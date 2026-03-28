@@ -2,10 +2,11 @@
 
 import uuid
 
-from sqlalchemy import select, insert, update, text
+from sqlalchemy import select, insert, update
 from app.mcp.server import mcp
 from app.db.session import get_db
 from app.db.tables import hub_todos, todo_overrides
+from app.db.compat import now, upsert
 
 
 _HUB_TODO_COLS = [
@@ -105,14 +106,21 @@ def coco_todo_add(
 
     with get_db() as conn:
         conn.execute(
-            text(
-                "INSERT INTO todo_overrides "
-                "(hub_todo_id, title, project_id, priority, owner, due_date, node_id, status, "
-                "source_type, source_content_id, is_platform_native, created_at, updated_at) "
-                "VALUES (:id, :title, :project, :priority, :owner, NULL, NULL, 'open', "
-                "NULL, NULL, 1, datetime('now'), datetime('now'))"
-            ),
-            {"id": todo_id, "title": title, "project": project, "priority": priority, "owner": owner},
+            insert(todo_overrides).values(
+                hub_todo_id=todo_id,
+                title=title,
+                project_id=project,
+                priority=priority,
+                owner=owner,
+                due_date=None,
+                node_id=None,
+                status="open",
+                source_type=None,
+                source_content_id=None,
+                is_platform_native=1,
+                created_at=now(),
+                updated_at=now(),
+            )
         )
 
     return {
@@ -167,20 +175,19 @@ def coco_todo_done(todo_id: str) -> dict:
 
         if existing:
             conn.execute(
-                text(
-                    "UPDATE todo_overrides SET status = 'done', updated_at = datetime('now') "
-                    "WHERE hub_todo_id = :id"
-                ),
-                {"id": todo_id},
+                update(todo_overrides)
+                .where(todo_overrides.c.hub_todo_id == todo_id)
+                .values(status="done", updated_at=now())
             )
         else:
             conn.execute(
-                text(
-                    "INSERT INTO todo_overrides "
-                    "(hub_todo_id, status, is_platform_native, created_at, updated_at) "
-                    "VALUES (:id, 'done', 0, datetime('now'), datetime('now'))"
-                ),
-                {"id": todo_id},
+                insert(todo_overrides).values(
+                    hub_todo_id=todo_id,
+                    status="done",
+                    is_platform_native=0,
+                    created_at=now(),
+                    updated_at=now(),
+                )
             )
 
     return {

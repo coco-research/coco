@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import insert, select, update, delete
 
 from app.db.session import get_db
+from app.db.compat import now
 from app.db.tables import project_context, handoffs, workflows, workflow_templates
 from app.services.verification import verification_service
 from app.models.collaboration import (
@@ -62,14 +63,16 @@ def update_context(context_id: str, body: PatchContextBody):
     if not updates:
         raise HTTPException(400, "No valid fields to update")
 
-    version_bump = ", version = version + 1" if "content" in updates else ""
-    set_clause = ", ".join(f"{k} = ?" for k in updates)
-    values = list(updates.values()) + [context_id]
+    values = dict(updates)
+    values["updated_at"] = now()
+    if "content" in updates:
+        values["version"] = project_context.c.version + 1
 
     with get_db() as conn:
-        result = conn.exec_driver_sql(
-            f"UPDATE project_context SET {set_clause}{version_bump}, updated_at = datetime('now') WHERE id = ?",
-            tuple(values),
+        result = conn.execute(
+            update(project_context)
+            .where(project_context.c.id == context_id)
+            .values(**values)
         )
         if result.rowcount == 0:
             raise HTTPException(404, "Context section not found")
@@ -260,13 +263,13 @@ def update_workflow(workflow_id: str, body: PatchWorkflowBody):
         if updates["status"] not in valid:
             raise HTTPException(400, f"Invalid status. Must be one of: {valid}")
 
-    set_clause = ", ".join(f"{k} = ?" for k in updates)
-    values = list(updates.values()) + [workflow_id]
+    updates["updated_at"] = now()
 
     with get_db() as conn:
-        result = conn.exec_driver_sql(
-            f"UPDATE workflows SET {set_clause}, updated_at = datetime('now') WHERE id = ?",
-            tuple(values),
+        result = conn.execute(
+            update(workflows)
+            .where(workflows.c.id == workflow_id)
+            .values(**updates)
         )
         if result.rowcount == 0:
             raise HTTPException(404, "Workflow not found")
@@ -294,9 +297,10 @@ def advance_workflow(workflow_id: str):
         next_step = wf["current_step"] + 1
 
         if next_step >= len(steps):
-            conn.exec_driver_sql(
-                "UPDATE workflows SET status = 'completed', current_step = ?, updated_at = datetime('now') WHERE id = ?",
-                (next_step, workflow_id),
+            conn.execute(
+                update(workflows)
+                .where(workflows.c.id == workflow_id)
+                .values(status="completed", current_step=next_step, updated_at=now())
             )
             result = dict(conn.execute(
                 select(workflows).where(workflows.c.id == workflow_id)
@@ -322,9 +326,10 @@ def advance_workflow(workflow_id: str):
             )
         )
 
-        conn.exec_driver_sql(
-            "UPDATE workflows SET current_step = ?, updated_at = datetime('now') WHERE id = ?",
-            (next_step, workflow_id),
+        conn.execute(
+            update(workflows)
+            .where(workflows.c.id == workflow_id)
+            .values(current_step=next_step, updated_at=now())
         )
 
         result = dict(conn.execute(

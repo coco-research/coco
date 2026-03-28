@@ -16,6 +16,7 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import insert, select, update
 
 from app.db.session import get_db
+from app.db.compat import now
 from app.db.tables import agents, agent_output, analysis_jobs, nodes
 from app.services.folder_scanner import (
     build_folder_summary,
@@ -308,12 +309,20 @@ def analyze_folder(node_id: str, body: AnalyzeFolderBody):
                     node_id=node_id,
                     role=agent["role"],
                 )
-                conn.exec_driver_sql(
-                    "UPDATE agents SET status = 'running', pid = ?, started_at = datetime('now'), "
-                    "stopped_at = NULL, exit_code = NULL, last_heartbeat = datetime('now'), "
-                    "task_description = ?, working_directory = ?, "
-                    "updated_at = datetime('now') WHERE id = ?",
-                    (pid, task[:2000], folder_path, agent["id"]),
+                conn.execute(
+                    update(agents)
+                    .where(agents.c.id == agent["id"])
+                    .values(
+                        status="running",
+                        pid=pid,
+                        started_at=now(),
+                        stopped_at=None,
+                        exit_code=None,
+                        last_heartbeat=now(),
+                        task_description=task[:2000],
+                        working_directory=folder_path,
+                        updated_at=now(),
+                    )
                 )
                 spawned_ids.append(agent["id"])
             except RuntimeError:
@@ -405,9 +414,10 @@ def get_analysis_job(job_id: str):
                 .where(analysis_jobs.c.id == job_id)
                 .values(status="completed", results_summary=results_summary)
             )
-            conn.exec_driver_sql(
-                "UPDATE analysis_jobs SET completed_at = datetime('now') WHERE id = ?",
-                (job_id,),
+            conn.execute(
+                update(analysis_jobs)
+                .where(analysis_jobs.c.id == job_id)
+                .values(completed_at=now())
             )
             result["status"] = "completed"
             result["results_summary"] = results_summary

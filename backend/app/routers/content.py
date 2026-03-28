@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import select, func, text, update
 from app.db.session import get_db
+from app.db.compat import now
 from app.db.tables import (
     hub_content, hub_project_content, hub_projects,
     content_classifications,
@@ -310,13 +311,15 @@ def accept_suggestion(content_id: str, body: AcceptSuggestionBody | None = None)
             project_id = (body.project_id if body and body.project_id else None) or row.classified_project_id or row.suggested_project_id
 
             conn.execute(
-                text(
-                    "UPDATE content_classifications "
-                    "SET status = 'accepted', auto_classified = 1, project_id = :pid, "
-                    "classified_project_id = :pid, classified_at = datetime('now') "
-                    "WHERE hub_content_id = :cid"
-                ),
-                {"pid": project_id, "cid": content_id},
+                update(content_classifications)
+                .where(content_classifications.c.hub_content_id == content_id)
+                .values(
+                    status="accepted",
+                    auto_classified=1,
+                    project_id=project_id,
+                    classified_project_id=project_id,
+                    classified_at=now(),
+                )
             )
 
         return {"status": "accepted", "content_id": content_id, "project_id": project_id}
@@ -340,12 +343,12 @@ def reject_suggestion(content_id: str):
                 raise HTTPException(404, "No suggestion found for this content")
 
             conn.execute(
-                text(
-                    "UPDATE content_classifications "
-                    "SET status = 'rejected', classified_at = datetime('now') "
-                    "WHERE hub_content_id = :cid"
-                ),
-                {"cid": content_id},
+                update(content_classifications)
+                .where(content_classifications.c.hub_content_id == content_id)
+                .values(
+                    status="rejected",
+                    classified_at=now(),
+                )
             )
 
         return {"status": "rejected", "content_id": content_id}
@@ -383,13 +386,15 @@ def _batch_accept_impl(min_confidence: float = 0.90):
             for r in rows:
                 project_id = r.classified_project_id or r.suggested_project_id
                 conn.execute(
-                    text(
-                        "UPDATE content_classifications "
-                        "SET status = 'accepted', auto_classified = 1, project_id = :pid, "
-                        "classified_project_id = :pid, classified_at = datetime('now') "
-                        "WHERE hub_content_id = :cid"
-                    ),
-                    {"pid": project_id, "cid": r.hub_content_id},
+                    update(content_classifications)
+                    .where(content_classifications.c.hub_content_id == r.hub_content_id)
+                    .values(
+                        status="accepted",
+                        auto_classified=1,
+                        project_id=project_id,
+                        classified_project_id=project_id,
+                        classified_at=now(),
+                    )
                 )
                 count += 1
 

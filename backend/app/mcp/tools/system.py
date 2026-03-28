@@ -5,8 +5,9 @@ import subprocess
 import time
 from pathlib import Path
 
-from sqlalchemy import select, text
+from sqlalchemy import select
 from app.mcp.server import mcp
+from app.db.compat import days_ago
 from app.config import HUB_DB_PATH, PLATFORM_DB_PATH, BRAIN_JSON_PATH, QUEUE_JSON_PATH
 from app.db.session import get_db
 from app.db.tables import hub_api_costs, cost_ledger
@@ -58,7 +59,7 @@ def coco_cost(days: int = 30) -> dict:
         try:
             rows = conn.execute(
                 select(cost_ledger.c.model, cost_ledger.c.project_id, cost_ledger.c.cost_usd)
-                .where(cost_ledger.c.created_at >= text(f"datetime('now', '-{days} days')"))
+                .where(cost_ledger.c.created_at >= days_ago(days))
             ).fetchall()
             for r in rows:
                 cost = r.cost_usd or 0.0
@@ -74,7 +75,7 @@ def coco_cost(days: int = 30) -> dict:
         try:
             rows = conn.execute(
                 select(hub_api_costs.c.model, hub_api_costs.c.cost_usd)
-                .where(hub_api_costs.c.created_at >= text(f"datetime('now', '-{days} days')"))
+                .where(hub_api_costs.c.created_at >= days_ago(days))
             ).fetchall()
             for r in rows:
                 cost = r.cost_usd or 0.0

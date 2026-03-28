@@ -3,8 +3,9 @@ import logging
 import uuid
 from collections import defaultdict
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import select, insert, update, delete, text, func
+from sqlalchemy import select, insert, update, delete, func
 from app.db.session import get_db
+from app.db.compat import now, upsert
 from app.db.tables import (
     hub_todos, hub_content, hub_project_content,
     todo_overrides, todo_dependencies, entity_identifiers,
@@ -334,12 +335,12 @@ def merge_todos(body: MergeTodosBody):
             if rid == keep_id:
                 continue
             conn.execute(
-                text(
-                    "INSERT INTO todo_overrides (hub_todo_id, status, updated_at) "
-                    "VALUES (:id, 'archived', datetime('now')) "
-                    "ON CONFLICT(hub_todo_id) DO UPDATE SET status = 'archived', updated_at = datetime('now')"
-                ),
-                {"id": rid},
+                upsert(
+                    todo_overrides,
+                    values={"hub_todo_id": rid, "status": "archived", "updated_at": now()},
+                    conflict_cols=["hub_todo_id"],
+                    update_cols=["status", "updated_at"],
+                )
             )
             archived_count += 1
 
@@ -354,22 +355,21 @@ def create_todo(body: CreateTodoBody):
     with get_db() as conn:
         try:
             conn.execute(
-                text(
-                    "INSERT INTO todo_overrides "
-                    "(hub_todo_id, title, project_id, priority, owner, due_date, node_id, status, "
-                    "source_type, source_content_id, is_platform_native, created_at, updated_at) "
-                    "VALUES (:id, :title, :project_id, :priority, :owner, :due_date, :node_id, "
-                    "'open', NULL, NULL, 1, datetime('now'), datetime('now'))"
-                ),
-                {
-                    "id": todo_id,
-                    "title": title,
-                    "project_id": body.project_id,
-                    "priority": body.priority,
-                    "owner": body.owner,
-                    "due_date": body.due_date,
-                    "node_id": body.node_id,
-                },
+                insert(todo_overrides).values(
+                    hub_todo_id=todo_id,
+                    title=title,
+                    project_id=body.project_id,
+                    priority=body.priority,
+                    owner=body.owner,
+                    due_date=body.due_date,
+                    node_id=body.node_id,
+                    status="open",
+                    source_type=None,
+                    source_content_id=None,
+                    is_platform_native=1,
+                    created_at=now(),
+                    updated_at=now(),
+                )
             )
         except Exception as e:
             log.exception("create_todo failed: %s", e)
@@ -462,22 +462,19 @@ def update_todo(todo_id: str, body: PatchTodoBody):
         ).fetchone()
 
         if row:
-            set_parts = [f"{k} = :{k}" for k in updates]
-            set_parts.append("updated_at = datetime('now')")
             conn.execute(
-                text(
-                    f"UPDATE todo_overrides SET {', '.join(set_parts)} "
-                    f"WHERE hub_todo_id = :hub_todo_id"
-                ),
-                {**updates, "hub_todo_id": todo_id},
+                update(todo_overrides)
+                .where(todo_overrides.c.hub_todo_id == todo_id)
+                .values(**updates, updated_at=now())
             )
         else:
-            col_names = list(updates.keys())
-            col_str = ", ".join(["hub_todo_id"] + col_names + ["is_platform_native", "updated_at"])
-            val_str = ", ".join([":hub_todo_id"] + [f":{k}" for k in col_names] + [":is_native", "datetime('now')"])
             conn.execute(
-                text(f"INSERT INTO todo_overrides ({col_str}) VALUES ({val_str})"),
-                {"hub_todo_id": todo_id, **updates, "is_native": 1 if is_native else 0},
+                insert(todo_overrides).values(
+                    hub_todo_id=todo_id,
+                    **updates,
+                    is_platform_native=1 if is_native else 0,
+                    updated_at=now(),
+                )
             )
 
     todo_result = _get_todo_by_id(todo_id)
@@ -536,12 +533,17 @@ def transition_todo(todo_id: str, body: TransitionBody):
     # Upsert status
     with get_db() as conn:
         conn.execute(
-            text(
-                "INSERT INTO todo_overrides (hub_todo_id, status, is_platform_native, updated_at) "
-                "VALUES (:id, :status, :native, datetime('now')) "
-                "ON CONFLICT(hub_todo_id) DO UPDATE SET status = :status, updated_at = datetime('now')"
-            ),
-            {"id": todo_id, "status": to_state, "native": 1 if is_native else 0},
+            upsert(
+                todo_overrides,
+                values={
+                    "hub_todo_id": todo_id,
+                    "status": to_state,
+                    "is_platform_native": 1 if is_native else 0,
+                    "updated_at": now(),
+                },
+                conflict_cols=["hub_todo_id"],
+                update_cols=["status", "updated_at"],
+            )
         )
 
     todo_result = _get_todo_by_id(todo_id)
@@ -561,11 +563,12 @@ def sync_todos_from_kh():
     try:
         with get_db() as conn:
             rows = conn.execute(
-                text(
-                    "SELECT id, source, title, metadata, content_type "
-                    "FROM hub_content "
-                    "WHERE source IN ('email', 'voice') AND metadata IS NOT NULL"
+                select(
+                    hub_content.c.id, hub_content.c.source, hub_content.c.title,
+                    hub_content.c.metadata, hub_content.c.content_type,
                 )
+                .where(hub_content.c.source.in_(["email", "voice"]))
+                .where(hub_content.c.metadata.isnot(None))
             ).fetchall()
     except Exception as e:
         log.error("sync_hub_read_failed", extra={"error": str(e)})
@@ -671,18 +674,20 @@ def sync_todos_from_kh():
 
                 try:
                     conn.execute(
-                        text(
-                            "INSERT INTO todo_overrides "
-                            "(hub_todo_id, title, project_id, priority, owner, due_date, status, "
-                            "source_type, source_content_id, is_platform_native, created_at, updated_at) "
-                            "VALUES (:id, :title, :project_id, :priority, :owner, :due_date, 'open', "
-                            ":source_type, :source_key, 1, datetime('now'), datetime('now'))"
-                        ),
-                        {
-                            "id": todo_id, "title": title, "project_id": project_id_val,
-                            "priority": priority_val, "owner": owner, "due_date": due_date,
-                            "source_type": source_type, "source_key": source_key,
-                        },
+                        insert(todo_overrides).values(
+                            hub_todo_id=todo_id,
+                            title=title,
+                            project_id=project_id_val,
+                            priority=priority_val,
+                            owner=owner,
+                            due_date=due_date,
+                            status="open",
+                            source_type=source_type,
+                            source_content_id=source_key,
+                            is_platform_native=1,
+                            created_at=now(),
+                            updated_at=now(),
+                        )
                     )
                     synced += 1
                     existing_source_ids.add(source_key)
@@ -741,12 +746,12 @@ def dedup_todos():
 
             for tid in ids_to_archive:
                 conn.execute(
-                    text(
-                        "INSERT INTO todo_overrides (hub_todo_id, status, updated_at) "
-                        "VALUES (:id, 'archived', datetime('now')) "
-                        "ON CONFLICT(hub_todo_id) DO UPDATE SET status = 'archived', updated_at = datetime('now')"
-                    ),
-                    {"id": tid},
+                    upsert(
+                        todo_overrides,
+                        values={"hub_todo_id": tid, "status": "archived", "updated_at": now()},
+                        conflict_cols=["hub_todo_id"],
+                        update_cols=["status", "updated_at"],
+                    )
                 )
                 removed += 1
             groups_cleaned += 1

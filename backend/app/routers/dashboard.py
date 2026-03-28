@@ -3,6 +3,7 @@ import logging
 from fastapi import APIRouter
 from sqlalchemy import select, func, text
 from app.db.session import get_db
+from app.db.compat import today, days_ago, date_trunc_day
 from app.db.tables import (
     hub_projects, hub_content, hub_project_content, hub_drafts,
     hub_api_costs, hub_sync_state,
@@ -189,7 +190,7 @@ def get_dashboard(node_id: str | None = None, subtree: bool = True):
 
         # Costs — today + month totals
         try:
-            stmt = select(func.coalesce(func.sum(cost_ledger.c.cost_usd), 0).label("total")).where(cost_ledger.c.created_at >= text("date('now')"))
+            stmt = select(func.coalesce(func.sum(cost_ledger.c.cost_usd), 0).label("total")).where(cost_ledger.c.created_at >= today())
             if node_ids is not None:
                 stmt = stmt.where(cost_ledger.c.node_id.in_(node_ids))
             row = conn.execute(stmt).fetchone()
@@ -207,7 +208,7 @@ def get_dashboard(node_id: str | None = None, subtree: bool = True):
         try:
             row = conn.execute(
                 select(func.coalesce(func.sum(hub_api_costs.c.cost_usd), 0).label("total"))
-                .where(hub_api_costs.c.created_at >= text("date('now')"))
+                .where(hub_api_costs.c.created_at >= today())
             ).fetchone()
             result["costs"]["today_usd"] += round(row.total, 4) if row else 0.0
 
@@ -225,30 +226,32 @@ def get_dashboard(node_id: str | None = None, subtree: bool = True):
         # Daily costs (last 7 days)
         daily_map: dict[str, float] = {}
         try:
+            d_col = date_trunc_day(cost_ledger.c.created_at).label("d")
             stmt = (
                 select(
-                    func.date(cost_ledger.c.created_at).label("d"),
+                    d_col,
                     func.coalesce(func.sum(cost_ledger.c.cost_usd), 0).label("total"),
                 )
-                .where(cost_ledger.c.created_at >= text("date('now', '-7 days')"))
+                .where(cost_ledger.c.created_at >= days_ago(7))
             )
             if node_ids is not None:
                 stmt = stmt.where(cost_ledger.c.node_id.in_(node_ids))
-            stmt = stmt.group_by(text("d")).order_by(text("d"))
+            stmt = stmt.group_by(d_col).order_by(d_col)
             for r in conn.execute(stmt).fetchall():
                 daily_map[r.d] = daily_map.get(r.d, 0.0) + r.total
         except Exception:
             pass
 
         try:
+            d_col2 = date_trunc_day(hub_api_costs.c.created_at).label("d")
             stmt = (
                 select(
-                    func.date(hub_api_costs.c.created_at).label("d"),
+                    d_col2,
                     func.coalesce(func.sum(hub_api_costs.c.cost_usd), 0).label("total"),
                 )
-                .where(hub_api_costs.c.created_at >= text("date('now', '-7 days')"))
-                .group_by(text("d"))
-                .order_by(text("d"))
+                .where(hub_api_costs.c.created_at >= days_ago(7))
+                .group_by(d_col2)
+                .order_by(d_col2)
             )
             for r in conn.execute(stmt).fetchall():
                 daily_map[r.d] = daily_map.get(r.d, 0.0) + r.total
@@ -256,10 +259,10 @@ def get_dashboard(node_id: str | None = None, subtree: bool = True):
             pass
 
         from datetime import date, timedelta
-        today = date.today()
+        today_date = date.today()
         daily = []
         for i in range(6, -1, -1):
-            d = (today - timedelta(days=i)).isoformat()
+            d = (today_date - timedelta(days=i)).isoformat()
             daily.append(round(daily_map.get(d, 0.0), 4))
         result["costs"]["daily"] = daily
 

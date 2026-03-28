@@ -2,7 +2,7 @@
 
 import logging
 from fastapi import APIRouter, Query
-from sqlalchemy import select, text
+from sqlalchemy import select, outerjoin
 from app.db.session import get_db
 from app.db.tables import (
     hub_todos, hub_content,
@@ -57,14 +57,22 @@ def unified_search(
 
         # --- Todos from platform (platform-native) ---
         try:
+            j = outerjoin(
+                todo_overrides, entity_identifiers,
+                (entity_identifiers.c.entity_id == todo_overrides.c.hub_todo_id)
+                & (entity_identifiers.c.entity_type == "todo"),
+            )
             rows = conn.execute(
-                text(
-                    "SELECT t.hub_todo_id, t.title, t.status, ei.display_id "
-                    "FROM todo_overrides t "
-                    "LEFT JOIN entity_identifiers ei ON ei.entity_id = t.hub_todo_id AND ei.entity_type = 'todo' "
-                    "WHERE t.is_platform_native = 1 AND t.title LIKE :pattern LIMIT :limit"
-                ),
-                {"pattern": pattern, "limit": limit},
+                select(
+                    todo_overrides.c.hub_todo_id,
+                    todo_overrides.c.title,
+                    todo_overrides.c.status,
+                    entity_identifiers.c.display_id,
+                )
+                .select_from(j)
+                .where(todo_overrides.c.is_platform_native == 1)
+                .where(todo_overrides.c.title.like(pattern))
+                .limit(limit)
             ).fetchall()
             existing_ids = {r["id"] for r in results if r["type"] == "todo"}
             for r in rows:
@@ -82,14 +90,19 @@ def unified_search(
 
         # --- Agents ---
         try:
+            j_agents = outerjoin(
+                agents, entity_identifiers,
+                (entity_identifiers.c.entity_id == agents.c.id)
+                & (entity_identifiers.c.entity_type == "agent"),
+            )
             rows = conn.execute(
-                text(
-                    "SELECT a.id, a.name, a.status, a.role, ei.display_id "
-                    "FROM agents a "
-                    "LEFT JOIN entity_identifiers ei ON ei.entity_id = a.id AND ei.entity_type = 'agent' "
-                    "WHERE a.name LIKE :pattern LIMIT :limit"
-                ),
-                {"pattern": pattern, "limit": limit},
+                select(
+                    agents.c.id, agents.c.name, agents.c.status, agents.c.role,
+                    entity_identifiers.c.display_id,
+                )
+                .select_from(j_agents)
+                .where(agents.c.name.like(pattern))
+                .limit(limit)
             ).fetchall()
             for r in rows:
                 subtitle_parts = []
@@ -110,14 +123,19 @@ def unified_search(
 
         # --- Tasks ---
         try:
+            j_tasks = outerjoin(
+                tasks, entity_identifiers,
+                (entity_identifiers.c.entity_id == tasks.c.id)
+                & (entity_identifiers.c.entity_type == "task"),
+            )
             rows = conn.execute(
-                text(
-                    "SELECT t.id, t.title, t.status, t.priority, ei.display_id "
-                    "FROM tasks t "
-                    "LEFT JOIN entity_identifiers ei ON ei.entity_id = t.id AND ei.entity_type = 'task' "
-                    "WHERE t.title LIKE :pattern LIMIT :limit"
-                ),
-                {"pattern": pattern, "limit": limit},
+                select(
+                    tasks.c.id, tasks.c.title, tasks.c.status, tasks.c.priority,
+                    entity_identifiers.c.display_id,
+                )
+                .select_from(j_tasks)
+                .where(tasks.c.title.like(pattern))
+                .limit(limit)
             ).fetchall()
             for r in rows:
                 subtitle_parts = []
@@ -138,14 +156,19 @@ def unified_search(
 
         # --- Goals ---
         try:
+            j_goals = outerjoin(
+                goals, entity_identifiers,
+                (entity_identifiers.c.entity_id == goals.c.id)
+                & (entity_identifiers.c.entity_type == "goal"),
+            )
             rows = conn.execute(
-                text(
-                    "SELECT g.id, g.title, g.status, g.progress_pct, ei.display_id "
-                    "FROM goals g "
-                    "LEFT JOIN entity_identifiers ei ON ei.entity_id = g.id AND ei.entity_type = 'goal' "
-                    "WHERE g.title LIKE :pattern LIMIT :limit"
-                ),
-                {"pattern": pattern, "limit": limit},
+                select(
+                    goals.c.id, goals.c.title, goals.c.status, goals.c.progress_pct,
+                    entity_identifiers.c.display_id,
+                )
+                .select_from(j_goals)
+                .where(goals.c.title.like(pattern))
+                .limit(limit)
             ).fetchall()
             for r in rows:
                 pct = r.progress_pct

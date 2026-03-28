@@ -15,12 +15,13 @@ import uuid
 import structlog
 from datetime import datetime, timezone
 
-from sqlalchemy import select, text
+from sqlalchemy import select
 from app.db.session import get_db
 from app.db.tables import (
     hub_content, hub_project_content, hub_projects,
     content_classifications,
 )
+from app.db.compat import now, upsert
 from app.config import BRAIN_JSON_PATH
 
 log = structlog.get_logger()
@@ -316,19 +317,27 @@ def _apply_classification(
     try:
         with get_db() as conn:
             conn.execute(
-                text(
-                    "INSERT OR REPLACE INTO content_classifications "
-                    "(id, hub_content_id, classified_project_id, project_id, confidence, reasoning, "
-                    "auto_classified, status, action, classified_at, created_at) "
-                    "VALUES (:id, :cid, :pid, :pid2, :conf, :reason, :auto, 'accepted', 'classify', "
-                    "datetime('now'), datetime('now'))"
-                ),
-                {
-                    "id": str(uuid.uuid4()), "cid": content_id,
-                    "pid": project_id, "pid2": project_id,
-                    "conf": confidence, "reason": reasoning,
-                    "auto": 1 if auto else 0,
-                },
+                upsert(
+                    content_classifications,
+                    values={
+                        "id": str(uuid.uuid4()),
+                        "hub_content_id": content_id,
+                        "classified_project_id": project_id,
+                        "project_id": project_id,
+                        "confidence": confidence,
+                        "reasoning": reasoning,
+                        "auto_classified": 1 if auto else 0,
+                        "status": "accepted",
+                        "action": "classify",
+                        "classified_at": now(),
+                        "created_at": now(),
+                    },
+                    conflict_cols=["hub_content_id"],
+                    update_cols=[
+                        "classified_project_id", "project_id", "confidence",
+                        "reasoning", "auto_classified", "status", "action", "classified_at",
+                    ],
+                )
             )
     except Exception as e:
         log.warning("apply_classification_failed", content_id=content_id, error=str(e))
@@ -338,18 +347,27 @@ def _save_suggestion(content_id: str, project_id: str, confidence: float, reason
     try:
         with get_db() as conn:
             conn.execute(
-                text(
-                    "INSERT OR REPLACE INTO content_classifications "
-                    "(id, hub_content_id, classified_project_id, suggested_project_id, confidence, "
-                    "reasoning, auto_classified, status, action, classified_at, created_at) "
-                    "VALUES (:id, :cid, :pid, :pid2, :conf, :reason, 0, 'suggested', 'classify', "
-                    "datetime('now'), datetime('now'))"
-                ),
-                {
-                    "id": str(uuid.uuid4()), "cid": content_id,
-                    "pid": project_id, "pid2": project_id,
-                    "conf": confidence, "reason": reasoning,
-                },
+                upsert(
+                    content_classifications,
+                    values={
+                        "id": str(uuid.uuid4()),
+                        "hub_content_id": content_id,
+                        "classified_project_id": project_id,
+                        "suggested_project_id": project_id,
+                        "confidence": confidence,
+                        "reasoning": reasoning,
+                        "auto_classified": 0,
+                        "status": "suggested",
+                        "action": "classify",
+                        "classified_at": now(),
+                        "created_at": now(),
+                    },
+                    conflict_cols=["hub_content_id"],
+                    update_cols=[
+                        "classified_project_id", "suggested_project_id", "confidence",
+                        "reasoning", "auto_classified", "status", "action", "classified_at",
+                    ],
+                )
             )
     except Exception as e:
         log.warning("save_suggestion_failed", content_id=content_id, error=str(e))

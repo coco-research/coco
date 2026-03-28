@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select, func, text
 from app.db.session import get_db
 from app.db.tables import cost_ledger, budgets, hub_api_costs
+from app.db.compat import days_ago, date_trunc_day
 from app.db.tree_utils import build_node_id_filter
 from app.models.costs import CreateBudgetBody
 
@@ -24,7 +25,7 @@ def cost_summary(
         # Platform cost_ledger
         try:
             node_ids = _resolve_node_ids(conn, node_id, subtree)
-            conditions = [cost_ledger.c.created_at >= text(f"datetime('now', '-{days} days')")]
+            conditions = [cost_ledger.c.created_at >= days_ago(days)]
             if node_ids is not None:
                 conditions.append(cost_ledger.c.node_id.in_(node_ids))
 
@@ -49,7 +50,7 @@ def cost_summary(
             stmt = select(
                 hub_api_costs.c.model,
                 hub_api_costs.c.cost_usd,
-            ).where(hub_api_costs.c.created_at >= text(f"datetime('now', '-{days} days')"))
+            ).where(hub_api_costs.c.created_at >= days_ago(days))
             rows = conn.execute(stmt).fetchall()
             for r in rows:
                 cost = r.cost_usd or 0.0
@@ -63,18 +64,19 @@ def cost_summary(
 
         # Daily breakdown — platform
         try:
-            conditions_d = [cost_ledger.c.created_at >= text(f"datetime('now', '-{days} days')")]
+            conditions_d = [cost_ledger.c.created_at >= days_ago(days)]
             if node_ids is not None:
                 conditions_d.append(cost_ledger.c.node_id.in_(node_ids))
 
+            d_col = date_trunc_day(cost_ledger.c.created_at).label("d")
             stmt = (
                 select(
-                    func.date(cost_ledger.c.created_at).label("d"),
+                    d_col,
                     func.coalesce(func.sum(cost_ledger.c.cost_usd), 0).label("total"),
                 )
                 .where(*conditions_d)
-                .group_by(text("d"))
-                .order_by(text("d"))
+                .group_by(d_col)
+                .order_by(d_col)
             )
             rows = conn.execute(stmt).fetchall()
             for r in rows:
@@ -84,14 +86,15 @@ def cost_summary(
 
         # Daily breakdown — hub
         try:
+            d_col2 = date_trunc_day(hub_api_costs.c.created_at).label("d")
             stmt = (
                 select(
-                    func.date(hub_api_costs.c.created_at).label("d"),
+                    d_col2,
                     func.coalesce(func.sum(hub_api_costs.c.cost_usd), 0).label("total"),
                 )
-                .where(hub_api_costs.c.created_at >= text(f"datetime('now', '-{days} days')"))
-                .group_by(text("d"))
-                .order_by(text("d"))
+                .where(hub_api_costs.c.created_at >= days_ago(days))
+                .group_by(d_col2)
+                .order_by(d_col2)
             )
             rows = conn.execute(stmt).fetchall()
             for r in rows:

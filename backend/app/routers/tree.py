@@ -2,8 +2,9 @@ import uuid
 from fastapi import APIRouter, HTTPException
 import structlog
 
-from sqlalchemy import select, insert, update, delete, text
+from sqlalchemy import select, insert, update, delete
 from app.db.session import get_db
+from app.db.compat import now
 from app.db.tables import (
     nodes, agents, goals, tasks, cost_ledger, budgets,
     project_context, handoffs, workflows, analysis_jobs,
@@ -211,7 +212,7 @@ def patch_node(node_id: str, body: PatchNodeBody):
         conn.execute(
             update(nodes)
             .where(nodes.c.id == node_id)
-            .values(**updates, updated_at=text("datetime('now')"))
+            .values(**updates, updated_at=now())
         )
 
         row = conn.execute(
@@ -297,7 +298,7 @@ def move_node(node_id: str, body: MoveNodeBody):
             update(nodes)
             .where(nodes.c.id == node_id)
             .values(parent_id=body.new_parent_id, path=new_path, depth=new_depth,
-                    sort_order=sort_order_val, updated_at=text("datetime('now')"))
+                    sort_order=sort_order_val, updated_at=now())
         )
 
         descendants = conn.execute(
@@ -310,7 +311,7 @@ def move_node(node_id: str, body: MoveNodeBody):
             conn.execute(
                 update(nodes)
                 .where(nodes.c.id == desc.id)
-                .values(path=desc_new_path, depth=desc_new_depth, updated_at=text("datetime('now')"))
+                .values(path=desc_new_path, depth=desc_new_depth, updated_at=now())
             )
 
         row = conn.execute(
@@ -329,7 +330,7 @@ def reorder_nodes(items: list[ReorderItem]):
             conn.execute(
                 update(nodes)
                 .where(nodes.c.id == item.id)
-                .values(sort_order=item.sort_order, updated_at=text("datetime('now')"))
+                .values(sort_order=item.sort_order, updated_at=now())
             )
 
     event_bus.emit("tree.changed", {"action": "reordered"})

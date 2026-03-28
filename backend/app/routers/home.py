@@ -10,6 +10,7 @@ from fastapi import APIRouter
 from sqlalchemy import select, func, text
 
 from app.db.session import get_db
+from app.db.compat import today as today_sql
 from app.db.tables import (
     hub_content, hub_project_content, hub_drafts, hub_todos,
     hub_projects, hub_api_costs, hub_sync_state,
@@ -168,7 +169,7 @@ def get_home():
                 select(func.count().label("cnt"))
                 .select_from(hub_todos)
                 .where(hub_todos.c.status == "open")
-                .where(hub_todos.c.due_date < text("date('now', 'localtime')"))
+                .where(hub_todos.c.due_date < today_sql())
             ).fetchone()
             result["attention"]["overdue_todos"] = row.cnt if row else 0
         except Exception:
@@ -219,7 +220,7 @@ def get_home():
             overdue = conn.execute(
                 select(*_todo_cols)
                 .where(hub_todos.c.status == "open")
-                .where(hub_todos.c.due_date < text("date('now', 'localtime')"))
+                .where(hub_todos.c.due_date < today_sql())
                 .order_by(hub_todos.c.due_date.asc())
                 .limit(50)
             ).fetchall()
@@ -298,7 +299,7 @@ def get_home():
         try:
             row = conn.execute(
                 select(func.coalesce(func.sum(hub_api_costs.c.cost_usd), 0).label("total"))
-                .where(hub_api_costs.c.created_at >= text("date('now')"))
+                .where(hub_api_costs.c.created_at >= today_sql())
             ).fetchone()
             result["costs"]["today_usd"] += round(row.total, 4) if row else 0.0
         except Exception:
@@ -330,7 +331,7 @@ def get_home():
         try:
             row = conn.execute(
                 select(func.coalesce(func.sum(cost_ledger.c.cost_usd), 0).label("total"))
-                .where(cost_ledger.c.created_at >= text("date('now')"))
+                .where(cost_ledger.c.created_at >= today_sql())
             ).fetchone()
             result["costs"]["today_usd"] += round(row.total, 4) if row else 0.0
         except Exception:

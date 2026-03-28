@@ -1,9 +1,10 @@
 import logging
 import uuid
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import select, insert, text
+from sqlalchemy import select, insert
 from app.db.session import get_db
 from app.db.tables import hub_drafts, draft_decisions
+from app.db.compat import upsert
 from app.services.event_bus import event_bus
 
 log = logging.getLogger(__name__)
@@ -99,11 +100,17 @@ def approve_draft(draft_id: str):
 
         # Write decision
         conn.execute(
-            text(
-                "INSERT OR REPLACE INTO draft_decisions (id, hub_draft_id, status, decided_by) "
-                "VALUES (:id, :draft_id, 'approved', 'user')"
-            ),
-            {"id": str(uuid.uuid4()), "draft_id": draft_id},
+            upsert(
+                draft_decisions,
+                values={
+                    "id": str(uuid.uuid4()),
+                    "hub_draft_id": draft_id,
+                    "status": "approved",
+                    "decided_by": "user",
+                },
+                conflict_cols=["hub_draft_id"],
+                update_cols=["status", "decided_by"],
+            )
         )
 
         # Return the draft with overlaid status
@@ -129,11 +136,17 @@ def reject_draft(draft_id: str):
 
         # Write decision
         conn.execute(
-            text(
-                "INSERT OR REPLACE INTO draft_decisions (id, hub_draft_id, status, decided_by) "
-                "VALUES (:id, :draft_id, 'rejected', 'user')"
-            ),
-            {"id": str(uuid.uuid4()), "draft_id": draft_id},
+            upsert(
+                draft_decisions,
+                values={
+                    "id": str(uuid.uuid4()),
+                    "hub_draft_id": draft_id,
+                    "status": "rejected",
+                    "decided_by": "user",
+                },
+                conflict_cols=["hub_draft_id"],
+                update_cols=["status", "decided_by"],
+            )
         )
 
         # Return the draft with overlaid status

@@ -254,7 +254,7 @@ export function CommandPalette() {
 
       {/* Palette */}
       <div
-        className="relative w-full max-w-lg rounded-2xl border border-border bg-card shadow-2xl"
+        className="relative w-full max-w-lg rounded-2xl border border-border bg-card shadow-2xl animate-cmd-palette-enter"
         onKeyDown={onKeyDown}
       >
         {/* Search input */}

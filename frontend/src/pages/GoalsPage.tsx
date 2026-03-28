@@ -6,6 +6,7 @@ import { cn, timeAgo } from '../lib/utils';
 import { InlineEditor } from '../components/shared/InlineEditor';
 import { PropertiesPanel } from '../components/shared/PropertiesPanel';
 import { PropertyField } from '../components/shared/PropertyField';
+import { useToast } from '../components/shared/Toast';
 
 interface Goal {
   id: string;
@@ -108,6 +109,7 @@ function GoalNode({ goal, allGoals, depth = 0, onSelect, selectedId }: { goal: G
 function AddGoalForm({ projectId, onClose }: { projectId: string | null; onClose: () => void }) {
   const [title, setTitle] = useState('');
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -121,7 +123,11 @@ function AddGoalForm({ projectId, onClose }: { projectId: string | null; onClose
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['goals'] });
+      toast('Goal created', 'success');
       onClose();
+    },
+    onError: () => {
+      toast('Failed to create goal', 'error');
     },
   });
 

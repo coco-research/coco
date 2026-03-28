@@ -67,6 +67,7 @@ export function AddTodoDialog() {
         due_date: dueDate || undefined,
       });
       void qc.invalidateQueries({ queryKey: ['todos'] });
+      toast('Todo created', 'success');
 
       if (result.possible_duplicate) {
         // Show warning but keep dialog open briefly
@@ -81,6 +82,8 @@ export function AddTodoDialog() {
         resetForm();
         setOpen(false);
       }
+    } catch {
+      toast('Failed to create todo', 'error');
     } finally {
       setSaving(false);
     }

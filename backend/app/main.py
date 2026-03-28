@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException as _HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
@@ -8,6 +8,7 @@ import time
 
 from app.db.init_db import init_platform_db
 from app.services.process_manager import process_manager
+from app.services.id_generator import resolve_display_id as _resolve_display_id
 from app.routers import (
     health, projects, teams, brain, content, agents, tasks,
     costs, todos, drafts, sessions, activity, events,
@@ -126,6 +127,16 @@ app.include_router(analysis.router)
 app.include_router(stt.router)
 app.include_router(triggers.router)
 app.include_router(triggers.webhook_router)
+
+# --- Cross-cutting resolve endpoint ---
+
+@app.get("/api/resolve/{display_id}", tags=["Search"])
+def resolve_display_id(display_id: str):
+    """Resolve a human-readable display ID (e.g. CXR-47) to entity type + id."""
+    result = _resolve_display_id(display_id)
+    if not result:
+        raise _HTTPException(404, f"No entity found for display ID '{display_id}'")
+    return result
 
 # Serve static frontend in production
 static_dir = Path(__file__).parent.parent / "static"

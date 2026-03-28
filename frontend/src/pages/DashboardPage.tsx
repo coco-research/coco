@@ -75,7 +75,7 @@ interface MetricCardProps {
 function MetricCard({ icon: Icon, label, value, sub, to, alert }: MetricCardProps) {
   const content = (
     <div className={cn(
-      'bg-card border border-border rounded-lg p-4 hover:bg-accent/30 transition-colors',
+      'bg-card border border-border rounded-lg p-4 hover:bg-accent/30 transition-all hover:scale-[1.01]',
       alert && 'border-destructive/30 bg-destructive/5'
     )}>
       <div className="flex items-start justify-between">

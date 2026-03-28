@@ -1,0 +1,8 @@
+{
+  "name": "coco-platform",
+  "private": true,
+  "scripts": {
+    "dev": "./scripts/dev.sh",
+    "build": "cd frontend && npm run build && cp -r dist ../backend/static"
+  }
+}

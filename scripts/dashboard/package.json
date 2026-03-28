@@ -1,0 +1,14 @@
+{
+  "name": "coco-dashboard",
+  "version": "1.0.0",
+  "description": "CoCo web dashboard — chat, sessions, skills, history at localhost:3000",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "gray-matter": "^4.0.3",
+    "open": "^10.1.0"
+  }
+}

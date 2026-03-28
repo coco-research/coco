@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.coco.think</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>/Users/Rijul_Kalra/.coco/think.py</string>
+    </array>
+    <key>StartInterval</key>
+    <integer>900</integer>
+    <key>StandardOutPath</key>
+    <string>/Users/Rijul_Kalra/.coco/logs/think-stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/Rijul_Kalra/.coco/logs/think-error.log</string>
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+</plist>

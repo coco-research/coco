@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CoCo — Conversational Terminal Assistant</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f5f5f7;--tile:#fff;
+  --primary:#1d1d1f;--secondary:#6e6e73;--tertiary:#86868b;
+  --blue:#0071e3;--green:#248a3d;--amber:#c93400;
+  --teal:#0071a4;--purple:#7d2fa0;
+  --gap:16px;--radius:20px;--pad:28px;
+  --font:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text',system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:'SF Mono',ui-monospace,'Cascadia Code','Fira Code',Menlo,Consolas,monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--primary);-webkit-font-smoothing:antialiased;line-height:1.55}
+
+/* ── Nav ── */
+.nav{position:sticky;top:0;z-index:100;background:rgba(245,245,247,.8);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,.06);padding:0 48px;display:flex;align-items:center;justify-content:space-between;height:52px}
+.nav-brand{font-size:17px;font-weight:700;color:var(--primary);text-decoration:none;letter-spacing:-.02em}
+.nav-brand span{color:var(--blue)}
+.nav-links{display:flex;gap:4px}
+.nav-links a{font-size:12px;font-weight:500;color:var(--secondary);text-decoration:none;padding:6px 12px;border-radius:980px;transition:all .2s ease}
+.nav-links a:hover{color:var(--primary);background:rgba(0,0,0,.04)}
+.nav-links a:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+/* ── Container ── */
+.container{max-width:980px;margin:0 auto;padding:0 48px}
+
+/* ── Hero ── */
+.hero{text-align:center;padding:80px 20px 60px}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:100px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:rgba(0,113,227,.08);color:var(--blue);margin-bottom:20px}
+.hero-badge-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.hero h1{font-size:clamp(48px,7vw,80px);font-weight:700;letter-spacing:-.04em;line-height:.95;margin-bottom:12px}
+.hero h1 .accent{background:linear-gradient(135deg,var(--blue),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(16px,2vw,21px);font-weight:400;color:var(--secondary);max-width:620px;margin:0 auto 32px;line-height:1.45}
+.hero-meta{display:flex;justify-content:center;gap:32px;flex-wrap:wrap}
+.hero-meta-item{text-align:center}
+.hero-meta-val{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.hero-meta-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--tertiary);margin-top:4px}
+
+/* ── Sections ── */
+section{padding:60px 0}
+section+section{border-top:1px solid rgba(0,0,0,.06)}
+.section-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--secondary);margin-bottom:8px}
+.section-title{font-size:clamp(28px,4vw,42px);font-weight:700;letter-spacing:-.03em;line-height:1.1;margin-bottom:12px}
+.section-desc{font-size:15px;color:var(--secondary);line-height:1.55;max-width:600px;margin-bottom:32px}
+
+/* ── Card / Tile ── */
+.tile{background:var(--tile);border-radius:var(--radius);padding:var(--pad);display:flex;flex-direction:column;box-shadow:0 1px 4px rgba(0,0,0,.04),0 0 0 .5px rgba(0,0,0,.04);transition:box-shadow .3s ease,transform .3s ease}
+.tile:hover{box-shadow:0 8px 30px rgba(0,0,0,.08),0 0 0 .5px rgba(0,0,0,.06);transform:translateY(-2px)}
+.tile-blue{background:linear-gradient(135deg,#e8f0fe,#d2e3fc)}
+.tile-green{background:linear-gradient(135deg,#e6f4ea,#ceead6)}
+.tile-teal{background:linear-gradient(135deg,#e0f2f1,#b2dfdb)}
+.tile-purple{background:linear-gradient(135deg,#f3e8fd,#e1bee7)}
+.tile-amber{background:linear-gradient(135deg,#fef3e8,#fde0c2)}
+.tile-dark{background:var(--primary);color:#f5f5f7}
+.tile-dark .lbl{color:rgba(255,255,255,.5)}
+.tile-dark .desc,.tile-dark p{color:rgba(255,255,255,.55)}
+
+/* ── Typography inside tiles ── */
+.lbl{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--secondary)}
+.tile-title{font-size:17px;font-weight:600;color:var(--primary);margin-top:8px;letter-spacing:-.01em}
+.tile-dark .tile-title{color:#f5f5f7}
+.desc{font-size:13px;color:var(--secondary);line-height:1.55;margin-top:6px}
+.stat{font-size:clamp(46px,5.5vw,64px);font-weight:700;letter-spacing:-.03em;line-height:1;margin-top:auto}
+.stat-sm{font-size:clamp(30px,3.2vw,42px);font-weight:700;letter-spacing:-.02em;line-height:1}
+.unit{font-size:14px;font-weight:500;color:var(--primary);margin-top:4px}
+.tile-dark .unit{color:#f5f5f7}
+
+/* ── Grids ── */
+.bento{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:auto;gap:var(--gap)}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--gap)}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap)}
+
+/* ── Feature icons ── */
+.icon-wrap{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.icon-blue{background:rgba(0,113,227,.1);color:var(--blue)}
+.icon-green{background:rgba(36,138,61,.1);color:var(--green)}
+.icon-teal{background:rgba(0,113,164,.1);color:var(--teal)}
+.icon-purple{background:rgba(125,47,160,.1);color:var(--purple)}
+.icon-amber{background:rgba(201,52,0,.1);color:var(--amber)}
+
+/* ── Badge ── */
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;width:fit-content}
+.badge-green{background:rgba(36,138,61,.1);color:var(--green)}
+.badge-blue{background:rgba(0,113,227,.1);color:var(--blue)}
+.badge-amber{background:rgba(201,52,0,.1);color:var(--amber)}
+.badge-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* ── Code blocks ── */
+pre{background:#1d1d1f;color:#e5e5e7;border-radius:14px;padding:20px 24px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;margin-top:16px}
+code{font-family:var(--mono);font-size:.88em}
+p code,li code{background:rgba(0,113,227,.07);color:var(--blue);padding:2px 7px;border-radius:5px;font-size:.84em}
+.c-comment{color:#6e6e73}
+.c-cmd{color:#64d2ff}
+.c-str{color:#ffd60a}
+.c-flag{color:#ff9f0a}
+
+/* ── Architecture diagram ── */
+.arch{background:#1d1d1f;color:#86868b;border-radius:14px;padding:24px 28px;font-family:var(--mono);font-size:12px;line-height:1.65;overflow-x:auto;white-space:pre}
+.arch .hl{color:#64d2ff;font-weight:600}
+.arch .hl2{color:#ff9f0a}
+.arch .hl3{color:#bf5af2}
+
+/* ── Pills ── */
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.pill{font-size:12px;font-weight:500;color:var(--primary);background:rgba(0,0,0,.04);padding:6px 14px;border-radius:8px;white-space:nowrap;transition:background .2s}
+.pill:hover{background:rgba(0,0,0,.08)}
+
+/* ── Phase list ── */
+.phase-list{margin-top:16px}
+.phase-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.06)}
+.phase-item:last-child{border-bottom:none}
+.phase-num{width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.phase-info{flex:1;min-width:0}
+.phase-name{font-size:14px;font-weight:600;color:var(--primary)}
+.phase-desc{font-size:12px;color:var(--secondary);margin-top:2px;line-height:1.45}
+.phase-badge{flex-shrink:0}
+
+/* ── Table ── */
+.table-wrap{overflow-x:auto;margin-top:16px;border-radius:14px;border:1px solid rgba(0,0,0,.06);background:var(--tile)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--tertiary);text-align:left;padding:12px 16px;background:rgba(0,0,0,.02);border-bottom:1px solid rgba(0,0,0,.06)}
+td{padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.04);color:var(--secondary);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(0,113,227,.02)}
+td strong{color:var(--primary);font-weight:600}
+
+/* ── Check list ── */
+.check-list{list-style:none}
+.check-list li{position:relative;padding:5px 0 5px 24px;font-size:14px;color:var(--secondary)}
+.check-list li::before{content:'';position:absolute;left:0;top:10px;width:14px;height:14px;border-radius:50%;border:2px solid var(--green);background:rgba(36,138,61,.12)}
+
+/* ── Items list ── */
+.items{list-style:none}
+.items li{font-size:13px;color:var(--secondary);padding:8px 0;border-bottom:1px solid rgba(0,0,0,.06);line-height:1.45;display:flex;align-items:flex-start;gap:8px}
+.items li:last-child{border-bottom:none}
+.items li strong{color:var(--primary);font-weight:600}
+.li-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:7px}
+
+/* ── Footer ── */
+footer{text-align:center;padding:40px 0 32px;font-size:12px;color:var(--tertiary)}
+footer a{color:var(--blue);text-decoration:none}
+footer a:hover{text-decoration:underline}
+
+/* ── Fade in ── */
+.fade{opacity:0;transform:translateY(16px);transition:opacity .6s cubic-bezier(.25,.46,.45,.94),transform .6s cubic-bezier(.25,.46,.45,.94)}
+.fade.v{opacity:1;transform:translateY(0)}
+.fade:nth-child(2){transition-delay:.04s}
+.fade:nth-child(3){transition-delay:.08s}
+.fade:nth-child(4){transition-delay:.12s}
+.fade:nth-child(5){transition-delay:.16s}
+.fade:nth-child(6){transition-delay:.2s}
+
+/* ── Responsive ── */
+@media(max-width:900px){
+  .bento{grid-template-columns:repeat(2,1fr)}
+  .grid-3{grid-template-columns:repeat(2,1fr)}
+  .container{padding:0 24px}
+  .nav{padding:0 24px}
+}
+@media(max-width:600px){
+  .bento,.grid-2,.grid-3{grid-template-columns:1fr}
+  .hero{padding:48px 0 40px}
+  .hero-meta{gap:20px}
+  .nav-links{display:none}
+  .container{padding:0 16px}
+  .nav{padding:0 16px}
+  section{padding:40px 0}
+  .tile{padding:20px}
+}
+
+/* ── Print ── */
+@media print{
+  .nav{display:none}
+  .tile{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
+}
+
+/* ── Reduced motion ── */
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <a href="#top" class="nav-brand"><span>CoCo</span></a>
+  <div class="nav-links">
+    <a href="#how-it-works">How It Works</a>
+    <a href="#features">Features</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#quickstart">Quick Start</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#skills">Skills</a>
+  </div>
+</nav>
+
+<div class="container" id="top">
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-badge"><div class="hero-badge-dot"></div>v1.0.0 &middot; Feature Complete</div>
+    <h1><span class="accent">CoCo</span></h1>
+    <p class="hero-sub">A conversational terminal assistant that talks to you naturally, orchestrates 75+ skills, learns from corrections, watches your project, and works fully offline with voice.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <div class="hero-meta-val" style="color:var(--blue)">75</div>
+        <div class="hero-meta-label">Skills Routed</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-val" style="color:var(--green)">227</div>
+        <div class="hero-meta-label">Tests Passing</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-val" style="color:var(--teal)">6</div>
+        <div class="hero-meta-label">Phases Complete</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-val" style="color:var(--purple)">0</div>
+        <div class="hero-meta-label">Cloud Dependencies</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- How It Works -->
+  <section id="how-it-works">
+    <div class="section-label">How It Works</div>
+    <div class="section-title">Your entire skill ecosystem,<br>one conversation away.</div>
+    <div class="section-desc">CoCo is a persistent Node.js process that sits between you and Claude Code. You talk; it figures out which of your 75 skills to invoke.</div>
+
+    <div class="grid-2">
+      <div class="tile tile-blue fade">
+        <div class="lbl">The Flow</div>
+        <div class="tile-title">You speak or type &rarr; CoCo classifies &rarr; skill executes</div>
+        <ul class="items" style="margin-top:12px">
+          <li><div class="li-dot" style="background:var(--blue)"></div><strong>Input</strong> &mdash; Text via terminal or voice via push-to-talk (whisper.cpp)</li>
+          <li><div class="li-dot" style="background:var(--teal)"></div><strong>Classify</strong> &mdash; Tier 1 checks corrections, slash commands, regex, keywords (instant). Tier 2 falls back to Claude for ambiguous inputs.</li>
+          <li><div class="li-dot" style="background:var(--green)"></div><strong>Route</strong> &mdash; Team/GSD routers extract params. Orchestrator spawns a Claude Code session with the right skill context.</li>
+          <li><div class="li-dot" style="background:var(--purple)"></div><strong>Execute</strong> &mdash; Session runs in a collapsible dashboard panel with live output. Multiple sessions run in parallel.</li>
+          <li><div class="li-dot" style="background:var(--amber)"></div><strong>Learn</strong> &mdash; Every classification is logged. Corrections (<code>/correct</code>) override future routing. Skill sequences are tracked for recommendations.</li>
+        </ul>
+      </div>
+      <div class="tile fade">
+        <div class="lbl">Two Modes</div>
+        <div class="tile-title">Interactive TUI or single-command</div>
+        <p class="desc" style="margin-top:8px"><strong>Interactive:</strong> Full Ink terminal UI with dashboard, status bar, suggestion bar, session panels, voice toggle. Launches with <code>coco</code> or <code>npm run dev</code>.</p>
+        <p class="desc"><strong>Single-command:</strong> Pipe one command and exit. <code>coco "research OAuth patterns"</code> &mdash; output streams to stdout, no TUI needed.</p>
+        <div style="margin-top:auto">
+          <div class="lbl" style="margin-bottom:8px">Proactive Mode</div>
+          <p class="desc" style="margin:0">When enabled (<code>/proactive on</code>), CoCo watches your files, email (HxStore), and calendar (AppleScript) &mdash; suggesting actions in a non-intrusive bar. All suggestions require explicit Enter to accept. Toggle per channel: <code>/proactive email on</code>, <code>/proactive calendar on</code>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features">
+    <div class="section-label">Core Features</div>
+    <div class="section-title">Built for how you actually work.</div>
+    <div class="section-desc">Every feature designed around real daily workflows &mdash; multi-tasking, voice, intelligence, proactive suggestions, and the full skill ecosystem.</div>
+
+    <div class="grid-3">
+      <div class="tile fade">
+        <div class="icon-wrap icon-blue">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="tile-title">Two-Tier Intent Classification</div>
+        <p class="desc">Tier 1: corrections store, slash commands, regex triggers, keyword scoring (instant). Tier 2: Claude-based for ambiguous inputs. 100% on 50-query test set.</p>
+      </div>
+      <div class="tile fade">
+        <div class="icon-wrap icon-teal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="tile-title">Parallel Sessions + Dashboard</div>
+        <p class="desc">Run 3+ Claude sessions simultaneously. Each gets a collapsible panel with live output, status, layer progress, and elapsed time.</p>
+      </div>
+      <div class="tile fade">
+        <div class="icon-wrap icon-purple">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </div>
+        <div class="tile-title">Voice I/O (Offline)</div>
+        <p class="desc">Push-to-talk via local whisper.cpp. TTS via macOS <code>say</code>. No cloud APIs. Toggle with <code>/voice on</code>.</p>
+      </div>
+      <div class="tile fade">
+        <div class="icon-wrap icon-green">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"/><polyline points="14 2 14 8 20 8"/><path d="m3 15 2 2 4-4"/></svg>
+        </div>
+        <div class="tile-title">Learning Loop</div>
+        <p class="desc">Say <code>/correct team-review</code> and CoCo learns. Corrections stored in SQLite, applied first on future inputs. Skill sequence recommendations after 3+ occurrences.</p>
+      </div>
+      <div class="tile fade">
+        <div class="icon-wrap icon-amber">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div class="tile-title">Proactive Suggestions</div>
+        <p class="desc">File watcher, email monitor (HxStore + attachments), calendar bridge. Non-intrusive suggestion bar &mdash; accept with Enter, dismiss with Esc. Never auto-executes.</p>
+      </div>
+      <div class="tile fade">
+        <div class="icon-wrap icon-blue">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        </div>
+        <div class="tile-title">75 Skills Auto-Discovered</div>
+        <p class="desc">Reads <code>~/.claude/commands/</code> at startup. Covers /team, /gsd, /pmstudio, /email, Superpowers, and custom commands.</p>
+      </div>
+      <div class="tile fade">
+        <div class="icon-wrap icon-teal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </div>
+        <div class="tile-title">Task Queue + Dependencies</div>
+        <p class="desc">Queue commands while sessions run. FIFO with dependency support and priority. "After the research, build the component."</p>
+      </div>
+      <div class="tile fade">
+        <div class="icon-wrap icon-green">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+        </div>
+        <div class="tile-title">Ambient Context</div>
+        <p class="desc">Greets with project name, branch, last session, queue depth. Summarizes exchanges every 10 turns. Manages token budget automatically.</p>
+      </div>
+      <div class="tile fade">
+        <div class="icon-wrap icon-purple">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="tile-title">Persistent SQLite State</div>
+        <p class="desc">15+ tables: sessions, history, skills, queue, intent log, corrections, sequences, summaries, preferences, suggestions. Survives restarts at <code>~/.coco/coco.db</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture -->
+  <section id="architecture">
+    <div class="section-label">Architecture</div>
+    <div class="section-title">Node.js + Ink + SQLite</div>
+    <div class="section-desc">Built on the Claude Code SDK &mdash; every session inherits all existing commands, skills, agents, hooks, and MCP servers automatically.</div>
+
+    <div class="arch" role="img" aria-label="CoCo architecture diagram">     <span style="color:#86868b">You (text / voice / proactive suggestion)</span>
+          |
+          v
+     +---------------------------------------------+
+     |  <span class="hl">CoCo</span>  <span style="color:#86868b">(Node.js + Ink terminal UI)</span>           |
+     |                                             |
+     |  +--------------+   +--------------------+  |
+     |  | <span class="hl2">Intent</span>       |-->| <span class="hl2">Skill Registry</span>     |  |
+     |  | <span class="hl2">Classifier</span>   |   | <span style="color:#86868b">75 skills loaded</span>   |  |
+     |  | <span style="color:#86868b">Tier1 + Tier2</span>|   +--------------------+  |
+     |  +------+-------+                           |
+     |         |           +--------------------+  |
+     |  +------v-------+   | <span class="hl2">Learning Store</span>    |  |
+     |  | <span class="hl2">Orchestrator</span> |<--| <span style="color:#86868b">corrections +</span>    |  |
+     |  | <span style="color:#86868b">route+dispatch</span>|   | <span style="color:#86868b">sequences</span>        |  |
+     |  +------+-------+   +--------------------+  |
+     |         |                                    |
+     |  +------v-------+   +--------------------+  |
+     |  | <span class="hl3">Session Mgr</span>  |-->| <span class="hl3">Dashboard UI</span>       |  |
+     |  | <span style="color:#86868b">spawn/track</span>  |   | <span style="color:#86868b">panels + suggest</span>  |  |
+     |  +------+-------+   +--------------------+  |
+     |         |                                    |
+     |  +------v-------+   +--------------------+  |
+     |  | <span style="color:#86868b">Task Queue</span>   |   | <span class="hl3">Voice I/O</span>          |  |
+     |  | <span style="color:#86868b">FIFO + deps</span>  |   | <span style="color:#86868b">whisper + say</span>     |  |
+     |  +--------------+   +--------------------+  |
+     |                                             |
+     |  +--------------+   +--------------------+  |
+     |  | <span class="hl2">Proactive</span>    |   | <span class="hl2">Context Mgr</span>       |  |
+     |  | <span style="color:#86868b">file/email/</span>  |   | <span style="color:#86868b">greeting +</span>        |  |
+     |  | <span style="color:#86868b">calendar</span>     |   | <span style="color:#86868b">summarize</span>         |  |
+     |  +--------------+   +--------------------+  |
+     |                                             |
+     |  +-------------------------------------+    |
+     |  | <span style="color:#86868b">SQLite  (15+ tables at ~/.coco/)</span>     |    |
+     |  +-------------------------------------+    |
+     +---------------------+-----------------------+
+                           |
+                           v
+     +---------------------------------------------+
+     |  <span class="hl">Claude Code SDK</span>  <span style="color:#86868b">(inherits everything)</span>      |
+     |  <span style="color:#86868b">commands . skills . agents . hooks . MCP</span>    |
+     +---------------------------------------------+</div>
+
+    <div class="pills">
+      <span class="pill">Node.js 20+</span>
+      <span class="pill">TypeScript 5.5</span>
+      <span class="pill">Ink 5 (React for terminal)</span>
+      <span class="pill">better-sqlite3</span>
+      <span class="pill">p-queue</span>
+      <span class="pill">execa</span>
+      <span class="pill">gray-matter</span>
+      <span class="pill">whisper.cpp</span>
+      <span class="pill">Vitest</span>
+    </div>
+  </section>
+
+  <!-- Quick Start -->
+  <section id="quickstart">
+    <div class="section-label">Quick Start</div>
+    <div class="section-title">Up and running in minutes.</div>
+
+    <div class="grid-2">
+      <div class="tile fade">
+        <div class="lbl">Prerequisites</div>
+        <ul class="check-list" style="margin-top:12px">
+          <li>Node.js 20+ installed</li>
+          <li>Claude CLI authenticated (<code>claude -p</code> works)</li>
+          <li>macOS (voice uses <code>say</code> / whisper.cpp)</li>
+        </ul>
+      </div>
+      <div class="tile fade">
+        <div class="lbl">Voice Setup (Optional)</div>
+        <p class="desc" style="margin-top:8px">Install whisper.cpp via Homebrew for push-to-talk voice input. CoCo downloads the base English model automatically on first <code>/voice on</code>.</p>
+        <div class="badge badge-green" style="margin-top:auto"><div class="badge-dot" style="background:var(--green)"></div>Fully Offline</div>
+      </div>
+    </div>
+
+    <pre><span class="c-comment"># Navigate to CoCo</span>
+<span class="c-cmd">cd</span> ~/Downloads/coco/src
+
+<span class="c-comment"># Install dependencies</span>
+<span class="c-cmd">npm</span> install
+
+<span class="c-comment"># Interactive TUI (full dashboard)</span>
+<span class="c-cmd">npm</span> run dev
+
+<span class="c-comment"># Single-command mode (no TUI needed)</span>
+<span class="c-cmd">npx</span> tsx src/index.tsx <span class="c-str">"research OAuth patterns"</span>
+
+<span class="c-comment"># Global install (use `coco` anywhere)</span>
+<span class="c-cmd">npm</span> run link
+
+<span class="c-comment"># Run all 227 tests</span>
+<span class="c-cmd">npm</span> test</pre>
+  </section>
+
+  <!-- Roadmap -->
+  <section id="roadmap">
+    <div class="section-label">Roadmap</div>
+    <div class="section-title">6 phases. All complete.</div>
+    <div class="section-desc">All phases built, verified, and code-reviewed. 227 tests passing across 23 files. MVP at Phase 2; Phases 3&ndash;5 add voice, intelligence, and proactive capabilities.</div>
+
+    <div class="tile" style="padding:12px 24px">
+      <div class="phase-list">
+        <div class="phase-item">
+          <div class="phase-num" style="background:var(--green)">0</div>
+          <div class="phase-info">
+            <div class="phase-name">Proof of Concept</div>
+            <div class="phase-desc"><code>coco.sh</code> shell script &mdash; text in, route to <code>claude -p</code>, stream output back. 3 dispatch modes validated.</div>
+          </div>
+          <div class="phase-badge"><div class="badge badge-green"><div class="badge-dot" style="background:var(--green)"></div>Complete</div></div>
+        </div>
+        <div class="phase-item">
+          <div class="phase-num" style="background:var(--blue)">1</div>
+          <div class="phase-info">
+            <div class="phase-name">Core Application</div>
+            <div class="phase-desc">Node.js + Ink app. Orchestrator, skill registry (74 skills), SQLite state, CoCo personality. 100% routing accuracy.</div>
+          </div>
+          <div class="phase-badge"><div class="badge badge-green"><div class="badge-dot" style="background:var(--green)"></div>29/29 Tests</div></div>
+        </div>
+        <div class="phase-item">
+          <div class="phase-num" style="background:var(--teal)">2</div>
+          <div class="phase-info">
+            <div class="phase-name">Parallel Sessions + Dashboard</div>
+            <div class="phase-desc">Multi-session manager, live dashboard with collapsible panels, task queue with dependency support, status bar.</div>
+          </div>
+          <div class="phase-badge"><div class="badge badge-green"><div class="badge-dot" style="background:var(--green)"></div>101 Tests</div></div>
+        </div>
+        <div class="phase-item" style="background:rgba(0,113,227,.03);margin:0 -24px;padding:12px 24px;border-radius:12px">
+          <div class="phase-num" style="background:var(--primary)">&#x2713;</div>
+          <div class="phase-info">
+            <div class="phase-name" style="color:var(--blue)">MVP Boundary (v1.0)</div>
+            <div class="phase-desc">A persistent terminal assistant that dispatches to the full skill ecosystem, runs parallel sessions, and persists state.</div>
+          </div>
+        </div>
+        <div class="phase-item">
+          <div class="phase-num" style="background:var(--purple)">3</div>
+          <div class="phase-info">
+            <div class="phase-name">Voice I/O</div>
+            <div class="phase-desc">Push-to-talk via whisper.cpp, TTS via macOS <code>say</code>, hotkey binding, voice manager with toggle.</div>
+          </div>
+          <div class="phase-badge"><div class="badge badge-green"><div class="badge-dot" style="background:var(--green)"></div>101 Tests</div></div>
+        </div>
+        <div class="phase-item">
+          <div class="phase-num" style="background:var(--amber)">4</div>
+          <div class="phase-info">
+            <div class="phase-name">Intelligence Layer</div>
+            <div class="phase-desc">Two-tier intent classifier, learning store with corrections, context manager with ambient greeting, team/GSD routers with param extraction. 100% on 50-query accuracy suite.</div>
+          </div>
+          <div class="phase-badge"><div class="badge badge-green"><div class="badge-dot" style="background:var(--green)"></div>163 Tests</div></div>
+        </div>
+        <div class="phase-item">
+          <div class="phase-num" style="background:var(--purple)">5</div>
+          <div class="phase-info">
+            <div class="phase-name">Proactive Mode</div>
+            <div class="phase-desc">File watcher, email monitor (HxStore + attachments), calendar bridge (AppleScript), suggestion bar UI, trigger engine with 14 rules, preference learning. Never auto-executes.</div>
+          </div>
+          <div class="phase-badge"><div class="badge badge-green"><div class="badge-dot" style="background:var(--green)"></div>227 Tests</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section id="skills">
+    <div class="section-label">Skill Ecosystem</div>
+    <div class="section-title">What CoCo can route to.</div>
+    <div class="section-desc">Auto-discovers from <code>~/.claude/commands/</code> at startup. Here are the main families.</div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Family</th><th>Examples</th><th>What It Does</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong style="color:var(--blue)">/team</strong></td>
+            <td><code>research</code> <code>build</code> <code>review</code> <code>ship</code> <code>test</code></td>
+            <td>Cross-functional product team &mdash; spawns specialized roles for each task</td>
+          </tr>
+          <tr>
+            <td><strong style="color:var(--teal)">/gsd</strong></td>
+            <td><code>plan-phase</code> <code>execute-phase</code> <code>verify-work</code></td>
+            <td>Multi-phase project orchestration with persistent state and milestones</td>
+          </tr>
+          <tr>
+            <td><strong style="color:var(--purple)">/pmstudio</strong></td>
+            <td><code>prd</code> <code>arb</code> <code>dr</code> <code>sync</code> <code>nfr</code></td>
+            <td>PM documentation suite &mdash; PRDs, architecture decks, DR plans, audits</td>
+          </tr>
+          <tr>
+            <td><strong style="color:var(--amber)">/email</strong></td>
+            <td><code>read</code> <code>search</code> <code>summary</code> <code>reply</code></td>
+            <td>Outlook email monitoring, search, thread reading, AI summaries</td>
+          </tr>
+          <tr>
+            <td><strong style="color:var(--green)">Superpowers</strong></td>
+            <td><code>brainstorming</code> <code>TDD</code> <code>debugging</code> <code>code-review</code></td>
+            <td>Task execution quality &mdash; systematic debugging, test-driven dev, reviews</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Project Structure -->
+  <section id="structure">
+    <div class="section-label">Project Structure</div>
+    <div class="section-title">Directory layout.</div>
+
+    <pre><span class="c-str">coco/</span>
++-- <span class="c-flag">src/src/</span>
+|   +-- <span class="c-cmd">index.tsx</span>              <span class="c-comment"># Entry — CLI args, boot Ink or single-cmd</span>
+|   +-- <span class="c-flag">core/</span>                  <span class="c-comment"># Phases 1-4</span>
+|   |   +-- orchestrator.ts       <span class="c-comment"># Intent -> route -> execute</span>
+|   |   +-- intent-classifier.ts  <span class="c-comment"># Two-tier classification (P4)</span>
+|   |   +-- learning-store.ts     <span class="c-comment"># Corrections + sequences (P4)</span>
+|   |   +-- context-manager.ts    <span class="c-comment"># Greeting + summarization (P4)</span>
+|   |   +-- session-manager.ts    <span class="c-comment"># Spawn/track/resume sessions</span>
+|   |   +-- skill-registry.ts     <span class="c-comment"># Auto-discover ~/.claude/commands/</span>
+|   |   +-- state.ts              <span class="c-comment"># SQLite — 15+ tables</span>
+|   |   +-- task-queue.ts         <span class="c-comment"># FIFO + dependency support</span>
+|   |   +-- notifier.ts           <span class="c-comment"># macOS notifications</span>
+|   +-- <span class="c-flag">integrations/</span>          <span class="c-comment"># Phase 4 routers</span>
+|   |   +-- team-router.ts        <span class="c-comment"># NL -> /team commands + params</span>
+|   |   +-- gsd-router.ts         <span class="c-comment"># NL -> /gsd commands + params</span>
+|   +-- <span class="c-flag">proactive/</span>             <span class="c-comment"># Phase 5</span>
+|   |   +-- engine.ts             <span class="c-comment"># 5s tick loop, suggestion queue</span>
+|   |   +-- trigger-engine.ts     <span class="c-comment"># Rule matching + confidence</span>
+|   |   +-- suggestion-ranker.ts  <span class="c-comment"># Score, dedupe, threshold filter</span>
+|   |   +-- preference-store.ts   <span class="c-comment"># Accept/dismiss learning</span>
+|   |   +-- file-watcher.ts       <span class="c-comment"># fs.watch + debounce + ignore</span>
+|   |   +-- email-monitor.ts      <span class="c-comment"># HxStore + attachments + drop</span>
+|   |   +-- calendar-bridge.ts    <span class="c-comment"># AppleScript Calendar.app</span>
+|   |   +-- default-rules.ts      <span class="c-comment"># 14 pre-configured trigger rules</span>
+|   +-- <span class="c-flag">ui/</span>
+|   |   +-- App.tsx               <span class="c-comment"># Ink root layout</span>
+|   |   +-- Dashboard.tsx         <span class="c-comment"># Multi-session layout manager</span>
+|   |   +-- SessionPanel.tsx      <span class="c-comment"># Live output per session</span>
+|   |   +-- StatusBar.tsx         <span class="c-comment"># Status + confidence indicator</span>
+|   |   +-- SuggestionBar.tsx     <span class="c-comment"># Proactive suggestion UI (P5)</span>
+|   |   +-- CommandInput.tsx      <span class="c-comment"># Text input with history</span>
+|   +-- <span class="c-flag">voice/</span>
+|       +-- listener.ts           <span class="c-comment"># whisper.cpp subprocess</span>
+|       +-- speaker.ts            <span class="c-comment"># macOS `say` wrapper</span>
+|       +-- hotkey.ts             <span class="c-comment"># Push-to-talk binding</span>
+|       +-- audio-capture.ts      <span class="c-comment"># Mic recording via sox</span>
+|       +-- voice-manager.ts      <span class="c-comment"># Toggle + lifecycle</span>
+|       +-- setup.ts              <span class="c-comment"># Model download on first run</span>
++-- <span class="c-flag">prompts/</span>
+|   +-- coco-system.md            <span class="c-comment"># Personality + routing instructions</span>
++-- <span class="c-flag">tests/</span>                      <span class="c-comment"># 227 Vitest specs across 23 files</span>
++-- <span class="c-str">RESEARCH.md</span>                 <span class="c-comment"># Competitive analysis (14 tools)</span>
++-- <span class="c-str">ROADMAP.md</span>                  <span class="c-comment"># 6-phase plan, all complete</span>
++-- <span class="c-str">TECH-SPEC.md</span>                <span class="c-comment"># Full technical specification</span>
++-- package.json
++-- tsconfig.json</pre>
+  </section>
+
+  <!-- Competitive Landscape -->
+  <section id="landscape">
+    <div class="section-label">Why CoCo?</div>
+    <div class="section-title">Nothing else does this.</div>
+    <div class="section-desc">14 tools evaluated. None combine: always-on daemon + voice + terminal orchestration + extensible skills + learning loop.</div>
+
+    <div class="grid-2">
+      <div class="tile tile-dark fade">
+        <div class="lbl">Key Insight</div>
+        <div class="stat-sm" style="margin-top:auto;color:#f5f5f7">34</div>
+        <div class="unit">source modules</div>
+        <p class="desc">34 TypeScript modules across 6 directories. 227 tests. 15+ SQLite tables. From intent classification to proactive file watching &mdash; all built, verified, and code-reviewed.</p>
+      </div>
+      <div class="tile fade">
+        <ul class="items" style="margin-top:0">
+          <li><div class="li-dot" style="background:var(--blue)"></div><strong>Claude Code</strong> — Skills + hooks + MCP + 1M context. No daemon, no voice.</li>
+          <li><div class="li-dot" style="background:var(--teal)"></div><strong>OpenAI Codex CLI</strong> — Voice input (experimental). OpenAI only, no daemon.</li>
+          <li><div class="li-dot" style="background:var(--green)"></div><strong>Aider</strong> — Best git integration, voice. Code-only, no general tasks.</li>
+          <li><div class="li-dot" style="background:var(--purple)"></div><strong>Open Interpreter</strong> — General-purpose execution. AGPL, no daemon, no MCP.</li>
+          <li><div class="li-dot" style="background:var(--amber)"></div><strong>TmuxAI</strong> — Observe all panes passively. Observation only, no execution.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Known Gaps -->
+  <section>
+    <div class="section-label">Known Gaps</div>
+    <div class="section-title">Non-blocking issues.</div>
+
+    <div class="grid-3">
+      <div class="tile fade">
+        <div class="badge badge-amber" style="margin-bottom:8px"><div class="badge-dot" style="background:var(--amber)"></div>Phase 2</div>
+        <p class="desc"><code>/reattach</code> command not implemented (detach works)</p>
+      </div>
+      <div class="tile fade">
+        <div class="badge badge-amber" style="margin-bottom:8px"><div class="badge-dot" style="background:var(--amber)"></div>Phase 3</div>
+        <p class="desc">No latency benchmark for whisper.cpp &lt;2s target</p>
+      </div>
+      <div class="tile fade">
+        <div class="badge badge-blue" style="margin-bottom:8px"><div class="badge-dot" style="background:var(--tertiary)"></div>Cosmetic</div>
+        <p class="desc"><code>src/src/</code> double-nested directory structure</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <p>Project CoCo &middot; Built by <a href="#">Rijul Kalra</a> &middot; McKinsey Cross Risk</p>
+  <p style="margin-top:6px">Part of the <a href="#">how-i-pm-with-ai</a> framework</p>
+</footer>
+
+<script>
+// Intersection Observer for fade-in
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('v'); obs.unobserve(e.target); } });
+}, { threshold: 0.15 });
+document.querySelectorAll('.fade').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

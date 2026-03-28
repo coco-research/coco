@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoCo - Skills</title>
+  <style>
+    :root {
+      --bg: #f5f5f7; --tile: #fff;
+      --primary: #1d1d1f; --secondary: #6e6e73; --tertiary: #86868b;
+      --blue: #0071e3; --green: #248a3d; --amber: #c93400;
+      --teal: #0071a4; --purple: #7d2fa0;
+      --gap: 16px; --radius: 20px; --pad: 28px;
+      --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+              system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --mono: 'SF Mono', ui-monospace, 'Cascadia Code', 'Fira Code', Menlo, Consolas, monospace;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      min-height: 100%;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* -- Nav Bar -- */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--tile);
+      border-bottom: 1px solid #d2d2d7;
+      padding: 0 var(--pad);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 52px;
+    }
+
+    nav .logo {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    nav .nav-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    nav .nav-links a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    nav .nav-links a:hover { color: var(--primary); }
+    nav .nav-links a.active { color: var(--blue); }
+
+    /* -- Page Content -- */
+    .page-content {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: var(--pad);
+    }
+
+    .page-header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--primary);
+    }
+
+    .page-header .subtitle {
+      font-size: 15px;
+      color: var(--secondary);
+      margin-top: 4px;
+    }
+
+    /* -- Search -- */
+    .search-bar {
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+
+    .search-bar input {
+      width: 100%;
+      max-width: 480px;
+      font-family: var(--font);
+      font-size: 15px;
+      padding: 12px 18px;
+      border: 1px solid #d2d2d7;
+      border-radius: 24px;
+      outline: none;
+      background: var(--tile);
+      color: var(--primary);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-bar input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(0,113,227,0.15);
+    }
+
+    .search-bar input::placeholder { color: var(--tertiary); }
+
+    /* -- Family Section -- */
+    .family-section {
+      margin-top: 28px;
+    }
+
+    .family-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-left: 4px solid var(--secondary);
+      padding-left: 16px;
+      margin-bottom: var(--gap);
+    }
+
+    .family-header h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .family-count-badge {
+      font-size: 12px;
+      font-weight: 600;
+      background: #f0f0f2;
+      color: var(--secondary);
+      padding: 2px 10px;
+      border-radius: 10px;
+    }
+
+    /* Family accent colors */
+    .family-section[data-family="gsd"] .family-header { border-left-color: var(--blue); }
+    .family-section[data-family="team"] .family-header { border-left-color: var(--green); }
+    .family-section[data-family="pmstudio"] .family-header { border-left-color: var(--teal); }
+    .family-section[data-family="email"] .family-header { border-left-color: var(--amber); }
+    .family-section[data-family="superpowers"] .family-header { border-left-color: var(--purple); }
+    .family-section[data-family="standalone"] .family-header { border-left-color: var(--secondary); }
+
+    /* -- Skill Grid -- */
+    .skill-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--gap);
+    }
+
+    @media (min-width: 640px) {
+      .skill-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (min-width: 960px) {
+      .skill-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    /* -- Skill Card -- */
+    .skill-card {
+      background: var(--tile);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.1s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .skill-card:hover {
+      box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+      transform: translateY(-1px);
+    }
+
+    .skill-card .skill-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .skill-card .skill-desc {
+      font-size: 13px;
+      color: var(--secondary);
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .skill-card .card-badges {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    /* -- Family Badge -- */
+    .family-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #fff;
+      letter-spacing: 0.3px;
+    }
+
+    .family-badge.gsd { background: var(--blue); }
+    .family-badge.team { background: var(--green); }
+    .family-badge.pmstudio { background: var(--teal); }
+    .family-badge.email { background: var(--amber); }
+    .family-badge.superpowers { background: var(--purple); }
+    .family-badge.standalone { background: var(--secondary); }
+
+    /* -- Source Badge -- */
+    .source-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      background: #f0f0f2;
+      color: var(--tertiary);
+      letter-spacing: 0.3px;
+    }
+
+    /* -- Responsive -- */
+    @media (max-width: 600px) {
+      nav { padding: 0 16px; }
+      nav .nav-links { gap: 16px; }
+      nav .nav-links a { font-size: 13px; }
+      .page-content { padding: 20px 16px; }
+      .page-header h1 { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">CoCo</a>
+    <div class="nav-links">
+      <a href="/">Chat</a>
+      <a href="/sessions.html">Sessions</a>
+      <a href="/skills.html" class="active">Skills</a>
+      <a href="/history.html">History</a>
+    </div>
+  </nav>
+
+  <div class="page-content">
+    <div class="page-header">
+      <h1>Skills</h1>
+      <p class="subtitle" id="subtitle">Loading skills...</p>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Search skills by name or description...">
+    </div>
+
+    <div id="families-container"></div>
+  </div>
+
+  <script>
+    // -- Config --
+    const FAMILY_ORDER = ['gsd', 'team', 'pmstudio', 'email', 'superpowers', 'standalone'];
+    const FAMILY_LABELS = {
+      gsd: 'GSD',
+      team: 'Team',
+      pmstudio: 'PMStudio',
+      email: 'Email',
+      superpowers: 'Superpowers',
+      standalone: 'Standalone'
+    };
+
+    let allSkills = [];
+    let searchTerm = '';
+    let debounceTimer = null;
+
+    // -- Rendering --
+    function renderSkills() {
+      const container = document.getElementById('families-container');
+      const grouped = {};
+
+      // Group and filter
+      const filtered = allSkills.filter(s => {
+        if (!searchTerm) return true;
+        const q = searchTerm.toLowerCase();
+        return (s.name || '').toLowerCase().includes(q) ||
+               (s.description || '').toLowerCase().includes(q);
+      });
+
+      for (const family of FAMILY_ORDER) {
+        grouped[family] = [];
+      }
+      for (const skill of filtered) {
+        const fam = (skill.family || 'standalone').toLowerCase();
+        if (!grouped[fam]) grouped[fam] = [];
+        grouped[fam].push(skill);
+      }
+
+      // Count families with skills
+      const totalFamilies = FAMILY_ORDER.filter(f => grouped[f] && grouped[f].length > 0).length;
+      document.getElementById('subtitle').textContent =
+        `${filtered.length} skill${filtered.length !== 1 ? 's' : ''} across ${totalFamilies} famil${totalFamilies !== 1 ? 'ies' : 'y'}`;
+
+      let html = '';
+      for (const family of FAMILY_ORDER) {
+        const skills = grouped[family];
+        if (!skills || skills.length === 0) continue;
+
+        html += `
+          <div class="family-section" data-family="${family}">
+            <div class="family-header">
+              <h2>${FAMILY_LABELS[family] || family}</h2>
+              <span class="family-count-badge">${skills.length}</span>
+            </div>
+            <div class="skill-grid">
+              ${skills.map(s => `
+                <a class="skill-card" href="/?skill=${encodeURIComponent(s.name)}" title="Open ${s.name} in chat">
+                  <div class="skill-name">${escapeHtml(s.name)}</div>
+                  <div class="skill-desc">${escapeHtml(s.description || 'No description')}</div>
+                  <div class="card-badges">
+                    <span class="family-badge ${family}">${FAMILY_LABELS[family] || family}</span>
+                    <span class="source-badge">${s.source || 'skill'}</span>
+                  </div>
+                </a>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html || '<div style="text-align:center;padding:40px;color:var(--secondary);">No skills match your search.</div>';
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // -- Search --
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        searchTerm = e.target.value.trim();
+        renderSkills();
+      }, 200);
+    });
+
+    // -- Load skills --
+    async function loadSkills() {
+      try {
+        const res = await fetch('/api/skills');
+        allSkills = await res.json();
+        renderSkills();
+      } catch (err) {
+        console.error('Failed to load skills:', err);
+        document.getElementById('subtitle').textContent = 'Failed to load skills';
+      }
+    }
+
+    loadSkills();
+  </script>
+</body>
+</html>

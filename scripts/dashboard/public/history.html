@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoCo - History</title>
+  <style>
+    :root {
+      --bg: #f5f5f7; --tile: #fff;
+      --primary: #1d1d1f; --secondary: #6e6e73; --tertiary: #86868b;
+      --blue: #0071e3; --green: #248a3d; --amber: #c93400;
+      --teal: #0071a4; --purple: #7d2fa0;
+      --gap: 16px; --radius: 20px; --pad: 28px;
+      --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+              system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --mono: 'SF Mono', ui-monospace, 'Cascadia Code', 'Fira Code', Menlo, Consolas, monospace;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      min-height: 100%;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* -- Nav Bar -- */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--tile);
+      border-bottom: 1px solid #d2d2d7;
+      padding: 0 var(--pad);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 52px;
+    }
+
+    nav .logo {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    nav .nav-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    nav .nav-links a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    nav .nav-links a:hover { color: var(--primary); }
+    nav .nav-links a.active { color: var(--blue); }
+
+    /* -- Page Content -- */
+    .page-content {
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: var(--pad);
+    }
+
+    .page-header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--primary);
+    }
+
+    .page-header .subtitle {
+      font-size: 15px;
+      color: var(--secondary);
+      margin-top: 4px;
+    }
+
+    /* -- Search Bar -- */
+    .search-bar {
+      margin-top: 20px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .search-bar input {
+      width: 100%;
+      font-family: var(--font);
+      font-size: 15px;
+      padding: 12px 44px 12px 18px;
+      border: 1px solid #d2d2d7;
+      border-radius: 24px;
+      outline: none;
+      background: var(--tile);
+      color: var(--primary);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-bar input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(0,113,227,0.15);
+    }
+
+    .search-bar input::placeholder { color: var(--tertiary); }
+
+    .search-clear {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 22px;
+      height: 22px;
+      border: none;
+      background: #d2d2d7;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .search-clear.visible { display: flex; }
+
+    /* -- Event Count -- */
+    .event-count {
+      font-size: 13px;
+      color: var(--tertiary);
+      margin-bottom: 12px;
+    }
+
+    /* -- Timeline -- */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* -- Event Entry -- */
+    .event-entry {
+      background: var(--tile);
+      border-radius: 14px;
+      padding: 14px 18px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      border-left: 4px solid var(--tertiary);
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .event-entry.type-session_start { border-left-color: var(--green); }
+    .event-entry.type-tool_use { border-left-color: var(--blue); }
+    .event-entry.type-skill_invoked { border-left-color: var(--purple); }
+    .event-entry.type-error { border-left-color: var(--amber); }
+
+    .event-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+
+    .event-timestamp {
+      font-size: 12px;
+      color: var(--secondary);
+      font-family: var(--mono);
+    }
+
+    .event-type-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #fff;
+      letter-spacing: 0.3px;
+    }
+
+    .event-type-badge.session_start { background: var(--green); }
+    .event-type-badge.tool_use { background: var(--blue); }
+    .event-type-badge.skill_invoked { background: var(--purple); }
+    .event-type-badge.error { background: var(--amber); }
+    .event-type-badge.default { background: var(--tertiary); }
+
+    .event-tool {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .event-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .event-tag {
+      font-size: 11px;
+      color: var(--tertiary);
+      background: #f0f0f2;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-family: var(--mono);
+    }
+
+    .event-preview {
+      font-size: 13px;
+      color: var(--secondary);
+      margin-top: 6px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    /* -- Empty / Load More -- */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--secondary);
+    }
+
+    .empty-state p { font-size: 15px; }
+
+    .load-more {
+      text-align: center;
+      padding: 16px;
+    }
+
+    .load-more button {
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 24px;
+      background: var(--tile);
+      color: var(--blue);
+      border: 1px solid #d2d2d7;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .load-more button:hover { background: #f0f0f2; }
+
+    /* -- Responsive -- */
+    @media (max-width: 600px) {
+      nav { padding: 0 16px; }
+      nav .nav-links { gap: 16px; }
+      nav .nav-links a { font-size: 13px; }
+      .page-content { padding: 20px 16px; }
+      .page-header h1 { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">CoCo</a>
+    <div class="nav-links">
+      <a href="/">Chat</a>
+      <a href="/sessions.html">Sessions</a>
+      <a href="/skills.html">Skills</a>
+      <a href="/history.html" class="active">History</a>
+    </div>
+  </nav>
+
+  <div class="page-content">
+    <div class="page-header">
+      <h1>History</h1>
+      <p class="subtitle">Interaction timeline from events.jsonl</p>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Search events by type, tool, session, or text...">
+      <button class="search-clear" id="search-clear" title="Clear search">&times;</button>
+    </div>
+
+    <div class="event-count" id="event-count"></div>
+    <div class="timeline" id="timeline"></div>
+    <div id="load-more-container"></div>
+  </div>
+
+  <script>
+    // -- State --
+    const allEvents = [];
+    let searchTerm = '';
+    let debounceTimer = null;
+    const RENDER_LIMIT = 500;
+    let renderCount = RENDER_LIMIT;
+
+    // -- Helpers --
+    function formatTimestamp(ts) {
+      const d = new Date(typeof ts === 'number' && ts < 1e12 ? ts * 1000 : ts);
+      if (isNaN(d.getTime())) return '---';
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const month = months[d.getMonth()];
+      const day = d.getDate();
+      let hours = d.getHours();
+      const mins = String(d.getMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12;
+      return `${month} ${day}, ${hours}:${mins} ${ampm}`;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function truncatePath(path) {
+      if (!path) return '';
+      const parts = path.split('/');
+      if (parts.length <= 3) return path;
+      return '.../' + parts.slice(-2).join('/');
+    }
+
+    function getTypeBadgeClass(type) {
+      const known = ['session_start', 'tool_use', 'skill_invoked', 'error'];
+      return known.includes(type) ? type : 'default';
+    }
+
+    // -- Filter --
+    function filterEvents() {
+      if (!searchTerm) return allEvents;
+      const q = searchTerm.toLowerCase();
+      return allEvents.filter(e => {
+        const fields = [
+          e.type, e.tool, e.session, e.session_id,
+          e.input, e.skill, e.cwd, e.status
+        ];
+        return fields.some(f => f && String(f).toLowerCase().includes(q));
+      });
+    }
+
+    // -- Render --
+    function render() {
+      const timeline = document.getElementById('timeline');
+      const countEl = document.getElementById('event-count');
+      const loadMoreEl = document.getElementById('load-more-container');
+      const clearBtn = document.getElementById('search-clear');
+
+      clearBtn.classList.toggle('visible', searchTerm.length > 0);
+
+      const filtered = filterEvents();
+      // Newest first
+      const sorted = filtered.slice().sort((a, b) => {
+        const aTs = typeof a.ts === 'number' && a.ts < 1e12 ? a.ts * 1000 : (a.ts || 0);
+        const bTs = typeof b.ts === 'number' && b.ts < 1e12 ? b.ts * 1000 : (b.ts || 0);
+        return bTs - aTs;
+      });
+
+      const toRender = sorted.slice(0, renderCount);
+      const hasMore = sorted.length > renderCount;
+
+      countEl.textContent = `${filtered.length} event${filtered.length !== 1 ? 's' : ''}${searchTerm ? ' matching "' + searchTerm + '"' : ''}`;
+
+      if (toRender.length === 0) {
+        timeline.innerHTML = `<div class="empty-state"><p>${searchTerm ? 'No events match your search.' : 'No events recorded yet.'}</p></div>`;
+        loadMoreEl.innerHTML = '';
+        return;
+      }
+
+      timeline.innerHTML = toRender.map(e => {
+        const typeClass = getTypeBadgeClass(e.type);
+        const sid = e.session || e.session_id || '';
+        const truncSid = sid ? (sid.length > 8 ? sid.substring(0, 8) + '...' : sid) : '';
+        const preview = e.input ? escapeHtml(String(e.input).substring(0, 100)) : '';
+
+        return `
+          <div class="event-entry type-${typeClass}">
+            <div class="event-header">
+              <span class="event-timestamp">${formatTimestamp(e.ts)}</span>
+              <span class="event-type-badge ${typeClass}">${escapeHtml(e.type || 'unknown')}</span>
+              ${e.tool ? `<span class="event-tool">${escapeHtml(e.tool)}</span>` : ''}
+            </div>
+            <div class="event-tags">
+              ${truncSid ? `<span class="event-tag">${escapeHtml(truncSid)}</span>` : ''}
+              ${e.cwd ? `<span class="event-tag">${escapeHtml(truncatePath(e.cwd))}</span>` : ''}
+              ${e.status ? `<span class="event-tag">${escapeHtml(e.status)}</span>` : ''}
+            </div>
+            ${preview ? `<div class="event-preview">${preview}${String(e.input).length > 100 ? '...' : ''}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      if (hasMore) {
+        loadMoreEl.innerHTML = `
+          <div class="load-more">
+            <button onclick="loadMore()">Load more (${sorted.length - renderCount} remaining)</button>
+          </div>
+        `;
+      } else {
+        loadMoreEl.innerHTML = '';
+      }
+    }
+
+    function loadMore() {
+      renderCount += RENDER_LIMIT;
+      render();
+    }
+
+    // -- Search --
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        searchTerm = e.target.value.trim();
+        renderCount = RENDER_LIMIT;
+        render();
+      }, 200);
+    });
+
+    document.getElementById('search-clear').addEventListener('click', () => {
+      searchInput.value = '';
+      searchTerm = '';
+      renderCount = RENDER_LIMIT;
+      render();
+      searchInput.focus();
+    });
+
+    // -- SSE --
+    function startSSE() {
+      const evtSource = new EventSource('/api/events');
+      evtSource.onmessage = (evt) => {
+        try {
+          const event = JSON.parse(evt.data);
+          allEvents.push(event);
+          render();
+        } catch (err) {
+          // ignore parse errors
+        }
+      };
+
+      evtSource.onerror = () => {
+        // SSE will auto-reconnect
+      };
+    }
+
+    // -- Init --
+    startSSE();
+  </script>
+</body>
+</html>

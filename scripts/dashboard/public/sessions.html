@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoCo - Sessions</title>
+  <style>
+    :root {
+      --bg: #f5f5f7; --tile: #fff;
+      --primary: #1d1d1f; --secondary: #6e6e73; --tertiary: #86868b;
+      --blue: #0071e3; --green: #248a3d; --amber: #c93400;
+      --teal: #0071a4; --purple: #7d2fa0;
+      --gap: 16px; --radius: 20px; --pad: 28px;
+      --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+              system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --mono: 'SF Mono', ui-monospace, 'Cascadia Code', 'Fira Code', Menlo, Consolas, monospace;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* -- Nav Bar -- */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--tile);
+      border-bottom: 1px solid #d2d2d7;
+      padding: 0 var(--pad);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 52px;
+      flex-shrink: 0;
+    }
+
+    nav .logo {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    nav .nav-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    nav .nav-links a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    nav .nav-links a:hover { color: var(--primary); }
+    nav .nav-links a.active { color: var(--blue); }
+
+    /* -- Page Header -- */
+    .page-header {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: var(--pad) var(--pad) 0;
+    }
+
+    .page-header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--primary);
+    }
+
+    .page-header .subtitle {
+      font-size: 15px;
+      color: var(--secondary);
+      margin-top: 4px;
+    }
+
+    /* -- Session Grid -- */
+    .session-grid {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: var(--gap) var(--pad) var(--pad);
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--gap);
+    }
+
+    @media (min-width: 640px) {
+      .session-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (min-width: 960px) {
+      .session-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    /* -- Session Card -- */
+    .session-card {
+      background: var(--tile);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      border-left: 4px solid transparent;
+      transition: box-shadow 0.2s, border-color 0.3s;
+    }
+
+    .session-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .session-card.active {
+      border-left-color: var(--green);
+    }
+
+    .session-card .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .session-card .session-id {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--secondary);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 10px;
+    }
+
+    .status-badge.active {
+      background: #e8f5e9;
+      color: var(--green);
+    }
+
+    .status-badge.complete {
+      background: #f0f0f2;
+      color: var(--secondary);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    .status-badge.active .status-dot { background: var(--green); }
+    .status-badge.complete .status-dot { background: var(--tertiary); }
+
+    .session-card .skill-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--blue);
+      margin-bottom: 10px;
+    }
+
+    .session-card .meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--secondary);
+      margin-top: 6px;
+    }
+
+    .meta-label { color: var(--tertiary); }
+
+    /* -- Empty State -- */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--secondary);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.4;
+    }
+
+    .empty-state p {
+      font-size: 16px;
+      max-width: 400px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* -- Responsive -- */
+    @media (max-width: 600px) {
+      nav { padding: 0 16px; }
+      nav .nav-links { gap: 16px; }
+      nav .nav-links a { font-size: 13px; }
+      .page-header { padding: 20px 16px 0; }
+      .page-header h1 { font-size: 26px; }
+      .session-grid { padding: var(--gap) 16px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">CoCo</a>
+    <div class="nav-links">
+      <a href="/">Chat</a>
+      <a href="/sessions.html" class="active">Sessions</a>
+      <a href="/skills.html">Skills</a>
+      <a href="/history.html">History</a>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <h1>Sessions</h1>
+    <p class="subtitle">Active and recent Claude Code sessions</p>
+  </div>
+
+  <div class="session-grid" id="session-grid"></div>
+  <div id="empty-state" class="empty-state" style="display:none;">
+    <div class="empty-icon">&#9723;</div>
+    <p>No sessions in the last 24 hours</p>
+  </div>
+
+  <script>
+    // -- Helpers: XSS prevention --
+    function escapeHtml(str) {
+      if (str == null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // -- State --
+    const sessions = new Map();
+
+    // -- Helpers --
+    function formatDuration(ms) {
+      if (ms < 1000) return '0s';
+      const totalSec = Math.floor(ms / 1000);
+      const hours = Math.floor(totalSec / 3600);
+      const mins = Math.floor((totalSec % 3600) / 60);
+      const secs = totalSec % 60;
+      if (hours > 0) return `${hours}h ${mins}m`;
+      if (mins > 0) return `${mins}m ${secs}s`;
+      return `${secs}s`;
+    }
+
+    function timeAgo(ts) {
+      const now = Date.now();
+      const tsMs = typeof ts === 'number' && ts < 1e12 ? ts * 1000 : ts;
+      const diff = now - tsMs;
+      if (diff < 60000) return 'just now';
+      const mins = Math.floor(diff / 60000);
+      if (mins < 60) return `${mins} min ago`;
+      const hours = Math.floor(mins / 60);
+      if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+      const days = Math.floor(hours / 24);
+      return `${days} day${days > 1 ? 's' : ''} ago`;
+    }
+
+    function truncateId(id) {
+      if (!id) return '---';
+      const str = String(id);
+      return str.length > 8 ? str.substring(0, 8) + '...' : str;
+    }
+
+    function isActive(session) {
+      const tsMs = typeof session.lastTs === 'number' && session.lastTs < 1e12
+        ? session.lastTs * 1000 : session.lastTs;
+      return (Date.now() - tsMs) < 60000;
+    }
+
+    function isLast24h(session) {
+      const tsMs = typeof session.lastTs === 'number' && session.lastTs < 1e12
+        ? session.lastTs * 1000 : session.lastTs;
+      return (Date.now() - tsMs) < 86400000;
+    }
+
+    // -- Rendering --
+    function renderSessions() {
+      const grid = document.getElementById('session-grid');
+      const emptyEl = document.getElementById('empty-state');
+
+      const list = Array.from(sessions.values())
+        .filter(isLast24h)
+        .sort((a, b) => {
+          const aActive = isActive(a);
+          const bActive = isActive(b);
+          if (aActive !== bActive) return aActive ? -1 : 1;
+          return (b.lastTs || 0) - (a.lastTs || 0);
+        });
+
+      if (list.length === 0) {
+        grid.innerHTML = '';
+        emptyEl.style.display = 'block';
+        return;
+      }
+
+      emptyEl.style.display = 'none';
+      grid.innerHTML = list.map(s => {
+        const active = isActive(s);
+        const statusClass = active ? 'active' : 'complete';
+        const statusLabel = s.status === 'active' || active ? 'Active' : 'Complete';
+        const duration = s.duration || ((s.lastTs || 0) - (s.firstTs || 0)) * (s.lastTs < 1e12 ? 1000 : 1);
+
+        return `
+          <div class="session-card ${active ? 'active' : ''}" data-id="${escapeHtml(s.id)}">
+            <div class="card-header">
+              <span class="session-id">${escapeHtml(truncateId(s.id))}</span>
+              <span class="status-badge ${escapeHtml(statusClass)}">
+                <span class="status-dot"></span>
+                ${escapeHtml(statusLabel)}
+              </span>
+            </div>
+            <div class="skill-name">${escapeHtml(s.skill || 'General')}</div>
+            <div class="meta-row">
+              <span><span class="meta-label">Duration:</span> ${escapeHtml(formatDuration(duration))}</span>
+              <span><span class="meta-label">Events:</span> ${escapeHtml(String(s.eventCount || 0))}</span>
+            </div>
+            <div class="meta-row">
+              <span><span class="meta-label">Last activity:</span> ${escapeHtml(timeAgo(s.lastTs))}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // -- Load initial sessions --
+    async function loadSessions() {
+      try {
+        const res = await fetch('/api/sessions');
+        const data = await res.json();
+        for (const s of data) {
+          sessions.set(s.id, s);
+        }
+        renderSessions();
+      } catch (err) {
+        console.error('Failed to load sessions:', err);
+      }
+    }
+
+    // -- SSE live updates --
+    function startSSE() {
+      const evtSource = new EventSource('/api/events');
+      evtSource.onmessage = (evt) => {
+        try {
+          const event = JSON.parse(evt.data);
+          const sid = event.session || event.session_id;
+          if (!sid) return;
+
+          const tsMs = typeof event.ts === 'number' && event.ts < 1e12
+            ? event.ts * 1000 : (event.ts || Date.now());
+
+          if (sessions.has(sid)) {
+            const s = sessions.get(sid);
+            s.lastTs = event.ts || s.lastTs;
+            s.eventCount = (s.eventCount || 0) + 1;
+            if (event.skill) s.skill = event.skill;
+            s.status = 'active';
+          } else {
+            sessions.set(sid, {
+              id: sid,
+              status: 'active',
+              skill: event.skill || event.tool || null,
+              duration: 0,
+              firstTs: event.ts || Date.now(),
+              lastTs: event.ts || Date.now(),
+              eventCount: 1,
+            });
+          }
+
+          renderSessions();
+        } catch (err) {
+          // ignore parse errors
+        }
+      };
+
+      evtSource.onerror = () => {
+        // SSE will auto-reconnect
+      };
+    }
+
+    // -- Init --
+    loadSessions();
+    startSSE();
+
+    // Re-render every 30s to update relative times
+    setInterval(renderSessions, 30000);
+  </script>
+</body>
+</html>

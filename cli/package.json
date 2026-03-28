@@ -1,0 +1,33 @@
+{
+  "name": "coco",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "coco": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsx src/index.tsx",
+    "build": "tsc && node -e \"const fs=require('fs');const f='dist/index.js';const c=fs.readFileSync(f,'utf8');if(!c.startsWith('#!')){fs.writeFileSync(f,'#!/usr/bin/env node\\n'+c);}\" && chmod +x dist/index.js",
+    "start": "node dist/index.js",
+    "link": "npm run build && npm link",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "ink": "^5.1.0",
+    "react": "^18.3.0",
+    "better-sqlite3": "^11.0.0",
+    "gray-matter": "^4.0.3",
+    "eventemitter3": "^5.0.0",
+    "p-queue": "^8.0.0",
+    "execa": "^9.0.0",
+    "strip-ansi": "^7.1.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/react": "^18.3.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

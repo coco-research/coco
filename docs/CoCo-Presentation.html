@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoCo — The Brain of Claude Code</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, "Helvetica Neue", sans-serif;
+  background: #000; color: rgba(255,255,255,0.92);
+  overflow: hidden; height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.deck { position: relative; width: 100%; height: 100vh; }
+.slide {
+  position: absolute; inset: 0;
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 80px 40px 56px; overflow-y: auto;
+}
+.slide.active { display: flex; animation: fadeIn 0.6s cubic-bezier(0,0,0.5,1) both; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* BRAND */
+.brand { position: fixed; top: 24px; left: 32px; z-index: 100; display: flex; align-items: center; gap: 10px; }
+.brand-orb {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: conic-gradient(from 180deg, #af52de, #5e5ce6, #2997ff, #30d158, #af52de);
+  position: relative; animation: orbSpin 20s linear infinite;
+}
+.brand-orb::after { content: ''; position: absolute; inset: 2px; border-radius: 50%; background: #000; }
+.brand-name { font-size: 14px; font-weight: 600; letter-spacing: 0.02em; color: rgba(255,255,255,0.56); }
+
+/* NAV */
+.counter { position: fixed; top: 24px; right: 32px; z-index: 100; font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.4); }
+.dots { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; gap: 8px; }
+.dots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: background 0.3s; }
+.dots span.active { background: #2997ff; }
+
+/* ORB */
+.orb {
+  width: 180px; height: 180px; border-radius: 50%; position: relative; flex-shrink: 0;
+  background: conic-gradient(from 180deg, #af52de, #5e5ce6, #2997ff, #30d158, #af52de);
+  box-shadow: 0 0 80px rgba(94,92,230,0.3);
+  animation: orbSpin 20s linear infinite;
+}
+.orb::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: #000; }
+.orb.bg { width: 200px; height: 200px; opacity: 0.4; position: absolute; }
+.orb.tiny { width: 48px; height: 48px; box-shadow: 0 0 24px rgba(94,92,230,0.2); }
+.orb.tiny::after { inset: 2px; }
+@keyframes orbSpin { to { transform: rotate(360deg); } }
+
+/* TYPOGRAPHY */
+.hero { font-size: clamp(48px,6vw,80px); font-weight: 600; letter-spacing: -0.022em; line-height: 1.05; }
+.section-h { font-size: clamp(32px,4vw,52px); font-weight: 600; letter-spacing: -0.015em; line-height: 1.1; }
+.body-text { font-size: clamp(17px,1.8vw,21px); font-weight: 400; line-height: 1.47; color: rgba(255,255,255,0.56); }
+.caption { font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.56); }
+.muted { color: #86868b; }
+.accent { color: #2997ff; }
+.green { color: #30d158; }
+
+/* CARDS */
+.card { background: #1d1d1f; border-radius: 28px; padding: 48px; }
+.card-sm { padding: 36px; }
+.card-xs { padding: 24px; border-radius: 20px; }
+
+/* GRID */
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 960px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 960px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; width: 100%; max-width: 960px; }
+
+/* STAGGER */
+.stagger > * { opacity: 0; animation: fadeIn 0.6s cubic-bezier(0,0,0.5,1) both; }
+.slide.active .stagger > *:nth-child(1) { animation-delay: 0s; }
+.slide.active .stagger > *:nth-child(2) { animation-delay: 0.08s; }
+.slide.active .stagger > *:nth-child(3) { animation-delay: 0.16s; }
+.slide.active .stagger > *:nth-child(4) { animation-delay: 0.24s; }
+.slide.active .stagger > *:nth-child(5) { animation-delay: 0.32s; }
+.slide.active .stagger > *:nth-child(6) { animation-delay: 0.4s; }
+.slide.active .stagger > *:nth-child(7) { animation-delay: 0.48s; }
+.slide.active .stagger > *:nth-child(8) { animation-delay: 0.56s; }
+.slide.active .stagger > *:nth-child(9) { animation-delay: 0.64s; }
+.slide.active .stagger > *:nth-child(10) { animation-delay: 0.72s; }
+.slide.active .stagger > *:nth-child(11) { animation-delay: 0.8s; }
+.slide.active .stagger > *:nth-child(12) { animation-delay: 0.88s; }
+
+/* TERMINAL */
+.terminal { font-family: "SF Mono", Menlo, monospace; font-size: 15px; line-height: 1.9; }
+.terminal .cmd { color: rgba(255,255,255,0.92); }
+.terminal .route { color: #2997ff; }
+.terminal .dim { color: rgba(255,255,255,0.3); }
+
+/* DASHBOARD */
+.dashboard {
+  font-family: "SF Mono", Menlo, monospace; font-size: 13px; line-height: 1.6;
+  color: rgba(255,255,255,0.72); width: 100%; max-width: 560px;
+}
+.dashboard .hdr { color: rgba(255,255,255,0.56); }
+.dashboard .done { color: #30d158; }
+.dashboard .active { color: #2997ff; }
+.dashboard .wait { color: rgba(255,255,255,0.3); }
+
+/* ACHIEVE */
+.achieve { display: flex; align-items: baseline; gap: 12px; padding: 7px 0; font-size: 16px; font-weight: 400; }
+.achieve .check { color: #30d158; font-weight: 600; flex-shrink: 0; }
+
+/* LABEL */
+.label { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+
+/* FOOTER */
+.footer-links { display: flex; gap: 24px; }
+.footer-links a { font-size: 14px; color: #2997ff; text-decoration: none; }
+
+/* BENTO */
+.bento {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: minmax(0, 1fr); gap: 8px;
+  max-width: 1200px; width: 100%; flex: 1;
+}
+.bento-item {
+  background: #1d1d1f; border-radius: 20px; padding: 24px;
+  display: flex; flex-direction: column; position: relative; overflow: hidden;
+  transition: transform 0.3s cubic-bezier(0,0,0.5,1);
+}
+.bento-item:hover { transform: scale(1.015); }
+.bento-2x2 { grid-column: span 2; grid-row: span 2; padding: 32px; }
+.bento-2x1 { grid-column: span 2; }
+.bento-item .b-title { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.92); }
+.bento-item .b-sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px; line-height: 1.4; }
+.bento-pill { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 8px; }
+
+/* COMPARISON TABLE */
+.cmp-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.cmp-table th { text-align: center; padding: 12px 10px; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #86868b; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.cmp-table th:first-child { text-align: left; padding-left: 20px; }
+.cmp-table td { padding: 11px 10px; text-align: center; color: rgba(255,255,255,0.72); border-bottom: 1px solid rgba(255,255,255,0.04); }
+.cmp-table td:first-child { text-align: left; font-weight: 600; padding-left: 20px; }
+.cmp-table .no { color: #86868b; }
+.cmp-table .yes { color: #30d158; font-weight: 600; }
+.cmp-table .partial { color: rgba(255,255,255,0.56); }
+
+/* VOICE FLOW */
+.flow-step { display: flex; align-items: center; gap: 16px; }
+.flow-arrow { color: #2997ff; font-size: 20px; }
+
+/* PRINT */
+@media print {
+  .slide { display: flex !important; position: relative !important; page-break-after: always; height: 100vh; opacity: 1 !important; animation: none !important; }
+  .dots, .counter { display: none; }
+}
+/* MOBILE */
+@media (max-width: 768px) {
+  .slide { padding: 64px 24px 56px; }
+  .grid-3, .grid-2, .grid-4 { grid-template-columns: 1fr; }
+  .bento { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .bento-2x2 { grid-column: span 2; grid-row: span 1; }
+  .bento-2x1 { grid-column: span 2; }
+  .card { padding: 32px; }
+  .dashboard { font-size: 11px; }
+}
+@media (max-width: 480px) {
+  .bento { grid-template-columns: 1fr; }
+  .bento-2x2, .bento-2x1 { grid-column: span 1; }
+}
+</style>
+</head>
+<body>
+
+<div class="brand"><div class="brand-orb"></div><div class="brand-name">CoCo <span style="color:rgba(255,255,255,0.3)">by</span> DMG</div></div>
+<div class="counter" id="counter">1 / 14</div>
+<div class="dots" id="dots"></div>
+
+<div class="deck" id="deck">
+
+<!-- SLIDE 1: TITLE -->
+<div class="slide active" data-orb>
+  <div class="orb"></div>
+  <div style="height:32px"></div>
+  <div class="hero" style="text-align:center">CoCo</div>
+  <div style="height:8px"></div>
+  <div style="font-size:17px;font-weight:600;letter-spacing:0.08em;color:rgba(255,255,255,0.4);text-align:center">by DMG</div>
+  <div style="height:16px"></div>
+  <div class="body-text" style="text-align:center">The Brain of Claude Code</div>
+</div>
+
+<!-- SLIDE 2: THE PROBLEM -->
+<div class="slide">
+  <div class="section-h accent" style="text-align:center">CoCo sees what you can't.</div>
+  <div style="height:12px"></div>
+  <div class="section-h muted" style="text-align:center">Context is everywhere. Intelligence is nowhere.</div>
+  <div style="height:48px"></div>
+  <div class="grid-3 stagger">
+    <div class="card card-sm" style="text-align:center">
+      <div style="font-size:56px;font-weight:600;color:#2997ff">75</div>
+      <div class="caption">commands</div>
+    </div>
+    <div class="card card-sm" style="text-align:center">
+      <div style="font-size:56px;font-weight:600;color:#2997ff">30</div>
+      <div class="caption">skills</div>
+    </div>
+    <div class="card card-sm" style="text-align:center">
+      <div style="font-size:56px;font-weight:600;color:#2997ff">4</div>
+      <div class="caption">disconnected tools</div>
+    </div>
+  </div>
+  <div style="height:32px"></div>
+  <div class="body-text" style="text-align:center;max-width:720px">No tool combines: always-on daemon + voice + terminal orchestration + extensible skills + learning loop.</div>
+</div>
+
+<!-- SLIDE 3: THE VISION -->
+<div class="slide" data-orb>
+  <div style="position:relative;text-align:center">
+    <div class="orb bg" style="top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+    <div class="section-h accent" style="position:relative">CoCo knows everything you know.</div>
+    <div style="height:8px"></div>
+    <div class="section-h" style="position:relative;color:rgba(255,255,255,0.56)">And it never forgets.</div>
+  </div>
+</div>
+
+<!-- SLIDE 4: JUST TALK -->
+<div class="slide">
+  <div class="section-h accent" style="text-align:center">CoCo routes.</div>
+  <div style="height:40px"></div>
+  <div class="card card-sm terminal stagger" style="max-width:640px;width:100%">
+    <div><span class="cmd">&gt; fix the login bug</span><span class="dim"> .............. </span><span class="route">/team fix</span></div>
+    <div><span class="cmd">&gt; write a PRD</span><span class="dim"> ..................... </span><span class="route">/pmstudio-prd</span></div>
+    <div><span class="cmd">&gt; what changed overnight?</span><span class="dim"> ....... </span><span class="route">/hub briefing</span></div>
+    <div><span class="cmd">&gt; check my unread emails</span><span class="dim"> ....... </span><span class="route">/email-unread</span></div>
+    <div><span class="cmd">&gt; plan the next phase</span><span class="dim"> .......... </span><span class="route">/gsd:plan-phase</span></div>
+    <div><span class="cmd">&gt; build this feature</span><span class="dim"> ........... </span><span class="route">/team develop (5 agents)</span></div>
+  </div>
+  <div style="height:24px"></div>
+  <div class="body-text" style="text-align:center">7 priority levels. 60+ patterns. Zero configuration.</div>
+</div>
+
+<!-- SLIDE 5: PARALLEL INTELLIGENCE -->
+<div class="slide">
+  <div class="section-h accent" style="text-align:center">CoCo runs 10 agents at once.</div>
+  <div style="height:40px"></div>
+  <div class="card card-sm" style="max-width:580px;width:100%;padding:0">
+    <div class="dashboard" style="padding:24px 28px">
+      <div class="hdr" style="border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:10px;margin-bottom:10px">CoCo | project-name (main) | 3 active | 2:34</div>
+      <div class="done"> [L1 Research] ..................... done  &#10003;</div>
+      <div class="active"> [L2 Execute] ...................... 3/4  &#9670;</div>
+      <div style="color:rgba(255,255,255,0.48);padding-left:20px">   senior-backend-eng: Working on service.ts</div>
+      <div class="wait"> [L3 Review] ...................... wait  &#9675;</div>
+      <div class="wait"> [L4 Synthesis] ................... wait  &#9675;</div>
+      <div style="border-top:1px solid rgba(255,255,255,0.1);margin-top:10px;padding-top:10px;color:rgba(255,255,255,0.3)"> &gt; _</div>
+    </div>
+  </div>
+  <div style="height:24px"></div>
+  <div class="body-text" style="text-align:center">Parallel sessions. Live dashboard. Task queue with dependencies.</div>
+</div>
+
+<!-- SLIDE 6: VOICE -->
+<div class="slide">
+  <div class="section-h accent" style="text-align:center">CoCo listens.</div>
+  <div style="height:12px"></div>
+  <div class="body-text" style="text-align:center;max-width:600px">Push-to-talk. Fully offline. whisper.cpp transcription in under 2 seconds.</div>
+  <div style="height:40px"></div>
+  <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center" class="stagger">
+    <div class="card-xs" style="background:#1d1d1f;border-radius:20px;padding:24px 32px;text-align:center">
+      <div style="font-size:32px;margin-bottom:8px">&#127908;</div>
+      <div style="font-size:15px;font-weight:600">Voice</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="card-xs" style="background:#1d1d1f;border-radius:20px;padding:24px 32px;text-align:center">
+      <div style="font-size:13px;font-weight:600;color:#2997ff;margin-bottom:8px">whisper.cpp</div>
+      <div style="font-size:15px;font-weight:600">Text</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="card-xs" style="background:#1d1d1f;border-radius:20px;padding:24px 32px;text-align:center">
+      <div style="font-size:13px;font-weight:600;color:#2997ff;margin-bottom:8px">CoCo routes</div>
+      <div style="font-size:15px;font-weight:600">Action</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="card-xs" style="background:#1d1d1f;border-radius:20px;padding:24px 32px;text-align:center">
+      <div style="font-size:32px;margin-bottom:8px">&#128264;</div>
+      <div style="font-size:15px;font-weight:600">macOS say</div>
+    </div>
+  </div>
+  <div style="height:32px"></div>
+  <div style="font-size:17px;color:#86868b;text-align:center">No cloud. No API. No latency.</div>
+</div>
+
+<!-- SLIDE 7: THE SKILL ECOSYSTEM -->
+<div class="slide">
+  <div class="section-h accent" style="text-align:center">CoCo commands an army.</div>
+  <div style="height:12px"></div>
+  <div style="text-align:center">
+    <span style="font-size:64px;font-weight:600;color:#2997ff">165+</span>
+    <span style="font-size:21px;color:rgba(255,255,255,0.56);margin-left:12px">tools. One voice.</span>
+  </div>
+  <div style="height:32px"></div>
+  <div class="grid-4 stagger">
+    <div class="card-xs" style="background:#1d1d1f;border-radius:20px;padding:24px;text-align:center">
+      <div style="font-size:40px;font-weight:600;color:#2997ff">75</div>
+      <div style="font-size:14px;font-weight:600;margin-top:4px">Commands</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px">/team /gsd /email /pmstudio /ss</div>
+    </div>
+    <div class="card-xs" style="background:#1d1d1f;border-radius:20px;padding:24px;text-align:center">
+      <div style="font-size:40px;font-weight:600;color:#2997ff">30</div>
+      <div style="font-size:14px;font-weight:600;margin-top:4px">Skills</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px">TDD, debugging, brainstorming, PM Studio</div>
+    </div>
+    <div class="card-xs" style="background:#1d1d1f;border-radius:20px;padding:24px;text-align:center">
+      <div style="font-size:40px;font-weight:600;color:#2997ff">32</div>
+      <div style="font-size:14px;font-weight:600;margin-top:4px">Plugins</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px">LSP, code review, security, frontend</div>
+    </div>
+    <div class="card-xs" style="background:#1d1d1f;border-radius:20px;padding:24px;text-align:center">
+      <div style="font-size:40px;font-weight:600;color:#2997ff">13</div>
+      <div style="font-size:14px;font-weight:600;margin-top:4px">Agents</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px">10 running in parallel</div>
+    </div>
+    <div class="card-xs" style="background:#1d1d1f;border-radius:20px;padding:24px;text-align:center">
+      <div style="font-size:40px;font-weight:600;color:rgba(255,255,255,0.56)">34</div>
+      <div style="font-size:14px;font-weight:600;margin-top:4px">Specialist Roles</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px">Junior to Principal</div>
+    </div>
+    <div class="card-xs" style="background:#1d1d1f;border-radius:20px;padding:24px;text-align:center">
+      <div style="font-size:40px;font-weight:600;color:rgba(255,255,255,0.56)">4</div>
+      <div style="font-size:14px;font-weight:600;margin-top:4px">MCP Servers</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px">Knowledge Hub, Jira, Confluence, Atlassian</div>
+    </div>
+    <div class="card-xs" style="background:#1d1d1f;border-radius:20px;padding:24px;text-align:center">
+      <div style="font-size:40px;font-weight:600;color:rgba(255,255,255,0.56)">11</div>
+      <div style="font-size:14px;font-weight:600;margin-top:4px">LSP Integrations</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px">TypeScript, Python, Go, Rust, Swift...</div>
+    </div>
+    <div class="card-xs" style="background:#1d1d1f;border-radius:20px;padding:24px;text-align:center">
+      <div style="font-size:40px;font-weight:600;color:rgba(255,255,255,0.56)">32</div>
+      <div style="font-size:14px;font-weight:600;margin-top:4px">GSD Commands</div>
+    </div>
+  </div>
+  <div style="height:24px"></div>
+  <div class="body-text" style="text-align:center">Auto-discovered from ~/.claude/ at startup. Add a .md file — CoCo learns it.</div>
+</div>
+
+<!-- SLIDE 8: KNOWLEDGE HUB -->
+<div class="slide">
+  <div class="section-h accent" style="text-align:center">CoCo remembers everything.</div>
+  <div style="height:8px"></div>
+  <div class="body-text" style="text-align:center">4 sources. One brain. Auto-classified.</div>
+  <div style="height:36px"></div>
+  <div class="grid-2 stagger">
+    <div class="card card-sm" style="text-align:left">
+      <div style="font-size:28px;margin-bottom:12px">&#127908;</div>
+      <div style="font-size:19px;font-weight:600;margin-bottom:8px">Voice Memos</div>
+      <div class="caption">Apple transcription. Structured into decisions, action items, attendees.</div>
+    </div>
+    <div class="card card-sm" style="text-align:left">
+      <div style="font-size:28px;margin-bottom:12px">&#9993;&#65039;</div>
+      <div style="font-size:19px;font-weight:600;margin-bottom:8px">Email</div>
+      <div class="caption">Triage as actionable, FYI, or noise. Extract decisions and action items.</div>
+    </div>
+    <div class="card card-sm" style="text-align:left">
+      <div style="font-size:28px;margin-bottom:12px">&#128203;</div>
+      <div style="font-size:19px;font-weight:600;margin-bottom:8px">Jira</div>
+      <div class="caption">Delta polling. Only what changed. Issues, status, assignees, comments.</div>
+    </div>
+    <div class="card card-sm" style="text-align:left">
+      <div style="font-size:28px;margin-bottom:12px">&#128196;</div>
+      <div style="font-size:19px;font-weight:600;margin-bottom:8px">Confluence</div>
+      <div class="caption">Page ingestion with stale document detection.</div>
+    </div>
+  </div>
+  <div style="height:24px"></div>
+  <div class="body-text" style="text-align:center;max-width:700px">Haiku triage &rarr; Sonnet extraction &rarr; 4-tier classification &rarr; auto-learning feedback loop.<br>Every correction makes it smarter.</div>
+</div>
+
+<!-- SLIDE 9: WHAT COCO BUILT -->
+<div class="slide">
+  <div class="section-h accent" style="text-align:center">CoCo delivered.</div>
+  <div style="height:36px"></div>
+  <div class="card stagger" style="max-width:720px;width:100%;padding:40px 48px">
+    <div class="achieve"><span class="check">&#10003;</span> 15 voice memos &rarr; structured meeting notes</div>
+    <div class="achieve"><span class="check">&#10003;</span> 53 emails triaged and classified to 12 projects</div>
+    <div class="achieve"><span class="check">&#10003;</span> 5 team product documents generated</div>
+    <div class="achieve"><span class="check">&#10003;</span> 48-slide presentation updated (20 slides changed)</div>
+    <div class="achieve"><span class="check">&#10003;</span> Permissions matrix built</div>
+    <div class="achieve"><span class="check">&#10003;</span> User journey documentation created</div>
+    <div class="achieve"><span class="check">&#10003;</span> PRD updated from 4 meetings</div>
+    <div class="achieve"><span class="check">&#10003;</span> 17 Jira stories created</div>
+    <div class="achieve"><span class="check">&#10003;</span> Vendor validation email drafted</div>
+    <div class="achieve"><span class="check">&#10003;</span> Discovery session prep completed</div>
+  </div>
+  <div style="height:20px"></div>
+  <div style="font-size:17px;color:#86868b;text-align:center">One conversation. One afternoon.</div>
+</div>
+
+<!-- SLIDE 10: THE COST -->
+<div class="slide">
+  <div class="section-h accent" style="text-align:center">CoCo costs less than your coffee.</div>
+  <div style="height:48px"></div>
+  <div class="grid-3 stagger">
+    <div class="card card-sm" style="text-align:center">
+      <div style="font-size:48px;font-weight:600;color:#2997ff">$1</div>
+      <div style="font-size:14px;color:#86868b">/million tokens</div>
+      <div style="height:12px"></div>
+      <div style="font-size:17px;font-weight:600">Triage</div>
+      <div class="caption">Haiku classifies at speed</div>
+    </div>
+    <div class="card card-sm" style="text-align:center">
+      <div style="font-size:48px;font-weight:600;color:#2997ff">$3</div>
+      <div style="font-size:14px;color:#86868b">/million tokens</div>
+      <div style="height:12px"></div>
+      <div style="font-size:17px;font-weight:600">Synthesis</div>
+      <div class="caption">Sonnet extracts intelligence</div>
+    </div>
+    <div class="card card-sm" style="text-align:center">
+      <div style="font-size:48px;font-weight:600;color:#30d158">&lt;$30</div>
+      <div style="font-size:14px;color:#86868b">/month</div>
+      <div style="height:12px"></div>
+      <div style="font-size:17px;font-weight:600">Total</div>
+      <div class="caption">Everything. Local-first.</div>
+    </div>
+  </div>
+  <div style="height:32px"></div>
+  <div class="body-text" style="text-align:center">Local-first. SQLite + FTS5 + sqlite-vec. Your data never leaves.</div>
+</div>
+
+<!-- SLIDE 11: VS THE WORLD -->
+<div class="slide">
+  <div class="section-h accent" style="text-align:center">CoCo vs everyone.</div>
+  <div style="height:36px"></div>
+  <div style="max-width:960px;width:100%;overflow-x:auto">
+    <table class="cmp-table">
+      <thead>
+        <tr>
+          <th style="text-align:left">Capability</th>
+          <th>Cursor</th>
+          <th>Windsurf</th>
+          <th>Copilot</th>
+          <th>Claude Code</th>
+          <th>Codex</th>
+          <th style="color:#2997ff">CoCo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Natural language routing</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="yes">&#10003;</td></tr>
+        <tr><td>Voice I/O (offline)</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="yes">&#10003;</td></tr>
+        <tr><td>Parallel agent teams</td><td class="no">&mdash;</td><td class="partial">Cascade</td><td class="no">&mdash;</td><td class="partial">Subagents</td><td class="partial">Sandboxed</td><td class="yes">10 agents</td></tr>
+        <tr><td>Email + Voice + Jira ingestion</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="yes">&#10003;</td></tr>
+        <tr><td>Task queue + dependencies</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="yes">&#10003;</td></tr>
+        <tr><td>Auto-learning classification</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="yes">&#10003;</td></tr>
+        <tr><td>Custom skills (no code)</td><td class="partial">.cursorrules</td><td class="partial">.windsurfrules</td><td class="no">&mdash;</td><td class="partial">CLAUDE.md</td><td class="no">&mdash;</td><td class="yes">30 skills + 32 plugins</td></tr>
+        <tr><td>Persistent state (SQLite)</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="yes">&#10003;</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="height:20px"></div>
+  <div style="font-size:15px;color:rgba(255,255,255,0.3);text-align:center">They write code. CoCo runs your world.</div>
+</div>
+
+<!-- SLIDE 12: BENTO FEATURES -->
+<div class="slide" style="padding:32px 40px">
+  <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px">
+    <div class="orb tiny" style="animation:orbSpin 20s linear infinite"></div>
+    <span style="font-size:28px;font-weight:600;letter-spacing:-0.015em">CoCo</span>
+    <span style="font-size:14px;font-weight:600;letter-spacing:0.06em;color:rgba(255,255,255,0.3)">by DMG</span>
+  </div>
+  <div class="bento stagger" style="max-width:1200px;height:calc(100vh - 110px)">
+
+    <!-- 1: Router 2x2 -->
+    <div class="bento-item bento-2x2" style="background:linear-gradient(135deg,#1a1040 0%,#0d1f3c 50%,#0a2520 100%);justify-content:space-between">
+      <div class="orb tiny" style="flex-shrink:0"></div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div style="font-size:22px;font-weight:600;margin-bottom:6px">Natural Language Routing</div>
+        <div style="font-size:14px;color:rgba(255,255,255,0.48)">7 priority levels. 60+ patterns. Zero config.</div>
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+          <span class="bento-pill" style="color:#2997ff;background:rgba(41,151,255,0.12)">Build</span>
+          <span class="bento-pill" style="color:#30d158;background:rgba(48,209,88,0.12)">Fix</span>
+          <span class="bento-pill" style="color:#af52de;background:rgba(175,82,222,0.12)">Plan</span>
+          <span class="bento-pill" style="color:#ff9f0a;background:rgba(255,159,10,0.12)">Document</span>
+          <span class="bento-pill" style="color:#ff453a;background:rgba(255,69,58,0.12)">Research</span>
+        </div>
+      </div>
+      <div style="font-family:'SF Mono',Menlo,monospace;font-size:12px;color:rgba(255,255,255,0.3);margin-top:auto">&gt; "check my email" &rarr; /email-unread</div>
+    </div>
+
+    <!-- 2: Voice I/O -->
+    <div class="bento-item" style="background:linear-gradient(180deg,#1d1d1f 0%,#2d1a3d 100%);justify-content:space-between">
+      <div style="font-size:36px;line-height:1">&#127908;</div>
+      <div>
+        <div class="b-title">Voice I/O</div>
+        <div class="b-sub">Push-to-talk &bull; whisper.cpp &bull; macOS say &bull; Offline</div>
+      </div>
+    </div>
+
+    <!-- 3: Dashboard -->
+    <div class="bento-item" style="background:linear-gradient(180deg,#1d1d1f 0%,#1a2540 100%);justify-content:space-between">
+      <div style="font-family:'SF Mono',Menlo,monospace;font-size:10px;color:rgba(255,255,255,0.4);line-height:1.6">
+        [L1] done &#10003;<br>[L2] 3/4 &#9670;<br>[L3] wait &#9675;
+      </div>
+      <div>
+        <div class="b-title">Live Dashboard</div>
+        <div class="b-sub">10 parallel sessions</div>
+      </div>
+    </div>
+
+    <!-- 4: 44 Commands -->
+    <div class="bento-item" style="background:#1d1d1f;justify-content:center;align-items:center;text-align:center">
+      <div style="font-size:48px;font-weight:600;color:#2997ff;line-height:1">75</div>
+      <div class="b-title" style="margin-top:6px">Commands</div>
+      <div class="b-sub">Auto-discovered at startup</div>
+    </div>
+
+    <!-- 5: Learning Loop -->
+    <div class="bento-item" style="background:linear-gradient(180deg,#1d1d1f 0%,#142520 100%);justify-content:center;align-items:center;text-align:center">
+      <div style="font-size:48px;color:#30d158;line-height:1">&#8635;</div>
+      <div class="b-title" style="margin-top:10px">Learning Loop</div>
+      <div class="b-sub">Corrections &rarr; Better routing</div>
+    </div>
+
+    <!-- 6: Knowledge Hub 2x1 -->
+    <div class="bento-item bento-2x1" style="background:linear-gradient(90deg,#1d1d1f 0%,#2a1f10 100%);flex-direction:row;align-items:center;gap:24px">
+      <div style="flex-shrink:0">
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">&#129504;</div>
+        <div style="font-size:17px;font-weight:600">Knowledge Hub</div>
+      </div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.48);line-height:1.7;font-family:'SF Mono',Menlo,monospace">
+        &bull; Email &bull; Voice &bull; Jira &bull; Confluence<br>
+        &bull; Haiku triage &rarr; Sonnet synthesis
+      </div>
+    </div>
+
+    <!-- 7: Task Queue -->
+    <div class="bento-item" style="background:#1d1d1f;justify-content:center;align-items:center;text-align:center">
+      <div style="font-size:36px;line-height:1;margin-bottom:8px">&#128203;</div>
+      <div class="b-title">Task Queue</div>
+      <div class="b-sub">Dependencies &bull; Priorities</div>
+    </div>
+
+    <!-- 8: Tests -->
+    <div class="bento-item" style="background:#1d1d1f;justify-content:center;align-items:center;text-align:center">
+      <div style="font-size:36px;font-weight:600;color:#30d158;line-height:1">120</div>
+      <div class="b-title" style="margin-top:6px">Tests Passing</div>
+      <div class="b-sub">100% routing accuracy</div>
+    </div>
+
+    <!-- 9: PM Studio -->
+    <div class="bento-item" style="background:linear-gradient(180deg,#1d1d1f 0%,#1a2540 100%);justify-content:space-between">
+      <div style="font-size:28px;line-height:1">&#128221;</div>
+      <div>
+        <div class="b-title">PM Studio</div>
+        <div class="b-sub">PRD &bull; ARB &bull; DR &bull; IRP &bull; Changelog + 7 more</div>
+      </div>
+    </div>
+
+    <!-- 10: Local-first 2x1 -->
+    <div class="bento-item bento-2x1" style="background:linear-gradient(90deg,#0d2a1a 0%,#1d1d1f 100%);flex-direction:row;align-items:center;gap:24px">
+      <div style="flex-shrink:0">
+        <div style="font-size:36px;font-weight:600;color:#30d158;line-height:1">&lt;$30</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:4px">/month</div>
+      </div>
+      <div style="width:1px;height:32px;background:rgba(255,255,255,0.1)"></div>
+      <div>
+        <div class="b-title">Local-First</div>
+        <div class="b-sub">SQLite + FTS5 + sqlite-vec. Your data never leaves.</div>
+      </div>
+    </div>
+
+    <!-- 11: MCP Tools -->
+    <div class="bento-item" style="background:#1d1d1f;justify-content:center;align-items:center;text-align:center">
+      <div style="font-size:48px;font-weight:600;color:#2997ff;line-height:1">20</div>
+      <div class="b-title" style="margin-top:6px">MCP Tools</div>
+      <div class="b-sub">Always in context</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 13: WHAT'S NEXT -->
+<div class="slide">
+  <div class="section-h accent" style="text-align:center">CoCo evolves.</div>
+  <div style="height:48px"></div>
+  <div style="max-width:720px;width:100%;display:flex;flex-direction:column;gap:20px" class="stagger">
+    <div class="card card-sm">
+      <div class="label accent">Phase 4 &mdash; Intelligence Layer</div>
+      <div style="font-size:17px;font-weight:600;margin-bottom:8px">Natural language routing without /prefix</div>
+      <div class="caption">Learning from corrections. Context-aware greetings. Routing improves over time.</div>
+    </div>
+    <div class="card card-sm">
+      <div class="label accent">Phase 5 &mdash; Proactive Mode</div>
+      <div style="font-size:17px;font-weight:600;margin-bottom:8px">CoCo acts without being asked</div>
+      <div class="caption">File watch. Email triggers. Calendar events. From assistant to colleague.</div>
+    </div>
+  </div>
+  <div style="height:32px"></div>
+  <div style="font-size:17px;color:#86868b;text-align:center">From assistant to colleague.</div>
+</div>
+
+<!-- SLIDE 14: CLOSING -->
+<div class="slide" data-orb>
+  <div class="orb"></div>
+  <div style="height:32px"></div>
+  <div class="hero" style="text-align:center">CoCo</div>
+  <div style="height:8px"></div>
+  <div style="font-size:17px;font-weight:600;letter-spacing:0.08em;color:rgba(255,255,255,0.4);text-align:center">by DMG</div>
+  <div style="height:16px"></div>
+  <div class="body-text" style="text-align:center">Your AI. Supercharged.</div>
+  <div style="height:8px"></div>
+  <div style="font-size:17px;color:#86868b;text-align:center">The brain of Claude Code. Open source. Extensible. Yours.</div>
+  <div style="height:64px"></div>
+  <div class="footer-links">
+    <a href="#">GitHub</a>
+    <a href="#">Portfolio</a>
+    <a href="#">Contact</a>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const dotsEl = document.getElementById('dots');
+const counterEl = document.getElementById('counter');
+let current = 0;
+const total = slides.length;
+
+for (let i = 0; i < total; i++) {
+  const d = document.createElement('span');
+  d.addEventListener('click', () => goTo(i));
+  dotsEl.appendChild(d);
+}
+
+function goTo(n) {
+  if (n < 0 || n >= total || n === current) return;
+  slides[current].classList.remove('active');
+  current = n;
+  const s = slides[current];
+  s.classList.remove('active');
+  void s.offsetWidth;
+  s.classList.add('active');
+  updateUI();
+  s.querySelectorAll('.stagger > *').forEach(el => {
+    el.style.animation = 'none';
+    void el.offsetWidth;
+    el.style.animation = '';
+  });
+}
+
+function updateUI() {
+  counterEl.textContent = (current + 1) + ' / ' + total;
+  dotsEl.querySelectorAll('span').forEach((d, i) => d.classList.toggle('active', i === current));
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(current - 1);
+});
+
+updateUI();
+</script>
+</body>
+</html>

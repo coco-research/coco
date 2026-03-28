@@ -1,12 +1,26 @@
 import uuid
 import structlog
 from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel
 from app.db.connections import get_hub_db, get_platform_db
 from app.models.content import ClassifyContentBody
 
 log = structlog.get_logger()
 
 router = APIRouter(tags=["Content"])
+
+
+# ---------------------------------------------------------------------------
+# Pydantic models for suggestions
+# ---------------------------------------------------------------------------
+
+
+class AcceptSuggestionBody(BaseModel):
+    project_id: str | None = None  # optional override
+
+
+class ExtractActionsBody(BaseModel):
+    pass
 
 
 @router.get("/api/content")
@@ -164,6 +178,229 @@ def dismiss_content(content_id: str):
             pdb.commit()
 
         return {"status": "dismissed", "content_id": content_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+
+# ---------------------------------------------------------------------------
+# Suggestions API
+# ---------------------------------------------------------------------------
+
+
+@router.get("/api/content/suggestions")
+def list_suggestions(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
+    """Return items from content_classifications where status='suggested', joined with hub.db content."""
+    try:
+        with get_platform_db() as pdb:
+            rows = pdb.execute(
+                """SELECT id, hub_content_id, classified_project_id, suggested_project_id,
+                          confidence, reasoning, status, created_at
+                   FROM content_classifications
+                   WHERE status = 'suggested'
+                   ORDER BY confidence DESC
+                   LIMIT ? OFFSET ?""",
+                (limit, offset),
+            ).fetchall()
+
+            total_row = pdb.execute(
+                "SELECT COUNT(*) as cnt FROM content_classifications WHERE status = 'suggested'"
+            ).fetchone()
+            total = total_row["cnt"] if total_row else 0
+
+        if not rows:
+            return {"items": [], "total": 0}
+
+        # Enrich with hub.db content metadata
+        suggestions = []
+        hub_ids = [r["hub_content_id"] for r in rows]
+
+        hub_content_map = {}
+        try:
+            with get_hub_db() as hub:
+                for hid in hub_ids:
+                    hrow = hub.execute(
+                        "SELECT id, title, body, source, created_at FROM content WHERE id = ?",
+                        (hid,),
+                    ).fetchone()
+                    if hrow:
+                        hub_content_map[hid] = dict(hrow)
+        except Exception:
+            pass
+
+        # Get project names
+        project_name_map = {}
+        try:
+            with get_hub_db() as hub:
+                projects = hub.execute("SELECT id, name FROM projects").fetchall()
+                project_name_map = {p["id"]: p["name"] for p in projects}
+        except Exception:
+            pass
+
+        for r in rows:
+            item = dict(r)
+            hub_data = hub_content_map.get(r["hub_content_id"], {})
+            item["title"] = hub_data.get("title", "Unknown")
+            item["body"] = (hub_data.get("body") or "")[:300]
+            item["source"] = hub_data.get("source")
+            item["content_created_at"] = hub_data.get("created_at")
+            proj_id = r["classified_project_id"] or r["suggested_project_id"]
+            item["suggested_project_name"] = project_name_map.get(proj_id, proj_id)
+            suggestions.append(item)
+
+        return {"items": suggestions, "total": total}
+    except Exception as e:
+        log.warning("list_suggestions_failed", error=str(e))
+        return {"items": [], "total": 0}
+
+
+@router.post("/api/content/{content_id}/accept-suggestion")
+def accept_suggestion(content_id: str, body: AcceptSuggestionBody | None = None):
+    """Accept a suggestion (moves to auto_classified=1, status='accepted')."""
+    try:
+        with get_platform_db() as pdb:
+            row = pdb.execute(
+                "SELECT id, classified_project_id, suggested_project_id FROM content_classifications WHERE hub_content_id = ?",
+                (content_id,),
+            ).fetchone()
+
+            if not row:
+                raise HTTPException(404, "No suggestion found for this content")
+
+            project_id = (body.project_id if body and body.project_id else None) or row["classified_project_id"] or row["suggested_project_id"]
+
+            pdb.execute(
+                """UPDATE content_classifications
+                   SET status = 'accepted', auto_classified = 1, project_id = ?,
+                       classified_project_id = ?, classified_at = datetime('now')
+                   WHERE hub_content_id = ?""",
+                (project_id, project_id, content_id),
+            )
+            pdb.commit()
+
+        return {"status": "accepted", "content_id": content_id, "project_id": project_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+
+@router.post("/api/content/{content_id}/reject-suggestion")
+def reject_suggestion(content_id: str):
+    """Reject a suggestion (status='rejected')."""
+    try:
+        with get_platform_db() as pdb:
+            row = pdb.execute(
+                "SELECT id FROM content_classifications WHERE hub_content_id = ?",
+                (content_id,),
+            ).fetchone()
+
+            if not row:
+                raise HTTPException(404, "No suggestion found for this content")
+
+            pdb.execute(
+                "UPDATE content_classifications SET status = 'rejected', classified_at = datetime('now') WHERE hub_content_id = ?",
+                (content_id,),
+            )
+            pdb.commit()
+
+        return {"status": "rejected", "content_id": content_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+
+@router.post("/api/content/run-classifier")
+def run_classifier(limit: int = Query(50, ge=1, le=200)):
+    """Manually trigger the auto-classifier to process unsorted content."""
+    try:
+        from app.services.auto_classifier import process_unsorted
+
+        stats = process_unsorted(limit=limit)
+        return {"status": "ok", **stats}
+    except Exception as e:
+        log.warning("run_classifier_failed", error=str(e))
+        raise HTTPException(500, str(e))
+
+
+@router.post("/api/content/batch-accept-suggestions")
+def batch_accept_suggestions(min_confidence: float = Query(0.90)):
+    """Accept all suggestions with confidence >= threshold."""
+    try:
+        with get_platform_db() as pdb:
+            rows = pdb.execute(
+                """SELECT hub_content_id, classified_project_id, suggested_project_id
+                   FROM content_classifications
+                   WHERE status = 'suggested' AND confidence >= ?""",
+                (min_confidence,),
+            ).fetchall()
+
+            count = 0
+            for r in rows:
+                project_id = r["classified_project_id"] or r["suggested_project_id"]
+                pdb.execute(
+                    """UPDATE content_classifications
+                       SET status = 'accepted', auto_classified = 1, project_id = ?,
+                           classified_project_id = ?, classified_at = datetime('now')
+                       WHERE hub_content_id = ?""",
+                    (project_id, project_id, r["hub_content_id"]),
+                )
+                count += 1
+
+            pdb.commit()
+
+        return {"status": "ok", "accepted_count": count, "min_confidence": min_confidence}
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+
+# ---------------------------------------------------------------------------
+# Content-to-Action extraction
+# ---------------------------------------------------------------------------
+
+
+@router.post("/api/content/{content_id}/extract-actions")
+def extract_actions(content_id: str):
+    """Extract action items from a content item and create platform-native todos."""
+    try:
+        # Get content from hub.db
+        with get_hub_db() as hub:
+            row = hub.execute(
+                "SELECT id, title, body, source FROM content WHERE id = ?",
+                (content_id,),
+            ).fetchone()
+            if not row:
+                raise HTTPException(404, "Content not found")
+
+        text = f"{row['title'] or ''}\n{row['body'] or ''}"
+
+        from app.services.collaboration_context import extract_action_items_from_text
+
+        items = extract_action_items_from_text(text)
+
+        if not items:
+            return {"status": "ok", "actions_created": 0, "actions": []}
+
+        # Create platform-native todos in todo_overrides (NOT hub.db)
+        created = []
+        with get_platform_db() as pdb:
+            for desc in items:
+                todo_id = str(uuid.uuid4())
+                pdb.execute(
+                    """INSERT INTO todo_overrides
+                       (hub_todo_id, title, status, priority, source_type, source_content_id, is_platform_native, created_at)
+                       VALUES (?, ?, 'open', 'medium', 'extracted', ?, 1, datetime('now'))""",
+                    (todo_id, desc, content_id),
+                )
+                created.append({"id": todo_id, "title": desc})
+            pdb.commit()
+
+        return {"status": "ok", "actions_created": len(created), "actions": created}
     except HTTPException:
         raise
     except Exception as e:

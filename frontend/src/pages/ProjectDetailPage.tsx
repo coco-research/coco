@@ -20,6 +20,7 @@ import { InlineEditor } from '../components/shared/InlineEditor';
 import { CreateAgentDialog } from '../components/agents/CreateAgentDialog';
 import { AgentDetail } from '../components/agents/AgentDetail';
 import { RecruitAgentDialog } from '../components/agents/RecruitAgentDialog';
+import { SharedTaskBoard } from '../components/agents/SharedTaskBoard';
 import { TodoList } from '../components/todos/TodoList';
 import { AddTodoDialog } from '../components/todos/AddTodoDialog';
 import type { Todo } from '../components/todos/TodoList';
@@ -1370,6 +1371,29 @@ function HandoffHistory({ handoffs }: { handoffs: Handoff[] }) {
   );
 }
 
+function CollaborationTaskBoard({ nodeId }: { nodeId: string }) {
+  const { data: agents = [] } = useQuery<Agent[]>({
+    queryKey: ['agents', 'node', nodeId],
+    queryFn: () => apiFetch(`/agents?node_id=${nodeId}&subtree=true`),
+  });
+
+  const agentIds = agents.map((a) => a.id);
+
+  if (agentIds.length === 0) return null;
+
+  return (
+    <section>
+      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+        Task Board
+      </h3>
+      <SharedTaskBoard
+        agentIds={agentIds}
+        title="Delegated Tasks"
+      />
+    </section>
+  );
+}
+
 function CollaborationTab({ projectId, nodeId }: { projectId: string; nodeId: string | null }) {
   const queryClient = useQueryClient();
   const [workflowDialogOpen, setWorkflowDialogOpen] = useState(false);
@@ -1529,6 +1553,9 @@ function CollaborationTab({ projectId, nodeId }: { projectId: string; nodeId: st
           onEdited={invalidateAll}
         />
       </section>
+
+      {/* Shared Task Board */}
+      <CollaborationTaskBoard nodeId={effectiveNodeId} />
 
       {/* Handoff History */}
       {allHandoffs.some(h => h.status === 'completed' || h.status === 'skipped') && (

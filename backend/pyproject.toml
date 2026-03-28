@@ -12,6 +12,7 @@ dependencies = [
     "structlog>=24.0.0",
     "edge-tts>=6.1.0",
     "alembic>=1.13.0",
+    "kokoro>=0.9.4",
 ]
 
 [project.optional-dependencies]

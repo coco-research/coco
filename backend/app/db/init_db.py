@@ -362,6 +362,15 @@ CREATE TABLE IF NOT EXISTS task_board (
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_type TEXT NOT NULL,
+    data_json TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_events_type ON events(event_type);
+CREATE INDEX IF NOT EXISTS idx_events_created ON events(created_at);
+
 CREATE TABLE IF NOT EXISTS triggers (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -439,6 +448,21 @@ CREATE TABLE IF NOT EXISTS self_improve_agents (
 );
 CREATE INDEX IF NOT EXISTS idx_si_agents_cycle ON self_improve_agents(cycle_id);
 CREATE INDEX IF NOT EXISTS idx_si_agents_agent ON self_improve_agents(agent_id);
+
+CREATE TABLE IF NOT EXISTS inbox_read_state (
+    item_key TEXT PRIMARY KEY,
+    read_state TEXT NOT NULL DEFAULT 'unread' CHECK(read_state IN ('unread', 'seen', 'dismissed')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS jarvis_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    command TEXT NOT NULL,
+    response_summary TEXT,
+    cards_json TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_jarvis_sessions_created ON jarvis_sessions(created_at);
 """
 
 MIGRATION = """

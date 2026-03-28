@@ -1,6 +1,7 @@
 import asyncio
 import json
-from fastapi import APIRouter, HTTPException
+from typing import Optional
+from fastapi import APIRouter, HTTPException, Query
 from sse_starlette.sse import EventSourceResponse
 from app.config import EVENTS_JSONL_PATH
 from app.db.connections import get_platform_db
@@ -45,14 +46,20 @@ async def _jsonl_tail_generator():
         await asyncio.sleep(poll_interval)
 
 
-async def _merged_event_generator():
+async def _merged_event_generator(since: str | None = None):
     """Merge events from the in-process EventBus AND the external events.jsonl file.
 
-    Uses asyncio.wait to select whichever source produces an event first,
-    plus a periodic heartbeat so the SSE connection stays alive.
+    If *since* is provided (ISO-8601 timestamp), replays persisted events from
+    the DB first so that reconnecting clients don't miss anything, then switches
+    to live streaming.
     """
     heartbeat_interval = 15  # seconds
     poll_interval = 1  # seconds
+
+    # --- Replay missed events from DB ---
+    if since:
+        for evt in event_bus.replay(since):
+            yield evt
 
     # Set up EventBus subscription
     bus_queue: asyncio.Queue = asyncio.Queue(maxsize=256)
@@ -117,8 +124,8 @@ async def _merged_event_generator():
 
 
 @router.get("/api/events/stream")
-async def event_stream():
-    return EventSourceResponse(_merged_event_generator())
+async def event_stream(since: Optional[str] = Query(None, description="ISO-8601 timestamp to replay events from")):
+    return EventSourceResponse(_merged_event_generator(since=since))
 
 
 async def _agent_status_generator():

@@ -4,17 +4,17 @@ Returns structured card data alongside spoken replies for visual rendering.
 """
 
 import asyncio
+import json
 import os
 import re
 import shutil
 import subprocess
 import uuid
-from collections import deque
 from datetime import datetime, timezone
 from urllib.parse import urlencode
 
 import structlog
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 
 from app.db.connections import get_hub_db, get_platform_db
 from app.models.jarvis import (
@@ -30,29 +30,55 @@ log = structlog.get_logger()
 router = APIRouter(tags=["Jarvis"])
 
 
-# ─── Session Memory (last 5 command+response pairs) ─────────────────────────
-
-_SESSION_HISTORY: deque[dict] = deque(maxlen=5)
+# ─── Session Memory (DB-backed via jarvis_sessions table) ────────────────────
 
 
-def _record_exchange(user_text: str, reply: str) -> None:
-    """Store a command+response pair in session memory."""
-    _SESSION_HISTORY.append({
-        "user": user_text[:500],
-        "assistant": reply[:500],
-        "ts": datetime.now(timezone.utc).isoformat(),
-    })
+def _record_exchange(user_text: str, reply: str, cards: list | None = None) -> None:
+    """Store a command+response pair in the jarvis_sessions DB table."""
+    try:
+        cards_json = json.dumps([c.model_dump() if hasattr(c, 'model_dump') else c for c in (cards or [])]) if cards else None
+        with get_platform_db() as db:
+            db.execute(
+                "INSERT INTO jarvis_sessions (command, response_summary, cards_json) VALUES (?, ?, ?)",
+                (user_text[:500], reply[:500], cards_json),
+            )
+            db.commit()
+    except Exception as e:
+        log.warning("jarvis_record_exchange_failed", error=str(e))
 
 
 def _get_history_context() -> str:
-    """Build a context string from recent session history for Claude fallback."""
-    if not _SESSION_HISTORY:
+    """Build a context string from last 5 commands in DB for Claude fallback."""
+    try:
+        with get_platform_db() as db:
+            rows = db.execute(
+                "SELECT command, response_summary FROM jarvis_sessions "
+                "ORDER BY created_at DESC LIMIT 5"
+            ).fetchall()
+        if not rows:
+            return ""
+        lines = []
+        for entry in reversed(rows):
+            lines.append(f"User: {entry['command']}")
+            lines.append(f"Assistant: {entry['response_summary']}")
+        return "\n".join(lines)
+    except Exception:
         return ""
-    lines = []
-    for entry in _SESSION_HISTORY:
-        lines.append(f"User: {entry['user']}")
-        lines.append(f"Assistant: {entry['assistant']}")
-    return "\n".join(lines)
+
+
+def _get_recent_history(limit: int = 20) -> list[dict]:
+    """Return recent Jarvis interactions from DB."""
+    try:
+        with get_platform_db() as db:
+            rows = db.execute(
+                "SELECT id, command, response_summary, cards_json, created_at "
+                "FROM jarvis_sessions ORDER BY created_at DESC LIMIT ?",
+                (limit,),
+            ).fetchall()
+        return [dict(r) for r in rows]
+    except Exception as e:
+        log.warning("jarvis_get_history_failed", error=str(e))
+        return []
 
 
 # ─── Inline Action Extraction ────────────────────────────────────────────────
@@ -690,30 +716,19 @@ async def _claude_fallback(text: str) -> CommandResponse:
 
 @router.post("/api/jarvis/command", response_model=CommandResponse)
 async def jarvis_command(req: CommandRequest):
-    # Hydrate session memory from frontend context if provided
-    if req.context:
-        for entry in req.context:
-            if entry.get("query") and entry.get("reply"):
-                # Only add if not already tracked server-side
-                already = any(
-                    h["user"] == entry["query"][:500] for h in _SESSION_HISTORY
-                )
-                if not already:
-                    _record_exchange(entry["query"], entry["reply"])
-
     # ─── Inline actions: create todo, approve draft ───
     todo_title = _extract_create_todo(req.text)
     if todo_title:
         log.info("jarvis_inline_action", action="create_todo", title=todo_title[:50])
         result = await _handle_create_todo(todo_title)
-        _record_exchange(req.text, result.reply)
+        _record_exchange(req.text, result.reply, result.cards)
         return result
 
     draft_id = _extract_approve_draft(req.text)
     if draft_id:
         log.info("jarvis_inline_action", action="approve_draft", draft_id=draft_id)
         result = await _handle_approve_draft(draft_id)
-        _record_exchange(req.text, result.reply)
+        _record_exchange(req.text, result.reply, result.cards)
         return result
 
     # ─── Standard command matching ───
@@ -721,11 +736,30 @@ async def jarvis_command(req: CommandRequest):
     if handler_name and handler_name in HANDLERS:
         log.info("jarvis_command", handler=handler_name, text=req.text[:50])
         result = await HANDLERS[handler_name](remaining=remaining)
-        _record_exchange(req.text, result.reply)
+        _record_exchange(req.text, result.reply, result.cards)
         return result
 
     # ─── Claude fallback ───
     log.info("jarvis_command_fallback", text=req.text[:50])
     result = await _claude_fallback(req.text)
-    _record_exchange(req.text, result.reply)
+    _record_exchange(req.text, result.reply, result.cards)
     return result
+
+
+@router.get("/api/jarvis/history")
+def jarvis_history(limit: int = Query(default=20, ge=1, le=100)):
+    """Return recent Jarvis command interactions."""
+    return _get_recent_history(limit)
+
+
+@router.delete("/api/jarvis/history")
+def jarvis_clear_history():
+    """Clear all Jarvis session history."""
+    try:
+        with get_platform_db() as db:
+            db.execute("DELETE FROM jarvis_sessions")
+            db.commit()
+        return {"ok": True, "message": "History cleared."}
+    except Exception as e:
+        log.warning("jarvis_clear_history_failed", error=str(e))
+        return {"ok": False, "message": str(e)}

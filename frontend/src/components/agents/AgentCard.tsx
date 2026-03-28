@@ -1,9 +1,9 @@
 import React from 'react';
-import { Briefcase, ClipboardList, Code2, UserSearch, Bot, Crown, Cpu, ShieldCheck, Megaphone, BarChart3, PenTool } from 'lucide-react';
-import { useQueryClient } from '@tanstack/react-query';
+import { Briefcase, ClipboardList, Code2, UserSearch, Bot, Crown, Cpu, ShieldCheck, Megaphone, BarChart3, PenTool, ListTodo } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { cn, timeAgo } from '../../lib/utils';
 import { InlineEditor } from '../shared/InlineEditor';
-import { apiPatch } from '../../lib/api';
+import { apiFetch, apiPatch } from '../../lib/api';
 
 export interface Agent {
   id: string;
@@ -85,6 +85,15 @@ export const AgentCard = React.memo(function AgentCard({ agent, onClick, onSpawn
     ? timeAgo(agent.started_at).replace(' ago', '')
     : null;
 
+  // Fetch task queue count for badge
+  const { data: taskQueue = [] } = useQuery<{ id: string }[]>({
+    queryKey: ['task-queue', agent.id],
+    queryFn: () => apiFetch(`/tasks/queue/${agent.id}`),
+    refetchInterval: 15000,
+    staleTime: 10000,
+  });
+  const taskCount = taskQueue.length;
+
   return (
     <div
       className="rounded-xl border border-border bg-card p-5 hover:shadow-md transition-all cursor-pointer"
@@ -127,6 +136,12 @@ export const AgentCard = React.memo(function AgentCard({ agent, onClick, onSpawn
         <span className="capitalize">{agent.status}</span>
         {agent.pid && <span>PID {agent.pid}</span>}
         {uptime && <span>{uptime}</span>}
+        {taskCount > 0 && (
+          <span className="flex items-center gap-1 ml-auto px-2 py-0.5 rounded-full bg-accent/20 text-accent text-[10px] font-medium">
+            <ListTodo size={10} />
+            {taskCount} task{taskCount !== 1 ? 's' : ''}
+          </span>
+        )}
       </div>
 
       <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>

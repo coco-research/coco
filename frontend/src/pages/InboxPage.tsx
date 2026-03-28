@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useScope } from '../context/ScopeContext';
-import { apiPost, apiFetch } from '../lib/api';
+import { apiPost, apiFetch, apiPatch } from '../lib/api';
 import {
-  Inbox, AlertTriangle, FileCheck, FolderOpen, Activity, Check, X, Eye, EyeOff, ChevronRight, Clock, Mic
+  Inbox, AlertTriangle, FileCheck, FolderOpen, Activity, Check, X, Eye, EyeOff, ChevronRight, Clock, Mic,
+  CheckSquare, Square, MinusSquare,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useInViewport } from '../hooks/useInViewport';
@@ -93,6 +94,9 @@ function ProjectPicker({
 function InboxItemRow({
   item,
   readState,
+  selected,
+  selectMode,
+  onToggleSelect,
   onMarkSeen,
   onDismiss,
   onApprove,
@@ -101,6 +105,9 @@ function InboxItemRow({
 }: {
   item: InboxItem;
   readState: ReadState;
+  selected: boolean;
+  selectMode: boolean;
+  onToggleSelect: (id: string) => void;
   onMarkSeen: (id: string) => void;
   onDismiss: (id: string) => void;
   onApprove: (sourceId: string) => void;
@@ -129,8 +136,18 @@ function InboxItemRow({
       className={cn(
         'group flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-all cursor-pointer relative',
         stateClassName,
+        selected && 'bg-primary/5 ring-1 ring-primary/20',
       )}
     >
+      {/* Checkbox for multi-select */}
+      {selectMode && (
+        <button
+          className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+          onClick={(e) => { e.stopPropagation(); onToggleSelect(item.id); }}
+        >
+          {selected ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
+        </button>
+      )}
       {/* Unread indicator dot */}
       <div className="shrink-0 relative">
         {typeIcon(item.type)}
@@ -212,31 +229,58 @@ function InboxItemRow({
 export default function InboxPage() {
   const [activeTab, setActiveTab] = useState<InboxTab>('all');
   const { selectedNodeId, scopeProjectIds } = useScope();
-  const [readStates, setReadStates] = useState<Record<string, ReadState>>({});
   const [showDismissed, setShowDismissed] = useState(false);
   const [voiceMode, setVoiceMode] = useState(false);
   const [voiceItem, setVoiceItem] = useState<VoiceDecisionItem | null>(null);
   const [voiceLoading, setVoiceLoading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectMode, setSelectMode] = useState(false);
+  const [batchProjectPicker, setBatchProjectPicker] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // ─── Helpers for read state ──────────────────────────────────────
+  // ─── Server-persisted read states ────────────────────────────────
+
+  const { data: serverReadStates, refetch: refetchReadStates } = useQuery({
+    queryKey: ['inbox-read-states'],
+    queryFn: () => apiFetch<Record<string, ReadState>>('/inbox/read-states'),
+    staleTime: 5_000,
+  });
+
+  const readStates: Record<string, ReadState> = serverReadStates ?? {};
 
   const getReadState = useCallback(
     (id: string): ReadState => readStates[id] ?? 'unread',
     [readStates],
   );
 
+  // Mutation: patch a single read state
+  const patchReadStateMut = useMutation({
+    mutationFn: ({ item_key, read_state }: { item_key: string; read_state: ReadState }) =>
+      apiPatch<unknown>('/inbox/read-state', { item_key, read_state }),
+    onSuccess: () => {
+      refetchReadStates();
+    },
+  });
+
+  // Mutation: batch patch read states
+  const batchReadStateMut = useMutation({
+    mutationFn: ({ item_keys, read_state }: { item_keys: string[]; read_state: ReadState }) =>
+      apiPatch<unknown>('/inbox/read-states/batch', { item_keys, read_state }),
+    onSuccess: () => {
+      refetchReadStates();
+    },
+  });
+
   const handleMarkSeen = useCallback((id: string) => {
-    setReadStates((prev) => {
-      if (prev[id] === 'seen' || prev[id] === 'dismissed') return prev;
-      return { ...prev, [id]: 'seen' };
-    });
-  }, []);
+    // Optimistic: already returned from getReadState via server
+    // but also persist to server
+    patchReadStateMut.mutate({ item_key: id, read_state: 'seen' });
+  }, [patchReadStateMut]);
 
   const handleDismiss = useCallback((id: string) => {
-    setReadStates((prev) => ({ ...prev, [id]: 'dismissed' }));
-  }, []);
+    patchReadStateMut.mutate({ item_key: id, read_state: 'dismissed' });
+  }, [patchReadStateMut]);
 
   // ─── Queries ──────────────────────────────────────────────────────
 
@@ -477,6 +521,110 @@ export default function InboxPage() {
     health: activeDedupedItems.filter(i => i.type === 'health').length,
   };
 
+  // ─── Multi-select helpers ─────────────────────────────────────────
+
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const toggleSelectAll = useCallback(() => {
+    if (selectedIds.size === filteredItems.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredItems.map(i => i.id)));
+    }
+  }, [filteredItems, selectedIds.size]);
+
+  // Derive selected items
+  const selectedItems = useMemo(
+    () => filteredItems.filter(i => selectedIds.has(i.id)),
+    [filteredItems, selectedIds],
+  );
+
+  const selectedDrafts = useMemo(
+    () => selectedItems.filter(i => i.type === 'draft_approval' && i.sourceId),
+    [selectedItems],
+  );
+
+  const selectedClassify = useMemo(
+    () => selectedItems.filter(i => i.type === 'classify' && i.sourceId),
+    [selectedItems],
+  );
+
+  // Exit select mode clears selection
+  const exitSelectMode = useCallback(() => {
+    setSelectMode(false);
+    setSelectedIds(new Set());
+    setBatchProjectPicker(false);
+  }, []);
+
+  // Select all checkbox state
+  const selectAllState: 'none' | 'some' | 'all' =
+    selectedIds.size === 0
+      ? 'none'
+      : selectedIds.size === filteredItems.length
+        ? 'all'
+        : 'some';
+
+  // ─── Batch action handlers ────────────────────────────────────────
+
+  const handleBatchApprove = useCallback(async () => {
+    if (selectedDrafts.length === 0) return;
+    let successCount = 0;
+    for (const item of selectedDrafts) {
+      try {
+        await apiPost(`/drafts/${item.sourceId}/approve`, {});
+        successCount++;
+      } catch { /* skip failed */ }
+    }
+    // Dismiss all approved items
+    const keys = selectedDrafts.map(i => i.id);
+    batchReadStateMut.mutate({ item_keys: keys, read_state: 'dismissed' });
+    queryClient.invalidateQueries({ queryKey: ['drafts'] });
+    queryClient.invalidateQueries({ queryKey: ['queue'] });
+    toast(`${successCount} draft${successCount !== 1 ? 's' : ''} approved`, 'success');
+    exitSelectMode();
+  }, [selectedDrafts, batchReadStateMut, queryClient, toast, exitSelectMode]);
+
+  const handleBatchClassify = useCallback(async (projectId: string) => {
+    if (selectedClassify.length === 0) return;
+    let successCount = 0;
+    for (const item of selectedClassify) {
+      try {
+        await apiPost(`/content/${item.sourceId}/classify`, { project_id: projectId });
+        successCount++;
+      } catch { /* skip failed */ }
+    }
+    const keys = selectedClassify.map(i => i.id);
+    batchReadStateMut.mutate({ item_keys: keys, read_state: 'dismissed' });
+    queryClient.invalidateQueries({ queryKey: ['content-unsorted'] });
+    queryClient.invalidateQueries({ queryKey: ['queue'] });
+    toast(`${successCount} item${successCount !== 1 ? 's' : ''} classified`, 'success');
+    setBatchProjectPicker(false);
+    exitSelectMode();
+  }, [selectedClassify, batchReadStateMut, queryClient, toast, exitSelectMode]);
+
+  const handleBatchDismiss = useCallback(() => {
+    if (selectedItems.length === 0) return;
+    const keys = selectedItems.map(i => i.id);
+    batchReadStateMut.mutate({ item_keys: keys, read_state: 'dismissed' });
+    toast(`${keys.length} item${keys.length !== 1 ? 's' : ''} dismissed`, 'info');
+    exitSelectMode();
+  }, [selectedItems, batchReadStateMut, toast, exitSelectMode]);
+
+  const handleBatchMarkSeen = useCallback(() => {
+    if (selectedItems.length === 0) return;
+    const keys = selectedItems.map(i => i.id);
+    batchReadStateMut.mutate({ item_keys: keys, read_state: 'seen' });
+    toast(`${keys.length} item${keys.length !== 1 ? 's' : ''} marked seen`, 'info');
+    exitSelectMode();
+  }, [selectedItems, batchReadStateMut, toast, exitSelectMode]);
+
   // ─── Voice mode helpers ──────────────────────────────────────────
 
   const fetchVoiceItem = useCallback(async (command: string) => {
@@ -530,6 +678,22 @@ export default function InboxPage() {
       {/* Header row with tabs + controls */}
       <div className="flex items-center justify-between border-b border-border">
         <div className="flex items-center gap-1">
+          {/* Select All checkbox in tab header */}
+          {selectMode && (
+            <button
+              onClick={toggleSelectAll}
+              className="flex items-center px-2 py-2 text-muted-foreground hover:text-foreground transition-colors"
+              title={selectAllState === 'all' ? 'Deselect all' : 'Select all'}
+            >
+              {selectAllState === 'all' ? (
+                <CheckSquare size={16} className="text-primary" />
+              ) : selectAllState === 'some' ? (
+                <MinusSquare size={16} className="text-primary" />
+              ) : (
+                <Square size={16} />
+              )}
+            </button>
+          )}
           {TAB_CONFIG.map(({ key, label, icon: TabIcon }) => (
             <button
               key={key}
@@ -559,6 +723,18 @@ export default function InboxPage() {
 
         {/* Right-side controls */}
         <div className="flex items-center gap-3 pb-2">
+          <button
+            onClick={() => selectMode ? exitSelectMode() : setSelectMode(true)}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+              selectMode
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:bg-accent/10',
+            )}
+          >
+            <CheckSquare size={14} />
+            {selectMode ? 'Cancel' : 'Select'}
+          </button>
           <button
             onClick={() => setVoiceMode(v => !v)}
             className={cn(
@@ -614,7 +790,7 @@ export default function InboxPage() {
         </div>
       ) : (
         <>
-          {/* Items — click container to enable j/k navigation */}
+          {/* Items -- click container to enable j/k navigation */}
           {filteredItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
               <Inbox size={40} className="mb-3 opacity-30" />
@@ -636,6 +812,9 @@ export default function InboxPage() {
                   <InboxItemRow
                     item={item}
                     readState={getReadState(item.id)}
+                    selected={selectedIds.has(item.id)}
+                    selectMode={selectMode}
+                    onToggleSelect={toggleSelect}
                     onMarkSeen={handleMarkSeen}
                     onDismiss={handleDismiss}
                     onApprove={handleApprove}
@@ -647,6 +826,58 @@ export default function InboxPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* Floating batch action bar */}
+      {selectMode && selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 bg-card border border-border rounded-xl shadow-2xl animate-fade-in">
+          <span className="text-sm font-medium text-foreground mr-2">
+            {selectedIds.size} item{selectedIds.size !== 1 ? 's' : ''} selected
+          </span>
+          <div className="w-px h-5 bg-border" />
+          {selectedDrafts.length > 0 && (
+            <button
+              onClick={handleBatchApprove}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-success/10 text-success hover:bg-success/20 transition-colors"
+            >
+              <Check size={14} />
+              Approve {selectedDrafts.length > 1 ? `(${selectedDrafts.length})` : ''}
+            </button>
+          )}
+          {selectedClassify.length > 0 && (
+            <div className="relative">
+              <button
+                onClick={() => setBatchProjectPicker(p => !p)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-warning/10 text-warning hover:bg-warning/20 transition-colors"
+              >
+                <FolderOpen size={14} />
+                Classify {selectedClassify.length > 1 ? `(${selectedClassify.length})` : ''}
+              </button>
+              {batchProjectPicker && (
+                <div className="absolute bottom-full mb-2 right-0">
+                  <ProjectPicker
+                    onSelect={handleBatchClassify}
+                    onCancel={() => setBatchProjectPicker(false)}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          <button
+            onClick={handleBatchMarkSeen}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-accent/50 text-foreground hover:bg-accent transition-colors"
+          >
+            <Eye size={14} />
+            Mark Seen
+          </button>
+          <button
+            onClick={handleBatchDismiss}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+          >
+            <X size={14} />
+            Dismiss
+          </button>
+        </div>
       )}
     </div>
   );

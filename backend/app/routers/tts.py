@@ -1,10 +1,11 @@
 """Text-to-Speech endpoint.
 
 Priority order:
-1. Piper TTS with Jarvis voice (Paul Bettany) — local, free, instant
-2. Edge TTS (Azure Neural voices) — free, high quality, many voices
-3. OpenAI TTS — if OPENAI_API_KEY is set
-4. macOS `say` — zero-cost fallback
+1. Kokoro TTS (local, 82M-param, near-ElevenLabs quality)
+2. Piper TTS with Jarvis voice (Paul Bettany) — local, free, instant
+3. Edge TTS (Azure Neural voices) — free, high quality, many voices
+4. OpenAI TTS — if OPENAI_API_KEY is set
+5. macOS `say` — zero-cost fallback
 """
 
 import os
@@ -17,6 +18,7 @@ from fastapi import APIRouter
 from fastapi.responses import FileResponse, Response
 
 from app.models.tts import TTSRequest
+from app.services.kokoro_engine import KokoroEngine
 
 log = structlog.get_logger()
 
@@ -25,6 +27,9 @@ router = APIRouter(tags=["Voice"])
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 TTS_CACHE_DIR = Path(tempfile.gettempdir()) / "coco-tts"
 TTS_CACHE_DIR.mkdir(exist_ok=True)
+
+# Kokoro engine singleton (lazy-loads model on first generate call)
+kokoro_engine = KokoroEngine(cache_dir=TTS_CACHE_DIR)
 
 JARVIS_MODEL = Path.home() / ".coco" / "voices" / "jarvis" / "en" / "en_GB" / "jarvis" / "high" / "jarvis-high.onnx"
 
@@ -48,9 +53,19 @@ EDGE_VOICES = {
     "maisie": "en-GB-MaisieNeural",
 }
 
+# Kokoro voice IDs for routing
+KOKORO_VOICES = {"af_heart", "am_adam", "bf_emma", "bm_george"}
+
 # All available voices for the frontend
 VOICE_CATALOG = [
+    # Kokoro (local, high quality)
+    {"id": "af_heart", "name": "Heart", "gender": "female", "engine": "kokoro", "accent": "American"},
+    {"id": "am_adam", "name": "Adam", "gender": "male", "engine": "kokoro", "accent": "American"},
+    {"id": "bf_emma", "name": "Emma (Kokoro)", "gender": "female", "engine": "kokoro", "accent": "British"},
+    {"id": "bm_george", "name": "George", "gender": "male", "engine": "kokoro", "accent": "British"},
+    # Piper
     {"id": "jarvis", "name": "Jarvis (Paul Bettany)", "gender": "male", "engine": "piper", "accent": "British"},
+    # Edge TTS
     {"id": "ryan", "name": "Ryan", "gender": "male", "engine": "edge", "accent": "British"},
     {"id": "brian", "name": "Brian", "gender": "male", "engine": "edge", "accent": "American"},
     {"id": "andrew", "name": "Andrew", "gender": "male", "engine": "edge", "accent": "American"},
@@ -65,6 +80,11 @@ VOICE_CATALOG = [
 
 
 # ─── TTS Engines ──────────────────────────────────────────────────────────────
+
+def _kokoro_tts(text: str, voice: str = "af_heart", speed: float = 1.0) -> Path | None:
+    """Generate audio using local Kokoro TTS model."""
+    return kokoro_engine.generate(text, voice=voice, speed=speed)
+
 
 def _piper_jarvis(text: str) -> Path | None:
     """Generate audio using local Piper TTS with Jarvis voice model."""
@@ -147,12 +167,15 @@ def _macos_say(text: str) -> Path | None:
 @router.get("/api/tts/voices")
 def list_voices():
     """List all available TTS voices."""
+    kokoro_ok = kokoro_engine.is_available()
     catalog = list(VOICE_CATALOG)
-    # Mark Jarvis as unavailable if model not downloaded
     for v in catalog:
-        v["available"] = True
-        if v["id"] == "jarvis" and not JARVIS_MODEL.exists():
-            v["available"] = False
+        if v["engine"] == "kokoro":
+            v["available"] = kokoro_ok
+        elif v["id"] == "jarvis":
+            v["available"] = JARVIS_MODEL.exists()
+        else:
+            v["available"] = True
     return {"voices": catalog}
 
 
@@ -161,6 +184,22 @@ async def text_to_speech(req: TTSRequest):
     """Generate speech audio. Cascades through engines based on voice selection."""
 
     voice_id = req.voice.lower()
+
+    # ─── Kokoro (local, high quality) ───
+    if voice_id in KOKORO_VOICES:
+        # Parse speed: Kokoro uses float multiplier, req.speed is like "-5%" or "+10%"
+        kokoro_speed = 1.0
+        try:
+            pct = req.speed.replace("%", "").replace("+", "")
+            kokoro_speed = 1.0 + float(pct) / 100.0
+        except (ValueError, AttributeError):
+            pass
+        path = _kokoro_tts(req.text, voice=voice_id, speed=kokoro_speed)
+        if path:
+            log.info("tts_served", engine="kokoro", voice=voice_id)
+            return FileResponse(str(path), media_type="audio/wav")
+        # Fall through: try Edge with a similar accent
+        voice_id = "ryan" if voice_id.startswith("b") else "andrew"
 
     # ─── Jarvis (Piper local model) ───
     if voice_id == "jarvis":

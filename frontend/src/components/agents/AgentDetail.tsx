@@ -1,10 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { GitBranch, ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import { apiFetch, apiPost, apiPatch } from '../../lib/api';
 import { useEventSource } from '../../lib/sse';
 import { cn, timeAgo } from '../../lib/utils';
+import { statePillClass, STATE_LABELS } from '../../lib/state-machine';
 import { PropertiesPanel } from '../shared/PropertiesPanel';
 import { PropertyField } from '../shared/PropertyField';
 import { CommentThread } from '../shared/CommentThread';
+import { DelegationPanel } from './DelegationPanel';
 import { LogViewer } from './LogViewer';
 import type { Agent } from './AgentCard';
 
@@ -34,6 +38,132 @@ interface LogRow {
   stream: string;
   chunk: string;
   timestamp: string;
+}
+
+interface DelegationTask {
+  id: string;
+  title: string;
+  status: string;
+  priority: string;
+  agent_id: string | null;
+  agent_name: string | null;
+  delegated_by: string | null;
+  delegated_by_name: string | null;
+  delegated_to: string | null;
+  delegated_to_name: string | null;
+  created_at: string;
+}
+
+interface AgentDelegationsData {
+  delegated_by_me: DelegationTask[];
+  delegated_to_me: DelegationTask[];
+}
+
+function AgentDelegations({ agentId }: { agentId: string }) {
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
+
+  const { data, isLoading } = useQuery<AgentDelegationsData>({
+    queryKey: ['agent-delegations', agentId],
+    queryFn: () => apiFetch(`/agents/${agentId}/delegations`),
+    refetchInterval: 10000,
+  });
+
+  if (isLoading) return null;
+
+  const byMe = data?.delegated_by_me ?? [];
+  const toMe = data?.delegated_to_me ?? [];
+
+  if (byMe.length === 0 && toMe.length === 0) return null;
+
+  return (
+    <div className="border-t border-border pt-4 space-y-4">
+      <div className="flex items-center gap-2">
+        <GitBranch size={14} className="text-muted-foreground" />
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          Delegations
+        </span>
+        <span className="ml-auto text-[10px] text-muted-foreground">
+          {byMe.length + toMe.length} total
+        </span>
+      </div>
+
+      {/* Delegated BY this agent */}
+      {byMe.length > 0 && (
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <ArrowUpRight size={12} className="text-blue-400" />
+            <span>Delegated to others ({byMe.length})</span>
+          </div>
+          {byMe.map((task) => (
+            <div key={task.id} className="space-y-0">
+              <button
+                onClick={() => setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
+                className="w-full flex items-center gap-2 px-3 py-2 text-left rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+              >
+                <span className="flex-1 text-sm text-foreground truncate">{task.title}</span>
+                <span className={cn(
+                  'inline-block px-1.5 py-0.5 rounded-full text-[10px] font-medium capitalize shrink-0',
+                  statePillClass(task.status),
+                )}>
+                  {STATE_LABELS[task.status] ?? task.status.replace('_', ' ')}
+                </span>
+                <span className="text-[10px] text-muted-foreground shrink-0">
+                  to {task.delegated_to_name ?? 'unknown'}
+                </span>
+              </button>
+              {expandedTaskId === task.id && (
+                <div className="ml-3 pl-3 border-l border-border">
+                  <DelegationPanel
+                    taskId={task.id}
+                    taskTitle={task.title}
+                    currentAgentId={task.agent_id}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Delegated TO this agent */}
+      {toMe.length > 0 && (
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <ArrowDownRight size={12} className="text-emerald-400" />
+            <span>Received from others ({toMe.length})</span>
+          </div>
+          {toMe.map((task) => (
+            <div key={task.id} className="space-y-0">
+              <button
+                onClick={() => setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
+                className="w-full flex items-center gap-2 px-3 py-2 text-left rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+              >
+                <span className="flex-1 text-sm text-foreground truncate">{task.title}</span>
+                <span className={cn(
+                  'inline-block px-1.5 py-0.5 rounded-full text-[10px] font-medium capitalize shrink-0',
+                  statePillClass(task.status),
+                )}>
+                  {STATE_LABELS[task.status] ?? task.status.replace('_', ' ')}
+                </span>
+                <span className="text-[10px] text-muted-foreground shrink-0">
+                  from {task.delegated_by_name ?? 'unknown'}
+                </span>
+              </button>
+              {expandedTaskId === task.id && (
+                <div className="ml-3 pl-3 border-l border-border">
+                  <DelegationPanel
+                    taskId={task.id}
+                    taskTitle={task.title}
+                    currentAgentId={task.agent_id}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function AgentDetail({ agentId, onClose, onAction }: AgentDetailProps) {
@@ -228,6 +358,9 @@ export function AgentDetail({ agentId, onClose, onAction }: AgentDetailProps) {
               </button>
             )}
           </div>
+
+          {/* Delegations section */}
+          <AgentDelegations agentId={agentId} />
 
           {/* Log viewer */}
           <div className="border-t border-border pt-4">

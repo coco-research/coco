@@ -5,10 +5,14 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel, Field
+import structlog
 
 from app.db.connections import get_platform_db
+from app.services.event_bus import event_bus
+
+log = structlog.get_logger()
 
 router = APIRouter(prefix="/api/triggers", tags=["Triggers"])
 webhook_router = APIRouter(prefix="/api/webhooks", tags=["Webhooks"])
@@ -50,21 +54,108 @@ def _row_to_dict(row) -> dict:
     return d
 
 
-async def _execute_trigger_action(trigger: dict) -> dict:
-    """Execute the action for a trigger. Currently returns mock results."""
+async def _execute_trigger_action(trigger: dict, context: dict | None = None) -> dict:
+    """Execute the action for a trigger. Dispatches to real action handlers."""
+    from app.services.process_manager import process_manager
+
     action_type = trigger["action_type"]
     action_config = trigger["action_config"]
     if isinstance(action_config, str):
         action_config = json.loads(action_config)
 
+    trigger_name = trigger.get("name", "unknown")
+    node_id = trigger.get("node_id")
+
     if action_type == "spawn_agent":
-        return {"status": "success", "result": f"Would spawn agent {action_config.get('agent_id', 'unknown')}"}
+        # Spawn a real Claude agent via ProcessManager
+        agent_name = action_config.get("agent_name", f"trigger-{trigger_name}")
+        task = action_config.get("task", f"Triggered by automation: {trigger_name}")
+        model = action_config.get("model", "sonnet")
+        cwd = action_config.get("cwd")
+        role = action_config.get("role", "custom")
+
+        # If context was provided (e.g. webhook payload), append to task
+        if context:
+            task += f"\n\nTrigger context:\n```json\n{json.dumps(context, indent=2)}\n```"
+
+        agent_id = str(uuid.uuid4())
+        now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        with get_platform_db() as db:
+            db.execute(
+                "INSERT INTO agents (id, name, node_id, model, role, task_description, status, started_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, 'running', ?)",
+                (agent_id, agent_name, node_id, model, role, task, now),
+            )
+            db.commit()
+
+        try:
+            pid = process_manager.spawn(agent_id, task, cwd=cwd, model=model, node_id=node_id, role=role)
+            with get_platform_db() as db:
+                db.execute("UPDATE agents SET pid = ? WHERE id = ?", (pid, agent_id))
+                db.commit()
+            return {"status": "success", "result": f"Spawned agent '{agent_name}' (pid={pid})", "agent_id": agent_id}
+        except RuntimeError as e:
+            with get_platform_db() as db:
+                db.execute(
+                    "UPDATE agents SET status = 'failed', stopped_at = datetime('now') WHERE id = ?",
+                    (agent_id,),
+                )
+                db.commit()
+            return {"status": "failed", "error": str(e)}
+
     elif action_type == "create_todo":
-        return {"status": "success", "result": f"Would create todo: {action_config.get('title', 'untitled')}"}
+        # Insert a platform-native todo into todo_overrides
+        title = action_config.get("title", f"Auto-todo from {trigger_name}")
+        priority = action_config.get("priority", "medium")
+        todo_id = f"trigger-{uuid.uuid4().hex[:12]}"
+        now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        with get_platform_db() as db:
+            db.execute(
+                """INSERT INTO todo_overrides
+                   (hub_todo_id, title, status, priority, node_id, is_platform_native, created_at, updated_at)
+                   VALUES (?, ?, 'open', ?, ?, 1, ?, ?)""",
+                (todo_id, title, priority, node_id, now, now),
+            )
+            db.commit()
+        event_bus.emit("todo.created", {"todo_id": todo_id, "title": title, "source": "trigger"})
+        return {"status": "success", "result": f"Created todo: {title}", "todo_id": todo_id}
+
     elif action_type == "notify":
-        return {"status": "success", "result": f"Would notify: {action_config.get('message', '')}"}
+        # Emit an event via EventBus (picked up by SSE subscribers)
+        message = action_config.get("message", f"Trigger fired: {trigger_name}")
+        event_bus.emit("trigger.notification", {
+            "trigger_id": trigger["id"],
+            "trigger_name": trigger_name,
+            "message": message,
+            "context": context,
+        })
+        log.info("trigger_notification", trigger_id=trigger["id"], message=message)
+        return {"status": "success", "result": f"Notification sent: {message}"}
+
     elif action_type == "run_command":
-        return {"status": "success", "result": f"Would run: {action_config.get('command', '')}"}
+        # Run a shell command (capped at 30s timeout)
+        import asyncio
+        command = action_config.get("command", "")
+        if not command:
+            return {"status": "failed", "error": "No command specified"}
+        try:
+            proc = await asyncio.create_subprocess_shell(
+                command,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=30)
+            output = stdout.decode("utf-8", errors="replace").strip()
+            err_output = stderr.decode("utf-8", errors="replace").strip()
+            if proc.returncode == 0:
+                return {"status": "success", "result": output[:2000] or "Command succeeded"}
+            else:
+                return {"status": "failed", "error": f"Exit code {proc.returncode}: {err_output[:1000]}"}
+        except asyncio.TimeoutError:
+            return {"status": "failed", "error": "Command timed out after 30 seconds"}
+        except Exception as e:
+            return {"status": "failed", "error": str(e)}
+
     return {"status": "skipped", "result": "Unknown action type"}
 
 
@@ -245,8 +336,11 @@ async def get_trigger_logs(
 # ── Webhook receiver ──────────────────────────────────────────────
 
 @webhook_router.post("/{trigger_id}")
-async def receive_webhook(trigger_id: str):
-    """Webhook receiver — validates trigger exists with type='webhook', fires action, logs result."""
+async def receive_webhook(trigger_id: str, request: Request):
+    """Webhook receiver — validates trigger exists with type='webhook', fires action, logs result.
+
+    Accepts any JSON body and passes it as context to the action.
+    """
     with get_platform_db() as conn:
         row = conn.execute("SELECT * FROM triggers WHERE id = ?", (trigger_id,)).fetchone()
         if not row:
@@ -259,7 +353,16 @@ async def receive_webhook(trigger_id: str):
     if not trigger["enabled"]:
         raise HTTPException(status_code=409, detail="Trigger is disabled")
 
-    result = await _execute_trigger_action(trigger)
+    # Parse incoming JSON body as context
+    context = None
+    try:
+        body = await request.body()
+        if body:
+            context = await request.json()
+    except Exception:
+        context = None
+
+    result = await _execute_trigger_action(trigger, context=context)
 
     with get_platform_db() as conn:
         _log_trigger_fire(

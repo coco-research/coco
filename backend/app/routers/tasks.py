@@ -302,3 +302,15 @@ def get_agent_task_queue(agent_id: str):
 def get_delegation_chain(task_id: str):
     """Get the full delegation chain (parent ancestors + subtasks) for a task."""
     return delegation_service.get_delegation_chain(task_id)
+
+
+@router.get("/api/nodes/{node_id}/task-board")
+def get_node_task_board(node_id: str):
+    """Get all tasks for agents in this node, for the shared task board view."""
+    return delegation_service.get_node_task_board(node_id)
+
+
+@router.get("/api/agents/{agent_id}/delegations")
+def get_agent_delegations(agent_id: str):
+    """Get tasks delegated by and to an agent."""
+    return delegation_service.get_agent_delegations(agent_id)

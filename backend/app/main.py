@@ -7,6 +7,7 @@ import structlog
 import time
 
 from app.db.init_db import init_platform_db
+from app.services.event_bus import event_bus
 from app.services.process_manager import process_manager
 from app.services.trigger_engine import trigger_engine
 from app.services.id_generator import resolve_display_id as _resolve_display_id
@@ -18,6 +19,7 @@ from app.routers import (
     settings, chat, dashboard, goals, tree, home, collaboration,
     tts, comments, templates, jarvis, analysis, stt, triggers,
     self_improve,
+    inbox,
 )
 
 structlog.configure(
@@ -35,6 +37,8 @@ async def lifespan(app: FastAPI):
     log.info("platform_db_initialized")
     process_manager.reconcile_on_startup()
     log.info("orphan_reconciliation_done")
+    deleted = event_bus.cleanup(max_age_hours=24)
+    log.info("stale_events_cleaned", deleted=deleted)
     await trigger_engine.start()
     log.info("trigger_engine_started")
     yield
@@ -70,6 +74,7 @@ openapi_tags = [
     {"name": "Triggers", "description": "Cron, webhook, and file-watch triggers"},
     {"name": "Webhooks", "description": "Incoming webhook receiver"},
     {"name": "Self-Improve", "description": "Self-improvement cycle management"},
+    {"name": "Inbox", "description": "Inbox read-state persistence and batch actions"},
 ]
 
 app = FastAPI(
@@ -136,6 +141,7 @@ app.include_router(stt.router)
 app.include_router(triggers.router)
 app.include_router(triggers.webhook_router)
 app.include_router(self_improve.router)
+app.include_router(inbox.router)
 
 # --- Cross-cutting resolve endpoint ---
 

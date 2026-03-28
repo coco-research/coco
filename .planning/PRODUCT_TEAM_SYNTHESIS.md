@@ -10,8 +10,8 @@ After analyzing all 8 reports, these are the moves that every agent agreed on:
 ### 1. MERGE THE THREE DASHBOARDS
 **Reported by:** Senior PM, Frontend PM, UX Designer, B2C PM
 - Home, Analytics, and Jarvis overlap 70%+ in data
-- Merge Home + Analytics into a single "Home" page
-- Jarvis becomes a voice overlay/mode, not a separate page
+- **Keep Home + Analytics separate** (user decision — Home = daily driver, Analytics = data/trends)
+- **Merge Home + Jarvis** — Jarvis becomes a voice mode/overlay within Home, not a separate page
 - Home should show "action cards" (what to DO), not metric cards (what IS)
 
 ### 2. UNIFY THE CHAT STORY
@@ -68,7 +68,7 @@ Every report independently arrived at the same conclusion: CoCo has too many sur
 | Toast feedback on all mutations | Frontend PM | High | 2h |
 | Page transition animations | UX Designer, Frontend PM | High | 1h |
 | j/k list navigation + keyboard actions | Frontend PM, UX Designer | High | 4h |
-| Merge Home + Analytics dashboards | Senior PM, UX Designer | High | 2-3 days |
+| ~~Merge Home + Analytics~~ | -- | -- | **REJECTED** — kept separate by design. Merge Home + Jarvis instead. |
 | Persist inbox read state | Senior PM, Frontend PM | Medium | 4h |
 | Inbox batch actions | Senior PM | Medium | 1 day |
 | Fix silent error handlers → toast | Frontend PM | Medium | 1h |

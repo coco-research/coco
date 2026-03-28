@@ -1,15 +1,23 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mic, MicOff, Send, Loader2 } from 'lucide-react';
+import { Mic, MicOff, Send, Loader2, Clock } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useVoiceInput } from '../../hooks/useVoiceInput';
 import { useTypewriter } from '../../hooks/useTypewriter';
-import { apiPost } from '../../lib/api';
+import { apiFetch, apiPost } from '../../lib/api';
 import type { CommandResponse } from '../../types/cards';
 
 interface HistoryEntry {
   query: string;
   reply: string;
+}
+
+interface JarvisHistoryItem {
+  id: number;
+  command: string;
+  response_summary: string | null;
+  cards_json: string | null;
+  created_at: string;
 }
 
 interface Props {
@@ -41,8 +49,31 @@ export function JarvisInput({ onCommand, onSpeak, onChime, onInteract, delay = 0
   const [userQuery, setUserQuery] = useState('');
   const [suggestChat, setSuggestChat] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [recentCommands, setRecentCommands] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const voice = useVoiceInput();
+
+  // Fetch recent Jarvis history on mount
+  useEffect(() => {
+    apiFetch<JarvisHistoryItem[]>('/jarvis/history?limit=5')
+      .then((items) => {
+        // Deduplicate commands and keep only unique ones
+        const seen = new Set<string>();
+        const cmds: string[] = [];
+        for (const item of items) {
+          const cmd = item.command.trim();
+          const lower = cmd.toLowerCase();
+          if (!seen.has(lower) && cmds.length < 5) {
+            seen.add(lower);
+            cmds.push(cmd);
+          }
+        }
+        setRecentCommands(cmds);
+      })
+      .catch(() => {
+        // Silently ignore — history is optional
+      });
+  }, []);
 
   const handleCommand = useCallback(async (input: string) => {
     if (!input.trim() || isProcessing) return;
@@ -60,6 +91,12 @@ export function JarvisInput({ onCommand, onSpeak, onChime, onInteract, delay = 0
       setResponse(result.reply);
       // Track in session history (keep last 5)
       setHistory((prev) => [...prev.slice(-4), { query: input.trim(), reply: result.reply }]);
+      // Update recent commands for suggestions
+      setRecentCommands((prev) => {
+        const lower = input.trim().toLowerCase();
+        const filtered = prev.filter((c) => c.toLowerCase() !== lower);
+        return [input.trim(), ...filtered].slice(0, 5);
+      });
       onChime();
 
       // Speak the response and wait for it to finish
@@ -211,8 +248,27 @@ export function JarvisInput({ onCommand, onSpeak, onChime, onInteract, delay = 0
         </button>
       </form>
 
+      {/* Recent commands as clickable suggestions */}
+      {!response && !voice.isListening && recentCommands.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+          <Clock size={10} className="text-white/20" />
+          {recentCommands.map((cmd, i) => (
+            <button
+              key={i}
+              onClick={() => handleCommand(cmd)}
+              disabled={isProcessing}
+              className="text-[10px] font-mono text-white/25 hover:text-sky-400/70 transition-colors
+                         border border-white/8 hover:border-sky-400/30 rounded-md px-2 py-0.5
+                         disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              {cmd.length > 30 ? cmd.slice(0, 30) + '...' : cmd}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Hints */}
-      {!response && !voice.isListening && (
+      {!response && !voice.isListening && recentCommands.length === 0 && (
         <p className="text-center text-[10px] text-white/20 mt-2.5 tracking-wider">
           try: "process" · "briefing" · "overdue" · "decide" · "todos" · "health" · "costs" · "search" · or ask anything
         </p>
@@ -221,7 +277,7 @@ export function JarvisInput({ onCommand, onSpeak, onChime, onInteract, delay = 0
       {/* Error */}
       {voice.error && (
         <p className="text-center text-[10px] text-[#FF453A]/60 mt-1">
-          mic error: {voice.error}
+          {voice.error}
         </p>
       )}
     </div>

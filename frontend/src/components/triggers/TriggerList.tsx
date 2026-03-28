@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiFetch, apiPost, apiDelete, apiPatch } from '../../lib/api';
-import { Clock, Webhook, FolderSearch, Trash2, Play, AlertCircle, Loader2 } from 'lucide-react';
+import { Clock, Webhook, FolderSearch, Trash2, Play, AlertCircle, Loader2, ChevronDown, ChevronRight, Copy, Check } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export interface TriggerLogEntry {
-  status: 'success' | 'failed';
+  id?: number;
+  trigger_id?: string;
+  status: 'success' | 'failed' | 'skipped';
+  result?: string;
+  error?: string;
   message?: string;
   fired_at: string;
 }
@@ -18,9 +22,11 @@ export interface Trigger {
   config: Record<string, unknown>;
   action_type: 'spawn_agent' | 'create_todo' | 'notify' | 'run_command';
   action_config: Record<string, unknown>;
+  node_id?: string | null;
   last_fired_at: string | null;
   fire_count: number;
   last_log?: TriggerLogEntry | null;
+  recent_logs?: TriggerLogEntry[];
   created_at: string;
   updated_at: string;
 }
@@ -41,13 +47,92 @@ interface TriggerListProps {
   onEdit?: (trigger: Trigger) => void;
 }
 
+function WebhookUrlDisplay({ triggerId }: { triggerId: string }) {
+  const [copied, setCopied] = useState(false);
+  const url = `${window.location.origin}/api/webhooks/${triggerId}`;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div className="flex items-center gap-2 px-3 py-1.5 ml-4">
+      <code className="text-[10px] text-muted-foreground font-mono bg-muted px-2 py-0.5 rounded truncate max-w-xs">
+        POST {url}
+      </code>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+        aria-label="Copy webhook URL"
+      >
+        {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+      </button>
+    </div>
+  );
+}
+
+function TriggerLogPanel({ triggerId }: { triggerId: string }) {
+  const { data, isLoading } = useQuery<{ items: TriggerLogEntry[]; total: number }>({
+    queryKey: ['trigger-logs', triggerId],
+    queryFn: () => apiFetch(`/triggers/${triggerId}/logs?limit=10`),
+    staleTime: 10_000,
+  });
+
+  if (isLoading) return <p className="text-[10px] text-muted-foreground px-3 py-1 ml-4">Loading logs...</p>;
+
+  const logs = data?.items ?? [];
+  if (logs.length === 0) return <p className="text-[10px] text-muted-foreground px-3 py-1 ml-4">No fire history yet.</p>;
+
+  return (
+    <div className="ml-4 mr-2 mb-1 border border-border rounded-md overflow-hidden">
+      <table className="w-full text-[10px]">
+        <thead>
+          <tr className="bg-muted/50">
+            <th className="text-left px-2 py-1 font-medium text-muted-foreground">Time</th>
+            <th className="text-left px-2 py-1 font-medium text-muted-foreground">Status</th>
+            <th className="text-left px-2 py-1 font-medium text-muted-foreground">Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          {logs.map((entry, i) => (
+            <tr key={entry.id ?? i} className="border-t border-border/50">
+              <td className="px-2 py-1 text-muted-foreground whitespace-nowrap">
+                {new Date(entry.fired_at).toLocaleString()}
+              </td>
+              <td className="px-2 py-1">
+                <span className={cn(
+                  'px-1 py-0.5 rounded font-semibold',
+                  entry.status === 'success' ? 'text-emerald-400 bg-emerald-500/10' :
+                  entry.status === 'failed' ? 'text-red-400 bg-red-500/10' :
+                  'text-yellow-400 bg-yellow-500/10',
+                )}>
+                  {entry.status}
+                </span>
+              </td>
+              <td className="px-2 py-1 text-muted-foreground truncate max-w-[200px]">
+                {entry.error || entry.result || '-'}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function TriggerList({ onEdit }: TriggerListProps) {
   const queryClient = useQueryClient();
   const [testResults, setTestResults] = useState<Record<string, { status: 'loading' | 'success' | 'error'; message?: string }>>({});
+  const [expandedLogs, setExpandedLogs] = useState<Record<string, boolean>>({});
 
   const { data: triggers = [], isLoading } = useQuery<Trigger[]>({
     queryKey: ['triggers'],
     queryFn: () => apiFetch<Trigger[]>('/triggers'),
+    refetchInterval: 30_000, // Auto-refresh every 30s to show latest fire counts
   });
 
   const toggleMut = useMutation({
@@ -77,18 +162,20 @@ export function TriggerList({ onEdit }: TriggerListProps) {
   const handleTest = async (triggerId: string) => {
     setTestResults((prev) => ({ ...prev, [triggerId]: { status: 'loading' } }));
     try {
-      const result = await apiPost<{ status: string; message?: string }>(`/triggers/${triggerId}/test`, {});
+      const result = await apiPost<{ status: string; result?: string; error?: string }>(`/triggers/${triggerId}/test`, {});
       setTestResults((prev) => ({
         ...prev,
-        [triggerId]: { status: 'success', message: result.message ?? 'Test passed' },
+        [triggerId]: { status: result.status === 'failed' ? 'error' : 'success', message: result.result ?? result.error ?? 'Done' },
       }));
+      // Refresh trigger list and logs
+      queryClient.invalidateQueries({ queryKey: ['triggers'] });
+      queryClient.invalidateQueries({ queryKey: ['trigger-logs', triggerId] });
     } catch (err) {
       setTestResults((prev) => ({
         ...prev,
         [triggerId]: { status: 'error', message: err instanceof Error ? err.message : 'Test failed' },
       }));
     }
-    // Auto-clear result after 5s
     setTimeout(() => {
       setTestResults((prev) => {
         const next = { ...prev };
@@ -116,6 +203,15 @@ export function TriggerList({ onEdit }: TriggerListProps) {
         const Icon = typeIcons[trigger.trigger_type];
         const lastLogFailed = trigger.last_log?.status === 'failed';
         const testResult = testResults[trigger.id];
+        const logsExpanded = expandedLogs[trigger.id];
+
+        // Config summary for subtitle
+        const configSummary = trigger.trigger_type === 'cron'
+          ? `cron: ${(trigger.config as Record<string, string>).expression || (trigger.config as Record<string, string>).cron || '?'}`
+          : trigger.trigger_type === 'file_watch'
+            ? `watching: ${(trigger.config as Record<string, string>).path || '?'}`
+            : 'webhook';
+
         return (
           <div key={trigger.id} className="space-y-0">
             <div
@@ -124,7 +220,17 @@ export function TriggerList({ onEdit }: TriggerListProps) {
                 lastLogFailed ? 'border-red-500/40' : 'border-border',
               )}
             >
-              {/* Error dot + Icon + name */}
+              {/* Expand/collapse logs */}
+              <button
+                type="button"
+                onClick={() => setExpandedLogs((prev) => ({ ...prev, [trigger.id]: !prev[trigger.id] }))}
+                className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                aria-label={logsExpanded ? 'Collapse logs' : 'Expand logs'}
+              >
+                {logsExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+              </button>
+
+              {/* Icon + name */}
               <button
                 type="button"
                 onClick={() => onEdit?.(trigger)}
@@ -140,13 +246,20 @@ export function TriggerList({ onEdit }: TriggerListProps) {
                   <p className="text-sm font-medium text-foreground truncate">
                     {trigger.name}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[10px] text-muted-foreground truncate">
+                    {configSummary}
+                    {' — '}
                     {trigger.last_fired_at
                       ? `Last fired ${new Date(trigger.last_fired_at).toLocaleString()} (${trigger.fire_count}x)`
                       : 'Never fired'}
                   </p>
                 </div>
               </button>
+
+              {/* Action badge */}
+              <span className="text-[10px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded whitespace-nowrap">
+                {trigger.action_type.replace('_', ' ')}
+              </span>
 
               {/* Type badge */}
               <span
@@ -203,6 +316,11 @@ export function TriggerList({ onEdit }: TriggerListProps) {
               </button>
             </div>
 
+            {/* Webhook URL display */}
+            {trigger.trigger_type === 'webhook' && logsExpanded && (
+              <WebhookUrlDisplay triggerId={trigger.id} />
+            )}
+
             {/* Error message from last failed log */}
             {lastLogFailed && trigger.last_log?.message && (
               <div className="flex items-start gap-2 px-3 py-1.5 ml-4 text-xs text-red-400">
@@ -227,6 +345,9 @@ export function TriggerList({ onEdit }: TriggerListProps) {
                 <span>{testResult.message}</span>
               </div>
             )}
+
+            {/* Expandable log history */}
+            {logsExpanded && <TriggerLogPanel triggerId={trigger.id} />}
           </div>
         );
       })}

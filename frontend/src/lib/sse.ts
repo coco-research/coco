@@ -43,6 +43,9 @@ export function useEventSource(url: string, options: UseEventSourceOptions = {})
 
   const [status, setStatus] = useState<SSEConnectionStatus>('disconnected');
 
+  // Track the timestamp of the last received event for reconnection replay
+  const lastEventTimestampRef = useRef<string | null>(null);
+
   // Use refs so reconnection logic always sees latest callbacks without re-triggering the effect.
   const eventsRef = useRef(events);
   eventsRef.current = events;
@@ -82,6 +85,22 @@ export function useEventSource(url: string, options: UseEventSourceOptions = {})
       }
     }
 
+    function trackTimestamp(data: unknown) {
+      // Extract timestamp from event data for reconnection replay
+      if (data && typeof data === 'object' && 'ts' in (data as Record<string, unknown>)) {
+        const ts = (data as Record<string, unknown>).ts;
+        if (typeof ts === 'number') {
+          // Convert Unix epoch to ISO-8601 UTC
+          lastEventTimestampRef.current = new Date(ts * 1000).toISOString();
+        } else if (typeof ts === 'string') {
+          lastEventTimestampRef.current = ts;
+        }
+      } else {
+        // Fallback: use current time
+        lastEventTimestampRef.current = new Date().toISOString();
+      }
+    }
+
     function makeHandler(eventType: string) {
       return (e: MessageEvent) => {
         let parsed: unknown;
@@ -90,6 +109,8 @@ export function useEventSource(url: string, options: UseEventSourceOptions = {})
         } catch {
           parsed = e.data;
         }
+
+        trackTimestamp(parsed);
 
         const handler = eventsRef.current[eventType];
         if (handler) handler(parsed);
@@ -103,7 +124,14 @@ export function useEventSource(url: string, options: UseEventSourceOptions = {})
 
       setStatus('connecting');
 
-      const es = new EventSource(url);
+      // Append ?since= on reconnection so the server replays missed events
+      let connectUrl = url;
+      if (attempt > 0 && lastEventTimestampRef.current) {
+        const separator = url.includes('?') ? '&' : '?';
+        connectUrl = `${url}${separator}since=${encodeURIComponent(lastEventTimestampRef.current)}`;
+      }
+
+      const es = new EventSource(connectUrl);
       esRef = es;
 
       es.onopen = () => {
@@ -145,6 +173,7 @@ export function useEventSource(url: string, options: UseEventSourceOptions = {})
         } catch {
           parsed = e.data;
         }
+        trackTimestamp(parsed);
         if (onAnyRef.current) onAnyRef.current('message', parsed);
       };
 

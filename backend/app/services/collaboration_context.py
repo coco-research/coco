@@ -15,7 +15,7 @@ import sqlite3
 import uuid
 from datetime import datetime, timezone
 
-from app.db.connections import get_platform_db
+from app.db.connections import get_platform_db, get_hub_db
 from app.config import HUB_DB_PATH
 
 log = logging.getLogger(__name__)
@@ -140,6 +140,146 @@ def build_collaboration_prompt(node_id: str, agent_role: str) -> str:
     sections.append("- Be specific and actionable -- the next team member needs to act on your output")
 
     return "\n".join(sections)
+
+
+def build_knowledge_context(
+    node_id: str | None = None,
+    project_id: str | None = None,
+    token_budget: int = 2000,
+) -> str:
+    """Build knowledge context from hub.db for agent/chat injection.
+
+    Queries recent emails, Jira updates, and active action items for the
+    given project. Stays within token_budget (rough: 1 token ~ 4 chars).
+
+    Returns a structured text block, or empty string if no context found.
+    """
+    char_budget = token_budget * 4
+    sections: list[str] = []
+    used = 0
+
+    # Resolve project_id from node_id if needed
+    if not project_id and node_id:
+        try:
+            with get_platform_db() as db:
+                row = db.execute(
+                    "SELECT hub_project_id FROM nodes WHERE id = ?", (node_id,)
+                ).fetchone()
+                if row and row["hub_project_id"]:
+                    project_id = row["hub_project_id"]
+        except Exception:
+            pass
+
+    if not project_id:
+        return ""
+
+    try:
+        with get_hub_db() as hub:
+            # 1. Recent emails (last 7 days)
+            try:
+                emails = hub.execute(
+                    """SELECT title, summary, source, created_at
+                       FROM content
+                       WHERE project_id = ? AND source IN ('email', 'outlook')
+                       AND created_at >= datetime('now', '-7 days')
+                       ORDER BY created_at DESC LIMIT 5""",
+                    (project_id,),
+                ).fetchall()
+
+                if emails:
+                    email_lines = ["Recent emails:"]
+                    for e in emails:
+                        line = f"- {e['title'] or 'Untitled'}"
+                        if e.get("summary"):
+                            line += f": {e['summary'][:100]}"
+                        email_lines.append(line)
+                    block = "\n".join(email_lines)
+                    if used + len(block) < char_budget:
+                        sections.append(block)
+                        used += len(block)
+            except Exception:
+                pass
+
+            # 2. Recent Jira updates
+            try:
+                jira_items = hub.execute(
+                    """SELECT title, summary, source, created_at
+                       FROM content
+                       WHERE project_id = ? AND source IN ('jira', 'jira_ticket')
+                       AND created_at >= datetime('now', '-7 days')
+                       ORDER BY created_at DESC LIMIT 5""",
+                    (project_id,),
+                ).fetchall()
+
+                if jira_items:
+                    jira_lines = ["Recent Jira updates:"]
+                    for j in jira_items:
+                        line = f"- {j['title'] or 'Untitled'}"
+                        if j.get("summary"):
+                            line += f": {j['summary'][:100]}"
+                        jira_lines.append(line)
+                    block = "\n".join(jira_lines)
+                    if used + len(block) < char_budget:
+                        sections.append(block)
+                        used += len(block)
+            except Exception:
+                pass
+
+            # 3. Active action items / todos
+            try:
+                todos = hub.execute(
+                    """SELECT title, priority, due_date, status
+                       FROM todos
+                       WHERE project_id = ? AND status = 'open'
+                       ORDER BY priority ASC LIMIT 5""",
+                    (project_id,),
+                ).fetchall()
+
+                if todos:
+                    todo_lines = ["Active action items:"]
+                    for t in todos:
+                        line = f"- [{t.get('priority', 'medium')}] {t['title']}"
+                        if t.get("due_date"):
+                            line += f" (due: {t['due_date']})"
+                        todo_lines.append(line)
+                    block = "\n".join(todo_lines)
+                    if used + len(block) < char_budget:
+                        sections.append(block)
+                        used += len(block)
+            except Exception:
+                pass
+
+            # 4. General recent content
+            try:
+                recent = hub.execute(
+                    """SELECT title, source, created_at
+                       FROM content
+                       WHERE project_id = ?
+                       AND source NOT IN ('email', 'outlook', 'jira', 'jira_ticket')
+                       ORDER BY created_at DESC LIMIT 3""",
+                    (project_id,),
+                ).fetchall()
+
+                if recent:
+                    recent_lines = ["Other recent content:"]
+                    for r in recent:
+                        recent_lines.append(f"- [{r.get('source', 'unknown')}] {r['title'] or 'Untitled'}")
+                    block = "\n".join(recent_lines)
+                    if used + len(block) < char_budget:
+                        sections.append(block)
+                        used += len(block)
+            except Exception:
+                pass
+
+    except Exception as e:
+        log.debug("build_knowledge_context_failed: %s", e)
+        return ""
+
+    if not sections:
+        return ""
+
+    header = f"== KNOWLEDGE CONTEXT (project: {project_id}) =="
+    return header + "\n\n" + "\n\n".join(sections)
 
 
 def extract_action_items_from_text(text: str) -> list[str]:

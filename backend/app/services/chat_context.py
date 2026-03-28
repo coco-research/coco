@@ -68,6 +68,17 @@ def build_chat_context(
     if agents_section:
         sections.append(agents_section)
 
+    # 9. Knowledge context from hub.db (recent emails, Jira, action items)
+    try:
+        from app.services.collaboration_context import build_knowledge_context
+        knowledge_ctx = build_knowledge_context(
+            node_id=node_id, project_id=project_id, token_budget=1500
+        )
+        if knowledge_ctx:
+            sections.append(knowledge_ctx)
+    except Exception as e:
+        log.debug("knowledge_context_injection_skipped: %s", e)
+
     return "\n\n".join(sections)
 
 

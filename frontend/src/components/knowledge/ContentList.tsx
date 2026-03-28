@@ -1,7 +1,10 @@
+import { useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { Mail, Mic, Bug, FileText, FileQuestion } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { timeAgo } from '../../lib/utils';
+import { useListNavigation } from '../../hooks/useListNavigation';
 import type { ReactNode } from 'react';
 
 export interface ContentItemMetadata {
@@ -60,11 +63,26 @@ const STATUS_STYLES: Record<string, string> = {
   pending: 'bg-accent/50 text-muted-foreground',
 };
 
+const ROW_HEIGHT = 52; // estimated row height in px
 const LIMIT = 50;
 
 export function ContentList({ items, total, isLoading, selectedId, onSelect }: ContentListProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const offset = parseInt(searchParams.get('offset') ?? '0', 10);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // j/k keyboard navigation
+  const { selectedIndex, getItemProps, containerRef } = useListNavigation(items, {
+    onSelect: (item) => onSelect(item),
+  });
+
+  // List virtualization for 1000+ items
+  const virtualizer = useVirtualizer({
+    count: items.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 10,
+  });
 
   function setOffset(next: number) {
     setSearchParams((prev) => {
@@ -99,7 +117,12 @@ export function ContentList({ items, total, isLoading, selectedId, onSelect }: C
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div
+      ref={containerRef}
+      className="flex flex-col h-full"
+      tabIndex={0}
+      onFocus={() => {/* ensure container is focusable for j/k nav */}}
+    >
       {/* Header row */}
       <div className="grid grid-cols-[2rem_1fr_8rem_6rem_5rem] gap-3 px-4 py-2 text-xs font-medium text-muted-foreground border-b border-border uppercase tracking-wide bg-card">
         <span />
@@ -109,41 +132,65 @@ export function ContentList({ items, total, isLoading, selectedId, onSelect }: C
         <span>Date</span>
       </div>
 
-      {/* Content rows */}
-      <div className="flex-1 overflow-y-auto">
-        {items.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => onSelect(item)}
-            className={cn(
-              'w-full grid grid-cols-[2rem_1fr_8rem_6rem_5rem] gap-3 px-4 py-3 text-left text-sm',
-              'border-b border-border/50 transition-colors',
-              'hover:bg-accent/50',
-              selectedId === item.id && 'bg-accent/20',
-            )}
-          >
-            <span className="flex items-center justify-center">
-              {SOURCE_ICONS[item.source] ?? <FileQuestion className="h-4 w-4 text-muted-foreground" />}
-            </span>
-            <span className="truncate text-foreground">{item.title}</span>
-            <span className="truncate text-muted-foreground text-xs">
-              {item.metadata?.classification?.project_id ?? '--'}
-            </span>
-            <span>
-              <span
+      {/* Virtualized content rows */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto">
+        <div
+          style={{
+            height: virtualizer.getTotalSize(),
+            position: 'relative',
+            width: '100%',
+          }}
+        >
+          {virtualizer.getVirtualItems().map((virtualRow) => {
+            const item = items[virtualRow.index];
+            const isKbSelected = virtualRow.index === selectedIndex;
+
+            return (
+              <button
+                key={item.id}
+                ref={virtualizer.measureElement}
+                data-index={virtualRow.index}
+                {...getItemProps(virtualRow.index)}
+                onClick={() => onSelect(item)}
                 className={cn(
-                  'inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize',
-                  STATUS_STYLES[item.status] ?? 'bg-accent/50 text-muted-foreground',
+                  'w-full grid grid-cols-[2rem_1fr_8rem_6rem_5rem] gap-3 px-4 py-3 text-left text-sm',
+                  'border-b border-border/50 transition-colors',
+                  'hover:bg-accent/50',
+                  selectedId === item.id && 'bg-accent/20',
+                  isKbSelected && 'ring-2 ring-primary/40 bg-primary/5',
                 )}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
               >
-                {item.status}
-              </span>
-            </span>
-            <span className="text-xs text-muted-foreground whitespace-nowrap">
-              {timeAgo(item.created_at)}
-            </span>
-          </button>
-        ))}
+                <span className="flex items-center justify-center">
+                  {SOURCE_ICONS[item.source] ?? <FileQuestion className="h-4 w-4 text-muted-foreground" />}
+                </span>
+                <span className="truncate text-foreground">{item.title}</span>
+                <span className="truncate text-muted-foreground text-xs">
+                  {item.metadata?.classification?.project_id ?? '--'}
+                </span>
+                <span>
+                  <span
+                    className={cn(
+                      'inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize',
+                      STATUS_STYLES[item.status] ?? 'bg-accent/50 text-muted-foreground',
+                    )}
+                  >
+                    {item.status}
+                  </span>
+                </span>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  {timeAgo(item.created_at)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Pagination */}

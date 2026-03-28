@@ -1,12 +1,25 @@
 """API endpoints for the self-improvement cycle feature."""
 
+import json
+from datetime import datetime, timezone, timedelta
+
 from fastapi import APIRouter, HTTPException
+from sqlalchemy import select, insert, update
+
 from app.models.self_improve import (
     StartCycleBody,
     ApproveImprovementBody,
     RejectImprovementBody,
+    SelfImprovePreferences,
+    CycleAnalyticsItem,
 )
 from app.services.self_improve import self_improve_service
+from app.db.session import get_db
+from app.db.tables import (
+    self_improve_cycles,
+    self_improve_improvements,
+    self_improve_preferences,
+)
 
 router = APIRouter(prefix="/api/self-improve", tags=["Self-Improve"])
 
@@ -127,3 +140,132 @@ def get_cycle_agents(cycle_id: str):
     if not cycle:
         raise HTTPException(status_code=404, detail="Cycle not found")
     return self_improve_service.get_cycle_agents(cycle_id)
+
+
+# ------------------------------------------------------------------
+# Analytics
+# ------------------------------------------------------------------
+
+
+@router.get("/analytics")
+def get_analytics(days: int = 30) -> list[CycleAnalyticsItem]:
+    """Return aggregate stats for self-improvement cycles."""
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+
+    with get_db() as conn:
+        rows = conn.execute(
+            select(
+                self_improve_cycles.c.id,
+                self_improve_cycles.c.status,
+                self_improve_cycles.c.started_at,
+                self_improve_cycles.c.completed_at,
+                self_improve_cycles.c.spent_usd,
+                self_improve_cycles.c.created_at,
+            ).where(
+                self_improve_cycles.c.created_at >= cutoff
+            ).order_by(
+                self_improve_cycles.c.created_at.asc()
+            )
+        ).fetchall()
+
+        results: list[CycleAnalyticsItem] = []
+        for row in rows:
+            # Count improvements for this cycle
+            imp_rows = conn.execute(
+                select(self_improve_improvements.c.id, self_improve_improvements.c.diff_stat)
+                .where(self_improve_improvements.c.cycle_id == row.id)
+            ).fetchall()
+
+            improvements_count = len(imp_rows)
+
+            # Parse files_changed from diff_stat strings
+            files_changed = 0
+            for imp in imp_rows:
+                ds = imp.diff_stat
+                if ds and "file" in ds:
+                    # e.g. "5 files changed, 120 insertions(+), 30 deletions(-)"
+                    try:
+                        files_changed += int(ds.split()[0])
+                    except (ValueError, IndexError):
+                        pass
+
+            # Calculate duration
+            duration_seconds = 0
+            if row.started_at and row.completed_at:
+                try:
+                    start = datetime.fromisoformat(row.started_at)
+                    end = datetime.fromisoformat(row.completed_at)
+                    duration_seconds = int((end - start).total_seconds())
+                except (ValueError, TypeError):
+                    pass
+
+            results.append(CycleAnalyticsItem(
+                id=row.id,
+                started_at=row.started_at,
+                files_changed=files_changed,
+                cost=row.spent_usd or 0.0,
+                duration_seconds=duration_seconds,
+                improvements_count=improvements_count,
+                status=row.status,
+            ))
+
+        return results
+
+
+# ------------------------------------------------------------------
+# Preferences
+# ------------------------------------------------------------------
+
+_PREF_KEYS = ["auto_enabled", "cron_expression", "max_cost_per_cycle", "focus_areas"]
+
+_PREF_DEFAULTS = SelfImprovePreferences()
+
+
+@router.get("/preferences")
+def get_preferences() -> SelfImprovePreferences:
+    """Get self-improve auto-schedule preferences."""
+    with get_db() as conn:
+        rows = conn.execute(
+            select(self_improve_preferences.c.key, self_improve_preferences.c.value)
+            .where(self_improve_preferences.c.key.in_(_PREF_KEYS))
+        ).fetchall()
+
+        data: dict = {}
+        for row in rows:
+            key, value = row.key, row.value
+            try:
+                data[key] = json.loads(value)
+            except (json.JSONDecodeError, TypeError):
+                data[key] = value
+
+        return SelfImprovePreferences(**data)
+
+
+@router.post("/preferences")
+def save_preferences(body: SelfImprovePreferences) -> SelfImprovePreferences:
+    """Save self-improve auto-schedule preferences."""
+    now = datetime.now(timezone.utc).isoformat()
+    prefs = body.model_dump()
+
+    with get_db() as conn:
+        for key, value in prefs.items():
+            serialized = json.dumps(value)
+            # Upsert: try insert, on conflict update
+            existing = conn.execute(
+                select(self_improve_preferences.c.key)
+                .where(self_improve_preferences.c.key == key)
+            ).fetchone()
+
+            if existing:
+                conn.execute(
+                    update(self_improve_preferences)
+                    .where(self_improve_preferences.c.key == key)
+                    .values(value=serialized, updated_at=now)
+                )
+            else:
+                conn.execute(
+                    insert(self_improve_preferences)
+                    .values(key=key, value=serialized, updated_at=now)
+                )
+
+    return body

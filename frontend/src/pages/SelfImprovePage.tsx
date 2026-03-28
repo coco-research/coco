@@ -8,6 +8,10 @@ import { useToast } from '../components/shared/Toast';
 import { CycleControl } from '../components/self-improve/CycleControl';
 import { ImprovementCard } from '../components/self-improve/ImprovementCard';
 import { CycleHistory } from '../components/self-improve/CycleHistory';
+import { AgentActivityPanel } from '../components/self-improve/AgentActivityPanel';
+import { CycleAnalytics } from '../components/self-improve/CycleAnalytics';
+import { AutoScheduleSettings } from '../components/self-improve/AutoScheduleSettings';
+import type { AnalyticsItem } from '../components/self-improve/CycleAnalytics';
 import type { Cycle, SquadAgent, GateResult } from '../types/self-improve';
 
 // ─── Stage Stepper ───────────────────────────────────────────────────
@@ -201,6 +205,7 @@ export default function SelfImprovePage() {
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCycleId, setSelectedCycleId] = useState<string | null>(null);
+  const [analyticsRange, setAnalyticsRange] = useState<7 | 30 | 90>(30);
 
   // Active cycle
   const { data: activeCycle, isLoading: activeLoading } = useQuery({
@@ -235,6 +240,12 @@ export default function SelfImprovePage() {
     refetchInterval: activeCycle && !TERMINAL_STATUSES.includes(activeCycle.status) ? 5000 : false,
   });
 
+  // Analytics data
+  const { data: analyticsData = [], isLoading: analyticsLoading } = useQuery({
+    queryKey: ['self-improve', 'analytics', analyticsRange],
+    queryFn: () => apiFetch<AnalyticsItem[]>(`/self-improve/analytics?days=${analyticsRange}`),
+  });
+
   // Selected past cycle detail
   const { data: selectedCycle } = useQuery({
     queryKey: ['self-improve', 'cycle', selectedCycleId],
@@ -260,6 +271,7 @@ export default function SelfImprovePage() {
   );
 
   const isLoading = activeLoading || cyclesLoading;
+  const isActive = !!activeCycle && !TERMINAL_STATUSES.includes(activeCycle.status);
 
   if (isLoading) return <PageSkeleton />;
 
@@ -272,7 +284,7 @@ export default function SelfImprovePage() {
         <div className="flex items-center gap-3">
           <Sparkles size={20} className="text-accent" />
           <h1 className="text-xl font-bold text-foreground">Self-Improve</h1>
-          {activeCycle && !TERMINAL_STATUSES.includes(activeCycle.status) && (
+          {isActive && (
             <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-accent/20 text-accent animate-pulse">
               ACTIVE
             </span>
@@ -281,7 +293,7 @@ export default function SelfImprovePage() {
         {!hasNoCycles && (
           <button
             onClick={() => setDialogOpen(true)}
-            disabled={!!activeCycle && !TERMINAL_STATUSES.includes(activeCycle.status)}
+            disabled={isActive}
             className="px-4 py-2 rounded-lg bg-accent text-accent-foreground hover:opacity-90 transition-opacity font-medium text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Zap size={14} />
@@ -290,8 +302,19 @@ export default function SelfImprovePage() {
         )}
       </div>
 
+      {/* Auto-schedule settings (collapsible) */}
+      <AutoScheduleSettings />
+
       {/* Empty state */}
       {hasNoCycles && <EmptyState onStart={() => setDialogOpen(true)} />}
+
+      {/* Agent Activity Panel (visible when cycle is active) */}
+      {isActive && (
+        <AgentActivityPanel
+          cycleId={activeCycle?.id ?? null}
+          cycleStatus={activeCycle?.status ?? null}
+        />
+      )}
 
       {/* Active cycle panel */}
       {activeCycle && !TERMINAL_STATUSES.includes(activeCycle.status) && (
@@ -335,29 +358,47 @@ export default function SelfImprovePage() {
         </div>
       )}
 
-      {/* Improvements grid */}
-      {displayCycle && displayCycle.improvements.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Inbox size={16} className="text-muted-foreground" />
-            <h2 className="text-sm font-semibold text-foreground">
-              Improvements
-              {displayCycle.status === 'awaiting_approval' && (
-                <span className="ml-2 text-xs font-normal text-amber-400">Action required</span>
-              )}
-            </h2>
+      {/* Bottom: Analytics + Improvements side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Bottom left: Cycle Analytics */}
+        <CycleAnalytics
+          data={analyticsData}
+          isLoading={analyticsLoading}
+          dateRange={analyticsRange}
+          onDateRangeChange={setAnalyticsRange}
+          onCycleClick={(id) => setSelectedCycleId(id)}
+        />
+
+        {/* Bottom right: Improvements list */}
+        {displayCycle && displayCycle.improvements.length > 0 ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Inbox size={16} className="text-muted-foreground" />
+              <h2 className="text-sm font-semibold text-foreground">
+                Improvements
+                {displayCycle.status === 'awaiting_approval' && (
+                  <span className="ml-2 text-xs font-normal text-amber-400">Action required</span>
+                )}
+              </h2>
+            </div>
+            <div className="space-y-4">
+              {displayCycle.improvements.map((imp) => (
+                <ImprovementCard
+                  key={imp.id}
+                  improvement={imp}
+                  highlight={displayCycle.status === 'awaiting_approval' && imp.status === 'awaiting_approval'}
+                />
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {displayCycle.improvements.map((imp) => (
-              <ImprovementCard
-                key={imp.id}
-                improvement={imp}
-                highlight={displayCycle.status === 'awaiting_approval' && imp.status === 'awaiting_approval'}
-              />
-            ))}
+        ) : (
+          <div className="bg-card rounded-xl border border-border p-5 flex items-center justify-center">
+            <span className="text-xs text-muted-foreground">
+              {displayCycle ? 'No improvements yet' : 'Select a cycle to view improvements'}
+            </span>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Selected past cycle back button */}
       {selectedCycleId && selectedCycleId !== activeCycle?.id && (

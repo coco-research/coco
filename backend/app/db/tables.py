@@ -548,6 +548,14 @@ self_improve_improvements = Table(
     Column("updated_at", Text, nullable=False),
 )
 
+self_improve_preferences = Table(
+    "self_improve_preferences",
+    metadata,
+    Column("key", Text, primary_key=True),
+    Column("value", Text, nullable=False),
+    Column("updated_at", Text, nullable=False),
+)
+
 self_improve_agents = Table(
     "self_improve_agents",
     metadata,

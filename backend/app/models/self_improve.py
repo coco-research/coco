@@ -51,3 +51,20 @@ class ApproveImprovementBody(BaseModel):
 
 class RejectImprovementBody(BaseModel):
     reason: str | None = None
+
+
+class SelfImprovePreferences(BaseModel):
+    auto_enabled: bool = False
+    cron_expression: str = "0 3 * * 1"  # Default: Weekly Monday 3AM
+    max_cost_per_cycle: float = 5.0
+    focus_areas: list[str] = []
+
+
+class CycleAnalyticsItem(BaseModel):
+    id: str
+    started_at: str | None
+    files_changed: int
+    cost: float
+    duration_seconds: int
+    improvements_count: int
+    status: str

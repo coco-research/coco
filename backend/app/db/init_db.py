@@ -558,6 +558,13 @@ CREATE TABLE IF NOT EXISTS staged_actions (
 CREATE INDEX IF NOT EXISTS idx_staged_actions_content ON staged_actions(content_id);
 CREATE INDEX IF NOT EXISTS idx_staged_actions_status ON staged_actions(status);
 
+-- Sprint 7: Self-Improve Preferences
+CREATE TABLE IF NOT EXISTS self_improve_preferences (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Sprint 6: Verification Results
 CREATE TABLE IF NOT EXISTS verification_results (
     id TEXT PRIMARY KEY,

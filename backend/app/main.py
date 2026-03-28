@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException as _HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +13,7 @@ from app.services.process_manager import process_manager
 from app.services.trigger_engine import trigger_engine
 from app.services.id_generator import resolve_display_id as _resolve_display_id
 from app.services.self_improve import self_improve_service
+from app.services.hub_sync import hub_sync
 from app.services.event_bus import event_bus as _event_bus
 from app.routers import (
     health, projects, teams, brain, content, agents, tasks,
@@ -43,7 +45,12 @@ async def lifespan(app: FastAPI):
     log.info("heartbeat_loop_started")
     await trigger_engine.start()
     log.info("trigger_engine_started")
+    hub_sync_task = asyncio.create_task(hub_sync.start())
+    log.info("hub_sync_started")
     yield
+    hub_sync.stop()
+    hub_sync_task.cancel()
+    log.info("hub_sync_stopped")
     process_manager.stop_heartbeat()
     await trigger_engine.stop()
     log.info("platform_stopping")

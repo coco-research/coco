@@ -486,6 +486,36 @@ CREATE TABLE IF NOT EXISTS verification_gates (
 );
 CREATE INDEX IF NOT EXISTS idx_vg_entity ON verification_gates(entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_vg_node ON verification_gates(node_id);
+
+CREATE TABLE IF NOT EXISTS extracted_entities (
+    id TEXT PRIMARY KEY,
+    content_id TEXT NOT NULL,
+    entity_type TEXT NOT NULL CHECK(entity_type IN ('person','project','date','decision','action_item','topic')),
+    value TEXT NOT NULL,
+    confidence REAL NOT NULL DEFAULT 0.5,
+    source_mode TEXT NOT NULL DEFAULT 'regex' CHECK(source_mode IN ('regex','llm')),
+    context_snippet TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_ee_content ON extracted_entities(content_id);
+CREATE INDEX IF NOT EXISTS idx_ee_type ON extracted_entities(entity_type);
+CREATE INDEX IF NOT EXISTS idx_ee_value ON extracted_entities(value);
+
+CREATE TABLE IF NOT EXISTS insights (
+    id TEXT PRIMARY KEY,
+    insight_type TEXT NOT NULL CHECK(insight_type IN ('cross_reference','pattern','contradiction')),
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    confidence REAL NOT NULL DEFAULT 0.5,
+    status TEXT NOT NULL DEFAULT 'new' CHECK(status IN ('new','seen','actioned','dismissed')),
+    entity_ids TEXT NOT NULL DEFAULT '[]',
+    content_ids TEXT NOT NULL DEFAULT '[]',
+    metadata_json TEXT DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_insights_type ON insights(insight_type);
+CREATE INDEX IF NOT EXISTS idx_insights_status ON insights(status);
 """
 
 MIGRATION = """

@@ -716,3 +716,36 @@ hub_sync_watermark = Table(
     Column("last_rowid", Integer),
     Column("row_count", Integer),
 )
+
+# ---------------------------------------------------------------------------
+# Extracted entities & insights (Cross-Source Insight Engine)
+# ---------------------------------------------------------------------------
+
+extracted_entities = Table(
+    "extracted_entities",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("content_id", Text, nullable=False),
+    Column("entity_type", Text, nullable=False),
+    Column("value", Text, nullable=False),
+    Column("confidence", Float, nullable=False, server_default="0.5"),
+    Column("source_mode", Text, nullable=False, server_default="regex"),
+    Column("context_snippet", Text),
+    Column("created_at", Text, nullable=False),
+)
+
+insights = Table(
+    "insights",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("insight_type", Text, nullable=False),
+    Column("title", Text, nullable=False),
+    Column("description", Text, nullable=False),
+    Column("confidence", Float, nullable=False, server_default="0.5"),
+    Column("status", Text, nullable=False, server_default="new"),
+    Column("entity_ids", Text, nullable=False, server_default="[]"),
+    Column("content_ids", Text, nullable=False, server_default="[]"),
+    Column("metadata_json", Text, server_default="{}"),
+    Column("created_at", Text, nullable=False),
+    Column("updated_at", Text, nullable=False),
+)

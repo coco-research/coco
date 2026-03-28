@@ -22,6 +22,7 @@ from app.routers import (
     tts, comments, templates, jarvis, analysis, stt, triggers,
     self_improve,
     inbox,
+    insights,
 )
 
 structlog.configure(
@@ -85,6 +86,7 @@ openapi_tags = [
     {"name": "Webhooks", "description": "Incoming webhook receiver"},
     {"name": "Self-Improve", "description": "Self-improvement cycle management"},
     {"name": "Inbox", "description": "Inbox read-state persistence and batch actions"},
+    {"name": "Insights", "description": "Cross-source entity extraction and insight generation"},
 ]
 
 app = FastAPI(
@@ -152,6 +154,7 @@ app.include_router(triggers.router)
 app.include_router(triggers.webhook_router)
 app.include_router(self_improve.router)
 app.include_router(inbox.router)
+app.include_router(insights.router)
 
 # --- Cross-cutting resolve endpoint ---
 

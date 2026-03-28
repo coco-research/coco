@@ -440,6 +440,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.10.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.24" },
+    { name = "sqlalchemy", specifier = ">=2.0.0" },
     { name = "sqlalchemy", specifier = ">=2.0.48" },
     { name = "sse-starlette", specifier = ">=2.0.0" },
     { name = "structlog", specifier = ">=24.0.0" },

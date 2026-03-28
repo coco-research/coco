@@ -8,6 +8,7 @@ class ChatRequest(BaseModel):
     model: str | None = "sonnet"
     project_id: str | None = None
     session_id: str | None = None
+    content_ids: list[str] | None = None
 
 
 class SessionCreate(BaseModel):

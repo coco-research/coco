@@ -380,11 +380,36 @@ async def chat(req: ChatRequest):
     # Build system prompt with full context injection
     system_prompt = build_chat_context(project_id=req.project_id)
 
+    # If content_ids are attached, fetch them and prepend as context
+    message_with_context = req.message
+    if req.content_ids:
+        from app.db.connections import get_hub_db
+        context_parts: list[str] = []
+        for cid in req.content_ids[:10]:  # Limit to 10 attachments
+            try:
+                with get_hub_db() as db:
+                    row = db.execute(
+                        "SELECT title, summary, body, source FROM content WHERE id = ?",
+                        (cid,),
+                    ).fetchone()
+                    if row:
+                        part = f"--- Attached: {row['title'] or 'Untitled'} (source: {row['source'] or 'unknown'}) ---\n"
+                        if row.get("summary"):
+                            part += f"{row['summary']}\n"
+                        if row.get("body"):
+                            part += f"{row['body']}\n"
+                        context_parts.append(part)
+            except Exception:
+                pass
+        if context_parts:
+            attached_context = "\n".join(context_parts)
+            message_with_context = f"[The user has attached the following Knowledge Hub content for context:]\n\n{attached_context}\n\n[User message:]\n{req.message}"
+
     # Return SSE stream — include session_id in first event so frontend can track it
     async def event_gen():
         # Emit session_id as the first event so the frontend knows which session this belongs to
         yield {"event": "session", "data": json.dumps({"type": "session", "session_id": session_id})}
-        async for evt in chat_event_generator(req.message, model, system_prompt, session_id=session_id):
+        async for evt in chat_event_generator(message_with_context, model, system_prompt, session_id=session_id):
             yield evt
 
     return EventSourceResponse(

@@ -85,7 +85,7 @@ export default function ChatPage() {
   );
 
   const handleSend = useCallback(
-    async (content: string) => {
+    async (content: string, contentIds?: string[]) => {
       const userMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'user',
@@ -111,6 +111,7 @@ export default function ChatPage() {
             message: content,
             model,
             session_id: sessionIdForRequest || null,
+            ...(contentIds && contentIds.length > 0 ? { content_ids: contentIds } : {}),
           }),
           signal: controller.signal,
         });

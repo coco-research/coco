@@ -4,7 +4,7 @@ import { useScope } from '../context/ScopeContext';
 import { apiPost, apiFetch, apiPatch } from '../lib/api';
 import {
   Inbox, AlertTriangle, FileCheck, FolderOpen, Activity, Check, X, Eye, EyeOff, ChevronRight, Clock, Mic,
-  CheckSquare, Square, MinusSquare,
+  CheckSquare, Square, MinusSquare, Bot, ChevronDown as ChevronDownIcon,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useInViewport } from '../hooks/useInViewport';
@@ -13,7 +13,16 @@ import { useListNavigation } from '../hooks/useListNavigation';
 import { VoiceDecisionCard, type VoiceDecisionItem } from '../components/inbox/VoiceDecisionCard';
 
 type ReadState = 'unread' | 'seen' | 'dismissed';
-type InboxTab = 'all' | 'urgent' | 'drafts' | 'classify' | 'health';
+type InboxTab = 'all' | 'urgent' | 'drafts' | 'classify' | 'health' | 'auto_handled';
+
+interface AutoHandledItem {
+  id: string;
+  action: string;
+  summary: string;
+  project?: string;
+  confidence?: number;
+  timestamp?: string;
+}
 
 interface InboxItem {
   id: string;
@@ -37,6 +46,7 @@ const TAB_CONFIG: { key: InboxTab; label: string; icon: React.ElementType }[] = 
   { key: 'drafts', label: 'Drafts', icon: FileCheck },
   { key: 'classify', label: 'Classify', icon: FolderOpen },
   { key: 'health', label: 'Health', icon: Activity },
+  { key: 'auto_handled', label: 'Auto-handled', icon: Bot },
 ];
 
 function typeIcon(type: InboxItem['type']) {
@@ -508,6 +518,22 @@ export default function InboxPage() {
     },
   });
 
+  // ─── Auto-handled items from queue data ────────────────────────────
+  const autoHandledItems: AutoHandledItem[] = useMemo(() => {
+    const raw = queueData?.auto_handled_since_last_session;
+    if (!Array.isArray(raw)) return [];
+    return raw.map((item: Record<string, unknown>, idx: number) => ({
+      id: (item.id as string) ?? `auto-${idx}`,
+      action: (item.action as string) ?? (item.status as string) ?? 'processed',
+      summary: (item.summary as string) ?? (item.title as string) ?? 'Auto-handled item',
+      project: item.project as string | undefined,
+      confidence: item.confidence as number | undefined,
+      timestamp: (item.timestamp as string | undefined) ?? (item.created_at as string | undefined),
+    }));
+  }, [queueData]);
+
+  const [autoHandledExpanded, setAutoHandledExpanded] = useState(true);
+
   // Counts exclude dismissed items
   const activeDedupedItems = dedupedItems.filter(i => getReadState(i.id) !== 'dismissed');
   const dismissedCount = dedupedItems.filter(i => getReadState(i.id) === 'dismissed').length;
@@ -519,6 +545,7 @@ export default function InboxPage() {
     drafts: activeDedupedItems.filter(i => i.type === 'draft_approval').length,
     classify: activeDedupedItems.filter(i => i.type === 'classify').length,
     health: activeDedupedItems.filter(i => i.type === 'health').length,
+    auto_handled: autoHandledItems.length,
   };
 
   // ─── Multi-select helpers ─────────────────────────────────────────
@@ -788,6 +815,65 @@ export default function InboxPage() {
             />
           )}
         </div>
+      ) : activeTab === 'auto_handled' ? (
+        /* Auto-handled tab: separate display */
+        autoHandledItems.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+            <Bot size={40} className="mb-3 opacity-30" />
+            <p className="text-sm font-medium">No auto-handled items</p>
+            <p className="text-xs mt-1">Nothing was automatically processed since your last session.</p>
+          </div>
+        ) : (
+          <div className="border border-border rounded-xl overflow-hidden">
+            <button
+              onClick={() => setAutoHandledExpanded(e => !e)}
+              className="flex items-center gap-2 w-full px-4 py-3 bg-muted/30 text-sm font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+            >
+              <ChevronDownIcon size={14} className={cn('transition-transform', !autoHandledExpanded && '-rotate-90')} />
+              <Bot size={14} />
+              Auto-handled since last session ({autoHandledItems.length})
+            </button>
+            {autoHandledExpanded && (
+              <div className="divide-y divide-border">
+                {autoHandledItems.map(item => (
+                  <div key={item.id} className="flex items-center gap-3 px-4 py-3 opacity-70 hover:opacity-90 transition-opacity">
+                    <div className="shrink-0">
+                      <Bot size={14} className="text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-muted-foreground truncate">{item.summary}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className={cn(
+                          'text-[10px] px-1.5 py-0.5 rounded font-medium',
+                          item.action === 'classified' ? 'bg-info/10 text-info' :
+                          item.action === 'dismissed' ? 'bg-muted text-muted-foreground' :
+                          'bg-success/10 text-success'
+                        )}>
+                          {item.action}
+                        </span>
+                        {item.confidence != null && (
+                          <span className="text-[10px] text-muted-foreground">
+                            {Math.round(item.confidence * 100)}% confidence
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {item.project && (
+                      <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
+                        {item.project}
+                      </span>
+                    )}
+                    {item.timestamp && (
+                      <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">
+                        {new Date(item.timestamp).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
       ) : (
         <>
           {/* Items -- click container to enable j/k navigation */}

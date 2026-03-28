@@ -575,6 +575,19 @@ CREATE TABLE IF NOT EXISTS verification_results (
 );
 CREATE INDEX IF NOT EXISTS idx_vr_entity ON verification_results(entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_vr_node ON verification_results(node_id);
+
+-- Sprint 7: Inbox notifications (server-persisted inbox items)
+CREATE TABLE IF NOT EXISTS inbox_notifications (
+    id TEXT PRIMARY KEY,
+    item_type TEXT NOT NULL,
+    item_key TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    body TEXT,
+    metadata_json TEXT DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_inbox_notif_type ON inbox_notifications(item_type);
+CREATE INDEX IF NOT EXISTS idx_inbox_notif_created ON inbox_notifications(created_at);
 """
 
 MIGRATION = """

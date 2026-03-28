@@ -345,6 +345,51 @@ def get_home():
         except Exception:
             log.warning("home_query_failed", section="platform_costs_month", exc_info=True)
 
+        # Self-improve stats
+        try:
+            from datetime import timedelta
+            week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+
+            cycles_week_row = conn.exec_driver_sql(
+                "SELECT COUNT(*) as cnt FROM self_improve_cycles "
+                "WHERE started_at >= ? AND status IN ('completed', 'rejected', 'failed')",
+                (week_ago,),
+            ).fetchone()
+            cycles_this_week = cycles_week_row._mapping["cnt"] if cycles_week_row else 0
+
+            files_improved_row = conn.exec_driver_sql(
+                "SELECT COUNT(*) as cnt FROM self_improve_improvements i "
+                "JOIN self_improve_cycles c ON i.cycle_id = c.id "
+                "WHERE c.started_at >= ? AND i.status IN ('approved_by_human', 'merged')",
+                (week_ago,),
+            ).fetchone()
+            files_improved = files_improved_row._mapping["cnt"] if files_improved_row else 0
+
+            active_cycle_row = conn.exec_driver_sql(
+                "SELECT id, status FROM self_improve_cycles "
+                "WHERE status NOT IN ('completed', 'rejected', 'failed') "
+                "ORDER BY created_at DESC LIMIT 1",
+            ).fetchone()
+            active_cycle = None
+            if active_cycle_row:
+                active_cycle = {
+                    "id": active_cycle_row._mapping["id"],
+                    "status": active_cycle_row._mapping["status"],
+                }
+
+            result["self_improve"] = {
+                "cycles_this_week": cycles_this_week,
+                "files_improved": files_improved,
+                "active_cycle": active_cycle,
+            }
+        except Exception:
+            log.warning("home_query_failed", section="self_improve", exc_info=True)
+            result["self_improve"] = {
+                "cycles_this_week": 0,
+                "files_improved": 0,
+                "active_cycle": None,
+            }
+
     # Queue: drafts + classify from attention counts
     result["queue"]["drafts"] = result["attention"]["pending_drafts"]
     result["queue"]["classify"] = result["attention"]["unsorted_count"]

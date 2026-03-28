@@ -29,6 +29,7 @@ class TriggerEngine:
         """Start the trigger engine. Call from FastAPI lifespan."""
         self._running = True
         log.info("trigger_engine_starting")
+        self._ensure_self_improve_trigger()
         self._tasks.append(asyncio.create_task(self._cron_loop()))
         self._tasks.append(asyncio.create_task(self._file_watch_loop()))
 
@@ -141,6 +142,54 @@ class TriggerEngine:
                     error=str(e),
                 )
             log.warning("trigger_fire_failed", trigger_id=trigger["id"], error=str(e))
+
+    def _ensure_self_improve_trigger(self):
+        """Register the default self-improve auto trigger if it doesn't exist."""
+        try:
+            from app.services.self_improve_scheduler import get_self_improve_preferences
+            import uuid
+
+            prefs = get_self_improve_preferences()
+
+            with get_db() as conn:
+                existing = conn.exec_driver_sql(
+                    "SELECT id, config FROM triggers WHERE action_type = 'self_improve_auto' LIMIT 1",
+                ).fetchone()
+
+                if existing:
+                    # Update cron expression if preference changed
+                    current_config = json.loads(existing._mapping["config"]) if isinstance(existing._mapping["config"], str) else existing._mapping["config"]
+                    if current_config.get("expression") != prefs["cron"]:
+                        conn.exec_driver_sql(
+                            "UPDATE triggers SET config = ?, enabled = ?, updated_at = ? WHERE id = ?",
+                            (
+                                json.dumps({"expression": prefs["cron"]}),
+                                1 if prefs["enabled"] else 0,
+                                datetime.now(timezone.utc).isoformat(),
+                                existing._mapping["id"],
+                            ),
+                        )
+                        log.info("self_improve_trigger_updated", cron=prefs["cron"], enabled=prefs["enabled"])
+                else:
+                    now = datetime.now(timezone.utc).isoformat()
+                    conn.exec_driver_sql(
+                        "INSERT INTO triggers (id, name, trigger_type, enabled, config, action_type, action_config, created_at, updated_at) "
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        (
+                            str(uuid.uuid4()),
+                            "Self-Improve Auto Cycle",
+                            "cron",
+                            1 if prefs["enabled"] else 0,
+                            json.dumps({"expression": prefs["cron"]}),
+                            "self_improve_auto",
+                            json.dumps({}),
+                            now,
+                            now,
+                        ),
+                    )
+                    log.info("self_improve_trigger_registered", cron=prefs["cron"], enabled=prefs["enabled"])
+        except Exception as e:
+            log.warning("self_improve_trigger_setup_failed", error=str(e))
 
     @staticmethod
     def _cron_matches(expr: str, now: datetime) -> bool:

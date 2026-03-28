@@ -575,6 +575,18 @@ inbox_read_state = Table(
     Column("updated_at", Text, nullable=False),
 )
 
+inbox_notifications = Table(
+    "inbox_notifications",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("item_type", Text, nullable=False),
+    Column("item_key", Text, nullable=False),
+    Column("title", Text, nullable=False),
+    Column("body", Text),
+    Column("metadata_json", Text, server_default="{}"),
+    Column("created_at", Text, nullable=False),
+)
+
 # ---------------------------------------------------------------------------
 # Jarvis sessions
 # ---------------------------------------------------------------------------

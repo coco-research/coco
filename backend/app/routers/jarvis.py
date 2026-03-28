@@ -171,6 +171,7 @@ COMMAND_PATTERNS = [
     (["chat", "talk to claude", "ask claude", "open chat"], "cmd_chat"),
     (["projects", "my projects", "project list"], "cmd_projects"),
     (["dismiss", "clear", "go back", "never mind", "cancel"], "cmd_dismiss"),
+    (["self improve", "self-improve", "improvements", "improved overnight", "what did you improve"], "cmd_self_improve"),
 ]
 
 
@@ -444,6 +445,33 @@ async def cmd_dismiss(**_) -> CommandResponse:
     return CommandResponse(reply="Dismissed.", cards=[])
 
 
+async def cmd_self_improve(**_) -> CommandResponse:
+    """Show the latest self-improvement cycle summary."""
+    try:
+        data = jarvis_self_improve_summary()
+        summary = data.get("summary")
+        if not summary:
+            return CommandResponse(
+                reply="No completed self-improvement cycles yet.",
+                cards=[CardDataModel(id=_card_id(), type="text_response", data={"text": "No self-improvement cycles have completed yet."})],
+            )
+        return CommandResponse(
+            reply=summary,
+            cards=[CardDataModel(
+                id=_card_id(), type="metric_grid",
+                data={"metrics": [
+                    {"label": "Improvements", "value": data.get("improvements_count", 0), "color": "green"},
+                    {"label": "Cost", "value": f"${data.get('spent_usd', 0):.2f}", "color": "sky"},
+                ]},
+            )],
+            action="navigate",
+            url="/self-improve",
+        )
+    except Exception as e:
+        log.warning("cmd_self_improve_error", error=str(e))
+        return CommandResponse(reply="Couldn't check self-improvement status.", cards=[])
+
+
 # -- Voice Decision Queue --
 
 _voice_queue_state: dict = {"current_item": None, "current_type": None, "current_id": None}
@@ -644,6 +672,7 @@ HANDLERS = {
     "cmd_voice_approve": cmd_voice_approve,
     "cmd_voice_reject": cmd_voice_reject,
     "cmd_voice_defer": cmd_voice_defer,
+    "cmd_self_improve": cmd_self_improve,
 }
 
 
@@ -737,6 +766,62 @@ async def jarvis_command(req: CommandRequest):
     result = await _claude_fallback(req.text)
     _record_exchange(req.text, result.reply, result.cards)
     return result
+
+
+@router.get("/api/jarvis/self-improve-summary")
+def jarvis_self_improve_summary():
+    """Return the latest self-improvement cycle summary for Jarvis voice queue."""
+    try:
+        with get_db() as conn:
+            row = conn.exec_driver_sql(
+                "SELECT id, status, budget_usd, spent_usd, max_improvements, "
+                "started_at, completed_at FROM self_improve_cycles "
+                "WHERE status IN ('completed', 'rejected') "
+                "ORDER BY completed_at DESC LIMIT 1"
+            ).fetchone()
+            if not row:
+                return {"summary": None, "message": "No completed self-improvement cycles."}
+
+            cycle = dict(row._mapping)
+            cycle_id = cycle["id"]
+
+            imp_rows = conn.exec_driver_sql(
+                "SELECT title FROM self_improve_improvements "
+                "WHERE cycle_id = ? AND status IN ('approved_by_human', 'merged', 'awaiting_approval') "
+                "ORDER BY priority LIMIT 5",
+                (cycle_id,),
+            ).fetchall()
+            titles = [r._mapping["title"] for r in imp_rows]
+
+            imp_count_row = conn.exec_driver_sql(
+                "SELECT COUNT(*) as cnt FROM self_improve_improvements "
+                "WHERE cycle_id = ? AND status IN ('approved_by_human', 'merged')",
+                (cycle_id,),
+            ).fetchone()
+            imp_count = imp_count_row._mapping["cnt"] if imp_count_row else 0
+
+        spent = cycle.get("spent_usd", 0) or 0
+        if imp_count == 0:
+            summary = f"Self-improvement cycle finished. No improvements were applied. Cost: ${spent:.2f}."
+        else:
+            changes_desc = ", ".join(titles[:3])
+            if len(titles) > 3:
+                changes_desc += f", and {len(titles) - 3} more"
+            summary = (
+                f"I improved {imp_count} file{'s' if imp_count != 1 else ''} overnight. "
+                f"{changes_desc}. Total cost: ${spent:.2f}."
+            )
+
+        return {
+            "summary": summary,
+            "cycle_id": cycle_id,
+            "improvements_count": imp_count,
+            "spent_usd": spent,
+            "titles": titles,
+        }
+    except Exception as e:
+        log.warning("jarvis_self_improve_summary_failed", error=str(e))
+        return {"summary": None, "message": str(e)}
 
 
 @router.get("/api/jarvis/history")

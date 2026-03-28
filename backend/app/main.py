@@ -13,6 +13,7 @@ from app.services.process_manager import process_manager
 from app.services.trigger_engine import trigger_engine
 from app.services.id_generator import resolve_display_id as _resolve_display_id
 from app.services.self_improve import self_improve_service
+from app.services.self_improve_scheduler import register_event_listeners as _register_si_listeners
 from app.services.hub_sync import hub_sync
 from app.services.event_bus import event_bus as _event_bus
 from app.routers import (
@@ -47,6 +48,8 @@ async def lifespan(app: FastAPI):
     log.info("heartbeat_loop_started")
     await trigger_engine.start()
     log.info("trigger_engine_started")
+    _register_si_listeners()
+    log.info("self_improve_scheduler_listeners_registered")
     hub_sync_task = asyncio.create_task(hub_sync.start())
     log.info("hub_sync_started")
     yield

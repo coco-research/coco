@@ -1,13 +1,14 @@
-"""Inbox read-state persistence endpoints."""
+"""Inbox read-state persistence endpoints and server-persisted notifications."""
 
+import json
 import logging
 from datetime import datetime, timezone
 from pydantic import BaseModel
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select, text
 
 from app.db.session import get_db
-from app.db.tables import inbox_read_state
+from app.db.tables import inbox_read_state, inbox_notifications
 
 log = logging.getLogger(__name__)
 
@@ -82,3 +83,62 @@ def mark_all_seen():
             (now,),
         )
         return {"updated": result.rowcount}
+
+
+# ---------------------------------------------------------------------------
+# Server-persisted inbox notifications
+# ---------------------------------------------------------------------------
+
+@router.get("/api/inbox/notifications")
+def get_notifications(
+    item_type: str | None = Query(default=None, description="Filter by item_type"),
+    limit: int = Query(default=50, ge=1, le=200),
+):
+    """Return server-persisted inbox notification items with their read states.
+
+    These include self-improvement summaries and other system-generated items.
+    """
+    try:
+        with get_db() as conn:
+            if item_type:
+                rows = conn.exec_driver_sql(
+                    "SELECT n.id, n.item_type, n.item_key, n.title, n.body, n.metadata_json, n.created_at, "
+                    "COALESCE(rs.read_state, 'unread') as read_state "
+                    "FROM inbox_notifications n "
+                    "LEFT JOIN inbox_read_state rs ON n.item_key = rs.item_key "
+                    "WHERE n.item_type = ? "
+                    "ORDER BY n.created_at DESC LIMIT ?",
+                    (item_type, limit),
+                ).fetchall()
+            else:
+                rows = conn.exec_driver_sql(
+                    "SELECT n.id, n.item_type, n.item_key, n.title, n.body, n.metadata_json, n.created_at, "
+                    "COALESCE(rs.read_state, 'unread') as read_state "
+                    "FROM inbox_notifications n "
+                    "LEFT JOIN inbox_read_state rs ON n.item_key = rs.item_key "
+                    "ORDER BY n.created_at DESC LIMIT ?",
+                    (limit,),
+                ).fetchall()
+
+            items = []
+            for r in rows:
+                item = dict(r._mapping)
+                if item.get("metadata_json"):
+                    try:
+                        item["metadata"] = json.loads(item["metadata_json"])
+                    except (json.JSONDecodeError, TypeError):
+                        item["metadata"] = {}
+                else:
+                    item["metadata"] = {}
+                del item["metadata_json"]
+                items.append(item)
+            return items
+    except Exception as e:
+        log.warning("inbox_notifications_query_failed: %s", str(e))
+        return []
+
+
+@router.get("/api/inbox/self-improve-summaries")
+def get_self_improve_summaries(limit: int = Query(default=20, ge=1, le=100)):
+    """Return self-improvement summary inbox items."""
+    return get_notifications(item_type="self_improve_summary", limit=limit)

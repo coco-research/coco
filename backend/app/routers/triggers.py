@@ -162,6 +162,14 @@ async def _execute_trigger_action(trigger: dict, context: dict | None = None) ->
         except Exception as e:
             return {"status": "failed", "error": str(e)}
 
+    elif action_type == "self_improve_auto":
+        from app.services.self_improve_scheduler import auto_start_cycle
+        result = auto_start_cycle()
+        if result["action"] == "started":
+            return {"status": "success", "result": f"Started self-improve cycle {result['cycle_id']}", "cycle_id": result["cycle_id"]}
+        else:
+            return {"status": "skipped", "result": result.get("reason", "Skipped")}
+
     return {"status": "skipped", "result": "Unknown action type"}
 
 

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Mic, MicOff, Send, X, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { apiPost } from '../../lib/api';
@@ -188,7 +188,6 @@ function OrbPanel({
 // --- CocoOrb: main component -------------------------------------------------
 
 export function CocoOrb() {
-  const location = useLocation();
   const navigate = useNavigate();
   const audio = useJarvisAudio();
   const voice = useVoiceInput();
@@ -201,9 +200,6 @@ export function CocoOrb() {
   const [cards, setCards] = useState<CardData[]>([]);
 
   const autoCollapseTimer = useRef<ReturnType<typeof setTimeout>>();
-
-  // Hide on /jarvis page
-  if (location.pathname === '/jarvis') return null;
 
   const resetAutoCollapse = () => {
     clearTimeout(autoCollapseTimer.current);

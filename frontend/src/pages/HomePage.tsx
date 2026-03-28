@@ -1,12 +1,13 @@
 import { type ReactNode, useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
-import { AlertTriangle, Clock, Search, Activity, FileText, FolderOpen, HeartPulse } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { AlertTriangle, Search, FileText, FolderOpen, HeartPulse, Sparkles } from 'lucide-react';
 import { apiFetch, apiPatch, apiPost } from '../lib/api';
 import { cn, timeAgo } from '../lib/utils';
 import { BriefingCard, type SyncResult } from '../components/home/BriefingCard';
 import { ProjectHealthGrid } from '../components/home/ProjectHealthGrid';
 import { FocusList } from '../components/home/FocusList';
+import { JarvisOverlay } from '../components/home/JarvisOverlay';
 import type { HomeData, Todo } from '../types/home';
 
 function LoadingState() {
@@ -77,6 +78,17 @@ function getSyncStatus(health: HomeData['health']) {
 export default function HomePage() {
   const queryClient = useQueryClient();
   const [syncBanner, setSyncBanner] = useState<string | null>(null);
+  const [jarvisOpen, setJarvisOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Auto-open Jarvis overlay when ?jarvis=true is in the URL
+  useEffect(() => {
+    if (searchParams.get('jarvis') === 'true') {
+      setJarvisOpen(true);
+      // Remove the query param so it doesn't persist on refresh
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const { data, isLoading, isError } = useQuery<HomeData>({
     queryKey: ['home'],
@@ -209,6 +221,14 @@ export default function HomePage() {
           </div>
           <div className="flex items-center gap-3">
             <button
+              onClick={() => setJarvisOpen(true)}
+              className="inline-flex items-center gap-1 text-[11px] border border-border rounded-md px-2.5 py-1 text-muted-foreground hover:text-foreground hover:border-foreground/20 cursor-pointer transition-colors"
+              title="Activate Jarvis"
+            >
+              <Sparkles size={10} />
+              Jarvis
+            </button>
+            <button
               onClick={openCommandPalette}
               className="inline-flex items-center gap-1 text-[11px] border border-border rounded-md px-2.5 py-1 text-muted-foreground hover:text-foreground hover:border-foreground/20 cursor-pointer transition-colors"
             >
@@ -266,6 +286,9 @@ export default function HomePage() {
           <ProjectHealthGrid projects={data.projects} />
         </div>
       </div>
+
+      {/* Jarvis cinematic overlay */}
+      <JarvisOverlay isOpen={jarvisOpen} onClose={() => setJarvisOpen(false)} />
     </div>
   );
 }

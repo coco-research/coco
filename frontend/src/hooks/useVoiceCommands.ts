@@ -28,7 +28,7 @@ const PAGE_ROUTES: Record<string, string> = {
   settings: '/settings',
   tree: '/tree',
   portfolio: '/tree',
-  jarvis: '/jarvis',
+  jarvis: '/?jarvis=true',
 };
 
 interface CommandResponse {
@@ -59,6 +59,13 @@ export function useVoiceCommands() {
   const handleCommand = useCallback(
     async (text: string) => {
       const lower = text.toLowerCase().trim();
+
+      // ─── Activate Jarvis ────────────────────────────────────────
+      if (/^(?:activate\s+jarvis|open\s+jarvis|launch\s+jarvis|jarvis)$/.test(lower)) {
+        navigate('/?jarvis=true');
+        toast('Activating Jarvis', 'info');
+        return;
+      }
 
       // ─── Navigation ─────────────────────────────────────────────
       const navMatch = lower.match(/^(?:go\s+to|open|show|navigate\s+to)\s+(.+)$/);

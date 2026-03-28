@@ -90,9 +90,8 @@ export default function App() {
                   <Route path="tree/:nodeId" element={<ErrorBoundary><TreePage /></ErrorBoundary>} />
                   <Route path="self-improve" element={<ErrorBoundary><SelfImprovePage /></ErrorBoundary>} />
                   <Route path="settings" element={<ErrorBoundary><SettingsPage /></ErrorBoundary>} />
+                  <Route path="jarvis" element={<ErrorBoundary><JarvisPage /></ErrorBoundary>} />
                 </Route>
-                {/* Jarvis renders outside AppShell for full-bleed dark experience */}
-                <Route path="jarvis" element={<ErrorBoundary><JarvisPage /></ErrorBoundary>} />
               </Routes>
             </Suspense>
           </BrowserRouter>

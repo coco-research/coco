@@ -371,7 +371,7 @@ def extract_actions(content_id: str):
         # Get content from hub.db
         with get_hub_db() as hub:
             row = hub.execute(
-                "SELECT id, title, body, source FROM content WHERE id = ?",
+                "SELECT id, title, body, source, project_id FROM content WHERE id = ?",
                 (content_id,),
             ).fetchone()
             if not row:
@@ -379,26 +379,13 @@ def extract_actions(content_id: str):
 
         text = f"{row['title'] or ''}\n{row['body'] or ''}"
 
-        from app.services.collaboration_context import extract_action_items_from_text
+        from app.services.collaboration_context import create_platform_todos_from_text
 
-        items = extract_action_items_from_text(text)
-
-        if not items:
-            return {"status": "ok", "actions_created": 0, "actions": []}
-
-        # Create platform-native todos in todo_overrides (NOT hub.db)
-        created = []
-        with get_platform_db() as pdb:
-            for desc in items:
-                todo_id = str(uuid.uuid4())
-                pdb.execute(
-                    """INSERT INTO todo_overrides
-                       (hub_todo_id, title, status, priority, source_type, source_content_id, is_platform_native, created_at)
-                       VALUES (?, ?, 'open', 'medium', 'extracted', ?, 1, datetime('now'))""",
-                    (todo_id, desc, content_id),
-                )
-                created.append({"id": todo_id, "title": desc})
-            pdb.commit()
+        created = create_platform_todos_from_text(
+            text,
+            source_content_id=content_id,
+            project_id=row.get("project_id"),
+        )
 
         return {"status": "ok", "actions_created": len(created), "actions": created}
     except HTTPException:

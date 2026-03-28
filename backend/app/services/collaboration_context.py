@@ -11,12 +11,10 @@ from __future__ import annotations
 import json
 import logging
 import re
-import sqlite3
 import uuid
 from datetime import datetime, timezone
 
 from app.db.connections import get_platform_db, get_hub_db
-from app.config import HUB_DB_PATH
 
 log = logging.getLogger(__name__)
 
@@ -283,82 +281,233 @@ def build_knowledge_context(
 
 
 def extract_action_items_from_text(text: str) -> list[str]:
-    """Extract action items from agent output text using simple heuristics.
+    """Extract action items from agent output or content text.
 
-    Matches lines starting with TODO:, ACTION:, or - [ ].
-    Returns a list of action item descriptions.
+    Matches:
+    - Explicit markers: TODO:, ACTION:, - [ ], FOLLOW UP:
+    - Imperative patterns: "need to ...", "should ...", "must ...",
+      "follow up on ...", "schedule ...", "send ...", "prepare ..."
+    - Assignment patterns: "John needs to...", "@john ...", "Assigned to:"
+
+    Returns a list of action item descriptions (max 200 chars each).
     """
     items: list[str] = []
+    seen: set[str] = set()  # deduplicate
+
+    # Phase 1: Explicit action markers
+    explicit_patterns = [
+        r"^TODO:\s*(.+)",
+        r"^ACTION:\s*(.+)",
+        r"^FOLLOW\s*UP:\s*(.+)",
+        r"^-\s*\[\s*\]\s*(.+)",
+        r"^NEXT\s*STEP:\s*(.+)",
+        r"^ACTION\s*ITEM:\s*(.+)",
+        r"^Assigned\s+to\s+\w+:\s*(.+)",
+    ]
+
+    # Phase 2: Imperative sentence patterns (mid-line)
+    imperative_patterns = [
+        r"(?:we |I |you |they |he |she )?need(?:s)?\s+to\s+(.{10,})",
+        r"(?:we |I |you |they |he |she )?should\s+(.{10,})",
+        r"(?:we |I |you |they |he |she )?must\s+(.{10,})",
+        r"follow\s+up\s+(?:on|with|about)\s+(.{10,})",
+        r"(?:please\s+)?schedule\s+(.{10,})",
+        r"(?:please\s+)?send\s+(.{10,})",
+        r"(?:please\s+)?prepare\s+(.{10,})",
+        r"(?:please\s+)?review\s+(.{10,})",
+        r"(?:please\s+)?draft\s+(.{10,})",
+        r"(?:please\s+)?set\s+up\s+(.{10,})",
+        r"(?:please\s+)?create\s+(.{10,})",
+        r"(?:please\s+)?update\s+(.{10,})",
+        r"(?:please\s+)?confirm\s+(.{10,})",
+        r"(?:please\s+)?coordinate\s+with\s+(.{10,})",
+        r"@(\w+)\s+(.{10,})",
+    ]
+
     for line in text.splitlines():
         stripped = line.strip()
-        # Match "TODO: ...", "ACTION: ...", "- [ ] ..."
-        for pattern in [
-            r"^TODO:\s*(.+)",
-            r"^ACTION:\s*(.+)",
-            r"^-\s*\[\s*\]\s*(.+)",
-        ]:
+        if not stripped or len(stripped) < 5:
+            continue
+
+        # Explicit markers
+        for pattern in explicit_patterns:
             m = re.match(pattern, stripped, re.IGNORECASE)
             if m:
-                desc = m.group(1).strip()
+                desc = m.group(1).strip().rstrip(".")
                 if desc and len(desc) > 3:
-                    items.append(desc[:200])
+                    key = desc.lower()[:50]
+                    if key not in seen:
+                        seen.add(key)
+                        items.append(desc[:200])
                 break
+        else:
+            # Imperative patterns (only if no explicit match)
+            for pattern in imperative_patterns:
+                m = re.search(pattern, stripped, re.IGNORECASE)
+                if m:
+                    # For @mention pattern, group(2) has the action
+                    if pattern.startswith(r"@"):
+                        owner = m.group(1)
+                        desc = f"@{owner}: {m.group(2).strip().rstrip('.')}"
+                    else:
+                        desc = m.group(1).strip().rstrip(".")
+                    # Truncate at sentence boundary
+                    for sep in [". ", "; ", " - ", "\t"]:
+                        if sep in desc:
+                            desc = desc[: desc.index(sep)]
+                            break
+                    if desc and len(desc) > 5:
+                        key = desc.lower()[:50]
+                        if key not in seen:
+                            seen.add(key)
+                            items.append(desc[:200])
+                    break
+
     return items
+
+
+def extract_due_date(text: str) -> str | None:
+    """Extract a due date hint from text.
+
+    Handles: "by Friday", "by March 30", "ASAP", "this week", "by EOD",
+    "by end of week", "by next Monday".
+
+    Returns a human-readable date hint string, or None.
+    """
+    text_lower = text.lower()
+
+    # Absolute dates: "by March 30", "by 2026-03-30", "due March 30"
+    abs_match = re.search(
+        r"(?:by|due|before|until)\s+(\w+\s+\d{1,2}(?:,?\s*\d{4})?)",
+        text_lower,
+    )
+    if abs_match:
+        return abs_match.group(1).strip()
+
+    # ISO dates
+    iso_match = re.search(r"(\d{4}-\d{2}-\d{2})", text)
+    if iso_match:
+        return iso_match.group(1)
+
+    # Relative dates
+    relative_patterns = {
+        r"\bASAP\b": "ASAP",
+        r"\bby\s+EOD\b": "end of day",
+        r"\bby\s+end\s+of\s+day\b": "end of day",
+        r"\bby\s+end\s+of\s+week\b": "end of week",
+        r"\bthis\s+week\b": "this week",
+        r"\bnext\s+week\b": "next week",
+        r"\bby\s+Friday\b": "Friday",
+        r"\bby\s+Monday\b": "next Monday",
+        r"\bby\s+tomorrow\b": "tomorrow",
+        r"\bby\s+tonight\b": "tonight",
+    }
+    for pattern, label in relative_patterns.items():
+        if re.search(pattern, text, re.IGNORECASE):
+            return label
+
+    return None
+
+
+def extract_owner(text: str) -> str | None:
+    """Extract an owner/assignee from text.
+
+    Handles: "@john", "Assigned to John:", "John needs to...",
+    "for John to review".
+    """
+    # @mention
+    m = re.search(r"@(\w+)", text)
+    if m:
+        return m.group(1)
+
+    # "Assigned to X:"
+    m = re.search(r"Assigned\s+to\s+(\w+)", text, re.IGNORECASE)
+    if m:
+        return m.group(1)
+
+    # "X needs to..."
+    m = re.match(r"(\w+)\s+needs?\s+to\b", text.strip())
+    if m:
+        name = m.group(1)
+        # Filter out common pronouns
+        if name.lower() not in {"we", "i", "you", "they", "he", "she", "it", "someone", "team"}:
+            return name
+
+    return None
+
+
+def create_platform_todos_from_text(
+    text: str, source_content_id: str | None = None, project_id: str | None = None
+) -> list[dict]:
+    """Extract action items from text and create platform-native todos.
+
+    Writes to todo_overrides in platform.db (NEVER to hub.db).
+    Returns list of created todo dicts.
+    """
+    items = extract_action_items_from_text(text)
+    if not items:
+        return []
+
+    created = []
+    try:
+        with get_platform_db() as db:
+            for desc in items:
+                todo_id = str(uuid.uuid4())
+                owner = extract_owner(desc)
+                due_hint = extract_due_date(desc)
+
+                db.execute(
+                    """INSERT INTO todo_overrides
+                       (hub_todo_id, title, status, priority, owner, due_date,
+                        project_id, source_type, source_content_id,
+                        is_platform_native, created_at)
+                       VALUES (?, ?, 'open', 'medium', ?, ?, ?, 'extracted', ?, 1, datetime('now'))""",
+                    (todo_id, desc, owner, due_hint, project_id, source_content_id),
+                )
+                created.append({
+                    "id": todo_id,
+                    "title": desc,
+                    "owner": owner,
+                    "due_hint": due_hint,
+                })
+            db.commit()
+    except Exception as e:
+        log.warning("create_platform_todos_failed: %s", e)
+
+    return created
 
 
 def _create_todos_from_agent_output(
     output_text: str, agent_id: str, node_id: str
 ) -> int:
-    """Scan agent output for action items and create todos in hub.db.
+    """Scan agent output for action items and create todos in platform.db.
 
+    Writes to todo_overrides (platform-native) instead of hub.db.
     Returns the number of todos created.
     """
-    items = extract_action_items_from_text(output_text)
-    if not items:
-        return 0
-
-    created = 0
+    # Resolve project_id from node_id
+    project_id = None
     try:
-        conn = sqlite3.connect(str(HUB_DB_PATH), timeout=10)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL")
-        conn.execute("PRAGMA busy_timeout=5000")
-
-        # Resolve project_id from node_id via project_content or just use None
-        project_id = None
-        try:
-            row = conn.execute(
-                "SELECT project_id FROM project_content WHERE content_id = ? LIMIT 1",
-                (node_id,),
+        with get_platform_db() as db:
+            row = db.execute(
+                "SELECT hub_project_id FROM nodes WHERE id = ?", (node_id,)
             ).fetchone()
-            if row:
-                project_id = row["project_id"]
-        except Exception:
-            pass
+            if row and row["hub_project_id"]:
+                project_id = row["hub_project_id"]
+    except Exception:
+        pass
 
-        for desc in items:
-            todo_id = str(uuid.uuid4())
-            source_key = f"agent:{agent_id}:{todo_id[:8]}"
-            try:
-                conn.execute(
-                    """INSERT INTO todos (id, title, project_id, priority, owner, status, source_type, source_content_id, created_at)
-                       VALUES (?, ?, ?, 'medium', 'rijul', 'open', 'decide', ?, datetime('now'))""",
-                    (todo_id, desc, project_id, source_key),
-                )
-                created += 1
-            except Exception as e:
-                log.debug("agent_todo_insert_failed: %s", e)
+    source_key = f"agent:{agent_id}"
+    created_items = create_platform_todos_from_text(
+        output_text, source_content_id=source_key, project_id=project_id
+    )
+    count = len(created_items)
 
-        conn.commit()
-        conn.close()
-    except Exception as e:
-        log.warning("agent_todo_creation_failed: %s", e)
-
-    if created:
+    if count:
         log.info("agent_todos_created", extra={
-            "agent_id": agent_id, "node_id": node_id, "count": created
+            "agent_id": agent_id, "node_id": node_id, "count": count
         })
-    return created
+    return count
 
 
 def auto_capture_output(agent_id: str, agent_role: str, node_id: str | None) -> None:

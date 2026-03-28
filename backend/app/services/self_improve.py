@@ -16,6 +16,7 @@ import structlog
 from app.db.connections import get_platform_db
 from app.services.event_bus import event_bus
 from app.services.process_manager import process_manager
+from app.services.verification import verification_service
 from app.services.worktree_manager import WorktreeManager, DENYLIST_PATTERNS
 
 log = structlog.get_logger()
@@ -575,6 +576,29 @@ class SelfImproveService:
                     ),
                 )
 
+                # Run G1 ideation gate on each proposed improvement
+                try:
+                    cycle_row = db.execute(
+                        "SELECT focus_areas FROM self_improve_cycles WHERE id = ?", (cycle_id,)
+                    ).fetchone()
+                    focus_areas = json.loads(cycle_row["focus_areas"]) if cycle_row and cycle_row["focus_areas"] else []
+                    g1_result = verification_service.run_gate(
+                        gate_name="G1_ideation",
+                        input_data={"requirements": focus_areas},
+                        output_data={
+                            "title": imp.get("title", ""),
+                            "description": imp.get("description", ""),
+                            "priority": imp.get("category", ""),  # maps to priority validation
+                            "category": imp.get("category", ""),
+                        },
+                        entity_type="improvement",
+                        entity_id=imp_id,
+                    )
+                    if g1_result.verdict.value == "fail":
+                        log.warning("gate_failed", gate="G1", improvement_id=imp_id)
+                except Exception as e:
+                    log.debug("g1_gate_skipped", error=str(e))
+
             db.execute(
                 "UPDATE self_improve_cycles SET status = 'architecting' WHERE id = ?",
                 (cycle_id,),
@@ -639,6 +663,25 @@ class SelfImproveService:
                 (cycle_id,),
             )
             db.commit()
+
+        # Run G2 plan gate on the architect's output
+        try:
+            g2_result = verification_service.run_gate(
+                gate_name="G2_plan",
+                input_data={"improvements": [dict(r) for r in approved]},
+                output_data={
+                    "steps": ordered,
+                    "files": [f for item in ordered for f in item.get("estimated_files", [])],
+                    "success_criteria": [],
+                    "risks": [],
+                },
+                entity_type="cycle",
+                entity_id=cycle_id,
+            )
+            if g2_result.verdict.value == "fail":
+                log.warning("gate_failed", gate="G2", cycle_id=cycle_id)
+        except Exception as e:
+            log.debug("g2_gate_skipped", error=str(e))
 
         # Spawn a Dev agent per improvement in its own worktree
         denylist_str = ", ".join(DENYLIST_PATTERNS)
@@ -820,6 +863,26 @@ class SelfImproveService:
             self._check_developing_complete(cycle_id)
             return
 
+        # Run G3 implementation gate before proceeding to review
+        try:
+            diff_for_gate = self.worktree_mgr.get_diff(imp["branch_name"]) if imp["branch_name"] else ""
+            g3_result = verification_service.run_gate(
+                gate_name="G3_implementation",
+                input_data={"title": imp.get("title", ""), "description": imp.get("description", "")},
+                output_data={
+                    "diff": diff_for_gate[:5000] if diff_for_gate else "",
+                    "test_results": test_results,
+                    "security_scan": security_scan,
+                    "changed_files": [],
+                },
+                entity_type="improvement",
+                entity_id=improvement_id,
+            )
+            if g3_result.verdict.value == "fail":
+                log.warning("gate_failed", gate="G3", improvement_id=improvement_id)
+        except Exception as e:
+            log.debug("g3_gate_skipped", error=str(e))
+
         # Both passed — spawn Reviewer
         with get_platform_db() as db:
             db.execute(
@@ -978,6 +1041,25 @@ class SelfImproveService:
             qa_results = {"all_passed": False, "regressions": ["Failed to parse QA output"], "integration_issues": []}
 
         now = datetime.now(timezone.utc).isoformat()
+
+        # Run G4 acceptance gate on QA results
+        try:
+            g4_result = verification_service.run_gate(
+                gate_name="G4_acceptance",
+                input_data={"requirements": []},
+                output_data={
+                    "criteria_met": [qa_results.get("all_passed", False)],
+                    "review_notes": json.dumps(qa_results),
+                    "changelog_entry": "",
+                    "pr_description": "",
+                },
+                entity_type="cycle",
+                entity_id=cycle_id,
+            )
+            if g4_result.verdict.value == "fail":
+                log.warning("gate_failed", gate="G4", cycle_id=cycle_id)
+        except Exception as e:
+            log.debug("g4_gate_skipped", error=str(e))
 
         if qa_results.get("all_passed", False):
             with get_platform_db() as db:

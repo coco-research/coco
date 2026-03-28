@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Query
 
 from app.db.connections import get_platform_db
+from app.services.verification import verification_service
 from app.models.collaboration import (
     CreateContextBody,
     CreateHandoffBody,
@@ -366,3 +367,39 @@ def advance_workflow(workflow_id: str):
         result["steps"] = json.loads(result["steps"])
         result["current_step_info"] = step_info
         return result
+
+
+# ---------------------------------------------------------------------------
+# Verification Gate endpoints
+# ---------------------------------------------------------------------------
+
+@router.post("/api/workflows/{workflow_id}/verify", tags=["Collaboration"])
+def verify_workflow_step(workflow_id: str, body: dict):
+    """Run a verification gate on a workflow step."""
+    gate_name = body.get("gate", "G3_implementation")
+    input_data = body.get("input_data", {})
+    output_data = body.get("output_data", {})
+
+    # Get node_id from workflow
+    with get_platform_db() as db:
+        row = db.execute("SELECT node_id FROM workflows WHERE id = ?", (workflow_id,)).fetchone()
+        if not row:
+            raise HTTPException(404, "Workflow not found")
+        node_id = row["node_id"]
+
+    result = verification_service.run_gate(
+        gate_name=gate_name,
+        input_data=input_data,
+        output_data=output_data,
+        node_id=node_id,
+        entity_type="workflow",
+        entity_id=workflow_id,
+    )
+    return result.to_dict()
+
+
+@router.get("/api/verification/history", tags=["Collaboration"])
+def get_verification_history(entity_type: str | None = None, entity_id: str | None = None,
+                             node_id: str | None = None, limit: int = 20):
+    """Retrieve verification gate history."""
+    return verification_service.get_history(entity_type, entity_id, node_id, limit)

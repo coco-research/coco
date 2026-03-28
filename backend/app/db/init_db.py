@@ -463,6 +463,21 @@ CREATE TABLE IF NOT EXISTS jarvis_sessions (
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_jarvis_sessions_created ON jarvis_sessions(created_at);
+
+CREATE TABLE IF NOT EXISTS verification_gates (
+    id TEXT PRIMARY KEY,
+    gate TEXT NOT NULL,
+    verdict TEXT NOT NULL,
+    checks_json TEXT,
+    summary TEXT,
+    node_id TEXT,
+    entity_type TEXT,
+    entity_id TEXT,
+    run_at TEXT NOT NULL,
+    duration_ms INTEGER DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_vg_entity ON verification_gates(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_vg_node ON verification_gates(node_id);
 """
 
 MIGRATION = """

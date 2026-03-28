@@ -25,3 +25,15 @@ class PatchTaskBody(BaseModel):
 
 class CheckoutTaskBody(BaseModel):
     checked_out_by: str = "user"
+
+
+class DelegateTaskBody(BaseModel):
+    to_agent_id: str
+    context: Optional[dict] = None
+
+
+class CreateSubtaskBody(BaseModel):
+    title: str
+    agent_id: str
+    node_id: Optional[str] = None
+    context: Optional[dict] = None

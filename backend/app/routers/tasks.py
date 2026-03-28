@@ -6,8 +6,9 @@ from app.db.connections import get_platform_db
 from app.db.tree_utils import build_node_id_filter
 from app.services.event_bus import event_bus
 from app.services.id_generator import assign_display_id
-from app.models.tasks import CheckoutTaskBody, CreateTaskBody, PatchTaskBody
+from app.models.tasks import CheckoutTaskBody, CreateTaskBody, CreateSubtaskBody, DelegateTaskBody, PatchTaskBody
 from app.models.common import TransitionBody
+from app.services.delegation import delegation_service
 
 log = logging.getLogger(__name__)
 
@@ -242,3 +243,62 @@ def release_task(task_id: str):
         db.commit()
         row = db.execute("SELECT id, title, description, agent_id, node_id, project_id, status, priority, checked_out_by, checked_out_at, created_at, updated_at FROM tasks WHERE id = ?", (task_id,)).fetchone()
         return dict(row)
+
+
+# ---- Delegation endpoints ----
+
+
+@router.post("/api/tasks/{task_id}/delegate")
+def delegate_task(task_id: str, body: DelegateTaskBody):
+    """Delegate a task from its current agent to another agent."""
+    with get_platform_db() as db:
+        task = db.execute("SELECT agent_id FROM tasks WHERE id = ?", (task_id,)).fetchone()
+        if not task:
+            raise HTTPException(404, "Task not found")
+        from_agent_id = task["agent_id"]
+        if not from_agent_id:
+            raise HTTPException(400, "Task has no assigned agent to delegate from")
+
+    try:
+        result = delegation_service.delegate_task(
+            task_id, from_agent_id, body.to_agent_id, body.context
+        )
+    except ValueError as exc:
+        raise HTTPException(404, str(exc))
+
+    event_bus.emit("task.delegated", {
+        "id": task_id, "from_agent": from_agent_id, "to_agent": body.to_agent_id,
+    })
+    return result
+
+
+@router.post("/api/tasks/{task_id}/subtask", status_code=201)
+def create_subtask(task_id: str, body: CreateSubtaskBody):
+    """Create a subtask under an existing parent task."""
+    try:
+        result = delegation_service.create_subtask(
+            parent_task_id=task_id,
+            title=body.title,
+            agent_id=body.agent_id,
+            node_id=body.node_id,
+            context=body.context,
+        )
+    except ValueError as exc:
+        raise HTTPException(404, str(exc))
+
+    event_bus.emit("task.subtask_created", {
+        "id": result["id"], "parent_task_id": task_id, "agent_id": body.agent_id,
+    })
+    return result
+
+
+@router.get("/api/tasks/queue/{agent_id}")
+def get_agent_task_queue(agent_id: str):
+    """Get all open/in-progress tasks for an agent (assigned or delegated)."""
+    return delegation_service.get_agent_queue(agent_id)
+
+
+@router.get("/api/tasks/{task_id}/delegation-chain")
+def get_delegation_chain(task_id: str):
+    """Get the full delegation chain (parent ancestors + subtasks) for a task."""
+    return delegation_service.get_delegation_chain(task_id)

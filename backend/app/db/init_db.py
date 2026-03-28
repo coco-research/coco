@@ -354,6 +354,14 @@ CREATE INDEX IF NOT EXISTS idx_handoffs_node ON handoffs(node_id);
 CREATE INDEX IF NOT EXISTS idx_workflows_node ON workflows(node_id);
 CREATE INDEX IF NOT EXISTS idx_project_context_node ON project_context(node_id);
 
+CREATE TABLE IF NOT EXISTS task_board (
+    id TEXT PRIMARY KEY,
+    node_id TEXT NOT NULL,
+    name TEXT NOT NULL DEFAULT 'Shared Board',
+    agent_ids TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS triggers (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -508,6 +516,24 @@ def init_platform_db():
             except Exception as e:
                 log.warning("add_column_skipped", table="chat_messages", column="session_id", error=str(e))
 
+    # Add delegation columns to tasks if missing
+    if "tasks" in existing_tables:
+        task_cols = {r[1] for r in conn.execute("PRAGMA table_info(tasks)").fetchall()}
+        for col, default in [
+            ("delegated_by", None),
+            ("delegated_to", None),
+            ("parent_task_id", None),
+            ("context_json", "'{}'"),
+        ]:
+            if col not in task_cols:
+                try:
+                    ddl = f"ALTER TABLE tasks ADD COLUMN {col} TEXT"
+                    if default is not None:
+                        ddl += f" DEFAULT {default}"
+                    conn.execute(ddl)
+                except Exception as e:
+                    log.warning("add_column_skipped", table="tasks", column=col, error=str(e))
+
     # Add role column to agents if missing
     if "agents" in existing_tables:
         cols = {r[1] for r in conn.execute("PRAGMA table_info(agents)").fetchall()}
@@ -539,6 +565,8 @@ def init_platform_db():
         "CREATE INDEX IF NOT EXISTS idx_handoffs_node ON handoffs(node_id)",
         "CREATE INDEX IF NOT EXISTS idx_workflows_node ON workflows(node_id)",
         "CREATE INDEX IF NOT EXISTS idx_project_context_node ON project_context(node_id)",
+        "CREATE INDEX IF NOT EXISTS idx_tasks_parent ON tasks(parent_task_id)",
+        "CREATE INDEX IF NOT EXISTS idx_tasks_delegated_to ON tasks(delegated_to)",
     ]
     for idx_sql in _runtime_indexes:
         try:

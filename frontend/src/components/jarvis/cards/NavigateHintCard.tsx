@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../../../lib/utils';
 import type { NavigateHintData } from '../../../types/cards';
@@ -19,64 +19,98 @@ export function NavigateHintCard({
   const isJarvis = variant === 'jarvis';
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
+  const [cancelled, setCancelled] = useState(false);
+  const rafRef = useRef<number>(0);
 
   useEffect(() => {
+    if (cancelled) return;
+
     const start = performance.now() + delay;
-    let raf: number;
 
     function tick(now: number) {
       const elapsed = now - start;
       if (elapsed < 0) {
-        raf = requestAnimationFrame(tick);
+        rafRef.current = requestAnimationFrame(tick);
         return;
       }
       const pct = Math.min(elapsed / NAV_DURATION, 1);
       setProgress(pct);
       if (pct < 1) {
-        raf = requestAnimationFrame(tick);
+        rafRef.current = requestAnimationFrame(tick);
       } else {
         navigate(data.url);
       }
     }
 
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [data.url, delay, navigate]);
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [data.url, delay, navigate, cancelled]);
+
+  const handleCancel = useCallback(() => {
+    cancelAnimationFrame(rafRef.current);
+    setCancelled(true);
+    setProgress(0);
+  }, []);
 
   return (
     <div className="space-y-3 px-1">
-      <p
-        className={cn(
-          'text-sm',
-          isJarvis ? 'text-white/50' : 'text-muted-foreground',
-        )}
-      >
-        Taking you to{' '}
-        <span
+      <div className="flex items-center justify-between">
+        <p
           className={cn(
-            'font-medium',
-            isJarvis ? 'text-[#0A84FF]' : 'text-foreground',
+            'text-sm',
+            isJarvis ? 'text-white/50' : 'text-muted-foreground',
           )}
         >
-          {data.destination}
-        </span>
-        ...
-      </p>
-
-      <div
-        className={cn(
-          'h-0.5 rounded-full overflow-hidden',
-          isJarvis ? 'bg-white/10' : 'bg-muted',
+          {cancelled ? (
+            <span className={cn(isJarvis ? 'text-white/30' : 'text-muted-foreground/60')}>
+              Navigation cancelled
+            </span>
+          ) : (
+            <>
+              Taking you to{' '}
+              <span
+                className={cn(
+                  'font-medium',
+                  isJarvis ? 'text-[#0A84FF]' : 'text-foreground',
+                )}
+              >
+                {data.destination}
+              </span>
+              ...
+            </>
+          )}
+        </p>
+        {!cancelled && (
+          <button
+            onClick={handleCancel}
+            className={cn(
+              'text-xs font-medium px-2 py-0.5 rounded transition-colors shrink-0',
+              isJarvis
+                ? 'text-white/40 hover:text-white/70 hover:bg-white/5'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+            )}
+          >
+            Cancel
+          </button>
         )}
-      >
+      </div>
+
+      {!cancelled && (
         <div
           className={cn(
-            'h-full rounded-full transition-none',
-            isJarvis ? 'bg-[#0A84FF]' : 'bg-primary',
+            'h-0.5 rounded-full overflow-hidden',
+            isJarvis ? 'bg-white/10' : 'bg-muted',
           )}
-          style={{ width: `${progress * 100}%` }}
-        />
-      </div>
+        >
+          <div
+            className={cn(
+              'h-full rounded-full transition-none',
+              isJarvis ? 'bg-[#0A84FF]' : 'bg-primary',
+            )}
+            style={{ width: `${progress * 100}%` }}
+          />
+        </div>
+      )}
     </div>
   );
 }

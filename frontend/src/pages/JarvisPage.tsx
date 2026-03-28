@@ -201,7 +201,10 @@ export default function JarvisPage() {
     if (dataCards.length > 0) {
       canvas.showCards(dataCards);
     } else if (result.cards?.length === 0 || text.toLowerCase().includes('dismiss') || text.toLowerCase().includes('clear')) {
-      canvas.dismiss();
+      // Use rAF to batch the dismiss state update and avoid canvas flash
+      requestAnimationFrame(() => {
+        canvas.dismiss();
+      });
     }
     return result;
   }, [canvas]);
@@ -320,7 +323,7 @@ export default function JarvisPage() {
 
           {/* Phase 4: Projects + Focus */}
           {phase >= 4 && (
-            <div className="grid grid-cols-12 gap-6 max-w-5xl mx-auto">
+            <div className="grid grid-cols-12 gap-3 sm:gap-4 md:gap-6 max-w-5xl mx-auto">
               <GlassCard className="col-span-12 lg:col-span-7 p-4" delay={0} glow>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-xs uppercase tracking-widest text-sky-400/60 font-mono">Projects</h3>

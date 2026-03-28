@@ -18,7 +18,7 @@ export interface HomeProject {
   todo_open: number;
   todo_done: number;
   todo_total: number;
-  active: boolean;
+  active: boolean | number;
   sources: { email: number; voice: number; jira: number; confluence: number };
 }
 

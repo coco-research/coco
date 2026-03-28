@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import { cn } from '../lib/utils';
 import { GeneralSettings } from '../components/settings/GeneralSettings';
@@ -6,7 +6,14 @@ import { AutonomySettings } from '../components/settings/AutonomySettings';
 import { DisplaySettings } from '../components/settings/DisplaySettings';
 import { BrainViewer } from '../components/settings/BrainViewer';
 import { useTheme } from '../context/ThemeContext';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, BellOff } from 'lucide-react';
+import {
+  isSupported as notifSupported,
+  isPermitted as notifPermitted,
+  isEnabled as notifEnabled,
+  setEnabled as setNotifEnabled,
+  requestPermission,
+} from '../lib/desktop-notifications';
 
 type SaveStatus = 'idle' | 'saving' | 'saved';
 
@@ -15,6 +22,77 @@ const tabTriggerCls = cn(
   'hover:text-foreground',
   'data-[state=active]:text-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary',
 );
+
+function NotificationToggle() {
+  const supported = notifSupported();
+  const [enabled, setEnabled] = useState(notifEnabled());
+  const [permitted, setPermitted] = useState(notifPermitted());
+
+  // Sync permission state on mount (could change outside our control)
+  useEffect(() => {
+    setPermitted(notifPermitted());
+  }, []);
+
+  const toggle = useCallback(async () => {
+    if (!supported) return;
+
+    if (!enabled) {
+      // Turning on: request permission first
+      const granted = await requestPermission();
+      setPermitted(granted);
+      if (granted) {
+        setNotifEnabled(true);
+        setEnabled(true);
+      }
+    } else {
+      // Turning off
+      setNotifEnabled(false);
+      setEnabled(false);
+    }
+  }, [enabled, supported]);
+
+  if (!supported) {
+    return (
+      <div className="flex items-center justify-between py-3 border-b border-border opacity-50">
+        <div>
+          <p className="text-sm font-medium text-foreground">Desktop Notifications</p>
+          <p className="text-xs text-muted-foreground">Not supported in this browser.</p>
+        </div>
+        <BellOff size={16} className="text-muted-foreground" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-border">
+      <div>
+        <p className="text-sm font-medium text-foreground">Desktop Notifications</p>
+        <p className="text-xs text-muted-foreground">
+          {!permitted && !enabled
+            ? 'Get alerts when agents crash or fail. Click to grant permission.'
+            : enabled
+              ? 'You will receive desktop alerts for agent failures.'
+              : 'Enable desktop alerts for agent failures.'}
+        </p>
+      </div>
+      <button
+        onClick={toggle}
+        className={cn(
+          'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+          enabled ? 'bg-accent' : 'bg-border',
+        )}
+        aria-label={enabled ? 'Disable desktop notifications' : 'Enable desktop notifications'}
+      >
+        <span
+          className={cn(
+            'inline-block h-4 w-4 transform rounded-full bg-card transition-transform',
+            enabled ? 'translate-x-6' : 'translate-x-1',
+          )}
+        />
+      </button>
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
@@ -60,6 +138,9 @@ export default function SettingsPage() {
         <Tabs.Content value="general" className="flex-1 overflow-y-auto py-4 space-y-6">
           <GeneralSettings onSaveStatus={setSaveStatus} />
           <DisplaySettings onSaveStatus={setSaveStatus} />
+          <div className="max-w-lg">
+            <NotificationToggle />
+          </div>
         </Tabs.Content>
 
         <Tabs.Content value="advanced" className="flex-1 overflow-y-auto py-4 space-y-6">

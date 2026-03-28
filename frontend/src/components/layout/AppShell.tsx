@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Breadcrumbs } from '../shared/Breadcrumbs';
 import { NotificationDropdown } from '../shared/NotificationDropdown';
+import { FloatingMic } from '../shared/FloatingMic';
 import { useSSEStatus } from '../shared/NotificationProvider';
 
 function ConnectionBanner() {
@@ -55,6 +56,9 @@ export function AppShell() {
           <Outlet />
         </main>
       </div>
+
+      {/* Floating mic for voice commands */}
+      <FloatingMic />
     </div>
   );
 }

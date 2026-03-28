@@ -9,6 +9,7 @@ import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import { ToastProvider } from './components/shared/Toast';
 import { NotificationProvider } from './components/shared/NotificationProvider';
 import { ScopeProvider } from './context/ScopeContext';
+import { useDesktopNotificationListener } from './hooks/useDesktopNotifications';
 
 // Eager: lightweight landing + dashboard (first paint)
 import HomePage from './pages/HomePage';
@@ -28,6 +29,12 @@ const ActivityPage = lazy(() => import('./pages/ActivityPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const TreePage = lazy(() => import('./pages/TreePage'));
 const JarvisPage = lazy(() => import('./pages/JarvisPage'));
+
+/** Activates desktop notification listener for agent failures. */
+function DesktopNotifications() {
+  useDesktopNotificationListener();
+  return null;
+}
 
 function PageFallback() {
   return (
@@ -53,6 +60,7 @@ export default function App() {
             <CommandPalette />
             <KeyboardShortcuts />
             <CocoOrb />
+            <DesktopNotifications />
             <Suspense fallback={<PageFallback />}>
               <Routes>
                 <Route element={<AppShell />}>

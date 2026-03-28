@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Sparkles, XCircle, Zap, Bot, Inbox } from 'lucide-react';
+import { Sparkles, XCircle, Zap, Bot, Inbox, ShieldCheck, ShieldAlert, ShieldQuestion } from 'lucide-react';
 import { apiFetch, apiPost } from '../lib/api';
 import { cn } from '../lib/utils';
 import { formatCost } from '../lib/utils';
@@ -8,19 +8,19 @@ import { useToast } from '../components/shared/Toast';
 import { CycleControl } from '../components/self-improve/CycleControl';
 import { ImprovementCard } from '../components/self-improve/ImprovementCard';
 import { CycleHistory } from '../components/self-improve/CycleHistory';
-import type { Cycle, SquadAgent } from '../types/self-improve';
+import type { Cycle, SquadAgent, GateResult } from '../types/self-improve';
 
 // ─── Stage Stepper ───────────────────────────────────────────────────
 
 const STAGES = [
-  { key: 'planning', label: 'Planning' },
-  { key: 'architecting', label: 'Architecting' },
-  { key: 'developing', label: 'Developing' },
-  { key: 'testing', label: 'Testing' },
-  { key: 'reviewing', label: 'Reviewing' },
-  { key: 'documenting', label: 'Documenting' },
-  { key: 'awaiting_approval', label: 'Approval' },
-  { key: 'completed', label: 'Done' },
+  { key: 'planning', label: 'Planning', gate: 'G1_ideation' },
+  { key: 'architecting', label: 'Architecting', gate: 'G2_plan' },
+  { key: 'developing', label: 'Developing', gate: null },
+  { key: 'testing', label: 'Testing', gate: 'G3_implementation' },
+  { key: 'reviewing', label: 'Reviewing', gate: null },
+  { key: 'documenting', label: 'Documenting', gate: null },
+  { key: 'awaiting_approval', label: 'Approval', gate: 'G4_acceptance' },
+  { key: 'completed', label: 'Done', gate: null },
 ] as const;
 
 const TERMINAL_STATUSES = ['completed', 'rejected', 'failed'];
@@ -32,8 +32,24 @@ function getStageIndex(status: Cycle['status']): number {
   return idx >= 0 ? idx : -1;
 }
 
-function StageStepper({ status }: { status: Cycle['status'] }) {
+function GateBadge({ verdict }: { verdict: 'pass' | 'fail' | 'warn' | 'pending' }) {
+  if (verdict === 'pass') return <ShieldCheck size={10} className="text-green-400" />;
+  if (verdict === 'fail') return <ShieldAlert size={10} className="text-red-400" />;
+  if (verdict === 'warn') return <ShieldAlert size={10} className="text-yellow-400" />;
+  return <ShieldQuestion size={10} className="text-muted-foreground/50" />;
+}
+
+function StageStepper({ status, gateResults = [] }: { status: Cycle['status']; gateResults?: GateResult[] }) {
   const activeIdx = getStageIndex(status);
+
+  // Build a map of gate name -> latest verdict
+  const gateVerdicts = useMemo(() => {
+    const map: Record<string, 'pass' | 'fail' | 'warn'> = {};
+    for (const gr of gateResults) {
+      map[gr.gate] = gr.verdict;
+    }
+    return map;
+  }, [gateResults]);
 
   return (
     <div className="flex items-center gap-1 overflow-x-auto py-2">
@@ -41,6 +57,7 @@ function StageStepper({ status }: { status: Cycle['status'] }) {
         const isComplete = activeIdx > idx;
         const isActive = activeIdx === idx && !TERMINAL_STATUSES.includes(status);
         const isDone = status === 'completed' && stage.key === 'completed';
+        const gateVerdict = stage.gate ? gateVerdicts[stage.gate] : null;
 
         return (
           <div key={stage.key} className="flex items-center gap-1">
@@ -48,14 +65,21 @@ function StageStepper({ status }: { status: Cycle['status'] }) {
               <div className={cn('w-6 h-px', isComplete || isDone ? 'bg-accent' : 'bg-border')} />
             )}
             <div className="flex flex-col items-center gap-1 min-w-[60px]">
-              <span
-                className={cn(
-                  'w-3 h-3 rounded-full border-2 transition-all',
-                  (isComplete || isDone) && 'bg-accent border-accent',
-                  isActive && 'border-accent bg-accent/40 animate-pulse',
-                  !isComplete && !isActive && !isDone && 'border-muted-foreground/40 bg-transparent',
+              <div className="relative">
+                <span
+                  className={cn(
+                    'w-3 h-3 rounded-full border-2 transition-all block',
+                    (isComplete || isDone) && 'bg-accent border-accent',
+                    isActive && 'border-accent bg-accent/40 animate-pulse',
+                    !isComplete && !isActive && !isDone && 'border-muted-foreground/40 bg-transparent',
+                  )}
+                />
+                {stage.gate && (
+                  <span className="absolute -top-1 -right-2.5" title={stage.gate}>
+                    <GateBadge verdict={gateVerdict ?? (isComplete ? 'pending' : 'pending')} />
+                  </span>
                 )}
-              />
+              </div>
               <span className={cn(
                 'text-[10px] leading-tight text-center',
                 (isComplete || isDone) && 'text-accent font-medium',
@@ -203,6 +227,14 @@ export default function SelfImprovePage() {
     refetchInterval: activeCycle && !TERMINAL_STATUSES.includes(activeCycle.status) ? 3000 : false,
   });
 
+  // Gate results for active cycle
+  const { data: gateResults = [] } = useQuery({
+    queryKey: ['self-improve', 'gates', activeCycle?.id],
+    queryFn: () => apiFetch<GateResult[]>(`/verification/history?entity_type=cycle&entity_id=${activeCycle!.id}`).catch(() => []),
+    enabled: !!activeCycle?.id,
+    refetchInterval: activeCycle && !TERMINAL_STATUSES.includes(activeCycle.status) ? 5000 : false,
+  });
+
   // Selected past cycle detail
   const { data: selectedCycle } = useQuery({
     queryKey: ['self-improve', 'cycle', selectedCycleId],
@@ -276,7 +308,7 @@ export default function SelfImprovePage() {
             </button>
           </div>
 
-          <StageStepper status={activeCycle.status} />
+          <StageStepper status={activeCycle.status} gateResults={gateResults} />
           <BudgetMeter spent={activeCycle.spent_usd} budget={activeCycle.budget_usd} />
           <SquadView agents={agents} />
 

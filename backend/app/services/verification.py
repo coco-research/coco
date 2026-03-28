@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from sqlalchemy import insert
 from app.db.session import get_db
-from app.db.tables import verification_gates
+from app.db.tables import verification_gates, verification_results
 
 log = structlog.get_logger()
 
@@ -52,6 +52,7 @@ class GateResult:
     summary: str = ""
     run_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     duration_ms: int = 0
+    retry_count: int = 0
 
     def to_dict(self) -> dict:
         return {
@@ -61,6 +62,7 @@ class GateResult:
             "summary": self.summary,
             "run_at": self.run_at,
             "duration_ms": self.duration_ms,
+            "retry_count": self.retry_count,
         }
 
 
@@ -355,9 +357,60 @@ class VerificationService:
                     + (f", {len(warned)} warnings" if warned else ""),
         )
 
+    def run_gate_with_retry(
+        self,
+        gate_name: str,
+        input_data: dict,
+        output_data: dict,
+        node_id: str | None = None,
+        max_retries: int = 2,
+        budget_usd: float | None = None,
+        spent_usd: float = 0.0,
+        entity_type: str | None = None,
+        entity_id: str | None = None,
+    ) -> GateResult:
+        """Run a gate with retry logic and budget checking.
+
+        Retries up to ``max_retries`` times if the gate fails.  Aborts early
+        if ``spent_usd >= budget_usd``.  Each attempt is persisted.
+        """
+        if budget_usd is not None and spent_usd >= budget_usd:
+            result = GateResult(
+                gate=gate_name,
+                verdict=GateVerdict.FAIL,
+                summary="Budget exhausted before gate could run",
+            )
+            self._persist_result(result, node_id, entity_type, entity_id)
+            return result
+
+        last_result: GateResult | None = None
+        for attempt in range(max_retries + 1):
+            result = self.run_gate(
+                gate_name=gate_name,
+                input_data=input_data,
+                output_data=output_data,
+                node_id=node_id,
+                entity_type=entity_type,
+                entity_id=entity_id,
+            )
+            result.retry_count = attempt
+            last_result = result
+
+            if result.verdict != GateVerdict.FAIL:
+                return result
+
+            if attempt < max_retries:
+                log.info("gate_retry", gate=gate_name, attempt=attempt + 1, max_retries=max_retries)
+
+        return last_result  # type: ignore[return-value]
+
     def _persist_result(self, result: GateResult, node_id: str | None,
                         entity_type: str | None, entity_id: str | None):
-        """Save gate result to platform.db."""
+        """Save gate result to both verification_gates and verification_results."""
+        checks_payload = json.dumps([
+            {"name": c.name, "passed": c.passed, "message": c.message, "severity": c.severity}
+            for c in result.checks
+        ])
         try:
             with get_db() as conn:
                 conn.execute(
@@ -365,14 +418,27 @@ class VerificationService:
                         id=str(uuid.uuid4()),
                         gate=result.gate,
                         verdict=result.verdict.value,
-                        checks_json=json.dumps([
-                            {"name": c.name, "passed": c.passed, "message": c.message, "severity": c.severity}
-                            for c in result.checks
-                        ]),
+                        checks_json=checks_payload,
                         summary=result.summary,
                         node_id=node_id,
                         entity_type=entity_type,
                         entity_id=entity_id,
+                        run_at=result.run_at,
+                        duration_ms=result.duration_ms,
+                    )
+                )
+                conn.execute(
+                    insert(verification_results).values(
+                        id=str(uuid.uuid4()),
+                        gate=result.gate,
+                        verdict=result.verdict.value,
+                        checks_json=checks_payload,
+                        summary=result.summary,
+                        node_id=node_id,
+                        entity_type=entity_type,
+                        entity_id=entity_id,
+                        retry_count=result.retry_count,
+                        budget_spent_usd=0.0,
                         run_at=result.run_at,
                         duration_ms=result.duration_ms,
                     )
@@ -382,30 +448,43 @@ class VerificationService:
 
     def get_history(self, entity_type: str | None = None, entity_id: str | None = None,
                     node_id: str | None = None, limit: int = 20) -> list[dict]:
-        """Retrieve gate history from database."""
+        """Retrieve gate history from database, with parsed checks."""
         try:
             with get_db() as conn:
                 conditions = []
                 params: list = []
                 if entity_type:
-                    conditions.append("entity_type = ?")
+                    conditions.append("vg.entity_type = ?")
                     params.append(entity_type)
                 if entity_id:
-                    conditions.append("entity_id = ?")
+                    conditions.append("vg.entity_id = ?")
                     params.append(entity_id)
                 if node_id:
-                    conditions.append("node_id = ?")
+                    conditions.append("vg.node_id = ?")
                     params.append(node_id)
 
                 where = " AND ".join(conditions) if conditions else "1=1"
                 params.append(limit)
 
+                # Join with verification_results to get retry_count
                 rows = conn.exec_driver_sql(
-                    f"SELECT * FROM verification_gates WHERE {where} ORDER BY run_at DESC LIMIT ?",
+                    f"SELECT vg.*, COALESCE(vr.retry_count, 0) as retry_count "
+                    f"FROM verification_gates vg "
+                    f"LEFT JOIN verification_results vr "
+                    f"  ON vg.gate = vr.gate AND vg.entity_id = vr.entity_id AND vg.run_at = vr.run_at "
+                    f"WHERE {where} "
+                    f"ORDER BY vg.run_at DESC LIMIT ?",
                     tuple(params),
                 ).fetchall()
 
-                return [dict(r._mapping) for r in rows]
+                results = []
+                for r in rows:
+                    row = dict(r._mapping)
+                    # Parse checks_json for the frontend
+                    checks_raw = row.pop("checks_json", None)
+                    row["checks"] = json.loads(checks_raw) if checks_raw else []
+                    results.append(row)
+                return results
         except Exception as e:
             log.warning("verification_gate_history_failed", error=str(e))
             return []

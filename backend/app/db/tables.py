@@ -591,6 +591,23 @@ verification_gates = Table(
     Column("duration_ms", Integer, server_default="0"),
 )
 
+verification_results = Table(
+    "verification_results",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("gate", Text, nullable=False),
+    Column("verdict", Text, nullable=False),
+    Column("checks_json", Text),
+    Column("summary", Text),
+    Column("node_id", Text),
+    Column("entity_type", Text),
+    Column("entity_id", Text),
+    Column("retry_count", Integer, server_default="0"),
+    Column("budget_spent_usd", Float, server_default="0.0"),
+    Column("run_at", Text, nullable=False),
+    Column("duration_ms", Integer, server_default="0"),
+)
+
 # ---------------------------------------------------------------------------
 # Templates
 # ---------------------------------------------------------------------------

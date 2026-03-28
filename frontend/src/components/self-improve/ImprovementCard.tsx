@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { FileCode, Check, X, ChevronDown, ChevronUp, ShieldCheck, ShieldAlert, TestTube } from 'lucide-react';
+import { FileCode, Check, X, ChevronDown, ChevronUp, ShieldCheck, ShieldAlert, TestTube, AlertTriangle } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiPost } from '../../lib/api';
 import { cn } from '../../lib/utils';
 import { useToast } from '../shared/Toast';
 import { DiffViewer } from './DiffViewer';
-import type { Improvement } from '../../types/self-improve';
+import type { Improvement, GateResult } from '../../types/self-improve';
 
 const CATEGORY_COLORS: Record<Improvement['category'], { bg: string; text: string }> = {
   performance: { bg: 'bg-blue-500/20', text: 'text-blue-400' },
@@ -137,6 +137,39 @@ export function ImprovementCard({ improvement, highlight }: { improvement: Impro
                 ))}
               </ul>
             )}
+          </div>
+        )}
+
+        {/* Gate results (issues list) */}
+        {improvement.gate_results && improvement.gate_results.length > 0 && (
+          <div className="space-y-2 mb-3">
+            {improvement.gate_results
+              .filter((gr: GateResult) => gr.verdict !== 'pass')
+              .map((gr: GateResult, gIdx: number) => {
+                const failedChecks = gr.checks.filter((c) => !c.passed);
+                if (failedChecks.length === 0) return null;
+                return (
+                  <div key={gIdx} className="rounded-lg bg-muted/30 border border-border p-3">
+                    <div className="flex items-center gap-2 text-xs mb-2">
+                      <AlertTriangle size={14} className={gr.verdict === 'fail' ? 'text-red-400' : 'text-yellow-400'} />
+                      <span className={cn('font-medium', gr.verdict === 'fail' ? 'text-red-400' : 'text-yellow-400')}>
+                        {gr.gate} — {gr.verdict === 'fail' ? 'Failed' : 'Warning'}
+                      </span>
+                      {gr.retry_count > 0 && (
+                        <span className="text-muted-foreground ml-auto">retry {gr.retry_count}</span>
+                      )}
+                    </div>
+                    <ul className="space-y-1 text-xs text-muted-foreground">
+                      {failedChecks.map((c, cIdx) => (
+                        <li key={cIdx} className="flex items-start gap-1">
+                          <span className={cn('shrink-0 mt-0.5', c.severity === 'error' ? 'text-red-400' : 'text-yellow-400')}>-</span>
+                          <span>{c.message}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
           </div>
         )}
 

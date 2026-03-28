@@ -25,6 +25,23 @@ export interface Cycle {
   error: string | null;
 }
 
+export interface GateCheck {
+  name: string;
+  passed: boolean;
+  message: string;
+  severity: string;
+}
+
+export interface GateResult {
+  gate: string;
+  verdict: 'pass' | 'fail' | 'warn';
+  checks: GateCheck[];
+  summary: string;
+  retry_count: number;
+  run_at: string;
+  duration_ms: number;
+}
+
 export interface Improvement {
   id: string;
   cycle_id: string;
@@ -61,6 +78,7 @@ export interface Improvement {
   } | null;
   pr_description: string | null;
   agent_id: string | null;
+  gate_results?: GateResult[];
   created_at: string;
   updated_at: string;
 }

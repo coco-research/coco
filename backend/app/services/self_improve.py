@@ -6,9 +6,12 @@ and presents them to a human for approval.
 """
 
 import json
+import os
+import shutil
+import subprocess
 import uuid
 import threading
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 import structlog
@@ -22,6 +25,8 @@ from app.services.worktree_manager import WorktreeManager, DENYLIST_PATTERNS
 log = structlog.get_logger()
 
 REPO_ROOT = Path(__file__).parent.parent.parent.parent  # coco-platform root
+LOCK_FILE = Path.home() / ".coco" / "self_improve.lock"
+MIN_DISK_MB = 500  # minimum free disk space in MB
 
 # Valid cycle statuses
 CYCLE_STATUSES = [
@@ -167,6 +172,89 @@ SQUAD_ROLES = {
 }
 
 
+def _check_disk_space(min_mb: int = MIN_DISK_MB) -> bool:
+    """Return True if at least ``min_mb`` MB of disk space is free."""
+    try:
+        usage = shutil.disk_usage(REPO_ROOT)
+        free_mb = usage.free / (1024 * 1024)
+        if free_mb < min_mb:
+            log.warning("disk_space_low", free_mb=round(free_mb, 1), min_mb=min_mb)
+            return False
+        return True
+    except Exception as e:
+        log.warning("disk_space_check_failed", error=str(e))
+        return True  # optimistic fallback
+
+
+def _acquire_lock() -> bool:
+    """Acquire the self-improve lock file. Returns False if another cycle owns it."""
+    LOCK_FILE.parent.mkdir(parents=True, exist_ok=True)
+    if LOCK_FILE.exists():
+        try:
+            content = LOCK_FILE.read_text().strip()
+            pid = int(content.split(":")[0]) if content else 0
+            # Check if the owning process is still alive
+            if pid > 0:
+                os.kill(pid, 0)  # signal 0 checks existence
+                log.warning("lock_held_by_running_process", pid=pid)
+                return False
+        except (ProcessLookupError, OSError, ValueError):
+            # Process is gone — stale lock, safe to take over
+            log.info("removing_stale_lock", path=str(LOCK_FILE))
+    LOCK_FILE.write_text(f"{os.getpid()}:{datetime.now(timezone.utc).isoformat()}")
+    return True
+
+
+def _release_lock():
+    """Release the self-improve lock file."""
+    try:
+        LOCK_FILE.unlink(missing_ok=True)
+    except Exception as e:
+        log.warning("lock_release_failed", error=str(e))
+
+
+def cleanup_stale_worktrees(max_age_hours: int = 24):
+    """Remove self-improve worktrees older than ``max_age_hours``."""
+    try:
+        result = subprocess.run(
+            ["git", "worktree", "list", "--porcelain"],
+            capture_output=True, text=True, cwd=REPO_ROOT,
+        )
+        if result.returncode != 0:
+            log.warning("worktree_list_failed", stderr=result.stderr[:200])
+            return
+
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=max_age_hours)
+        current_worktree: str | None = None
+
+        for line in result.stdout.splitlines():
+            if line.startswith("worktree "):
+                current_worktree = line[len("worktree "):]
+            elif line.startswith("branch ") and current_worktree:
+                branch = line[len("branch refs/heads/"):]
+                if branch.startswith("self-improve/"):
+                    wt_path = Path(current_worktree)
+                    if wt_path.exists():
+                        try:
+                            mtime = datetime.fromtimestamp(wt_path.stat().st_mtime, tz=timezone.utc)
+                            if mtime < cutoff:
+                                log.info("cleaning_stale_worktree", path=str(wt_path), branch=branch)
+                                subprocess.run(
+                                    ["git", "worktree", "remove", "--force", str(wt_path)],
+                                    capture_output=True, cwd=REPO_ROOT,
+                                )
+                                # Also try to delete the branch
+                                subprocess.run(
+                                    ["git", "branch", "-D", branch],
+                                    capture_output=True, cwd=REPO_ROOT,
+                                )
+                        except Exception as e:
+                            log.warning("stale_worktree_cleanup_failed", path=str(wt_path), error=str(e))
+                current_worktree = None
+    except Exception as e:
+        log.warning("cleanup_stale_worktrees_error", error=str(e))
+
+
 class SelfImproveService:
     def __init__(self):
         self.worktree_mgr = WorktreeManager()
@@ -184,31 +272,46 @@ class SelfImproveService:
         focus_areas: list[str] | None,
     ) -> dict:
         """Start a new self-improvement cycle."""
-        with self._lock:
-            if self._active_cycle_id is not None:
-                # Check if it's actually still active in DB
-                existing = self.get_cycle(self._active_cycle_id)
-                if existing and existing._mapping["status"] not in ("completed", "rejected", "failed"):
-                    raise RuntimeError("A self-improvement cycle is already active")
-                self._active_cycle_id = None
+        # Pre-flight checks
+        if not _check_disk_space():
+            raise RuntimeError(f"Insufficient disk space (need at least {MIN_DISK_MB}MB free)")
 
-            cycle_id = str(uuid.uuid4())
-            now = datetime.now(timezone.utc).isoformat()
+        if not _acquire_lock():
+            raise RuntimeError("Another self-improvement cycle is running (lock file held)")
 
-            with get_db() as db:
-                db.exec_driver_sql(
-                    """INSERT INTO self_improve_cycles
-                       (id, status, budget_usd, spent_usd, max_improvements, focus_areas, started_at, created_at)
-                       VALUES (?, ?, ?, 0.0, ?, ?, ?, ?)""",
-                    (
-                        cycle_id, "planning", budget_usd, max_improvements,
-                        json.dumps(focus_areas) if focus_areas else None,
-                        now, now,
-                    ),
-                )
-                pass  # auto-commit
+        try:
+            # Clean up stale worktrees from previous failed cycles
+            cleanup_stale_worktrees()
 
-            self._active_cycle_id = cycle_id
+            with self._lock:
+                if self._active_cycle_id is not None:
+                    # Check if it's actually still active in DB
+                    existing = self.get_cycle(self._active_cycle_id)
+                    if existing and existing.get("status") not in ("completed", "rejected", "failed"):
+                        _release_lock()
+                        raise RuntimeError("A self-improvement cycle is already active")
+                    self._active_cycle_id = None
+
+                cycle_id = str(uuid.uuid4())
+                now = datetime.now(timezone.utc).isoformat()
+
+                with get_db() as db:
+                    db.exec_driver_sql(
+                        """INSERT INTO self_improve_cycles
+                           (id, status, budget_usd, spent_usd, max_improvements, focus_areas, started_at, created_at)
+                           VALUES (?, ?, ?, 0.0, ?, ?, ?, ?)""",
+                        (
+                            cycle_id, "planning", budget_usd, max_improvements,
+                            json.dumps(focus_areas) if focus_areas else None,
+                            now, now,
+                        ),
+                    )
+                    pass  # auto-commit
+
+                self._active_cycle_id = cycle_id
+        except Exception:
+            _release_lock()
+            raise
 
         # Spawn PM agent to analyze codebase
         focus_clause = ""
@@ -359,6 +462,7 @@ class SelfImproveService:
             if self._active_cycle_id == cycle_id:
                 self._active_cycle_id = None
 
+        _release_lock()
         event_bus.emit("self_improve.cycle_cancelled", {"cycle_id": cycle_id})
         return self.get_cycle(cycle_id)
 
@@ -577,13 +681,13 @@ class SelfImproveService:
                     ),
                 )
 
-                # Run G1 ideation gate on each proposed improvement
+                # Run G1 ideation gate with retry on each proposed improvement
                 try:
                     cycle_row = db.exec_driver_sql(
-                        "SELECT focus_areas FROM self_improve_cycles WHERE id = ?", (cycle_id,)
+                        "SELECT focus_areas, budget_usd, spent_usd FROM self_improve_cycles WHERE id = ?", (cycle_id,)
                     ).fetchone()
                     focus_areas = json.loads(cycle_row._mapping["focus_areas"]) if cycle_row and cycle_row._mapping["focus_areas"] else []
-                    g1_result = verification_service.run_gate(
+                    g1_result = verification_service.run_gate_with_retry(
                         gate_name="G1_ideation",
                         input_data={"requirements": focus_areas},
                         output_data={
@@ -594,9 +698,12 @@ class SelfImproveService:
                         },
                         entity_type="improvement",
                         entity_id=imp_id,
+                        max_retries=2,
+                        budget_usd=cycle_row._mapping["budget_usd"] if cycle_row else None,
+                        spent_usd=cycle_row._mapping["spent_usd"] if cycle_row else 0.0,
                     )
                     if g1_result.verdict.value == "fail":
-                        log.warning("gate_failed", gate="G1", improvement_id=imp_id)
+                        log.warning("gate_failed", gate="G1", improvement_id=imp_id, retries=g1_result.retry_count)
                 except Exception as e:
                     log.debug("g1_gate_skipped", error=str(e))
 
@@ -665,9 +772,13 @@ class SelfImproveService:
             )
             db.commit()
 
-        # Run G2 plan gate on the architect's output
+        # Run G2 plan gate with retry on the architect's output
         try:
-            g2_result = verification_service.run_gate(
+            with get_db() as db:
+                _cr = db.exec_driver_sql(
+                    "SELECT budget_usd, spent_usd FROM self_improve_cycles WHERE id = ?", (cycle_id,)
+                ).fetchone()
+            g2_result = verification_service.run_gate_with_retry(
                 gate_name="G2_plan",
                 input_data={"improvements": [dict(r._mapping) for r in approved]},
                 output_data={
@@ -678,15 +789,30 @@ class SelfImproveService:
                 },
                 entity_type="cycle",
                 entity_id=cycle_id,
+                max_retries=2,
+                budget_usd=_cr._mapping["budget_usd"] if _cr else None,
+                spent_usd=_cr._mapping["spent_usd"] if _cr else 0.0,
             )
             if g2_result.verdict.value == "fail":
-                log.warning("gate_failed", gate="G2", cycle_id=cycle_id)
+                log.warning("gate_failed", gate="G2", cycle_id=cycle_id, retries=g2_result.retry_count)
         except Exception as e:
             log.debug("g2_gate_skipped", error=str(e))
 
         # Spawn a Dev agent per improvement in its own worktree
         denylist_str = ", ".join(DENYLIST_PATTERNS)
         for imp_row in approved:
+            # Budget check before each improvement
+            if not self._check_budget(cycle_id):
+                log.warning("budget_exceeded_during_dev", cycle_id=cycle_id)
+                self._fail_cycle(cycle_id, "Budget exceeded during development")
+                return
+
+            # Disk space check before worktree creation
+            if not _check_disk_space():
+                log.warning("disk_space_low_during_dev", cycle_id=cycle_id)
+                self._fail_cycle(cycle_id, f"Insufficient disk space (need at least {MIN_DISK_MB}MB free)")
+                return
+
             imp_id = imp_row._mapping["id"]
             title = imp_row._mapping["title"]
             description = imp_row._mapping["description"]
@@ -864,10 +990,14 @@ class SelfImproveService:
             self._check_developing_complete(cycle_id)
             return
 
-        # Run G3 implementation gate before proceeding to review
+        # Run G3 implementation gate with retry before proceeding to review
         try:
             diff_for_gate = self.worktree_mgr.get_diff(imp["branch_name"]) if imp["branch_name"] else ""
-            g3_result = verification_service.run_gate(
+            with get_db() as db:
+                _cr = db.exec_driver_sql(
+                    "SELECT budget_usd, spent_usd FROM self_improve_cycles WHERE id = ?", (cycle_id,)
+                ).fetchone()
+            g3_result = verification_service.run_gate_with_retry(
                 gate_name="G3_implementation",
                 input_data={"title": imp.get("title", ""), "description": imp.get("description", "")},
                 output_data={
@@ -878,9 +1008,12 @@ class SelfImproveService:
                 },
                 entity_type="improvement",
                 entity_id=improvement_id,
+                max_retries=2,
+                budget_usd=_cr._mapping["budget_usd"] if _cr else None,
+                spent_usd=_cr._mapping["spent_usd"] if _cr else 0.0,
             )
             if g3_result.verdict.value == "fail":
-                log.warning("gate_failed", gate="G3", improvement_id=improvement_id)
+                log.warning("gate_failed", gate="G3", improvement_id=improvement_id, retries=g3_result.retry_count)
         except Exception as e:
             log.debug("g3_gate_skipped", error=str(e))
 
@@ -1043,9 +1176,13 @@ class SelfImproveService:
 
         now = datetime.now(timezone.utc).isoformat()
 
-        # Run G4 acceptance gate on QA results
+        # Run G4 acceptance gate with retry on QA results
         try:
-            g4_result = verification_service.run_gate(
+            with get_db() as db:
+                _cr = db.exec_driver_sql(
+                    "SELECT budget_usd, spent_usd FROM self_improve_cycles WHERE id = ?", (cycle_id,)
+                ).fetchone()
+            g4_result = verification_service.run_gate_with_retry(
                 gate_name="G4_acceptance",
                 input_data={"requirements": []},
                 output_data={
@@ -1056,9 +1193,12 @@ class SelfImproveService:
                 },
                 entity_type="cycle",
                 entity_id=cycle_id,
+                max_retries=2,
+                budget_usd=_cr._mapping["budget_usd"] if _cr else None,
+                spent_usd=_cr._mapping["spent_usd"] if _cr else 0.0,
             )
             if g4_result.verdict.value == "fail":
-                log.warning("gate_failed", gate="G4", cycle_id=cycle_id)
+                log.warning("gate_failed", gate="G4", cycle_id=cycle_id, retries=g4_result.retry_count)
         except Exception as e:
             log.debug("g4_gate_skipped", error=str(e))
 
@@ -1074,6 +1214,7 @@ class SelfImproveService:
                 if self._active_cycle_id == cycle_id:
                     self._active_cycle_id = None
 
+            _release_lock()
             event_bus.emit("self_improve.cycle_completed", {"cycle_id": cycle_id})
         else:
             issues = qa_results.get("regressions", []) + qa_results.get("integration_issues", [])
@@ -1157,6 +1298,7 @@ class SelfImproveService:
                     if self._active_cycle_id == cycle_id:
                         self._active_cycle_id = None
 
+                _release_lock()
                 event_bus.emit("self_improve.cycle_completed", {
                     "cycle_id": cycle_id, "status": "rejected",
                 })
@@ -1204,6 +1346,7 @@ class SelfImproveService:
             if self._active_cycle_id == cycle_id:
                 self._active_cycle_id = None
 
+        _release_lock()
         event_bus.emit("self_improve.cycle_failed", {"cycle_id": cycle_id, "error": error})
 
     def _spawn_squad_agent(

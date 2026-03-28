@@ -7,8 +7,9 @@ from app.db.connections import get_hub_db, get_platform_db
 from app.config import HUB_DB_PATH, BRAIN_JSON_PATH
 from app.services.dedup import similarity, find_duplicates, pick_best, group_similarity
 from app.services.event_bus import event_bus
-from app.models.todos import CreateTodoBody, MergeTodosBody, PatchTodoBody
+from app.models.todos import CreateTodoBody, CreateDependencyBody, MergeTodosBody, PatchTodoBody
 from app.models.common import TransitionBody
+from app.services.id_generator import assign_display_id, resolve_display_id
 
 log = logging.getLogger(__name__)
 
@@ -182,6 +183,8 @@ def list_todos(
         # Step 2: Read all overrides + platform-native todos from platform.db
         overrides: dict[str, dict] = {}
         platform_native: list[dict] = []
+        display_id_map: dict[str, str] = {}
+        blocked_by_counts: dict[str, int] = {}
         with get_platform_db() as pdb:
             override_rows = pdb.execute("SELECT * FROM todo_overrides").fetchall()
             for r in override_rows:
@@ -191,6 +194,22 @@ def list_todos(
                 else:
                     overrides[row["hub_todo_id"]] = row
 
+            # Load display IDs
+            try:
+                ident_rows = pdb.execute("SELECT hub_todo_id, display_id FROM todo_identifiers").fetchall()
+                display_id_map = {r["hub_todo_id"]: r["display_id"] for r in ident_rows}
+            except Exception:
+                pass
+
+            # Load blocked_by counts
+            try:
+                dep_rows = pdb.execute(
+                    "SELECT todo_id, COUNT(*) as cnt FROM todo_dependencies GROUP BY todo_id"
+                ).fetchall()
+                blocked_by_counts = {r["todo_id"]: r["cnt"] for r in dep_rows}
+            except Exception:
+                pass
+
         # Step 3: Merge hub todos with overrides
         merged = []
         for t in hub_todos:
@@ -198,6 +217,14 @@ def list_todos(
 
         # Step 4: Add platform-native todos
         merged.extend(platform_native)
+
+        # Step 4b: Enrich with display_id and blocked_by_count
+        for t in merged:
+            tid = t.get("id")
+            if tid in display_id_map:
+                t["display_id"] = display_id_map[tid]
+            if tid in blocked_by_counts:
+                t["blocked_by_count"] = blocked_by_counts[tid]
 
         # Step 5: Apply filters
         if status:
@@ -213,6 +240,21 @@ def list_todos(
     except Exception as e:
         log.exception("list_todos failed: %s", e)
         return []
+
+
+@router.get("/api/todos/by-id/{display_id}")
+def get_todo_by_display_id(display_id: str):
+    """Resolve a human-readable display ID (e.g. CXR-47) to the full todo."""
+    hub_todo_id = resolve_display_id(display_id)
+    if not hub_todo_id:
+        raise HTTPException(404, f"No todo found for display ID '{display_id}'")
+
+    todo = _get_todo_by_id(hub_todo_id)
+    if not todo:
+        raise HTTPException(404, f"Todo {hub_todo_id} not found")
+
+    todo["display_id"] = display_id.upper()
+    return todo
 
 
 @router.get("/api/todos/duplicates")
@@ -344,6 +386,16 @@ def create_todo(body: CreateTodoBody):
         "node_id": body.node_id,
         "is_platform_native": True,
     }
+
+    # Assign human-readable display ID if node_id is provided
+    effective_node_id = body.node_id or body.project_id
+    if effective_node_id:
+        try:
+            display_id = assign_display_id(todo_id, effective_node_id)
+            if display_id:
+                result["display_id"] = display_id
+        except Exception as e:
+            log.warning("assign_display_id_failed: %s", e)
 
     # Dedup-on-ingest: check for near-duplicates across both hub.db and platform-native todos
     try:
@@ -685,3 +737,77 @@ def dedup_todos():
 
     log.info("todo_dedup_complete", extra={"removed": removed, "groups_cleaned": groups_cleaned})
     return {"removed": removed, "groups_cleaned": groups_cleaned}
+
+
+# ---- Todo Dependencies ----
+
+
+@router.get("/api/todos/{todo_id}/dependencies")
+def list_dependencies(todo_id: str):
+    """List all dependencies for a todo."""
+    existing = _get_todo_by_id(todo_id)
+    if not existing:
+        raise HTTPException(404, "Todo not found")
+
+    with get_platform_db() as pdb:
+        rows = pdb.execute(
+            "SELECT id, todo_id, depends_on, dep_type, created_at "
+            "FROM todo_dependencies WHERE todo_id = ? ORDER BY created_at",
+            (todo_id,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+@router.post("/api/todos/{todo_id}/dependencies", status_code=201)
+def create_dependency(todo_id: str, body: CreateDependencyBody):
+    """Add a dependency: todo_id is blocked by depends_on."""
+    existing = _get_todo_by_id(todo_id)
+    if not existing:
+        raise HTTPException(404, "Todo not found")
+
+    dep_todo = _get_todo_by_id(body.depends_on)
+    if not dep_todo:
+        raise HTTPException(404, f"Dependency todo '{body.depends_on}' not found")
+
+    if todo_id == body.depends_on:
+        raise HTTPException(400, "A todo cannot depend on itself")
+
+    dep_id = str(uuid.uuid4())
+
+    with get_platform_db() as pdb:
+        try:
+            pdb.execute(
+                "INSERT INTO todo_dependencies (id, todo_id, depends_on, dep_type) "
+                "VALUES (?, ?, ?, ?)",
+                (dep_id, todo_id, body.depends_on, body.dep_type),
+            )
+            pdb.commit()
+        except Exception as e:
+            if "UNIQUE constraint" in str(e):
+                raise HTTPException(409, "Dependency already exists")
+            raise HTTPException(500, f"Failed to create dependency: {e}")
+
+    event_bus.emit("todo.dependency.created", {
+        "todo_id": todo_id,
+        "depends_on": body.depends_on,
+        "dep_type": body.dep_type,
+    })
+    return {"id": dep_id, "todo_id": todo_id, "depends_on": body.depends_on, "dep_type": body.dep_type}
+
+
+@router.delete("/api/todos/{todo_id}/dependencies/{dep_id}")
+def delete_dependency(todo_id: str, dep_id: str):
+    """Remove a dependency."""
+    with get_platform_db() as pdb:
+        row = pdb.execute(
+            "SELECT id FROM todo_dependencies WHERE id = ? AND todo_id = ?",
+            (dep_id, todo_id),
+        ).fetchone()
+        if not row:
+            raise HTTPException(404, "Dependency not found")
+
+        pdb.execute("DELETE FROM todo_dependencies WHERE id = ?", (dep_id,))
+        pdb.commit()
+
+    event_bus.emit("todo.dependency.deleted", {"todo_id": todo_id, "dep_id": dep_id})
+    return {"ok": True}

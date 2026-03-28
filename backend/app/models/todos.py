@@ -25,3 +25,8 @@ class PatchTodoBody(BaseModel):
 class MergeTodosBody(BaseModel):
     keep_id: str
     remove_ids: list[str]
+
+
+class CreateDependencyBody(BaseModel):
+    depends_on: str
+    dep_type: str = "blocked_by"

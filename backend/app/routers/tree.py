@@ -42,7 +42,7 @@ def get_tree():
         rows = db.execute(
             "SELECT id, parent_id, hub_project_id, label, node_type, "
             "sort_order, path, depth, icon, color, folder_path, github_repo, "
-            "jira_key, confluence_space, metadata, created_at, updated_at "
+            "jira_key, confluence_space, prefix, metadata, created_at, updated_at "
             "FROM nodes ORDER BY depth, sort_order"
         ).fetchall()
         nodes = [dict(r) for r in rows]
@@ -73,7 +73,7 @@ def get_node(node_id: str):
         node = db.execute(
             "SELECT id, parent_id, hub_project_id, label, node_type, "
             "sort_order, path, depth, icon, color, folder_path, github_repo, "
-            "jira_key, confluence_space, metadata, created_at, updated_at "
+            "jira_key, confluence_space, prefix, metadata, created_at, updated_at "
             "FROM nodes WHERE id = ?",
             (node_id,),
         ).fetchone()
@@ -83,7 +83,7 @@ def get_node(node_id: str):
         children = db.execute(
             "SELECT id, parent_id, hub_project_id, label, node_type, "
             "sort_order, path, depth, icon, color, folder_path, github_repo, "
-            "jira_key, confluence_space, metadata, created_at, updated_at "
+            "jira_key, confluence_space, prefix, metadata, created_at, updated_at "
             "FROM nodes WHERE parent_id = ? ORDER BY sort_order",
             (node_id,),
         ).fetchall()
@@ -97,7 +97,7 @@ def get_subtree(node_id: str):
         node = db.execute(
             "SELECT id, parent_id, hub_project_id, label, node_type, "
             "sort_order, path, depth, icon, color, folder_path, github_repo, "
-            "jira_key, confluence_space, metadata, created_at, updated_at "
+            "jira_key, confluence_space, prefix, metadata, created_at, updated_at "
             "FROM nodes WHERE id = ?",
             (node_id,),
         ).fetchone()
@@ -108,7 +108,7 @@ def get_subtree(node_id: str):
         descendants = db.execute(
             "SELECT id, parent_id, hub_project_id, label, node_type, "
             "sort_order, path, depth, icon, color, folder_path, github_repo, "
-            "jira_key, confluence_space, metadata, created_at, updated_at "
+            "jira_key, confluence_space, prefix, metadata, created_at, updated_at "
             "FROM nodes WHERE path LIKE ? ORDER BY depth, sort_order",
             (path_prefix + "%",),
         ).fetchall()
@@ -163,7 +163,7 @@ def create_node(body: CreateNodeBody):
         row = db.execute(
             "SELECT id, parent_id, hub_project_id, label, node_type, "
             "sort_order, path, depth, icon, color, folder_path, github_repo, "
-            "jira_key, confluence_space, metadata, created_at, updated_at "
+            "jira_key, confluence_space, prefix, metadata, created_at, updated_at "
             "FROM nodes WHERE id = ?",
             (new_id,),
         ).fetchone()
@@ -194,7 +194,7 @@ def patch_node(node_id: str, body: PatchNodeBody):
 
         updates = []
         params = []
-        for field in ("label", "node_type", "icon", "color", "folder_path", "github_repo", "jira_key", "confluence_space", "metadata", "sort_order"):
+        for field in ("label", "node_type", "icon", "color", "folder_path", "github_repo", "jira_key", "confluence_space", "prefix", "metadata", "sort_order"):
             if field in body.model_fields_set:
                 val = getattr(body, field)
                 updates.append(f"{field} = ?")
@@ -215,7 +215,7 @@ def patch_node(node_id: str, body: PatchNodeBody):
         row = db.execute(
             "SELECT id, parent_id, hub_project_id, label, node_type, "
             "sort_order, path, depth, icon, color, folder_path, github_repo, "
-            "jira_key, confluence_space, metadata, created_at, updated_at "
+            "jira_key, confluence_space, prefix, metadata, created_at, updated_at "
             "FROM nodes WHERE id = ?",
             (node_id,),
         ).fetchone()
@@ -313,7 +313,7 @@ def move_node(node_id: str, body: MoveNodeBody):
         row = db.execute(
             "SELECT id, parent_id, hub_project_id, label, node_type, "
             "sort_order, path, depth, icon, color, folder_path, github_repo, "
-            "jira_key, confluence_space, metadata, created_at, updated_at "
+            "jira_key, confluence_space, prefix, metadata, created_at, updated_at "
             "FROM nodes WHERE id = ?",
             (node_id,),
         ).fetchone()

@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS nodes (
     github_repo TEXT,
     jira_key TEXT,
     confluence_space TEXT,
+    prefix TEXT,
     metadata TEXT DEFAULT '{}',
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -275,6 +276,30 @@ CREATE TABLE IF NOT EXISTS project_overrides (
 );
 CREATE INDEX IF NOT EXISTS idx_project_overrides_hub ON project_overrides(hub_project_id);
 
+CREATE TABLE IF NOT EXISTS id_sequences (
+    node_id TEXT PRIMARY KEY REFERENCES nodes(id),
+    next_seq INTEGER NOT NULL DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS todo_identifiers (
+    hub_todo_id TEXT PRIMARY KEY,
+    node_id TEXT NOT NULL,
+    sequence_num INTEGER NOT NULL,
+    display_id TEXT NOT NULL,
+    UNIQUE(node_id, sequence_num)
+);
+CREATE INDEX IF NOT EXISTS idx_todo_ident_display ON todo_identifiers(display_id);
+
+CREATE TABLE IF NOT EXISTS todo_dependencies (
+    id TEXT PRIMARY KEY,
+    todo_id TEXT NOT NULL,
+    depends_on TEXT NOT NULL,
+    dep_type TEXT NOT NULL DEFAULT 'blocked_by',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(todo_id, depends_on)
+);
+CREATE INDEX IF NOT EXISTS idx_todo_deps_todo ON todo_dependencies(todo_id);
+CREATE INDEX IF NOT EXISTS idx_todo_deps_dep ON todo_dependencies(depends_on);
+
 CREATE TABLE IF NOT EXISTS todo_overrides (
     hub_todo_id TEXT PRIMARY KEY,
     title TEXT,
@@ -397,7 +422,7 @@ def init_platform_db():
     # nodes: folder_path, github_repo, jira_key, confluence_space
     if "nodes" in existing_tables:
         cols = {r[1] for r in conn.execute("PRAGMA table_info(nodes)").fetchall()}
-        for col in ("folder_path", "github_repo", "jira_key", "confluence_space"):
+        for col in ("folder_path", "github_repo", "jira_key", "confluence_space", "prefix"):
             if col not in cols:
                 try:
                     conn.execute(f"ALTER TABLE nodes ADD COLUMN {col} TEXT")

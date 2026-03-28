@@ -27,6 +27,7 @@ class PatchNodeBody(BaseModel):
     github_repo: Optional[str] = None
     jira_key: Optional[str] = None
     confluence_space: Optional[str] = None
+    prefix: Optional[str] = None
     metadata: Optional[str] = None
     sort_order: Optional[int] = None
 

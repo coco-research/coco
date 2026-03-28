@@ -12,7 +12,7 @@ from app.routers import (
     health, projects, teams, brain, content, agents, tasks,
     costs, todos, drafts, sessions, activity, events,
     settings, chat, dashboard, goals, tree, home, collaboration,
-    tts, comments, templates, jarvis, analysis,
+    tts, comments, templates, jarvis, analysis, stt,
 )
 
 structlog.configure(
@@ -121,6 +121,7 @@ app.include_router(jarvis.router)
 app.include_router(comments.router)
 app.include_router(templates.router)
 app.include_router(analysis.router)
+app.include_router(stt.router)
 
 # Serve static frontend in production
 static_dir = Path(__file__).parent.parent / "static"

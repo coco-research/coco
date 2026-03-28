@@ -1,7 +1,8 @@
 """In-process async event bus for broadcasting real-time events to SSE subscribers.
 
 Events are persisted to the ``events`` table in platform.db so that SSE clients
-can replay missed events after a reconnection.
+can replay missed events after a reconnection.  They are also appended to
+``~/.coco/events.jsonl`` so that the CLI can tail the same stream.
 """
 
 from __future__ import annotations
@@ -11,11 +12,12 @@ import json
 import sqlite3
 import time
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import AsyncGenerator
 
 import structlog
 
-from app.config import PLATFORM_DB_PATH
+from app.config import EVENTS_JSONL_PATH, PLATFORM_DB_PATH
 
 log = structlog.get_logger()
 
@@ -89,6 +91,44 @@ class EventBus:
 
         # Persist (fire-and-forget)
         self._persist(event_type, data_json)
+
+        # Bridge to events.jsonl for CLI visibility
+        self._append_jsonl(event_type, data)
+
+    # -- events.jsonl bridge ------------------------------------------------
+
+    _JSONL_MAX_LINES = 10_000
+    _JSONL_TRIM_TO = 5_000
+
+    def _append_jsonl(self, event_type: str, data: dict) -> None:
+        """Append one line to ~/.coco/events.jsonl. Never blocks emit()."""
+        try:
+            line = json.dumps({
+                "type": event_type,
+                "data": data,
+                "ts": datetime.now(timezone.utc).isoformat(),
+            })
+            EVENTS_JSONL_PATH.parent.mkdir(parents=True, exist_ok=True)
+            with open(EVENTS_JSONL_PATH, "a") as f:
+                f.write(line + "\n")
+            self._trim_events_file()
+        except Exception:
+            pass  # Never block on file append
+
+    def _trim_events_file(self) -> None:
+        """If events.jsonl exceeds _JSONL_MAX_LINES, truncate to the last _JSONL_TRIM_TO lines."""
+        try:
+            if not EVENTS_JSONL_PATH.exists():
+                return
+            lines = EVENTS_JSONL_PATH.read_text().splitlines()
+            if len(lines) > self._JSONL_MAX_LINES:
+                trimmed = lines[-self._JSONL_TRIM_TO :]
+                tmp = EVENTS_JSONL_PATH.with_suffix(".jsonl.tmp")
+                tmp.write_text("\n".join(trimmed) + "\n")
+                tmp.rename(EVENTS_JSONL_PATH)
+                log.info("events_jsonl_trimmed", kept=len(trimmed))
+        except Exception:
+            pass  # Best effort
 
     def replay(self, since: str) -> list[dict]:
         """Return persisted events created after *since* (ISO-8601 timestamp).

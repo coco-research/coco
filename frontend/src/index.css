@@ -624,6 +624,50 @@ textarea,
               0 0 0 1px oklch(1 0 0 / 0.04);
 }
 
+/* Smooth bubble entrance animation */
+@keyframes floating-mic-bubble-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.floating-mic-bubble-enter {
+  animation: floating-mic-bubble-in 0.25s ease-out;
+}
+
+/* Blinking cursor for streaming transcript */
+@keyframes floating-mic-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.floating-mic-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 0.9em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: oklch(0.623 0.214 259.815 / 0.8);
+  animation: floating-mic-blink 0.8s steps(1) infinite;
+}
+
+/* Provider indicator badge beneath transcript */
+.floating-mic-provider-badge {
+  display: block;
+  margin-top: 4px;
+  font-size: 9px;
+  line-height: 1;
+  color: oklch(0.556 0 0 / 0.5);
+}
+
+/* Third pulsing ring for extra depth */
+.floating-mic-ring-3 {
+  animation-delay: 1200ms;
+}
+
 /* Light theme overrides */
 :root .floating-mic-idle {
   background: oklch(0.985 0 0 / 0.88);
@@ -658,6 +702,12 @@ textarea,
 :root .floating-mic-glow {
   background: radial-gradient(circle, oklch(0.623 0.214 259.815 / 0.06) 0%, transparent 70%);
 }
+:root .floating-mic-cursor {
+  background: oklch(0.623 0.214 259.815 / 0.6);
+}
+:root .floating-mic-provider-badge {
+  color: oklch(0.556 0 0 / 0.4);
+}
 
 @media (prefers-reduced-motion: reduce) {
   .floating-mic-ring,
@@ -666,4 +716,6 @@ textarea,
   }
   .floating-mic-ring { display: none; }
   .floating-mic-wave-bar { transform: scaleY(0.6); }
+  .floating-mic-cursor { animation: none; opacity: 1; }
+  .floating-mic-bubble-enter { animation: none; }
 }

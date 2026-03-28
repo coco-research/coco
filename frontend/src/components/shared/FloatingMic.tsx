@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Mic, MicOff, Loader2, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { useVoiceInput, speechSupported } from '../../hooks/useVoiceInput';
+import { useVoiceInput } from '../../hooks/useVoiceInput';
 
 type MicState = 'idle' | 'listening' | 'processing' | 'speaking';
 
@@ -11,9 +11,12 @@ type MicState = 'idle' | 'listening' | 'processing' | 'speaking';
  *
  * States:
  *   idle       — static mic icon with subtle glow
- *   listening  — pulsing ring + red dot, shows interim transcript bubble
+ *   listening  — pulsing ring + red dot, shows live streaming transcript bubble
  *   processing — spinner replacing mic icon
  *   speaking   — waveform animation bars (TTS playback)
+ *
+ * Shows a provider indicator badge (Deepgram / Web Speech) while listening.
+ * Live interim transcripts stream in real-time as the user speaks.
  *
  * On final transcript, dispatches `coco:voice-command` CustomEvent so
  * useVoiceCommands can route the command app-wide.
@@ -28,6 +31,27 @@ export function FloatingMic() {
   const [response, setResponse] = useState<string | null>(null);
   const [showBubble, setShowBubble] = useState(false);
   const autoDismissRef = useRef<ReturnType<typeof setTimeout>>();
+  const inactivityRef = useRef<ReturnType<typeof setTimeout>>();
+  const lastTranscriptRef = useRef('');
+
+  // Auto-dismiss transcript bubble after 5s of inactivity (no new text)
+  useEffect(() => {
+    if (!voice.isListening) return;
+
+    // If transcript hasn't changed, start the 5s timer
+    if (voice.transcript === lastTranscriptRef.current && voice.transcript) {
+      clearTimeout(inactivityRef.current);
+      inactivityRef.current = setTimeout(() => {
+        voice.stop();
+        setMicState('idle');
+      }, 5000);
+    } else {
+      clearTimeout(inactivityRef.current);
+    }
+    lastTranscriptRef.current = voice.transcript;
+
+    return () => clearTimeout(inactivityRef.current);
+  }, [voice.transcript, voice.isListening, voice]);
 
   // Listen for external response events (from useVoiceCommands)
   useEffect(() => {
@@ -71,7 +95,8 @@ export function FloatingMic() {
   if (location.pathname === '/jarvis') return null;
 
   // No mic support or voice disabled — don't render
-  if (!speechSupported) return null;
+  // Use hook's `supported` which accounts for both Deepgram and Web Speech
+  if (!voice.supported) return null;
   const voiceEnabled = localStorage.getItem('voice-enabled') !== 'false';
   if (!voiceEnabled) return null;
 
@@ -91,6 +116,7 @@ export function FloatingMic() {
       setResponse(null);
       setShowBubble(false);
       setMicState('listening');
+      lastTranscriptRef.current = '';
       voice.start(handleResult);
     }
   }, [voice, handleResult, micState]);
@@ -106,26 +132,33 @@ export function FloatingMic() {
   const isProcessing = micState === 'processing';
   const isSpeaking = micState === 'speaking';
 
+  const providerLabel = voice.provider === 'deepgram' ? 'Deepgram' : 'Web Speech';
+
   return (
     <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2">
-      {/* Transcript bubble (while listening) */}
+      {/* Streaming transcript bubble (while listening) */}
       {isListening && (
-        <div className="floating-mic-bubble animate-slide-up">
+        <div className="floating-mic-bubble floating-mic-bubble-enter">
           {voice.transcript ? (
-            <p className="text-sm text-foreground">
-              &ldquo;{voice.transcript}&rdquo;
+            <p className="text-sm text-foreground leading-relaxed">
+              {voice.transcript}
+              <span className="floating-mic-cursor" />
             </p>
           ) : (
             <p className="text-sm text-muted-foreground animate-pulse">
               Listening...
             </p>
           )}
+          {/* Provider indicator badge */}
+          <span className="floating-mic-provider-badge">
+            via {providerLabel}
+          </span>
         </div>
       )}
 
       {/* Response bubble */}
       {showBubble && !isListening && (response || isProcessing) && (
-        <div className="floating-mic-bubble animate-slide-up relative">
+        <div className="floating-mic-bubble floating-mic-bubble-enter relative">
           {isProcessing ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 size={14} className="animate-spin" />
@@ -155,6 +188,7 @@ export function FloatingMic() {
           <>
             <span className="floating-mic-ring floating-mic-ring-1" />
             <span className="floating-mic-ring floating-mic-ring-2" />
+            <span className="floating-mic-ring floating-mic-ring-3" />
           </>
         )}
 

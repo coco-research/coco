@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useScope } from '../context/ScopeContext';
 import { Target, Plus, ChevronRight, Check } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn, timeAgo } from '../lib/utils';
 import { InlineEditor } from '../components/shared/InlineEditor';
+import { PropertiesPanel } from '../components/shared/PropertiesPanel';
+import { PropertyField } from '../components/shared/PropertyField';
 
 interface Goal {
   id: string;
@@ -32,7 +34,7 @@ function ProgressBar({ value }: { value: number }) {
   );
 }
 
-function GoalNode({ goal, allGoals, depth = 0 }: { goal: Goal; allGoals: Goal[]; depth?: number }) {
+function GoalNode({ goal, allGoals, depth = 0, onSelect, selectedId }: { goal: Goal; allGoals: Goal[]; depth?: number; onSelect: (goal: Goal) => void; selectedId: string | null }) {
   const [expanded, setExpanded] = useState(true);
   const children = allGoals.filter(g => g.parent_id === goal.id);
   const hasChildren = children.length > 0;
@@ -40,7 +42,11 @@ function GoalNode({ goal, allGoals, depth = 0 }: { goal: Goal; allGoals: Goal[];
   return (
     <div>
       <div
-        className="group flex items-center gap-2 px-3 py-2 hover:bg-accent/50 rounded-md cursor-pointer transition-colors"
+        onClick={() => onSelect(goal)}
+        className={cn(
+          "group flex items-center gap-2 px-3 py-2 hover:bg-accent/50 rounded-md cursor-pointer transition-colors",
+          selectedId === goal.id && "bg-accent/30",
+        )}
         style={{ paddingLeft: `${depth * 24 + 12}px` }}
       >
         {hasChildren ? (
@@ -91,7 +97,7 @@ function GoalNode({ goal, allGoals, depth = 0 }: { goal: Goal; allGoals: Goal[];
       {hasChildren && expanded && (
         <div>
           {children.map(child => (
-            <GoalNode key={child.id} goal={child} allGoals={allGoals} depth={depth + 1} />
+            <GoalNode key={child.id} goal={child} allGoals={allGoals} depth={depth + 1} onSelect={onSelect} selectedId={selectedId} />
           ))}
         </div>
       )}
@@ -147,9 +153,18 @@ function AddGoalForm({ projectId, onClose }: { projectId: string | null; onClose
   );
 }
 
+const STATUS_OPTIONS = [
+  { value: 'active', label: 'Active' },
+  { value: 'achieved', label: 'Achieved' },
+  { value: 'dropped', label: 'Dropped' },
+];
+
 export default function GoalsPage() {
   const { selectedNodeId, scopeProjectIds } = useScope();
   const [showAdd, setShowAdd] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+
+  const queryClient = useQueryClient();
 
   const { data: goals = [], isLoading } = useQuery<Goal[]>({
     queryKey: ['goals', selectedNodeId, scopeProjectIds],
@@ -206,10 +221,135 @@ export default function GoalsPage() {
       ) : (
         <div className="border border-border rounded-xl overflow-hidden divide-y divide-border">
           {rootGoals.map(goal => (
-            <GoalNode key={goal.id} goal={goal} allGoals={goals} />
+            <GoalNode key={goal.id} goal={goal} allGoals={goals} onSelect={setSelectedGoal} selectedId={selectedGoal?.id ?? null} />
           ))}
         </div>
       )}
+
+      {/* Goal detail slide-out */}
+      {selectedGoal && (
+        <GoalDetailPanel
+          goal={selectedGoal}
+          allGoals={goals}
+          onClose={() => setSelectedGoal(null)}
+          onSaved={() => {
+            queryClient.invalidateQueries({ queryKey: ['goals'] });
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+/* ---------- Goal Detail Panel ---------- */
+
+interface GoalDetailPanelProps {
+  goal: Goal;
+  allGoals: Goal[];
+  onClose: () => void;
+  onSaved: () => void;
+}
+
+function GoalDetailPanel({ goal, allGoals, onClose, onSaved }: GoalDetailPanelProps) {
+  const linkedTodos = allGoals.filter(g => g.parent_id === goal.id);
+
+  const handleSave = async (field: string, value: string) => {
+    try {
+      await fetch(`/api/goals/${goal.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: value }),
+      });
+      onSaved();
+    } catch {
+      // ignore
+    }
+  };
+
+  const statusLabel = goal.status.charAt(0).toUpperCase() + goal.status.slice(1);
+
+  return (
+    <PropertiesPanel
+      open={true}
+      onClose={onClose}
+      title={goal.title}
+      subtitle={`${statusLabel} \u00b7 ${goal.progress_pct}% complete`}
+    >
+      {/* Properties */}
+      <div className="space-y-0">
+        <PropertyField
+          label="Title"
+          value={goal.title}
+          onSave={(v) => handleSave('title', v)}
+        />
+        <PropertyField
+          label="Description"
+          value={goal.description}
+          onSave={(v) => handleSave('description', v)}
+          type="textarea"
+          placeholder="Describe this goal..."
+        />
+        <PropertyField
+          label="Status"
+          value={goal.status}
+          onSave={(v) => handleSave('status', v)}
+          type="select"
+          options={STATUS_OPTIONS}
+        />
+        <div className="mb-3">
+          <span className="block text-xs text-muted-foreground mb-0.5">Progress</span>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+              <div
+                className={cn(
+                  'h-full rounded-full transition-all',
+                  goal.progress_pct >= 100 ? 'bg-success' : goal.progress_pct >= 50 ? 'bg-info' : 'bg-warning'
+                )}
+                style={{ width: `${Math.min(goal.progress_pct, 100)}%` }}
+              />
+            </div>
+            <span className="text-xs text-muted-foreground tabular-nums">{goal.progress_pct}%</span>
+          </div>
+        </div>
+        <PropertyField
+          label="Owner"
+          value={goal.owner}
+          onSave={(v) => handleSave('owner', v)}
+          placeholder="Assign an owner..."
+        />
+        <PropertyField
+          label="Target date"
+          value={goal.target_date}
+          onSave={(v) => handleSave('target_date', v)}
+          placeholder="YYYY-MM-DD"
+        />
+        <PropertyField label="Created" value={goal.created_at ? timeAgo(goal.created_at) : null} />
+      </div>
+
+      {/* Sub-goals / linked items */}
+      {linkedTodos.length > 0 && (
+        <div className="border-t border-border pt-4 mt-4">
+          <span className="block text-xs text-muted-foreground mb-2">Sub-goals ({linkedTodos.length})</span>
+          <div className="space-y-1">
+            {linkedTodos.map(sub => (
+              <div key={sub.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/30">
+                {sub.status === 'achieved' ? (
+                  <Check size={12} className="text-success shrink-0" />
+                ) : (
+                  <Target size={12} className="text-muted-foreground shrink-0" />
+                )}
+                <span className={cn(
+                  'text-xs flex-1 truncate',
+                  sub.status === 'achieved' && 'line-through text-muted-foreground',
+                )}>
+                  {sub.title}
+                </span>
+                <span className="text-[10px] text-muted-foreground tabular-nums">{sub.progress_pct}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </PropertiesPanel>
   );
 }

@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 class CommandRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=5000)
     project_id: str | None = None
+    context: list[dict] | None = None  # recent command-response pairs from frontend
 
 
 class CardActionModel(BaseModel):

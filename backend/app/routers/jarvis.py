@@ -487,6 +487,17 @@ async def _claude_fallback(text: str) -> CommandResponse:
 
 @router.post("/api/jarvis/command", response_model=CommandResponse)
 async def jarvis_command(req: CommandRequest):
+    # Hydrate session memory from frontend context if provided
+    if req.context:
+        for entry in req.context:
+            if entry.get("query") and entry.get("reply"):
+                # Only add if not already tracked server-side
+                already = any(
+                    h["user"] == entry["query"][:500] for h in _SESSION_HISTORY
+                )
+                if not already:
+                    _record_exchange(entry["query"], entry["reply"])
+
     # ─── Inline actions: create todo, approve draft ───
     todo_title = _extract_create_todo(req.text)
     if todo_title:

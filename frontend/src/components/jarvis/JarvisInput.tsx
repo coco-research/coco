@@ -7,6 +7,11 @@ import { useTypewriter } from '../../hooks/useTypewriter';
 import { apiPost } from '../../lib/api';
 import type { CommandResponse } from '../../types/cards';
 
+interface HistoryEntry {
+  query: string;
+  reply: string;
+}
+
 interface Props {
   onCommand?: (text: string) => Promise<CommandResponse>;
   onSpeak: (text: string) => Promise<void>;
@@ -35,6 +40,7 @@ export function JarvisInput({ onCommand, onSpeak, onChime, onInteract, delay = 0
   const [response, setResponse] = useState('');
   const [userQuery, setUserQuery] = useState('');
   const [suggestChat, setSuggestChat] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const voice = useVoiceInput();
 
@@ -50,8 +56,10 @@ export function JarvisInput({ onCommand, onSpeak, onChime, onInteract, delay = 0
     try {
       const result = onCommand
         ? await onCommand(input.trim())
-        : await apiPost<CommandResponse>('/jarvis/command', { text: input.trim() });
+        : await apiPost<CommandResponse>('/jarvis/command', { text: input.trim(), context: history });
       setResponse(result.reply);
+      // Track in session history (keep last 5)
+      setHistory((prev) => [...prev.slice(-4), { query: input.trim(), reply: result.reply }]);
       onChime();
 
       // Speak the response and wait for it to finish
@@ -95,6 +103,18 @@ export function JarvisInput({ onCommand, onSpeak, onChime, onInteract, delay = 0
       className="jarvis-reveal max-w-xl mx-auto"
       style={{ '--reveal-delay': `${delay}ms` } as React.CSSProperties}
     >
+      {/* Session history — last few command-response pairs */}
+      {history.length > 0 && (
+        <div className="max-w-xl mx-auto space-y-2 mb-4">
+          {history.slice(-5).map((h, i) => (
+            <div key={i} className="text-xs text-white/40">
+              <span className="font-mono text-sky-400/60">&gt; {h.query}</span>
+              <p className="ml-4 text-white/25">{h.reply.slice(0, 100)}{h.reply.length > 100 ? '...' : ''}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* User's spoken/typed query */}
       {userQuery && (
         <p className="text-center text-xs text-white/30 mb-2">

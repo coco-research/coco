@@ -19,3 +19,6 @@ AGENT_TIMEOUT_MINUTES = int(os.getenv("AGENT_TIMEOUT_MINUTES", "30"))
 CHAT_TIMEOUT_MINUTES = int(os.getenv("CHAT_TIMEOUT_MINUTES", "5"))
 DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY", "")
 USE_AGENT_SDK = os.getenv("USE_AGENT_SDK", "false").lower() in ("true", "1", "yes")
+
+# Database URL — defaults to SQLite (platform.db), supports PostgreSQL for cloud
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{PLATFORM_DB_PATH}")

@@ -7,8 +7,14 @@ from pathlib import Path
 
 import structlog
 from fastapi import APIRouter
+from sqlalchemy import select, func, text
 
-from app.db.connections import get_hub_db, get_platform_db
+from app.db.session import get_db
+from app.db.tables import (
+    hub_content, hub_project_content, hub_drafts, hub_todos,
+    hub_projects, hub_api_costs, hub_sync_state,
+    tasks, cost_ledger,
+)
 
 log = structlog.get_logger()
 
@@ -49,7 +55,6 @@ def _session_data() -> dict:
             return result
         data = json.loads(files[0].read_text())
 
-        # since last session
         started = data.get("started_at")
         if started:
             started_dt = datetime.fromisoformat(started.replace("Z", "+00:00"))
@@ -65,7 +70,6 @@ def _session_data() -> dict:
             else:
                 result["since"]["label"] = f"{hours / 24:.1f}d ago"
 
-        # session info
         result["info"]["last_started"] = data.get("started_at")
         result["info"]["last_focus"] = data.get("focus_project")
         result["info"]["last_launch_type"] = data.get("launch_type")
@@ -75,18 +79,19 @@ def _session_data() -> dict:
         return result
 
 
-def _health_from_sync_state(db) -> list[dict]:
-    """Read sync_state table and compute stale_hours."""
+def _health_from_sync_state(conn) -> list[dict]:
+    """Read hub_sync_state table and compute stale_hours."""
     try:
-        rows = db.execute(
-            "SELECT source_name, status, last_success, items_synced FROM sync_state"
+        rows = conn.execute(
+            select(hub_sync_state)
         ).fetchall()
         now = datetime.now(timezone.utc)
         health = []
         for r in rows:
-            h = dict(r)
-            h["source"] = h.pop("source_name", h.get("source", "unknown"))
-            h["last_sync"] = h.get("last_success")
+            h = dict(r._mapping)
+            # Normalize field names
+            h["source"] = h.pop("source", h.get("source_name", "unknown"))
+            h["last_sync"] = h.get("last_sync") or h.get("last_success")
             # Compute stale_hours
             stale_hours = None
             if h.get("last_sync"):
@@ -132,173 +137,223 @@ def get_home():
         "session": session["info"],
     }
 
-    # --- Hub DB queries (single connection) ---
-    try:
-        with get_hub_db() as db:
-            # Attention: unsorted count
-            try:
-                row = db.execute(
-                    "SELECT COUNT(*) as cnt FROM content WHERE id NOT IN (SELECT content_id FROM project_content)"
-                ).fetchone()
-                result["attention"]["unsorted_count"] = row["cnt"] if row else 0
-            except Exception:
-                log.warning("home_query_failed", section="unsorted_count", exc_info=True)
+    with get_db() as conn:
+        # --- Hub mirror queries ---
 
-            # Attention: pending drafts
-            try:
-                row = db.execute(
-                    "SELECT COUNT(*) as cnt FROM drafts WHERE status = 'pending'"
-                ).fetchone()
-                result["attention"]["pending_drafts"] = row["cnt"] if row else 0
-            except Exception:
-                log.warning("home_query_failed", section="pending_drafts", exc_info=True)
+        # Attention: unsorted count
+        try:
+            row = conn.execute(
+                select(func.count().label("cnt"))
+                .select_from(hub_content)
+                .where(hub_content.c.id.notin_(select(hub_project_content.c.content_id)))
+            ).fetchone()
+            result["attention"]["unsorted_count"] = row.cnt if row else 0
+        except Exception:
+            log.warning("home_query_failed", section="unsorted_count", exc_info=True)
 
-            # Attention: overdue todos
-            try:
-                row = db.execute(
-                    "SELECT COUNT(*) as cnt FROM todos WHERE status = 'open' AND due_date < date('now', 'localtime')"
-                ).fetchone()
-                result["attention"]["overdue_todos"] = row["cnt"] if row else 0
-            except Exception:
-                log.warning("home_query_failed", section="overdue_todos", exc_info=True)
+        # Attention: pending drafts
+        try:
+            row = conn.execute(
+                select(func.count().label("cnt"))
+                .select_from(hub_drafts)
+                .where(hub_drafts.c.status == "pending")
+            ).fetchone()
+            result["attention"]["pending_drafts"] = row.cnt if row else 0
+        except Exception:
+            log.warning("home_query_failed", section="pending_drafts", exc_info=True)
 
-            # Health (sync_state)
-            try:
-                health = _health_from_sync_state(db)
-                result["health"] = health
-                result["attention"]["health_alerts"] = sum(
-                    1 for h in health if h.get("status") in ("red", "critical")
-                )
-            except Exception:
-                log.warning("home_query_failed", section="health", exc_info=True)
+        # Attention: overdue todos
+        try:
+            row = conn.execute(
+                select(func.count().label("cnt"))
+                .select_from(hub_todos)
+                .where(hub_todos.c.status == "open")
+                .where(hub_todos.c.due_date < text("date('now', 'localtime')"))
+            ).fetchone()
+            result["attention"]["overdue_todos"] = row.cnt if row else 0
+        except Exception:
+            log.warning("home_query_failed", section="overdue_todos", exc_info=True)
 
-            # Todos
-            try:
-                row = db.execute(
-                    "SELECT COUNT(*) as cnt FROM todos WHERE status = 'open'"
-                ).fetchone()
-                result["todos"]["total_open"] = row["cnt"] if row else 0
+        # Health
+        try:
+            health = _health_from_sync_state(conn)
+            result["health"] = health
+            result["attention"]["health_alerts"] = sum(
+                1 for h in health if h.get("status") in ("red", "critical")
+            )
+        except Exception:
+            log.warning("home_query_failed", section="health", exc_info=True)
 
-                high = db.execute(
-                    "SELECT id, title, project_id, owner, due_date, priority, status, source_type, jira_key, tags "
-                    "FROM todos WHERE status = 'open' AND priority = 'high' ORDER BY created_at DESC LIMIT 50"
-                ).fetchall()
-                result["todos"]["high_priority"] = [dict(r) for r in high]
+        # Todos
+        try:
+            row = conn.execute(
+                select(func.count().label("cnt"))
+                .select_from(hub_todos)
+                .where(hub_todos.c.status == "open")
+            ).fetchone()
+            result["todos"]["total_open"] = row.cnt if row else 0
 
-                medium = db.execute(
-                    "SELECT id, title, project_id, owner, due_date, priority, status, source_type, jira_key, tags "
-                    "FROM todos WHERE status = 'open' AND priority = 'medium' ORDER BY created_at DESC LIMIT 20"
-                ).fetchall()
-                result["todos"]["medium_priority"] = [dict(r) for r in medium]
+            _todo_cols = [
+                hub_todos.c.id, hub_todos.c.title, hub_todos.c.project_id,
+                hub_todos.c.owner, hub_todos.c.due_date, hub_todos.c.priority,
+                hub_todos.c.status, hub_todos.c.source_type, hub_todos.c.jira_key,
+                hub_todos.c.tags,
+            ]
 
-                overdue = db.execute(
-                    "SELECT id, title, project_id, owner, due_date, priority, status, source_type, jira_key, tags "
-                    "FROM todos WHERE status = 'open' AND due_date < date('now', 'localtime') ORDER BY due_date ASC LIMIT 50"
-                ).fetchall()
-                result["todos"]["overdue"] = [dict(r) for r in overdue]
-            except Exception:
-                log.warning("home_query_failed", section="todos", exc_info=True)
+            high = conn.execute(
+                select(*_todo_cols)
+                .where(hub_todos.c.status == "open", hub_todos.c.priority == "high")
+                .order_by(hub_todos.c.created_at.desc())
+                .limit(50)
+            ).fetchall()
+            result["todos"]["high_priority"] = [dict(r._mapping) for r in high]
 
-            # Projects with todo counts and source breakdown
-            try:
-                rows = db.execute(
-                    """SELECT p.id, p.name, p.active,
-                        (SELECT COUNT(*) FROM project_content pc WHERE pc.project_id = p.id) as item_count,
-                        (SELECT COUNT(*) FROM todos t WHERE t.project_id = p.id AND t.status = 'open') as todo_open,
-                        (SELECT COUNT(*) FROM todos t WHERE t.project_id = p.id AND t.status = 'done') as todo_done,
-                        (SELECT COUNT(*) FROM todos t WHERE t.project_id = p.id) as todo_total
-                    FROM projects p ORDER BY p.name"""
-                ).fetchall()
-                projects = []
-                for r in rows:
-                    p = dict(r)
-                    sources = {"email": 0, "voice": 0, "jira": 0, "confluence": 0}
-                    try:
-                        src_rows = db.execute(
-                            """SELECT c.source, COUNT(*) as count
-                               FROM content c
-                               JOIN project_content pc ON c.id = pc.content_id
-                               WHERE pc.project_id = ?
-                               GROUP BY c.source""",
-                            (p["id"],),
-                        ).fetchall()
-                        for sr in src_rows:
-                            src = sr["source"]
-                            sources[src] = sr["count"]
-                    except Exception:
-                        log.warning("home_query_failed", section="project_sources", exc_info=True)
-                    p["sources"] = sources
-                    projects.append(p)
-                result["projects"] = projects
-            except Exception:
-                log.warning("home_query_failed", section="projects", exc_info=True)
+            medium = conn.execute(
+                select(*_todo_cols)
+                .where(hub_todos.c.status == "open", hub_todos.c.priority == "medium")
+                .order_by(hub_todos.c.created_at.desc())
+                .limit(20)
+            ).fetchall()
+            result["todos"]["medium_priority"] = [dict(r._mapping) for r in medium]
 
-            # Costs from hub api_costs
-            try:
-                row = db.execute(
-                    "SELECT COALESCE(SUM(cost_usd), 0) as total FROM api_costs WHERE created_at >= date('now')"
-                ).fetchone()
-                result["costs"]["today_usd"] += round(row["total"], 4) if row else 0.0
-            except Exception:
-                log.warning("home_query_failed", section="hub_costs_today", exc_info=True)
+            overdue = conn.execute(
+                select(*_todo_cols)
+                .where(hub_todos.c.status == "open")
+                .where(hub_todos.c.due_date < text("date('now', 'localtime')"))
+                .order_by(hub_todos.c.due_date.asc())
+                .limit(50)
+            ).fetchall()
+            result["todos"]["overdue"] = [dict(r._mapping) for r in overdue]
+        except Exception:
+            log.warning("home_query_failed", section="todos", exc_info=True)
 
-            try:
-                row = db.execute(
-                    "SELECT COALESCE(SUM(cost_usd), 0) as total FROM api_costs WHERE created_at >= date('now', 'start of month')"
-                ).fetchone()
-                result["costs"]["month_usd"] += round(row["total"], 4) if row else 0.0
-            except Exception:
-                log.warning("home_query_failed", section="hub_costs_month", exc_info=True)
-    except Exception:
-        pass
+        # Projects with todo counts and source breakdown
+        try:
+            todo_open_sq = (
+                select(func.count())
+                .select_from(hub_todos)
+                .where(hub_todos.c.project_id == hub_projects.c.id, hub_todos.c.status == "open")
+                .correlate(hub_projects)
+                .scalar_subquery()
+                .label("todo_open")
+            )
+            todo_done_sq = (
+                select(func.count())
+                .select_from(hub_todos)
+                .where(hub_todos.c.project_id == hub_projects.c.id, hub_todos.c.status == "done")
+                .correlate(hub_projects)
+                .scalar_subquery()
+                .label("todo_done")
+            )
+            todo_total_sq = (
+                select(func.count())
+                .select_from(hub_todos)
+                .where(hub_todos.c.project_id == hub_projects.c.id)
+                .correlate(hub_projects)
+                .scalar_subquery()
+                .label("todo_total")
+            )
+            item_count_sq = (
+                select(func.count())
+                .select_from(hub_project_content)
+                .where(hub_project_content.c.project_id == hub_projects.c.id)
+                .correlate(hub_projects)
+                .scalar_subquery()
+                .label("item_count")
+            )
 
-    # --- Platform DB queries (single connection) ---
-    try:
-        with get_platform_db() as db:
-            # Queue: tasks
-            try:
-                row = db.execute(
-                    "SELECT COUNT(*) as cnt FROM tasks WHERE status = 'open'"
-                ).fetchone()
-                # Don't overwrite total here; we compute it below
-                row_urgent = db.execute(
-                    "SELECT COUNT(*) as cnt FROM tasks WHERE status = 'open' AND priority = 'high'"
-                ).fetchone()
-                result["queue"]["urgent"] = row_urgent["cnt"] if row_urgent else 0
-            except Exception:
-                log.warning("home_query_failed", section="platform_tasks", exc_info=True)
+            rows = conn.execute(
+                select(
+                    hub_projects.c.id,
+                    hub_projects.c.name,
+                    hub_projects.c.active,
+                    item_count_sq,
+                    todo_open_sq,
+                    todo_done_sq,
+                    todo_total_sq,
+                ).order_by(hub_projects.c.name)
+            ).fetchall()
+            projects = []
+            for r in rows:
+                p = dict(r._mapping)
+                sources = {"email": 0, "voice": 0, "jira": 0, "confluence": 0}
+                try:
+                    src_rows = conn.execute(
+                        select(hub_content.c.source, func.count().label("count"))
+                        .join(hub_project_content, hub_content.c.id == hub_project_content.c.content_id)
+                        .where(hub_project_content.c.project_id == p["id"])
+                        .group_by(hub_content.c.source)
+                    ).fetchall()
+                    for sr in src_rows:
+                        sources[sr.source] = sr.count
+                except Exception:
+                    log.warning("home_query_failed", section="project_sources", exc_info=True)
+                p["sources"] = sources
+                projects.append(p)
+            result["projects"] = projects
+        except Exception:
+            log.warning("home_query_failed", section="projects", exc_info=True)
 
-            # Costs from platform cost_ledger
-            try:
-                row = db.execute(
-                    "SELECT COALESCE(SUM(cost_usd), 0) as total FROM cost_ledger WHERE created_at >= date('now')"
-                ).fetchone()
-                result["costs"]["today_usd"] += round(row["total"], 4) if row else 0.0
-            except Exception:
-                log.warning("home_query_failed", section="platform_costs_today", exc_info=True)
+        # Costs from hub api_costs mirror
+        try:
+            row = conn.execute(
+                select(func.coalesce(func.sum(hub_api_costs.c.cost_usd), 0).label("total"))
+                .where(hub_api_costs.c.created_at >= text("date('now')"))
+            ).fetchone()
+            result["costs"]["today_usd"] += round(row.total, 4) if row else 0.0
+        except Exception:
+            log.warning("home_query_failed", section="hub_costs_today", exc_info=True)
 
-            try:
-                row = db.execute(
-                    "SELECT COALESCE(SUM(cost_usd), 0) as total FROM cost_ledger WHERE created_at >= date('now', 'start of month')"
-                ).fetchone()
-                result["costs"]["month_usd"] += round(row["total"], 4) if row else 0.0
-            except Exception:
-                log.warning("home_query_failed", section="platform_costs_month", exc_info=True)
-    except Exception:
-        pass
+        try:
+            row = conn.execute(
+                select(func.coalesce(func.sum(hub_api_costs.c.cost_usd), 0).label("total"))
+                .where(hub_api_costs.c.created_at >= text("date('now', 'start of month')"))
+            ).fetchone()
+            result["costs"]["month_usd"] += round(row.total, 4) if row else 0.0
+        except Exception:
+            log.warning("home_query_failed", section="hub_costs_month", exc_info=True)
+
+        # --- Platform queries ---
+
+        # Queue: tasks
+        try:
+            row_urgent = conn.execute(
+                select(func.count().label("cnt"))
+                .select_from(tasks)
+                .where(tasks.c.status == "open", tasks.c.priority == "high")
+            ).fetchone()
+            result["queue"]["urgent"] = row_urgent.cnt if row_urgent else 0
+        except Exception:
+            log.warning("home_query_failed", section="platform_tasks", exc_info=True)
+
+        # Costs from platform cost_ledger
+        try:
+            row = conn.execute(
+                select(func.coalesce(func.sum(cost_ledger.c.cost_usd), 0).label("total"))
+                .where(cost_ledger.c.created_at >= text("date('now')"))
+            ).fetchone()
+            result["costs"]["today_usd"] += round(row.total, 4) if row else 0.0
+        except Exception:
+            log.warning("home_query_failed", section="platform_costs_today", exc_info=True)
+
+        try:
+            row = conn.execute(
+                select(func.coalesce(func.sum(cost_ledger.c.cost_usd), 0).label("total"))
+                .where(cost_ledger.c.created_at >= text("date('now', 'start of month')"))
+            ).fetchone()
+            result["costs"]["month_usd"] += round(row.total, 4) if row else 0.0
+        except Exception:
+            log.warning("home_query_failed", section="platform_costs_month", exc_info=True)
 
     # Queue: drafts + classify from attention counts
     result["queue"]["drafts"] = result["attention"]["pending_drafts"]
     result["queue"]["classify"] = result["attention"]["unsorted_count"]
-
-    # Fix 2: Compute total as sum of all queue components
     result["queue"]["total"] = (
         result["queue"]["urgent"]
         + result["queue"]["drafts"]
         + result["queue"]["classify"]
     )
 
-    # Round final costs
     result["costs"]["today_usd"] = round(result["costs"]["today_usd"], 4)
     result["costs"]["month_usd"] = round(result["costs"]["month_usd"], 4)
 
@@ -335,15 +390,10 @@ def _display_source(name: str) -> str:
 
 
 def _build_briefing(current: dict) -> dict:
-    """Generate a structured, Jarvis-style briefing with typed scenes.
-
-    Returns {"script": str, "scenes": list[dict]} where script is the full
-    text for TTS and scenes have per-type visual treatments.
-    """
+    """Generate a structured, Jarvis-style briefing with typed scenes."""
     scenes: list[dict] = []
     prev = _read_snapshot()
 
-    # ── Scene: Greeting ──
     hour = datetime.now().hour
     greetings = {
         "morning": [
@@ -366,7 +416,6 @@ def _build_briefing(current: dict) -> dict:
     greeting_text = random.choice(greetings[period])
     scenes.append({"type": "greeting", "text": greeting_text})
 
-    # ── Scene: Time context ──
     since = current.get("since_last_session", {})
     hours_ago = since.get("hours_ago")
     if hours_ago is not None:
@@ -385,7 +434,6 @@ def _build_briefing(current: dict) -> dict:
     todos = current.get("todos") or {}
     projects = current.get("projects") or []
 
-    # ── Delta-aware scenes: only mention what CHANGED ──
     stale = [h for h in health if h and (h.get("stale_hours") or 0) > 24]
 
     if prev:
@@ -394,7 +442,6 @@ def _build_briefing(current: dict) -> dict:
         prev_health = prev.get("health") or []
         prev_stale_sources = {h.get("source", "") for h in prev_health if h and (h.get("stale_hours") or 0) > 24}
 
-        # Health: only alert if NEW sources went stale (not already stale last time)
         newly_stale = [h for h in stale if h.get("source", "") not in prev_stale_sources]
         if newly_stale:
             names = " and ".join(_display_source(h["source"]) for h in newly_stale)
@@ -407,23 +454,18 @@ def _build_briefing(current: dict) -> dict:
             })
             scenes.append({"type": "action", "text": "Want me to run a process?", "action": "process"})
 
-        # Overdue: only if count INCREASED
         prev_overdue = prev_attn.get("overdue_todos") or 0
         curr_overdue = attention.get("overdue_todos") or 0
         if curr_overdue > prev_overdue:
             diff = curr_overdue - prev_overdue
             scenes.append({"type": "alert", "text": f"{diff} new item{'s' if diff != 1 else ''} went overdue.", "severity": "high"})
-        # unchanged overdue = SKIP (don't repeat)
 
-        # Drafts: only if count INCREASED
         prev_drafts = prev_attn.get("pending_drafts") or 0
         curr_drafts = attention.get("pending_drafts") or 0
         if curr_drafts > prev_drafts:
             diff = curr_drafts - prev_drafts
             scenes.append({"type": "metric", "text": f"{diff} new draft{'s' if diff != 1 else ''} to review.", "value": diff, "label": "new drafts"})
-        # unchanged drafts = SKIP
 
-        # Todos: only if count changed
         prev_open = prev_todos.get("total_open") or 0
         curr_open = todos.get("total_open") or 0
         if curr_open > prev_open:
@@ -432,16 +474,13 @@ def _build_briefing(current: dict) -> dict:
         elif curr_open < prev_open:
             diff = prev_open - curr_open
             scenes.append({"type": "status", "text": f"You cleared {diff} todo{'s' if diff != 1 else ''}. Nice work."})
-        # unchanged = SKIP
 
-        # High priority: only if increased
         prev_high = len(prev_todos.get("high_priority", []))
         curr_high = len(todos.get("high_priority", []))
         if curr_high > prev_high:
             scenes.append({"type": "alert", "text": f"{curr_high - prev_high} new high-priority item{'s' if curr_high - prev_high != 1 else ''}.", "severity": "medium"})
 
     else:
-        # First briefing ever — give a full summary
         if stale:
             names = " and ".join(_display_source(h["source"]) for h in stale)
             hrs = stale[0].get("stale_hours")
@@ -468,14 +507,12 @@ def _build_briefing(current: dict) -> dict:
                 msg += f", {high} high priority"
             scenes.append({"type": "metric", "text": msg + ".", "value": total_open, "label": "todos"})
 
-    # ── Scene: Project spotlight (only if top project CHANGED or is new) ──
     active = [p for p in projects if p and p.get("active") and (p.get("todo_open") or 0) > 0]
     if active:
         top = max(active, key=lambda p: p.get("todo_open") or 0)
         top_open = top.get("todo_open") or 0
         top_id = top.get("id")
         if top_open >= 5 and top_id is not None:
-            # Only spotlight if this project wasn't the top last time, or its count grew
             prev_proj_list = (prev or {}).get("projects") or []
             prev_projects = {p.get("id"): p.get("todo_open", 0) for p in prev_proj_list if p}
             prev_top_count = prev_projects.get(top_id, 0)
@@ -487,7 +524,6 @@ def _build_briefing(current: dict) -> dict:
                     "value": top_open,
                 })
 
-    # ── Closing ──
     content_scenes = [s for s in scenes if s["type"] not in ("greeting", "context")]
     if not content_scenes:
         scenes.append({"type": "quip", "text": random.choice([
@@ -496,7 +532,6 @@ def _build_briefing(current: dict) -> dict:
             "Nothing new to report. You're up to date.",
         ])})
 
-    # Save snapshot
     _write_snapshot({
         "attention": attention,
         "health": health,
@@ -511,7 +546,6 @@ def _build_briefing(current: dict) -> dict:
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })
 
-    # Build flat script for TTS (all scene texts joined)
     script = " ".join(s["text"] for s in scenes)
 
     return {"script": script, "scenes": scenes}

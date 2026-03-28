@@ -2,7 +2,12 @@ import uuid
 import structlog
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
-from app.db.connections import get_hub_db, get_platform_db
+from sqlalchemy import select, func, text, update
+from app.db.session import get_db
+from app.db.tables import (
+    hub_content, hub_project_content, hub_projects,
+    content_classifications,
+)
 from app.models.content import ClassifyContentBody
 
 log = structlog.get_logger()
@@ -10,13 +15,8 @@ log = structlog.get_logger()
 router = APIRouter(tags=["Content"])
 
 
-# ---------------------------------------------------------------------------
-# Pydantic models for suggestions
-# ---------------------------------------------------------------------------
-
-
 class AcceptSuggestionBody(BaseModel):
-    project_id: str | None = None  # optional override
+    project_id: str | None = None
 
 
 class ExtractActionsBody(BaseModel):
@@ -33,74 +33,72 @@ def list_content(
     offset: int = Query(0, ge=0),
 ):
     try:
-        with get_hub_db() as db:
-            # FTS search path
+        with get_db() as conn:
+            # FTS search path — use text() since SA doesn't support FTS5 natively
             if q:
                 try:
-                    count_row = db.execute(
-                        "SELECT COUNT(*) as cnt FROM content_fts WHERE content_fts MATCH ?",
-                        (q,),
+                    count_row = conn.execute(
+                        text("SELECT COUNT(*) as cnt FROM content_fts WHERE content_fts MATCH :q"),
+                        {"q": q},
                     ).fetchone()
-                    total = count_row["cnt"] if count_row else 0
+                    total = count_row.cnt if count_row else 0
 
-                    rows = db.execute(
-                        """SELECT c.* FROM content c
-                           JOIN content_fts f ON c.id = f.rowid
-                           WHERE content_fts MATCH ?
-                           ORDER BY rank
-                           LIMIT ? OFFSET ?""",
-                        (q, limit, offset),
+                    rows = conn.execute(
+                        text(
+                            "SELECT c.* FROM hub_content c "
+                            "JOIN content_fts f ON c.id = f.rowid "
+                            "WHERE content_fts MATCH :q "
+                            "ORDER BY rank "
+                            "LIMIT :limit OFFSET :offset"
+                        ),
+                        {"q": q, "limit": limit, "offset": offset},
                     ).fetchall()
-                    return {"items": [dict(r) for r in rows], "total": total}
+                    return {"items": [dict(r._mapping) for r in rows], "total": total}
                 except Exception as fts_err:
                     log.warning("fts5_search_fallback", query=q, error=str(fts_err),
-                                msg="content_fts table missing or MATCH query failed, falling back to non-FTS query")
+                                msg="content_fts table missing or MATCH query failed")
 
-            conditions: list[str] = []
-            params: list[str | int] = []
+            conditions = []
 
             if source:
-                conditions.append("c.source = ?")
-                params.append(source)
+                conditions.append(hub_content.c.source == source)
             if status == "unsorted":
-                # Unsorted = not assigned to any project AND not classified/dismissed in platform.db
                 conditions.append(
-                    "c.id NOT IN (SELECT content_id FROM project_content)"
+                    hub_content.c.id.notin_(select(hub_project_content.c.content_id))
                 )
                 try:
-                    with get_platform_db() as pdb:
-                        actioned = pdb.execute(
-                            "SELECT hub_content_id FROM content_classifications"
-                        ).fetchall()
-                        actioned_ids = [r["hub_content_id"] for r in actioned]
-                        if actioned_ids:
-                            placeholders = ",".join("?" for _ in actioned_ids)
-                            conditions.append(f"c.id NOT IN ({placeholders})")
-                            params.extend(actioned_ids)
+                    actioned = conn.execute(
+                        select(content_classifications.c.hub_content_id)
+                    ).fetchall()
+                    actioned_ids = [r.hub_content_id for r in actioned]
+                    if actioned_ids:
+                        conditions.append(hub_content.c.id.notin_(actioned_ids))
                 except Exception:
                     pass
             elif status:
-                conditions.append("c.status = ?")
-                params.append(status)
+                conditions.append(hub_content.c.status == status)
             if project_id:
                 conditions.append(
-                    "c.id IN (SELECT content_id FROM project_content WHERE project_id = ?)"
+                    hub_content.c.id.in_(
+                        select(hub_project_content.c.content_id)
+                        .where(hub_project_content.c.project_id == project_id)
+                    )
                 )
-                params.append(project_id)
 
-            where = (" WHERE " + " AND ".join(conditions)) if conditions else ""
+            stmt_count = select(func.count().label("cnt")).select_from(hub_content)
+            stmt_rows = select(hub_content)
+            if conditions:
+                stmt_count = stmt_count.where(*conditions)
+                stmt_rows = stmt_rows.where(*conditions)
 
-            total_row = db.execute(
-                f"SELECT COUNT(*) as cnt FROM content c{where}", params
-            ).fetchone()
-            total = total_row["cnt"] if total_row else 0
+            total_row = conn.execute(stmt_count).fetchone()
+            total = total_row.cnt if total_row else 0
 
-            rows = db.execute(
-                f"SELECT c.* FROM content c{where} ORDER BY c.created_at DESC LIMIT ? OFFSET ?",
-                params + [limit, offset],
+            rows = conn.execute(
+                stmt_rows.order_by(hub_content.c.created_at.desc()).limit(limit).offset(offset)
             ).fetchall()
 
-            return {"items": [dict(r) for r in rows], "total": total}
+            return {"items": [dict(r._mapping) for r in rows], "total": total}
     except Exception:
         return {"items": [], "total": 0}
 
@@ -108,29 +106,33 @@ def list_content(
 @router.get("/api/content/{content_id}")
 def get_content(content_id: str):
     try:
-        with get_hub_db() as db:
-            row = db.execute("SELECT * FROM content WHERE id = ?", (content_id,)).fetchone()
+        with get_db() as conn:
+            row = conn.execute(
+                select(hub_content).where(hub_content.c.id == content_id)
+            ).fetchone()
             if not row:
                 raise HTTPException(404, "Content not found")
-            item = dict(row)
+            item = dict(row._mapping)
 
-        # Overlay classification status from platform.db
-        try:
-            with get_platform_db() as pdb:
-                classification = pdb.execute(
-                    "SELECT action, project_id, classified_at FROM content_classifications WHERE hub_content_id = ?",
-                    (content_id,),
+            # Overlay classification status
+            try:
+                classification = conn.execute(
+                    select(
+                        content_classifications.c.action,
+                        content_classifications.c.project_id,
+                        content_classifications.c.classified_at,
+                    ).where(content_classifications.c.hub_content_id == content_id)
                 ).fetchone()
                 if classification:
                     item["classification"] = {
-                        "action": classification["action"],
-                        "project_id": classification["project_id"],
-                        "classified_at": classification["classified_at"],
+                        "action": classification.action,
+                        "project_id": classification.project_id,
+                        "classified_at": classification.classified_at,
                     }
-        except Exception:
-            pass
+            except Exception:
+                pass
 
-        return item
+            return item
     except HTTPException:
         raise
     except Exception:
@@ -139,20 +141,23 @@ def get_content(content_id: str):
 
 @router.post("/api/content/{content_id}/classify")
 def classify_content(content_id: str, body: ClassifyContentBody):
-    """Classify content by recording in platform.db overlay (hub.db stays read-only)."""
+    """Classify content by recording in platform.db overlay."""
     project_id = body.project_id
     try:
-        with get_hub_db() as db:
-            row = db.execute("SELECT id FROM content WHERE id = ?", (content_id,)).fetchone()
+        with get_db() as conn:
+            row = conn.execute(
+                select(hub_content.c.id).where(hub_content.c.id == content_id)
+            ).fetchone()
             if not row:
                 raise HTTPException(404, "Content not found")
 
-        with get_platform_db() as pdb:
-            pdb.execute(
-                "INSERT OR REPLACE INTO content_classifications (id, hub_content_id, project_id, action) VALUES (?, ?, ?, 'classify')",
-                (str(uuid.uuid4()), content_id, project_id),
+            conn.execute(
+                text(
+                    "INSERT OR REPLACE INTO content_classifications "
+                    "(id, hub_content_id, project_id, action) VALUES (:id, :cid, :pid, 'classify')"
+                ),
+                {"id": str(uuid.uuid4()), "cid": content_id, "pid": project_id},
             )
-            pdb.commit()
 
         return {"status": "classified", "content_id": content_id, "project_id": project_id}
     except HTTPException:
@@ -163,19 +168,22 @@ def classify_content(content_id: str, body: ClassifyContentBody):
 
 @router.post("/api/content/{content_id}/dismiss")
 def dismiss_content(content_id: str):
-    """Dismiss content by recording in platform.db overlay (hub.db stays read-only)."""
+    """Dismiss content by recording in platform.db overlay."""
     try:
-        with get_hub_db() as db:
-            row = db.execute("SELECT id FROM content WHERE id = ?", (content_id,)).fetchone()
+        with get_db() as conn:
+            row = conn.execute(
+                select(hub_content.c.id).where(hub_content.c.id == content_id)
+            ).fetchone()
             if not row:
                 raise HTTPException(404, "Content not found")
 
-        with get_platform_db() as pdb:
-            pdb.execute(
-                "INSERT OR REPLACE INTO content_classifications (id, hub_content_id, action) VALUES (?, ?, 'dismiss')",
-                (str(uuid.uuid4()), content_id),
+            conn.execute(
+                text(
+                    "INSERT OR REPLACE INTO content_classifications "
+                    "(id, hub_content_id, action) VALUES (:id, :cid, 'dismiss')"
+                ),
+                {"id": str(uuid.uuid4()), "cid": content_id},
             )
-            pdb.commit()
 
         return {"status": "dismissed", "content_id": content_id}
     except HTTPException:
@@ -194,65 +202,68 @@ def list_suggestions(
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
 ):
-    """Return items from content_classifications where status='suggested', joined with hub.db content."""
+    """Return items from content_classifications where status='suggested', joined with hub content."""
     try:
-        with get_platform_db() as pdb:
-            rows = pdb.execute(
-                """SELECT id, hub_content_id, classified_project_id, suggested_project_id,
-                          confidence, reasoning, status, created_at
-                   FROM content_classifications
-                   WHERE status = 'suggested'
-                   ORDER BY confidence DESC
-                   LIMIT ? OFFSET ?""",
-                (limit, offset),
+        with get_db() as conn:
+            rows = conn.execute(
+                select(
+                    content_classifications.c.id,
+                    content_classifications.c.hub_content_id,
+                    content_classifications.c.classified_project_id,
+                    content_classifications.c.suggested_project_id,
+                    content_classifications.c.confidence,
+                    content_classifications.c.reasoning,
+                    content_classifications.c.status,
+                    content_classifications.c.created_at,
+                )
+                .where(content_classifications.c.status == "suggested")
+                .order_by(content_classifications.c.confidence.desc())
+                .limit(limit).offset(offset)
             ).fetchall()
 
-            total_row = pdb.execute(
-                "SELECT COUNT(*) as cnt FROM content_classifications WHERE status = 'suggested'"
+            total_row = conn.execute(
+                select(func.count().label("cnt"))
+                .select_from(content_classifications)
+                .where(content_classifications.c.status == "suggested")
             ).fetchone()
-            total = total_row["cnt"] if total_row else 0
+            total = total_row.cnt if total_row else 0
 
-        if not rows:
-            return {"items": [], "total": 0}
+            if not rows:
+                return {"items": [], "total": 0}
 
-        # Enrich with hub.db content metadata
-        suggestions = []
-        hub_ids = [r["hub_content_id"] for r in rows]
+            # Enrich with hub content metadata
+            hub_ids = [r.hub_content_id for r in rows]
+            hub_content_map = {}
+            for hid in hub_ids:
+                hrow = conn.execute(
+                    select(
+                        hub_content.c.id, hub_content.c.title,
+                        hub_content.c.body, hub_content.c.source,
+                        hub_content.c.created_at,
+                    ).where(hub_content.c.id == hid)
+                ).fetchone()
+                if hrow:
+                    hub_content_map[hid] = dict(hrow._mapping)
 
-        hub_content_map = {}
-        try:
-            with get_hub_db() as hub:
-                for hid in hub_ids:
-                    hrow = hub.execute(
-                        "SELECT id, title, body, source, created_at FROM content WHERE id = ?",
-                        (hid,),
-                    ).fetchone()
-                    if hrow:
-                        hub_content_map[hid] = dict(hrow)
-        except Exception:
-            pass
+            # Get project names
+            project_rows = conn.execute(
+                select(hub_projects.c.id, hub_projects.c.name)
+            ).fetchall()
+            project_name_map = {p.id: p.name for p in project_rows}
 
-        # Get project names
-        project_name_map = {}
-        try:
-            with get_hub_db() as hub:
-                projects = hub.execute("SELECT id, name FROM projects").fetchall()
-                project_name_map = {p["id"]: p["name"] for p in projects}
-        except Exception:
-            pass
+            suggestions = []
+            for r in rows:
+                item = dict(r._mapping)
+                hub_data = hub_content_map.get(r.hub_content_id, {})
+                item["title"] = hub_data.get("title", "Unknown")
+                item["body"] = (hub_data.get("body") or "")[:300]
+                item["source"] = hub_data.get("source")
+                item["content_created_at"] = hub_data.get("created_at")
+                proj_id = r.classified_project_id or r.suggested_project_id
+                item["suggested_project_name"] = project_name_map.get(proj_id, proj_id)
+                suggestions.append(item)
 
-        for r in rows:
-            item = dict(r)
-            hub_data = hub_content_map.get(r["hub_content_id"], {})
-            item["title"] = hub_data.get("title", "Unknown")
-            item["body"] = (hub_data.get("body") or "")[:300]
-            item["source"] = hub_data.get("source")
-            item["content_created_at"] = hub_data.get("created_at")
-            proj_id = r["classified_project_id"] or r["suggested_project_id"]
-            item["suggested_project_name"] = project_name_map.get(proj_id, proj_id)
-            suggestions.append(item)
-
-        return {"items": suggestions, "total": total}
+            return {"items": suggestions, "total": total}
     except Exception as e:
         log.warning("list_suggestions_failed", error=str(e))
         return {"items": [], "total": 0}
@@ -260,27 +271,31 @@ def list_suggestions(
 
 @router.post("/api/content/{content_id}/accept-suggestion")
 def accept_suggestion(content_id: str, body: AcceptSuggestionBody | None = None):
-    """Accept a suggestion (moves to auto_classified=1, status='accepted')."""
+    """Accept a suggestion."""
     try:
-        with get_platform_db() as pdb:
-            row = pdb.execute(
-                "SELECT id, classified_project_id, suggested_project_id FROM content_classifications WHERE hub_content_id = ?",
-                (content_id,),
+        with get_db() as conn:
+            row = conn.execute(
+                select(
+                    content_classifications.c.id,
+                    content_classifications.c.classified_project_id,
+                    content_classifications.c.suggested_project_id,
+                ).where(content_classifications.c.hub_content_id == content_id)
             ).fetchone()
 
             if not row:
                 raise HTTPException(404, "No suggestion found for this content")
 
-            project_id = (body.project_id if body and body.project_id else None) or row["classified_project_id"] or row["suggested_project_id"]
+            project_id = (body.project_id if body and body.project_id else None) or row.classified_project_id or row.suggested_project_id
 
-            pdb.execute(
-                """UPDATE content_classifications
-                   SET status = 'accepted', auto_classified = 1, project_id = ?,
-                       classified_project_id = ?, classified_at = datetime('now')
-                   WHERE hub_content_id = ?""",
-                (project_id, project_id, content_id),
+            conn.execute(
+                text(
+                    "UPDATE content_classifications "
+                    "SET status = 'accepted', auto_classified = 1, project_id = :pid, "
+                    "classified_project_id = :pid, classified_at = datetime('now') "
+                    "WHERE hub_content_id = :cid"
+                ),
+                {"pid": project_id, "cid": content_id},
             )
-            pdb.commit()
 
         return {"status": "accepted", "content_id": content_id, "project_id": project_id}
     except HTTPException:
@@ -291,22 +306,25 @@ def accept_suggestion(content_id: str, body: AcceptSuggestionBody | None = None)
 
 @router.post("/api/content/{content_id}/reject-suggestion")
 def reject_suggestion(content_id: str):
-    """Reject a suggestion (status='rejected')."""
+    """Reject a suggestion."""
     try:
-        with get_platform_db() as pdb:
-            row = pdb.execute(
-                "SELECT id FROM content_classifications WHERE hub_content_id = ?",
-                (content_id,),
+        with get_db() as conn:
+            row = conn.execute(
+                select(content_classifications.c.id)
+                .where(content_classifications.c.hub_content_id == content_id)
             ).fetchone()
 
             if not row:
                 raise HTTPException(404, "No suggestion found for this content")
 
-            pdb.execute(
-                "UPDATE content_classifications SET status = 'rejected', classified_at = datetime('now') WHERE hub_content_id = ?",
-                (content_id,),
+            conn.execute(
+                text(
+                    "UPDATE content_classifications "
+                    "SET status = 'rejected', classified_at = datetime('now') "
+                    "WHERE hub_content_id = :cid"
+                ),
+                {"cid": content_id},
             )
-            pdb.commit()
 
         return {"status": "rejected", "content_id": content_id}
     except HTTPException:
@@ -332,27 +350,30 @@ def run_classifier(limit: int = Query(50, ge=1, le=200)):
 def batch_accept_suggestions(min_confidence: float = Query(0.90)):
     """Accept all suggestions with confidence >= threshold."""
     try:
-        with get_platform_db() as pdb:
-            rows = pdb.execute(
-                """SELECT hub_content_id, classified_project_id, suggested_project_id
-                   FROM content_classifications
-                   WHERE status = 'suggested' AND confidence >= ?""",
-                (min_confidence,),
+        with get_db() as conn:
+            rows = conn.execute(
+                select(
+                    content_classifications.c.hub_content_id,
+                    content_classifications.c.classified_project_id,
+                    content_classifications.c.suggested_project_id,
+                )
+                .where(content_classifications.c.status == "suggested")
+                .where(content_classifications.c.confidence >= min_confidence)
             ).fetchall()
 
             count = 0
             for r in rows:
-                project_id = r["classified_project_id"] or r["suggested_project_id"]
-                pdb.execute(
-                    """UPDATE content_classifications
-                       SET status = 'accepted', auto_classified = 1, project_id = ?,
-                           classified_project_id = ?, classified_at = datetime('now')
-                       WHERE hub_content_id = ?""",
-                    (project_id, project_id, r["hub_content_id"]),
+                project_id = r.classified_project_id or r.suggested_project_id
+                conn.execute(
+                    text(
+                        "UPDATE content_classifications "
+                        "SET status = 'accepted', auto_classified = 1, project_id = :pid, "
+                        "classified_project_id = :pid, classified_at = datetime('now') "
+                        "WHERE hub_content_id = :cid"
+                    ),
+                    {"pid": project_id, "cid": r.hub_content_id},
                 )
                 count += 1
-
-            pdb.commit()
 
         return {"status": "ok", "accepted_count": count, "min_confidence": min_confidence}
     except Exception as e:
@@ -368,23 +389,24 @@ def batch_accept_suggestions(min_confidence: float = Query(0.90)):
 def extract_actions(content_id: str):
     """Extract action items from a content item and create platform-native todos."""
     try:
-        # Get content from hub.db
-        with get_hub_db() as hub:
-            row = hub.execute(
-                "SELECT id, title, body, source, project_id FROM content WHERE id = ?",
-                (content_id,),
+        with get_db() as conn:
+            row = conn.execute(
+                select(
+                    hub_content.c.id, hub_content.c.title,
+                    hub_content.c.body, hub_content.c.source,
+                ).where(hub_content.c.id == content_id)
             ).fetchone()
             if not row:
                 raise HTTPException(404, "Content not found")
 
-        text = f"{row['title'] or ''}\n{row['body'] or ''}"
+        content_text = f"{row.title or ''}\n{row.body or ''}"
 
         from app.services.collaboration_context import create_platform_todos_from_text
 
         created = create_platform_todos_from_text(
-            text,
+            content_text,
             source_content_id=content_id,
-            project_id=row.get("project_id"),
+            project_id=None,  # project_id not available on hub_content directly
         )
 
         return {"status": "ok", "actions_created": len(created), "actions": created}

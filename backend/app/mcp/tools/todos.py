@@ -2,11 +2,18 @@
 
 import uuid
 
+from sqlalchemy import select, insert, update, text
 from app.mcp.server import mcp
-from app.db.connections import get_hub_db, get_platform_db
+from app.db.session import get_db
+from app.db.tables import hub_todos, todo_overrides
 
 
-_HUB_TODO_COLS = "id, title, project_id, priority, owner, due_date, status, source_type, source_content_id, created_at"
+_HUB_TODO_COLS = [
+    hub_todos.c.id, hub_todos.c.title, hub_todos.c.project_id,
+    hub_todos.c.priority, hub_todos.c.owner, hub_todos.c.due_date,
+    hub_todos.c.status, hub_todos.c.source_type,
+    hub_todos.c.source_content_id, hub_todos.c.created_at,
+]
 
 
 @mcp.tool()
@@ -17,24 +24,24 @@ def coco_todo_list(status: str = "open", project: str | None = None) -> dict:
         status: Filter by status ('open', 'backlog', 'todo', 'in_progress', 'done', 'archived'). Default: 'open'.
         project: Optional project_id to filter by.
     """
-    hub_todos: list[dict] = []
+    hub_items: list[dict] = []
     try:
-        with get_hub_db() as db:
-            rows = db.execute(
-                f"SELECT {_HUB_TODO_COLS} FROM todos ORDER BY created_at DESC"
+        with get_db() as conn:
+            rows = conn.execute(
+                select(*_HUB_TODO_COLS).order_by(hub_todos.c.created_at.desc())
             ).fetchall()
-            hub_todos = [dict(r) for r in rows]
+            hub_items = [dict(r._mapping) for r in rows]
     except Exception:
         pass
 
-    # Read overrides + platform-native from platform.db
+    # Read overrides + platform-native
     overrides: dict[str, dict] = {}
     platform_native: list[dict] = []
     try:
-        with get_platform_db() as pdb:
-            override_rows = pdb.execute("SELECT * FROM todo_overrides").fetchall()
+        with get_db() as conn:
+            override_rows = conn.execute(select(todo_overrides)).fetchall()
             for r in override_rows:
-                row = dict(r)
+                row = dict(r._mapping)
                 if row.get("is_platform_native"):
                     platform_native.append({
                         "id": row["hub_todo_id"],
@@ -55,7 +62,7 @@ def coco_todo_list(status: str = "open", project: str | None = None) -> dict:
 
     # Merge hub todos with overrides
     merged = []
-    for t in hub_todos:
+    for t in hub_items:
         override = overrides.get(t["id"])
         if override:
             for field in ("title", "status", "priority", "owner", "due_date", "project_id"):
@@ -71,7 +78,6 @@ def coco_todo_list(status: str = "open", project: str | None = None) -> dict:
     if project:
         merged = [t for t in merged if t.get("project_id") == project]
 
-    # Sort by created_at desc
     merged.sort(key=lambda t: t.get("created_at") or "", reverse=True)
 
     return {
@@ -97,15 +103,17 @@ def coco_todo_add(
     """
     todo_id = str(uuid.uuid4())
 
-    with get_platform_db() as pdb:
-        pdb.execute(
-            """INSERT INTO todo_overrides
-               (hub_todo_id, title, project_id, priority, owner, due_date, node_id, status,
-                source_type, source_content_id, is_platform_native, created_at, updated_at)
-               VALUES (?, ?, ?, ?, ?, NULL, NULL, 'open', NULL, NULL, 1, datetime('now'), datetime('now'))""",
-            (todo_id, title, project, priority, owner),
+    with get_db() as conn:
+        conn.execute(
+            text(
+                "INSERT INTO todo_overrides "
+                "(hub_todo_id, title, project_id, priority, owner, due_date, node_id, status, "
+                "source_type, source_content_id, is_platform_native, created_at, updated_at) "
+                "VALUES (:id, :title, :project, :priority, :owner, NULL, NULL, 'open', "
+                "NULL, NULL, 1, datetime('now'), datetime('now'))"
+            ),
+            {"id": todo_id, "title": title, "project": project, "priority": priority, "owner": owner},
         )
-        pdb.commit()
 
     return {
         "id": todo_id,
@@ -125,23 +133,24 @@ def coco_todo_done(todo_id: str) -> dict:
     Args:
         todo_id: The UUID of the todo to complete.
     """
-    # Check if todo exists
     found = False
 
-    # Check hub.db
-    try:
-        with get_hub_db() as db:
-            row = db.execute("SELECT id FROM todos WHERE id = ?", (todo_id,)).fetchone()
+    with get_db() as conn:
+        # Check hub mirror
+        try:
+            row = conn.execute(
+                select(hub_todos.c.id).where(hub_todos.c.id == todo_id)
+            ).fetchone()
             if row:
                 found = True
-    except Exception:
-        pass
+        except Exception:
+            pass
 
-    # Check platform.db
-    if not found:
-        with get_platform_db() as pdb:
-            row = pdb.execute(
-                "SELECT hub_todo_id FROM todo_overrides WHERE hub_todo_id = ?", (todo_id,)
+        # Check platform
+        if not found:
+            row = conn.execute(
+                select(todo_overrides.c.hub_todo_id)
+                .where(todo_overrides.c.hub_todo_id == todo_id)
             ).fetchone()
             if row:
                 found = True
@@ -150,24 +159,29 @@ def coco_todo_done(todo_id: str) -> dict:
         return {"error": f"Todo '{todo_id}' not found."}
 
     # Upsert override to set status = done
-    with get_platform_db() as pdb:
-        existing = pdb.execute(
-            "SELECT hub_todo_id FROM todo_overrides WHERE hub_todo_id = ?", (todo_id,)
+    with get_db() as conn:
+        existing = conn.execute(
+            select(todo_overrides.c.hub_todo_id)
+            .where(todo_overrides.c.hub_todo_id == todo_id)
         ).fetchone()
 
         if existing:
-            pdb.execute(
-                "UPDATE todo_overrides SET status = 'done', updated_at = datetime('now') WHERE hub_todo_id = ?",
-                (todo_id,),
+            conn.execute(
+                text(
+                    "UPDATE todo_overrides SET status = 'done', updated_at = datetime('now') "
+                    "WHERE hub_todo_id = :id"
+                ),
+                {"id": todo_id},
             )
         else:
-            pdb.execute(
-                """INSERT INTO todo_overrides
-                   (hub_todo_id, status, is_platform_native, created_at, updated_at)
-                   VALUES (?, 'done', 0, datetime('now'), datetime('now'))""",
-                (todo_id,),
+            conn.execute(
+                text(
+                    "INSERT INTO todo_overrides "
+                    "(hub_todo_id, status, is_platform_native, created_at, updated_at) "
+                    "VALUES (:id, 'done', 0, datetime('now'), datetime('now'))"
+                ),
+                {"id": todo_id},
             )
-        pdb.commit()
 
     return {
         "id": todo_id,

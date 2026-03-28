@@ -4,9 +4,16 @@ import json
 import uuid
 from datetime import datetime, timezone
 
+from sqlalchemy import select, text
+
 from app.mcp.server import mcp
 from app.config import SESSIONS_DIR
-from app.db.connections import get_hub_db, get_platform_db
+from app.db.session import get_db
+from app.db.tables import (
+    hub_todos, hub_content, hub_drafts,
+    agents, tasks, goals, todo_overrides, draft_decisions,
+    entity_identifiers, project_context, handoffs, workflows,
+)
 from app.routers.home import get_home, _build_briefing, _health_from_sync_state
 from app.services.event_bus import event_bus
 
@@ -60,11 +67,9 @@ def coco_status() -> dict:
     """
     home = get_home()
 
-    # Count projects
     projects = home.get("projects", [])
     active_projects = [p for p in projects if p.get("active")]
 
-    # Health summary
     health = home.get("health", [])
     health_ok = sum(1 for h in health if h.get("status") in ("green", "ok", None))
     health_warn = sum(1 for h in health if h.get("status") in ("yellow", "warning"))
@@ -92,99 +97,99 @@ def coco_search(query: str, project: str | None = None) -> dict:
     pattern = f"%{query}%"
     limit = 20
 
-    # Todos from hub.db
-    try:
-        with get_hub_db() as db:
-            rows = db.execute(
-                "SELECT id, title, project_id, status FROM todos WHERE title LIKE ? LIMIT ?",
-                (pattern, limit),
+    with get_db() as conn:
+        # Todos from hub mirror
+        try:
+            rows = conn.execute(
+                select(hub_todos.c.id, hub_todos.c.title, hub_todos.c.project_id, hub_todos.c.status)
+                .where(hub_todos.c.title.like(pattern))
+                .limit(limit)
             ).fetchall()
             for r in rows:
-                if project and r["project_id"] != project:
+                if project and r.project_id != project:
                     continue
                 results.append({
                     "type": "todo",
-                    "id": r["id"],
-                    "title": r["title"] or "(untitled)",
-                    "status": r["status"],
-                    "project_id": r["project_id"],
+                    "id": r.id,
+                    "title": r.title or "(untitled)",
+                    "status": r.status,
+                    "project_id": r.project_id,
                 })
-    except Exception:
-        pass
+        except Exception:
+            pass
 
-    # Agents from platform.db
-    try:
-        with get_platform_db() as pdb:
-            rows = pdb.execute(
-                "SELECT id, name, status, role FROM agents WHERE name LIKE ? LIMIT ?",
-                (pattern, limit),
+        # Agents
+        try:
+            rows = conn.execute(
+                select(agents.c.id, agents.c.name, agents.c.status, agents.c.role)
+                .where(agents.c.name.like(pattern))
+                .limit(limit)
             ).fetchall()
             for r in rows:
                 results.append({
                     "type": "agent",
-                    "id": r["id"],
-                    "title": r["name"] or "(unnamed)",
-                    "status": r["status"],
-                    "role": r["role"],
+                    "id": r.id,
+                    "title": r.name or "(unnamed)",
+                    "status": r.status,
+                    "role": r.role,
                 })
-    except Exception:
-        pass
+        except Exception:
+            pass
 
-    # Tasks from platform.db
-    try:
-        with get_platform_db() as pdb:
-            rows = pdb.execute(
-                "SELECT id, title, status, priority FROM tasks WHERE title LIKE ? LIMIT ?",
-                (pattern, limit),
+        # Tasks
+        try:
+            rows = conn.execute(
+                select(tasks.c.id, tasks.c.title, tasks.c.status, tasks.c.priority)
+                .where(tasks.c.title.like(pattern))
+                .limit(limit)
             ).fetchall()
             for r in rows:
                 results.append({
                     "type": "task",
-                    "id": r["id"],
-                    "title": r["title"] or "(untitled)",
-                    "status": r["status"],
-                    "priority": r["priority"],
+                    "id": r.id,
+                    "title": r.title or "(untitled)",
+                    "status": r.status,
+                    "priority": r.priority,
                 })
-    except Exception:
-        pass
+        except Exception:
+            pass
 
-    # Goals from platform.db
-    try:
-        with get_platform_db() as pdb:
-            rows = pdb.execute(
-                "SELECT id, title, status, progress_pct FROM goals WHERE title LIKE ? LIMIT ?",
-                (pattern, limit),
+        # Goals
+        try:
+            rows = conn.execute(
+                select(goals.c.id, goals.c.title, goals.c.status, goals.c.progress_pct)
+                .where(goals.c.title.like(pattern))
+                .limit(limit)
             ).fetchall()
             for r in rows:
                 results.append({
                     "type": "goal",
-                    "id": r["id"],
-                    "title": r["title"] or "(untitled)",
-                    "status": r["status"],
-                    "progress_pct": r["progress_pct"],
+                    "id": r.id,
+                    "title": r.title or "(untitled)",
+                    "status": r.status,
+                    "progress_pct": r.progress_pct,
                 })
-    except Exception:
-        pass
+        except Exception:
+            pass
 
-    # Content from hub.db
-    try:
-        with get_hub_db() as db:
-            rows = db.execute(
-                "SELECT id, title, source, content_type FROM content WHERE title LIKE ? LIMIT ?",
-                (pattern, limit),
+        # Content from hub mirror
+        try:
+            rows = conn.execute(
+                select(hub_content.c.id, hub_content.c.title, hub_content.c.source)
+                .where(hub_content.c.title.like(pattern))
+                .limit(limit)
             ).fetchall()
             for r in rows:
                 results.append({
                     "type": "content",
-                    "id": r["id"],
-                    "title": r["title"] or "(untitled)",
-                    "source": r["source"],
-                    "content_type": r["content_type"],
+                    "id": r.id,
+                    "title": r.title or "(untitled)",
+                    "source": r.source,
                 })
-    except Exception:
-        pass
+        except Exception:
+            pass
 
-    # Sort: prefix matches first, then shorter titles
+    # Sort
     q_lower = query.lower()
     results.sort(key=lambda r: (
         0 if (r.get("title") or "").lower().startswith(q_lower) else 1,
@@ -209,31 +214,42 @@ def coco_context(project: str) -> dict:
     }
 
     try:
-        with get_platform_db() as db:
-            # Context sections
-            rows = db.execute(
-                "SELECT id, section, title, content, author_role, version, updated_at "
-                "FROM project_context WHERE node_id = ? ORDER BY created_at",
-                (project,),
+        with get_db() as conn:
+            rows = conn.execute(
+                select(
+                    project_context.c.id, project_context.c.section,
+                    project_context.c.title, project_context.c.content,
+                    project_context.c.author_role, project_context.c.version,
+                    project_context.c.updated_at,
+                )
+                .where(project_context.c.node_id == project)
+                .order_by(project_context.c.created_at)
             ).fetchall()
-            result["context_sections"] = [dict(r) for r in rows]
+            result["context_sections"] = [dict(r._mapping) for r in rows]
 
-            # Recent handoffs
-            rows = db.execute(
-                "SELECT id, from_role, to_role, title, status, created_at "
-                "FROM handoffs WHERE node_id = ? ORDER BY created_at DESC LIMIT 10",
-                (project,),
+            rows = conn.execute(
+                select(
+                    handoffs.c.id, handoffs.c.from_role, handoffs.c.to_role,
+                    handoffs.c.title, handoffs.c.status, handoffs.c.created_at,
+                )
+                .where(handoffs.c.node_id == project)
+                .order_by(handoffs.c.created_at.desc())
+                .limit(10)
             ).fetchall()
-            result["handoffs"] = [dict(r) for r in rows]
+            result["handoffs"] = [dict(r._mapping) for r in rows]
 
-            # Active workflow
-            row = db.execute(
-                "SELECT id, template_name, objective, steps, current_step, status "
-                "FROM workflows WHERE node_id = ? AND status = 'active' ORDER BY created_at DESC LIMIT 1",
-                (project,),
+            row = conn.execute(
+                select(
+                    workflows.c.id, workflows.c.template_name, workflows.c.objective,
+                    workflows.c.steps, workflows.c.current_step, workflows.c.status,
+                )
+                .where(workflows.c.node_id == project)
+                .where(workflows.c.status == "active")
+                .order_by(workflows.c.created_at.desc())
+                .limit(1)
             ).fetchone()
             if row:
-                wf = dict(row)
+                wf = dict(row._mapping)
                 try:
                     wf["steps"] = json.loads(wf["steps"])
                 except Exception:
@@ -254,23 +270,25 @@ def coco_approve(draft_id: str) -> dict:
     Args:
         draft_id: The UUID of the draft to approve.
     """
-    # Verify draft exists
     try:
-        with get_hub_db() as db:
-            row = db.execute("SELECT id, title FROM drafts WHERE id = ?", (draft_id,)).fetchone()
+        with get_db() as conn:
+            row = conn.execute(
+                select(hub_drafts.c.id, hub_drafts.c.content)
+                .where(hub_drafts.c.id == draft_id)
+            ).fetchone()
             if not row:
                 return {"error": f"Draft '{draft_id}' not found."}
-            title = row["title"]
+            title = getattr(row, "title", None) or draft_id
+
+            conn.execute(
+                text(
+                    "INSERT OR REPLACE INTO draft_decisions (id, hub_draft_id, status, decided_by) "
+                    "VALUES (:id, :draft_id, 'approved', 'user')"
+                ),
+                {"id": str(uuid.uuid4()), "draft_id": draft_id},
+            )
     except Exception:
         return {"error": f"Failed to look up draft '{draft_id}'."}
-
-    # Write decision
-    with get_platform_db() as pdb:
-        pdb.execute(
-            "INSERT OR REPLACE INTO draft_decisions (id, hub_draft_id, status, decided_by) VALUES (?, ?, 'approved', 'user')",
-            (str(uuid.uuid4()), draft_id),
-        )
-        pdb.commit()
 
     event_bus.emit("draft.approved", {"draft_id": draft_id, "title": title})
 
@@ -292,23 +310,25 @@ def coco_reject(draft_id: str, reason: str | None = None) -> dict:
         draft_id: The UUID of the draft to reject.
         reason: Optional reason for rejection.
     """
-    # Verify draft exists
     try:
-        with get_hub_db() as db:
-            row = db.execute("SELECT id, title FROM drafts WHERE id = ?", (draft_id,)).fetchone()
+        with get_db() as conn:
+            row = conn.execute(
+                select(hub_drafts.c.id, hub_drafts.c.content)
+                .where(hub_drafts.c.id == draft_id)
+            ).fetchone()
             if not row:
                 return {"error": f"Draft '{draft_id}' not found."}
-            title = row["title"]
+            title = getattr(row, "title", None) or draft_id
+
+            conn.execute(
+                text(
+                    "INSERT OR REPLACE INTO draft_decisions (id, hub_draft_id, status, decided_by) "
+                    "VALUES (:id, :draft_id, 'rejected', 'user')"
+                ),
+                {"id": str(uuid.uuid4()), "draft_id": draft_id},
+            )
     except Exception:
         return {"error": f"Failed to look up draft '{draft_id}'."}
-
-    # Write decision
-    with get_platform_db() as pdb:
-        pdb.execute(
-            "INSERT OR REPLACE INTO draft_decisions (id, hub_draft_id, status, decided_by) VALUES (?, ?, 'rejected', 'user')",
-            (str(uuid.uuid4()), draft_id),
-        )
-        pdb.commit()
 
     event_bus.emit("draft.rejected", {"draft_id": draft_id, "title": title, "reason": reason})
 

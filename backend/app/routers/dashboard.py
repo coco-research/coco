@@ -1,83 +1,47 @@
 import logging
 
 from fastapi import APIRouter
-from app.db.connections import get_hub_db, get_platform_db
-from app.db.tree_utils import build_node_id_filter
+from sqlalchemy import select, func, text
+from app.db.session import get_db
+from app.db.tables import (
+    hub_projects, hub_content, hub_project_content, hub_drafts,
+    hub_api_costs, hub_sync_state,
+    agents, tasks, cost_ledger, content_classifications, nodes,
+)
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Dashboard"])
 
 
-def _project_source_counts(db, project_id: str) -> dict:
+def _project_source_counts(conn, project_id: str) -> dict:
     """Get per-source content counts for a project."""
     counts = {"email": 0, "voice": 0, "jira": 0, "confluence": 0}
     try:
-        rows = db.execute(
-            """SELECT c.source, COUNT(*) as count
-               FROM content c
-               JOIN project_content pc ON c.id = pc.content_id
-               WHERE pc.project_id = ?
-               GROUP BY c.source""",
-            (project_id,),
+        rows = conn.execute(
+            select(hub_content.c.source, func.count().label("count"))
+            .join(hub_project_content, hub_content.c.id == hub_project_content.c.content_id)
+            .where(hub_project_content.c.project_id == project_id)
+            .group_by(hub_content.c.source)
         ).fetchall()
         for r in rows:
-            src = r["source"]
-            if src in counts:
-                counts[src] = r["count"]
-            else:
-                counts[src] = r["count"]
+            counts[r.source] = r.count
     except Exception:
         pass
     return counts
 
 
-def _project_last_activity(db, project_id: str) -> str | None:
+def _project_last_activity(conn, project_id: str) -> str | None:
     """Get the most recent content created_at for a project."""
     try:
-        row = db.execute(
-            """SELECT MAX(c.created_at) as last_activity
-               FROM content c
-               JOIN project_content pc ON c.id = pc.content_id
-               WHERE pc.project_id = ?""",
-            (project_id,),
+        row = conn.execute(
+            select(func.max(hub_content.c.created_at).label("last_activity"))
+            .join(hub_project_content, hub_content.c.id == hub_project_content.c.content_id)
+            .where(hub_project_content.c.project_id == project_id)
         ).fetchone()
-        return row["last_activity"] if row else None
+        return row.last_activity if row else None
     except Exception:
         return None
-
-
-def _daily_costs_platform(db, days: int = 7, node_where: str = "", node_params: list | None = None) -> dict:
-    """Get daily cost totals from platform cost_ledger for the last N days."""
-    try:
-        params: list = [f"-{days} days"] + (node_params or [])
-        rows = db.execute(
-            f"""SELECT date(created_at) as d, COALESCE(SUM(cost_usd), 0) as total
-               FROM cost_ledger
-               WHERE created_at >= date('now', ?){node_where}
-               GROUP BY date(created_at)
-               ORDER BY d""",
-            params,
-        ).fetchall()
-        return {r["d"]: r["total"] for r in rows}
-    except Exception:
-        return {}
-
-
-def _daily_costs_hub(db, days: int = 7) -> dict:
-    """Get daily cost totals from hub api_costs for the last N days."""
-    try:
-        rows = db.execute(
-            """SELECT date(created_at) as d, COALESCE(SUM(cost_usd), 0) as total
-               FROM api_costs
-               WHERE created_at >= date('now', ?)
-               GROUP BY date(created_at)
-               ORDER BY d""",
-            (f"-{days} days",),
-        ).fetchall()
-        return {r["d"]: r["total"] for r in rows}
-    except Exception:
-        return {}
 
 
 @router.get("/api/dashboard")
@@ -91,200 +55,227 @@ def get_dashboard(node_id: str | None = None, subtree: bool = True):
         "unsorted_count": 0,
     }
 
-    # Projects from hub.db (with per-source counts and last_activity)
-    try:
-        with get_hub_db() as db:
-            rows = db.execute("""
-                SELECT p.id, p.name, p.jira_key, p.active,
-                    (SELECT COUNT(*) FROM project_content pc WHERE pc.project_id = p.id) as item_count
-                FROM projects p ORDER BY p.name
-            """).fetchall()
+    with get_db() as conn:
+        # Projects from hub mirror (with per-source counts and last_activity)
+        try:
+            item_count_sq = (
+                select(func.count())
+                .select_from(hub_project_content)
+                .where(hub_project_content.c.project_id == hub_projects.c.id)
+                .correlate(hub_projects)
+                .scalar_subquery()
+                .label("item_count")
+            )
+            rows = conn.execute(
+                select(
+                    hub_projects.c.id,
+                    hub_projects.c.name,
+                    hub_projects.c.jira_key,
+                    hub_projects.c.active,
+                    item_count_sq,
+                ).order_by(hub_projects.c.name)
+            ).fetchall()
             projects = []
             for r in rows:
-                p = dict(r)
-                p["sources"] = _project_source_counts(db, p["id"])
-                p["last_activity"] = _project_last_activity(db, p["id"])
+                p = dict(r._mapping)
+                p["sources"] = _project_source_counts(conn, p["id"])
+                p["last_activity"] = _project_last_activity(conn, p["id"])
                 projects.append(p)
             result["projects"] = projects
-    except Exception as e:
-        logger.exception("dashboard: failed to load projects: %s", e)
+        except Exception as e:
+            logger.exception("dashboard: failed to load projects: %s", e)
 
-    # Unsorted content count (exclude items classified/dismissed in platform.db)
-    try:
-        excluded_ids: list[str] = []
+        # Unsorted content count
         try:
-            with get_platform_db() as pdb:
-                actioned = pdb.execute(
-                    "SELECT hub_content_id FROM content_classifications"
+            actioned_ids: list[str] = []
+            try:
+                actioned = conn.execute(
+                    select(content_classifications.c.hub_content_id)
                 ).fetchall()
-                excluded_ids = [r["hub_content_id"] for r in actioned]
+                actioned_ids = [r.hub_content_id for r in actioned]
+            except Exception:
+                pass
+
+            # Content not in project_content and not classified
+            conditions = [
+                hub_content.c.id.notin_(
+                    select(hub_project_content.c.content_id)
+                )
+            ]
+            if actioned_ids:
+                conditions.append(hub_content.c.id.notin_(actioned_ids))
+
+            row = conn.execute(
+                select(func.count().label("cnt"))
+                .select_from(hub_content)
+                .where(*conditions)
+            ).fetchone()
+            result["unsorted_count"] = row.cnt if row else 0
         except Exception:
             pass
 
-        with get_hub_db() as db:
-            extra_filter = ""
-            extra_params: list[str] = []
-            if excluded_ids:
-                placeholders = ",".join("?" for _ in excluded_ids)
-                extra_filter = f" AND id NOT IN ({placeholders})"
-                extra_params = excluded_ids
-
-            row = db.execute(
-                f"""SELECT COUNT(*) as cnt FROM content
-                    WHERE id NOT IN (SELECT content_id FROM project_content){extra_filter}""",
-                extra_params,
-            ).fetchone()
-            result["unsorted_count"] = row["cnt"] if row else 0
-    except Exception:
-        pass
-
-    # Sync health — use explicit columns, normalize to "source" key
-    try:
-        with get_hub_db() as db:
-            # Discover column names from the table
-            try:
-                sample = db.execute("SELECT * FROM sync_state LIMIT 1").fetchone()
-                if sample:
-                    col_names = sample.keys()
-                else:
-                    col_names = []
-            except Exception:
-                col_names = []
-
-            rows = db.execute("SELECT * FROM sync_state").fetchall()
+        # Sync health from hub mirror
+        try:
+            rows = conn.execute(select(hub_sync_state)).fetchall()
             health = []
             for r in rows:
-                h = dict(r)
-                # Normalize: frontend expects "source", not "source_name"
+                h = dict(r._mapping)
+                # Normalize key names for frontend
                 if "source_name" in h and "source" not in h:
                     h["source"] = h.pop("source_name")
-                # Ensure "last_sync" key exists
+                if "source" not in h:
+                    h["source"] = h.get("source", "unknown")
                 if "last_sync" not in h:
                     h["last_sync"] = h.get("last_synced") or h.get("synced_at") or None
                 health.append(h)
             result["health"] = health
-    except Exception:
-        pass
+        except Exception:
+            pass
 
-    # Drafts count for queue
-    try:
-        with get_hub_db() as db:
-            row = db.execute("SELECT COUNT(*) as cnt FROM drafts WHERE status = 'pending'").fetchone()
-            result["queue"]["drafts"] = row["cnt"] if row else 0
-    except Exception:
-        pass
+        # Drafts count for queue
+        try:
+            row = conn.execute(
+                select(func.count().label("cnt"))
+                .select_from(hub_drafts)
+                .where(hub_drafts.c.status == "pending")
+            ).fetchone()
+            result["queue"]["drafts"] = row.cnt if row else 0
+        except Exception:
+            pass
 
-    # Resolve node filter once for all platform.db queries
-    node_where = ""
-    node_params: list[str] = []
-    try:
-        if node_id:
-            with get_platform_db() as db:
-                node_frag, node_params = build_node_id_filter(db, node_id, subtree)
-                if node_frag:
-                    node_where = " AND " + node_frag
-    except Exception:
-        pass
+        # Resolve node filter
+        node_ids: list[str] | None = None
+        try:
+            if node_id:
+                node_ids = _resolve_node_ids(conn, node_id, subtree)
+        except Exception:
+            pass
 
-    # Agents from platform.db
-    try:
-        with get_platform_db() as db:
-            rows = db.execute(
-                f"SELECT status, COUNT(*) as cnt FROM agents WHERE 1=1{node_where} GROUP BY status",
-                node_params,
-            ).fetchall()
+        # Agents
+        try:
+            stmt = select(agents.c.status, func.count().label("cnt"))
+            if node_ids is not None:
+                stmt = stmt.where(agents.c.node_id.in_(node_ids))
+            stmt = stmt.group_by(agents.c.status)
+            rows = conn.execute(stmt).fetchall()
             total = 0
             for r in rows:
-                s = r["status"]
-                c = r["cnt"]
+                s = r.status
+                c = r.cnt
                 total += c
                 if s in result["agents"]:
                     result["agents"][s] = c
             result["agents"]["total"] = total
-    except Exception:
-        pass
+        except Exception:
+            pass
 
-    # Queue tasks
-    try:
-        with get_platform_db() as db:
-            row = db.execute(
-                f"SELECT COUNT(*) as cnt FROM tasks WHERE status = 'open'{node_where}",
-                node_params,
+        # Queue tasks
+        try:
+            stmt = select(func.count().label("cnt")).select_from(tasks).where(tasks.c.status == "open")
+            if node_ids is not None:
+                stmt = stmt.where(tasks.c.node_id.in_(node_ids))
+            row = conn.execute(stmt).fetchone()
+            result["queue"]["total"] = row.cnt if row else 0
+
+            stmt = select(func.count().label("cnt")).select_from(tasks).where(tasks.c.status == "open", tasks.c.priority == "high")
+            if node_ids is not None:
+                stmt = stmt.where(tasks.c.node_id.in_(node_ids))
+            row = conn.execute(stmt).fetchone()
+            result["queue"]["urgent"] = row.cnt if row else 0
+        except Exception:
+            pass
+
+        result["queue"]["classify"] = result["unsorted_count"]
+
+        # Costs — today + month totals
+        try:
+            stmt = select(func.coalesce(func.sum(cost_ledger.c.cost_usd), 0).label("total")).where(cost_ledger.c.created_at >= text("date('now')"))
+            if node_ids is not None:
+                stmt = stmt.where(cost_ledger.c.node_id.in_(node_ids))
+            row = conn.execute(stmt).fetchone()
+            result["costs"]["today_usd"] = round(row.total, 4) if row else 0.0
+
+            stmt = select(func.coalesce(func.sum(cost_ledger.c.cost_usd), 0).label("total")).where(cost_ledger.c.created_at >= text("date('now', 'start of month')"))
+            if node_ids is not None:
+                stmt = stmt.where(cost_ledger.c.node_id.in_(node_ids))
+            row = conn.execute(stmt).fetchone()
+            result["costs"]["month_usd"] = round(row.total, 4) if row else 0.0
+        except Exception:
+            pass
+
+        # Hub api_costs
+        try:
+            row = conn.execute(
+                select(func.coalesce(func.sum(hub_api_costs.c.cost_usd), 0).label("total"))
+                .where(hub_api_costs.c.created_at >= text("date('now')"))
             ).fetchone()
-            result["queue"]["total"] = row["cnt"] if row else 0
-            row = db.execute(
-                f"SELECT COUNT(*) as cnt FROM tasks WHERE status = 'open' AND priority = 'high'{node_where}",
-                node_params,
+            result["costs"]["today_usd"] += round(row.total, 4) if row else 0.0
+
+            row = conn.execute(
+                select(func.coalesce(func.sum(hub_api_costs.c.cost_usd), 0).label("total"))
+                .where(hub_api_costs.c.created_at >= text("date('now', 'start of month')"))
             ).fetchone()
-            result["queue"]["urgent"] = row["cnt"] if row else 0
-    except Exception:
-        pass
+            result["costs"]["month_usd"] += round(row.total, 4) if row else 0.0
+        except Exception:
+            pass
 
-    # Classify count (unsorted content)
-    result["queue"]["classify"] = result["unsorted_count"]
+        result["costs"]["today_usd"] = round(result["costs"]["today_usd"], 4)
+        result["costs"]["month_usd"] = round(result["costs"]["month_usd"], 4)
 
-    # Costs — today + month totals
-    try:
-        with get_platform_db() as db:
-            row = db.execute(
-                f"SELECT COALESCE(SUM(cost_usd), 0) as total FROM cost_ledger WHERE created_at >= date('now'){node_where}",
-                node_params,
-            ).fetchone()
-            result["costs"]["today_usd"] = round(row["total"], 4) if row else 0.0
+        # Daily costs (last 7 days)
+        daily_map: dict[str, float] = {}
+        try:
+            stmt = (
+                select(
+                    func.date(cost_ledger.c.created_at).label("d"),
+                    func.coalesce(func.sum(cost_ledger.c.cost_usd), 0).label("total"),
+                )
+                .where(cost_ledger.c.created_at >= text("date('now', '-7 days')"))
+            )
+            if node_ids is not None:
+                stmt = stmt.where(cost_ledger.c.node_id.in_(node_ids))
+            stmt = stmt.group_by(text("d")).order_by(text("d"))
+            for r in conn.execute(stmt).fetchall():
+                daily_map[r.d] = daily_map.get(r.d, 0.0) + r.total
+        except Exception:
+            pass
 
-            row = db.execute(
-                f"SELECT COALESCE(SUM(cost_usd), 0) as total FROM cost_ledger WHERE created_at >= date('now', 'start of month'){node_where}",
-                node_params,
-            ).fetchone()
-            result["costs"]["month_usd"] = round(row["total"], 4) if row else 0.0
-    except Exception:
-        pass
+        try:
+            stmt = (
+                select(
+                    func.date(hub_api_costs.c.created_at).label("d"),
+                    func.coalesce(func.sum(hub_api_costs.c.cost_usd), 0).label("total"),
+                )
+                .where(hub_api_costs.c.created_at >= text("date('now', '-7 days')"))
+                .group_by(text("d"))
+                .order_by(text("d"))
+            )
+            for r in conn.execute(stmt).fetchall():
+                daily_map[r.d] = daily_map.get(r.d, 0.0) + r.total
+        except Exception:
+            pass
 
-    # Also add hub api_costs to cost totals
-    try:
-        with get_hub_db() as db:
-            try:
-                row = db.execute(
-                    "SELECT COALESCE(SUM(cost_usd), 0) as total FROM api_costs WHERE created_at >= date('now')"
-                ).fetchone()
-                result["costs"]["today_usd"] += round(row["total"], 4) if row else 0.0
-            except Exception:
-                pass
-            try:
-                row = db.execute(
-                    "SELECT COALESCE(SUM(cost_usd), 0) as total FROM api_costs WHERE created_at >= date('now', 'start of month')"
-                ).fetchone()
-                result["costs"]["month_usd"] += round(row["total"], 4) if row else 0.0
-            except Exception:
-                pass
-    except Exception:
-        pass
-
-    result["costs"]["today_usd"] = round(result["costs"]["today_usd"], 4)
-    result["costs"]["month_usd"] = round(result["costs"]["month_usd"], 4)
-
-    # Daily costs (last 7 days) — merge platform + hub
-    daily_map: dict[str, float] = {}
-    try:
-        with get_platform_db() as db:
-            for d, v in _daily_costs_platform(db, 7, node_where, node_params).items():
-                daily_map[d] = daily_map.get(d, 0.0) + v
-    except Exception:
-        pass
-    try:
-        with get_hub_db() as db:
-            for d, v in _daily_costs_hub(db, 7).items():
-                daily_map[d] = daily_map.get(d, 0.0) + v
-    except Exception:
-        pass
-
-    # Build sorted daily array (last 7 days, fill gaps with 0)
-    from datetime import date, timedelta
-    today = date.today()
-    daily = []
-    for i in range(6, -1, -1):
-        d = (today - timedelta(days=i)).isoformat()
-        daily.append(round(daily_map.get(d, 0.0), 4))
-    result["costs"]["daily"] = daily
+        from datetime import date, timedelta
+        today = date.today()
+        daily = []
+        for i in range(6, -1, -1):
+            d = (today - timedelta(days=i)).isoformat()
+            daily.append(round(daily_map.get(d, 0.0), 4))
+        result["costs"]["daily"] = daily
 
     return result
+
+
+def _resolve_node_ids(conn, node_id: str, subtree: bool) -> list[str]:
+    """Resolve node_id to list of IDs (including subtree if requested)."""
+    if not subtree:
+        return [node_id]
+    row = conn.execute(
+        select(nodes.c.path).where(nodes.c.id == node_id)
+    ).fetchone()
+    if not row:
+        return [node_id]
+    rows = conn.execute(
+        select(nodes.c.id).where(nodes.c.path.like(row.path + "%"))
+    ).fetchall()
+    return [r.id for r in rows]

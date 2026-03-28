@@ -15,7 +15,12 @@ import uuid
 import structlog
 from datetime import datetime, timezone
 
-from app.db.connections import get_hub_db, get_platform_db
+from sqlalchemy import select, text
+from app.db.session import get_db
+from app.db.tables import (
+    hub_content, hub_project_content, hub_projects,
+    content_classifications,
+)
 from app.config import BRAIN_JSON_PATH
 
 log = structlog.get_logger()
@@ -32,16 +37,11 @@ def classify_single(
     source: str | None,
     sender: str | None,
 ) -> dict:
-    """Classify a single content item.
-
-    Returns: {"project_id": str|None, "confidence": float, "reasoning": str, "method": "rule"|"llm"}
-    """
-    # Try rule-based first
+    """Classify a single content item."""
     result = _rule_based_classify(title, body, source, sender)
     if result and result["confidence"] >= SUGGEST_THRESHOLD:
         return result
 
-    # Fall back to LLM if available
     try:
         llm_result = _llm_classify(title, body, source, sender)
         if llm_result:
@@ -58,11 +58,6 @@ def classify_single(
 
 
 def classify_batch(items: list[dict]) -> list[dict]:
-    """Classify a batch of content items.
-
-    Each item should have: id, title, body, source, sender
-    Returns list of classification results with content_id added.
-    """
     results = []
     for item in items:
         result = classify_single(
@@ -78,37 +73,25 @@ def classify_batch(items: list[dict]) -> list[dict]:
 
 
 def process_unsorted(limit: int = 50) -> dict:
-    """Process unsorted content from hub.db.
-
-    Returns: {"auto_classified": int, "suggested": int, "skipped": int}
-    """
     stats = {"auto_classified": 0, "suggested": 0, "skipped": 0}
 
-    # Get unsorted items from hub.db
     unsorted = _get_unsorted_content(limit)
     if not unsorted:
         return stats
 
-    # Classify each
     results = classify_batch(unsorted)
 
-    # Apply results
     for result in results:
         if result["confidence"] >= AUTO_CLASSIFY_THRESHOLD and result["project_id"]:
             _apply_classification(
-                result["content_id"],
-                result["project_id"],
-                result["confidence"],
-                result["reasoning"],
-                auto=True,
+                result["content_id"], result["project_id"],
+                result["confidence"], result["reasoning"], auto=True,
             )
             stats["auto_classified"] += 1
         elif result["confidence"] >= SUGGEST_THRESHOLD and result["project_id"]:
             _save_suggestion(
-                result["content_id"],
-                result["project_id"],
-                result["confidence"],
-                result["reasoning"],
+                result["content_id"], result["project_id"],
+                result["confidence"], result["reasoning"],
             )
             stats["suggested"] += 1
         else:
@@ -118,49 +101,46 @@ def process_unsorted(limit: int = 50) -> dict:
 
 
 def _get_unsorted_content(limit: int) -> list[dict]:
-    """Get unsorted content from hub.db that hasn't been classified yet."""
     try:
-        with get_hub_db() as hub:
-            rows = hub.execute(
-                "SELECT id, title, body, source FROM content ORDER BY created_at DESC LIMIT ?",
-                (limit * 3,),
+        with get_db() as conn:
+            rows = conn.execute(
+                select(hub_content.c.id, hub_content.c.title, hub_content.c.body, hub_content.c.source)
+                .order_by(hub_content.c.created_at.desc())
+                .limit(limit * 3)
             ).fetchall()
 
-        if not rows:
-            return []
+            if not rows:
+                return []
 
-        content_ids = [r["id"] for r in rows]
+            content_ids = [r.id for r in rows]
 
-        # Filter out already-classified items
-        with get_platform_db() as pdb:
+            # Filter out already-classified items
             classified = set()
             for cid in content_ids:
-                row = pdb.execute(
-                    "SELECT hub_content_id FROM content_classifications WHERE hub_content_id = ?",
-                    (cid,),
+                row = conn.execute(
+                    select(content_classifications.c.hub_content_id)
+                    .where(content_classifications.c.hub_content_id == cid)
                 ).fetchone()
                 if row:
                     classified.add(cid)
 
-        # Also filter out items already assigned to a project (hub.db)
-        with get_hub_db() as hub:
+            # Filter out items already assigned to a project
             assigned = set()
             try:
                 for cid in content_ids:
-                    row = hub.execute(
-                        "SELECT content_id FROM project_content WHERE content_id = ?",
-                        (cid,),
+                    row = conn.execute(
+                        select(hub_project_content.c.content_id)
+                        .where(hub_project_content.c.content_id == cid)
                     ).fetchone()
                     if row:
                         assigned.add(cid)
             except Exception:
-                # project_content table may not exist
                 pass
 
         unsorted = []
         for r in rows:
-            if r["id"] not in classified and r["id"] not in assigned:
-                unsorted.append(dict(r))
+            if r.id not in classified and r.id not in assigned:
+                unsorted.append(dict(r._mapping))
             if len(unsorted) >= limit:
                 break
 
@@ -173,11 +153,9 @@ def _get_unsorted_content(limit: int) -> list[dict]:
 def _rule_based_classify(
     title: str, body: str | None, source: str | None, sender: str | None
 ) -> dict | None:
-    """Rule-based classification using keyword and sender matching."""
-    text = f"{title} {body or ''}".lower()
+    text_combined = f"{title} {body or ''}".lower()
     sender_lower = (sender or "").lower()
 
-    # Load project rules from brain.json
     rules = _load_classification_rules()
 
     best_match = None
@@ -187,21 +165,18 @@ def _rule_based_classify(
         confidence = 0.0
         reasons = []
 
-        # Keyword matching
         keywords = project_rules.get("keywords", [])
-        matched_keywords = [kw for kw in keywords if kw.lower() in text]
+        matched_keywords = [kw for kw in keywords if kw.lower() in text_combined]
         if matched_keywords:
             keyword_conf = min(0.4 + 0.15 * len(matched_keywords), 0.85)
             confidence = max(confidence, keyword_conf)
             reasons.append(f"keywords: {', '.join(matched_keywords)}")
 
-        # Sender matching
         senders = project_rules.get("senders", [])
         if any(s.lower() in sender_lower for s in senders if s):
             confidence = max(confidence, 0.80)
             reasons.append(f"sender match: {sender}")
 
-        # Jira key matching
         jira_key = project_rules.get("jira_key", "")
         if jira_key and jira_key.upper() in (title or "").upper():
             confidence = max(confidence, 0.95)
@@ -220,17 +195,14 @@ def _rule_based_classify(
 
 
 def _load_classification_rules() -> dict:
-    """Load classification rules from brain.json and hub.db projects."""
     rules: dict = {}
 
-    # Load from brain.json
     try:
         brain_path = str(BRAIN_JSON_PATH)
         if os.path.exists(brain_path):
             with open(brain_path) as f:
                 brain = json.load(f)
 
-            # Extract sender->project mappings from people
             people = brain.get("people", {})
             if isinstance(people, dict):
                 for name, info in people.items():
@@ -244,22 +216,21 @@ def _load_classification_rules() -> dict:
     except Exception as e:
         log.debug("brain_rules_load_failed", error=str(e))
 
-    # Load project info from hub.db
+    # Load project info from hub mirror
     try:
-        with get_hub_db() as hub:
-            projects = hub.execute(
-                "SELECT id, name, jira_key FROM projects WHERE active = 1"
+        with get_db() as conn:
+            projects = conn.execute(
+                select(hub_projects.c.id, hub_projects.c.name, hub_projects.c.jira_key)
+                .where(hub_projects.c.active == 1)
             ).fetchall()
             for p in projects:
-                pid = p["id"]
+                pid = p.id
                 if pid not in rules:
                     rules[pid] = {"keywords": [], "senders": [], "jira_key": ""}
-                # Add project name words as keywords
-                name_words = [w.lower() for w in (p["name"] or "").split() if len(w) > 2]
+                name_words = [w.lower() for w in (p.name or "").split() if len(w) > 2]
                 rules[pid]["keywords"].extend(name_words)
-                jira_val = p["jira_key"]
-                if jira_val:
-                    rules[pid]["jira_key"] = jira_val
+                if p.jira_key:
+                    rules[pid]["jira_key"] = p.jira_key
     except Exception as e:
         log.debug("hub_rules_load_failed", error=str(e))
 
@@ -269,7 +240,6 @@ def _load_classification_rules() -> dict:
 def _llm_classify(
     title: str, body: str | None, source: str | None, sender: str | None
 ) -> dict | None:
-    """Use Anthropic SDK (Haiku) to classify content. Returns None if unavailable."""
     try:
         from app.services.agent_sdk_client import agent_sdk, record_sdk_cost
     except ImportError:
@@ -278,13 +248,13 @@ def _llm_classify(
     if not agent_sdk.is_available():
         return None
 
-    # Get available projects
     try:
-        with get_hub_db() as hub:
-            projects = hub.execute(
-                "SELECT id, name FROM projects WHERE active = 1"
+        with get_db() as conn:
+            projects = conn.execute(
+                select(hub_projects.c.id, hub_projects.c.name)
+                .where(hub_projects.c.active == 1)
             ).fetchall()
-        project_list = "\n".join(f"- {p['id']}: {p['name']}" for p in projects)
+        project_list = "\n".join(f"- {p.id}: {p.name}" for p in projects)
     except Exception:
         return None
 
@@ -311,7 +281,6 @@ If no project matches, return: {{"project_id": null, "confidence": 0.0, "reasoni
         result = agent_sdk.quick_command(prompt, model="haiku", max_tokens=256)
         content = result["content"].strip()
 
-        # Record cost
         record_sdk_cost(
             model=result.get("model", "haiku"),
             input_tokens=result.get("input_tokens", 0),
@@ -322,9 +291,7 @@ If no project matches, return: {{"project_id": null, "confidence": 0.0, "reasoni
         log.warning("llm_classify_api_failed", error=str(e))
         return None
 
-    # Parse JSON from response
     try:
-        # Handle markdown code blocks
         if "```" in content:
             content = content.split("```")[1]
             if content.startswith("json"):
@@ -344,55 +311,45 @@ If no project matches, return: {{"project_id": null, "confidence": 0.0, "reasoni
 
 
 def _apply_classification(
-    content_id: str,
-    project_id: str,
-    confidence: float,
-    reasoning: str,
-    auto: bool = False,
+    content_id: str, project_id: str, confidence: float, reasoning: str, auto: bool = False,
 ):
-    """Save classification to platform.db."""
     try:
-        with get_platform_db() as db:
-            db.execute(
-                """INSERT OR REPLACE INTO content_classifications
-                   (id, hub_content_id, classified_project_id, project_id, confidence, reasoning,
-                    auto_classified, status, action, classified_at, created_at)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, 'accepted', 'classify', datetime('now'), datetime('now'))""",
-                (
-                    str(uuid.uuid4()),
-                    content_id,
-                    project_id,
-                    project_id,
-                    confidence,
-                    reasoning,
-                    1 if auto else 0,
+        with get_db() as conn:
+            conn.execute(
+                text(
+                    "INSERT OR REPLACE INTO content_classifications "
+                    "(id, hub_content_id, classified_project_id, project_id, confidence, reasoning, "
+                    "auto_classified, status, action, classified_at, created_at) "
+                    "VALUES (:id, :cid, :pid, :pid2, :conf, :reason, :auto, 'accepted', 'classify', "
+                    "datetime('now'), datetime('now'))"
                 ),
+                {
+                    "id": str(uuid.uuid4()), "cid": content_id,
+                    "pid": project_id, "pid2": project_id,
+                    "conf": confidence, "reason": reasoning,
+                    "auto": 1 if auto else 0,
+                },
             )
-            db.commit()
     except Exception as e:
         log.warning("apply_classification_failed", content_id=content_id, error=str(e))
 
 
-def _save_suggestion(
-    content_id: str, project_id: str, confidence: float, reasoning: str
-):
-    """Save a classification suggestion for user review."""
+def _save_suggestion(content_id: str, project_id: str, confidence: float, reasoning: str):
     try:
-        with get_platform_db() as db:
-            db.execute(
-                """INSERT OR REPLACE INTO content_classifications
-                   (id, hub_content_id, classified_project_id, suggested_project_id, confidence,
-                    reasoning, auto_classified, status, action, classified_at, created_at)
-                   VALUES (?, ?, ?, ?, ?, ?, 0, 'suggested', 'classify', datetime('now'), datetime('now'))""",
-                (
-                    str(uuid.uuid4()),
-                    content_id,
-                    project_id,
-                    project_id,
-                    confidence,
-                    reasoning,
+        with get_db() as conn:
+            conn.execute(
+                text(
+                    "INSERT OR REPLACE INTO content_classifications "
+                    "(id, hub_content_id, classified_project_id, suggested_project_id, confidence, "
+                    "reasoning, auto_classified, status, action, classified_at, created_at) "
+                    "VALUES (:id, :cid, :pid, :pid2, :conf, :reason, 0, 'suggested', 'classify', "
+                    "datetime('now'), datetime('now'))"
                 ),
+                {
+                    "id": str(uuid.uuid4()), "cid": content_id,
+                    "pid": project_id, "pid2": project_id,
+                    "conf": confidence, "reason": reasoning,
+                },
             )
-            db.commit()
     except Exception as e:
         log.warning("save_suggestion_failed", content_id=content_id, error=str(e))

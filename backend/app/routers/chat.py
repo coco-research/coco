@@ -6,9 +6,11 @@ import uuid
 
 from fastapi import APIRouter, HTTPException, Query
 from sse_starlette.sse import EventSourceResponse
+from sqlalchemy import select, insert, update, delete, text
 
 from app.config import CHAT_TIMEOUT_MINUTES, USE_AGENT_SDK
-from app.db.connections import get_platform_db
+from app.db.session import get_db
+from app.db.tables import chat_sessions, chat_messages, hub_content
 from app.services.chat_context import build_chat_context
 from app.models.chat import ChatRequest, MessageOut, SessionCreate, SessionOut
 
@@ -22,37 +24,38 @@ router = APIRouter(tags=["Chat"])
 # ---------------------------------------------------------------------------
 
 def _create_session(title: str | None = None, model: str | None = "sonnet") -> dict:
-    """Create a new chat session and return it as a dict."""
     session_id = str(uuid.uuid4())
-    with get_platform_db() as db:
-        db.execute(
-            "INSERT INTO chat_sessions (id, title, model) VALUES (?, ?, ?)",
-            (session_id, title or "New Chat", model),
+    with get_db() as conn:
+        conn.execute(
+            insert(chat_sessions).values(id=session_id, title=title or "New Chat", model=model)
         )
-        db.commit()
-        row = db.execute(
-            "SELECT id, title, model, message_count, created_at, updated_at FROM chat_sessions WHERE id = ?",
-            (session_id,),
+        row = conn.execute(
+            select(
+                chat_sessions.c.id, chat_sessions.c.title, chat_sessions.c.model,
+                chat_sessions.c.message_count, chat_sessions.c.created_at, chat_sessions.c.updated_at,
+            ).where(chat_sessions.c.id == session_id)
         ).fetchone()
-    return dict(row)
+    return dict(row._mapping)
 
 
 def _update_session_after_message(session_id: str, title: str | None = None):
-    """Increment message_count, update updated_at, and optionally set title."""
-    with get_platform_db() as db:
+    with get_db() as conn:
         if title:
-            db.execute(
-                "UPDATE chat_sessions SET message_count = message_count + 1, "
-                "updated_at = datetime('now'), title = ? WHERE id = ?",
-                (title, session_id),
+            conn.execute(
+                text(
+                    "UPDATE chat_sessions SET message_count = message_count + 1, "
+                    "updated_at = datetime('now'), title = :title WHERE id = :id"
+                ),
+                {"title": title, "id": session_id},
             )
         else:
-            db.execute(
-                "UPDATE chat_sessions SET message_count = message_count + 1, "
-                "updated_at = datetime('now') WHERE id = ?",
-                (session_id,),
+            conn.execute(
+                text(
+                    "UPDATE chat_sessions SET message_count = message_count + 1, "
+                    "updated_at = datetime('now') WHERE id = :id"
+                ),
+                {"id": session_id},
             )
-        db.commit()
 
 
 def _save_message(
@@ -62,15 +65,14 @@ def _save_message(
     tokens_used: int | None = None,
     session_id: str | None = None,
 ) -> str:
-    """Save a chat message to platform.db and return its id."""
     msg_id = str(uuid.uuid4())
-    with get_platform_db() as db:
-        db.execute(
-            "INSERT INTO chat_messages (id, session_id, role, content, model, tokens_used) "
-            "VALUES (?, ?, ?, ?, ?, ?)",
-            (msg_id, session_id, role, content, model, tokens_used),
+    with get_db() as conn:
+        conn.execute(
+            insert(chat_messages).values(
+                id=msg_id, session_id=session_id, role=role,
+                content=content, model=model, tokens_used=tokens_used,
+            )
         )
-        db.commit()
     return msg_id
 
 
@@ -80,34 +82,38 @@ def _save_message(
 
 @router.get("/api/chat/sessions")
 def list_sessions():
-    """List all chat sessions ordered by most recently updated."""
     try:
-        with get_platform_db() as db:
-            rows = db.execute(
-                "SELECT id, title, model, message_count, created_at, updated_at "
-                "FROM chat_sessions ORDER BY updated_at DESC"
+        with get_db() as conn:
+            rows = conn.execute(
+                select(
+                    chat_sessions.c.id, chat_sessions.c.title, chat_sessions.c.model,
+                    chat_sessions.c.message_count, chat_sessions.c.created_at, chat_sessions.c.updated_at,
+                ).order_by(chat_sessions.c.updated_at.desc())
             ).fetchall()
 
-            sessions = [dict(r) for r in rows]
+            sessions = [dict(r._mapping) for r in rows]
 
-            # Check for orphan messages (no session_id) and surface as "Unsorted"
-            orphan_count = db.execute(
-                "SELECT COUNT(*) as cnt FROM chat_messages WHERE session_id IS NULL"
-            ).fetchone()["cnt"]
+            orphan_count_row = conn.execute(
+                select(text("COUNT(*) as cnt")).select_from(chat_messages)
+                .where(chat_messages.c.session_id.is_(None))
+            ).fetchone()
+            orphan_count = orphan_count_row.cnt if orphan_count_row else 0
 
             if orphan_count > 0:
-                # Find the earliest and latest orphan message timestamps
-                ts = db.execute(
-                    "SELECT MIN(created_at) as first_at, MAX(created_at) as last_at "
-                    "FROM chat_messages WHERE session_id IS NULL"
+                ts = conn.execute(
+                    select(
+                        text("MIN(created_at) as first_at"),
+                        text("MAX(created_at) as last_at"),
+                    ).select_from(chat_messages)
+                    .where(chat_messages.c.session_id.is_(None))
                 ).fetchone()
                 sessions.append({
                     "id": "__unsorted__",
                     "title": "Unsorted",
                     "model": None,
                     "message_count": orphan_count,
-                    "created_at": ts["first_at"] or "",
-                    "updated_at": ts["last_at"] or "",
+                    "created_at": ts.first_at or "",
+                    "updated_at": ts.last_at or "",
                 })
 
             return sessions
@@ -118,7 +124,6 @@ def list_sessions():
 
 @router.post("/api/chat/sessions")
 def create_session(req: SessionCreate | None = None):
-    """Create a new chat session."""
     title = req.title if req else None
     model = req.model if req else "sonnet"
     return _create_session(title=title, model=model)
@@ -130,24 +135,28 @@ def get_session_messages(
     limit: int = Query(200, ge=1, le=500),
     offset: int = Query(0, ge=0),
 ):
-    """Get messages for a specific session."""
     try:
-        with get_platform_db() as db:
+        with get_db() as conn:
+            _msg_cols = [
+                chat_messages.c.id, chat_messages.c.session_id, chat_messages.c.role,
+                chat_messages.c.content, chat_messages.c.model, chat_messages.c.tokens_used,
+                chat_messages.c.created_at,
+            ]
             if session_id == "__unsorted__":
-                rows = db.execute(
-                    "SELECT id, session_id, role, content, model, tokens_used, created_at "
-                    "FROM chat_messages WHERE session_id IS NULL "
-                    "ORDER BY created_at ASC LIMIT ? OFFSET ?",
-                    (limit, offset),
+                rows = conn.execute(
+                    select(*_msg_cols)
+                    .where(chat_messages.c.session_id.is_(None))
+                    .order_by(chat_messages.c.created_at.asc())
+                    .limit(limit).offset(offset)
                 ).fetchall()
             else:
-                rows = db.execute(
-                    "SELECT id, session_id, role, content, model, tokens_used, created_at "
-                    "FROM chat_messages WHERE session_id = ? "
-                    "ORDER BY created_at ASC LIMIT ? OFFSET ?",
-                    (session_id, limit, offset),
+                rows = conn.execute(
+                    select(*_msg_cols)
+                    .where(chat_messages.c.session_id == session_id)
+                    .order_by(chat_messages.c.created_at.asc())
+                    .limit(limit).offset(offset)
                 ).fetchall()
-            return [dict(r) for r in rows]
+            return [dict(r._mapping) for r in rows]
     except Exception as e:
         logger.exception("get_session_messages failed for session %s: %s", session_id, e)
         return []
@@ -155,15 +164,19 @@ def get_session_messages(
 
 @router.delete("/api/chat/sessions/{session_id}")
 def delete_session(session_id: str):
-    """Delete a session and all its messages."""
     try:
-        with get_platform_db() as db:
+        with get_db() as conn:
             if session_id == "__unsorted__":
-                db.execute("DELETE FROM chat_messages WHERE session_id IS NULL")
+                conn.execute(
+                    delete(chat_messages).where(chat_messages.c.session_id.is_(None))
+                )
             else:
-                db.execute("DELETE FROM chat_messages WHERE session_id = ?", (session_id,))
-                db.execute("DELETE FROM chat_sessions WHERE id = ?", (session_id,))
-            db.commit()
+                conn.execute(
+                    delete(chat_messages).where(chat_messages.c.session_id == session_id)
+                )
+                conn.execute(
+                    delete(chat_sessions).where(chat_sessions.c.id == session_id)
+                )
         return {"status": "ok"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
@@ -174,7 +187,6 @@ def delete_session(session_id: str):
 # ---------------------------------------------------------------------------
 
 async def _check_claude_available() -> bool:
-    """Check if the claude CLI is available on PATH."""
     try:
         proc = await asyncio.create_subprocess_exec(
             "which", "claude",
@@ -188,7 +200,6 @@ async def _check_claude_available() -> bool:
 
 
 async def _sdk_chat_event_generator(message: str, model: str, system_prompt: str, session_id: str | None = None):
-    """SDK-based streaming chat generator. Used when USE_AGENT_SDK is enabled."""
     from app.services.agent_sdk_client import agent_sdk
 
     full_response = ""
@@ -198,10 +209,7 @@ async def _sdk_chat_event_generator(message: str, model: str, system_prompt: str
 
     try:
         async for event in agent_sdk.stream_chat(
-            prompt=message,
-            model=model,
-            system=system_prompt,
-            max_tokens=8192,
+            prompt=message, model=model, system=system_prompt, max_tokens=8192,
         ):
             event_type = event.get("type")
             if event_type == "token":
@@ -213,7 +221,6 @@ async def _sdk_chat_event_generator(message: str, model: str, system_prompt: str
                 output_tokens = event.get("output_tokens", 0)
                 response_model = event.get("model", model)
             elif event_type == "done":
-                # Final content from stream (already accumulated via tokens)
                 if not full_response:
                     full_response = event.get("content", "")
     except Exception as e:
@@ -225,16 +232,15 @@ async def _sdk_chat_event_generator(message: str, model: str, system_prompt: str
                 _update_session_after_message(session_id)
         return
 
-    # Save assistant message with real token count
     tokens_used = input_tokens + output_tokens
     if full_response:
         _save_message("assistant", full_response, model, tokens_used, session_id=session_id)
         if session_id:
-            with get_platform_db() as db:
-                row = db.execute("SELECT title FROM chat_sessions WHERE id = ?", (session_id,)).fetchone()
-                if row and row["title"] == "New Chat":
-                    # Use first 50 chars of the user message (passed in `message`) as auto-title
-                    # but message may include context prefix — extract user part
+            with get_db() as conn:
+                row = conn.execute(
+                    select(chat_sessions.c.title).where(chat_sessions.c.id == session_id)
+                ).fetchone()
+                if row and row.title == "New Chat":
                     auto_title = message[:50].strip()
                     if len(message) > 50:
                         auto_title += "..."
@@ -242,23 +248,17 @@ async def _sdk_chat_event_generator(message: str, model: str, system_prompt: str
                 else:
                     _update_session_after_message(session_id)
 
-    # Record real cost to cost_ledger
     if input_tokens or output_tokens:
         from app.services.agent_sdk_client import record_sdk_cost
         record_sdk_cost(
-            model=response_model,
-            input_tokens=input_tokens,
-            output_tokens=output_tokens,
-            source="chat",
+            model=response_model, input_tokens=input_tokens,
+            output_tokens=output_tokens, source="chat",
         )
 
     yield {"event": "done", "data": json.dumps({"type": "done", "content": full_response, "session_id": session_id})}
 
 
 async def chat_event_generator(message: str, model: str, system_prompt: str, session_id: str | None = None):
-    """Async generator yielding SSE event dicts for EventSourceResponse."""
-
-    # --- SDK path (preferred when enabled) ---
     if USE_AGENT_SDK:
         from app.services.agent_sdk_client import agent_sdk
         if agent_sdk.is_available():
@@ -266,7 +266,6 @@ async def chat_event_generator(message: str, model: str, system_prompt: str, ses
                 yield evt
             return
 
-    # --- Subprocess path (fallback) ---
     env = {**os.environ}
     env.pop("CLAUDE_CODE_ENTRYPOINT", None)
 
@@ -283,7 +282,7 @@ async def chat_event_generator(message: str, model: str, system_prompt: str, ses
             stderr=asyncio.subprocess.PIPE,
             cwd=os.environ.get("HOME", "/tmp"),
             env=env,
-            limit=1024 * 1024,  # 1MB line buffer (default 64KB too small for stream-json)
+            limit=1024 * 1024,
         )
     except FileNotFoundError:
         yield {"event": "error", "data": json.dumps({"type": "error", "message": "claude CLI not found on PATH"})}
@@ -299,23 +298,22 @@ async def chat_event_generator(message: str, model: str, system_prompt: str, ses
     try:
         deadline = asyncio.get_event_loop().time() + timeout_seconds
 
-        async for line in proc.stdout:  # noqa: E501
+        async for line in proc.stdout:
             if asyncio.get_event_loop().time() > deadline:
                 timed_out = True
                 break
 
-            text = line.decode("utf-8", errors="replace").strip()
-            if not text:
+            line_text = line.decode("utf-8", errors="replace").strip()
+            if not line_text:
                 continue
 
             try:
-                chunk = json.loads(text)
+                chunk = json.loads(line_text)
                 if not isinstance(chunk, dict):
                     continue
 
                 chunk_type = chunk.get("type")
 
-                # Handle assistant message content blocks
                 if chunk_type == "assistant":
                     assistant_message = chunk.get("message")
                     if isinstance(assistant_message, dict):
@@ -326,7 +324,6 @@ async def chat_event_generator(message: str, model: str, system_prompt: str, ses
                                 full_response += token
                                 yield {"event": "token", "data": json.dumps({"type": "token", "content": token})}
 
-                # Handle content_block_delta streaming events
                 elif chunk_type == "content_block_delta":
                     delta = chunk.get("delta", {})
                     if isinstance(delta, dict) and delta.get("type") == "text_delta":
@@ -334,11 +331,9 @@ async def chat_event_generator(message: str, model: str, system_prompt: str, ses
                         full_response += token
                         yield {"event": "token", "data": json.dumps({"type": "token", "content": token})}
 
-                # Handle result type (final assembled message — result can be a string or dict)
                 elif chunk_type == "result":
                     result_val = chunk.get("result")
                     if isinstance(result_val, str):
-                        # result is the plain text response
                         if not full_response:
                             full_response = result_val
                             yield {"event": "token", "data": json.dumps({"type": "token", "content": result_val})}
@@ -351,8 +346,6 @@ async def chat_event_generator(message: str, model: str, system_prompt: str, ses
                                     full_response = token
                                     yield {"event": "token", "data": json.dumps({"type": "token", "content": token})}
 
-                # Skip system, rate_limit_event, etc. silently
-
             except json.JSONDecodeError:
                 continue
 
@@ -363,7 +356,6 @@ async def chat_event_generator(message: str, model: str, system_prompt: str, ses
             except asyncio.TimeoutError:
                 proc.kill()
             yield {"event": "error", "data": json.dumps({"type": "error", "message": f"Chat timed out after {CHAT_TIMEOUT_MINUTES} minutes"})}
-            # Still save whatever we got
             if full_response:
                 _save_message("assistant", full_response, model, session_id=session_id)
                 if session_id:
@@ -372,7 +364,6 @@ async def chat_event_generator(message: str, model: str, system_prompt: str, ses
 
         await proc.wait()
 
-        # Check for errors
         if proc.returncode != 0 and not full_response:
             stderr_bytes = await proc.stderr.read()
             stderr_text = stderr_bytes.decode("utf-8", errors="replace").strip()
@@ -388,8 +379,6 @@ async def chat_event_generator(message: str, model: str, system_prompt: str, ses
         return
 
     finally:
-        # CRITICAL: Kill the claude subprocess if it is still running when the
-        # generator is closed (e.g., client disconnects, CancelledError, GeneratorExit).
         if proc.returncode is None:
             try:
                 proc.terminate()
@@ -403,15 +392,15 @@ async def chat_event_generator(message: str, model: str, system_prompt: str, ses
                 except Exception:
                     pass
 
-    # Save assistant message and send done event
-    tokens_used = len(full_response.split()) if full_response else 0  # rough estimate
+    tokens_used = len(full_response.split()) if full_response else 0
     if full_response:
         _save_message("assistant", full_response, model, tokens_used, session_id=session_id)
         if session_id:
-            # Auto-title: if session title is still "New Chat", set it from user message
-            with get_platform_db() as db:
-                row = db.execute("SELECT title FROM chat_sessions WHERE id = ?", (session_id,)).fetchone()
-                if row and row["title"] == "New Chat":
+            with get_db() as conn:
+                row = conn.execute(
+                    select(chat_sessions.c.title).where(chat_sessions.c.id == session_id)
+                ).fetchone()
+                if row and row.title == "New Chat":
                     auto_title = message[:50].strip()
                     if len(message) > 50:
                         auto_title += "..."
@@ -428,14 +417,11 @@ async def chat_event_generator(message: str, model: str, system_prompt: str, ses
 
 @router.post("/api/chat")
 async def chat(req: ChatRequest):
-    """Stream a chat response from Claude via SSE."""
-    # Validate
     if not req.message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty")
     if len(req.message) > 50000:
         raise HTTPException(status_code=400, detail="Message too long (max 50,000 characters)")
 
-    # Check claude is available (SDK path doesn't need CLI)
     sdk_available = False
     if USE_AGENT_SDK:
         from app.services.agent_sdk_client import agent_sdk
@@ -445,41 +431,38 @@ async def chat(req: ChatRequest):
 
     model = req.model or "sonnet"
 
-    # Resolve or create session
     session_id = req.session_id
     if not session_id:
-        # Auto-create a session
         auto_title = req.message[:50].strip()
         if len(req.message) > 50:
             auto_title += "..."
         session = _create_session(title=auto_title, model=model)
         session_id = session["id"]
 
-    # Save user message
     _save_message("user", req.message, model, session_id=session_id)
     _update_session_after_message(session_id)
 
-    # Build system prompt with full context injection
     system_prompt = build_chat_context(project_id=req.project_id)
 
-    # If content_ids are attached, fetch them and prepend as context
+    # If content_ids are attached, fetch them from hub mirror
     message_with_context = req.message
     if req.content_ids:
-        from app.db.connections import get_hub_db
         context_parts: list[str] = []
-        for cid in req.content_ids[:10]:  # Limit to 10 attachments
+        for cid in req.content_ids[:10]:
             try:
-                with get_hub_db() as db:
-                    row = db.execute(
-                        "SELECT title, summary, body, source FROM content WHERE id = ?",
-                        (cid,),
+                with get_db() as conn:
+                    row = conn.execute(
+                        select(
+                            hub_content.c.title, hub_content.c.summary,
+                            hub_content.c.body, hub_content.c.source,
+                        ).where(hub_content.c.id == cid)
                     ).fetchone()
                     if row:
-                        part = f"--- Attached: {row['title'] or 'Untitled'} (source: {row['source'] or 'unknown'}) ---\n"
-                        if row.get("summary"):
-                            part += f"{row['summary']}\n"
-                        if row.get("body"):
-                            part += f"{row['body']}\n"
+                        part = f"--- Attached: {row.title or 'Untitled'} (source: {row.source or 'unknown'}) ---\n"
+                        if row.summary:
+                            part += f"{row.summary}\n"
+                        if row.body:
+                            part += f"{row.body}\n"
                         context_parts.append(part)
             except Exception:
                 pass
@@ -487,9 +470,7 @@ async def chat(req: ChatRequest):
             attached_context = "\n".join(context_parts)
             message_with_context = f"[The user has attached the following Knowledge Hub content for context:]\n\n{attached_context}\n\n[User message:]\n{req.message}"
 
-    # Return SSE stream — include session_id in first event so frontend can track it
     async def event_gen():
-        # Emit session_id as the first event so the frontend knows which session this belongs to
         yield {"event": "session", "data": json.dumps({"type": "session", "session_id": session_id})}
         async for evt in chat_event_generator(message_with_context, model, system_prompt, session_id=session_id):
             yield evt
@@ -501,7 +482,7 @@ async def chat(req: ChatRequest):
 
 
 # ---------------------------------------------------------------------------
-# Legacy history endpoints (backward compat)
+# Legacy history endpoints
 # ---------------------------------------------------------------------------
 
 @router.get("/api/chat/history")
@@ -509,15 +490,18 @@ def chat_history(
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
 ):
-    """Return chat messages in chronological order (oldest first)."""
     try:
-        with get_platform_db() as db:
-            rows = db.execute(
-                "SELECT id, session_id, role, content, model, tokens_used, created_at "
-                "FROM chat_messages ORDER BY created_at ASC LIMIT ? OFFSET ?",
-                (limit, offset),
+        with get_db() as conn:
+            rows = conn.execute(
+                select(
+                    chat_messages.c.id, chat_messages.c.session_id, chat_messages.c.role,
+                    chat_messages.c.content, chat_messages.c.model, chat_messages.c.tokens_used,
+                    chat_messages.c.created_at,
+                )
+                .order_by(chat_messages.c.created_at.asc())
+                .limit(limit).offset(offset)
             ).fetchall()
-            return [dict(r) for r in rows]
+            return [dict(r._mapping) for r in rows]
     except Exception as e:
         logger.exception("chat_history failed: %s", e)
         return []
@@ -525,12 +509,10 @@ def chat_history(
 
 @router.delete("/api/chat/history")
 def clear_chat_history():
-    """Delete all chat messages."""
     try:
-        with get_platform_db() as db:
-            db.execute("DELETE FROM chat_messages")
-            db.execute("DELETE FROM chat_sessions")
-            db.commit()
+        with get_db() as conn:
+            conn.execute(delete(chat_messages))
+            conn.execute(delete(chat_sessions))
         return {"status": "ok", "message": "Chat history cleared"}
     except Exception as e:
         return {"status": "error", "message": str(e)}

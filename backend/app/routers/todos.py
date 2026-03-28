@@ -3,7 +3,12 @@ import logging
 import uuid
 from collections import defaultdict
 from fastapi import APIRouter, HTTPException, Query
-from app.db.connections import get_hub_db, get_platform_db
+from sqlalchemy import select, insert, update, delete, text, func
+from app.db.session import get_db
+from app.db.tables import (
+    hub_todos, hub_content, hub_project_content,
+    todo_overrides, todo_dependencies, entity_identifiers,
+)
 from app.config import HUB_DB_PATH, BRAIN_JSON_PATH
 from app.services.dedup import similarity, find_duplicates, pick_best, group_similarity
 from app.services.event_bus import event_bus
@@ -29,34 +34,23 @@ def _load_people_priorities() -> dict[str, str]:
 
 
 def _extract_action_items_from_content(row: dict) -> list[dict]:
-    """Extract action items from a content row's metadata JSON.
-
-    Supports two metadata layouts:
-    - email: metadata.extraction.action_items
-    - voice: metadata.meeting_note.action_items
-    """
+    """Extract action items from a content row's metadata JSON."""
     try:
         meta = json.loads(row.get("metadata") or "{}")
     except (json.JSONDecodeError, TypeError):
         return []
 
     items = []
-
-    # Email layout
     extraction = meta.get("extraction", {})
     if extraction and isinstance(extraction.get("action_items"), list):
         items.extend(extraction["action_items"])
-
-    # Voice memo layout
     meeting = meta.get("meeting_note", {})
     if meeting and isinstance(meeting.get("action_items"), list):
         items.extend(meeting["action_items"])
-
     return items
 
 
 def _infer_priority(action_item: dict, people_priorities: dict) -> str:
-    """Infer todo priority based on owner matching against brain.json people."""
     owner = (action_item.get("owner") or "").lower()
     if not owner:
         return "medium"
@@ -67,7 +61,6 @@ def _infer_priority(action_item: dict, people_priorities: dict) -> str:
 
 
 def _source_type_from_content(source: str) -> str:
-    """Map content.source to todo source_type."""
     mapping = {"email": "email", "voice": "voice"}
     return mapping.get(source, "email")
 
@@ -84,23 +77,25 @@ TODO_TRANSITIONS: dict[str, list[str]] = {
     "in_progress": ["done", "todo"],
     "done": ["archived", "in_progress"],
     "archived": ["backlog"],
-    # Legacy states map forward
     "open": ["backlog", "todo", "in_progress", "done", "archived"],
     "dismissed": ["backlog", "archived"],
 }
 
-# ---- Hub.db column list (explicit, never SELECT *) ----
+# ---- Hub.db column list ----
 
-_HUB_TODO_COLS = "id, title, project_id, priority, owner, due_date, status, source_type, source_content_id, created_at"
+_HUB_TODO_COLS = [
+    hub_todos.c.id, hub_todos.c.title, hub_todos.c.project_id,
+    hub_todos.c.priority, hub_todos.c.owner, hub_todos.c.due_date,
+    hub_todos.c.status, hub_todos.c.source_type,
+    hub_todos.c.source_content_id, hub_todos.c.created_at,
+]
 
 # ---- Overlay helpers ----
 
-# Fields in hub.db todos that can be overridden via platform.db
 _OVERLAY_FIELDS = ("title", "status", "priority", "owner", "due_date", "project_id", "node_id")
 
 
 def _merge_hub_todo_with_override(hub_todo: dict, override: dict | None) -> dict:
-    """Apply platform.db override fields on top of a hub.db todo row."""
     if not override:
         return hub_todo
     merged = dict(hub_todo)
@@ -112,7 +107,6 @@ def _merge_hub_todo_with_override(hub_todo: dict, override: dict | None) -> dict
 
 
 def _build_platform_native_todo(row: dict) -> dict:
-    """Build a todo dict from a platform-native todo_overrides row."""
     return {
         "id": row["hub_todo_id"],
         "title": row.get("title"),
@@ -132,30 +126,27 @@ def _build_platform_native_todo(row: dict) -> dict:
 
 def _get_todo_by_id(todo_id: str) -> dict | None:
     """Fetch a single todo by id, merging hub + overlay or returning platform-native."""
-    # Check platform.db first
-    with get_platform_db() as pdb:
-        override_row = pdb.execute(
-            "SELECT * FROM todo_overrides WHERE hub_todo_id = ?", (todo_id,)
+    with get_db() as conn:
+        override_row = conn.execute(
+            select(todo_overrides).where(todo_overrides.c.hub_todo_id == todo_id)
         ).fetchone()
-        override = dict(override_row) if override_row else None
+        override = dict(override_row._mapping) if override_row else None
 
-    if override and override.get("is_platform_native"):
-        return _build_platform_native_todo(override)
+        if override and override.get("is_platform_native"):
+            return _build_platform_native_todo(override)
 
-    # Check hub.db
-    try:
-        with get_hub_db() as db:
-            row = db.execute(
-                f"SELECT {_HUB_TODO_COLS} FROM todos WHERE id = ?", (todo_id,)
+        # Check hub mirror
+        try:
+            row = conn.execute(
+                select(*_HUB_TODO_COLS).where(hub_todos.c.id == todo_id)
             ).fetchone()
             if row:
-                return _merge_hub_todo_with_override(dict(row), override)
-    except Exception:
-        pass
+                return _merge_hub_todo_with_override(dict(row._mapping), override)
+        except Exception:
+            pass
 
-    # If we have an override but no hub row, it may be orphaned -- still return it
-    if override:
-        return _build_platform_native_todo(override)
+        if override:
+            return _build_platform_native_todo(override)
 
     return None
 
@@ -169,27 +160,27 @@ def list_todos(
     offset: int = Query(0, ge=0),
 ):
     try:
-        # Step 1: Read all hub.db todos (read-only)
-        hub_todos: list[dict] = []
-        try:
-            with get_hub_db() as db:
-                rows = db.execute(
-                    f"SELECT {_HUB_TODO_COLS} FROM todos ORDER BY created_at DESC"
+        with get_db() as conn:
+            # Step 1: Read all hub mirror todos
+            hub_rows: list[dict] = []
+            try:
+                rows = conn.execute(
+                    select(*_HUB_TODO_COLS).order_by(hub_todos.c.created_at.desc())
                 ).fetchall()
-                hub_todos = [dict(r) for r in rows]
-        except Exception as e:
-            log.warning("list_todos_hub_read_failed: %s", e)
+                hub_rows = [dict(r._mapping) for r in rows]
+            except Exception as e:
+                log.warning("list_todos_hub_read_failed: %s", e)
 
-        # Step 2: Read all overrides + platform-native todos from platform.db
-        overrides: dict[str, dict] = {}
-        platform_native: list[dict] = []
-        display_id_map: dict[str, str] = {}
-        blocked_by_counts: dict[str, int] = {}
-        blocking_counts: dict[str, int] = {}
-        with get_platform_db() as pdb:
-            override_rows = pdb.execute("SELECT * FROM todo_overrides").fetchall()
+            # Step 2: Read all overrides + platform-native
+            overrides: dict[str, dict] = {}
+            platform_native: list[dict] = []
+            display_id_map: dict[str, str] = {}
+            blocked_by_counts: dict[str, int] = {}
+            blocking_counts: dict[str, int] = {}
+
+            override_rows = conn.execute(select(todo_overrides)).fetchall()
             for r in override_rows:
-                row = dict(r)
+                row = dict(r._mapping)
                 if row.get("is_platform_native"):
                     platform_native.append(_build_platform_native_todo(row))
                 else:
@@ -197,60 +188,67 @@ def list_todos(
 
             # Load display IDs
             try:
-                ident_rows = pdb.execute(
-                    "SELECT entity_id, display_id FROM entity_identifiers WHERE entity_type = 'todo'"
+                ident_rows = conn.execute(
+                    select(entity_identifiers.c.entity_id, entity_identifiers.c.display_id)
+                    .where(entity_identifiers.c.entity_type == "todo")
                 ).fetchall()
-                display_id_map = {r["entity_id"]: r["display_id"] for r in ident_rows}
+                display_id_map = {r.entity_id: r.display_id for r in ident_rows}
             except Exception:
                 pass
 
-            # Load blocked_by counts (how many things block this todo)
+            # Load blocked_by counts
             try:
-                dep_rows = pdb.execute(
-                    "SELECT todo_id, COUNT(*) as cnt FROM todo_dependencies "
-                    "WHERE dep_type = 'blocked_by' GROUP BY todo_id"
+                dep_rows = conn.execute(
+                    select(
+                        todo_dependencies.c.todo_id,
+                        func.count().label("cnt"),
+                    )
+                    .where(todo_dependencies.c.dep_type == "blocked_by")
+                    .group_by(todo_dependencies.c.todo_id)
                 ).fetchall()
-                blocked_by_counts = {r["todo_id"]: r["cnt"] for r in dep_rows}
+                blocked_by_counts = {r.todo_id: r.cnt for r in dep_rows}
             except Exception:
                 pass
 
-            # Load blocking counts (how many things this todo blocks)
+            # Load blocking counts
             try:
-                blocking_rows = pdb.execute(
-                    "SELECT depends_on, COUNT(*) as cnt FROM todo_dependencies "
-                    "WHERE dep_type = 'blocked_by' GROUP BY depends_on"
+                blocking_rows = conn.execute(
+                    select(
+                        todo_dependencies.c.depends_on,
+                        func.count().label("cnt"),
+                    )
+                    .where(todo_dependencies.c.dep_type == "blocked_by")
+                    .group_by(todo_dependencies.c.depends_on)
                 ).fetchall()
-                blocking_counts = {r["depends_on"]: r["cnt"] for r in blocking_rows}
+                blocking_counts = {r.depends_on: r.cnt for r in blocking_rows}
             except Exception:
                 pass
 
-        # Step 3: Merge hub todos with overrides
-        merged = []
-        for t in hub_todos:
-            merged.append(_merge_hub_todo_with_override(t, overrides.get(t["id"])))
+            # Step 3: Merge
+            merged = []
+            for t in hub_rows:
+                merged.append(_merge_hub_todo_with_override(t, overrides.get(t["id"])))
+            merged.extend(platform_native)
 
-        # Step 4: Add platform-native todos
-        merged.extend(platform_native)
+            # Step 4: Enrich
+            for t in merged:
+                tid = t.get("id")
+                if tid in display_id_map:
+                    t["display_id"] = display_id_map[tid]
+                t["blocked_by_count"] = blocked_by_counts.get(tid, 0)
+                t["blocking_count"] = blocking_counts.get(tid, 0)
 
-        # Step 4b: Enrich with display_id and dependency counts
-        for t in merged:
-            tid = t.get("id")
-            if tid in display_id_map:
-                t["display_id"] = display_id_map[tid]
-            t["blocked_by_count"] = blocked_by_counts.get(tid, 0)
-            t["blocking_count"] = blocking_counts.get(tid, 0)
+            # Step 5: Filter
+            if status:
+                merged = [t for t in merged if t.get("status") == status]
+            if project_id:
+                merged = [t for t in merged if t.get("project_id") == project_id]
+            if priority:
+                merged = [t for t in merged if t.get("priority") == priority]
 
-        # Step 5: Apply filters
-        if status:
-            merged = [t for t in merged if t.get("status") == status]
-        if project_id:
-            merged = [t for t in merged if t.get("project_id") == project_id]
-        if priority:
-            merged = [t for t in merged if t.get("priority") == priority]
-
-        # Step 6: Sort by created_at desc, then paginate
-        merged.sort(key=lambda t: t.get("created_at") or "", reverse=True)
-        return merged[offset : offset + limit]
+            # Step 6: Sort + paginate
+            merged.sort(key=lambda t: t.get("created_at") or "", reverse=True)
+            return merged[offset : offset + limit]
     except Exception as e:
         log.exception("list_todos failed: %s", e)
         return []
@@ -258,7 +256,6 @@ def list_todos(
 
 @router.get("/api/todos/by-id/{display_id}")
 def get_todo_by_display_id(display_id: str):
-    """Resolve a human-readable display ID (e.g. CXR-47) to the full todo."""
     result = resolve_display_id(display_id)
     if not result or result.get("entity_type") != "todo":
         raise HTTPException(404, f"No todo found for display ID '{display_id}'")
@@ -276,40 +273,35 @@ def get_todo_by_display_id(display_id: str):
 def find_duplicate_todos(
     threshold: float = Query(0.75, ge=0.1, le=1.0),
 ):
-    """Find groups of near-duplicate todos using fuzzy title matching.
-
-    Returns duplicate groups with a suggested todo to keep and the rest as duplicates.
-    """
     try:
-        hub_todos: list[dict] = []
-        try:
-            with get_hub_db() as db:
-                rows = db.execute(
-                    f"SELECT {_HUB_TODO_COLS} FROM todos WHERE status NOT IN ('archived', 'done') ORDER BY created_at DESC"
+        with get_db() as conn:
+            hub_rows: list[dict] = []
+            try:
+                rows = conn.execute(
+                    select(*_HUB_TODO_COLS)
+                    .where(hub_todos.c.status.notin_(["archived", "done"]))
+                    .order_by(hub_todos.c.created_at.desc())
                 ).fetchall()
-                hub_todos = [dict(r) for r in rows]
-        except Exception:
-            pass
+                hub_rows = [dict(r._mapping) for r in rows]
+            except Exception:
+                pass
 
-        # Apply overrides and add platform-native
-        with get_platform_db() as pdb:
-            override_rows = pdb.execute("SELECT * FROM todo_overrides").fetchall()
+            override_rows = conn.execute(select(todo_overrides)).fetchall()
 
         overrides: dict[str, dict] = {}
         platform_native: list[dict] = []
         for r in override_rows:
-            row = dict(r)
+            row = dict(r._mapping)
             if row.get("is_platform_native"):
                 platform_native.append(_build_platform_native_todo(row))
             else:
                 overrides[row["hub_todo_id"]] = row
 
         merged = []
-        for t in hub_todos:
+        for t in hub_rows:
             merged.append(_merge_hub_todo_with_override(t, overrides.get(t["id"])))
         merged.extend(platform_native)
 
-        # Filter out archived/done
         todos = [t for t in merged if t.get("status") not in ("archived", "done")]
     except Exception as e:
         raise HTTPException(500, f"Failed to read todos: {e}")
@@ -329,63 +321,56 @@ def find_duplicate_todos(
 
 @router.post("/api/todos/merge")
 def merge_todos(body: MergeTodosBody):
-    """Merge duplicate todos by keeping one and archiving the rest.
-
-    Sets removed todos' status to 'archived' in todo_overrides (platform.db).
-    """
     keep_id = body.keep_id
     remove_ids = body.remove_ids
 
-    # Verify keep_id exists
     kept = _get_todo_by_id(keep_id)
     if not kept:
         raise HTTPException(404, f"Todo {keep_id} not found")
 
-    # Archive each removed todo via platform.db overlay
     archived_count = 0
-    with get_platform_db() as pdb:
+    with get_db() as conn:
         for rid in remove_ids:
             if rid == keep_id:
                 continue
-            pdb.execute(
-                """INSERT INTO todo_overrides (hub_todo_id, status, updated_at)
-                   VALUES (?, 'archived', datetime('now'))
-                   ON CONFLICT(hub_todo_id) DO UPDATE SET status = 'archived', updated_at = datetime('now')""",
-                (rid,),
+            conn.execute(
+                text(
+                    "INSERT INTO todo_overrides (hub_todo_id, status, updated_at) "
+                    "VALUES (:id, 'archived', datetime('now')) "
+                    "ON CONFLICT(hub_todo_id) DO UPDATE SET status = 'archived', updated_at = datetime('now')"
+                ),
+                {"id": rid},
             )
             archived_count += 1
-        pdb.commit()
 
-    return {
-        "kept": kept,
-        "archived_count": archived_count,
-    }
+    return {"kept": kept, "archived_count": archived_count}
 
 
 @router.post("/api/todos", status_code=201)
 def create_todo(body: CreateTodoBody):
-    """Create a new todo in platform.db (never writes to hub.db)."""
     title = body.title
     todo_id = str(uuid.uuid4())
 
-    with get_platform_db() as pdb:
+    with get_db() as conn:
         try:
-            pdb.execute(
-                """INSERT INTO todo_overrides
-                   (hub_todo_id, title, project_id, priority, owner, due_date, node_id, status,
-                    source_type, source_content_id, is_platform_native, created_at, updated_at)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, 'open', NULL, NULL, 1, datetime('now'), datetime('now'))""",
-                (
-                    todo_id,
-                    title,
-                    body.project_id,
-                    body.priority,
-                    body.owner,
-                    body.due_date,
-                    body.node_id,
+            conn.execute(
+                text(
+                    "INSERT INTO todo_overrides "
+                    "(hub_todo_id, title, project_id, priority, owner, due_date, node_id, status, "
+                    "source_type, source_content_id, is_platform_native, created_at, updated_at) "
+                    "VALUES (:id, :title, :project_id, :priority, :owner, :due_date, :node_id, "
+                    "'open', NULL, NULL, 1, datetime('now'), datetime('now'))"
                 ),
+                {
+                    "id": todo_id,
+                    "title": title,
+                    "project_id": body.project_id,
+                    "priority": body.priority,
+                    "owner": body.owner,
+                    "due_date": body.due_date,
+                    "node_id": body.node_id,
+                },
             )
-            pdb.commit()
         except Exception as e:
             log.exception("create_todo failed: %s", e)
             raise HTTPException(500, f"Failed to create todo: {e}")
@@ -402,7 +387,6 @@ def create_todo(body: CreateTodoBody):
         "is_platform_native": True,
     }
 
-    # Assign human-readable display ID if node_id is provided
     effective_node_id = body.node_id or body.project_id
     if effective_node_id:
         try:
@@ -412,29 +396,32 @@ def create_todo(body: CreateTodoBody):
         except Exception as e:
             log.warning("assign_display_id_failed: %s", e)
 
-    # Dedup-on-ingest: check for near-duplicates across both hub.db and platform-native todos
+    # Dedup-on-ingest
     try:
         existing_titles: list[dict] = []
 
-        # Hub.db todos
-        try:
-            with get_hub_db() as db:
-                hub_rows = db.execute(
-                    "SELECT id, title FROM todos WHERE id != ? AND status NOT IN ('archived', 'done') LIMIT 500",
-                    (todo_id,),
+        with get_db() as conn:
+            # Hub todos
+            try:
+                hub_rows = conn.execute(
+                    select(hub_todos.c.id, hub_todos.c.title)
+                    .where(hub_todos.c.id != todo_id)
+                    .where(hub_todos.c.status.notin_(["archived", "done"]))
+                    .limit(500)
                 ).fetchall()
-                existing_titles.extend({"id": r["id"], "title": r["title"]} for r in hub_rows)
-        except Exception:
-            pass
+                existing_titles.extend({"id": r.id, "title": r.title} for r in hub_rows)
+            except Exception:
+                pass
 
-        # Platform-native todos
-        with get_platform_db() as pdb:
-            pn_rows = pdb.execute(
-                "SELECT hub_todo_id, title FROM todo_overrides "
-                "WHERE hub_todo_id != ? AND is_platform_native = 1 AND status NOT IN ('archived', 'done') LIMIT 500",
-                (todo_id,),
+            # Platform-native todos
+            pn_rows = conn.execute(
+                select(todo_overrides.c.hub_todo_id, todo_overrides.c.title)
+                .where(todo_overrides.c.hub_todo_id != todo_id)
+                .where(todo_overrides.c.is_platform_native == 1)
+                .where(todo_overrides.c.status.notin_(["archived", "done"]))
+                .limit(500)
             ).fetchall()
-            existing_titles.extend({"id": r["hub_todo_id"], "title": r["title"]} for r in pn_rows)
+            existing_titles.extend({"id": r.hub_todo_id, "title": r.title} for r in pn_rows)
 
         best_match = None
         best_score = 0.0
@@ -458,46 +445,41 @@ def create_todo(body: CreateTodoBody):
 
 @router.patch("/api/todos/{todo_id}")
 def update_todo(todo_id: str, body: PatchTodoBody):
-    """Update a todo via platform.db overlay (never writes to hub.db)."""
     updates = {k: v for k, v in body.model_dump(exclude_unset=True).items()}
     if not updates:
         raise HTTPException(400, "No valid fields to update")
 
-    # Check that the todo exists somewhere
     existing = _get_todo_by_id(todo_id)
     if not existing:
         raise HTTPException(404, "Todo not found")
 
     is_native = existing.get("is_platform_native", False)
 
-    # Upsert into todo_overrides
-    with get_platform_db() as pdb:
-        row = pdb.execute(
-            "SELECT hub_todo_id FROM todo_overrides WHERE hub_todo_id = ?", (todo_id,)
+    with get_db() as conn:
+        row = conn.execute(
+            select(todo_overrides.c.hub_todo_id)
+            .where(todo_overrides.c.hub_todo_id == todo_id)
         ).fetchone()
 
         if row:
-            # Update existing override row
-            set_parts = [f"{k} = ?" for k in updates]
+            set_parts = [f"{k} = :{k}" for k in updates]
             set_parts.append("updated_at = datetime('now')")
-            vals = list(updates.values()) + [todo_id]
-            pdb.execute(
-                f"UPDATE todo_overrides SET {', '.join(set_parts)} WHERE hub_todo_id = ?",
-                vals,
+            conn.execute(
+                text(
+                    f"UPDATE todo_overrides SET {', '.join(set_parts)} "
+                    f"WHERE hub_todo_id = :hub_todo_id"
+                ),
+                {**updates, "hub_todo_id": todo_id},
             )
         else:
-            # Insert new override for a hub.db todo
             col_names = list(updates.keys())
-            col_str = ", ".join(["hub_todo_id"] + col_names + ["is_platform_native"])
-            placeholders = ", ".join(["?"] * (len(col_names) + 2))
-            vals = [todo_id] + list(updates.values()) + [1 if is_native else 0]
-            pdb.execute(
-                f"INSERT INTO todo_overrides ({col_str}, updated_at) VALUES ({placeholders}, datetime('now'))",
-                vals,
+            col_str = ", ".join(["hub_todo_id"] + col_names + ["is_platform_native", "updated_at"])
+            val_str = ", ".join([":hub_todo_id"] + [f":{k}" for k in col_names] + [":is_native", "datetime('now')"])
+            conn.execute(
+                text(f"INSERT INTO todo_overrides ({col_str}) VALUES ({val_str})"),
+                {"hub_todo_id": todo_id, **updates, "is_native": 1 if is_native else 0},
             )
-        pdb.commit()
 
-    # Re-fetch merged result
     todo_result = _get_todo_by_id(todo_id)
     event_bus.emit("todo.updated", {"id": todo_id, **updates})
     return todo_result
@@ -505,16 +487,10 @@ def update_todo(todo_id: str, body: PatchTodoBody):
 
 @router.patch("/api/todos/{todo_id}/transition")
 def transition_todo(todo_id: str, body: TransitionBody):
-    """Transition a todo to a new state using the state machine.
-
-    Validates that the transition is allowed from the current state.
-    Returns 422 if the transition is invalid.
-    """
     to_state = body.to_state
     if to_state not in TODO_STATES:
         raise HTTPException(400, f"Invalid state: {to_state}. Valid states: {sorted(TODO_STATES)}")
 
-    # Get current state (merged view)
     existing = _get_todo_by_id(todo_id)
     if not existing:
         raise HTTPException(404, "Todo not found")
@@ -534,16 +510,16 @@ def transition_todo(todo_id: str, body: TransitionBody):
     # Check for unresolved blocking dependencies when completing
     warning = None
     if to_state == "done":
-        with get_platform_db() as pdb:
-            unresolved_rows = pdb.execute(
-                "SELECT td.depends_on FROM todo_dependencies td "
-                "WHERE td.todo_id = ? AND td.dep_type = 'blocked_by'",
-                (todo_id,),
+        with get_db() as conn:
+            unresolved_rows = conn.execute(
+                select(todo_dependencies.c.depends_on)
+                .where(todo_dependencies.c.todo_id == todo_id)
+                .where(todo_dependencies.c.dep_type == "blocked_by")
             ).fetchall()
 
         unresolved_blockers = []
         for r in unresolved_rows:
-            blocker = _get_todo_by_id(r["depends_on"])
+            blocker = _get_todo_by_id(r.depends_on)
             if blocker and blocker.get("status") not in ("done", "archived"):
                 unresolved_blockers.append({
                     "id": blocker["id"],
@@ -557,15 +533,16 @@ def transition_todo(todo_id: str, body: TransitionBody):
                 f"that are not yet done."
             )
 
-    # Upsert status into todo_overrides
-    with get_platform_db() as pdb:
-        pdb.execute(
-            """INSERT INTO todo_overrides (hub_todo_id, status, is_platform_native, updated_at)
-               VALUES (?, ?, ?, datetime('now'))
-               ON CONFLICT(hub_todo_id) DO UPDATE SET status = ?, updated_at = datetime('now')""",
-            (todo_id, to_state, 1 if is_native else 0, to_state),
+    # Upsert status
+    with get_db() as conn:
+        conn.execute(
+            text(
+                "INSERT INTO todo_overrides (hub_todo_id, status, is_platform_native, updated_at) "
+                "VALUES (:id, :status, :native, datetime('now')) "
+                "ON CONFLICT(hub_todo_id) DO UPDATE SET status = :status, updated_at = datetime('now')"
+            ),
+            {"id": todo_id, "status": to_state, "native": 1 if is_native else 0},
         )
-        pdb.commit()
 
     todo_result = _get_todo_by_id(todo_id)
     if warning:
@@ -576,24 +553,19 @@ def transition_todo(todo_id: str, body: TransitionBody):
 
 @router.post("/api/todos/sync")
 def sync_todos_from_kh():
-    """Pull action items from Knowledge Hub content and create todos for new ones.
-
-    Scans content table metadata for action_items (emails and voice memos),
-    deduplicates against existing todos by source_content_id, and creates
-    new todos with priority inferred from brain.json people graph.
-
-    New todos are written to platform.db as platform-native (never writes to hub.db).
-    """
+    """Pull action items from Knowledge Hub content and create todos for new ones."""
     people_priorities = _load_people_priorities()
     synced = 0
     skipped = 0
 
     try:
-        with get_hub_db() as hub:
-            rows = hub.execute(
-                "SELECT id, source, title, metadata, content_type "
-                "FROM content "
-                "WHERE source IN ('email', 'voice') AND metadata IS NOT NULL"
+        with get_db() as conn:
+            rows = conn.execute(
+                text(
+                    "SELECT id, source, title, metadata, content_type "
+                    "FROM hub_content "
+                    "WHERE source IN ('email', 'voice') AND metadata IS NOT NULL"
+                )
             ).fetchall()
     except Exception as e:
         log.error("sync_hub_read_failed", extra={"error": str(e)})
@@ -602,65 +574,69 @@ def sync_todos_from_kh():
     if not rows:
         return {"synced": 0, "skipped": 0, "total": 0}
 
-    # Gather existing source_content_ids from BOTH hub.db and platform.db
+    # Gather existing source_content_ids from BOTH hub + platform
     existing_source_ids: set[str] = set()
     existing_titles: set[tuple[str, str | None]] = set()
 
     try:
-        with get_hub_db() as hub:
+        with get_db() as conn:
+            # From hub mirror
             try:
-                src_rows = hub.execute(
-                    "SELECT source_content_id FROM todos WHERE source_content_id IS NOT NULL"
+                src_rows = conn.execute(
+                    select(hub_todos.c.source_content_id)
+                    .where(hub_todos.c.source_content_id.isnot(None))
                 ).fetchall()
-                existing_source_ids.update(r["source_content_id"] for r in src_rows)
+                existing_source_ids.update(r.source_content_id for r in src_rows)
             except Exception:
                 pass
 
             try:
-                title_rows = hub.execute(
-                    "SELECT LOWER(TRIM(title)) as norm_title, project_id FROM todos"
+                title_rows = conn.execute(
+                    select(
+                        func.lower(func.trim(hub_todos.c.title)).label("norm_title"),
+                        hub_todos.c.project_id,
+                    )
                 ).fetchall()
-                existing_titles.update((r["norm_title"], r["project_id"]) for r in title_rows)
+                existing_titles.update((r.norm_title, r.project_id) for r in title_rows)
             except Exception:
                 pass
+
+            # From platform
+            try:
+                pn_src_rows = conn.execute(
+                    select(todo_overrides.c.source_content_id)
+                    .where(todo_overrides.c.source_content_id.isnot(None))
+                ).fetchall()
+                existing_source_ids.update(r.source_content_id for r in pn_src_rows)
+            except Exception:
+                pass
+
+            try:
+                pn_title_rows = conn.execute(
+                    select(
+                        func.lower(func.trim(todo_overrides.c.title)).label("norm_title"),
+                        todo_overrides.c.project_id,
+                    ).where(todo_overrides.c.is_platform_native == 1)
+                ).fetchall()
+                existing_titles.update((r.norm_title, r.project_id) for r in pn_title_rows)
+            except Exception:
+                pass
+
+            # Get project mappings from hub mirror
+            pc_rows = conn.execute(
+                select(hub_project_content.c.content_id, hub_project_content.c.project_id)
+            ).fetchall()
+            project_map = {r.content_id: r.project_id for r in pc_rows}
+
     except Exception:
-        pass
-
-    # From platform.db
-    with get_platform_db() as pdb:
-        try:
-            pn_src_rows = pdb.execute(
-                "SELECT source_content_id FROM todo_overrides WHERE source_content_id IS NOT NULL"
-            ).fetchall()
-            existing_source_ids.update(r["source_content_id"] for r in pn_src_rows)
-        except Exception:
-            pass
-
-        try:
-            pn_title_rows = pdb.execute(
-                "SELECT LOWER(TRIM(title)) as norm_title, project_id FROM todo_overrides WHERE is_platform_native = 1"
-            ).fetchall()
-            existing_titles.update((r["norm_title"], r["project_id"]) for r in pn_title_rows)
-        except Exception:
-            pass
-
-    # Get project mappings from hub.db
-    project_map: dict[str, str] = {}
-    try:
-        with get_hub_db() as hub:
-            pc_rows = hub.execute(
-                "SELECT content_id, project_id FROM project_content"
-            ).fetchall()
-            project_map = {r["content_id"]: r["project_id"] for r in pc_rows}
-    except Exception:
-        pass
+        project_map = {}
 
     batch_titles: set[tuple[str, str | None]] = set()
 
-    # Write new todos to platform.db as platform-native
-    with get_platform_db() as pdb:
+    # Write new todos
+    with get_db() as conn:
         for row in rows:
-            row_dict = dict(row)
+            row_dict = dict(row._mapping)
             content_id = row_dict["id"]
             source = row_dict.get("source", "email")
 
@@ -682,12 +658,11 @@ def sync_todos_from_kh():
                 todo_id = str(uuid.uuid4())
                 title = description[:200]
                 project_id_val = project_map.get(content_id)
-                priority = _infer_priority(item, people_priorities)
+                priority_val = _infer_priority(item, people_priorities)
                 source_type = _source_type_from_content(source)
                 owner = item.get("owner") or "rijul"
                 due_date = item.get("due_date")
 
-                # Title-based dedup
                 normalized = title.strip().lower()
                 title_key = (normalized, project_id_val)
                 if title_key in existing_titles or title_key in batch_titles:
@@ -695,12 +670,19 @@ def sync_todos_from_kh():
                     continue
 
                 try:
-                    pdb.execute(
-                        """INSERT INTO todo_overrides
-                           (hub_todo_id, title, project_id, priority, owner, due_date, status,
-                            source_type, source_content_id, is_platform_native, created_at, updated_at)
-                           VALUES (?, ?, ?, ?, ?, ?, 'open', ?, ?, 1, datetime('now'), datetime('now'))""",
-                        (todo_id, title, project_id_val, priority, owner, due_date, source_type, source_key),
+                    conn.execute(
+                        text(
+                            "INSERT INTO todo_overrides "
+                            "(hub_todo_id, title, project_id, priority, owner, due_date, status, "
+                            "source_type, source_content_id, is_platform_native, created_at, updated_at) "
+                            "VALUES (:id, :title, :project_id, :priority, :owner, :due_date, 'open', "
+                            ":source_type, :source_key, 1, datetime('now'), datetime('now'))"
+                        ),
+                        {
+                            "id": todo_id, "title": title, "project_id": project_id_val,
+                            "priority": priority_val, "owner": owner, "due_date": due_date,
+                            "source_type": source_type, "source_key": source_key,
+                        },
                     )
                     synced += 1
                     existing_source_ids.add(source_key)
@@ -709,45 +691,37 @@ def sync_todos_from_kh():
                     log.warning("sync_todo_insert_failed", extra={"content_id": content_id, "error": str(e)})
                     skipped += 1
 
-        pdb.commit()
-
     log.info("todo_sync_complete", extra={"synced": synced, "skipped": skipped})
     return {"synced": synced, "skipped": skipped, "total": synced + skipped}
 
 
 @router.post("/api/todos/dedup")
 def dedup_todos():
-    """Remove duplicate todos, keeping the oldest one per normalized title + project_id.
+    """Remove duplicate todos, keeping the oldest one per normalized title + project_id."""
+    hub_rows: list[dict] = []
+    with get_db() as conn:
+        try:
+            rows = conn.execute(select(*_HUB_TODO_COLS)).fetchall()
+            hub_rows = [dict(r._mapping) for r in rows]
+        except Exception:
+            pass
 
-    Archives duplicates via todo_overrides in platform.db (never writes to hub.db).
-    """
-    # Gather all active todos (merged view)
-    hub_todos: list[dict] = []
-    try:
-        with get_hub_db() as db:
-            rows = db.execute(f"SELECT {_HUB_TODO_COLS} FROM todos").fetchall()
-            hub_todos = [dict(r) for r in rows]
-    except Exception:
-        pass
-
-    with get_platform_db() as pdb:
-        override_rows = pdb.execute("SELECT * FROM todo_overrides").fetchall()
+        override_rows = conn.execute(select(todo_overrides)).fetchall()
 
     overrides: dict[str, dict] = {}
     platform_native: list[dict] = []
     for r in override_rows:
-        row = dict(r)
+        row = dict(r._mapping)
         if row.get("is_platform_native"):
             platform_native.append(_build_platform_native_todo(row))
         else:
             overrides[row["hub_todo_id"]] = row
 
     all_todos: list[dict] = []
-    for t in hub_todos:
+    for t in hub_rows:
         all_todos.append(_merge_hub_todo_with_override(t, overrides.get(t["id"])))
     all_todos.extend(platform_native)
 
-    # Group by normalized title + project_id
     groups: dict[tuple[str, str | None], list[dict]] = defaultdict(list)
     for t in all_todos:
         norm_title = (t.get("title") or "").strip().lower()
@@ -757,26 +731,25 @@ def dedup_todos():
     removed = 0
     groups_cleaned = 0
 
-    with get_platform_db() as pdb:
+    with get_db() as conn:
         for _key, group in groups.items():
             if len(group) < 2:
                 continue
 
-            # Sort by created_at ascending, keep oldest
             group.sort(key=lambda t: t.get("created_at") or "")
             ids_to_archive = [t["id"] for t in group[1:]]
 
             for tid in ids_to_archive:
-                pdb.execute(
-                    """INSERT INTO todo_overrides (hub_todo_id, status, updated_at)
-                       VALUES (?, 'archived', datetime('now'))
-                       ON CONFLICT(hub_todo_id) DO UPDATE SET status = 'archived', updated_at = datetime('now')""",
-                    (tid,),
+                conn.execute(
+                    text(
+                        "INSERT INTO todo_overrides (hub_todo_id, status, updated_at) "
+                        "VALUES (:id, 'archived', datetime('now')) "
+                        "ON CONFLICT(hub_todo_id) DO UPDATE SET status = 'archived', updated_at = datetime('now')"
+                    ),
+                    {"id": tid},
                 )
                 removed += 1
             groups_cleaned += 1
-
-        pdb.commit()
 
     log.info("todo_dedup_complete", extra={"removed": removed, "groups_cleaned": groups_cleaned})
     return {"removed": removed, "groups_cleaned": groups_cleaned}
@@ -785,13 +758,7 @@ def dedup_todos():
 # ---- Todo Dependencies ----
 
 
-def _has_circular_dependency(pdb, from_id: str, to_id: str) -> bool:
-    """Check if adding from_id -> to_id (from_id blocked by to_id) creates a cycle.
-
-    Uses BFS to walk the dependency graph from to_id and see if we can reach from_id.
-    If to_id is (transitively) blocked by from_id, then adding from_id blocked_by to_id
-    would create a cycle.
-    """
+def _has_circular_dependency(conn, from_id: str, to_id: str) -> bool:
     visited: set[str] = set()
     queue = [to_id]
     while queue:
@@ -801,61 +768,72 @@ def _has_circular_dependency(pdb, from_id: str, to_id: str) -> bool:
         if current in visited:
             continue
         visited.add(current)
-        # Find everything that blocks `current`
-        rows = pdb.execute(
-            "SELECT depends_on FROM todo_dependencies WHERE todo_id = ? AND dep_type = 'blocked_by'",
-            (current,),
+        rows = conn.execute(
+            select(todo_dependencies.c.depends_on)
+            .where(todo_dependencies.c.todo_id == current)
+            .where(todo_dependencies.c.dep_type == "blocked_by")
         ).fetchall()
         for r in rows:
-            queue.append(r["depends_on"])
+            queue.append(r.depends_on)
     return False
 
 
 @router.get("/api/todos/{todo_id}/dependencies")
 def list_dependencies(todo_id: str):
-    """List all dependencies for a todo, categorized by relationship type.
-
-    Returns:
-      - blocked_by: todos that block this one (this todo depends on them)
-      - blocking: todos that this one blocks (they depend on this todo)
-      - related_to: related todos (bidirectional)
-    """
     existing = _get_todo_by_id(todo_id)
     if not existing:
         raise HTTPException(404, "Todo not found")
 
-    with get_platform_db() as pdb:
-        # Things this todo is blocked by
-        blocked_by_rows = pdb.execute(
-            "SELECT id, todo_id, depends_on, dep_type, created_at "
-            "FROM todo_dependencies WHERE todo_id = ? AND dep_type = 'blocked_by' ORDER BY created_at",
-            (todo_id,),
+    with get_db() as conn:
+        blocked_by_rows = conn.execute(
+            select(
+                todo_dependencies.c.id,
+                todo_dependencies.c.todo_id,
+                todo_dependencies.c.depends_on,
+                todo_dependencies.c.dep_type,
+                todo_dependencies.c.created_at,
+            )
+            .where(todo_dependencies.c.todo_id == todo_id)
+            .where(todo_dependencies.c.dep_type == "blocked_by")
+            .order_by(todo_dependencies.c.created_at)
         ).fetchall()
 
-        # Things this todo is blocking (reverse lookup)
-        blocking_rows = pdb.execute(
-            "SELECT id, todo_id, depends_on, dep_type, created_at "
-            "FROM todo_dependencies WHERE depends_on = ? AND dep_type = 'blocked_by' ORDER BY created_at",
-            (todo_id,),
+        blocking_rows = conn.execute(
+            select(
+                todo_dependencies.c.id,
+                todo_dependencies.c.todo_id,
+                todo_dependencies.c.depends_on,
+                todo_dependencies.c.dep_type,
+                todo_dependencies.c.created_at,
+            )
+            .where(todo_dependencies.c.depends_on == todo_id)
+            .where(todo_dependencies.c.dep_type == "blocked_by")
+            .order_by(todo_dependencies.c.created_at)
         ).fetchall()
 
-        # Related-to links (bidirectional)
-        related_rows = pdb.execute(
-            "SELECT id, todo_id, depends_on, dep_type, created_at "
-            "FROM todo_dependencies WHERE (todo_id = ? OR depends_on = ?) AND dep_type = 'related_to' "
-            "ORDER BY created_at",
-            (todo_id, todo_id),
+        related_rows = conn.execute(
+            select(
+                todo_dependencies.c.id,
+                todo_dependencies.c.todo_id,
+                todo_dependencies.c.depends_on,
+                todo_dependencies.c.dep_type,
+                todo_dependencies.c.created_at,
+            )
+            .where(
+                ((todo_dependencies.c.todo_id == todo_id) | (todo_dependencies.c.depends_on == todo_id))
+                & (todo_dependencies.c.dep_type == "related_to")
+            )
+            .order_by(todo_dependencies.c.created_at)
         ).fetchall()
 
-    # Collect all related todo IDs for enrichment
     dep_ids: set[str] = set()
     for r in blocked_by_rows:
-        dep_ids.add(r["depends_on"])
+        dep_ids.add(r.depends_on)
     for r in blocking_rows:
-        dep_ids.add(r["todo_id"])
+        dep_ids.add(r.todo_id)
     for r in related_rows:
-        dep_ids.add(r["todo_id"])
-        dep_ids.add(r["depends_on"])
+        dep_ids.add(r.todo_id)
+        dep_ids.add(r.depends_on)
     dep_ids.discard(todo_id)
 
     title_map: dict[str, str] = {}
@@ -867,17 +845,17 @@ def list_dependencies(todo_id: str):
             status_map[did] = t.get("status", "")
 
     def _enrich(row, related_id: str):
-        d = dict(row)
+        d = dict(row._mapping)
         d["related_title"] = title_map.get(related_id, "")
         d["related_status"] = status_map.get(related_id, "")
         d["related_id"] = related_id
         return d
 
     return {
-        "blocked_by": [_enrich(r, r["depends_on"]) for r in blocked_by_rows],
-        "blocking": [_enrich(r, r["todo_id"]) for r in blocking_rows],
+        "blocked_by": [_enrich(r, r.depends_on) for r in blocked_by_rows],
+        "blocking": [_enrich(r, r.todo_id) for r in blocking_rows],
         "related_to": [
-            _enrich(r, r["depends_on"] if r["todo_id"] == todo_id else r["todo_id"])
+            _enrich(r, r.depends_on if r.todo_id == todo_id else r.todo_id)
             for r in related_rows
         ],
     }
@@ -885,20 +863,22 @@ def list_dependencies(todo_id: str):
 
 @router.get("/api/todos/all-dependencies")
 def list_all_dependencies():
-    """Return all todo dependencies for the dependency graph visualization."""
-    with get_platform_db() as pdb:
-        rows = pdb.execute(
-            "SELECT id, todo_id, depends_on, dep_type, created_at FROM todo_dependencies ORDER BY created_at"
+    with get_db() as conn:
+        rows = conn.execute(
+            select(
+                todo_dependencies.c.id,
+                todo_dependencies.c.todo_id,
+                todo_dependencies.c.depends_on,
+                todo_dependencies.c.dep_type,
+                todo_dependencies.c.created_at,
+            )
+            .order_by(todo_dependencies.c.created_at)
         ).fetchall()
-    return [dict(r) for r in rows]
+    return [dict(r._mapping) for r in rows]
 
 
 @router.post("/api/todos/{todo_id}/dependencies", status_code=201)
 def create_dependency(todo_id: str, body: CreateDependencyBody):
-    """Add a dependency: todo_id is blocked by depends_on.
-
-    Validates both todos exist and prevents circular dependencies.
-    """
     existing = _get_todo_by_id(todo_id)
     if not existing:
         raise HTTPException(404, "Todo not found")
@@ -910,10 +890,9 @@ def create_dependency(todo_id: str, body: CreateDependencyBody):
     if todo_id == body.depends_on:
         raise HTTPException(400, "A todo cannot depend on itself")
 
-    # Circular dependency check (only for blocked_by, not related_to)
     if body.dep_type == "blocked_by":
-        with get_platform_db() as pdb:
-            if _has_circular_dependency(pdb, todo_id, body.depends_on):
+        with get_db() as conn:
+            if _has_circular_dependency(conn, todo_id, body.depends_on):
                 raise HTTPException(
                     422,
                     f"Circular dependency detected: '{body.depends_on}' is already transitively "
@@ -922,14 +901,16 @@ def create_dependency(todo_id: str, body: CreateDependencyBody):
 
     dep_id = str(uuid.uuid4())
 
-    with get_platform_db() as pdb:
+    with get_db() as conn:
         try:
-            pdb.execute(
-                "INSERT INTO todo_dependencies (id, todo_id, depends_on, dep_type) "
-                "VALUES (?, ?, ?, ?)",
-                (dep_id, todo_id, body.depends_on, body.dep_type),
+            conn.execute(
+                insert(todo_dependencies).values(
+                    id=dep_id,
+                    todo_id=todo_id,
+                    depends_on=body.depends_on,
+                    dep_type=body.dep_type,
+                )
             )
-            pdb.commit()
         except Exception as e:
             if "UNIQUE constraint" in str(e):
                 raise HTTPException(409, "Dependency already exists")
@@ -951,17 +932,18 @@ def create_dependency(todo_id: str, body: CreateDependencyBody):
 
 @router.delete("/api/todos/{todo_id}/dependencies/{dep_id}")
 def delete_dependency(todo_id: str, dep_id: str):
-    """Remove a dependency."""
-    with get_platform_db() as pdb:
-        row = pdb.execute(
-            "SELECT id FROM todo_dependencies WHERE id = ? AND todo_id = ?",
-            (dep_id, todo_id),
+    with get_db() as conn:
+        row = conn.execute(
+            select(todo_dependencies.c.id)
+            .where(todo_dependencies.c.id == dep_id)
+            .where(todo_dependencies.c.todo_id == todo_id)
         ).fetchone()
         if not row:
             raise HTTPException(404, "Dependency not found")
 
-        pdb.execute("DELETE FROM todo_dependencies WHERE id = ?", (dep_id,))
-        pdb.commit()
+        conn.execute(
+            delete(todo_dependencies).where(todo_dependencies.c.id == dep_id)
+        )
 
     event_bus.emit("todo.dependency.deleted", {"todo_id": todo_id, "dep_id": dep_id})
     return {"ok": True}

@@ -1,5 +1,9 @@
 from fastapi import APIRouter, HTTPException
-from app.db.connections import get_hub_db, get_platform_db
+from sqlalchemy import select, func, insert, update, text
+from app.db.session import get_db
+from app.db.tables import (
+    hub_projects, hub_content, hub_project_content, project_overrides,
+)
 from app.models.projects import ProjectUpdate
 
 router = APIRouter(tags=["Projects"])
@@ -7,48 +11,64 @@ router = APIRouter(tags=["Projects"])
 @router.get("/api/projects")
 def list_projects():
     try:
-        with get_hub_db() as db:
-            rows = db.execute("""
-                SELECT p.id, p.name, p.jira_key, p.confluence_space, p.active,
-                    (SELECT COUNT(*) FROM content c
-                     JOIN project_content pc ON c.id = pc.content_id
-                     WHERE pc.project_id = p.id) as item_count
-                FROM projects p
-                ORDER BY p.name
-            """).fetchall()
-            return [dict(r) for r in rows]
-    except Exception as e:
+        with get_db() as conn:
+            # Subquery for item_count per project
+            item_count_sq = (
+                select(func.count())
+                .select_from(hub_content)
+                .join(hub_project_content, hub_content.c.id == hub_project_content.c.content_id)
+                .where(hub_project_content.c.project_id == hub_projects.c.id)
+                .correlate(hub_projects)
+                .scalar_subquery()
+                .label("item_count")
+            )
+            stmt = (
+                select(
+                    hub_projects.c.id,
+                    hub_projects.c.name,
+                    hub_projects.c.jira_key,
+                    hub_projects.c.confluence_space,
+                    hub_projects.c.active,
+                    item_count_sq,
+                )
+                .order_by(hub_projects.c.name)
+            )
+            rows = conn.execute(stmt).fetchall()
+            return [dict(r._mapping) for r in rows]
+    except Exception:
         return []
 
 @router.get("/api/projects/{project_id}")
 def get_project(project_id: str):
-    with get_hub_db() as db:
-        row = db.execute("SELECT * FROM projects WHERE id = ?", (project_id,)).fetchone()
+    with get_db() as conn:
+        row = conn.execute(
+            select(hub_projects).where(hub_projects.c.id == project_id)
+        ).fetchone()
         if not row:
             raise HTTPException(404, "Project not found")
-        project = dict(row)
-        # Get content counts by source
-        counts = db.execute("""
-            SELECT c.source, COUNT(*) as count
-            FROM content c
-            JOIN project_content pc ON c.id = pc.content_id
-            WHERE pc.project_id = ?
-            GROUP BY c.source
-        """, (project_id,)).fetchall()
-        project["content_counts"] = {r["source"]: r["count"] for r in counts}
+        project = dict(row._mapping)
 
-        # Overlay any platform.db overrides
+        # Get content counts by source
+        stmt = (
+            select(hub_content.c.source, func.count().label("count"))
+            .join(hub_project_content, hub_content.c.id == hub_project_content.c.content_id)
+            .where(hub_project_content.c.project_id == project_id)
+            .group_by(hub_content.c.source)
+        )
+        counts = conn.execute(stmt).fetchall()
+        project["content_counts"] = {r.source: r.count for r in counts}
+
+        # Overlay any platform overrides
         try:
-            with get_platform_db() as pdb:
-                override = pdb.execute(
-                    "SELECT name, description FROM project_overrides WHERE hub_project_id = ?",
-                    (project_id,),
-                ).fetchone()
-                if override:
-                    if override["name"]:
-                        project["name"] = override["name"]
-                    if override["description"]:
-                        project["description"] = override["description"]
+            override = conn.execute(
+                select(project_overrides.c.name, project_overrides.c.description)
+                .where(project_overrides.c.hub_project_id == project_id)
+            ).fetchone()
+            if override:
+                if override.name:
+                    project["name"] = override.name
+                if override.description:
+                    project["description"] = override.description
         except Exception:
             pass
 
@@ -58,36 +78,39 @@ def get_project(project_id: str):
 @router.patch("/api/projects/{project_id}")
 def update_project(project_id: str, body: ProjectUpdate):
     """Update project name/description via platform.db overlay (hub.db stays read-only)."""
-    # Verify project exists in hub.db
-    with get_hub_db() as db:
-        row = db.execute("SELECT id FROM projects WHERE id = ?", (project_id,)).fetchone()
+    with get_db() as conn:
+        # Verify project exists
+        row = conn.execute(
+            select(hub_projects.c.id).where(hub_projects.c.id == project_id)
+        ).fetchone()
         if not row:
             raise HTTPException(404, "Project not found")
 
-    updates = {k: v for k, v in body.model_dump().items() if v is not None}
-    if not updates:
-        raise HTTPException(400, "No fields to update")
+        updates = {k: v for k, v in body.model_dump().items() if v is not None}
+        if not updates:
+            raise HTTPException(400, "No fields to update")
 
-    with get_platform_db() as pdb:
-        existing = pdb.execute(
-            "SELECT hub_project_id FROM project_overrides WHERE hub_project_id = ?",
-            (project_id,),
+        existing = conn.execute(
+            select(project_overrides.c.hub_project_id)
+            .where(project_overrides.c.hub_project_id == project_id)
         ).fetchone()
 
         if existing:
-            set_clause = ", ".join(f"{k} = ?" for k in updates)
-            values = list(updates.values()) + [project_id]
-            pdb.execute(
-                f"UPDATE project_overrides SET {set_clause} WHERE hub_project_id = ?",
-                values,
+            conn.execute(
+                update(project_overrides)
+                .where(project_overrides.c.hub_project_id == project_id)
+                .values(**updates)
             )
         else:
             import uuid
-            pdb.execute(
-                "INSERT INTO project_overrides (id, hub_project_id, name, description) VALUES (?, ?, ?, ?)",
-                (str(uuid.uuid4()), project_id, updates.get("name"), updates.get("description")),
+            conn.execute(
+                insert(project_overrides).values(
+                    id=str(uuid.uuid4()),
+                    hub_project_id=project_id,
+                    name=updates.get("name"),
+                    description=updates.get("description"),
+                )
             )
-        pdb.commit()
 
     # Return full project with overlay
     return get_project(project_id)

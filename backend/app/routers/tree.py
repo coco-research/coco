@@ -2,7 +2,13 @@ import uuid
 from fastapi import APIRouter, HTTPException
 import structlog
 
-from app.db.connections import get_platform_db, get_hub_db
+from sqlalchemy import select, insert, update, delete, text
+from app.db.session import get_db
+from app.db.tables import (
+    nodes, agents, goals, tasks, cost_ledger, budgets,
+    project_context, handoffs, workflows, analysis_jobs,
+    comments, agent_roles, hub_projects,
+)
 from app.services.event_bus import event_bus
 from app.models.tree import CreateNodeBody, MoveNodeBody, PatchNodeBody, ReorderItem
 
@@ -12,19 +18,15 @@ router = APIRouter(tags=["Tree"])
 
 # --- Helpers ---
 
-def _row_to_dict(row) -> dict:
-    return dict(row) if row else None
-
-
-def _build_tree(nodes: list[dict]) -> list[dict]:
+def _build_tree(node_list: list[dict]) -> list[dict]:
     """Build nested tree structure from flat list of node dicts."""
     by_id = {}
-    for n in nodes:
+    for n in node_list:
         n["children"] = []
         by_id[n["id"]] = n
 
     roots = []
-    for n in nodes:
+    for n in node_list:
         pid = n.get("parent_id")
         if pid and pid in by_id:
             by_id[pid]["children"].append(n)
@@ -34,87 +36,82 @@ def _build_tree(nodes: list[dict]) -> list[dict]:
     return roots
 
 
+_NODE_COLS = [
+    nodes.c.id, nodes.c.parent_id, nodes.c.hub_project_id, nodes.c.label,
+    nodes.c.node_type, nodes.c.sort_order, nodes.c.path, nodes.c.depth,
+    nodes.c.icon, nodes.c.color, nodes.c.folder_path, nodes.c.github_repo,
+    nodes.c.jira_key, nodes.c.confluence_space, nodes.c.prefix,
+    nodes.c.metadata_json, nodes.c.created_at, nodes.c.updated_at,
+]
+
+
 # --- Endpoints ---
 
 @router.get("/api/tree")
 def get_tree():
-    with get_platform_db() as db:
-        rows = db.execute(
-            "SELECT id, parent_id, hub_project_id, label, node_type, "
-            "sort_order, path, depth, icon, color, folder_path, github_repo, "
-            "jira_key, confluence_space, prefix, metadata, created_at, updated_at "
-            "FROM nodes ORDER BY depth, sort_order"
+    with get_db() as conn:
+        rows = conn.execute(
+            select(*_NODE_COLS).order_by(nodes.c.depth, nodes.c.sort_order)
         ).fetchall()
-        nodes = [dict(r) for r in rows]
-        tree = _build_tree(nodes)
+        node_list = [dict(r._mapping) for r in rows]
+        tree = _build_tree(node_list)
         return tree
 
 
 @router.get("/api/tree/unplaced")
 def get_unplaced():
     """Return hub.db projects not yet placed in the tree."""
-    with get_platform_db() as pdb:
-        placed = pdb.execute(
-            "SELECT hub_project_id FROM nodes WHERE hub_project_id IS NOT NULL"
+    with get_db() as conn:
+        placed = conn.execute(
+            select(nodes.c.hub_project_id).where(nodes.c.hub_project_id.isnot(None))
         ).fetchall()
-        placed_ids = {r["hub_project_id"] for r in placed}
+        placed_ids = {r.hub_project_id for r in placed}
 
-    try:
-        with get_hub_db() as hdb:
-            rows = hdb.execute("SELECT id, name FROM projects ORDER BY name").fetchall()
-            return [dict(r) for r in rows if r["id"] not in placed_ids]
-    except Exception:
-        return []
+        try:
+            rows = conn.execute(
+                select(hub_projects.c.id, hub_projects.c.name)
+                .order_by(hub_projects.c.name)
+            ).fetchall()
+            return [dict(r._mapping) for r in rows if r.id not in placed_ids]
+        except Exception:
+            return []
 
 
 @router.get("/api/tree/{node_id}")
 def get_node(node_id: str):
-    with get_platform_db() as db:
-        node = db.execute(
-            "SELECT id, parent_id, hub_project_id, label, node_type, "
-            "sort_order, path, depth, icon, color, folder_path, github_repo, "
-            "jira_key, confluence_space, prefix, metadata, created_at, updated_at "
-            "FROM nodes WHERE id = ?",
-            (node_id,),
+    with get_db() as conn:
+        node = conn.execute(
+            select(*_NODE_COLS).where(nodes.c.id == node_id)
         ).fetchone()
         if not node:
             raise HTTPException(404, "Node not found")
-        result = dict(node)
-        children = db.execute(
-            "SELECT id, parent_id, hub_project_id, label, node_type, "
-            "sort_order, path, depth, icon, color, folder_path, github_repo, "
-            "jira_key, confluence_space, prefix, metadata, created_at, updated_at "
-            "FROM nodes WHERE parent_id = ? ORDER BY sort_order",
-            (node_id,),
+        result = dict(node._mapping)
+        children = conn.execute(
+            select(*_NODE_COLS)
+            .where(nodes.c.parent_id == node_id)
+            .order_by(nodes.c.sort_order)
         ).fetchall()
-        result["children"] = [dict(c) for c in children]
+        result["children"] = [dict(c._mapping) for c in children]
         return result
 
 
 @router.get("/api/tree/{node_id}/subtree")
 def get_subtree(node_id: str):
-    with get_platform_db() as db:
-        node = db.execute(
-            "SELECT id, parent_id, hub_project_id, label, node_type, "
-            "sort_order, path, depth, icon, color, folder_path, github_repo, "
-            "jira_key, confluence_space, prefix, metadata, created_at, updated_at "
-            "FROM nodes WHERE id = ?",
-            (node_id,),
+    with get_db() as conn:
+        node = conn.execute(
+            select(*_NODE_COLS).where(nodes.c.id == node_id)
         ).fetchone()
         if not node:
             raise HTTPException(404, "Node not found")
-        node_dict = dict(node)
+        node_dict = dict(node._mapping)
         path_prefix = node_dict["path"] + "/"
-        descendants = db.execute(
-            "SELECT id, parent_id, hub_project_id, label, node_type, "
-            "sort_order, path, depth, icon, color, folder_path, github_repo, "
-            "jira_key, confluence_space, prefix, metadata, created_at, updated_at "
-            "FROM nodes WHERE path LIKE ? ORDER BY depth, sort_order",
-            (path_prefix + "%",),
+        descendants = conn.execute(
+            select(*_NODE_COLS)
+            .where(nodes.c.path.like(path_prefix + "%"))
+            .order_by(nodes.c.depth, nodes.c.sort_order)
         ).fetchall()
-        all_nodes = [node_dict] + [dict(d) for d in descendants]
+        all_nodes = [node_dict] + [dict(d._mapping) for d in descendants]
         tree = _build_tree(all_nodes)
-        # Return the root of the subtree (should be exactly one)
         return tree[0] if tree else node_dict
 
 
@@ -125,56 +122,57 @@ def create_node(body: CreateNodeBody):
         real = os.path.realpath(os.path.expanduser(body.folder_path))
         if not real.startswith(os.path.expanduser("~")):
             raise HTTPException(400, "Folder path must be within home directory")
-    with get_platform_db() as db:
-        parent = db.execute("SELECT path, depth FROM nodes WHERE id = ?", (body.parent_id,)).fetchone()
+    with get_db() as conn:
+        parent = conn.execute(
+            select(nodes.c.path, nodes.c.depth).where(nodes.c.id == body.parent_id)
+        ).fetchone()
         if not parent:
             raise HTTPException(400, "Parent node not found")
 
         new_id = str(uuid.uuid4())
-        new_path = parent["path"] + "/" + new_id
-        new_depth = parent["depth"] + 1
+        new_path = parent.path + "/" + new_id
+        new_depth = parent.depth + 1
 
-        db.execute(
-            "INSERT INTO nodes (id, parent_id, hub_project_id, label, node_type, sort_order, path, depth, icon, color, folder_path, github_repo, jira_key, confluence_space) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (new_id, body.parent_id, body.hub_project_id, body.label, body.node_type,
-             body.sort_order, new_path, new_depth, body.icon, body.color, body.folder_path,
-             body.github_repo, body.jira_key, body.confluence_space),
+        conn.execute(
+            insert(nodes).values(
+                id=new_id, parent_id=body.parent_id, hub_project_id=body.hub_project_id,
+                label=body.label, node_type=body.node_type, sort_order=body.sort_order,
+                path=new_path, depth=new_depth, icon=body.icon, color=body.color,
+                folder_path=body.folder_path, github_repo=body.github_repo,
+                jira_key=body.jira_key, confluence_space=body.confluence_space,
+            )
         )
 
         # Auto-spawn default agents for project and team nodes
         spawned_agents = []
         if body.node_type in ("project", "team"):
-            roles = db.execute(
-                "SELECT slug, name, default_model, default_system_prompt FROM agent_roles ORDER BY sort_order"
+            role_rows = conn.execute(
+                select(
+                    agent_roles.c.slug, agent_roles.c.name,
+                    agent_roles.c.default_model, agent_roles.c.default_system_prompt,
+                ).order_by(agent_roles.c.sort_order)
             ).fetchall()
-            for role in roles:
+            for role in role_rows:
                 agent_id = str(uuid.uuid4())
-                db.execute(
-                    "INSERT INTO agents (id, name, node_id, model, role, system_prompt, status) "
-                    "VALUES (?, ?, ?, ?, ?, ?, 'idle')",
-                    (agent_id, role["name"], new_id, role["default_model"],
-                     role["slug"], role["default_system_prompt"]),
+                conn.execute(
+                    insert(agents).values(
+                        id=agent_id, name=role.name, node_id=new_id,
+                        model=role.default_model, role=role.slug,
+                        system_prompt=role.default_system_prompt, status="idle",
+                    )
                 )
                 spawned_agents.append(agent_id)
 
-        db.commit()
-
-        row = db.execute(
-            "SELECT id, parent_id, hub_project_id, label, node_type, "
-            "sort_order, path, depth, icon, color, folder_path, github_repo, "
-            "jira_key, confluence_space, prefix, metadata, created_at, updated_at "
-            "FROM nodes WHERE id = ?",
-            (new_id,),
+        row = conn.execute(
+            select(*_NODE_COLS).where(nodes.c.id == new_id)
         ).fetchone()
-        result = dict(row)
+        result = dict(row._mapping)
 
         if spawned_agents:
-            agents = db.execute(
-                f"SELECT * FROM agents WHERE id IN ({','.join('?' for _ in spawned_agents)})",
-                spawned_agents,
+            agent_rows = conn.execute(
+                select(agents).where(agents.c.id.in_(spawned_agents))
             ).fetchall()
-            result["agents"] = [dict(a) for a in agents]
+            result["agents"] = [dict(a._mapping) for a in agent_rows]
 
     event_bus.emit("tree.changed", {"action": "created", "node_id": new_id, "label": body.label})
     return result
@@ -187,39 +185,39 @@ def patch_node(node_id: str, body: PatchNodeBody):
         real = os.path.realpath(os.path.expanduser(body.folder_path))
         if not real.startswith(os.path.expanduser("~")):
             raise HTTPException(400, "Folder path must be within home directory")
-    with get_platform_db() as db:
-        existing = db.execute("SELECT id FROM nodes WHERE id = ?", (node_id,)).fetchone()
+    with get_db() as conn:
+        existing = conn.execute(
+            select(nodes.c.id).where(nodes.c.id == node_id)
+        ).fetchone()
         if not existing:
             raise HTTPException(404, "Node not found")
 
-        updates = []
-        params = []
-        for field in ("label", "node_type", "icon", "color", "folder_path", "github_repo", "jira_key", "confluence_space", "prefix", "metadata", "sort_order"):
-            if field in body.model_fields_set:
-                val = getattr(body, field)
-                updates.append(f"{field} = ?")
-                params.append(val)
+        updates = {}
+        # Map model field names to DB column names (metadata -> metadata_json)
+        field_map = {
+            "label": "label", "node_type": "node_type", "icon": "icon",
+            "color": "color", "folder_path": "folder_path",
+            "github_repo": "github_repo", "jira_key": "jira_key",
+            "confluence_space": "confluence_space", "prefix": "prefix",
+            "metadata": "metadata_json", "sort_order": "sort_order",
+        }
+        for model_field, db_col in field_map.items():
+            if model_field in body.model_fields_set:
+                updates[db_col] = getattr(body, model_field)
 
         if not updates:
             raise HTTPException(400, "No fields to update")
 
-        updates.append("updated_at = datetime('now')")
-        params.append(node_id)
-
-        db.execute(
-            f"UPDATE nodes SET {', '.join(updates)} WHERE id = ?",
-            params,
+        conn.execute(
+            update(nodes)
+            .where(nodes.c.id == node_id)
+            .values(**updates, updated_at=text("datetime('now')"))
         )
-        db.commit()
 
-        row = db.execute(
-            "SELECT id, parent_id, hub_project_id, label, node_type, "
-            "sort_order, path, depth, icon, color, folder_path, github_repo, "
-            "jira_key, confluence_space, prefix, metadata, created_at, updated_at "
-            "FROM nodes WHERE id = ?",
-            (node_id,),
+        row = conn.execute(
+            select(*_NODE_COLS).where(nodes.c.id == node_id)
         ).fetchone()
-        result = dict(row)
+        result = dict(row._mapping)
 
     event_bus.emit("tree.changed", {"action": "updated", "node_id": node_id})
     return result
@@ -230,35 +228,39 @@ def delete_node(node_id: str):
     if node_id == "root":
         raise HTTPException(400, "Cannot delete root node")
 
-    with get_platform_db() as db:
-        existing = db.execute("SELECT id FROM nodes WHERE id = ?", (node_id,)).fetchone()
+    with get_db() as conn:
+        existing = conn.execute(
+            select(nodes.c.id).where(nodes.c.id == node_id)
+        ).fetchone()
         if not existing:
             raise HTTPException(404, "Node not found")
 
-        children = db.execute("SELECT id FROM nodes WHERE parent_id = ?", (node_id,)).fetchone()
+        children = conn.execute(
+            select(nodes.c.id).where(nodes.c.parent_id == node_id)
+        ).fetchone()
         if children:
             raise HTTPException(400, "Cannot delete node with children. Remove or move children first.")
 
-        # Collect agent IDs for cascading deletes on child tables
-        agent_rows = db.execute("SELECT id FROM agents WHERE node_id = ?", (node_id,)).fetchall()
-        agent_ids = [r["id"] for r in agent_rows]
+        agent_rows = conn.execute(
+            select(agents.c.id).where(agents.c.node_id == node_id)
+        ).fetchall()
+        agent_ids = [r.id for r in agent_rows]
 
-        # Cascade: delete records referencing this node or its agents
         if agent_ids:
-            placeholders = ",".join("?" for _ in agent_ids)
-            db.execute(f"DELETE FROM comments WHERE entity_id IN ({placeholders})", agent_ids)
-        db.execute("DELETE FROM cost_ledger WHERE node_id = ?", (node_id,))
-        db.execute("DELETE FROM budgets WHERE node_id = ?", (node_id,))
-        db.execute("DELETE FROM project_context WHERE node_id = ?", (node_id,))
-        db.execute("DELETE FROM handoffs WHERE node_id = ?", (node_id,))
-        db.execute("DELETE FROM workflows WHERE node_id = ?", (node_id,))
-        db.execute("DELETE FROM analysis_jobs WHERE node_id = ?", (node_id,))
+            conn.execute(
+                delete(comments).where(comments.c.entity_id.in_(agent_ids))
+            )
+        conn.execute(delete(cost_ledger).where(cost_ledger.c.node_id == node_id))
+        conn.execute(delete(budgets).where(budgets.c.node_id == node_id))
+        conn.execute(delete(project_context).where(project_context.c.node_id == node_id))
+        conn.execute(delete(handoffs).where(handoffs.c.node_id == node_id))
+        conn.execute(delete(workflows).where(workflows.c.node_id == node_id))
+        conn.execute(delete(analysis_jobs).where(analysis_jobs.c.node_id == node_id))
 
-        db.execute("DELETE FROM agents WHERE node_id = ?", (node_id,))
-        db.execute("DELETE FROM goals WHERE node_id = ?", (node_id,))
-        db.execute("DELETE FROM tasks WHERE node_id = ?", (node_id,))
-        db.execute("DELETE FROM nodes WHERE id = ?", (node_id,))
-        db.commit()
+        conn.execute(delete(agents).where(agents.c.node_id == node_id))
+        conn.execute(delete(goals).where(goals.c.node_id == node_id))
+        conn.execute(delete(tasks).where(tasks.c.node_id == node_id))
+        conn.execute(delete(nodes).where(nodes.c.id == node_id))
 
     event_bus.emit("tree.changed", {"action": "deleted", "node_id": node_id})
     return {"ok": True}
@@ -269,55 +271,52 @@ def move_node(node_id: str, body: MoveNodeBody):
     if node_id == "root":
         raise HTTPException(400, "Cannot move root node")
 
-    with get_platform_db() as db:
-        node = db.execute("SELECT id, path, depth FROM nodes WHERE id = ?", (node_id,)).fetchone()
+    with get_db() as conn:
+        node = conn.execute(
+            select(nodes.c.id, nodes.c.path, nodes.c.depth).where(nodes.c.id == node_id)
+        ).fetchone()
         if not node:
             raise HTTPException(404, "Node not found")
 
-        new_parent = db.execute("SELECT id, path, depth FROM nodes WHERE id = ?", (body.new_parent_id,)).fetchone()
+        new_parent = conn.execute(
+            select(nodes.c.id, nodes.c.path, nodes.c.depth).where(nodes.c.id == body.new_parent_id)
+        ).fetchone()
         if not new_parent:
             raise HTTPException(400, "New parent node not found")
 
-        # Prevent moving a node under itself
-        if new_parent["path"].startswith(node["path"] + "/") or new_parent["id"] == node_id:
+        if new_parent.path.startswith(node.path + "/") or new_parent.id == node_id:
             raise HTTPException(400, "Cannot move a node under itself")
 
-        old_path = node["path"]
-        new_path = new_parent["path"] + "/" + node_id
-        new_depth = new_parent["depth"] + 1
-        depth_diff = new_depth - node["depth"]
+        old_path = node.path
+        new_path = new_parent.path + "/" + node_id
+        new_depth = new_parent.depth + 1
+        depth_diff = new_depth - node.depth
 
-        # Update the node itself
         sort_order_val = body.sort_order if body.sort_order is not None else 0
-        db.execute(
-            "UPDATE nodes SET parent_id = ?, path = ?, depth = ?, sort_order = ?, updated_at = datetime('now') "
-            "WHERE id = ?",
-            (body.new_parent_id, new_path, new_depth, sort_order_val, node_id),
+        conn.execute(
+            update(nodes)
+            .where(nodes.c.id == node_id)
+            .values(parent_id=body.new_parent_id, path=new_path, depth=new_depth,
+                    sort_order=sort_order_val, updated_at=text("datetime('now')"))
         )
 
-        # Update all descendants: replace old_path prefix with new_path, adjust depth
-        descendants = db.execute(
-            "SELECT id, path, depth FROM nodes WHERE path LIKE ?",
-            (old_path + "/%",),
+        descendants = conn.execute(
+            select(nodes.c.id, nodes.c.path, nodes.c.depth)
+            .where(nodes.c.path.like(old_path + "/%"))
         ).fetchall()
         for desc in descendants:
-            desc_new_path = new_path + desc["path"][len(old_path):]
-            desc_new_depth = desc["depth"] + depth_diff
-            db.execute(
-                "UPDATE nodes SET path = ?, depth = ?, updated_at = datetime('now') WHERE id = ?",
-                (desc_new_path, desc_new_depth, desc["id"]),
+            desc_new_path = new_path + desc.path[len(old_path):]
+            desc_new_depth = desc.depth + depth_diff
+            conn.execute(
+                update(nodes)
+                .where(nodes.c.id == desc.id)
+                .values(path=desc_new_path, depth=desc_new_depth, updated_at=text("datetime('now')"))
             )
 
-        db.commit()
-
-        row = db.execute(
-            "SELECT id, parent_id, hub_project_id, label, node_type, "
-            "sort_order, path, depth, icon, color, folder_path, github_repo, "
-            "jira_key, confluence_space, prefix, metadata, created_at, updated_at "
-            "FROM nodes WHERE id = ?",
-            (node_id,),
+        row = conn.execute(
+            select(*_NODE_COLS).where(nodes.c.id == node_id)
         ).fetchone()
-        result = dict(row)
+        result = dict(row._mapping)
 
     event_bus.emit("tree.changed", {"action": "moved", "node_id": node_id})
     return result
@@ -325,13 +324,13 @@ def move_node(node_id: str, body: MoveNodeBody):
 
 @router.post("/api/tree/reorder")
 def reorder_nodes(items: list[ReorderItem]):
-    with get_platform_db() as db:
+    with get_db() as conn:
         for item in items:
-            db.execute(
-                "UPDATE nodes SET sort_order = ?, updated_at = datetime('now') WHERE id = ?",
-                (item.sort_order, item.id),
+            conn.execute(
+                update(nodes)
+                .where(nodes.c.id == item.id)
+                .values(sort_order=item.sort_order, updated_at=text("datetime('now')"))
             )
-        db.commit()
 
     event_bus.emit("tree.changed", {"action": "reordered"})
     return {"ok": True}
@@ -341,11 +340,13 @@ def reorder_nodes(items: list[ReorderItem]):
 def get_folder_contents(node_id: str):
     """Return folder listing for a node's linked folder_path."""
     import os
-    with get_platform_db() as db:
-        row = db.execute("SELECT folder_path FROM nodes WHERE id = ?", (node_id,)).fetchone()
+    with get_db() as conn:
+        row = conn.execute(
+            select(nodes.c.folder_path).where(nodes.c.id == node_id)
+        ).fetchone()
         if not row:
             raise HTTPException(404, "Node not found")
-        folder_path = row[0]
+        folder_path = row.folder_path
         if not folder_path or not os.path.isdir(folder_path):
             return {"path": folder_path, "exists": False, "files": []}
 
@@ -378,7 +379,7 @@ def browse_filesystem(path: str = "~"):
     import os
     resolved = os.path.expanduser(path)
     home = os.path.expanduser("~")
-    resolved = os.path.realpath(resolved)  # resolve symlinks
+    resolved = os.path.realpath(resolved)
     if not resolved.startswith(home):
         raise HTTPException(403, "Cannot browse outside home directory")
     if not os.path.isdir(resolved):

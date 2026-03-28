@@ -386,6 +386,59 @@ CREATE TABLE IF NOT EXISTS trigger_log (
     error TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_trigger_log_trigger ON trigger_log(trigger_id);
+
+CREATE TABLE IF NOT EXISTS self_improve_cycles (
+    id TEXT PRIMARY KEY,
+    status TEXT NOT NULL DEFAULT 'idle',
+    budget_usd REAL NOT NULL DEFAULT 5.0,
+    spent_usd REAL NOT NULL DEFAULT 0.0,
+    max_improvements INTEGER NOT NULL DEFAULT 5,
+    focus_areas TEXT,
+    started_at TEXT,
+    completed_at TEXT,
+    error TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS self_improve_improvements (
+    id TEXT PRIMARY KEY,
+    cycle_id TEXT NOT NULL REFERENCES self_improve_cycles(id),
+    title TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    priority INTEGER NOT NULL DEFAULT 0,
+    category TEXT NOT NULL DEFAULT 'refactor',
+    status TEXT NOT NULL DEFAULT 'proposed',
+    worktree_path TEXT,
+    branch_name TEXT,
+    diff_summary TEXT,
+    diff_stat TEXT,
+    test_results TEXT,
+    review_notes TEXT,
+    security_scan TEXT,
+    pr_description TEXT,
+    changelog_entry TEXT,
+    agent_id TEXT,
+    human_comment TEXT,
+    reject_reason TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_si_improvements_cycle ON self_improve_improvements(cycle_id);
+
+CREATE TABLE IF NOT EXISTS self_improve_agents (
+    id TEXT PRIMARY KEY,
+    cycle_id TEXT NOT NULL REFERENCES self_improve_cycles(id),
+    improvement_id TEXT REFERENCES self_improve_improvements(id),
+    agent_id TEXT NOT NULL,
+    role TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    started_at TEXT,
+    completed_at TEXT,
+    output_summary TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_si_agents_cycle ON self_improve_agents(cycle_id);
+CREATE INDEX IF NOT EXISTS idx_si_agents_agent ON self_improve_agents(agent_id);
 """
 
 MIGRATION = """

@@ -195,6 +195,12 @@ class ProcessManager:
             except Exception as e:
                 log.warning("analysis_job_check_failed", agent_id=agent_id, error=str(e))
 
+            # Check if this agent belongs to a self-improve cycle
+            try:
+                self._check_self_improve_agent(agent_id, status)
+            except Exception as e:
+                log.warning("self_improve_check_failed", agent_id=agent_id, error=str(e))
+
             # Clean up metadata
             self._agent_meta.pop(agent_id, None)
 
@@ -220,6 +226,20 @@ class ProcessManager:
     def is_alive(self, agent_id: str) -> bool:
         proc = self._processes.get(agent_id)
         return proc is not None and proc.poll() is None
+
+    def _check_self_improve_agent(self, agent_id: str, agent_status: str):
+        """Check if this agent belongs to a self-improve cycle and notify the service."""
+        with get_platform_db() as db:
+            row = db.execute(
+                "SELECT agent_id FROM self_improve_agents WHERE agent_id = ?",
+                (agent_id,),
+            ).fetchone()
+            if not row:
+                return
+
+        # Import here to avoid circular imports at module level
+        from app.services.self_improve import self_improve_service
+        self_improve_service.on_agent_completed(agent_id, agent_status)
 
     def _check_analysis_job_completion(self, agent_id: str, agent_status: str):
         """Check if this agent's completion should update an analysis job."""

@@ -10,11 +10,14 @@ from app.db.init_db import init_platform_db
 from app.services.process_manager import process_manager
 from app.services.trigger_engine import trigger_engine
 from app.services.id_generator import resolve_display_id as _resolve_display_id
+from app.services.self_improve import self_improve_service
+from app.services.event_bus import event_bus as _event_bus
 from app.routers import (
     health, projects, teams, brain, content, agents, tasks,
     costs, todos, drafts, sessions, activity, events,
     settings, chat, dashboard, goals, tree, home, collaboration,
     tts, comments, templates, jarvis, analysis, stt, triggers,
+    self_improve,
 )
 
 structlog.configure(
@@ -66,6 +69,7 @@ openapi_tags = [
     {"name": "Analysis", "description": "Folder analysis pipeline"},
     {"name": "Triggers", "description": "Cron, webhook, and file-watch triggers"},
     {"name": "Webhooks", "description": "Incoming webhook receiver"},
+    {"name": "Self-Improve", "description": "Self-improvement cycle management"},
 ]
 
 app = FastAPI(
@@ -131,6 +135,7 @@ app.include_router(analysis.router)
 app.include_router(stt.router)
 app.include_router(triggers.router)
 app.include_router(triggers.webhook_router)
+app.include_router(self_improve.router)
 
 # --- Cross-cutting resolve endpoint ---
 

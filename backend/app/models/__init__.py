@@ -72,6 +72,9 @@ from app.models.brain import UpdatePersonBody
 # Projects
 from app.models.projects import ProjectUpdate
 
+# Self-Improve
+from app.models.self_improve import StartCycleBody, ApproveImprovementBody, RejectImprovementBody
+
 __all__ = [
     # Common
     "TransitionBody",
@@ -134,4 +137,8 @@ __all__ = [
     "UpdatePersonBody",
     # Projects
     "ProjectUpdate",
+    # Self-Improve
+    "StartCycleBody",
+    "ApproveImprovementBody",
+    "RejectImprovementBody",
 ]

@@ -13,7 +13,7 @@ class PodcastResponse(BaseModel):
     script: str | None = None
     audio_path: str | None = None
     duration: float | None = None
-    voice: str | None = "af_heart"
+    voice: str | None = "andrew"
     status: str | None = "pending"
     created_at: str
 

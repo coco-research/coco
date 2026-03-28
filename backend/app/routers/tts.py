@@ -1,14 +1,12 @@
 """Text-to-Speech endpoint.
 
-Priority order:
-1. Kokoro TTS (local, 82M-param, near-ElevenLabs quality)
-2. Piper TTS with Jarvis voice (Paul Bettany) — local, free, instant
-3. Edge TTS (Azure Neural voices) — free, high quality, many voices
-4. OpenAI TTS — if OPENAI_API_KEY is set
-5. macOS `say` — zero-cost fallback
+Engine priority:
+1. Edge TTS (Microsoft Azure Neural voices) — free, high quality, cloud API
+2. macOS `say` — zero-cost local fallback
+
+No downloaded model weights (Kokoro, Piper removed per project rules).
 """
 
-import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -18,20 +16,13 @@ from fastapi import APIRouter
 from fastapi.responses import FileResponse, Response
 
 from app.models.tts import TTSRequest
-from app.services.kokoro_engine import KokoroEngine
 
 log = structlog.get_logger()
 
 router = APIRouter(tags=["Voice"])
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 TTS_CACHE_DIR = Path(tempfile.gettempdir()) / "coco-tts"
 TTS_CACHE_DIR.mkdir(exist_ok=True)
-
-# Kokoro engine singleton (lazy-loads model on first generate call)
-kokoro_engine = KokoroEngine(cache_dir=TTS_CACHE_DIR)
-
-JARVIS_MODEL = Path.home() / ".coco" / "voices" / "jarvis" / "en" / "en_GB" / "jarvis" / "high" / "jarvis-high.onnx"
 
 
 # ─── Voice Registry ───────────────────────────────────────────────────────────
@@ -53,62 +44,23 @@ EDGE_VOICES = {
     "maisie": "en-GB-MaisieNeural",
 }
 
-# Kokoro voice IDs for routing
-KOKORO_VOICES = {"af_heart", "am_adam", "bf_emma", "bm_george"}
-
-# All available voices for the frontend
 VOICE_CATALOG = [
-    # Kokoro (local, high quality)
-    {"id": "af_heart", "name": "Heart", "gender": "female", "engine": "kokoro", "accent": "American"},
-    {"id": "am_adam", "name": "Adam", "gender": "male", "engine": "kokoro", "accent": "American"},
-    {"id": "bf_emma", "name": "Emma (Kokoro)", "gender": "female", "engine": "kokoro", "accent": "British"},
-    {"id": "bm_george", "name": "George", "gender": "male", "engine": "kokoro", "accent": "British"},
-    # Piper
-    {"id": "jarvis", "name": "Jarvis (Paul Bettany)", "gender": "male", "engine": "piper", "accent": "British"},
-    # Edge TTS
-    {"id": "ryan", "name": "Ryan", "gender": "male", "engine": "edge", "accent": "British"},
-    {"id": "brian", "name": "Brian", "gender": "male", "engine": "edge", "accent": "American"},
     {"id": "andrew", "name": "Andrew", "gender": "male", "engine": "edge", "accent": "American"},
+    {"id": "brian", "name": "Brian", "gender": "male", "engine": "edge", "accent": "American"},
+    {"id": "ryan", "name": "Ryan", "gender": "male", "engine": "edge", "accent": "British"},
     {"id": "connor", "name": "Connor", "gender": "male", "engine": "edge", "accent": "Irish"},
-    {"id": "sonia", "name": "Sonia", "gender": "female", "engine": "edge", "accent": "British"},
-    {"id": "jenny", "name": "Jenny", "gender": "female", "engine": "edge", "accent": "American"},
+    {"id": "liam", "name": "Liam", "gender": "male", "engine": "edge", "accent": "Canadian"},
+    {"id": "william", "name": "William", "gender": "male", "engine": "edge", "accent": "Australian"},
     {"id": "aria", "name": "Aria", "gender": "female", "engine": "edge", "accent": "American"},
+    {"id": "jenny", "name": "Jenny", "gender": "female", "engine": "edge", "accent": "American"},
     {"id": "emma", "name": "Emma", "gender": "female", "engine": "edge", "accent": "American"},
+    {"id": "sonia", "name": "Sonia", "gender": "female", "engine": "edge", "accent": "British"},
     {"id": "libby", "name": "Libby", "gender": "female", "engine": "edge", "accent": "British"},
     {"id": "maisie", "name": "Maisie", "gender": "female", "engine": "edge", "accent": "British"},
 ]
 
 
 # ─── TTS Engines ──────────────────────────────────────────────────────────────
-
-def _kokoro_tts(text: str, voice: str = "af_heart", speed: float = 1.0) -> Path | None:
-    """Generate audio using local Kokoro TTS model."""
-    return kokoro_engine.generate(text, voice=voice, speed=speed)
-
-
-def _piper_jarvis(text: str) -> Path | None:
-    """Generate audio using local Piper TTS with Jarvis voice model."""
-    if not JARVIS_MODEL.exists():
-        return None
-    try:
-        import uuid as _uuid
-        out_path = TTS_CACHE_DIR / f"piper_{_uuid.uuid4().hex[:8]}.wav"
-        result = subprocess.run(
-            ["piper", "--model", str(JARVIS_MODEL), "--output_file", str(out_path)],
-            input=text.encode(),
-            capture_output=True,
-            timeout=15,
-            cwd=str(Path.home() / ".coco"),
-        )
-        if result.returncode == 0 and out_path.exists() and out_path.stat().st_size > 100:
-            return out_path
-        log.warning("tts_piper_failed", stderr=result.stderr.decode()[:200])
-    except FileNotFoundError:
-        log.warning("tts_piper_not_installed")
-    except Exception as e:
-        log.warning("tts_piper_exception", error=str(e))
-    return None
-
 
 async def _edge_tts(text: str, voice: str, speed: str) -> Path | None:
     """Generate audio using edge-tts (free Azure Neural voices)."""
@@ -123,25 +75,6 @@ async def _edge_tts(text: str, voice: str, speed: str) -> Path | None:
             return out_path
     except Exception as e:
         log.warning("tts_edge_failed", error=str(e))
-    return None
-
-
-async def _openai_tts(text: str) -> bytes | None:
-    """Generate audio using OpenAI TTS API."""
-    if not OPENAI_API_KEY:
-        return None
-    try:
-        import httpx
-        async with httpx.AsyncClient(timeout=15) as client:
-            resp = await client.post(
-                "https://api.openai.com/v1/audio/speech",
-                headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
-                json={"model": "tts-1", "voice": "onyx", "input": text, "speed": 1.0, "response_format": "mp3"},
-            )
-            if resp.status_code == 200:
-                return resp.content
-    except Exception as e:
-        log.warning("tts_openai_failed", error=str(e))
     return None
 
 
@@ -167,70 +100,42 @@ def _macos_say(text: str) -> Path | None:
 @router.get("/api/tts/voices")
 def list_voices():
     """List all available TTS voices."""
-    kokoro_ok = kokoro_engine.is_available()
     catalog = list(VOICE_CATALOG)
     for v in catalog:
-        if v["engine"] == "kokoro":
-            v["available"] = kokoro_ok
-        elif v["id"] == "jarvis":
-            v["available"] = JARVIS_MODEL.exists()
-        else:
-            v["available"] = True
+        v["available"] = True
     return {"voices": catalog}
 
 
 @router.post("/api/tts")
 async def text_to_speech(req: TTSRequest):
-    """Generate speech audio. Cascades through engines based on voice selection."""
+    """Generate speech audio. Edge-TTS primary, macOS say fallback."""
 
     voice_id = req.voice.lower()
 
-    # ─── Kokoro (local, high quality) ───
-    if voice_id in KOKORO_VOICES:
-        # Parse speed: Kokoro uses float multiplier, req.speed is like "-5%" or "+10%"
-        kokoro_speed = 1.0
-        try:
-            pct = req.speed.replace("%", "").replace("+", "")
-            kokoro_speed = 1.0 + float(pct) / 100.0
-        except (ValueError, AttributeError):
-            pass
-        path = _kokoro_tts(req.text, voice=voice_id, speed=kokoro_speed)
-        if path:
-            log.info("tts_served", engine="kokoro", voice=voice_id)
-            return FileResponse(str(path), media_type="audio/wav")
-        # Fall through: try Edge with a similar accent
-        voice_id = "ryan" if voice_id.startswith("b") else "andrew"
+    # Resolve to Edge voice ID
+    edge_voice = EDGE_VOICES.get(voice_id)
+    if not edge_voice:
+        # If the voice_id is already a full Neural voice ID, use it
+        if "Neural" in voice_id:
+            edge_voice = voice_id
+        else:
+            # Default to Andrew
+            edge_voice = EDGE_VOICES["andrew"]
 
-    # ─── Jarvis (Piper local model) ───
-    if voice_id == "jarvis":
-        path = _piper_jarvis(req.text)
-        if path:
-            log.info("tts_served", engine="piper-jarvis")
-            return FileResponse(str(path), media_type="audio/wav")
-        # Fall through to Edge with Ryan as closest alternative
-        voice_id = "ryan"
-
-    # ─── Edge TTS ───
-    edge_voice = EDGE_VOICES.get(voice_id, voice_id)
-    # If it looks like a full Edge voice ID, use it directly
-    if "Neural" in edge_voice or "Neural" in voice_id:
-        edge_voice = voice_id if "Neural" in voice_id else edge_voice
-
+    # ─── Edge TTS (primary) ───
     path = await _edge_tts(req.text, edge_voice, req.speed)
     if path:
         log.info("tts_served", engine="edge", voice=edge_voice)
         return FileResponse(str(path), media_type="audio/mpeg")
 
-    # ─── OpenAI ───
-    audio = await _openai_tts(req.text)
-    if audio:
-        log.info("tts_served", engine="openai")
-        return Response(content=audio, media_type="audio/mpeg")
-
-    # ─── macOS say ───
+    # ─── macOS say (fallback) ───
     path = _macos_say(req.text)
     if path:
         log.info("tts_served", engine="macos")
         return FileResponse(str(path), media_type="audio/aiff")
 
-    return Response(content='{"error": "All TTS engines failed"}', media_type="application/json", status_code=503)
+    return Response(
+        content='{"error": "All TTS engines failed"}',
+        media_type="application/json",
+        status_code=503,
+    )

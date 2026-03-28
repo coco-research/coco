@@ -172,7 +172,7 @@ async def _execute_trigger_action(trigger: dict, context: dict | None = None) ->
 
     elif action_type == "podcast_generate":
         from app.services.podcast import generate_podcast as _gen_podcast
-        voice = action_config.get("voice", "af_heart")
+        voice = action_config.get("voice", "andrew")
         try:
             result = await _gen_podcast(voice=voice)
             return {"status": "success", "result": f"Podcast generated: {result.get('id')}", "podcast_id": result.get("id")}

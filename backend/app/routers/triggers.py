@@ -1,4 +1,4 @@
-"""Triggers & Webhooks — CRUD + webhook receiver."""
+"""Triggers & Webhooks -- CRUD + webhook receiver."""
 
 import json
 import uuid
@@ -7,9 +7,11 @@ from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel, Field
+from sqlalchemy import insert, select, delete
 import structlog
 
-from app.db.connections import get_platform_db
+from app.db.session import get_db
+from app.db.tables import triggers, trigger_log, agents, todo_overrides
 from app.services.event_bus import event_bus
 
 log = structlog.get_logger()
@@ -18,7 +20,7 @@ router = APIRouter(prefix="/api/triggers", tags=["Triggers"])
 webhook_router = APIRouter(prefix="/api/webhooks", tags=["Webhooks"])
 
 
-# ── Pydantic models ──────────────────────────────────────────────
+# -- Pydantic models --
 
 class TriggerCreate(BaseModel):
     name: str
@@ -40,10 +42,10 @@ class TriggerUpdate(BaseModel):
     enabled: Optional[bool] = None
 
 
-# ── Helpers ───────────────────────────────────────────────────────
+# -- Helpers --
 
 def _row_to_dict(row) -> dict:
-    d = dict(row)
+    d = dict(row._mapping)
     for key in ("config", "action_config"):
         if key in d and isinstance(d[key], str):
             try:
@@ -67,61 +69,66 @@ async def _execute_trigger_action(trigger: dict, context: dict | None = None) ->
     node_id = trigger.get("node_id")
 
     if action_type == "spawn_agent":
-        # Spawn a real Claude agent via ProcessManager
         agent_name = action_config.get("agent_name", f"trigger-{trigger_name}")
         task = action_config.get("task", f"Triggered by automation: {trigger_name}")
         model = action_config.get("model", "sonnet")
         cwd = action_config.get("cwd")
         role = action_config.get("role", "custom")
 
-        # If context was provided (e.g. webhook payload), append to task
         if context:
             task += f"\n\nTrigger context:\n```json\n{json.dumps(context, indent=2)}\n```"
 
         agent_id = str(uuid.uuid4())
         now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        with get_platform_db() as db:
-            db.execute(
-                "INSERT INTO agents (id, name, node_id, model, role, task_description, status, started_at) "
-                "VALUES (?, ?, ?, ?, ?, ?, 'running', ?)",
-                (agent_id, agent_name, node_id, model, role, task, now),
+        with get_db() as conn:
+            conn.execute(
+                insert(agents).values(
+                    id=agent_id,
+                    name=agent_name,
+                    node_id=node_id,
+                    model=model,
+                    role=role,
+                    task_description=task,
+                    status="running",
+                    started_at=now,
+                )
             )
-            db.commit()
 
         try:
             pid = process_manager.spawn(agent_id, task, cwd=cwd, model=model, node_id=node_id, role=role)
-            with get_platform_db() as db:
-                db.execute("UPDATE agents SET pid = ? WHERE id = ?", (pid, agent_id))
-                db.commit()
+            with get_db() as conn:
+                conn.exec_driver_sql("UPDATE agents SET pid = ? WHERE id = ?", (pid, agent_id))
             return {"status": "success", "result": f"Spawned agent '{agent_name}' (pid={pid})", "agent_id": agent_id}
         except RuntimeError as e:
-            with get_platform_db() as db:
-                db.execute(
+            with get_db() as conn:
+                conn.exec_driver_sql(
                     "UPDATE agents SET status = 'failed', stopped_at = datetime('now') WHERE id = ?",
                     (agent_id,),
                 )
-                db.commit()
             return {"status": "failed", "error": str(e)}
 
     elif action_type == "create_todo":
-        # Insert a platform-native todo into todo_overrides
         title = action_config.get("title", f"Auto-todo from {trigger_name}")
         priority = action_config.get("priority", "medium")
         todo_id = f"trigger-{uuid.uuid4().hex[:12]}"
         now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        with get_platform_db() as db:
-            db.execute(
-                """INSERT INTO todo_overrides
-                   (hub_todo_id, title, status, priority, node_id, is_platform_native, created_at, updated_at)
-                   VALUES (?, ?, 'open', ?, ?, 1, ?, ?)""",
-                (todo_id, title, priority, node_id, now, now),
+        with get_db() as conn:
+            conn.execute(
+                insert(todo_overrides).values(
+                    hub_todo_id=todo_id,
+                    title=title,
+                    status="open",
+                    priority=priority,
+                    node_id=node_id,
+                    is_platform_native=1,
+                    created_at=now,
+                    updated_at=now,
+                )
             )
-            db.commit()
         event_bus.emit("todo.created", {"todo_id": todo_id, "title": title, "source": "trigger"})
         return {"status": "success", "result": f"Created todo: {title}", "todo_id": todo_id}
 
     elif action_type == "notify":
-        # Emit an event via EventBus (picked up by SSE subscribers)
         message = action_config.get("message", f"Trigger fired: {trigger_name}")
         event_bus.emit("trigger.notification", {
             "trigger_id": trigger["id"],
@@ -133,7 +140,6 @@ async def _execute_trigger_action(trigger: dict, context: dict | None = None) ->
         return {"status": "success", "result": f"Notification sent: {message}"}
 
     elif action_type == "run_command":
-        # Run a shell command (capped at 30s timeout)
         import asyncio
         command = action_config.get("command", "")
         if not command:
@@ -163,17 +169,21 @@ def _log_trigger_fire(conn, trigger_id: str, status: str, result: str = None, er
     """Insert a trigger_log row and bump fire_count / last_fired_at."""
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     conn.execute(
-        "INSERT INTO trigger_log (trigger_id, fired_at, status, result, error) VALUES (?, ?, ?, ?, ?)",
-        (trigger_id, now, status, result, error),
+        insert(trigger_log).values(
+            trigger_id=trigger_id,
+            fired_at=now,
+            status=status,
+            result=result,
+            error=error,
+        )
     )
-    conn.execute(
+    conn.exec_driver_sql(
         "UPDATE triggers SET fire_count = fire_count + 1, last_fired_at = ?, updated_at = ? WHERE id = ?",
         (now, now, trigger_id),
     )
-    conn.commit()
 
 
-# ── CRUD endpoints ────────────────────────────────────────────────
+# -- CRUD endpoints --
 
 @router.get("")
 async def list_triggers(
@@ -191,24 +201,29 @@ async def list_triggers(
         params.append(enabled)
 
     where = (" WHERE " + " AND ".join(clauses)) if clauses else ""
-    with get_platform_db() as conn:
-        rows = conn.execute(f"SELECT * FROM triggers{where} ORDER BY created_at DESC", params).fetchall()
+    with get_db() as conn:
+        rows = conn.exec_driver_sql(
+            f"SELECT * FROM triggers{where} ORDER BY created_at DESC",
+            tuple(params),
+        ).fetchall()
     return [_row_to_dict(r) for r in rows]
 
 
 @router.get("/{trigger_id}")
 async def get_trigger(trigger_id: str):
     """Get a single trigger with its recent log entries."""
-    with get_platform_db() as conn:
-        row = conn.execute("SELECT * FROM triggers WHERE id = ?", (trigger_id,)).fetchone()
+    with get_db() as conn:
+        row = conn.execute(
+            select(triggers).where(triggers.c.id == trigger_id)
+        ).fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Trigger not found")
-        recent_logs = conn.execute(
+        recent_logs = conn.exec_driver_sql(
             "SELECT * FROM trigger_log WHERE trigger_id = ? ORDER BY fired_at DESC LIMIT 10",
             (trigger_id,),
         ).fetchall()
     trigger = _row_to_dict(row)
-    trigger["recent_logs"] = [dict(r) for r in recent_logs]
+    trigger["recent_logs"] = [dict(r._mapping) for r in recent_logs]
     return trigger
 
 
@@ -217,33 +232,34 @@ async def create_trigger(body: TriggerCreate):
     """Create a new trigger."""
     trigger_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    with get_platform_db() as conn:
+    with get_db() as conn:
         conn.execute(
-            "INSERT INTO triggers (id, name, trigger_type, enabled, config, action_type, action_config, node_id, created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                trigger_id,
-                body.name,
-                body.trigger_type,
-                int(body.enabled),
-                json.dumps(body.config),
-                body.action_type,
-                json.dumps(body.action_config),
-                body.node_id,
-                now,
-                now,
-            ),
+            insert(triggers).values(
+                id=trigger_id,
+                name=body.name,
+                trigger_type=body.trigger_type,
+                enabled=int(body.enabled),
+                config=json.dumps(body.config),
+                action_type=body.action_type,
+                action_config=json.dumps(body.action_config),
+                node_id=body.node_id,
+                created_at=now,
+                updated_at=now,
+            )
         )
-        conn.commit()
-        row = conn.execute("SELECT * FROM triggers WHERE id = ?", (trigger_id,)).fetchone()
+        row = conn.execute(
+            select(triggers).where(triggers.c.id == trigger_id)
+        ).fetchone()
     return _row_to_dict(row)
 
 
 @router.patch("/{trigger_id}")
 async def update_trigger(trigger_id: str, body: TriggerUpdate):
     """Update fields on an existing trigger."""
-    with get_platform_db() as conn:
-        existing = conn.execute("SELECT * FROM triggers WHERE id = ?", (trigger_id,)).fetchone()
+    with get_db() as conn:
+        existing = conn.execute(
+            select(triggers).where(triggers.c.id == trigger_id)
+        ).fetchone()
         if not existing:
             raise HTTPException(status_code=404, detail="Trigger not found")
 
@@ -271,37 +287,44 @@ async def update_trigger(trigger_id: str, body: TriggerUpdate):
         params.append(now)
         params.append(trigger_id)
 
-        conn.execute(f"UPDATE triggers SET {', '.join(updates)} WHERE id = ?", params)
-        conn.commit()
-        row = conn.execute("SELECT * FROM triggers WHERE id = ?", (trigger_id,)).fetchone()
+        conn.exec_driver_sql(
+            f"UPDATE triggers SET {', '.join(updates)} WHERE id = ?",
+            tuple(params),
+        )
+        row = conn.execute(
+            select(triggers).where(triggers.c.id == trigger_id)
+        ).fetchone()
     return _row_to_dict(row)
 
 
 @router.delete("/{trigger_id}", status_code=204)
 async def delete_trigger(trigger_id: str):
     """Delete a trigger and all its log entries."""
-    with get_platform_db() as conn:
-        existing = conn.execute("SELECT id FROM triggers WHERE id = ?", (trigger_id,)).fetchone()
+    with get_db() as conn:
+        existing = conn.exec_driver_sql(
+            "SELECT id FROM triggers WHERE id = ?", (trigger_id,)
+        ).fetchone()
         if not existing:
             raise HTTPException(status_code=404, detail="Trigger not found")
-        conn.execute("DELETE FROM trigger_log WHERE trigger_id = ?", (trigger_id,))
-        conn.execute("DELETE FROM triggers WHERE id = ?", (trigger_id,))
-        conn.commit()
+        conn.execute(delete(trigger_log).where(trigger_log.c.trigger_id == trigger_id))
+        conn.execute(delete(triggers).where(triggers.c.id == trigger_id))
     return None
 
 
 @router.post("/{trigger_id}/test")
 async def test_trigger(trigger_id: str):
     """Manually fire a trigger once and log the result."""
-    with get_platform_db() as conn:
-        row = conn.execute("SELECT * FROM triggers WHERE id = ?", (trigger_id,)).fetchone()
+    with get_db() as conn:
+        row = conn.execute(
+            select(triggers).where(triggers.c.id == trigger_id)
+        ).fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Trigger not found")
         trigger = _row_to_dict(row)
 
     result = await _execute_trigger_action(trigger)
 
-    with get_platform_db() as conn:
+    with get_db() as conn:
         _log_trigger_fire(
             conn,
             trigger_id,
@@ -319,30 +342,31 @@ async def get_trigger_logs(
     offset: int = Query(0, ge=0),
 ):
     """Paginated log history for a trigger."""
-    with get_platform_db() as conn:
-        existing = conn.execute("SELECT id FROM triggers WHERE id = ?", (trigger_id,)).fetchone()
+    with get_db() as conn:
+        existing = conn.exec_driver_sql(
+            "SELECT id FROM triggers WHERE id = ?", (trigger_id,)
+        ).fetchone()
         if not existing:
             raise HTTPException(status_code=404, detail="Trigger not found")
-        total = conn.execute(
+        total = conn.exec_driver_sql(
             "SELECT COUNT(*) FROM trigger_log WHERE trigger_id = ?", (trigger_id,)
         ).fetchone()[0]
-        rows = conn.execute(
+        rows = conn.exec_driver_sql(
             "SELECT * FROM trigger_log WHERE trigger_id = ? ORDER BY fired_at DESC LIMIT ? OFFSET ?",
             (trigger_id, limit, offset),
         ).fetchall()
-    return {"items": [dict(r) for r in rows], "total": total, "limit": limit, "offset": offset}
+    return {"items": [dict(r._mapping) for r in rows], "total": total, "limit": limit, "offset": offset}
 
 
-# ── Webhook receiver ──────────────────────────────────────────────
+# -- Webhook receiver --
 
 @webhook_router.post("/{trigger_id}")
 async def receive_webhook(trigger_id: str, request: Request):
-    """Webhook receiver — validates trigger exists with type='webhook', fires action, logs result.
-
-    Accepts any JSON body and passes it as context to the action.
-    """
-    with get_platform_db() as conn:
-        row = conn.execute("SELECT * FROM triggers WHERE id = ?", (trigger_id,)).fetchone()
+    """Webhook receiver -- validates trigger exists with type='webhook', fires action, logs result."""
+    with get_db() as conn:
+        row = conn.execute(
+            select(triggers).where(triggers.c.id == trigger_id)
+        ).fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Trigger not found")
         trigger = _row_to_dict(row)
@@ -353,7 +377,6 @@ async def receive_webhook(trigger_id: str, request: Request):
     if not trigger["enabled"]:
         raise HTTPException(status_code=409, detail="Trigger is disabled")
 
-    # Parse incoming JSON body as context
     context = None
     try:
         body = await request.body()
@@ -364,7 +387,7 @@ async def receive_webhook(trigger_id: str, request: Request):
 
     result = await _execute_trigger_action(trigger, context=context)
 
-    with get_platform_db() as conn:
+    with get_db() as conn:
         _log_trigger_fire(
             conn,
             trigger_id,

@@ -1,0 +1,605 @@
+"""SA Core table definitions for platform.db.
+
+These mirror the DDL in init_db.py.  They are used for typed SA Core
+queries (select / insert / update / delete) across routers and services.
+
+NOTE: The canonical schema is still the raw DDL in init_db.SCHEMA.
+These Table objects must stay in sync with it.  When adding new tables
+or columns, update BOTH places.
+"""
+
+from sqlalchemy import (
+    Column,
+    Float,
+    Integer,
+    MetaData,
+    Table,
+    Text,
+)
+
+metadata = MetaData()
+
+# ---------------------------------------------------------------------------
+# Nodes / tree
+# ---------------------------------------------------------------------------
+
+nodes = Table(
+    "nodes",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("parent_id", Text),
+    Column("hub_project_id", Text),
+    Column("label", Text, nullable=False),
+    Column("node_type", Text, nullable=False, server_default="group"),
+    Column("sort_order", Integer, nullable=False, server_default="0"),
+    Column("path", Text, nullable=False, server_default=""),
+    Column("depth", Integer, nullable=False, server_default="0"),
+    Column("icon", Text),
+    Column("color", Text),
+    Column("folder_path", Text),
+    Column("github_repo", Text),
+    Column("jira_key", Text),
+    Column("confluence_space", Text),
+    Column("prefix", Text),
+    Column("metadata", Text, server_default="{}"),
+    Column("created_at", Text, nullable=False),
+    Column("updated_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Agents
+# ---------------------------------------------------------------------------
+
+agents = Table(
+    "agents",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("name", Text, nullable=False),
+    Column("node_id", Text),
+    Column("project_id", Text),
+    Column("model", Text, nullable=False, server_default="sonnet"),
+    Column("role", Text, server_default="custom"),
+    Column("status", Text, nullable=False, server_default="idle"),
+    Column("task_description", Text),
+    Column("system_prompt", Text),
+    Column("working_directory", Text),
+    Column("pid", Integer),
+    Column("started_at", Text),
+    Column("stopped_at", Text),
+    Column("last_heartbeat", Text),
+    Column("exit_code", Integer),
+    Column("config", Text, server_default="{}"),
+    Column("reports_to", Text),
+    Column("created_at", Text, nullable=False),
+    Column("updated_at", Text, nullable=False),
+)
+
+agent_roles = Table(
+    "agent_roles",
+    metadata,
+    Column("slug", Text, primary_key=True),
+    Column("name", Text, nullable=False),
+    Column("default_system_prompt", Text),
+    Column("default_model", Text, server_default="sonnet"),
+    Column("sort_order", Integer, server_default="0"),
+)
+
+agent_output = Table(
+    "agent_output",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("agent_id", Text, nullable=False),
+    Column("stream", Text, nullable=False),
+    Column("chunk", Text, nullable=False),
+    Column("timestamp", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Cost tracking
+# ---------------------------------------------------------------------------
+
+cost_ledger = Table(
+    "cost_ledger",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("agent_id", Text),
+    Column("node_id", Text),
+    Column("project_id", Text),
+    Column("model", Text, nullable=False),
+    Column("input_tokens", Integer, nullable=False, server_default="0"),
+    Column("output_tokens", Integer, nullable=False, server_default="0"),
+    Column("cost_usd", Float, nullable=False, server_default="0.0"),
+    Column("source", Text, nullable=False, server_default="agent"),
+    Column("created_at", Text, nullable=False),
+)
+
+budgets = Table(
+    "budgets",
+    metadata,
+    Column("project_id", Text, primary_key=True),
+    Column("node_id", Text),
+    Column("daily_cap_usd", Float),
+    Column("weekly_cap_usd", Float),
+    Column("monthly_cap_usd", Float),
+    Column("alert_threshold_pct", Float, server_default="0.8"),
+)
+
+# ---------------------------------------------------------------------------
+# Governance
+# ---------------------------------------------------------------------------
+
+governance_log = Table(
+    "governance_log",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("action", Text, nullable=False),
+    Column("item_type", Text, nullable=False),
+    Column("item_id", Text),
+    Column("autonomy_mode", Text),
+    Column("confidence", Float),
+    Column("decision_by", Text, server_default="user"),
+    Column("notes", Text),
+    Column("created_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Tasks
+# ---------------------------------------------------------------------------
+
+tasks = Table(
+    "tasks",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("title", Text, nullable=False),
+    Column("description", Text),
+    Column("agent_id", Text),
+    Column("node_id", Text),
+    Column("project_id", Text),
+    Column("status", Text, nullable=False, server_default="open"),
+    Column("priority", Text, server_default="medium"),
+    Column("checked_out_by", Text),
+    Column("checked_out_at", Text),
+    Column("delegated_by", Text),
+    Column("delegated_to", Text),
+    Column("parent_task_id", Text),
+    Column("context_json", Text, server_default="{}"),
+    Column("created_at", Text, nullable=False),
+    Column("updated_at", Text, nullable=False),
+)
+
+task_documents = Table(
+    "task_documents",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("task_id", Text, nullable=False),
+    Column("key", Text, nullable=False),
+    Column("body", Text, nullable=False, server_default=""),
+    Column("revision", Integer, nullable=False, server_default="1"),
+    Column("created_at", Text, nullable=False),
+    Column("updated_at", Text, nullable=False),
+)
+
+task_board = Table(
+    "task_board",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("node_id", Text, nullable=False),
+    Column("name", Text, nullable=False, server_default="Shared Board"),
+    Column("agent_ids", Text, nullable=False, server_default="[]"),
+    Column("created_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Chat
+# ---------------------------------------------------------------------------
+
+chat_sessions = Table(
+    "chat_sessions",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("title", Text),
+    Column("model", Text, server_default="sonnet"),
+    Column("message_count", Integer, server_default="0"),
+    Column("created_at", Text, nullable=False),
+    Column("updated_at", Text, nullable=False),
+)
+
+chat_messages = Table(
+    "chat_messages",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("session_id", Text),
+    Column("role", Text, nullable=False),
+    Column("content", Text, nullable=False),
+    Column("model", Text),
+    Column("tokens_used", Integer),
+    Column("created_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Preferences
+# ---------------------------------------------------------------------------
+
+preferences = Table(
+    "preferences",
+    metadata,
+    Column("key", Text, primary_key=True),
+    Column("value", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Comments
+# ---------------------------------------------------------------------------
+
+comments = Table(
+    "comments",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("entity_type", Text, nullable=False),
+    Column("entity_id", Text, nullable=False),
+    Column("parent_id", Text),
+    Column("author", Text, nullable=False, server_default="user"),
+    Column("body", Text, nullable=False),
+    Column("mentions", Text, server_default="[]"),
+    Column("created_at", Text, nullable=False),
+    Column("updated_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Collaboration: project_context, handoffs, workflows
+# ---------------------------------------------------------------------------
+
+project_context = Table(
+    "project_context",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("node_id", Text, nullable=False),
+    Column("section", Text, nullable=False),
+    Column("title", Text),
+    Column("content", Text, nullable=False),
+    Column("author_agent_id", Text),
+    Column("author_role", Text),
+    Column("version", Integer, server_default="1"),
+    Column("created_at", Text, nullable=False),
+    Column("updated_at", Text, nullable=False),
+)
+
+handoffs = Table(
+    "handoffs",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("node_id", Text, nullable=False),
+    Column("workflow_id", Text),
+    Column("from_agent_id", Text, nullable=False),
+    Column("from_role", Text),
+    Column("to_role", Text, nullable=False),
+    Column("title", Text, nullable=False),
+    Column("description", Text),
+    Column("status", Text, nullable=False, server_default="pending"),
+    Column("created_at", Text, nullable=False),
+    Column("accepted_at", Text),
+    Column("completed_at", Text),
+)
+
+workflows = Table(
+    "workflows",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("node_id", Text, nullable=False),
+    Column("template_name", Text, nullable=False),
+    Column("objective", Text),
+    Column("steps", Text, nullable=False),
+    Column("current_step", Integer, server_default="0"),
+    Column("status", Text, nullable=False, server_default="active"),
+    Column("created_at", Text, nullable=False),
+    Column("updated_at", Text, nullable=False),
+)
+
+workflow_templates = Table(
+    "workflow_templates",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("name", Text, nullable=False),
+    Column("description", Text),
+    Column("steps", Text, nullable=False),
+    Column("created_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Goals
+# ---------------------------------------------------------------------------
+
+goals = Table(
+    "goals",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("project_id", Text),
+    Column("node_id", Text),
+    Column("parent_id", Text),
+    Column("title", Text, nullable=False),
+    Column("description", Text),
+    Column("status", Text, nullable=False, server_default="active"),
+    Column("progress_pct", Integer, server_default="0"),
+    Column("owner", Text),
+    Column("target_date", Text),
+    Column("created_at", Text, nullable=False),
+    Column("updated_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Decisions / Classifications
+# ---------------------------------------------------------------------------
+
+draft_decisions = Table(
+    "draft_decisions",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("hub_draft_id", Text, nullable=False),
+    Column("status", Text, nullable=False),
+    Column("decided_by", Text, server_default="user"),
+    Column("decided_at", Text, nullable=False),
+)
+
+content_classifications = Table(
+    "content_classifications",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("hub_content_id", Text, nullable=False),
+    Column("project_id", Text),
+    Column("classified_project_id", Text),
+    Column("suggested_project_id", Text),
+    Column("action", Text, server_default="classify"),
+    Column("confidence", Float, server_default="0.0"),
+    Column("reasoning", Text),
+    Column("auto_classified", Integer, server_default="0"),
+    Column("status", Text, server_default="pending"),
+    Column("classified_at", Text, nullable=False),
+    Column("created_at", Text),
+)
+
+project_overrides = Table(
+    "project_overrides",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("hub_project_id", Text, nullable=False),
+    Column("name", Text),
+    Column("description", Text),
+    Column("created_at", Text, nullable=False),
+    Column("updated_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# ID sequences / entity identifiers
+# ---------------------------------------------------------------------------
+
+id_sequences = Table(
+    "id_sequences",
+    metadata,
+    Column("node_id", Text, primary_key=True),
+    Column("next_seq", Integer, nullable=False, server_default="1"),
+)
+
+entity_identifiers = Table(
+    "entity_identifiers",
+    metadata,
+    Column("entity_id", Text, primary_key=True),
+    Column("entity_type", Text, nullable=False),
+    Column("node_id", Text, nullable=False),
+    Column("sequence_num", Integer, nullable=False),
+    Column("display_id", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Todo overrides / dependencies
+# ---------------------------------------------------------------------------
+
+todo_overrides = Table(
+    "todo_overrides",
+    metadata,
+    Column("hub_todo_id", Text, primary_key=True),
+    Column("title", Text),
+    Column("status", Text),
+    Column("priority", Text),
+    Column("owner", Text),
+    Column("due_date", Text),
+    Column("project_id", Text),
+    Column("node_id", Text),
+    Column("source_type", Text),
+    Column("source_content_id", Text),
+    Column("is_platform_native", Integer, server_default="0"),
+    Column("created_at", Text),
+    Column("updated_at", Text),
+)
+
+todo_dependencies = Table(
+    "todo_dependencies",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("todo_id", Text, nullable=False),
+    Column("depends_on", Text, nullable=False),
+    Column("dep_type", Text, nullable=False, server_default="blocked_by"),
+    Column("created_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Analysis jobs
+# ---------------------------------------------------------------------------
+
+analysis_jobs = Table(
+    "analysis_jobs",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("node_id", Text, nullable=False),
+    Column("folder_path", Text, nullable=False),
+    Column("analysis_type", Text, server_default="full"),
+    Column("status", Text, server_default="pending"),
+    Column("file_count", Integer, server_default="0"),
+    Column("agent_ids", Text, server_default="[]"),
+    Column("results_summary", Text),
+    Column("created_at", Text, nullable=False),
+    Column("completed_at", Text),
+)
+
+# ---------------------------------------------------------------------------
+# Events
+# ---------------------------------------------------------------------------
+
+events = Table(
+    "events",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("event_type", Text, nullable=False),
+    Column("data_json", Text, nullable=False),
+    Column("created_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Triggers
+# ---------------------------------------------------------------------------
+
+triggers = Table(
+    "triggers",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("name", Text, nullable=False),
+    Column("trigger_type", Text, nullable=False),
+    Column("enabled", Integer, nullable=False, server_default="1"),
+    Column("config", Text, nullable=False, server_default="{}"),
+    Column("action_type", Text, nullable=False),
+    Column("action_config", Text, nullable=False, server_default="{}"),
+    Column("node_id", Text),
+    Column("last_fired_at", Text),
+    Column("fire_count", Integer, server_default="0"),
+    Column("created_at", Text, nullable=False),
+    Column("updated_at", Text, nullable=False),
+)
+
+trigger_log = Table(
+    "trigger_log",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("trigger_id", Text, nullable=False),
+    Column("fired_at", Text, nullable=False),
+    Column("status", Text, nullable=False),
+    Column("result", Text),
+    Column("error", Text),
+)
+
+# ---------------------------------------------------------------------------
+# Self-improve
+# ---------------------------------------------------------------------------
+
+self_improve_cycles = Table(
+    "self_improve_cycles",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("status", Text, nullable=False, server_default="idle"),
+    Column("budget_usd", Float, nullable=False, server_default="5.0"),
+    Column("spent_usd", Float, nullable=False, server_default="0.0"),
+    Column("max_improvements", Integer, nullable=False, server_default="5"),
+    Column("focus_areas", Text),
+    Column("started_at", Text),
+    Column("completed_at", Text),
+    Column("error", Text),
+    Column("created_at", Text, nullable=False),
+)
+
+self_improve_improvements = Table(
+    "self_improve_improvements",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("cycle_id", Text, nullable=False),
+    Column("title", Text, nullable=False),
+    Column("description", Text, nullable=False, server_default=""),
+    Column("priority", Integer, nullable=False, server_default="0"),
+    Column("category", Text, nullable=False, server_default="refactor"),
+    Column("status", Text, nullable=False, server_default="proposed"),
+    Column("worktree_path", Text),
+    Column("branch_name", Text),
+    Column("diff_summary", Text),
+    Column("diff_stat", Text),
+    Column("test_results", Text),
+    Column("review_notes", Text),
+    Column("security_scan", Text),
+    Column("pr_description", Text),
+    Column("changelog_entry", Text),
+    Column("agent_id", Text),
+    Column("human_comment", Text),
+    Column("reject_reason", Text),
+    Column("created_at", Text, nullable=False),
+    Column("updated_at", Text, nullable=False),
+)
+
+self_improve_agents = Table(
+    "self_improve_agents",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("cycle_id", Text, nullable=False),
+    Column("improvement_id", Text),
+    Column("agent_id", Text, nullable=False),
+    Column("role", Text, nullable=False),
+    Column("status", Text, nullable=False, server_default="pending"),
+    Column("started_at", Text),
+    Column("completed_at", Text),
+    Column("output_summary", Text),
+    Column("created_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Inbox
+# ---------------------------------------------------------------------------
+
+inbox_read_state = Table(
+    "inbox_read_state",
+    metadata,
+    Column("item_key", Text, primary_key=True),
+    Column("read_state", Text, nullable=False, server_default="unread"),
+    Column("updated_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Jarvis sessions
+# ---------------------------------------------------------------------------
+
+jarvis_sessions = Table(
+    "jarvis_sessions",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("command", Text, nullable=False),
+    Column("response_summary", Text),
+    Column("cards_json", Text),
+    Column("created_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Verification gates
+# ---------------------------------------------------------------------------
+
+verification_gates = Table(
+    "verification_gates",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("gate", Text, nullable=False),
+    Column("verdict", Text, nullable=False),
+    Column("checks_json", Text),
+    Column("summary", Text),
+    Column("node_id", Text),
+    Column("entity_type", Text),
+    Column("entity_id", Text),
+    Column("run_at", Text, nullable=False),
+    Column("duration_ms", Integer, server_default="0"),
+)
+
+# ---------------------------------------------------------------------------
+# Templates
+# ---------------------------------------------------------------------------
+
+templates = Table(
+    "templates",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("name", Text, nullable=False),
+    Column("description", Text),
+    Column("template_json", Text, nullable=False),
+    Column("created_at", Text, nullable=False),
+)

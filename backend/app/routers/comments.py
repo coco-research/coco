@@ -1,6 +1,10 @@
+import json
 import uuid
 from fastapi import APIRouter, HTTPException, Query
-from app.db.connections import get_platform_db
+from sqlalchemy import insert, select, delete
+
+from app.db.session import get_db
+from app.db.tables import comments
 from app.models.comments import CreateCommentBody, PatchCommentBody
 
 router = APIRouter(tags=["Comments"])
@@ -13,54 +17,59 @@ def list_comments(
 ):
     """List comments for an entity, returned as a flat list sorted by created_at.
     Client-side threading uses parent_id to build the tree."""
-    with get_platform_db() as db:
-        rows = db.execute(
-            "SELECT id, entity_type, entity_id, parent_id, author, body, mentions, "
-            "created_at, updated_at FROM comments "
-            "WHERE entity_type = ? AND entity_id = ? "
-            "ORDER BY created_at ASC",
-            (entity_type, entity_id),
+    with get_db() as conn:
+        rows = conn.execute(
+            select(
+                comments.c.id, comments.c.entity_type, comments.c.entity_id,
+                comments.c.parent_id, comments.c.author, comments.c.body,
+                comments.c.mentions, comments.c.created_at, comments.c.updated_at,
+            )
+            .where(comments.c.entity_type == entity_type, comments.c.entity_id == entity_id)
+            .order_by(comments.c.created_at.asc())
         ).fetchall()
-        return [dict(r) for r in rows]
+        return [dict(r._mapping) for r in rows]
 
 
 @router.post("/api/comments", status_code=201)
 def create_comment(body: CreateCommentBody):
-    import json
-
     comment_id = str(uuid.uuid4())
     mentions_json = json.dumps(body.mentions)
 
-    with get_platform_db() as db:
-        # If replying, verify parent exists and belongs to same entity
+    with get_db() as conn:
         if body.parent_id:
-            parent = db.execute(
-                "SELECT id, entity_type, entity_id FROM comments WHERE id = ?",
-                (body.parent_id,),
+            parent = conn.execute(
+                select(comments.c.id, comments.c.entity_type, comments.c.entity_id)
+                .where(comments.c.id == body.parent_id)
             ).fetchone()
             if not parent:
                 raise HTTPException(404, "Parent comment not found")
-            if parent["entity_type"] != body.entity_type or parent["entity_id"] != body.entity_id:
+            pm = parent._mapping
+            if pm["entity_type"] != body.entity_type or pm["entity_id"] != body.entity_id:
                 raise HTTPException(400, "Parent comment belongs to a different entity")
 
-        db.execute(
-            "INSERT INTO comments (id, entity_type, entity_id, parent_id, author, body, mentions) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (comment_id, body.entity_type, body.entity_id, body.parent_id, body.author, body.body, mentions_json),
+        conn.execute(
+            insert(comments).values(
+                id=comment_id,
+                entity_type=body.entity_type,
+                entity_id=body.entity_id,
+                parent_id=body.parent_id,
+                author=body.author,
+                body=body.body,
+                mentions=mentions_json,
+            )
         )
-        db.commit()
-        row = db.execute(
-            "SELECT id, entity_type, entity_id, parent_id, author, body, mentions, "
-            "created_at, updated_at FROM comments WHERE id = ?",
-            (comment_id,),
+        row = conn.execute(
+            select(
+                comments.c.id, comments.c.entity_type, comments.c.entity_id,
+                comments.c.parent_id, comments.c.author, comments.c.body,
+                comments.c.mentions, comments.c.created_at, comments.c.updated_at,
+            ).where(comments.c.id == comment_id)
         ).fetchone()
-        return dict(row)
+        return dict(row._mapping)
 
 
 @router.patch("/api/comments/{comment_id}")
 def update_comment(comment_id: str, body: PatchCommentBody):
-    import json
-
     updates: dict[str, str] = {}
     if body.body is not None:
         updates["body"] = body.body
@@ -73,29 +82,28 @@ def update_comment(comment_id: str, body: PatchCommentBody):
     set_clause = ", ".join(f"{k} = ?" for k in updates)
     values = list(updates.values()) + [comment_id]
 
-    with get_platform_db() as db:
-        result = db.execute(
+    with get_db() as conn:
+        result = conn.exec_driver_sql(
             f"UPDATE comments SET {set_clause}, updated_at = datetime('now') WHERE id = ?",
-            values,
+            tuple(values),
         )
-        db.commit()
         if result.rowcount == 0:
             raise HTTPException(404, "Comment not found")
-        row = db.execute(
-            "SELECT id, entity_type, entity_id, parent_id, author, body, mentions, "
-            "created_at, updated_at FROM comments WHERE id = ?",
-            (comment_id,),
+        row = conn.execute(
+            select(
+                comments.c.id, comments.c.entity_type, comments.c.entity_id,
+                comments.c.parent_id, comments.c.author, comments.c.body,
+                comments.c.mentions, comments.c.created_at, comments.c.updated_at,
+            ).where(comments.c.id == comment_id)
         ).fetchone()
-        return dict(row)
+        return dict(row._mapping)
 
 
 @router.delete("/api/comments/{comment_id}", status_code=204)
 def delete_comment(comment_id: str):
-    with get_platform_db() as db:
-        # Delete child replies first, then the comment itself
-        db.execute("DELETE FROM comments WHERE parent_id = ?", (comment_id,))
-        result = db.execute("DELETE FROM comments WHERE id = ?", (comment_id,))
-        db.commit()
+    with get_db() as conn:
+        conn.execute(delete(comments).where(comments.c.parent_id == comment_id))
+        result = conn.execute(delete(comments).where(comments.c.id == comment_id))
         if result.rowcount == 0:
             raise HTTPException(404, "Comment not found")
     return None

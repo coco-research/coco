@@ -13,8 +13,10 @@ import os
 import uuid
 
 from fastapi import APIRouter, HTTPException
+from sqlalchemy import insert, select, update
 
-from app.db.connections import get_platform_db
+from app.db.session import get_db
+from app.db.tables import agents, agent_output, analysis_jobs, nodes
 from app.services.folder_scanner import (
     build_folder_summary,
     read_file_content,
@@ -177,7 +179,6 @@ def _build_agent_task(
     """Build the full task prompt for an agent based on its role and analysis type."""
     parts: list[str] = []
 
-    # Analysis type prefix
     prefix = ANALYSIS_TYPE_PREFIXES.get(analysis_type, ANALYSIS_TYPE_PREFIXES["full"])
     if analysis_type == "custom" and custom_prompt:
         prefix = custom_prompt
@@ -186,7 +187,6 @@ def _build_agent_task(
 
     parts.append(prefix)
 
-    # Role-specific prompt
     role_prompt = ROLE_ANALYSIS_PROMPTS.get(role)
     if role_prompt:
         parts.append("")
@@ -196,11 +196,8 @@ def _build_agent_task(
         parts.append("")
         parts.append("Summarize and extract key insights from these documents.")
 
-    # Folder summary
     parts.append("")
     parts.append(folder_summary)
-
-    # File contents
     parts.append("")
     parts.append(file_context)
 
@@ -213,7 +210,7 @@ def _convert_patterns_to_extensions(patterns: list[str]) -> list[str]:
     for p in patterns:
         p = p.strip()
         if p.startswith("*."):
-            exts.append(p[1:])  # *.md -> .md
+            exts.append(p[1:])
         elif p.startswith("."):
             exts.append(p)
         else:
@@ -230,16 +227,15 @@ def _convert_patterns_to_extensions(patterns: list[str]) -> list[str]:
 def analyze_folder(node_id: str, body: AnalyzeFolderBody):
     """Start a folder analysis job: scan folder, assign tasks to agents, spawn them."""
 
-    with get_platform_db() as db:
+    with get_db() as conn:
         # 1. Validate node
-        node = db.execute(
-            "SELECT id, folder_path, label FROM nodes WHERE id = ?",
-            (node_id,),
+        node = conn.execute(
+            select(nodes.c.id, nodes.c.folder_path, nodes.c.label).where(nodes.c.id == node_id)
         ).fetchone()
         if not node:
             raise HTTPException(404, "Node not found")
 
-        folder_path = body.folder_path or (node["folder_path"] if node else None)
+        folder_path = body.folder_path or (node._mapping["folder_path"] if node else None)
         if not folder_path:
             raise HTTPException(400, "No folder_path specified and node has no folder_path set")
 
@@ -247,23 +243,23 @@ def analyze_folder(node_id: str, body: AnalyzeFolderBody):
         if not os.path.isdir(folder_path):
             raise HTTPException(400, f"Folder does not exist: {folder_path}")
 
-        # Security: must be under home directory
         home = os.path.expanduser("~")
         if not os.path.realpath(folder_path).startswith(home):
             raise HTTPException(403, "Folder must be within home directory")
 
         # 2. Get agents for this node
-        agents = db.execute(
-            "SELECT id, name, role, model, status, system_prompt FROM agents WHERE node_id = ?",
-            (node_id,),
+        agent_rows = conn.execute(
+            select(
+                agents.c.id, agents.c.name, agents.c.role,
+                agents.c.model, agents.c.status, agents.c.system_prompt,
+            ).where(agents.c.node_id == node_id)
         ).fetchall()
-        agents = [dict(a) for a in agents]
+        agents_list = [dict(a._mapping) for a in agent_rows]
 
-        if not agents:
+        if not agents_list:
             raise HTTPException(400, "No agents assigned to this node. Recruit agents first.")
 
-        # Filter to idle/completed/failed agents (not currently running)
-        available = [a for a in agents if a["status"] in ("idle", "completed", "failed", "killed")]
+        available = [a for a in agents_list if a["status"] in ("idle", "completed", "failed", "killed")]
         if not available:
             raise HTTPException(
                 409,
@@ -297,7 +293,6 @@ def analyze_folder(node_id: str, body: AnalyzeFolderBody):
                 folder_summary=folder_summary,
             )
 
-            # Inject collaboration context
             collab_ctx = build_collaboration_prompt(node_id, agent["role"] or "custom")
             if collab_ctx:
                 task = collab_ctx + "\n\n---\n\n" + task
@@ -313,36 +308,32 @@ def analyze_folder(node_id: str, body: AnalyzeFolderBody):
                     node_id=node_id,
                     role=agent["role"],
                 )
-                db.execute(
-                    """UPDATE agents SET status = 'running', pid = ?, started_at = datetime('now'),
-                       stopped_at = NULL, exit_code = NULL, last_heartbeat = datetime('now'),
-                       task_description = ?, working_directory = ?,
-                       updated_at = datetime('now') WHERE id = ?""",
+                conn.exec_driver_sql(
+                    "UPDATE agents SET status = 'running', pid = ?, started_at = datetime('now'), "
+                    "stopped_at = NULL, exit_code = NULL, last_heartbeat = datetime('now'), "
+                    "task_description = ?, working_directory = ?, "
+                    "updated_at = datetime('now') WHERE id = ?",
                     (pid, task[:2000], folder_path, agent["id"]),
                 )
                 spawned_ids.append(agent["id"])
             except RuntimeError:
-                # Max concurrent agents reached -- stop spawning more
                 break
 
         if not spawned_ids:
             raise HTTPException(429, "Could not spawn any agents -- max concurrent limit reached")
 
         # 7. Create job record
-        db.execute(
-            """INSERT INTO analysis_jobs
-               (id, node_id, folder_path, analysis_type, status, file_count, agent_ids)
-               VALUES (?, ?, ?, ?, 'running', ?, ?)""",
-            (
-                job_id,
-                node_id,
-                folder_path,
-                body.analysis_type,
-                len(files),
-                json.dumps(spawned_ids),
-            ),
+        conn.execute(
+            insert(analysis_jobs).values(
+                id=job_id,
+                node_id=node_id,
+                folder_path=folder_path,
+                analysis_type=body.analysis_type,
+                status="running",
+                file_count=len(files),
+                agent_ids=json.dumps(spawned_ids),
+            )
         )
-        db.commit()
 
         return {
             "job_id": job_id,
@@ -359,37 +350,35 @@ def analyze_folder(node_id: str, body: AnalyzeFolderBody):
 @router.get("/api/analysis-jobs/{job_id}")
 def get_analysis_job(job_id: str):
     """Get an analysis job with agent statuses and results."""
-    with get_platform_db() as db:
-        job = db.execute(
-            "SELECT * FROM analysis_jobs WHERE id = ?", (job_id,)
+    with get_db() as conn:
+        job = conn.execute(
+            select(analysis_jobs).where(analysis_jobs.c.id == job_id)
         ).fetchone()
         if not job:
             raise HTTPException(404, "Analysis job not found")
 
-        result = dict(job)
+        result = dict(job._mapping)
         agent_ids = json.loads(result.get("agent_ids", "[]"))
 
-        # Fetch agent statuses and output
         agents_info: list[dict] = []
         all_completed = True
         any_running = False
 
         for aid in agent_ids:
-            agent = db.execute(
+            agent = conn.exec_driver_sql(
                 "SELECT id, name, role, status, exit_code, started_at, stopped_at FROM agents WHERE id = ?",
                 (aid,),
             ).fetchone()
             if not agent:
                 continue
-            agent_dict = dict(agent)
+            agent_dict = dict(agent._mapping)
 
-            # Get output text if completed
             if agent_dict["status"] == "completed":
-                output_rows = db.execute(
+                output_rows = conn.exec_driver_sql(
                     "SELECT chunk FROM agent_output WHERE agent_id = ? ORDER BY id DESC LIMIT 50",
                     (aid,),
                 ).fetchall()
-                agent_dict["output"] = "\n".join(r["chunk"] for r in reversed(output_rows))
+                agent_dict["output"] = "\n".join(r._mapping["chunk"] for r in reversed(output_rows))
             else:
                 agent_dict["output"] = None
 
@@ -403,9 +392,7 @@ def get_analysis_job(job_id: str):
 
         result["agents"] = agents_info
 
-        # Auto-update job status
         if all_completed and result["status"] == "running":
-            # Build results summary
             summaries: list[str] = []
             for ai in agents_info:
                 if ai.get("output"):
@@ -413,13 +400,15 @@ def get_analysis_job(job_id: str):
                     summaries.append(f"## {role_label} ({ai['name']})\n\n{ai['output']}")
             results_summary = "\n\n---\n\n".join(summaries) if summaries else "No output captured."
 
-            db.execute(
-                """UPDATE analysis_jobs
-                   SET status = 'completed', results_summary = ?, completed_at = datetime('now')
-                   WHERE id = ?""",
-                (results_summary, job_id),
+            conn.execute(
+                update(analysis_jobs)
+                .where(analysis_jobs.c.id == job_id)
+                .values(status="completed", results_summary=results_summary)
             )
-            db.commit()
+            conn.exec_driver_sql(
+                "UPDATE analysis_jobs SET completed_at = datetime('now') WHERE id = ?",
+                (job_id,),
+            )
             result["status"] = "completed"
             result["results_summary"] = results_summary
 
@@ -429,20 +418,23 @@ def get_analysis_job(job_id: str):
 @router.get("/api/analysis-jobs")
 def list_analysis_jobs(node_id: str | None = None):
     """List analysis jobs, optionally filtered by node_id."""
-    with get_platform_db() as db:
+    with get_db() as conn:
         if node_id:
-            rows = db.execute(
-                "SELECT * FROM analysis_jobs WHERE node_id = ? ORDER BY created_at DESC",
-                (node_id,),
+            rows = conn.execute(
+                select(analysis_jobs)
+                .where(analysis_jobs.c.node_id == node_id)
+                .order_by(analysis_jobs.c.created_at.desc())
             ).fetchall()
         else:
-            rows = db.execute(
-                "SELECT * FROM analysis_jobs ORDER BY created_at DESC LIMIT 50"
+            rows = conn.execute(
+                select(analysis_jobs)
+                .order_by(analysis_jobs.c.created_at.desc())
+                .limit(50)
             ).fetchall()
 
         results = []
         for row in rows:
-            d = dict(row)
+            d = dict(row._mapping)
             d["agent_ids"] = json.loads(d.get("agent_ids", "[]"))
             results.append(d)
 

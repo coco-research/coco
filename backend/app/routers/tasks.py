@@ -2,7 +2,10 @@ import logging
 import uuid
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Query
-from app.db.connections import get_platform_db
+from sqlalchemy import insert
+
+from app.db.session import get_db
+from app.db.tables import tasks
 from app.db.tree_utils import build_node_id_filter
 from app.services.event_bus import event_bus
 from app.services.id_generator import assign_display_id
@@ -32,6 +35,11 @@ TASK_TRANSITIONS: dict[str, list[str]] = {
     "cancelled": ["backlog", "archived"],
 }
 
+_TASK_COLS = (
+    "id, title, description, agent_id, node_id, project_id, status, priority, "
+    "checked_out_by, checked_out_at, created_at, updated_at"
+)
+
 
 @router.get("/api/tasks")
 def list_tasks(
@@ -60,48 +68,46 @@ def list_tasks(
         conditions.append("t.priority = ?")
         params.append(priority)
 
-    with get_platform_db() as db:
-        node_frag, node_params = build_node_id_filter(db, node_id, subtree, column="t.node_id")
+    with get_db() as conn:
+        node_frag, node_params = build_node_id_filter(conn, node_id, subtree, column="t.node_id")
         if node_frag:
             conditions.append(node_frag)
             params.extend(node_params)
 
         where = (" WHERE " + " AND ".join(conditions)) if conditions else ""
 
-        rows = db.execute(
+        rows = conn.exec_driver_sql(
             f"SELECT t.id, t.title, t.description, t.agent_id, t.node_id, t.project_id, "
             f"t.status, t.priority, t.checked_out_by, t.checked_out_at, t.created_at, t.updated_at, "
             f"ei.display_id "
             f"FROM tasks t "
             f"LEFT JOIN entity_identifiers ei ON ei.entity_id = t.id AND ei.entity_type = 'task' "
             f"{where} ORDER BY t.created_at DESC LIMIT ? OFFSET ?",
-            params + [limit, offset],
+            tuple(params + [limit, offset]),
         ).fetchall()
-        return [dict(r) for r in rows]
+        return [dict(r._mapping) for r in rows]
 
 
 @router.post("/api/tasks", status_code=201)
 def create_task(body: CreateTaskBody):
     task_id = str(uuid.uuid4())
-    with get_platform_db() as db:
-        db.execute(
-            """INSERT INTO tasks (id, title, description, project_id, node_id, priority, agent_id)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (
-                task_id,
-                body.title,
-                body.description,
-                body.project_id,
-                body.node_id,
-                body.priority,
-                body.agent_id,
-            ),
+    with get_db() as conn:
+        conn.execute(
+            insert(tasks).values(
+                id=task_id,
+                title=body.title,
+                description=body.description,
+                project_id=body.project_id,
+                node_id=body.node_id,
+                priority=body.priority,
+                agent_id=body.agent_id,
+            )
         )
-        db.commit()
-        row = db.execute("SELECT id, title, description, agent_id, node_id, project_id, status, priority, checked_out_by, checked_out_at, created_at, updated_at FROM tasks WHERE id = ?", (task_id,)).fetchone()
-        result = dict(row)
+        row = conn.exec_driver_sql(
+            f"SELECT {_TASK_COLS} FROM tasks WHERE id = ?", (task_id,)
+        ).fetchone()
+        result = dict(row._mapping)
 
-    # Assign human-readable display ID if node_id is provided
     effective_node_id = body.node_id or body.project_id
     if effective_node_id:
         try:
@@ -117,8 +123,8 @@ def create_task(body: CreateTaskBody):
 
 @router.get("/api/tasks/{task_id}")
 def get_task(task_id: str):
-    with get_platform_db() as db:
-        row = db.execute(
+    with get_db() as conn:
+        row = conn.exec_driver_sql(
             "SELECT t.id, t.title, t.description, t.agent_id, t.node_id, t.project_id, "
             "t.status, t.priority, t.checked_out_by, t.checked_out_at, t.created_at, t.updated_at, "
             "ei.display_id "
@@ -129,7 +135,7 @@ def get_task(task_id: str):
         ).fetchone()
         if not row:
             raise HTTPException(404, "Task not found")
-        return dict(row)
+        return dict(row._mapping)
 
 
 @router.patch("/api/tasks/{task_id}")
@@ -141,16 +147,17 @@ def update_task(task_id: str, body: PatchTaskBody):
     set_clause = ", ".join(f"{k} = ?" for k in updates)
     values = list(updates.values()) + [task_id]
 
-    with get_platform_db() as db:
-        result = db.execute(
+    with get_db() as conn:
+        result = conn.exec_driver_sql(
             f"UPDATE tasks SET {set_clause}, updated_at = datetime('now') WHERE id = ?",
-            values,
+            tuple(values),
         )
-        db.commit()
         if result.rowcount == 0:
             raise HTTPException(404, "Task not found")
-        row = db.execute("SELECT id, title, description, agent_id, node_id, project_id, status, priority, checked_out_by, checked_out_at, created_at, updated_at FROM tasks WHERE id = ?", (task_id,)).fetchone()
-        task_result = dict(row)
+        row = conn.exec_driver_sql(
+            f"SELECT {_TASK_COLS} FROM tasks WHERE id = ?", (task_id,)
+        ).fetchone()
+        task_result = dict(row._mapping)
 
     event_bus.emit("task.updated", {"id": task_id, **updates})
     return task_result
@@ -158,21 +165,19 @@ def update_task(task_id: str, body: PatchTaskBody):
 
 @router.patch("/api/tasks/{task_id}/transition")
 def transition_task(task_id: str, body: TransitionBody):
-    """Transition a task to a new state using the state machine.
-
-    Validates that the transition is allowed from the current state.
-    Returns 422 if the transition is invalid.
-    """
+    """Transition a task to a new state using the state machine."""
     to_state = body.to_state
     if to_state not in TASK_STATES:
         raise HTTPException(400, f"Invalid state: {to_state}. Valid states: {sorted(TASK_STATES)}")
 
-    with get_platform_db() as db:
-        row = db.execute("SELECT id, title, description, agent_id, node_id, project_id, status, priority, checked_out_by, checked_out_at, created_at, updated_at FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    with get_db() as conn:
+        row = conn.exec_driver_sql(
+            f"SELECT {_TASK_COLS} FROM tasks WHERE id = ?", (task_id,)
+        ).fetchone()
         if not row:
             raise HTTPException(404, "Task not found")
 
-        current_state = dict(row).get("status", "open")
+        current_state = dict(row._mapping).get("status", "open")
         allowed = TASK_TRANSITIONS.get(current_state, [])
 
         if to_state not in allowed:
@@ -182,14 +187,15 @@ def transition_task(task_id: str, body: TransitionBody):
                 f"Allowed transitions: {allowed}",
             )
 
-        db.execute(
+        conn.exec_driver_sql(
             "UPDATE tasks SET status = ?, updated_at = datetime('now') WHERE id = ?",
             (to_state, task_id),
         )
-        db.commit()
 
-        updated = db.execute("SELECT id, title, description, agent_id, node_id, project_id, status, priority, checked_out_by, checked_out_at, created_at, updated_at FROM tasks WHERE id = ?", (task_id,)).fetchone()
-        task_result = dict(updated) if updated else {"id": task_id, "status": to_state}
+        updated = conn.exec_driver_sql(
+            f"SELECT {_TASK_COLS} FROM tasks WHERE id = ?", (task_id,)
+        ).fetchone()
+        task_result = dict(updated._mapping) if updated else {"id": task_id, "status": to_state}
 
     event_bus.emit("task.updated", {"id": task_id, "status": to_state, "from_state": current_state})
     return task_result
@@ -199,50 +205,47 @@ def transition_task(task_id: str, body: TransitionBody):
 def checkout_task(task_id: str, body: CheckoutTaskBody | None = None):
     checked_out_by = body.checked_out_by if body else "user"
 
-    with get_platform_db() as db:
-        try:
-            db.execute("BEGIN IMMEDIATE")
-            row = db.execute("SELECT status, checked_out_by FROM tasks WHERE id = ?", (task_id,)).fetchone()
-            if not row:
-                db.execute("ROLLBACK")
-                raise HTTPException(404, "Task not found")
-            if row["checked_out_by"] is not None:
-                db.execute("ROLLBACK")
-                raise HTTPException(409, f"Task already checked out by {row['checked_out_by']}")
-            db.execute(
-                """UPDATE tasks SET status = 'checked_out',
-                   checked_out_by = ?, checked_out_at = ?,
-                   updated_at = datetime('now')
-                   WHERE id = ?""",
-                (checked_out_by, datetime.now(timezone.utc).isoformat(), task_id),
-            )
-            db.execute("COMMIT")
-        except HTTPException:
-            raise
-        except Exception:
-            db.execute("ROLLBACK")
-            raise
+    with get_db() as conn:
+        # The SA get_db() context manager wraps in a transaction already,
+        # so we don't need BEGIN IMMEDIATE. The SERIALIZABLE isolation is implicit.
+        row = conn.exec_driver_sql(
+            "SELECT status, checked_out_by FROM tasks WHERE id = ?", (task_id,)
+        ).fetchone()
+        if not row:
+            raise HTTPException(404, "Task not found")
+        if row._mapping["checked_out_by"] is not None:
+            raise HTTPException(409, f"Task already checked out by {row._mapping['checked_out_by']}")
+        conn.exec_driver_sql(
+            "UPDATE tasks SET status = 'checked_out', "
+            "checked_out_by = ?, checked_out_at = ?, "
+            "updated_at = datetime('now') WHERE id = ?",
+            (checked_out_by, datetime.now(timezone.utc).isoformat(), task_id),
+        )
 
-        row = db.execute("SELECT id, title, description, agent_id, node_id, project_id, status, priority, checked_out_by, checked_out_at, created_at, updated_at FROM tasks WHERE id = ?", (task_id,)).fetchone()
-        return dict(row)
+        row = conn.exec_driver_sql(
+            f"SELECT {_TASK_COLS} FROM tasks WHERE id = ?", (task_id,)
+        ).fetchone()
+        return dict(row._mapping)
 
 
 @router.post("/api/tasks/{task_id}/release")
 def release_task(task_id: str):
-    with get_platform_db() as db:
-        row = db.execute("SELECT id FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    with get_db() as conn:
+        row = conn.exec_driver_sql(
+            "SELECT id FROM tasks WHERE id = ?", (task_id,)
+        ).fetchone()
         if not row:
             raise HTTPException(404, "Task not found")
-        db.execute(
-            """UPDATE tasks SET status = 'open',
-               checked_out_by = NULL, checked_out_at = NULL,
-               updated_at = datetime('now')
-               WHERE id = ?""",
+        conn.exec_driver_sql(
+            "UPDATE tasks SET status = 'open', "
+            "checked_out_by = NULL, checked_out_at = NULL, "
+            "updated_at = datetime('now') WHERE id = ?",
             (task_id,),
         )
-        db.commit()
-        row = db.execute("SELECT id, title, description, agent_id, node_id, project_id, status, priority, checked_out_by, checked_out_at, created_at, updated_at FROM tasks WHERE id = ?", (task_id,)).fetchone()
-        return dict(row)
+        row = conn.exec_driver_sql(
+            f"SELECT {_TASK_COLS} FROM tasks WHERE id = ?", (task_id,)
+        ).fetchone()
+        return dict(row._mapping)
 
 
 # ---- Delegation endpoints ----
@@ -251,11 +254,13 @@ def release_task(task_id: str):
 @router.post("/api/tasks/{task_id}/delegate")
 def delegate_task(task_id: str, body: DelegateTaskBody):
     """Delegate a task from its current agent to another agent."""
-    with get_platform_db() as db:
-        task = db.execute("SELECT agent_id FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    with get_db() as conn:
+        task = conn.exec_driver_sql(
+            "SELECT agent_id FROM tasks WHERE id = ?", (task_id,)
+        ).fetchone()
         if not task:
             raise HTTPException(404, "Task not found")
-        from_agent_id = task["agent_id"]
+        from_agent_id = task._mapping["agent_id"]
         if not from_agent_id:
             raise HTTPException(400, "Task has no assigned agent to delegate from")
 

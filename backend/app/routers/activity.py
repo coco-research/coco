@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Query
-from app.db.connections import get_platform_db
+from app.db.session import get_db
 from app.db.tree_utils import build_node_id_filter
 
 router = APIRouter(tags=["Activity"])
@@ -29,18 +29,20 @@ def list_activity(
             conditions.append("item_id IN (SELECT id FROM agents WHERE project_id = ?)")
             params.append(project_id)
 
-        with get_platform_db() as db:
-            node_frag, node_params = build_node_id_filter(db, node_id, subtree)
+        with get_db() as conn:
+            node_frag, node_params = build_node_id_filter(conn, node_id, subtree)
             if node_frag:
                 conditions.append(node_frag)
                 params.extend(node_params)
 
             where = (" WHERE " + " AND ".join(conditions)) if conditions else ""
 
-            rows = db.execute(
-                f"SELECT id, action, item_type, item_id, autonomy_mode, confidence, decision_by, notes, created_at FROM governance_log{where} ORDER BY created_at DESC LIMIT ? OFFSET ?",
-                params + [limit, offset],
+            rows = conn.exec_driver_sql(
+                f"SELECT id, action, item_type, item_id, autonomy_mode, confidence, "
+                f"decision_by, notes, created_at FROM governance_log{where} "
+                f"ORDER BY created_at DESC LIMIT ? OFFSET ?",
+                tuple(params + [limit, offset]),
             ).fetchall()
-            return [dict(r) for r in rows]
+            return [dict(r._mapping) for r in rows]
     except Exception:
         return []

@@ -4,7 +4,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query
 from sse_starlette.sse import EventSourceResponse
 from app.config import EVENTS_JSONL_PATH
-from app.db.connections import get_platform_db
+from app.db.session import get_db
 from app.services.event_bus import event_bus
 
 router = APIRouter(tags=["Events"])
@@ -129,18 +129,14 @@ async def event_stream(since: Optional[str] = Query(None, description="ISO-8601 
 
 
 async def _agent_status_generator():
-    """Stream live agent status changes via the EventBus.
-
-    On connect, emits a snapshot of all current agents so the client
-    can hydrate without a separate REST call, then streams deltas.
-    """
+    """Stream live agent status changes via the EventBus."""
     # 1. Send initial snapshot of all agents
-    with get_platform_db() as db:
-        rows = db.execute(
+    with get_db() as conn:
+        rows = conn.exec_driver_sql(
             "SELECT id, name, status, role, pid, started_at, stopped_at, last_heartbeat "
             "FROM agents ORDER BY created_at DESC"
         ).fetchall()
-        snapshot = [dict(r) for r in rows]
+        snapshot = [dict(r._mapping) for r in rows]
 
     yield {
         "event": "agent.snapshot",
@@ -154,13 +150,7 @@ async def _agent_status_generator():
 
 @router.get("/api/events/agents")
 async def agent_status_stream():
-    """SSE endpoint for live agent status updates.
-
-    Emits an initial ``agent.snapshot`` event with all agents, then
-    streams ``agent.spawned``, ``agent.paused``, ``agent.resumed``,
-    ``agent.killed``, ``agent.completed``, and ``agent.failed`` events
-    as they occur.
-    """
+    """SSE endpoint for live agent status updates."""
     return EventSourceResponse(_agent_status_generator())
 
 
@@ -169,16 +159,15 @@ async def _agent_output_generator(agent_id: str):
     last_id = 0
 
     while True:
-        with get_platform_db() as db:
-            rows = db.execute(
-                """SELECT id, stream, chunk, timestamp FROM agent_output
-                   WHERE agent_id = ? AND id > ?
-                   ORDER BY id ASC LIMIT 50""",
+        with get_db() as conn:
+            rows = conn.exec_driver_sql(
+                "SELECT id, stream, chunk, timestamp FROM agent_output "
+                "WHERE agent_id = ? AND id > ? ORDER BY id ASC LIMIT 50",
                 (agent_id, last_id),
             ).fetchall()
 
             for row in rows:
-                r = dict(row)
+                r = dict(row._mapping)
                 last_id = r["id"]
                 yield {
                     "id": str(r["id"]),
@@ -187,15 +176,14 @@ async def _agent_output_generator(agent_id: str):
                 }
 
             # Check if agent is still active
-            agent = db.execute(
+            agent = conn.exec_driver_sql(
                 "SELECT status FROM agents WHERE id = ?", (agent_id,)
             ).fetchone()
 
-            if agent and agent["status"] in ("completed", "failed", "killed"):
-                # Emit final status event
+            if agent and agent._mapping["status"] in ("completed", "failed", "killed"):
                 yield {
                     "event": "status",
-                    "data": json.dumps({"status": agent["status"]}),
+                    "data": json.dumps({"status": agent._mapping["status"]}),
                 }
                 return
 
@@ -204,8 +192,8 @@ async def _agent_output_generator(agent_id: str):
 
 @router.get("/api/events/agents/{agent_id}")
 async def agent_event_stream(agent_id: str):
-    with get_platform_db() as db:
-        row = db.execute("SELECT id FROM agents WHERE id = ?", (agent_id,)).fetchone()
+    with get_db() as conn:
+        row = conn.exec_driver_sql("SELECT id FROM agents WHERE id = ?", (agent_id,)).fetchone()
         if not row:
             raise HTTPException(404, "Agent not found")
     return EventSourceResponse(_agent_output_generator(agent_id))

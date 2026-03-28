@@ -30,10 +30,25 @@ def unified_search(
                 "WHERE title LIKE ? LIMIT ?",
                 (pattern, limit),
             ).fetchall()
+            # Bulk-fetch display_ids for matched todo IDs from platform.db
+            todo_display_ids: dict[str, str] = {}
+            if rows:
+                try:
+                    with get_platform_db() as pdb:
+                        placeholders = ",".join("?" for _ in rows)
+                        id_rows = pdb.execute(
+                            f"SELECT entity_id, display_id FROM entity_identifiers "
+                            f"WHERE entity_type = 'todo' AND entity_id IN ({placeholders})",
+                            [r["id"] for r in rows],
+                        ).fetchall()
+                        todo_display_ids = {r["entity_id"]: r["display_id"] for r in id_rows}
+                except Exception as e:
+                    log.warning("search_hub_todo_display_ids_failed: %s", e)
             for r in rows:
                 results.append({
                     "type": "todo",
                     "id": r["id"],
+                    "display_id": todo_display_ids.get(r["id"]),
                     "title": r["title"] or "(untitled)",
                     "subtitle": f"Status: {r['status'] or 'open'}",
                     "url": f"/todos",
@@ -45,8 +60,10 @@ def unified_search(
     try:
         with get_platform_db() as pdb:
             rows = pdb.execute(
-                "SELECT hub_todo_id, title, status FROM todo_overrides "
-                "WHERE is_platform_native = 1 AND title LIKE ? LIMIT ?",
+                "SELECT t.hub_todo_id, t.title, t.status, ei.display_id "
+                "FROM todo_overrides t "
+                "LEFT JOIN entity_identifiers ei ON ei.entity_id = t.hub_todo_id AND ei.entity_type = 'todo' "
+                "WHERE t.is_platform_native = 1 AND t.title LIKE ? LIMIT ?",
                 (pattern, limit),
             ).fetchall()
             # Avoid duplicates (hub.db todos already included above)
@@ -56,6 +73,7 @@ def unified_search(
                     results.append({
                         "type": "todo",
                         "id": r["hub_todo_id"],
+                        "display_id": r["display_id"],
                         "title": r["title"] or "(untitled)",
                         "subtitle": f"Status: {r['status'] or 'open'}",
                         "url": f"/todos",
@@ -67,8 +85,10 @@ def unified_search(
     try:
         with get_platform_db() as pdb:
             rows = pdb.execute(
-                "SELECT id, name, status, role FROM agents "
-                "WHERE name LIKE ? LIMIT ?",
+                "SELECT a.id, a.name, a.status, a.role, ei.display_id "
+                "FROM agents a "
+                "LEFT JOIN entity_identifiers ei ON ei.entity_id = a.id AND ei.entity_type = 'agent' "
+                "WHERE a.name LIKE ? LIMIT ?",
                 (pattern, limit),
             ).fetchall()
             for r in rows:
@@ -80,6 +100,7 @@ def unified_search(
                 results.append({
                     "type": "agent",
                     "id": r["id"],
+                    "display_id": r["display_id"],
                     "title": r["name"] or "(unnamed)",
                     "subtitle": " - ".join(subtitle_parts) or "Agent",
                     "url": f"/agents/{r['id']}",
@@ -91,8 +112,10 @@ def unified_search(
     try:
         with get_platform_db() as pdb:
             rows = pdb.execute(
-                "SELECT id, title, status, priority FROM tasks "
-                "WHERE title LIKE ? LIMIT ?",
+                "SELECT t.id, t.title, t.status, t.priority, ei.display_id "
+                "FROM tasks t "
+                "LEFT JOIN entity_identifiers ei ON ei.entity_id = t.id AND ei.entity_type = 'task' "
+                "WHERE t.title LIKE ? LIMIT ?",
                 (pattern, limit),
             ).fetchall()
             for r in rows:
@@ -104,6 +127,7 @@ def unified_search(
                 results.append({
                     "type": "task",
                     "id": r["id"],
+                    "display_id": r["display_id"],
                     "title": r["title"] or "(untitled)",
                     "subtitle": " - ".join(subtitle_parts) or "Task",
                     "url": f"/tasks",
@@ -115,8 +139,10 @@ def unified_search(
     try:
         with get_platform_db() as pdb:
             rows = pdb.execute(
-                "SELECT id, title, status, progress_pct FROM goals "
-                "WHERE title LIKE ? LIMIT ?",
+                "SELECT g.id, g.title, g.status, g.progress_pct, ei.display_id "
+                "FROM goals g "
+                "LEFT JOIN entity_identifiers ei ON ei.entity_id = g.id AND ei.entity_type = 'goal' "
+                "WHERE g.title LIKE ? LIMIT ?",
                 (pattern, limit),
             ).fetchall()
             for r in rows:
@@ -127,6 +153,7 @@ def unified_search(
                 results.append({
                     "type": "goal",
                     "id": r["id"],
+                    "display_id": r["display_id"],
                     "title": r["title"] or "(untitled)",
                     "subtitle": subtitle,
                     "url": f"/goals",

@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react';
+import { Sparkles } from 'lucide-react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppShell } from './components/layout/AppShell';
@@ -11,6 +12,7 @@ import { NotificationProvider } from './components/shared/NotificationProvider';
 import { ScopeProvider } from './context/ScopeContext';
 import { useDesktopNotificationListener } from './hooks/useDesktopNotifications';
 import { useVoiceCommands } from './hooks/useVoiceCommands';
+import { useEdition } from './hooks/useEdition';
 
 // Eager: lightweight landing + dashboard (first paint)
 import HomePage from './pages/HomePage';
@@ -43,6 +45,20 @@ function DesktopNotifications() {
 function VoiceCommandRouter() {
   useVoiceCommands();
   return null;
+}
+
+function StudioRoute({ children }: { children: React.ReactNode }) {
+  const { isStudio } = useEdition();
+  if (!isStudio) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <Sparkles className="text-muted-foreground" size={32} />
+        <p className="text-muted-foreground text-sm">This feature requires CoCo Studio</p>
+        <p className="text-xs text-muted-foreground">Set COCO_EDITION=studio to enable</p>
+      </div>
+    );
+  }
+  return <>{children}</>;
 }
 
 function PageFallback() {
@@ -89,10 +105,10 @@ export default function App() {
                   <Route path="activity" element={<ErrorBoundary><ActivityPage /></ErrorBoundary>} />
                   <Route path="tree" element={<ErrorBoundary><TreePage /></ErrorBoundary>} />
                   <Route path="tree/:nodeId" element={<ErrorBoundary><TreePage /></ErrorBoundary>} />
-                  <Route path="self-improve" element={<ErrorBoundary><SelfImprovePage /></ErrorBoundary>} />
-                  <Route path="replays/:id" element={<ErrorBoundary><ReplayPage /></ErrorBoundary>} />
+                  <Route path="self-improve" element={<ErrorBoundary><StudioRoute><SelfImprovePage /></StudioRoute></ErrorBoundary>} />
+                  <Route path="replays/:id" element={<ErrorBoundary><StudioRoute><ReplayPage /></StudioRoute></ErrorBoundary>} />
                   <Route path="settings" element={<ErrorBoundary><SettingsPage /></ErrorBoundary>} />
-                  <Route path="jarvis" element={<ErrorBoundary><JarvisPage /></ErrorBoundary>} />
+                  <Route path="jarvis" element={<ErrorBoundary><StudioRoute><JarvisPage /></StudioRoute></ErrorBoundary>} />
                 </Route>
               </Routes>
             </Suspense>

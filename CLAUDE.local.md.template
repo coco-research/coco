@@ -1,0 +1,22 @@
+# CoCo Platform — Local Configuration Template
+
+## What This Is
+Copy this file to `CLAUDE.local.md` and customize for your environment.
+CLAUDE.local.md is gitignored and will not be committed.
+
+## Your Configuration
+- **Working directory:** /path/to/coco-platform
+- **Backend:** Python 3.13 + FastAPI + uvicorn
+- **Frontend:** React 19 + Vite 6 + Radix UI + Tailwind CSS 4
+- **Package managers:** uv (backend), pnpm (frontend)
+
+## Your Data Stores
+- `~/.hub/hub.db` — Knowledge Hub (read-only)
+- `~/.coco/platform.db` — Platform database (read-write)
+- `~/.coco/brain.json` — People graph and rules
+- `~/.coco/config.json` — CoCo configuration
+
+## Conventions
+- Backend tests: `pytest`
+- Frontend tests: `vitest`
+- Commit format: `{sprint}.{task}: {description}`

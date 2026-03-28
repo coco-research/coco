@@ -1,0 +1,32 @@
+Business Source License 1.1
+
+Licensor: Rijul Kalra
+Licensed Work: CoCo Platform Studio Features
+Change Date: 2029-03-28
+Change License: MIT License
+
+Terms: The Licensed Work is provided under this Business Source License.
+Usage of the Licensed Work is subject to the following terms:
+
+1. You may use the Licensed Work for any purpose, including production use,
+   as long as you do not offer the Licensed Work as a hosted service.
+
+2. On the Change Date, the Licensed Work will be made available under the
+   Change License (MIT), at which point you may use it under those terms.
+
+3. If your use of the Licensed Work does not comply with the requirements
+   currently in effect as described in this License, you must purchase a
+   commercial license from the Licensor.
+
+The Licensed Work includes the following components:
+- Jarvis voice assistant and overlay
+- Text-to-Speech (TTS) synthesis engine
+- Speech-to-Text (STT) transcription
+- Agent Replay generation and sharing
+- Morning Podcast briefing generation
+- Self-Improvement cycle management
+- Folder Analysis pipeline
+- CocoOrb voice interface
+
+All other components of CoCo Platform are available under the MIT License.
+See the LICENSE file for details.

@@ -8,3 +8,6 @@ backend/static/
 dist/
 .DS_Store
 .claude/worktrees/
+CLAUDE.local.md
+*.db-wal
+*.db-shm

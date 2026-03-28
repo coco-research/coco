@@ -9,6 +9,7 @@ import { cn } from '../../lib/utils';
 import { useScope, type TreeNode } from '../../context/ScopeContext';
 import { useState, useRef, useEffect, useSyncExternalStore } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useEdition } from '../../hooks/useEdition';
 
 // ─── Sidebar collapse state (shared across components) ────────────────
 const STORAGE_KEY = 'coco-sidebar-collapsed';
@@ -251,6 +252,7 @@ function useInboxCount(): number {
 export function Sidebar() {
   const inboxCount = useInboxCount();
   const collapsed = useSidebarCollapsed();
+  const { isStudio } = useEdition();
 
   return (
     <aside
@@ -277,7 +279,7 @@ export function Sidebar() {
       <nav className={cn('flex-1 py-2 overflow-y-auto flex flex-col gap-4 scrollbar-auto-hide', collapsed ? 'px-1' : 'px-2')}>
         <SidebarSection label="Home" collapsed={collapsed}>
           <NavItem to="/" icon={Home} label="Home" end collapsed={collapsed} />
-          <NavItem to="/?jarvis=true" icon={Sparkles} label="Jarvis" collapsed={collapsed} />
+          {isStudio && <NavItem to="/?jarvis=true" icon={Sparkles} label="Jarvis" collapsed={collapsed} />}
           <NavItem to="/analytics" icon={BarChart3} label="Analytics" collapsed={collapsed} />
           <NavItem to="/inbox" icon={Inbox} label="Inbox" badge={inboxCount} badgeTone="danger" collapsed={collapsed} />
         </SidebarSection>
@@ -298,7 +300,7 @@ export function Sidebar() {
           <NavItem to="/agents" icon={Radio} label="Agent Team" collapsed={collapsed} />
           <NavItem to="/costs" icon={DollarSign} label="Costs" collapsed={collapsed} />
           <NavItem to="/activity" icon={Activity} label="Activity" collapsed={collapsed} />
-          <NavItem to="/self-improve" icon={Wand2} label="Self-Improve" collapsed={collapsed} />
+          {isStudio && <NavItem to="/self-improve" icon={Wand2} label="Self-Improve" collapsed={collapsed} />}
           <NavItem to="/settings" icon={Settings} label="Settings" collapsed={collapsed} />
         </SidebarSection>
       </nav>

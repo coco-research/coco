@@ -355,10 +355,13 @@ class ProcessManager:
 
                     text = line.decode('utf-8', errors='replace').rstrip()
                     if text:
-                        raw_conn.execute(
-                            "INSERT INTO agent_output (agent_id, stream, chunk) VALUES (?, 'stdout', ?)",
-                            (agent_id, text)
-                        )
+                        # Parse stream-json: extract only assistant text content
+                        content_text = self._extract_stream_text(text)
+                        if content_text:
+                            raw_conn.execute(
+                                "INSERT INTO agent_output (agent_id, stream, chunk) VALUES (?, 'stdout', ?)",
+                                (agent_id, content_text)
+                            )
                         batch.append(text)
 
                         now = time.monotonic()

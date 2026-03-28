@@ -590,7 +590,6 @@ CREATE TABLE IF NOT EXISTS verification_results (
 );
 CREATE INDEX IF NOT EXISTS idx_vr_gate ON verification_results(gate_name);
 CREATE INDEX IF NOT EXISTS idx_vr_entity ON verification_results(entity_type, entity_id);
-CREATE INDEX IF NOT EXISTS idx_vr_node ON verification_results(node_id);
 
 -- Sprint 7: Inbox notifications (server-persisted inbox items)
 CREATE TABLE IF NOT EXISTS inbox_notifications (

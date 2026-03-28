@@ -1,7 +1,7 @@
 # Sprint 8 Plan: "Open-Source Prep"
 
 **Date:** 2026-03-28
-**Duration:** 10 days
+**Duration:** 8 days
 **Prerequisites:** Sprint 7
 
 ---
@@ -15,7 +15,7 @@ Runtime feature flags via `COCO_EDITION` env var — **not** build-time separati
 | Edition | License | Features |
 |---------|---------|----------|
 | **Core** | MIT | Home, Projects, Agents, Knowledge Hub, Todos/Goals/Tasks, Basic Costs, Chat, Inbox, Settings, Search, Comments, Templates, Triggers |
-| **Studio** | BSL 1.1 | Jarvis voice, TTS/STT, Agent Replay, Morning Podcast, Self-Improvement, Folder Analysis, Cost Leaderboard, CocoOrb voice |
+| **Studio** | BSL 1.1 | Jarvis voice, TTS/STT, Agent Replay, Morning Podcast, Self-Improvement, Folder Analysis, CocoOrb voice |
 
 ### Day 1: Feature Gate Infrastructure
 - `feature_gate.py` — `is_studio()`, `require_studio()` decorator, `GET /api/edition` endpoint
@@ -87,55 +87,14 @@ Runtime feature flags via `COCO_EDITION` env var — **not** build-time separati
 
 ---
 
-## Workstream C: Cost Leaderboard (Days 7-8)
+## Workstream C: Security Hardening (Days 7-8)
 
-> "You built this for $2.34, community average $4.87"
-
-Anonymous opt-in telemetry. No tracking, no device ID, open-source server.
-
-### Day 7: Backend
-- `leaderboard.py` router — submit, query, my-submissions
-- `leaderboard_client.py` — HTTP client for community server (or local-only mode)
-- `leaderboard_submissions` table — local record of what was sent
-- Feature-type detection (auto-categorize: "bug fix", "new feature", "refactor", etc.)
-
-### Day 8: Frontend
-- `CostLeaderboard.tsx` — percentile ring ("cheaper than 73% of similar tasks")
-- Achievement badges (e.g., "Under $1 Club", "Efficiency Expert")
-- Opt-in flow in Settings page (explicit consent, review-before-send)
-
-### Privacy Guarantees
-
-- Opt-in only — never sends without explicit user consent
-- Review-before-send — user sees exact payload before submission
-- No tracking, no cookies, no device fingerprint
-- Open-source server — anyone can audit
-- Deletable — user can remove their submissions at any time
-
-### Schema
-
-```sql
-CREATE TABLE leaderboard_submissions (
-    id            TEXT PRIMARY KEY,
-    feature_type  TEXT,
-    cost          REAL,
-    duration      REAL,
-    model         TEXT,
-    submitted_at  TEXT DEFAULT (datetime('now')),
-    remote_id     TEXT
-);
-```
-
----
-
-## Workstream D: Security Hardening (Days 9-10)
-
-### Day 9: Authentication + API Key Safety
+### Day 7: Authentication + API Key Safety
 - Bearer token auth middleware (optional — only active when `COCO_AUTH_TOKEN` env var is set)
 - Fix STT raw API key exposure — scoped temporary keys with short TTL
 - CORS configuration via `COCO_CORS_ORIGINS` env var (default: localhost only)
 
-### Day 10: Rate Limiting + Audit
+### Day 8: Rate Limiting + Audit
 - Rate limiting via `slowapi` (sensible defaults, configurable)
 - Dependency audit: `pip-audit` (backend), `npm audit` (frontend)
 - Additional security headers: CSP, Referrer-Policy, X-Content-Type-Options
@@ -155,9 +114,9 @@ CREATE TABLE leaderboard_submissions (
 
 | Metric | Count |
 |--------|-------|
-| New files | 21 |
+| New files | 17 |
 | Modified files | 12 |
-| New DB tables | 1 (`leaderboard_submissions`) |
+| New DB tables | 0 |
 
 ## Risk Register
 
@@ -169,29 +128,9 @@ CREATE TABLE leaderboard_submissions (
 
 ---
 
-## Sprint 5.5 Compatibility Addendum
+## Sprint 5.5 Compatibility Note
 
 > Sprint 5.5 introduces SQLAlchemy Core + hub mirror tables. All new code in Sprint 8+ MUST use SA Core, not raw sqlite3.
-
-### Schema changes (1 table → SA Core definition in `tables.py`)
-
-| Raw SQL in this plan | SA Core replacement |
-|---|---|
-| `CREATE TABLE leaderboard_submissions` (line 118) | `leaderboard_submissions = Table("leaderboard_submissions", metadata, ...)` in `tables.py` |
-
-### Connection pattern changes
-
-`leaderboard.py` router uses `get_db()` from `app.db.session`:
-
-```python
-from app.db.session import get_db
-from app.db.tables import leaderboard_submissions
-
-with get_db() as conn:
-    conn.execute(leaderboard_submissions.insert().values(...))
-```
-
-### Open-source implications
 
 Sprint 8 splits Core vs Studio editions. The `DATABASE_URL` env var from Sprint 5.5 fits naturally:
 - **Core edition:** `DATABASE_URL=sqlite:///~/.coco/platform.db` (default, zero-config)

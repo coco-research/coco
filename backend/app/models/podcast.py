@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 
 class GeneratePodcastBody(BaseModel):
-    voice: str = "af_heart"
+    voice: str = "andrew"
 
 
 class PodcastResponse(BaseModel):

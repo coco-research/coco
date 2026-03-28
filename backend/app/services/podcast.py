@@ -1,19 +1,13 @@
-"""Podcast briefing service — aggregates data, generates script, synthesizes audio.
+"""Podcast briefing service — aggregates data, generates script via Haiku.
 
-Uses KokoroEngine for TTS with sentence-boundary chunking and silence insertion.
-Falls back to edge-tts if Kokoro is unavailable, and to script-only if neither works.
+Script-only for now (no TTS). The PodcastPlayer renders the script as text.
 """
 
-import io
-import re
-import struct
 import subprocess
 import uuid
-import wave
 from datetime import datetime, timezone
 from pathlib import Path
 
-import numpy as np
 import structlog
 from sqlalchemy import func, select, text
 
@@ -32,16 +26,8 @@ log = structlog.get_logger()
 PODCASTS_DIR = Path.home() / ".coco" / "podcasts"
 PODCASTS_DIR.mkdir(parents=True, exist_ok=True)
 
-# Sample rate for Kokoro TTS
-SAMPLE_RATE = 24000
-
-# Silence durations
-CHUNK_SILENCE_MS = 300
-SECTION_SILENCE_MS = 600
-
 # Hard cap
 MAX_WORDS = 450
-MAX_DURATION_SECONDS = 180  # 3 minutes
 
 
 def _iso_now() -> str:
@@ -149,283 +135,214 @@ def aggregate_briefing_data() -> dict:
         except Exception:
             log.warning("podcast_agg_failed", section="recent_self_improve", exc_info=True)
 
+        # Overdue todos (due before today, still open)
+        try:
+            rows = conn.execute(
+                select(hub_todos.c.id, hub_todos.c.title, hub_todos.c.priority, hub_todos.c.due_date, hub_todos.c.project_id)
+                .where(hub_todos.c.status == "open")
+                .where(hub_todos.c.due_date < text("date('now', 'localtime')"))
+                .where(hub_todos.c.due_date.isnot(None))
+                .order_by(hub_todos.c.priority.desc())
+                .limit(10)
+            ).fetchall()
+            data["overdue_todos"] = [dict(r._mapping) for r in rows]
+        except Exception:
+            log.warning("podcast_agg_failed", section="overdue_todos", exc_info=True)
+
     return data
 
 
 # ---------------------------------------------------------------------------
-# 2. Generate script (template-based, deterministic)
+# 2. Generate script (Haiku-powered, conversational)
 # ---------------------------------------------------------------------------
 
 # Section marker for silence insertion
 SECTION_BREAK = "\n\n"
 
+BRIEFING_SYSTEM_PROMPT = """You are CoCo, a PM assistant generating a morning audio briefing script for Rijul.
+
+Rules:
+- Write a conversational 2-3 minute briefing (300-450 words max)
+- Start with a natural greeting using the time of day and date
+- Prioritize what MATTERS: overdue items first, then what's due today, then highlights
+- Be specific with names, projects, and numbers — don't be vague
+- Skip noise: don't mention zero-count sections or unimportant details
+- End with a clear "top 3 priorities" and a brief sign-off
+- Write for SPOKEN delivery: short sentences, no bullet points, no markdown
+- Use section breaks (double newline) between topics for natural pauses
+- If there's nothing significant, say so briefly — don't pad with filler"""
+
 
 def generate_script(data: dict) -> str:
-    """Produce a conversational morning briefing script from aggregated data.
+    """Generate a conversational briefing script using Claude Haiku via agent_sdk_client.
 
+    Uses the Platform's existing LLM layer (rate limiting, cost tracking, fallback).
+    Falls back to a simple template if the API call fails.
     Target: 300-450 words, 2-3 minutes at ~150 wpm.
     """
-    greeting = _greeting_word()
-    date_str = data.get("date", _today_str())
-    sections: list[str] = []
+    try:
+        from app.services.agent_sdk_client import create_message
 
-    # --- Greeting ---
-    sections.append(
-        f"Good {greeting}. It's {date_str}. Here's your CoCo briefing."
-    )
+        prompt_data = _format_data_for_prompt(data)
 
-    # --- Overnight highlights ---
-    highlights: list[str] = []
-    completed = data.get("completed_agents", 0)
-    new_todos = data.get("new_todos", 0)
-    completed_todos = data.get("completed_todos", 0)
-    cost = data.get("cost_last_24h", 0.0)
-    self_improve = data.get("recent_self_improve", 0)
-
-    if completed > 0:
-        highlights.append(
-            f"{completed} agent{'s' if completed != 1 else ''} finished their work overnight."
-        )
-    if completed_todos > 0:
-        highlights.append(
-            f"{completed_todos} todo{'s' if completed_todos != 1 else ''} got marked done."
-        )
-    if new_todos > 0:
-        highlights.append(
-            f"{new_todos} new todo{'s' if new_todos != 1 else ''} came in over the last 24 hours."
-        )
-    if cost > 0.01:
-        highlights.append(
-            f"API spend in the last 24 hours was ${cost:.2f}."
-        )
-    if self_improve > 0:
-        highlights.append(
-            f"The self-improve engine completed {self_improve} cycle{'s' if self_improve != 1 else ''}."
+        result = create_message(
+            model="haiku",
+            system=BRIEFING_SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": prompt_data}],
+            max_tokens=800,
+            purpose="podcast_briefing",
         )
 
-    if highlights:
-        sections.append("Here's what happened. " + " ".join(highlights))
-    else:
-        sections.append(
-            "It's been a quiet stretch. No major activity in the last 24 hours."
-        )
+        script = result["content"].strip()
 
-    # --- Action items: todos due today ---
+        # Hard cap at MAX_WORDS
+        words = script.split()
+        if len(words) > MAX_WORDS:
+            words = words[:MAX_WORDS]
+            script = " ".join(words) + "... and that's the highlights."
+
+        log.info(
+            "podcast_script_generated",
+            engine="haiku",
+            words=len(script.split()),
+            cost_usd=result.get("cost_usd", 0),
+        )
+        return script
+
+    except Exception as e:
+        log.warning("haiku_script_failed_using_fallback", error=str(e))
+        return _fallback_template_script(data)
+
+
+def _format_data_for_prompt(data: dict) -> str:
+    """Format aggregated data as a structured prompt for Haiku."""
+    lines = [
+        f"Date: {data.get('date', _today_str())}",
+        f"Time of day: {_greeting_word()}",
+        f"Completed agents (last 24h): {data.get('completed_agents', 0)}",
+        f"New todos (last 24h): {data.get('new_todos', 0)}",
+        f"Completed todos (last 24h): {data.get('completed_todos', 0)}",
+        f"API cost (last 24h): ${data.get('cost_last_24h', 0.0):.2f}",
+        f"Self-improve cycles (last 24h): {data.get('recent_self_improve', 0)}",
+    ]
+
     todos = data.get("todos_due_today", [])
     if todos:
-        count = len(todos)
-        sections.append(
-            f"You've got {count} item{'s' if count != 1 else ''} due today."
-        )
-        # List up to 5
-        for i, todo in enumerate(todos[:5]):
-            title = todo.get("title", "Untitled")
-            priority = todo.get("priority", "medium")
-            marker = "High priority: " if priority == "high" else ""
-            sections.append(f"{marker}{title}.")
-        if count > 5:
-            sections.append(f"Plus {count - 5} more. Check the todos page for the full list.")
+        lines.append(f"\nTodos due today ({len(todos)}):")
+        for t in todos[:10]:
+            priority = t.get("priority", "medium")
+            lines.append(f"  [{priority.upper()}] {t.get('title', 'Untitled')}")
     else:
-        sections.append("No items due today. Clear runway.")
+        lines.append("\nNo todos due today.")
 
-    # --- Sign-off ---
-    sections.append(
-        "That's your briefing. Have a productive day."
-    )
+    # Add overdue context if available
+    overdue = data.get("overdue_todos", [])
+    if overdue:
+        lines.append(f"\nOverdue todos ({len(overdue)}):")
+        for t in overdue[:10]:
+            lines.append(f"  [{t.get('priority', 'medium').upper()}] {t.get('title', 'Untitled')} (due: {t.get('due_date', '?')})")
 
-    script = SECTION_BREAK.join(sections)
+    lines.append("\nGenerate the morning briefing script now.")
+    return "\n".join(lines)
 
-    # Hard cap at MAX_WORDS
-    words = script.split()
-    if len(words) > MAX_WORDS:
-        words = words[:MAX_WORDS]
-        script = " ".join(words) + "... and that's the highlights."
 
-    return script
+def _fallback_template_script(data: dict) -> str:
+    """Simple template fallback if Haiku is unavailable."""
+    greeting = _greeting_word()
+    date_str = data.get("date", _today_str())
+    parts = [f"Good {greeting}. It's {date_str}. Here's your CoCo briefing."]
+
+    completed = data.get("completed_agents", 0)
+    new_todos = data.get("new_todos", 0)
+    cost = data.get("cost_last_24h", 0.0)
+
+    highlights = []
+    if completed > 0:
+        highlights.append(f"{completed} agents finished overnight.")
+    if new_todos > 0:
+        highlights.append(f"{new_todos} new todos came in.")
+    if cost > 0.01:
+        highlights.append(f"API spend was ${cost:.2f}.")
+
+    if highlights:
+        parts.append(" ".join(highlights))
+    else:
+        parts.append("Quiet stretch. No major activity.")
+
+    todos = data.get("todos_due_today", [])
+    if todos:
+        parts.append(f"{len(todos)} items due today.")
+        for t in todos[:3]:
+            parts.append(f"{t.get('title', 'Untitled')}.")
+    else:
+        parts.append("Nothing due today. Clear runway.")
+
+    parts.append("That's your briefing. Have a productive day.")
+    return SECTION_BREAK.join(parts)
 
 
 # ---------------------------------------------------------------------------
-# 3. Synthesize audio
+# 3. Synthesize audio (Edge-TTS — Microsoft cloud, no local models)
 # ---------------------------------------------------------------------------
 
+# Edge-TTS voice options (natural-sounding, free)
+EDGE_VOICES = {
+    "andrew": "en-US-AndrewNeural",       # Male, warm
+    "aria": "en-US-AriaNeural",            # Female, conversational
+    "guy": "en-US-GuyNeural",              # Male, professional
+    "jenny": "en-US-JennyNeural",          # Female, clear
+    "ryan": "en-GB-RyanNeural",            # Male, British
+    "sonia": "en-GB-SoniaNeural",          # Female, British
+}
 
-def _generate_silence(duration_ms: int, sample_rate: int = SAMPLE_RATE) -> np.ndarray:
-    """Generate silence as a numpy array of zeros."""
-    num_samples = int(sample_rate * duration_ms / 1000)
-    return np.zeros(num_samples, dtype=np.float32)
-
-
-def _chunk_text(text: str, max_chars: int = 200) -> list[str]:
-    """Split text at sentence boundaries (. ! ?) with max chars per chunk."""
-    # Split on sentence-ending punctuation followed by space
-    sentences = re.split(r'(?<=[.!?])\s+', text.strip())
-    chunks: list[str] = []
-    current = ""
-
-    for sentence in sentences:
-        if not sentence:
-            continue
-        if current and len(current) + len(sentence) + 1 > max_chars:
-            chunks.append(current.strip())
-            current = sentence
-        else:
-            current = f"{current} {sentence}" if current else sentence
-
-    if current.strip():
-        chunks.append(current.strip())
-
-    return chunks
+DEFAULT_VOICE = "andrew"
 
 
-def _concat_wav_arrays(arrays: list[np.ndarray], sample_rate: int = SAMPLE_RATE) -> bytes:
-    """Concatenate numpy float32 arrays into a WAV byte buffer."""
-    if not arrays:
-        return b""
-    combined = np.concatenate(arrays)
-    # Convert float32 [-1, 1] to int16
-    int16_data = (combined * 32767).astype(np.int16)
-
-    buf = io.BytesIO()
-    with wave.open(buf, "wb") as wf:
-        wf.setnchannels(1)
-        wf.setsampwidth(2)  # 16-bit
-        wf.setframerate(sample_rate)
-        wf.writeframes(int16_data.tobytes())
-
-    return buf.getvalue()
-
-
-async def _edge_tts_fallback(script: str, out_path: Path) -> float | None:
-    """Try edge-tts as fallback. Returns duration in seconds or None."""
-    try:
-        import edge_tts
-
-        communicate = edge_tts.Communicate(script, "en-US-AndrewNeural", rate="-5%")
-        await communicate.save(str(out_path.with_suffix(".mp3")))
-        mp3_path = out_path.with_suffix(".mp3")
-        if mp3_path.exists() and mp3_path.stat().st_size > 100:
-            # Estimate duration: ~150 wpm
-            word_count = len(script.split())
-            duration = word_count / 150 * 60
-            # Rename to match expected path
-            mp3_path.rename(out_path)
-            return duration
-    except ImportError:
-        log.warning("edge_tts_not_installed")
-    except Exception as e:
-        log.warning("edge_tts_fallback_failed", error=str(e))
-    return None
-
-
-def synthesize_audio(
+async def synthesize_audio(
     script: str,
-    voice: str = "af_heart",
+    voice: str = DEFAULT_VOICE,
     podcast_id: str | None = None,
 ) -> tuple[str, float] | None:
-    """Synthesize audio from script using Kokoro with chunking and silence.
+    """Synthesize audio from script using Edge-TTS (Microsoft cloud).
 
     Returns (file_path, duration_seconds) or None if synthesis fails.
     """
-    from app.services.kokoro_engine import KokoroEngine
+    import edge_tts
 
     if podcast_id is None:
         podcast_id = uuid.uuid4().hex[:12]
 
-    out_path = PODCASTS_DIR / f"{podcast_id}.wav"
+    out_path = PODCASTS_DIR / f"{podcast_id}.mp3"
 
-    # Split script into sections (separated by double newlines)
-    sections = script.split(SECTION_BREAK)
-    all_audio: list[np.ndarray] = []
+    # Resolve voice name to Edge-TTS voice ID
+    voice_id = EDGE_VOICES.get(voice, EDGE_VOICES[DEFAULT_VOICE])
 
-    # Check Kokoro availability
-    engine = KokoroEngine(cache_dir=PODCASTS_DIR / ".cache")
-    (PODCASTS_DIR / ".cache").mkdir(parents=True, exist_ok=True)
+    try:
+        communicate = edge_tts.Communicate(script, voice_id, rate="-5%")
+        await communicate.save(str(out_path))
 
-    if not engine.is_available():
-        log.warning("kokoro_not_available_for_podcast")
+        if not out_path.exists() or out_path.stat().st_size < 100:
+            log.warning("edge_tts_empty_output", voice=voice_id)
+            return None
+
+        # Estimate duration from word count (~150 wpm)
+        word_count = len(script.split())
+        duration = round(word_count / 150 * 60, 1)
+
+        log.info(
+            "podcast_audio_synthesized",
+            engine="edge-tts",
+            voice=voice_id,
+            path=str(out_path),
+            duration=duration,
+            word_count=word_count,
+        )
+
+        return str(out_path), duration
+
+    except Exception as e:
+        log.error("edge_tts_failed", error=str(e), exc_info=True)
         return None
-
-    for sec_idx, section in enumerate(sections):
-        chunks = _chunk_text(section, max_chars=200)
-
-        for chunk_idx, chunk in enumerate(chunks):
-            if not chunk.strip():
-                continue
-
-            # Generate audio for this chunk via Kokoro
-            chunk_path = engine.generate(chunk, voice=voice, speed=1.0)
-            if chunk_path is None:
-                log.warning("podcast_chunk_failed", section=sec_idx, chunk=chunk_idx)
-                continue
-
-            # Read the WAV data as numpy
-            try:
-                import soundfile as sf
-                audio_data, sr = sf.read(str(chunk_path), dtype="float32")
-                all_audio.append(audio_data)
-            except Exception as e:
-                log.warning("podcast_chunk_read_failed", error=str(e))
-                continue
-
-            # Add inter-chunk silence (300ms)
-            if chunk_idx < len(chunks) - 1:
-                all_audio.append(_generate_silence(CHUNK_SILENCE_MS))
-
-        # Add inter-section silence (600ms)
-        if sec_idx < len(sections) - 1:
-            all_audio.append(_generate_silence(SECTION_SILENCE_MS))
-
-    if not all_audio:
-        log.warning("podcast_no_audio_generated")
-        return None
-
-    # Concatenate and write
-    wav_bytes = _concat_wav_arrays(all_audio, SAMPLE_RATE)
-    out_path.write_bytes(wav_bytes)
-
-    # Calculate actual duration
-    combined = np.concatenate(all_audio)
-    actual_duration = len(combined) / SAMPLE_RATE
-
-    # Quality gate: compare to expected duration
-    word_count = len(script.split())
-    expected_duration = word_count / 150 * 60  # 150 wpm
-
-    if expected_duration > 0:
-        ratio = actual_duration / expected_duration
-        if abs(ratio - 1.0) > 0.2:
-            log.warning(
-                "podcast_duration_mismatch",
-                actual=round(actual_duration, 1),
-                expected=round(expected_duration, 1),
-                ratio=round(ratio, 2),
-            )
-
-    # Hard cap at 3 minutes
-    if actual_duration > MAX_DURATION_SECONDS:
-        log.warning("podcast_exceeds_cap", duration=round(actual_duration, 1))
-        # Truncate: keep only MAX_DURATION_SECONDS worth
-        max_samples = int(SAMPLE_RATE * MAX_DURATION_SECONDS)
-        truncated = combined[:max_samples]
-        # Re-write
-        int16_data = (truncated * 32767).astype(np.int16)
-        buf = io.BytesIO()
-        with wave.open(buf, "wb") as wf:
-            wf.setnchannels(1)
-            wf.setsampwidth(2)
-            wf.setframerate(SAMPLE_RATE)
-            wf.writeframes(int16_data.tobytes())
-        out_path.write_bytes(buf.getvalue())
-        actual_duration = MAX_DURATION_SECONDS
-
-    log.info(
-        "podcast_audio_synthesized",
-        path=str(out_path),
-        duration=round(actual_duration, 1),
-        word_count=word_count,
-    )
-
-    return str(out_path), round(actual_duration, 1)
 
 
 # ---------------------------------------------------------------------------
@@ -433,8 +350,8 @@ def synthesize_audio(
 # ---------------------------------------------------------------------------
 
 
-async def generate_podcast(voice: str = "af_heart") -> dict:
-    """Full pipeline: aggregate -> script -> audio -> persist -> notify."""
+async def generate_podcast(voice: str = DEFAULT_VOICE) -> dict:
+    """Full pipeline: aggregate -> Haiku script -> Edge-TTS audio -> persist -> notify."""
     podcast_id = uuid.uuid4().hex[:12]
     now = _iso_now()
     title = f"Morning Brief — {datetime.now().strftime('%b %d, %Y')}"
@@ -455,26 +372,15 @@ async def generate_podcast(voice: str = "af_heart") -> dict:
         # 1. Aggregate data
         data = aggregate_briefing_data()
 
-        # 2. Generate script
+        # 2. Generate script (Haiku with template fallback)
         script = generate_script(data)
 
-        # 3. Synthesize audio
-        result = synthesize_audio(script, voice=voice, podcast_id=podcast_id)
-
-        if result is None:
-            # Try edge-tts fallback
-            out_path = PODCASTS_DIR / f"{podcast_id}.wav"
-            try:
-                import asyncio
-                duration = await _edge_tts_fallback(script, out_path)
-                if duration:
-                    result = (str(out_path), duration)
-            except Exception:
-                pass
+        # 3. Synthesize audio (Edge-TTS)
+        result = await synthesize_audio(script, voice=voice, podcast_id=podcast_id)
 
         audio_path = result[0] if result else None
         duration = result[1] if result else None
-        status = "ready" if result else "ready"  # script-only is still "ready"
+        status = "ready"
 
         # 4. Update DB record
         with get_db() as conn:

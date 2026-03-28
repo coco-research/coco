@@ -31,7 +31,7 @@ def list_podcasts(limit: int = 10):
 @router.post("/", response_model=PodcastResponse)
 async def generate_podcast(body: GeneratePodcastBody | None = None):
     """Generate a new morning briefing podcast."""
-    voice = body.voice if body else "af_heart"
+    voice = body.voice if body else "andrew"
     result = await podcast_service.generate_podcast(voice=voice)
     return PodcastResponse(**result)
 

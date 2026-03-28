@@ -5,6 +5,7 @@ import { apiFetch, apiPatch, apiPost, apiTransition } from '../../lib/api.ts';
 import { cn, timeAgo } from '../../lib/utils.ts';
 import { TransitionButtons } from '../shared/TransitionButtons';
 import { statePillClass, STATE_LABELS } from '../../lib/state-machine';
+import { DelegationPanel } from '../agents/DelegationPanel';
 import type { Task } from './TaskList.tsx';
 
 interface Agent {
@@ -279,6 +280,15 @@ export function TaskDetail({ task, onClose }: TaskDetailProps) {
               <span className="text-muted-foreground">Updated</span>
               <span className="text-foreground">{timeAgo(task.updated_at)}</span>
             </div>
+          </div>
+
+          {/* Delegation */}
+          <div className="pt-2 border-t border-border">
+            <DelegationPanel
+              taskId={task.id}
+              taskTitle={task.title}
+              currentAgentId={task.agent_id ?? null}
+            />
           </div>
         </div>
 

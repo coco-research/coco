@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, FolderKanban, Radio, LayoutGrid, GitFork } from 'lucide-react';
+import { Plus, FolderKanban, Radio, LayoutGrid, GitFork, ListTodo, ChevronDown, ChevronRight } from 'lucide-react';
 import { apiFetch, apiPost } from '../lib/api';
 import { AgentCard, type Agent } from '../components/agents/AgentCard';
 import { CreateAgentDialog } from '../components/agents/CreateAgentDialog';
 import { AgentDetail } from '../components/agents/AgentDetail';
 import { OrgChart, type OrgNode } from '../components/agents/OrgChart';
+import { SharedTaskBoard } from '../components/agents/SharedTaskBoard';
 import { useToast } from '../components/shared/Toast';
 
 type ViewMode = 'cards' | 'org-chart';
@@ -31,6 +32,8 @@ export default function AgentsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>(getStoredView);
+  const [taskQueueOpen, setTaskQueueOpen] = useState(false);
+  const [taskQueueAgentId, setTaskQueueAgentId] = useState<string | null>(null);
 
   const toggleView = (mode: ViewMode) => {
     setViewMode(mode);
@@ -198,6 +201,46 @@ export default function AgentsPage() {
               </div>
             </section>
           ))}
+        </div>
+      )}
+
+      {/* Task Queue Section */}
+      {agents.length > 0 && (
+        <div className="mt-8 border-t border-border pt-6">
+          <button
+            onClick={() => setTaskQueueOpen(!taskQueueOpen)}
+            className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-foreground/80 transition-colors mb-4"
+          >
+            {taskQueueOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+            <ListTodo size={16} />
+            Task Queue
+          </button>
+
+          {taskQueueOpen && (
+            <div className="space-y-3">
+              {/* Agent selector for task queue */}
+              <div className="flex items-center gap-3">
+                <select
+                  value={taskQueueAgentId ?? ''}
+                  onChange={(e) => setTaskQueueAgentId(e.target.value || null)}
+                  className="bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
+                >
+                  <option value="">All Agents</option>
+                  {agents.map((a) => (
+                    <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <SharedTaskBoard
+                agentIds={taskQueueAgentId ? [taskQueueAgentId] : agents.map((a) => a.id)}
+                title={taskQueueAgentId
+                  ? `${agents.find((a) => a.id === taskQueueAgentId)?.name ?? 'Agent'}'s Tasks`
+                  : 'All Agent Tasks'
+                }
+              />
+            </div>
+          )}
         </div>
       )}
 

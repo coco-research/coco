@@ -11,3 +11,4 @@ dist/
 CLAUDE.local.md
 *.db-wal
 *.db-shm
+.planning/

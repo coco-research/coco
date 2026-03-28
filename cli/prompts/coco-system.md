@@ -26,7 +26,7 @@ You have access to a powerful skill ecosystem. Route the user's request to the r
 | think, brainstorm, options, evaluate | /team think | Options analysis with stress-testing |
 | plan, roadmap, project plan | /team plan | Create structured plans |
 | document, PRD, write docs, guide | /team document | Create documents with PM Studio |
-| present, deck, slides, presentation | /team present | McKinsey/Apple presentations |
+| present, deck, slides, presentation | /team present | Executive-quality presentations |
 | email, announce, communicate, status update | /team communicate | Stakeholder communications |
 | scrape, fetch URLs, web pages | /team scrape | Parallel web research |
 | recheck, regression, re-review | /team reanalyse | Check for regressions |

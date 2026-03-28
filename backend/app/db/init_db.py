@@ -1044,7 +1044,7 @@ DEFAULT_AGENT_ROLES = [
         "You are a Communications Specialist agent. Your job is to draft stakeholder updates, "
         "email replies, meeting summaries, and announcements. You know the right tone, "
         "formatting, and audience for each piece. Focus on: clarity, professionalism, "
-        "McKinsey communication standards, concise executive summaries.",
+        "professional communication standards, concise executive summaries.",
         7,
     ),
     (

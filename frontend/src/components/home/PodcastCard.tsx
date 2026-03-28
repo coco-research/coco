@@ -47,7 +47,7 @@ export function PodcastCard() {
   });
 
   const generateMutation = useMutation({
-    mutationFn: () => apiPost<Podcast>('/podcasts/', { voice: 'af_heart' }),
+    mutationFn: () => apiPost<Podcast>('/podcasts/', { voice: 'andrew' }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['podcasts'] });
     },

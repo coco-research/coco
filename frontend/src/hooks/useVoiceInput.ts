@@ -1,10 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { DeepgramClient } from '../lib/deepgram';
 
 interface VoiceInputState {
   isListening: boolean;
   transcript: string;
   error: string | null;
 }
+
+type SttProvider = 'deepgram' | 'webspeech' | 'none';
 
 const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
@@ -17,19 +20,92 @@ export function useVoiceInput() {
     error: null,
   });
 
+  const [provider, setProvider] = useState<SttProvider>('none');
   const recognitionRef = useRef<any>(null);
+  const deepgramRef = useRef<DeepgramClient | null>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const onResultRef = useRef<((text: string) => void) | null>(null);
+
+  // Check Deepgram availability on mount, fall back to Web Speech API
+  useEffect(() => {
+    let cancelled = false;
+    const client = new DeepgramClient();
+    client.isAvailable().then((available) => {
+      if (cancelled) return;
+      if (available) {
+        deepgramRef.current = client;
+        setProvider('deepgram');
+      } else if (SpeechRecognition) {
+        setProvider('webspeech');
+      } else {
+        setProvider('none');
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       recognitionRef.current?.abort();
+      deepgramRef.current?.stop();
       clearTimeout(silenceTimerRef.current);
     };
   }, []);
 
-  const start = useCallback((onFinalResult: (text: string) => void) => {
+  // ---------- Deepgram path ----------
+  const startDeepgram = useCallback((onFinalResult: (text: string) => void) => {
+    const client = deepgramRef.current;
+    if (!client) return;
+
+    onResultRef.current = onFinalResult;
+    let accumulated = '';
+
+    setState({ isListening: true, transcript: '', error: null });
+
+    client
+      .start((text, isFinal) => {
+        if (isFinal) {
+          accumulated += (accumulated ? ' ' : '') + text;
+          setState((s) => ({ ...s, transcript: accumulated }));
+
+          // Auto-stop after 1.5s of silence following final text
+          clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = setTimeout(() => {
+            client.stop();
+            setState((s) => ({ ...s, isListening: false }));
+            if (accumulated.trim()) {
+              onResultRef.current?.(accumulated.trim());
+            }
+            accumulated = '';
+          }, 1500);
+        } else {
+          // Show interim text
+          setState((s) => ({ ...s, transcript: accumulated + (accumulated ? ' ' : '') + text }));
+        }
+      })
+      .catch((err: Error) => {
+        setState((s) => ({
+          ...s,
+          isListening: false,
+          error: err.message || 'Failed to start Deepgram STT',
+        }));
+      });
+
+    // Safety timeout - stop after 10s
+    silenceTimerRef.current = setTimeout(() => {
+      client.stop();
+      setState((s) => ({ ...s, isListening: false }));
+      if (accumulated.trim()) {
+        onResultRef.current?.(accumulated.trim());
+      }
+    }, 10000);
+  }, []);
+
+  // ---------- Web Speech API path ----------
+  const startWebSpeech = useCallback((onFinalResult: (text: string) => void) => {
     if (!SpeechRecognition) {
       setState((s) => ({ ...s, error: 'Speech recognition not supported. Use Chrome.' }));
       return;
@@ -44,25 +120,22 @@ export function useVoiceInput() {
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
     recognition.interimResults = true;
-    recognition.continuous = true;  // don't stop on first pause
+    recognition.continuous = true;
     recognition.maxAlternatives = 1;
 
     let finalTranscript = '';
-    let lastResultTime = Date.now();
 
     recognition.onstart = () => {
       setState({ isListening: true, transcript: '', error: null });
       finalTranscript = '';
-      lastResultTime = Date.now();
 
-      // Safety timeout — stop after 10s max
+      // Safety timeout -- stop after 10s max
       silenceTimerRef.current = setTimeout(() => {
         recognition.stop();
       }, 10000);
     };
 
     recognition.onresult = (event: any) => {
-      lastResultTime = Date.now();
       let interim = '';
       finalTranscript = '';
 
@@ -98,12 +171,10 @@ export function useVoiceInput() {
 
     recognition.onerror = (event: any) => {
       clearTimeout(silenceTimerRef.current);
-      // 'no-speech' and 'aborted' are not real errors
       if (event.error === 'no-speech' || event.error === 'aborted') {
         setState((s) => ({ ...s, isListening: false }));
         return;
       }
-      // Friendly error messages for common mic issues
       const friendlyErrors: Record<string, string> = {
         'not-allowed': 'Microphone access denied. Please allow mic permission in your browser settings.',
         'NotAllowedError': 'Microphone access denied. Please allow mic permission in your browser settings.',
@@ -121,10 +192,35 @@ export function useVoiceInput() {
     recognition.start();
   }, []);
 
+  // ---------- Unified start / stop ----------
+  const start = useCallback(
+    (onFinalResult: (text: string) => void) => {
+      if (provider === 'deepgram') {
+        startDeepgram(onFinalResult);
+      } else if (provider === 'webspeech') {
+        startWebSpeech(onFinalResult);
+      } else {
+        setState((s) => ({ ...s, error: 'No speech recognition available.' }));
+      }
+    },
+    [provider, startDeepgram, startWebSpeech],
+  );
+
   const stop = useCallback(() => {
     clearTimeout(silenceTimerRef.current);
-    recognitionRef.current?.stop();
-  }, []);
+    if (provider === 'deepgram') {
+      deepgramRef.current?.stop();
+      setState((s) => ({ ...s, isListening: false }));
+    } else {
+      recognitionRef.current?.stop();
+    }
+  }, [provider]);
 
-  return { ...state, start, stop, supported: speechSupported };
+  return {
+    ...state,
+    start,
+    stop,
+    supported: provider !== 'none',
+    provider,
+  };
 }

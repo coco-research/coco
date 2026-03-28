@@ -7,6 +7,8 @@ import { DisplaySettings } from '../components/settings/DisplaySettings';
 import { BrainViewer } from '../components/settings/BrainViewer';
 import { useTheme } from '../context/ThemeContext';
 import { Sun, Moon, BellOff } from 'lucide-react';
+import { TriggerList, type Trigger } from '../components/triggers/TriggerList';
+import { TriggerForm } from '../components/triggers/TriggerForm';
 import {
   isSupported as notifSupported,
   isPermitted as notifPermitted,
@@ -94,6 +96,28 @@ function NotificationToggle() {
   );
 }
 
+function AutomationsTab() {
+  const [editingTrigger, setEditingTrigger] = useState<Trigger | null>(null);
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-1">Triggers</h3>
+        <p className="text-xs text-muted-foreground mb-3">
+          Automate actions based on schedules, webhooks, or file changes.
+        </p>
+        <TriggerList onEdit={(t) => setEditingTrigger(t)} />
+      </div>
+      <div className="border-t border-border pt-4">
+        <TriggerForm
+          editingTrigger={editingTrigger}
+          onDone={() => setEditingTrigger(null)}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const { theme, toggleTheme } = useTheme();
@@ -130,6 +154,9 @@ export default function SettingsPage() {
           <Tabs.Trigger value="general" className={tabTriggerCls}>
             General
           </Tabs.Trigger>
+          <Tabs.Trigger value="automations" className={tabTriggerCls}>
+            Automations
+          </Tabs.Trigger>
           <Tabs.Trigger value="advanced" className={tabTriggerCls}>
             Advanced
           </Tabs.Trigger>
@@ -141,6 +168,10 @@ export default function SettingsPage() {
           <div className="max-w-lg">
             <NotificationToggle />
           </div>
+        </Tabs.Content>
+
+        <Tabs.Content value="automations" className="flex-1 overflow-y-auto py-4">
+          <AutomationsTab />
         </Tabs.Content>
 
         <Tabs.Content value="advanced" className="flex-1 overflow-y-auto py-4 space-y-6">

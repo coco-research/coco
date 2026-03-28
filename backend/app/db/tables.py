@@ -15,6 +15,7 @@ from sqlalchemy import (
     MetaData,
     Table,
     Text,
+    UniqueConstraint,
 )
 
 metadata = MetaData()
@@ -41,7 +42,7 @@ nodes = Table(
     Column("jira_key", Text),
     Column("confluence_space", Text),
     Column("prefix", Text),
-    Column("metadata", Text, server_default="{}"),
+    Column("metadata_json", Text, server_default="{}"),
     Column("created_at", Text, nullable=False),
     Column("updated_at", Text, nullable=False),
 )
@@ -602,4 +603,105 @@ templates = Table(
     Column("description", Text),
     Column("template_json", Text, nullable=False),
     Column("created_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Hub mirror tables (populated by hub_sync service from hub.db)
+# ---------------------------------------------------------------------------
+
+hub_todos = Table(
+    "hub_todos", metadata,
+    Column("id", Text, primary_key=True),
+    Column("title", Text),
+    Column("description", Text),
+    Column("project_id", Text),
+    Column("owner", Text),
+    Column("due_date", Text),
+    Column("priority", Text),
+    Column("status", Text),
+    Column("source_type", Text),
+    Column("source_content_id", Text),
+    Column("jira_key", Text),
+    Column("created_at", Text),
+    Column("completed_at", Text),
+    Column("tags", Text),
+)
+
+hub_content = Table(
+    "hub_content", metadata,
+    Column("id", Text, primary_key=True),
+    Column("title", Text),
+    Column("body", Text),
+    Column("summary", Text),
+    Column("source", Text),
+    Column("source_id", Text),
+    Column("sender", Text),
+    Column("triage", Text),
+    Column("priority", Text),
+    Column("has_action_item", Integer),
+    Column("action_owner", Text),
+    Column("action_due_date", Text),
+    Column("ingested_at", Text),
+    Column("created_at", Text),
+)
+
+hub_projects = Table(
+    "hub_projects", metadata,
+    Column("id", Text, primary_key=True),
+    Column("name", Text),
+    Column("jira_key", Text),
+    Column("confluence_space", Text),
+    Column("active", Integer, server_default="1"),
+    Column("created_at", Text),
+)
+
+hub_sync_state = Table(
+    "hub_sync_state", metadata,
+    Column("source", Text, primary_key=True),
+    Column("last_sync", Text),
+    Column("item_count", Integer),
+    Column("status", Text),
+    Column("message", Text),
+)
+
+hub_project_content = Table(
+    "hub_project_content", metadata,
+    Column("project_id", Text, nullable=False),
+    Column("content_id", Text, nullable=False),
+    UniqueConstraint("project_id", "content_id"),
+)
+
+hub_api_costs = Table(
+    "hub_api_costs", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("feature", Text),
+    Column("model", Text),
+    Column("input_tokens", Integer),
+    Column("output_tokens", Integer),
+    Column("cost_usd", Float),
+    Column("created_at", Text),
+)
+
+hub_drafts = Table(
+    "hub_drafts", metadata,
+    Column("id", Text, primary_key=True),
+    Column("project_id", Text),
+    Column("template", Text),
+    Column("section", Text),
+    Column("content", Text),
+    Column("source_content_id", Text),
+    Column("status", Text),
+    Column("created_at", Text),
+)
+
+# ---------------------------------------------------------------------------
+# Hub sync watermark (tracks sync progress)
+# ---------------------------------------------------------------------------
+
+hub_sync_watermark = Table(
+    "hub_sync_watermark", metadata,
+    Column("table_name", Text, primary_key=True),
+    Column("last_synced_at", Text),
+    Column("last_rowid", Integer),
+    Column("row_count", Integer),
 )

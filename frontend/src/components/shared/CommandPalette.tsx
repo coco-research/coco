@@ -3,17 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import {
   Search, LayoutDashboard, FolderKanban, Radio, MessageSquare,
   DollarSign, Settings, CheckSquare, Users, Inbox, Activity, ListTodo,
-  Plus, Bot, Target, Trash2, Network, Home, FileText, Loader2,
+  Plus, Bot, Target, Trash2, Network, Home, FileText, FilePenLine, Loader2,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { apiFetch } from '../../lib/api';
 
 interface SearchResult {
-  type: 'todo' | 'agent' | 'task' | 'goal' | 'content';
+  type: 'todo' | 'agent' | 'task' | 'goal' | 'content' | 'draft';
   id: string;
   title: string;
   subtitle: string;
   url: string;
+  display_id?: string;
+  exact_match?: boolean;
 }
 
 const searchTypeIcons: Record<string, React.ElementType> = {
@@ -22,6 +24,7 @@ const searchTypeIcons: Record<string, React.ElementType> = {
   task: ListTodo,
   goal: Target,
   content: FileText,
+  draft: FilePenLine,
 };
 
 const searchTypeLabels: Record<string, string> = {
@@ -30,6 +33,7 @@ const searchTypeLabels: Record<string, string> = {
   task: 'Tasks',
   goal: 'Goals',
   content: 'Content',
+  draft: 'Drafts',
 };
 
 interface CommandItem {
@@ -142,10 +146,10 @@ export function CommandPalette() {
         }
 
         // Normal search
-        const searchResults = await apiFetch<SearchResult[]>(
-          `/search?q=${encodeURIComponent(query)}&limit=10`,
+        const { results: apiResults } = await apiFetch<{ results: SearchResult[]; query: string }>(
+          `/search?q=${encodeURIComponent(query)}&types=todos,agents,content,goals,drafts&limit=10`,
         );
-        results.push(...searchResults);
+        results.push(...apiResults);
         setSearchResults(results);
       } catch {
         setSearchResults([]);
@@ -426,7 +430,14 @@ export function CommandPalette() {
                                   className={idx === selectedIndex ? 'text-accent' : 'text-muted-foreground'}
                                 />
                                 <div className="flex-1 min-w-0">
-                                  <div className="truncate">{result.title}</div>
+                                  <div className="truncate flex items-center gap-1.5">
+                                    {result.display_id && (
+                                      <span className="inline-flex shrink-0 rounded bg-accent/15 px-1.5 py-0.5 text-[10px] font-mono font-semibold text-accent">
+                                        {result.display_id}
+                                      </span>
+                                    )}
+                                    <span className="truncate">{result.title}</span>
+                                  </div>
                                   <div className="text-[11px] text-muted-foreground truncate">
                                     {result.subtitle}
                                   </div>

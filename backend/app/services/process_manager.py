@@ -8,7 +8,7 @@ import psutil
 import structlog
 from app.db.connections import get_platform_db, _connect
 from app.config import PLATFORM_DB_PATH, MAX_CONCURRENT_AGENTS, AGENT_TIMEOUT_MINUTES, USE_AGENT_SDK
-from app.services.collaboration_context import auto_capture_output
+from app.services.collaboration_context import auto_capture_output, build_knowledge_context
 from app.services.event_bus import event_bus
 
 log = structlog.get_logger()
@@ -170,10 +170,31 @@ class ProcessManager:
                    if k in _ALLOWED_ENV_KEYS or k.startswith("CLAUDE_")}
             env.pop("CLAUDE_CODE_ENTRYPOINT", None)
 
+            # Inject knowledge context into the task prompt
+            enriched_task = task
+            try:
+                # Resolve project_id from node_id
+                kc_project_id = None
+                if node_id:
+                    with get_platform_db() as db:
+                        nrow = db.execute(
+                            "SELECT hub_project_id FROM nodes WHERE id = ?", (node_id,)
+                        ).fetchone()
+                        if nrow and nrow["hub_project_id"]:
+                            kc_project_id = nrow["hub_project_id"]
+
+                knowledge_ctx = build_knowledge_context(
+                    node_id=node_id, project_id=kc_project_id, token_budget=2000
+                )
+                if knowledge_ctx:
+                    enriched_task = f"{knowledge_ctx}\n\n---\n\n{task}"
+            except Exception as e:
+                log.debug("knowledge_context_injection_skipped", agent_id=agent_id, error=str(e))
+
             cmd = ["claude", "-p", "--output-format", "stream-json"]
             if model:
                 cmd.extend(["--model", model])
-            cmd.append(task)
+            cmd.append(enriched_task)
 
             proc = subprocess.Popen(
                 cmd,

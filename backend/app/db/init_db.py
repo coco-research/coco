@@ -261,10 +261,18 @@ CREATE TABLE IF NOT EXISTS content_classifications (
     id TEXT PRIMARY KEY,
     hub_content_id TEXT NOT NULL UNIQUE,
     project_id TEXT,
-    action TEXT NOT NULL CHECK(action IN ('classify','dismiss')),
-    classified_at TEXT NOT NULL DEFAULT (datetime('now'))
+    classified_project_id TEXT,
+    suggested_project_id TEXT,
+    action TEXT DEFAULT 'classify' CHECK(action IN ('classify','dismiss')),
+    confidence REAL DEFAULT 0.0,
+    reasoning TEXT,
+    auto_classified INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'pending',
+    classified_at TEXT NOT NULL DEFAULT (datetime('now')),
+    created_at TEXT DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_content_class_hub ON content_classifications(hub_content_id);
+CREATE INDEX IF NOT EXISTS idx_content_class_status ON content_classifications(status);
 
 CREATE TABLE IF NOT EXISTS project_overrides (
     id TEXT PRIMARY KEY,
@@ -592,6 +600,33 @@ def init_platform_db():
                 conn.execute("ALTER TABLE chat_messages ADD COLUMN session_id TEXT REFERENCES chat_sessions(id)")
             except Exception as e:
                 log.warning("add_column_skipped", table="chat_messages", column="session_id", error=str(e))
+
+    # Add new columns to content_classifications if missing
+    if "content_classifications" in existing_tables:
+        cc_cols = {r[1] for r in conn.execute("PRAGMA table_info(content_classifications)").fetchall()}
+        for col, default in [
+            ("confidence", "0.0"),
+            ("reasoning", None),
+            ("auto_classified", "0"),
+            ("status", "'pending'"),
+            ("classified_project_id", None),
+            ("suggested_project_id", None),
+            ("created_at", None),
+        ]:
+            if col not in cc_cols:
+                try:
+                    ddl = f"ALTER TABLE content_classifications ADD COLUMN {col}"
+                    if col == "confidence":
+                        ddl += " REAL DEFAULT 0.0"
+                    elif col == "auto_classified":
+                        ddl += " INTEGER DEFAULT 0"
+                    elif col in ("reasoning", "classified_project_id", "suggested_project_id", "created_at"):
+                        ddl += " TEXT"
+                    elif col == "status":
+                        ddl += " TEXT DEFAULT 'pending'"
+                    conn.execute(ddl)
+                except Exception as e:
+                    log.warning("add_column_skipped", table="content_classifications", column=col, error=str(e))
 
     # Add delegation columns to tasks if missing
     if "tasks" in existing_tables:

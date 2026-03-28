@@ -4,7 +4,7 @@ import { useScope } from '../context/ScopeContext';
 import { apiPost, apiFetch, apiPatch } from '../lib/api';
 import {
   Inbox, AlertTriangle, FileCheck, FolderOpen, Activity, Check, X, Eye, EyeOff, ChevronRight, Clock, Mic,
-  CheckSquare, Square, MinusSquare, Bot, ChevronDown as ChevronDownIcon,
+  CheckSquare, Square, MinusSquare, Bot, ChevronDown as ChevronDownIcon, Lightbulb, Sparkles,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useInViewport } from '../hooks/useInViewport';
@@ -13,7 +13,21 @@ import { useListNavigation } from '../hooks/useListNavigation';
 import { VoiceDecisionCard, type VoiceDecisionItem } from '../components/inbox/VoiceDecisionCard';
 
 type ReadState = 'unread' | 'seen' | 'dismissed';
-type InboxTab = 'all' | 'urgent' | 'drafts' | 'classify' | 'health' | 'auto_handled';
+type InboxTab = 'all' | 'urgent' | 'drafts' | 'classify' | 'suggestions' | 'health' | 'auto_handled';
+
+interface SuggestionItem {
+  id: string;
+  hub_content_id: string;
+  title: string;
+  body?: string;
+  source?: string;
+  classified_project_id?: string;
+  suggested_project_id?: string;
+  suggested_project_name?: string;
+  confidence: number;
+  reasoning?: string;
+  content_created_at?: string;
+}
 
 interface AutoHandledItem {
   id: string;
@@ -45,6 +59,7 @@ const TAB_CONFIG: { key: InboxTab; label: string; icon: React.ElementType }[] = 
   { key: 'urgent', label: 'Urgent', icon: AlertTriangle },
   { key: 'drafts', label: 'Drafts', icon: FileCheck },
   { key: 'classify', label: 'Classify', icon: FolderOpen },
+  { key: 'suggestions', label: 'Suggestions', icon: Lightbulb },
   { key: 'health', label: 'Health', icon: Activity },
   { key: 'auto_handled', label: 'Auto-handled', icon: Bot },
 ];
@@ -340,6 +355,47 @@ export default function InboxPage() {
     staleTime: 10_000,
   });
 
+  // Suggestions from auto-classifier
+  const { data: suggestionsData, refetch: refetchSuggestions } = useQuery({
+    queryKey: ['content-suggestions'],
+    queryFn: () => apiFetch<{ items: SuggestionItem[]; total: number }>('/content/suggestions'),
+    staleTime: 10_000,
+  });
+
+  const suggestions: SuggestionItem[] = suggestionsData?.items ?? [];
+
+  const acceptSuggestionMut = useMutation({
+    mutationFn: ({ contentId, projectId }: { contentId: string; projectId?: string }) =>
+      apiPost<unknown>(`/content/${contentId}/accept-suggestion`, projectId ? { project_id: projectId } : {}),
+    onSuccess: () => {
+      refetchSuggestions();
+      queryClient.invalidateQueries({ queryKey: ['content-unsorted'] });
+      toast('Suggestion accepted', 'success');
+    },
+    onError: () => toast('Failed to accept suggestion', 'error'),
+  });
+
+  const rejectSuggestionMut = useMutation({
+    mutationFn: (contentId: string) =>
+      apiPost<unknown>(`/content/${contentId}/reject-suggestion`, {}),
+    onSuccess: () => {
+      refetchSuggestions();
+      toast('Suggestion rejected', 'info');
+    },
+    onError: () => toast('Failed to reject suggestion', 'error'),
+  });
+
+  const batchAcceptSuggestionsMut = useMutation({
+    mutationFn: (minConfidence: number) =>
+      apiPost<unknown>(`/content/batch-accept-suggestions?min_confidence=${minConfidence}`, {}),
+    onSuccess: () => {
+      refetchSuggestions();
+      queryClient.invalidateQueries({ queryKey: ['content-unsorted'] });
+      toast('High-confidence suggestions accepted', 'success');
+    },
+    onError: () => toast('Failed to batch accept', 'error'),
+  });
+
   const { data: todosData } = useQuery({
     queryKey: ['todos-overdue'],
     queryFn: async () => {
@@ -544,6 +600,7 @@ export default function InboxPage() {
     urgent: activeDedupedItems.filter(i => i.type === 'urgent' || i.type === 'overdue').length,
     drafts: activeDedupedItems.filter(i => i.type === 'draft_approval').length,
     classify: activeDedupedItems.filter(i => i.type === 'classify').length,
+    suggestions: suggestions.length,
     health: activeDedupedItems.filter(i => i.type === 'health').length,
     auto_handled: autoHandledItems.length,
   };
@@ -815,6 +872,90 @@ export default function InboxPage() {
             />
           )}
         </div>
+      ) : activeTab === 'suggestions' ? (
+        /* Suggestions tab: AI-classified content awaiting review */
+        suggestions.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+            <Lightbulb size={40} className="mb-3 opacity-30" />
+            <p className="text-sm font-medium">No suggestions</p>
+            <p className="text-xs mt-1">The auto-classifier has no pending suggestions right now.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {/* Batch accept bar */}
+            {suggestions.filter(s => s.confidence >= 0.90).length > 0 && (
+              <div className="flex items-center gap-3 px-4 py-2.5 bg-success/5 border border-success/20 rounded-xl">
+                <Sparkles size={14} className="text-success" />
+                <span className="text-sm text-muted-foreground flex-1">
+                  {suggestions.filter(s => s.confidence >= 0.90).length} suggestion{suggestions.filter(s => s.confidence >= 0.90).length !== 1 ? 's' : ''} with 90%+ confidence
+                </span>
+                <button
+                  onClick={() => batchAcceptSuggestionsMut.mutate(0.90)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-success/10 text-success hover:bg-success/20 transition-colors"
+                >
+                  <Check size={14} />
+                  Accept All High-Confidence
+                </button>
+              </div>
+            )}
+            <div className="border border-border rounded-xl divide-y divide-border overflow-hidden">
+              {suggestions.map(s => (
+                <div key={s.id} className="flex items-start gap-3 px-4 py-3 hover:bg-accent/50 transition-colors">
+                  <div className="shrink-0 mt-0.5">
+                    <Lightbulb size={14} className="text-warning" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{s.title}</p>
+                    {s.body && (
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{s.body}</p>
+                    )}
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                      {s.suggested_project_name && (
+                        <span className="text-[10px] bg-info/10 text-info px-1.5 py-0.5 rounded font-medium">
+                          {s.suggested_project_name}
+                        </span>
+                      )}
+                      <span className={cn(
+                        'text-[10px] px-1.5 py-0.5 rounded font-medium',
+                        s.confidence >= 0.85 ? 'bg-success/10 text-success' :
+                        s.confidence >= 0.70 ? 'bg-warning/10 text-warning' :
+                        'bg-muted text-muted-foreground'
+                      )}>
+                        {Math.round(s.confidence * 100)}% confidence
+                      </span>
+                      {s.source && (
+                        <span className="text-[10px] text-muted-foreground">
+                          via {s.source}
+                        </span>
+                      )}
+                      {s.reasoning && (
+                        <span className="text-[10px] text-muted-foreground italic">
+                          {s.reasoning}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={() => acceptSuggestionMut.mutate({ contentId: s.hub_content_id })}
+                      className="p-1.5 rounded hover:bg-success/20 text-success transition-colors"
+                      title="Accept suggestion"
+                    >
+                      <Check size={14} />
+                    </button>
+                    <button
+                      onClick={() => rejectSuggestionMut.mutate(s.hub_content_id)}
+                      className="p-1.5 rounded hover:bg-destructive/20 text-destructive transition-colors"
+                      title="Reject suggestion"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
       ) : activeTab === 'auto_handled' ? (
         /* Auto-handled tab: separate display */
         autoHandledItems.length === 0 ? (

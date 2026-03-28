@@ -6,15 +6,13 @@ from pathlib import Path
 import structlog
 import time
 
-from fastapi import HTTPException as _HTTPException
 from app.db.init_db import init_platform_db
 from app.services.process_manager import process_manager
-from app.services.id_generator import resolve_display_id as _resolve_display_id
 from app.routers import (
     health, projects, teams, brain, content, agents, tasks,
     costs, todos, drafts, sessions, activity, events,
     settings, chat, dashboard, goals, tree, home, collaboration,
-    tts, comments, templates, jarvis, analysis, search,
+    tts, comments, templates, jarvis, analysis, stt,
 )
 
 structlog.configure(
@@ -61,7 +59,6 @@ openapi_tags = [
     {"name": "Comments", "description": "Threaded comments on entities"},
     {"name": "Templates", "description": "Project export/import templates"},
     {"name": "Analysis", "description": "Folder analysis pipeline"},
-    {"name": "Search", "description": "Unified cross-entity search"},
 ]
 
 app = FastAPI(
@@ -124,17 +121,7 @@ app.include_router(jarvis.router)
 app.include_router(comments.router)
 app.include_router(templates.router)
 app.include_router(analysis.router)
-app.include_router(search.router)
-
-# --- Cross-cutting resolve endpoint ---
-
-@app.get("/api/resolve/{display_id}", tags=["Search"])
-def resolve_display_id(display_id: str):
-    """Resolve a human-readable display ID (e.g. CXR-47) to entity type + id."""
-    result = _resolve_display_id(display_id)
-    if not result:
-        raise _HTTPException(404, f"No entity found for display ID '{display_id}'")
-    return result
+app.include_router(stt.router)
 
 # Serve static frontend in production
 static_dir = Path(__file__).parent.parent / "static"

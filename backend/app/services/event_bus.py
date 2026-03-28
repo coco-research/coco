@@ -37,13 +37,20 @@ class EventBus:
         for q in dead:
             self._subscribers.remove(q)
 
-    async def subscribe(self) -> AsyncGenerator[dict, None]:
-        """Yield SSE-ready dicts as they arrive. Call unsubscribe() on cleanup."""
+    async def subscribe(self, event_prefix: str | None = None) -> AsyncGenerator[dict, None]:
+        """Yield SSE-ready dicts as they arrive.
+
+        Args:
+            event_prefix: If set, only yield events whose ``event`` field
+                starts with this prefix (e.g. ``"agent."``).
+        """
         q: asyncio.Queue = asyncio.Queue(maxsize=256)
         self._subscribers.append(q)
         try:
             while True:
                 event = await q.get()
+                if event_prefix and not event.get("event", "").startswith(event_prefix):
+                    continue
                 yield event
         finally:
             self.unsubscribe(q)

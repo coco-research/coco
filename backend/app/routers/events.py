@@ -121,6 +121,42 @@ async def event_stream():
     return EventSourceResponse(_merged_event_generator())
 
 
+async def _agent_status_generator():
+    """Stream live agent status changes via the EventBus.
+
+    On connect, emits a snapshot of all current agents so the client
+    can hydrate without a separate REST call, then streams deltas.
+    """
+    # 1. Send initial snapshot of all agents
+    with get_platform_db() as db:
+        rows = db.execute(
+            "SELECT id, name, status, role, pid, started_at, stopped_at, last_heartbeat "
+            "FROM agents ORDER BY created_at DESC"
+        ).fetchall()
+        snapshot = [dict(r) for r in rows]
+
+    yield {
+        "event": "agent.snapshot",
+        "data": json.dumps({"agents": snapshot, "type": "agent.snapshot"}),
+    }
+
+    # 2. Stream status deltas filtered to agent.* events
+    async for event in event_bus.subscribe(event_prefix="agent."):
+        yield event
+
+
+@router.get("/api/events/agents")
+async def agent_status_stream():
+    """SSE endpoint for live agent status updates.
+
+    Emits an initial ``agent.snapshot`` event with all agents, then
+    streams ``agent.spawned``, ``agent.paused``, ``agent.resumed``,
+    ``agent.killed``, ``agent.completed``, and ``agent.failed`` events
+    as they occur.
+    """
+    return EventSourceResponse(_agent_status_generator())
+
+
 async def _agent_output_generator(agent_id: str):
     """Poll agent_output table and emit new rows as SSE events."""
     last_id = 0

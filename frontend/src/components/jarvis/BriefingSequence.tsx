@@ -135,12 +135,12 @@ function MetricScene({ scene, visible }: { scene: BriefingScene; visible: boolea
         if (!replaced && /^\d+$/.test(part) && scene.value != null) {
           replaced = true;
           return (
-            <span key={i} className="font-mono font-bold text-[#0A84FF]">
+            <span key={`metric-${part}-${i}`} className="font-mono font-bold text-[#0A84FF]">
               {count.toLocaleString()}
             </span>
           );
         }
-        return <span key={i}>{part}</span>;
+        return <span key={`text-${part.slice(0, 8)}-${i}`}>{part}</span>;
       })}
       {!isDone && <span className="inline-block w-0.5 h-3.5 bg-white/40 ml-0.5 animate-pulse" />}
     </p>
@@ -256,7 +256,7 @@ export function BriefingSequence({ scenes, enabled, isSpeaking, onAllRevealed }:
         const visible = i < visibleCount;
         const isPostGreeting = i === 1 && scenes[0]?.type === 'greeting';
         return (
-          <div key={i}>
+          <div key={`${scene.type}-${scene.text.slice(0, 20)}-${i}`}>
             {/* Thin divider after greeting */}
             {isPostGreeting && visible && (
               <div className="w-16 h-px bg-white/10 mx-auto my-3 transition-opacity duration-500" />

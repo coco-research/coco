@@ -40,7 +40,7 @@ The CLI workflow (`/coco`, CoCo SKILL.md, `think.py`, MCP tools) continues to wo
 | Phase 11: Todos & Settings | 3 days | 41 days |
 | Phase 12: Polish & Production | 5 days | 46 days |
 
-**Total estimate: ~46 working days (~9-10 weeks)**
+**Total estimate: ~50 working days (~10 weeks)**
 
 ---
 
@@ -242,6 +242,83 @@ The CLI workflow (`/coco`, CoCo SKILL.md, `think.py`, MCP tools) continues to wo
 - **Search:** Leverage existing `content_fts` FTS5 table in `hub.db` (read-only)
 - **HTML sanitization:** `DOMPurify` on frontend for email bodies
 - **Classification:** Calls backend which uses same logic as KH `reclassify` MCP tool
+
+---
+
+### Phase 5.5: Database Abstraction & Hub Sync (4 days)
+
+**Goal:** Introduce SQLAlchemy Core as the database abstraction layer so the platform can target both SQLite (local/dev) and PostgreSQL (cloud/production). Mirror hub.db tables into platform's database so all reads come from one source. KH itself stays untouched — it continues writing to hub.db (SQLite) as before.
+
+**Deployment note:** This phase is tested locally on SQLite for at least 2 weeks before any cloud/PostgreSQL deployment. The abstraction is in place but PostgreSQL is not required until cloud launch.
+
+#### Architecture
+
+```
+LOCAL MODE (default, open-source):
+  KH CLI -> hub.db (SQLite, unchanged)
+  Sync daemon reads hub.db -> writes hub_* mirror tables into platform DB
+  CoCo Platform reads from platform DB only (SQLite or PostgreSQL)
+
+CLOUD MODE (future):
+  KH CLI -> hub.db (local Mac)
+  Sync daemon pushes hub.db deltas -> cloud PostgreSQL
+  CoCo Platform reads from PostgreSQL only
+```
+
+#### Tasks
+
+| # | Task | Effort | Notes |
+|---|------|--------|-------|
+| 5.5.1 | Add SQLAlchemy Core dependency + engine factory: `create_engine()` from `DATABASE_URL` env var (default: `sqlite:///~/.coco/platform.db`) | 0.25d | No ORM — Core only |
+| 5.5.2 | Define SA Core `Table` metadata for all 37 existing platform.db tables | 0.5d | Mirror existing schema in `backend/app/db/tables.py` |
+| 5.5.3 | Create connection manager: replaces `connections.py` with SA engine. `get_db()` returns SA connection. WAL + foreign keys via engine events | 0.25d | Backward compat: existing `get_platform_db()` delegates to new engine |
+| 5.5.4 | Hub mirror tables: create `hub_content`, `hub_projects`, `hub_todos`, `hub_action_items`, `hub_drafts` in platform DB schema | 0.25d | Subset of hub.db schema — only tables platform reads |
+| 5.5.5 | Hub sync service: `backend/app/services/hub_sync.py` — reads hub.db (read-only), diffs against `hub_sync_state` watermark table, upserts changed rows into `hub_*` tables | 0.5d | Runs on startup + every 60s via background task |
+| 5.5.6 | Migrate Phase 2 routers (projects, health, dashboard) from raw sqlite3 to SA Core queries | 0.5d | Start with highest-traffic endpoints |
+| 5.5.7 | Migrate hub.db reads: replace all `get_hub_db()` calls with reads from `hub_*` mirror tables | 0.5d | Remove direct hub.db dependency from routers |
+| 5.5.8 | Update Alembic config: auto-generate migrations from SA Core metadata, support both SQLite and PostgreSQL | 0.25d | `alembic.ini` reads `DATABASE_URL` |
+| 5.5.9 | Add `docker-compose.yml` with PostgreSQL service (for future use, not required locally) | 0.25d | `DATABASE_URL=postgresql://coco:coco@localhost/coco` |
+| 5.5.10 | Integration tests: run full test suite against both SQLite and PostgreSQL (CI matrix) | 0.5d | `pytest --db=sqlite` and `pytest --db=postgres` |
+| 5.5.11 | Update `init_db.py`: use SA Core `metadata.create_all()` instead of raw DDL. Keep backward compat migration logic | 0.25d | Idempotent — safe to run on existing DBs |
+
+#### Acceptance Criteria
+- [ ] `DATABASE_URL=sqlite:///...` works identically to current behavior (no regressions)
+- [ ] `DATABASE_URL=postgresql://...` connects and all tables are created via Alembic
+- [ ] Hub sync service mirrors hub.db content into `hub_*` tables within 60 seconds of changes
+- [ ] No router imports `sqlite3` directly — all go through SA Core engine
+- [ ] No router calls `get_hub_db()` — all hub reads come from `hub_*` mirror tables
+- [ ] Test suite passes against both SQLite and PostgreSQL
+- [ ] KH CLI is completely unmodified — hub.db schema and write patterns unchanged
+- [ ] Existing `~/.coco/platform.db` data survives the migration (no data loss)
+
+#### Key Decisions
+- **SQLAlchemy Core, not ORM:** Dialect-agnostic SQL without mapped classes or identity maps. Core gives us `table.select().where(...)` that compiles to correct SQL for both dialects.
+- **Hub sync, not direct read:** Decouples KH from Platform's database engine. KH stays on SQLite forever. Platform reads from one source (its own DB) regardless of engine.
+- **Sync watermark:** `hub_sync_state` table tracks last-synced rowid/timestamp per hub table. Delta sync, not full copy.
+- **Local-first testing:** Phase runs entirely on SQLite locally for at least 2 weeks. PostgreSQL validated in CI but not required for development. Cloud deployment is a separate future step.
+- **60-second sync interval:** Acceptable lag for a dashboard. KH data is already minutes old (email/Jira polling).
+
+#### Migration Strategy
+
+Routers are migrated incrementally. During this phase, both patterns coexist:
+
+```python
+# OLD (removed by end of phase)
+with get_hub_db() as db:
+    row = db.execute("SELECT ... FROM todos WHERE id = ?", (tid,)).fetchone()
+
+# NEW (SA Core — works on SQLite AND PostgreSQL)
+with get_db() as conn:
+    row = conn.execute(hub_todos.select().where(hub_todos.c.id == tid)).fetchone()
+```
+
+`get_hub_db()` is deprecated but not removed until all callers are migrated.
+
+#### What stays unchanged
+- `~/.hub/hub.db` — KH still owns this, still writes to it, schema unchanged
+- `~/.coco/brain.json`, `queue.json`, `config.json` — JSON files stay as-is
+- KH MCP tools — continue reading/writing hub.db directly
+- `think.py` — continues reading hub.db directly
 
 ---
 
@@ -508,8 +585,13 @@ Phase 3:           Phase 5:          Phase 7:           Phase 8:
 Dashboard          KH Browser        Chat               Tasks
     |                  |                                    |
     v                  v                                    |
-Phase 4:           Phase 6:                                |
-Stations           Decision Queue                          |
+Phase 4:           Phase 5.5:                              |
+Stations           DB Abstraction                          |
+    |              & Hub Sync                               |
+    |                  |                                    |
+    |                  v                                    |
+    |              Phase 6:                                 |
+    |              Decision Queue                           |
     |                  |                                    |
     +------------------+------------------------------------+
     |
@@ -529,12 +611,14 @@ Phase 12: Polish & Production
 **Parallel opportunities:**
 - Phases 3, 5, 7, and 8 can be built in parallel after Phase 2 (they share no dependencies)
 - Phase 4 depends on Phase 3 (station cards on dashboard)
-- Phase 6 depends on Phase 5 (classify actions use content endpoints)
+- Phase 5.5 depends on Phase 5 (needs hub.db read patterns to exist before abstracting them)
+- Phase 6 depends on Phase 5.5 (classify actions use new SA Core queries and hub mirror tables)
 - Phase 9 depends on Phases 4 + 8 (cost tracking needs stations + tasks)
 - Phases 10 and 11 depend only on Phase 2 but are sequenced late because they are lower priority
 - Phase 12 depends on all prior phases (polish pass)
+- All phases after 5.5 benefit from SA Core — new queries are written DB-agnostic from the start
 
-**Critical path:** 1 -> 2 -> 3 -> 4 -> 9 -> 12 (25 days)
+**Critical path:** 1 -> 2 -> 5 -> 5.5 -> 6 -> 9 -> 12 (30 days)
 
 ---
 

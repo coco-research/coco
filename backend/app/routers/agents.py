@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 from app.db.connections import get_platform_db
 from app.db.tree_utils import build_node_id_filter
 from app.services.process_manager import process_manager
-from app.services.collaboration_context import build_collaboration_prompt
+from app.services.collaboration_context import build_collaboration_prompt, build_coco_context, build_yolo_constraints
 from app.services.event_bus import event_bus
 from app.models.agents import (
     CreateAgentBody,
@@ -196,6 +196,8 @@ def spawn_agent(agent_id: str, body: SpawnAgentBody | None = None):
         # Inject collaboration context if this agent is part of a team workflow
         node_id = agent.get("node_id")
         role = agent.get("role", "custom")
+        yolo_mode = body.yolo_mode if body else False
+
         if node_id:
             collab_ctx = build_collaboration_prompt(node_id, role)
             if collab_ctx:
@@ -205,7 +207,10 @@ def spawn_agent(agent_id: str, body: SpawnAgentBody | None = None):
         cwd = agent.get("working_directory")
 
         try:
-            pid = process_manager.spawn(agent_id, task, cwd=cwd, model=model, node_id=node_id, role=role)
+            pid = process_manager.spawn(
+                agent_id, task, cwd=cwd, model=model,
+                node_id=node_id, role=role, yolo_mode=yolo_mode,
+            )
         except RuntimeError as e:
             raise HTTPException(429, str(e))
 

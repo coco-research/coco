@@ -31,6 +31,7 @@ class PatchAgentBody(BaseModel):
 
 class SpawnAgentBody(BaseModel):
     task: Optional[str] = None
+    yolo_mode: bool = False
 
 
 class CreateRoleBody(BaseModel):

@@ -15,6 +15,7 @@ import uuid
 from datetime import datetime, timezone
 
 from app.db.connections import get_platform_db, get_hub_db
+from app.config import HUB_DB_PATH, BRAIN_JSON_PATH, CONFIG_JSON_PATH
 
 log = logging.getLogger(__name__)
 
@@ -138,6 +139,147 @@ def build_collaboration_prompt(node_id: str, agent_role: str) -> str:
     sections.append("- Be specific and actionable -- the next team member needs to act on your output")
 
     return "\n".join(sections)
+
+
+TOKEN_BUDGET_CHARS = 8000  # ~2000 tokens
+
+
+def build_coco_context(node_id: str) -> str:
+    """Build CoCo brain context for an agent working on a specific node.
+
+    Reads brain.json people and rules, filters to those relevant to the node's
+    project, and formats as a context block for the agent's system prompt.
+    """
+    # 1. Read brain.json
+    try:
+        brain = json.loads(BRAIN_JSON_PATH.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError, OSError) as e:
+        log.debug("brain_json_read_failed: %s", e)
+        return ""
+
+    people: dict = brain.get("people", {})
+    rules: list = brain.get("attention_rules", [])
+    if not people and not rules:
+        return ""
+
+    # 2. Look up project_id from the node's tree_nodes row
+    project_id: str | None = None
+    try:
+        with get_platform_db() as db:
+            row = db.execute(
+                "SELECT project_id FROM tree_nodes WHERE id = ?", (node_id,)
+            ).fetchone()
+            if row:
+                project_id = row["project_id"]
+    except Exception:
+        pass
+
+    # 3. Filter people associated with this project
+    filtered_people: list[tuple[str, dict]] = []
+    for key, person in people.items():
+        person_projects = person.get("projects", [])
+        if project_id and project_id in person_projects:
+            filtered_people.append((key, person))
+        elif not project_id:
+            # No project context — include high-priority people
+            if person.get("priority") == "high":
+                filtered_people.append((key, person))
+
+    # 4. Filter attention rules matching this project
+    filtered_rules: list[dict] = []
+    for rule in rules:
+        target = rule.get("target_project")
+        if project_id and target == project_id:
+            filtered_rules.append(rule)
+        elif not project_id:
+            # Include person-level rules (no target_project)
+            if not target:
+                filtered_rules.append(rule)
+
+    if not filtered_people and not filtered_rules:
+        return ""
+
+    # 5. Format output
+    parts: list[str] = ["## Team Context (from CoCo Brain)"]
+
+    if filtered_people:
+        parts.append("")
+        parts.append("### Key People")
+        for key, person in filtered_people:
+            name = person.get("full_name", key)
+            role = person.get("role", "unknown")
+            projects = ", ".join(person.get("projects", []))
+            topics = ", ".join(person.get("patterns", {}).get("typical_topics", []))
+            line = f"- {name} ({role})"
+            if topics:
+                line += f" -- topics: {topics}"
+            parts.append(line)
+            if projects:
+                parts.append(f"  Projects: {projects}")
+
+    if filtered_rules:
+        parts.append("")
+        parts.append("### Attention Rules")
+        for rule in filtered_rules:
+            reason = rule.get("reason", "")
+            action = rule.get("action", "unknown")
+            parts.append(f"- {reason} (action: {action})")
+
+    result = "\n".join(parts)
+
+    # 6. Respect token budget
+    if len(result) > TOKEN_BUDGET_CHARS:
+        result = result[:TOKEN_BUDGET_CHARS] + "\n... (truncated)"
+
+    return result
+
+
+def build_yolo_constraints(project_id: str | None = None) -> str:
+    """Build YOLO mode constraints for an agent.
+
+    If YOLO mode is active, returns permission guidelines for autonomous actions.
+    If not active, returns empty string.
+    """
+    try:
+        config = json.loads(CONFIG_JSON_PATH.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError, OSError) as e:
+        log.debug("config_json_read_failed: %s", e)
+        return ""
+
+    if config.get("autonomy_mode") != "yolo":
+        return ""
+
+    profile = config.get("yolo_profile", "triage")
+    profiles_map = config.get("yolo", {}).get("profiles", {})
+    profile_info = profiles_map.get(profile, {})
+    profile_description = profile_info.get("description", profile)
+
+    # Build safe/escalate lists based on profile
+    if profile == "triage":
+        safe = "read, search, classify, gather information"
+        escalate = "create, update, delete, modify any data"
+    elif profile == "pm":
+        safe = "read, search, classify, create todos, approve drafts, update brain"
+        escalate = "delete, modify agents, create Jira tickets, external comms"
+    elif profile == "full":
+        safe = "read, search, classify, create, update, approve drafts, update brain, update Confluence"
+        escalate = "create Jira tickets, external comms, git push, destructive operations"
+    else:
+        safe = "read, search"
+        escalate = "all write operations"
+
+    parts = [
+        f"## Autonomy Mode: YOLO ({profile})",
+        "",
+        "You have elevated permissions for this session. Guidelines:",
+        f"- **Safe actions** (do without asking): {safe}",
+        f"- **Escalate** (ask before doing): {escalate}",
+        "- **Never** (always blocked): delete production data, push to main without review, modify auth/credentials",
+        "",
+        f"Profile: {profile_description}",
+    ]
+
+    return "\n".join(parts)
 
 
 def build_knowledge_context(

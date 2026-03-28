@@ -3,12 +3,13 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useScope } from '../context/ScopeContext';
 import { apiPost, apiFetch } from '../lib/api';
 import {
-  Inbox, AlertTriangle, FileCheck, FolderOpen, Activity, Check, X, Eye, EyeOff, ChevronRight, Clock
+  Inbox, AlertTriangle, FileCheck, FolderOpen, Activity, Check, X, Eye, EyeOff, ChevronRight, Clock, Mic
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useInViewport } from '../hooks/useInViewport';
 import { useToast } from '../components/shared/Toast';
 import { useListNavigation } from '../hooks/useListNavigation';
+import { VoiceDecisionCard, type VoiceDecisionItem } from '../components/inbox/VoiceDecisionCard';
 
 type ReadState = 'unread' | 'seen' | 'dismissed';
 type InboxTab = 'all' | 'urgent' | 'drafts' | 'classify' | 'health';
@@ -213,6 +214,9 @@ export default function InboxPage() {
   const { selectedNodeId, scopeProjectIds } = useScope();
   const [readStates, setReadStates] = useState<Record<string, ReadState>>({});
   const [showDismissed, setShowDismissed] = useState(false);
+  const [voiceMode, setVoiceMode] = useState(false);
+  const [voiceItem, setVoiceItem] = useState<VoiceDecisionItem | null>(null);
+  const [voiceLoading, setVoiceLoading] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -473,6 +477,54 @@ export default function InboxPage() {
     health: activeDedupedItems.filter(i => i.type === 'health').length,
   };
 
+  // ─── Voice mode helpers ──────────────────────────────────────────
+
+  const fetchVoiceItem = useCallback(async (command: string) => {
+    setVoiceLoading(true);
+    try {
+      const res = await apiPost<{ card?: VoiceDecisionItem; message?: string }>(
+        '/jarvis/command',
+        { text: command },
+      );
+      setVoiceItem(res.card ?? null);
+      if (res.message) toast(res.message, 'info');
+    } catch {
+      setVoiceItem(null);
+    } finally {
+      setVoiceLoading(false);
+    }
+  }, [toast]);
+
+  // Auto-fetch first item when entering voice mode
+  useEffect(() => {
+    if (voiceMode) {
+      fetchVoiceItem('next decision');
+    } else {
+      setVoiceItem(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [voiceMode]);
+
+  const handleVoiceApprove = useCallback(() => {
+    fetchVoiceItem('approve');
+    queryClient.invalidateQueries({ queryKey: ['drafts'] });
+    queryClient.invalidateQueries({ queryKey: ['queue'] });
+  }, [fetchVoiceItem, queryClient]);
+
+  const handleVoiceReject = useCallback(() => {
+    fetchVoiceItem('reject');
+    queryClient.invalidateQueries({ queryKey: ['drafts'] });
+    queryClient.invalidateQueries({ queryKey: ['queue'] });
+  }, [fetchVoiceItem, queryClient]);
+
+  const handleVoiceDefer = useCallback(() => {
+    fetchVoiceItem('defer');
+  }, [fetchVoiceItem]);
+
+  const handleVoiceNext = useCallback(() => {
+    fetchVoiceItem('next decision');
+  }, [fetchVoiceItem]);
+
   return (
     <div className="space-y-4">
       {/* Header row with tabs + controls */}
@@ -507,6 +559,18 @@ export default function InboxPage() {
 
         {/* Right-side controls */}
         <div className="flex items-center gap-3 pb-2">
+          <button
+            onClick={() => setVoiceMode(v => !v)}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+              voiceMode
+                ? 'bg-accent text-accent-foreground'
+                : 'text-muted-foreground hover:bg-accent/10',
+            )}
+          >
+            <Mic size={14} />
+            Voice
+          </button>
           {unreadCount > 0 && (
             <span className="text-xs text-muted-foreground">
               {unreadCount} unread
@@ -530,37 +594,59 @@ export default function InboxPage() {
         </div>
       </div>
 
-      {/* Items — click container to enable j/k navigation */}
-      {filteredItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-          <Inbox size={40} className="mb-3 opacity-30" />
-          <p className="text-sm font-medium">Inbox zero</p>
-          <p className="text-xs mt-1">Nothing needs your attention right now.</p>
+      {/* Voice mode: show large-format decision card */}
+      {voiceMode ? (
+        <div className="py-4">
+          {voiceLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <VoiceDecisionCard
+              item={voiceItem}
+              onApprove={handleVoiceApprove}
+              onReject={handleVoiceReject}
+              onDefer={handleVoiceDefer}
+              onNext={handleVoiceNext}
+              isListening={voiceMode}
+            />
+          )}
         </div>
       ) : (
-        <div
-          ref={containerRef}
-          tabIndex={0}
-          className="border border-border rounded-xl divide-y divide-border overflow-hidden outline-none"
-        >
-          {filteredItems.map((item, idx) => (
-            <div
-              key={item.id}
-              data-list-index={idx}
-              className={cn(idx === selectedIndex && 'list-nav-selected')}
-            >
-              <InboxItemRow
-                item={item}
-                readState={getReadState(item.id)}
-                onMarkSeen={handleMarkSeen}
-                onDismiss={handleDismiss}
-                onApprove={handleApprove}
-                onReject={handleReject}
-                onClassify={handleClassify}
-              />
+        <>
+          {/* Items — click container to enable j/k navigation */}
+          {filteredItems.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+              <Inbox size={40} className="mb-3 opacity-30" />
+              <p className="text-sm font-medium">Inbox zero</p>
+              <p className="text-xs mt-1">Nothing needs your attention right now.</p>
             </div>
-          ))}
-        </div>
+          ) : (
+            <div
+              ref={containerRef}
+              tabIndex={0}
+              className="border border-border rounded-xl divide-y divide-border overflow-hidden outline-none"
+            >
+              {filteredItems.map((item, idx) => (
+                <div
+                  key={item.id}
+                  data-list-index={idx}
+                  className={cn(idx === selectedIndex && 'list-nav-selected')}
+                >
+                  <InboxItemRow
+                    item={item}
+                    readState={getReadState(item.id)}
+                    onMarkSeen={handleMarkSeen}
+                    onDismiss={handleDismiss}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                    onClassify={handleClassify}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

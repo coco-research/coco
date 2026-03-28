@@ -8,6 +8,7 @@ import time
 
 from app.db.init_db import init_platform_db
 from app.services.process_manager import process_manager
+from app.services.trigger_engine import trigger_engine
 from app.services.id_generator import resolve_display_id as _resolve_display_id
 from app.routers import (
     health, projects, teams, brain, content, agents, tasks,
@@ -31,7 +32,10 @@ async def lifespan(app: FastAPI):
     log.info("platform_db_initialized")
     process_manager.reconcile_on_startup()
     log.info("orphan_reconciliation_done")
+    await trigger_engine.start()
+    log.info("trigger_engine_started")
     yield
+    await trigger_engine.stop()
     log.info("platform_stopping")
 
 openapi_tags = [

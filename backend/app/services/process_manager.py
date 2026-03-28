@@ -212,7 +212,7 @@ class ProcessManager:
             proc = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stderr=subprocess.STDOUT,  # merge stderr into stdout to prevent pipe deadlock
                 cwd=cwd or os.environ["HOME"],
                 env=env,
             )
@@ -322,6 +322,46 @@ class ProcessManager:
 
             self._concurrency_semaphore.release()
             self._agent_meta.pop(agent_id, None)
+
+    @staticmethod
+    def _extract_stream_text(raw_line: str) -> str | None:
+        """Extract human-readable text from a stream-json line.
+
+        Claude CLI --output-format stream-json emits JSON events.  We only
+        want the actual assistant text, not system/hook/tool metadata.
+        Returns the text fragment or None if the line should be skipped.
+        """
+        import json as _json
+        try:
+            obj = _json.loads(raw_line)
+        except (ValueError, TypeError):
+            # Not JSON — could be plain text from --verbose; keep it
+            return raw_line if raw_line.strip() else None
+
+        etype = obj.get("type", "")
+
+        # stream-json content_block_delta with text
+        if etype == "content_block_delta":
+            delta = obj.get("delta", {})
+            if delta.get("type") == "text_delta":
+                return delta.get("text", "")
+
+        # Final result message (non-streaming)
+        if etype == "result":
+            return obj.get("result", "")
+
+        # Assistant message with text content blocks
+        if etype == "assistant":
+            content = obj.get("content", [])
+            parts = []
+            for block in content:
+                if isinstance(block, dict) and block.get("type") == "text":
+                    parts.append(block.get("text", ""))
+            if parts:
+                return "\n".join(parts)
+
+        # Skip system, hook_started, hook_response, tool_use, etc.
+        return None
 
     def _read_output(self, agent_id: str, proc: subprocess.Popen):
         """Read stdout and store in platform.db.

@@ -19,7 +19,103 @@ DEFAULT_EXTENSIONS: set[str] = {
     ".md", ".txt", ".pdf", ".docx", ".csv", ".json", ".yaml", ".yml",
     ".html", ".py", ".ts", ".js", ".jsx", ".tsx", ".sql", ".sh", ".toml",
     ".cfg", ".ini", ".xml", ".rst", ".adoc", ".log",
+    ".eml", ".msg", ".pptx", ".ppt", ".xlsx", ".xls",
 }
+
+# ---------------------------------------------------------------------------
+# File categorization
+# ---------------------------------------------------------------------------
+
+FILE_CATEGORIES: dict[str, dict] = {
+    "email": {
+        "label": "Emails",
+        "icon": "mail",
+        "extensions": {".eml", ".msg"},
+        "name_patterns": [],
+    },
+    "meeting-notes": {
+        "label": "Meeting Notes",
+        "icon": "users",
+        "extensions": set(),
+        "name_patterns": ["meeting note", "meeting-note", "minutes", "standup", "retro", "sync note"],
+    },
+    "presentation": {
+        "label": "Presentations",
+        "icon": "presentation",
+        "extensions": {".pptx", ".ppt"},
+        "name_patterns": [],
+    },
+    "spreadsheet": {
+        "label": "Spreadsheets & Data",
+        "icon": "table",
+        "extensions": {".xlsx", ".xls", ".csv"},
+        "name_patterns": [],
+    },
+    "assessment": {
+        "label": "Assessments & Reports",
+        "icon": "clipboard-check",
+        "extensions": set(),
+        "name_patterns": ["assessment", "report", "analysis", "review", "audit", "scorecard"],
+    },
+    "requirement": {
+        "label": "Requirements & Specs",
+        "icon": "file-text",
+        "extensions": set(),
+        "name_patterns": ["requirement", "spec", "prd", "brd", "compliance", "regulatory"],
+    },
+    "document": {
+        "label": "Documents",
+        "icon": "file",
+        "extensions": {".docx", ".doc", ".pdf", ".html"},
+        "name_patterns": [],
+    },
+    "code": {
+        "label": "Code & Config",
+        "icon": "code",
+        "extensions": {".py", ".ts", ".js", ".jsx", ".tsx", ".sql", ".sh", ".toml", ".cfg", ".ini", ".yaml", ".yml", ".json", ".xml"},
+        "name_patterns": [],
+    },
+    "notes": {
+        "label": "Notes & Markdown",
+        "icon": "sticky-note",
+        "extensions": {".md", ".txt", ".rst", ".adoc"},
+        "name_patterns": [],
+    },
+}
+
+# Priority order for categorization — first match wins (name patterns checked first)
+_CATEGORY_PRIORITY = [
+    "email", "meeting-notes", "presentation", "spreadsheet",
+    "assessment", "requirement", "document", "code", "notes",
+]
+
+
+def categorize_file(filename: str) -> str:
+    """Categorize a file by extension-only categories first, then name patterns."""
+    name_lower = filename.lower()
+    ext = os.path.splitext(filename)[1].lower()
+
+    # 1. Strong extension match — categories where extension is definitive
+    #    (e.g., .eml is always email, .pptx is always presentation)
+    _EXTENSION_DEFINITIVE = ["email", "presentation", "spreadsheet"]
+    for cat_id in _EXTENSION_DEFINITIVE:
+        if ext in FILE_CATEGORIES[cat_id]["extensions"]:
+            return cat_id
+
+    # 2. Name-pattern match
+    for cat_id in _CATEGORY_PRIORITY:
+        cat = FILE_CATEGORIES[cat_id]
+        for pattern in cat["name_patterns"]:
+            if pattern in name_lower:
+                return cat_id
+
+    # 3. Extension match (remaining)
+    for cat_id in _CATEGORY_PRIORITY:
+        cat = FILE_CATEGORIES[cat_id]
+        if ext in cat["extensions"]:
+            return cat_id
+
+    return "other"
 
 # Directories to always skip
 SKIP_DIRS: set[str] = {
@@ -105,6 +201,7 @@ def scan_folder(
                 "ext": ext,
                 "size_bytes": st.st_size,
                 "modified_at": mtime.isoformat(),
+                "category": categorize_file(fname),
             })
 
             if len(files) >= max_files * 3:

@@ -43,7 +43,10 @@ function NodeCard({ node, project }: { node: TreeNode; project?: Project }) {
   const Icon = NODE_ICONS[node.node_type] ?? FolderKanban;
   const childCount = node.children?.length ?? 0;
   const hasHub = !!node.hub_project_id;
-  const linkTo = hasHub ? `/projects/${node.hub_project_id}` : `/tree/${node.id}`;
+
+  // All nodes navigate to their detail page.
+  // Hub-linked nodes go to /projects/{id}, others go to /node/{id}
+  const linkTo = hasHub ? `/projects/${node.hub_project_id}` : `/node/${node.id}`;
 
   return (
     <Link
@@ -54,6 +57,22 @@ function NodeCard({ node, project }: { node: TreeNode; project?: Project }) {
       )}
       style={node.color ? { borderLeftColor: node.color } : undefined}
     >
+      <NodeCardContent node={node} Icon={Icon} project={project} childCount={childCount} />
+      {!hasHub && childCount > 0 && (
+        <div className="flex items-center gap-1 mt-2 text-[10px] text-accent">
+          <ChevronRight size={10} />
+          {childCount} item{childCount !== 1 ? 's' : ''}
+        </div>
+      )}
+    </Link>
+  );
+}
+
+function NodeCardContent({ node, Icon, project, childCount }: {
+  node: TreeNode; Icon: React.ElementType; project?: Project; childCount: number;
+}) {
+  return (
+    <>
       <div className="flex items-center gap-2 mb-2">
         <Icon size={14} className="text-muted-foreground shrink-0" />
         <h3 className="text-sm font-medium text-foreground truncate">{node.label}</h3>
@@ -75,14 +94,14 @@ function NodeCard({ node, project }: { node: TreeNode; project?: Project }) {
             <span className="font-mono text-foreground">{project.jira_key}</span>
           </div>
         )}
-        {childCount > 0 && (
+        {childCount > 0 && !project && (
           <div className="flex items-center justify-between">
             <span>Children</span>
             <span className="font-medium text-foreground">{childCount}</span>
           </div>
         )}
       </div>
-    </Link>
+    </>
   );
 }
 

@@ -95,6 +95,8 @@ export default function App() {
                   <Route path="projects" element={<ErrorBoundary><ProjectsPage /></ErrorBoundary>} />
                   <Route path="projects/:projectId" element={<ErrorBoundary><ProjectDetailPage /></ErrorBoundary>} />
                   <Route path="projects/:projectId/:tab" element={<ErrorBoundary><ProjectDetailPage /></ErrorBoundary>} />
+                  <Route path="node/:nodeId" element={<ErrorBoundary><ProjectDetailPage /></ErrorBoundary>} />
+                  <Route path="node/:nodeId/:tab" element={<ErrorBoundary><ProjectDetailPage /></ErrorBoundary>} />
                   <Route path="agents" element={<ErrorBoundary><AgentsPage /></ErrorBoundary>} />
                   <Route path="knowledge" element={<ErrorBoundary><KnowledgePage /></ErrorBoundary>} />
                   <Route path="inbox" element={<ErrorBoundary><InboxPage /></ErrorBoundary>} />

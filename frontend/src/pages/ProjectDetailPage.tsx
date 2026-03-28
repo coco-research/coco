@@ -6,7 +6,7 @@ import {
   FolderKanban, Search, Radio, CheckSquare, Target, DollarSign, Users, Settings,
   Mail, Mic, Ticket, FileText, Plus, ChevronRight, Check, ChevronDown, X,
   GitBranch, Play, SkipForward, ChevronUp, Pencil, Download, Save,
-  FolderOpen, Folder, FolderSearch,
+  FolderOpen, Folder, FolderSearch, LayoutGrid, GitFork,
 } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { cn, timeAgo, formatCost } from '../lib/utils';
@@ -17,6 +17,7 @@ import { ContentList } from '../components/knowledge/ContentList';
 import { ContentDetail } from '../components/knowledge/ContentDetail';
 import type { ContentItem } from '../components/knowledge/ContentList';
 import { AgentCard, ROLE_META, type Agent } from '../components/agents/AgentCard';
+import { OrgChart, type OrgNode } from '../components/agents/OrgChart';
 import { InlineEditor } from '../components/shared/InlineEditor';
 import { CreateAgentDialog } from '../components/agents/CreateAgentDialog';
 import { AgentDetail } from '../components/agents/AgentDetail';
@@ -190,6 +191,68 @@ interface FolderFile {
   is_dir: boolean;
   size: number | null;
   modified: number;
+  category?: string;
+}
+
+interface FolderCategory {
+  id: string;
+  label: string;
+  icon: string;
+  count: number;
+}
+
+const CATEGORY_ICONS: Record<string, string> = {
+  email: '📧', 'meeting-notes': '📝', presentation: '📊', spreadsheet: '📈',
+  assessment: '📋', requirement: '📑', document: '📄', code: '💻',
+  notes: '🗒️', folder: '📁', other: '📎',
+};
+
+const CATEGORY_ORDER = [
+  'email', 'meeting-notes', 'presentation', 'spreadsheet',
+  'assessment', 'requirement', 'document', 'code', 'notes', 'other',
+];
+
+function GroupedFileList({ files, formatSize, formatDate }: {
+  files: FolderFile[];
+  formatSize: (b: number | null) => string;
+  formatDate: (ts: number) => string;
+}) {
+  // Group files by category
+  const groups: Record<string, FolderFile[]> = {};
+  for (const f of files) {
+    const cat = f.is_dir ? 'folder' : (f.category || 'other');
+    (groups[cat] ??= []).push(f);
+  }
+
+  // Sort groups by CATEGORY_ORDER
+  const sortedCategories = [...CATEGORY_ORDER, 'folder'].filter(c => groups[c]?.length);
+
+  return (
+    <div>
+      {sortedCategories.map(cat => (
+        <div key={cat}>
+          <div className="flex items-center gap-2 px-4 py-2 bg-muted/30 border-b border-border">
+            <span className="text-sm">{CATEGORY_ICONS[cat] || '📎'}</span>
+            <span className="text-[11px] font-semibold text-foreground uppercase tracking-wide">
+              {cat === 'folder' ? 'Folders' : cat === 'meeting-notes' ? 'Meeting Notes' : cat.replace(/-/g, ' ')}
+            </span>
+            <span className="text-[10px] text-muted-foreground">({groups[cat].length})</span>
+          </div>
+          <div className="divide-y divide-border">
+            {groups[cat].map(f => (
+              <div key={f.name} className="flex items-center gap-3 px-4 pl-8 py-2 hover:bg-accent/20 transition-colors">
+                <span className="flex-1 min-w-0 text-sm text-foreground truncate">{f.name}</span>
+                {f.size != null && (
+                  <span className="text-xs text-muted-foreground tabular-nums shrink-0">{formatSize(f.size)}</span>
+                )}
+                <span className="text-xs text-muted-foreground shrink-0">{formatDate(f.modified)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function FolderTab({ nodeId, projectId }: { nodeId: string | null; projectId: string }) {
@@ -205,8 +268,10 @@ function FolderTab({ nodeId, projectId }: { nodeId: string | null; projectId: st
 
   const folderPath = (nodeData?.folder_path as string) ?? '';
 
+  const [groupByCategory, setGroupByCategory] = useState(true);
+
   const { data: folderData, isLoading: folderLoading } = useQuery<{
-    path: string; exists: boolean; files: FolderFile[];
+    path: string; exists: boolean; files: FolderFile[]; categories?: FolderCategory[];
   }>({
     queryKey: ['tree-folder', nodeId, folderPath],
     queryFn: () => apiFetch(`/tree/${nodeId}/folder`),
@@ -298,8 +363,30 @@ function FolderTab({ nodeId, projectId }: { nodeId: string | null; projectId: st
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Contents</h4>
-            <span className="text-xs text-muted-foreground">{folderData?.files?.length ?? 0} items</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setGroupByCategory(!groupByCategory)}
+                className={cn(
+                  'text-[10px] px-2 py-0.5 rounded-full border transition-colors',
+                  groupByCategory ? 'bg-accent/20 border-accent/30 text-accent' : 'border-border text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {groupByCategory ? 'Grouped' : 'Flat'}
+              </button>
+              <span className="text-xs text-muted-foreground">{folderData?.files?.length ?? 0} items</span>
+            </div>
           </div>
+
+          {/* Category summary pills */}
+          {groupByCategory && folderData?.categories && folderData.categories.length > 1 && (
+            <div className="flex items-center gap-1.5 px-4 py-2 border-b border-border overflow-x-auto">
+              {folderData.categories.map(cat => (
+                <span key={cat.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/50 text-[10px] text-muted-foreground shrink-0">
+                  {CATEGORY_ICONS[cat.id] || '📎'} {cat.label} <span className="font-medium text-foreground">{cat.count}</span>
+                </span>
+              ))}
+            </div>
+          )}
 
           {folderLoading ? (
             <div className="space-y-1 p-3">
@@ -316,11 +403,13 @@ function FolderTab({ nodeId, projectId }: { nodeId: string | null; projectId: st
             <div className="text-center py-12 text-muted-foreground">
               <p className="text-sm">Empty folder</p>
             </div>
+          ) : groupByCategory ? (
+            <GroupedFileList files={folderData.files} formatSize={formatSize} formatDate={formatDate} />
           ) : (
             <div className="divide-y divide-border">
               {folderData.files.map((f) => (
                 <div key={f.name} className="flex items-center gap-3 px-4 py-2.5 hover:bg-accent/20 transition-colors">
-                  <span className="text-base shrink-0">{f.is_dir ? '📁' : '📄'}</span>
+                  <span className="text-base shrink-0">{f.is_dir ? '📁' : CATEGORY_ICONS[f.category || 'other'] || '📄'}</span>
                   <span className="flex-1 min-w-0 text-sm text-foreground truncate">{f.name}</span>
                   {f.size != null && (
                     <span className="text-xs text-muted-foreground tabular-nums shrink-0">{formatSize(f.size)}</span>
@@ -366,15 +455,16 @@ function FolderTab({ nodeId, projectId }: { nodeId: string | null; projectId: st
 
 // ─── Agents Tab ─────────────────────────────────────────────────────
 
-function AgentsTab({ projectId }: { projectId: string }) {
+function AgentsTab({ projectId, nodeId: propNodeId }: { projectId: string; nodeId?: string | null }) {
   const queryClient = useQueryClient();
   const [recruitOpen, setRecruitOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const [viewMode, setViewMode] = useState<'cards' | 'org-chart'>('org-chart');
   const { tree } = useScope();
 
-  // Find the tree node_id that matches this hub project ID
-  const nodeId = (() => {
+  // Resolve node_id: use prop if given, otherwise search tree by hub_project_id
+  const nodeId = propNodeId ?? (() => {
     if (!tree) return null;
     const find = (n: typeof tree): string | null => {
       if (n.hub_project_id === projectId) return n.id;
@@ -387,25 +477,43 @@ function AgentsTab({ projectId }: { projectId: string }) {
     return find(tree);
   })();
 
-  // Query agents by both project_id (legacy) and node_id (tree-based)
+  // Query agents by node_id (primary) and project_id (fallback for legacy)
   const { data: agents = [], isLoading } = useQuery<Agent[]>({
     queryKey: ['agents', projectId, nodeId],
     queryFn: async () => {
-      const byProject = await apiFetch<Agent[]>(`/agents?project_id=${projectId}`);
+      const results: Agent[] = [];
+      const ids = new Set<string>();
+
+      // Primary: query by node_id
       if (nodeId) {
         const byNode = await apiFetch<Agent[]>(`/agents?node_id=${nodeId}&subtree=true`);
-        // Merge and dedupe
-        const ids = new Set(byProject.map(a => a.id));
-        for (const a of byNode) {
-          if (!ids.has(a.id)) byProject.push(a);
-        }
+        for (const a of byNode) { ids.add(a.id); results.push(a); }
       }
-      return byProject;
+
+      // Fallback: also query by project_id for legacy agents
+      if (projectId && projectId !== nodeId) {
+        try {
+          const byProject = await apiFetch<Agent[]>(`/agents?project_id=${projectId}`);
+          for (const a of byProject) {
+            if (!ids.has(a.id)) { ids.add(a.id); results.push(a); }
+          }
+        } catch { /* ignore if project_id doesn't match a real project */ }
+      }
+
+      return results;
     },
     refetchInterval: (query) => {
       const data = query.state.data ?? [];
       return data.some((a: Agent) => a.status === 'running' || a.status === 'paused') ? 3000 : 30000;
     },
+  });
+
+  // Org chart data (only fetched when in org-chart view)
+  const { data: orgChartRoots = [] } = useQuery<OrgNode[]>({
+    queryKey: ['agents-org-chart', nodeId],
+    queryFn: () => apiFetch(`/agents/org-chart${nodeId ? `?node_id=${nodeId}` : ''}`),
+    refetchInterval: agents.some(a => a.status === 'running' || a.status === 'paused') ? 3000 : 30000,
+    enabled: viewMode === 'org-chart' && agents.length > 0,
   });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['agents'] });
@@ -466,13 +574,38 @@ function AgentsTab({ projectId }: { projectId: string }) {
             </div>
           )}
         </div>
-        <button
-          onClick={() => setRecruitOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity"
-        >
-          <Plus size={14} />
-          Recruit Agent
-        </button>
+        <div className="flex items-center gap-3">
+          {/* View toggle */}
+          {agents.length > 0 && (
+            <div className="flex items-center rounded-lg border border-border bg-muted/50 p-0.5">
+              <button
+                onClick={() => setViewMode('cards')}
+                className={cn('flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md transition-all',
+                  viewMode === 'cards' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <LayoutGrid size={14} />
+                Cards
+              </button>
+              <button
+                onClick={() => setViewMode('org-chart')}
+                className={cn('flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md transition-all',
+                  viewMode === 'org-chart' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <GitFork size={14} />
+                Org Chart
+              </button>
+            </div>
+          )}
+          <button
+            onClick={() => setRecruitOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity"
+          >
+            <Plus size={14} />
+            Recruit Agent
+          </button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -492,6 +625,11 @@ function AgentsTab({ projectId }: { projectId: string }) {
             Recruit Agent
           </button>
         </div>
+      ) : viewMode === 'org-chart' ? (
+        <OrgChart
+          roots={orgChartRoots}
+          onSelect={(id) => setSelectedId(id)}
+        />
       ) : filteredAgents.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
           <p className="text-sm">No agents with status "{statusFilter}"</p>
@@ -1768,28 +1906,38 @@ function CollaborationTab({ projectId, nodeId }: { projectId: string; nodeId: st
 // ─── Main Page Component ─────────────────────────────────────────────
 
 export default function ProjectDetailPage() {
-  const { projectId, tab } = useParams();
+  const { projectId: routeProjectId, nodeId: routeNodeId, tab } = useParams();
   const { tree, setSelectedNodeId } = useScope();
   const qc = useQueryClient();
-  const storageKey = `coco:project-tab:${projectId}`;
-  const [activeTab, setActiveTab] = useState<TabKey>(() => {
-    if (tab && TABS.some(t => t.key === tab)) return tab as TabKey;
-    return (localStorage.getItem(storageKey) as TabKey) ?? 'overview';
-  });
 
-  // Find the tree node ID for this hub project
-  const resolvedNodeId = (() => {
-    if (!projectId || !tree) return null;
-    const findNode = (n: typeof tree): string | null => {
-      if (n.hub_project_id === projectId) return n.id;
+  // Resolve: either we have a projectId (hub project) or a nodeId (tree node)
+  const isNodeRoute = !!routeNodeId && !routeProjectId;
+
+  // For node routes, find the node in the tree to get label + hub_project_id
+  const treeNode = (() => {
+    const targetId = routeNodeId || null;
+    const targetProjectId = routeProjectId || null;
+    if (!tree) return null;
+    const find = (n: typeof tree): typeof tree | null => {
+      if (targetId && n.id === targetId) return n;
+      if (targetProjectId && n.hub_project_id === targetProjectId) return n;
       for (const c of n.children ?? []) {
-        const r = findNode(c);
+        const r = find(c);
         if (r) return r;
       }
       return null;
     };
-    return findNode(tree);
+    return find(tree);
   })();
+
+  const resolvedNodeId = routeNodeId || treeNode?.id || null;
+  const projectId = routeProjectId || treeNode?.hub_project_id || null;
+
+  const storageKey = `coco:project-tab:${projectId || resolvedNodeId}`;
+  const [activeTab, setActiveTab] = useState<TabKey>(() => {
+    if (tab && TABS.some(t => t.key === tab)) return tab as TabKey;
+    return (localStorage.getItem(storageKey) as TabKey) ?? 'overview';
+  });
 
   // Set scope when node is found
   useEffect(() => {
@@ -1800,6 +1948,7 @@ export default function ProjectDetailPage() {
     localStorage.setItem(storageKey, activeTab);
   }, [activeTab, storageKey]);
 
+  // Fetch hub project data (only if we have a projectId)
   const { data: project, isLoading } = useQuery({
     queryKey: ['project', projectId],
     queryFn: async () => {
@@ -1810,7 +1959,15 @@ export default function ProjectDetailPage() {
     enabled: !!projectId,
   });
 
-  if (isLoading) {
+  // For node-only routes (no hub project), build a minimal project-like object from tree node
+  const effectiveProject = project || (treeNode ? {
+    id: treeNode.hub_project_id || treeNode.id,
+    name: treeNode.label,
+    total: 0,
+    node_type: treeNode.node_type,
+  } : null);
+
+  if (isLoading && projectId) {
     return (
       <div className="space-y-4">
         <div className="h-8 w-48 bg-muted/50 rounded animate-pulse" />
@@ -1819,7 +1976,7 @@ export default function ProjectDetailPage() {
     );
   }
 
-  if (!project) {
+  if (!effectiveProject) {
     return (
       <div className="text-center py-16 text-muted-foreground">
         <p className="text-sm font-medium">Project not found</p>
@@ -1827,16 +1984,18 @@ export default function ProjectDetailPage() {
     );
   }
 
+  const effectiveId = projectId || resolvedNodeId || '';
+
   return (
     <div className="space-y-4">
       {/* Project header */}
       <div>
         <InlineEditor
-          value={project.name}
+          value={effectiveProject.name}
           onSave={async (name) => {
             if (resolvedNodeId) {
               await apiPatch(`/tree/${resolvedNodeId}`, { name });
-            } else {
+            } else if (projectId) {
               await apiPatch(`/projects/${projectId}`, { name });
             }
             void qc.invalidateQueries({ queryKey: ['project', projectId] });
@@ -1846,7 +2005,7 @@ export default function ProjectDetailPage() {
           className="text-lg font-semibold text-foreground"
         />
         <p className="text-xs text-muted-foreground mt-0.5">
-          {project.total ?? 0} items total
+          {effectiveProject.total ?? 0} items total
         </p>
       </div>
 
@@ -1871,16 +2030,27 @@ export default function ProjectDetailPage() {
 
       {/* Tab content */}
       <div className="animate-fade-in">
-        {activeTab === 'overview' && <OverviewTab project={project} projectId={projectId!} />}
-        {activeTab === 'knowledge' && <KnowledgeTab projectId={projectId!} />}
-        {activeTab === 'folder' && <FolderTab nodeId={resolvedNodeId} projectId={projectId!} />}
-        {activeTab === 'agents' && <AgentsTab projectId={projectId!} />}
-        {activeTab === 'collaboration' && <CollaborationTab projectId={projectId!} nodeId={resolvedNodeId} />}
-        {activeTab === 'todos' && <TodosTab projectId={projectId!} />}
-        {activeTab === 'goals' && <GoalsTab projectId={projectId!} />}
-        {activeTab === 'costs' && <CostsTab projectId={projectId!} />}
-        {activeTab === 'people' && <PeopleTab projectId={projectId!} projectName={project.name} />}
-        {activeTab === 'settings' && <ProjectSettingsTab project={project} projectId={projectId!} />}
+        {activeTab === 'overview' && <OverviewTab project={effectiveProject} projectId={effectiveId} />}
+        {activeTab === 'knowledge' && projectId && <KnowledgeTab projectId={projectId} />}
+        {activeTab === 'knowledge' && !projectId && (
+          <div className="text-center py-12 text-muted-foreground">
+            <p className="text-sm">This node is not linked to a Knowledge Hub project.</p>
+            <p className="text-xs mt-1">Link it in Settings to see knowledge content here.</p>
+          </div>
+        )}
+        {activeTab === 'folder' && <FolderTab nodeId={resolvedNodeId} projectId={effectiveId} />}
+        {activeTab === 'agents' && <AgentsTab projectId={effectiveId} nodeId={resolvedNodeId} />}
+        {activeTab === 'collaboration' && <CollaborationTab projectId={effectiveId} nodeId={resolvedNodeId} />}
+        {activeTab === 'todos' && projectId && <TodosTab projectId={projectId} />}
+        {activeTab === 'todos' && !projectId && (
+          <div className="text-center py-12 text-muted-foreground">
+            <p className="text-sm">Link this node to a Knowledge Hub project to manage todos.</p>
+          </div>
+        )}
+        {activeTab === 'goals' && <GoalsTab projectId={effectiveId} />}
+        {activeTab === 'costs' && <CostsTab projectId={effectiveId} />}
+        {activeTab === 'people' && <PeopleTab projectId={effectiveId} projectName={effectiveProject.name} />}
+        {activeTab === 'settings' && <ProjectSettingsTab project={effectiveProject} projectId={effectiveId} />}
       </div>
     </div>
   );

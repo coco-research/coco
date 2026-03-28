@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ChevronDown, ChevronRight, Download, Clock, CheckCircle2,
-  Loader2, XCircle, FileText, FolderSearch,
+  Loader2, XCircle, FileText, FolderSearch, ListTodo, FileEdit, Sparkles,
 } from 'lucide-react';
-import { apiFetch } from '../../lib/api';
+import { apiFetch, apiPost } from '../../lib/api';
 import { cn, timeAgo } from '../../lib/utils';
 
 // ---------------------------------------------------------------------------
@@ -190,6 +190,11 @@ function JobCard({
       {/* Expanded content */}
       {expanded && (
         <div className="border-t border-border">
+          {/* Action bar for completed jobs */}
+          {displayJob.status === 'completed' && (
+            <AnalysisActions job={displayJob} />
+          )}
+
           {displayJob.agents && displayJob.agents.length > 0 ? (
             <div className="divide-y divide-border">
               {displayJob.agents.map((agent) => (
@@ -205,6 +210,90 @@ function JobCard({
               {job.status === 'running' ? 'Analysis in progress...' : 'No results available.'}
             </div>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Analysis Actions — post-analysis actions (create PRD, extract todos, etc.)
+// ---------------------------------------------------------------------------
+
+function AnalysisActions({ job }: { job: AnalysisJob }) {
+  const queryClient = useQueryClient();
+  const [actionResult, setActionResult] = useState<string | null>(null);
+
+  const extractTodos = useMutation({
+    mutationFn: () => apiPost(`/analysis-jobs/${job.id}/extract-todos`, {}),
+    onSuccess: (data: { created: number }) => {
+      setActionResult(`Extracted ${data.created} action items`);
+      void queryClient.invalidateQueries({ queryKey: ['todos'] });
+    },
+  });
+
+  const generateDoc = useMutation({
+    mutationFn: (docType: string) => apiPost(`/analysis-jobs/${job.id}/generate-document`, { document_type: docType }),
+    onSuccess: (data: { agent_id: string; document_type: string }) => {
+      setActionResult(`Generating ${data.document_type}... Agent spawned.`);
+      void queryClient.invalidateQueries({ queryKey: ['agents'] });
+    },
+  });
+
+  const hasOutput = job.agents?.some(a => a.output && a.output !== 'No output captured.');
+
+  if (!hasOutput) return null;
+
+  return (
+    <div className="px-4 py-2.5 border-b border-border bg-muted/20">
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mr-2">Actions</span>
+
+        <button
+          onClick={() => extractTodos.mutate()}
+          disabled={extractTodos.isPending}
+          className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded-lg border border-border hover:bg-accent/20 hover:border-accent/30 transition-colors disabled:opacity-50"
+        >
+          <ListTodo size={12} />
+          {extractTodos.isPending ? 'Extracting...' : 'Extract Todos'}
+        </button>
+
+        <button
+          onClick={() => generateDoc.mutate('prd')}
+          disabled={generateDoc.isPending}
+          className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded-lg border border-border hover:bg-accent/20 hover:border-accent/30 transition-colors disabled:opacity-50"
+        >
+          <FileEdit size={12} />
+          {generateDoc.isPending ? 'Generating...' : 'Generate PRD'}
+        </button>
+
+        <button
+          onClick={() => generateDoc.mutate('status-report')}
+          disabled={generateDoc.isPending}
+          className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded-lg border border-border hover:bg-accent/20 hover:border-accent/30 transition-colors disabled:opacity-50"
+        >
+          <FileText size={12} />
+          Status Report
+        </button>
+
+        <button
+          onClick={() => generateDoc.mutate('executive-summary')}
+          disabled={generateDoc.isPending}
+          className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded-lg border border-border hover:bg-accent/20 hover:border-accent/30 transition-colors disabled:opacity-50"
+        >
+          <Sparkles size={12} />
+          Exec Summary
+        </button>
+      </div>
+
+      {actionResult && (
+        <div className="mt-1.5 text-[10px] text-green-400 flex items-center gap-1">
+          <CheckCircle2 size={10} /> {actionResult}
+        </div>
+      )}
+      {(extractTodos.isError || generateDoc.isError) && (
+        <div className="mt-1.5 text-[10px] text-red-400">
+          Action failed. Check agents tab for details.
         </div>
       )}
     </div>
@@ -244,13 +333,13 @@ function AgentResultSection({ agent }: { agent: AgentResult }) {
         </span>
       </button>
 
-      {open && agent.output && (
+      {open && agent.output && agent.output !== 'No output captured.' && (
         <div className="px-4 pb-4 pl-10">
           <MarkdownContent text={agent.output} />
         </div>
       )}
 
-      {open && !agent.output && agent.status === 'completed' && (
+      {open && (!agent.output || agent.output === 'No output captured.') && agent.status === 'completed' && (
         <div className="px-4 pb-3 pl-10 text-xs text-muted-foreground">
           No output captured.
         </div>
@@ -264,7 +353,6 @@ function AgentResultSection({ agent }: { agent: AgentResult }) {
 // ---------------------------------------------------------------------------
 
 function MarkdownContent({ text }: { text: string }) {
-  // Simple rendering: split by lines, apply basic styling
   return (
     <div className="text-xs text-foreground/90 leading-relaxed whitespace-pre-wrap font-mono bg-muted/30 rounded-lg p-3 max-h-80 overflow-y-auto">
       {text}

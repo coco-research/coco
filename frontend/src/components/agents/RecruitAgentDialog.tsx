@@ -134,7 +134,7 @@ export function RecruitAgentDialog({ open, onOpenChange, nodeId, onRecruited }: 
                         <span className="text-sm font-medium text-foreground">{role.name}</span>
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2">
-                        {role.system_prompt.split('\n')[0]}
+                        {(role.system_prompt ?? '').split('\n')[0] || role.name}
                       </p>
                       <p className="text-[10px] text-muted-foreground mt-1.5 uppercase tracking-wider">
                         {role.default_model}

@@ -189,6 +189,7 @@ app.include_router(insights.router)
 app.include_router(actions.router)
 app.include_router(replay.router)
 app.include_router(podcast.router)
+app.include_router(analysis.router)
 
 # Studio routers (only when COCO_EDITION=studio)
 if is_studio():
@@ -196,7 +197,6 @@ if is_studio():
     app.include_router(tts.router)
     app.include_router(stt.router)
     app.include_router(self_improve.router)
-    app.include_router(analysis.router)
 
 @app.get("/api/edition", tags=["System"])
 def get_edition():

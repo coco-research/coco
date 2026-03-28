@@ -31,6 +31,61 @@ router = APIRouter(tags=["Analysis"])
 
 
 # ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _clean_agent_output(raw: str) -> str:
+    """Strip stream-json system/hook lines from stored agent output.
+
+    Old output stored before the parser was added contains raw JSON events.
+    This retroactively extracts only human-readable text.
+    """
+    lines = raw.split("\n")
+    cleaned: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            cleaned.append("")
+            continue
+        # Try to detect raw stream-json lines
+        if stripped.startswith("{") and stripped.endswith("}"):
+            try:
+                obj = json.loads(stripped)
+                etype = obj.get("type", "")
+                # Extract text from content_block_delta
+                if etype == "content_block_delta":
+                    delta = obj.get("delta", {})
+                    if delta.get("type") == "text_delta":
+                        t = delta.get("text", "")
+                        if t:
+                            cleaned.append(t)
+                    continue
+                # Extract from result event
+                if etype == "result":
+                    t = obj.get("result", "")
+                    if t:
+                        cleaned.append(t)
+                    continue
+                # Extract from assistant message
+                if etype == "assistant":
+                    for block in obj.get("content", []):
+                        if isinstance(block, dict) and block.get("type") == "text":
+                            cleaned.append(block.get("text", ""))
+                    continue
+                # Skip system, hook_started, hook_response, etc.
+                if etype in ("system", "tool_use", "tool_result", ""):
+                    continue
+                # Unknown JSON — skip
+                continue
+            except (ValueError, TypeError):
+                pass
+        # Not JSON — keep as-is (actual text content)
+        cleaned.append(line)
+    result = "\n".join(cleaned).strip()
+    return result if result else "No output captured."
+
+
+# ---------------------------------------------------------------------------
 # Role-based analysis prompts
 # ---------------------------------------------------------------------------
 
@@ -384,10 +439,24 @@ def get_analysis_job(job_id: str):
 
             if agent_dict["status"] == "completed":
                 output_rows = conn.exec_driver_sql(
-                    "SELECT chunk FROM agent_output WHERE agent_id = ? ORDER BY id DESC LIMIT 50",
+                    "SELECT chunk FROM agent_output WHERE agent_id = ? ORDER BY id DESC LIMIT 200",
                     (aid,),
                 ).fetchall()
-                agent_dict["output"] = "\n".join(r._mapping["chunk"] for r in reversed(output_rows))
+                raw_text = "\n".join(r._mapping["chunk"] for r in reversed(output_rows))
+                # Strip any residual stream-json lines stored before the parser was added
+                cleaned = _clean_agent_output(raw_text)
+
+                # Fallback: if agent_output was empty/garbage, check project_context
+                if cleaned == "No output captured." or not cleaned.strip():
+                    ctx_row = conn.exec_driver_sql(
+                        "SELECT content FROM project_context "
+                        "WHERE author_agent_id = ? ORDER BY created_at DESC LIMIT 1",
+                        (aid,),
+                    ).fetchone()
+                    if ctx_row:
+                        cleaned = ctx_row._mapping["content"]
+
+                agent_dict["output"] = cleaned
             else:
                 agent_dict["output"] = None
 
@@ -449,3 +518,220 @@ def list_analysis_jobs(node_id: str | None = None):
             results.append(d)
 
         return results
+
+
+# ---------------------------------------------------------------------------
+# Post-analysis actions
+# ---------------------------------------------------------------------------
+
+from pydantic import BaseModel
+
+
+class GenerateDocumentBody(BaseModel):
+    document_type: str  # "prd", "status-report", "executive-summary"
+
+
+@router.post("/api/analysis-jobs/{job_id}/extract-todos")
+def extract_todos_from_analysis(job_id: str):
+    """Extract action items / todos from analysis results and create platform todos."""
+    with get_db() as conn:
+        job = conn.execute(
+            select(analysis_jobs).where(analysis_jobs.c.id == job_id)
+        ).fetchone()
+        if not job:
+            raise HTTPException(404, "Analysis job not found")
+
+        agent_ids = json.loads(job._mapping.get("agent_ids", "[]"))
+        node_id = job._mapping.get("node_id")
+
+        # Gather all agent output
+        all_output = []
+        for aid in agent_ids:
+            output_rows = conn.exec_driver_sql(
+                "SELECT chunk FROM agent_output WHERE agent_id = ? ORDER BY id LIMIT 200",
+                (aid,),
+            ).fetchall()
+            raw = "\n".join(r._mapping["chunk"] for r in output_rows)
+            cleaned = _clean_agent_output(raw)
+            if cleaned and cleaned != "No output captured.":
+                all_output.append(cleaned)
+
+        # Also check project_context
+        if not all_output:
+            ctx_rows = conn.exec_driver_sql(
+                "SELECT content FROM project_context WHERE node_id = ? ORDER BY created_at DESC LIMIT 5",
+                (node_id,),
+            ).fetchall()
+            for r in ctx_rows:
+                if r._mapping["content"]:
+                    all_output.append(r._mapping["content"])
+
+        if not all_output:
+            return {"created": 0, "message": "No analysis output to extract from"}
+
+        combined = "\n\n---\n\n".join(all_output)
+
+        # Use simple regex extraction for action items
+        import re
+        todo_patterns = [
+            r'- \[ \] (.+)',               # Markdown checkbox
+            r'- \*\*(.+?)\*\*',            # Bold list items
+            r'(?:TODO|Action|Next step)[:\s]+(.+)',  # Explicit labels
+        ]
+
+        items: list[str] = []
+        for pattern in todo_patterns:
+            items.extend(re.findall(pattern, combined, re.IGNORECASE))
+
+        # Deduplicate (rough)
+        seen: set[str] = set()
+        unique_items: list[str] = []
+        for item in items:
+            item = item.strip().rstrip('*').strip()
+            if len(item) < 10 or item.lower() in seen:
+                continue
+            seen.add(item.lower())
+            unique_items.append(item)
+
+        # Create todos in platform DB
+        from app.db.tables import hub_todos
+        created = 0
+        for title in unique_items[:20]:  # Cap at 20
+            todo_id = str(uuid.uuid4())
+            conn.execute(
+                insert(hub_todos).values(
+                    id=todo_id,
+                    title=title[:200],
+                    project_id=_get_project_for_node(conn, node_id),
+                    owner="rijul",
+                    priority="medium",
+                    status="open",
+                    source_type="analysis",
+                    created_at=now(),
+                )
+            )
+            created += 1
+
+        return {"created": created, "items": unique_items[:20]}
+
+
+@router.post("/api/analysis-jobs/{job_id}/generate-document")
+def generate_document_from_analysis(job_id: str, body: GenerateDocumentBody):
+    """Spawn an agent to generate a document (PRD, status report, etc.) from analysis results."""
+    with get_db() as conn:
+        job = conn.execute(
+            select(analysis_jobs).where(analysis_jobs.c.id == job_id)
+        ).fetchone()
+        if not job:
+            raise HTTPException(404, "Analysis job not found")
+
+        job_data = dict(job._mapping)
+        node_id = job_data.get("node_id")
+        folder_path = job_data.get("folder_path")
+        agent_ids = json.loads(job_data.get("agent_ids", "[]"))
+
+        # Gather analysis output for context
+        all_output: list[str] = []
+        for aid in agent_ids:
+            output_rows = conn.exec_driver_sql(
+                "SELECT chunk FROM agent_output WHERE agent_id = ? ORDER BY id LIMIT 200",
+                (aid,),
+            ).fetchall()
+            raw = "\n".join(r._mapping["chunk"] for r in output_rows)
+            cleaned = _clean_agent_output(raw)
+            if cleaned and cleaned != "No output captured.":
+                all_output.append(cleaned)
+
+        # Fallback to project_context
+        if not all_output and node_id:
+            ctx_rows = conn.exec_driver_sql(
+                "SELECT content, section FROM project_context WHERE node_id = ? ORDER BY created_at DESC LIMIT 5",
+                (node_id,),
+            ).fetchall()
+            for r in ctx_rows:
+                if r._mapping["content"]:
+                    all_output.append(f"## {r._mapping['section']}\n\n{r._mapping['content']}")
+
+        if not all_output:
+            raise HTTPException(400, "No analysis output available to generate from")
+
+        context = "\n\n---\n\n".join(all_output)
+
+        # Build document generation prompt
+        DOC_PROMPTS = {
+            "prd": (
+                "Based on the following project analysis, create a comprehensive Product Requirements Document (PRD). Include:\n"
+                "1. Executive Summary\n2. Problem Statement\n3. Goals & Success Metrics\n4. User Stories / Requirements\n"
+                "5. Technical Requirements\n6. Dependencies & Risks\n7. Timeline & Milestones\n8. Open Questions\n\n"
+                "Write it as a polished, stakeholder-ready document in Markdown format."
+            ),
+            "status-report": (
+                "Based on the following project analysis, create a concise weekly status report. Include:\n"
+                "1. Summary (3 bullets)\n2. Completed This Week\n3. In Progress\n4. Blocked / At Risk\n"
+                "5. Key Decisions Needed\n6. Next Week's Priorities\n\n"
+                "Format for executive audience — clear, concise, actionable."
+            ),
+            "executive-summary": (
+                "Based on the following project analysis, create a 1-page executive summary. Include:\n"
+                "1. Project Overview (2-3 sentences)\n2. Current Status (RAG)\n3. Key Risks (top 3)\n"
+                "4. Decisions Required\n5. Next Steps\n\n"
+                "Maximum 500 words. Write for C-level audience."
+            ),
+        }
+
+        prompt_prefix = DOC_PROMPTS.get(body.document_type, DOC_PROMPTS["status-report"])
+        task = f"{prompt_prefix}\n\n---\n\n## Analysis Context\n\n{context}"
+
+        # Find an available agent for this node, or use the first one
+        available_agent_id = None
+        for aid in agent_ids:
+            agent_row = conn.exec_driver_sql(
+                "SELECT id, status FROM agents WHERE id = ? AND status IN ('idle', 'completed', 'failed')",
+                (aid,),
+            ).fetchone()
+            if agent_row:
+                available_agent_id = agent_row._mapping["id"]
+                break
+
+        if not available_agent_id:
+            # Create a new agent for this task
+            available_agent_id = str(uuid.uuid4())
+            conn.execute(
+                insert(agents).values(
+                    id=available_agent_id,
+                    node_id=node_id,
+                    name=f"Doc Writer ({body.document_type})",
+                    role="scribe",
+                    status="idle",
+                    model="sonnet",
+                    task_description=f"Generate {body.document_type} from analysis",
+                    created_at=now(),
+                )
+            )
+
+    # Spawn the agent
+    pid = process_manager.spawn(
+        agent_id=available_agent_id,
+        task=task,
+        cwd=folder_path,
+        model="sonnet",
+        node_id=node_id,
+        role="scribe",
+    )
+
+    return {
+        "agent_id": available_agent_id,
+        "document_type": body.document_type,
+        "pid": pid,
+        "status": "spawned",
+    }
+
+
+def _get_project_for_node(conn, node_id: str) -> str | None:
+    """Look up which project a node belongs to."""
+    if not node_id:
+        return None
+    row = conn.exec_driver_sql(
+        "SELECT project_id FROM nodes WHERE id = ?", (node_id,),
+    ).fetchone()
+    return row._mapping["project_id"] if row else None

@@ -193,9 +193,17 @@ def patch_node(node_id: str, body: PatchNodeBody):
             raise HTTPException(404, "Node not found")
 
         updates = {}
-        for field in ("label", "node_type", "icon", "color", "folder_path", "github_repo", "jira_key", "confluence_space", "prefix", "metadata_json", "sort_order"):
-            if field in body.model_fields_set:
-                updates[field] = getattr(body, field)
+        # Map model field names to DB column names (metadata -> metadata_json)
+        field_map = {
+            "label": "label", "node_type": "node_type", "icon": "icon",
+            "color": "color", "folder_path": "folder_path",
+            "github_repo": "github_repo", "jira_key": "jira_key",
+            "confluence_space": "confluence_space", "prefix": "prefix",
+            "metadata": "metadata_json", "sort_order": "sort_order",
+        }
+        for model_field, db_col in field_map.items():
+            if model_field in body.model_fields_set:
+                updates[db_col] = getattr(body, model_field)
 
         if not updates:
             raise HTTPException(400, "No fields to update")

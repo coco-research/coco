@@ -1,6 +1,8 @@
 import uuid
 from fastapi import APIRouter, HTTPException, Query
-from app.db.connections import get_hub_db, get_platform_db
+from sqlalchemy import select, func, text
+from app.db.session import get_db
+from app.db.tables import cost_ledger, budgets, hub_api_costs
 from app.db.tree_utils import build_node_id_filter
 from app.models.costs import CreateBudgetBody
 
@@ -16,110 +18,86 @@ def cost_summary(
     total_usd = 0.0
     by_model: dict[str, float] = {}
     by_project: dict[str, float] = {}
-    daily_totals: list[float] = []
-
-    # Platform cost_ledger
-    try:
-        with get_platform_db() as db:
-            conditions = ["created_at >= datetime('now', ?)"]
-            params: list[str | int] = [f"-{days} days"]
-
-            node_frag, node_params = build_node_id_filter(db, node_id, subtree)
-            if node_frag:
-                conditions.append(node_frag)
-                params.extend(node_params)
-
-            where = " WHERE " + " AND ".join(conditions)
-            rows = db.execute(
-                f"SELECT model, project_id, cost_usd FROM cost_ledger{where}",
-                params,
-            ).fetchall()
-            for r in rows:
-                cost = r["cost_usd"] or 0.0
-                total_usd += cost
-                model = r["model"] or "unknown"
-                by_model[model] = by_model.get(model, 0.0) + cost
-                proj = r["project_id"] or "unassigned"
-                by_project[proj] = by_project.get(proj, 0.0) + cost
-    except Exception:
-        pass
-
-    # Hub api_costs
-    try:
-        with get_hub_db() as db:
-            # Try common column name patterns
-            try:
-                rows = db.execute(
-                    """SELECT model, project_id, cost_usd FROM api_costs
-                       WHERE created_at >= datetime('now', ?)""",
-                    (f"-{days} days",),
-                ).fetchall()
-            except Exception:
-                try:
-                    rows = db.execute(
-                        """SELECT model, project_id, total_cost as cost_usd FROM api_costs
-                           WHERE timestamp >= datetime('now', ?)""",
-                        (f"-{days} days",),
-                    ).fetchall()
-                except Exception:
-                    rows = []
-
-            for r in rows:
-                row = dict(r)
-                cost = row.get("cost_usd") or row.get("total_cost") or 0.0
-                total_usd += cost
-                model = row.get("model") or "unknown"
-                by_model[model] = by_model.get(model, 0.0) + cost
-                proj = row.get("project_id") or "unassigned"
-                by_project[proj] = by_project.get(proj, 0.0) + cost
-    except Exception:
-        pass
-
-    daily_avg = total_usd / max(days, 1)
-
-    # Build daily breakdown for SpendChart
     daily_by_date: dict[str, float] = {}
 
-    try:
-        with get_platform_db() as db:
-            conditions_daily = ["created_at >= datetime('now', ?)"]
-            params_daily: list[str | int] = [f"-{days} days"]
+    with get_db() as conn:
+        # Platform cost_ledger
+        try:
+            node_ids = _resolve_node_ids(conn, node_id, subtree)
+            conditions = [cost_ledger.c.created_at >= text(f"datetime('now', '-{days} days')")]
+            if node_ids is not None:
+                conditions.append(cost_ledger.c.node_id.in_(node_ids))
 
-            node_frag_d, node_params_d = build_node_id_filter(db, node_id, subtree)
-            if node_frag_d:
-                conditions_daily.append(node_frag_d)
-                params_daily.extend(node_params_d)
-
-            where_daily = " WHERE " + " AND ".join(conditions_daily)
-            rows = db.execute(
-                f"""SELECT date(created_at) as d, COALESCE(SUM(cost_usd), 0) as total
-                   FROM cost_ledger{where_daily}
-                   GROUP BY date(created_at)
-                   ORDER BY d""",
-                params_daily,
-            ).fetchall()
+            stmt = select(
+                cost_ledger.c.model,
+                cost_ledger.c.project_id,
+                cost_ledger.c.cost_usd,
+            ).where(*conditions)
+            rows = conn.execute(stmt).fetchall()
             for r in rows:
-                daily_by_date[r["d"]] = daily_by_date.get(r["d"], 0.0) + r["total"]
-    except Exception:
-        pass
+                cost = r.cost_usd or 0.0
+                total_usd += cost
+                model = r.model or "unknown"
+                by_model[model] = by_model.get(model, 0.0) + cost
+                proj = r.project_id or "unassigned"
+                by_project[proj] = by_project.get(proj, 0.0) + cost
+        except Exception:
+            pass
 
-    try:
-        with get_hub_db() as db:
-            try:
-                rows = db.execute(
-                    """SELECT date(created_at) as d, COALESCE(SUM(cost_usd), 0) as total
-                       FROM api_costs
-                       WHERE created_at >= datetime('now', ?)
-                       GROUP BY date(created_at)
-                       ORDER BY d""",
-                    (f"-{days} days",),
-                ).fetchall()
-                for r in rows:
-                    daily_by_date[r["d"]] = daily_by_date.get(r["d"], 0.0) + r["total"]
-            except Exception:
-                pass
-    except Exception:
-        pass
+        # Hub api_costs (mirror)
+        try:
+            stmt = select(
+                hub_api_costs.c.model,
+                hub_api_costs.c.cost_usd,
+            ).where(hub_api_costs.c.created_at >= text(f"datetime('now', '-{days} days')"))
+            rows = conn.execute(stmt).fetchall()
+            for r in rows:
+                cost = r.cost_usd or 0.0
+                total_usd += cost
+                model = r.model or "unknown"
+                by_model[model] = by_model.get(model, 0.0) + cost
+        except Exception:
+            pass
+
+        daily_avg = total_usd / max(days, 1)
+
+        # Daily breakdown — platform
+        try:
+            conditions_d = [cost_ledger.c.created_at >= text(f"datetime('now', '-{days} days')")]
+            if node_ids is not None:
+                conditions_d.append(cost_ledger.c.node_id.in_(node_ids))
+
+            stmt = (
+                select(
+                    func.date(cost_ledger.c.created_at).label("d"),
+                    func.coalesce(func.sum(cost_ledger.c.cost_usd), 0).label("total"),
+                )
+                .where(*conditions_d)
+                .group_by(text("d"))
+                .order_by(text("d"))
+            )
+            rows = conn.execute(stmt).fetchall()
+            for r in rows:
+                daily_by_date[r.d] = daily_by_date.get(r.d, 0.0) + r.total
+        except Exception:
+            pass
+
+        # Daily breakdown — hub
+        try:
+            stmt = (
+                select(
+                    func.date(hub_api_costs.c.created_at).label("d"),
+                    func.coalesce(func.sum(hub_api_costs.c.cost_usd), 0).label("total"),
+                )
+                .where(hub_api_costs.c.created_at >= text(f"datetime('now', '-{days} days')"))
+                .group_by(text("d"))
+                .order_by(text("d"))
+            )
+            rows = conn.execute(stmt).fetchall()
+            for r in rows:
+                daily_by_date[r.d] = daily_by_date.get(r.d, 0.0) + r.total
+        except Exception:
+            pass
 
     daily = [
         {"date": d, "cost_usd": round(v, 4)}
@@ -144,30 +122,24 @@ def cost_events(
     node_id: str | None = None,
     subtree: bool = False,
 ):
-    conditions: list[str] = []
-    params: list[str | int] = []
-
-    if agent_id:
-        conditions.append("agent_id = ?")
-        params.append(agent_id)
-    if project_id:
-        conditions.append("project_id = ?")
-        params.append(project_id)
-
     try:
-        with get_platform_db() as db:
-            node_frag, node_params = build_node_id_filter(db, node_id, subtree)
-            if node_frag:
-                conditions.append(node_frag)
-                params.extend(node_params)
+        with get_db() as conn:
+            conditions = []
+            if agent_id:
+                conditions.append(cost_ledger.c.agent_id == agent_id)
+            if project_id:
+                conditions.append(cost_ledger.c.project_id == project_id)
 
-            where = (" WHERE " + " AND ".join(conditions)) if conditions else ""
+            node_ids = _resolve_node_ids(conn, node_id, subtree)
+            if node_ids is not None:
+                conditions.append(cost_ledger.c.node_id.in_(node_ids))
 
-            rows = db.execute(
-                f"SELECT id, agent_id, node_id, project_id, model, input_tokens, output_tokens, cost_usd, source, created_at FROM cost_ledger{where} ORDER BY created_at DESC LIMIT ? OFFSET ?",
-                params + [limit, offset],
-            ).fetchall()
-            return [dict(r) for r in rows]
+            stmt = select(cost_ledger)
+            if conditions:
+                stmt = stmt.where(*conditions)
+            stmt = stmt.order_by(cost_ledger.c.created_at.desc()).limit(limit).offset(offset)
+            rows = conn.execute(stmt).fetchall()
+            return [dict(r._mapping) for r in rows]
     except Exception:
         return []
 
@@ -175,9 +147,18 @@ def cost_events(
 @router.get("/api/budgets")
 def list_budgets():
     try:
-        with get_platform_db() as db:
-            rows = db.execute("SELECT project_id, node_id, daily_cap_usd, weekly_cap_usd, monthly_cap_usd, alert_threshold_pct FROM budgets").fetchall()
-            return [dict(r) for r in rows]
+        with get_db() as conn:
+            rows = conn.execute(
+                select(
+                    budgets.c.project_id,
+                    budgets.c.node_id,
+                    budgets.c.daily_cap_usd,
+                    budgets.c.weekly_cap_usd,
+                    budgets.c.monthly_cap_usd,
+                    budgets.c.alert_threshold_pct,
+                )
+            ).fetchall()
+            return [dict(r._mapping) for r in rows]
     except Exception:
         return []
 
@@ -188,15 +169,43 @@ def create_or_update_budget(body: CreateBudgetBody):
     monthly_cap = body.monthly_cap_usd
     alert_threshold = body.alert_threshold_pct
 
-    with get_platform_db() as db:
-        db.execute(
-            """INSERT INTO budgets (project_id, monthly_cap_usd, alert_threshold_pct)
-               VALUES (?, ?, ?)
-               ON CONFLICT(project_id) DO UPDATE SET
-                 monthly_cap_usd = excluded.monthly_cap_usd,
-                 alert_threshold_pct = excluded.alert_threshold_pct""",
-            (project_id, monthly_cap, alert_threshold),
+    with get_db() as conn:
+        conn.execute(
+            text(
+                "INSERT INTO budgets (project_id, monthly_cap_usd, alert_threshold_pct) "
+                "VALUES (:pid, :cap, :thresh) "
+                "ON CONFLICT(project_id) DO UPDATE SET "
+                "monthly_cap_usd = excluded.monthly_cap_usd, "
+                "alert_threshold_pct = excluded.alert_threshold_pct"
+            ),
+            {"pid": project_id, "cap": monthly_cap, "thresh": alert_threshold},
         )
-        db.commit()
-        row = db.execute("SELECT project_id, node_id, daily_cap_usd, weekly_cap_usd, monthly_cap_usd, alert_threshold_pct FROM budgets WHERE project_id = ?", (project_id,)).fetchone()
-        return dict(row)
+        row = conn.execute(
+            select(
+                budgets.c.project_id,
+                budgets.c.node_id,
+                budgets.c.daily_cap_usd,
+                budgets.c.weekly_cap_usd,
+                budgets.c.monthly_cap_usd,
+                budgets.c.alert_threshold_pct,
+            ).where(budgets.c.project_id == project_id)
+        ).fetchone()
+        return dict(row._mapping)
+
+
+def _resolve_node_ids(conn, node_id: str | None, subtree: bool) -> list[str] | None:
+    """Resolve node_id filter to list of IDs, or None if no filtering needed."""
+    if not node_id:
+        return None
+    if subtree:
+        from app.db.tables import nodes
+        row = conn.execute(
+            select(nodes.c.path).where(nodes.c.id == node_id)
+        ).fetchone()
+        if not row:
+            return [node_id]
+        rows = conn.execute(
+            select(nodes.c.id).where(nodes.c.path.like(row.path + "%"))
+        ).fetchall()
+        return [r.id for r in rows]
+    return [node_id]

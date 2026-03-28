@@ -5,9 +5,11 @@ import subprocess
 import time
 from pathlib import Path
 
+from sqlalchemy import select, text
 from app.mcp.server import mcp
 from app.config import HUB_DB_PATH, PLATFORM_DB_PATH, BRAIN_JSON_PATH, QUEUE_JSON_PATH
-from app.db.connections import get_hub_db, get_platform_db
+from app.db.session import get_db
+from app.db.tables import hub_api_costs, cost_ledger
 from app.routers.home import _health_from_sync_state
 
 _start_time = time.time()
@@ -32,8 +34,8 @@ def coco_health() -> dict:
 
     # Read sync_state for adapter health
     try:
-        with get_hub_db() as db:
-            result["adapters"] = _health_from_sync_state(db)
+        with get_db() as conn:
+            result["adapters"] = _health_from_sync_state(conn)
     except Exception:
         pass
 
@@ -51,50 +53,36 @@ def coco_cost(days: int = 30) -> dict:
     by_model: dict[str, float] = {}
     by_project: dict[str, float] = {}
 
-    # Platform cost_ledger
-    try:
-        with get_platform_db() as db:
-            rows = db.execute(
-                "SELECT model, project_id, cost_usd FROM cost_ledger WHERE created_at >= datetime('now', ?)",
-                (f"-{days} days",),
+    with get_db() as conn:
+        # Platform cost_ledger
+        try:
+            rows = conn.execute(
+                select(cost_ledger.c.model, cost_ledger.c.project_id, cost_ledger.c.cost_usd)
+                .where(cost_ledger.c.created_at >= text(f"datetime('now', '-{days} days')"))
             ).fetchall()
             for r in rows:
-                cost = r["cost_usd"] or 0.0
+                cost = r.cost_usd or 0.0
                 total_usd += cost
-                model = r["model"] or "unknown"
+                model = r.model or "unknown"
                 by_model[model] = by_model.get(model, 0.0) + cost
-                proj = r["project_id"] or "unassigned"
+                proj = r.project_id or "unassigned"
                 by_project[proj] = by_project.get(proj, 0.0) + cost
-    except Exception:
-        pass
+        except Exception:
+            pass
 
-    # Hub api_costs
-    try:
-        with get_hub_db() as db:
-            try:
-                rows = db.execute(
-                    "SELECT model, project_id, cost_usd FROM api_costs WHERE created_at >= datetime('now', ?)",
-                    (f"-{days} days",),
-                ).fetchall()
-            except Exception:
-                try:
-                    rows = db.execute(
-                        "SELECT model, project_id, total_cost as cost_usd FROM api_costs WHERE timestamp >= datetime('now', ?)",
-                        (f"-{days} days",),
-                    ).fetchall()
-                except Exception:
-                    rows = []
-
+        # Hub api_costs (mirror)
+        try:
+            rows = conn.execute(
+                select(hub_api_costs.c.model, hub_api_costs.c.cost_usd)
+                .where(hub_api_costs.c.created_at >= text(f"datetime('now', '-{days} days')"))
+            ).fetchall()
             for r in rows:
-                row = dict(r)
-                cost = row.get("cost_usd") or row.get("total_cost") or 0.0
+                cost = r.cost_usd or 0.0
                 total_usd += cost
-                model = row.get("model") or "unknown"
+                model = r.model or "unknown"
                 by_model[model] = by_model.get(model, 0.0) + cost
-                proj = row.get("project_id") or "unassigned"
-                by_project[proj] = by_project.get(proj, 0.0) + cost
-    except Exception:
-        pass
+        except Exception:
+            pass
 
     daily_avg = total_usd / max(days, 1)
 

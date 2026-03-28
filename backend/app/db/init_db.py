@@ -733,6 +733,12 @@ def init_platform_db():
     _seed_workflow_templates(conn)
 
     conn.close()
+
+    # Ensure SA-defined tables exist (mirrors + any new tables added to tables.py)
+    from app.db.tables import metadata as sa_metadata
+    from app.db.engine import engine
+    sa_metadata.create_all(engine, checkfirst=True)
+
     _seed_nodes()
     _backfill_agents_for_nodes()
 

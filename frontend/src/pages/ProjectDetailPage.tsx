@@ -1460,6 +1460,7 @@ function CollaborationTab({ projectId, nodeId }: { projectId: string; nodeId: st
 export default function ProjectDetailPage() {
   const { projectId, tab } = useParams();
   const { tree, setSelectedNodeId } = useScope();
+  const qc = useQueryClient();
   const storageKey = `coco:project-tab:${projectId}`;
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
     if (tab && TABS.some(t => t.key === tab)) return tab as TabKey;
@@ -1522,7 +1523,15 @@ export default function ProjectDetailPage() {
       <div>
         <InlineEditor
           value={project.name}
-          onSave={async (name) => { await apiPatch(`/projects/${projectId}`, { name }); }}
+          onSave={async (name) => {
+            if (resolvedNodeId) {
+              await apiPatch(`/tree/${resolvedNodeId}`, { name });
+            } else {
+              await apiPatch(`/projects/${projectId}`, { name });
+            }
+            void qc.invalidateQueries({ queryKey: ['project', projectId] });
+            void qc.invalidateQueries({ queryKey: ['tree'] });
+          }}
           as="h2"
           className="text-lg font-semibold text-foreground"
         />

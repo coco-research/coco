@@ -3,7 +3,7 @@ import {
   FolderKanban, Radio, MessageSquare,
   DollarSign, Settings, CheckSquare, Search, Inbox, Brain,
   Target, Activity, ChevronsUpDown, ChevronRight, Network,
-  BarChart3, Home, Sparkles, PanelLeftClose, PanelLeftOpen,
+  BarChart3, Home, Sparkles, PanelLeftClose, PanelLeftOpen, Wand2,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useScope, type TreeNode } from '../../context/ScopeContext';
@@ -298,6 +298,7 @@ export function Sidebar() {
           <NavItem to="/agents" icon={Radio} label="Agent Team" collapsed={collapsed} />
           <NavItem to="/costs" icon={DollarSign} label="Costs" collapsed={collapsed} />
           <NavItem to="/activity" icon={Activity} label="Activity" collapsed={collapsed} />
+          <NavItem to="/self-improve" icon={Wand2} label="Self-Improve" collapsed={collapsed} />
           <NavItem to="/settings" icon={Settings} label="Settings" collapsed={collapsed} />
         </SidebarSection>
       </nav>

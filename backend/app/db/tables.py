@@ -630,19 +630,20 @@ hub_todos = Table(
 hub_content = Table(
     "hub_content", metadata,
     Column("id", Text, primary_key=True),
-    Column("title", Text),
-    Column("body", Text),
-    Column("summary", Text),
     Column("source", Text),
     Column("source_id", Text),
-    Column("sender", Text),
-    Column("triage", Text),
-    Column("priority", Text),
-    Column("has_action_item", Integer),
-    Column("action_owner", Text),
-    Column("action_due_date", Text),
-    Column("ingested_at", Text),
+    Column("source_path", Text),
+    Column("content_type", Text),
+    Column("title", Text),
+    Column("raw_text", Text, key="body"),        # alias: routers use .c.body
+    Column("processed_text", Text, key="summary"),  # alias: routers use .c.summary
+    Column("metadata", Text),
+    Column("status", Text),
+    Column("relevance_score", Float),
     Column("created_at", Text),
+    Column("updated_at", Text),
+    Column("ingested_at", Text),
+    Column("processed_at", Text),
 )
 
 hub_projects = Table(
@@ -651,47 +652,57 @@ hub_projects = Table(
     Column("name", Text),
     Column("jira_key", Text),
     Column("confluence_space", Text),
-    Column("active", Integer, server_default="1"),
+    Column("folder_path", Text),
     Column("created_at", Text),
+    Column("active", Integer, server_default="1"),
 )
 
 hub_sync_state = Table(
     "hub_sync_state", metadata,
-    Column("source", Text, primary_key=True),
-    Column("last_sync", Text),
-    Column("item_count", Integer),
+    Column("source_name", Text, primary_key=True, key="source"),  # alias
+    Column("last_success", Text, key="last_sync"),  # alias
+    Column("last_failure", Text),
+    Column("items_synced", Integer, key="item_count"),  # alias
+    Column("error_message", Text, key="message"),  # alias
     Column("status", Text),
-    Column("message", Text),
 )
 
 hub_project_content = Table(
     "hub_project_content", metadata,
     Column("project_id", Text, nullable=False),
     Column("content_id", Text, nullable=False),
+    Column("confidence", Float),
+    Column("method", Text),
+    Column("classified_at", Text),
     UniqueConstraint("project_id", "content_id"),
 )
 
 hub_api_costs = Table(
     "hub_api_costs", metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("feature", Text),
+    Column("timestamp", Text, key="created_at"),  # alias
     Column("model", Text),
+    Column("feature", Text),
     Column("input_tokens", Integer),
     Column("output_tokens", Integer),
+    Column("cache_read_tokens", Integer),
+    Column("cache_write_tokens", Integer),
     Column("cost_usd", Float),
-    Column("created_at", Text),
+    Column("content_id", Text),
 )
 
 hub_drafts = Table(
     "hub_drafts", metadata,
     Column("id", Text, primary_key=True),
     Column("project_id", Text),
-    Column("template", Text),
-    Column("section", Text),
-    Column("content", Text),
     Column("source_content_id", Text),
+    Column("target_template", Text, key="template"),  # alias
+    Column("target_section", Text, key="section"),  # alias
+    Column("content", Text),
+    Column("format", Text),
     Column("status", Text),
     Column("created_at", Text),
+    Column("reviewed_at", Text),
 )
 
 # ---------------------------------------------------------------------------

@@ -353,6 +353,31 @@ CREATE INDEX IF NOT EXISTS idx_goals_status ON goals(status);
 CREATE INDEX IF NOT EXISTS idx_handoffs_node ON handoffs(node_id);
 CREATE INDEX IF NOT EXISTS idx_workflows_node ON workflows(node_id);
 CREATE INDEX IF NOT EXISTS idx_project_context_node ON project_context(node_id);
+
+CREATE TABLE IF NOT EXISTS triggers (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    trigger_type TEXT NOT NULL CHECK(trigger_type IN ('cron', 'webhook', 'file_watch')),
+    enabled INTEGER NOT NULL DEFAULT 1,
+    config TEXT NOT NULL DEFAULT '{}',
+    action_type TEXT NOT NULL CHECK(action_type IN ('spawn_agent', 'run_command', 'create_todo', 'notify')),
+    action_config TEXT NOT NULL DEFAULT '{}',
+    node_id TEXT,
+    last_fired_at TEXT,
+    fire_count INTEGER DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS trigger_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    trigger_id TEXT NOT NULL REFERENCES triggers(id),
+    fired_at TEXT NOT NULL DEFAULT (datetime('now')),
+    status TEXT NOT NULL CHECK(status IN ('success', 'failed', 'skipped')),
+    result TEXT,
+    error TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_trigger_log_trigger ON trigger_log(trigger_id);
 """
 
 MIGRATION = """

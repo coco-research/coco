@@ -4,6 +4,7 @@ import { X, Plus, AlertTriangle } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { cn } from '../../lib/utils';
 import { apiFetch, apiPost } from '../../lib/api';
+import { useToast } from '../shared/Toast';
 
 interface Project {
   id: string;
@@ -25,6 +26,7 @@ interface CreateTodoResponse {
 
 export function AddTodoDialog() {
   const qc = useQueryClient();
+  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [dupWarning, setDupWarning] = useState<PossibleDuplicate | null>(null);

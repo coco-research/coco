@@ -37,6 +37,7 @@ function TodosSkeleton() {
 
 export default function TodosPage() {
   const qc = useQueryClient();
+  const { toast } = useToast();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [boardPending, setBoardPending] = useState(false);
   const [dedupOpen, setDedupOpen] = useState(false);
@@ -84,6 +85,9 @@ export default function TodosPage() {
     try {
       await apiTransition(`/todos/${id}`, toState);
       void qc.invalidateQueries({ queryKey: ['todos'] });
+      toast(`Todo moved to ${toState.replace(/_/g, ' ')}`, 'success');
+    } catch {
+      toast('Failed to update todo', 'error');
     } finally {
       setBoardPending(false);
     }

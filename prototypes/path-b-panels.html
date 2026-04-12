@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Path B — Slide-Over Panels | CoCo Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ── Reset & Base ─────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0b0f1a;
+    --surface:   #111827;
+    --surface-2: #1e293b;
+    --border:    #1e293b;
+    --text:      #e2e8f0;
+    --text-dim:  #94a3b8;
+    --accent:    #818cf8;
+    --accent-2:  #6366f1;
+    --green:     #34d399;
+    --red:       #f87171;
+    --orange:    #fb923c;
+    --yellow:    #fbbf24;
+    --panel-bg:  rgba(15, 23, 42, 0.95);
+    --panel-w:   440px;
+    --chat-w:    360px;
+    --anim:      300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Top Bar ──────────────────────────────────────────── */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+    height: 48px;
+    display: flex; align-items: center; gap: 12px;
+    padding: 0 20px;
+    background: rgba(11, 15, 26, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar .logo { font-weight: 700; font-size: 15px; color: var(--accent); letter-spacing: -0.3px; }
+  .topbar .subtitle { font-size: 12px; color: var(--text-dim); }
+  .topbar .badge {
+    margin-left: auto;
+    font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 99px;
+    background: rgba(129, 140, 248, 0.15); color: var(--accent);
+    border: 1px solid rgba(129, 140, 248, 0.25);
+  }
+
+  /* ── Main Layout ──────────────────────────────────────── */
+  .main {
+    margin-top: 48px;
+    display: flex;
+    min-height: calc(100vh - 48px);
+    transition: opacity var(--anim);
+  }
+  .main.dimmed { opacity: 0.4; pointer-events: none; }
+
+  /* ── Sidebar ──────────────────────────────────────────── */
+  .sidebar {
+    width: 200px; flex-shrink: 0;
+    padding: 20px 14px;
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .sidebar h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-dim); margin-bottom: 12px; }
+  .sidebar a {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px; border-radius: 6px;
+    color: var(--text-dim); text-decoration: none; font-size: 13px;
+    transition: background 150ms, color 150ms;
+    margin-bottom: 2px;
+  }
+  .sidebar a:hover { background: var(--surface-2); color: var(--text); }
+  .sidebar a.active { background: rgba(129, 140, 248, 0.12); color: var(--accent); }
+  .sidebar .icon { width: 16px; text-align: center; font-size: 14px; }
+
+  /* ── Action Stream ────────────────────────────────────── */
+  .stream {
+    flex: 1;
+    padding: 28px 32px;
+    max-width: 720px;
+  }
+  .stream h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .stream .desc { font-size: 13px; color: var(--text-dim); margin-bottom: 24px; }
+
+  .stream-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 200ms, transform 100ms, box-shadow 200ms;
+  }
+  .stream-item:hover {
+    border-color: var(--accent);
+    transform: translateX(2px);
+    box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.15);
+  }
+  .stream-item.active-item {
+    border-color: var(--accent);
+    background: rgba(129, 140, 248, 0.06);
+  }
+
+  .item-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .item-icon.draft    { background: rgba(52, 211, 153, 0.15); }
+  .item-icon.agent    { background: rgba(129, 140, 248, 0.15); }
+  .item-icon.todo     { background: rgba(248, 113, 113, 0.15); }
+  .item-icon.content  { background: rgba(251, 191, 36, 0.15); }
+  .item-icon.chat     { background: rgba(99, 102, 241, 0.15); }
+
+  .item-body { flex: 1; min-width: 0; }
+  .item-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+  .item-meta { font-size: 12px; color: var(--text-dim); display: flex; gap: 12px; flex-wrap: wrap; }
+  .item-meta .tag {
+    display: inline-block;
+    padding: 1px 7px; border-radius: 4px;
+    font-size: 11px; font-weight: 500;
+  }
+  .tag-green  { background: rgba(52, 211, 153, 0.15); color: var(--green); }
+  .tag-red    { background: rgba(248, 113, 113, 0.15); color: var(--red); }
+  .tag-orange { background: rgba(251, 191, 36, 0.15); color: var(--orange); }
+  .tag-purple { background: rgba(129, 140, 248, 0.15); color: var(--accent); }
+
+  .item-time { font-size: 11px; color: var(--text-dim); white-space: nowrap; padding-top: 2px; }
+
+  /* ── Hint Bar ─────────────────────────────────────────── */
+  .hint {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 10px 20px;
+    font-size: 12px; color: var(--text-dim); text-align: center;
+    background: rgba(11, 15, 26, 0.8);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--border);
+  }
+  .hint kbd {
+    display: inline-block; padding: 1px 6px; border-radius: 4px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    font-size: 11px; font-family: inherit;
+  }
+
+  /* ── Overlay ──────────────────────────────────────────── */
+  .overlay {
+    position: fixed; inset: 0; z-index: 50;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0; pointer-events: none;
+    transition: opacity var(--anim);
+  }
+  .overlay.visible { opacity: 1; pointer-events: auto; }
+
+  /* ── Panels ───────────────────────────────────────────── */
+  .panel {
+    position: fixed; top: 0; bottom: 0; right: 0; z-index: 100;
+    width: var(--panel-w);
+    background: var(--panel-bg);
+    backdrop-filter: blur(24px) saturate(1.4);
+    border-left: 1px solid rgba(255,255,255,0.08);
+    box-shadow: -20px 0 60px rgba(0,0,0,0.5);
+    transform: translateX(100%);
+    transition: transform var(--anim);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .panel.open { transform: translateX(0); }
+  .panel.chat-panel { width: var(--chat-w); z-index: 110; }
+  .panel.stacked { transform: translateX(-20px); }
+
+  .panel-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+  }
+  .panel-header .panel-type {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--accent); font-weight: 600;
+  }
+  .panel-header .panel-title {
+    font-size: 15px; font-weight: 700; flex: 1;
+  }
+  .panel-close {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-dim); font-size: 14px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 150ms, color 150ms;
+  }
+  .panel-close:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+
+  .panel-body {
+    flex: 1; overflow-y: auto; padding: 20px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface-2) transparent;
+  }
+
+  .panel-footer {
+    padding: 14px 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+  }
+
+  /* ── Panel Content Utilities ──────────────────────────── */
+  .p-section { margin-bottom: 20px; }
+  .p-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 6px; font-weight: 600; }
+  .p-text { font-size: 13px; line-height: 1.65; color: var(--text); }
+  .p-text-dim { font-size: 13px; line-height: 1.65; color: var(--text-dim); }
+
+  .p-meta-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    padding: 14px; border-radius: 8px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+  }
+  .p-meta-item .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dim); }
+  .p-meta-item .value { font-size: 13px; font-weight: 500; margin-top: 2px; }
+
+  .p-highlight-box {
+    padding: 14px 16px; border-radius: 8px;
+    background: rgba(129, 140, 248, 0.08);
+    border: 1px solid rgba(129, 140, 248, 0.18);
+  }
+  .p-highlight-box h4 { font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .p-highlight-box ul { list-style: none; padding: 0; }
+  .p-highlight-box li {
+    font-size: 13px; padding: 4px 0;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .p-highlight-box li::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  .p-expandable {
+    border: 1px solid rgba(255,255,255,0.06); border-radius: 8px;
+    overflow: hidden;
+  }
+  .p-expandable-header {
+    padding: 10px 14px;
+    font-size: 12px; font-weight: 600; color: var(--text-dim);
+    cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+    background: rgba(255,255,255,0.02);
+    transition: background 150ms;
+  }
+  .p-expandable-header:hover { background: rgba(255,255,255,0.04); }
+  .p-expandable-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height 300ms ease;
+  }
+  .p-expandable.expanded .p-expandable-body { max-height: 300px; overflow-y: auto; }
+  .p-expandable-body pre {
+    padding: 12px 14px;
+    font-size: 11px; line-height: 1.5;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: var(--text-dim);
+    white-space: pre-wrap;
+    background: rgba(0,0,0,0.2);
+  }
+
+  .entity-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .entity-tag {
+    padding: 3px 10px; border-radius: 99px;
+    font-size: 11px; font-weight: 500;
+    background: rgba(129, 140, 248, 0.1); color: var(--accent);
+    border: 1px solid rgba(129, 140, 248, 0.2);
+  }
+
+  textarea.p-notes {
+    width: 100%; min-height: 80px; padding: 10px 12px;
+    background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px; color: var(--text); font-size: 13px;
+    font-family: inherit; resize: vertical;
+    transition: border-color 200ms;
+  }
+  textarea.p-notes:focus { outline: none; border-color: var(--accent); }
+
+  .email-body {
+    padding: 14px; border-radius: 8px;
+    background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05);
+    font-size: 13px; line-height: 1.7; color: var(--text);
+  }
+  .email-body p { margin-bottom: 10px; }
+  .email-body p:last-child { margin-bottom: 0; }
+
+  /* ── Buttons ──────────────────────────────────────────── */
+  .btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 7px;
+    font-size: 12px; font-weight: 600; font-family: inherit;
+    border: 1px solid rgba(255,255,255,0.1);
+    cursor: pointer; transition: all 150ms;
+  }
+  .btn-primary {
+    background: var(--accent-2); color: #fff; border-color: var(--accent-2);
+  }
+  .btn-primary:hover { background: #4f46e5; }
+  .btn-success {
+    background: rgba(52, 211, 153, 0.15); color: var(--green); border-color: rgba(52, 211, 153, 0.25);
+  }
+  .btn-success:hover { background: rgba(52, 211, 153, 0.25); }
+  .btn-danger {
+    background: rgba(248, 113, 113, 0.12); color: var(--red); border-color: rgba(248, 113, 113, 0.2);
+  }
+  .btn-danger:hover { background: rgba(248, 113, 113, 0.22); }
+  .btn-ghost {
+    background: rgba(255,255,255,0.04); color: var(--text-dim);
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+  .chat-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--accent); cursor: pointer;
+    padding: 6px 0; border: none; background: none; font-family: inherit;
+    transition: opacity 150ms;
+  }
+  .chat-link:hover { opacity: 0.8; }
+
+  /* ── Chat Panel Specifics ─────────────────────────────── */
+  .chat-messages { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .chat-msg {
+    max-width: 85%; padding: 10px 14px;
+    border-radius: 12px; font-size: 13px; line-height: 1.55;
+  }
+  .chat-msg.user {
+    align-self: flex-end;
+    background: var(--accent-2); color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .chat-msg.assistant {
+    align-self: flex-start;
+    background: rgba(255,255,255,0.07);
+    border-bottom-left-radius: 4px;
+  }
+  .chat-msg .sender { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; opacity: 0.7; }
+
+  .chat-input-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .chat-input {
+    flex: 1; padding: 9px 12px;
+    background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px; color: var(--text); font-size: 13px; font-family: inherit;
+  }
+  .chat-input:focus { outline: none; border-color: var(--accent); }
+  .chat-input::placeholder { color: var(--text-dim); }
+  .model-select {
+    padding: 7px 8px;
+    background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px; color: var(--text-dim); font-size: 11px; font-family: inherit;
+    cursor: pointer;
+  }
+  .chat-send {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: var(--accent-2); border: none; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 15px;
+    transition: background 150ms;
+  }
+  .chat-send:hover { background: #4f46e5; }
+  .chat-context {
+    padding: 10px 14px; margin: 0 16px 8px;
+    border-radius: 8px;
+    background: rgba(129, 140, 248, 0.08);
+    border: 1px solid rgba(129, 140, 248, 0.15);
+    font-size: 11px; color: var(--accent);
+  }
+
+  /* ── Counter badge ────────────────────────────────────── */
+  .count-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 18px; height: 18px; border-radius: 99px;
+    background: var(--accent-2); color: #fff;
+    font-size: 10px; font-weight: 700; padding: 0 5px;
+  }
+
+  /* ── Priority badge ───────────────────────────────────── */
+  .priority-high {
+    display: inline-block;
+    padding: 2px 8px; border-radius: 4px;
+    background: rgba(248, 113, 113, 0.15); color: var(--red);
+    font-size: 11px; font-weight: 600;
+  }
+
+  /* ── Responsive ───────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <div class="logo">CoCo</div>
+  <div class="subtitle">Path B — Slide-Over Panels</div>
+  <div class="badge">Prototype</div>
+</div>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay"></div>
+
+<!-- Main Content -->
+<div class="main" id="main">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h3>Navigation</h3>
+    <a href="#" class="active"><span class="icon">&#9679;</span> Action Stream</a>
+    <a href="#"><span class="icon">&#9632;</span> Projects</a>
+    <a href="#"><span class="icon">&#9733;</span> Agents</a>
+    <a href="#"><span class="icon">&#9998;</span> Drafts <span class="count-badge">3</span></a>
+    <a href="#"><span class="icon">&#9745;</span> Todos</a>
+    <a href="#"><span class="icon">&#128172;</span> Chat</a>
+    <a href="#"><span class="icon">&#9881;</span> Settings</a>
+  </div>
+
+  <!-- Action Stream -->
+  <div class="stream">
+    <h2>Action Stream</h2>
+    <p class="desc">Click any item to open its slide-over panel. No page navigation needed.</p>
+
+    <div class="stream-item" data-panel="draft" id="item-draft">
+      <div class="item-icon draft">&#128196;</div>
+      <div class="item-body">
+        <div class="item-title">ACC Phase 2 Status Update</div>
+        <div class="item-meta">
+          <span class="tag tag-green">Draft Ready</span>
+          <span>Knowledge Hub</span>
+          <span>Confidence: 87%</span>
+        </div>
+      </div>
+      <div class="item-time">2m ago</div>
+    </div>
+
+    <div class="stream-item" data-panel="agent" id="item-agent">
+      <div class="item-icon agent">&#129302;</div>
+      <div class="item-body">
+        <div class="item-title">Technical Architect &mdash; Architecture Review</div>
+        <div class="item-meta">
+          <span class="tag tag-purple">Agent Output</span>
+          <span>$0.23</span>
+          <span>4m 12s</span>
+        </div>
+      </div>
+      <div class="item-time">8m ago</div>
+    </div>
+
+    <div class="stream-item" data-panel="todo" id="item-todo">
+      <div class="item-icon todo">&#9888;</div>
+      <div class="item-body">
+        <div class="item-title">Review GitGuardian incident #29214721</div>
+        <div class="item-meta">
+          <span class="tag tag-red">High Priority</span>
+          <span>Source: email</span>
+          <span>Project: ACC</span>
+        </div>
+      </div>
+      <div class="item-time">22m ago</div>
+    </div>
+
+    <div class="stream-item" data-panel="content" id="item-content">
+      <div class="item-icon content">&#128231;</div>
+      <div class="item-body">
+        <div class="item-title">AuditBoard Config Migration Email</div>
+        <div class="item-meta">
+          <span class="tag tag-orange">Content</span>
+          <span>pankaj@example.com</span>
+          <span>4 entities extracted</span>
+        </div>
+      </div>
+      <div class="item-time">1h ago</div>
+    </div>
+
+    <div class="stream-item" data-panel="chat" id="item-chat">
+      <div class="item-icon chat">&#128172;</div>
+      <div class="item-body">
+        <div class="item-title">Chat with CoCo</div>
+        <div class="item-meta">
+          <span class="tag tag-purple">Quick Chat</span>
+          <span>General context</span>
+        </div>
+      </div>
+      <div class="item-time">now</div>
+    </div>
+  </div>
+</div>
+
+<!-- Hint bar -->
+<div class="hint">
+  Click any stream item to open its panel &middot; Press <kbd>Esc</kbd> to close &middot; "Chat About This" stacks a chat panel on top
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PANEL 1: Draft Preview                                 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-draft">
+  <div class="panel-header">
+    <div>
+      <div class="panel-type">Draft Preview</div>
+      <div class="panel-title">ACC Phase 2 Status Update</div>
+    </div>
+    <button class="panel-close" onclick="closeAllPanels()">&times;</button>
+  </div>
+  <div class="panel-body">
+    <div class="p-section">
+      <div class="p-meta-grid">
+        <div class="p-meta-item">
+          <div class="label">Created by</div>
+          <div class="value">Knowledge Hub</div>
+        </div>
+        <div class="p-meta-item">
+          <div class="label">Confidence</div>
+          <div class="value" style="color:var(--green)">87%</div>
+        </div>
+        <div class="p-meta-item">
+          <div class="label">Project</div>
+          <div class="value">ACC</div>
+        </div>
+        <div class="p-meta-item">
+          <div class="label">Type</div>
+          <div class="value">Status Update</div>
+        </div>
+      </div>
+    </div>
+    <div class="p-section">
+      <div class="p-label">Draft Content</div>
+      <div class="p-text">
+        <p><strong>ACC Phase 2 &mdash; Weekly Status Update</strong></p>
+        <br>
+        <p><strong>Summary:</strong> Phase 2 migration is on track. The configuration sync pipeline completed its first end-to-end run on Thursday. Three blocking issues from Phase 1 have been resolved. The AuditBoard API integration now handles pagination correctly and retry logic is in place for rate-limited endpoints.</p>
+        <br>
+        <p><strong>Key Milestones:</strong></p>
+        <p>&bull; Config sync pipeline &mdash; COMPLETE</p>
+        <p>&bull; Data validation framework &mdash; IN PROGRESS (80%)</p>
+        <p>&bull; Stakeholder UAT &mdash; SCHEDULED (Apr 12)</p>
+        <p>&bull; Production cutover &mdash; ON TRACK (Apr 19)</p>
+        <br>
+        <p><strong>Risks:</strong></p>
+        <p>&bull; GitGuardian flagged a potential credential exposure in the config migration scripts. Under investigation.</p>
+        <p>&bull; AuditBoard rate limits may constrain the initial bulk migration window. Mitigation: staggered batching over 48h.</p>
+        <br>
+        <p><strong>Next Steps:</strong></p>
+        <p>&bull; Complete data validation framework (ETA: Tuesday)</p>
+        <p>&bull; Schedule UAT walkthrough with Pankaj and Risk Ops</p>
+        <p>&bull; Finalize rollback procedures document</p>
+      </div>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <div class="btn-row" style="margin-bottom:10px;">
+      <button class="btn btn-success">Approve &#10003;</button>
+      <button class="btn btn-danger">Reject &#10007;</button>
+      <button class="btn btn-primary">Edit &amp; Approve</button>
+      <button class="btn btn-ghost">Assign Reviewer &#9662;</button>
+    </div>
+    <button class="chat-link" onclick="openChatOverlay('ACC Phase 2 Status Update draft')">&#128172; Chat About This</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PANEL 2: Agent Output                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-agent">
+  <div class="panel-header">
+    <div>
+      <div class="panel-type">Agent Output</div>
+      <div class="panel-title">Technical Architect &mdash; Architecture Review</div>
+    </div>
+    <button class="panel-close" onclick="closeAllPanels()">&times;</button>
+  </div>
+  <div class="panel-body">
+    <div class="p-section">
+      <div class="p-highlight-box">
+        <h4>Structured Summary</h4>
+        <ul>
+          <li><strong>3 bottlenecks</strong> identified in current architecture</li>
+          <li><strong>Recommendations:</strong> connection pooling, read replicas, Redis cache layer</li>
+          <li><strong>8 files</strong> analyzed across 2 repositories</li>
+          <li>Estimated performance improvement: <strong>40-60%</strong> on read paths</li>
+        </ul>
+      </div>
+    </div>
+    <div class="p-section">
+      <div class="p-meta-grid">
+        <div class="p-meta-item">
+          <div class="label">Cost</div>
+          <div class="value">$0.23</div>
+        </div>
+        <div class="p-meta-item">
+          <div class="label">Duration</div>
+          <div class="value">4m 12s</div>
+        </div>
+        <div class="p-meta-item">
+          <div class="label">Model</div>
+          <div class="value">Claude Opus</div>
+        </div>
+        <div class="p-meta-item">
+          <div class="label">Tokens</div>
+          <div class="value">12,847</div>
+        </div>
+      </div>
+    </div>
+    <div class="p-section">
+      <div class="p-expandable" id="expand-agent">
+        <div class="p-expandable-header" onclick="toggleExpand('expand-agent')">
+          <span>Full Output (Raw Log)</span>
+          <span>&#9662;</span>
+        </div>
+        <div class="p-expandable-body">
+          <pre>[2026-04-06 09:14:22] Starting architecture review...
+[2026-04-06 09:14:23] Scanning: backend/api/routes.py
+[2026-04-06 09:14:24] Scanning: backend/db/connections.py
+[2026-04-06 09:14:25] Scanning: backend/services/audit.py
+[2026-04-06 09:14:27] Scanning: backend/services/sync.py
+[2026-04-06 09:14:28] Scanning: backend/middleware/auth.py
+[2026-04-06 09:14:30] Scanning: backend/models/config.py
+[2026-04-06 09:14:31] Scanning: backend/utils/cache.py
+[2026-04-06 09:14:33] Scanning: backend/workers/migration.py
+
+BOTTLENECK 1: Database Connection Exhaustion
+  Location: backend/db/connections.py:42
+  Issue: New connection created per request, no pooling
+  Impact: Under 50+ concurrent requests, SQLite locks
+  Fix: Implement connection pool (max 10, overflow 20)
+
+BOTTLENECK 2: N+1 Query Pattern
+  Location: backend/services/audit.py:87-102
+  Issue: Iterating audit items, querying config per item
+  Impact: 200ms+ per request with large audit sets
+  Fix: Batch query with IN clause, or eager loading
+
+BOTTLENECK 3: No Read Caching
+  Location: backend/api/routes.py:155
+  Issue: Project metadata fetched from DB on every request
+  Impact: Redundant I/O for rarely-changing data
+  Fix: Redis/in-memory cache with 5-min TTL
+
+[2026-04-06 09:18:34] Review complete. 3 findings.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <div class="btn-row" style="margin-bottom:10px;">
+      <button class="btn btn-primary">Spawn Follow-up</button>
+      <button class="btn btn-ghost">Export as PDF</button>
+    </div>
+    <button class="chat-link" onclick="openChatOverlay('Architecture Review by Technical Architect')">&#128172; Chat About This</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PANEL 3: Todo Detail                                   -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-todo">
+  <div class="panel-header">
+    <div>
+      <div class="panel-type">Todo Detail</div>
+      <div class="panel-title">Review GitGuardian incident #29214721</div>
+    </div>
+    <button class="panel-close" onclick="closeAllPanels()">&times;</button>
+  </div>
+  <div class="panel-body">
+    <div class="p-section">
+      <div class="p-meta-grid">
+        <div class="p-meta-item">
+          <div class="label">Source</div>
+          <div class="value">Email &mdash; GitGuardian</div>
+        </div>
+        <div class="p-meta-item">
+          <div class="label">Priority</div>
+          <div class="value"><span class="priority-high">HIGH</span></div>
+        </div>
+        <div class="p-meta-item">
+          <div class="label">Project</div>
+          <div class="value">ACC</div>
+        </div>
+        <div class="p-meta-item">
+          <div class="label">Dependencies</div>
+          <div class="value" style="color:var(--text-dim)">None</div>
+        </div>
+      </div>
+    </div>
+    <div class="p-section">
+      <div class="p-label">Description</div>
+      <div class="p-text">GitGuardian has detected a potential credential exposure in commit <code style="background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;font-size:12px;">a3f82c1</code> on the <code style="background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;font-size:12px;">phase/2-migration</code> branch. The flagged secret appears to be an AuditBoard API token in <code style="background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;font-size:12px;">scripts/migrate-config.sh</code>. Verify whether this is a real credential or a false positive, and rotate if necessary.</div>
+    </div>
+    <div class="p-section">
+      <div class="p-label">Notes</div>
+      <textarea class="p-notes" placeholder="Add notes about this todo...">Checked with Pankaj — this was a test token from staging, not production. Will still rotate as a precaution. Need to add .gitguardian.yml to suppress future false positives for test fixtures.</textarea>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <div class="btn-row" style="margin-bottom:10px;">
+      <button class="btn btn-success">Mark Complete &#10003;</button>
+      <button class="btn btn-primary">Delegate to Agent</button>
+      <button class="btn btn-ghost">Change Priority &#9662;</button>
+    </div>
+    <button class="chat-link" onclick="openChatOverlay('GitGuardian incident #29214721')">&#128172; Chat About This</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PANEL 4: Content / Knowledge                           -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-content">
+  <div class="panel-header">
+    <div>
+      <div class="panel-type">Content / Knowledge</div>
+      <div class="panel-title">AuditBoard Config Migration Email</div>
+    </div>
+    <button class="panel-close" onclick="closeAllPanels()">&times;</button>
+  </div>
+  <div class="panel-body">
+    <div class="p-section">
+      <div class="p-meta-grid">
+        <div class="p-meta-item">
+          <div class="label">Source</div>
+          <div class="value">Email</div>
+        </div>
+        <div class="p-meta-item">
+          <div class="label">From</div>
+          <div class="value">pankaj@example.com</div>
+        </div>
+        <div class="p-meta-item">
+          <div class="label">Received</div>
+          <div class="value">Today, 8:42 AM</div>
+        </div>
+        <div class="p-meta-item">
+          <div class="label">Classified</div>
+          <div class="value" style="color:var(--orange)">Pending</div>
+        </div>
+      </div>
+    </div>
+    <div class="p-section">
+      <div class="p-label">Email Body</div>
+      <div class="email-body">
+        <p>Hi Rijul,</p>
+        <p>Quick update on the AuditBoard config migration. I spoke with the vendor team yesterday and they confirmed the new API endpoints will be available in the Q2 sandbox by April 15th.</p>
+        <p>A few things to flag:</p>
+        <p>1. The <strong>configuration export format</strong> is changing from XML to JSON in v3.2. Our migration scripts will need updating.<br>
+        2. They're deprecating the <strong>bulk-import endpoint</strong> we currently use. Replacement is a streaming API with webhook callbacks.<br>
+        3. The new auth model uses <strong>OAuth 2.0 with PKCE</strong> instead of API keys. We'll need to register our app.</p>
+        <p>Can you check if our current migration timeline accounts for these changes? I think we might need an extra sprint.</p>
+        <p>Also, Sanjay from the AuditBoard team will be on PTO April 8-15, so we should get any questions to him before Monday.</p>
+        <p>Best,<br>Pankaj</p>
+      </div>
+    </div>
+    <div class="p-section">
+      <div class="p-label">Extracted Entities</div>
+      <div class="entity-tags">
+        <span class="entity-tag">AuditBoard</span>
+        <span class="entity-tag">Config Migration</span>
+        <span class="entity-tag">Q2</span>
+        <span class="entity-tag">OAuth 2.0</span>
+        <span class="entity-tag">Sanjay (AuditBoard)</span>
+        <span class="entity-tag">API v3.2</span>
+      </div>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <div class="btn-row" style="margin-bottom:10px;">
+      <button class="btn btn-primary">Classify to Project &#9662;</button>
+      <button class="btn btn-ghost">Extract Todos</button>
+      <button class="btn btn-danger">Dismiss</button>
+    </div>
+    <button class="chat-link" onclick="openChatOverlay('AuditBoard Config Migration Email from Pankaj')">&#128172; Chat About This</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PANEL 5: Chat (stacking overlay)                       -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="panel chat-panel" id="panel-chat">
+  <div class="panel-header">
+    <div>
+      <div class="panel-type">Chat</div>
+      <div class="panel-title">Chat with CoCo</div>
+    </div>
+    <button class="panel-close" onclick="closeChatPanel()">&times;</button>
+  </div>
+  <div class="chat-context" id="chat-context">
+    Discussing: <span id="chat-context-text">General conversation</span>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+    <!-- Messages injected by JS -->
+  </div>
+  <div class="chat-input-bar">
+    <select class="model-select">
+      <option>sonnet</option>
+      <option>opus</option>
+      <option>haiku</option>
+    </select>
+    <input type="text" class="chat-input" placeholder="Ask CoCo anything..." id="chat-input">
+    <button class="chat-send" onclick="sendChatMessage()">&#8593;</button>
+  </div>
+</div>
+
+<script>
+// ── State ────────────────────────────────────────────────
+let activePanel = null;
+let chatOpen = false;
+let chatContext = '';
+
+const overlay  = document.getElementById('overlay');
+const main     = document.getElementById('main');
+
+// ── Open a primary panel ─────────────────────────────────
+function openPanel(name) {
+  // Close any existing panel first (instant)
+  if (activePanel && activePanel !== name) {
+    document.getElementById('panel-' + activePanel).classList.remove('open');
+    document.getElementById('item-' + activePanel)?.classList.remove('active-item');
+  }
+
+  // Close chat if open
+  if (chatOpen) {
+    document.getElementById('panel-chat').classList.remove('open');
+    chatOpen = false;
+  }
+
+  activePanel = name;
+  overlay.classList.add('visible');
+  main.classList.add('dimmed');
+  document.getElementById('panel-' + name).classList.remove('stacked');
+  document.getElementById('panel-' + name).classList.add('open');
+  document.getElementById('item-' + name)?.classList.add('active-item');
+}
+
+// ── Close all panels ─────────────────────────────────────
+function closeAllPanels() {
+  if (activePanel) {
+    document.getElementById('panel-' + activePanel).classList.remove('open', 'stacked');
+    document.getElementById('item-' + activePanel)?.classList.remove('active-item');
+    activePanel = null;
+  }
+  if (chatOpen) {
+    document.getElementById('panel-chat').classList.remove('open');
+    chatOpen = false;
+  }
+  overlay.classList.remove('visible');
+  main.classList.remove('dimmed');
+}
+
+// ── Open Chat as overlay on top of active panel ──────────
+function openChatOverlay(context) {
+  chatContext = context;
+  document.getElementById('chat-context-text').textContent = context;
+  loadChatMessages(context);
+
+  // Stack the active panel back slightly
+  if (activePanel) {
+    document.getElementById('panel-' + activePanel).classList.add('stacked');
+  }
+
+  document.getElementById('panel-chat').classList.add('open');
+  chatOpen = true;
+}
+
+// ── Close only the chat panel ────────────────────────────
+function closeChatPanel() {
+  document.getElementById('panel-chat').classList.remove('open');
+  chatOpen = false;
+  if (activePanel) {
+    document.getElementById('panel-' + activePanel).classList.remove('stacked');
+  }
+}
+
+// ── Open standalone chat (from stream) ───────────────────
+function openStandaloneChat() {
+  if (activePanel) {
+    document.getElementById('panel-' + activePanel).classList.remove('open', 'stacked');
+    document.getElementById('item-' + activePanel)?.classList.remove('active-item');
+    activePanel = null;
+  }
+
+  chatContext = 'General conversation';
+  document.getElementById('chat-context-text').textContent = chatContext;
+  loadChatMessages(chatContext);
+
+  overlay.classList.add('visible');
+  main.classList.add('dimmed');
+  document.getElementById('panel-chat').classList.add('open');
+  chatOpen = true;
+}
+
+// ── Load mock chat messages ──────────────────────────────
+function loadChatMessages(context) {
+  const container = document.getElementById('chat-messages');
+
+  const conversations = {
+    'General conversation': [
+      { role: 'assistant', text: 'Good morning, Rijul. You have 3 pending drafts and 1 high-priority todo. The architecture review from Technical Architect just completed. What would you like to tackle first?' },
+      { role: 'user', text: 'What did the architecture review find?' },
+      { role: 'assistant', text: 'The Technical Architect identified 3 bottlenecks: (1) no database connection pooling, (2) N+1 query pattern in the audit service, and (3) missing read cache for project metadata. Estimated 40-60% improvement on read paths if all three are addressed. Want me to create todos for each recommendation?' },
+    ],
+    default: [
+      { role: 'assistant', text: 'I have context on "' + context + '". What would you like to know?' },
+      { role: 'user', text: 'Give me a quick summary of the key points.' },
+      { role: 'assistant', text: 'Here are the highlights from this item. The main action items are already tracked in your todos. Would you like me to draft a follow-up or create new tasks based on this?' },
+    ]
+  };
+
+  const msgs = conversations[context] || conversations['default'];
+  container.innerHTML = msgs.map(m => `
+    <div class="chat-msg ${m.role}">
+      <div class="sender">${m.role === 'user' ? 'You' : 'CoCo'}</div>
+      ${m.text}
+    </div>
+  `).join('');
+
+  // Scroll to bottom
+  setTimeout(() => container.scrollTop = container.scrollHeight, 50);
+}
+
+// ── Send a mock message ──────────────────────────────────
+function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const container = document.getElementById('chat-messages');
+  container.innerHTML += `<div class="chat-msg user"><div class="sender">You</div>${text}</div>`;
+  input.value = '';
+
+  setTimeout(() => {
+    container.innerHTML += `<div class="chat-msg assistant"><div class="sender">CoCo</div>Got it. Let me look into that for you...</div>`;
+    container.scrollTop = container.scrollHeight;
+  }, 600);
+}
+
+// ── Expandable sections ──────────────────────────────────
+function toggleExpand(id) {
+  document.getElementById(id).classList.toggle('expanded');
+}
+
+// ── Stream item click handlers ───────────────────────────
+document.querySelectorAll('.stream-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const panel = item.dataset.panel;
+    if (panel === 'chat') {
+      openStandaloneChat();
+    } else {
+      openPanel(panel);
+    }
+  });
+});
+
+// ── Overlay click to close ───────────────────────────────
+overlay.addEventListener('click', closeAllPanels);
+
+// ── Escape key to close ──────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (chatOpen && activePanel) {
+      closeChatPanel();
+    } else {
+      closeAllPanels();
+    }
+  }
+});
+
+// ── Enter to send chat ───────────────────────────────────
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendChatMessage();
+});
+</script>
+
+</body>
+</html>

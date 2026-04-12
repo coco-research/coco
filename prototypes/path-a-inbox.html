@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoCo Inbox — Path A (Patch)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #181a20;
+    --surface-hover: #1e2028;
+    --surface-selected: #242630;
+    --border: #2a2d38;
+    --text: #e4e5eb;
+    --text-muted: #8b8d98;
+    --text-dim: #5c5e6a;
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.10);
+    --red-border: rgba(239,68,68,0.35);
+    --blue: #3b82f6;
+    --blue-bg: rgba(59,130,246,0.10);
+    --blue-border: rgba(59,130,246,0.35);
+    --grey: #6b7280;
+    --grey-bg: rgba(107,114,128,0.08);
+    --grey-border: rgba(107,114,128,0.25);
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.12);
+    --accent: #a78bfa;
+    --radius: 8px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Top Bar ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .topbar h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .topbar-actions { display: flex; gap: 8px; }
+
+  .btn {
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .btn:hover { background: var(--surface-hover); color: var(--text); border-color: #3a3d48; }
+  .btn-primary {
+    background: var(--blue);
+    color: #fff;
+    border-color: var(--blue);
+  }
+  .btn-primary:hover { background: #2563eb; border-color: #2563eb; }
+  .btn-danger {
+    background: transparent;
+    color: var(--red);
+    border-color: var(--red-border);
+  }
+  .btn-danger:hover { background: var(--red-bg); }
+  .btn-success {
+    background: transparent;
+    color: var(--green);
+    border-color: rgba(34,197,94,0.35);
+  }
+  .btn-success:hover { background: var(--green-bg); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn-ghost {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    padding: 4px 8px;
+  }
+  .btn-ghost:hover { color: var(--text); background: var(--surface-hover); }
+
+  /* ── Tab Bar ── */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .tab {
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: inherit;
+  }
+  .tab:hover { background: var(--surface-hover); color: var(--text); }
+  .tab.active { background: var(--surface-selected); color: var(--text); }
+  .tab-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 10px;
+    line-height: 1.4;
+  }
+  .tab[data-tab="urgent"] .tab-badge { background: var(--red-bg); color: var(--red); }
+  .tab[data-tab="drafts"] .tab-badge { background: var(--blue-bg); color: var(--blue); }
+  .tab[data-tab="everything"] .tab-badge { background: var(--grey-bg); color: var(--grey); }
+  .tab[data-tab="urgent"].active .tab-badge { background: var(--red); color: #fff; }
+  .tab[data-tab="drafts"].active .tab-badge { background: var(--blue); color: #fff; }
+  .tab[data-tab="everything"].active .tab-badge { background: var(--grey); color: #fff; }
+
+  /* ── Batch Actions ── */
+  .batch-bar {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 24px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .batch-bar.visible { display: flex; }
+  .batch-bar span { font-size: 12px; color: var(--text-dim); margin-right: 4px; }
+
+  /* ── Main Content ── */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── Item List ── */
+  .item-list {
+    flex: 1;
+    overflow-y: auto;
+    min-width: 0;
+  }
+  .item-list::-webkit-scrollbar { width: 6px; }
+  .item-list::-webkit-scrollbar-track { background: transparent; }
+  .item-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .item {
+    display: flex;
+    align-items: center;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.12s;
+    position: relative;
+    gap: 14px;
+  }
+  .item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: 0 2px 2px 0;
+  }
+  .item.urgent::before { background: var(--red); }
+  .item.draft::before { background: var(--blue); }
+  .item.normal::before { background: transparent; }
+  .item:hover { background: var(--surface-hover); }
+  .item.selected { background: var(--surface-selected); }
+  .item.dimmed { opacity: 0.45; }
+
+  .item-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .item-icon.email { background: var(--red-bg); color: var(--red); }
+  .item-icon.agent { background: rgba(168,85,247,0.12); color: #a855f7; }
+  .item-icon.kh { background: var(--blue-bg); color: var(--blue); }
+  .item-icon.auto { background: var(--green-bg); color: var(--green); }
+  .item-icon.classify { background: rgba(234,179,8,0.12); color: #eab308; }
+
+  .item-body { flex: 1; min-width: 0; }
+  .item-title {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+  }
+  .item-meta {
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .item-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-dim); }
+  .priority-badge {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--red-bg);
+    color: var(--red);
+  }
+
+  .item-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.12s;
+  }
+  .item:hover .item-actions { opacity: 1; }
+  .item.selected .item-actions { opacity: 1; }
+
+  /* ── Filter Chips ── */
+  .filter-bar {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .filter-bar.visible { display: flex; }
+  .filter-bar label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .chip {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.12s;
+    font-family: inherit;
+  }
+  .chip:hover { background: var(--surface-hover); color: var(--text); }
+  .chip.active { background: var(--surface-selected); color: var(--text); border-color: var(--accent); }
+  .chip-group { display: flex; gap: 4px; }
+  .filter-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+  /* ── Detail Panel ── */
+  .detail-panel {
+    width: 420px;
+    border-left: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+    transition: transform 0.2s, opacity 0.2s;
+  }
+  .detail-panel.hidden {
+    transform: translateX(20px);
+    opacity: 0;
+    width: 0;
+    border: none;
+  }
+  .detail-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .detail-header h2 { font-size: 16px; font-weight: 600; line-height: 1.4; margin-bottom: 12px; }
+  .detail-meta-grid {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 6px 12px;
+    font-size: 12px;
+  }
+  .detail-meta-grid dt { color: var(--text-dim); }
+  .detail-meta-grid dd { color: var(--text-muted); }
+  .detail-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .detail-body p { font-size: 13px; line-height: 1.7; color: var(--text-muted); }
+  .detail-body p + p { margin-top: 12px; }
+  .detail-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .detail-footer .spacer { flex: 1; }
+  .detail-chat-link {
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .detail-chat-link:hover { text-decoration: underline; }
+
+  .detail-empty {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+
+  /* ── Toast ── */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100;
+  }
+  .toast {
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    background: #1a1d27;
+    border: 1px solid var(--border);
+    color: var(--text);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    animation: toast-in 0.25s ease-out;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .toast.success { border-color: rgba(34,197,94,0.4); }
+  .toast.success::before { content: '\2713'; color: var(--green); }
+  .toast.info { border-color: rgba(59,130,246,0.4); }
+  .toast.info::before { content: '\2139'; color: var(--blue); }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes toast-out { from { opacity: 1; } to { opacity: 0; transform: translateY(-8px); } }
+</style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <h1>Inbox</h1>
+  <div class="topbar-actions">
+    <button class="btn" onclick="batchDismissRead()">Dismiss Read</button>
+    <button class="btn btn-primary" id="approve-all-btn" onclick="batchApproveDrafts()" style="display:none">Approve All Drafts</button>
+  </div>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar">
+  <button class="tab active" data-tab="urgent" onclick="switchTab('urgent')">
+    Urgent <span class="tab-badge">3</span>
+  </button>
+  <button class="tab" data-tab="drafts" onclick="switchTab('drafts')">
+    Drafts <span class="tab-badge">5</span>
+  </button>
+  <button class="tab" data-tab="everything" onclick="switchTab('everything')">
+    Everything <span class="tab-badge">28</span>
+  </button>
+</div>
+
+<!-- Batch Action Bar (drafts only) -->
+<div class="batch-bar" id="batch-bar">
+  <span>Batch actions:</span>
+  <button class="btn btn-success btn-sm" onclick="batchApproveDrafts()">Approve All (5)</button>
+</div>
+
+<!-- Filter Bar (everything only) -->
+<div class="filter-bar" id="filter-bar">
+  <label>Source</label>
+  <div class="chip-group">
+    <button class="chip active" onclick="toggleChip(this)">All</button>
+    <button class="chip" onclick="toggleChip(this)">Email</button>
+    <button class="chip" onclick="toggleChip(this)">Agent</button>
+    <button class="chip" onclick="toggleChip(this)">KH</button>
+  </div>
+  <div class="filter-sep"></div>
+  <label>Status</label>
+  <div class="chip-group">
+    <button class="chip active" onclick="toggleChip(this)">All</button>
+    <button class="chip" onclick="toggleChip(this)">Unread</button>
+    <button class="chip" onclick="toggleChip(this)">Read</button>
+    <button class="chip" onclick="toggleChip(this)">Acted</button>
+  </div>
+</div>
+
+<!-- Main: List + Detail -->
+<div class="main">
+  <div class="item-list" id="item-list"></div>
+  <div class="detail-panel hidden" id="detail-panel">
+    <div class="detail-empty">Select an item to preview</div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ── Data ──
+const items = {
+  urgent: [
+    { id: 'u1', title: 'GitGuardian incident #29214721', type: 'email', icon: 'email', priority: 'high', time: '9 days ago', project: 'Unassigned', source: 'Email — GitGuardian', confidence: null,
+      body: 'A new incident has been detected on your monitored perimeter. Secret type: Generic Password. Occurrences: 2. Repository: coco-platform/backend. This incident requires immediate review to determine if the exposed secret is still active and needs rotation.',
+      actions: ['Review', 'Dismiss', 'Assign to Project'] },
+    { id: 'u2', title: 'GitGuardian incident #29214720', type: 'email', icon: 'email', priority: 'high', time: '9 days ago', project: 'Unassigned', source: 'Email — GitGuardian', confidence: null,
+      body: 'A new incident has been detected on your monitored perimeter. Secret type: AWS Access Key. Occurrences: 1. Repository: coco-platform/scripts. Immediate rotation recommended if the key is still active.',
+      actions: ['Review', 'Dismiss'] },
+    { id: 'u3', title: 'Failed: Developer agent on auth refactor', type: 'agent', icon: 'agent', priority: 'high', time: '2h ago', project: 'CoCo Platform', source: 'Agent — Developer', confidence: null,
+      body: 'The Developer agent failed during execution of task "Refactor auth middleware to support PIN + session tokens". Error: Process exited with code 1 after 47 minutes. Last output: "TypeError: Cannot read properties of undefined (reading \'verify\')" at middleware/auth.ts:34. 3 files were modified before failure.',
+      actions: ['View Logs', 'Retry', 'Dismiss'] },
+  ],
+  drafts: [
+    { id: 'd1', title: 'ACC Phase 2 Status Update', type: 'kh', icon: 'kh', priority: null, time: '1h ago', project: 'ACC', source: 'Knowledge Hub', confidence: '92%',
+      body: 'Auto-generated status update for ACC Phase 2. Covers: milestone progress (7/12 complete), risk register updates (2 new amber items), vendor status (AuditBoard integration on track), and upcoming deliverables for the next sprint cycle. Ready for your review before publishing to the team Confluence space.',
+      actions: ['Preview', 'Approve', 'Reject'] },
+    { id: 'd2', title: 'AuditBoard Config Migration Plan', type: 'kh', icon: 'kh', priority: null, time: '3h ago', project: 'AuditBoard', source: 'Knowledge Hub', confidence: '88%',
+      body: 'Migration plan for AuditBoard configuration from legacy XML format to the new YAML-based config system. Includes: rollback procedures, environment-specific overrides, secrets handling via AWS Parameter Store, and a phased rollout schedule across dev/staging/prod.',
+      actions: ['Preview', 'Approve', 'Reject'] },
+    { id: 'd3', title: '3PI V2 Vendor Comparison', type: 'kh', icon: 'kh', priority: null, time: '5h ago', project: '3PI', source: 'Knowledge Hub', confidence: '85%',
+      body: 'Comparative analysis of 3PI V2 vendor candidates. Evaluates: API capabilities, pricing models, compliance certifications (SOC2, ISO 27001), SLA commitments, and integration complexity. Recommendation: Vendor B (Aravo) based on weighted scoring matrix.',
+      actions: ['Preview', 'Approve', 'Reject'] },
+    { id: 'd4', title: 'Cross Risk Q2 Planning Doc', type: 'kh', icon: 'kh', priority: null, time: '8h ago', project: 'Cross Risk', source: 'Knowledge Hub', confidence: '91%',
+      body: 'Q2 planning document consolidating inputs from all Cross Risk workstreams. Key themes: automation of control testing (target 40% reduction in manual effort), knowledge graph expansion, and platform consolidation. Budget allocation and headcount requests included.',
+      actions: ['Preview', 'Approve', 'Reject'] },
+    { id: 'd5', title: 'Aravo API Integration Guide', type: 'kh', icon: 'kh', priority: null, time: '1d ago', project: '3PI', source: 'Knowledge Hub', confidence: '79%',
+      body: 'Technical integration guide for the Aravo REST API. Covers: authentication (OAuth2 client credentials), pagination patterns, rate limiting (100 req/min), webhook setup for real-time notifications, and error handling. Includes code samples in Python and TypeScript.',
+      actions: ['Preview', 'Approve', 'Reject'] },
+  ],
+  everything: [] // built dynamically
+};
+
+// Build "everything" by combining urgent + drafts + extras
+const extras = [
+  { id: 'e1', title: 'Weekly digest: 14 emails classified', type: 'auto', icon: 'auto', priority: null, time: '30m ago', project: null, source: 'Auto-handler', confidence: null,
+    body: 'CoCo automatically classified 14 incoming emails this week: 8 filed to projects, 4 marked as newsletters (archived), 2 flagged for review. No manual intervention needed. Classification accuracy this week: 96%.', actions: ['View Summary'], dimmed: true },
+  { id: 'e2', title: 'Pankaj: RE: 3PI Contract Data', type: 'email', icon: 'email', priority: null, time: '1h ago', project: '3PI', source: 'Email — Pankaj Bhatt', confidence: null,
+    body: 'Hi Rijul, attaching the updated contract data extract for 3PI Phase 2. The vendor fields have been normalized per your request. Let me know if you need the raw export as well. — Pankaj', actions: ['Reply', 'File to Project', 'Dismiss'] },
+  { id: 'e3', title: 'Researcher agent completed: Aravo API docs', type: 'agent', icon: 'agent', priority: null, time: '2h ago', project: '3PI', source: 'Agent — Researcher', confidence: null,
+    body: 'Research task completed successfully. Scraped and summarized Aravo API documentation (47 pages). Key findings: REST API supports bulk operations, webhook notifications for status changes, and sandbox environment available. Output saved to Knowledge Hub as draft.', actions: ['View Output', 'Dismiss'] },
+  { id: 'e4', title: 'Classified: Company IT Newsletter', type: 'auto', icon: 'auto', priority: null, time: '3h ago', project: null, source: 'Auto-handler', confidence: '97%',
+    body: 'Automatically classified as newsletter and archived. Subject: "Company Technology Update — March 2026". No action items detected.', actions: ['Reclassify'], dimmed: true },
+  { id: 'e5', title: 'Needs classification: "FW: Vendor Security Assessment"', type: 'classify', icon: 'classify', priority: null, time: '4h ago', project: null, source: 'Email — Unclassified', confidence: '45%',
+    body: 'Forwarded email from Sarah Chen regarding a vendor security assessment questionnaire. CoCo could not confidently classify this item (45% confidence). Possible projects: AuditBoard, 3PI, or Cross Risk general.', actions: ['Classify', 'Dismiss'] },
+  { id: 'e6', title: 'Health check: All 3 agents healthy', type: 'auto', icon: 'auto', priority: null, time: '6h ago', project: null, source: 'System — Health Monitor', confidence: null,
+    body: 'Periodic health check completed. Developer agent: healthy (idle). Researcher agent: healthy (idle). Reviewer agent: healthy (idle). No resource warnings. Uptime: 99.8% this week.', actions: ['View Details'], dimmed: true },
+  { id: 'e7', title: 'Ravi: ACC standup notes', type: 'email', icon: 'email', priority: null, time: '8h ago', project: 'ACC', source: 'Email — Ravi Sharma', confidence: null,
+    body: 'Notes from today\'s ACC standup: Sprint velocity at 34 points (target 38). Blockers: waiting on AuditBoard sandbox access, pending legal review on data residency. Action items: Rijul to follow up with vendor, Ravi to update risk register.', actions: ['Reply', 'File to Project', 'Dismiss'] },
+  { id: 'e8', title: 'Auto-filed: Jira notification to ACC', type: 'auto', icon: 'auto', priority: null, time: '10h ago', project: 'ACC', source: 'Auto-handler', confidence: '99%',
+    body: 'Jira notification "ACC-142: Update audit trail schema" was automatically filed to the ACC project. Assigned to: Ravi Sharma. Status change: In Progress → In Review.', actions: ['View in Jira'], dimmed: true },
+  { id: 'e9', title: 'Reviewer agent: PR #87 feedback ready', type: 'agent', icon: 'agent', priority: null, time: '12h ago', project: 'CoCo Platform', source: 'Agent — Reviewer', confidence: null,
+    body: 'Code review completed for PR #87 "Add SSE endpoint for station logs". Findings: 2 suggestions (non-blocking), 1 question about error handling in stream disconnection. Overall assessment: Approve with minor suggestions.', actions: ['View Review', 'Dismiss'] },
+  { id: 'e10', title: 'Sarah: Vendor security questionnaire', type: 'email', icon: 'email', priority: null, time: '1d ago', project: 'AuditBoard', source: 'Email — Sarah Chen', confidence: null,
+    body: 'Rijul, can you review the attached vendor security questionnaire for AuditBoard? Legal needs our responses by end of week. I\'ve pre-filled sections 1-3 based on our standard template. Sections 4-6 need your input on the technical architecture.', actions: ['Reply', 'File to Project', 'Dismiss'] },
+  { id: 'e11', title: 'Auto-handled: Calendar invite accepted', type: 'auto', icon: 'auto', priority: null, time: '1d ago', project: null, source: 'Auto-handler', confidence: '99%',
+    body: 'Calendar invite "Cross Risk Weekly Sync" was automatically accepted based on your recurring meeting rules. Time: Thursday 10:00 AM EST.', actions: ['View Calendar'], dimmed: true },
+  { id: 'e12', title: 'Suggestion: Archive stale 3PI V1 docs', type: 'classify', icon: 'classify', priority: null, time: '2d ago', project: '3PI', source: 'CoCo — Suggestions', confidence: '72%',
+    body: 'CoCo detected 8 Knowledge Hub documents tagged "3PI V1" that haven\'t been accessed in 90+ days. Suggested action: archive to reduce clutter and improve search relevance. This would not delete any content.', actions: ['Archive', 'Keep', 'Dismiss'] },
+];
+
+items.everything = [...items.urgent, ...items.drafts, ...extras];
+
+let currentTab = 'urgent';
+let selectedId = null;
+
+// ── Tab Switching ──
+function switchTab(tab) {
+  currentTab = tab;
+  selectedId = null;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.getElementById('batch-bar').classList.toggle('visible', tab === 'drafts');
+  document.getElementById('filter-bar').classList.toggle('visible', tab === 'everything');
+  document.getElementById('approve-all-btn').style.display = tab === 'drafts' ? '' : 'none';
+  renderList();
+  renderDetail();
+}
+
+// ── List Rendering ──
+function renderList() {
+  const list = document.getElementById('item-list');
+  const data = items[currentTab];
+  list.innerHTML = data.map(item => {
+    const cls = item.priority === 'high' ? 'urgent' : (item.type === 'kh' ? 'draft' : 'normal');
+    const dimmed = item.dimmed ? ' dimmed' : '';
+    const selected = item.id === selectedId ? ' selected' : '';
+    return `
+      <div class="item ${cls}${dimmed}${selected}" onclick="selectItem('${item.id}')">
+        <div class="item-icon ${item.icon}">${iconFor(item.icon)}</div>
+        <div class="item-body">
+          <div class="item-title">${item.title}</div>
+          <div class="item-meta">
+            ${item.priority === 'high' ? '<span class="priority-badge">High</span>' : ''}
+            <span>${item.type}</span>
+            <span class="dot"></span>
+            <span>${item.time}</span>
+            ${item.project ? `<span class="dot"></span><span>${item.project}</span>` : ''}
+          </div>
+        </div>
+        <div class="item-actions">
+          ${item.actions.map(a => actionBtn(a, item.id)).join('')}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function iconFor(type) {
+  switch(type) {
+    case 'email': return '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 8l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>';
+    case 'agent': return '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2a4 4 0 014 4v1H8V6a4 4 0 014-4z"/><rect x="4" y="7" width="16" height="13" rx="2"/><circle cx="9" cy="13" r="1.5" fill="currentColor"/><circle cx="15" cy="13" r="1.5" fill="currentColor"/></svg>';
+    case 'kh': return '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 2v4M16 2v4M4 10h16"/></svg>';
+    case 'auto': return '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>';
+    case 'classify': return '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z"/></svg>';
+    default: return '?';
+  }
+}
+
+function actionBtn(label, itemId) {
+  let cls = 'btn btn-sm';
+  if (label === 'Dismiss' || label === 'Reject') cls += ' btn-danger';
+  else if (label === 'Approve' || label === 'Retry') cls += ' btn-success';
+  else if (label === 'Review' || label === 'View Logs' || label === 'Preview') cls += ' btn-primary';
+  const display = label === 'Approve' ? 'Approve \u2713' : label === 'Reject' ? 'Reject \u2717' : label;
+  return `<button class="${cls}" onclick="doAction(event, '${itemId}', '${label}')">${display}</button>`;
+}
+
+// ── Item Selection ──
+function selectItem(id) {
+  selectedId = id;
+  renderList();
+  renderDetail();
+}
+
+function renderDetail() {
+  const panel = document.getElementById('detail-panel');
+  if (!selectedId) {
+    panel.classList.add('hidden');
+    panel.innerHTML = '<div class="detail-empty">Select an item to preview</div>';
+    return;
+  }
+  const item = findItem(selectedId);
+  if (!item) return;
+  panel.classList.remove('hidden');
+  panel.innerHTML = `
+    <div class="detail-header">
+      <h2>${item.title}</h2>
+      <dl class="detail-meta-grid">
+        <dt>Source</dt><dd>${item.source}</dd>
+        <dt>Date</dt><dd>${item.time}</dd>
+        ${item.project ? `<dt>Project</dt><dd>${item.project}</dd>` : ''}
+        ${item.confidence ? `<dt>Confidence</dt><dd>${item.confidence}</dd>` : ''}
+        ${item.priority ? `<dt>Priority</dt><dd style="color:var(--red);text-transform:capitalize">${item.priority}</dd>` : ''}
+      </dl>
+    </div>
+    <div class="detail-body">
+      <p>${item.body}</p>
+    </div>
+    <div class="detail-footer">
+      ${item.actions.map(a => actionBtn(a, item.id)).join('')}
+      <span class="spacer"></span>
+      <a class="detail-chat-link" onclick="toast('Opening chat...','info')">Chat About This</a>
+    </div>`;
+}
+
+function findItem(id) {
+  for (const tab of Object.values(items)) {
+    const found = tab.find(i => i.id === id);
+    if (found) return found;
+  }
+  return null;
+}
+
+// ── Actions ──
+function doAction(e, itemId, label) {
+  e.stopPropagation();
+  const item = findItem(itemId);
+  const name = item ? item.title : itemId;
+  switch(label) {
+    case 'Dismiss':
+      removeItem(itemId);
+      toast(`Dismissed: ${name}`, 'success');
+      break;
+    case 'Approve':
+      removeItem(itemId);
+      toast(`Approved: ${name}`, 'success');
+      break;
+    case 'Reject':
+      removeItem(itemId);
+      toast(`Rejected: ${name}`, 'info');
+      break;
+    case 'Retry':
+      toast(`Retrying: ${name}`, 'info');
+      break;
+    case 'Review':
+    case 'View Logs':
+    case 'Preview':
+      selectItem(itemId);
+      toast(`Viewing: ${name}`, 'info');
+      break;
+    default:
+      toast(`${label}: ${name}`, 'info');
+  }
+}
+
+function removeItem(id) {
+  for (const [tab, list] of Object.entries(items)) {
+    const idx = list.findIndex(i => i.id === id);
+    if (idx !== -1) list.splice(idx, 1);
+  }
+  if (selectedId === id) selectedId = null;
+  updateBadges();
+  renderList();
+  renderDetail();
+}
+
+function batchApproveDrafts() {
+  const count = items.drafts.length;
+  if (count === 0) return;
+  const ids = items.drafts.map(i => i.id);
+  ids.forEach(id => {
+    items.everything = items.everything.filter(i => i.id !== id);
+  });
+  items.drafts = [];
+  selectedId = null;
+  updateBadges();
+  renderList();
+  renderDetail();
+  toast(`Approved all ${count} drafts`, 'success');
+}
+
+function batchDismissRead() {
+  toast('Dismissed all read items', 'success');
+}
+
+function updateBadges() {
+  document.querySelector('[data-tab="urgent"] .tab-badge').textContent = items.urgent.length;
+  document.querySelector('[data-tab="drafts"] .tab-badge').textContent = items.drafts.length;
+  document.querySelector('[data-tab="everything"] .tab-badge').textContent = items.everything.length;
+  const batchBtn = document.querySelector('#batch-bar .btn-success');
+  if (batchBtn) batchBtn.textContent = `Approve All (${items.drafts.length})`;
+}
+
+// ── Filter Chips ──
+function toggleChip(el) {
+  const group = el.parentElement;
+  group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  toast(`Filter: ${el.textContent}`, 'info');
+}
+
+// ── Toast ──
+function toast(msg, type = 'info') {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => {
+    el.style.animation = 'toast-out 0.2s ease-in forwards';
+    setTimeout(() => el.remove(), 200);
+  }, 2500);
+}
+
+// ── Init ──
+renderList();
+</script>
+</body>
+</html>

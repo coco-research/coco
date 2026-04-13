@@ -97,6 +97,7 @@ GET_ARTICLE_TOOL = {
             "title": {"type": "string", "description": "Article title (case-insensitive match)"},
             "gid": {"type": "string", "description": "Article GID (exact match — preferred if available)"},
         },
+        "required": ["gid"],
     },
 }
 
@@ -114,6 +115,15 @@ def _get_db():
     conn = sqlite3.connect(f"file:{KNOWLEDGE_DB_PATH}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+import re as _re
+_FTS5_SPECIAL = _re.compile(r'[*^":()]|(?:^|\s)(?:AND|OR|NOT|NEAR)\b', _re.IGNORECASE)
+
+
+def _sanitize_fts5(query: str) -> str:
+    """Strip FTS5 special operators to prevent syntax errors."""
+    return _FTS5_SPECIAL.sub(' ', query).strip() or query
 
 
 def execute_search_articles(query: str, limit: int = 5, project: str | None = None) -> str:
@@ -146,15 +156,16 @@ def execute_search_articles(query: str, limit: int = 5, project: str | None = No
             "JOIN articles_fts f ON a.gid = f.gid "
             "WHERE articles_fts MATCH ? "
             "ORDER BY rank LIMIT ?",
-            (query, min(limit, 10)),
+            (_sanitize_fts5(query), min(limit, 10)),
         ).fetchall()
         items = [{"gid": r["gid"], "title": r["title"], "summary": (r["summary"] or "")[:300],
                   "score": round(r["confidence"] or 0.5, 3)} for r in rows]
         return json.dumps({"results": items, "count": len(items)})
     except Exception:
+        safe_q = query.replace("%", "").replace("_", "")
         rows = conn.execute(
             "SELECT gid, title, summary, confidence FROM articles WHERE title LIKE ? LIMIT ?",
-            (f"%{query}%", min(limit, 10)),
+            (f"%{safe_q}%", min(limit, 10)),
         ).fetchall()
         items = [{"gid": r["gid"], "title": r["title"], "summary": (r["summary"] or "")[:300],
                   "score": round(r["confidence"] or 0.5, 3)} for r in rows]
@@ -208,7 +219,8 @@ def execute_get_entity(name: str) -> str:
             "article_confidence": round(article["confidence"], 2) if article else None,
         })
     except Exception as e:
-        return json.dumps({"error": str(e)})
+        log.warning("execute_get_entity error: %s", e)
+        return json.dumps({"error": "Entity lookup failed"})
     finally:
         conn.close()
 
@@ -276,7 +288,8 @@ def execute_traverse_connections(entity_name: str, connection_type: str | None =
             "total": len(connections),
         })
     except Exception as e:
-        return json.dumps({"error": str(e)})
+        log.warning("execute_traverse_connections error: %s", e)
+        return json.dumps({"error": "Connection traversal failed"})
     finally:
         conn.close()
 
@@ -337,7 +350,8 @@ def execute_get_article(title: str | None = None, gid: str | None = None) -> str
             "article_type": row["article_type"],
         })
     except Exception as e:
-        return json.dumps({"error": str(e)})
+        log.warning("execute_get_article error: %s", e)
+        return json.dumps({"error": "Article retrieval failed"})
     finally:
         conn.close()
 
@@ -448,8 +462,17 @@ def ultrathink_qa(
             if hasattr(block, "type") and block.type == "thinking":
                 thinking_text += block.thinking + "\n"
 
-        # Check for tool use
+        # Check stop_reason and tool use
+        stop_reason = getattr(response, "stop_reason", "end_turn")
         tool_uses = [b for b in response.content if hasattr(b, "type") and b.type == "tool_use"]
+
+        if stop_reason == "max_tokens":
+            # Response truncated — extract what we have and stop
+            for block in response.content:
+                if hasattr(block, "type") and block.type == "text":
+                    final_answer += block.text
+            final_answer += "\n\n[Note: response was truncated due to length limits]"
+            break
 
         if not tool_uses:
             # Model is done — extract final text answer
@@ -498,7 +521,7 @@ def ultrathink_qa(
             tool_results.append({
                 "type": "tool_result",
                 "tool_use_id": tu.id,
-                "content": result_str[:8000],  # Cap tool result size
+                "content": f"<retrieved_data>{result_str[:8000]}</retrieved_data>",
             })
 
         # Append assistant response + tool results for next round
@@ -523,7 +546,7 @@ def ultrathink_qa(
         avg_rel = sum(s["relevance"] for s in sources) / len(sources)
         confidence = min(0.95, avg_rel * 0.6 + 0.2 * min(len(sources) / 5, 1.0) + 0.1 * min(rounds_used / 3, 1.0))
     else:
-        confidence = 0.2
+        confidence = 0.0  # No evidence from knowledge base — signal clearly
 
     return {
         "answer": final_answer,

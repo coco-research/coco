@@ -1,16 +1,18 @@
 """Knowledge Engine search — queries ~/.coco/knowledge/knowledge.db."""
 import json
+import os
 import re
 import sqlite3
 import logging
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from fastapi import APIRouter, Query, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from app.config import KNOWLEDGE_DB_PATH, KNOWLEDGE_DIR
+from app.config import KNOWLEDGE_DB_PATH, KNOWLEDGE_DIR, PERSONAL_BRAIN_DIR, COCO_DIR
 
 # ---------------------------------------------------------------------------
 # TTL cache for semantic search results (cold-start ~8s per MemPalace call)
@@ -652,6 +654,173 @@ def people_graph(
 
 
 # ---------------------------------------------------------------------------
+# Personal File Browser
+# ---------------------------------------------------------------------------
+
+PERSONAL_SLUGS = {
+    "personal-immigration", "personal-finance", "personal-medical",
+    "personal-career", "personal-legal", "personal-housing",
+}
+
+BRAIN_META = {
+    "personal-immigration": {"label": "Immigration", "icon": "Plane"},
+    "personal-finance":     {"label": "Finance", "icon": "DollarSign"},
+    "personal-legal":       {"label": "Legal", "icon": "Scale"},
+    "personal-medical":     {"label": "Medical", "icon": "Heart"},
+    "personal-career":      {"label": "Career", "icon": "Briefcase"},
+    "personal-housing":     {"label": "Housing", "icon": "Home"},
+}
+
+
+def _get_personal_files() -> dict[str, list[dict]]:
+    """Load all files with extracted content from the 6 personal brain DBs."""
+    all_files: dict[str, list[dict]] = {}
+    for slug in sorted(PERSONAL_SLUGS):
+        db_path = PERSONAL_BRAIN_DIR / slug / "project_brain.db"
+        if not db_path.exists():
+            continue
+        try:
+            conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute(
+                "SELECT id, name, type, metadata_json FROM entities "
+                "WHERE metadata_json LIKE '%content_text%'"
+            ).fetchall()
+            conn.close()
+            files = []
+            for r in rows:
+                try:
+                    meta = json.loads(r["metadata_json"])
+                except Exception:
+                    continue
+                content = meta.get("content_text", "")
+                if len(content) < 50:
+                    continue
+                ext = meta.get("ext", meta.get("file_type", "")).lstrip(".").lower()
+                files.append({
+                    "id": r["id"],
+                    "name": r["name"],
+                    "ext": ext,
+                    "file_path": meta.get("file_path", meta.get("path", "")),
+                    "file_type": ext,
+                    "file_size_bytes": meta.get("file_size_bytes", meta.get("size", 0)),
+                    "char_count": meta.get("char_count", len(content)),
+                    "extracted_at": meta.get("extracted_at", ""),
+                    "preview": content[:150].replace("\n", " ").strip(),
+                    "pages": meta.get("pages"),
+                })
+            all_files[slug] = files
+        except Exception:
+            continue
+    return all_files
+
+
+def _get_personal_file_detail(brain_slug: str, entity_id: int) -> dict | None:
+    """Load full detail for a single file from a personal brain DB."""
+    if brain_slug not in PERSONAL_SLUGS:
+        return None
+    db_path = PERSONAL_BRAIN_DIR / brain_slug / "project_brain.db"
+    if not db_path.exists():
+        return None
+    try:
+        conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+        conn.row_factory = sqlite3.Row
+        row = conn.execute(
+            "SELECT id, name, type, metadata_json FROM entities WHERE id = ?",
+            (entity_id,)
+        ).fetchone()
+        conn.close()
+        if not row:
+            return None
+        meta = json.loads(row["metadata_json"])
+        content = meta.get("content_text", "")
+        if len(content) < 50:
+            return None
+        ext = meta.get("ext", meta.get("file_type", "")).lstrip(".").lower()
+        return {
+            "id": row["id"],
+            "name": row["name"],
+            "brain_slug": brain_slug,
+            "ext": ext,
+            "file_path": meta.get("file_path", meta.get("path", "")),
+            "file_type": ext,
+            "file_size_bytes": meta.get("file_size_bytes", meta.get("size", 0)),
+            "char_count": meta.get("char_count", len(content)),
+            "extracted_at": meta.get("extracted_at", ""),
+            "pages": meta.get("pages"),
+            "content_text": content,
+        }
+    except Exception:
+        return None
+
+
+def _get_category_summaries() -> dict[str, dict]:
+    """Load project_summary articles for personal categories from knowledge.db."""
+    summaries: dict[str, dict] = {}
+    conn = _get_knowledge_db()
+    if conn is None:
+        return summaries
+    try:
+        for row in conn.execute("""
+            SELECT a.gid, a.summary, a.body_json, pel.project_slug
+            FROM articles a
+            JOIN project_entity_links pel ON a.gid = pel.gid
+            WHERE a.article_type = 'project_summary'
+            AND pel.project_slug LIKE 'personal-%'
+        """).fetchall():
+            try:
+                body = json.loads(row["body_json"] or "{}")
+                summaries[row["project_slug"]] = {
+                    "summary": row["summary"],
+                    "sections": body.get("sections", []),
+                    "gid": row["gid"],
+                }
+            except Exception:
+                pass
+        conn.close()
+    except Exception:
+        pass
+    return summaries
+
+
+@router.get("/api/knowledge/personal/files")
+def personal_files(q: str | None = None):
+    """Return personal files grouped by category with optional search."""
+    all_files = _get_personal_files()
+    summaries = _get_category_summaries()
+
+    categories = []
+    total = 0
+    for slug in ["personal-immigration", "personal-finance", "personal-legal",
+                 "personal-medical", "personal-career", "personal-housing"]:
+        files = all_files.get(slug, [])
+        if q:
+            q_lower = q.lower()
+            files = [f for f in files if q_lower in f["name"].lower() or q_lower in f.get("preview", "").lower()]
+        meta = BRAIN_META.get(slug, {"label": slug, "icon": "File"})
+        total += len(files)
+        categories.append({
+            "slug": slug,
+            "label": meta["label"],
+            "icon": meta["icon"],
+            "file_count": len(files),
+            "summary": summaries.get(slug),
+            "files": sorted(files, key=lambda x: x["name"].lower()),
+        })
+
+    return {"categories": categories, "total": total}
+
+
+@router.get("/api/knowledge/personal/file/{brain_slug}/{entity_id}")
+def personal_file_detail(brain_slug: str, entity_id: int):
+    """Return full detail for a single personal file."""
+    detail = _get_personal_file_detail(brain_slug, entity_id)
+    if detail is None:
+        return {"error": "File not found"}
+    return detail
+
+
+# ---------------------------------------------------------------------------
 # Media-memory search (Wave 3 — media unification)
 # ---------------------------------------------------------------------------
 
@@ -905,7 +1074,7 @@ def knowledge_qa(req: QARequest):
                 input_tokens=result.get("input_tokens", 0),
                 output_tokens=result.get("output_tokens", 0),
                 mode="ultrathink",
-                thinking=result.get("thinking"),
+                thinking=(result.get("thinking") or "")[:5000] or None,
                 tool_calls=result.get("tool_calls"),
                 rounds=result.get("rounds", 1),
             )
@@ -1069,14 +1238,14 @@ async def knowledge_qa_stream(
             try:
                 yield f"event: mode\ndata: ultrathink\n\n"
                 from app.services.rag_tools import ultrathink_qa
-                result = ultrathink_qa(question=q, project=project)
+                result = await asyncio.to_thread(ultrathink_qa, question=q, project=project)
                 if result.get("thinking"):
                     yield f"event: thinking\ndata: {json.dumps(result['thinking'][:5000])}\n\n"
                 for tc in result.get("tool_calls", []):
                     yield f"event: tool_call\ndata: {json.dumps(tc)}\n\n"
                 if result.get("sources"):
                     yield f"event: sources\ndata: {json.dumps(result['sources'][:max_sources])}\n\n"
-                yield f"event: token\ndata: {result['answer'].replace(chr(10), chr(92) + 'n')}\n\n"
+                yield f"event: token\ndata: {json.dumps(result['answer'])}\n\n"
                 yield f"event: done\ndata: {json.dumps({'confidence': result['confidence'], 'model': result.get('model', ''), 'rounds': result.get('rounds', 1)})}\n\n"
                 if result.get("input_tokens") or result.get("output_tokens"):
                     yield f"event: usage\ndata: {json.dumps({'type': 'usage', 'input_tokens': result.get('input_tokens', 0), 'output_tokens': result.get('output_tokens', 0)})}\n\n"
@@ -1184,3 +1353,327 @@ async def knowledge_qa_stream(
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+# ---------------------------------------------------------------------------
+# Daily Briefing
+# ---------------------------------------------------------------------------
+
+_BRIEFING_CACHE_PATH = KNOWLEDGE_DIR / "briefing_cache.json"
+_BRIEFING_CACHE_TTL = 3600  # 1 hour in seconds
+_COCO_DB_PATH = COCO_DIR / "coco.db"
+
+
+def _open_db_ro(path: Path) -> sqlite3.Connection | None:
+    """Open a SQLite DB in read-only mode. Returns None if file missing."""
+    if not path.exists():
+        return None
+    conn = sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=5.0)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def _safe_scalar(conn: sqlite3.Connection | None, sql: str, params: tuple = ()):
+    """Run a query returning a single scalar value. Returns None on error."""
+    if conn is None:
+        return None
+    try:
+        row = conn.execute(sql, params).fetchone()
+        return row[0] if row else None
+    except Exception:
+        return None
+
+
+def _safe_query_list(conn: sqlite3.Connection | None, sql: str, params: tuple = ()) -> list[dict]:
+    """Run a query, returning list of dicts. Returns [] on any error."""
+    if conn is None:
+        return []
+    try:
+        rows = conn.execute(sql, params).fetchall()
+        return [dict(r) for r in rows]
+    except Exception:
+        return []
+
+
+def _load_briefing_cache() -> dict | None:
+    """Load cached briefing if fresh (< TTL)."""
+    if not _BRIEFING_CACHE_PATH.exists():
+        return None
+    try:
+        with open(_BRIEFING_CACHE_PATH) as f:
+            cached = json.load(f)
+        generated_at = cached.get("generated_at", "")
+        if not generated_at:
+            return None
+        # Parse ISO timestamp
+        gen_dt = datetime.fromisoformat(generated_at.replace("Z", "+00:00"))
+        age = (datetime.now(timezone.utc) - gen_dt).total_seconds()
+        if age < _BRIEFING_CACHE_TTL:
+            return cached
+        return None
+    except Exception:
+        return None
+
+
+def _save_briefing_cache(data: dict):
+    """Atomically write briefing cache to JSON file."""
+    try:
+        _BRIEFING_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        tmp_path = _BRIEFING_CACHE_PATH.with_suffix(".tmp")
+        with open(tmp_path, "w") as f:
+            json.dump(data, f, indent=2, default=str)
+        os.replace(str(tmp_path), str(_BRIEFING_CACHE_PATH))
+    except Exception as e:
+        log.warning("briefing_cache_write_error: %s", e)
+
+
+def _generate_briefing() -> dict:
+    """Build the daily briefing from knowledge.db and coco.db via pure SQL aggregation."""
+    kdb = _open_db_ro(KNOWLEDGE_DB_PATH)
+    cdb = _open_db_ro(_COCO_DB_PATH)
+    now = datetime.now(timezone.utc)
+
+    sections: list[dict] = []
+    highlights: list[str] = []
+
+    try:
+        # ------------------------------------------------------------------
+        # Section 1: What Changed (last 24h)
+        # ------------------------------------------------------------------
+        new_articles = _safe_query_list(
+            kdb,
+            "SELECT article_type, COUNT(*) as cnt FROM articles "
+            "WHERE generated_at >= datetime('now', '-24 hours') "
+            "GROUP BY article_type ORDER BY cnt DESC",
+        )
+        new_total = sum(r["cnt"] for r in new_articles)
+        new_detail = ", ".join(f"{r['cnt']} {r['article_type']}" for r in new_articles) if new_articles else "none"
+
+        updated_articles = _safe_query_list(
+            kdb,
+            "SELECT COUNT(*) as cnt, COALESCE(AVG(confidence), 0) as avg_conf FROM articles "
+            "WHERE updated_at >= datetime('now', '-24 hours') AND updated_at != generated_at",
+        )
+        updated_count = updated_articles[0]["cnt"] if updated_articles else 0
+        updated_avg_conf = updated_articles[0]["avg_conf"] if updated_articles else 0
+
+        # Confidence trend: average of articles updated in last 24h vs overall average
+        overall_avg = _safe_scalar(kdb, "SELECT COALESCE(AVG(confidence), 0) FROM articles") or 0
+        conf_delta = round(updated_avg_conf - overall_avg, 3) if updated_count > 0 else 0
+        conf_detail = f"Average confidence {'+' if conf_delta >= 0 else ''}{conf_delta:.3f}" if updated_count > 0 else "No updates"
+
+        # Recent decisions from coco.db
+        recent_decisions = _safe_query_list(
+            cdb,
+            "SELECT COUNT(*) as cnt FROM decision_queue "
+            "WHERE status = 'resolved' AND created_at >= datetime('now', '-24 hours')",
+        )
+        decisions_resolved = recent_decisions[0]["cnt"] if recent_decisions else 0
+
+        what_changed_items = [
+            {"label": "New articles", "value": str(new_total), "detail": new_detail},
+            {"label": "Updated articles", "value": str(updated_count), "detail": conf_detail},
+        ]
+        if decisions_resolved > 0:
+            what_changed_items.append(
+                {"label": "Decisions resolved", "value": str(decisions_resolved), "detail": "In last 24 hours"}
+            )
+
+        sections.append({
+            "title": "What Changed",
+            "icon": "activity",
+            "items": what_changed_items,
+        })
+
+        # ------------------------------------------------------------------
+        # Section 2: Attention Needed
+        # ------------------------------------------------------------------
+        # Low confidence articles (below 0.9)
+        low_conf_count = _safe_scalar(
+            kdb, "SELECT COUNT(*) FROM articles WHERE confidence < 0.9"
+        ) or 0
+
+        # Articles with declining confidence (updated_at in last 7 days where confidence dropped)
+        # We approximate: articles with confidence < overall average
+        below_avg_count = _safe_scalar(
+            kdb,
+            "SELECT COUNT(*) FROM articles WHERE confidence < (SELECT AVG(confidence) FROM articles)",
+        ) or 0
+
+        # Orphaned entities: entities without articles
+        total_entities = _safe_scalar(kdb, "SELECT COUNT(*) FROM global_entities") or 0
+        entities_with_articles = _safe_scalar(kdb, "SELECT COUNT(DISTINCT gid) FROM articles") or 0
+        orphaned_pct = round((total_entities - entities_with_articles) / total_entities * 100, 1) if total_entities > 0 else 0
+
+        # Pending decisions
+        pending_decisions = _safe_scalar(
+            cdb, "SELECT COUNT(*) FROM decision_queue WHERE status = 'pending'"
+        ) or 0
+
+        attention_items = []
+        if low_conf_count > 0:
+            severity = "critical" if low_conf_count > 100 else "warning"
+            attention_items.append(
+                {"label": "Low confidence articles", "value": f"{low_conf_count:,}", "severity": severity}
+            )
+        if orphaned_pct > 50:
+            severity = "critical" if orphaned_pct > 80 else "warning"
+            attention_items.append(
+                {"label": "Orphaned entities", "value": f"{orphaned_pct}%", "severity": severity}
+            )
+        if pending_decisions > 0:
+            severity = "warning" if pending_decisions < 10 else "critical"
+            attention_items.append(
+                {"label": "Pending decisions", "value": f"{pending_decisions:,}", "severity": severity}
+            )
+        if below_avg_count > 50:
+            attention_items.append(
+                {"label": "Below-average confidence", "value": f"{below_avg_count:,}", "severity": "info"}
+            )
+
+        if not attention_items:
+            attention_items.append({"label": "All clear", "value": "No issues detected", "severity": "info"})
+
+        sections.append({
+            "title": "Attention Needed",
+            "icon": "alert-triangle",
+            "items": attention_items,
+        })
+
+        # ------------------------------------------------------------------
+        # Section 3: Key Metrics
+        # ------------------------------------------------------------------
+        total_articles = _safe_scalar(kdb, "SELECT COUNT(*) FROM articles") or 0
+        avg_confidence = _safe_scalar(kdb, "SELECT COALESCE(AVG(confidence), 0) FROM articles") or 0
+        entity_coverage = round(entities_with_articles / total_entities * 100, 1) if total_entities > 0 else 0
+        total_projects = _safe_scalar(kdb, "SELECT COUNT(*) FROM project_registry") or 0
+        total_connections = _safe_scalar(kdb, "SELECT COUNT(*) FROM cross_project_connections") or 0
+
+        # Yesterday comparison: articles that existed > 24h ago
+        articles_yesterday = _safe_scalar(
+            kdb, "SELECT COUNT(*) FROM articles WHERE generated_at < datetime('now', '-24 hours')"
+        ) or 0
+        article_trend = total_articles - articles_yesterday
+
+        metrics_items = [
+            {"label": "Total articles", "value": f"{total_articles:,}", "detail": f"+{article_trend} vs yesterday" if article_trend > 0 else "No change"},
+            {"label": "Avg confidence", "value": f"{avg_confidence:.3f}"},
+            {"label": "Entity coverage", "value": f"{entity_coverage}%", "detail": f"{entities_with_articles:,} of {total_entities:,} entities"},
+            {"label": "Projects", "value": f"{total_projects:,}"},
+            {"label": "Connections", "value": f"{total_connections:,}"},
+        ]
+
+        sections.append({
+            "title": "Key Metrics",
+            "icon": "bar-chart",
+            "items": metrics_items,
+        })
+
+        # ------------------------------------------------------------------
+        # Section 4: Upcoming (decisions + action items)
+        # ------------------------------------------------------------------
+        top_pending = _safe_query_list(
+            cdb,
+            "SELECT title, priority, project FROM decision_queue "
+            "WHERE status = 'pending' ORDER BY priority DESC, created_at ASC LIMIT 5",
+        )
+
+        open_todos = _safe_scalar(
+            cdb,
+            "SELECT COUNT(*) FROM hub_todos WHERE status NOT IN ('done', 'dismissed')",
+        ) or 0
+
+        high_priority_todos = _safe_scalar(
+            cdb,
+            "SELECT COUNT(*) FROM hub_todos WHERE status NOT IN ('done', 'dismissed') AND priority = 'high'",
+        ) or 0
+
+        upcoming_items = []
+        if top_pending:
+            upcoming_items.append(
+                {"label": "Pending decisions", "value": str(len(top_pending)),
+                 "detail": ", ".join(d["title"][:40] for d in top_pending[:3])}
+            )
+        if open_todos > 0:
+            upcoming_items.append(
+                {"label": "Open action items", "value": f"{open_todos:,}",
+                 "detail": f"{high_priority_todos} high-priority" if high_priority_todos > 0 else ""}
+            )
+
+        if not upcoming_items:
+            upcoming_items.append({"label": "No upcoming items", "value": "Clear schedule"})
+
+        sections.append({
+            "title": "Upcoming",
+            "icon": "calendar",
+            "items": upcoming_items,
+        })
+
+        # ------------------------------------------------------------------
+        # Highlights — smart observations
+        # ------------------------------------------------------------------
+        # Check for article types with notably low confidence
+        type_conf = _safe_query_list(
+            kdb,
+            "SELECT article_type, AVG(confidence) as avg_conf, COUNT(*) as cnt "
+            "FROM articles GROUP BY article_type HAVING cnt >= 5 ORDER BY avg_conf ASC",
+        )
+        for tc in type_conf[:2]:
+            if tc["avg_conf"] < avg_confidence - 0.02:
+                highlights.append(
+                    f"{tc['article_type']} articles have lower confidence ({tc['avg_conf']:.3f}) "
+                    f"than average ({avg_confidence:.3f}) — may need re-harvest"
+                )
+
+        # Projects missing summaries
+        projects_with_summaries = _safe_scalar(
+            kdb,
+            "SELECT COUNT(DISTINCT parent_project) FROM articles WHERE article_type = 'project_summary'",
+        ) or 0
+        if total_projects > 0 and projects_with_summaries < total_projects:
+            missing = total_projects - projects_with_summaries
+            highlights.append(f"{missing} projects still missing project_summary articles")
+
+        # Large orphan count
+        if orphaned_pct > 70:
+            highlights.append(
+                f"{orphaned_pct}% of entities lack articles — consider running a targeted harvest"
+            )
+
+        # No activity warning
+        if new_total == 0 and updated_count == 0:
+            highlights.append("No article changes in the last 24 hours — knowledge engine may be idle")
+
+    except Exception as e:
+        log.error("briefing_generation_error: %s", e)
+        sections = [{"title": "Error", "icon": "alert-triangle",
+                     "items": [{"label": "Briefing generation failed", "value": str(e), "severity": "critical"}]}]
+    finally:
+        if kdb:
+            kdb.close()
+        if cdb:
+            cdb.close()
+
+    return {
+        "generated_at": now.isoformat().replace("+00:00", "Z"),
+        "sections": sections,
+        "highlights": highlights,
+    }
+
+
+@router.get("/api/knowledge/briefing")
+async def get_briefing(force: bool = False):
+    """Daily briefing — aggregated stats from knowledge.db and coco.db.
+
+    Returns cached version if fresh (< 1 hour). Pass force=true to regenerate.
+    """
+    if not force:
+        cached = _load_briefing_cache()
+        if cached is not None:
+            cached["from_cache"] = True
+            return cached
+
+    briefing = _generate_briefing()
+    _save_briefing_cache(briefing)
+    briefing["from_cache"] = False
+    return briefing

@@ -787,6 +787,7 @@ class QARequest(BaseModel):
     question: str = Field(..., min_length=1, max_length=2000)
     project: str | None = None
     max_sources: int = Field(5, ge=1, le=10)
+    mode: str = Field("lightning", pattern="^(lightning|ultrathink)$")
 
 
 class QASource(BaseModel):
@@ -803,6 +804,10 @@ class QAResponse(BaseModel):
     model: str = ""
     input_tokens: int = 0
     output_tokens: int = 0
+    mode: str = "lightning"
+    thinking: str | None = None
+    tool_calls: list[dict] | None = None
+    rounds: int = 1
 
 
 _QA_SYSTEM_PROMPT = """You are a knowledge assistant for a personal/work wiki. Answer the user's question based ONLY on the provided articles. Follow these rules:
@@ -883,12 +888,35 @@ def _extract_citations(answer: str, articles: list[dict]) -> list[QASource]:
 def knowledge_qa(req: QARequest):
     """Answer a question using knowledge articles as context (RAG).
 
-    1. Semantic search for relevant articles
-    2. Fetch full article content for top results
-    3. Send to Claude with RAG system prompt
-    4. Return answer with cited sources
+    Modes:
+    - lightning (default): single-shot Haiku RAG (~2s)
+    - ultrathink: multi-hop agentic RAG with Sonnet extended thinking (~15-30s)
     """
-    # Step 1: Semantic search
+    # Ultrathink mode — delegate to agentic loop
+    if req.mode == "ultrathink":
+        try:
+            from app.services.rag_tools import ultrathink_qa
+            result = ultrathink_qa(question=req.question, project=req.project)
+            return QAResponse(
+                answer=result["answer"],
+                sources=[QASource(**s) for s in result["sources"][:req.max_sources]],
+                confidence=result["confidence"],
+                model=result.get("model", ""),
+                input_tokens=result.get("input_tokens", 0),
+                output_tokens=result.get("output_tokens", 0),
+                mode="ultrathink",
+                thinking=result.get("thinking"),
+                tool_calls=result.get("tool_calls"),
+                rounds=result.get("rounds", 1),
+            )
+        except Exception as e:
+            log.error("ultrathink_qa_error: %s", e)
+            return QAResponse(
+                answer="Ultrathink mode encountered an error. Falling back is not automatic — try lightning mode.",
+                sources=[], confidence=0.0, mode="ultrathink",
+            )
+
+    # Lightning mode — single-shot Haiku RAG
     mod = _get_search_module()
     conn = _get_knowledge_db()
 
@@ -1021,11 +1049,14 @@ async def knowledge_qa_stream(
     q: str = Query(..., min_length=1, max_length=2000),
     project: str | None = None,
     max_sources: int = Query(5, ge=1, le=10),
+    mode: str = Query("lightning", pattern="^(lightning|ultrathink)$"),
 ):
     """Streaming Q&A via SSE — sends sources first, then answer tokens, then done.
 
     Event types:
     - sources: JSON array of {gid, title, snippet, relevance}
+    - thinking: extended thinking content (ultrathink only)
+    - tool_call: tool invocation info (ultrathink only)
     - token: text delta of the answer
     - error: error message
     - done: JSON with {confidence, input_tokens, output_tokens, model}
@@ -1033,6 +1064,28 @@ async def knowledge_qa_stream(
     import asyncio
 
     async def generate():
+        # Ultrathink streaming — run synchronously, emit results as SSE events
+        if mode == "ultrathink":
+            try:
+                yield f"event: mode\ndata: ultrathink\n\n"
+                from app.services.rag_tools import ultrathink_qa
+                result = ultrathink_qa(question=q, project=project)
+                if result.get("thinking"):
+                    yield f"event: thinking\ndata: {json.dumps(result['thinking'][:5000])}\n\n"
+                for tc in result.get("tool_calls", []):
+                    yield f"event: tool_call\ndata: {json.dumps(tc)}\n\n"
+                if result.get("sources"):
+                    yield f"event: sources\ndata: {json.dumps(result['sources'][:max_sources])}\n\n"
+                yield f"event: token\ndata: {result['answer'].replace(chr(10), chr(92) + 'n')}\n\n"
+                yield f"event: done\ndata: {json.dumps({'confidence': result['confidence'], 'model': result.get('model', ''), 'rounds': result.get('rounds', 1)})}\n\n"
+                if result.get("input_tokens") or result.get("output_tokens"):
+                    yield f"event: usage\ndata: {json.dumps({'type': 'usage', 'input_tokens': result.get('input_tokens', 0), 'output_tokens': result.get('output_tokens', 0)})}\n\n"
+            except Exception as e:
+                log.error("ultrathink_stream_error: %s", e)
+                yield f"event: error\ndata: Ultrathink mode encountered an error\n\n"
+            return
+
+        # Lightning mode — existing streaming path
         conn = _get_knowledge_db()
         if conn is None:
             yield f"event: error\ndata: Knowledge database not available\n\n"

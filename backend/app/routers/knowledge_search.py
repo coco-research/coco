@@ -6,10 +6,11 @@ import sqlite3
 import logging
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from fastapi import APIRouter, Query, Request
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, Path as FastApiPath, Query, Request
+from fastapi.responses import JSONResponse, StreamingResponse
+from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel, Field
 
 from app.config import KNOWLEDGE_DB_PATH, KNOWLEDGE_DIR, PERSONAL_BRAIN_DIR, COCO_DIR
@@ -47,15 +48,36 @@ router = APIRouter(tags=["Knowledge"])
 
 
 def _sanitize_fts5(query: str) -> str:
-    """Sanitize user input for FTS5 MATCH — strip special operators."""
-    # Remove FTS5 special characters: *, ^, ", (, ), {, }, :
-    sanitized = re.sub(r'[^\w\s]', ' ', query)
-    # Remove FTS5 keyword operators (case-insensitive, whole words only)
-    sanitized = re.sub(r'\b(AND|OR|NOT|NEAR)\b', ' ', sanitized, flags=re.IGNORECASE)
-    # Collapse whitespace
-    sanitized = re.sub(r'\s+', ' ', sanitized).strip()
-    # If empty after sanitization, return original (will fail gracefully)
-    return sanitized if sanitized else query
+    """Sanitize user input for FTS5 MATCH to prevent operator injection.
+
+    Wraps each token in double-quotes to treat as literal text,
+    preventing AND/OR/NOT/NEAR/* operators from being interpreted.
+    """
+    if not query or not query.strip():
+        return '""'
+    # Strip any existing double-quotes, then quote each token
+    tokens = query.replace('"', '').split()
+    # Quote each token individually and join with spaces (implicit AND)
+    quoted = ' '.join(f'"{t}"' for t in tokens if t)
+    return quoted or '""'
+
+
+def _sanitize_like_input(value: str) -> str:
+    """Escape LIKE wildcards in user input so % and _ are treated literally.
+
+    Caller must add  ESCAPE '\\' to the SQL LIKE clause.
+    """
+    return value.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
+
+
+_GID_PATTERN = re.compile(r"^[a-f0-9-]{8,64}$")
+
+
+def _validate_gid(gid: str) -> JSONResponse | None:
+    """Return a 400 JSONResponse if GID is malformed, else None."""
+    if not _GID_PATTERN.match(gid):
+        return JSONResponse(status_code=400, content={"error": "Invalid GID format"})
+    return None
 
 
 def _get_knowledge_db():
@@ -127,7 +149,7 @@ def knowledge_stats():
         log.error("knowledge_stats_error: %s", e)
         if conn:
             conn.close()
-        return {"available": False, "error": str(e)}
+        return {"available": False, "error": "Internal error"}
 
 
 @router.get("/api/knowledge/projects")
@@ -165,7 +187,7 @@ def knowledge_projects():
         log.error("knowledge_projects_error: %s", e)
         if conn:
             conn.close()
-        return {"items": [], "error": str(e)}
+        return {"items": [], "error": "Internal error"}
 
 
 # ---------------------------------------------------------------------------
@@ -201,7 +223,8 @@ def list_knowledge_articles(
 
                 rows = conn.execute(
                     "SELECT a.id, a.gid, a.title, a.summary, a.confidence, a.generated_at, "
-                    "a.article_type, ge.type as entity_type, ge.canonical_name "
+                    "a.article_type, ge.type as entity_type, ge.canonical_name, "
+                    "a.infobox_json "
                     "FROM articles a "
                     "JOIN articles_fts f ON a.gid = f.gid "
                     "LEFT JOIN global_entities ge ON a.gid = ge.gid "
@@ -213,16 +236,17 @@ def list_knowledge_articles(
 
                 conn.close()
                 return {"items": [dict(r) for r in rows], "total": total}
-            except Exception:
-                pass  # Fall through to LIKE
+            except Exception as fts_err:
+                import logging
+                logging.getLogger(__name__).warning("FTS5 search failed, falling back to LIKE: %s", fts_err)
 
         # Standard query path
         conditions = ["a.confidence >= ?"]
         params: list = [min_confidence]
 
         if q:
-            conditions.append("a.title LIKE ?")
-            params.append(f"%{q}%")
+            conditions.append("a.title LIKE ? ESCAPE '\\'")
+            params.append(f"%{_sanitize_like_input(q)}%")
 
         if project:
             conditions.append(
@@ -255,7 +279,8 @@ def list_knowledge_articles(
 
         rows = conn.execute(
             f"SELECT a.id, a.gid, a.title, a.summary, a.confidence, a.generated_at, "
-            f"a.article_type, ge.type as entity_type, ge.canonical_name "
+            f"a.article_type, ge.type as entity_type, ge.canonical_name, "
+            f"a.infobox_json "
             f"FROM articles a "
             f"LEFT JOIN global_entities ge ON a.gid = ge.gid "
             f"WHERE {where} "
@@ -270,7 +295,7 @@ def list_knowledge_articles(
         log.error("knowledge_articles_error: %s", e)
         if conn:
             conn.close()
-        return {"items": [], "total": 0, "error": str(e)}
+        return {"items": [], "total": 0, "error": "Internal error"}
 
 
 # ---------------------------------------------------------------------------
@@ -280,6 +305,7 @@ def list_knowledge_articles(
 @router.get("/api/knowledge/article/{gid}/related")
 def related_articles(gid: str, limit: int = Query(10, ge=1, le=20)):
     """Find articles related to the given article via shared entities and direct links."""
+    if err := _validate_gid(gid): return err
     conn = _get_knowledge_db()
     if conn is None:
         return {"items": []}
@@ -338,12 +364,13 @@ def related_articles(gid: str, limit: int = Query(10, ge=1, le=20)):
         log.error("related_articles_error: %s", e)
         if conn:
             conn.close()
-        return {"items": [], "error": str(e)}
+        return {"items": [], "error": "Internal error"}
 
 
 @router.get("/api/knowledge/article/{gid}/backlinks")
 def article_backlinks(gid: str, limit: int = Query(20, ge=1, le=50)):
     """Find articles that link TO this article."""
+    if err := _validate_gid(gid): return err
     conn = _get_knowledge_db()
     if conn is None:
         return {"items": []}
@@ -371,7 +398,7 @@ def article_backlinks(gid: str, limit: int = Query(20, ge=1, le=50)):
         log.error("backlinks_error: %s", e)
         if conn:
             conn.close()
-        return {"items": [], "error": str(e)}
+        return {"items": [], "error": "Internal error"}
 
 
 # ---------------------------------------------------------------------------
@@ -434,7 +461,42 @@ def programs_overview():
         log.error("programs_overview_error: %s", e)
         if conn:
             conn.close()
-        return {"programs": [], "auditboard": None, "error": str(e)}
+        return {"programs": [], "auditboard": None, "error": "Internal error"}
+
+
+# ---------------------------------------------------------------------------
+# Entity names for wikilink matching
+# ---------------------------------------------------------------------------
+
+@router.get("/api/knowledge/entities/names")
+def get_entity_names(limit: int = Query(2000, ge=1, le=5000)):
+    """Return entity names for wikilink matching in article bodies.
+
+    Only returns entities that have at least one article, so wikilinks
+    always point to existing content.
+    """
+    conn = _get_knowledge_db()
+    if conn is None:
+        return []
+
+    try:
+        rows = conn.execute(
+            "SELECT gid, canonical_name, type FROM global_entities "
+            "WHERE gid IN (SELECT DISTINCT gid FROM articles) "
+            "ORDER BY canonical_name LIMIT ?",
+            (limit,),
+        ).fetchall()
+        result = [
+            {"gid": r["gid"], "name": r["canonical_name"], "type": r["type"]}
+            for r in rows
+        ]
+        conn.close()
+        return result
+    except Exception as e:
+        log.error("get_entity_names_error: %s", e)
+        if conn:
+            conn.close()
+        return []
 
 
 # ---------------------------------------------------------------------------
@@ -449,12 +511,12 @@ def knowledge_search(q: str = Query(..., min_length=1), limit: int = Query(10, l
         return {"entities": [], "articles": [], "message": "Knowledge DB not available"}
 
     try:
-        pattern = f"%{q}%"
+        pattern = f"%{_sanitize_like_input(q)}%"
 
         # Search entities
         entities = []
         rows = conn.execute(
-            "SELECT gid, canonical_name, type, importance_score FROM global_entities WHERE canonical_name LIKE ? ORDER BY importance_score DESC LIMIT ?",
+            "SELECT gid, canonical_name, type, importance_score FROM global_entities WHERE canonical_name LIKE ? ESCAPE '\\' ORDER BY importance_score DESC LIMIT ?",
             (pattern, limit)
         ).fetchall()
         for r in rows:
@@ -473,7 +535,7 @@ def knowledge_search(q: str = Query(..., min_length=1), limit: int = Query(10, l
         except Exception:
             # FTS might not match — fall back to LIKE on articles
             rows = conn.execute(
-                "SELECT gid, title FROM articles WHERE title LIKE ? LIMIT ?",
+                "SELECT gid, title FROM articles WHERE title LIKE ? ESCAPE '\\' LIMIT ?",
                 (pattern, limit)
             ).fetchall()
             for r in rows:
@@ -485,11 +547,12 @@ def knowledge_search(q: str = Query(..., min_length=1), limit: int = Query(10, l
         log.error("knowledge_search_error: %s", e)
         if conn:
             conn.close()
-        return {"entities": [], "articles": [], "error": str(e)}
+        return {"entities": [], "articles": [], "error": "Internal error"}
 
 @router.get("/api/knowledge/article/{gid}")
 def get_knowledge_article(gid: str):
     """Get a specific knowledge article by GID."""
+    if err := _validate_gid(gid): return err
     conn = _get_knowledge_db()
     if conn is None:
         return {"error": "Knowledge DB not available"}
@@ -512,7 +575,7 @@ def get_knowledge_article(gid: str):
     except Exception as e:
         if conn:
             conn.close()
-        return {"error": str(e)}
+        return {"error": "Internal error"}
 
 
 # ---------------------------------------------------------------------------
@@ -561,7 +624,7 @@ def semantic_search(
         return result
     except Exception as e:
         log.error("semantic_search_error: %s", e)
-        return {"items": [], "error": str(e)}
+        return {"items": [], "error": "Internal error"}
 
 
 @router.get("/api/knowledge/cross-project")
@@ -579,7 +642,73 @@ def cross_project_search(
         return {"items": results, "total": len(results)}
     except Exception as e:
         log.error("cross_project_search_error: %s", e)
-        return {"items": [], "error": str(e)}
+        return {"items": [], "error": "Internal error"}
+
+
+# Noise words that indicate a "person" entity is actually a system, concept, or role
+_PERSON_NOISE_WORDS = {
+    'system', 'platform', 'module', 'dashboard', 'report', 'compliance', 'process',
+    'contract', 'tool', 'tracker', 'filing', 'database', 'control', 'data', 'template',
+    'integration', 'application', 'coverage', 'settings', 'document', 'workflow',
+    'notification', 'analytics', 'security', 'table', 'amount', 'package', 'phone',
+    'configuration', 'archive', 'extension', 'cookie', 'mobile', 'automated',
+    'filter', 'metric', 'audit', 'risk', 'entity', 'access', 'review', 'action',
+    'global', 'primary', 'core', 'technical', 'hub', 'operating', 'success', 'facing',
+    'save', 'view', 'confirm', 'virtual', 'statutory', 'verification', 'support',
+    'new', 'year', 'thanks', 'call', 'distributed', 'denial', 'trust', 'deep',
+    'live', 'client', 'french', 'canadian', 'github', 'execute', 'time', 'commitment',
+    'apps', 'type', 'definition', 'scope', 'objects', 'scan', 'frequency', 'transfer',
+    'rating', 'comparative', 'epics', 'courtesy', 'biz', 'sprint', 'phase',
+    'reporting', 'consolidated', 'controllership', 'dialogue', 'staffing', 'functional',
+    'requirements', 'snowflake', 'case', 'operator', 'charge', 'code', 'service',
+    'external', 'worker', 'street', 'current', 'state', 'start', 'date', 'hi',
+    'hello', 'dear', 'regards', 'sincerely', 'cheers',
+    # Countries and locations
+    'arabia', 'lanka', 'canada', 'toronto', 'london', 'york', 'india', 'china',
+    'japan', 'brazil', 'mexico', 'kong', 'singapore', 'australia', 'zealand',
+    'africa', 'europe', 'america', 'kingdom', 'republic', 'islands', 'rico',
+    'beijing', 'shanghai', 'mumbai', 'delhi', 'paris', 'berlin', 'madrid',
+    # Orgs and company suffixes
+    'solutions', 'consulting', 'partners', 'holdings', 'associates', 'services',
+    'technologies', 'corporation', 'group', 'institute', 'foundation', 'council',
+    # More noise
+    'optimize', 'project', 'program', 'initiative', 'framework', 'strategy',
+    'overview', 'summary', 'update', 'status', 'agenda', 'minutes', 'notes',
+    # Locations / regions
+    'northern', 'southern', 'eastern', 'western', 'central', 'amsterdam',
+    'netherlands', 'macedonia', 'zealand', 'ireland', 'scotland', 'wales',
+    # Text fragments / labels
+    'how', 'tips', 'priority', 'troubleshooting', 'please', 'click', 'here',
+    'welcome', 'join', 'info', 'fyi', 'asap', 'tbd', 'todo', 'done',
+    'jones', 'dow',  # Dow Jones = financial index
+    'original', 'appointment', 'additional', 'information', 'description',
+    'standard', 'advanced', 'basic', 'general', 'specific', 'related',
+}
+
+
+def _is_likely_person(name: str) -> bool:
+    """Heuristic check: does this name look like a real person?"""
+    if '  ' in name:  # double spaces = parsing artifact
+        return False
+    words = name.split()
+    # Must be 2-4 words
+    if len(words) < 2 or len(words) > 4:
+        return False
+    # Reasonable length
+    if len(name) < 5 or len(name) > 40:
+        return False
+    # Each word should start with uppercase and be mostly alphabetic
+    for w in words:
+        if not w or not w[0].isupper():
+            return False
+        alpha_count = sum(1 for c in w if c.isalpha())
+        if alpha_count < len(w) * 0.7:
+            return False
+    # No noise words
+    name_lower_words = {w.lower() for w in words}
+    if name_lower_words & _PERSON_NOISE_WORDS:
+        return False
+    return True
 
 
 @router.get("/api/knowledge/people-graph")
@@ -590,8 +719,8 @@ def people_graph(
 ):
     """All person entities with cross-project presence and connections.
 
-    Uses a single efficient JOIN query instead of delegating to
-    ``get_people_graph()`` which triggered N+1 queries (10,000+).
+    Filters out misclassified entities (systems, concepts, roles) that were
+    incorrectly tagged as 'person' by the entity extraction pipeline.
     """
     conn = _get_knowledge_db()
     if conn is None:
@@ -602,10 +731,17 @@ def people_graph(
         where_extra = ""
         params: list = []
         if q:
-            where_extra = " AND ge.canonical_name LIKE ?"
-            params.append(f"%{q}%")
+            where_extra = " AND ge.canonical_name LIKE ? ESCAPE '\\'"
+            params.append(f"%{_sanitize_like_input(q)}%")
 
-        # Single query: persons with project count, project list, and connections
+        # SQL-level pre-filter: must have 2+ words, reasonable length
+        name_filter = (
+            " AND ge.canonical_name LIKE '% %'"
+            " AND LENGTH(ge.canonical_name) BETWEEN 5 AND 40"
+        )
+
+        # Fetch more than needed, then post-filter with heuristic
+        fetch_limit = limit * 3  # overfetch to compensate for post-filter
         rows = conn.execute(
             f"""
             SELECT
@@ -618,28 +754,34 @@ def people_graph(
                  WHERE cpc.source_gid = ge.gid OR cpc.target_gid = ge.gid) as connections
             FROM global_entities ge
             LEFT JOIN project_entity_links pel ON ge.gid = pel.gid
-            WHERE ge.type = 'person'{where_extra}
+            WHERE ge.type = 'person'{name_filter}{where_extra}
             GROUP BY ge.gid
-            ORDER BY ge.importance_score DESC
+            ORDER BY project_count DESC, connections DESC, ge.canonical_name ASC
             LIMIT ? OFFSET ?
             """,
-            params + [limit, offset],
+            params + [fetch_limit, offset],
         ).fetchall()
 
+        # Post-filter: apply Python heuristic to remove noise
         items = []
         for r in rows:
+            name = r[1]
+            if not _is_likely_person(name):
+                continue
             items.append({
                 "gid": r[0],
-                "canonical_name": r[1],
+                "canonical_name": name,
                 "importance_score": r[2] or 0,
                 "project_count": r[3] or 0,
                 "projects": (r[4] or "").split(",") if r[4] else [],
                 "connections": r[5] or 0,
             })
+            if len(items) >= limit:
+                break
 
-        # Total count for pagination (respecting filter)
+        # Total count (approximate — filtered count is expensive, use SQL pre-filter)
         total_row = conn.execute(
-            f"SELECT COUNT(*) FROM global_entities ge WHERE ge.type = 'person'{where_extra}",
+            f"SELECT COUNT(*) FROM global_entities ge WHERE ge.type = 'person'{name_filter}{where_extra}",
             params[:1] if q else [],
         ).fetchone()
         total = total_row[0] if total_row else len(items)
@@ -650,7 +792,7 @@ def people_graph(
         log.error("people_graph_error: %s", e)
         if conn:
             conn.close()
-        return {"items": [], "total": 0, "error": str(e)}
+        return {"items": [], "total": 0, "error": "Internal error"}
 
 
 # ---------------------------------------------------------------------------
@@ -1112,9 +1254,10 @@ def knowledge_qa(req: QARequest):
                 ).fetchall()
                 search_results = [dict(r) for r in rows]
             except Exception:
+                safe_question_like = _sanitize_like_input(req.question)
                 rows = conn.execute(
-                    "SELECT gid, title, summary FROM articles WHERE title LIKE ? LIMIT ?",
-                    (f"%{req.question}%", req.max_sources),
+                    "SELECT gid, title, summary FROM articles WHERE title LIKE ? ESCAPE '\\' LIMIT ?",
+                    (f"%{safe_question_like}%", req.max_sources),
                 ).fetchall()
                 search_results = [dict(r) for r in rows]
 
@@ -1355,12 +1498,174 @@ async def knowledge_qa_stream(
     )
 
 
+@router.post("/api/knowledge/ask/stream")
+async def knowledge_qa_stream_post(req: QARequest):
+    """Streaming Q&A via SSE (POST) — mirrors GET /api/knowledge/ask/stream but accepts JSON body.
+
+    Event types:
+    - status: {"phase": "searching"|"generating"}
+    - sources: JSON array of {gid, title, snippet, relevance}
+    - thinking: extended thinking content (ultrathink only)
+    - tool_call: tool invocation info (ultrathink only)
+    - chunk: {"text": "..."} — streamed answer tokens
+    - error: {"message": "..."}
+    - done: {"confidence": float, "model": str, "input_tokens": int, "output_tokens": int}
+    """
+    import asyncio
+
+    async def generate():
+        # Ultrathink mode — run synchronously, emit results as SSE events
+        if req.mode == "ultrathink":
+            try:
+                yield {"event": "status", "data": json.dumps({"phase": "searching"})}
+                yield {"event": "mode", "data": "ultrathink"}
+                from app.services.rag_tools import ultrathink_qa
+                result = await asyncio.to_thread(ultrathink_qa, question=req.question, project=req.project)
+                if result.get("thinking"):
+                    yield {"event": "thinking", "data": json.dumps(result["thinking"][:5000])}
+                for tc in result.get("tool_calls", []):
+                    yield {"event": "tool_call", "data": json.dumps(tc)}
+                if result.get("sources"):
+                    yield {"event": "sources", "data": json.dumps(result["sources"][:req.max_sources])}
+                yield {"event": "status", "data": json.dumps({"phase": "generating"})}
+                # Emit answer as a single chunk (ultrathink is not token-streamed)
+                yield {"event": "chunk", "data": json.dumps({"text": result["answer"]})}
+                done_data = {
+                    "confidence": result["confidence"],
+                    "model": result.get("model", ""),
+                    "rounds": result.get("rounds", 1),
+                    "input_tokens": result.get("input_tokens", 0),
+                    "output_tokens": result.get("output_tokens", 0),
+                }
+                yield {"event": "done", "data": json.dumps(done_data)}
+            except Exception as e:
+                log.error("ultrathink_stream_post_error: %s", e)
+                yield {"event": "error", "data": json.dumps({"message": "Ultrathink mode encountered an error"})}
+            return
+
+        # Lightning mode — search then stream answer tokens
+        yield {"event": "status", "data": json.dumps({"phase": "searching"})}
+
+        conn = _get_knowledge_db()
+        if conn is None:
+            yield {"event": "error", "data": json.dumps({"message": "Knowledge database not available"})}
+            return
+
+        try:
+            # Search
+            mod = _get_search_module()
+            search_results = []
+            if mod:
+                try:
+                    search_results = mod.search(req.question, project=req.project, limit=req.max_sources)
+                except Exception:
+                    pass
+
+            if not search_results:
+                try:
+                    safe_q = _sanitize_fts5(req.question)
+                    rows = conn.execute(
+                        "SELECT gid, title, snippet(articles_fts, 1, '', '', '...', 80) as snippet "
+                        "FROM articles_fts WHERE articles_fts MATCH ? LIMIT ?",
+                        (safe_q, req.max_sources),
+                    ).fetchall()
+                    search_results = [dict(r) for r in rows]
+                except Exception:
+                    pass
+
+            if not search_results:
+                conn.close()
+                yield {"event": "error", "data": json.dumps({"message": "No relevant articles found"})}
+                return
+
+            # Fetch articles
+            articles = []
+            for result in search_results:
+                gid = result.get("gid", "")
+                if not gid:
+                    continue
+                row = conn.execute(
+                    "SELECT gid, title, summary, body_json, confidence FROM articles "
+                    "WHERE gid = ? ORDER BY version DESC LIMIT 1",
+                    (gid,),
+                ).fetchone()
+                if row:
+                    art = dict(row)
+                    art["relevance"] = result.get("score", result.get("confidence", 0.5))
+                    articles.append(art)
+            conn.close()
+
+            # Send sources
+            source_data = [
+                {"gid": a["gid"], "title": a["title"],
+                 "snippet": a.get("summary", "")[:200],
+                 "relevance": round(float(a.get("relevance", 0.5)), 3)}
+                for a in articles
+            ]
+            yield {"event": "sources", "data": json.dumps(source_data)}
+            yield {"event": "status", "data": json.dumps({"phase": "generating"})}
+
+            # Stream answer
+            rag_context = _build_rag_context(articles)
+            user_prompt = (
+                f"Articles:\n{rag_context}\n\n"
+                f"Question: {req.question}\n\n"
+                f"Answer the question using only the information from the articles above."
+            )
+
+            try:
+                from app.services.agent_sdk_client import AgentSDKClient
+                client = AgentSDKClient()
+
+                full_answer = ""
+                async for chunk in client.stream_chat(
+                    prompt=user_prompt,
+                    model="haiku",
+                    system=_QA_SYSTEM_PROMPT,
+                    max_tokens=2048,
+                ):
+                    if chunk["type"] == "token":
+                        full_answer += chunk["content"]
+                        yield {"event": "chunk", "data": json.dumps({"text": chunk["content"]})}
+                    elif chunk["type"] == "done":
+                        # Extract citations for confidence
+                        sources = _extract_citations(full_answer, articles)
+                        avg_relevance = sum(s.relevance for s in sources) / len(sources) if sources else 0.3
+                        confidence = min(0.95, avg_relevance * 0.7 + 0.3 * min(len(sources) / 3, 1.0))
+                        done_data = {
+                            "confidence": round(confidence, 3),
+                            "model": chunk.get("model", ""),
+                            "input_tokens": 0,
+                            "output_tokens": 0,
+                        }
+                        yield {"event": "done", "data": json.dumps(done_data)}
+                    elif chunk["type"] == "usage":
+                        yield {"event": "usage", "data": json.dumps({"input_tokens": chunk.get("input_tokens", 0), "output_tokens": chunk.get("output_tokens", 0)})}
+
+            except Exception as e:
+                log.error("qa_stream_post_generate_error: %s", e)
+                # Fallback: return article summaries as the answer
+                summaries = "\n".join(
+                    f"- **{a['title']}**: {a.get('summary', '')}" for a in articles[:3]
+                )
+                fallback_answer = (
+                    f"I found relevant articles but couldn't generate a synthesis "
+                    f"(API unavailable). Here are the top results:\n\n{summaries}"
+                )
+                yield {"event": "chunk", "data": json.dumps({"text": fallback_answer})}
+                yield {"event": "done", "data": json.dumps({"confidence": 0.3, "model": "fallback", "input_tokens": 0, "output_tokens": 0})}
+
+        except Exception as e:
+            log.error("qa_stream_post_outer_error: %s", e)
+            yield {"event": "error", "data": json.dumps({"message": "An internal error occurred"})}
+
+    return EventSourceResponse(generate())
+
+
 # ---------------------------------------------------------------------------
-# Daily Briefing
+# Shared DB helpers
 # ---------------------------------------------------------------------------
 
-_BRIEFING_CACHE_PATH = KNOWLEDGE_DIR / "briefing_cache.json"
-_BRIEFING_CACHE_TTL = 3600  # 1 hour in seconds
 _COCO_DB_PATH = COCO_DIR / "coco.db"
 
 
@@ -1370,6 +1675,25 @@ def _open_db_ro(path: Path) -> sqlite3.Connection | None:
         return None
     conn = sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=5.0)
     conn.row_factory = sqlite3.Row
+    return conn
+
+
+def _open_brain_db(brain_path: Path) -> sqlite3.Connection | None:
+    """Open a brain DB read-only with busy timeout for cloud-synced volumes.
+
+    Returns None if file missing or path escapes PERSONAL_BRAIN_DIR.
+    """
+    if not brain_path.exists():
+        return None
+    # Path confinement: ensure brain DB is under PERSONAL_BRAIN_DIR
+    try:
+        brain_path.resolve().relative_to(PERSONAL_BRAIN_DIR.resolve())
+    except ValueError:
+        log.warning("brain_path_traversal_blocked: %s", brain_path)
+        return None
+    conn = sqlite3.connect(f"file:{brain_path}?mode=ro", uri=True, timeout=2.0)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA busy_timeout = 1000")
     return conn
 
 
@@ -1674,6 +1998,784 @@ async def get_briefing(force: bool = False):
             return cached
 
     briefing = _generate_briefing()
+
+    # Compute program health and attach to briefing
+    briefing["program_health"] = _compute_program_health()
+
     _save_briefing_cache(briefing)
     briefing["from_cache"] = False
     return briefing
+
+
+# ---------------------------------------------------------------------------
+# Decision Queue Helpers (shared by dashboard, timeline, health)
+# ---------------------------------------------------------------------------
+
+def _get_decision_queue(
+    status: str | None = None,
+    project: str | None = None,
+    days: int | None = None,
+    limit: int = 50,
+) -> list[dict]:
+    """Query decision_queue from coco.db with optional filters."""
+    cdb = _open_db_ro(_COCO_DB_PATH)
+    if cdb is None:
+        return []
+    try:
+        clauses = []
+        params: list = []
+        if status:
+            clauses.append("status = ?")
+            params.append(status)
+        if project:
+            clauses.append("project = ?")
+            params.append(project)
+        if days:
+            clauses.append("REPLACE(REPLACE(created_at, 'T', ' '), '+00:00', '') >= datetime('now', ?)")
+            params.append(f"-{days} days")
+        where = (" WHERE " + " AND ".join(clauses)) if clauses else ""
+        sql = f"SELECT * FROM decision_queue{where} ORDER BY created_at DESC LIMIT ?"
+        params.append(limit)
+        rows = cdb.execute(sql, tuple(params)).fetchall()
+        return [dict(r) for r in rows]
+    except Exception as e:
+        log.error("decision_queue_query_error: %s", e)
+        return []
+    finally:
+        cdb.close()
+
+
+def _get_project_slug_from_registry(slug: str) -> dict | None:
+    """Validate slug exists in project_registry. Returns project row or None."""
+    kdb = _get_knowledge_db()
+    if kdb is None:
+        return None
+    try:
+        row = kdb.execute(
+            "SELECT slug, description, temperature FROM project_registry WHERE slug = ?",
+            (slug,),
+        ).fetchone()
+        return dict(row) if row else None
+    except Exception:
+        return None
+    finally:
+        kdb.close()
+
+
+def _compute_program_health() -> list[dict]:
+    """Compute health scores for each program using batched queries (3 total, not N per slug)."""
+    kdb = _get_knowledge_db()
+    cdb = _open_db_ro(_COCO_DB_PATH)
+    if kdb is None:
+        if cdb:
+            cdb.close()
+        return []
+
+    try:
+        # Get all projects
+        projects = _safe_query_list(
+            kdb,
+            "SELECT slug, description FROM project_registry ORDER BY slug",
+        )
+        if not projects:
+            return []
+
+        # Group projects into programs by common prefix
+        program_map: dict[str, list[str]] = {}
+        for p in projects:
+            slug = p["slug"]
+            program_id = slug.split("-")[0] if "-" in slug else slug
+            program_map.setdefault(program_id, []).append(slug)
+
+        # Batched query 1: article counts + stale + low confidence per slug (single query)
+        article_stats = _safe_query_list(
+            kdb,
+            "SELECT pel.project_slug, "
+            "COUNT(*) as total, "
+            "SUM(CASE WHEN a.updated_at < datetime('now', '-30 days') THEN 1 ELSE 0 END) as stale, "
+            "SUM(CASE WHEN a.confidence < 0.85 THEN 1 ELSE 0 END) as low_conf "
+            "FROM articles a "
+            "JOIN project_entity_links pel ON a.gid = pel.gid "
+            "GROUP BY pel.project_slug",
+        )
+        stats_by_slug: dict[str, dict] = {
+            r["project_slug"]: {"total": r["total"], "stale": r["stale"], "low_conf": r["low_conf"]}
+            for r in article_stats
+        }
+
+        # Batched query 2: pending decisions per project (single query)
+        pending_by_slug: dict[str, int] = {}
+        if cdb:
+            pending_rows = _safe_query_list(
+                cdb,
+                "SELECT project, COUNT(*) as cnt FROM decision_queue "
+                "WHERE status = 'pending' AND project IS NOT NULL AND project != '' "
+                "GROUP BY project",
+            )
+            pending_by_slug = {r["project"]: r["cnt"] for r in pending_rows}
+
+        # Build results from pre-fetched data
+        results = []
+        for program_id, slugs in program_map.items():
+            total_articles = 0
+            stale_count = 0
+            low_conf_count = 0
+            pending_decisions = 0
+
+            for slug in slugs:
+                s = stats_by_slug.get(slug, {"total": 0, "stale": 0, "low_conf": 0})
+                total_articles += s["total"]
+                stale_count += s["stale"]
+                low_conf_count += s["low_conf"]
+                pending_decisions += pending_by_slug.get(slug, 0)
+
+            # Apply health formula
+            score = 100
+            score -= 15 * pending_decisions
+            stale_ratio = stale_count / total_articles if total_articles > 0 else 0
+            score -= int(10 * stale_ratio)
+            score -= 5 * min(low_conf_count, 10)
+            score = max(0, min(100, score))
+
+            issues = []
+            if pending_decisions > 0:
+                issues.append(f"{pending_decisions} pending decision{'s' if pending_decisions != 1 else ''}")
+            if stale_count > 0:
+                issues.append(f"{stale_count} stale article{'s' if stale_count != 1 else ''}")
+
+            health = "green" if score >= 80 else ("yellow" if score >= 50 else "red")
+
+            results.append({
+                "id": program_id,
+                "name": program_id.replace("-", " ").title(),
+                "health": health,
+                "score": score,
+                "issues": issues,
+                "article_count": total_articles,
+                "pending_decisions": pending_decisions,
+                "stale_articles": stale_count,
+            })
+
+        return sorted(results, key=lambda x: x["score"])
+    except Exception as e:
+        log.error("program_health_error: %s", e)
+        return []
+    finally:
+        if kdb:
+            kdb.close()
+        if cdb:
+            cdb.close()
+
+
+# ---------------------------------------------------------------------------
+# Project Dashboard
+# ---------------------------------------------------------------------------
+
+@router.get("/api/knowledge/project/{slug}/dashboard")
+async def get_project_dashboard(slug: str):
+    """PM-oriented project status dashboard — decisions, tasks, people, articles."""
+    if not re.match(r"^[a-z0-9][a-z0-9_-]{0,63}$", slug):
+        return JSONResponse(status_code=400, content={"error": "Invalid slug format"})
+
+    # Validate slug exists in project_registry
+    project = _get_project_slug_from_registry(slug)
+    if project is None:
+
+        return JSONResponse(status_code=404, content={"error": "Project not found"})
+
+    kdb = _get_knowledge_db()
+    cdb = _open_db_ro(_COCO_DB_PATH)
+
+    try:
+        # Article stats
+        article_count = _safe_scalar(
+            kdb,
+            "SELECT COUNT(*) FROM articles a "
+            "JOIN project_entity_links pel ON a.gid = pel.gid "
+            "WHERE pel.project_slug = ?",
+            (slug,),
+        ) or 0
+
+        last_article = _safe_scalar(
+            kdb,
+            "SELECT MAX(updated_at) FROM articles a "
+            "JOIN project_entity_links pel ON a.gid = pel.gid "
+            "WHERE pel.project_slug = ?",
+            (slug,),
+        )
+
+        # Recent articles
+        recent_articles = _safe_query_list(
+            kdb,
+            "SELECT a.gid, a.title, a.confidence, a.updated_at "
+            "FROM articles a "
+            "JOIN project_entity_links pel ON a.gid = pel.gid "
+            "WHERE pel.project_slug = ? "
+            "ORDER BY a.updated_at DESC LIMIT 10",
+            (slug,),
+        )
+
+        # Key people (entities of type 'person' linked to this project)
+        key_people = _safe_query_list(
+            kdb,
+            "SELECT ge.gid, ge.canonical_name "
+            "FROM global_entities ge "
+            "JOIN project_entity_links pel ON ge.gid = pel.gid "
+            "WHERE pel.project_slug = ? AND ge.type = 'person' "
+            "ORDER BY ge.canonical_name LIMIT 20",
+            (slug,),
+        )
+
+        # Decisions from decision_queue (primary source)
+        decisions = _safe_query_list(
+            cdb,
+            "SELECT title, status, priority, created_at "
+            "FROM decision_queue WHERE project = ? "
+            "ORDER BY created_at DESC LIMIT 20",
+            (slug,),
+        ) if cdb else []
+
+        pending_decisions = sum(1 for d in decisions if d.get("status") == "pending")
+        total_decisions = len(decisions)
+
+        # Open action items (pending/in_progress decisions as proxy)
+        open_tasks = [d for d in decisions if d.get("status") in ("pending", "in_progress")]
+
+        # Try brain DB for supplemental decision/task data
+        brain_decisions: list[dict] = []
+        brain_tasks: list[dict] = []
+        if kdb:
+            brain_row = kdb.execute(
+                "SELECT slug FROM project_registry WHERE slug = ?", (slug,)
+            ).fetchone()
+            if brain_row:
+                brain_path = PERSONAL_BRAIN_DIR / slug / "project_brain.db"
+                bdb = _open_brain_db(brain_path)
+                if bdb:
+                    try:
+                        brain_decisions = _safe_query_list(
+                            bdb,
+                            "SELECT date, decision, decided_by FROM decisions ORDER BY date DESC LIMIT 10",
+                        )
+                        brain_tasks = _safe_query_list(
+                            bdb,
+                            "SELECT title, status, due_date FROM tasks WHERE status != 'done' ORDER BY due_date ASC LIMIT 10",
+                        )
+                    finally:
+                        bdb.close()
+
+        # Compute health
+        stale_count = _safe_scalar(
+            kdb,
+            "SELECT COUNT(*) FROM articles a "
+            "JOIN project_entity_links pel ON a.gid = pel.gid "
+            "WHERE pel.project_slug = ? AND a.updated_at < datetime('now', '-30 days')",
+            (slug,),
+        ) or 0
+
+        score = 100
+        score -= 15 * pending_decisions
+        stale_ratio = stale_count / article_count if article_count > 0 else 0
+        score -= int(10 * stale_ratio)
+        score = max(0, min(100, score))
+        health = "green" if score >= 80 else ("yellow" if score >= 50 else "red")
+
+        return {
+            "slug": slug,
+            "name": project.get("description", slug),
+            "health": health,
+            "score": score,
+            "last_activity": last_article,
+            "stats": {
+                "articles": article_count,
+                "decisions_total": total_decisions + len(brain_decisions),
+                "decisions_pending": pending_decisions,
+                "tasks_total": len(open_tasks) + len(brain_tasks),
+                "tasks_open": len(open_tasks) + len([t for t in brain_tasks if t.get("status") != "done"]),
+                "people": len(key_people),
+            },
+            "recent_decisions": decisions[:5],
+            "brain_decisions": brain_decisions[:5],
+            "open_tasks": [{"title": d["title"], "status": d["status"], "created_at": d.get("created_at")} for d in open_tasks[:5]],
+            "brain_tasks": brain_tasks[:5],
+            "key_people": [{"gid": p["gid"], "name": p["canonical_name"]} for p in key_people],
+            "recent_articles": [{"gid": a["gid"], "title": a["title"], "confidence": a["confidence"], "updated_at": a["updated_at"]} for a in recent_articles],
+        }
+    except Exception as e:
+        log.error("project_dashboard_error slug=%s: %s", slug, e)
+        return {"slug": slug, "error": "Internal error loading dashboard"}
+    finally:
+        if kdb:
+            kdb.close()
+        if cdb:
+            cdb.close()
+
+
+# ---------------------------------------------------------------------------
+# Decision Timeline
+# ---------------------------------------------------------------------------
+
+_timeline_cache: dict[str, tuple[float, dict]] = {}
+_TIMELINE_CACHE_TTL = 300
+_TIMELINE_CACHE_MAX = 100
+
+
+@router.get("/api/knowledge/timeline")
+async def get_decision_timeline(
+    days: int = Query(14, ge=1, le=365),
+    program: str = Query(None, max_length=100),
+    person: str = Query(None, max_length=200),
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    force: bool = False,
+):
+    """Cross-project decision timeline from decision_queue + brain DBs."""
+    # Normalize cache key
+    cache_key = f"timeline:{days}:{(program or '').lower()}:{(person or '').lower()}:{limit}:{offset}"
+
+    if not force and cache_key in _timeline_cache:
+        ts, data = _timeline_cache[cache_key]
+        if time.time() - ts < _TIMELINE_CACHE_TTL:
+            return data
+
+    items: list[dict] = []
+    cdb = _open_db_ro(_COCO_DB_PATH)
+    kdb = _get_knowledge_db()
+
+    try:
+        # Primary: decision_queue from coco.db
+        if cdb:
+            # Use REPLACE to normalize ISO timestamps with T and +00:00 for comparison
+            clauses = ["REPLACE(REPLACE(created_at, 'T', ' '), '+00:00', '') >= datetime('now', ?)"]
+            params: list = [f"-{days} days"]
+
+            if program:
+                clauses.append("LOWER(project) LIKE ?")
+                params.append(f"%{_sanitize_like_input(program.lower())}%")
+
+            if person:
+                clauses.append("LOWER(title || ' ' || COALESCE(body, '')) LIKE ?")
+                params.append(f"%{_sanitize_like_input(person.lower())}%")
+
+            where = " AND ".join(clauses)
+            rows = cdb.execute(
+                f"SELECT title, status, priority, project, created_at, body "
+                f"FROM decision_queue WHERE {where} "
+                f"ORDER BY created_at DESC LIMIT 500",
+                tuple(params),
+            ).fetchall()
+
+            for r in rows:
+                items.append({
+                    "date": r["created_at"],
+                    "project_slug": r["project"] or "",
+                    "project_name": r["project"] or "",
+                    "type": "decision",
+                    "title": r["title"],
+                    "author": None,
+                    "detail": r["body"],
+                    "status": r["status"],
+                })
+
+        # Supplemental: brain DB decisions (skip if > 20 projects to avoid DoS)
+        if kdb:
+            project_rows = _safe_query_list(kdb, "SELECT slug FROM project_registry LIMIT 20")
+            for pr in project_rows:
+                brain_path = PERSONAL_BRAIN_DIR / pr["slug"] / "project_brain.db"
+                bdb = _open_brain_db(brain_path)
+                if bdb is None:
+                    continue
+                try:
+                    brain_items = _safe_query_list(
+                        bdb,
+                        "SELECT date, decision, decided_by FROM decisions "
+                        "WHERE date >= date('now', ?) ORDER BY date DESC LIMIT 20",
+                        (f"-{days} days",),
+                    )
+                    for bi in brain_items:
+                        # Apply person filter if specified
+                        if person and person.lower() not in (bi.get("decided_by") or "").lower():
+                            continue
+                        items.append({
+                            "date": bi["date"],
+                            "project_slug": pr["slug"],
+                            "project_name": pr["slug"],
+                            "type": "decision",
+                            "title": bi["decision"],
+                            "author": bi.get("decided_by"),
+                            "detail": None,
+                            "status": "recorded",
+                        })
+                except Exception as e:
+                    log.warning("timeline_brain_error slug=%s: %s", pr["slug"], e)
+                finally:
+                    bdb.close()
+
+        # Sort by date desc, deduplicate by title similarity, apply pagination
+        items.sort(key=lambda x: x.get("date") or "", reverse=True)
+        total = len(items)
+        paginated = items[offset : offset + limit]
+
+        now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        from_date = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
+
+        result = {
+            "items": paginated,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "date_range": {"from": from_date, "to": now_str},
+        }
+
+        # Cache the result
+        if len(_timeline_cache) >= _TIMELINE_CACHE_MAX:
+            oldest = min(_timeline_cache, key=lambda k: _timeline_cache[k][0])
+            del _timeline_cache[oldest]
+        _timeline_cache[cache_key] = (time.time(), result)
+
+        return result
+    except Exception as e:
+        log.error("timeline_error: %s", e)
+        return {"items": [], "total": 0, "error": "Internal error loading timeline"}
+    finally:
+        if kdb:
+            kdb.close()
+        if cdb:
+            cdb.close()
+
+
+# ---------------------------------------------------------------------------
+# Person Card
+# ---------------------------------------------------------------------------
+
+@router.get("/api/knowledge/person/{gid}")
+async def get_person_card(gid: str):
+    """Rich person detail — projects, decisions, related people, articles."""
+    if err := _validate_gid(gid): return err
+
+    kdb = _get_knowledge_db()
+    cdb = _open_db_ro(_COCO_DB_PATH)
+    if kdb is None:
+
+        return JSONResponse(status_code=503, content={"error": "Knowledge DB not available"})
+
+    try:
+        # Get person entity
+        person = kdb.execute(
+            "SELECT gid, canonical_name, type FROM global_entities WHERE gid = ?",
+            (gid,),
+        ).fetchone()
+
+        if not person or person["type"] != "person":
+    
+            return JSONResponse(status_code=404, content={"error": "Person not found"})
+
+        name = person["canonical_name"]
+
+        # Projects this person belongs to
+        projects = _safe_query_list(
+            kdb,
+            "SELECT DISTINCT pel.project_slug, pr.description "
+            "FROM project_entity_links pel "
+            "LEFT JOIN project_registry pr ON pel.project_slug = pr.slug "
+            "WHERE pel.gid = ?",
+            (gid,),
+        )
+
+        project_slugs = [p["project_slug"] for p in projects]
+
+        # Decisions from coco.db for projects this person is in
+        decisions: list[dict] = []
+        if cdb and project_slugs:
+            placeholders = ",".join("?" for _ in project_slugs)
+            decision_rows = cdb.execute(
+                f"SELECT title, status, project, created_at FROM decision_queue "
+                f"WHERE project IN ({placeholders}) "
+                f"ORDER BY created_at DESC LIMIT 10",
+                tuple(project_slugs),
+            ).fetchall()
+            decisions = [dict(r) for r in decision_rows]
+
+        # Related people (co-project presence)
+        related: list[dict] = []
+        if project_slugs:
+            placeholders = ",".join("?" for _ in project_slugs)
+            related_rows = kdb.execute(
+                f"SELECT ge.gid, ge.canonical_name, COUNT(DISTINCT pel.project_slug) as shared_projects "
+                f"FROM global_entities ge "
+                f"JOIN project_entity_links pel ON ge.gid = pel.gid "
+                f"WHERE pel.project_slug IN ({placeholders}) "
+                f"AND ge.type = 'person' AND ge.gid != ? "
+                f"GROUP BY ge.gid "
+                f"ORDER BY shared_projects DESC LIMIT 10",
+                (*project_slugs, gid),
+            ).fetchall()
+            related = [{"gid": r["gid"], "name": r["canonical_name"], "shared_projects": r["shared_projects"]} for r in related_rows]
+
+        # Article for this person
+        article = kdb.execute(
+            "SELECT gid, title, confidence FROM articles WHERE gid = ?",
+            (gid,),
+        ).fetchone()
+
+        # Email-sourced articles related to this person's projects
+        email_articles: list[dict] = []
+        if project_slugs:
+            placeholders = ",".join("?" for _ in project_slugs)
+            email_rows = kdb.execute(
+                f"SELECT a.title, a.updated_at FROM articles a "
+                f"JOIN project_entity_links pel ON a.gid = pel.gid "
+                f"WHERE pel.project_slug IN ({placeholders}) "
+                f"AND a.article_type = 'email_thread' "
+                f"ORDER BY a.updated_at DESC LIMIT 5",
+                tuple(project_slugs),
+            ).fetchall()
+            email_articles = [{"subject": r["title"][:80], "date": r["updated_at"]} for r in email_rows]
+
+        return {
+            "gid": gid,
+            "name": name,
+            "projects": [{"slug": p["project_slug"], "name": p.get("description") or p["project_slug"]} for p in projects],
+            "decisions": [{"text": d["title"], "date": d["created_at"], "project": d["project"], "status": d["status"]} for d in decisions],
+            "email_count": len(email_articles),
+            "recent_emails": email_articles,
+            "related_people": related,
+            "article_gid": article["gid"] if article else None,
+        }
+    except Exception as e:
+        log.error("person_card_error gid=%s: %s", gid, e)
+        return {"gid": gid, "error": "Internal error loading person data"}
+    finally:
+        if kdb:
+            kdb.close()
+        if cdb:
+            cdb.close()
+
+
+# ---------------------------------------------------------------------------
+# Daily Briefing
+# ---------------------------------------------------------------------------
+
+_BRIEFING_CACHE_PATH = KNOWLEDGE_DIR / "briefing_cache.json"
+_BRIEFING_CACHE_TTL = 3600  # 1 hour in seconds
+
+
+# ---------------------------------------------------------------------------
+# Pipeline Observability
+# ---------------------------------------------------------------------------
+
+@router.get("/api/knowledge/pipeline/runs")
+async def get_pipeline_runs(limit: int = Query(20, ge=1, le=100)):
+    """Return recent pipeline run history."""
+    conn = _get_knowledge_db()
+    if conn is None:
+        return []
+    try:
+        rows = conn.execute(
+            "SELECT * FROM pipeline_runs ORDER BY started_at DESC LIMIT ?", (limit,)
+        ).fetchall()
+        return [dict(r) for r in rows]
+    except Exception as e:
+        log.error("get_pipeline_runs error: %s", e)
+        return []
+    finally:
+        conn.close()
+
+
+@router.get("/api/knowledge/pipeline/health")
+async def get_pipeline_health():
+    """Return pipeline health summary."""
+    conn = _get_knowledge_db()
+    if conn is None:
+        return {"last_run": None, "article_count": 0, "avg_confidence": 0, "status": "unknown"}
+    try:
+        last_run = conn.execute(
+            "SELECT * FROM pipeline_runs ORDER BY started_at DESC LIMIT 1"
+        ).fetchone()
+        article_count = conn.execute("SELECT COUNT(*) FROM articles").fetchone()[0]
+        avg_conf = conn.execute("SELECT AVG(confidence) FROM articles").fetchone()[0]
+        return {
+            "last_run": dict(last_run) if last_run else None,
+            "article_count": article_count,
+            "avg_confidence": round(avg_conf or 0, 4),
+            "status": "healthy" if last_run and last_run["projects_err"] == 0 else "degraded",
+        }
+    except Exception:
+        return {"last_run": None, "article_count": 0, "avg_confidence": 0, "status": "unknown"}
+    finally:
+        conn.close()
+
+
+@router.get("/api/knowledge/quality/dashboard")
+async def get_quality_dashboard():
+    """Comprehensive quality metrics for the knowledge engine."""
+    conn = _get_knowledge_db()
+    if conn is None:
+        return {"error": "Knowledge DB not available"}
+    try:
+        # 1. Confidence distribution (5 buckets)
+        buckets = []
+        for lo, hi, label in [
+            (0, 0.5, '0-50%'),
+            (0.5, 0.7, '50-70%'),
+            (0.7, 0.85, '70-85%'),
+            (0.85, 0.95, '85-95%'),
+            (0.95, 1.01, '95-100%'),
+        ]:
+            count = conn.execute(
+                "SELECT COUNT(*) FROM articles WHERE confidence >= ? AND confidence < ?",
+                (lo, hi),
+            ).fetchone()[0]
+            buckets.append({"range": label, "count": count})
+
+        # 2. Confidence trend (last 30 days, daily average)
+        trend = conn.execute("""
+            SELECT DATE(generated_at) as day,
+                   ROUND(AVG(confidence), 4) as avg_conf,
+                   COUNT(*) as count
+            FROM articles
+            WHERE generated_at >= DATE('now', '-30 days')
+            GROUP BY DATE(generated_at)
+            ORDER BY day
+        """).fetchall()
+
+        # 3. Per-project scorecard
+        projects = conn.execute("""
+            SELECT pel.project_slug,
+                   COUNT(DISTINCT a.gid) as article_count,
+                   ROUND(AVG(a.confidence), 4) as avg_confidence,
+                   ROUND(MIN(a.confidence), 4) as min_confidence,
+                   COUNT(DISTINCT CASE WHEN a.confidence >= 0.95 THEN a.gid END) as above_95
+            FROM project_entity_links pel
+            JOIN articles a ON a.gid = pel.gid
+            GROUP BY pel.project_slug
+            ORDER BY avg_confidence ASC
+        """).fetchall()
+
+        # 4. Article type breakdown
+        types = conn.execute("""
+            SELECT article_type,
+                   COUNT(*) as count,
+                   ROUND(AVG(confidence), 4) as avg_conf
+            FROM articles
+            GROUP BY article_type
+            ORDER BY count DESC
+        """).fetchall()
+
+        # 5. Entity coverage
+        total_entities = conn.execute("SELECT COUNT(*) FROM global_entities").fetchone()[0]
+        entities_with_articles = conn.execute(
+            "SELECT COUNT(DISTINCT gid) FROM articles"
+        ).fetchone()[0]
+        orphan_entities = conn.execute(
+            "SELECT COUNT(*) FROM global_entities "
+            "WHERE gid NOT IN (SELECT DISTINCT gid FROM project_entity_links)"
+        ).fetchone()[0]
+
+        # 6. Pipeline health (last 5 runs)
+        pipeline_runs: list[dict] = []
+        try:
+            pipeline_runs = [
+                dict(r)
+                for r in conn.execute(
+                    "SELECT * FROM pipeline_runs ORDER BY started_at DESC LIMIT 5"
+                ).fetchall()
+            ]
+        except Exception:
+            pass
+
+        # 7. Overall stats
+        total_articles = conn.execute("SELECT COUNT(*) FROM articles").fetchone()[0]
+        avg_confidence = conn.execute(
+            "SELECT ROUND(AVG(confidence), 4) FROM articles"
+        ).fetchone()[0]
+
+        return {
+            "overall": {
+                "total_articles": total_articles,
+                "avg_confidence": avg_confidence,
+                "total_entities": total_entities,
+                "entities_with_articles": entities_with_articles,
+                "entity_coverage_pct": round(
+                    entities_with_articles / max(total_entities, 1) * 100, 1
+                ),
+                "orphan_entities": orphan_entities,
+            },
+            "confidence_distribution": buckets,
+            "confidence_trend": [dict(r) for r in trend],
+            "project_scorecard": [dict(r) for r in projects],
+            "article_types": [dict(r) for r in types],
+            "pipeline_runs": pipeline_runs,
+        }
+    except Exception as e:
+        log.error("get_quality_dashboard error: %s", e)
+        return {"error": "Internal error"}
+    finally:
+        conn.close()
+
+
+@router.get("/api/knowledge/stats/full")
+def knowledge_stats_full():
+    """Full article + entity breakdown with type counts, project coverage, and FTS coverage."""
+    conn = _get_knowledge_db()
+    if conn is None:
+        return {"available": False, "message": "Knowledge DB not available"}
+
+    try:
+        # --- Articles ---
+        total_articles = conn.execute("SELECT COUNT(*) FROM articles").fetchone()[0]
+
+        article_type_rows = conn.execute(
+            "SELECT article_type, COUNT(*) as count FROM articles GROUP BY article_type ORDER BY count DESC"
+        ).fetchall()
+        articles_by_type = {r["article_type"]: r["count"] for r in article_type_rows}
+
+        # --- Entities ---
+        total_entities = conn.execute("SELECT COUNT(*) FROM global_entities").fetchone()[0]
+
+        entity_type_rows = conn.execute(
+            "SELECT type, COUNT(*) as count FROM global_entities GROUP BY type ORDER BY count DESC"
+        ).fetchall()
+        entities_by_type = {r["type"]: r["count"] for r in entity_type_rows}
+
+        # --- Projects ---
+        total_projects = conn.execute("SELECT COUNT(*) FROM project_registry").fetchone()[0]
+        projects_with_articles = conn.execute(
+            "SELECT COUNT(DISTINCT pel.project_slug) FROM project_entity_links pel "
+            "JOIN articles a ON a.gid = pel.gid"
+        ).fetchone()[0]
+
+        # --- FTS coverage ---
+        articles_in_fts = 0
+        try:
+            articles_in_fts = conn.execute(
+                "SELECT COUNT(DISTINCT gid) FROM articles_fts"
+            ).fetchone()[0]
+        except Exception:
+            pass  # FTS table may not exist
+
+        conn.close()
+        return {
+            "available": True,
+            "articles": {
+                "total": total_articles,
+                "by_type": articles_by_type,
+            },
+            "entities": {
+                "total": total_entities,
+                "by_type": entities_by_type,
+            },
+            "projects": {
+                "total": total_projects,
+                "with_articles": projects_with_articles,
+            },
+            "fts_coverage": {
+                "articles_in_fts": articles_in_fts,
+                "total_articles": total_articles,
+            },
+        }
+    except Exception as e:
+        log.error("knowledge_stats_full error: %s", e)
+        if conn:
+            conn.close()
+        return {"available": False, "error": "Internal error"}

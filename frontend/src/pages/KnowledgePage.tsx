@@ -1,39 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Skeleton } from 'boneyard-js/react';
-import { FileText, Sparkles, Network, BookOpen, Users, Image, MessageSquare } from 'lucide-react';
+import { Sunrise, Compass, LayoutGrid, Users } from 'lucide-react';
 import { apiFetch } from '../lib/api';
 import { cn } from '../lib/utils';
-import { FilterBar } from '../components/knowledge/FilterBar';
-import { ContentList } from '../components/knowledge/ContentList';
-import { ContentDetail } from '../components/knowledge/ContentDetail';
-import { InsightPanel } from '../components/knowledge/InsightPanel';
-import { EntityGraph } from '../components/knowledge/EntityGraph';
+import { resolveTab, type KnowledgeTab } from '../lib/navigation';
 import { WikiArticleList } from '../components/knowledge/WikiArticleList';
 import { WikiArticleDetail } from '../components/knowledge/WikiArticleDetail';
 import { WikiFilterBar, type WikiFilters } from '../components/knowledge/WikiFilterBar';
 import { PeopleView } from '../components/knowledge/PeopleView';
-import { MediaView } from '../components/knowledge/MediaView';
-import { KnowledgeQA } from '../components/knowledge/KnowledgeQA';
-import type { ContentItem } from '../components/knowledge/ContentList';
+import { DailyBriefing } from '../components/knowledge/DailyBriefing';
+import { ProgramDashboard } from '../components/knowledge/ProgramDashboard';
+import { ProgramDetail } from '../components/knowledge/ProgramDetail';
+import { ProjectDashboard } from '../components/knowledge/ProjectDashboard';
+import { PersonCard } from '../components/knowledge/PersonCard';
+import { DecisionTimeline } from '../components/knowledge/DecisionTimeline';
+import { AttentionBadge } from '../components/knowledge/AttentionBadge';
+import { UnifiedSearch } from '../components/knowledge/UnifiedSearch';
+import { KnowledgeStats } from '../components/knowledge/KnowledgeStats';
 import type { WikiArticle } from '../components/knowledge/WikiArticleList';
 
-interface ContentResponse {
-  items: ContentItem[];
-  total: number;
-}
-
-type Tab = 'ask' | 'content' | 'insights' | 'entities' | 'wiki' | 'people' | 'media';
-
-const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
-  { id: 'ask', label: 'Ask', icon: <MessageSquare className="h-4 w-4" /> },
-  { id: 'content', label: 'Content', icon: <FileText className="h-4 w-4" /> },
-  { id: 'insights', label: 'Insights', icon: <Sparkles className="h-4 w-4" /> },
-  { id: 'entities', label: 'Entities', icon: <Network className="h-4 w-4" /> },
-  { id: 'wiki', label: 'Wiki', icon: <BookOpen className="h-4 w-4" /> },
+const TABS: { id: KnowledgeTab; label: string; icon: React.ReactNode }[] = [
+  { id: 'briefing', label: 'Briefing', icon: <Sunrise className="h-4 w-4" /> },
+  { id: 'explore', label: 'Explore', icon: <Compass className="h-4 w-4" /> },
+  { id: 'programs', label: 'Programs', icon: <LayoutGrid className="h-4 w-4" /> },
   { id: 'people', label: 'People', icon: <Users className="h-4 w-4" /> },
-  { id: 'media', label: 'Media', icon: <Image className="h-4 w-4" /> },
 ];
 
 // Map program IDs to their first project slug for filtering
@@ -44,48 +35,122 @@ const PROGRAM_SLUG_MAP: Record<string, string> = {
   'optimize': 'optimize',
 };
 
+interface BriefingSection {
+  title: string;
+  icon: string;
+  items: { label: string; value: string; detail?: string; severity?: string }[];
+}
+
+interface BriefingResponse {
+  generated_at: string;
+  sections: BriefingSection[];
+  highlights: string[];
+  program_health?: { id: string; name: string; health: string; score: number; issues: string[]; article_count: number; pending_decisions: number; stale_articles: number }[];
+  from_cache?: boolean;
+}
+
 export default function KnowledgePage() {
-  const [searchParams] = useSearchParams();
-  const [selected, setSelected] = useState<ContentItem | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Derive state from URL — single source of truth (fixes M4 sync loop)
+  const activeTab = useMemo(() => resolveTab(searchParams.get('tab')), [searchParams]);
+  const selectedProgramId = searchParams.get('program') || null;
+  const selectedProjectSlug = searchParams.get('project') || null;
+  const selectedPersonGid = searchParams.get('person') || null;
+  const searchQuery = searchParams.get('q') ?? '';
+
+  // Local state for things not in URL
   const [selectedWikiGid, setSelectedWikiGid] = useState<string | null>(null);
   const programParam = searchParams.get('program') ?? '';
   const initialProject = programParam ? (PROGRAM_SLUG_MAP[programParam] ?? '') : '';
   const [wikiFilters, setWikiFilters] = useState<WikiFilters>({ articleType: '', entityType: '', minConfidence: 0, project: initialProject });
-  const initialTab = (searchParams.get('tab') as Tab) || 'ask';
-  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
 
-  // Sync program param changes into wiki filters
-  useEffect(() => {
-    if (programParam) {
-      const slug = PROGRAM_SLUG_MAP[programParam] ?? '';
-      if (slug) {
-        setWikiFilters((prev) => ({ ...prev, project: slug }));
-      }
-    }
-  }, [programParam]);
-
-  const source = searchParams.get('source') ?? '';
-  const projectId = searchParams.get('project_id') ?? '';
-  const q = searchParams.get('q') ?? '';
-  const offset = searchParams.get('offset') ?? '0';
-
-  const params = new URLSearchParams();
-  if (source) params.set('source', source);
-  if (projectId) params.set('project_id', projectId);
-  if (q) params.set('q', q);
-  params.set('limit', '50');
-  params.set('offset', offset);
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['content', { source, project_id: projectId, q, offset }],
-    queryFn: () => apiFetch<ContentResponse>(`/content?${params.toString()}`),
-    enabled: activeTab === 'content',
+  // Shared briefing data (used by DailyBriefing and AttentionBadge)
+  const briefingQuery = useQuery({
+    queryKey: ['briefing'],
+    queryFn: () => apiFetch<BriefingResponse>('/knowledge/briefing'),
+    staleTime: 5 * 60 * 1000,
   });
+
+  // URL mutation helpers — all state changes go through URL
+  const setParam = useCallback((key: string, value: string | null) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (value) next.set(key, value);
+      else next.delete(key);
+      return next;
+    });
+  }, [setSearchParams]);
+
+  const handleTabChange = useCallback((tab: KnowledgeTab) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams();
+      next.set('tab', tab);
+      // Preserve program/project when switching to programs tab
+      if (tab === 'programs') {
+        const prog = prev.get('program');
+        const proj = prev.get('project');
+        if (prog) next.set('program', prog);
+        if (proj) next.set('project', proj);
+      }
+      return next;
+    });
+  }, [setSearchParams]);
+
+  const handleSearchFocus = useCallback(() => {
+    if (activeTab !== 'explore') {
+      handleTabChange('explore');
+    }
+  }, [activeTab, handleTabChange]);
+
+  const handleSearchQueryChange = useCallback((q: string) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (q) next.set('q', q);
+      else next.delete('q');
+      return next;
+    });
+  }, [setSearchParams]);
+
+  const handleNavigateProgram = useCallback((programId: string) => {
+    setSearchParams(new URLSearchParams({ tab: 'programs', program: programId }));
+  }, [setSearchParams]);
+
+  const handleNavigateProject = useCallback((slug: string) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams({ tab: 'programs', project: slug });
+      const prog = prev.get('program');
+      if (prog) next.set('program', prog);
+      return next;
+    });
+  }, [setSearchParams]);
+
+  const handleNavigatePerson = useCallback((gid: string) => {
+    setSearchParams(new URLSearchParams({ tab: 'people', person: gid }));
+  }, [setSearchParams]);
+
+  const handleNavigateArticle = useCallback((gid: string) => {
+    setSelectedWikiGid(gid);
+    handleTabChange('explore');
+  }, [handleTabChange]);
 
   return (
     <div className="flex flex-col h-full">
+      {/* Header with attention badge */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <h1 className="text-2xl font-semibold">Knowledge</h1>
+        <AttentionBadge briefingData={briefingQuery.data ?? null} />
+      </div>
+
+      {/* Unified search bar — always visible above tabs */}
+      <div className="px-4 pb-2">
+        <UnifiedSearch
+          query={searchQuery}
+          onQueryChange={handleSearchQueryChange}
+          onFocus={handleSearchFocus}
+          isActive={activeTab === 'explore'}
+          onSelectArticle={handleNavigateArticle}
+        />
       </div>
 
       {/* Tab bar */}
@@ -93,9 +158,11 @@ export default function KnowledgePage() {
         {TABS.map((tab) => (
           <button
             key={tab.id}
+            id={`tab-${tab.id}`}
             role="tab"
             aria-selected={activeTab === tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            aria-controls={`tabpanel-${tab.id}`}
+            onClick={() => handleTabChange(tab.id)}
             className={cn(
               'flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px',
               activeTab === tab.id
@@ -110,53 +177,28 @@ export default function KnowledgePage() {
       </div>
 
       {/* Tab content */}
-      {activeTab === 'ask' && (
-        <div className="flex-1 overflow-hidden">
-          <KnowledgeQA onSelectArticle={(gid) => {
-            setSelectedWikiGid(gid);
-            setActiveTab('wiki');
-          }} />
+      {activeTab === 'briefing' && (
+        <div id="tabpanel-briefing" role="tabpanel" aria-labelledby="tab-briefing" className="flex-1 overflow-auto">
+          <DailyBriefing
+            briefingData={briefingQuery.data ?? null}
+            isLoading={briefingQuery.isLoading}
+            onRefresh={() => briefingQuery.refetch()}
+            onNavigateProgram={handleNavigateProgram}
+          />
+          <div className="px-4 pb-4">
+            <KnowledgeStats />
+          </div>
+          <div className="px-6 pb-6">
+            <DecisionTimeline onNavigateProject={handleNavigateProject} />
+          </div>
         </div>
       )}
 
-      {activeTab === 'content' && (
-        <>
-          <FilterBar />
-          <Skeleton name="knowledge-content" loading={isLoading && activeTab === 'content'}>
-            <div className="flex-1 overflow-hidden">
-              <ContentList
-                items={data?.items ?? []}
-                total={data?.total ?? 0}
-                isLoading={isLoading}
-                selectedId={selected?.id ?? null}
-                onSelect={setSelected}
-              />
-            </div>
-          </Skeleton>
-          {selected && (
-            <ContentDetail
-              item={selected}
-              onClose={() => setSelected(null)}
-            />
+      {activeTab === 'explore' && (
+        <div id="tabpanel-explore" role="tabpanel" aria-labelledby="tab-explore">
+          {!searchQuery && (
+            <WikiFilterBar filters={wikiFilters} onChange={setWikiFilters} />
           )}
-        </>
-      )}
-
-      {activeTab === 'insights' && (
-        <div className="flex-1 overflow-hidden">
-          <InsightPanel />
-        </div>
-      )}
-
-      {activeTab === 'entities' && (
-        <div className="flex-1 overflow-hidden">
-          <EntityGraph />
-        </div>
-      )}
-
-      {activeTab === 'wiki' && (
-        <>
-          <WikiFilterBar filters={wikiFilters} onChange={setWikiFilters} />
           <div className="flex-1 overflow-hidden flex">
             <div className={cn('flex-1 overflow-hidden', selectedWikiGid && 'max-w-[400px]')}>
               <WikiArticleList
@@ -174,28 +216,52 @@ export default function KnowledgePage() {
               </div>
             )}
           </div>
-        </>
+        </div>
       )}
 
       {activeTab === 'people' && (
-        <div className="flex-1 overflow-hidden flex">
-          <div className={cn('flex-1 overflow-hidden', selectedWikiGid && 'max-w-[450px]')}>
-            <PeopleView onSelectGid={(gid) => setSelectedWikiGid(gid)} />
+        <div id="tabpanel-people" role="tabpanel" aria-labelledby="tab-people" className="flex-1 overflow-hidden flex">
+          <div className={cn('flex-1 overflow-hidden', selectedPersonGid && 'max-w-[450px]')}>
+            <PeopleView onSelectGid={handleNavigatePerson} />
           </div>
-          {selectedWikiGid && (
+          {selectedPersonGid && (
             <div className="flex-1 overflow-hidden">
-              <WikiArticleDetail
-                gid={selectedWikiGid}
-                onClose={() => setSelectedWikiGid(null)}
+              <PersonCard
+                gid={selectedPersonGid}
+                onClose={() => setParam('person', null)}
+                onNavigateProject={handleNavigateProject}
+                onSelectPerson={handleNavigatePerson}
+                onSelectArticle={handleNavigateArticle}
               />
             </div>
           )}
         </div>
       )}
 
-      {activeTab === 'media' && (
-        <div className="flex-1 overflow-hidden">
-          <MediaView />
+      {activeTab === 'programs' && (
+        <div id="tabpanel-programs" role="tabpanel" aria-labelledby="tab-programs" className="flex-1 overflow-hidden">
+          {selectedProjectSlug ? (
+            <ProjectDashboard
+              slug={selectedProjectSlug}
+              onBack={() => setParam('project', null)}
+              onSelectPerson={handleNavigatePerson}
+              onSelectArticle={handleNavigateArticle}
+            />
+          ) : selectedProgramId ? (
+            <ProgramDetail
+              programId={selectedProgramId}
+              onBack={() => setParam('program', null)}
+              onNavigateWiki={(project) => setParam('project', project)}
+            />
+          ) : (
+            <ProgramDashboard
+              onSelectProgram={(id) => setParam('program', id)}
+              onNavigateWiki={(project) => {
+                setWikiFilters((prev) => ({ ...prev, project }));
+                handleTabChange('explore');
+              }}
+            />
+          )}
         </div>
       )}
     </div>

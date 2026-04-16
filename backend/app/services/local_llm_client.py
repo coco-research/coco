@@ -13,13 +13,58 @@ Task types and their model routing:
   default          → Gemma4-26B MoE
 """
 
+import fcntl
+import os
 import subprocess
 import sys
+import threading
+from contextlib import contextmanager
+from pathlib import Path
+
 import structlog
 
 from app.config import LOCAL_LLM_ENABLED, LOCAL_LLM_TIMEOUT, LOCAL_LLM_FALLBACK_TO_CLOUD
 
 log = structlog.get_logger()
+
+# ---------------------------------------------------------------------------
+# MLX concurrency guards — MUST be held by every caller that spawns
+# mlx_lm / mlx_vlm, across every process (backend, cron, ad-hoc scripts).
+#
+# Two layers:
+#   1. threading.Lock  → intra-process (FastAPI's thread pool)
+#   2. fcntl.flock     → inter-process (cron's ThreadPoolExecutor in a
+#                        separate Python + any ad-hoc script)
+#
+# The flock is advisory and, on BSD/macOS, associated with the open file
+# description — so two fds in the same process can both acquire LOCK_EX.
+# Keep the threading.Lock to cover that gap.
+#
+# Shared lockfile lives alongside the knowledge pipeline's working dir so
+# the non-FastAPI code path (~/.coco/knowledge/base_generator.py) can
+# acquire the same lock.
+# ---------------------------------------------------------------------------
+
+_inference_lock  = threading.Lock()
+_MLX_LOCK_PATH   = Path.home() / ".coco" / "knowledge" / "mlx.lock"
+
+
+@contextmanager
+def _mlx_exclusive():
+    """Acquire thread lock + fcntl flock for the duration of the block.
+
+    Blocks until no other thread in this process AND no other process is
+    running an mlx_lm/mlx_vlm subprocess.
+    """
+    _MLX_LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
+    fd = os.open(str(_MLX_LOCK_PATH), os.O_RDWR | os.O_CREAT, 0o644)
+    with _inference_lock:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX)
+            yield
+        finally:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+            os.close(fd)
 
 # ---------------------------------------------------------------------------
 # Model registry
@@ -205,23 +250,24 @@ class LocalLLMClient:
             max_tokens=max_tokens,
         )
 
-        try:
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=timeout,
-            )
-        except subprocess.TimeoutExpired as exc:
-            raise LocalLLMError(
-                f"Local LLM timed out after {timeout}s (model={model_id})",
-                cause=exc,
-            ) from exc
-        except Exception as exc:
-            raise LocalLLMError(
-                f"Failed to launch local LLM subprocess: {exc}",
-                cause=exc,
-            ) from exc
+        with _mlx_exclusive():
+            try:
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=timeout,
+                )
+            except subprocess.TimeoutExpired as exc:
+                raise LocalLLMError(
+                    f"Local LLM timed out after {timeout}s (model={model_id})",
+                    cause=exc,
+                ) from exc
+            except Exception as exc:
+                raise LocalLLMError(
+                    f"Failed to launch local LLM subprocess: {exc}",
+                    cause=exc,
+                ) from exc
 
         if result.returncode != 0:
             stderr_snippet = (result.stderr or "")[:400]

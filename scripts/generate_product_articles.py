@@ -14,6 +14,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import fcntl
 import hashlib
 import json
 import logging
@@ -24,6 +25,7 @@ import sqlite3
 import subprocess
 import sys
 import textwrap
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -202,6 +204,24 @@ _MODEL_FOR_TIER: dict[str, str] = {
     "article-rich": "mlx-community/gemma-4-31b-it-4bit",
 }
 
+# Shared lockfile — matches the path used by backend LocalLLMClient and
+# knowledge/base_generator.py. Every MLX invoker on this machine must hold
+# this lock to prevent concurrent model loads from OOM'ing the laptop.
+_MLX_LOCK_PATH = Path.home() / ".coco" / "knowledge" / "mlx.lock"
+
+
+@contextmanager
+def _mlx_exclusive():
+    """Block until no other process is running an mlx_lm/mlx_vlm subprocess."""
+    _MLX_LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
+    fd = os.open(str(_MLX_LOCK_PATH), os.O_RDWR | os.O_CREAT, 0o644)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        yield
+    finally:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+        os.close(fd)
+
 
 def _call_local_llm(
     prompt: str, task_type: str = "article-stub", timeout: int = 180
@@ -213,21 +233,22 @@ def _call_local_llm(
     Claude CLI).
     """
     model_id = _MODEL_FOR_TIER.get(task_type, _MODEL_FOR_TIER["article-stub"])
-    log.info("  Calling local MLX model %s ...", model_id)
+    log.info("  Calling local MLX model %s (waiting for mlx lock) ...", model_id)
 
     try:
-        result = subprocess.run(
-            [
-                "python3", "-m", "mlx_vlm.generate",
-                "--model", model_id,
-                "--prompt", prompt,
-                "--max-tokens", "2000",
-            ],
-            input=None,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-        )
+        with _mlx_exclusive():
+            result = subprocess.run(
+                [
+                    "python3", "-m", "mlx_vlm.generate",
+                    "--model", model_id,
+                    "--prompt", prompt,
+                    "--max-tokens", "2000",
+                ],
+                input=None,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+            )
 
         if result.returncode != 0:
             log.error(

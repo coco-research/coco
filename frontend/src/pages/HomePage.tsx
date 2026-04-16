@@ -1,7 +1,7 @@
 import { type ReactNode, useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
-import { AlertTriangle, Search, FileText, FolderOpen, HeartPulse, Sparkles } from 'lucide-react';
+import { AlertTriangle, Search, FileText, FolderOpen, HeartPulse, Sparkles, CheckSquare } from 'lucide-react';
 import { apiFetch, apiPatch, apiPost } from '../lib/api';
 import { cn, timeAgo } from '../lib/utils';
 import { BriefingCard, type SyncResult } from '../components/home/BriefingCard';
@@ -9,6 +9,7 @@ import { PodcastCard } from '../components/home/PodcastCard';
 import { ProjectHealthGrid } from '../components/home/ProjectHealthGrid';
 import { FocusList } from '../components/home/FocusList';
 import { JarvisOverlay } from '../components/home/JarvisOverlay';
+import { KnowledgeEngineCard } from '../components/home/KnowledgeEngineCard';
 import type { HomeData, Todo } from '../types/home';
 import { Skeleton } from 'boneyard-js/react';
 
@@ -276,8 +277,47 @@ export default function HomePage() {
             health={data.health}
             projects={data.projects}
             todos={data.todos}
+            drafts={data.drafts}
             onSyncComplete={handleSyncComplete}
           />
+          {/* Hub Stats Cards */}
+          <div className="grid grid-cols-2 gap-3">
+            <Link
+              to="/todos"
+              className="rounded-xl border border-border bg-card p-4 hover:bg-accent/30 transition-colors group"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <CheckSquare size={14} className="text-muted-foreground group-hover:text-foreground transition-colors" />
+                <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Todos</span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-semibold text-foreground">{data.todos.total_open}</span>
+                <span className="text-xs text-muted-foreground">open</span>
+              </div>
+              <div className="flex gap-3 mt-1 text-[11px] text-muted-foreground">
+                <span>{data.todos.high_priority.length} high</span>
+                <span>{data.todos.overdue.length} overdue</span>
+              </div>
+            </Link>
+            <Link
+              to="/drafts"
+              className="rounded-xl border border-border bg-card p-4 hover:bg-accent/30 transition-colors group"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <FileText size={14} className="text-muted-foreground group-hover:text-foreground transition-colors" />
+                <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Drafts</span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-semibold text-foreground">{data.drafts?.total ?? data.attention.pending_drafts}</span>
+                <span className="text-xs text-muted-foreground">total</span>
+              </div>
+              <div className="flex gap-3 mt-1 text-[11px] text-muted-foreground">
+                <span>{data.drafts?.by_status?.pending ?? data.attention.pending_drafts} pending</span>
+                <span>{data.drafts?.by_status?.approved ?? 0} approved</span>
+              </div>
+            </Link>
+          </div>
+          <KnowledgeEngineCard />
           <FocusList
             todos={mergedTodos}
             projects={data.projects}

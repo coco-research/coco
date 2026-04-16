@@ -23,8 +23,10 @@ const ProjectsPage = lazy(() => import('./pages/ProjectsPage'));
 const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'));
 const AgentsPage = lazy(() => import('./pages/AgentsPage'));
 const KnowledgePage = lazy(() => import('./pages/KnowledgePage'));
+const GraphPage = lazy(() => import('./pages/GraphPage'));
 const InboxPage = lazy(() => import('./pages/InboxPage'));
 const TodosPage = lazy(() => import('./pages/TodosPage'));
+const DraftsPage = lazy(() => import('./pages/DraftsPage'));
 const GoalsPage = lazy(() => import('./pages/GoalsPage'));
 const ChatPage = lazy(() => import('./pages/ChatPage'));
 const CostsPage = lazy(() => import('./pages/CostsPage'));
@@ -34,6 +36,9 @@ const TreePage = lazy(() => import('./pages/TreePage'));
 const JarvisPage = lazy(() => import('./pages/JarvisPage'));
 const SelfImprovePage = lazy(() => import('./pages/SelfImprovePage'));
 const ReplayPage = lazy(() => import('./pages/ReplayPage'));
+const BrainPage = lazy(() => import('./pages/BrainPage'));
+const CanvasPage = lazy(() => import('./pages/CanvasPage'));
+const BriefingPage = lazy(() => import('./pages/BriefingPage'));
 
 /** Activates desktop notification listener for agent failures. */
 function DesktopNotifications() {
@@ -99,8 +104,12 @@ export default function App() {
                   <Route path="node/:nodeId/:tab" element={<ErrorBoundary><ProjectDetailPage /></ErrorBoundary>} />
                   <Route path="agents" element={<ErrorBoundary><AgentsPage /></ErrorBoundary>} />
                   <Route path="knowledge" element={<ErrorBoundary><KnowledgePage /></ErrorBoundary>} />
+                  <Route path="brain" element={<ErrorBoundary><BrainPage /></ErrorBoundary>} />
+                  <Route path="graph" element={<ErrorBoundary><GraphPage /></ErrorBoundary>} />
+                  <Route path="canvas" element={<ErrorBoundary><CanvasPage /></ErrorBoundary>} />
                   <Route path="inbox" element={<ErrorBoundary><InboxPage /></ErrorBoundary>} />
                   <Route path="todos" element={<ErrorBoundary><TodosPage /></ErrorBoundary>} />
+                  <Route path="drafts" element={<ErrorBoundary><DraftsPage /></ErrorBoundary>} />
                   <Route path="goals" element={<ErrorBoundary><GoalsPage /></ErrorBoundary>} />
                   <Route path="chat" element={<ErrorBoundary><ChatPage /></ErrorBoundary>} />
                   <Route path="costs" element={<ErrorBoundary><CostsPage /></ErrorBoundary>} />
@@ -111,6 +120,7 @@ export default function App() {
                   <Route path="replays/:id" element={<ErrorBoundary><StudioRoute><ReplayPage /></StudioRoute></ErrorBoundary>} />
                   <Route path="settings" element={<ErrorBoundary><SettingsPage /></ErrorBoundary>} />
                   <Route path="jarvis" element={<ErrorBoundary><StudioRoute><JarvisPage /></StudioRoute></ErrorBoundary>} />
+                  <Route path="briefing" element={<ErrorBoundary><BriefingPage /></ErrorBoundary>} />
                 </Route>
               </Routes>
             </Suspense>

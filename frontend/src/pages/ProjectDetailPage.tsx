@@ -40,18 +40,22 @@ import { FolderPickerDialog } from '../components/tree/FolderPickerDialog';
 
 const TABS = [
   { key: 'overview', label: 'Overview', icon: FolderKanban },
-  { key: 'knowledge', label: 'Knowledge', icon: Search },
-  { key: 'folder', label: 'Project Folder', icon: FolderOpen },
-  { key: 'agents', label: 'Agents', icon: Radio },
-  { key: 'collaboration', label: 'Collaboration', icon: GitBranch },
-  { key: 'todos', label: 'Todos', icon: CheckSquare },
-  { key: 'goals', label: 'Goals', icon: Target },
-  { key: 'costs', label: 'Costs', icon: DollarSign },
+  { key: 'work', label: 'Work', icon: CheckSquare },
   { key: 'people', label: 'People', icon: Users },
   { key: 'settings', label: 'Settings', icon: Settings },
 ] as const;
 
 type TabKey = (typeof TABS)[number]['key'];
+
+// Map old 10-tab keys to new 4-tab keys (for URL param backward compat)
+const LEGACY_TAB_MAP: Record<string, TabKey> = {
+  overview: 'overview', knowledge: 'overview', folder: 'overview', agents: 'overview',
+  collaboration: 'work', todos: 'work', goals: 'work', costs: 'work',
+  people: 'people', settings: 'settings',
+};
+
+type OverviewSubTab = 'overview' | 'knowledge' | 'folder' | 'agents';
+type WorkSubTab = 'todos' | 'goals' | 'collaboration' | 'costs';
 
 // ─── Shared small components ─────────────────────────────────────────
 
@@ -959,14 +963,17 @@ function PeopleTab({ projectId, projectName }: { projectId: string; projectName:
     queryFn: () => apiFetch('/brain/people'),
   });
 
-  // Filter people associated with this project (by name match)
+  // Filter people associated with this project (by slug or display name match)
   const allPeople = Object.entries(peopleData ?? {});
+  const pid = projectId?.toLowerCase() ?? '';
+  const pname = projectName.toLowerCase();
   const projectPeople = allPeople.filter(([, person]) =>
-    person.projects.some(p =>
-      p.toLowerCase() === projectName.toLowerCase() ||
-      p.toLowerCase().includes(projectName.toLowerCase()) ||
-      projectName.toLowerCase().includes(p.toLowerCase())
-    )
+    person.projects.some(p => {
+      const pl = p.toLowerCase();
+      return pl === pid || pl === pname ||
+        pl.includes(pname) || pname.includes(pl) ||
+        pl.includes(pid) || pid.includes(pl);
+    })
   );
 
   const displayPeople = showAll ? allPeople : projectPeople;
@@ -1935,8 +1942,20 @@ export default function ProjectDetailPage() {
 
   const storageKey = `coco:project-tab:${projectId || resolvedNodeId}`;
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
-    if (tab && TABS.some(t => t.key === tab)) return tab as TabKey;
-    return (localStorage.getItem(storageKey) as TabKey) ?? 'overview';
+    if (tab && LEGACY_TAB_MAP[tab]) return LEGACY_TAB_MAP[tab];
+    const stored = localStorage.getItem(storageKey) as TabKey;
+    if (stored && TABS.some(t => t.key === stored)) return stored;
+    return 'overview';
+  });
+  const [overviewSub, setOverviewSub] = useState<OverviewSubTab>(() => {
+    const OVERVIEW_SUBS = new Set<string>(['overview', 'knowledge', 'folder', 'agents']);
+    if (tab && OVERVIEW_SUBS.has(tab)) return tab as OverviewSubTab;
+    return 'overview';
+  });
+  const [workSub, setWorkSub] = useState<WorkSubTab>(() => {
+    const WORK_SUBS = new Set<string>(['todos', 'goals', 'collaboration', 'costs']);
+    if (tab && WORK_SUBS.has(tab)) return tab as WorkSubTab;
+    return 'todos';
   });
 
   // Set scope when node is found
@@ -2030,26 +2049,70 @@ export default function ProjectDetailPage() {
 
       {/* Tab content */}
       <div className="animate-fade-in">
-        {activeTab === 'overview' && <OverviewTab project={effectiveProject} projectId={effectiveId} />}
-        {activeTab === 'knowledge' && projectId && <KnowledgeTab projectId={projectId} />}
-        {activeTab === 'knowledge' && !projectId && (
-          <div className="text-center py-12 text-muted-foreground">
-            <p className="text-sm">This node is not linked to a Knowledge Hub project.</p>
-            <p className="text-xs mt-1">Link it in Settings to see knowledge content here.</p>
-          </div>
+        {/* ── Overview: sub-tabs Overview | Knowledge | Folder | Agents ── */}
+        {activeTab === 'overview' && (
+          <>
+            <div className="flex items-center gap-1 mb-4 border-b border-border/50 pb-2">
+              {(['overview', 'knowledge', 'folder', 'agents'] as const).map((sub) => (
+                <button
+                  key={sub}
+                  onClick={() => setOverviewSub(sub)}
+                  className={cn(
+                    'px-3 py-1.5 text-xs rounded-md capitalize transition-colors',
+                    overviewSub === sub
+                      ? 'bg-primary/10 text-primary font-medium'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                  )}
+                >
+                  {sub === 'folder' ? 'Folder' : sub.charAt(0).toUpperCase() + sub.slice(1)}
+                </button>
+              ))}
+            </div>
+            {overviewSub === 'overview' && <OverviewTab project={effectiveProject} projectId={effectiveId} />}
+            {overviewSub === 'knowledge' && projectId && <KnowledgeTab projectId={projectId} />}
+            {overviewSub === 'knowledge' && !projectId && (
+              <div className="text-center py-12 text-muted-foreground">
+                <p className="text-sm">This node is not linked to a Knowledge Hub project.</p>
+                <p className="text-xs mt-1">Link it in Settings to see knowledge content here.</p>
+              </div>
+            )}
+            {overviewSub === 'folder' && <FolderTab nodeId={resolvedNodeId} projectId={effectiveId} />}
+            {overviewSub === 'agents' && <AgentsTab projectId={effectiveId} nodeId={resolvedNodeId} />}
+          </>
         )}
-        {activeTab === 'folder' && <FolderTab nodeId={resolvedNodeId} projectId={effectiveId} />}
-        {activeTab === 'agents' && <AgentsTab projectId={effectiveId} nodeId={resolvedNodeId} />}
-        {activeTab === 'collaboration' && <CollaborationTab projectId={effectiveId} nodeId={resolvedNodeId} />}
-        {activeTab === 'todos' && projectId && <TodosTab projectId={projectId} />}
-        {activeTab === 'todos' && !projectId && (
-          <div className="text-center py-12 text-muted-foreground">
-            <p className="text-sm">Link this node to a Knowledge Hub project to manage todos.</p>
-          </div>
+
+        {/* ── Work: sub-tabs Todos | Goals | Collaboration | Costs ── */}
+        {activeTab === 'work' && (
+          <>
+            <div className="flex items-center gap-1 mb-4 border-b border-border/50 pb-2">
+              {(['todos', 'goals', 'collaboration', 'costs'] as const).map((sub) => (
+                <button
+                  key={sub}
+                  onClick={() => setWorkSub(sub)}
+                  className={cn(
+                    'px-3 py-1.5 text-xs rounded-md capitalize transition-colors',
+                    workSub === sub
+                      ? 'bg-primary/10 text-primary font-medium'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                  )}
+                >
+                  {sub.charAt(0).toUpperCase() + sub.slice(1)}
+                </button>
+              ))}
+            </div>
+            {workSub === 'todos' && projectId && <TodosTab projectId={projectId} />}
+            {workSub === 'todos' && !projectId && (
+              <div className="text-center py-12 text-muted-foreground">
+                <p className="text-sm">Link this node to a Knowledge Hub project to manage todos.</p>
+              </div>
+            )}
+            {workSub === 'goals' && <GoalsTab projectId={effectiveId} />}
+            {workSub === 'collaboration' && <CollaborationTab projectId={effectiveId} nodeId={resolvedNodeId} />}
+            {workSub === 'costs' && <CostsTab projectId={effectiveId} />}
+          </>
         )}
-        {activeTab === 'goals' && <GoalsTab projectId={effectiveId} />}
-        {activeTab === 'costs' && <CostsTab projectId={effectiveId} />}
-        {activeTab === 'people' && <PeopleTab projectId={effectiveId} projectName={effectiveProject.name} />}
+
+        {activeTab === 'people' && <PeopleTab projectId={effectiveId} projectName={effectiveProject.name as string} />}
         {activeTab === 'settings' && <ProjectSettingsTab project={effectiveProject} projectId={effectiveId} />}
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useRef, useCallback } from 'react';
 import { X, Loader2, Users, FileText, Mail, ChevronRight, ExternalLink } from 'lucide-react';
 import { apiFetch } from '../../lib/api';
 import { cn } from '../../lib/utils';
@@ -60,11 +61,24 @@ export function PersonCard({ gid, onClose, onNavigateProject, onSelectPerson, on
     enabled: !!gid,
   });
 
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Focus close button on mount so Escape key is immediately available
+  useEffect(() => {
+    closeButtonRef.current?.focus();
+  }, [gid]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') onClose();
+  }, [onClose]);
+
   return (
     <div
       role="dialog"
       aria-label="Person details"
+      aria-modal="false"
       className="h-full flex flex-col bg-background border-l border-border"
+      onKeyDown={handleKeyDown}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
@@ -75,6 +89,7 @@ export function PersonCard({ gid, onClose, onNavigateProject, onSelectPerson, on
           </h2>
         </div>
         <button
+          ref={closeButtonRef}
           onClick={onClose}
           aria-label="Close person details"
           className="p-1 rounded hover:bg-muted transition-colors"

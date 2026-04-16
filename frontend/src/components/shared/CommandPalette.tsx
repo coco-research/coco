@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Search, LayoutDashboard, FolderKanban, Radio, MessageSquare,
   DollarSign, Settings, CheckSquare, Users, Inbox, Activity, ListTodo,
-  Plus, Bot, Target, Trash2, Network, Home, FileText, FilePenLine, Loader2,
+  Plus, Bot, Target, Trash2, Network, Home, FileText, FilePenLine, Loader2, Brain,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { apiFetch } from '../../lib/api';
@@ -54,8 +54,12 @@ const navigationCommands: CommandItem[] = [
   { label: 'Chat', path: '/chat', keywords: 'coco talk message', icon: MessageSquare, shortcut: 'g c', section: 'navigation' },
   { label: 'Settings', path: '/settings', keywords: 'config preferences', icon: Settings, shortcut: 'g s', section: 'navigation' },
   { label: 'Knowledge Hub', path: '/knowledge', keywords: 'content email voice search', icon: Search, shortcut: 'g k', section: 'navigation' },
+  { label: 'Knowledge Graph', path: '/graph', keywords: 'graph network entity relationship connections', icon: Network, shortcut: 'g g', section: 'navigation' },
+  { label: 'Brain', path: '/brain', keywords: 'brain decisions events tasks activity', icon: Brain, shortcut: 'g b', section: 'navigation' },
+  { label: 'Brain Map', path: '/canvas', keywords: 'canvas brain map spatial flow nodes', icon: Network, shortcut: 'g m', section: 'navigation' },
   { label: 'Teams', path: '/projects', keywords: 'project team list', icon: FolderKanban, shortcut: 'g p', section: 'navigation' },
   { label: 'Todos', path: '/todos', keywords: 'todo action item', icon: CheckSquare, shortcut: 'g o', section: 'navigation' },
+  { label: 'Drafts', path: '/drafts', keywords: 'draft review pending approve reject', icon: FileText, shortcut: 'g r', section: 'navigation' },
   { label: 'Goals', path: '/goals', keywords: 'goal objective', icon: Target, shortcut: 'g l', section: 'navigation' },
   { label: 'Costs', path: '/costs', keywords: 'budget spend money', icon: DollarSign, shortcut: 'g $', section: 'navigation' },
   { label: 'Activity', path: '/activity', keywords: 'log history', icon: Activity, shortcut: 'g v', section: 'navigation' },

@@ -112,6 +112,18 @@ export function EntityGraph() {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Header with graph link */}
+      <div className="px-4 py-2 border-b border-border flex items-center justify-between">
+        <span className="text-xs text-muted-foreground">{total} entities extracted</span>
+        <a
+          href="/graph"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-accent/10 text-accent hover:bg-accent/20 transition-colors"
+        >
+          <Network className="h-3 w-3" />
+          Explore in Graph
+        </a>
+      </div>
+
       {/* Type filter tabs */}
       <div className="px-4 py-3 border-b border-border flex items-center gap-2 flex-wrap">
         <button

@@ -44,6 +44,11 @@ export interface QueueSummary {
   classify: number;
 }
 
+export interface DraftsSummary {
+  total: number;
+  by_status: Record<string, number>;
+}
+
 export interface HomeData {
   greeting: string;
   date: string;
@@ -56,6 +61,7 @@ export interface HomeData {
     medium_priority: Todo[];
     overdue: Todo[];
   };
+  drafts?: DraftsSummary;
   projects: HomeProject[];
   queue: QueueSummary;
   costs: { today_usd: number; month_usd: number };

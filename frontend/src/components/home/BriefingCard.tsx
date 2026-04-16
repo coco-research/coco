@@ -9,6 +9,7 @@ import type {
   SourceHealth,
   HomeProject,
   Todo,
+  DraftsSummary,
 } from '../../types/home';
 
 export interface SyncResult {
@@ -30,6 +31,7 @@ interface BriefingCardProps {
     medium_priority: Todo[];
     overdue: Todo[];
   };
+  drafts?: DraftsSummary;
   onSyncComplete?: (result: SyncResult) => void;
 }
 
@@ -136,7 +138,7 @@ function generateBullets(props: BriefingCardProps): Bullet[] {
 }
 
 export function BriefingCard(props: BriefingCardProps) {
-  const { sinceLastSession, queue, costs, todos, projects, health, onSyncComplete } = props;
+  const { sinceLastSession, queue, costs, todos, drafts, projects, health, onSyncComplete } = props;
   const bullets = generateBullets(props);
   const hasContent = bullets.length > 0;
 
@@ -220,6 +222,12 @@ export function BriefingCard(props: BriefingCardProps) {
         <span className="text-border">·</span>
         <span>{todos.high_priority.length} high priority</span>
         <span className="text-border">·</span>
+        {drafts && (
+          <>
+            <span>{drafts.total} drafts ({drafts.by_status?.pending ?? 0} pending)</span>
+            <span className="text-border">·</span>
+          </>
+        )}
         <span>{totalProjects} active projects</span>
         <span className="text-border">·</span>
         <span>{healthyCount}/{totalSources} sources healthy</span>

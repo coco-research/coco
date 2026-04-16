@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Sunrise, Compass, LayoutGrid, Users } from 'lucide-react';
 import { apiFetch } from '../lib/api';
 import { cn } from '../lib/utils';
-import { resolveTab, type KnowledgeTab } from '../lib/navigation';
+import { resolveTab, projectParams, personParams, type KnowledgeTab } from '../lib/navigation';
 import { WikiArticleList } from '../components/knowledge/WikiArticleList';
 import { WikiArticleDetail } from '../components/knowledge/WikiArticleDetail';
 import { WikiFilterBar, type WikiFilters } from '../components/knowledge/WikiFilterBar';
@@ -117,22 +117,19 @@ export default function KnowledgePage() {
   }, [setSearchParams]);
 
   const handleNavigateProject = useCallback((slug: string) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams({ tab: 'programs', project: slug });
-      const prog = prev.get('program');
-      if (prog) next.set('program', prog);
-      return next;
-    });
+    setSearchParams((prev) => projectParams(slug, prev.get('program') ?? undefined));
   }, [setSearchParams]);
 
   const handleNavigatePerson = useCallback((gid: string) => {
-    setSearchParams(new URLSearchParams({ tab: 'people', person: gid }));
+    setSearchParams(personParams(gid));
   }, [setSearchParams]);
 
   const handleNavigateArticle = useCallback((gid: string) => {
     setSelectedWikiGid(gid);
     handleTabChange('explore');
   }, [handleTabChange]);
+
+  const handlePersonClose = useCallback(() => setParam('person', null), [setParam]);
 
   return (
     <div className="flex flex-col h-full">
@@ -228,7 +225,7 @@ export default function KnowledgePage() {
             <div className="flex-1 overflow-hidden">
               <PersonCard
                 gid={selectedPersonGid}
-                onClose={() => setParam('person', null)}
+                onClose={handlePersonClose}
                 onNavigateProject={handleNavigateProject}
                 onSelectPerson={handleNavigatePerson}
                 onSelectArticle={handleNavigateArticle}

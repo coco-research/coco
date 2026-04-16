@@ -16,6 +16,7 @@ describe('WikiFilterBar', () => {
   it('renders all article type pills', () => {
     setup();
     expect(screen.getByRole('button', { name: 'Entity' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Product' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Meeting' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Graph Insight' })).toBeInTheDocument();
   });
@@ -81,7 +82,7 @@ describe('WikiFilterBar', () => {
     const { onChange } = setup({ articleType: 'entity', minConfidence: 30 });
 
     await user.click(screen.getByText('Clear (2)'));
-    expect(onChange).toHaveBeenCalledWith({ articleType: '', entityType: '', minConfidence: 0 });
+    expect(onChange).toHaveBeenCalledWith({ articleType: '', entityType: '', minConfidence: 0, project: '' });
   });
 });
 
@@ -90,6 +91,12 @@ describe('articleTypeBadge', () => {
     const badge = articleTypeBadge('meeting');
     expect(badge.label).toBe('Meeting');
     expect(badge.className).toContain('blue');
+  });
+
+  it('returns teal badge for product type', () => {
+    const badge = articleTypeBadge('product');
+    expect(badge.label).toBe('Product');
+    expect(badge.className).toContain('teal');
   });
 
   it('falls back for unknown types', () => {

@@ -8,6 +8,8 @@ const PAGE_LABELS: Record<string, string> = {
   tree: 'My Portfolio',
   agents: 'Agent Team',
   knowledge: 'Knowledge',
+  graph: 'Graph',
+  canvas: 'Brain Map',
   inbox: 'Inbox',
   todos: 'Todos',
   goals: 'Goals',

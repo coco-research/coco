@@ -3,7 +3,7 @@ import {
   FolderKanban, Radio, MessageSquare,
   DollarSign, Settings, CheckSquare, Search, Inbox, Brain,
   Target, Activity, ChevronsUpDown, ChevronRight, Network,
-  BarChart3, Home, Sparkles, PanelLeftClose, PanelLeftOpen, Wand2, Workflow, FileText,
+  BarChart3, Home, Sparkles, PanelLeftClose, PanelLeftOpen, Wand2, Workflow, FileText, Sun,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useScope, type TreeNode } from '../../context/ScopeContext';
@@ -279,6 +279,7 @@ export function Sidebar() {
       <nav className={cn('flex-1 py-2 overflow-y-auto flex flex-col gap-4 scrollbar-auto-hide', collapsed ? 'px-1' : 'px-2')}>
         <SidebarSection label="Home" collapsed={collapsed}>
           <NavItem to="/" icon={Home} label="Home" end collapsed={collapsed} />
+          <NavItem to="/briefing" icon={Sun} label="Briefing" collapsed={collapsed} />
           <NavItem to="/analytics" icon={BarChart3} label="Analytics" collapsed={collapsed} />
           <NavItem to="/inbox" icon={Inbox} label="Inbox" badge={inboxCount} badgeTone="danger" collapsed={collapsed} />
         </SidebarSection>

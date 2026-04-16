@@ -1,12 +1,17 @@
+import json
+import logging
+import sqlite3
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from app.config import BRAIN_JSON_PATH, QUEUE_JSON_PATH, CONFIG_JSON_PATH
+from app.config import BRAIN_JSON_PATH, QUEUE_JSON_PATH, CONFIG_JSON_PATH, BRAIN_DB_PATH
 from app.services.json_store import read_json, write_json
 from app.models.brain import UpdatePersonBody
+
+log = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -46,10 +51,71 @@ router = APIRouter(tags=["Brain"])
 def get_brain():
     return read_json(BRAIN_JSON_PATH)
 
+def _is_likely_person(name: str) -> bool:
+    """Filter out entity extraction noise — concepts misclassified as people.
+
+    Root cause: brain entity_extractor.py regex matches any two capitalized words
+    (e.g., "Data Flow", "Access Control") as person names. This filter catches the
+    most obvious non-people at the API level until the extractor is fixed upstream.
+    """
+    if not name or len(name) < 3:
+        return False
+    # Reject names with newlines/tabs (document parsing artifacts)
+    if "\n" in name or "\t" in name:
+        return False
+    words = name.split()
+    # Real names are 2-4 words
+    if len(words) < 2 or len(words) > 4:
+        return False
+    # Reject if any word is a common business/tech term
+    _NON_PERSON_WORDS = {
+        "control", "controls", "access", "policy", "policies", "system", "systems",
+        "management", "process", "processes", "workflow", "workflows", "module",
+        "modules", "action", "actions", "status", "review", "reviews", "compliance",
+        "risk", "risks", "audit", "security", "report", "reports", "analytics",
+        "criteria", "phase", "phases", "project", "projects", "board", "service",
+        "services", "data", "additional", "active", "general", "internal", "external",
+        "framework", "model", "models", "assessment", "testing", "inventory",
+        "portal", "dashboard", "integration", "configuration", "requirements",
+        "summary", "overview", "analysis", "automation", "monitoring", "tracking",
+        "authentication", "authorization", "submission", "corporate", "regulatory",
+        "initiatives", "metrics", "roadmap", "feed", "score", "high", "low",
+        "medium", "critical", "sync", "export", "import", "login", "view",
+        "records", "proposed", "automated", "sharing", "launch", "build",
+        "reasoning", "context", "vision", "agenda", "product", "diagrams",
+        "flow", "state", "future", "current", "initial", "final",
+    }
+    if any(w.lower() in _NON_PERSON_WORDS for w in words):
+        return False
+    # Reject 2-letter words that aren't initials (Ad, On, Or, If, etc.)
+    if any(len(w) == 2 and w[1].islower() for w in words):
+        return False
+    # Reject if first word is a common verb (Add, Enter, View, Run, etc.)
+    _VERB_STARTS = {"add", "added", "adding", "enter", "use", "run", "get", "set",
+                    "check", "open", "close", "start", "stop", "update", "delete",
+                    "create", "remove", "enable", "disable", "configure", "deploy",
+                    "phased", "proposed", "planned", "revised", "shared"}
+    if words[0].lower() in _VERB_STARTS:
+        return False
+    return True
+
+
 @router.get("/api/brain/people")
 def get_people():
     brain = read_json(BRAIN_JSON_PATH)
-    return brain.get("people", {})
+    people = brain.get("people", {})
+    # Two-pass filter: (1) structural check, (2) require email evidence
+    # Email evidence = the person appeared as a sender in at least one email
+    # This is the strongest signal that someone is a real person, not a document fragment
+    return {
+        slug: p for slug, p in people.items()
+        if _is_likely_person(p.get("full_name", ""))
+        and (
+            p.get("patterns", {}).get("email_from")  # has sent emails
+            or p.get("source") == "manual"            # manually added
+            or slug == "rijul"                         # self
+        )
+    }
 
 @router.get("/api/brain/people/{slug}")
 def get_person(slug: str):
@@ -248,3 +314,205 @@ def queue_from_improvement(body: QueueFromImprovement):
 @router.get("/api/config")
 def get_config():
     return read_json(CONFIG_JSON_PATH)
+
+
+# ---------------------------------------------------------------------------
+# Brain DB endpoints (project_brain.db — read-only)
+# ---------------------------------------------------------------------------
+
+def _brain_db_conn() -> sqlite3.Connection | None:
+    """Open a read-only connection to project_brain.db.
+
+    Returns None if the file does not exist so callers can return empty results.
+    """
+    if not BRAIN_DB_PATH.exists():
+        return None
+    conn = sqlite3.connect(f"file:{BRAIN_DB_PATH}?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def _rows_to_dicts(rows: list[sqlite3.Row]) -> list[dict]:
+    """Convert sqlite3.Row objects to plain dicts, parsing JSON columns."""
+    results = []
+    for row in rows:
+        d = dict(row)
+        # Parse known JSON columns if present
+        for json_col in ("participants_json", "metadata_json"):
+            if json_col in d and isinstance(d[json_col], str):
+                try:
+                    d[json_col] = json.loads(d[json_col])
+                except (json.JSONDecodeError, TypeError):
+                    pass
+        results.append(d)
+    return results
+
+
+@router.get("/api/brain/decisions")
+def get_brain_decisions(
+    limit: int = Query(50, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    search: str = Query("", max_length=200),
+):
+    """List decisions from project_brain.db with optional text search."""
+    conn = _brain_db_conn()
+    if conn is None:
+        return {"items": [], "total": 0}
+    try:
+        if search.strip():
+            pattern = f"%{search.strip()}%"
+            total = conn.execute(
+                "SELECT COUNT(*) FROM decisions WHERE project_id = 1 "
+                "AND (decision LIKE ? OR context LIKE ? OR decided_by LIKE ?)",
+                (pattern, pattern, pattern),
+            ).fetchone()[0]
+            rows = conn.execute(
+                "SELECT * FROM decisions WHERE project_id = 1 "
+                "AND (decision LIKE ? OR context LIKE ? OR decided_by LIKE ?) "
+                "ORDER BY date DESC LIMIT ? OFFSET ?",
+                (pattern, pattern, pattern, limit, offset),
+            ).fetchall()
+        else:
+            total = conn.execute(
+                "SELECT COUNT(*) FROM decisions WHERE project_id = 1"
+            ).fetchone()[0]
+            rows = conn.execute(
+                "SELECT * FROM decisions WHERE project_id = 1 "
+                "ORDER BY date DESC LIMIT ? OFFSET ?",
+                (limit, offset),
+            ).fetchall()
+        return {"items": _rows_to_dicts(rows), "total": total}
+    except Exception:
+        log.exception("brain_decisions_error")
+        raise HTTPException(500, "Failed to read decisions from brain database")
+    finally:
+        conn.close()
+
+
+@router.get("/api/brain/events")
+def get_brain_events(
+    limit: int = Query(50, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    type: str = Query("", max_length=50, alias="type"),
+):
+    """List events from project_brain.db with optional type filter."""
+    conn = _brain_db_conn()
+    if conn is None:
+        return {"items": [], "total": 0}
+    try:
+        if type.strip():
+            total = conn.execute(
+                "SELECT COUNT(*) FROM events WHERE project_id = 1 AND type = ?",
+                (type.strip(),),
+            ).fetchone()[0]
+            rows = conn.execute(
+                "SELECT * FROM events WHERE project_id = 1 AND type = ? "
+                "ORDER BY date DESC LIMIT ? OFFSET ?",
+                (type.strip(), limit, offset),
+            ).fetchall()
+        else:
+            total = conn.execute(
+                "SELECT COUNT(*) FROM events WHERE project_id = 1"
+            ).fetchone()[0]
+            rows = conn.execute(
+                "SELECT * FROM events WHERE project_id = 1 "
+                "ORDER BY date DESC LIMIT ? OFFSET ?",
+                (limit, offset),
+            ).fetchall()
+        return {"items": _rows_to_dicts(rows), "total": total}
+    except Exception:
+        log.exception("brain_events_error")
+        raise HTTPException(500, "Failed to read events from brain database")
+    finally:
+        conn.close()
+
+
+@router.get("/api/brain/tasks")
+def get_brain_tasks(
+    limit: int = Query(50, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    status: str = Query("", max_length=50),
+):
+    """List tasks from project_brain.db with optional status filter."""
+    conn = _brain_db_conn()
+    if conn is None:
+        return {"items": [], "total": 0, "by_status": {}}
+    try:
+        # Status breakdown
+        status_rows = conn.execute(
+            "SELECT status, COUNT(*) as cnt FROM tasks WHERE project_id = 1 GROUP BY status"
+        ).fetchall()
+        by_status = {r["status"]: r["cnt"] for r in status_rows}
+
+        if status.strip():
+            total = conn.execute(
+                "SELECT COUNT(*) FROM tasks WHERE project_id = 1 AND status = ?",
+                (status.strip(),),
+            ).fetchone()[0]
+            rows = conn.execute(
+                "SELECT * FROM tasks WHERE project_id = 1 AND status = ? "
+                "ORDER BY priority, status, created_at DESC LIMIT ? OFFSET ?",
+                (status.strip(), limit, offset),
+            ).fetchall()
+        else:
+            total = conn.execute(
+                "SELECT COUNT(*) FROM tasks WHERE project_id = 1"
+            ).fetchone()[0]
+            rows = conn.execute(
+                "SELECT * FROM tasks WHERE project_id = 1 "
+                "ORDER BY priority, status, created_at DESC LIMIT ? OFFSET ?",
+                (limit, offset),
+            ).fetchall()
+        return {"items": _rows_to_dicts(rows), "total": total, "by_status": by_status}
+    except Exception:
+        log.exception("brain_tasks_error")
+        raise HTTPException(500, "Failed to read tasks from brain database")
+    finally:
+        conn.close()
+
+
+@router.get("/api/brain/stats")
+def get_brain_stats():
+    """Aggregate counts from project_brain.db."""
+    conn = _brain_db_conn()
+    if conn is None:
+        return {
+            "available": False,
+            "entities": 0,
+            "decisions": 0,
+            "events": 0,
+            "tasks": {"total": 0, "open": 0, "done": 0},
+        }
+    try:
+        entities = conn.execute(
+            "SELECT COUNT(*) FROM entities WHERE project_id = 1"
+        ).fetchone()[0]
+        decisions = conn.execute(
+            "SELECT COUNT(*) FROM decisions WHERE project_id = 1"
+        ).fetchone()[0]
+        events_count = conn.execute(
+            "SELECT COUNT(*) FROM events WHERE project_id = 1"
+        ).fetchone()[0]
+        task_total = conn.execute(
+            "SELECT COUNT(*) FROM tasks WHERE project_id = 1"
+        ).fetchone()[0]
+        status_rows = conn.execute(
+            "SELECT status, COUNT(*) as cnt FROM tasks WHERE project_id = 1 GROUP BY status"
+        ).fetchall()
+        task_by_status = {r["status"]: r["cnt"] for r in status_rows}
+
+        return {
+            "available": True,
+            "entities": entities,
+            "decisions": decisions,
+            "events": events_count,
+            "tasks": {
+                "total": task_total,
+                **task_by_status,
+            },
+        }
+    except Exception:
+        log.exception("brain_stats_error")
+        raise HTTPException(500, "Failed to read stats from brain database")
+    finally:
+        conn.close()

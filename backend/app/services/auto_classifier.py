@@ -279,7 +279,7 @@ Return exactly this JSON format (no other text):
 If no project matches, return: {{"project_id": null, "confidence": 0.0, "reasoning": "no match"}}"""
 
     try:
-        result = agent_sdk.quick_command(prompt, model="haiku", max_tokens=256)
+        result = agent_sdk.quick_command(prompt, model="haiku", max_tokens=256, task_type="classification")
         content = result["content"].strip()
 
         record_sdk_cost(

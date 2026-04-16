@@ -745,6 +745,8 @@ hub_projects = Table(
     Column("confluence_space", Text),
     Column("folder_path", Text),
     Column("created_at", Text),
+    Column("updated_at", Text),
+    Column("metadata_json", Text, server_default="{}"),
     Column("active", Integer, server_default="1"),
 )
 
@@ -856,4 +858,27 @@ insights = Table(
     Column("sources", Text, default="[]"),
     Column("status", Text, default="new"),
     Column("created_at", Text),
+)
+
+# ---------------------------------------------------------------------------
+# Attention tracking
+# ---------------------------------------------------------------------------
+
+attention_scores = Table(
+    "attention_scores",
+    metadata,
+    Column("project_slug", Text, primary_key=True),
+    Column("score", Float, server_default="0"),
+    Column("view_count", Integer, server_default="0"),
+    Column("last_viewed_at", Text),
+    Column("updated_at", Text),
+)
+
+attention_events = Table(
+    "attention_events",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("project_slug", Text, nullable=False),
+    Column("source", Text, nullable=False, server_default="content"),
+    Column("viewed_at", Text, nullable=False),
 )

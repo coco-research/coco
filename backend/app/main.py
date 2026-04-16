@@ -18,6 +18,8 @@ from app.services.id_generator import resolve_display_id as _resolve_display_id
 from app.services.self_improve import self_improve_service
 from app.services.self_improve_scheduler import register_event_listeners as _register_si_listeners
 from app.services.hub_sync import hub_sync
+from app.services.knowledge_sync import knowledge_sync
+from app.services.attention_tracker import attention_tracker
 from app.services.event_bus import event_bus as _event_bus
 from app.services.feature_gate import is_studio, COCO_EDITION, STUDIO_FEATURES
 from app.routers import (
@@ -32,6 +34,8 @@ from app.routers import (
     replay,
     podcast,
     knowledge_search,
+    graph,
+    attention,
 )
 
 structlog.configure(
@@ -64,7 +68,15 @@ async def lifespan(app: FastAPI):
     log.info("self_improve_scheduler_listeners_registered")
     hub_sync_task = asyncio.create_task(hub_sync.start())
     log.info("hub_sync_started")
+    knowledge_sync_task = asyncio.create_task(knowledge_sync.start())
+    log.info("knowledge_sync_started")
+    attention_tracker_task = asyncio.create_task(attention_tracker.start())
+    log.info("attention_tracker_started")
     yield
+    attention_tracker.stop()
+    attention_tracker_task.cancel()
+    knowledge_sync.stop()
+    knowledge_sync_task.cancel()
     hub_sync.stop()
     hub_sync_task.cancel()
     log.info("hub_sync_stopped")
@@ -107,6 +119,8 @@ openapi_tags = [
     {"name": "Actions", "description": "Content-to-action extraction pipeline"},
     {"name": "Replays", "description": "Agent replay generation and sharing"},
     {"name": "Knowledge", "description": "Knowledge Engine search and articles"},
+    {"name": "Graph", "description": "Knowledge graph from graphify (nodes, edges, communities)"},
+    {"name": "Attention", "description": "User attention tracking and gap detection"},
 ]
 
 app = FastAPI(
@@ -193,6 +207,8 @@ app.include_router(replay.router)
 app.include_router(podcast.router)
 app.include_router(analysis.router)
 app.include_router(knowledge_search.router)
+app.include_router(graph.router)
+app.include_router(attention.router)
 
 # Studio routers (only when COCO_EDITION=studio)
 if is_studio():

@@ -620,6 +620,24 @@ CREATE TABLE IF NOT EXISTS agent_replays (
 );
 CREATE INDEX IF NOT EXISTS idx_agent_replays_agent ON agent_replays(agent_id);
 CREATE INDEX IF NOT EXISTS idx_agent_replays_share ON agent_replays(share_token);
+
+-- Wave 4.3: Attention tracking
+CREATE TABLE IF NOT EXISTS attention_scores (
+    project_slug TEXT PRIMARY KEY,
+    score REAL DEFAULT 0,
+    view_count INTEGER DEFAULT 0,
+    last_viewed_at TEXT,
+    updated_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS attention_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_slug TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'content',
+    viewed_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_attention_events_slug ON attention_events(project_slug);
+CREATE INDEX IF NOT EXISTS idx_attention_events_viewed ON attention_events(viewed_at);
 """
 
 MIGRATION = """

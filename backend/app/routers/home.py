@@ -14,7 +14,7 @@ from app.db.compat import today as today_sql, start_of_month
 from app.db.tables import (
     hub_content, hub_project_content, hub_drafts, hub_todos,
     hub_projects, hub_api_costs, hub_sync_state,
-    tasks, cost_ledger,
+    tasks, cost_ledger, draft_decisions,
 )
 
 log = structlog.get_logger()
@@ -391,6 +391,41 @@ def get_home():
                 "active_cycle": None,
             }
 
+        # Drafts summary
+        try:
+            # Total drafts
+            row = conn.execute(
+                select(func.count().label("cnt")).select_from(hub_drafts)
+            ).fetchone()
+            total_drafts = row.cnt if row else 0
+
+            # By-status counts (hub_drafts status overlaid with draft_decisions)
+            draft_rows = conn.execute(
+                select(hub_drafts.c.id, hub_drafts.c.status)
+            ).fetchall()
+            # Overlay platform decisions
+            decision_map: dict[str, str] = {}
+            try:
+                dec_rows = conn.execute(
+                    select(draft_decisions.c.hub_draft_id, draft_decisions.c.status)
+                ).fetchall()
+                decision_map = {r.hub_draft_id: r.status for r in dec_rows}
+            except Exception:
+                pass
+
+            draft_by_status: dict[str, int] = {}
+            for dr in draft_rows:
+                effective_status = decision_map.get(dr.id, dr.status)
+                draft_by_status[effective_status] = draft_by_status.get(effective_status, 0) + 1
+
+            result["drafts"] = {
+                "total": total_drafts,
+                "by_status": draft_by_status,
+            }
+        except Exception:
+            log.warning("home_query_failed", section="drafts_summary", exc_info=True)
+            result["drafts"] = {"total": 0, "by_status": {}}
+
     # Queue: drafts + classify from attention counts
     result["queue"]["drafts"] = result["attention"]["pending_drafts"]
     result["queue"]["classify"] = result["attention"]["unsorted_count"]
@@ -402,6 +437,76 @@ def get_home():
 
     result["costs"]["today_usd"] = round(result["costs"]["today_usd"], 4)
     result["costs"]["month_usd"] = round(result["costs"]["month_usd"], 4)
+
+    return result
+
+
+@router.get("/api/hub/stats")
+def get_hub_stats():
+    """Unified hub.db summary: todos, drafts, and content counts."""
+    result: dict = {
+        "todos": {"total": 0, "open": 0, "done": 0, "dismissed": 0, "by_status": {}},
+        "drafts": {"total": 0, "pending": 0, "approved": 0, "rejected": 0, "by_status": {}},
+        "content": {"total": 0},
+    }
+
+    with get_db() as conn:
+        # Todos by status
+        try:
+            rows = conn.execute(
+                select(hub_todos.c.status, func.count().label("cnt"))
+                .group_by(hub_todos.c.status)
+            ).fetchall()
+            by_status: dict[str, int] = {}
+            total = 0
+            for r in rows:
+                s = r.status or "unknown"
+                by_status[s] = r.cnt
+                total += r.cnt
+            result["todos"]["total"] = total
+            result["todos"]["open"] = by_status.get("open", 0)
+            result["todos"]["done"] = by_status.get("done", 0)
+            result["todos"]["dismissed"] = by_status.get("dismissed", 0)
+            result["todos"]["by_status"] = by_status
+        except Exception:
+            log.warning("hub_stats_failed", section="todos", exc_info=True)
+
+        # Drafts by status (with platform decision overlay)
+        try:
+            draft_rows = conn.execute(
+                select(hub_drafts.c.id, hub_drafts.c.status)
+            ).fetchall()
+            decision_map: dict[str, str] = {}
+            try:
+                dec_rows = conn.execute(
+                    select(draft_decisions.c.hub_draft_id, draft_decisions.c.status)
+                ).fetchall()
+                decision_map = {r.hub_draft_id: r.status for r in dec_rows}
+            except Exception:
+                pass
+
+            draft_by_status: dict[str, int] = {}
+            draft_total = 0
+            for dr in draft_rows:
+                effective_status = decision_map.get(dr.id, dr.status)
+                draft_by_status[effective_status] = draft_by_status.get(effective_status, 0) + 1
+                draft_total += 1
+            result["drafts"]["total"] = draft_total
+            result["drafts"]["pending"] = draft_by_status.get("pending", 0)
+            result["drafts"]["approved"] = draft_by_status.get("approved", 0)
+            result["drafts"]["rejected"] = draft_by_status.get("rejected", 0)
+            result["drafts"]["by_status"] = draft_by_status
+        except Exception:
+            log.warning("hub_stats_failed", section="drafts", exc_info=True)
+
+        # Content total
+        try:
+            row = conn.execute(
+                select(func.count().label("cnt")).select_from(hub_content)
+            ).fetchone()
+            result["content"]["total"] = row.cnt if row else 0
+        except Exception:
+            log.warning("hub_stats_failed", section="content", exc_info=True)
 
     return result
 
@@ -602,6 +707,20 @@ def get_briefing():
     """Generate a smart Jarvis-style briefing with structured scenes."""
     home_data = get_home()
     return _build_briefing(home_data)
+
+
+MORNING_BRIEFING_PATH = Path.home() / ".coco" / "last-morning-briefing.json"
+
+
+@router.get("/api/briefing")
+def get_morning_briefing():
+    """Return the last morning briefing JSON from the automation daemon."""
+    if not MORNING_BRIEFING_PATH.exists():
+        return {"error": "No morning briefing found. The daemon runs daily at 6 AM."}
+    try:
+        return json.loads(MORNING_BRIEFING_PATH.read_text())
+    except Exception as e:
+        return {"error": f"Failed to read briefing: {e}"}
 
 
 @router.post("/api/home/process")

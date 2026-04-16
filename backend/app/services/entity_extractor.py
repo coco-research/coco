@@ -69,6 +69,26 @@ _TOPIC_RE = re.compile(
     r"\b((?:[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+))\b"
 )
 
+# Common compound phrases that are not meaningful topics — prevent noise entities
+_TOPIC_STOPLIST: frozenset = frozenset({
+    "access control", "action item", "action items", "audit trail",
+    "best practice", "best practices", "business logic", "business process",
+    "business rules", "change management", "cloud computing", "code review",
+    "control framework", "data flow", "data governance", "data model",
+    "data pipeline", "data quality", "decision making", "design pattern",
+    "due diligence", "error handling", "exception handling", "file system",
+    "form validation", "front end", "functional requirement", "input validation",
+    "issue tracker", "key performance", "knowledge base", "lessons learned",
+    "load balancing", "machine learning", "meeting notes", "network security",
+    "open source", "performance metric", "project management", "pull request",
+    "quality assurance", "regulatory compliance", "release management",
+    "risk management", "role based", "root cause", "security policy",
+    "service level", "software development", "source control", "sprint planning",
+    "stakeholder management", "status update", "system design", "technical debt",
+    "test case", "third party", "threat model", "unit test", "use case",
+    "user story", "version control", "work item",
+})
+
 
 def _clip(text: str, match: re.Match, window: int = 80) -> str:
     """Extract a context snippet around a regex match."""
@@ -157,19 +177,26 @@ def _extract_regex(content_text: str) -> list[dict]:
             "context_snippet": _clip(content_text, m),
         })
 
-    # Topics (capitalized multi-word phrases)
+    # Topics (capitalized multi-word phrases — require 2+ occurrences, filter stoplist)
     seen_topics: set[str] = set()
+    content_lower = content_text.lower()
     for m in _TOPIC_RE.finditer(content_text):
         topic = m.group(1)
         topic_lower = topic.lower()
+        if topic_lower in _TOPIC_STOPLIST:
+            continue
         if topic_lower not in seen_topics and len(topic) > 5:
-            seen_topics.add(topic_lower)
-            entities.append({
-                "entity_type": "topic",
-                "value": topic,
-                "confidence": 0.5,
-                "context_snippet": _clip(content_text, m),
-            })
+            occurrences = content_lower.count(topic_lower)
+            if occurrences >= 2:
+                seen_topics.add(topic_lower)
+                # Confidence scales with frequency: 0.7 at 2x, 0.8 at 3x+, max 0.8
+                confidence = min(0.5 + 0.1 * occurrences, 0.8)
+                entities.append({
+                    "entity_type": "topic",
+                    "value": topic,
+                    "confidence": confidence,
+                    "context_snippet": _clip(content_text, m),
+                })
 
     return entities
 

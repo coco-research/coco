@@ -190,7 +190,7 @@ def generate_script(data: dict) -> str:
             system=BRIEFING_SYSTEM_PROMPT,
             messages=[{"role": "user", "content": prompt_data}],
             max_tokens=800,
-            purpose="podcast_briefing",
+            purpose="briefing",  # routes to local LLM (Gemma4-26B)
         )
 
         script = result["content"].strip()

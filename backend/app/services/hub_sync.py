@@ -10,12 +10,13 @@ so platform queries never touch hub.db directly.
 """
 
 import asyncio
+import json
 import sqlite3
 import structlog
 from datetime import datetime, timezone
 from pathlib import Path
 
-from app.config import HUB_DB_PATH, PLATFORM_DB_PATH
+from app.config import HUB_DB_PATH, KNOWLEDGE_DB_PATH, PLATFORM_DB_PATH
 
 log = structlog.get_logger()
 
@@ -76,6 +77,8 @@ CREATE TABLE IF NOT EXISTS hub_projects (
     confluence_space TEXT,
     folder_path TEXT,
     created_at TEXT NOT NULL,
+    updated_at TEXT,
+    metadata_json TEXT DEFAULT '{}',
     active INTEGER NOT NULL DEFAULT 1
 );
 
@@ -173,6 +176,18 @@ class HubSyncService:
         conn = sqlite3.connect(str(PLATFORM_DB_PATH), timeout=10)
         try:
             conn.executescript(_MIRROR_DDL)
+
+            # Migrate: add columns introduced for knowledge.db sync
+            existing_cols = {
+                r[1] for r in conn.execute("PRAGMA table_info(hub_projects)").fetchall()
+            }
+            if "updated_at" not in existing_cols:
+                conn.execute("ALTER TABLE hub_projects ADD COLUMN updated_at TEXT")
+            if "metadata_json" not in existing_cols:
+                conn.execute(
+                    "ALTER TABLE hub_projects ADD COLUMN metadata_json TEXT DEFAULT '{}'"
+                )
+
             conn.commit()
             log.info("hub_mirror_tables_ensured")
         finally:
@@ -229,6 +244,9 @@ class HubSyncService:
             plat_conn.close()
         finally:
             hub_conn.close()
+
+        # Sync knowledge.db projects (after hub.db sync so hub projects take precedence)
+        self._sync_knowledge_projects()
 
     def _sync_table_full(
         self,
@@ -323,6 +341,74 @@ class HubSyncService:
             log.info("hub_content_fts5_created")
         except Exception as e:
             log.warning("hub_content_fts5_failed", error=str(e))
+
+    # ------------------------------------------------------------------
+    # Knowledge.db project sync
+    # ------------------------------------------------------------------
+
+    def _sync_knowledge_projects(self):
+        """Sync projects from knowledge.db project_registry into hub_projects.
+
+        Uses INSERT OR IGNORE so hub.db-sourced projects are never overwritten
+        (hub.db is authoritative for its own projects).
+        """
+        if not KNOWLEDGE_DB_PATH.exists():
+            log.debug("knowledge_db_not_found", path=str(KNOWLEDGE_DB_PATH))
+            return
+
+        try:
+            k_conn = sqlite3.connect(
+                f"file:{KNOWLEDGE_DB_PATH}?mode=ro", uri=True, timeout=10
+            )
+            k_conn.row_factory = sqlite3.Row
+        except Exception as e:
+            log.error("knowledge_db_connect_failed", error=str(e))
+            return
+
+        try:
+            rows = k_conn.execute(
+                "SELECT slug, description, registered_at, last_harvest, temperature "
+                "FROM project_registry"
+            ).fetchall()
+        except Exception as e:
+            log.warning("knowledge_project_registry_query_failed", error=str(e))
+            k_conn.close()
+            return
+
+        if not rows:
+            k_conn.close()
+            return
+
+        try:
+            plat_conn = sqlite3.connect(str(PLATFORM_DB_PATH), timeout=10)
+            plat_conn.execute("PRAGMA journal_mode=WAL")
+            plat_conn.execute("PRAGMA busy_timeout=5000")
+
+            synced = 0
+            for row in rows:
+                slug = row["slug"]
+                description = row["description"] or ""
+                name = description if description.strip() else slug
+                created_at = row["registered_at"] or datetime.now(timezone.utc).isoformat()
+                updated_at = row["last_harvest"]
+                temperature = row["temperature"] or "warm"
+                metadata_json = json.dumps({"temperature": temperature, "source": "knowledge"})
+
+                result = plat_conn.execute(
+                    "INSERT OR IGNORE INTO hub_projects "
+                    "(id, name, created_at, updated_at, metadata_json, active) "
+                    "VALUES (?, ?, ?, ?, ?, 1)",
+                    (slug, name, created_at, updated_at, metadata_json),
+                )
+                synced += result.rowcount
+
+            plat_conn.commit()
+            plat_conn.close()
+            log.info("knowledge_projects_synced", total=len(rows), inserted=synced)
+        except Exception as e:
+            log.error("knowledge_projects_sync_failed", error=str(e))
+        finally:
+            k_conn.close()
 
     # ------------------------------------------------------------------
     # Delta sync

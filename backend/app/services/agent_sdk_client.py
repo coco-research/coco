@@ -13,6 +13,8 @@ import structlog
 from anthropic import Anthropic, AsyncAnthropic, RateLimitError, APIStatusError
 from typing import AsyncIterator
 
+from app.config import LOCAL_LLM_ENABLED, LOCAL_LLM_FALLBACK_TO_CLOUD
+
 log = structlog.get_logger()
 
 # Model mapping: our friendly names -> Anthropic model IDs
@@ -111,11 +113,34 @@ class AgentSDKClient:
         model: str = "haiku",
         system: str | None = None,
         max_tokens: int = 4096,
+        task_type: str | None = None,  # if set + local eligible, route to local LLM
     ) -> dict:
         """Synchronous single-turn call with retry and fallback.
 
         Returns {"content": str, "input_tokens": int, "output_tokens": int, "model": str}.
         """
+        # Route to local LLM if task_type is local-eligible
+        LOCAL_ELIGIBLE_TASKS = {
+            "classification", "extraction", "summarization", "briefing",
+            "rag-lightning", "meeting-notes", "article-stub", "article-standard",
+        }
+
+        if task_type and task_type in LOCAL_ELIGIBLE_TASKS and LOCAL_LLM_ENABLED:
+            from .local_llm_client import LocalLLMClient, LocalLLMError
+            local = LocalLLMClient()
+            if local.is_available():
+                try:
+                    result = local.quick_command(prompt, task_type=task_type, max_tokens=max_tokens)
+                    log.info("local_llm_used", task_type=task_type, model=result["model"],
+                             output_tokens=result["output_tokens"])
+                    return result
+                except LocalLLMError as e:
+                    if LOCAL_LLM_FALLBACK_TO_CLOUD:
+                        log.warning("local_llm_failed_falling_back", task_type=task_type, error=str(e))
+                        # Fall through to cloud
+                    else:
+                        raise
+
         if not self._sync:
             raise RuntimeError("Anthropic API key not configured")
 
@@ -413,3 +438,30 @@ def record_sdk_cost(
 
 # Singleton
 agent_sdk = AgentSDKClient()
+
+
+def create_message(
+    model: str = "haiku",
+    system: str | None = None,
+    messages: list | None = None,
+    max_tokens: int = 1024,
+    purpose: str = "briefing",
+    **_kwargs,
+) -> dict:
+    """Compatibility shim used by podcast.py.
+
+    Routes through quick_command with task_type=purpose so eligible tasks
+    (briefing, summarization) are handled by the local LLM.
+    """
+    prompt = ""
+    if messages:
+        for m in messages:
+            if m.get("role") == "user":
+                prompt += m.get("content", "")
+    return agent_sdk.quick_command(
+        prompt=prompt,
+        model=model,
+        system=system,
+        max_tokens=max_tokens,
+        task_type=purpose,
+    )

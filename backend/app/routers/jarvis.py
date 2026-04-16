@@ -711,6 +711,7 @@ async def _claude_fallback(text_str: str) -> CommandResponse:
 
                 result = agent_sdk.quick_command(
                     prompt=prompt, model="haiku", system=system_prompt, max_tokens=512,
+                    task_type="classification",
                 )
                 reply = result["content"].strip()
                 if len(reply) > 300:

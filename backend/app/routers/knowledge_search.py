@@ -1310,6 +1310,7 @@ def knowledge_qa(req: QARequest):
                 model="haiku",
                 system=_QA_SYSTEM_PROMPT,
                 max_tokens=2048,
+                task_type="rag-lightning",
             )
             answer_text = result["content"]
             model_used = result.get("model", "")
@@ -2779,3 +2780,52 @@ def knowledge_stats_full():
         if conn:
             conn.close()
         return {"available": False, "error": "Internal error"}
+
+
+# ---------------------------------------------------------------------------
+# Article by name — wiki_server.py migration (serve by title, not GID)
+# ---------------------------------------------------------------------------
+
+@router.get("/api/knowledge/article-by-name/{name}")
+def get_article_by_name(name: str):
+    """Look up a knowledge article by entity name (case-insensitive).
+
+    Replaces wiki_server.py /wiki/{title} for the React frontend.
+    Returns the first matching article with parsed JSON fields.
+    """
+    safe_name = _sanitize_like_input(name)
+    conn = _get_knowledge_db()
+    if conn is None:
+        return {"error": "Knowledge DB not available"}
+    try:
+        # Exact match first, then case-insensitive fallback
+        row = conn.execute(
+            "SELECT * FROM articles WHERE title = ? LIMIT 1", (name,)
+        ).fetchone()
+        if row is None:
+            row = conn.execute(
+                "SELECT * FROM articles WHERE lower(title) = lower(?) LIMIT 1",
+                (safe_name,),
+            ).fetchone()
+        if row is None:
+            # Partial match as last resort
+            row = conn.execute(
+                "SELECT * FROM articles WHERE lower(title) LIKE lower(?) LIMIT 1",
+                (f"{safe_name}%",),
+            ).fetchone()
+        if row is None:
+            conn.close()
+            return {"error": f"No article found for '{name}'"}
+        article = dict(row)
+        for field in ("body_json", "infobox_json", "sources_json"):
+            if article.get(field) and isinstance(article[field], str):
+                try:
+                    article[field] = json.loads(article[field])
+                except (json.JSONDecodeError, TypeError):
+                    pass
+        conn.close()
+        return article
+    except Exception:
+        if conn:
+            conn.close()
+        return {"error": "Internal error"}

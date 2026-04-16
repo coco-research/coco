@@ -178,9 +178,9 @@ class LocalLLMClient:
             full_prompt = f"{system}\n\n{prompt}"
 
         # Build subprocess command.
-        # Use system python3 (not sys.executable) because MLX is installed
-        # in the system Python, not in the FastAPI venv.
-        _python = "python3"
+        # Use absolute path to system python3 — MLX is installed there,
+        # not in the FastAPI venv. Bare "python3" resolves to venv python.
+        _python = "/opt/homebrew/bin/python3"
         if framework == "lm":
             cmd = [
                 _python, "-m", "mlx_lm", "generate",

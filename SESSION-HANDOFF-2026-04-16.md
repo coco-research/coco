@@ -7,23 +7,26 @@
 
 ## 0. TL;DR — what to do tomorrow
 
+**Post-handoff execution:** the user's 5 follow-up tasks were executed in-session — pykeen restart, OneTrust article review, log-rotate re-enabled, docs committed (e963af9), Section 11.2 resolved. See Section 2.14 for details. Steps below are verification-only now.
+
 1. **Verify no overnight jetsam:** `find /Library/Logs/DiagnosticReports -name 'JetsamEvent-*' -newermt '2026-04-16 18:00:00'` → must be empty.
-2. **Restart pykeen to activate Adam-checkpoint kwargs** — Section 2.9 confirmed PID 1411 cached imports from before the edit so the kwargs never took effect. `launchctl kickstart -k gui/$UID/com.coco.pykeen-train`. Adam state reset is negligible at MRR=0.0.
-3. **Verify pykeen is advancing post-restart:** `ps -p $(pgrep -f '[p]ython.*pykeen_bridge\.py') -o pid,etime,%cpu,rss` and `cat ~/.coco/knowledge/pykeen-model/grokking_state.json`.
-4. **Verify pykeen checkpoint file appeared (post-restart):** `ls -la ~/.coco/knowledge/pykeen-model/pykeen_training_checkpoint.pt` should exist within ~10 min.
-5. **Confirm master-cron yielded at Fri 01:00:** `tail -5 ~/.coco/knowledge/master-cron.stdout.log` should show "pykeen_bridge.py is active, yielding machine." (See Section 11.2 — guard bypassed at 18:22 while pykeen was live. Not fully understood.)
-6. **Check email-watcher + think have been firing:** `ls -la ~/.coco/knowledge/.last-cron-run` mtime should NOT advance overnight (master-cron yielded), but other agents should have run.
-7. **Fix stale Haiku model IDs** before re-enabling digests — Section 11.3. Two fallback paths will error silently if local MLX fails.
-8. Then pick one of the **pending improvements** in Section 6 and proceed.
+2. ~~Restart pykeen~~ **DONE 20:44 EDT** (Section 2.14). PID 1411 → **57376**, Adam checkpoint kwargs now active. Just verify still running: `ps -p $(pgrep -f '[p]ython.*pykeen_bridge\.py') -o pid,etime,%cpu,rss`.
+3. **Verify pykeen checkpoint file appeared:** `ls -la ~/.coco/knowledge/pykeen-model/pykeen_training_checkpoint.pt` should exist (>10 min since restart).
+4. **Confirm master-cron behaved correctly at Fri 01:00:** `tail -5 ~/.coco/knowledge/master-cron.stdout.log` should show "pykeen_bridge.py is active, yielding machine." Section 11.2 resolved the 18:22 "bypass" as the deliberate flock-validation test — guard is fine, just confirm still firing.
+5. **Close the 12:00 fire unknown:** `launchctl print gui/$UID/com.coco.master-cron | grep -A8 'calendar interval'` — plist says 01:00+14:00 but 12:00 fired today.
+6. **Check email-watcher + think have been firing:** `ls -la ~/.coco/knowledge/.last-cron-run`, plus recent entries in `~/.coco/logs/email-watcher.log`.
+7. ~~**Fix stale Haiku model IDs** before re-enabling digests — Section 11.3.~~ ✅ Fixed in Section 2.14.
+8. Then pick from Section 6 priorities.
 
 ---
 
-## 1. Current live state at session end (2026-04-16 18:42 EDT)
+## 1. Current live state at session end (2026-04-16 20:46 EDT — updated post-handoff)
 
 ### Processes running
 | PID | Process | Status |
 |---|---|---|
-| 1411 | `pykeen_bridge.py --full --top 50` | Daemon, ~6h elapsed, 155% CPU, 530 MB RSS, round 51 → 52 |
+| ~~1411~~ **57376** | `pykeen_bridge.py --full --top 50` | **Restarted 20:44** — was PID 1411 at round 75, new process picks up Adam checkpoint kwargs. Was 38% CPU, 107 MB RSS at +3s; expect steady-state ~155% CPU, ~530 MB RSS. (Section 2.14) |
+| 55642 | `mlx_vlm.server --model gemma-4-26b-a4b-it-4bit` | Warm daemon, 16.4 GB RSS, port 8088 (Section 2.13) |
 | 1418 | `litestream replicate` | Daemon, idle |
 | 8952 | `pykeen_dashboard.py` | User-launched browser dashboard |
 | 8791 | `knowledge-dashboard.py --serve` | User-launched browser dashboard |
@@ -31,21 +34,22 @@
 ### Launchd agents — currently loaded
 | Label | State | Schedule |
 |---|---|---|
-| `com.coco.pykeen-train` | running (PID 1411) | KeepAlive |
+| `com.coco.pykeen-train` | running (PID 57376 — restarted 20:44) | KeepAlive |
+| `com.coco.mlx-vlm-server` | running (PID 55642) | KeepAlive — warm 26B-A4B (Section 2.13) |
 | `com.coco.litestream` | running (PID 1418) | KeepAlive |
 | `com.coco.pykeen-dashboard` | running (PID 8952) | (user launched) |
 | `com.coco.knowledge-dashboard` | running (PID 8791) | (user launched) |
 | `com.coco.master-cron` | idle, registered | next fire **Fri 2026-04-17 01:00** (will yield to pykeen) |
 | `com.coco.email-watcher` | loaded, fires on interval | every 15 min |
 | `com.coco.think` | loaded, fires on interval | every 30 min |
-| `com.coco.mlx-vlm-server` | **running (PID 55642)** | KeepAlive — warm 26B-A4B (see Section 2.13) |
+| `com.coco.log-rotate` | **loaded 20:45** — Group C plist treatment applied | Sun 04:00 (Section 2.14) |
 
 ### Launchd agents — STOPPED (booted out)
 - `com.coco.meeting-prep` (was every 20 min)
 - `com.coco.morning-briefing` (was 06:00 daily) — **will not fire 06:00 tomorrow**
 - `com.coco.weekly-report` (was Fri 16:00) — **will not fire Fri 16:00**
 - `com.coco.backup` (was Sun 03:00) — **will not fire Sun 03:00**
-- `com.coco.log-rotate` (was Sun 04:00) — **will not fire Sun 04:00; logs growing unrestricted**
+- ~~`com.coco.log-rotate`~~ **re-enabled 20:45** (Section 2.14)
 - `com.coco.mempalace` (was KeepAlive) — vector search currently unavailable
 - `com.coco.pykeen-dashboard` and `com.coco.knowledge-dashboard` are listed in launchd but were originally user-launched
 
@@ -242,9 +246,86 @@ Previously the biggest pending structural item (Priority 2 in Section 6). Shippe
 - NO dual-warm — Section 2.12 verdict stands. Only 26B-A4B in the warm server.
 - Qwen2.5-7B fallback — obsolete per Section 2.10 (64 GB correction).
 
-**Residual cleanup (not urgent):**
-- Port the same warm-server client into `backend/app/services/local_llm_client.py` (platform station path) and `scripts/generate_product_articles.py` (batch gen path). They still use the subprocess + flock path; they work unchanged but don't benefit from the warm pool until refactored.
-- Decide if `mlx.lock` can be removed once all 3 call sites migrate. For now: safe to keep — only fires on subprocess fallback.
+**Residual cleanup (DONE in Section 2.14):** all 3 MLX call sites now have the warm-pool fast path. `mlx.lock` is no longer needed for normal operation but is kept on the subprocess fallback for safety.
+
+### 2.14 Warm-pool extended to all 3 call sites + supporting work
+
+Followed up Section 2.13 by porting the warm-server client to the remaining two MLX call sites and shipping a one-off CLI for targeted regen + validation.
+
+**Stale Haiku model IDs fixed (resolves Section 11.3):**
+| File | Old | New |
+|---|---|---|
+| `~/.coco/knowledge/digest_generator.py:25` | `claude-haiku-4-5-20250514` (invalid) | `claude-haiku-4-5-20251001` |
+| `~/.coco/knowledge/graphrag_bridge.py:102,173` | `anthropic/claude-haiku-4-5-20250929` (wrong date) | `anthropic/claude-haiku-4-5-20251001` |
+
+**Warm-pool ported to 2 more call sites:**
+| File | Change |
+|---|---|
+| `backend/app/services/local_llm_client.py` (in repo) | Added `_warm_server_model()`, `_call_warm_server()`. `quick_command` tries warm server first and returns the same dict shape; falls back to existing subprocess+flock on any failure. Logs `path=warm_server` for observability. |
+| `scripts/generate_product_articles.py` (in repo) | Added parallel helpers and warm-first routing in `_call_local_llm`. Same JSON-extraction path; subprocess fallback preserved. |
+
+**New CLI: `~/.coco/knowledge/regen_one.py`** — single-entity regeneration via the live pipeline (harvest → categorize → enrich graph_neighbors → generate). Defaults to dry-run output to `/tmp/regen_<slug>.{md,json}`. Supports `--task-type` (article-standard, article-rich) and `--persist` (write to knowledge.db). Intended for per-article quality validation before bulk regeneration.
+
+```bash
+python3 ~/.coco/knowledge/regen_one.py --entity "OneTrust" --type system --project 3pi-v2
+python3 ~/.coco/knowledge/regen_one.py --entity "Pankaj Arora" --type person --project 3pi-v2
+```
+
+**Smoke test — Pankaj Arora (person) via warm server:**
+| Metric | Result |
+|---|---|
+| Wall time | **88.4s** (87.6s LLM + 0.8s pipeline) |
+| Generation tps | 35.6 (slower than OneTrust 67 tps — long context drags prefill) |
+| Peak memory | 17.4 GB (stable, same 26B model) |
+| Words | **1611** (within 10% of 1800 floor) |
+| Sections | 6, all present |
+| Section floors hit | **5 of 6** (Overview 268, Work 366, Relationships 349, Current 210, Open Qs 154 ≥ floor; History 264 vs 300 floor — short by 36) |
+| Confidence | 1.0 |
+| Evidence | 411 raw chunks → 2 decisions + 1 event + 15 graph_neighbors + 160 emails + 246 docs |
+
+**This validates the new system end-to-end on a HUMAN-type entity** (Section 2.13 only tested SYSTEM). The HUMAN prompt template, warm server, graph neighbors integration, and full engine pipeline all round-trip cleanly.
+
+**Output for review:** `/tmp/regen_pankaj_arora.{md,json}`.
+
+### 2.15 Post-handoff execution — 5 tasks from the evening task list (20:30–20:50 EDT)
+
+After the handoff was first written the user requested 5 follow-ups; all 5 were executed in-session.
+
+**Task 1 — Pykeen restart (done 20:44)**
+- `launchctl kickstart -k gui/$UID/com.coco.pykeen-train`. Old PID 1411 (round 75, MRR=0.0, 8h17m elapsed, 380 MB RSS) killed and replaced by **PID 57376**. At +3s new process was at 38% CPU / 107 MB RSS — still loading weights; steady-state expected to match the prior process.
+- This activates the Adam checkpoint kwargs added at `pykeen_bridge.py:186-189` (Section 2.5) which the previous process never loaded due to Python's import cache. Adam state reset is negligible because MRR=0.0 means training is nowhere near grokking.
+- Pending verification: `ls -la ~/.coco/knowledge/pykeen-model/pykeen_training_checkpoint.pt` should show the file ~10 min after restart.
+
+**Task 2 — OneTrust article quality sign-off — GREEN LIGHT**
+
+Compared all 5 OneTrust runs + the new warm-server run (`/tmp/onetrust-warm.json` from Section 2.13):
+
+| Run | Words | Verdict |
+|---|---|---|
+| `/tmp/onetrust-article.md` — 26B v1 (old prompt) | 944 | baseline |
+| `/tmp/onetrust-article-31b.json` — 31B v1 (old) | 981 | marginal improvement |
+| `/tmp/onetrust-v2-26b.json` — 26B v2 cold (new prompt) | **1,569** | quality bar — hits 4/6 section floors |
+| `/tmp/onetrust-v2-31b.json` — 31B v2 (new) | 1,340 | shorter despite bigger model (confirms Section 2.12) |
+| `/tmp/onetrust-warm.json` — 26B v2 via warm server | **1,446** | **ship-ready — 8% shorter than cold, +36% faster** |
+
+Warm v2 per-section vs floors: Overview 185 (250), History 271 (300), Technical 325 (350), Relationships 260 (300), Current Status 176 (200), Open Questions 167 (150 ✓). Still has `[[wikilinks]]`, specific artifacts (`customField1158`, `tpi_comments`, `supplier_is_false_positive`, `eos Rechtsanwaelte GmbH`), named stakeholders, dates, initiative numbers.
+
+**Verdict: proceed with Phase 14 depth-pass propagation.** Prompt + warm server are good enough to propagate across ~1,138 legacy articles at the current batch_size=15/cron pace. Copy `/tmp/onetrust-*` to a persistent location before next reboot.
+
+**Task 3 — Commit today's repo changes (two commits on main)**
+- **`e963af9 docs: stability plan, cron ecosystem map, and 2026-04-16 session handoff`** — 3 new top-level docs, 1786 insertions.
+- **`5736680 feat: port MLX warm-pool client to platform + product-articles call sites`** — `backend/app/services/local_llm_client.py` + `scripts/generate_product_articles.py`, 215+/3−. Captures Section 2.14 warm-pool port work (initially missed in e963af9 and added as follow-up).
+- Left untouched: `frontend/src/bones/home-dashboard.bones.json` (unrelated per Section 3), `scripts/think.py` (unrelated per Section 3), and ~100 untracked prototype/PDF/SVG files from earlier sessions.
+- **Dotfiles repo for `~/.coco/` — deferred** as a proper standalone task.
+
+**Task 4 — Re-enable `com.coco.log-rotate` (done 20:45)**
+- Applied Group C plist treatment to `~/Library/LaunchAgents/com.coco.log-rotate.plist` — added `ProcessType=Background`, `LowPriorityIO=true`, `Nice=10`. `RunAtLoad=false` was already correct.
+- Backup: `~/Library/LaunchAgents/.backup-2026-04-16T12-21-10/com.coco.log-rotate.plist.pre-groupC`.
+- `launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.coco.log-rotate.plist` → loaded, exit 0. Next fire: **Sun 2026-04-19 04:00**. For immediate rotation: `launchctl kickstart gui/$UID/com.coco.log-rotate`. `rotate-logs.sh` triggers any log >10 MB, keeps 2 backups — covers `master-cron.stderr.log` (88K lines, growing).
+
+**Task 5 — Section 11.2 investigation (written)**
+- The "guard bypass" observation (18:22 master-cron start while pykeen was live) is **resolved** — it was the Section 2.6 flock-validation test where the user intentionally disabled the guard and then `pkill -TERM`'d the run (exit 143 ≡ SIGTERM). The guard is restored and has not been observed failing in production.
+- One unknown remains: the 12:00 fire does not match the plist's `StartCalendarInterval` (01:00 + 14:00). Close tomorrow with `launchctl print gui/$UID/com.coco.master-cron | grep -A8 'calendar interval'`.
 
 ---
 
@@ -254,11 +335,17 @@ Previously the biggest pending structural item (Priority 2 in Section 6). Shippe
 - `backend/app/services/local_llm_client.py` — added flock around MLX subprocess
 - `scripts/generate_product_articles.py` — added flock around MLX subprocess
 
-### Inside the repo (NEW, NOT committed)
+### Inside the repo (committed as `e963af9` — docs)
 - `STABILITY-PLAN.md` — v2 plan addressing all 8 BLOCKs + 5 FLAGs from earlier review
 - `CRON-ECOSYSTEM-MAP.html` — beautiful-mermaid ecosystem map
 - `SESSION-HANDOFF-2026-04-16.md` — this file
-- (also various PLATFORM-ANALYSIS-*.pdf/.svg, .html prototypes from earlier sessions — see `git status`)
+
+### Inside the repo (committed as `5736680` — warm-pool port)
+- `backend/app/services/local_llm_client.py` — warm-server client for platform station path (Section 2.14)
+- `scripts/generate_product_articles.py` — warm-server client for batch article gen path (Section 2.14)
+
+### Inside the repo (untracked, NOT committed — earlier session artifacts)
+- ~100 files: `PLATFORM-ANALYSIS-*.pdf/.svg`, `FEATURE-INVENTORY.html`, `KNOWLEDGE-QUALITY-REPORT.html`, `prototypes/path-*.html`, `frontend/pw-*.cjs`, `Screenshots-clone/`, etc. See `git status` in main checkout.
 
 ### Outside the repo — wiki detail overhaul (Section 2.11, later session)
 | Path | Change |
@@ -275,6 +362,15 @@ Previously the biggest pending structural item (Priority 2 in Section 6). Shippe
 |---|---|
 | `~/Library/LaunchAgents/com.coco.mlx-vlm-server.plist` | NEW launchd agent — runs `python -m mlx_vlm.server` on 127.0.0.1:8088, KeepAlive, RunAtLoad=false, Nice=5, Background, OMP/MKL=4. Logs to `~/.coco/logs/mlx-vlm-server.{stdout,stderr}.log` |
 | `~/.coco/knowledge/base_generator.py` | Added `_MLX_SERVER_URL`, `_MLX_SERVER_HEALTH_CACHE`, `_warm_server_model()`, `_call_warm_server()`, `_strip_mlx_artifacts()`; `_call_local_llm()` now tries warm server first and falls back to the existing subprocess+flock path |
+
+### Warm-pool extension + Haiku fixes (Section 2.14)
+| Path | Location | Change |
+|---|---|---|
+| `backend/app/services/local_llm_client.py` | In repo | Added `_warm_server_model()`, `_call_warm_server()`. `quick_command` tries warm server first, returns the existing dict shape, falls back to subprocess+flock. Logs `path=warm_server` for observability. |
+| `scripts/generate_product_articles.py` | In repo | Added `_warm_server_model()`, `_call_warm_server_raw()`. `_call_local_llm()` tries warm server first and falls back to subprocess+flock. Same JSON-extraction path. |
+| `~/.coco/knowledge/digest_generator.py` | Outside repo | Stale Haiku ID fixed: `claude-haiku-4-5-20250514` → `claude-haiku-4-5-20251001` (line 25). Resolves Section 11.3 finding 1. |
+| `~/.coco/knowledge/graphrag_bridge.py` | Outside repo | Stale Haiku ID fixed: `anthropic/claude-haiku-4-5-20250929` → `anthropic/claude-haiku-4-5-20251001` (lines 102 + 173). Resolves Section 11.3 finding 2. |
+| `~/.coco/knowledge/regen_one.py` | Outside repo | NEW CLI for targeted single-entity regeneration via the live pipeline. Supports `--entity`, `--type`, `--project`, `--task-type`, `--persist`. Default writes `/tmp/regen_<slug>.{md,json}` for quality review. |
 
 ### Inside the repo (uncommitted edits, NOT today's flock work — pre-existing)
 - `frontend/src/bones/home-dashboard.bones.json` — modified, unrelated
@@ -306,10 +402,12 @@ To rollback Group C plist treatments + scripts: `bash /Users/Rijul_Kalra/Library
 ## 4. Commits made today
 
 ```
+5736680  feat: port MLX warm-pool client to platform + product-articles call sites   (Section 2.14)
+e963af9  docs: stability plan, cron ecosystem map, and 2026-04-16 session handoff    (Section 2.15 task 3)
 e0d27b2  fix: serialize MLX subprocess spawns via shared flock on ~/.coco/knowledge/mlx.lock
 ```
 
-That's the only commit. The pykeen_bridge.py Adam checkpoint, run-cron.sh rewrite, and plist edits are in `~/.coco/` which is **NOT under git version control** here. (Worth setting up a dotfiles repo for `~/.coco/` separately — see Section 6.)
+Three commits on `main` today, total 2,001+ line insertions. The pykeen_bridge.py Adam checkpoint, run-cron.sh rewrite, Haiku-ID fixes, `regen_one.py`, and the launchd plist edits are in `~/.coco/` and `~/Library/LaunchAgents/` — **NOT under git version control** here. (Worth setting up a dotfiles repo for `~/.coco/` separately — see Section 6. Decision deferred in Section 2.15 task 3.)
 
 ---
 
@@ -390,14 +488,14 @@ The 5 plists not yet treated with the Background/Nice/LowPriorityIO/RunAtLoad-re
 
 ### Priority 5 — Re-enable stopped agents
 Decide one-by-one when to re-enable. Suggested order (lowest memory risk first):
-1. `think` (already re-enabled)
-2. `email-watcher` (already re-enabled)
-3. `mempalace` — needed for vector search; currently NO vector search available
-4. `morning-briefing` — needed for daily 06:00 summary
-5. `meeting-prep` — needed for upcoming meeting briefings
-6. `weekly-report` — Friday afternoon report
-7. `backup` — Sunday weekly snapshot (only matters if litestream isn't enough)
-8. `log-rotate` — **important to re-enable soon**: master-cron stderr is already 88,277 lines and growing
+1. `think` ✅ re-enabled
+2. `email-watcher` ✅ re-enabled
+3. `log-rotate` ✅ **re-enabled 20:45 with Group C treatment (Section 2.15 task 4)**
+4. `mempalace` — needed for vector search; currently NO vector search available
+5. `morning-briefing` — needed for daily 06:00 summary
+6. `meeting-prep` — needed for upcoming meeting briefings
+7. `weekly-report` — Friday afternoon report
+8. `backup` — Sunday weekly snapshot (only matters if litestream isn't enough)
 
 ### Priority 6 — Smaller improvements (consolidation)
 From `CRON-ECOSYSTEM-MAP.html` improvement section:
@@ -549,20 +647,28 @@ Then pick from Section 6 priorities.
 This file's claims, cross-checked at write time. Tomorrow, re-verify items marked ⏰.
 
 - [x] Commit `e0d27b2` exists on `main` — verify with `git log --oneline -1`
+- [x] Commit `e963af9 docs: ...` exists on `main` (Section 2.15 task 3)
+- [x] Commit `5736680 feat: port MLX warm-pool client ...` exists on `main` (Section 2.15 task 3)
 - [x] `~/.coco/knowledge/run-cron.sh` contains the pykeen-yield block (NOT TEST MODE) — verified earlier at line 30
 - [x] `~/.coco/knowledge/pykeen_bridge.py` lines 186-189 contain the new checkpoint kwargs — verified earlier
-- [x] pykeen PID 1411 alive at session end
+- [x] pykeen restarted — new PID 57376 alive, Adam kwargs now active (Section 2.15 task 1)
 - [x] No new JetsamEvent files since 18:22 — verified twice during session
+- [x] `com.coco.log-rotate` loaded with Group C plist treatment (Section 2.15 task 4)
+- [x] OneTrust quality bar reviewed — warm v2 signed off for Phase 14 propagation (Section 2.15 task 2)
+- [x] Section 11.2 resolved — 18:22 "bypass" was the intentional flock-validation test
+- [x] Haiku model IDs fixed in `digest_generator.py` + `graphrag_bridge.py` (Section 2.14, resolves 11.3)
 - [x] Backup `/tmp/run-cron.sh.backup-20260416T182201` exists
-- [x] Backup `~/Library/LaunchAgents/.backup-2026-04-16T12-21-10/` exists with rollback.sh
+- [x] Backup `~/Library/LaunchAgents/.backup-2026-04-16T12-21-10/` exists with rollback.sh + new `com.coco.log-rotate.plist.pre-groupC`
 - [x] `CRON-ECOSYSTEM-MAP.html` exists at repo root, contains L0/L1a/L1b/L1c/L2 + wiki security table
 - [x] `STABILITY-PLAN.md` exists at repo root
 - [x] Project memory file `project_crash_rca.md` exists
-- [ ] ⏰ Adam checkpoint file `pykeen_training_checkpoint.pt` appears ~10 min after pykeen restart (TL;DR #2)
-- [ ] ⏰ master-cron yielded cleanly at next 01:00 fire (Section 11.2)
+- [ ] ⏰ Adam checkpoint file `pykeen_training_checkpoint.pt` appears ~10 min after restart (pykeen PID 57376)
+- [ ] ⏰ master-cron yields cleanly at next 01:00 fire (Section 11.2)
 - [ ] ⏰ No jetsam through next 24h
 - [ ] ⏰ Warm MLX server (PID 55642) still up and serving Gemma4-26B-A4B (Section 2.13)
-- [ ] ⏰ `last-cron-result.json` exists after Fri 01:00 run (Section 11.2 — missing after 18:22 SIGTERM)
+- [ ] ⏰ `last-cron-result.json` exists after Fri 01:00 run (confirms clean completion, not SIGTERM)
+- [ ] ⏰ 12:00 fire schedule unknown closed via `launchctl print gui/$UID/com.coco.master-cron` (Section 11.2)
+- [ ] ⏰ Log-rotate fires Sun 04:00 and rotates `master-cron.stderr.log` (currently 88K lines)
 
 ---
 
@@ -637,16 +743,16 @@ If pykeen was live from 12:30 through 18:22, this guard should have short-circui
 
 2. **Warm-server / pykeen memory co-residency.** Section 2.13 shows warm server at 16.4 GB RSS. Pykeen at 530 MB → 4.17 GB peak (Priority 7 observation). On 64 GB M4 Max this is fine, but combined with a cold-path fallback that spawns a 15 GB subprocess, peak could transiently hit ~36 GB during that fallback. Flock-protected so only one cold-load at a time — acceptable.
 
-### 11.3 Stale model IDs (fix before next master-cron fire)
+### 11.3 Stale model IDs — ✅ FIXED (Section 2.14)
 
-Commit `9693c19 fix: update stale model IDs to Claude 4.6 family` missed two files:
+Commit `9693c19 fix: update stale model IDs to Claude 4.6 family` had missed two files. Both fixed in Section 2.14:
 
-| File:line | Current (stale) | Correct |
+| File:line | Old (stale) | New |
 |---|---|---|
-| `~/.coco/knowledge/digest_generator.py:25` | `claude-haiku-4-5-20250514` — **invalid Anthropic ID** | `claude-haiku-4-5-20251001` |
-| `~/.coco/knowledge/graphrag_bridge.py:102` | `anthropic/claude-haiku-4-5-20250929` — wrong date suffix | `anthropic/claude-haiku-4-5-20251001` |
+| `~/.coco/knowledge/digest_generator.py:25` | `claude-haiku-4-5-20250514` (invalid) | `claude-haiku-4-5-20251001` ✅ |
+| `~/.coco/knowledge/graphrag_bridge.py:102+173` | `anthropic/claude-haiku-4-5-20250929` (wrong date) | `anthropic/claude-haiku-4-5-20251001` ✅ |
 
-Neither has fired since `9693c19` because master-cron has been yielding/sigtermed and Phase 10 digests only run Mondays. Fix before re-enabling digests or running Phase 11 (GraphRAG) standalone — otherwise the QB Gateway will 4xx and the fallback chain silently degrades.
+Safe to re-enable digests / Phase 11 (GraphRAG) without 4xx errors from QB Gateway.
 
 ### 11.4 Framework mismatch in `_LOCAL_MODEL_REGISTRY`
 

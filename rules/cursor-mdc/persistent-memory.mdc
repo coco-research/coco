@@ -1,0 +1,121 @@
+---
+description: Load and continuously update persistent memory across sessions
+globs:
+alwaysApply: true
+---
+
+# Persistent Memory Protocol
+
+## Session Start (CRITICAL)
+
+**Before ANY work, read both memory files:**
+
+1. `~/.claude/CLAUDE.md` — Global memory (cross-project patterns)
+2. `./CLAUDE.local.md` — Local memory (project-specific)
+
+**Multi-project workspaces:** If the workspace contains multiple project folders, each project should have its own `CLAUDE.local.md` inside its folder. The workspace root `CLAUDE.local.md` tracks standalone tasks only. When working on a specific project, read that project's local memory file (e.g., `./ProjectName/CLAUDE.local.md`).
+
+If `./CLAUDE.local.md` doesn't exist, create it immediately using the template in the `persistent-memory` skill (`~/.cursor/skills/persistent-memory/SKILL.md`).
+
+## Continuous Local Memory Updates
+
+**Update `./CLAUDE.local.md` IMMEDIATELY after:**
+
+| Trigger | What to Log |
+|---------|-------------|
+| **Code change** | File modified, what changed, why |
+| **New file created** | Purpose, location, dependencies |
+| **Bug fixed** | Root cause, solution, prevention |
+| **Feature added** | What it does, where it lives |
+| **Refactor** | What changed, before/after pattern |
+| **Dependency added** | Package name, version, why needed |
+| **Config change** | What setting, old → new value |
+| **API endpoint** | Route, method, purpose |
+| **Decision made** | Choice, alternatives considered, rationale |
+
+**Format:**
+```markdown
+## Recent Changes
+
+- [YYYY-MM-DD HH:MM] `path/to/file.ts` — Added error handling for API timeout
+- [YYYY-MM-DD HH:MM] `package.json` — Added axios@1.6.0 for HTTP requests
+```
+
+## Global Memory Updates
+
+**Update `~/.claude/CLAUDE.md` when patterns are reusable:**
+
+- New tool/skill installed
+- Cross-project convention established
+- Lesson learned applicable everywhere
+- Workflow optimization discovered
+
+## Local Memory Template
+
+```markdown
+# Project Memory — {Project Name}
+
+## Overview
+- Purpose:
+- Stack:
+- Started: [YYYY-MM-DD]
+
+## Architecture
+- Entry:
+- Structure:
+
+## Key Decisions
+<!-- Log every significant choice -->
+
+## Recent Changes
+<!-- Updated continuously with each code change -->
+
+## Open Questions
+<!-- Unresolved items -->
+
+## Commands
+- Dev:
+- Build:
+- Test:
+```
+
+## Rules
+
+1. **Never skip updates** — Every code change gets logged
+2. **Be specific** — Include file paths, function names, line numbers
+3. **Explain why** — Not just what changed, but rationale
+4. **No secrets** — Never log API keys, passwords, tokens
+5. **Timestamp everything** — Use `[YYYY-MM-DD HH:MM]` format
+
+## CRITICAL: Batching Requirement
+
+**When making code changes, ALWAYS include the memory update in the SAME tool batch:**
+
+```
+Good: [Edit file] + [Update CLAUDE.local.md] in one batch
+Bad:  [Edit file] then [Update CLAUDE.local.md] in separate turns
+```
+
+Why? Separate turns risk forgetting the update entirely.
+
+## Self-Check Before Completing Any Turn
+
+Ask yourself:
+> "Did I create, edit, or delete any file? Did I make a decision or learn something?"
+
+If YES and you haven't updated `./CLAUDE.local.md`, **DO NOT complete the turn** until you add the update.
+
+## Quality Protocol Reminder
+
+When creating a NEW `./CLAUDE.local.md`, always include these sections from the template:
+- **Quality Protocol** — with workflow steps and batch size rule
+- **Verification Log** — for tracking verification runs
+
+These are mandatory per `~/.claude/CLAUDE.md` "Code Quality Protocol". Every project inherits this protocol.
+
+## Violation Recovery
+
+If you forgot to update memory in a previous turn:
+1. Acknowledge it briefly
+2. Add the missed entries NOW with correct timestamps
+3. Continue with current task

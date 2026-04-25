@@ -1,0 +1,41 @@
+name: Publish to GitHub Packages (npm)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@rkz91'
+
+      - name: Verify package.json
+        run: |
+          node -e "
+          const pkg = require('./package.json');
+          if (!pkg.name.startsWith('@rkz91/')) {
+            console.error('package.json name must be scoped @rkz91/*');
+            process.exit(1);
+          }
+          console.log('package.json valid:', pkg.name, pkg.version);
+          "
+
+      - name: Confirm bin/coco.js syntax
+        run: node --check bin/coco.js
+
+      - name: Publish
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

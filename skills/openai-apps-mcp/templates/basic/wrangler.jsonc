@@ -1,0 +1,13 @@
+{
+  "name": "openai-app-mcp",
+  "main": "dist/index.js",
+  "compatibility_date": "2025-10-08",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "dist/client",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

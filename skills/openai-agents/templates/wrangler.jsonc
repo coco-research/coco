@@ -1,0 +1,31 @@
+// Cloudflare Workers configuration for OpenAI Agents
+// NOTE: OpenAI Agents SDK has experimental support for Cloudflare Workers
+// Some features may not work due to runtime limitations
+{
+  "name": "openai-agents-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-10-26",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Node.js compatibility for OpenAI SDK
+  "node_compat": true,
+
+  // Environment variables
+  "vars": {
+    "ENVIRONMENT": "production"
+  },
+
+  // Secrets (set via: wrangler secret put OPENAI_API_KEY)
+  // OPENAI_API_KEY - Required for OpenAI API access
+
+  // Observability
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.1
+  },
+
+  // Limits (adjust based on your agent's complexity)
+  "limits": {
+    "cpu_ms": 30000
+  }
+}

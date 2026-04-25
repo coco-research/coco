@@ -1,0 +1,13 @@
+{
+  "name": "vscode-continue",
+  "version": "0.0.1",
+  "description": "STUB — VS Code adapter via the Continue extension. Planned for Coco v0.2.",
+  "status": "stub",
+  "tracking_issue": "https://github.com/rkz91/coco/issues/4",
+  "targets": {
+    "config": "~/.continue/config.json"
+  },
+  "transforms": ["compile skills/commands/rules to Continue config schema"],
+  "supports_systems": [],
+  "domains": []
+}

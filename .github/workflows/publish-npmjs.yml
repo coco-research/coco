@@ -1,0 +1,47 @@
+name: Publish to npmjs.com
+
+# Publishes @rkz91/coco-cli to the public npmjs.com registry.
+# Frictionless install for users — no auth required: `npm install -g @rkz91/coco-cli`.
+#
+# Setup (one-time):
+#   1. Create npm account at https://www.npmjs.com/signup
+#   2. Generate token: https://www.npmjs.com/settings/<username>/tokens (type: Automation)
+#   3. Add as repo secret named NPM_TOKEN: Settings → Secrets and variables → Actions → New
+#   4. Trigger this workflow on a release or manually
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@rkz91'
+
+      - name: Verify package.json
+        run: |
+          node -e "
+          const pkg = require('./package.json');
+          if (!pkg.name.startsWith('@rkz91/')) {
+            console.error('package.json name must be scoped @rkz91/*');
+            process.exit(1);
+          }
+          console.log('package.json valid:', pkg.name, pkg.version);
+          "
+
+      - name: Confirm bin/coco.js syntax
+        run: node --check bin/coco.js
+
+      - name: Publish
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pyyaml
+        run: pip install pyyaml
+
+      - name: Validate adapter manifests
+        run: |
+          python3 <<'PY'
+          import json, sys, pathlib
+          errors = []
+          for p in pathlib.Path('adapters').glob('*/manifest.json'):
+              try:
+                  m = json.loads(p.read_text())
+                  for k in ['name', 'version', 'description']:
+                      if k not in m:
+                          errors.append(f'{p}: missing key "{k}"')
+              except json.JSONDecodeError as e:
+                  errors.append(f'{p}: invalid JSON — {e}')
+          if errors:
+              for e in errors:
+                  print(f'  {e}')
+              sys.exit(1)
+          print(f'All manifests valid.')
+          PY
+
+      - name: Adapter install.sh syntax check
+        run: |
+          for f in adapters/*/install.sh install.sh; do
+            bash -n "$f" || { echo "Syntax error in $f"; exit 1; }
+          done
+          echo "All install scripts pass syntax check."
+
+      - name: Adapter smoke test (dry-run)
+        run: |
+          for adapter in claude-code cursor codex generic; do
+            echo "--- testing $adapter (dry-run) ---"
+            bash adapters/$adapter/install.sh --dry-run > /tmp/$adapter.out 2>&1 || {
+              echo "FAIL: $adapter"
+              cat /tmp/$adapter.out
+              exit 1
+            }
+            echo "PASS: $adapter"
+          done
+
+      - name: Validate root install.sh routing
+        run: |
+          bash install.sh --list
+          bash install.sh --dry-run --adapter claude-code | head -5
+
+      - name: Test npm wrapper syntax
+        run: |
+          node --check bin/coco.js
+          node bin/coco.js --help | head -5
+
+      - name: Test build-index.py runs cleanly
+        run: |
+          python3 scripts/build-index.py
+          # confirm all expected outputs exist
+          for f in skills/INDEX.md commands/INDEX.md agents/INDEX.md docs/by-domain/pm.md docs/by-domain/engineering.md; do
+            test -f "$f" || { echo "Missing: $f"; exit 1; }
+          done
+          echo "INDEX files generated successfully."
+
+      - name: Verify INDEX is up to date
+        run: |
+          python3 scripts/build-index.py
+          if ! git diff --quiet skills/INDEX.md commands/INDEX.md agents/INDEX.md docs/by-domain/; then
+            echo "INDEX files are out of date. Run: python3 scripts/build-index.py"
+            git diff skills/INDEX.md commands/INDEX.md agents/INDEX.md docs/by-domain/ | head -50
+            exit 1
+          fi
+          echo "INDEX files up to date."

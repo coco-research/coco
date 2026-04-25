@@ -1,0 +1,58 @@
+---
+description: Create and maintain AGENTS.md for all agent projects
+globs: **/*agent*, **/*assistant*, **/ai/**
+alwaysApply: false
+---
+
+# AGENTS.md Creation Protocol
+
+**When working on any agent project, always create and maintain an AGENTS.md file.**
+
+## When to Create AGENTS.md
+
+Create `AGENTS.md` in the project root when:
+- Starting a new agent/assistant project
+- Adding AI capabilities to existing project
+- Working with LLM integrations (OpenAI, Anthropic, etc.)
+- Implementing Agent Lightning training
+
+## AGENTS.md Template
+
+```markdown
+# AGENTS.md
+
+## Agent Overview
+- Purpose: [What does this agent do?]
+- Model: [gpt-4o, claude-sonnet-4-20250514, etc.]
+- Framework: [OpenAI Agents, LangChain, custom, etc.]
+
+## Architecture
+- Entry point: [main file]
+- Tools: [list of tools/functions]
+- Memory: [how context is managed]
+
+## Training (Agent Lightning)
+- Traces: [where traces are stored]
+- Reward function: [how success is measured]
+- Prompts: [versioned prompt location]
+
+## Instructions for AI Agents
+[Compressed docs index and key instructions for the agent]
+
+IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning.
+```
+
+## Connection to Agent Lightning
+
+When AGENTS.md exists, integrate with training:
+
+1. **Document reward signals** in AGENTS.md
+2. **Track prompt versions** referenced in training/prompts/
+3. **Log architecture decisions** for training context
+4. **Update after training runs** with performance improvements
+
+## Why AGENTS.md Matters
+
+Per Vercel research: AGENTS.md (passive context) achieves 100% pass rate vs 53% for skills alone. Always include key instructions directly in AGENTS.md rather than relying on skill invocation.
+
+See also: `agent-lightning.mdc` for training patterns.

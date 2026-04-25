@@ -1,0 +1,11 @@
+{
+  "name": "generic",
+  "version": "0.1.0",
+  "description": "AGENTS.md producer for any AGENTS.md-compatible tool (Aider, Continue, Windsurf, Cline, ...)",
+  "targets": {
+    "agents_md": "./AGENTS.md (project root)"
+  },
+  "transforms": ["delegates to adapters/codex/install.sh"],
+  "supports_systems": ["gsd", "brain", "team"],
+  "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
+}

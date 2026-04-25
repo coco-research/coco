@@ -1,0 +1,18 @@
+# GitHub Sponsors / funding configuration
+# Enable Sponsors for the maintainer to surface a "Sponsor" button on the repo page.
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+
+github: [rkz91]
+# patreon: ""
+# open_collective: ""
+# ko_fi: ""
+# tidelift: ""
+# community_bridge: ""
+# liberapay: ""
+# issuehunt: ""
+# otechie: ""
+# lfx_crowdfunding: ""
+# buy_me_a_coffee: ""
+# polar: ""
+# thanks_dev: ""
+# custom: ["https://your-funding-url.com"]

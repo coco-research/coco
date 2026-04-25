@@ -1,0 +1,58 @@
+---
+description: Product Requirements Document lifecycle management
+globs: **/PRD*.md, **/prd*.md, **/*requirements*.md
+alwaysApply: false
+---
+
+# PRD Management
+
+Maintain and update PRD.md throughout the project lifecycle.
+
+## PRD Structure
+
+```markdown
+# Product Requirements Document
+
+## Overview
+- Problem Statement
+- Target Users
+- Success Metrics
+
+## Requirements
+- Functional Requirements (MUST, SHOULD, COULD)
+- Non-Functional Requirements (Performance, Security)
+- Constraints & Assumptions
+
+## User Stories
+- As a [user], I want [goal], so that [benefit]
+- Acceptance Criteria
+
+## Technical Approach
+- Architecture Overview
+- Key Components
+- Integration Points
+
+## Timeline & Milestones
+- Phases
+- Deliverables
+
+## Open Questions
+- Unresolved items
+```
+
+## Update Triggers
+
+Update PRD when:
+- Requirements change
+- New user stories emerge
+- Technical approach shifts
+- Scope adjusts
+- Questions get resolved
+
+## Best Practices
+
+- Keep PRD as single source of truth
+- Version control all changes
+- Link to related docs (ADRs, designs)
+- Mark sections as Draft/Final
+- Track open questions until resolved

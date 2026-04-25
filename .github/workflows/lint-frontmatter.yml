@@ -1,0 +1,111 @@
+name: Lint frontmatter
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'skills/**/SKILL.md'
+      - 'agents/**/*.md'
+      - 'commands/**/*.md'
+      - 'systems/**/SKILL.md'
+      - 'workflows/**/*.md'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pyyaml
+        run: pip install pyyaml
+
+      - name: Validate frontmatter
+        run: |
+          python3 <<'PY'
+          import sys, pathlib, yaml
+
+          REQUIRED_FIELDS = ['name', 'description']
+          OPTIONAL_DOMAINS = ['foundational', 'pm', 'engineering', 'design', 'ops', 'meta']
+          KNOWN_ADAPTERS = ['claude-code', 'cursor', 'codex', 'generic']
+
+          errors = []
+          checked = 0
+
+          def parse_frontmatter(path):
+              text = path.read_text()
+              if not text.startswith('---'):
+                  return None
+              parts = text.split('---', 2)
+              if len(parts) < 3:
+                  return None
+              try:
+                  return yaml.safe_load(parts[1])
+              except yaml.YAMLError as e:
+                  return {'__yaml_error': str(e)}
+
+          for pattern in ['skills/*/SKILL.md', 'systems/*/skills/*/SKILL.md']:
+              for p in pathlib.Path('.').glob(pattern):
+                  checked += 1
+                  fm = parse_frontmatter(p)
+                  if fm is None:
+                      errors.append(f'{p}: missing or malformed frontmatter')
+                      continue
+                  if '__yaml_error' in fm:
+                      errors.append(f'{p}: YAML parse error — {fm["__yaml_error"]}')
+                      continue
+                  for f in REQUIRED_FIELDS:
+                      if f not in fm:
+                          errors.append(f'{p}: missing required field "{f}"')
+                  if 'domain' in fm and fm['domain'] not in OPTIONAL_DOMAINS:
+                      errors.append(f'{p}: unknown domain "{fm["domain"]}" (allowed: {OPTIONAL_DOMAINS})')
+                  if 'supports' in fm and isinstance(fm['supports'], list):
+                      for adapter in fm['supports']:
+                          if adapter not in KNOWN_ADAPTERS:
+                              errors.append(f'{p}: unknown adapter "{adapter}" in supports (allowed: {KNOWN_ADAPTERS})')
+
+          print(f'Checked {checked} skill files')
+          if errors:
+              print('\n--- Errors ---')
+              for e in errors:
+                  print(f'  {e}')
+              sys.exit(1)
+          else:
+              print('All frontmatter valid.')
+          PY
+
+      - name: Validate adapter manifests
+        run: |
+          python3 <<'PY'
+          import json, sys, pathlib
+          errors = []
+          for p in pathlib.Path('adapters').glob('*/manifest.json'):
+              try:
+                  m = json.loads(p.read_text())
+                  for k in ['name', 'version', 'description']:
+                      if k not in m:
+                          errors.append(f'{p}: missing key "{k}"')
+              except json.JSONDecodeError as e:
+                  errors.append(f'{p}: invalid JSON — {e}')
+          if errors:
+              for e in errors:
+                  print(f'  {e}')
+              sys.exit(1)
+          print(f'All {sum(1 for _ in pathlib.Path("adapters").glob("*/manifest.json"))} manifests valid.')
+          PY
+
+      - name: Verify install scripts are executable
+        run: |
+          for f in adapters/*/install.sh; do
+            if [[ ! -x "$f" ]]; then
+              echo "Warning: $f is not executable"
+            fi
+            bash -n "$f" || { echo "Syntax error in $f"; exit 1; }
+          done
+          echo "All install scripts pass syntax check."

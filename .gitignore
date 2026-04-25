@@ -1,0 +1,35 @@
+# OS / editor
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# IDE-local config (users wire via adapters/*/install.sh)
+.claude/
+.cursor/
+
+# Local secrets / env
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+credentials.json
+secrets.yaml
+
+# Brain DB and local memory artifacts (project-specific, not framework)
+project_brain.db*
+_brain_manifest.json
+**/CLAUDE.local.md
+
+# Generated artifacts
+AGENTS.md.bak
+node_modules/
+__pycache__/
+*.pyc
+
+# Untracked legacy worktrees / backups
+*.bak
+*.backup
+*-backup

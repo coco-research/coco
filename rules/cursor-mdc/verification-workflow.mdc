@@ -1,0 +1,84 @@
+---
+description: Mandatory verification after every code change. Merges quality gate + pre-implementation checklist into one enforced workflow.
+alwaysApply: true
+---
+
+# Verification Workflow (MANDATORY — ALL PROJECTS)
+
+**This rule applies to EVERY code change in EVERY project. No exceptions. No batching without verification.**
+
+## BEFORE Writing Code (30-Second Pre-Check)
+
+Answer these 5 questions. If you can't answer any of them, STOP and explore first.
+
+1. **Scope:** What files will change? Are any shared/imported by other components?
+2. **State:** What new variables/hooks are needed? Where should they be declared to avoid TDZ?
+3. **Imports:** Named or default export? Do all consumers match?
+4. **Failure:** What happens if data is null? If the API fails? If the user navigates away?
+5. **Tests:** Do existing tests cover this code? Will my changes break assertions?
+
+## AFTER Each 1-2 File Change (Quality Gate)
+
+Run these 6 gates IN ORDER. If any gate fails, fix it before touching another file.
+
+| # | Gate | Command / Action | Time |
+|---|------|-----------------|------|
+| 1 | **Build** | `npm run build` (or equivalent) | 10s |
+| 2 | **Lint** | `ReadLints` on edited files | 5s |
+| 3 | **Imports** | Verify named/default match; no circular deps | 30s |
+| 4 | **References** | Search for all usages of renamed/removed identifiers | 30s |
+| 5 | **Tests** | `npx vitest run path/to/file.test.jsx` | 10s |
+| 6 | **Behavior** | Does it render? Console errors? Happy path works? | 30s |
+
+**Total: ~2 minutes per verification cycle. This saves 30+ minutes of debugging.**
+
+## AFTER Completing a Feature/Task (Full Verification)
+
+Run all 7 categories on every changed file:
+
+1. Variable Declaration Order (TDZ)
+2. Import/Export Integrity
+3. React State Consistency
+4. Mock Isolation (test files)
+5. Dead Code Detection
+6. CSS Class Integrity
+7. React Anti-Patterns
+
+Report findings using the PASS/FAIL/WARNING template from the skill.
+
+## Batch Size Rule
+
+| Files Changed | Action |
+|---------------|--------|
+| 1-2 files | Verify immediately after both edits |
+| 3-5 files | Verify after each pair of files |
+| 6+ files | **STOP. Break into smaller tasks.** Large batches hide bugs. |
+
+## Anti-Patterns to Flag Immediately
+
+These are the TOP recurring bugs. Flag them the instant you see them:
+
+- **Variable used before declaration** — move declaration up
+- **useEffect with missing deps** — add to dependency array
+- **State derived from props without `key`** — add `key={id}` to force remount
+- **`ref.current` in render return** — use state instead
+- **Multiple elements matching query** — use `getAllBy*` or `within()`
+- **Mutating state directly** — use spread/concat, never push/splice
+- **Mock leakage between describes** — add `mockReset()` in `afterEach`
+- **Orphaned handler after JSX removal** — delete the dead function
+
+## Subagent Verification
+
+If a subagent in another window made code changes, run the same verification on their output:
+
+```
+Launch verification-agent on [files changed by subagent].
+Report findings. Fix FAIL items before proceeding.
+```
+
+## Escape Hatches (When to Skip)
+
+- Markdown/docs/comments only (no executable code)
+- TODO comments
+- CSS value changes only (not selectors or class names)
+- Git operations (commit, push, status)

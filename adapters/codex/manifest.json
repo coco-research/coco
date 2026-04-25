@@ -1,0 +1,11 @@
+{
+  "name": "codex",
+  "version": "0.1.0",
+  "description": "Generates AGENTS.md for OpenAI Codex CLI from Coco artifacts",
+  "targets": {
+    "agents_md": "./AGENTS.md (project root)"
+  },
+  "transforms": ["compile skills/commands/rules into single AGENTS.md"],
+  "supports_systems": ["gsd", "brain", "team"],
+  "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
+}

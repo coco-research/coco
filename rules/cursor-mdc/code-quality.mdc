@@ -1,0 +1,243 @@
+---
+description: Code documentation, error handling, and logging standards
+globs: **/*.js, **/*.ts, **/*.jsx, **/*.tsx, **/*.py
+alwaysApply: false
+---
+
+# Code Quality Standards
+
+This rule combines documentation, error handling, and logging conventions into a single reference.
+
+---
+
+## Part 1: Documentation Standards
+
+### Function Documentation (JSDoc)
+
+```typescript
+/**
+ * Brief description of what function does.
+ *
+ * @param paramName - Description of parameter
+ * @returns Description of return value
+ * @throws ErrorType - When this error occurs
+ *
+ * @example
+ * const result = myFunction('input');
+ */
+```
+
+### WHY Comments
+
+```typescript
+// WHY: Explain the reasoning, not the what
+// Context that isn't obvious from the code
+const result = complexOperation();
+```
+
+### TODO / FIXME / HACK / NOTE
+
+```typescript
+// TODO(owner): Description of what needs to be done
+// FIXME: Description of bug that needs fixing
+// HACK: Explanation of why this workaround exists
+// NOTE: Important context for future readers
+```
+
+### File Headers
+
+```typescript
+/**
+ * @fileoverview Brief description of file's purpose
+ * @module ModuleName
+ */
+```
+
+### When to Document
+
+- Public APIs (always)
+- Complex algorithms (always)
+- Non-obvious business logic (always)
+- Workarounds and hacks (always)
+- Simple getters/setters (skip)
+- Self-explanatory code (skip)
+
+### Anti-Pattern
+
+```typescript
+// BAD: Restates the code
+// Increment i by 1
+i++;
+
+// GOOD: Explains why
+// Skip header row in CSV processing
+i++;
+```
+
+---
+
+## Part 2: Error Handling Patterns
+
+### Never Swallow Errors
+
+```typescript
+// BAD: Silent failure
+try {
+  await riskyOperation();
+} catch (e) {}
+
+// GOOD: Handle or rethrow
+try {
+  await riskyOperation();
+} catch (error) {
+  logger.error('Operation failed', { error, context });
+  throw new OperationError('Failed to complete', { cause: error });
+}
+```
+
+### Custom Error Classes
+
+```typescript
+class AppError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public statusCode: number = 500,
+    public isOperational: boolean = true
+  ) {
+    super(message);
+    this.name = this.constructor.name;
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+class ValidationError extends AppError {
+  constructor(message: string) {
+    super(message, 'VALIDATION_ERROR', 400);
+  }
+}
+```
+
+### API Error Response Format
+
+```typescript
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Email is required",
+    "details": { "field": "email" }
+  }
+}
+```
+
+### Async Error Handling
+
+```typescript
+// Always use try-catch with async/await
+async function fetchData() {
+  try {
+    const response = await api.get('/data');
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      return null; // Expected case
+    }
+    throw error; // Unexpected, rethrow
+  }
+}
+```
+
+### Error Boundaries (React)
+
+```tsx
+<ErrorBoundary fallback={<ErrorPage />}>
+  <App />
+</ErrorBoundary>
+```
+
+### What to Include When Logging Errors
+
+- Error message and stack trace
+- Request context (user, endpoint)
+- Timestamp and correlation ID
+
+---
+
+## Part 3: Logging Conventions
+
+### Log Levels
+
+| Level | Use When |
+|-------|----------|
+| `error` | Something failed, needs attention |
+| `warn` | Unexpected but handled, potential issue |
+| `info` | Significant events (startup, requests) |
+| `debug` | Detailed troubleshooting info |
+| `trace` | Very verbose, step-by-step execution |
+
+### Structured Logging
+
+```typescript
+// BAD: Unstructured
+console.log('User login failed for ' + email);
+
+// GOOD: Structured
+logger.error('User login failed', {
+  event: 'auth.login.failed',
+  email,
+  reason: 'invalid_password',
+  ip: req.ip,
+  timestamp: new Date().toISOString()
+});
+```
+
+### What to Log
+
+- Application startup/shutdown
+- API requests (method, path, status, duration)
+- Authentication events
+- Business-critical operations
+- Errors with full context
+- External service calls
+
+### What NOT to Log
+
+- Passwords or tokens
+- Personal data (PII)
+- Credit card numbers
+- Session secrets
+- Full request/response bodies (use sampling)
+
+### Correlation IDs
+
+```typescript
+// Trace requests across services
+const correlationId = req.headers['x-correlation-id'] || uuid();
+logger.info('Processing request', { correlationId, path: req.path });
+```
+
+### Performance Logging
+
+```typescript
+const start = performance.now();
+await operation();
+const duration = performance.now() - start;
+
+logger.info('Operation completed', {
+  operation: 'fetchUsers',
+  durationMs: duration.toFixed(2)
+});
+```
+
+### Standard Log Format
+
+```json
+{
+  "timestamp": "2025-02-05T10:30:00.000Z",
+  "level": "info",
+  "message": "Request completed",
+  "correlationId": "abc-123",
+  "service": "api",
+  "data": { "path": "/users", "status": 200, "durationMs": 45 }
+}
+```

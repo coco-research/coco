@@ -1,0 +1,65 @@
+---
+description: Security best practices - secrets, authentication, input validation
+globs:
+alwaysApply: true
+---
+
+# Security Rules
+
+**CRITICAL: These rules always apply.**
+
+## Never Hardcode Secrets
+
+```javascript
+// ❌ NEVER DO THIS
+const API_KEY = 'sk-abc123...';
+const DB_PASSWORD = 'mypassword';
+
+// ✅ ALWAYS USE ENVIRONMENT VARIABLES
+const API_KEY = process.env.API_KEY;
+const DB_PASSWORD = process.env.DB_PASSWORD;
+```
+
+## Environment Files
+
+- `.env` — Local development (gitignored)
+- `.env.example` — Template with placeholder values (committed)
+- Never commit `.env` files with real values
+
+## Authentication Patterns
+
+```javascript
+// Always validate tokens server-side
+// Never trust client-side auth state
+// Use httpOnly cookies for session tokens
+// Implement token expiration and refresh
+```
+
+## Input Validation
+
+```javascript
+// Validate ALL user input
+// Sanitize before database queries
+// Use parameterized queries (prevent SQL injection)
+// Escape output (prevent XSS)
+```
+
+## Sensitive Data
+
+Never log or store:
+- Passwords (store hashed only)
+- API keys or tokens
+- Personal Identifiable Information (PII)
+- Credit card numbers
+- Session tokens
+
+## File Patterns to Gitignore
+
+```
+.env
+.env.local
+*.pem
+*.key
+credentials.json
+secrets.yaml
+```

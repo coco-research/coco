@@ -1,0 +1,75 @@
+---
+description: Testing conventions and best practices
+globs: **/*.test.*, **/*.spec.*, **/test/**, **/tests/**
+alwaysApply: false
+---
+
+# Testing Standards
+
+## Test Structure (AAA Pattern)
+
+```typescript
+describe('UserService', () => {
+  describe('createUser', () => {
+    it('should create user with valid data', async () => {
+      // Arrange
+      const userData = { name: 'John', email: 'john@example.com' };
+
+      // Act
+      const user = await userService.createUser(userData);
+
+      // Assert
+      expect(user.id).toBeDefined();
+      expect(user.name).toBe('John');
+    });
+  });
+});
+```
+
+## Naming Conventions
+
+```typescript
+// Pattern: should [expected behavior] when [condition]
+it('should throw ValidationError when email is missing', () => {});
+it('should return null when user not found', () => {});
+it('should emit event when order is placed', () => {});
+```
+
+## Test Categories
+
+| Type | Purpose | Speed |
+|------|---------|-------|
+| Unit | Single function/class | Fast |
+| Integration | Multiple components | Medium |
+| E2E | Full user flow | Slow |
+
+## Mocking
+
+```typescript
+// Mock external dependencies
+jest.mock('../services/api');
+
+// Use dependency injection for testability
+const service = new UserService(mockDatabase, mockLogger);
+```
+
+## What to Test
+
+- Happy path (expected behavior)
+- Edge cases (empty, null, max values)
+- Error conditions (invalid input, failures)
+- Boundary conditions (limits, transitions)
+
+## What NOT to Test
+
+- Third-party library internals
+- Framework code
+- Trivial getters/setters
+- Implementation details (test behavior, not code)
+
+## Test Isolation
+
+- Each test should be independent
+- Use beforeEach for setup, afterEach for cleanup
+- Never depend on test execution order
+- Reset mocks between tests

@@ -1,0 +1,71 @@
+---
+description: Dependency management and package conventions
+globs: package.json, requirements.txt, pyproject.toml, Cargo.toml
+alwaysApply: false
+---
+
+# Dependency Management
+
+## Adding Dependencies
+
+1. **Check necessity** — Can stdlib solve it?
+2. **Evaluate package** — Maintenance, security, size
+3. **Pin versions** — Avoid breaking changes
+4. **Document why** — In CLAUDE.local.md
+
+## Version Pinning
+
+```json
+// package.json
+{
+  "dependencies": {
+    "axios": "1.6.0",      // Exact version
+    "lodash": "^4.17.21"   // Minor updates allowed
+  }
+}
+```
+
+```txt
+# requirements.txt
+requests==2.31.0           # Exact version
+flask>=2.0.0,<3.0.0        # Range with upper bound
+```
+
+## Before Adding a Package
+
+Check:
+- Last updated (< 6 months ideal)
+- Open issues count
+- Download count / popularity
+- Bundle size (for frontend)
+- License compatibility
+
+## Security
+
+```bash
+# Regular audits
+npm audit
+pip-audit
+```
+
+## Dependency Types
+
+| Type | Use For |
+|------|---------|
+| dependencies | Runtime requirements |
+| devDependencies | Build/test tools |
+| peerDependencies | Expected in host project |
+| optionalDependencies | Nice-to-have, non-blocking |
+
+## Documentation
+
+When adding a dependency, log in CLAUDE.local.md:
+```markdown
+- [2025-02-05] Added `zod@3.22.0` — Runtime schema validation for API inputs
+```
+
+## Removal
+
+- Remove unused dependencies regularly
+- Use `depcheck` (npm) or similar tools
+- Update lock files after removal

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Coco — Open Graph / Twitter card image
+  Apple philosophy: one mark, one phrase, generous space, no stat dump.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="intelligence" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#C2A8FF"/>
+      <stop offset="50%" stop-color="#7FB8FF"/>
+      <stop offset="100%" stop-color="#A6F0CD"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background: deep midnight, not pure black -->
+  <rect x="0" y="0" width="1200" height="630" fill="#0A0F1F"/>
+
+  <!-- Mark on left side: same logo pattern, scaled up -->
+  <g transform="translate(120, 165)">
+    <!-- C anchor (white) -->
+    <path d="M 145 100
+             A 100 100 0 1 0 145 300"
+          stroke="#FFFFFF"
+          stroke-width="22"
+          stroke-linecap="round"
+          fill="none"/>
+    <!-- C accent (gradient) -->
+    <path d="M 195 100
+             A 100 100 0 1 1 195 300"
+          stroke="url(#intelligence)"
+          stroke-width="22"
+          stroke-linecap="round"
+          fill="none"/>
+  </g>
+
+  <!-- Right side: wordmark + tagline, generous space -->
+  <text x="500" y="280"
+        font-family="-apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif"
+        font-size="140" font-weight="700"
+        fill="#FFFFFF"
+        letter-spacing="-6">
+    Coco
+  </text>
+
+  <text x="500" y="370"
+        font-family="-apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif"
+        font-size="42" font-weight="500"
+        fill="#FFFFFF"
+        opacity="0.82">
+    An entire team. Wherever your AI lives.
+  </text>
+
+  <!-- Bottom-right URL, small, low opacity -->
+  <text x="1080" y="600"
+        font-family="'SF Mono', 'Menlo', 'Monaco', monospace"
+        font-size="22" fill="#FFFFFF" opacity="0.5"
+        text-anchor="end">
+    github.com/rkz91/coco
+  </text>
+</svg>

@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+
+  "project": {
+    "name": "{{PROJECT_NAME}}",
+    "type": "{{PROJECT_TYPE}}",
+    "classification": "{{DATA_CLASSIFICATION}}",
+    "prodIds": [],
+    "targetGoLive": "{{TARGET_DATE}}",
+    "created": "{{NOW}}",
+    "lastScan": null
+  },
+
+  "categories": {},
+
+  "score": {
+    "overall": 0,
+    "byPriority": { "p0": 0, "p1": 0, "p2": 0 },
+    "byCategory": {},
+    "trend": "new",
+    "previousScans": []
+  },
+
+  "config": {
+    "autoScan": true,
+    "scanFrequency": "on_invoke",
+    "staleDays": 14,
+    "projectType": "{{PROJECT_TYPE}}"
+  }
+}

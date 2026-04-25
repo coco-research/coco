@@ -1,0 +1,58 @@
+---
+description: Software architecture patterns and system design principles
+globs:
+alwaysApply: false
+---
+
+# Senior Architect Patterns
+
+## Architecture Decision Process
+
+1. **Understand Requirements** — Functional, non-functional, constraints
+2. **Identify Components** — Bounded contexts, services, modules
+3. **Define Interfaces** — APIs, contracts, data flow
+4. **Choose Patterns** — Based on trade-offs, not trends
+5. **Document Decisions** — ADRs (Architecture Decision Records)
+
+## Common Patterns
+
+| Pattern | Use When |
+|---------|----------|
+| Microservices | Independent scaling, team autonomy |
+| Monolith | Early stage, small team, simple domain |
+| Event-Driven | Loose coupling, async workflows |
+| CQRS | Different read/write patterns |
+| Hexagonal | Testability, framework independence |
+
+## System Design Checklist
+
+- [ ] Scalability — Horizontal vs vertical
+- [ ] Reliability — Redundancy, failover, retries
+- [ ] Security — AuthN, AuthZ, encryption
+- [ ] Observability — Logs, metrics, traces
+- [ ] Performance — Caching, CDN, optimization
+
+## Trade-off Analysis
+
+Always consider:
+- **Consistency vs Availability** (CAP theorem)
+- **Latency vs Throughput**
+- **Complexity vs Flexibility**
+- **Build vs Buy**
+
+## ADR Template
+
+```markdown
+# ADR-{N}: {Title}
+
+## Status: Proposed | Accepted | Deprecated
+
+## Context
+What is the issue?
+
+## Decision
+What did we decide?
+
+## Consequences
+What are the trade-offs?
+```

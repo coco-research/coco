@@ -1,0 +1,73 @@
+---
+description:
+globs: "**/*.jsx, **/*.tsx"
+alwaysApply: false
+---
+
+# React & Frontend Skills (MANDATORY)
+
+**RULE: When this rule triggers (any .jsx/.tsx file), you MUST read the skills below BEFORE writing code. Read them in order. Do NOT skip any.**
+
+## 1. Design System — UI/UX Pro Max (REQUIRED for new components/pages)
+
+**Path**: `~/.cursor/skills/ui-ux-pro-max/SKILL.md` — Read this file NOW.
+
+Before writing any new component or page, generate a design system first:
+
+```bash
+python3 ~/.cursor/skills/ui-ux-pro-max/scripts/search.py "<product keywords>" --design-system
+```
+
+Use domain searches for specifics:
+- `--domain style` for UI styles (glassmorphism, minimalism, etc.)
+- `--domain typography` for font pairings
+- `--domain color` for palettes
+- `--domain ux` for interaction best practices
+- `--stack react` for React-specific guidelines
+
+## 2. Frontend Design Quality (REQUIRED for all UI work)
+
+**Path**: `~/.cursor/skills/frontend-design/SKILL.md` — Read this file NOW.
+
+Enforces:
+- Bold, distinctive aesthetic direction (no generic AI slop)
+- Intentional typography (no default Inter/Arial/Roboto)
+- Cohesive color themes with CSS variables
+- Meaningful animations and micro-interactions
+- Unexpected layouts, spatial composition, visual depth
+
+## 3. React Performance — Vercel Best Practices (REQUIRED for all React code)
+
+**Path**: `~/.cursor/skills/vercel-react-best-practices/SKILL.md` — Read this file NOW.
+
+57 rules across 8 categories, prioritized by impact:
+1. **CRITICAL**: Eliminate waterfalls (`async-parallel`, `async-defer-await`)
+2. **CRITICAL**: Bundle size (`bundle-barrel-imports`, `bundle-dynamic-imports`)
+3. **HIGH**: Server-side performance (`server-cache-react`, `server-parallel-fetching`)
+4. **MEDIUM**: Re-render optimization (`rerender-memo`, `rerender-derived-state`)
+
+Read individual rule files for code examples: `~/.cursor/skills/vercel-react-best-practices/rules/<rule-name>.md`
+
+## 4. Web Interface Guidelines (for reviews/audits)
+
+**Path**: `~/.cursor/skills/web-design-guidelines/SKILL.md` — Read this file when reviewing/auditing UI.
+
+Use when reviewing or auditing existing UI. Fetches latest guidelines from Vercel and checks compliance.
+
+## Workflow
+
+1. **New page/component**: Read skills #1 + #2 → generate design system → implement with #3 performance rules
+2. **Editing existing**: Read skill #3 → apply performance patterns → check #2 for design quality
+3. **Reviewing/auditing**: Read skill #4 → run compliance check against web interface guidelines
+
+## Pre-Delivery Checklist
+
+Before completing any React UI work:
+- [ ] No emojis as icons (use SVG: Heroicons, Lucide)
+- [ ] All clickable elements have `cursor-pointer`
+- [ ] Hover states provide visual feedback (150-300ms transitions)
+- [ ] Light/dark mode text contrast meets 4.5:1 minimum
+- [ ] Responsive at 375px, 768px, 1024px, 1440px
+- [ ] No horizontal scroll on mobile
+- [ ] `prefers-reduced-motion` respected
+- [ ] Form inputs have labels, images have alt text

@@ -1,0 +1,30 @@
+---
+description: Routes tasks to the correct skill file automatically
+alwaysApply: true
+---
+
+# Skill Router
+
+**Before starting ANY task, scan this table. If the task matches a trigger, read the skill file FIRST — before writing any code.**
+
+## Task → Skill Routing Table
+
+| Trigger | Skill | Path |
+|---------|-------|------|
+| Create a PRD, write requirements, document a feature | **prd-generator** | `~/.cursor/skills/prd-generator/SKILL.md` |
+| Write tests, generate tests, test coverage | **generate-tests** | `~/.cursor/skills/generate-tests/SKILL.md` |
+| Verify code, check quality, audit code, pre-commit | **verification** | `~/.cursor/skills/verification/SKILL.md` |
+| Remember this, persist context, session memory | **persistent-memory** | `~/.cursor/skills/persistent-memory/SKILL.md` |
+
+## How to Use
+
+1. Read the task/request
+2. Match against the trigger patterns above
+3. Read the SKILL.md at the listed path
+4. Follow the skill's instructions for the task
+
+If multiple skills match, read them in priority order (top of table = highest priority).
+
+## Adding New Skills
+
+To add a skill, place its `SKILL.md` in `~/.cursor/skills/[skill-name]/` and add a row to this table.

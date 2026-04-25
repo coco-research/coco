@@ -1,0 +1,12 @@
+{
+  "name": "task-prd-creator",
+  "version": "1.0.0",
+  "description": "Use this skill when users request new features, enhancements, bug fixes, or any work that needs plan",
+  "author": {
+    "name": "Ship Shit Dev",
+    "email": "hello@shipshit.dev",
+    "url": "https://github.com/shipshitdev"
+  },
+  "license": "MIT",
+  "skills": "."
+}

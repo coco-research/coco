@@ -1,0 +1,32 @@
+{
+  "name": "coco",
+  "displayName": "Coco",
+  "description": "An entire team. Wherever your AI lives. 59 skills, 34 commands, 10 agents, 3 system bundles for project orchestration, knowledge tracking, and multi-agent pipelines. MIT, vendor-neutral.",
+  "version": "0.1.0",
+  "author": "Coco Inc",
+  "license": "MIT",
+  "homepage": "https://github.com/rkz91/coco",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rkz91/coco.git"
+  },
+  "install": {
+    "command": "bash",
+    "args": ["adapters/claude-code/install.sh"]
+  },
+  "compatibility": {
+    "claude-code": ">=0.1.0"
+  },
+  "tags": [
+    "ai",
+    "agent-skills",
+    "orchestration",
+    "multi-agent",
+    "developer-tools",
+    "productivity"
+  ],
+  "categories": [
+    "skills-library",
+    "orchestration"
+  ]
+}

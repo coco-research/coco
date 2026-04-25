@@ -1,0 +1,45 @@
+{
+  "name": "@rkz91/coco-cli",
+  "version": "0.1.0",
+  "description": "An entire team. Wherever your AI lives. Open-source AI workflow framework with 59+ skills, 34+ commands, and multi-agent orchestration. Vendor-neutral across Claude Code, Cursor, Codex, and AGENTS.md tools.",
+  "bin": {
+    "coco": "./bin/coco.js"
+  },
+  "files": [
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node bin/coco.js --help"
+  },
+  "keywords": [
+    "ai",
+    "ai-agents",
+    "agent-skills",
+    "agents-md",
+    "claude-code",
+    "cursor",
+    "codex",
+    "mcp",
+    "llm-tools",
+    "developer-tools",
+    "productivity"
+  ],
+  "author": "Coco Inc",
+  "license": "MIT",
+  "homepage": "https://github.com/rkz91/coco",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rkz91/coco.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rkz91/coco/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}

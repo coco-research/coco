@@ -1,0 +1,70 @@
+---
+description: Project file and folder organization patterns
+globs:
+alwaysApply: false
+---
+
+# File Organization
+
+## Standard Project Structure
+
+```
+project/
+├── src/
+│   ├── components/      # UI components
+│   ├── hooks/           # Custom React hooks
+│   ├── services/        # API clients, business logic
+│   ├── utils/           # Pure utility functions
+│   ├── types/           # TypeScript types/interfaces
+│   ├── constants/       # App constants
+│   ├── context/         # React context providers
+│   └── views/           # Page-level components
+├── tests/               # Test files (mirror src structure)
+├── public/              # Static assets
+├── docs/                # Documentation
+├── scripts/             # Build/deploy scripts
+└── config/              # Configuration files
+```
+
+## Naming Conventions
+
+| Type | Convention | Example |
+|------|------------|---------|
+| Components | PascalCase | `UserProfile.tsx` |
+| Hooks | camelCase, use prefix | `useAuth.ts` |
+| Utils | camelCase | `formatDate.ts` |
+| Constants | SCREAMING_SNAKE | `API_ENDPOINTS.ts` |
+| Types | PascalCase | `UserTypes.ts` |
+| Tests | match source + .test | `UserProfile.test.tsx` |
+
+## Colocation Principle
+
+Keep related files together:
+
+```
+components/
+└── Button/
+    ├── Button.tsx
+    ├── Button.test.tsx
+    ├── Button.styles.css
+    └── index.ts
+```
+
+## Index Files
+
+```typescript
+// components/index.ts — Re-export for cleaner imports
+export { Button } from './Button';
+export { Input } from './Input';
+export { Modal } from './Modal';
+
+// Usage
+import { Button, Input } from '@/components';
+```
+
+## Avoid
+
+- Deep nesting (max 3-4 levels)
+- Barrel files in large directories (bundle size)
+- Mixing concerns in single files
+- Generic names (`utils.ts`, `helpers.ts`, `misc.ts`)

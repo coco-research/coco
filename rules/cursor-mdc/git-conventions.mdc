@@ -1,0 +1,62 @@
+---
+description: Git commit and branching conventions
+globs:
+alwaysApply: true
+---
+
+# Git Conventions
+
+## Commit Message Format
+
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer]
+```
+
+### Types
+
+| Type | Description |
+|------|-------------|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation only |
+| `style` | Formatting, no code change |
+| `refactor` | Code change, no new feature or fix |
+| `perf` | Performance improvement |
+| `test` | Adding tests |
+| `chore` | Maintenance tasks |
+
+### Examples
+
+```
+feat(auth): add OAuth2 login support
+
+fix(api): handle null response from server
+
+docs: update README with setup instructions
+
+refactor(components): extract Button into separate file
+```
+
+## Branch Naming
+
+```
+<type>/<ticket-id>-<short-description>
+```
+
+Examples:
+- `feat/PROJ-123-user-auth`
+- `fix/PROJ-456-null-pointer`
+- `chore/update-dependencies`
+
+## Best Practices
+
+- Commit early, commit often
+- One logical change per commit
+- Write meaningful commit messages
+- Keep commits atomic and reversible
+- Squash WIP commits before merging
+- Never force push to shared branches

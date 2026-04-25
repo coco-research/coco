@@ -1,0 +1,22 @@
+{
+  "name": "openai-app-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "deploy": "npm run build && wrangler deploy",
+    "preview": "wrangler dev"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.21.0",
+    "hono": "^4.10.2",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.13.13",
+    "@cloudflare/workers-types": "^4.20250531.0",
+    "vite": "^7.1.9",
+    "wrangler": "^4.42.2"
+  }
+}

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Coco — vertical lockup (mark + wordmark), dark variant
+
+  Apple-style design:
+    • Mark: two interlocked C-arcs — anchor white, accent Apple Intelligence gradient
+    • Wordmark: "coco" in custom geometric weight, gradient fill matching the accent C
+    • Generous space between mark and wordmark (Apple breathing room)
+    • Single tone for canvas (deep midnight #0A0F1F)
+    • No decoration, no strokes on text, no shadows
+    • Squircle removed — wordmark below would cramp it
+
+  Use as primary brand lockup. For app icons / favicons, see logo-icon.svg.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 720" width="512" height="720" role="img" aria-label="Coco">
+  <defs>
+    <!-- Apple Intelligence gradient for accent C and wordmark -->
+    <linearGradient id="intelligence" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#C2A8FF"/>
+      <stop offset="50%" stop-color="#7FB8FF"/>
+      <stop offset="100%" stop-color="#A6F0CD"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Solid background -->
+  <rect x="0" y="0" width="512" height="720" fill="#0A0F1F"/>
+
+  <!-- Icon mark, centered, top portion -->
+  <g transform="translate(0, 30)">
+    <!-- C #1: anchor, pure white -->
+    <path d="M 232 158
+             A 100 100 0 1 0 232 358"
+          stroke="#FFFFFF"
+          stroke-width="24"
+          stroke-linecap="round"
+          fill="none"/>
+    <!-- C #2: accent, Apple Intelligence gradient -->
+    <path d="M 280 158
+             A 100 100 0 1 1 280 358"
+          stroke="url(#intelligence)"
+          stroke-width="24"
+          stroke-linecap="round"
+          fill="none"/>
+  </g>
+
+  <!-- Wordmark "coco" — gradient fill, Apple-style geometric -->
+  <text x="256" y="635"
+        font-family="-apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif"
+        font-size="160" font-weight="700"
+        fill="url(#intelligence)"
+        text-anchor="middle"
+        letter-spacing="-6">
+    coco
+  </text>
+</svg>

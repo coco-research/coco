@@ -1,0 +1,84 @@
+---
+description: Automatic parallel agent orchestration based on task complexity
+alwaysApply: true
+---
+
+# Parallel Agent Orchestration (Auto-Select)
+
+**Automatically select the best orchestration pattern for every task. No user input needed.**
+
+## Pattern Selection Decision Tree
+
+```
+Is the task a single file read/edit or simple question?
+  YES → No agents. Use tools directly.
+  NO  ↓
+
+Can ALL subtasks run independently (no deps between them)?
+  YES → Can it fit in ≤4 subtasks?
+    YES → PATTERN 1: Single Wave
+    NO  → PATTERN 2: Multi-Wave (split into waves of 4)
+  NO  ↓
+
+Do later subtasks need results from earlier ones?
+  YES → Do they need FULL prior context (iterative refinement)?
+    YES → PATTERN 4: Resume Chains
+    NO  → PATTERN 3: Shared Files (write findings → read findings)
+```
+
+## Pattern 1: Single Wave
+
+**When:** 2-4 independent subtasks. No coordination needed.
+
+```
+Launch: [Agent A, Agent B, Agent C, Agent D]
+Collect results. Done.
+```
+
+## Pattern 2: Multi-Wave
+
+**When:** 5+ subtasks, or verification needed after implementation.
+
+```
+Wave 1: [A, B, C, D] → collect + synthesize
+Wave 2: [E, F, G, H] → prompts include Wave 1 synthesis
+Wave 3: [verification-agent] → checks all changes
+```
+
+## Pattern 3: Shared Files
+
+**When:** Agents need each other's output.
+
+```
+Create: .coordination-[task].md
+Wave 1: Agents write their section to the file
+Wave 2: Agents READ the file, then act on what others found
+```
+
+## Pattern 4: Resume Chains
+
+**When:** Deep iterative work on a complex problem.
+
+```
+Round 1: Agent explores → returns findings + ID
+Round 2: Resume agent with new context
+Round 3: Continue with full history
+```
+
+## Mandatory Verification Rule
+
+**Every implementation pattern MUST end with a verification step.**
+
+| Pattern | Verification |
+|---------|-------------|
+| Single Wave | Run verification-agent in a follow-up call |
+| Multi-Wave | Final wave is always verification-agent |
+| Shared Files | Wave 2+ includes verification-agent |
+| Resume Chains | Final round is "verify everything you changed" |
+
+## Rules
+
+1. **Auto-select pattern** — Never ask the user which pattern to use
+2. **Batch independent agents** — Launch all parallel agents in one message
+3. **Full context in every prompt** — Agents don't see the conversation
+4. **Never skip verification** — Last step of any pattern is always verify

@@ -35,13 +35,13 @@ You get a 13-section PRD in seconds. The AI invoked [`skills/prd-generator/SKILL
 
 ---
 
-## Try a slash command
+## Try a command
 
 ```
 /team:plan Build a CLI for AWS cost monitoring
 ```
 
-Multi-agent planning pipeline kicks off. Routes to [`commands/team/plan.md`](../commands/team/plan.md).
+In Claude Code and Cursor, this appears as a first-class slash command. In Codex, it may not show up in a visible command palette, but the generated `AGENTS.md` still tells the model that `/team:plan` exists. Routes to [`commands/team/plan.md`](../commands/team/plan.md).
 
 ---
 
@@ -53,7 +53,7 @@ bash install.sh --systems gsd
 
 Adds 68 skills for project orchestration: state-tracked phases, parallel agent waves, atomic commits, verification gates.
 
-```
+```text
 /gsd-new-project
 /gsd-plan-phase
 /gsd-execute-phase
@@ -107,6 +107,7 @@ Conventions: [`CONTRIBUTING.md`](../CONTRIBUTING.md).
 | `install.sh` skips files | Pass `--dry-run` to see what would happen |
 | Symlinks didn't resolve | Re-run `bash install.sh`; check `~/.claude/skills/<name>` |
 | AGENTS.md missing | `cd` to your project first; Codex/generic adapters write to cwd |
+| Codex shows no slash-command menu | Expected; verify `AGENTS.md` is loaded with `codex debug prompt-input` |
 | AI doesn't invoke skill | Verify SKILL.md has `description:` frontmatter (used for routing) |
 
 Open an issue for anything not listed.

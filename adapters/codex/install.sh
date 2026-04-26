@@ -42,6 +42,26 @@ emit_skill() {
   echo "- **$name** — $desc"
 }
 
+emit_invocation_guide() {
+  cat <<'EOF'
+## Codex Invocation Guide
+
+Codex may not render Coco workflows as a visible slash-command palette. Treat the command and skill names in this file as model-available workflows.
+
+When the user:
+- types a literal command like `/team:plan` or `/gsd-plan-phase`, treat it as an explicit request to follow that workflow
+- references a workflow name in plain English like `use team:ship`, `run gsd-new-project`, or `follow brain-init`, map it to the matching command or skill and follow it
+- asks for an outcome that clearly matches one of the workflows below, prefer the named Coco workflow instead of inventing an ad hoc process
+
+Routing preference:
+1. Exact command name match
+2. Exact skill name match
+3. Closest plain-English match based on the descriptions in this file
+
+If a workflow is chosen, say so briefly and then execute it.
+EOF
+}
+
 emit_skills() {
   local found=0
   for skill in "$REPO_ROOT/skills"/*/SKILL.md; do
@@ -70,10 +90,31 @@ emit_commands_from_dir() {
     nsname=$(basename "$ns")
     for cmd in "$ns"*.md; do
       [[ -f "$cmd" ]] || continue
-      local cname
+      local cname desc
       cname=$(basename "$cmd" .md)
       [[ "$cname" == "_index" ]] && continue
-      echo "- /$nsname:$cname"
+      desc=$(
+        awk '
+          /^>/ {
+            sub(/^> */, "")
+            print
+            exit
+          }
+          /^# / {
+            line=$0
+            sub(/^# [^—-]+[—-] /, "", line)
+            if (line != $0) {
+              print line
+              exit
+            }
+          }
+        ' "$cmd"
+      )
+      if [[ -n "$desc" ]]; then
+        echo "- \`/$nsname:$cname\` — $desc"
+      else
+        echo "- \`/$nsname:$cname\`"
+      fi
     done
   done
 }
@@ -124,6 +165,8 @@ generate() {
   if [[ ${#SYSTEMS[@]} -gt 0 ]]; then
     echo "Systems: ${SYSTEMS[*]}"
   fi
+  echo ""
+  emit_invocation_guide
   echo ""
   echo "## Skills"
   echo ""

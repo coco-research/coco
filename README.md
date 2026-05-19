@@ -358,7 +358,7 @@ bash install.sh --systems brain
 bash adapters/codex/install.sh
 ```
 
-> Compiles every skill + command + rule into a single <a href="https://agents.md/">AGENTS.md</a>. Drop into any project. Codex, Aider, Continue, Windsurf, Cline pick it up automatically.
+> Compiles every skill, command, agent, and rule into a single <a href="https://agents.md/">AGENTS.md</a>. Drop into any project. Codex, Aider, Continue, Windsurf, Cline pick it up automatically. In Codex this is prompt context, not necessarily a visible slash-command palette.
 
 </td>
 </tr>

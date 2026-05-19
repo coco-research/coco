@@ -72,4 +72,8 @@ ARGS=()
 [[ -n "$DRY_RUN" ]] && ARGS+=("$DRY_RUN")
 [[ -n "$SYSTEMS" ]] && ARGS+=("--systems" "$SYSTEMS")
 
-bash "$ADAPTER_DIR/install.sh" "${ARGS[@]}"
+if [[ ${#ARGS[@]} -gt 0 ]]; then
+  bash "$ADAPTER_DIR/install.sh" "${ARGS[@]}"
+else
+  bash "$ADAPTER_DIR/install.sh"
+fi

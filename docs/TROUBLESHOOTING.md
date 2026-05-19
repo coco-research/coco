@@ -59,13 +59,26 @@ If `description:` is missing, add it. Re-run install.
 
 ### Slash command not recognized
 
-Coco's commands install as `<namespace>:<name>` (Claude Code) or in `commands/<ns>/<name>.md` (Codex via AGENTS.md). Verify:
+Coco's commands install differently by adapter:
+
+- Claude Code: concrete files under `~/.claude/commands/`
+- Codex / generic: command names are exported into `AGENTS.md` and injected into model context
+
+For Claude Code, verify:
 
 ```bash
 ls ~/.claude/commands/ | grep <name>
 ```
 
 If absent, re-run install.
+
+For Codex, verify that the generated file is being loaded:
+
+```bash
+codex debug prompt-input
+```
+
+If the prompt dump contains the generated `AGENTS.md` content, the install worked even if Codex does not show a slash-command palette.
 
 ### AGENTS.md missing
 
@@ -114,6 +127,14 @@ Confirm `AGENTS.md` is at your project root (not nested). Codex reads the closes
 cd path/to/project
 bash adapters/codex/install.sh
 ```
+
+Then verify:
+
+```bash
+codex debug prompt-input
+```
+
+If you have multiple `AGENTS.md` files on disk, make sure the one nearest your working directory is the intended one.
 
 ---
 

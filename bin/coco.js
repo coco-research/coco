@@ -2,13 +2,13 @@
 // Coco CLI — clones Coco into a target dir and runs the installer.
 //
 // Usage:
-//   npx coco-cli                      # clones to ./coco and installs (auto-detect adapter)
-//   npx coco-cli install              # same as above
-//   npx coco-cli install --adapter cursor
-//   npx coco-cli install --systems gsd,brain,team
-//   npx coco-cli update               # pull latest in existing clone
-//   npx coco-cli uninstall            # remove symlinks + clone
-//   npx coco-cli --help
+//   npx @rkz91/coco-cli               # clones to ./coco and installs (auto-detect adapter)
+//   npx @rkz91/coco-cli install       # same as above
+//   npx @rkz91/coco-cli install --adapter cursor
+//   npx @rkz91/coco-cli install --systems gsd,brain,team
+//   npx @rkz91/coco-cli update        # pull latest in existing clone
+//   npx @rkz91/coco-cli uninstall     # remove symlinks + clone
+//   npx @rkz91/coco-cli --help
 
 'use strict';
 
@@ -17,18 +17,18 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
-const REPO = 'https://github.com/rijulkalra2000/coco.git';
+const REPO = 'https://github.com/rkz91/coco.git';
 const DEFAULT_DIR = path.join(process.cwd(), 'coco');
 
 function help() {
   console.log(`Coco — open-source AI workflow framework
 
 Usage:
-  npx coco-cli                          clone + install (auto-detect)
-  npx coco-cli install [flags]          clone + install with flags
-  npx coco-cli update [dir]             pull latest in existing clone
-  npx coco-cli uninstall [dir]          remove symlinks + clone
-  npx coco-cli --help                   this message
+  npx @rkz91/coco-cli                   clone + install (auto-detect)
+  npx @rkz91/coco-cli install [flags]   clone + install with flags
+  npx @rkz91/coco-cli update [dir]      pull latest in existing clone
+  npx @rkz91/coco-cli uninstall [dir]   remove symlinks + clone
+  npx @rkz91/coco-cli --help            this message
 
 Install flags (passed to install.sh):
   --adapter <name>                      claude-code | cursor | codex | generic
@@ -36,13 +36,13 @@ Install flags (passed to install.sh):
   --dry-run                             preview, no writes
 
 Examples:
-  npx coco-cli
-  npx coco-cli install --adapter cursor
-  npx coco-cli install --systems gsd,brain --adapter claude-code
-  npx coco-cli update
-  npx coco-cli uninstall
+  npx @rkz91/coco-cli
+  npx @rkz91/coco-cli install --adapter cursor
+  npx @rkz91/coco-cli install --systems gsd,brain --adapter claude-code
+  npx @rkz91/coco-cli update
+  npx @rkz91/coco-cli uninstall
 
-Repo: https://github.com/rijulkalra2000/coco
+Repo: https://github.com/rkz91/coco
 `);
 }
 
@@ -95,13 +95,13 @@ function cmdInstall(argv) {
   run('bash', [installScript, ...argv]);
 
   console.log(`\nDone. Coco installed at ${dir}.`);
-  console.log(`Re-run install / update later with:\n  npx coco-cli update`);
+  console.log(`Re-run install / update later with:\n  npx @rkz91/coco-cli update`);
 }
 
 function cmdUpdate(argv) {
   const dir = argv[0] && !argv[0].startsWith('--') ? argv[0] : DEFAULT_DIR;
   if (!fs.existsSync(path.join(dir, '.git'))) {
-    console.error(`Error: ${dir} is not a Coco clone. Run \`npx coco-cli install\` first.`);
+    console.error(`Error: ${dir} is not a Coco clone. Run \`npx @rkz91/coco-cli install\` first.`);
     process.exit(1);
   }
   cloneOrUpdate(dir);
@@ -149,7 +149,7 @@ function main() {
       cmdUninstall(rest);
       break;
     default:
-      // any unknown subcommand → pass through to install (e.g., npx coco-cli --adapter cursor)
+      // any unknown subcommand → pass through to install (e.g., npx @rkz91/coco-cli --adapter cursor)
       cmdInstall(argv);
   }
 }

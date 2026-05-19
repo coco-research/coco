@@ -712,6 +712,21 @@ Coco alongside the frameworks it builds on:
 
 ---
 
+## Quickest Install
+
+Run this one-liner to install Coco:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rkz91/coco/main/bin/coco-bootstrap.sh | bash
+```
+
+This script will:
+- Automatically detect your AI tool (Claude Code, Cursor, Codex, or generic)
+- Install Coco to `~/.coco` (override with `COCO_DIR`)
+- Run setup automatically
+
+---
+
 ## Browse the library
 
 [`skills/`](skills/) · [`commands/`](commands/) · [`agents/`](agents/) · [`workflows/`](workflows/) · [`templates/`](templates/) · [`rules/`](rules/) · [`systems/`](systems/) · [`adapters/`](adapters/) · [`docs/`](docs/) · [`examples/`](examples/)

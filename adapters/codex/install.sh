@@ -69,8 +69,7 @@ emit_skills() {
     emit_skill "$skill"
     found=1
   done
-  for sys in "${SYSTEMS[@]:-}"; do
-    [[ -n "$sys" ]] || continue
+  for sys in ${SYSTEMS[@]+"${SYSTEMS[@]}"}; do
     local dir
     dir=$(system_dir "$sys")
     for skill in "$dir"/skills/*/SKILL.md; do
@@ -121,8 +120,7 @@ emit_commands_from_dir() {
 
 emit_commands() {
   emit_commands_from_dir "$REPO_ROOT/commands"
-  for sys in "${SYSTEMS[@]:-}"; do
-    [[ -n "$sys" ]] || continue
+  for sys in ${SYSTEMS[@]+"${SYSTEMS[@]}"}; do
     local dir
     dir=$(system_dir "$sys")
     [[ -d "$dir/commands" ]] || continue
@@ -148,8 +146,7 @@ emit_agents_from_dir() {
 
 emit_agents() {
   emit_agents_from_dir "$REPO_ROOT/agents"
-  for sys in "${SYSTEMS[@]:-}"; do
-    [[ -n "$sys" ]] || continue
+  for sys in ${SYSTEMS[@]+"${SYSTEMS[@]}"}; do
     local dir
     dir=$(system_dir "$sys")
     [[ -d "$dir/agents" ]] || continue

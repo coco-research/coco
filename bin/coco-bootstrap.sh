@@ -5,9 +5,9 @@ REPO_URL="https://github.com/rkz91/coco.git"
 INSTALL_DIR="${COCO_DIR:-$HOME/.coco}"
 
 detect_adapter() {
-  if command -v claude >/dev/null 2>&1; then
-    echo "claude"
-  elif command -v cursor >/dev/null 2>&1; then
+  if [[ -n "${CLAUDECODE:-}" || -d "$HOME/.claude/skills" ]]; then
+    echo "claude-code"
+  elif [[ -d "$HOME/.cursor" ]]; then
     echo "cursor"
   elif command -v codex >/dev/null 2>&1; then
     echo "codex"
@@ -31,8 +31,12 @@ if [ -d "$INSTALL_DIR/.git" ]; then
   echo "Coco already exists. Updating..."
   git -C "$INSTALL_DIR" pull
 else
+  if [ -e "$INSTALL_DIR" ]; then
+    echo "Error: $INSTALL_DIR already exists but is not a Coco clone."
+    echo "Remove it manually or set COCO_DIR to a different path."
+    exit 1
+  fi
   echo "Cloning Coco..."
-  rm -rf "$INSTALL_DIR"
   git clone "$REPO_URL" "$INSTALL_DIR"
 fi
 

@@ -710,18 +710,23 @@ Coco alongside the frameworks it builds on:
 
 <sub>If Coco saves you time, consider <a href="https://github.com/rkz91/coco">starring the repo</a>. We also encourage starring <a href="https://github.com/obra/superpowers">obra/superpowers</a> and <a href="https://github.com/gsd-build/get-shit-done">gsd-build/get-shit-done</a> — the frameworks Coco stands on.</sub>
 
-<h2>⚡ Quickest Install</h2>
+---
 
-<p>Run this one-liner to install Coco:</p>
+## Quickest Install
 
-<pre><code>curl -fsSL https://raw.githubusercontent.com/rkz91/coco/main/bin/coco-bootstrap.sh | bash</code></pre>
+Run this one-liner to install Coco:
 
-<p>This script will:</p>
-<ul>
-  <li>Automatically detect your AI tool (Claude, Cursor, Codex, or generic)</li>
-  <li>Install Coco to <code>~/.coco</code> (can override using <code>COCO_DIR</code>)</li>
-  <li>Run setup automatically</li>
-</ul>
+```bash
+curl -fsSL https://raw.githubusercontent.com/rkz91/coco/main/bin/coco-bootstrap.sh | bash
+```
+
+This script will:
+- Automatically detect your AI tool (Claude Code, Cursor, Codex, or generic)
+- Install Coco to `~/.coco` (override with `COCO_DIR`)
+- Run setup automatically
+
+---
+
 ## Browse the library
 
 [`skills/`](skills/) · [`commands/`](commands/) · [`agents/`](agents/) · [`workflows/`](workflows/) · [`templates/`](templates/) · [`rules/`](rules/) · [`systems/`](systems/) · [`adapters/`](adapters/) · [`docs/`](docs/) · [`examples/`](examples/)

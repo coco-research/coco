@@ -6,9 +6,13 @@ import { cn, timeAgo } from '../../lib/utils';
 import { CommentInput } from './CommentInput';
 import type { Comment, MentionOption } from '../../types/comments';
 
+export type CommentEntityType = 'todo' | 'goal' | 'agent' | 'draft' | 'content';
+
 interface CommentThreadProps {
-  entityType: string;
+  entityType: CommentEntityType | string;
   entityId: string;
+  /** Render the thread inline without the collapse/expand toggle. */
+  defaultExpanded?: boolean;
 }
 
 interface Agent {
@@ -224,30 +228,35 @@ function CommentItem({
   );
 }
 
-export function CommentThread({ entityType, entityId }: CommentThreadProps) {
-  const [expanded, setExpanded] = useState(false);
+export function CommentThread({
+  entityType,
+  entityId,
+  defaultExpanded = false,
+}: CommentThreadProps) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
   const queryClient = useQueryClient();
 
   const queryKey = ['comments', entityType, entityId];
+  const active = expanded || defaultExpanded;
 
   const { data: comments = [] } = useQuery({
     queryKey,
     queryFn: () =>
       apiFetch<Comment[]>(`/comments?entity_type=${entityType}&entity_id=${entityId}`),
-    enabled: expanded,
+    enabled: active,
   });
 
   // Fetch mentionable entities
   const { data: agents = [] } = useQuery({
     queryKey: ['agents'],
     queryFn: () => apiFetch<Agent[]>('/agents'),
-    enabled: expanded,
+    enabled: active,
   });
 
   const { data: people = {} } = useQuery({
     queryKey: ['brain-people'],
     queryFn: () => apiFetch<PeopleMap>('/brain/people'),
-    enabled: expanded,
+    enabled: active,
   });
 
   const mentionOptions = useMemo<MentionOption[]>(() => {
@@ -290,7 +299,32 @@ export function CommentThread({ entityType, entityId }: CommentThreadProps) {
         mentions: payload.mentions,
         parent_id: payload.parent_id ?? null,
       }),
-    onSuccess: () => {
+    // Optimistic update: render the new comment immediately,
+    // then reconcile when the server responds (or rollback on error).
+    onMutate: async (payload) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<Comment[]>(queryKey) ?? [];
+      const nowIso = new Date().toISOString();
+      const optimistic: Comment = {
+        id: `optimistic-${nowIso}-${Math.random().toString(36).slice(2, 8)}`,
+        entity_type: entityType,
+        entity_id: entityId,
+        parent_id: payload.parent_id ?? null,
+        author: 'user',
+        body: payload.body,
+        mentions: JSON.stringify(payload.mentions ?? []),
+        created_at: nowIso,
+        updated_at: nowIso,
+      };
+      queryClient.setQueryData<Comment[]>(queryKey, [...previous, optimistic]);
+      return { previous };
+    },
+    onError: (_err, _payload, ctx) => {
+      if (ctx?.previous) {
+        queryClient.setQueryData(queryKey, ctx.previous);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey });
     },
   });

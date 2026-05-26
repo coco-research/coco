@@ -20,6 +20,7 @@ from app.db.session import get_db
 from app.db.tables import (
     hub_todos, hub_projects, hub_drafts, hub_sync_state,
     jarvis_sessions, draft_decisions, todo_overrides,
+    self_improve_cycles, self_improve_improvements,
 )
 from app.models.jarvis import (
     CardActionModel,
@@ -789,11 +790,19 @@ def jarvis_self_improve_summary():
     """Return the latest self-improvement cycle summary for Jarvis voice queue."""
     try:
         with get_db() as conn:
-            row = conn.exec_driver_sql(
-                "SELECT id, status, budget_usd, spent_usd, max_improvements, "
-                "started_at, completed_at FROM self_improve_cycles "
-                "WHERE status IN ('completed', 'rejected') "
-                "ORDER BY completed_at DESC LIMIT 1"
+            row = conn.execute(
+                select(
+                    self_improve_cycles.c.id,
+                    self_improve_cycles.c.status,
+                    self_improve_cycles.c.budget_usd,
+                    self_improve_cycles.c.spent_usd,
+                    self_improve_cycles.c.max_improvements,
+                    self_improve_cycles.c.started_at,
+                    self_improve_cycles.c.completed_at,
+                )
+                .where(self_improve_cycles.c.status.in_(["completed", "rejected"]))
+                .order_by(self_improve_cycles.c.completed_at.desc())
+                .limit(1)
             ).fetchone()
             if not row:
                 return {"summary": None, "message": "No completed self-improvement cycles."}
@@ -801,18 +810,24 @@ def jarvis_self_improve_summary():
             cycle = dict(row._mapping)
             cycle_id = cycle["id"]
 
-            imp_rows = conn.exec_driver_sql(
-                "SELECT title FROM self_improve_improvements "
-                "WHERE cycle_id = ? AND status IN ('approved_by_human', 'merged', 'awaiting_approval') "
-                "ORDER BY priority LIMIT 5",
-                (cycle_id,),
+            imp_rows = conn.execute(
+                select(self_improve_improvements.c.title)
+                .where(self_improve_improvements.c.cycle_id == cycle_id)
+                .where(self_improve_improvements.c.status.in_(
+                    ["approved_by_human", "merged", "awaiting_approval"]
+                ))
+                .order_by(self_improve_improvements.c.priority)
+                .limit(5)
             ).fetchall()
             titles = [r._mapping["title"] for r in imp_rows]
 
-            imp_count_row = conn.exec_driver_sql(
-                "SELECT COUNT(*) as cnt FROM self_improve_improvements "
-                "WHERE cycle_id = ? AND status IN ('approved_by_human', 'merged')",
-                (cycle_id,),
+            imp_count_row = conn.execute(
+                select(func.count().label("cnt"))
+                .select_from(self_improve_improvements)
+                .where(self_improve_improvements.c.cycle_id == cycle_id)
+                .where(self_improve_improvements.c.status.in_(
+                    ["approved_by_human", "merged"]
+                ))
             ).fetchone()
             imp_count = imp_count_row._mapping["cnt"] if imp_count_row else 0
 

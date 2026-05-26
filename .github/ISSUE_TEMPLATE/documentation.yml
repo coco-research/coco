@@ -1,0 +1,54 @@
+name: Documentation
+description: Report missing, incorrect, or unclear documentation
+title: "[Docs]: "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve our docs! Please fill out the sections below so we can locate and fix the issue.
+  - type: input
+    id: page
+    attributes:
+      label: Affected page or file
+      description: URL or relative path to the doc (e.g. `docs/setup.md`, `README.md#installation`).
+      placeholder: docs/setup.md
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Type of issue
+      options:
+        - Missing information
+        - Incorrect / out-of-date
+        - Confusing or unclear
+        - Broken link
+        - Typo / formatting
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's wrong?
+      description: Describe what is missing, incorrect, or unclear.
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested fix (optional)
+      description: If you have an idea for the corrected wording or content, share it here.
+    validations:
+      required: false
+  - type: dropdown
+    id: edition
+    attributes:
+      label: Edition
+      options:
+        - Core
+        - Studio
+        - Both / not sure
+    validations:
+      required: true

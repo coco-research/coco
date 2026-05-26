@@ -1,22 +1,33 @@
 name: Feature Request
-description: Suggest a new feature for CoCo Platform
+description: Suggest a new feature or enhancement for CoCo Platform
 title: "[Feature]: "
-labels: ["enhancement"]
+labels: ["enhancement", "triage"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement! Please search existing issues and discussions first.
   - type: textarea
     id: problem
     attributes:
       label: Problem
-      description: What problem does this solve?
+      description: What problem are you trying to solve? Who is affected?
     validations:
       required: true
   - type: textarea
     id: solution
     attributes:
       label: Proposed solution
-      description: How would you like this to work?
+      description: How would you like this to work? Be as concrete as you can.
     validations:
       required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other approaches did you consider? Why are they less good?
+    validations:
+      required: false
   - type: dropdown
     id: edition
     attributes:
@@ -27,3 +38,21 @@ body:
         - Not sure
     validations:
       required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - Small (a few hours)
+        - Medium (a few days)
+        - Large (a milestone)
+        - Not sure
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Screenshots, mockups, links, etc.
+    validations:
+      required: false

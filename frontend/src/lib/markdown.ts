@@ -15,8 +15,13 @@ export function renderMarkdownToHtml(raw: string): string {
     const langLabel = lang
       ? `<span class="text-xs text-muted-foreground font-mono block mb-1">${lang}</span>`
       : '';
-    const clipboardSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block mr-1 align-[-1px]"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>`;
-    return `<div class="relative group/code my-2"><pre class="bg-muted/50 font-mono text-sm p-3 rounded-lg overflow-x-auto">${langLabel}<code>${code.trim()}</code></pre><button class="code-copy-btn absolute top-2 right-2 px-2 py-1 text-[10px] font-medium rounded bg-muted text-muted-foreground opacity-0 group-hover/code:opacity-100 hover:bg-accent hover:text-accent-foreground transition-all" data-code="${code.trim().replace(/"/g, '&quot;')}">${clipboardSvg}Copy</button></div>`;
+    const clipboardSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="code-copy-icon inline-block mr-1 align-[-1px] pointer-events-none"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>`;
+    // data-code is HTML-attribute encoded; & and " need escaping. The `code` here is already
+    // HTML-escaped by the top-of-function pass (so '<' is '&lt;'), which is correct for both
+    // <code> content and as the attribute value source. We only need to escape '"' for the attr.
+    const trimmed = code.trim();
+    const attrEncoded = trimmed.replace(/"/g, '&quot;');
+    return `<div class="relative group/code my-2"><pre class="bg-muted/50 font-mono text-sm p-3 rounded-lg overflow-x-auto">${langLabel}<code>${trimmed}</code></pre><button type="button" class="code-copy-btn absolute top-2 right-2 inline-flex items-center px-2 py-1 text-[10px] font-medium rounded bg-muted text-muted-foreground opacity-0 group-hover/code:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent hover:bg-accent hover:text-accent-foreground transition-all" aria-label="Copy code" data-code="${attrEncoded}">${clipboardSvg}<span class="code-copy-label">Copy</span></button></div>`;
   });
 
   // Inline code (`...`)

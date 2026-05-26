@@ -17,7 +17,7 @@ interface RichContentProps {
 }
 
 const DEFAULT_PURIFY_CONFIG: DOMPurify.Config = {
-  ADD_ATTR: ['data-code'],
+  ADD_ATTR: ['data-code', 'aria-label', 'type'],
   ADD_TAGS: ['svg', 'rect', 'path'],
   ADD_URI_SAFE_ATTR: [
     'viewBox', 'fill', 'stroke', 'stroke-width', 'stroke-linecap',
@@ -40,18 +40,33 @@ export function RichContent({
   html = false,
   purifyConfig,
 }: RichContentProps) {
-  // Delegate click handler for copy buttons in rendered code blocks
+  // Delegate click handler for copy buttons in rendered code blocks.
+  // Replaces only the label text node — the SVG icon is preserved across
+  // the 1.5s "Copied!" feedback. `getAttribute('data-code')` auto-decodes
+  // the HTML entities the renderer emitted, so the clipboard receives the
+  // original source characters.
   const handleCopyClick = useCallback((e: React.MouseEvent) => {
     const target = (e.target as HTMLElement).closest('.code-copy-btn') as HTMLElement | null;
     if (!target) return;
     const code = target.getAttribute('data-code') ?? '';
-    const originalHtml = target.innerHTML;
-    navigator.clipboard.writeText(code).then(() => {
-      target.textContent = 'Copied!';
-      setTimeout(() => {
-        target.innerHTML = originalHtml;
-      }, 1500);
-    });
+    const label = target.querySelector('.code-copy-label');
+    const originalLabel = label?.textContent ?? 'Copy';
+    void navigator.clipboard.writeText(code).then(
+      () => {
+        if (label) label.textContent = 'Copied!';
+        target.setAttribute('aria-label', 'Code copied');
+        window.setTimeout(() => {
+          if (label) label.textContent = originalLabel;
+          target.setAttribute('aria-label', 'Copy code');
+        }, 1500);
+      },
+      () => {
+        if (label) label.textContent = 'Failed';
+        window.setTimeout(() => {
+          if (label) label.textContent = originalLabel;
+        }, 1500);
+      },
+    );
   }, []);
 
   // Fast path: no mermaid blocks → render directly without segmenting

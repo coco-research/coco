@@ -135,8 +135,29 @@ export function TodoList({ todos }: TodoListProps) {
                     <InlineEditor
                       value={todo.title}
                       onSave={async (newValue) => {
-                        await apiPatch(`/todos/${todo.id}`, { title: newValue });
-                        void qc.invalidateQueries({ queryKey: ['todos'] });
+                        // Optimistic update across all ['todos', ...] queries
+                        const queries = qc.getQueriesData<Todo[] | { items: Todo[] }>({ queryKey: ['todos'] });
+                        const snapshots = queries.map(([key, data]) => ({ key, data }));
+                        queries.forEach(([key]) => {
+                          qc.setQueryData(key, (old: Todo[] | { items: Todo[] } | undefined) => {
+                            if (!old) return old;
+                            if (Array.isArray(old)) {
+                              return old.map((t) => (t.id === todo.id ? { ...t, title: newValue } : t));
+                            }
+                            return {
+                              ...old,
+                              items: old.items.map((t) => (t.id === todo.id ? { ...t, title: newValue } : t)),
+                            };
+                          });
+                        });
+                        try {
+                          await apiPatch(`/todos/${todo.id}`, { title: newValue });
+                        } catch (e) {
+                          snapshots.forEach((s) => qc.setQueryData(s.key, s.data));
+                          throw e;
+                        } finally {
+                          void qc.invalidateQueries({ queryKey: ['todos'] });
+                        }
                       }}
                       as="span"
                       className={cn(

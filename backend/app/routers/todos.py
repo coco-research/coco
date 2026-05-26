@@ -567,7 +567,46 @@ def transition_todo(todo_id: str, body: TransitionBody):
 
     is_native = existing.get("is_platform_native", False)
 
-    # Check for unresolved blocking dependencies when completing
+    # GAP M9: hard-block in_progress transition if any blocker is not done.
+    if to_state == "in_progress":
+        with get_db() as conn:
+            blocker_ids = _get_blocker_ids(conn, todo_id)
+
+        incomplete_blockers = []
+        for bid in blocker_ids:
+            blocker = _get_todo_by_id(bid)
+            if not blocker:
+                # Dangling reference — treat as incomplete to be safe.
+                incomplete_blockers.append({
+                    "id": bid, "title": "(missing)", "status": "unknown",
+                })
+                continue
+            if blocker.get("status") != "done":
+                incomplete_blockers.append({
+                    "id": blocker["id"],
+                    "title": blocker.get("title", ""),
+                    "status": blocker.get("status", ""),
+                })
+
+        if incomplete_blockers:
+            titles = ", ".join(
+                f"'{b['title']}' ({b['status']})" for b in incomplete_blockers[:3]
+            )
+            more = "" if len(incomplete_blockers) <= 3 else f" and {len(incomplete_blockers) - 3} more"
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "error": "blocked_by_incomplete_dependencies",
+                    "message": (
+                        f"Cannot move to 'in_progress': {len(incomplete_blockers)} "
+                        f"blocker(s) not done — {titles}{more}. "
+                        "Complete or remove blockers first."
+                    ),
+                    "blockers": incomplete_blockers,
+                },
+            )
+
+    # Check for unresolved blocking dependencies when completing (soft warning).
     warning = None
     if to_state == "done":
         with get_db() as conn:

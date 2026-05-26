@@ -7,6 +7,7 @@ import { apiPatch } from '../lib/api';
 import { InlineEditor } from '../components/shared/InlineEditor';
 import { PropertiesPanel } from '../components/shared/PropertiesPanel';
 import { PropertyField } from '../components/shared/PropertyField';
+import { CommentThread } from '../components/shared/CommentThread';
 import { useToast } from '../components/shared/Toast';
 import { ErrorState } from '../components/shared/ErrorState';
 
@@ -426,6 +427,11 @@ function GoalDetailPanel({ goal, allGoals, onClose, onSaved }: GoalDetailPanelPr
           </div>
         </div>
       )}
+
+      {/* Comments */}
+      <div className="mt-4">
+        <CommentThread entityType="goal" entityId={goal.id} />
+      </div>
     </PropertiesPanel>
   );
 }

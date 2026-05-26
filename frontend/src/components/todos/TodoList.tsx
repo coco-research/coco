@@ -33,6 +33,8 @@ interface TodoListProps {
   todos: Todo[];
   /** Optional edit callback. Currently consumed by ProjectDetailPage; not wired into the list UI yet. */
   onEdit?: (todo: Todo) => void;
+  onSelect?: (todo: Todo) => void;
+  selectedId?: string | null;
 }
 
 const priorityBadge: Record<string, string> = {
@@ -46,7 +48,7 @@ function isOverdue(dueDate: string | null): boolean {
   return new Date(dueDate) < new Date(new Date().toDateString());
 }
 
-export function TodoList({ todos }: TodoListProps) {
+export function TodoList({ todos, onSelect, selectedId }: TodoListProps) {
   const qc = useQueryClient();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [flashId, setFlashId] = useState<string | null>(null);
@@ -104,10 +106,13 @@ export function TodoList({ todos }: TodoListProps) {
               return (
                 <div
                   key={todo.id}
+                  onClick={onSelect ? () => onSelect(todo) : undefined}
                   className={cn(
                     'flex items-center gap-3 px-4 py-3 rounded-xl border border-border bg-card hover:shadow-sm transition-all',
                     (isDone || isArchived) && 'opacity-50',
                     flashId === todo.id && 'animate-state-flash',
+                    onSelect && 'cursor-pointer',
+                    selectedId === todo.id && 'ring-1 ring-accent/40 bg-accent/10',
                   )}
                 >
                   {/* Status pill */}

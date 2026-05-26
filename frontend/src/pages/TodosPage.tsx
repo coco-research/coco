@@ -11,6 +11,8 @@ import { DedupDialog } from '../components/todos/DedupDialog';
 import { DependencyGraph } from '../components/todos/DependencyGraph';
 import { StatusBar } from '../components/shared/StatusBar';
 import { BoardView } from '../components/shared/BoardView';
+import { PropertiesPanel } from '../components/shared/PropertiesPanel';
+import { CommentThread } from '../components/shared/CommentThread';
 import { useToast } from '../components/shared/Toast';
 import type { TodoFilterState } from '../components/todos/TodoFilters';
 import type { Todo } from '../components/todos/TodoList';
@@ -42,6 +44,7 @@ export default function TodosPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [boardPending, setBoardPending] = useState(false);
   const [dedupOpen, setDedupOpen] = useState(false);
+  const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
 
   const [filters, setFilters] = useState<TodoFilterState>({
     status: '',
@@ -177,7 +180,11 @@ export default function TodosPage() {
             onRetry={() => void refetch()}
           />
         ) : viewMode === 'list' ? (
-          <TodoList todos={todos} />
+          <TodoList
+            todos={todos}
+            onSelect={setSelectedTodo}
+            selectedId={selectedTodo?.id ?? null}
+          />
         ) : (
           <BoardView
             items={todos}
@@ -199,6 +206,23 @@ export default function TodosPage() {
         <span className="text-border">|</span>
         <span>{statusCounts['backlog'] ?? 0} backlog</span>
       </div>
+
+      {/* Detail panel with comments */}
+      {selectedTodo && (
+        <PropertiesPanel
+          open={true}
+          onClose={() => setSelectedTodo(null)}
+          title={selectedTodo.title}
+          subtitle={`${selectedTodo.status.replace(/_/g, ' ')} · ${selectedTodo.priority}`}
+        >
+          {selectedTodo.description && (
+            <p className="text-sm text-foreground/80 whitespace-pre-wrap mb-4">
+              {selectedTodo.description}
+            </p>
+          )}
+          <CommentThread entityType="todo" entityId={selectedTodo.id} />
+        </PropertiesPanel>
+      )}
     </div>
   );
 }

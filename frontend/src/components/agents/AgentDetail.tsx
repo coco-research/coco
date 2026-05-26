@@ -9,6 +9,7 @@ import { PropertiesPanel } from '../shared/PropertiesPanel';
 import { PropertyField } from '../shared/PropertyField';
 import { CommentThread } from '../shared/CommentThread';
 import { DelegationPanel } from './DelegationPanel';
+import { AgentTaskList } from './AgentTaskList';
 import { LogViewer } from './LogViewer';
 import type { Agent } from './AgentCard';
 
@@ -374,6 +375,9 @@ export function AgentDetail({ agentId, onClose, onAction }: AgentDetailProps) {
 
           {/* Delegations section */}
           <AgentDelegations agentId={agentId} />
+
+          {/* Inter-agent task list (GAP M2) */}
+          <AgentTaskList agentId={agentId} />
 
           {/* Log viewer */}
           <div className="border-t border-border pt-4">

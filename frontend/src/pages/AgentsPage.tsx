@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, FolderKanban, Radio, LayoutGrid, GitFork, ListTodo, ChevronDown, ChevronRight } from 'lucide-react';
 import { Skeleton } from 'boneyard-js/react';
@@ -10,6 +10,7 @@ import { OrgChart, type OrgNode } from '../components/agents/OrgChart';
 import { SharedTaskBoard } from '../components/agents/SharedTaskBoard';
 import { useToast } from '../components/shared/Toast';
 import { ErrorState } from '../components/shared/ErrorState';
+import { useAgentSSE } from '../hooks/useAgentSSE';
 
 type ViewMode = 'cards' | 'org-chart';
 
@@ -42,22 +43,44 @@ export default function AgentsPage() {
     try { localStorage.setItem(VIEW_STORAGE_KEY, mode); } catch { /* ignore */ }
   };
 
+  // Live agent status via SSE — push-based status deltas mean we no longer
+  // need to poll every 3 seconds while agents are running.
+  const { agents: liveAgents, errored: sseErrored } = useAgentSSE();
+
   const { data: agents = [], isLoading, isError, error, refetch } = useQuery<Agent[]>({
     queryKey: ['agents'],
     queryFn: () => apiFetch('/agents'),
-    refetchInterval: (query) => {
-      const data = query.state.data ?? [];
-      return data.some((a: Agent) => a.status === 'running' || a.status === 'paused') ? 3000 : 30000;
-    },
+    // SSE drives live status — no polling when the EventSource is healthy.
+    // If SSE errors (backend down, proxy stripping headers), fall back to
+    // 30s polling so status still stays roughly fresh.
+    refetchInterval: () => (sseErrored ? 30000 : false),
   });
+
+  // When an agent.spawned / agent.completed / agent.failed event arrives,
+  // invalidate the REST list so derived fields (pid, exit_code, started_at,
+  // task_description) are refreshed alongside the status from SSE.
+  useEffect(() => {
+    if (liveAgents.size === 0) return;
+    queryClient.invalidateQueries({ queryKey: ['agents'] });
+    queryClient.invalidateQueries({ queryKey: ['agents-org-chart'] });
+    // We intentionally re-run whenever the live status Map identity changes;
+    // useAgentSSE returns a new Map for every status delta.
+  }, [liveAgents, queryClient]);
+
+  // Merge live SSE status onto the REST-fetched agent list so the UI always
+  // reflects the latest status, even before the REST refetch lands.
+  const mergedAgents = useMemo<Agent[]>(() => {
+    if (liveAgents.size === 0) return agents;
+    return agents.map((a) => {
+      const live = liveAgents.get(a.id);
+      return live ? { ...a, status: live.status } : a;
+    });
+  }, [agents, liveAgents]);
 
   const { data: orgChartRoots = [] } = useQuery<OrgNode[]>({
     queryKey: ['agents-org-chart'],
     queryFn: () => apiFetch('/agents/org-chart'),
-    refetchInterval: () => {
-      // Match the agents polling interval
-      return agents.some((a) => a.status === 'running' || a.status === 'paused') ? 3000 : 30000;
-    },
+    refetchInterval: () => (sseErrored ? 30000 : false),
     enabled: viewMode === 'org-chart',
   });
 
@@ -72,16 +95,16 @@ export default function AgentsPage() {
     return map;
   }, [projects]);
 
-  // Group agents by project_id
+  // Group agents by project_id (uses merged list so live SSE status is reflected)
   const grouped = useMemo(() => {
     const groups: Record<string, Agent[]> = {};
-    for (const agent of agents) {
+    for (const agent of mergedAgents) {
       const key = agent.project_id ?? '__unassigned__';
       if (!groups[key]) groups[key] = [];
       groups[key].push(agent);
     }
     return groups;
-  }, [agents]);
+  }, [mergedAgents]);
 
   const groupKeys = useMemo(() => {
     // Show assigned projects first (sorted by name), then unassigned

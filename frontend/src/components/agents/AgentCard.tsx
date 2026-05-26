@@ -59,7 +59,9 @@ export function StatusDot({ status }: { status: string }) {
       {isActive && (
         <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${color} opacity-75`} />
       )}
-      <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${color}`} />
+      <span
+        className={`relative inline-flex rounded-full h-2.5 w-2.5 ${color} ${isActive ? 'agent-pulse' : ''}`}
+      />
     </span>
   );
 }

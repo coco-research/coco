@@ -297,6 +297,16 @@ textarea,
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
+/* Live agent indicator — 1s loop, 0.6 → 1.0 opacity.
+   Drives the pulsing status dot for agents in the `running` state. */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.agent-pulse {
+  animation: pulse 1s ease-in-out infinite;
+}
+
 /* Page enter transition */
 @keyframes page-enter {
   from { opacity: 0; transform: translateY(4px); }
@@ -335,6 +345,7 @@ textarea,
   .animate-activity-enter,
   .animate-inbox-dismiss,
   .animate-pulse-dot,
+  .agent-pulse,
   .animate-notif-enter,
   .animate-notif-seen,
   .animate-notif-dismiss,

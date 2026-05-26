@@ -108,7 +108,7 @@ def _merge_hub_todo_with_override(hub_todo: dict, override: dict | None) -> dict
 
 
 def _build_platform_native_todo(row: dict) -> dict:
-    return {
+    out = {
         "id": row["hub_todo_id"],
         "title": row.get("title"),
         "status": row.get("status") or "open",
@@ -123,6 +123,11 @@ def _build_platform_native_todo(row: dict) -> dict:
         "updated_at": row.get("updated_at"),
         "is_platform_native": True,
     }
+    if row.get("human_id"):
+        # human_id is the primary identifier; display_id kept for back-compat.
+        out["human_id"] = row["human_id"]
+        out["display_id"] = row["human_id"]
+    return out
 
 
 def _get_todo_by_id(todo_id: str) -> dict | None:
@@ -234,8 +239,11 @@ def list_todos(
             # Step 4: Enrich
             for t in merged:
                 tid = t.get("id")
-                if tid in display_id_map:
-                    t["display_id"] = display_id_map[tid]
+                # Prefer explicit human_id column from override row when set.
+                if not t.get("human_id") and tid in display_id_map:
+                    t["human_id"] = display_id_map[tid]
+                if t.get("human_id") and not t.get("display_id"):
+                    t["display_id"] = t["human_id"]
                 t["blocked_by_count"] = blocked_by_counts.get(tid, 0)
                 t["blocking_count"] = blocking_counts.get(tid, 0)
 
@@ -266,6 +274,7 @@ def get_todo_by_display_id(display_id: str):
     if not todo:
         raise HTTPException(404, f"Todo {hub_todo_id} not found")
 
+    todo["human_id"] = result["display_id"]
     todo["display_id"] = result["display_id"]
     return todo
 
@@ -388,13 +397,14 @@ def create_todo(body: CreateTodoBody):
     }
 
     effective_node_id = body.node_id or body.project_id
-    if effective_node_id:
-        try:
-            display_id = assign_display_id(todo_id, effective_node_id)
-            if display_id:
-                result["display_id"] = display_id
-        except Exception as e:
-            log.warning("assign_display_id_failed: %s", e)
+    try:
+        # effective_node_id may be None — id_generator falls back to global bucket.
+        display_id = assign_display_id(todo_id, effective_node_id, entity_type="todo")
+        if display_id:
+            result["human_id"] = display_id
+            result["display_id"] = display_id
+    except Exception as e:
+        log.warning("assign_display_id_failed: %s", e)
 
     # Dedup-on-ingest
     try:

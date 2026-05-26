@@ -32,12 +32,16 @@ router = APIRouter(tags=["Agents"])
 _AGENT_COLS = (
     "id, name, node_id, project_id, model, role, status, task_description, "
     "system_prompt, working_directory, pid, started_at, stopped_at, "
-    "last_heartbeat, exit_code, config, reports_to, created_at, updated_at"
+    "last_heartbeat, exit_code, config, reports_to, human_id, created_at, updated_at"
 )
 
 
 def _agent_row_to_dict(row) -> dict:
-    return dict(row._mapping)
+    out = dict(row._mapping)
+    # human_id is the user-facing identifier; UUID `id` stays secondary.
+    if out.get("human_id"):
+        out["display_id"] = out["human_id"]
+    return out
 
 
 @router.get("/api/agents")
@@ -185,6 +189,8 @@ def fix_hierarchy(node_id: str | None = None):
 
 @router.post("/api/agents", status_code=201)
 def create_agent(body: CreateAgentBody):
+    from app.services.id_generator import assign_display_id
+
     agent_id = str(uuid.uuid4())
     with get_db() as conn:
         conn.execute(
@@ -200,6 +206,14 @@ def create_agent(body: CreateAgentBody):
                 reports_to=body.reports_to,
             )
         )
+
+    # Mint a human_id (writeback to agents.human_id happens inside the helper).
+    try:
+        assign_display_id(agent_id, body.node_id or body.project_id, entity_type="agent")
+    except Exception:
+        pass
+
+    with get_db() as conn:
         row = conn.exec_driver_sql(
             f"SELECT {_AGENT_COLS} FROM agents WHERE id = ?", (agent_id,)
         ).fetchone()
@@ -500,6 +514,15 @@ def recruit_agent(body: RecruitAgentBody):
                 reports_to=reports_to,
             )
         )
+
+    # Mint a human_id outside the transaction so we re-fetch with it populated.
+    try:
+        from app.services.id_generator import assign_display_id
+        assign_display_id(agent_id, body.node_id, entity_type="agent")
+    except Exception:
+        pass
+
+    with get_db() as conn:
         row = conn.exec_driver_sql(
             f"SELECT {_AGENT_COLS} FROM agents WHERE id = ?", (agent_id,)
         ).fetchone()

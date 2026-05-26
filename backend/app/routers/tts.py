@@ -5,8 +5,17 @@ Engine priority:
 2. macOS `say` — zero-cost local fallback
 
 No downloaded model weights (Kokoro, Piper removed per project rules).
+
+Cache strategy:
+    Filenames are deterministic — sha256 of (cache_version, backend, voice, speed, text).
+    This makes repeated requests cheap (file-exists short-circuit) AND guarantees
+    that different (backend, voice) pairs never collide on the same text.
+
+    The ``CACHE_VERSION`` prefix bumps any time the keying scheme changes — old
+    entries on disk are then ignored automatically because their hash differs.
 """
 
+import hashlib
 import subprocess
 import tempfile
 from pathlib import Path
@@ -23,6 +32,22 @@ router = APIRouter(tags=["Voice"])
 
 TTS_CACHE_DIR = Path(tempfile.gettempdir()) / "coco-tts"
 TTS_CACHE_DIR.mkdir(exist_ok=True)
+
+# Bump this when the cache-key composition changes — old entries become
+# unreachable (their hashes no longer match) and get garbage-collected on
+# normal /tmp cleanup. v2 = includes backend+voice+speed (was: voice-naive uuid).
+CACHE_VERSION = "v2"
+
+
+def _cache_key(backend: str, voice: str, speed: str, text: str) -> str:
+    """Deterministic cache key for a (backend, voice, speed, text) tuple.
+
+    Including ``backend`` and ``voice`` prevents collisions where the same text
+    rendered by different voices would otherwise share a file (Piper/Edge bug
+    flagged in NEXT_SPRINT 3.8).
+    """
+    raw = f"{CACHE_VERSION}:{backend}:{voice}:{speed}:{text}".encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
 
 
 # ─── Voice Registry ───────────────────────────────────────────────────────────
@@ -63,12 +88,19 @@ VOICE_CATALOG = [
 # ─── TTS Engines ──────────────────────────────────────────────────────────────
 
 async def _edge_tts(text: str, voice: str, speed: str) -> Path | None:
-    """Generate audio using edge-tts (free Azure Neural voices)."""
+    """Generate audio using edge-tts (free Azure Neural voices).
+
+    Cache key includes backend+voice+speed+text so different voices never
+    collide on the same text.
+    """
     try:
         import edge_tts
-        import uuid as _uuid
 
-        out_path = TTS_CACHE_DIR / f"edge_{_uuid.uuid4().hex[:8]}.mp3"
+        key = _cache_key("edge", voice, speed, text)
+        out_path = TTS_CACHE_DIR / f"edge_{key}.mp3"
+        if out_path.exists() and out_path.stat().st_size > 100:
+            log.info("tts_cache_hit", engine="edge", voice=voice)
+            return out_path
         communicate = edge_tts.Communicate(text, voice, rate=speed)
         await communicate.save(str(out_path))
         if out_path.exists() and out_path.stat().st_size > 100:
@@ -78,13 +110,20 @@ async def _edge_tts(text: str, voice: str, speed: str) -> Path | None:
     return None
 
 
-def _macos_say(text: str) -> Path | None:
-    """Generate audio using macOS say command. Text passed via stdin to avoid injection."""
+def _macos_say(text: str, voice: str = "Daniel", speed: str = "180") -> Path | None:
+    """Generate audio using macOS say command. Text passed via stdin to avoid injection.
+
+    Cache key includes backend+voice+speed+text — fixes the prior bug where
+    every macOS-voice request shared a single 'say_*.aiff' bucket.
+    """
     try:
-        import uuid as _uuid
-        out_path = TTS_CACHE_DIR / f"say_{_uuid.uuid4().hex[:8]}.aiff"
+        key = _cache_key("say", voice, speed, text)
+        out_path = TTS_CACHE_DIR / f"say_{key}.aiff"
+        if out_path.exists() and out_path.stat().st_size > 100:
+            log.info("tts_cache_hit", engine="macos", voice=voice)
+            return out_path
         result = subprocess.run(
-            ["say", "-v", "Daniel", "-r", "180", "-o", str(out_path)],
+            ["say", "-v", voice, "-r", speed, "-o", str(out_path)],
             input=text, text=True,
             capture_output=True, timeout=15,
         )

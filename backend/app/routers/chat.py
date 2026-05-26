@@ -13,6 +13,7 @@ from app.db.session import get_db
 from app.db.tables import chat_sessions, chat_messages, hub_content
 from app.db.compat import now
 from app.services.chat_context import build_chat_context
+from app.services.spawn_limiter import get_spawn_semaphore
 from app.models.chat import ChatRequest, MessageOut, SessionCreate, SessionOut
 
 logger = logging.getLogger(__name__)
@@ -272,6 +273,13 @@ async def chat_event_generator(message: str, model: str, system_prompt: str, ses
     full_prompt = f"[System context]\n{system_prompt}\n\n[User message]\n{message}"
     cmd.append(full_prompt)
 
+    # Cap concurrent claude-CLI spawns to prevent OOM (NEXT_SPRINT 1.3).
+    # The slot is held for the lifetime of the subprocess (released in the
+    # outer finally below) so that simultaneous running agents are bounded
+    # by COCO_MAX_PARALLEL_AGENTS, not just simultaneous spawn calls.
+    _spawn_sem = get_spawn_semaphore()
+    await _spawn_sem.acquire()
+    _spawn_slot_held = True
     try:
         proc = await asyncio.create_subprocess_exec(
             *cmd,
@@ -282,9 +290,13 @@ async def chat_event_generator(message: str, model: str, system_prompt: str, ses
             limit=1024 * 1024,
         )
     except FileNotFoundError:
+        _spawn_sem.release()
+        _spawn_slot_held = False
         yield {"event": "error", "data": json.dumps({"type": "error", "message": "claude CLI not found on PATH"})}
         return
     except Exception as e:
+        _spawn_sem.release()
+        _spawn_slot_held = False
         yield {"event": "error", "data": json.dumps({"type": "error", "message": f"Failed to start claude: {str(e)}"})}
         return
 
@@ -388,6 +400,11 @@ async def chat_event_generator(message: str, model: str, system_prompt: str, ses
                     proc.kill()
                 except Exception:
                     pass
+        # Release the spawn semaphore slot now that the subprocess has exited
+        # (NEXT_SPRINT 1.3 — cap concurrent claude-CLI agents).
+        if _spawn_slot_held:
+            _spawn_sem.release()
+            _spawn_slot_held = False
 
     tokens_used = len(full_response.split()) if full_response else 0
     if full_response:

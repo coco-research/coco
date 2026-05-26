@@ -193,11 +193,12 @@ function Waveform({ active }: { active: boolean }) {
         <div
           key={i}
           className={cn(
-            'w-[2px] h-[3px] rounded-full transition-all duration-500 origin-bottom will-change-transform',
+            'w-[2px] h-full rounded-full transition-colors duration-500 origin-bottom',
             active ? 'bg-white/40' : 'bg-white/10',
           )}
           style={{
-            transform: active ? undefined : 'scaleY(1)',
+            transform: active ? undefined : 'scaleY(0.2)',
+            willChange: active ? 'transform' : undefined,
             animation: active ? `jarvis-waveform ${0.4 + i * 0.1}s ease-in-out infinite alternate` : 'none',
           }}
         />

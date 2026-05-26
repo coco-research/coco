@@ -479,10 +479,10 @@ textarea,
   50% { opacity: 0.5; }
 }
 
-/* Audio waveform bars — GPU-accelerated via scaleY instead of height */
+/* Audio waveform bars — GPU-accelerated via scaleY instead of height (no reflow) */
 @keyframes jarvis-waveform {
-  0% { transform: scaleY(1); }
-  100% { transform: scaleY(4); }
+  0% { transform: scaleY(0.2); }
+  100% { transform: scaleY(0.9); }
 }
 
 /* Orb pulse — gentle glow, not sci-fi */

@@ -112,8 +112,26 @@ export const AgentCard = React.memo(function AgentCard({ agent, onClick, onSpawn
             <InlineEditor
               value={agent.name}
               onSave={async (name) => {
-                await apiPatch(`/agents/${agent.id}`, { name });
-                void qc.invalidateQueries({ queryKey: ['agents'] });
+                // Optimistic update + revert on error
+                const queryKeys = [['agents'], ['agents-org-chart']];
+                const snapshots = queryKeys.map((k) => ({
+                  key: k,
+                  data: qc.getQueryData(k),
+                }));
+                queryKeys.forEach((k) => {
+                  qc.setQueryData<Agent[] | undefined>(k, (old) =>
+                    old?.map((a) => (a.id === agent.id ? { ...a, name } : a)),
+                  );
+                });
+                try {
+                  await apiPatch(`/agents/${agent.id}`, { name });
+                } catch (e) {
+                  snapshots.forEach((s) => qc.setQueryData(s.key, s.data));
+                  throw e;
+                } finally {
+                  void qc.invalidateQueries({ queryKey: ['agents'] });
+                  void qc.invalidateQueries({ queryKey: ['agents-org-chart'] });
+                }
               }}
               as="h3"
               className="font-medium text-foreground truncate"
@@ -128,9 +146,35 @@ export const AgentCard = React.memo(function AgentCard({ agent, onClick, onSpawn
         </span>
       </div>
 
-      {agent.task_description && (
-        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{agent.task_description}</p>
-      )}
+      <div onClick={(e) => e.stopPropagation()} className="mb-3">
+        <InlineEditor
+          value={agent.task_description ?? ''}
+          placeholder="Add a description..."
+          onSave={async (task_description) => {
+            const queryKeys = [['agents'], ['agents-org-chart']];
+            const snapshots = queryKeys.map((k) => ({
+              key: k,
+              data: qc.getQueryData(k),
+            }));
+            queryKeys.forEach((k) => {
+              qc.setQueryData<Agent[] | undefined>(k, (old) =>
+                old?.map((a) => (a.id === agent.id ? { ...a, task_description } : a)),
+              );
+            });
+            try {
+              await apiPatch(`/agents/${agent.id}`, { task_description });
+            } catch (e) {
+              snapshots.forEach((s) => qc.setQueryData(s.key, s.data));
+              throw e;
+            } finally {
+              void qc.invalidateQueries({ queryKey: ['agents'] });
+              void qc.invalidateQueries({ queryKey: ['agents-org-chart'] });
+            }
+          }}
+          as="p"
+          className="text-sm text-muted-foreground line-clamp-2"
+        />
+      </div>
 
       <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
         <span className="capitalize">{agent.status}</span>

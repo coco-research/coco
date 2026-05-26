@@ -482,6 +482,53 @@ def update_todo(todo_id: str, body: PatchTodoBody):
     return todo_result
 
 
+@router.delete("/api/todos/{todo_id}", status_code=200)
+def delete_todo(todo_id: str):
+    """Delete a todo.
+
+    Platform-native todos are hard-deleted (override row + dependencies removed).
+    Hub-backed todos are soft-deleted by recording an override with status=archived,
+    since the hub mirror is read-only from this service.
+    """
+    existing = _get_todo_by_id(todo_id)
+    if not existing:
+        raise HTTPException(404, "Todo not found")
+
+    is_native = bool(existing.get("is_platform_native"))
+
+    with get_db() as conn:
+        # Always clean up dependency edges referencing this todo
+        conn.execute(
+            delete(todo_dependencies).where(todo_dependencies.c.todo_id == todo_id)
+        )
+        conn.execute(
+            delete(todo_dependencies).where(todo_dependencies.c.depends_on == todo_id)
+        )
+
+        if is_native:
+            conn.execute(
+                delete(todo_overrides).where(todo_overrides.c.hub_todo_id == todo_id)
+            )
+        else:
+            # Soft delete hub-backed todo via override
+            conn.execute(
+                upsert(
+                    todo_overrides,
+                    values={
+                        "hub_todo_id": todo_id,
+                        "status": "archived",
+                        "is_platform_native": 0,
+                        "updated_at": now(),
+                    },
+                    conflict_cols=["hub_todo_id"],
+                    update_cols=["status", "updated_at"],
+                )
+            )
+
+    event_bus.emit("todo.deleted", {"id": todo_id, "hard_deleted": is_native})
+    return {"id": todo_id, "deleted": True, "hard_deleted": is_native}
+
+
 @router.patch("/api/todos/{todo_id}/transition")
 def transition_todo(todo_id: str, body: TransitionBody):
     to_state = body.to_state

@@ -13,7 +13,13 @@ from app.db.tables import (
 from app.config import HUB_DB_PATH, BRAIN_JSON_PATH
 from app.services.dedup import similarity, find_duplicates, pick_best, group_similarity
 from app.services.event_bus import event_bus
-from app.models.todos import CreateTodoBody, CreateDependencyBody, MergeTodosBody, PatchTodoBody
+from app.models.todos import (
+    CreateBlockedByBody,
+    CreateDependencyBody,
+    CreateTodoBody,
+    MergeTodosBody,
+    PatchTodoBody,
+)
 from app.models.common import TransitionBody
 from app.services.id_generator import assign_display_id, resolve_display_id
 
@@ -867,6 +873,26 @@ def _has_circular_dependency(conn, from_id: str, to_id: str) -> bool:
     return False
 
 
+def _get_blocker_ids(conn, todo_id: str) -> list[str]:
+    """IDs of todos that block this todo (blocked_by edges)."""
+    rows = conn.execute(
+        select(todo_dependencies.c.depends_on)
+        .where(todo_dependencies.c.todo_id == todo_id)
+        .where(todo_dependencies.c.dep_type == "blocked_by")
+    ).fetchall()
+    return [r.depends_on for r in rows]
+
+
+def _get_blocked_ids(conn, todo_id: str) -> list[str]:
+    """IDs of todos that this todo blocks (inverse of blocked_by)."""
+    rows = conn.execute(
+        select(todo_dependencies.c.todo_id)
+        .where(todo_dependencies.c.depends_on == todo_id)
+        .where(todo_dependencies.c.dep_type == "blocked_by")
+    ).fetchall()
+    return [r.todo_id for r in rows]
+
+
 @router.get("/api/todos/{todo_id}/dependencies")
 def list_dependencies(todo_id: str):
     existing = _get_todo_by_id(todo_id)
@@ -966,6 +992,19 @@ def list_all_dependencies():
     return [dict(r._mapping) for r in rows]
 
 
+@router.get("/api/todos/{todo_id}")
+def get_todo(todo_id: str):
+    """Fetch a single todo with its blocker / blocking dependency ids."""
+    todo = _get_todo_by_id(todo_id)
+    if not todo:
+        raise HTTPException(404, "Todo not found")
+
+    with get_db() as conn:
+        todo["blocked_by"] = _get_blocker_ids(conn, todo_id)
+        todo["blocks"] = _get_blocked_ids(conn, todo_id)
+    return todo
+
+
 @router.post("/api/todos/{todo_id}/dependencies", status_code=201)
 def create_dependency(todo_id: str, body: CreateDependencyBody):
     existing = _get_todo_by_id(todo_id)
@@ -1036,3 +1075,96 @@ def delete_dependency(todo_id: str, dep_id: str):
 
     event_bus.emit("todo.dependency.deleted", {"todo_id": todo_id, "dep_id": dep_id})
     return {"ok": True}
+
+
+# ---- Convenience endpoints (GAP M9): blocked_by alias ----
+# These mirror /dependencies but with the blocker-centric vocabulary requested
+# by the GAP M9 spec: "todo B blocked by todo A".
+
+
+@router.post("/api/todos/{todo_id}/blocked_by", status_code=201)
+def add_blocked_by(todo_id: str, body: CreateBlockedByBody):
+    """Mark `todo_id` as blocked_by `blocker_id`.
+
+    Equivalent to POST /api/todos/{todo_id}/dependencies with
+    {depends_on: blocker_id, dep_type: 'blocked_by'} but expressed in the
+    blocker-centric vocabulary.
+    """
+    blocker_id = body.blocker_id
+
+    existing = _get_todo_by_id(todo_id)
+    if not existing:
+        raise HTTPException(404, "Todo not found")
+
+    blocker = _get_todo_by_id(blocker_id)
+    if not blocker:
+        raise HTTPException(404, f"Blocker todo '{blocker_id}' not found")
+
+    if todo_id == blocker_id:
+        raise HTTPException(400, "A todo cannot block itself")
+
+    with get_db() as conn:
+        if _has_circular_dependency(conn, todo_id, blocker_id):
+            raise HTTPException(
+                422,
+                f"Circular dependency detected: '{blocker_id}' is already "
+                f"transitively blocked by '{todo_id}'. Adding this dependency "
+                "would create a cycle.",
+            )
+
+    dep_id = str(uuid.uuid4())
+
+    with get_db() as conn:
+        try:
+            conn.execute(
+                insert(todo_dependencies).values(
+                    id=dep_id,
+                    todo_id=todo_id,
+                    depends_on=blocker_id,
+                    dep_type="blocked_by",
+                )
+            )
+        except Exception as e:
+            if "UNIQUE constraint" in str(e):
+                raise HTTPException(409, "Dependency already exists")
+            raise HTTPException(500, f"Failed to create dependency: {e}")
+
+    event_bus.emit("todo.dependency.created", {
+        "todo_id": todo_id,
+        "depends_on": blocker_id,
+        "dep_type": "blocked_by",
+    })
+    return {
+        "id": dep_id,
+        "todo_id": todo_id,
+        "blocker_id": blocker_id,
+        "depends_on": blocker_id,
+        "dep_type": "blocked_by",
+        "blocker_title": blocker.get("title", ""),
+        "blocker_status": blocker.get("status", ""),
+    }
+
+
+@router.delete("/api/todos/{todo_id}/blocked_by/{blocker_id}", status_code=204)
+def remove_blocked_by(todo_id: str, blocker_id: str):
+    """Remove the blocked_by edge from `todo_id` to `blocker_id`."""
+    with get_db() as conn:
+        row = conn.execute(
+            select(todo_dependencies.c.id)
+            .where(todo_dependencies.c.todo_id == todo_id)
+            .where(todo_dependencies.c.depends_on == blocker_id)
+            .where(todo_dependencies.c.dep_type == "blocked_by")
+        ).fetchone()
+        if not row:
+            raise HTTPException(404, "blocked_by edge not found")
+
+        conn.execute(
+            delete(todo_dependencies).where(todo_dependencies.c.id == row.id)
+        )
+
+    event_bus.emit("todo.dependency.deleted", {
+        "todo_id": todo_id,
+        "dep_id": row.id,
+        "blocker_id": blocker_id,
+    })
+    return None

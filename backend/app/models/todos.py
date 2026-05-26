@@ -30,3 +30,9 @@ class MergeTodosBody(BaseModel):
 class CreateDependencyBody(BaseModel):
     depends_on: str
     dep_type: str = "blocked_by"
+
+
+class CreateBlockedByBody(BaseModel):
+    """Body for POST /api/todos/:id/blocked_by — adds a blocker to this todo."""
+
+    blocker_id: str

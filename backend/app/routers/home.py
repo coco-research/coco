@@ -15,6 +15,7 @@ from app.db.tables import (
     hub_content, hub_project_content, hub_drafts, hub_todos,
     hub_projects, hub_api_costs, hub_sync_state,
     tasks, cost_ledger, draft_decisions,
+    self_improve_cycles, self_improve_improvements,
 )
 
 log = structlog.get_logger()
@@ -351,31 +352,38 @@ def get_home():
             from datetime import timedelta
             week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
 
-            cycles_week_row = conn.exec_driver_sql(
-                "SELECT COUNT(*) as cnt FROM self_improve_cycles "
-                "WHERE started_at >= ? AND status IN ('completed', 'rejected', 'failed')",
-                (week_ago,),
+            cycles_week_row = conn.execute(
+                select(func.count().label("cnt"))
+                .select_from(self_improve_cycles)
+                .where(self_improve_cycles.c.started_at >= week_ago)
+                .where(self_improve_cycles.c.status.in_(("completed", "rejected", "failed")))
             ).fetchone()
-            cycles_this_week = cycles_week_row._mapping["cnt"] if cycles_week_row else 0
+            cycles_this_week = cycles_week_row.cnt if cycles_week_row else 0
 
-            files_improved_row = conn.exec_driver_sql(
-                "SELECT COUNT(*) as cnt FROM self_improve_improvements i "
-                "JOIN self_improve_cycles c ON i.cycle_id = c.id "
-                "WHERE c.started_at >= ? AND i.status IN ('approved_by_human', 'merged')",
-                (week_ago,),
+            files_improved_row = conn.execute(
+                select(func.count().label("cnt"))
+                .select_from(
+                    self_improve_improvements.join(
+                        self_improve_cycles,
+                        self_improve_improvements.c.cycle_id == self_improve_cycles.c.id,
+                    )
+                )
+                .where(self_improve_cycles.c.started_at >= week_ago)
+                .where(self_improve_improvements.c.status.in_(("approved_by_human", "merged")))
             ).fetchone()
-            files_improved = files_improved_row._mapping["cnt"] if files_improved_row else 0
+            files_improved = files_improved_row.cnt if files_improved_row else 0
 
-            active_cycle_row = conn.exec_driver_sql(
-                "SELECT id, status FROM self_improve_cycles "
-                "WHERE status NOT IN ('completed', 'rejected', 'failed') "
-                "ORDER BY created_at DESC LIMIT 1",
+            active_cycle_row = conn.execute(
+                select(self_improve_cycles.c.id, self_improve_cycles.c.status)
+                .where(self_improve_cycles.c.status.notin_(("completed", "rejected", "failed")))
+                .order_by(self_improve_cycles.c.created_at.desc())
+                .limit(1)
             ).fetchone()
             active_cycle = None
             if active_cycle_row:
                 active_cycle = {
-                    "id": active_cycle_row._mapping["id"],
-                    "status": active_cycle_row._mapping["status"],
+                    "id": active_cycle_row.id,
+                    "status": active_cycle_row.status,
                 }
 
             result["self_improve"] = {

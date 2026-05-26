@@ -4,15 +4,31 @@ type SpeakingListener = (speaking: boolean) => void;
 
 class JarvisAudioEngine {
   private ctx: AudioContext | null = null;
-  private ambientStop: (() => void) | null = null;
+  private ambientStop: ((immediate?: boolean) => void) | null = null;
+  private ambientFadeTimer: ReturnType<typeof setTimeout> | null = null;
   private currentAudio: HTMLAudioElement | null = null;
   private _isSpeaking = false;
   private _listeners = new Set<SpeakingListener>();
+  /**
+   * Tracks every live oscillator (ambient layers, blips, chimes, LFOs) so we
+   * can force-stop them when the Jarvis overlay closes. Without this set,
+   * ambient oscillators leaked across overlay close → app continued humming.
+   */
+  private activeOscillators = new Set<OscillatorNode>();
 
   private ensureContext() {
     if (!this.ctx) this.ctx = new AudioContext();
     if (this.ctx.state === 'suspended') this.ctx.resume();
     return this.ctx;
+  }
+
+  /** Register an oscillator for tracked lifecycle. Auto-removes on natural end. */
+  private trackOsc(osc: OscillatorNode) {
+    this.activeOscillators.add(osc);
+    osc.addEventListener('ended', () => {
+      this.activeOscillators.delete(osc);
+      try { osc.disconnect(); } catch {}
+    });
   }
 
   private setSpeaking(v: boolean) {
@@ -39,6 +55,7 @@ class JarvisAudioEngine {
     osc.connect(gain).connect(ctx.destination);
     osc.start();
     osc.stop(ctx.currentTime + 0.15);
+    this.trackOsc(osc);
   }
 
   /** Section reveal chime */
@@ -54,6 +71,7 @@ class JarvisAudioEngine {
     osc.connect(gain).connect(ctx.destination);
     osc.start();
     osc.stop(ctx.currentTime + 0.4);
+    this.trackOsc(osc);
   }
 
   /** Two-tone success */
@@ -69,6 +87,7 @@ class JarvisAudioEngine {
       osc.connect(gain).connect(ctx.destination);
       osc.start(ctx.currentTime + i * 0.12);
       osc.stop(ctx.currentTime + i * 0.12 + 0.3);
+      this.trackOsc(osc);
     });
   }
 
@@ -95,6 +114,7 @@ class JarvisAudioEngine {
     sub.connect(subFilter).connect(subGain).connect(masterGain);
     sub.start();
     nodes.push(sub);
+    this.trackOsc(sub);
 
     // Layer 2: Warm pad — two detuned oscillators for width
     const padL = ctx.createOscillator();
@@ -114,6 +134,8 @@ class JarvisAudioEngine {
     padL.start();
     padR.start();
     nodes.push(padL, padR);
+    this.trackOsc(padL);
+    this.trackOsc(padR);
 
     // Layer 3: High shimmer — very quiet, adds "air"
     const shimmer = ctx.createOscillator();
@@ -136,18 +158,69 @@ class JarvisAudioEngine {
     shimmer.connect(shimmerFilter).connect(shimmerGain).connect(masterGain);
     shimmer.start();
     nodes.push(shimmer, lfo);
+    this.trackOsc(shimmer);
+    this.trackOsc(lfo);
 
-    this.ambientStop = () => {
-      masterGain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 2);
-      setTimeout(() => {
-        nodes.forEach((n) => { try { n.stop(); n.disconnect(); } catch {} });
-      }, 2200);
+    this.ambientStop = (immediate = false) => {
+      // Clear any pending fade-out timer
+      if (this.ambientFadeTimer) {
+        clearTimeout(this.ambientFadeTimer);
+        this.ambientFadeTimer = null;
+      }
+      const stopAll = () => {
+        nodes.forEach((n) => {
+          try { n.stop(); } catch {}
+          try { n.disconnect(); } catch {}
+          this.activeOscillators.delete(n);
+        });
+        try { masterGain.disconnect(); } catch {}
+      };
+      if (immediate) {
+        // Force-stop: kill ramps and oscillators NOW (no fade)
+        try { masterGain.gain.cancelScheduledValues(ctx.currentTime); } catch {}
+        try { masterGain.gain.setValueAtTime(0, ctx.currentTime); } catch {}
+        stopAll();
+      } else {
+        masterGain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 2);
+        this.ambientFadeTimer = setTimeout(() => {
+          stopAll();
+          this.ambientFadeTimer = null;
+        }, 2200);
+      }
       this.ambientStop = null;
     };
   }
 
   stopAmbient() {
     this.ambientStop?.();
+  }
+
+  /**
+   * Force-stop ALL audio output within ~one event-loop tick.
+   * Called when the Jarvis overlay unmounts/closes so oscillators don't leak.
+   */
+  forceStopAll() {
+    // Stop ambient with no fade
+    (this.ambientStop as ((immediate?: boolean) => void) | null)?.(true);
+    if (this.ambientFadeTimer) {
+      clearTimeout(this.ambientFadeTimer);
+      this.ambientFadeTimer = null;
+    }
+    // Stop every tracked oscillator (covers blip/chime/success too)
+    this.activeOscillators.forEach((osc) => {
+      try { osc.stop(); } catch {}
+      try { osc.disconnect(); } catch {}
+    });
+    this.activeOscillators.clear();
+    // Cancel TTS / Web Speech
+    if (this.currentAudio) {
+      try { this.currentAudio.pause(); } catch {}
+      this.currentAudio = null;
+    }
+    if ('speechSynthesis' in window) {
+      try { speechSynthesis.cancel(); } catch {}
+    }
+    this.setSpeaking(false);
   }
 
   private prefetchedUrl: string | null = null;
@@ -255,19 +328,13 @@ class JarvisAudioEngine {
 
   /** Clean up all audio resources (non-blocking) */
   destroy() {
-    // Cancel any playing speech immediately
+    // Force-stop every oscillator + TTS audio (the previous version cleared
+    // ambientStop without invoking it, so oscillators leaked past unmount).
+    this.forceStopAll();
     if (this.currentAudio) {
-      this.currentAudio.pause();
-      this.currentAudio.src = '';
-      this.currentAudio = null;
+      try { (this.currentAudio as HTMLAudioElement).src = ''; } catch {}
     }
-    if ('speechSynthesis' in window) speechSynthesis.cancel();
-    this.setSpeaking(false);
 
-    // Force-stop ambient oscillators immediately
-    if (this.ambientStop) {
-      this.ambientStop = null;
-    }
     // Revoke any prefetched blob URLs
     if (this.prefetchedUrl) {
       URL.revokeObjectURL(this.prefetchedUrl);
@@ -330,6 +397,7 @@ export function useJarvisAudio() {
     success: () => engine.success(),
     startAmbient: () => engine.startAmbient(),
     stopAmbient: () => engine.stopAmbient(),
+    forceStopAll: () => engine.forceStopAll(),
     cancelSpeak: () => engine.cancelSpeak(),
     isSpeaking,
   }), [isSpeaking]);

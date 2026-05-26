@@ -285,23 +285,72 @@ export default function InboxPage() {
     [readStates],
   );
 
-  // Mutation: patch a single read state
+  // Debounce ref: avoid immediate refetch after optimistic update (would cause flicker
+  // if the server hasn't committed the dismiss yet and returns the old state).
+  const refetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheduleReadStatesRefetch = useCallback(() => {
+    if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
+    refetchTimerRef.current = setTimeout(() => {
+      refetchTimerRef.current = null;
+      refetchReadStates();
+    }, 500);
+  }, [refetchReadStates]);
+
+  // Mutation: patch a single read state with optimistic cache update.
+  // We write directly to the ['inbox-read-states'] cache on mutate, so the row
+  // disappears immediately. On error we roll back. We do NOT refetch immediately
+  // on success — debounced 500ms — to avoid the brief "row reappears" flicker
+  // when the server hasn't yet propagated the change.
   const patchReadStateMut = useMutation({
     mutationFn: ({ item_key, read_state }: { item_key: string; read_state: ReadState }) =>
       apiPatch<unknown>('/inbox/read-state', { item_key, read_state }),
-    onSuccess: () => {
-      refetchReadStates();
+    onMutate: async ({ item_key, read_state }) => {
+      await queryClient.cancelQueries({ queryKey: ['inbox-read-states'] });
+      const previous = queryClient.getQueryData<Record<string, ReadState>>(['inbox-read-states']);
+      queryClient.setQueryData<Record<string, ReadState>>(['inbox-read-states'], (old) => ({
+        ...(old ?? {}),
+        [item_key]: read_state,
+      }));
+      return { previous };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous) {
+        queryClient.setQueryData(['inbox-read-states'], ctx.previous);
+      }
+    },
+    onSettled: () => {
+      scheduleReadStatesRefetch();
     },
   });
 
-  // Mutation: batch patch read states
+  // Mutation: batch patch read states with optimistic cache update.
   const batchReadStateMut = useMutation({
     mutationFn: ({ item_keys, read_state }: { item_keys: string[]; read_state: ReadState }) =>
       apiPatch<unknown>('/inbox/read-states/batch', { item_keys, read_state }),
-    onSuccess: () => {
-      refetchReadStates();
+    onMutate: async ({ item_keys, read_state }) => {
+      await queryClient.cancelQueries({ queryKey: ['inbox-read-states'] });
+      const previous = queryClient.getQueryData<Record<string, ReadState>>(['inbox-read-states']);
+      queryClient.setQueryData<Record<string, ReadState>>(['inbox-read-states'], (old) => {
+        const next = { ...(old ?? {}) };
+        for (const key of item_keys) next[key] = read_state;
+        return next;
+      });
+      return { previous };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous) {
+        queryClient.setQueryData(['inbox-read-states'], ctx.previous);
+      }
+    },
+    onSettled: () => {
+      scheduleReadStatesRefetch();
     },
   });
+
+  // Clean up pending refetch timer on unmount
+  useEffect(() => () => {
+    if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
+  }, []);
 
   // Debounced batch mark-as-seen: collect IDs, flush every 3s to avoid PATCH storm on scroll
   const seenQueueRef = useRef<Set<string>>(new Set());

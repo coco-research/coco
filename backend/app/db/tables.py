@@ -113,6 +113,21 @@ agent_output = Table(
     Column("timestamp", Text, nullable=False),
 )
 
+# Inter-agent delegation queue. Stays in sync with init_db.SCHEMA.
+agent_tasks = Table(
+    "agent_tasks",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("from_agent_id", Text),
+    Column("to_agent_id", Text, nullable=False),
+    Column("prompt", Text, nullable=False),
+    Column("status", Text, nullable=False, server_default="pending"),
+    Column("created_at", Text, nullable=False),
+    Column("claimed_at", Text),
+    Column("completed_at", Text),
+    Column("result", Text),
+)
+
 # ---------------------------------------------------------------------------
 # Cost tracking
 # ---------------------------------------------------------------------------

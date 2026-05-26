@@ -99,6 +99,22 @@ CREATE TABLE IF NOT EXISTS agent_output (
 );
 CREATE INDEX IF NOT EXISTS idx_agent_output_aid ON agent_output(agent_id);
 
+-- Inter-agent delegation. Agent A creates an agent_task for Agent B;
+-- B atomically claims pending tasks via UPDATE ... WHERE status='pending'.
+CREATE TABLE IF NOT EXISTS agent_tasks (
+    id TEXT PRIMARY KEY,
+    from_agent_id TEXT REFERENCES agents(id),
+    to_agent_id TEXT NOT NULL REFERENCES agents(id),
+    prompt TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','claimed','done','failed')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    claimed_at TEXT,
+    completed_at TEXT,
+    result TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_agent_tasks_to_status ON agent_tasks(to_agent_id, status);
+CREATE INDEX IF NOT EXISTS idx_agent_tasks_from ON agent_tasks(from_agent_id);
+
 CREATE TABLE IF NOT EXISTS cost_ledger (
     id TEXT PRIMARY KEY,
     agent_id TEXT REFERENCES agents(id),

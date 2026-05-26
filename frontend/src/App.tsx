@@ -39,6 +39,7 @@ const ReplayPage = lazy(() => import('./pages/ReplayPage'));
 const BrainPage = lazy(() => import('./pages/BrainPage'));
 const CanvasPage = lazy(() => import('./pages/CanvasPage'));
 const BriefingPage = lazy(() => import('./pages/BriefingPage'));
+const TriggersPage = lazy(() => import('./pages/TriggersPage'));
 
 /** Activates desktop notification listener for agent failures. */
 function DesktopNotifications() {
@@ -121,6 +122,7 @@ export default function App() {
                   <Route path="settings" element={<ErrorBoundary><SettingsPage /></ErrorBoundary>} />
                   <Route path="jarvis" element={<ErrorBoundary><StudioRoute><JarvisPage /></StudioRoute></ErrorBoundary>} />
                   <Route path="briefing" element={<ErrorBoundary><BriefingPage /></ErrorBoundary>} />
+                  <Route path="triggers" element={<ErrorBoundary><TriggersPage /></ErrorBoundary>} />
                 </Route>
               </Routes>
             </Suspense>

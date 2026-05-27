@@ -882,3 +882,68 @@ attention_events = Table(
     Column("source", Text, nullable=False, server_default="content"),
     Column("viewed_at", Text, nullable=False),
 )
+
+# ---------------------------------------------------------------------------
+# project_brain.db — separate read-only DB (NOT platform.db)
+#
+# These tables live in a distinct MetaData so they do not conflict with
+# platform.db tables of the same name (e.g. tasks, events).  They are
+# consumed by routers/brain.py through its own SA Core engine.
+# ---------------------------------------------------------------------------
+
+brain_metadata = MetaData()
+
+brain_decisions = Table(
+    "decisions",
+    brain_metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("project_id", Integer, nullable=False),
+    Column("thread_id", Integer),
+    Column("date", Text, nullable=False),
+    Column("decision", Text, nullable=False),
+    Column("context", Text),
+    Column("decided_by", Text),
+    Column("impact", Text),
+)
+
+brain_events = Table(
+    "events",
+    brain_metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("project_id", Integer, nullable=False),
+    Column("date", Text, nullable=False),
+    Column("type", Text, nullable=False),
+    Column("title", Text, nullable=False),
+    Column("summary", Text),
+    Column("source", Text),
+    Column("participants_json", Text, server_default="[]"),
+)
+
+brain_tasks = Table(
+    "tasks",
+    brain_metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("project_id", Integer, nullable=False),
+    Column("title", Text, nullable=False),
+    Column("status", Text, nullable=False, server_default="open"),
+    Column("owner_entity_id", Integer),
+    Column("priority", Integer, server_default="3"),
+    Column("due_date", Text),
+    Column("blocked_by_task_id", Integer),
+    Column("notes", Text),
+    Column("created_at", Text, nullable=False),
+    Column("completed_at", Text),
+)
+
+brain_entities = Table(
+    "entities",
+    brain_metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("project_id", Integer, nullable=False),
+    Column("type", Text, nullable=False),
+    Column("name", Text, nullable=False),
+    Column("external_id", Text),
+    Column("metadata_json", Text, server_default="{}"),
+    Column("created_at", Text, nullable=False),
+    Column("updated_at", Text, nullable=False),
+)

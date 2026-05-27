@@ -258,10 +258,39 @@ export default function InboxPage(): ReactElement {
 
   // ── Triage dispatch — POSTs with Idempotency-Key ──
 
+  // Debounce ref: avoid immediate refetch after optimistic update (would cause
+  // flicker if the server hasn't committed the triage yet and the GET returns
+  // the old queue, briefly resurrecting the dismissed card). Ported from
+  // wave-3 c168fc7 ("fix(inbox): eliminate dismiss flicker via optimistic
+  // cache"), adapted to the 3-zone design — instead of TanStack `onMutate`
+  // cache writes (which the redesign doesn't use), we hang the rollback off
+  // Zustand's `optimistic` map and debounce the reconciling invalidate.
+  const refetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheduleQueueRefetch = useCallback(() => {
+    if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
+    refetchTimerRef.current = setTimeout(() => {
+      refetchTimerRef.current = null;
+      queryClient.invalidateQueries({ queryKey: ['queue'] });
+    }, 500);
+  }, [queryClient]);
+
+  // Clean up pending refetch timer on unmount.
+  useEffect(
+    () => () => {
+      if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
+    },
+    [],
+  );
+
   const fireTriage = useCallback(
     async (decisionId: string, action: TriageAction) => {
       const endpoint = TRIAGE_TO_ENDPOINT[action];
       const optKey = TRIAGE_TO_OPTIMISTIC[action];
+      // Snapshot previous optimistic state for this id (rollback target).
+      // `clearOptimistic(id)` would re-show the card; if there had been a
+      // prior optimistic entry (rare — same card triaged twice in flight) we
+      // restore that exact value rather than dropping it.
+      const previous = useQueueStore.getState().optimistic[decisionId];
       // Mark optimistic immediately so the card slides out before the round-trip.
       setOptimistic(decisionId, optKey);
       try {
@@ -269,16 +298,22 @@ export default function InboxPage(): ReactElement {
         // We do NOT clear optimistic here — wait for SSE
         // `queue.side_effect_confirmed` to confirm side effects landed.
         // Belt-and-braces: invalidate the queue cache so a fresh GET catches
-        // any drift if SSE is degraded.
-        queryClient.invalidateQueries({ queryKey: ['queue'] });
+        // any drift if SSE is degraded — debounced 500ms to avoid the brief
+        // "card reappears" flicker when the server hasn't yet propagated the
+        // triage at the time of refetch.
+        scheduleQueueRefetch();
       } catch (e) {
         // Roll back — the user can retry. Show a toast.
-        clearOptimistic(decisionId);
+        if (previous !== undefined) {
+          setOptimistic(decisionId, previous);
+        } else {
+          clearOptimistic(decisionId);
+        }
         const msg = e instanceof Error ? e.message : 'Triage failed';
         toast(`Couldn't ${action}: ${msg}`, 'error');
       }
     },
-    [clearOptimistic, queryClient, setOptimistic, toast],
+    [clearOptimistic, scheduleQueueRefetch, setOptimistic, toast],
   );
 
   // Safety: after 8s of optimistic-but-unconfirmed state, force-clear so the

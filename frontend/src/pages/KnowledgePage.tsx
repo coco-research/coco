@@ -20,7 +20,6 @@ import { UnifiedSearch } from '../components/knowledge/UnifiedSearch';
 import { KnowledgeStats } from '../components/knowledge/KnowledgeStats';
 import { QualityDashboard } from '../components/knowledge/QualityDashboard';
 import type { WikiArticle } from '../components/knowledge/WikiArticleList';
-import { ErrorState } from '../components/shared/ErrorState';
 
 const TABS: { id: KnowledgeTab; label: string; icon: React.ReactNode }[] = [
   { id: 'search', label: 'Search', icon: <Search className="h-4 w-4" /> },

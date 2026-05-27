@@ -3,7 +3,7 @@ import {
   FolderKanban, Radio, MessageSquare,
   DollarSign, Settings, CheckSquare, Search, Inbox, Brain,
   Target, Activity, ChevronsUpDown, ChevronRight, Network,
-  BarChart3, Home, Sparkles, PanelLeftClose, PanelLeftOpen, Wand2, Workflow, FileText, Sun, Zap,
+  BarChart3, Home, PanelLeftClose, PanelLeftOpen, Wand2, Workflow, FileText, Sun, Zap,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useScope, type TreeNode } from '../../context/ScopeContext';

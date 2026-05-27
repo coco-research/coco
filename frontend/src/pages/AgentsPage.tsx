@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, FolderKanban, Radio, LayoutGrid, GitFork, ListTodo, ChevronDown, ChevronRight } from 'lucide-react';
 import { Skeleton } from 'boneyard-js/react';
@@ -92,6 +92,18 @@ export default function AgentsPage() {
   }, [grouped, projectMap]);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['agents'] });
+
+  // Listen for Cmd-K "New Agent" action — opens the spawn dialog
+  useEffect(() => {
+    const onAction = (e: Event) => {
+      const detail = (e as CustomEvent<{ type?: string }>).detail;
+      if (detail?.type === 'agent') {
+        setDialogOpen(true);
+      }
+    };
+    window.addEventListener('coco:action', onAction);
+    return () => window.removeEventListener('coco:action', onAction);
+  }, []);
 
   const ACTION_LABELS: Record<string, string> = {
     spawn: 'Agent spawned',

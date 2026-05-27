@@ -16,6 +16,7 @@ from sqlalchemy import (
     Table,
     Text,
     UniqueConstraint,
+    text,
 )
 
 metadata = MetaData()
@@ -371,7 +372,7 @@ draft_decisions = Table(
     Column("hub_draft_id", Text, nullable=False),
     Column("status", Text, nullable=False),
     Column("decided_by", Text, server_default="user"),
-    Column("decided_at", Text, nullable=False),
+    Column("decided_at", Text, nullable=False, server_default=text("(datetime('now'))")),
 )
 
 content_classifications = Table(
@@ -646,7 +647,7 @@ inbox_notifications = Table(
     Column("title", Text, nullable=False),
     Column("body", Text),
     Column("metadata_json", Text, server_default="{}"),
-    Column("created_at", Text, nullable=False),
+    Column("created_at", Text, nullable=False, server_default=text("(datetime('now'))")),
 )
 
 # ---------------------------------------------------------------------------
@@ -789,7 +790,7 @@ hub_project_content = Table(
 
 hub_api_costs = Table(
     "hub_api_costs", metadata,
-    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("id", Text, primary_key=True),
     Column("timestamp", Text, key="created_at"),  # alias
     Column("model", Text),
     Column("feature", Text),

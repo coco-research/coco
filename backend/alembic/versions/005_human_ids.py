@@ -148,6 +148,21 @@ def _backfill(conn, table: str, id_col: str, node_col: str | None, entity_type: 
 def upgrade() -> None:
     bind = op.get_bind()
 
+    # 0. Ensure the id_sequences / entity_identifiers tables exist.
+    #    In normal deploys init_db.py creates these via SA Core metadata
+    #    before alembic runs, but for fresh alembic-only deploys we create
+    #    them here so this migration is self-sufficient.
+    op.execute(
+        "CREATE TABLE IF NOT EXISTS id_sequences ("
+        "node_id TEXT PRIMARY KEY, next_seq INTEGER NOT NULL DEFAULT 1)"
+    )
+    op.execute(
+        "CREATE TABLE IF NOT EXISTS entity_identifiers ("
+        "entity_id TEXT PRIMARY KEY, entity_type TEXT NOT NULL, "
+        "node_id TEXT NOT NULL, sequence_num INTEGER NOT NULL, "
+        "display_id TEXT NOT NULL, UNIQUE(node_id, sequence_num))"
+    )
+
     # 1. Ensure global bucket exists for entities without a node.
     _ensure_global_bucket(bind)
 

@@ -168,7 +168,7 @@ export function NotificationDropdown() {
         aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors"
+        className="relative inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors"
       >
         <Bell size={16} aria-hidden="true" />
         {unreadCount > 0 && (

@@ -23,10 +23,11 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
   type ReactElement,
 } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiFetch, apiPostIdempotent } from '../../lib/api';
+import { apiFetch, apiPostIdempotent, generateUuidV4 } from '../../lib/api';
 import { useQueueStore, type OptimisticDecision } from '../../stores/queue';
 import { useToast } from '../../components/shared/Toast';
 import { ErrorState } from '../../components/shared/states';
@@ -275,16 +276,58 @@ export default function InboxPage(): ReactElement {
     }, 500);
   }, [queryClient]);
 
-  // Clean up pending refetch timer on unmount.
+  // Per-item safety-clear timers. Replaces the previous single 8s timer that
+  // reset on every new triage — under steady use that timer would never fire
+  // because each new optimistic entry restarted it. Per-item timers fire
+  // independently so each stale optimistic entry self-clears at +8s.
+  const safetyTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  );
+
+  // Stable Idempotency-Keys per (itemId, action). Pre-generated on first use
+  // so that double-tap / retry of the same logical action reuses the same key
+  // (Stripe-style dedupe). Cleared when the action settles.
+  const idempotencyKeysRef = useRef<Map<string, string>>(new Map());
+
+  // In-flight actions — keyed by `${itemId}:${action}`. Bail early if a tap
+  // arrives while the same logical action is already in flight.
+  const [inFlightActions, setInFlightActions] = useState<Set<string>>(
+    () => new Set(),
+  );
+  // Mirror in a ref for sync-read inside the callback without a stale closure.
+  const inFlightActionsRef = useRef<Set<string>>(inFlightActions);
+  useEffect(() => {
+    inFlightActionsRef.current = inFlightActions;
+  }, [inFlightActions]);
+
+  const markInFlight = useCallback((key: string, on: boolean) => {
+    setInFlightActions((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(key);
+      else next.delete(key);
+      return next;
+    });
+  }, []);
+
+  // Clean up pending refetch + safety timers on unmount.
   useEffect(
     () => () => {
       if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
+      for (const t of safetyTimersRef.current.values()) clearTimeout(t);
+      safetyTimersRef.current.clear();
     },
     [],
   );
 
   const fireTriage = useCallback(
     async (decisionId: string, action: TriageAction) => {
+      const inFlightKey = `${decisionId}:${action}`;
+      // Double-fire guard — bail if the same logical action is already in
+      // flight for this item. Prevents two distinct Idempotency-Key headers
+      // (which apiPostIdempotent generates by default) from being sent for the
+      // same user intent on a rapid double-tap.
+      if (inFlightActionsRef.current.has(inFlightKey)) return;
+
       const endpoint = TRIAGE_TO_ENDPOINT[action];
       const optKey = TRIAGE_TO_OPTIMISTIC[action];
       // Snapshot previous optimistic state for this id (rollback target).
@@ -292,10 +335,28 @@ export default function InboxPage(): ReactElement {
       // prior optimistic entry (rare — same card triaged twice in flight) we
       // restore that exact value rather than dropping it.
       const previous = useQueueStore.getState().optimistic[decisionId];
+
+      // Stabilize the Idempotency-Key per (itemId, action). On retry or
+      // double-tap, the same UUID is reused so the backend dedupe layer
+      // treats them as one logical request.
+      let idempotencyKey = idempotencyKeysRef.current.get(inFlightKey);
+      if (!idempotencyKey) {
+        idempotencyKey = generateUuidV4();
+        idempotencyKeysRef.current.set(inFlightKey, idempotencyKey);
+      }
+
       // Mark optimistic immediately so the card slides out before the round-trip.
       setOptimistic(decisionId, optKey);
+      markInFlight(inFlightKey, true);
+      inFlightActionsRef.current = new Set(inFlightActionsRef.current).add(
+        inFlightKey,
+      );
       try {
-        await apiPostIdempotent(`/queue/${decisionId}/${endpoint}`);
+        await apiPostIdempotent(
+          `/queue/${decisionId}/${endpoint}`,
+          {},
+          idempotencyKey,
+        );
         // We do NOT clear optimistic here — wait for SSE
         // `queue.side_effect_confirmed` to confirm side effects landed.
         // Belt-and-braces: invalidate the queue cache so a fresh GET catches
@@ -303,8 +364,14 @@ export default function InboxPage(): ReactElement {
         // "card reappears" flicker when the server hasn't yet propagated the
         // triage at the time of refetch.
         scheduleQueueRefetch();
+        // Success — drop the cached key so a fresh user action gets a fresh
+        // UUID (otherwise a second logical "approve" after success would
+        // collapse into the prior request server-side).
+        idempotencyKeysRef.current.delete(inFlightKey);
       } catch (e) {
         // Roll back — the user can retry. Show a toast.
+        // Keep the idempotency key cached so a retry POST reuses it (the
+        // backend will dedupe if the original actually landed).
         if (previous !== undefined) {
           setOptimistic(decisionId, previous);
         } else {
@@ -312,22 +379,39 @@ export default function InboxPage(): ReactElement {
         }
         const msg = e instanceof Error ? e.message : 'Triage failed';
         toast(`Couldn't ${action}: ${msg}`, 'error');
+      } finally {
+        markInFlight(inFlightKey, false);
       }
     },
-    [clearOptimistic, scheduleQueueRefetch, setOptimistic, toast],
+    [clearOptimistic, markInFlight, scheduleQueueRefetch, setOptimistic, toast],
   );
 
-  // Safety: after 8s of optimistic-but-unconfirmed state, force-clear so the
-  // card can be re-triaged. The card will reappear from the next GET if the
-  // server still has it pending.
+  // Safety: per-item +8s timer so each stale optimistic entry self-clears
+  // independently. Under steady use the previous single timer would reset on
+  // every new triage and never fire; this version schedules one timer per id
+  // when that id transitions into the optimistic map.
   useEffect(() => {
     const ids = Object.keys(optimistic);
-    if (ids.length === 0) return;
-    const t = setTimeout(() => {
-      for (const id of ids) clearOptimistic(id);
-      queryClient.invalidateQueries({ queryKey: ['queue'] });
-    }, 8000);
-    return () => clearTimeout(t);
+    const timers = safetyTimersRef.current;
+    // Schedule timers for any new optimistic ids.
+    for (const id of ids) {
+      if (timers.has(id)) continue;
+      const t = setTimeout(() => {
+        timers.delete(id);
+        clearOptimistic(id);
+        queryClient.invalidateQueries({ queryKey: ['queue'] });
+      }, 8000);
+      timers.set(id, t);
+    }
+    // Drop timers for ids that left the optimistic map (already confirmed via
+    // SSE or rolled back) — otherwise they'd fire a spurious invalidate.
+    const present = new Set(ids);
+    for (const [id, t] of Array.from(timers.entries())) {
+      if (!present.has(id)) {
+        clearTimeout(t);
+        timers.delete(id);
+      }
+    }
   }, [optimistic, clearOptimistic, queryClient]);
 
   // ── Keyboard triage state ──

@@ -238,15 +238,35 @@ async def text_to_speech(req: TTSRequest):
             edge_voice = EDGE_VOICES["andrew"]
 
     # ─── Edge TTS (primary) ───
+    edge_key = _cache_key("edge", edge_voice, req.speed, req.text)
+    edge_cached = TTS_CACHE_DIR / f"edge_{edge_key}.mp3"
+    edge_was_hit = edge_cached.exists() and edge_cached.stat().st_size > 100
+    log.info(
+        "tts_prefetch",
+        backend="edge",
+        voice=edge_voice,
+        cache_hit=edge_was_hit,
+        text_hash=edge_key[:16],
+    )
     path = await _edge_tts(req.text, edge_voice, req.speed)
     if path:
-        log.info("tts_served", engine="edge", voice=edge_voice)
+        log.info("tts_served", engine="edge", voice=edge_voice, cache_hit=edge_was_hit)
         return FileResponse(str(path), media_type="audio/mpeg")
 
     # ─── macOS say (fallback) ───
+    say_key = _cache_key("say", "Daniel", "180", req.text)
+    say_cached = TTS_CACHE_DIR / f"say_{say_key}.aiff"
+    say_was_hit = say_cached.exists() and say_cached.stat().st_size > 100
+    log.info(
+        "tts_prefetch",
+        backend="macos",
+        voice="Daniel",
+        cache_hit=say_was_hit,
+        text_hash=say_key[:16],
+    )
     path = _macos_say(req.text)
     if path:
-        log.info("tts_served", engine="macos")
+        log.info("tts_served", engine="macos", cache_hit=say_was_hit)
         return FileResponse(str(path), media_type="audio/aiff")
 
     return Response(

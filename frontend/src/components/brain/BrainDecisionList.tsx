@@ -95,6 +95,7 @@ export function BrainDecisionList({ search }: BrainDecisionListProps) {
         <span className="text-xs text-muted-foreground whitespace-nowrap">Decided by:</span>
         <div className="relative">
           <select
+            aria-label="Filter decisions by decider"
             value={decidedByFilter}
             onChange={(e) => setDecidedByFilter(e.target.value)}
             className="appearance-none bg-card border border-border rounded-lg pl-2 pr-7 py-1 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent/20"

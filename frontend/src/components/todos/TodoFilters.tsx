@@ -34,6 +34,7 @@ export function TodoFilters({ filters, onChange }: TodoFiltersProps) {
   return (
     <div className="flex items-center gap-3 flex-wrap">
       <select
+        aria-label="Filter todos by status"
         value={filters.status}
         onChange={(e) => update('status', e.target.value)}
         className={selectCls}
@@ -50,6 +51,7 @@ export function TodoFilters({ filters, onChange }: TodoFiltersProps) {
       </select>
 
       <select
+        aria-label="Filter todos by project"
         value={filters.project_id}
         onChange={(e) => update('project_id', e.target.value)}
         className={selectCls}
@@ -63,6 +65,7 @@ export function TodoFilters({ filters, onChange }: TodoFiltersProps) {
       </select>
 
       <select
+        aria-label="Filter todos by priority"
         value={filters.priority}
         onChange={(e) => update('priority', e.target.value)}
         className={selectCls}

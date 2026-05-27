@@ -29,6 +29,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch, apiPostIdempotent } from '../../lib/api';
 import { useQueueStore, type OptimisticDecision } from '../../stores/queue';
 import { useToast } from '../../components/shared/Toast';
+import { ErrorState } from '../../components/shared/states';
 import { Briefing } from './components/Briefing';
 import { DecisionDeck } from './components/DecisionDeck';
 import { ResolvedLog } from './components/ResolvedLog';
@@ -368,29 +369,47 @@ export default function InboxPage(): ReactElement {
       tabIndex={-1}
       className="space-y-4 outline-none"
     >
-      <Briefing
-        greeting={undefined}
-        dateLabel={dateLabel}
-        paragraphs={briefingParagraphs}
-        heroStats={heroStats}
-        active={activeZone === 'briefing'}
-        loading={briefingQ.isLoading}
-        errored={briefingQ.isError}
-      />
+      {briefingQ.isError ? (
+        <ErrorState
+          error={briefingQ.error}
+          title="Couldn't load briefing"
+          onRetry={() => void briefingQ.refetch()}
+          testId="inbox-briefing-error"
+        />
+      ) : (
+        <Briefing
+          greeting={undefined}
+          dateLabel={dateLabel}
+          paragraphs={briefingParagraphs}
+          heroStats={heroStats}
+          active={activeZone === 'briefing'}
+          loading={briefingQ.isLoading}
+          errored={false}
+        />
+      )}
 
-      <DecisionDeck
-        decisions={decisions}
-        pending={Object.fromEntries(
-          Object.keys(optimistic).map((id) => [id, true]),
-        )}
-        onAction={(id, key) => {
-          // key maps 1:1 to TriageAction (approve/reply/delegate/snooze).
-          void fireTriage(id, key as TriageAction);
-        }}
-        active={activeZone === 'deck'}
-        cardRef={deckCardRef}
-        onHotkeyRef={hotkeyTriggerRef}
-      />
+      {queueQ.isError ? (
+        <ErrorState
+          error={queueQ.error}
+          title="Couldn't load decision queue"
+          onRetry={() => void queueQ.refetch()}
+          testId="inbox-queue-error"
+        />
+      ) : (
+        <DecisionDeck
+          decisions={decisions}
+          pending={Object.fromEntries(
+            Object.keys(optimistic).map((id) => [id, true]),
+          )}
+          onAction={(id, key) => {
+            // key maps 1:1 to TriageAction (approve/reply/delegate/snooze).
+            void fireTriage(id, key as TriageAction);
+          }}
+          active={activeZone === 'deck'}
+          cardRef={deckCardRef}
+          onHotkeyRef={hotkeyTriggerRef}
+        />
+      )}
 
       <ResolvedLog
         items={resolved}

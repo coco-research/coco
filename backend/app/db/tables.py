@@ -861,6 +861,21 @@ insights = Table(
 )
 
 # ---------------------------------------------------------------------------
+# Audit log (Phase 11 — security/governance)
+# ---------------------------------------------------------------------------
+
+audit_log = Table(
+    "audit_log",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("action", Text, nullable=False),
+    Column("actor", Text, nullable=False, server_default="user"),
+    Column("payload_hash", Text),
+    Column("occurred_at", Text, nullable=False),
+    Column("ip", Text),
+)
+
+# ---------------------------------------------------------------------------
 # Attention tracking
 # ---------------------------------------------------------------------------
 

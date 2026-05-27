@@ -151,6 +151,11 @@ def delete_person(slug: str):
     del people[slug]
     brain["people"] = people
     write_json(BRAIN_JSON_PATH, brain)
+    try:
+        from app.services import audit as _audit
+        _audit.record(_audit.ACTION_BRAIN_DELETE, actor="user", payload={"slug": slug})
+    except Exception:
+        pass
 
 
 @router.get("/api/brain/rules")
@@ -255,9 +260,18 @@ def delete_queue_item(index: int):
     q = _read_queue()
     if index < 0 or index >= len(q["items"]):
         raise HTTPException(404, f"Queue index {index} out of range (0..{len(q['items'])-1})")
-    q["items"].pop(index)
+    removed = q["items"].pop(index)
     q["last_updated"] = datetime.now(timezone.utc).isoformat()
     write_json(QUEUE_JSON_PATH, q)
+    try:
+        from app.services import audit as _audit
+        _audit.record(
+            _audit.ACTION_QUEUE_DISMISS,
+            actor="user",
+            payload={"index": index, "item_id": (removed or {}).get("id")},
+        )
+    except Exception:
+        pass
 
 
 @router.post("/api/queue/from-agent", status_code=201)

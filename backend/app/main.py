@@ -42,6 +42,7 @@ from app.routers import (
     ingest,
     brain_query,
     brain_ops,
+    auth as auth_router,
 )
 
 structlog.configure(
@@ -151,9 +152,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Optional auth middleware — only active when COCO_AUTH_TOKEN is set
-if AUTH_TOKEN:
-    app.add_middleware(AuthMiddleware)
+# Auth middleware — always on (handles origin check + optional bearer/PIN).
+# In open mode (no token, no PIN) it only enforces the localhost-origin check
+# for state-changing methods. See app/middleware/auth.py.
+app.add_middleware(AuthMiddleware)
+_ = AUTH_TOKEN  # imported for back-compat / observability
 
 # Rate limiting middleware — active by default, disable with COCO_RATE_LIMIT=false
 if RATE_LIMIT_ENABLED:
@@ -233,6 +236,7 @@ app.include_router(attention.router)
 app.include_router(ingest.router)
 app.include_router(brain_query.router)
 app.include_router(brain_ops.router)
+app.include_router(auth_router.router)
 
 # Studio routers (only when COCO_EDITION=studio)
 if is_studio():

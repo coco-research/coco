@@ -13,10 +13,12 @@ with Sonnet extended thinking.
 import json
 import logging
 import os
-import sqlite3
 import sys
 import time
+from contextlib import contextmanager
 from pathlib import Path
+
+from sqlalchemy import create_engine, text
 
 from app.config import KNOWLEDGE_DB_PATH, KNOWLEDGE_DIR
 
@@ -28,6 +30,44 @@ if _knowledge_dir not in sys.path:
     sys.path.append(_knowledge_dir)
 
 _MAX_RAG_CONTEXT_CHARS = 20_000
+
+# ---------------------------------------------------------------------------
+# Knowledge DB engine (separate from platform.db; read-only)
+# ---------------------------------------------------------------------------
+# knowledge.db has its own schema (articles, articles_fts, global_entities,
+# cross_project_connections, project_entity_links) owned by the external
+# knowledge engine — not represented in app.db.tables. We route through a
+# dedicated SA engine and use text() for queries (FTS5 MATCH has no SA Core
+# equivalent anyway). SQLite-only — guarded by file existence check.
+
+_knowledge_engine = None
+
+
+def _get_knowledge_engine():
+    """Lazy-create a read-only SA engine for knowledge.db. Returns None if missing."""
+    global _knowledge_engine
+    if _knowledge_engine is not None:
+        return _knowledge_engine
+    if not KNOWLEDGE_DB_PATH.exists():
+        return None
+    url = f"sqlite:///file:{KNOWLEDGE_DB_PATH}?mode=ro&uri=true"
+    # SQLAlchemy needs the uri=true pass-through via the connect_args / URL form below
+    _knowledge_engine = create_engine(
+        f"sqlite:///{KNOWLEDGE_DB_PATH}",
+        connect_args={"timeout": 10, "uri": False},
+    )
+    return _knowledge_engine
+
+
+@contextmanager
+def _knowledge_conn():
+    """Yield a SA Connection to knowledge.db. None if DB missing."""
+    eng = _get_knowledge_engine()
+    if eng is None:
+        yield None
+        return
+    with eng.connect() as conn:
+        yield conn
 
 # ---------------------------------------------------------------------------
 # Tool definitions
@@ -108,15 +148,6 @@ ALL_TOOLS = [SEARCH_ARTICLES_TOOL, GET_ENTITY_TOOL, TRAVERSE_CONNECTIONS_TOOL, G
 # Tool executors
 # ---------------------------------------------------------------------------
 
-def _get_db():
-    """Open knowledge.db read-only."""
-    if not KNOWLEDGE_DB_PATH.exists():
-        return None
-    conn = sqlite3.connect(f"file:{KNOWLEDGE_DB_PATH}?mode=ro", uri=True)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
 import re as _re
 _FTS5_SPECIAL = _re.compile(r'[*^":()]|(?:^|\s)(?:AND|OR|NOT|NEAR)\b', _re.IGNORECASE)
 
@@ -144,216 +175,219 @@ def execute_search_articles(query: str, limit: int = 5, project: str | None = No
     except Exception as e:
         log.warning("semantic_search_fallback in ultrathink: %s", e)
 
-    # Fallback to FTS5
-    conn = _get_db()
-    if not conn:
-        return json.dumps({"results": [], "error": "Knowledge DB not available"})
+    # Fallback to FTS5 via SA Core
+    with _knowledge_conn() as conn:
+        if conn is None:
+            return json.dumps({"results": [], "error": "Knowledge DB not available"})
 
-    try:
-        rows = conn.execute(
-            "SELECT a.gid, a.title, a.summary, a.confidence "
-            "FROM articles a "
-            "JOIN articles_fts f ON a.gid = f.gid "
-            "WHERE articles_fts MATCH ? "
-            "ORDER BY rank LIMIT ?",
-            (_sanitize_fts5(query), min(limit, 10)),
-        ).fetchall()
-        items = [{"gid": r["gid"], "title": r["title"], "summary": (r["summary"] or "")[:300],
-                  "score": round(r["confidence"] or 0.5, 3)} for r in rows]
-        return json.dumps({"results": items, "count": len(items)})
-    except Exception:
-        safe_q = query.replace("%", "").replace("_", "")
-        rows = conn.execute(
-            "SELECT gid, title, summary, confidence FROM articles WHERE title LIKE ? LIMIT ?",
-            (f"%{safe_q}%", min(limit, 10)),
-        ).fetchall()
-        items = [{"gid": r["gid"], "title": r["title"], "summary": (r["summary"] or "")[:300],
-                  "score": round(r["confidence"] or 0.5, 3)} for r in rows]
-        return json.dumps({"results": items, "count": len(items)})
-    finally:
-        conn.close()
+        try:
+            # FTS5 MATCH has no SA Core equivalent — text() is dialect-isolated (SQLite only).
+            rows = conn.execute(
+                text(
+                    "SELECT a.gid, a.title, a.summary, a.confidence "
+                    "FROM articles a "
+                    "JOIN articles_fts f ON a.gid = f.gid "
+                    "WHERE articles_fts MATCH :q "
+                    "ORDER BY rank LIMIT :lim"
+                ),
+                {"q": _sanitize_fts5(query), "lim": min(limit, 10)},
+            ).mappings().all()
+            items = [{"gid": r["gid"], "title": r["title"], "summary": (r["summary"] or "")[:300],
+                      "score": round(r["confidence"] or 0.5, 3)} for r in rows]
+            return json.dumps({"results": items, "count": len(items)})
+        except Exception:
+            safe_q = query.replace("%", "").replace("_", "")
+            rows = conn.execute(
+                text("SELECT gid, title, summary, confidence FROM articles WHERE title LIKE :pat LIMIT :lim"),
+                {"pat": f"%{safe_q}%", "lim": min(limit, 10)},
+            ).mappings().all()
+            items = [{"gid": r["gid"], "title": r["title"], "summary": (r["summary"] or "")[:300],
+                      "score": round(r["confidence"] or 0.5, 3)} for r in rows]
+            return json.dumps({"results": items, "count": len(items)})
 
 
 def execute_get_entity(name: str) -> str:
     """Execute get_entity_details tool. Returns JSON string."""
-    conn = _get_db()
-    if not conn:
-        return json.dumps({"error": "Knowledge DB not available"})
+    with _knowledge_conn() as conn:
+        if conn is None:
+            return json.dumps({"error": "Knowledge DB not available"})
 
-    try:
-        row = conn.execute(
-            "SELECT gid, canonical_name, type, aliases_json, importance_score "
-            "FROM global_entities WHERE LOWER(canonical_name) LIKE LOWER(?) "
-            "ORDER BY importance_score DESC LIMIT 1",
-            (f"%{name}%",),
-        ).fetchone()
+        try:
+            row = conn.execute(
+                text(
+                    "SELECT gid, canonical_name, type, aliases_json, importance_score "
+                    "FROM global_entities WHERE LOWER(canonical_name) LIKE LOWER(:pat) "
+                    "ORDER BY importance_score DESC LIMIT 1"
+                ),
+                {"pat": f"%{name}%"},
+            ).mappings().first()
 
-        if not row:
-            return json.dumps({"found": False, "message": f"No entity found matching '{name}'"})
+            if not row:
+                return json.dumps({"found": False, "message": f"No entity found matching '{name}'"})
 
-        gid = row["gid"]
-        aliases = json.loads(row["aliases_json"] or "[]")
+            gid = row["gid"]
+            aliases = json.loads(row["aliases_json"] or "[]")
 
-        # Get project links
-        projects = conn.execute(
-            "SELECT project_slug FROM project_entity_links WHERE gid = ?", (gid,)
-        ).fetchall()
-        project_list = [p["project_slug"] for p in projects]
+            # Get project links
+            projects = conn.execute(
+                text("SELECT project_slug FROM project_entity_links WHERE gid = :gid"),
+                {"gid": gid},
+            ).mappings().all()
+            project_list = [p["project_slug"] for p in projects]
 
-        # Check if article exists
-        article = conn.execute(
-            "SELECT title, confidence FROM articles WHERE gid = ? ORDER BY version DESC LIMIT 1",
-            (gid,),
-        ).fetchone()
+            # Check if article exists
+            article = conn.execute(
+                text("SELECT title, confidence FROM articles WHERE gid = :gid ORDER BY version DESC LIMIT 1"),
+                {"gid": gid},
+            ).mappings().first()
 
-        return json.dumps({
-            "found": True,
-            "gid": gid,
-            "name": row["canonical_name"],
-            "type": row["type"],
-            "aliases": aliases,
-            "importance": round(row["importance_score"], 2),
-            "projects": project_list,
-            "has_article": article is not None,
-            "article_title": article["title"] if article else None,
-            "article_confidence": round(article["confidence"], 2) if article else None,
-        })
-    except Exception as e:
-        log.warning("execute_get_entity error: %s", e)
-        return json.dumps({"error": "Entity lookup failed"})
-    finally:
-        conn.close()
+            return json.dumps({
+                "found": True,
+                "gid": gid,
+                "name": row["canonical_name"],
+                "type": row["type"],
+                "aliases": aliases,
+                "importance": round(row["importance_score"], 2),
+                "projects": project_list,
+                "has_article": article is not None,
+                "article_title": article["title"] if article else None,
+                "article_confidence": round(article["confidence"], 2) if article else None,
+            })
+        except Exception as e:
+            log.warning("execute_get_entity error: %s", e)
+            return json.dumps({"error": "Entity lookup failed"})
 
 
 def execute_traverse_connections(entity_name: str, connection_type: str | None = None) -> str:
     """Execute traverse_connections tool. Returns JSON string."""
-    conn = _get_db()
-    if not conn:
-        return json.dumps({"error": "Knowledge DB not available"})
+    with _knowledge_conn() as conn:
+        if conn is None:
+            return json.dumps({"error": "Knowledge DB not available"})
 
-    try:
-        # Find the entity GID first
-        entity_row = conn.execute(
-            "SELECT gid, canonical_name FROM global_entities "
-            "WHERE LOWER(canonical_name) LIKE LOWER(?) "
-            "ORDER BY importance_score DESC LIMIT 1",
-            (f"%{entity_name}%",),
-        ).fetchone()
+        try:
+            # Find the entity GID first
+            entity_row = conn.execute(
+                text(
+                    "SELECT gid, canonical_name FROM global_entities "
+                    "WHERE LOWER(canonical_name) LIKE LOWER(:pat) "
+                    "ORDER BY importance_score DESC LIMIT 1"
+                ),
+                {"pat": f"%{entity_name}%"},
+            ).mappings().first()
 
-        if not entity_row:
-            return json.dumps({"found": False, "connections": [],
-                               "message": f"No entity found matching '{entity_name}'"})
+            if not entity_row:
+                return json.dumps({"found": False, "connections": [],
+                                   "message": f"No entity found matching '{entity_name}'"})
 
-        gid = entity_row["gid"]
+            gid = entity_row["gid"]
 
-        # Query connections in both directions
-        conditions = ["(c.source_gid = ? OR c.target_gid = ?)"]
-        params: list = [gid, gid]
+            # Query connections in both directions
+            params: dict = {"gid": gid}
+            type_clause = ""
+            if connection_type:
+                type_clause = " AND c.connection_type = :ctype"
+                params["ctype"] = connection_type
 
-        if connection_type:
-            conditions.append("c.connection_type = ?")
-            params.append(connection_type)
+            sql = (
+                "SELECT c.source_gid, c.target_gid, c.connection_type, c.strength, c.evidence_json, "
+                "ge_s.canonical_name as source_name, ge_t.canonical_name as target_name "
+                "FROM cross_project_connections c "
+                "JOIN global_entities ge_s ON c.source_gid = ge_s.gid "
+                "JOIN global_entities ge_t ON c.target_gid = ge_t.gid "
+                "WHERE (c.source_gid = :gid OR c.target_gid = :gid)"
+                f"{type_clause} "
+                "ORDER BY c.strength DESC LIMIT 20"
+            )
+            rows = conn.execute(text(sql), params).mappings().all()
 
-        where = " AND ".join(conditions)
-        rows = conn.execute(
-            f"SELECT c.source_gid, c.target_gid, c.connection_type, c.strength, c.evidence_json, "
-            f"ge_s.canonical_name as source_name, ge_t.canonical_name as target_name "
-            f"FROM cross_project_connections c "
-            f"JOIN global_entities ge_s ON c.source_gid = ge_s.gid "
-            f"JOIN global_entities ge_t ON c.target_gid = ge_t.gid "
-            f"WHERE {where} "
-            f"ORDER BY c.strength DESC LIMIT 20",
-            params,
-        ).fetchall()
+            connections = []
+            for r in rows:
+                other_name = r["target_name"] if r["source_gid"] == gid else r["source_name"]
+                other_gid = r["target_gid"] if r["source_gid"] == gid else r["source_gid"]
+                evidence = json.loads(r["evidence_json"] or "[]")
+                evidence_summary = "; ".join(str(e)[:100] for e in evidence[:3]) if evidence else ""
 
-        connections = []
-        for r in rows:
-            other_name = r["target_name"] if r["source_gid"] == gid else r["source_name"]
-            other_gid = r["target_gid"] if r["source_gid"] == gid else r["source_gid"]
-            evidence = json.loads(r["evidence_json"] or "[]")
-            evidence_summary = "; ".join(str(e)[:100] for e in evidence[:3]) if evidence else ""
+                connections.append({
+                    "connected_entity": other_name,
+                    "connected_gid": other_gid,
+                    "connection_type": r["connection_type"],
+                    "strength": round(r["strength"], 3),
+                    "evidence_summary": evidence_summary,
+                })
 
-            connections.append({
-                "connected_entity": other_name,
-                "connected_gid": other_gid,
-                "connection_type": r["connection_type"],
-                "strength": round(r["strength"], 3),
-                "evidence_summary": evidence_summary,
+            return json.dumps({
+                "entity": entity_row["canonical_name"],
+                "gid": gid,
+                "connections": connections,
+                "total": len(connections),
             })
-
-        return json.dumps({
-            "entity": entity_row["canonical_name"],
-            "gid": gid,
-            "connections": connections,
-            "total": len(connections),
-        })
-    except Exception as e:
-        log.warning("execute_traverse_connections error: %s", e)
-        return json.dumps({"error": "Connection traversal failed"})
-    finally:
-        conn.close()
+        except Exception as e:
+            log.warning("execute_traverse_connections error: %s", e)
+            return json.dumps({"error": "Connection traversal failed"})
 
 
 def execute_get_article(title: str | None = None, gid: str | None = None) -> str:
     """Execute get_article tool. Returns JSON string with full article content."""
-    conn = _get_db()
-    if not conn:
-        return json.dumps({"error": "Knowledge DB not available"})
+    with _knowledge_conn() as conn:
+        if conn is None:
+            return json.dumps({"error": "Knowledge DB not available"})
 
-    try:
-        if gid:
-            row = conn.execute(
-                "SELECT gid, title, summary, body_json, confidence, generated_at, article_type "
-                "FROM articles WHERE gid = ? ORDER BY version DESC LIMIT 1",
-                (gid,),
-            ).fetchone()
-        elif title:
-            row = conn.execute(
-                "SELECT gid, title, summary, body_json, confidence, generated_at, article_type "
-                "FROM articles WHERE LOWER(title) LIKE LOWER(?) ORDER BY confidence DESC LIMIT 1",
-                (f"%{title}%",),
-            ).fetchone()
-        else:
-            return json.dumps({"error": "Provide either title or gid"})
-
-        if not row:
-            return json.dumps({"found": False, "message": f"No article found for '{title or gid}'"})
-
-        # Parse body sections
-        body_json = row["body_json"] or "{}"
         try:
-            body = json.loads(body_json) if isinstance(body_json, str) else body_json
-        except (json.JSONDecodeError, TypeError):
-            body = {}
+            if gid:
+                row = conn.execute(
+                    text(
+                        "SELECT gid, title, summary, body_json, confidence, generated_at, article_type "
+                        "FROM articles WHERE gid = :gid ORDER BY version DESC LIMIT 1"
+                    ),
+                    {"gid": gid},
+                ).mappings().first()
+            elif title:
+                row = conn.execute(
+                    text(
+                        "SELECT gid, title, summary, body_json, confidence, generated_at, article_type "
+                        "FROM articles WHERE LOWER(title) LIKE LOWER(:pat) ORDER BY confidence DESC LIMIT 1"
+                    ),
+                    {"pat": f"%{title}%"},
+                ).mappings().first()
+            else:
+                return json.dumps({"error": "Provide either title or gid"})
 
-        sections_text = ""
-        for section in body.get("sections", []):
-            heading = section.get("heading", "")
-            content = section.get("content", "")
-            if heading:
-                sections_text += f"\n### {heading}\n{content}"
-            elif content:
-                sections_text += f"\n{content}"
+            if not row:
+                return json.dumps({"found": False, "message": f"No article found for '{title or gid}'"})
 
-        # Truncate if too long
-        if len(sections_text) > 4000:
-            sections_text = sections_text[:4000] + "\n[... truncated ...]"
+            # Parse body sections
+            body_json = row["body_json"] or "{}"
+            try:
+                body = json.loads(body_json) if isinstance(body_json, str) else body_json
+            except (json.JSONDecodeError, TypeError):
+                body = {}
 
-        return json.dumps({
-            "found": True,
-            "gid": row["gid"],
-            "title": row["title"],
-            "summary": row["summary"],
-            "content": sections_text,
-            "confidence": round(row["confidence"], 3),
-            "generated_at": row["generated_at"],
-            "article_type": row["article_type"],
-        })
-    except Exception as e:
-        log.warning("execute_get_article error: %s", e)
-        return json.dumps({"error": "Article retrieval failed"})
-    finally:
-        conn.close()
+            sections_text = ""
+            for section in body.get("sections", []):
+                heading = section.get("heading", "")
+                content = section.get("content", "")
+                if heading:
+                    sections_text += f"\n### {heading}\n{content}"
+                elif content:
+                    sections_text += f"\n{content}"
+
+            # Truncate if too long
+            if len(sections_text) > 4000:
+                sections_text = sections_text[:4000] + "\n[... truncated ...]"
+
+            return json.dumps({
+                "found": True,
+                "gid": row["gid"],
+                "title": row["title"],
+                "summary": row["summary"],
+                "content": sections_text,
+                "confidence": round(row["confidence"], 3),
+                "generated_at": row["generated_at"],
+                "article_type": row["article_type"],
+            })
+        except Exception as e:
+            log.warning("execute_get_article error: %s", e)
+            return json.dumps({"error": "Article retrieval failed"})
 
 
 def execute_tool(tool_name: str, tool_input: dict, project: str | None = None) -> str:

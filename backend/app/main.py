@@ -8,8 +8,11 @@ import structlog
 import time
 
 from app.config import COCO_CORS_ORIGINS
+from app.api.error_envelope import register_exception_handlers
 from app.middleware.auth import AuthMiddleware, AUTH_TOKEN
 from app.middleware.rate_limit import RateLimitMiddleware, RATE_LIMIT_ENABLED
+from app.middleware.idempotency import IdempotencyMiddleware
+from app.middleware.csp import CSPMiddleware
 from app.db.init_db import init_platform_db
 from app.services.event_bus import event_bus
 from app.services.process_manager import process_manager
@@ -36,6 +39,10 @@ from app.routers import (
     knowledge_search,
     graph,
     attention,
+    ingest,
+    brain_query,
+    brain_ops,
+    auth as auth_router,
 )
 
 structlog.configure(
@@ -129,6 +136,11 @@ app = FastAPI(
     openapi_tags=openapi_tags,
 )
 
+# Register canonical error-envelope handlers (INTEGRATION-CONTRACT §3).
+# Wraps RequestValidationError, HTTPException, DomainError, and 500s into the
+# {error, message, details, request_id, trace_id} shape the UI consumes.
+register_exception_handlers(app)
+
 cors_origins = [o.strip() for o in COCO_CORS_ORIGINS.split(",") if o.strip()]
 
 app.add_middleware(
@@ -139,13 +151,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Optional auth middleware — only active when COCO_AUTH_TOKEN is set
-if AUTH_TOKEN:
-    app.add_middleware(AuthMiddleware)
+# Auth middleware — always on (handles origin check + optional bearer/PIN).
+# In open mode (no token, no PIN) it only enforces the localhost-origin check
+# for state-changing methods. See app/middleware/auth.py.
+app.add_middleware(AuthMiddleware)
+_ = AUTH_TOKEN  # imported for back-compat / observability
 
 # Rate limiting middleware — active by default, disable with COCO_RATE_LIMIT=false
 if RATE_LIMIT_ENABLED:
     app.add_middleware(RateLimitMiddleware)
+
+# Idempotency middleware — enforces Idempotency-Key on mutating endpoints.
+# See .planning/v3/backend/DESIGN.md §7.
+app.add_middleware(IdempotencyMiddleware)
+
+# Default CSP middleware — applies a hardened default for API responses.
+# (Per-response SPA-friendly CSP from the security-headers handler below
+# takes precedence where it sets the header.)
+app.add_middleware(CSPMiddleware)
 
 # Security headers middleware
 @app.middleware("http")
@@ -209,6 +232,10 @@ app.include_router(analysis.router)
 app.include_router(knowledge_search.router)
 app.include_router(graph.router)
 app.include_router(attention.router)
+app.include_router(ingest.router)
+app.include_router(brain_query.router)
+app.include_router(brain_ops.router)
+app.include_router(auth_router.router)
 
 # Studio routers (only when COCO_EDITION=studio)
 if is_studio():

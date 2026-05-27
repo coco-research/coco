@@ -1,17 +1,37 @@
-"""Knowledge Engine search — queries ~/.coco/knowledge/knowledge.db."""
+"""Knowledge Engine search — queries ~/.coco/knowledge/knowledge.db.
+
+DB ACCESS
+---------
+This router reads from several SQLite databases that live OUTSIDE of platform.db
+(``~/.coco/knowledge/knowledge.db``, ``~/.coco/coco.db``, and per-project brain
+DBs under ``PERSONAL_BRAIN_DIR``). They are owned by external CLI tools and
+opened **read-only** here.
+
+Previously this used ``import sqlite3`` and ``sqlite3.connect()`` directly.
+That has been replaced with SQLAlchemy Core engines (one per DB path, cached)
+plus a thin compatibility shim (``_ROConn``) so existing call sites continue
+to use the familiar ``conn.execute(sql, params).fetchone()`` / ``.fetchall()``
+API. Every query is internally routed through ``sqlalchemy.text()`` against
+the SA Core engine — no raw ``sqlite3.Connection`` objects remain.
+
+FTS5 ``MATCH`` queries still use the FTS5 syntax inside ``text()`` and are
+implicitly SQLite-only — see comments tagged ``# SQLITE-ONLY``.
+"""
 import json
 import os
 import re
-import sqlite3
 import logging
 import sys
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Any
 from fastapi import APIRouter, Path as FastApiPath, Query, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel, Field
+from sqlalchemy import create_engine, event, text
+from sqlalchemy.engine import Connection as SAConnection, Engine
 
 from app.config import KNOWLEDGE_DB_PATH, KNOWLEDGE_DIR, PERSONAL_BRAIN_DIR, COCO_DIR
 
@@ -80,13 +100,171 @@ def _validate_gid(gid: str) -> JSONResponse | None:
     return None
 
 
-def _get_knowledge_db():
-    """Open knowledge.db read-only. Returns None if not available."""
+# ---------------------------------------------------------------------------
+# SA Core read-only access to external SQLite DBs
+# ---------------------------------------------------------------------------
+# These DBs are owned by other tools and opened ?mode=ro. We cache one SA
+# engine per (path, busy_timeout) so we don't recreate it on every request.
+# _ROConn is a thin compatibility shim mimicking the sqlite3.Connection /
+# Cursor API the rest of this file expects.
+
+_ro_engines: dict[tuple[str, int], Engine] = {}
+
+
+def _engine_for_ro(path: Path, busy_timeout_ms: int = 5000) -> Engine:
+    """Return a cached SA Core engine for a read-only SQLite file."""
+    key = (str(path), busy_timeout_ms)
+    eng = _ro_engines.get(key)
+    if eng is not None:
+        return eng
+    url = f"sqlite:///file:{path}?mode=ro&uri=true"
+    eng = create_engine(
+        url,
+        connect_args={"uri": True, "timeout": busy_timeout_ms / 1000.0},
+        pool_pre_ping=True,
+    )
+
+    @event.listens_for(eng, "connect")
+    def _set_pragmas(dbapi_conn, _record):  # pragma: no cover - PRAGMA setup
+        cur = dbapi_conn.cursor()
+        try:
+            cur.execute(f"PRAGMA busy_timeout = {busy_timeout_ms}")
+        finally:
+            cur.close()
+
+    _ro_engines[key] = eng
+    return eng
+
+
+class _Row(dict):
+    """Dict subclass that also supports positional indexing (sqlite3.Row parity).
+
+    ``r["col"]`` works as for a regular dict. ``r[0]`` returns the value at
+    column ordinal 0 — matching the behaviour of ``sqlite3.Row`` that callers
+    in this file rely on.
+    """
+
+    __slots__ = ("_keys",)
+
+    def __init__(self, mapping):
+        super().__init__(mapping)
+        # Capture insertion order for positional access.
+        self._keys = list(super().keys())
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return super().__getitem__(self._keys[key])
+        return super().__getitem__(key)
+
+
+class _ROResult:
+    """Mimics the sqlite3.Cursor result API on top of an SA Core Result."""
+
+    __slots__ = ("_rows",)
+
+    def __init__(self, mappings: list):
+        self._rows = mappings
+
+    def fetchone(self):
+        return self._rows[0] if self._rows else None
+
+    def fetchall(self):
+        return self._rows
+
+    def __iter__(self):
+        return iter(self._rows)
+
+
+class _ROConn:
+    """Thin sqlite3-shaped wrapper around an SA Core Connection.
+
+    Exposes ``.execute(sql, params=())``, ``.close()`` and lets callers keep
+    using ``?`` placeholders with tuple/list/dict params — internally we
+    rewrite the SQL to named binds and route through ``text()``.
+    """
+
+    __slots__ = ("_engine", "_conn", "_closed")
+
+    def __init__(self, engine: Engine):
+        self._engine = engine
+        self._conn: SAConnection | None = engine.connect()
+        self._closed = False
+
+    @staticmethod
+    def _bind(sql: str, params):
+        """Translate sqlite3-style ``?`` placeholders to SA named binds.
+
+        Accepts tuple / list / None / dict params. Returns (text_clause, dict).
+        """
+        if params is None:
+            params = ()
+        if isinstance(params, dict):
+            return text(sql), params
+        # Walk the SQL, replacing each ``?`` (outside of string literals) with
+        # :p0, :p1, ... — paired with the positional params.
+        out: list[str] = []
+        i = 0
+        n = len(sql)
+        idx = 0
+        in_squote = False
+        in_dquote = False
+        while i < n:
+            ch = sql[i]
+            if ch == "'" and not in_dquote:
+                in_squote = not in_squote
+                out.append(ch)
+            elif ch == '"' and not in_squote:
+                in_dquote = not in_dquote
+                out.append(ch)
+            elif ch == "?" and not (in_squote or in_dquote):
+                out.append(f":p{idx}")
+                idx += 1
+            else:
+                out.append(ch)
+            i += 1
+        bound = {f"p{j}": v for j, v in enumerate(params)}
+        if idx != len(params):
+            raise ValueError(
+                f"_ROConn.execute: placeholder count {idx} does not match "
+                f"params length {len(params)}"
+            )
+        return text("".join(out)), bound
+
+    def execute(self, sql: str, params=()) -> _ROResult:
+        if self._closed or self._conn is None:
+            raise RuntimeError("connection is closed")
+        clause, bound = self._bind(sql, params)
+        result = self._conn.execute(clause, bound)
+        # Eagerly materialise as list of _Row (dict + positional access) so
+        # callers can use ``dict(r)``, ``r["col"]`` and ``r[0]`` — matching
+        # the sqlite3.Row API the rest of this file expects.
+        try:
+            mappings = [_Row(m) for m in result.mappings().all()]
+        except Exception:
+            # Some statements (e.g. DDL) return nothing; fall back to [].
+            mappings = []
+        return _ROResult(mappings)
+
+    def close(self):
+        if self._closed:
+            return
+        self._closed = True
+        if self._conn is not None:
+            try:
+                self._conn.close()
+            finally:
+                self._conn = None
+
+
+# Type alias used in the rest of the file in place of ``sqlite3.Connection``.
+Conn = _ROConn
+
+
+def _get_knowledge_db() -> _ROConn | None:
+    """Open knowledge.db read-only via SA Core. Returns None if not available."""
     if not KNOWLEDGE_DB_PATH.exists():
         return None
-    conn = sqlite3.connect(f"file:{KNOWLEDGE_DB_PATH}?mode=ro", uri=True)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return _ROConn(_engine_for_ro(KNOWLEDGE_DB_PATH, busy_timeout_ms=5000))
 
 
 # ---------------------------------------------------------------------------
@@ -859,8 +1037,7 @@ def _get_personal_files() -> dict[str, list[dict]]:
         if not db_path.exists():
             continue
         try:
-            conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
-            conn.row_factory = sqlite3.Row
+            conn = _ROConn(_engine_for_ro(db_path, busy_timeout_ms=5000))
             rows = conn.execute(
                 "SELECT id, name, type, metadata_json FROM entities "
                 "WHERE metadata_json LIKE '%content_text%'"
@@ -902,8 +1079,7 @@ def _get_personal_file_detail(brain_slug: str, entity_id: int) -> dict | None:
     if not db_path.exists():
         return None
     try:
-        conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
-        conn.row_factory = sqlite3.Row
+        conn = _ROConn(_engine_for_ro(db_path, busy_timeout_ms=5000))
         row = conn.execute(
             "SELECT id, name, type, metadata_json FROM entities WHERE id = ?",
             (entity_id,)
@@ -1719,16 +1895,14 @@ async def knowledge_qa_stream_post(req: QARequest):
 _COCO_DB_PATH = COCO_DIR / "coco.db"
 
 
-def _open_db_ro(path: Path) -> sqlite3.Connection | None:
-    """Open a SQLite DB in read-only mode. Returns None if file missing."""
+def _open_db_ro(path: Path) -> _ROConn | None:
+    """Open a SQLite DB in read-only mode via SA Core. Returns None if file missing."""
     if not path.exists():
         return None
-    conn = sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=5.0)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return _ROConn(_engine_for_ro(path, busy_timeout_ms=5000))
 
 
-def _open_brain_db(brain_path: Path) -> sqlite3.Connection | None:
+def _open_brain_db(brain_path: Path) -> _ROConn | None:
     """Open a brain DB read-only with busy timeout for cloud-synced volumes.
 
     Returns None if file missing or path escapes PERSONAL_BRAIN_DIR.
@@ -1741,13 +1915,12 @@ def _open_brain_db(brain_path: Path) -> sqlite3.Connection | None:
     except ValueError:
         log.warning("brain_path_traversal_blocked: %s", brain_path)
         return None
-    conn = sqlite3.connect(f"file:{brain_path}?mode=ro", uri=True, timeout=2.0)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA busy_timeout = 1000")
-    return conn
+    # Brain DBs live on cloud-synced volumes and may briefly lock; use the
+    # shorter 1s busy-timeout the original code applied via PRAGMA.
+    return _ROConn(_engine_for_ro(brain_path, busy_timeout_ms=1000))
 
 
-def _safe_scalar(conn: sqlite3.Connection | None, sql: str, params: tuple = ()):
+def _safe_scalar(conn: _ROConn | None, sql: str, params: tuple = ()):
     """Run a query returning a single scalar value. Returns None on error."""
     if conn is None:
         return None
@@ -1758,7 +1931,7 @@ def _safe_scalar(conn: sqlite3.Connection | None, sql: str, params: tuple = ()):
         return None
 
 
-def _safe_query_list(conn: sqlite3.Connection | None, sql: str, params: tuple = ()) -> list[dict]:
+def _safe_query_list(conn: _ROConn | None, sql: str, params: tuple = ()) -> list[dict]:
     """Run a query, returning list of dicts. Returns [] on any error."""
     if conn is None:
         return []

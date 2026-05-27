@@ -878,6 +878,21 @@ insights = Table(
 )
 
 # ---------------------------------------------------------------------------
+# Audit log (Phase 11 — security/governance)
+# ---------------------------------------------------------------------------
+
+audit_log = Table(
+    "audit_log",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("action", Text, nullable=False),
+    Column("actor", Text, nullable=False, server_default="user"),
+    Column("payload_hash", Text),
+    Column("occurred_at", Text, nullable=False),
+    Column("ip", Text),
+)
+
+# ---------------------------------------------------------------------------
 # Attention tracking
 # ---------------------------------------------------------------------------
 
@@ -898,4 +913,127 @@ attention_events = Table(
     Column("project_slug", Text, nullable=False),
     Column("source", Text, nullable=False, server_default="content"),
     Column("viewed_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# project_brain.db — separate read-only DB (NOT platform.db)
+#
+# These tables live in a distinct MetaData so they do not conflict with
+# platform.db tables of the same name (e.g. tasks, events).  They are
+# consumed by routers/brain.py through its own SA Core engine.
+# ---------------------------------------------------------------------------
+
+brain_metadata = MetaData()
+
+brain_decisions = Table(
+    "decisions",
+    brain_metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("project_id", Integer, nullable=False),
+    Column("thread_id", Integer),
+    Column("date", Text, nullable=False),
+    Column("decision", Text, nullable=False),
+    Column("context", Text),
+    Column("decided_by", Text),
+    Column("impact", Text),
+)
+
+brain_events = Table(
+    "events",
+    brain_metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("project_id", Integer, nullable=False),
+    Column("date", Text, nullable=False),
+    Column("type", Text, nullable=False),
+    Column("title", Text, nullable=False),
+    Column("summary", Text),
+    Column("source", Text),
+    Column("participants_json", Text, server_default="[]"),
+)
+
+brain_tasks = Table(
+    "tasks",
+    brain_metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("project_id", Integer, nullable=False),
+    Column("title", Text, nullable=False),
+    Column("status", Text, nullable=False, server_default="open"),
+    Column("owner_entity_id", Integer),
+    Column("priority", Integer, server_default="3"),
+    Column("due_date", Text),
+    Column("blocked_by_task_id", Integer),
+    Column("notes", Text),
+    Column("created_at", Text, nullable=False),
+    Column("completed_at", Text),
+)
+
+brain_entities = Table(
+    "entities",
+    brain_metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("project_id", Integer, nullable=False),
+    Column("type", Text, nullable=False),
+    Column("name", Text, nullable=False),
+    Column("external_id", Text),
+    Column("metadata_json", Text, server_default="{}"),
+    Column("created_at", Text, nullable=False),
+    Column("updated_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Idempotency (Phase 2 Foundation Hardening) — see .planning/v3/backend/DESIGN.md §7
+# ---------------------------------------------------------------------------
+
+idempotency_keys = Table(
+    "idempotency_keys",
+    metadata,
+    Column("key", Text, nullable=False),
+    Column("route", Text, nullable=False),
+    Column("request_hash", Text, nullable=False),
+    Column("response_status", Integer, nullable=False),
+    Column("response_body", Text, nullable=False),
+    Column("created_at", Text, nullable=False),
+    UniqueConstraint("key", "route", name="uq_idempotency_keys_key_route"),
+)
+
+# ---------------------------------------------------------------------------
+# Dead-letter queue (Phase 10 — watchers + crons)
+# ---------------------------------------------------------------------------
+# Background jobs and file-watcher-triggered ingest tasks that fail are
+# enqueued here for bounded retry. After max retries, rows are marked
+# `archived` and surfaced to the operator via the admin DLQ endpoint.
+
+dead_letter_queue = Table(
+    "dead_letter_queue",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("source_task", Text, nullable=False),
+    Column("payload_json", Text, nullable=False, server_default="{}"),
+    Column("error", Text, nullable=False, server_default=""),
+    Column("retry_count", Integer, nullable=False, server_default="0"),
+    Column("status", Text, nullable=False, server_default="pending"),
+    Column("created_at", Text, nullable=False),
+    Column("next_retry_at", Text),
+    Column("last_attempt_at", Text),
+)
+
+# ---------------------------------------------------------------------------
+# Brain merge log (Phase 11 — Brain B4 graph ops)
+# ---------------------------------------------------------------------------
+# Append-only audit + undo buffer for entity_resolver merges. Distinct from
+# `brain_merge_audit` (B0): `brain_merge_audit` is the forever record of
+# *what* merged; `brain_merge_log` carries the *operational* metadata —
+# who performed the merge, until when it's reversible, and when (if ever)
+# it was undone. The graph_ops admin endpoints read from here.
+
+brain_merge_log = Table(
+    "brain_merge_log",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("merged_from", Text, nullable=False),
+    Column("merged_into", Text, nullable=False),
+    Column("performed_at", Text, nullable=False),
+    Column("performed_by", Text),
+    Column("reversible_until", Text),
+    Column("undone_at", Text),
 )

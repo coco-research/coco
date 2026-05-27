@@ -11,7 +11,17 @@ import logging
 import sqlite3
 from datetime import datetime, timezone
 
-from sqlalchemy import select, func
+from sqlalchemy import (
+    Column,
+    Float,
+    Integer,
+    MetaData,
+    Table,
+    Text,
+    create_engine,
+    func,
+    select,
+)
 
 from app.config import BRAIN_JSON_PATH, QUEUE_JSON_PATH, CONFIG_JSON_PATH, HUB_DB_PATH, KNOWLEDGE_DB_PATH
 from app.db.session import get_db
@@ -23,6 +33,68 @@ from app.db.tables import (
 from app.services.json_store import read_json
 
 log = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Knowledge DB (read-only) — SA Core table definitions
+#
+# The knowledge DB lives at KNOWLEDGE_DB_PATH and is owned by the Knowledge
+# Engine, not by platform.db. We bind a local read-only SA engine + table
+# definitions here so this service can query it via SA Core expressions
+# instead of raw SQL. Engines are cached per-path via _knowledge_engine().
+# ---------------------------------------------------------------------------
+
+_knowledge_metadata = MetaData()
+
+knowledge_global_entities = Table(
+    "global_entities",
+    _knowledge_metadata,
+    Column("gid", Text, primary_key=True),
+    Column("canonical_name", Text, nullable=False),
+    Column("type", Text, nullable=False),
+    Column("importance_score", Float, nullable=False, server_default="0.0"),
+)
+
+knowledge_articles = Table(
+    "articles",
+    _knowledge_metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("gid", Text, nullable=False),
+)
+
+knowledge_cross_project_connections = Table(
+    "cross_project_connections",
+    _knowledge_metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("source_gid", Text, nullable=False),
+    Column("target_gid", Text, nullable=False),
+)
+
+knowledge_project_entity_links = Table(
+    "project_entity_links",
+    _knowledge_metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("gid", Text, nullable=False),
+    Column("project_slug", Text, nullable=False),
+)
+
+_knowledge_engine_cache: dict = {}
+
+
+def _knowledge_engine(db_path):
+    """Lazy-create a read-only SA engine for the knowledge DB.
+
+    Cached per-path so repeated calls reuse the same engine.
+    """
+    key = str(db_path)
+    eng = _knowledge_engine_cache.get(key)
+    if eng is None:
+        eng = create_engine(
+            f"sqlite:///file:{db_path}?mode=ro&uri=true",
+            connect_args={"uri": True, "timeout": 10},
+        )
+        _knowledge_engine_cache[key] = eng
+    return eng
 
 
 def build_chat_context(
@@ -85,50 +157,65 @@ def build_chat_context(
 
 
 def _build_knowledge_engine_section(project_id: str | None = None) -> str | None:
-    """Query the Knowledge Engine for relevant entities and connections."""
+    """Query the Knowledge Engine for relevant entities and connections.
+
+    Uses SA Core expressions against a cached read-only engine for the
+    knowledge DB (separate from platform.db).
+    """
     if not KNOWLEDGE_DB_PATH.exists():
         return None
 
     try:
-        conn = sqlite3.connect(f"file:{KNOWLEDGE_DB_PATH}?mode=ro", uri=True)
-        conn.row_factory = sqlite3.Row
+        engine = _knowledge_engine(KNOWLEDGE_DB_PATH)
+        with engine.connect() as conn:
+            parts: list[str] = []
 
-        parts = []
+            # Get entity / article / connection counts
+            total = conn.execute(
+                select(func.count()).select_from(knowledge_global_entities)
+            ).scalar() or 0
+            article_count = conn.execute(
+                select(func.count()).select_from(knowledge_articles)
+            ).scalar() or 0
+            connection_count = conn.execute(
+                select(func.count()).select_from(knowledge_cross_project_connections)
+            ).scalar() or 0
 
-        # Get entity count
-        total = conn.execute("SELECT COUNT(*) FROM global_entities").fetchone()[0]
-        article_count = conn.execute("SELECT COUNT(*) FROM articles").fetchone()[0]
-        connection_count = conn.execute("SELECT COUNT(*) FROM cross_project_connections").fetchone()[0]
+            parts.append(
+                f"Knowledge Graph: {total} entities, {article_count} articles, "
+                f"{connection_count} cross-project connections."
+            )
 
-        parts.append(f"Knowledge Graph: {total} entities, {article_count} articles, {connection_count} cross-project connections.")
+            # Get top entities for this project (if project_id provided)
+            ge = knowledge_global_entities
+            if project_id:
+                pel = knowledge_project_entity_links
+                rows = conn.execute(
+                    select(ge.c.canonical_name, ge.c.type, ge.c.importance_score)
+                    .select_from(ge.join(pel, ge.c.gid == pel.c.gid))
+                    .where(pel.c.project_slug == project_id)
+                    .order_by(ge.c.importance_score.desc())
+                    .limit(5)
+                ).fetchall()
+                if rows:
+                    entity_list = ", ".join(
+                        f"{r.canonical_name} ({r.type})" for r in rows
+                    )
+                    parts.append(f"Key entities for this project: {entity_list}")
+            else:
+                # Top 5 global entities
+                rows = conn.execute(
+                    select(ge.c.canonical_name, ge.c.type, ge.c.importance_score)
+                    .order_by(ge.c.importance_score.desc())
+                    .limit(5)
+                ).fetchall()
+                if rows:
+                    entity_list = ", ".join(
+                        f"{r.canonical_name} ({r.type})" for r in rows
+                    )
+                    parts.append(f"Top entities: {entity_list}")
 
-        # Get top entities for this project (if project_id provided)
-        if project_id:
-            rows = conn.execute("""
-                SELECT ge.canonical_name, ge.type, ge.importance_score
-                FROM global_entities ge
-                JOIN project_entity_links pel ON ge.gid = pel.gid
-                WHERE pel.project_slug = ?
-                ORDER BY ge.importance_score DESC
-                LIMIT 5
-            """, (project_id,)).fetchall()
-            if rows:
-                entity_list = ", ".join(f"{r['canonical_name']} ({r['type']})" for r in rows)
-                parts.append(f"Key entities for this project: {entity_list}")
-        else:
-            # Top 5 global entities
-            rows = conn.execute("""
-                SELECT canonical_name, type, importance_score
-                FROM global_entities
-                ORDER BY importance_score DESC
-                LIMIT 5
-            """).fetchall()
-            if rows:
-                entity_list = ", ".join(f"{r['canonical_name']} ({r['type']})" for r in rows)
-                parts.append(f"Top entities: {entity_list}")
-
-        conn.close()
-        return "\n".join(parts) if parts else None
+            return "\n".join(parts) if parts else None
     except Exception as e:
         log.debug("knowledge_engine_section_skipped: %s", e)
         return None

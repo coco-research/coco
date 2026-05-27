@@ -1,7 +1,10 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Sparkles } from 'lucide-react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './lib/queryClient';
+import { connectPlatformSSE } from './sse/client';
+import { dispatchSSEEvent } from './sse/dispatch';
 import { AppShell } from './components/layout/AppShell';
 import { CommandPalette } from './components/shared/CommandPalette';
 import { KeyboardShortcuts } from './components/shared/KeyboardShortcuts';
@@ -75,11 +78,17 @@ function PageFallback() {
   );
 }
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: { staleTime: 30_000, refetchOnWindowFocus: true },
-  },
-});
+/** v3 platform SSE bridge — wires backend events into Query + Zustand. */
+function PlatformSSEBridge() {
+  useEffect(() => {
+    const handle = connectPlatformSSE({
+      queryClient,
+      onEvent: (evt) => dispatchSSEEvent(evt, queryClient),
+    });
+    return () => handle.close();
+  }, []);
+  return null;
+}
 
 export default function App() {
   return (
@@ -93,6 +102,7 @@ export default function App() {
             <CocoOrb />
             <DesktopNotifications />
             <VoiceCommandRouter />
+            <PlatformSSEBridge />
             <Suspense fallback={<PageFallback />}>
               <Routes>
                 <Route element={<AppShell />}>

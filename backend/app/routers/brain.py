@@ -1,14 +1,16 @@
 import json
 import logging
 import secrets
-import sqlite3
 from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
+from sqlalchemy import Engine, create_engine, func, or_, select
+from sqlalchemy.engine import Connection
 
 from app.config import BRAIN_JSON_PATH, QUEUE_JSON_PATH, CONFIG_JSON_PATH, BRAIN_DB_PATH
+from app.db.tables import brain_decisions, brain_events, brain_tasks, brain_entities
 from app.services.json_store import read_json, write_json
 from app.models.brain import UpdatePersonBody
 
@@ -150,6 +152,11 @@ def delete_person(slug: str):
     del people[slug]
     brain["people"] = people
     write_json(BRAIN_JSON_PATH, brain)
+    try:
+        from app.services import audit as _audit
+        _audit.record(_audit.ACTION_BRAIN_DELETE, actor="user", payload={"slug": slug})
+    except Exception:
+        pass
 
 
 @router.get("/api/brain/rules")
@@ -285,9 +292,18 @@ def delete_queue_item(index: int):
     q = _read_queue()
     if index < 0 or index >= len(q["items"]):
         raise HTTPException(404, f"Queue index {index} out of range (0..{len(q['items'])-1})")
-    q["items"].pop(index)
+    removed = q["items"].pop(index)
     q["last_updated"] = datetime.now(timezone.utc).isoformat()
     write_json(QUEUE_JSON_PATH, q)
+    try:
+        from app.services import audit as _audit
+        _audit.record(
+            _audit.ACTION_QUEUE_DISMISS,
+            actor="user",
+            payload={"index": index, "item_id": (removed or {}).get("id")},
+        )
+    except Exception:
+        pass
 
 
 @router.post("/api/queue/from-agent", status_code=201)
@@ -349,26 +365,45 @@ def get_config():
 
 
 # ---------------------------------------------------------------------------
-# Brain DB endpoints (project_brain.db — read-only)
+# Brain DB endpoints (project_brain.db — read-only SA Core engine)
 # ---------------------------------------------------------------------------
 
-def _brain_db_conn() -> sqlite3.Connection | None:
-    """Open a read-only connection to project_brain.db.
+_brain_engine: Engine | None = None
+
+
+def _get_brain_engine() -> Engine | None:
+    """Return a memoized read-only SA engine for project_brain.db.
+
+    Returns None if the brain DB file does not exist, so callers can short-
+    circuit to empty results without touching the disk on every request.
+    """
+    global _brain_engine
+    if not BRAIN_DB_PATH.exists():
+        return None
+    if _brain_engine is None:
+        # SQLite read-only via URI. The SA URL form uses the `uri=true` query
+        # param to pass through to sqlite3's connect(uri=True).
+        url = f"sqlite:///file:{BRAIN_DB_PATH}?mode=ro&uri=true"
+        _brain_engine = create_engine(url, connect_args={"timeout": 5})
+    return _brain_engine
+
+
+def _brain_db_conn() -> Connection | None:
+    """Open a read-only SA Connection to project_brain.db.
 
     Returns None if the file does not exist so callers can return empty results.
     """
-    if not BRAIN_DB_PATH.exists():
+    eng = _get_brain_engine()
+    if eng is None:
         return None
-    conn = sqlite3.connect(f"file:{BRAIN_DB_PATH}?mode=ro", uri=True)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return eng.connect()
 
 
-def _rows_to_dicts(rows: list[sqlite3.Row]) -> list[dict]:
-    """Convert sqlite3.Row objects to plain dicts, parsing JSON columns."""
+def _rows_to_dicts(rows) -> list[dict]:
+    """Convert SA Row objects to plain dicts, parsing JSON columns."""
     results = []
     for row in rows:
-        d = dict(row)
+        d = dict(row._mapping)
         # Parse known JSON columns if present
         for json_col in ("participants_json", "metadata_json"):
             if json_col in d and isinstance(d[json_col], str):
@@ -391,28 +426,28 @@ def get_brain_decisions(
     if conn is None:
         return {"items": [], "total": 0}
     try:
+        base_where = brain_decisions.c.project_id == 1
         if search.strip():
             pattern = f"%{search.strip()}%"
-            total = conn.execute(
-                "SELECT COUNT(*) FROM decisions WHERE project_id = 1 "
-                "AND (decision LIKE ? OR context LIKE ? OR decided_by LIKE ?)",
-                (pattern, pattern, pattern),
-            ).fetchone()[0]
-            rows = conn.execute(
-                "SELECT * FROM decisions WHERE project_id = 1 "
-                "AND (decision LIKE ? OR context LIKE ? OR decided_by LIKE ?) "
-                "ORDER BY date DESC LIMIT ? OFFSET ?",
-                (pattern, pattern, pattern, limit, offset),
-            ).fetchall()
+            search_clause = or_(
+                brain_decisions.c.decision.like(pattern),
+                brain_decisions.c.context.like(pattern),
+                brain_decisions.c.decided_by.like(pattern),
+            )
+            where_clause = base_where & search_clause
         else:
-            total = conn.execute(
-                "SELECT COUNT(*) FROM decisions WHERE project_id = 1"
-            ).fetchone()[0]
-            rows = conn.execute(
-                "SELECT * FROM decisions WHERE project_id = 1 "
-                "ORDER BY date DESC LIMIT ? OFFSET ?",
-                (limit, offset),
-            ).fetchall()
+            where_clause = base_where
+
+        total = conn.execute(
+            select(func.count()).select_from(brain_decisions).where(where_clause)
+        ).scalar() or 0
+        rows = conn.execute(
+            select(brain_decisions)
+            .where(where_clause)
+            .order_by(brain_decisions.c.date.desc())
+            .limit(limit)
+            .offset(offset)
+        ).fetchall()
         return {"items": _rows_to_dicts(rows), "total": total}
     except Exception:
         log.exception("brain_decisions_error")
@@ -432,25 +467,22 @@ def get_brain_events(
     if conn is None:
         return {"items": [], "total": 0}
     try:
+        base_where = brain_events.c.project_id == 1
         if type.strip():
-            total = conn.execute(
-                "SELECT COUNT(*) FROM events WHERE project_id = 1 AND type = ?",
-                (type.strip(),),
-            ).fetchone()[0]
-            rows = conn.execute(
-                "SELECT * FROM events WHERE project_id = 1 AND type = ? "
-                "ORDER BY date DESC LIMIT ? OFFSET ?",
-                (type.strip(), limit, offset),
-            ).fetchall()
+            where_clause = base_where & (brain_events.c.type == type.strip())
         else:
-            total = conn.execute(
-                "SELECT COUNT(*) FROM events WHERE project_id = 1"
-            ).fetchone()[0]
-            rows = conn.execute(
-                "SELECT * FROM events WHERE project_id = 1 "
-                "ORDER BY date DESC LIMIT ? OFFSET ?",
-                (limit, offset),
-            ).fetchall()
+            where_clause = base_where
+
+        total = conn.execute(
+            select(func.count()).select_from(brain_events).where(where_clause)
+        ).scalar() or 0
+        rows = conn.execute(
+            select(brain_events)
+            .where(where_clause)
+            .order_by(brain_events.c.date.desc())
+            .limit(limit)
+            .offset(offset)
+        ).fetchall()
         return {"items": _rows_to_dicts(rows), "total": total}
     except Exception:
         log.exception("brain_events_error")
@@ -472,29 +504,32 @@ def get_brain_tasks(
     try:
         # Status breakdown
         status_rows = conn.execute(
-            "SELECT status, COUNT(*) as cnt FROM tasks WHERE project_id = 1 GROUP BY status"
+            select(brain_tasks.c.status, func.count().label("cnt"))
+            .where(brain_tasks.c.project_id == 1)
+            .group_by(brain_tasks.c.status)
         ).fetchall()
-        by_status = {r["status"]: r["cnt"] for r in status_rows}
+        by_status = {r._mapping["status"]: r._mapping["cnt"] for r in status_rows}
 
+        base_where = brain_tasks.c.project_id == 1
         if status.strip():
-            total = conn.execute(
-                "SELECT COUNT(*) FROM tasks WHERE project_id = 1 AND status = ?",
-                (status.strip(),),
-            ).fetchone()[0]
-            rows = conn.execute(
-                "SELECT * FROM tasks WHERE project_id = 1 AND status = ? "
-                "ORDER BY priority, status, created_at DESC LIMIT ? OFFSET ?",
-                (status.strip(), limit, offset),
-            ).fetchall()
+            where_clause = base_where & (brain_tasks.c.status == status.strip())
         else:
-            total = conn.execute(
-                "SELECT COUNT(*) FROM tasks WHERE project_id = 1"
-            ).fetchone()[0]
-            rows = conn.execute(
-                "SELECT * FROM tasks WHERE project_id = 1 "
-                "ORDER BY priority, status, created_at DESC LIMIT ? OFFSET ?",
-                (limit, offset),
-            ).fetchall()
+            where_clause = base_where
+
+        total = conn.execute(
+            select(func.count()).select_from(brain_tasks).where(where_clause)
+        ).scalar() or 0
+        rows = conn.execute(
+            select(brain_tasks)
+            .where(where_clause)
+            .order_by(
+                brain_tasks.c.priority,
+                brain_tasks.c.status,
+                brain_tasks.c.created_at.desc(),
+            )
+            .limit(limit)
+            .offset(offset)
+        ).fetchall()
         return {"items": _rows_to_dicts(rows), "total": total, "by_status": by_status}
     except Exception:
         log.exception("brain_tasks_error")
@@ -517,21 +552,31 @@ def get_brain_stats():
         }
     try:
         entities = conn.execute(
-            "SELECT COUNT(*) FROM entities WHERE project_id = 1"
-        ).fetchone()[0]
+            select(func.count())
+            .select_from(brain_entities)
+            .where(brain_entities.c.project_id == 1)
+        ).scalar() or 0
         decisions = conn.execute(
-            "SELECT COUNT(*) FROM decisions WHERE project_id = 1"
-        ).fetchone()[0]
+            select(func.count())
+            .select_from(brain_decisions)
+            .where(brain_decisions.c.project_id == 1)
+        ).scalar() or 0
         events_count = conn.execute(
-            "SELECT COUNT(*) FROM events WHERE project_id = 1"
-        ).fetchone()[0]
+            select(func.count())
+            .select_from(brain_events)
+            .where(brain_events.c.project_id == 1)
+        ).scalar() or 0
         task_total = conn.execute(
-            "SELECT COUNT(*) FROM tasks WHERE project_id = 1"
-        ).fetchone()[0]
+            select(func.count())
+            .select_from(brain_tasks)
+            .where(brain_tasks.c.project_id == 1)
+        ).scalar() or 0
         status_rows = conn.execute(
-            "SELECT status, COUNT(*) as cnt FROM tasks WHERE project_id = 1 GROUP BY status"
+            select(brain_tasks.c.status, func.count().label("cnt"))
+            .where(brain_tasks.c.project_id == 1)
+            .group_by(brain_tasks.c.status)
         ).fetchall()
-        task_by_status = {r["status"]: r["cnt"] for r in status_rows}
+        task_by_status = {r._mapping["status"]: r._mapping["cnt"] for r in status_rows}
 
         return {
             "available": True,

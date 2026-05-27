@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config, event, pool
 from alembic import context
 
 # Alembic Config object
@@ -48,15 +48,18 @@ def run_migrations_online() -> None:
         poolclass=pool.NullPool,
     )
 
-    with connectable.connect() as connection:
-        # Enable foreign keys for SQLite. NOTE: executing any statement here
-        # autobegins a SQLAlchemy transaction, which causes Alembic to treat
-        # the connection as "in an external transaction" and skip its own
-        # transaction management. We therefore commit explicitly after
-        # run_migrations() so the version_num update and migration DML are
-        # actually persisted — otherwise connection.close() would roll back.
-        connection.exec_driver_sql("PRAGMA foreign_keys = ON")
+    # Enable foreign keys at DBAPI connect time — running PRAGMA through the
+    # SQLAlchemy Connection triggers 2.x autobegin, which leaves the version-
+    # stamp INSERT in an implicit transaction that gets rolled back on exit
+    # (SQLite uses non-transactional DDL, so alembic's begin_transaction is a
+    # no-op once a txn is already open).
+    @event.listens_for(connectable, "connect")
+    def _enable_sqlite_fk(dbapi_connection, _connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys = ON")
+        cursor.close()
 
+    with connectable.connect() as connection:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,

@@ -28,6 +28,43 @@ export function apiPost<T>(path: string, body: unknown): Promise<T> {
   return apiFetch(path, { method: 'POST', body: JSON.stringify(body) });
 }
 
+/**
+ * POST a mutating intent with an `Idempotency-Key` header (Stripe pattern).
+ *
+ * Per `.planning/v3/INTEGRATION.md` §C-4: the header is canonical; the same
+ * UUID is also echoed in the body as `client_event_id` for back-compat during
+ * the P3-P8 cutover. The backend's idempotency layer dedupes on the header.
+ */
+export function apiPostIdempotent<T>(
+  path: string,
+  body: Record<string, unknown> = {},
+  idempotencyKey?: string,
+): Promise<T> {
+  const key = idempotencyKey ?? generateUuidV4();
+  const finalBody = { ...body, client_event_id: key };
+  return apiFetch(path, {
+    method: 'POST',
+    headers: { 'Idempotency-Key': key },
+    body: JSON.stringify(finalBody),
+  });
+}
+
+/**
+ * Lightweight UUID v4 generator. Prefers `crypto.randomUUID()` where
+ * available, falls back to a manual RFC4122 v4 implementation.
+ */
+export function generateUuidV4(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  // Fallback — non-cryptographic, but adequate for client-side dedupe keys.
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 export function apiPatch<T>(path: string, body: unknown): Promise<T> {
   return apiFetch(path, { method: 'PATCH', body: JSON.stringify(body) });
 }

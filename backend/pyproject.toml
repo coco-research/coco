@@ -8,6 +8,7 @@ dependencies = [
     "uvicorn[standard]>=0.32.0",
     "sse-starlette>=2.0.0",
     "pydantic>=2.10.0",
+    "pydantic-settings>=2.5.0",
     "psutil>=6.0.0",
     "structlog>=24.0.0",
     "edge-tts>=6.1.0",

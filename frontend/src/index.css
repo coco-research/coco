@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./styles/motion.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -46,6 +47,50 @@
   --radius-xl: 1rem;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ===== Density (compact / cozy / comfortable) =====
+ * Cozy is the default. CSS variables are read by component-level utilities.
+ * The body `data-density` attribute is set by lib/density.ts.
+ */
+:root {
+  --density-scale: 1;
+  --density-space-1: 0.25rem;
+  --density-space-2: 0.5rem;
+  --density-space-3: 0.75rem;
+  --density-space-4: 1rem;
+  --density-font-xs: 0.75rem;
+  --density-font-sm: 0.875rem;
+  --density-font-base: 1rem;
+  --density-row-h: 2.25rem;
+}
+
+body[data-density="compact"] {
+  --density-scale: 0.875;
+  --density-space-1: 0.125rem;
+  --density-space-2: 0.375rem;
+  --density-space-3: 0.5rem;
+  --density-space-4: 0.75rem;
+  --density-font-xs: 0.6875rem;
+  --density-font-sm: 0.8125rem;
+  --density-font-base: 0.9375rem;
+  --density-row-h: 1.875rem;
+}
+
+body[data-density="cozy"] {
+  --density-scale: 1;
+}
+
+body[data-density="comfortable"] {
+  --density-scale: 1.125;
+  --density-space-1: 0.375rem;
+  --density-space-2: 0.625rem;
+  --density-space-3: 1rem;
+  --density-space-4: 1.25rem;
+  --density-font-xs: 0.8125rem;
+  --density-font-sm: 0.9375rem;
+  --density-font-base: 1.0625rem;
+  --density-row-h: 2.625rem;
 }
 
 /* ===== Light Theme ===== */

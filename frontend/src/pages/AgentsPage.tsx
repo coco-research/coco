@@ -117,6 +117,18 @@ export default function AgentsPage() {
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['agents'] });
 
+  // Listen for Cmd-K "New Agent" action — opens the spawn dialog
+  useEffect(() => {
+    const onAction = (e: Event) => {
+      const detail = (e as CustomEvent<{ type?: string }>).detail;
+      if (detail?.type === 'agent') {
+        setDialogOpen(true);
+      }
+    };
+    window.addEventListener('coco:action', onAction);
+    return () => window.removeEventListener('coco:action', onAction);
+  }, []);
+
   const ACTION_LABELS: Record<string, string> = {
     spawn: 'Agent spawned',
     pause: 'Agent paused',

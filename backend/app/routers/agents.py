@@ -405,6 +405,12 @@ def kill_agent(agent_id: str):
         result = _agent_row_to_dict(row)
 
     event_bus.emit("agent.killed", {"agent_id": agent_id, "name": result.get("name")})
+    try:
+        from app.services import audit as _audit
+        _audit.record(_audit.ACTION_AGENT_KILL, actor="user", payload={"agent_id": agent_id})
+    except Exception:
+        # Audit failure must not break the destructive path
+        pass
     return result
 
 

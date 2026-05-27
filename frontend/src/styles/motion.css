@@ -1,0 +1,34 @@
+/* ===== Motion + color-scheme hygiene =====
+ * Phase 11 P9 — Polish.
+ *
+ * Aggressively suppresses non-essential motion when the user opts out at the
+ * OS level (prefers-reduced-motion). Complements the per-animation overrides
+ * already in index.css with a global belt-and-braces sweep.
+ *
+ * Also pins the document to light mode at the browser level so form controls,
+ * scrollbars, and built-in widgets do not flip to a dark UA theme.
+ */
+
+:root {
+  /* Tell the UA to render built-in controls in light mode only. */
+  color-scheme: light;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* When the OS prefers dark, we still render light. This keeps the platform
+ * predictable for now — dark mode lives behind an explicit user toggle. */
+@media (prefers-color-scheme: dark) {
+  :root:not(.dark) {
+    color-scheme: light;
+  }
+}

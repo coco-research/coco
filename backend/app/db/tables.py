@@ -984,3 +984,24 @@ dead_letter_queue = Table(
     Column("next_retry_at", Text),
     Column("last_attempt_at", Text),
 )
+
+# ---------------------------------------------------------------------------
+# Brain merge log (Phase 11 — Brain B4 graph ops)
+# ---------------------------------------------------------------------------
+# Append-only audit + undo buffer for entity_resolver merges. Distinct from
+# `brain_merge_audit` (B0): `brain_merge_audit` is the forever record of
+# *what* merged; `brain_merge_log` carries the *operational* metadata —
+# who performed the merge, until when it's reversible, and when (if ever)
+# it was undone. The graph_ops admin endpoints read from here.
+
+brain_merge_log = Table(
+    "brain_merge_log",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("merged_from", Text, nullable=False),
+    Column("merged_into", Text, nullable=False),
+    Column("performed_at", Text, nullable=False),
+    Column("performed_by", Text),
+    Column("reversible_until", Text),
+    Column("undone_at", Text),
+)

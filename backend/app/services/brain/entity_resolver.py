@@ -787,6 +787,44 @@ def resolve_person_for_ingest(
     return None
 
 
+# ---------------------------------------------------------------------------
+# Merge-log wire-in (Phase 11 / Brain B4)
+# ---------------------------------------------------------------------------
+# `graph_ops.record_merge_to_log` mirrors every `merge_recorded` event into
+# the operational merge-log (in-process buffer + `brain_merge_log` SQL
+# table via the brain_ops router). We install the hook on demand so unit
+# tests can opt in/out cleanly.
+
+_MERGE_LOG_UNREGISTER: Optional[Callable[[], None]] = None
+
+
+def install_merge_log_hook() -> Callable[[], None]:
+    """Wire entity_resolver merges into the graph_ops merge log.
+
+    Idempotent: calling multiple times reuses the same registration and
+    returns the same unregister function.
+
+    Imported lazily to avoid a circular import (`graph_ops` imports from
+    this module).
+    """
+    global _MERGE_LOG_UNREGISTER
+    if _MERGE_LOG_UNREGISTER is not None:
+        return _MERGE_LOG_UNREGISTER
+
+    from app.services.brain.graph_ops import record_merge_to_log
+
+    _MERGE_LOG_UNREGISTER = register_bidirectional_link_hook(record_merge_to_log)
+    return _MERGE_LOG_UNREGISTER
+
+
+def uninstall_merge_log_hook() -> None:
+    """Test helper — undo `install_merge_log_hook`."""
+    global _MERGE_LOG_UNREGISTER
+    if _MERGE_LOG_UNREGISTER is not None:
+        _MERGE_LOG_UNREGISTER()
+        _MERGE_LOG_UNREGISTER = None
+
+
 __all__ = [
     "AliasType",
     "MergeMethod",
@@ -805,4 +843,6 @@ __all__ = [
     "make_resolver",
     "register_bidirectional_link_hook",
     "resolve_person_for_ingest",
+    "install_merge_log_hook",
+    "uninstall_merge_log_hook",
 ]

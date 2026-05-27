@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useCallback } from 'react';
 import { X, Loader2, Users, FileText, Mail, ChevronRight, ExternalLink } from 'lucide-react';
 import { apiFetch } from '../../lib/api';
-import { cn } from '../../lib/utils';
 
 interface PersonProject {
   slug: string;

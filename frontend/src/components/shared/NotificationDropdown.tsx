@@ -163,10 +163,14 @@ export function NotificationDropdown() {
   return (
     <div className="relative" ref={ref}>
       <button
+        type="button"
         onClick={() => setOpen(!open)}
-        className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors"
+        aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        className="relative inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors"
       >
-        <Bell size={16} />
+        <Bell size={16} aria-hidden="true" />
         {unreadCount > 0 && (
           <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[16px] h-4 px-1 text-[9px] font-bold text-white bg-red-500 rounded-full leading-none">
             {unreadCount > 99 ? '99+' : unreadCount}

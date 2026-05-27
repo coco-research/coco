@@ -82,7 +82,7 @@ export function DecisionTimeline({ onNavigateProject, defaultDays = 14 }: Decisi
     staleTime: 5 * 60 * 1000,
   });
 
-  const groups = data ? groupByDate(data.items) : new Map();
+  const groups: Map<string, TimelineItem[]> = data ? groupByDate(data.items) : new Map();
 
   return (
     <div className="bg-card border border-border rounded-xl">

@@ -6,7 +6,8 @@ import { AutonomySettings } from '../components/settings/AutonomySettings';
 import { DisplaySettings } from '../components/settings/DisplaySettings';
 import { BrainViewer } from '../components/settings/BrainViewer';
 import { useTheme } from '../context/ThemeContext';
-import { Sun, Moon, BellOff } from 'lucide-react';
+import { Sun, Moon, BellOff, RefreshCw } from 'lucide-react';
+import { resetOnboarding } from '../components/onboarding/OnboardingWizard';
 import { TriggerList, type Trigger } from '../components/triggers/TriggerList';
 import { TriggerForm } from '../components/triggers/TriggerForm';
 import {
@@ -31,13 +32,44 @@ import {
   type Locale,
 } from '../lib/i18n';
 
-type SaveStatus = 'idle' | 'saving' | 'saved';
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 const tabTriggerCls = cn(
   'px-3 py-2 text-sm font-medium text-muted-foreground transition-colors',
   'hover:text-foreground',
   'data-[state=active]:text-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary',
 );
+
+function ResetOnboardingControl() {
+  const [done, setDone] = useState(false);
+
+  const handleReset = () => {
+    resetOnboarding();
+    setDone(true);
+    // Reload so the wizard re-appears on Home immediately.
+    setTimeout(() => {
+      window.location.assign('/');
+    }, 400);
+  };
+
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-border">
+      <div>
+        <p className="text-sm font-medium text-foreground">Onboarding</p>
+        <p className="text-xs text-muted-foreground">
+          Replay the 5-step welcome wizard from the beginning.
+        </p>
+      </div>
+      <button
+        onClick={handleReset}
+        className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-accent/30 transition-colors"
+      >
+        <RefreshCw size={12} />
+        {done ? 'Resetting…' : 'Reset onboarding'}
+      </button>
+    </div>
+  );
+}
 
 function NotificationToggle() {
   const supported = notifSupported();
@@ -264,6 +296,7 @@ export default function SettingsPage() {
             <NotificationToggle />
             <DensityToggle />
             <LocalePicker />
+            <ResetOnboardingControl />
           </div>
         </Tabs.Content>
 

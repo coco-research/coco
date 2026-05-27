@@ -1,5 +1,6 @@
 import json
 import logging
+import secrets
 from datetime import datetime, timezone
 from typing import Any
 
@@ -180,6 +181,7 @@ def get_queue():
             continue
         normalized.append({
             "id": item.get("id", ""),
+            "human_id": item.get("human_id"),
             "priority": item.get("priority", "medium"),
             "type": item.get("type", "unknown"),
             "summary": item.get("summary", ""),
@@ -211,7 +213,6 @@ def _read_queue() -> dict:
 
 def _next_queue_id() -> str:
     """Generate a short queue id."""
-    import secrets
     return f"q-{secrets.token_hex(4)}"
 
 
@@ -223,8 +224,23 @@ def _next_queue_id() -> str:
 def add_queue_item(body: QueueItemCreate):
     """Add a new item to queue.json."""
     q = _read_queue()
+    item_id = _next_queue_id()
+
+    # Mint a human_id (e.g. CXR-47). Falls back to None if id_sequences is
+    # unreachable — never block queue inserts on this.
+    human_id: str | None = None
+    try:
+        from app.services.id_generator import assign_display_id
+        # Decisions have no per-node bucket; pass project so a matching node
+        # prefix is reused when one exists, otherwise the global "CXR" bucket.
+        node_id = _resolve_node_for_project(body.project) if body.project else None
+        human_id = assign_display_id(item_id, node_id, entity_type="decision")
+    except Exception as e:
+        log.warning("queue_human_id_assign_failed: %s", e)
+
     item = {
-        "id": _next_queue_id(),
+        "id": item_id,
+        "human_id": human_id,
         "type": body.type,
         "priority": body.priority,
         "summary": body.summary,
@@ -239,6 +255,22 @@ def add_queue_item(body: QueueItemCreate):
     q["last_updated"] = datetime.now(timezone.utc).isoformat()
     write_json(QUEUE_JSON_PATH, q)
     return item
+
+
+def _resolve_node_for_project(project: str | None) -> str | None:
+    """Best-effort lookup of a node_id for a given project label/id."""
+    if not project:
+        return None
+    try:
+        from app.db.session import get_db
+        with get_db() as conn:
+            row = conn.exec_driver_sql(
+                "SELECT id FROM nodes WHERE id = ? OR label = ? LIMIT 1",
+                (project, project),
+            ).fetchone()
+            return row[0] if row else None
+    except Exception:
+        return None
 
 
 @router.patch("/api/queue/{index}")

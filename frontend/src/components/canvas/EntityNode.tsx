@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import { User, Users, Monitor, FileText, Briefcase, Box, Building2, Waypoints } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -9,7 +9,10 @@ export type EntityNodeData = {
   gid: string;
   articleCount: number;
   confidence: number;
+  [key: string]: unknown;
 };
+
+export type EntityNodeT = Node<EntityNodeData, 'entity'>;
 
 const TYPE_COLORS: Record<string, string> = {
   person: 'bg-blue-950/80 border-blue-700/60',
@@ -33,7 +36,7 @@ const TYPE_ICONS: Record<string, React.ElementType> = {
   project: Waypoints,
 };
 
-function EntityNodeComponent({ data, selected }: NodeProps<EntityNodeData>) {
+function EntityNodeComponent({ data, selected }: NodeProps<EntityNodeT>) {
   const nodeData = data;
   const Icon = TYPE_ICONS[nodeData.entityType] ?? Box;
   const colors = TYPE_COLORS[nodeData.entityType] ?? 'bg-gray-900/80 border-gray-600/60';

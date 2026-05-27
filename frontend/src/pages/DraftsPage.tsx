@@ -4,6 +4,7 @@ import { FileText, Check, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { apiFetch, apiPost } from '../lib/api';
 import { cn } from '../lib/utils';
 import { useToast } from '../components/shared/Toast';
+import { ErrorState } from '../components/shared/ErrorState';
 
 interface Draft {
   id: string;
@@ -67,49 +68,53 @@ function DraftCard({
 
   return (
     <div className="border border-border rounded-lg bg-card overflow-hidden">
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={() => setExpanded(!expanded)}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(!expanded); } }}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-accent/30 transition-colors cursor-pointer"
-      >
-        {expanded ? (
-          <ChevronDown size={14} className="text-muted-foreground shrink-0" />
-        ) : (
-          <ChevronRight size={14} className="text-muted-foreground shrink-0" />
-        )}
-        <FileText size={14} className="text-muted-foreground shrink-0" />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-foreground truncate">
-              {draft.target_template} / {draft.target_section}
+      <div className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-accent/30 transition-colors">
+        <button
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+          aria-expanded={expanded}
+          aria-label={`${expanded ? 'Collapse' : 'Expand'} ${draft.target_template} / ${draft.target_section}`}
+          className="flex items-center gap-3 min-w-0 flex-1 text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm"
+        >
+          {expanded ? (
+            <ChevronDown size={14} aria-hidden="true" className="text-muted-foreground shrink-0" />
+          ) : (
+            <ChevronRight size={14} aria-hidden="true" className="text-muted-foreground shrink-0" />
+          )}
+          <FileText size={14} aria-hidden="true" className="text-muted-foreground shrink-0" />
+          <span className="min-w-0 flex-1">
+            <span className="flex items-center gap-2">
+              <span className="text-sm font-medium text-foreground truncate">
+                {draft.target_template} / {draft.target_section}
+              </span>
+              <StatusBadge status={draft.status} />
             </span>
-            <StatusBadge status={draft.status} />
-          </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-            <span>{draft.project_id}</span>
-            <span className="text-border">|</span>
-            <span>{draft.format}</span>
-            <span className="text-border">|</span>
-            <span>{new Date(draft.created_at).toLocaleDateString()}</span>
-          </div>
-        </div>
+            <span className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+              <span>{draft.project_id}</span>
+              <span className="text-border">|</span>
+              <span>{draft.format}</span>
+              <span className="text-border">|</span>
+              <span>{new Date(draft.created_at).toLocaleDateString()}</span>
+            </span>
+          </span>
+        </button>
         {draft.status === 'pending' && (
-          <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
+              type="button"
               onClick={() => onApprove(draft.id)}
               className="p-1.5 rounded-md text-success hover:bg-success/10 transition-colors"
-              title="Approve"
+              aria-label={`Approve draft ${draft.target_template} / ${draft.target_section}`}
             >
-              <Check size={14} />
+              <Check size={14} aria-hidden="true" />
             </button>
             <button
+              type="button"
               onClick={() => onReject(draft.id)}
               className="p-1.5 rounded-md text-destructive hover:bg-destructive/10 transition-colors"
-              title="Reject"
+              aria-label={`Reject draft ${draft.target_template} / ${draft.target_section}`}
             >
-              <X size={14} />
+              <X size={14} aria-hidden="true" />
             </button>
           </div>
         )}
@@ -135,7 +140,7 @@ export default function DraftsPage() {
   if (projectFilter) queryParams.set('project_id', projectFilter);
   queryParams.set('limit', '200');
 
-  const { data, isLoading, refetch } = useQuery<Draft[]>({
+  const { data, isLoading, isError, error, refetch } = useQuery<Draft[]>({
     queryKey: ['drafts', statusFilter, projectFilter],
     queryFn: () => apiFetch<Draft[]>(`/drafts?${queryParams.toString()}`),
     refetchInterval: 30000,
@@ -219,6 +224,7 @@ export default function DraftsPage() {
       {projects.length > 1 && (
         <div className="px-4 pb-3">
           <select
+            aria-label="Filter drafts by project"
             value={projectFilter}
             onChange={(e) => setProjectFilter(e.target.value)}
             className="text-xs bg-card border border-border rounded-md px-2 py-1.5 text-foreground"
@@ -237,6 +243,12 @@ export default function DraftsPage() {
       <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
         {isLoading ? (
           <DraftsSkeleton />
+        ) : isError ? (
+          <ErrorState
+            error={error}
+            title="Couldn't load drafts"
+            onRetry={() => void refetch()}
+          />
         ) : drafts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <FileText size={32} className="text-muted-foreground mb-3" />

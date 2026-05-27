@@ -59,3 +59,20 @@ class SpawnSubagentBody(BaseModel):
     task: str
     model: str = "sonnet"
     role: Optional[str] = None
+
+
+# ---------------------------------------------------------------------------
+# Inter-agent delegation
+# ---------------------------------------------------------------------------
+
+
+class CreateAgentTaskBody(BaseModel):
+    """Body for `POST /api/agents/{to_id}/tasks` — Agent A delegates to Agent B."""
+    prompt: str
+    from_agent_id: Optional[str] = None
+
+
+class CompleteAgentTaskBody(BaseModel):
+    """Body for `PATCH /api/agent_tasks/{id}` — mark done or failed with a result."""
+    status: str  # 'done' or 'failed'
+    result: Optional[str] = None

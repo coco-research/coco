@@ -13,6 +13,7 @@ from app.db.session import get_db
 from app.db.tables import chat_sessions, chat_messages, hub_content
 from app.db.compat import now
 from app.services.chat_context import build_chat_context
+from app.services.spawn_limiter import spawn_slot
 from app.models.chat import ChatRequest, MessageOut, SessionCreate, SessionOut
 
 logger = logging.getLogger(__name__)
@@ -197,7 +198,7 @@ async def _check_claude_available() -> bool:
 
 
 async def _sdk_chat_event_generator(message: str, model: str, system_prompt: str, session_id: str | None = None):
-    from app.services.agent_sdk_client import agent_sdk
+    from app.services.agent_sdk_client import agent_sdk  # noqa: lazy import (optional dep)
 
     full_response = ""
     input_tokens = 0
@@ -246,7 +247,7 @@ async def _sdk_chat_event_generator(message: str, model: str, system_prompt: str
                     _update_session_after_message(session_id)
 
     if input_tokens or output_tokens:
-        from app.services.agent_sdk_client import record_sdk_cost
+        from app.services.agent_sdk_client import record_sdk_cost  # noqa: lazy import (optional dep)
         record_sdk_cost(
             model=response_model, input_tokens=input_tokens,
             output_tokens=output_tokens, source="chat",
@@ -257,7 +258,7 @@ async def _sdk_chat_event_generator(message: str, model: str, system_prompt: str
 
 async def chat_event_generator(message: str, model: str, system_prompt: str, session_id: str | None = None):
     if USE_AGENT_SDK:
-        from app.services.agent_sdk_client import agent_sdk
+        from app.services.agent_sdk_client import agent_sdk  # noqa: lazy import (optional dep)
         if agent_sdk.is_available():
             async for evt in _sdk_chat_event_generator(message, model, system_prompt, session_id):
                 yield evt
@@ -272,122 +273,137 @@ async def chat_event_generator(message: str, model: str, system_prompt: str, ses
     full_prompt = f"[System context]\n{system_prompt}\n\n[User message]\n{message}"
     cmd.append(full_prompt)
 
-    try:
-        proc = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            cwd=os.environ.get("HOME", "/tmp"),
-            env=env,
-            limit=1024 * 1024,
-        )
-    except FileNotFoundError:
-        yield {"event": "error", "data": json.dumps({"type": "error", "message": "claude CLI not found on PATH"})}
-        return
-    except Exception as e:
-        yield {"event": "error", "data": json.dumps({"type": "error", "message": f"Failed to start claude: {str(e)}"})}
-        return
-
+    # Cap concurrent claude-CLI spawns to prevent OOM (NEXT_SPRINT 1.3).
+    # The slot is held for the lifetime of the subprocess via the ``spawn_slot``
+    # context manager so that simultaneous running agents are bounded by
+    # COCO_MAX_PARALLEL_AGENTS, not just simultaneous spawn calls. The context
+    # manager guarantees the slot is released on every exit path (timeout,
+    # non-zero exit, exception, normal completion).
     full_response = ""
     timeout_seconds = CHAT_TIMEOUT_MINUTES * 60
     timed_out = False
+    # Defense in depth: track whether we're inside the slot so any future
+    # refactor that bypasses the context manager still has a clear signal.
+    _spawn_slot_held = False
 
-    try:
-        deadline = asyncio.get_event_loop().time() + timeout_seconds
+    async with spawn_slot():
+        _spawn_slot_held = True
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                cwd=os.environ.get("HOME", "/tmp"),
+                env=env,
+                limit=1024 * 1024,
+            )
+        except FileNotFoundError:
+            yield {"event": "error", "data": json.dumps({"type": "error", "message": "claude CLI not found on PATH"})}
+            return
+        except Exception as e:
+            yield {"event": "error", "data": json.dumps({"type": "error", "message": f"Failed to start claude: {str(e)}"})}
+            return
 
-        async for line in proc.stdout:
-            if asyncio.get_event_loop().time() > deadline:
-                timed_out = True
-                break
+        try:
+            deadline = asyncio.get_event_loop().time() + timeout_seconds
 
-            line_text = line.decode("utf-8", errors="replace").strip()
-            if not line_text:
-                continue
+            async for line in proc.stdout:
+                if asyncio.get_event_loop().time() > deadline:
+                    timed_out = True
+                    break
 
-            try:
-                chunk = json.loads(line_text)
-                if not isinstance(chunk, dict):
+                line_text = line.decode("utf-8", errors="replace").strip()
+                if not line_text:
                     continue
 
-                chunk_type = chunk.get("type")
+                try:
+                    chunk = json.loads(line_text)
+                    if not isinstance(chunk, dict):
+                        continue
 
-                if chunk_type == "assistant":
-                    assistant_message = chunk.get("message")
-                    if isinstance(assistant_message, dict):
-                        content_blocks = assistant_message.get("content", [])
-                        for block in content_blocks:
-                            if isinstance(block, dict) and block.get("type") == "text":
-                                token = block.get("text", "")
-                                full_response += token
-                                yield {"event": "token", "data": json.dumps({"type": "token", "content": token})}
+                    chunk_type = chunk.get("type")
 
-                elif chunk_type == "content_block_delta":
-                    delta = chunk.get("delta", {})
-                    if isinstance(delta, dict) and delta.get("type") == "text_delta":
-                        token = delta.get("text", "")
-                        full_response += token
-                        yield {"event": "token", "data": json.dumps({"type": "token", "content": token})}
-
-                elif chunk_type == "result":
-                    result_val = chunk.get("result")
-                    if isinstance(result_val, str):
-                        if not full_response:
-                            full_response = result_val
-                            yield {"event": "token", "data": json.dumps({"type": "token", "content": result_val})}
-                    elif isinstance(result_val, dict):
-                        content_blocks = result_val.get("content", [])
-                        for block in content_blocks:
-                            if isinstance(block, dict) and block.get("type") == "text":
-                                token = block.get("text", "")
-                                if not full_response:
-                                    full_response = token
+                    if chunk_type == "assistant":
+                        assistant_message = chunk.get("message")
+                        if isinstance(assistant_message, dict):
+                            content_blocks = assistant_message.get("content", [])
+                            for block in content_blocks:
+                                if isinstance(block, dict) and block.get("type") == "text":
+                                    token = block.get("text", "")
+                                    full_response += token
                                     yield {"event": "token", "data": json.dumps({"type": "token", "content": token})}
 
-            except json.JSONDecodeError:
-                continue
+                    elif chunk_type == "content_block_delta":
+                        delta = chunk.get("delta", {})
+                        if isinstance(delta, dict) and delta.get("type") == "text_delta":
+                            token = delta.get("text", "")
+                            full_response += token
+                            yield {"event": "token", "data": json.dumps({"type": "token", "content": token})}
 
-        if timed_out:
-            proc.terminate()
-            try:
-                await asyncio.wait_for(proc.wait(), timeout=5)
-            except asyncio.TimeoutError:
-                proc.kill()
-            yield {"event": "error", "data": json.dumps({"type": "error", "message": f"Chat timed out after {CHAT_TIMEOUT_MINUTES} minutes"})}
+                    elif chunk_type == "result":
+                        result_val = chunk.get("result")
+                        if isinstance(result_val, str):
+                            if not full_response:
+                                full_response = result_val
+                                yield {"event": "token", "data": json.dumps({"type": "token", "content": result_val})}
+                        elif isinstance(result_val, dict):
+                            content_blocks = result_val.get("content", [])
+                            for block in content_blocks:
+                                if isinstance(block, dict) and block.get("type") == "text":
+                                    token = block.get("text", "")
+                                    if not full_response:
+                                        full_response = token
+                                        yield {"event": "token", "data": json.dumps({"type": "token", "content": token})}
+
+                except json.JSONDecodeError:
+                    continue
+
+            if timed_out:
+                proc.terminate()
+                try:
+                    await asyncio.wait_for(proc.wait(), timeout=5)
+                except asyncio.TimeoutError:
+                    proc.kill()
+                yield {"event": "error", "data": json.dumps({"type": "error", "message": f"Chat timed out after {CHAT_TIMEOUT_MINUTES} minutes"})}
+                if full_response:
+                    _save_message("assistant", full_response, model, session_id=session_id)
+                    if session_id:
+                        _update_session_after_message(session_id)
+                return
+
+            await proc.wait()
+
+            if proc.returncode != 0 and not full_response:
+                stderr_bytes = await proc.stderr.read()
+                stderr_text = stderr_bytes.decode("utf-8", errors="replace").strip()
+                yield {"event": "error", "data": json.dumps({"type": "error", "message": f"claude exited with code {proc.returncode}: {stderr_text[:500]}"})}
+                return
+
+        except Exception as e:
+            yield {"event": "error", "data": json.dumps({"type": "error", "message": f"Stream error: {str(e)}"})}
             if full_response:
                 _save_message("assistant", full_response, model, session_id=session_id)
                 if session_id:
                     _update_session_after_message(session_id)
             return
 
-        await proc.wait()
-
-        if proc.returncode != 0 and not full_response:
-            stderr_bytes = await proc.stderr.read()
-            stderr_text = stderr_bytes.decode("utf-8", errors="replace").strip()
-            yield {"event": "error", "data": json.dumps({"type": "error", "message": f"claude exited with code {proc.returncode}: {stderr_text[:500]}"})}
-            return
-
-    except Exception as e:
-        yield {"event": "error", "data": json.dumps({"type": "error", "message": f"Stream error: {str(e)}"})}
-        if full_response:
-            _save_message("assistant", full_response, model, session_id=session_id)
-            if session_id:
-                _update_session_after_message(session_id)
-        return
-
-    finally:
-        if proc.returncode is None:
-            try:
-                proc.terminate()
-            except Exception:
-                pass
-            try:
-                await asyncio.wait_for(proc.wait(), timeout=5)
-            except (asyncio.TimeoutError, Exception):
+        finally:
+            # Reap the subprocess so it doesn't outlive its slot — the
+            # ``async with spawn_slot()`` context manager will release the
+            # semaphore on every exit path (timeout/error/normal completion).
+            if proc.returncode is None:
                 try:
-                    proc.kill()
+                    proc.terminate()
                 except Exception:
                     pass
+                try:
+                    await asyncio.wait_for(proc.wait(), timeout=5)
+                except (asyncio.TimeoutError, Exception):
+                    try:
+                        proc.kill()
+                    except Exception:
+                        pass
+            _spawn_slot_held = False  # leaving the `async with` block releases the slot
 
     tokens_used = len(full_response.split()) if full_response else 0
     if full_response:
@@ -421,7 +437,7 @@ async def chat(req: ChatRequest):
 
     sdk_available = False
     if USE_AGENT_SDK:
-        from app.services.agent_sdk_client import agent_sdk
+        from app.services.agent_sdk_client import agent_sdk  # noqa: lazy import (optional dep)
         sdk_available = agent_sdk.is_available()
     if not sdk_available and not await _check_claude_available():
         raise HTTPException(status_code=503, detail="claude CLI is not installed or not on PATH (set USE_AGENT_SDK=true to use API instead)")

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "cmd-k",
+    "title": "Jump anywhere in 2 keys",
+    "body": "Press ⌘K to open the command palette and fuzzy-search across pages, projects, and actions."
+  },
+  {
+    "id": "shortcuts",
+    "title": "See every shortcut",
+    "body": "Press ? from anywhere to open the full keyboard shortcuts tour."
+  },
+  {
+    "id": "go-mode",
+    "title": "Navigate without the mouse",
+    "body": "Press g then h to go home, g then i for inbox, g then a for agents. It's faster than clicking."
+  },
+  {
+    "id": "j-k",
+    "title": "Vim-style list navigation",
+    "body": "On most lists, press j to move down and k to move up. Hit enter to open the highlighted item."
+  },
+  {
+    "id": "jarvis",
+    "title": "Talk to your CoCo",
+    "body": "Press ⌘J or click the orb to launch Jarvis voice mode and dictate decisions hands-free."
+  },
+  {
+    "id": "create",
+    "title": "Quick create",
+    "body": "Press c on any page to create something new — a todo, project, or draft, depending on context."
+  },
+  {
+    "id": "sidebar",
+    "title": "Reclaim screen space",
+    "body": "Press ⌘B to collapse the sidebar. Your projects stay one keystroke away when you need them."
+  },
+  {
+    "id": "decisions",
+    "title": "Decide without context-switching",
+    "body": "Pending decisions show up in the briefing card on Home. Approve or reject inline without opening a new page."
+  },
+  {
+    "id": "podcast",
+    "title": "Listen to your day",
+    "body": "The morning podcast summarises overnight Knowledge Hub activity in 90 seconds. Tap play on Home."
+  },
+  {
+    "id": "brain",
+    "title": "Your second brain",
+    "body": "Everything CoCo knows about people, projects, and decisions lives at /brain. Search it any time with ⌘K."
+  }
+]

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, BookOpen, CheckSquare, Clock, Inbox, Users, Zap, Calendar, Bell, GitMerge, RefreshCw } from 'lucide-react';
+import { AlertTriangle, BookOpen, CheckSquare, Clock, Inbox, Zap, Calendar, Bell, GitMerge, RefreshCw } from 'lucide-react';
 import { apiFetch } from '../lib/api';
 import { cn, timeAgo } from '../lib/utils';
 import { Link } from 'react-router-dom';
@@ -140,12 +140,14 @@ export default function BriefingPage() {
   // Safe defaults — API may return partial data depending on what daemon has generated
   const knowledge = data.knowledge ?? { total_articles: 0, total_entities: 0, total_connections: 0, new_articles: 0 };
   const decision_queue = data.decision_queue ?? { pending_count: 0, top_items: [] };
-  const rawAi = data.action_items ?? {};
+  // API may return high_priority as number or array — widen to unknown for runtime branching.
+  const rawAi = (data.action_items ?? {}) as Record<string, unknown>;
+  const hp = rawAi.high_priority;
   const action_items = {
-    total_open: rawAi.total_open ?? 0,
-    project_count: rawAi.project_count ?? 0,
+    total_open: (rawAi.total_open as number | undefined) ?? 0,
+    project_count: (rawAi.project_count as number | undefined) ?? 0,
     by_project: Array.isArray(rawAi.by_project) ? rawAi.by_project as ActionByProject[] : [],
-    high_priority: typeof rawAi.high_priority === 'number' ? rawAi.high_priority : Array.isArray(rawAi.high_priority) ? rawAi.high_priority.length : 0,
+    high_priority: typeof hp === 'number' ? hp : Array.isArray(hp) ? hp.length : 0,
   };
   const rawEd = data.email_digest ?? {};
   const email_digest = {
@@ -157,7 +159,8 @@ export default function BriefingPage() {
   const hot_projects = data.hot_projects ?? [];
   const recent_decisions = data.recent_decisions ?? [];
   const pending_todos = data.pending_todos ?? { total: 0, items: [] };
-  const pending_decisions_auto = data.pending_decisions_auto ?? { total: 0, items: [] };
+  // pending_decisions_auto: reserved for future surface — not consumed in current UI
+  void (data.pending_decisions_auto ?? { total: 0, items: [] });
   const upcoming_deadlines = data.upcoming_deadlines ?? [];
   const silence_alerts = data.silence_alerts ?? [];
   const contradiction_alerts = data.contradiction_alerts ?? [];
@@ -340,7 +343,7 @@ export default function BriefingPage() {
               {recent_decisions.slice(0, 5).map((d, i) => (
                 <div key={i} className="flex items-start gap-2">
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs text-foreground leading-snug">{(d as Record<string, string>).text ?? (d as Record<string, string>).decision ?? ''}</p>
+                    <p className="text-xs text-foreground leading-snug">{(d as unknown as Record<string, string>).text ?? (d as unknown as Record<string, string>).decision ?? ''}</p>
                     <div className="flex gap-2 mt-0.5">
                       <Tag text={d.project} />
                       {d.date && <span className="text-[10px] text-muted-foreground">{d.date.slice(0, 10)}</span>}

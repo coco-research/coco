@@ -5,6 +5,7 @@ import { Breadcrumbs } from '../shared/Breadcrumbs';
 import { NotificationDropdown } from '../shared/NotificationDropdown';
 import { FloatingMic } from '../shared/FloatingMic';
 import { useSSEStatus } from '../shared/NotificationProvider';
+import { ShortcutsTour } from '../discovery/ShortcutsTour';
 
 function ConnectionBanner() {
   const status = useSSEStatus();
@@ -36,14 +37,14 @@ export function AppShell() {
     <div className="flex min-h-screen bg-background">
       <Sidebar />
       <div
-        className="flex-1 flex flex-col transition-[margin-left] duration-200 ease-out"
+        className="flex-1 flex flex-col min-w-0 overflow-x-hidden transition-[margin-left] duration-200 ease-out"
         style={{ marginLeft: collapsed ? 48 : 240 }}
       >
         {/* Offline banner */}
         <ConnectionBanner />
 
         {/* Top header bar */}
-        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border px-6 py-3 flex items-center justify-between">
+        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border px-4 sm:px-5 lg:px-6 py-3 flex items-center justify-between gap-2">
           <Breadcrumbs />
           <div className="flex items-center gap-2">
             <button className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-secondary border border-border rounded-md hover:bg-accent/50 transition-colors">
@@ -60,7 +61,7 @@ export function AppShell() {
         {/* Content — page transition on route change */}
         <main
           key={location.pathname}
-          className="flex-1 p-6 max-w-7xl w-full mx-auto animate-page-enter"
+          className="flex-1 p-4 sm:p-5 lg:p-6 max-w-7xl w-full mx-auto animate-page-enter"
         >
           <Outlet />
         </main>
@@ -68,6 +69,9 @@ export function AppShell() {
 
       {/* Floating mic for voice commands */}
       <FloatingMic />
+
+      {/* First-run keyboard shortcuts tour (also opens on `?`) */}
+      <ShortcutsTour />
     </div>
   );
 }

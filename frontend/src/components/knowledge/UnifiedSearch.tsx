@@ -11,13 +11,8 @@ interface UnifiedSearchProps {
   onSelectArticle?: (gid: string) => void;
 }
 
-const QUESTION_PATTERNS = /^(who|what|when|where|why|how|is|are|was|were|do|does|did|can|could|should|would|will)\b/i;
-
-function isQuestion(q: string): boolean {
-  if (q.endsWith('?')) return true;
-  if (q.split(/\s+/).length > 5 && QUESTION_PATTERNS.test(q)) return true;
-  return false;
-}
+// Question detection helper retained for future use (mode routing).
+// Kept here rather than removed to make reintroduction trivial.
 
 export function UnifiedSearch({ query, onQueryChange, onFocus, isActive, onSelectArticle }: UnifiedSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);

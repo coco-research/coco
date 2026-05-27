@@ -10,6 +10,9 @@ import { ProjectHealthGrid } from '../components/home/ProjectHealthGrid';
 import { FocusList } from '../components/home/FocusList';
 import { JarvisOverlay } from '../components/home/JarvisOverlay';
 import { KnowledgeEngineCard } from '../components/home/KnowledgeEngineCard';
+import OnboardingWizard, { isOnboardingComplete } from '../components/onboarding/OnboardingWizard';
+import { DidYouKnow } from '../components/discovery/DidYouKnow';
+import { FeatureTooltip } from '../components/discovery/FeatureTooltip';
 import type { HomeData, Todo } from '../types/home';
 import { Skeleton } from 'boneyard-js/react';
 
@@ -18,12 +21,12 @@ function HomeFallback() {
     <div className="space-y-6">
       <div className="h-8 rounded-lg bg-muted/50 animate-pulse" />
       <div className="h-10 rounded-lg bg-muted/50 animate-pulse" />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className="lg:col-span-7 space-y-5">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:gap-6 lg:grid-cols-12">
+        <div className="lg:col-span-7 space-y-5 min-w-0">
           <div className="h-56 rounded-xl bg-muted/50 animate-pulse" />
           <div className="h-64 rounded-xl bg-muted/50 animate-pulse" />
         </div>
-        <div className="lg:col-span-5 space-y-3">
+        <div className="lg:col-span-5 space-y-3 min-w-0">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-32 rounded-lg bg-muted/50 animate-pulse" />
           ))}
@@ -82,7 +85,15 @@ export default function HomePage() {
   const queryClient = useQueryClient();
   const [syncBanner, setSyncBanner] = useState<string | null>(null);
   const [jarvisOpen, setJarvisOpen] = useState(false);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Show onboarding wizard on first load if not complete.
+  useEffect(() => {
+    if (!isOnboardingComplete()) {
+      setOnboardingOpen(true);
+    }
+  }, []);
 
   // Auto-open Jarvis overlay when ?jarvis=true is in the URL
   useEffect(() => {
@@ -137,7 +148,7 @@ export default function HomePage() {
     }
   };
 
-  if (isLoading || !data) return <Skeleton name="home-dashboard" loading animate="pulse" fallback={<HomeFallback />} />;
+  if (isLoading || !data) return <Skeleton name="home-dashboard" loading animate="pulse" fallback={<HomeFallback />}><></></Skeleton>;
 
   if (isError) {
     return (
@@ -224,14 +235,21 @@ export default function HomePage() {
             <span className="text-xs text-muted-foreground">{data.date}</span>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setJarvisOpen(true)}
-              className="inline-flex items-center gap-1 text-[11px] border border-border rounded-md px-2.5 py-1 text-muted-foreground hover:text-foreground hover:border-foreground/20 cursor-pointer transition-colors"
-              title="Activate Jarvis"
+            <FeatureTooltip
+              id="home-jarvis-button"
+              title="Try Jarvis voice mode"
+              description="Press ⌘J or click here to dictate decisions, ask questions, and drive CoCo hands-free."
+              placement="bottom"
             >
-              <Sparkles size={10} />
-              Jarvis
-            </button>
+              <button
+                onClick={() => setJarvisOpen(true)}
+                className="inline-flex items-center gap-1 text-[11px] border border-border rounded-md px-2.5 py-1 text-muted-foreground hover:text-foreground hover:border-foreground/20 cursor-pointer transition-colors"
+                title="Activate Jarvis"
+              >
+                <Sparkles size={10} />
+                Jarvis
+              </button>
+            </FeatureTooltip>
             <button
               onClick={openCommandPalette}
               className="inline-flex items-center gap-1 text-[11px] border border-border rounded-md px-2.5 py-1 text-muted-foreground hover:text-foreground hover:border-foreground/20 cursor-pointer transition-colors"
@@ -265,9 +283,10 @@ export default function HomePage() {
       </header>
 
       {/* Main 2-column layout: Left (action) | Right (status) */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:gap-6 lg:grid-cols-12">
         {/* Left column: Podcast + Briefing + Focus List */}
-        <div className="lg:col-span-7 space-y-5">
+        <div className="lg:col-span-7 space-y-5 min-w-0">
+          <DidYouKnow />
           <PodcastCard />
           <BriefingCard
             sinceLastSession={data.since_last_session}
@@ -326,13 +345,16 @@ export default function HomePage() {
         </div>
 
         {/* Right column: Projects (scrollable) */}
-        <div className="lg:col-span-5 lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto lg:scrollbar-auto-hide">
+        <div className="lg:col-span-5 min-w-0 lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto lg:scrollbar-auto-hide">
           <ProjectHealthGrid projects={data.projects} />
         </div>
       </div>
 
       {/* Jarvis cinematic overlay */}
       <JarvisOverlay isOpen={jarvisOpen} onClose={() => setJarvisOpen(false)} />
+
+      {/* First-run onboarding */}
+      <OnboardingWizard open={onboardingOpen} onClose={() => setOnboardingOpen(false)} />
     </div>
     </Skeleton>
   );

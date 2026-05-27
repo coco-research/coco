@@ -20,8 +20,8 @@ export function useCanvas() {
     previousCards: [],
   });
 
-  const transitionTimer = useRef<ReturnType<typeof setTimeout>>();
-  const autoIdleTimer = useRef<ReturnType<typeof setTimeout>>();
+  const transitionTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const autoIdleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // Clean up all timers on unmount
   useEffect(() => {

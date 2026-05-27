@@ -34,7 +34,7 @@ class KokoroEngine:
     def is_available() -> bool:
         """Check if the kokoro package is importable."""
         try:
-            import kokoro  # noqa: F401
+            import kokoro  # noqa: F401, lazy import (optional dep)
             return True
         except ImportError:
             return False
@@ -50,7 +50,7 @@ class KokoroEngine:
             if self._pipeline is not None:
                 return True
             try:
-                from kokoro import KPipeline
+                from kokoro import KPipeline  # noqa: lazy import (optional dep)
 
                 log.info("kokoro_loading", msg="Loading Kokoro model (first call, may download ~330MB)...")
                 self._pipeline = KPipeline(lang_code="a")  # 'a' = American English default
@@ -73,7 +73,7 @@ class KokoroEngine:
             return None
 
         try:
-            import soundfile as sf
+            import soundfile as sf  # noqa: lazy import (optional dep)
 
             # Determine lang_code from voice prefix
             lang_code = voice[0] if voice and voice[0] in ("a", "b") else "a"
@@ -82,7 +82,7 @@ class KokoroEngine:
             if self._pipeline is not None:
                 current_lang = getattr(self._pipeline, "lang_code", "a")
                 if current_lang != lang_code:
-                    from kokoro import KPipeline
+                    from kokoro import KPipeline  # noqa: F811, lazy import (optional dep)
                     self._pipeline = KPipeline(lang_code=lang_code)
 
             # Content-addressed cache filename
@@ -106,7 +106,7 @@ class KokoroEngine:
                 return None
 
             # Concatenate all chunks
-            import numpy as np
+            import numpy as np  # noqa: lazy import (optional dep)
             samples = np.concatenate(samples_list)
 
             # Write WAV at 24kHz (Kokoro's native sample rate)

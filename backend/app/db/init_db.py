@@ -19,6 +19,10 @@ import sqlite3
 import uuid
 
 import structlog
+# Historical raw DDL — kept for documentation / emergency rollback only.
+# DO NOT execute against platform.db; use `metadata.create_all()` instead.
+# tables.py is the single source of truth.
+
 from sqlalchemy import insert, select, text, update
 
 from app.config import HUB_DB_PATH, PLATFORM_DB_PATH

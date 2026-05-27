@@ -1,24 +1,24 @@
-import { Activity, AlertTriangle, BarChart3, Calendar, RefreshCw, Loader2, Zap } from 'lucide-react';
+import { Activity, AlertTriangle, BarChart3, Calendar, RefreshCw, Zap } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-interface BriefingItem {
+export interface BriefingItem {
   label: string;
   value: string;
   detail?: string;
   severity?: 'critical' | 'warning' | 'info';
 }
 
-interface BriefingSection {
+export interface BriefingSection {
   title: string;
   icon: string;
   items: BriefingItem[];
 }
 
-interface ProgramHealth {
+export interface ProgramHealth {
   id: string;
   name: string;
   health: string;
@@ -29,7 +29,7 @@ interface ProgramHealth {
   stale_articles: number;
 }
 
-interface BriefingResponse {
+export interface BriefingResponse {
   generated_at: string;
   sections: BriefingSection[];
   highlights: string[];

@@ -38,7 +38,7 @@ function ContentPickerDialog({
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ContentSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const doSearch = useCallback(async (q: string) => {
     if (!q.trim()) {
@@ -232,9 +232,11 @@ export function ChatInput({ onSend, disabled = false, streaming = false }: ChatI
         <div className="flex items-end gap-2">
           {/* Attach button */}
           <button
+            type="button"
             onClick={() => setPickerOpen(true)}
             disabled={disabled}
             title="Attach Knowledge Hub content"
+            aria-label="Attach Knowledge Hub content"
             className={cn(
               'flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center',
               'border border-border text-muted-foreground transition-all',
@@ -243,7 +245,7 @@ export function ChatInput({ onSend, disabled = false, streaming = false }: ChatI
               attachments.length > 0 && 'text-accent border-accent/40',
             )}
           >
-            <Paperclip size={18} />
+            <Paperclip size={18} aria-hidden="true" />
           </button>
           <textarea
             ref={textareaRef}
@@ -262,8 +264,10 @@ export function ChatInput({ onSend, disabled = false, streaming = false }: ChatI
             )}
           />
           <button
+            type="button"
             onClick={handleSend}
             disabled={disabled || !value.trim()}
+            aria-label={streaming ? 'Streaming response' : 'Send message'}
             className={cn(
               'flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center',
               'bg-accent text-accent-foreground transition-all shadow-sm',
@@ -272,9 +276,9 @@ export function ChatInput({ onSend, disabled = false, streaming = false }: ChatI
             )}
           >
             {streaming ? (
-              <Loader2 size={18} className="animate-spin" />
+              <Loader2 size={18} aria-hidden="true" className="animate-spin" />
             ) : (
-              <Send size={18} />
+              <Send size={18} aria-hidden="true" />
             )}
           </button>
         </div>

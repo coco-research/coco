@@ -55,11 +55,13 @@ export function GeneralSettings({ onSaveStatus }: GeneralSettingsProps) {
   return (
     <div className="space-y-6 max-w-lg">
       <div>
-        <label className="block text-sm font-medium text-foreground mb-1">Morning Cutoff Hour</label>
-        <p className="text-xs text-muted-foreground mb-2">
+        <label htmlFor="settings-morning-hour" className="block text-sm font-medium text-foreground mb-1">Morning Cutoff Hour</label>
+        <p id="settings-morning-hour-desc" className="text-xs text-muted-foreground mb-2">
           CoCo waits until this hour before sending morning briefs.
         </p>
         <input
+          id="settings-morning-hour"
+          aria-describedby="settings-morning-hour-desc"
           type="number"
           min={1}
           max={12}
@@ -74,13 +76,15 @@ export function GeneralSettings({ onSaveStatus }: GeneralSettingsProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-foreground mb-1">
+        <label htmlFor="settings-reopen-threshold" className="block text-sm font-medium text-foreground mb-1">
           Quick Reopen Threshold (minutes)
         </label>
-        <p className="text-xs text-muted-foreground mb-2">
+        <p id="settings-reopen-threshold-desc" className="text-xs text-muted-foreground mb-2">
           If you reopen a dismissed item within this window, CoCo re-promotes it.
         </p>
         <input
+          id="settings-reopen-threshold"
+          aria-describedby="settings-reopen-threshold-desc"
           type="number"
           min={1}
           max={120}

@@ -1,13 +1,22 @@
 """Trigger engine -- runs cron and file_watch triggers in background.
 
-Cron triggers fire based on standard 5-field cron expressions.
-File-watch triggers poll directories for mtime changes.
-Both types log every fire to the trigger_log table.
+Cron triggers fire based on standard 5-field cron expressions, evaluated
+once per minute (60s tick).
+
+File-watch triggers poll a directory for mtime changes (30s tick). The
+config supports {path, patterns, recursive, ignore} -- recursive=true uses
+rglob, ignore is a list of substrings filtered out of the match set.
+
+Webhook triggers fire on POST to /api/webhooks/{trigger_id}; no in-process
+loop here.
+
+Every fire is recorded in the trigger_log table by _fire() below.
 """
 
 import asyncio
 import json
 import os
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -16,6 +25,9 @@ import structlog
 from app.db.session import get_db
 
 log = structlog.get_logger()
+
+CRON_TICK_SECONDS = 60
+FILE_WATCH_TICK_SECONDS = 30
 
 
 class TriggerEngine:
@@ -70,7 +82,7 @@ class TriggerEngine:
                 }
             except Exception as e:
                 log.warning("cron_loop_error", error=str(e))
-            await asyncio.sleep(30)
+            await asyncio.sleep(CRON_TICK_SECONDS)
 
     async def _file_watch_loop(self):
         while self._running:
@@ -79,7 +91,9 @@ class TriggerEngine:
                 for t in triggers:
                     config = json.loads(t["config"]) if isinstance(t["config"], str) else t["config"]
                     watch_path = config.get("path", "")
-                    patterns = config.get("patterns", ["*"])
+                    patterns = config.get("patterns", ["*"]) or ["*"]
+                    recursive = bool(config.get("recursive", False))
+                    ignore = config.get("ignore", []) or []
                     if not watch_path or not os.path.exists(watch_path):
                         continue
 
@@ -93,21 +107,26 @@ class TriggerEngine:
                             changed_files.append(str(p))
                         self._file_mtime_cache[key] = mtime
                     else:
+                        glob_fn = p.rglob if recursive else p.glob
                         for pattern in patterns:
-                            for f in p.glob(pattern):
-                                if f.is_file():
-                                    mtime = f.stat().st_mtime
-                                    key = f"{t['id']}:{f}"
-                                    if key in self._file_mtime_cache and self._file_mtime_cache[key] < mtime:
-                                        changed_files.append(str(f))
-                                    self._file_mtime_cache[key] = mtime
+                            for f in glob_fn(pattern):
+                                if not f.is_file():
+                                    continue
+                                # Apply ignore filters (substring match against full path).
+                                if any(ig and ig in str(f) for ig in ignore):
+                                    continue
+                                mtime = f.stat().st_mtime
+                                key = f"{t['id']}:{f}"
+                                if key in self._file_mtime_cache and self._file_mtime_cache[key] < mtime:
+                                    changed_files.append(str(f))
+                                self._file_mtime_cache[key] = mtime
 
                     if changed_files:
-                        log.info("file_watch_triggered", trigger_id=t["id"], changed=changed_files[:5])
+                        log.info("file_watch_triggered", trigger_id=t["id"], changed=changed_files[:5], total=len(changed_files))
                         await self._fire(t, context={"changed_files": changed_files})
             except Exception as e:
                 log.warning("file_watch_loop_error", error=str(e))
-            await asyncio.sleep(30)
+            await asyncio.sleep(FILE_WATCH_TICK_SECONDS)
 
     def _load_triggers(self, trigger_type: str) -> list[dict]:
         with get_db() as conn:
@@ -119,7 +138,7 @@ class TriggerEngine:
 
     async def _fire(self, trigger: dict, context: dict | None = None):
         """Execute trigger action and log result."""
-        from app.routers.triggers import _execute_trigger_action, _log_trigger_fire
+        from app.routers.triggers import _execute_trigger_action, _log_trigger_fire  # noqa: lazy import (cycle)
 
         try:
             result = await _execute_trigger_action(trigger, context=context)
@@ -146,8 +165,7 @@ class TriggerEngine:
     def _ensure_self_improve_trigger(self):
         """Register the default self-improve auto trigger if it doesn't exist."""
         try:
-            from app.services.self_improve_scheduler import get_self_improve_preferences
-            import uuid
+            from app.services.self_improve_scheduler import get_self_improve_preferences  # noqa: lazy import (cycle)
 
             prefs = get_self_improve_preferences()
 

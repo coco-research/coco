@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, DollarSign } from 'lucide-react';
 import { apiFetch } from '../lib/api';
 import { cn } from '../lib/utils';
 import { SpendChart } from '../components/costs/SpendChart';
@@ -8,6 +8,8 @@ import { ModelBreakdown } from '../components/costs/ModelBreakdown';
 import { ProjectBreakdown } from '../components/costs/ProjectBreakdown';
 import { BudgetBar } from '../components/costs/BudgetBar';
 import { CostEventsTable } from '../components/costs/CostEventsTable';
+import { EmptyState } from '../components/shared/EmptyState';
+import { ErrorState } from '../components/shared/ErrorState';
 
 interface CostSummary {
   total_usd: number;
@@ -56,7 +58,7 @@ export default function CostsPage() {
   const [days, setDays] = useState<Period>(30);
   const [eventsOpen, setEventsOpen] = useState(false);
 
-  const { data: summary, isLoading } = useQuery<CostSummary>({
+  const { data: summary, isLoading, isError, error, refetch } = useQuery<CostSummary>({
     queryKey: ['costs-summary', days],
     queryFn: () => apiFetch<CostSummary>(`/costs/summary?days=${days}`),
     refetchInterval: 60000,
@@ -67,7 +69,26 @@ export default function CostsPage() {
     queryFn: () => apiFetch<Budget[]>('/budgets'),
   });
 
-  if (isLoading || !summary) return <CostsSkeleton />;
+  if (isLoading) return <CostsSkeleton />;
+  if (isError) {
+    return (
+      <ErrorState
+        error={error}
+        title="Couldn't load cost data"
+        onRetry={() => void refetch()}
+      />
+    );
+  }
+  if (!summary) {
+    return (
+      <EmptyState
+        icon={<DollarSign className="h-10 w-10" />}
+        title="No cost data yet"
+        description="Spend will appear here once agents start consuming credits."
+      />
+    );
+  }
+  const noSpend = summary.total_usd === 0 && (summary.daily ?? []).length === 0;
 
   const projectedMonthly = summary.daily_avg * 30;
 
@@ -102,8 +123,16 @@ export default function CostsPage() {
         <SummaryCard label="Projected Monthly" value={`$${projectedMonthly.toFixed(2)}`} />
       </div>
 
-      {/* Spend chart — full width */}
-      <SpendChart data={summary.daily ?? []} />
+      {/* Spend chart — full width (or empty hint) */}
+      {noSpend ? (
+        <EmptyState
+          icon={<DollarSign className="h-10 w-10" />}
+          title="No spend in this window"
+          description="Try a longer period, or wait for agents to consume credits."
+        />
+      ) : (
+        <SpendChart data={summary.daily ?? []} />
+      )}
 
       {/* Model + Project breakdowns side by side */}
       <div className="grid grid-cols-2 gap-4">

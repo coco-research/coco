@@ -47,7 +47,7 @@ function AgentAvatar({ name }: { name: string | null }) {
   );
 }
 
-export function DelegationPanel({ taskId, taskTitle, currentAgentId }: DelegationPanelProps) {
+export function DelegationPanel({ taskId, currentAgentId }: DelegationPanelProps) {
   const queryClient = useQueryClient();
   const [showDelegateDropdown, setShowDelegateDropdown] = useState(false);
   const [showSubtaskForm, setShowSubtaskForm] = useState(false);

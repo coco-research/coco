@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageSquare, Sparkles, Clock, AlertTriangle, PanelLeftClose, PanelLeft, Trash2, ChevronDown } from 'lucide-react';
-import { MessageBubble, type ChatMessage } from '../components/chat/MessageBubble';
+import { MessageBubble, type ChatMessage, type InlineAction } from '../components/chat/MessageBubble';
 import { ChatInput } from '../components/chat/ChatInput';
 import { ChatHistory } from '../components/chat/ChatHistory';
-import { apiFetch, apiDelete } from '../lib/api';
+import { apiFetch, apiDelete, apiPost } from '../lib/api';
 import { cn } from '../lib/utils';
 
 type Model = 'sonnet' | 'opus' | 'haiku';
@@ -160,8 +160,9 @@ export default function ChatPage() {
 
         // Finalize the assistant message
         const finalContent = assistantContent || 'No response received.';
+        const assistantId = crypto.randomUUID();
         const assistantMsg: ChatMessage = {
-          id: crypto.randomUUID(),
+          id: assistantId,
           role: 'assistant',
           content: finalContent,
           model,
@@ -171,6 +172,20 @@ export default function ChatPage() {
 
         // Refresh sidebar to show updated session list
         setSidebarRefreshKey((k) => k + 1);
+
+        // Fire-and-forget: classify the assistant message for inline actions
+        if (finalContent && finalContent !== 'No response received.') {
+          apiPost<{ actions: InlineAction[] }>(`/jarvis/extract-actions`, { text: finalContent })
+            .then((res) => {
+              if (!res?.actions?.length) return;
+              setMessages((prev) =>
+                prev.map((m) => (m.id === assistantId ? { ...m, actions: res.actions } : m)),
+              );
+            })
+            .catch(() => {
+              // Silent failure -- inline actions are best-effort enhancement
+            });
+        }
       } catch (err) {
         if ((err as Error).name === 'AbortError') return;
         const errorMsg: ChatMessage = {
@@ -208,6 +223,55 @@ export default function ChatPage() {
     setActiveSessionId(undefined);
   }, []);
 
+  // Dispatch inline action button clicks from assistant messages.
+  const handleInlineAction = useCallback(async (action: InlineAction) => {
+    try {
+      switch (action.type) {
+        case 'create_todo': {
+          const title = typeof action.payload?.title === 'string' && action.payload.title.trim()
+            ? (action.payload.title as string)
+            : 'New todo from chat';
+          await apiPost('/todos', { title });
+          break;
+        }
+        case 'approve_decision': {
+          const draftId = action.payload?.draft_id;
+          if (typeof draftId === 'string' && draftId) {
+            await apiPost(`/drafts/${encodeURIComponent(draftId)}/approve`, {});
+          } else {
+            window.location.assign('/inbox');
+          }
+          break;
+        }
+        case 'open_project': {
+          const slug = action.payload?.slug ?? action.payload?.name;
+          if (typeof slug === 'string' && slug) {
+            window.location.assign(`/projects/${encodeURIComponent(String(slug))}`);
+          } else {
+            window.location.assign('/projects');
+          }
+          break;
+        }
+        case 'open_link': {
+          const url = action.payload?.url;
+          if (typeof url === 'string' && url) {
+            window.open(url, '_blank', 'noopener,noreferrer');
+          }
+          break;
+        }
+      }
+    } catch (err) {
+      // Surface failure as a small assistant note rather than throwing.
+      const errorMsg: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: `Couldn't complete that action: ${err instanceof Error ? err.message : 'unknown error'}`,
+        created_at: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    }
+  }, []);
+
   const isEmpty = messages.length === 0 && !isStreaming;
 
   return (
@@ -226,10 +290,13 @@ export default function ChatPage() {
         {/* Header bar */}
         <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-card">
           <button
+            type="button"
             onClick={() => setSidebarOpen((o) => !o)}
+            aria-label={sidebarOpen ? 'Close conversation sidebar' : 'Open conversation sidebar'}
+            aria-expanded={sidebarOpen}
             className="p-1.5 rounded-lg hover:bg-accent/50 text-muted-foreground transition-colors"
           >
-            {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeft size={18} />}
+            {sidebarOpen ? <PanelLeftClose size={18} aria-hidden="true" /> : <PanelLeft size={18} aria-hidden="true" />}
           </button>
           <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center">
             <span className="text-[10px] font-bold text-accent-foreground">C</span>
@@ -314,7 +381,7 @@ export default function ChatPage() {
           ) : (
             <>
               {messages.map((msg) => (
-                <MessageBubble key={msg.id} message={msg} />
+                <MessageBubble key={msg.id} message={msg} onAction={handleInlineAction} />
               ))}
 
               {/* Streaming assistant message */}

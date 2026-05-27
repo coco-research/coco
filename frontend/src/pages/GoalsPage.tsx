@@ -7,7 +7,9 @@ import { apiPatch } from '../lib/api';
 import { InlineEditor } from '../components/shared/InlineEditor';
 import { PropertiesPanel } from '../components/shared/PropertiesPanel';
 import { PropertyField } from '../components/shared/PropertyField';
+import { CommentThread } from '../components/shared/CommentThread';
 import { useToast } from '../components/shared/Toast';
+import { ErrorState } from '../components/shared/ErrorState';
 
 interface Goal {
   id: string;
@@ -101,10 +103,13 @@ function GoalNode({ goal, allGoals, depth = 0, onSelect, selectedId, onRefresh }
       >
         {hasChildren ? (
           <button
+            type="button"
             onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
+            aria-label={expanded ? `Collapse ${goal.title}` : `Expand ${goal.title}`}
+            aria-expanded={expanded}
             className="shrink-0 p-0.5 rounded hover:bg-accent"
           >
-            <ChevronRight size={14} className={cn('transition-transform text-muted-foreground', expanded && 'rotate-90')} />
+            <ChevronRight size={14} aria-hidden="true" className={cn('transition-transform text-muted-foreground', expanded && 'rotate-90')} />
           </button>
         ) : (
           <div className="w-5 shrink-0" />
@@ -227,7 +232,7 @@ export default function GoalsPage() {
 
   const queryClient = useQueryClient();
 
-  const { data: goals = [], isLoading } = useQuery<Goal[]>({
+  const { data: goals = [], isLoading, isError, error, refetch } = useQuery<Goal[]>({
     queryKey: ['goals', selectedNodeId, scopeProjectIds],
     queryFn: async () => {
       const url = scopeProjectIds.length === 1
@@ -236,7 +241,7 @@ export default function GoalsPage() {
           ? `/api/goals?project_ids=${scopeProjectIds.join(',')}`
           : '/api/goals';
       const res = await fetch(url);
-      if (!res.ok) return [];
+      if (!res.ok) throw new Error(`Failed to load goals (HTTP ${res.status})`);
       return res.json();
     },
   });
@@ -273,6 +278,12 @@ export default function GoalsPage() {
             <div key={i} className="h-10 bg-muted/50 rounded-md animate-pulse" />
           ))}
         </div>
+      ) : isError ? (
+        <ErrorState
+          error={error}
+          title="Couldn't load goals"
+          onRetry={() => void refetch()}
+        />
       ) : rootGoals.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <Target size={40} className="mb-3 opacity-30" />
@@ -416,6 +427,11 @@ function GoalDetailPanel({ goal, allGoals, onClose, onSaved }: GoalDetailPanelPr
           </div>
         </div>
       )}
+
+      {/* Comments */}
+      <div className="mt-4">
+        <CommentThread entityType="goal" entityId={goal.id} />
+      </div>
     </PropertiesPanel>
   );
 }

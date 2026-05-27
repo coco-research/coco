@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Check, X, Zap, FileText, User, Calendar, AlertTriangle,
+  Check, X, Zap, FileText, User, Calendar,
   ChevronRight, Loader2, CheckCheck,
 } from 'lucide-react';
 import { apiFetch, apiPost } from '../../lib/api';

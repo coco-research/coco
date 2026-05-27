@@ -12,7 +12,7 @@ interface PodcastPlayerProps {
 const SPEED_OPTIONS = [0.75, 1, 1.25, 1.5];
 const BAR_COUNT = 32;
 
-export function PodcastPlayer({ audioUrl, script, duration, title }: PodcastPlayerProps) {
+export function PodcastPlayer({ audioUrl, script, duration }: PodcastPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -161,10 +161,13 @@ export function PodcastPlayer({ audioUrl, script, duration, title }: PodcastPlay
         <div className="flex items-center gap-3">
           {/* Play/Pause */}
           <button
+            type="button"
             onClick={togglePlay}
+            aria-label={isPlaying ? 'Pause' : 'Play'}
+            aria-pressed={isPlaying}
             className="w-9 h-9 rounded-full bg-foreground text-background flex items-center justify-center hover:opacity-90 transition-opacity shrink-0"
           >
-            {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
+            {isPlaying ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" className="ml-0.5" />}
           </button>
 
           {/* Progress bar */}
@@ -202,13 +205,17 @@ export function PodcastPlayer({ audioUrl, script, duration, title }: PodcastPlay
 
             {/* Volume */}
             <button
+              type="button"
               onClick={() => setIsMuted(!isMuted)}
+              aria-label={isMuted || volume === 0 ? 'Unmute' : 'Mute'}
+              aria-pressed={isMuted}
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              {isMuted || volume === 0 ? <VolumeX size={14} /> : <Volume2 size={14} />}
+              {isMuted || volume === 0 ? <VolumeX size={14} aria-hidden="true" /> : <Volume2 size={14} aria-hidden="true" />}
             </button>
             <input
               type="range"
+              aria-label="Volume"
               min={0}
               max={1}
               step={0.05}

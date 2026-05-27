@@ -4,17 +4,27 @@ import {
   Search, LayoutDashboard, FolderKanban, Radio, MessageSquare,
   DollarSign, Settings, CheckSquare, Users, Inbox, Activity, ListTodo,
   Plus, Bot, Target, Trash2, Network, Home, FileText, FilePenLine, Loader2, Brain,
+  Lightbulb, User, Briefcase,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { apiFetch } from '../../lib/api';
 
+type SearchType =
+  | 'todo' | 'agent' | 'task' | 'goal' | 'content' | 'draft'
+  | 'project' | 'decision' | 'person';
+
 interface SearchResult {
-  type: 'todo' | 'agent' | 'task' | 'goal' | 'content' | 'draft';
+  type: SearchType;
   id: string;
   title: string;
-  subtitle: string;
-  url: string;
-  display_id?: string;
+  // New unified-search fields
+  human_id?: string | null;
+  snippet?: string;
+  score?: number;
+  // Back-compat fields the palette already reads
+  subtitle?: string;
+  url?: string;
+  display_id?: string | null;
   exact_match?: boolean;
 }
 
@@ -25,6 +35,9 @@ const searchTypeIcons: Record<string, React.ElementType> = {
   goal: Target,
   content: FileText,
   draft: FilePenLine,
+  project: Briefcase,
+  decision: Lightbulb,
+  person: User,
 };
 
 const searchTypeLabels: Record<string, string> = {
@@ -32,8 +45,31 @@ const searchTypeLabels: Record<string, string> = {
   agent: 'Agents',
   task: 'Tasks',
   goal: 'Goals',
-  content: 'Content',
+  content: 'Knowledge',
   draft: 'Drafts',
+  project: 'Projects',
+  decision: 'Decisions',
+  person: 'People',
+};
+
+// Order in which type groups appear in the palette. Anything not listed falls
+// to the end in alphabetical order.
+const TYPE_ORDER: SearchType[] = [
+  'todo', 'task', 'agent', 'project', 'decision', 'person',
+  'goal', 'draft', 'content',
+];
+
+// Routes for result types whose row didn't include an explicit `url`.
+const TYPE_URL_FALLBACK: Record<string, string> = {
+  todo: '/todos',
+  task: '/tasks',
+  goal: '/goals',
+  draft: '/drafts',
+  project: '/projects',
+  decision: '/brain',
+  person: '/people',
+  content: '/knowledge',
+  agent: '/agents',
 };
 
 interface CommandItem {
@@ -84,7 +120,7 @@ export function CommandPalette() {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const navigate = useNavigate();
 
   const dispatchAction = useCallback((type: string) => {
@@ -133,34 +169,50 @@ export function CommandPalette() {
               display_id: string;
               node_id: string;
             }>(`/resolve/${encodeURIComponent(query.trim())}`);
-            const typeUrlMap: Record<string, string> = {
-              todo: '/todos',
-              task: '/tasks',
-            };
             results.push({
-              type: resolved.entity_type as SearchResult['type'],
+              type: resolved.entity_type as SearchType,
               id: resolved.entity_id,
-              title: `${resolved.display_id}`,
+              human_id: resolved.display_id,
+              title: resolved.display_id,
+              snippet: `Go to ${resolved.entity_type} ${resolved.display_id}`,
               subtitle: `Go to ${resolved.entity_type} ${resolved.display_id}`,
-              url: typeUrlMap[resolved.entity_type] ?? '/todos',
+              url: TYPE_URL_FALLBACK[resolved.entity_type] ?? '/todos',
+              score: 100,
             });
           } catch {
             // Not found -- fall through to normal search
           }
         }
 
-        // Normal search
-        const { results: apiResults } = await apiFetch<{ results: SearchResult[]; query: string }>(
-          `/search?q=${encodeURIComponent(query)}&types=todos,agents,content,goals,drafts&limit=10`,
+        // Unified search across todos, agents, projects, content, decisions, people.
+        // Backend returns a bare array of result rows; tolerate either shape.
+        const raw = await apiFetch<
+          SearchResult[] | { results: SearchResult[] }
+        >(
+          `/search?q=${encodeURIComponent(query)}&types=todos,agents,projects,content,decisions,people,goals,drafts,tasks&limit=20`,
         );
-        results.push(...apiResults);
+        const apiResults: SearchResult[] = Array.isArray(raw)
+          ? raw
+          : Array.isArray(raw?.results)
+            ? raw.results
+            : [];
+        // Normalize fields so the renderer can rely on snippet/url.
+        for (const r of apiResults) {
+          results.push({
+            ...r,
+            snippet: r.snippet ?? r.subtitle ?? '',
+            subtitle: r.subtitle ?? r.snippet ?? '',
+            url: r.url ?? TYPE_URL_FALLBACK[r.type] ?? '/',
+            display_id: r.display_id ?? r.human_id ?? null,
+          });
+        }
         setSearchResults(results);
       } catch {
         setSearchResults([]);
       } finally {
         setSearching(false);
       }
-    }, 300);
+    }, 150);
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -216,7 +268,8 @@ export function CommandPalette() {
 
   const executeSearchResult = useCallback(
     (result: SearchResult) => {
-      navigate(result.url);
+      const target = result.url ?? TYPE_URL_FALLBACK[result.type] ?? '/';
+      navigate(target);
       close();
     },
     [navigate, close],
@@ -389,13 +442,24 @@ export function CommandPalette() {
             </div>
           )}
           {!searching && searchResults.length > 0 && (() => {
-            // Group results by type
+            // Group results by type, then order groups by TYPE_ORDER (then alpha).
             const grouped = new Map<string, SearchResult[]>();
             for (const r of searchResults) {
               const existing = grouped.get(r.type) || [];
               existing.push(r);
               grouped.set(r.type, existing);
             }
+            for (const items of grouped.values()) {
+              items.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+            }
+            const orderedTypes = Array.from(grouped.keys()).sort((a, b) => {
+              const ai = TYPE_ORDER.indexOf(a as SearchType);
+              const bi = TYPE_ORDER.indexOf(b as SearchType);
+              if (ai === -1 && bi === -1) return a.localeCompare(b);
+              if (ai === -1) return 1;
+              if (bi === -1) return -1;
+              return ai - bi;
+            });
 
             return (
               <div>
@@ -404,7 +468,8 @@ export function CommandPalette() {
                     Search Results
                   </span>
                 </div>
-                {Array.from(grouped.entries()).map(([type, items]) => {
+                {orderedTypes.map((type) => {
+                  const items = grouped.get(type) || [];
                   const TypeIcon = searchTypeIcons[type] || FileText;
                   const typeLabel = searchTypeLabels[type] || type;
                   return (

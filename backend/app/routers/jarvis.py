@@ -20,12 +20,16 @@ from app.db.session import get_db
 from app.db.tables import (
     hub_todos, hub_projects, hub_drafts, hub_sync_state,
     jarvis_sessions, draft_decisions, todo_overrides,
+    self_improve_cycles, self_improve_improvements,
 )
 from app.models.jarvis import (
     CardActionModel,
     CardDataModel,
     CommandRequest,
     CommandResponse,
+    ExtractActionsRequest,
+    ExtractActionsResponse,
+    InlineAction,
 )
 from app.routers.home import get_home, _build_briefing
 
@@ -109,9 +113,159 @@ def _extract_approve_draft(text_str: str) -> str | None:
     return None
 
 
+# -- Inline action classifier (used by chat messages) --
+
+_TODO_TRIGGERS = (
+    "add a todo",
+    "add todo",
+    "create a todo",
+    "create todo",
+    "new todo",
+    "add this as a todo",
+    "track this as a todo",
+    "you should add",
+    "remind me to",
+    "don't forget to",
+    "make sure to",
+    "you need to",
+    "next step",
+    "action item",
+    "todo:",
+    "to-do:",
+    "to do:",
+)
+
+_APPROVE_TRIGGERS = (
+    "approve this draft",
+    "approve the draft",
+    "approve draft",
+    "approve this decision",
+    "approve the decision",
+    "approve decision",
+    "looks ready to approve",
+    "ready for approval",
+    "needs your approval",
+    "awaiting approval",
+    "pending decision",
+    "decision queue",
+)
+
+_URL_PATTERN = re.compile(r"https?://[^\s)>\]]+", re.IGNORECASE)
+_DRAFT_ID_PATTERN = re.compile(r"\bdraft[_\-\s]*(?:id\s*[:=]\s*)?([A-Za-z0-9][A-Za-z0-9_\-]{2,})", re.IGNORECASE)
+_PROJECT_REF_PATTERN = re.compile(
+    r"(?:open|view|jump\s+to|switch\s+to|go\s+to|navigate\s+to)\s+(?:the\s+)?project\s+[\"']?([A-Za-z0-9][A-Za-z0-9 _\-]{1,80}?)[\"']?(?=[\s\.\?\!,]|$)",
+    re.IGNORECASE,
+)
+_TODO_TITLE_PATTERN = re.compile(
+    r"(?:remind\s+me\s+to|don't\s+forget\s+to|make\s+sure\s+to|you\s+(?:should|need\s+to)|action\s+item:?|todo:?|to-do:?|to\s+do:?)\s*[:\-]?\s*(.+?)(?:[\.\n!?]|$)",
+    re.IGNORECASE,
+)
+
+
+def _extract_todo_title(text_str: str) -> str | None:
+    m = _TODO_TITLE_PATTERN.search(text_str)
+    if m:
+        title = m.group(1).strip().strip("\"'`")
+        if 3 <= len(title) <= 200:
+            return title
+    return None
+
+
+def _slugify(name: str) -> str:
+    s = name.strip().lower()
+    s = re.sub(r"[^a-z0-9\s\-]", "", s)
+    s = re.sub(r"\s+", "-", s)
+    return s[:80]
+
+
+def _extract_inline_actions(text_str: str) -> list[InlineAction]:
+    """Classify an assistant message and produce inline action buttons.
+
+    Heuristic regex + keyword classifier covering:
+      - todo creation
+      - decision/draft approval
+      - project open
+      - link click-through
+    Deduplicates by (type, key) and caps total actions at 4.
+    """
+    if not text_str:
+        return []
+
+    actions: list[InlineAction] = []
+    seen: set[tuple[str, str]] = set()
+    lower = text_str.lower()
+
+    # --- todo creation ---
+    if any(trigger in lower for trigger in _TODO_TRIGGERS):
+        title = _extract_todo_title(text_str)
+        payload: dict = {"title": title} if title else {}
+        key = ("create_todo", title or "")
+        if key not in seen:
+            seen.add(key)
+            actions.append(InlineAction(
+                type="create_todo",
+                label=f'Create todo: "{title}"' if title else "Create todo from this",
+                payload=payload,
+            ))
+
+    # --- decision / draft approval ---
+    if any(trigger in lower for trigger in _APPROVE_TRIGGERS):
+        draft_id = None
+        m = _DRAFT_ID_PATTERN.search(text_str)
+        if m:
+            candidate = m.group(1).strip()
+            # Avoid matching the literal word "approval" / "approve"
+            if candidate.lower() not in {"approval", "approve", "decision", "queue", "id"}:
+                draft_id = candidate
+        key = ("approve_decision", draft_id or "")
+        if key not in seen:
+            seen.add(key)
+            actions.append(InlineAction(
+                type="approve_decision",
+                label=f"Approve decision {draft_id}" if draft_id else "Approve decision",
+                payload={"draft_id": draft_id} if draft_id else {},
+            ))
+
+    # --- open project ---
+    for m in _PROJECT_REF_PATTERN.finditer(text_str):
+        name = m.group(1).strip().strip(".,!?\"'")
+        if not name:
+            continue
+        slug = _slugify(name)
+        key = ("open_project", slug)
+        if key in seen:
+            continue
+        seen.add(key)
+        actions.append(InlineAction(
+            type="open_project",
+            label=f"Open project: {name}",
+            payload={"name": name, "slug": slug},
+        ))
+        if len(actions) >= 4:
+            break
+
+    # --- link click-through ---
+    if len(actions) < 4:
+        for m in _URL_PATTERN.finditer(text_str):
+            url = m.group(0).rstrip(".,)]>'\"")
+            key = ("open_link", url)
+            if key in seen:
+                continue
+            seen.add(key)
+            actions.append(InlineAction(
+                type="open_link",
+                label=f"Open link",
+                payload={"url": url},
+            ))
+            if len(actions) >= 4:
+                break
+
+    return actions[:4]
+
+
 async def _handle_create_todo(title: str) -> CommandResponse:
-    from app.routers.todos import create_todo
-    from app.models.todos import CreateTodoBody
+    from app.routers.todos import create_todo  # noqa: lazy import (cycle)
+    from app.models.todos import CreateTodoBody  # noqa: lazy import (cycle)
 
     body = CreateTodoBody(title=title)
     result = create_todo(body)
@@ -129,7 +283,7 @@ async def _handle_create_todo(title: str) -> CommandResponse:
 
 
 async def _handle_approve_draft(draft_id: str) -> CommandResponse:
-    from app.routers.drafts import approve_draft
+    from app.routers.drafts import approve_draft  # noqa: lazy import (cycle)
 
     try:
         result = approve_draft(draft_id)
@@ -701,7 +855,7 @@ async def _claude_fallback(text_str: str) -> CommandResponse:
     history_ctx = _get_history_context()
 
     if USE_AGENT_SDK:
-        from app.services.agent_sdk_client import agent_sdk
+        from app.services.agent_sdk_client import agent_sdk  # noqa: lazy import (optional dep)
         if agent_sdk.is_available():
             try:
                 prompt = ""
@@ -717,7 +871,7 @@ async def _claude_fallback(text_str: str) -> CommandResponse:
                 if len(reply) > 300:
                     reply = reply[:297] + "..."
 
-                from app.services.agent_sdk_client import record_sdk_cost
+                from app.services.agent_sdk_client import record_sdk_cost  # noqa: lazy import (optional dep)
                 record_sdk_cost(
                     model=result["model"], input_tokens=result["input_tokens"],
                     output_tokens=result["output_tokens"], source="chat",
@@ -784,16 +938,40 @@ async def jarvis_command(req: CommandRequest):
     return result
 
 
+@router.post("/api/jarvis/extract-actions", response_model=ExtractActionsResponse)
+def jarvis_extract_actions(req: ExtractActionsRequest):
+    """Classify an assistant message and return inline action buttons.
+
+    Pure regex+keyword classifier. Used by the chat UI to surface
+    contextual quick actions (create todo, approve decision, open
+    project, open link) under each assistant message.
+    """
+    try:
+        actions = _extract_inline_actions(req.text)
+        return ExtractActionsResponse(actions=actions)
+    except Exception as e:
+        log.warning("jarvis_extract_actions_failed", error=str(e))
+        return ExtractActionsResponse(actions=[])
+
+
 @router.get("/api/jarvis/self-improve-summary")
 def jarvis_self_improve_summary():
     """Return the latest self-improvement cycle summary for Jarvis voice queue."""
     try:
         with get_db() as conn:
-            row = conn.exec_driver_sql(
-                "SELECT id, status, budget_usd, spent_usd, max_improvements, "
-                "started_at, completed_at FROM self_improve_cycles "
-                "WHERE status IN ('completed', 'rejected') "
-                "ORDER BY completed_at DESC LIMIT 1"
+            row = conn.execute(
+                select(
+                    self_improve_cycles.c.id,
+                    self_improve_cycles.c.status,
+                    self_improve_cycles.c.budget_usd,
+                    self_improve_cycles.c.spent_usd,
+                    self_improve_cycles.c.max_improvements,
+                    self_improve_cycles.c.started_at,
+                    self_improve_cycles.c.completed_at,
+                )
+                .where(self_improve_cycles.c.status.in_(["completed", "rejected"]))
+                .order_by(self_improve_cycles.c.completed_at.desc())
+                .limit(1)
             ).fetchone()
             if not row:
                 return {"summary": None, "message": "No completed self-improvement cycles."}
@@ -801,18 +979,24 @@ def jarvis_self_improve_summary():
             cycle = dict(row._mapping)
             cycle_id = cycle["id"]
 
-            imp_rows = conn.exec_driver_sql(
-                "SELECT title FROM self_improve_improvements "
-                "WHERE cycle_id = ? AND status IN ('approved_by_human', 'merged', 'awaiting_approval') "
-                "ORDER BY priority LIMIT 5",
-                (cycle_id,),
+            imp_rows = conn.execute(
+                select(self_improve_improvements.c.title)
+                .where(self_improve_improvements.c.cycle_id == cycle_id)
+                .where(self_improve_improvements.c.status.in_(
+                    ["approved_by_human", "merged", "awaiting_approval"]
+                ))
+                .order_by(self_improve_improvements.c.priority)
+                .limit(5)
             ).fetchall()
             titles = [r._mapping["title"] for r in imp_rows]
 
-            imp_count_row = conn.exec_driver_sql(
-                "SELECT COUNT(*) as cnt FROM self_improve_improvements "
-                "WHERE cycle_id = ? AND status IN ('approved_by_human', 'merged')",
-                (cycle_id,),
+            imp_count_row = conn.execute(
+                select(func.count().label("cnt"))
+                .select_from(self_improve_improvements)
+                .where(self_improve_improvements.c.cycle_id == cycle_id)
+                .where(self_improve_improvements.c.status.in_(
+                    ["approved_by_human", "merged"]
+                ))
             ).fetchone()
             imp_count = imp_count_row._mapping["cnt"] if imp_count_row else 0
 

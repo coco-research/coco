@@ -1,12 +1,14 @@
 import React from 'react';
-import { Briefcase, ClipboardList, Code2, UserSearch, Bot, Crown, Cpu, ShieldCheck, Megaphone, BarChart3, PenTool, ListTodo } from 'lucide-react';
+import { Briefcase, ClipboardList, Code2, UserSearch, Bot, Crown, Cpu, ShieldCheck, Megaphone, BarChart3, PenTool, ListTodo, DollarSign, Clock } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { cn, timeAgo } from '../../lib/utils';
+import { cn, timeAgo, formatCost } from '../../lib/utils';
 import { InlineEditor } from '../shared/InlineEditor';
 import { apiFetch, apiPatch } from '../../lib/api';
 
 export interface Agent {
   id: string;
+  human_id?: string | null;
+  display_id?: string | null;
   name: string;
   model: string;
   status: string;
@@ -24,6 +26,7 @@ export interface Agent {
   config: string;
   role: string | null;
   reports_to: string | null;
+  lifetime_cost_usd?: number;
   recent_output?: { stream: string; chunk: string; timestamp: string }[];
 }
 
@@ -59,7 +62,9 @@ export function StatusDot({ status }: { status: string }) {
       {isActive && (
         <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${color} opacity-75`} />
       )}
-      <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${color}`} />
+      <span
+        className={`relative inline-flex rounded-full h-2.5 w-2.5 ${color} ${isActive ? 'agent-pulse' : ''}`}
+      />
     </span>
   );
 }
@@ -85,6 +90,11 @@ export const AgentCard = React.memo(function AgentCard({ agent, onClick, onSpawn
     ? timeAgo(agent.started_at).replace(' ago', '')
     : null;
 
+  // "Last run" — heartbeat if active, else last stop time, else start time
+  const lastRunRaw = agent.last_heartbeat ?? agent.stopped_at ?? agent.started_at;
+  const lastRun = lastRunRaw ? timeAgo(lastRunRaw) : null;
+  const lifetimeCost = agent.lifetime_cost_usd ?? 0;
+
   // Fetch task queue count for badge
   const { data: taskQueue = [] } = useQuery<{ id: string }[]>({
     queryKey: ['task-queue', agent.id],
@@ -102,6 +112,14 @@ export const AgentCard = React.memo(function AgentCard({ agent, onClick, onSpawn
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <StatusDot status={agent.status} />
+          {(agent.human_id || agent.display_id) && (
+            <span
+              className="inline-flex items-center rounded bg-accent/30 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-muted-foreground"
+              title={agent.id}
+            >
+              {agent.human_id || agent.display_id}
+            </span>
+          )}
           {agent.role && ROLE_META[agent.role] && (
             <span className={cn('inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded', ROLE_META[agent.role].color)}>
               {(() => { const Icon = ROLE_META[agent.role!].icon; return <Icon size={10} />; })()}
@@ -112,8 +130,26 @@ export const AgentCard = React.memo(function AgentCard({ agent, onClick, onSpawn
             <InlineEditor
               value={agent.name}
               onSave={async (name) => {
-                await apiPatch(`/agents/${agent.id}`, { name });
-                void qc.invalidateQueries({ queryKey: ['agents'] });
+                // Optimistic update + revert on error
+                const queryKeys = [['agents'], ['agents-org-chart']];
+                const snapshots = queryKeys.map((k) => ({
+                  key: k,
+                  data: qc.getQueryData(k),
+                }));
+                queryKeys.forEach((k) => {
+                  qc.setQueryData<Agent[] | undefined>(k, (old) =>
+                    old?.map((a) => (a.id === agent.id ? { ...a, name } : a)),
+                  );
+                });
+                try {
+                  await apiPatch(`/agents/${agent.id}`, { name });
+                } catch (e) {
+                  snapshots.forEach((s) => qc.setQueryData(s.key, s.data));
+                  throw e;
+                } finally {
+                  void qc.invalidateQueries({ queryKey: ['agents'] });
+                  void qc.invalidateQueries({ queryKey: ['agents-org-chart'] });
+                }
               }}
               as="h3"
               className="font-medium text-foreground truncate"
@@ -128,11 +164,37 @@ export const AgentCard = React.memo(function AgentCard({ agent, onClick, onSpawn
         </span>
       </div>
 
-      {agent.task_description && (
-        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{agent.task_description}</p>
-      )}
+      <div onClick={(e) => e.stopPropagation()} className="mb-3">
+        <InlineEditor
+          value={agent.task_description ?? ''}
+          placeholder="Add a description..."
+          onSave={async (task_description) => {
+            const queryKeys = [['agents'], ['agents-org-chart']];
+            const snapshots = queryKeys.map((k) => ({
+              key: k,
+              data: qc.getQueryData(k),
+            }));
+            queryKeys.forEach((k) => {
+              qc.setQueryData<Agent[] | undefined>(k, (old) =>
+                old?.map((a) => (a.id === agent.id ? { ...a, task_description } : a)),
+              );
+            });
+            try {
+              await apiPatch(`/agents/${agent.id}`, { task_description });
+            } catch (e) {
+              snapshots.forEach((s) => qc.setQueryData(s.key, s.data));
+              throw e;
+            } finally {
+              void qc.invalidateQueries({ queryKey: ['agents'] });
+              void qc.invalidateQueries({ queryKey: ['agents-org-chart'] });
+            }
+          }}
+          as="p"
+          className="text-sm text-muted-foreground line-clamp-2"
+        />
+      </div>
 
-      <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+      <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
         <span className="capitalize">{agent.status}</span>
         {agent.pid && <span>PID {agent.pid}</span>}
         {uptime && <span>{uptime}</span>}
@@ -140,6 +202,19 @@ export const AgentCard = React.memo(function AgentCard({ agent, onClick, onSpawn
           <span className="flex items-center gap-1 ml-auto px-2 py-0.5 rounded-full bg-accent/20 text-accent text-[10px] font-medium">
             <ListTodo size={10} />
             {taskCount} task{taskCount !== 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
+
+      <div className="flex items-center gap-3 text-[11px] text-muted-foreground mb-3 tabular-nums">
+        <span className="flex items-center gap-1" title="Lifetime cost">
+          <DollarSign size={11} />
+          {formatCost(lifetimeCost)}
+        </span>
+        {lastRun && (
+          <span className="flex items-center gap-1" title={`Last activity: ${lastRunRaw}`}>
+            <Clock size={11} />
+            {lastRun}
           </span>
         )}
       </div>

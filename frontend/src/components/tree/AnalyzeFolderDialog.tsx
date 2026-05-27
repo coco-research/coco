@@ -351,7 +351,7 @@ export function AnalyzeFolderDialog({
 // Job Progress sub-component
 // ---------------------------------------------------------------------------
 
-function JobProgress({ job, jobId }: { job: AnalysisJob | null; jobId: string }) {
+function JobProgress({ job }: { job: AnalysisJob | null; jobId: string }) {
   if (!job) {
     return (
       <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">

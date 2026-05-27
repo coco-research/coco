@@ -9,7 +9,7 @@ Adds the operational merge log used by the graph-ops repair tooling
                           it was undone. The admin endpoints in
                           `routers/brain_ops.py` read/write this table.
 
-Revision ID: 003_brain_merge_log
+Revision ID: 007_brain_merge_log
 Revises: 140054f726ca
 Create Date: 2026-05-27
 """
@@ -18,7 +18,7 @@ from typing import Sequence, Union
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "003_brain_merge_log"
+revision: str = "007_brain_merge_log"
 down_revision: Union[str, None] = "140054f726ca"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

@@ -70,11 +70,13 @@ export function DisplaySettings({ onSaveStatus }: DisplaySettingsProps) {
   return (
     <div className="space-y-6 max-w-lg">
       <div>
-        <label className="block text-sm font-medium text-foreground mb-1">Max Projects Shown</label>
-        <p className="text-xs text-muted-foreground mb-2">
+        <label htmlFor="display-max-projects" className="block text-sm font-medium text-foreground mb-1">Max Projects Shown</label>
+        <p id="display-max-projects-desc" className="text-xs text-muted-foreground mb-2">
           Number of projects visible on the dashboard before &quot;Show more&quot;.
         </p>
         <input
+          id="display-max-projects"
+          aria-describedby="display-max-projects-desc"
           type="number"
           min={1}
           max={50}
@@ -96,6 +98,10 @@ export function DisplaySettings({ onSaveStatus }: DisplaySettingsProps) {
           </p>
         </div>
         <button
+          type="button"
+          role="switch"
+          aria-checked={collapseQuiet}
+          aria-label="Collapse quiet projects"
           onClick={() => {
             const v = !collapseQuiet;
             setCollapseQuiet(v);
@@ -123,6 +129,10 @@ export function DisplaySettings({ onSaveStatus }: DisplaySettingsProps) {
           </p>
         </div>
         <button
+          type="button"
+          role="switch"
+          aria-checked={showCost}
+          aria-label="Show cost on dashboard"
           onClick={() => {
             const v = !showCost;
             setShowCost(v);

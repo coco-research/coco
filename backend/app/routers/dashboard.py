@@ -1,4 +1,5 @@
 import logging
+from datetime import date, timedelta
 
 from fastapi import APIRouter
 from sqlalchemy import select, func
@@ -258,7 +259,6 @@ def get_dashboard(node_id: str | None = None, subtree: bool = True):
         except Exception:
             pass
 
-        from datetime import date, timedelta
         today_date = date.today()
         daily = []
         for i in range(6, -1, -1):

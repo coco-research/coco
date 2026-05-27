@@ -1,0 +1,138 @@
+{
+  "base": "http://localhost:5273",
+  "generatedAt": "2026-05-27T00:03:39.377Z",
+  "routes": [
+    {
+      "route": "Home",
+      "path": "/",
+      "url": "http://localhost:5273/",
+      "violationCount": 0,
+      "byImpact": {},
+      "violations": []
+    },
+    {
+      "route": "Analytics",
+      "path": "/analytics",
+      "url": "http://localhost:5273/analytics",
+      "violationCount": 0,
+      "byImpact": {},
+      "violations": []
+    },
+    {
+      "route": "Projects",
+      "path": "/projects",
+      "url": "http://localhost:5273/projects",
+      "violationCount": 0,
+      "byImpact": {},
+      "violations": []
+    },
+    {
+      "route": "ProjectDetail",
+      "path": "/projects/demo",
+      "url": "http://localhost:5273/projects/demo",
+      "violationCount": 0,
+      "byImpact": {},
+      "violations": []
+    },
+    {
+      "route": "Agents",
+      "path": "/agents",
+      "url": "http://localhost:5273/agents",
+      "violationCount": 0,
+      "byImpact": {},
+      "violations": []
+    },
+    {
+      "route": "Knowledge",
+      "path": "/knowledge",
+      "url": "http://localhost:5273/knowledge",
+      "violationCount": 0,
+      "byImpact": {},
+      "violations": []
+    },
+    {
+      "route": "Brain",
+      "path": "/brain",
+      "url": "http://localhost:5273/brain",
+      "violationCount": 0,
+      "byImpact": {},
+      "violations": []
+    },
+    {
+      "route": "Graph",
+      "path": "/graph",
+      "url": "http://localhost:5273/graph",
+      "violationCount": 0,
+      "byImpact": {},
+      "violations": []
+    },
+    {
+      "route": "Inbox",
+      "path": "/inbox",
+      "url": "http://localhost:5273/inbox",
+      "violationCount": 0,
+      "byImpact": {},
+      "violations": []
+    },
+    {
+      "route": "Todos",
+      "path": "/todos",
+      "url": "http://localhost:5273/todos",
+      "violationCount": 0,
+      "byImpact": {},
+      "violations": []
+    },
+    {
+      "route": "Drafts",
+      "path": "/drafts",
+      "url": "http://localhost:5273/drafts",
+      "violationCount": 0,
+      "byImpact": {},
+      "violations": []
+    },
+    {
+      "route": "Goals",
+      "path": "/goals",
+      "url": "http://localhost:5273/goals",
+      "violationCount": 0,
+      "byImpact": {},
+      "violations": []
+    },
+    {
+      "route": "Chat",
+      "path": "/chat",
+      "url": "http://localhost:5273/chat",
+      "violationCount": 0,
+      "byImpact": {},
+      "violations": []
+    },
+    {
+      "route": "Costs",
+      "path": "/costs",
+      "url": "http://localhost:5273/costs",
+      "violationCount": 0,
+      "byImpact": {},
+      "violations": []
+    },
+    {
+      "route": "Activity",
+      "path": "/activity",
+      "url": "http://localhost:5273/activity",
+      "violationCount": 0,
+      "byImpact": {},
+      "violations": []
+    },
+    {
+      "route": "Settings",
+      "path": "/settings",
+      "url": "http://localhost:5273/settings",
+      "violationCount": 0,
+      "byImpact": {},
+      "violations": []
+    }
+  ],
+  "ruleSummary": [],
+  "totals": {
+    "total": 0
+  }
+}

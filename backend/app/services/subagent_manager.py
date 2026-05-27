@@ -124,7 +124,7 @@ def kill_subagent(subagent_id: str) -> dict:
         # Try to kill the process if running
         if agent["status"] in ("running", "paused"):
             try:
-                from app.services.process_manager import process_manager
+                from app.services.process_manager import process_manager  # noqa: lazy import (cycle)
                 process_manager.kill(subagent_id)
             except Exception as e:
                 log.warning("subagent_kill_process_failed", id=subagent_id, error=str(e))

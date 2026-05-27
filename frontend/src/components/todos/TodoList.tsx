@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { Clock, Lock, ArrowRight, Link2 } from 'lucide-react';
+import { Clock, Lock, ArrowRight, Link2, ChevronDown, ChevronRight } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { apiTransition } from '../../lib/api';
+import { apiTransition, ApiError } from '../../lib/api';
 import { cn } from '../../lib/utils';
 import { InlineEditor } from '../shared/InlineEditor';
 import { TransitionButtons } from '../shared/TransitionButtons';
 import { statePillClass, STATE_LABELS } from '../../lib/state-machine';
 import { apiPatch } from '../../lib/api';
 import { AddDependencyDialog } from './AddDependencyDialog';
+import { TodoDependencies } from './TodoDependencies';
+import { useToast } from '../shared/Toast';
 
 export interface Todo {
   id: string;
@@ -27,10 +29,15 @@ export interface Todo {
   blocked_by_count?: number;
   blocking_count?: number;
   display_id?: string;
+  human_id?: string | null;
 }
 
 interface TodoListProps {
   todos: Todo[];
+  /** Optional edit callback. Currently consumed by ProjectDetailPage; not wired into the list UI yet. */
+  onEdit?: (todo: Todo) => void;
+  onSelect?: (todo: Todo) => void;
+  selectedId?: string | null;
 }
 
 const priorityBadge: Record<string, string> = {
@@ -44,11 +51,13 @@ function isOverdue(dueDate: string | null): boolean {
   return new Date(dueDate) < new Date(new Date().toDateString());
 }
 
-export function TodoList({ todos }: TodoListProps) {
+export function TodoList({ todos, onSelect, selectedId }: TodoListProps) {
   const qc = useQueryClient();
+  const { toast } = useToast();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [flashId, setFlashId] = useState<string | null>(null);
   const [depDialogTodoId, setDepDialogTodoId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   async function handleTransition(id: string, toState: string) {
     setPendingId(id);
@@ -57,6 +66,30 @@ export function TodoList({ todos }: TodoListProps) {
       setFlashId(id);
       setTimeout(() => setFlashId(null), 600);
       void qc.invalidateQueries({ queryKey: ['todos'] });
+      void qc.invalidateQueries({ queryKey: ['todo-detail', id] });
+    } catch (e) {
+      // GAP M9: surface 409 blocked_by errors (and other transition failures).
+      if (e instanceof ApiError) {
+        let detail = e.message;
+        try {
+          const parsed = JSON.parse(e.message) as { detail?: unknown };
+          if (parsed?.detail && typeof parsed.detail === 'object') {
+            const d = parsed.detail as { message?: string };
+            if (d.message) detail = d.message;
+          } else if (typeof parsed?.detail === 'string') {
+            detail = parsed.detail;
+          }
+        } catch {
+          // not JSON, use raw message
+        }
+        toast(detail, 'error');
+        if (e.status === 409) {
+          // Auto-expand the dependencies panel so the user can resolve.
+          setExpandedId(id);
+        }
+      } else {
+        toast('Failed to update todo', 'error');
+      }
     } finally {
       setPendingId(null);
     }
@@ -99,15 +132,32 @@ export function TodoList({ todos }: TodoListProps) {
               const isDone = todo.status === 'done';
               const isArchived = todo.status === 'archived';
 
+              const isExpanded = expandedId === todo.id;
               return (
                 <div
                   key={todo.id}
+                  onClick={onSelect ? () => onSelect(todo) : undefined}
                   className={cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-xl border border-border bg-card hover:shadow-sm transition-all',
+                    'rounded-xl border border-border bg-card hover:shadow-sm transition-all',
                     (isDone || isArchived) && 'opacity-50',
                     flashId === todo.id && 'animate-state-flash',
+                    onSelect && 'cursor-pointer',
+                    selectedId === todo.id && 'ring-1 ring-accent/40 bg-accent/10',
                   )}
                 >
+                <div className="flex items-center gap-3 px-4 py-3">
+                  {/* Expand toggle */}
+                  <button
+                    onClick={() => setExpandedId(isExpanded ? null : todo.id)}
+                    className="shrink-0 p-0.5 rounded hover:bg-accent/50 text-muted-foreground hover:text-foreground transition-colors"
+                    title={isExpanded ? 'Hide dependencies' : 'Show dependencies'}
+                    aria-expanded={isExpanded}
+                  >
+                    {isExpanded
+                      ? <ChevronDown className="h-3.5 w-3.5" />
+                      : <ChevronRight className="h-3.5 w-3.5" />
+                    }
+                  </button>
                   {/* Status pill */}
                   <span
                     className={cn(
@@ -118,10 +168,13 @@ export function TodoList({ todos }: TodoListProps) {
                     {STATE_LABELS[todo.status] ?? todo.status}
                   </span>
 
-                  {/* Display ID badge */}
-                  {todo.display_id && (
-                    <span className="shrink-0 font-mono text-[11px] text-muted-foreground bg-muted/50 border border-border rounded px-1.5 py-0.5 tracking-wide">
-                      {todo.display_id}
+                  {/* Human ID badge — primary identifier, falls back to legacy display_id */}
+                  {(todo.human_id || todo.display_id) && (
+                    <span
+                      className="shrink-0 font-mono text-[11px] text-muted-foreground bg-muted/50 border border-border rounded px-1.5 py-0.5 tracking-wide"
+                      title={todo.id}
+                    >
+                      {todo.human_id || todo.display_id}
                     </span>
                   )}
 
@@ -133,8 +186,29 @@ export function TodoList({ todos }: TodoListProps) {
                     <InlineEditor
                       value={todo.title}
                       onSave={async (newValue) => {
-                        await apiPatch(`/todos/${todo.id}`, { title: newValue });
-                        void qc.invalidateQueries({ queryKey: ['todos'] });
+                        // Optimistic update across all ['todos', ...] queries
+                        const queries = qc.getQueriesData<Todo[] | { items: Todo[] }>({ queryKey: ['todos'] });
+                        const snapshots = queries.map(([key, data]) => ({ key, data }));
+                        queries.forEach(([key]) => {
+                          qc.setQueryData(key, (old: Todo[] | { items: Todo[] } | undefined) => {
+                            if (!old) return old;
+                            if (Array.isArray(old)) {
+                              return old.map((t) => (t.id === todo.id ? { ...t, title: newValue } : t));
+                            }
+                            return {
+                              ...old,
+                              items: old.items.map((t) => (t.id === todo.id ? { ...t, title: newValue } : t)),
+                            };
+                          });
+                        });
+                        try {
+                          await apiPatch(`/todos/${todo.id}`, { title: newValue });
+                        } catch (e) {
+                          snapshots.forEach((s) => qc.setQueryData(s.key, s.data));
+                          throw e;
+                        } finally {
+                          void qc.invalidateQueries({ queryKey: ['todos'] });
+                        }
                       }}
                       as="span"
                       className={cn(
@@ -208,6 +282,13 @@ export function TodoList({ todos }: TodoListProps) {
                       size="sm"
                     />
                   </div>
+                </div>
+                {/* Expanded dependencies section (GAP M9) */}
+                {isExpanded && (
+                  <div className="px-4 pb-3 pt-1 border-t border-border/60 bg-muted/10">
+                    <TodoDependencies todoId={todo.id} allTodos={todos} />
+                  </div>
+                )}
                 </div>
               );
             })}

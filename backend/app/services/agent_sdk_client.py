@@ -11,9 +11,12 @@ import time
 import uuid
 import structlog
 from anthropic import Anthropic, AsyncAnthropic, RateLimitError, APIStatusError
+from sqlalchemy import insert
 from typing import AsyncIterator
 
 from app.config import LOCAL_LLM_ENABLED, LOCAL_LLM_FALLBACK_TO_CLOUD
+from app.db.session import get_db
+from app.db.tables import budgets, cost_ledger
 
 log = structlog.get_logger()
 
@@ -62,8 +65,6 @@ def _check_budget_before_spawn(
     if not node_id and not project_id:
         return
     try:
-        from app.db.session import get_db
-        from app.db.tables import budgets
 
         with get_db() as conn:
             budget_row = conn.exec_driver_sql(
@@ -126,7 +127,7 @@ class AgentSDKClient:
         }
 
         if task_type and task_type in LOCAL_ELIGIBLE_TASKS and LOCAL_LLM_ENABLED:
-            from .local_llm_client import LocalLLMClient, LocalLLMError
+            from .local_llm_client import LocalLLMClient, LocalLLMError  # noqa: lazy import (optional dep)
             local = LocalLLMClient()
             if local.is_available():
                 try:
@@ -394,7 +395,7 @@ def _record_dual(
     # 2. agent_sessions
     if agent_id:
         try:
-            from app.services.agent_session_store import increment_tokens
+            from app.services.agent_session_store import increment_tokens  # noqa: lazy import (cycle)
             increment_tokens(agent_id, input_tokens, output_tokens)
         except Exception as e:
             log.warning("session_token_update_failed", agent_id=agent_id, error=str(e))
@@ -411,10 +412,6 @@ def record_sdk_cost(
     project_id: str | None = None,
 ) -> None:
     """Write a row to cost_ledger with real token counts from the SDK."""
-    from sqlalchemy import insert
-    from app.db.session import get_db
-    from app.db.tables import cost_ledger
-
     if cost_usd is None:
         cost_usd = calculate_cost(model, input_tokens, output_tokens)
     try:

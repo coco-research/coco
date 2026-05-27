@@ -1,0 +1,1068 @@
+{
+  "base": "http://localhost:5173",
+  "generatedAt": "2026-05-26T23:41:48.465Z",
+  "routes": [
+    {
+      "route": "Home",
+      "path": "/",
+      "url": "http://localhost:5173/",
+      "violationCount": 4,
+      "byImpact": {
+        "critical": 2,
+        "serious": 2
+      },
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".p-2"
+              ],
+              "html": "<button class=\"relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            },
+            {
+              "target": [
+                ".w-9"
+              ],
+              "html": "<button class=\"w-9 h-9 rounded-full bg-foreground text-background flex items-center justify-center hover:opacity-90 transition-opacity shrink-0\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            },
+            {
+              "target": [
+                ".gap-2.flex.items-center > .hover\\:text-foreground:nth-child(2)"
+              ],
+              "html": "<button class=\"text-muted-foreground hover:text-foreground transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".min-w-\\[20px\\]"
+              ],
+              "html": "<span class=\"ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[20px] text-center bg-destructive text-destructive-foreground\">208</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #fafafa, background color: #fb2c36, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".text-lg"
+              ],
+              "html": "<h1 class=\"text-lg font-semibold text-foreground\">Good evening</h1>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.05 (foreground color: #717171, background color: #0a0a0a, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".items-baseline.gap-3.flex > .text-xs.text-muted-foreground"
+              ],
+              "html": "<span class=\"text-xs text-muted-foreground\">Tuesday, May 26</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.26 (foreground color: #4b4b4b, background color: #0a0a0a, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[title=\"Activate Jarvis\"]"
+              ],
+              "html": "<button class=\"inline-flex items-center gap-1 text-[11px] border border-border rounded-md px-2.5 py-1 text-muted-foreground hover:text-foreground hover:border-foreground/20 cursor-pointer transition-colors\" title=\"Activate Jarvis\">",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.26 (foreground color: #4b4b4b, background color: #0a0a0a, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-2\\.5.hover\\:border-foreground\\/20.cursor-pointer:nth-child(2)"
+              ],
+              "html": "<button class=\"inline-flex items-center gap-1 text-[11px] border border-border rounded-md px-2.5 py-1 text-muted-foreground hover:text-foreground hover:border-foreground/20 cursor-pointer transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.26 (foreground color: #4b4b4b, background color: #0a0a0a, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "label",
+          "impact": "critical",
+          "help": "Form elements must have labels",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/label?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "input"
+              ],
+              "html": "<input min=\"0\" max=\"1\" step=\"0.05\" class=\"w-16 h-1 accent-foreground/60\" type=\"range\" value=\"0.8\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element has no placeholder attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        },
+        {
+          "id": "scrollable-region-focusable",
+          "impact": "serious",
+          "help": "Scrollable region must have keyboard access",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/scrollable-region-focusable?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".gap-x-4"
+              ],
+              "html": "<div class=\"flex gap-x-4 text-xs text-muted-foreground border-t border-border/30 pt-3 mt-3 whitespace-nowrap overflow-x-auto\">",
+              "failureSummary": "Fix any of the following:\n  Element should have focusable content\n  Element should be focusable"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "Analytics",
+      "path": "/analytics",
+      "url": "http://localhost:5173/analytics",
+      "violationCount": 2,
+      "byImpact": {
+        "critical": 1,
+        "serious": 1
+      },
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".p-2"
+              ],
+              "html": "<button class=\"relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".min-w-\\[20px\\]"
+              ],
+              "html": "<span class=\"ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[20px] text-center bg-destructive text-destructive-foreground\">208</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #fafafa, background color: #fb2c36, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "Projects",
+      "path": "/projects",
+      "url": "http://localhost:5173/projects",
+      "violationCount": 2,
+      "byImpact": {
+        "critical": 1,
+        "serious": 1
+      },
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".p-2"
+              ],
+              "html": "<button class=\"relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".min-w-\\[20px\\]"
+              ],
+              "html": "<span class=\"ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[20px] text-center bg-destructive text-destructive-foreground\">208</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #fafafa, background color: #fb2c36, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "ProjectDetail",
+      "path": "/projects/demo",
+      "url": "http://localhost:5173/projects/demo",
+      "violationCount": 2,
+      "byImpact": {
+        "critical": 1,
+        "serious": 1
+      },
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".p-2"
+              ],
+              "html": "<button class=\"relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".min-w-\\[20px\\]"
+              ],
+              "html": "<span class=\"ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[20px] text-center bg-destructive text-destructive-foreground\">208</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #fafafa, background color: #fb2c36, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "Agents",
+      "path": "/agents",
+      "url": "http://localhost:5173/agents",
+      "violationCount": 2,
+      "byImpact": {
+        "critical": 1,
+        "serious": 1
+      },
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".p-2"
+              ],
+              "html": "<button class=\"relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".min-w-\\[20px\\]"
+              ],
+              "html": "<span class=\"ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[20px] text-center bg-destructive text-destructive-foreground\">208</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #fafafa, background color: #fb2c36, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".flex-col.flex.items-center:nth-child(3) > .flex-col.flex.items-center:nth-child(2) > .md\\:gap-6.gap-2.flex > .flex-col.flex.items-center:nth-child(1) > .flex-col.flex.items-center > .rounded-xl.p-4.min-w-\\[140px\\] > .bg-info\\/20.text-info.border-info\\/40:nth-child(3)"
+              ],
+              "html": "<span class=\"inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-info/20 text-info border-info/40\">PM</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.31 (foreground color: #1447e6, background color: #162140, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".flex-col.flex.items-center:nth-child(3) > .flex-col.flex.items-center:nth-child(2) > .md\\:gap-6.gap-2.flex > .flex-col.flex.items-center:nth-child(1) > .flex-col.flex.items-center > .flex-col.flex.items-center:nth-child(2) > .md\\:gap-6.gap-2.flex > .flex-col.flex.items-center:nth-child(1) > .flex-col.flex.items-center > .rounded-xl.p-4.min-w-\\[140px\\] > .bg-accent\\/20.text-accent.border-accent\\/40:nth-child(3)"
+              ],
+              "html": "<span class=\"inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-accent/20 text-accent border-accent/40\">UXR</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.31 (foreground color: #1447e6, background color: #162140, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".flex-col.flex.items-center:nth-child(4) > .flex-col.flex.items-center:nth-child(2) > .md\\:gap-6.gap-2.flex > .flex-col.flex.items-center:nth-child(1) > .flex-col.flex.items-center > .rounded-xl.p-4.min-w-\\[140px\\] > .bg-info\\/20.text-info.border-info\\/40:nth-child(3)"
+              ],
+              "html": "<span class=\"inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-info/20 text-info border-info/40\">PM</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.31 (foreground color: #1447e6, background color: #162140, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".flex-col.flex.items-center:nth-child(4) > .flex-col.flex.items-center:nth-child(2) > .md\\:gap-6.gap-2.flex > .flex-col.flex.items-center:nth-child(1) > .flex-col.flex.items-center > .flex-col.flex.items-center:nth-child(2) > .md\\:gap-6.gap-2.flex > .flex-col.flex.items-center:nth-child(1) > .flex-col.flex.items-center > .rounded-xl.p-4.min-w-\\[140px\\] > .bg-accent\\/20.text-accent.border-accent\\/40:nth-child(3)"
+              ],
+              "html": "<span class=\"inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-accent/20 text-accent border-accent/40\">UXR</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.31 (foreground color: #1447e6, background color: #162140, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "Knowledge",
+      "path": "/knowledge",
+      "url": "http://localhost:5173/knowledge",
+      "violationCount": 2,
+      "byImpact": {
+        "critical": 1,
+        "serious": 1
+      },
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".p-2"
+              ],
+              "html": "<button class=\"relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".min-w-\\[20px\\]"
+              ],
+              "html": "<span class=\"ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[20px] text-center bg-destructive text-destructive-foreground\">208</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #fafafa, background color: #fb2c36, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "Brain",
+      "path": "/brain",
+      "url": "http://localhost:5173/brain",
+      "violationCount": 2,
+      "byImpact": {
+        "critical": 2
+      },
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".p-2"
+              ],
+              "html": "<button class=\"relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        },
+        {
+          "id": "select-name",
+          "impact": "critical",
+          "help": "Select element must have an accessible name",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/select-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "select"
+              ],
+              "html": "<select class=\"appearance-none bg-card border border-border rounded-lg pl-2 pr-7 py-1 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent/20\"><option value=\"\">All</option></select>",
+              "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "Graph",
+      "path": "/graph",
+      "url": "http://localhost:5173/graph",
+      "error": "page.goto: Timeout 15000ms exceeded.\nCall log:\n  - navigating to \"http://localhost:5173/graph\", waiting until \"domcontentloaded\"\n"
+    },
+    {
+      "route": "Inbox",
+      "path": "/inbox",
+      "url": "http://localhost:5173/inbox",
+      "violationCount": 2,
+      "byImpact": {
+        "critical": 1,
+        "serious": 1
+      },
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".p-2"
+              ],
+              "html": "<button class=\"relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".min-w-\\[20px\\]"
+              ],
+              "html": "<span class=\"ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[20px] text-center bg-destructive text-destructive-foreground\">208</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #fafafa, background color: #fb2c36, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "Todos",
+      "path": "/todos",
+      "url": "http://localhost:5173/todos",
+      "violationCount": 3,
+      "byImpact": {
+        "critical": 2,
+        "serious": 1
+      },
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".p-2"
+              ],
+              "html": "<button class=\"relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".min-w-\\[20px\\]"
+              ],
+              "html": "<span class=\"ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[20px] text-center bg-destructive text-destructive-foreground\">208</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #fafafa, background color: #fb2c36, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "section:nth-child(1) > .space-y-1 > .hover\\:shadow-sm.rounded-xl.py-3:nth-child(2) > .bg-destructive\\/20.text-destructive.font-medium"
+              ],
+              "html": "<span class=\"text-xs px-2 py-0.5 rounded-full font-medium capitalize shrink-0 bg-destructive/20 text-destructive\">high</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.86 (foreground color: #fb2c36, background color: #451b1d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-sm.rounded-xl.py-3:nth-child(3) > .bg-destructive\\/20.text-destructive.font-medium"
+              ],
+              "html": "<span class=\"text-xs px-2 py-0.5 rounded-full font-medium capitalize shrink-0 bg-destructive/20 text-destructive\">high</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.86 (foreground color: #fb2c36, background color: #451b1d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "section:nth-child(1) > .space-y-1 > .hover\\:shadow-sm.rounded-xl.py-3:nth-child(4) > .bg-destructive\\/20.text-destructive.font-medium"
+              ],
+              "html": "<span class=\"text-xs px-2 py-0.5 rounded-full font-medium capitalize shrink-0 bg-destructive/20 text-destructive\">high</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.86 (foreground color: #fb2c36, background color: #451b1d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-sm.rounded-xl.py-3:nth-child(5) > .bg-destructive\\/20.text-destructive.font-medium"
+              ],
+              "html": "<span class=\"text-xs px-2 py-0.5 rounded-full font-medium capitalize shrink-0 bg-destructive/20 text-destructive\">high</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.86 (foreground color: #fb2c36, background color: #451b1d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "select-name",
+          "impact": "critical",
+          "help": "Select element must have an accessible name",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/select-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "select:nth-child(1)"
+              ],
+              "html": "<select class=\"bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            },
+            {
+              "target": [
+                "select:nth-child(2)"
+              ],
+              "html": "<select class=\"bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            },
+            {
+              "target": [
+                "select:nth-child(3)"
+              ],
+              "html": "<select class=\"bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "Drafts",
+      "path": "/drafts",
+      "url": "http://localhost:5173/drafts",
+      "violationCount": 4,
+      "byImpact": {
+        "critical": 2,
+        "serious": 2
+      },
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".p-2"
+              ],
+              "html": "<button class=\"relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".min-w-\\[20px\\]"
+              ],
+              "html": "<span class=\"ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[20px] text-center bg-destructive text-destructive-foreground\">208</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #fafafa, background color: #fb2c36, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-destructive\\/15"
+              ],
+              "html": "<span class=\"inline-flex items-center px-2 py-0.5 text-[11px] font-medium rounded-full border bg-destructive/15 text-destructive border-destructive/20\">rejected</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.12 (foreground color: #fb2c36, background color: #391a1c, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "nested-interactive",
+          "impact": "serious",
+          "help": "Interactive controls must not be nested",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/nested-interactive?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".overflow-hidden.rounded-lg.bg-card:nth-child(1) > .text-left.hover\\:bg-accent\\/30.cursor-pointer"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-accent/30 transition-colors cursor-pointer\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".overflow-hidden.rounded-lg.bg-card:nth-child(2) > .text-left.hover\\:bg-accent\\/30.cursor-pointer"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-accent/30 transition-colors cursor-pointer\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".overflow-hidden.rounded-lg.bg-card:nth-child(3) > .text-left.hover\\:bg-accent\\/30.cursor-pointer"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-accent/30 transition-colors cursor-pointer\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".overflow-hidden.rounded-lg.bg-card:nth-child(4) > .text-left.hover\\:bg-accent\\/30.cursor-pointer"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-accent/30 transition-colors cursor-pointer\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".overflow-hidden.rounded-lg.bg-card:nth-child(5) > .text-left.hover\\:bg-accent\\/30.cursor-pointer"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-accent/30 transition-colors cursor-pointer\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            }
+          ]
+        },
+        {
+          "id": "select-name",
+          "impact": "critical",
+          "help": "Select element must have an accessible name",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/select-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "select"
+              ],
+              "html": "<select class=\"text-xs bg-card border border-border rounded-md px-2 py-1.5 text-foreground\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "Goals",
+      "path": "/goals",
+      "url": "http://localhost:5173/goals",
+      "violationCount": 2,
+      "byImpact": {
+        "critical": 1,
+        "serious": 1
+      },
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".p-2"
+              ],
+              "html": "<button class=\"relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            },
+            {
+              "target": [
+                ".p-0\\.5"
+              ],
+              "html": "<button class=\"shrink-0 p-0.5 rounded hover:bg-accent\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".min-w-\\[20px\\]"
+              ],
+              "html": "<span class=\"ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[20px] text-center bg-destructive text-destructive-foreground\">208</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #fafafa, background color: #fb2c36, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".text-muted-foreground\\/50"
+              ],
+              "html": "<span class=\"text-muted-foreground/50 ml-0.5\" title=\"Aggregate of sub-goals\">avg</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "Chat",
+      "path": "/chat",
+      "url": "http://localhost:5173/chat",
+      "violationCount": 2,
+      "byImpact": {
+        "critical": 1,
+        "serious": 1
+      },
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".p-2.hover\\:text-foreground.hover\\:bg-accent\\/50"
+              ],
+              "html": "<button class=\"relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            },
+            {
+              "target": [
+                ".p-1\\.5.rounded-lg.hover\\:bg-accent\\/50"
+              ],
+              "html": "<button class=\"p-1.5 rounded-lg hover:bg-accent/50 text-muted-foreground transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            },
+            {
+              "target": [
+                ".hover\\:bg-accent\\/80"
+              ],
+              "html": "<button disabled=\"\" class=\"flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center bg-accent text-accent-foreground transition-all shadow-sm hover:bg-accent/80 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-ac",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".min-w-\\[20px\\]"
+              ],
+              "html": "<span class=\"ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[20px] text-center bg-destructive text-destructive-foreground\">208</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #fafafa, background color: #fb2c36, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(1) > .space-y-0\\.5 > .text-left.py-1\\.5.px-2 > .min-w-0.flex-1 > .text-muted-foreground\\/60.text-\\[10px\\]"
+              ],
+              "html": "<span class=\"text-[10px] text-muted-foreground/60\">2 msgs · 57d ago</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.31 (foreground color: #6a6a6a, background color: #171717, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(2) > .space-y-0\\.5 > .text-left.py-1\\.5.px-2:nth-child(1) > .min-w-0.flex-1 > .text-muted-foreground\\/60.text-\\[10px\\]"
+              ],
+              "html": "<span class=\"text-[10px] text-muted-foreground/60\">6 msgs · 59d ago</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.31 (foreground color: #6a6a6a, background color: #171717, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".text-left.py-1\\.5.px-2:nth-child(2) > .min-w-0.flex-1 > .text-muted-foreground\\/60.text-\\[10px\\]"
+              ],
+              "html": "<span class=\"text-[10px] text-muted-foreground/60\">1 msg · 59d ago</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.31 (foreground color: #6a6a6a, background color: #171717, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "Costs",
+      "path": "/costs",
+      "url": "http://localhost:5173/costs",
+      "violationCount": 2,
+      "byImpact": {
+        "critical": 1,
+        "serious": 1
+      },
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".p-2"
+              ],
+              "html": "<button class=\"relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".min-w-\\[20px\\]"
+              ],
+              "html": "<span class=\"ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[20px] text-center bg-destructive text-destructive-foreground\">208</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #fafafa, background color: #fb2c36, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "Activity",
+      "path": "/activity",
+      "url": "http://localhost:5173/activity",
+      "violationCount": 3,
+      "byImpact": {
+        "critical": 2,
+        "serious": 1
+      },
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".p-2"
+              ],
+              "html": "<button class=\"relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".min-w-\\[20px\\]"
+              ],
+              "html": "<span class=\"ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[20px] text-center bg-destructive text-destructive-foreground\">208</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #fafafa, background color: #fb2c36, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "select-name",
+          "impact": "critical",
+          "help": "Select element must have an accessible name",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/select-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "select"
+              ],
+              "html": "<select class=\"bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "Settings",
+      "path": "/settings",
+      "url": "http://localhost:5173/settings",
+      "violationCount": 3,
+      "byImpact": {
+        "critical": 2,
+        "serious": 1
+      },
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".p-2"
+              ],
+              "html": "<button class=\"relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors\">",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            },
+            {
+              "target": [
+                ".justify-between.py-3.border-b:nth-child(2) > .inline-flex.h-6.w-11"
+              ],
+              "html": "<button class=\"relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-accent\"><span class=\"inline-block h-4 w-4 transform rounded-full bg-card transition-transform translate-x-6\"></span></button>",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            },
+            {
+              "target": [
+                ".justify-between.py-3.border-b:nth-child(3) > .inline-flex.h-6.w-11"
+              ],
+              "html": "<button class=\"relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-accent\"><span class=\"inline-block h-4 w-4 transform rounded-full bg-card transition-transform translate-x-6\"></span></button>",
+              "failureSummary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                ".min-w-\\[20px\\]"
+              ],
+              "html": "<span class=\"ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-full min-w-[20px] text-center bg-destructive text-destructive-foreground\">208</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.64 (foreground color: #fafafa, background color: #fb2c36, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "label",
+          "impact": "critical",
+          "help": "Form elements must have labels",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/label?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "input[max=\"12\"]"
+              ],
+              "html": "<input min=\"1\" max=\"12\" class=\"w-full bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors\" ty",
+              "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element has no placeholder attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            },
+            {
+              "target": [
+                "input[max=\"120\"]"
+              ],
+              "html": "<input min=\"1\" max=\"120\" class=\"w-full bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors\" t",
+              "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element has no placeholder attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            },
+            {
+              "target": [
+                "input[max=\"50\"]"
+              ],
+              "html": "<input min=\"1\" max=\"50\" class=\"w-full bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors\" ty",
+              "failureSummary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element has no placeholder attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "ruleSummary": [
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+      "nodeCount": 266,
+      "routes": [
+        "Home",
+        "Analytics",
+        "Projects",
+        "ProjectDetail",
+        "Agents",
+        "Knowledge",
+        "Inbox",
+        "Todos",
+        "Drafts",
+        "Goals",
+        "Chat",
+        "Costs",
+        "Activity",
+        "Settings"
+      ]
+    },
+    {
+      "rule": "nested-interactive",
+      "impact": "serious",
+      "help": "Interactive controls must not be nested",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/nested-interactive?application=playwright",
+      "nodeCount": 199,
+      "routes": [
+        "Drafts"
+      ]
+    },
+    {
+      "rule": "button-name",
+      "impact": "critical",
+      "help": "Buttons must have discernible text",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/button-name?application=playwright",
+      "nodeCount": 22,
+      "routes": [
+        "Home",
+        "Analytics",
+        "Projects",
+        "ProjectDetail",
+        "Agents",
+        "Knowledge",
+        "Brain",
+        "Inbox",
+        "Todos",
+        "Drafts",
+        "Goals",
+        "Chat",
+        "Costs",
+        "Activity",
+        "Settings"
+      ]
+    },
+    {
+      "rule": "select-name",
+      "impact": "critical",
+      "help": "Select element must have an accessible name",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/select-name?application=playwright",
+      "nodeCount": 6,
+      "routes": [
+        "Brain",
+        "Todos",
+        "Drafts",
+        "Activity"
+      ]
+    },
+    {
+      "rule": "label",
+      "impact": "critical",
+      "help": "Form elements must have labels",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/label?application=playwright",
+      "nodeCount": 4,
+      "routes": [
+        "Home",
+        "Settings"
+      ]
+    },
+    {
+      "rule": "scrollable-region-focusable",
+      "impact": "serious",
+      "help": "Scrollable region must have keyboard access",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/scrollable-region-focusable?application=playwright",
+      "nodeCount": 1,
+      "routes": [
+        "Home"
+      ]
+    }
+  ],
+  "totals": {
+    "critical": 21,
+    "serious": 16,
+    "total": 37
+  }
+}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Network } from 'vis-network';
 import { DataSet } from 'vis-data';
@@ -72,7 +72,7 @@ const VIS_OPTIONS = {
     borderWidth: 1,
   },
   edges: {
-    smooth: { type: 'continuous' as const, roundness: 0.3 },
+    smooth: { enabled: true, type: 'continuous', roundness: 0.3 },
     color: { color: '#404060', opacity: 0.6 },
     width: 0.6,
   },

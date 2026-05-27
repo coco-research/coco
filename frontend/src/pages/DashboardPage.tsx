@@ -8,6 +8,7 @@ import { CostSummary } from '../components/dashboard/CostSummary';
 import { HealthBar } from '../components/dashboard/HealthBar';
 import { formatCost, cn, timeAgo } from '../lib/utils';
 import { useScope } from '../context/ScopeContext';
+import { ErrorState } from '../components/shared/ErrorState';
 
 interface DashboardProject {
   id: string;
@@ -106,7 +107,7 @@ export default function DashboardPage() {
     ? `/dashboard?node_id=${encodeURIComponent(selectedNodeId)}`
     : '/dashboard';
 
-  const { data: dashboard, isLoading } = useQuery<DashboardData>({
+  const { data: dashboard, isLoading, isError, error, refetch } = useQuery<DashboardData>({
     queryKey: ['dashboard', selectedNodeId],
     queryFn: () => apiFetch<DashboardData>(dashboardUrl),
     refetchInterval: 30000,
@@ -128,7 +129,17 @@ export default function DashboardPage() {
     project: row.project_id ?? undefined,
   }));
 
-  if (isLoading || !dashboard) return <LoadingState />;
+  if (isLoading) return <LoadingState />;
+  if (isError) {
+    return (
+      <ErrorState
+        error={error}
+        title="Couldn't load dashboard"
+        onRetry={() => void refetch()}
+      />
+    );
+  }
+  if (!dashboard) return <LoadingState />;
 
   const { projects, agents, queue, costs, health } = dashboard;
   // queue.total = open tasks, queue.drafts = pending drafts, queue.classify = unsorted content

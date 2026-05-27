@@ -108,8 +108,8 @@ def approve_draft(draft_id: str):
                     "status": "approved",
                     "decided_by": "user",
                 },
-                conflict_cols=["hub_draft_id"],
-                update_cols=["status", "decided_by"],
+                conflict_columns=["hub_draft_id"],
+                update_columns=["status", "decided_by"],
             )
         )
 
@@ -144,8 +144,8 @@ def reject_draft(draft_id: str):
                     "status": "rejected",
                     "decided_by": "user",
                 },
-                conflict_cols=["hub_draft_id"],
-                update_cols=["status", "decided_by"],
+                conflict_columns=["hub_draft_id"],
+                update_columns=["status", "decided_by"],
             )
         )
 

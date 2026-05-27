@@ -22,25 +22,11 @@ function isQuiet(project: HomeProject): boolean {
   return project.todo_total === 0 && project.item_count === 0;
 }
 
-const statusColors: Record<HealthStatus, string> = {
-  green: 'bg-success',
-  amber: 'bg-warning',
-  red: 'bg-destructive',
-  gray: 'bg-muted-foreground/30',
-};
-
 const statusBorderColors: Record<HealthStatus, string> = {
   green: 'border-l-success/50',
   amber: 'border-l-warning',
   red: 'border-l-destructive',
   gray: 'border-l-muted-foreground/20',
-};
-
-const statusLabelColors: Record<HealthStatus, string> = {
-  green: 'text-success',
-  amber: 'text-warning',
-  red: 'text-destructive',
-  gray: 'text-muted-foreground',
 };
 
 function SourcePill({ icon: Icon, count, label }: { icon: React.ElementType; count: number; label: string }) {

@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { X, Clock, Shield, ExternalLink, Network, Link2, ArrowLeft, List } from 'lucide-react';
+import { X, Clock, Shield, Network, Link2, ArrowLeft, List } from 'lucide-react';
 import { apiFetch } from '../../lib/api';
 import { cn } from '../../lib/utils';
 import { articleTypeBadge } from './WikiFilterBar';
 import { WikiLinkRenderer } from './WikiLinkRenderer';
-import { EgoGraphSidebar } from './EgoGraphSidebar';
+
+// Lazy-load EgoGraphSidebar — pulls in vis-network (~500KB) only when an article is open.
+const EgoGraphSidebar = lazy(() =>
+  import('./EgoGraphSidebar').then((m) => ({ default: m.EgoGraphSidebar })),
+);
 
 interface RelatedArticle {
   gid: string;
@@ -235,12 +238,14 @@ export function WikiArticleDetail({ gid, onClose }: WikiArticleDetailProps) {
         )}
 
         {/* Ego Graph */}
-        <EgoGraphSidebar
-          entityGid={gid}
-          onNodeClick={(targetGid) => {
-            window.location.hash = `#article/${targetGid}`;
-          }}
-        />
+        <Suspense fallback={<div className="h-64 flex items-center justify-center text-xs text-muted-foreground">Loading graph…</div>}>
+          <EgoGraphSidebar
+            entityGid={gid}
+            onNodeClick={(targetGid) => {
+              window.location.hash = `#article/${targetGid}`;
+            }}
+          />
+        </Suspense>
 
         {/* Related articles */}
         {relatedData && relatedData.items.length > 0 && (

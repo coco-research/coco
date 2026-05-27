@@ -1,11 +1,27 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { DeepgramClient } from '../lib/deepgram';
+import {
+  isMicDenied,
+  markMicDenied,
+  clearMicDenied,
+  isPermissionDeniedError,
+} from '../lib/micPermission';
+
+/**
+ * Error kinds the UI cares about. `permission-denied` is the only one that
+ * needs a special remediation flow (toast + browser-specific help link).
+ */
+export type VoiceErrorKind = 'permission-denied' | 'generic';
 
 interface VoiceInputState {
   isListening: boolean;
   transcript: string;
   error: string | null;
+  errorKind: VoiceErrorKind | null;
 }
+
+const PERMISSION_DENIED_MESSAGE =
+  'Microphone access denied. Enable in browser settings to use voice input.';
 
 type SttProvider = 'deepgram' | 'webspeech' | 'none';
 
@@ -51,13 +67,14 @@ export function useVoiceInput() {
     isListening: false,
     transcript: '',
     error: null,
+    errorKind: null,
   });
 
   const [provider, setProvider] = useState<SttProvider>('none');
   const recognitionRef = useRef<any>(null);
   const deepgramRef = useRef<DeepgramClient | null>(null);
-  const silenceTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  const transcriptionTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const transcriptionTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const onResultRef = useRef<((text: string) => void) | null>(null);
   const retryCountRef = useRef(0);
   const lastCommandArgsRef = useRef<{ onFinalResult: ((text: string) => void) } | null>(null);
@@ -101,12 +118,24 @@ export function useVoiceInput() {
         ...s,
         isListening: false,
         error: "Didn't catch that. Try again.",
+        errorKind: 'generic',
       }));
     }, TRANSCRIPTION_TIMEOUT_MS);
   }, []);
 
   const clearTranscriptionTimeout = useCallback(() => {
     clearTimeout(transcriptionTimeoutRef.current);
+  }, []);
+
+  // ─── Helper: surface a permission-denied error consistently ───────────
+  const setPermissionDenied = useCallback(() => {
+    markMicDenied();
+    setState({
+      isListening: false,
+      transcript: '',
+      error: PERMISSION_DENIED_MESSAGE,
+      errorKind: 'permission-denied',
+    });
   }, []);
 
   // ─── Fallback to Web Speech API when Deepgram fails ──────────────────
@@ -116,6 +145,7 @@ export function useVoiceInput() {
         ...s,
         isListening: false,
         error: 'Voice input unavailable. Try typing instead.',
+        errorKind: 'generic',
       }));
       return;
     }
@@ -140,7 +170,7 @@ export function useVoiceInput() {
     let accumulated = '';
     let gotResult = false;
 
-    setState({ isListening: true, transcript: '', error: null });
+    setState({ isListening: true, transcript: '', error: null, errorKind: null });
 
     // Start transcription timeout
     const stopDeepgram = () => {
@@ -178,9 +208,20 @@ export function useVoiceInput() {
       })
       .catch((err: Error) => {
         clearTranscriptionTimeout();
-        const errMsg = err.message || 'Failed to start Deepgram STT';
+        clearTimeout(silenceTimerRef.current);
+        // Preserve message for downstream fallback diagnostics if needed
+        void (err.message || 'Failed to start Deepgram STT');
 
-        // If Deepgram fails, try retry once, then fall back to Web Speech
+        // Permission denied is terminal — both Deepgram and Web Speech rely on
+        // the same underlying microphone permission, so falling back would
+        // just trigger the same error silently. Stop here and tell the user.
+        if (isPermissionDeniedError(err)) {
+          setPermissionDenied();
+          return;
+        }
+
+        // If Deepgram fails for a transient reason, retry once, then fall
+        // back to Web Speech.
         if (retryCountRef.current < 1 && !gotResult) {
           retryCountRef.current++;
           setTimeout(() => startDeepgram(onFinalResult), 500);
@@ -210,6 +251,7 @@ export function useVoiceInput() {
         ...s,
         isListening: false,
         error: 'Voice input unavailable. Try typing instead.',
+        errorKind: 'generic',
       }));
       return;
     }
@@ -232,7 +274,7 @@ export function useVoiceInput() {
     let gotResult = false;
 
     recognition.onstart = () => {
-      setState({ isListening: true, transcript: '', error: null });
+      setState({ isListening: true, transcript: '', error: null, errorKind: null });
       finalTranscript = '';
 
       // Start transcription timeout (15s with no result)
@@ -297,6 +339,13 @@ export function useVoiceInput() {
         return;
       }
 
+      // Permission denied — surface the structured error and persist for
+      // the rest of the session.
+      if (isPermissionDeniedError(errorCode)) {
+        setPermissionDenied();
+        return;
+      }
+
       // Network errors: retry once before giving up
       if ((errorCode === 'network' || errorCode === 'audio-capture') && retryCountRef.current < 1 && !gotResult) {
         retryCountRef.current++;
@@ -306,12 +355,17 @@ export function useVoiceInput() {
       }
 
       const msg = mapError(errorCode);
-      setState((s) => ({ ...s, isListening: false, error: msg || undefined }));
+      setState((s) => ({
+        ...s,
+        isListening: false,
+        error: msg || null,
+        errorKind: msg ? 'generic' : null,
+      }));
     };
 
     recognitionRef.current = recognition;
     recognition.start();
-  }, [startTranscriptionTimeout, clearTranscriptionTimeout]);
+  }, [startTranscriptionTimeout, clearTranscriptionTimeout, setPermissionDenied]);
 
   // ---------- Web Speech API path (public) ----------
   const startWebSpeech = useCallback((onFinalResult: (text: string) => void) => {
@@ -321,8 +375,21 @@ export function useVoiceInput() {
   // ---------- Unified start / stop ----------
   const start = useCallback(
     (onFinalResult: (text: string) => void) => {
+      // Short-circuit if we've already been denied this session. The browser
+      // would either silently re-deny or pop another prompt the user has
+      // already dismissed; either way the spinner UX is misleading.
+      if (isMicDenied()) {
+        setState({
+          isListening: false,
+          transcript: '',
+          error: PERMISSION_DENIED_MESSAGE,
+          errorKind: 'permission-denied',
+        });
+        return;
+      }
+
       // Clear any previous error
-      setState((s) => ({ ...s, error: null }));
+      setState((s) => ({ ...s, error: null, errorKind: null }));
 
       if (provider === 'deepgram') {
         startDeepgram(onFinalResult);
@@ -332,11 +399,21 @@ export function useVoiceInput() {
         setState((s) => ({
           ...s,
           error: 'Voice input unavailable. Try typing instead.',
+          errorKind: 'generic',
         }));
       }
     },
     [provider, startDeepgram, startWebSpeech],
   );
+
+  /**
+   * Clear the permission-denied flag so the next `start()` call attempts the
+   * browser prompt again. Intended for an explicit "Retry" affordance.
+   */
+  const retryPermission = useCallback(() => {
+    clearMicDenied();
+    setState((s) => ({ ...s, error: null, errorKind: null }));
+  }, []);
 
   const stop = useCallback(() => {
     clearTimeout(silenceTimerRef.current);
@@ -353,6 +430,7 @@ export function useVoiceInput() {
     ...state,
     start,
     stop,
+    retryPermission,
     supported: provider !== 'none',
     provider,
   };

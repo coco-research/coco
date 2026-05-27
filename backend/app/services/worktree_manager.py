@@ -4,6 +4,7 @@ Manages isolated git worktrees so self-improve agents never touch the main branc
 """
 
 import fnmatch
+import re
 import subprocess
 import shutil
 from dataclasses import dataclass
@@ -130,7 +131,6 @@ class WorktreeManager:
             line = line.strip()
             # e.g. "5 passed, 2 failed, 1 error in 3.21s"
             if "passed" in line or "failed" in line or "error" in line:
-                import re
                 passed_match = re.search(r"(\d+) passed", line)
                 failed_match = re.search(r"(\d+) failed", line)
                 errors_match = re.search(r"(\d+) error", line)

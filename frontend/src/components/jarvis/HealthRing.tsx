@@ -44,13 +44,28 @@ export function HealthRing({ sources, size = 160, delay = 0 }: HealthRingProps) 
   const offset = circumference * (1 - pct / 100);
   const overallColor = pct >= 70 ? '#0A84FF' : pct >= 40 ? '#FF9F0A' : '#FF453A';
 
+  // Tailwind v4 drop-shadow-* utilities regressed for SVG stroke glow (filter origin/color
+  // semantics changed; `drop-shadow-lg` no longer renders an arc glow reliably). Use an
+  // inline SVG <filter> + CSS var instead — works the same on Safari/Chrome regardless of
+  // Tailwind version. See NEXT_SPRINT_PLAN.md §3.7.
+  const filterId = `health-ring-glow-${size}`;
+
   return (
     <div
       className="jarvis-reveal inline-flex flex-col items-center gap-4"
-      style={{ '--reveal-delay': `${delay}ms` } as React.CSSProperties}
+      style={{ '--reveal-delay': `${delay}ms`, '--ring-glow': overallColor } as React.CSSProperties}
     >
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="transform -rotate-90">
+          <defs>
+            <filter id={filterId} x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
           <circle
             cx={center} cy={center} r={radius}
             fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={strokeWidth}
@@ -61,6 +76,7 @@ export function HealthRing({ sources, size = 160, delay = 0 }: HealthRingProps) 
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
+            filter={`url(#${filterId})`}
             style={{ transition: 'stroke-dashoffset 1.5s ease-out 0.3s' }}
           />
         </svg>

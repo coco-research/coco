@@ -139,18 +139,27 @@ export function JarvisOverlay({ isOpen, onClose }: JarvisOverlayProps) {
   const canvasDismissRef = useRef(canvas.dismiss);
   canvasDismissRef.current = canvas.dismiss;
 
-  // Reset state when overlay closes — stop audio immediately, don't block
+  // Reset state when overlay closes — stop ALL audio immediately, don't block
   useEffect(() => {
     if (!isOpen) {
       setPhase(0);
       setActivated(false);
       setInteracting(false);
       canvasDismissRef.current();
-      // Cancel speech synchronously to avoid lingering audio
-      try { audioRef.current.cancelSpeak(); } catch {}
+      // Force-stop every oscillator + speech synchronously so nothing leaks
+      // past close (previously ambient oscillators kept playing forever).
+      try { audioRef.current.forceStopAll(); } catch {}
       hasPlayed.current = false;
     }
   }, [isOpen]);
+
+  // Belt-and-suspenders: force-stop on unmount too, in case the parent
+  // unmounts the overlay without first flipping isOpen to false.
+  useEffect(() => {
+    return () => {
+      try { audioRef.current.forceStopAll(); } catch {}
+    };
+  }, []);
 
   // Start the sequence after user clicks (unlocks audio)
   const hasPlayed = useRef(false);

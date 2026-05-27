@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 import structlog
 
 from app.db.session import get_db
+from app.services.self_improve import self_improve_service
 from app.db.tables import (
     self_improve_cycles,
     preferences,
@@ -103,8 +104,6 @@ def auto_start_cycle() -> dict:
 
     # Start cycle
     try:
-        from app.services.self_improve import self_improve_service
-
         cycle = self_improve_service.start_cycle(
             budget_usd=prefs["budget_usd"],
             max_improvements=prefs["max_improvements"],

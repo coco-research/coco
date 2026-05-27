@@ -74,8 +74,23 @@ export class DeepgramClient {
       this.ws.onerror = () => reject(new Error('WebSocket connection failed'));
     });
 
-    // Start microphone capture
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // Start microphone capture. getUserMedia rejects with a DOMException when
+    // the user denies access (NotAllowedError) or no device is present
+    // (NotFoundError). We preserve the original error name so the caller can
+    // distinguish permission denial from other failures.
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      // Tear down the open WebSocket before bubbling — otherwise it leaks.
+      try {
+        this.ws?.close();
+      } catch {
+        // ignore
+      }
+      this.ws = null;
+      throw err;
+    }
     this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
     this.mediaRecorder.ondataavailable = (e: BlobEvent) => {
       if (this.ws?.readyState === WebSocket.OPEN && e.data.size > 0) {

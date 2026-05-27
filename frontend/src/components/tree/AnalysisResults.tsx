@@ -226,16 +226,20 @@ function AnalysisActions({ job }: { job: AnalysisJob }) {
   const [actionResult, setActionResult] = useState<string | null>(null);
 
   const extractTodos = useMutation({
-    mutationFn: () => apiPost(`/analysis-jobs/${job.id}/extract-todos`, {}),
-    onSuccess: (data: { created: number }) => {
+    mutationFn: () => apiPost<{ created: number }>(`/analysis-jobs/${job.id}/extract-todos`, {}),
+    onSuccess: (data) => {
       setActionResult(`Extracted ${data.created} action items`);
       void queryClient.invalidateQueries({ queryKey: ['todos'] });
     },
   });
 
   const generateDoc = useMutation({
-    mutationFn: (docType: string) => apiPost(`/analysis-jobs/${job.id}/generate-document`, { document_type: docType }),
-    onSuccess: (data: { agent_id: string; document_type: string }) => {
+    mutationFn: (docType: string) =>
+      apiPost<{ agent_id: string; document_type: string }>(
+        `/analysis-jobs/${job.id}/generate-document`,
+        { document_type: docType },
+      ),
+    onSuccess: (data) => {
       setActionResult(`Generating ${data.document_type}... Agent spawned.`);
       void queryClient.invalidateQueries({ queryKey: ['agents'] });
     },

@@ -13,7 +13,13 @@ from app.db.tables import (
 from app.config import HUB_DB_PATH, BRAIN_JSON_PATH
 from app.services.dedup import similarity, find_duplicates, pick_best, group_similarity
 from app.services.event_bus import event_bus
-from app.models.todos import CreateTodoBody, CreateDependencyBody, MergeTodosBody, PatchTodoBody
+from app.models.todos import (
+    CreateBlockedByBody,
+    CreateDependencyBody,
+    CreateTodoBody,
+    MergeTodosBody,
+    PatchTodoBody,
+)
 from app.models.common import TransitionBody
 from app.services.id_generator import assign_display_id, resolve_display_id
 
@@ -108,7 +114,7 @@ def _merge_hub_todo_with_override(hub_todo: dict, override: dict | None) -> dict
 
 
 def _build_platform_native_todo(row: dict) -> dict:
-    return {
+    out = {
         "id": row["hub_todo_id"],
         "title": row.get("title"),
         "status": row.get("status") or "open",
@@ -123,6 +129,11 @@ def _build_platform_native_todo(row: dict) -> dict:
         "updated_at": row.get("updated_at"),
         "is_platform_native": True,
     }
+    if row.get("human_id"):
+        # human_id is the primary identifier; display_id kept for back-compat.
+        out["human_id"] = row["human_id"]
+        out["display_id"] = row["human_id"]
+    return out
 
 
 def _get_todo_by_id(todo_id: str) -> dict | None:
@@ -234,8 +245,11 @@ def list_todos(
             # Step 4: Enrich
             for t in merged:
                 tid = t.get("id")
-                if tid in display_id_map:
-                    t["display_id"] = display_id_map[tid]
+                # Prefer explicit human_id column from override row when set.
+                if not t.get("human_id") and tid in display_id_map:
+                    t["human_id"] = display_id_map[tid]
+                if t.get("human_id") and not t.get("display_id"):
+                    t["display_id"] = t["human_id"]
                 t["blocked_by_count"] = blocked_by_counts.get(tid, 0)
                 t["blocking_count"] = blocking_counts.get(tid, 0)
 
@@ -266,6 +280,7 @@ def get_todo_by_display_id(display_id: str):
     if not todo:
         raise HTTPException(404, f"Todo {hub_todo_id} not found")
 
+    todo["human_id"] = result["display_id"]
     todo["display_id"] = result["display_id"]
     return todo
 
@@ -338,8 +353,8 @@ def merge_todos(body: MergeTodosBody):
                 upsert(
                     todo_overrides,
                     values={"hub_todo_id": rid, "status": "archived", "updated_at": now()},
-                    conflict_cols=["hub_todo_id"],
-                    update_cols=["status", "updated_at"],
+                    conflict_columns=["hub_todo_id"],
+                    update_columns=["status", "updated_at"],
                 )
             )
             archived_count += 1
@@ -388,13 +403,14 @@ def create_todo(body: CreateTodoBody):
     }
 
     effective_node_id = body.node_id or body.project_id
-    if effective_node_id:
-        try:
-            display_id = assign_display_id(todo_id, effective_node_id)
-            if display_id:
-                result["display_id"] = display_id
-        except Exception as e:
-            log.warning("assign_display_id_failed: %s", e)
+    try:
+        # effective_node_id may be None — id_generator falls back to global bucket.
+        display_id = assign_display_id(todo_id, effective_node_id, entity_type="todo")
+        if display_id:
+            result["human_id"] = display_id
+            result["display_id"] = display_id
+    except Exception as e:
+        log.warning("assign_display_id_failed: %s", e)
 
     # Dedup-on-ingest
     try:
@@ -482,6 +498,53 @@ def update_todo(todo_id: str, body: PatchTodoBody):
     return todo_result
 
 
+@router.delete("/api/todos/{todo_id}", status_code=200)
+def delete_todo(todo_id: str):
+    """Delete a todo.
+
+    Platform-native todos are hard-deleted (override row + dependencies removed).
+    Hub-backed todos are soft-deleted by recording an override with status=archived,
+    since the hub mirror is read-only from this service.
+    """
+    existing = _get_todo_by_id(todo_id)
+    if not existing:
+        raise HTTPException(404, "Todo not found")
+
+    is_native = bool(existing.get("is_platform_native"))
+
+    with get_db() as conn:
+        # Always clean up dependency edges referencing this todo
+        conn.execute(
+            delete(todo_dependencies).where(todo_dependencies.c.todo_id == todo_id)
+        )
+        conn.execute(
+            delete(todo_dependencies).where(todo_dependencies.c.depends_on == todo_id)
+        )
+
+        if is_native:
+            conn.execute(
+                delete(todo_overrides).where(todo_overrides.c.hub_todo_id == todo_id)
+            )
+        else:
+            # Soft delete hub-backed todo via override
+            conn.execute(
+                upsert(
+                    todo_overrides,
+                    values={
+                        "hub_todo_id": todo_id,
+                        "status": "archived",
+                        "is_platform_native": 0,
+                        "updated_at": now(),
+                    },
+                    conflict_cols=["hub_todo_id"],
+                    update_cols=["status", "updated_at"],
+                )
+            )
+
+    event_bus.emit("todo.deleted", {"id": todo_id, "hard_deleted": is_native})
+    return {"id": todo_id, "deleted": True, "hard_deleted": is_native}
+
+
 @router.patch("/api/todos/{todo_id}/transition")
 def transition_todo(todo_id: str, body: TransitionBody):
     to_state = body.to_state
@@ -504,7 +567,46 @@ def transition_todo(todo_id: str, body: TransitionBody):
 
     is_native = existing.get("is_platform_native", False)
 
-    # Check for unresolved blocking dependencies when completing
+    # GAP M9: hard-block in_progress transition if any blocker is not done.
+    if to_state == "in_progress":
+        with get_db() as conn:
+            blocker_ids = _get_blocker_ids(conn, todo_id)
+
+        incomplete_blockers = []
+        for bid in blocker_ids:
+            blocker = _get_todo_by_id(bid)
+            if not blocker:
+                # Dangling reference — treat as incomplete to be safe.
+                incomplete_blockers.append({
+                    "id": bid, "title": "(missing)", "status": "unknown",
+                })
+                continue
+            if blocker.get("status") != "done":
+                incomplete_blockers.append({
+                    "id": blocker["id"],
+                    "title": blocker.get("title", ""),
+                    "status": blocker.get("status", ""),
+                })
+
+        if incomplete_blockers:
+            titles = ", ".join(
+                f"'{b['title']}' ({b['status']})" for b in incomplete_blockers[:3]
+            )
+            more = "" if len(incomplete_blockers) <= 3 else f" and {len(incomplete_blockers) - 3} more"
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "error": "blocked_by_incomplete_dependencies",
+                    "message": (
+                        f"Cannot move to 'in_progress': {len(incomplete_blockers)} "
+                        f"blocker(s) not done — {titles}{more}. "
+                        "Complete or remove blockers first."
+                    ),
+                    "blockers": incomplete_blockers,
+                },
+            )
+
+    # Check for unresolved blocking dependencies when completing (soft warning).
     warning = None
     if to_state == "done":
         with get_db() as conn:
@@ -530,8 +632,35 @@ def transition_todo(todo_id: str, body: TransitionBody):
                 f"that are not yet done."
             )
 
-    # Upsert status
+    # Upsert status.
+    #
+    # Atomic-transition note (409 Conflict semantics):
+    #   On PostgreSQL we re-read the overlay row inside the same transaction
+    #   with ``SELECT ... FOR UPDATE`` so two concurrent transitions from the
+    #   same source state cannot both succeed.  If the row's status has
+    #   already moved away from ``current_state`` since the pre-flight check,
+    #   we raise 409.
+    #
+    #   SQLite does not implement row-level locks, so ``with_for_update()``
+    #   is a no-op there.  Atomic transitions on SQLite rely on the surrounding
+    #   transaction (BEGIN ... COMMIT) and the single-writer model — adequate
+    #   for the current single-node deployment but NOT a true row lock.
     with get_db() as conn:
+        locked = conn.execute(
+            select(todo_overrides.c.hub_todo_id, todo_overrides.c.status)
+            .where(todo_overrides.c.hub_todo_id == todo_id)
+            .with_for_update()
+        ).fetchone()
+
+        if locked is not None:
+            locked_status = locked._mapping.get("status") or "open"
+            if locked_status != current_state and locked_status != to_state:
+                raise HTTPException(
+                    409,
+                    f"Concurrent modification: todo is now in state "
+                    f"'{locked_status}', expected '{current_state}'.",
+                )
+
         conn.execute(
             upsert(
                 todo_overrides,
@@ -541,8 +670,8 @@ def transition_todo(todo_id: str, body: TransitionBody):
                     "is_platform_native": 1 if is_native else 0,
                     "updated_at": now(),
                 },
-                conflict_cols=["hub_todo_id"],
-                update_cols=["status", "updated_at"],
+                conflict_columns=["hub_todo_id"],
+                update_columns=["status", "updated_at"],
             )
         )
 
@@ -749,8 +878,8 @@ def dedup_todos():
                     upsert(
                         todo_overrides,
                         values={"hub_todo_id": tid, "status": "archived", "updated_at": now()},
-                        conflict_cols=["hub_todo_id"],
-                        update_cols=["status", "updated_at"],
+                        conflict_columns=["hub_todo_id"],
+                        update_columns=["status", "updated_at"],
                     )
                 )
                 removed += 1
@@ -781,6 +910,26 @@ def _has_circular_dependency(conn, from_id: str, to_id: str) -> bool:
         for r in rows:
             queue.append(r.depends_on)
     return False
+
+
+def _get_blocker_ids(conn, todo_id: str) -> list[str]:
+    """IDs of todos that block this todo (blocked_by edges)."""
+    rows = conn.execute(
+        select(todo_dependencies.c.depends_on)
+        .where(todo_dependencies.c.todo_id == todo_id)
+        .where(todo_dependencies.c.dep_type == "blocked_by")
+    ).fetchall()
+    return [r.depends_on for r in rows]
+
+
+def _get_blocked_ids(conn, todo_id: str) -> list[str]:
+    """IDs of todos that this todo blocks (inverse of blocked_by)."""
+    rows = conn.execute(
+        select(todo_dependencies.c.todo_id)
+        .where(todo_dependencies.c.depends_on == todo_id)
+        .where(todo_dependencies.c.dep_type == "blocked_by")
+    ).fetchall()
+    return [r.todo_id for r in rows]
 
 
 @router.get("/api/todos/{todo_id}/dependencies")
@@ -882,6 +1031,19 @@ def list_all_dependencies():
     return [dict(r._mapping) for r in rows]
 
 
+@router.get("/api/todos/{todo_id}")
+def get_todo(todo_id: str):
+    """Fetch a single todo with its blocker / blocking dependency ids."""
+    todo = _get_todo_by_id(todo_id)
+    if not todo:
+        raise HTTPException(404, "Todo not found")
+
+    with get_db() as conn:
+        todo["blocked_by"] = _get_blocker_ids(conn, todo_id)
+        todo["blocks"] = _get_blocked_ids(conn, todo_id)
+    return todo
+
+
 @router.post("/api/todos/{todo_id}/dependencies", status_code=201)
 def create_dependency(todo_id: str, body: CreateDependencyBody):
     existing = _get_todo_by_id(todo_id)
@@ -952,3 +1114,96 @@ def delete_dependency(todo_id: str, dep_id: str):
 
     event_bus.emit("todo.dependency.deleted", {"todo_id": todo_id, "dep_id": dep_id})
     return {"ok": True}
+
+
+# ---- Convenience endpoints (GAP M9): blocked_by alias ----
+# These mirror /dependencies but with the blocker-centric vocabulary requested
+# by the GAP M9 spec: "todo B blocked by todo A".
+
+
+@router.post("/api/todos/{todo_id}/blocked_by", status_code=201)
+def add_blocked_by(todo_id: str, body: CreateBlockedByBody):
+    """Mark `todo_id` as blocked_by `blocker_id`.
+
+    Equivalent to POST /api/todos/{todo_id}/dependencies with
+    {depends_on: blocker_id, dep_type: 'blocked_by'} but expressed in the
+    blocker-centric vocabulary.
+    """
+    blocker_id = body.blocker_id
+
+    existing = _get_todo_by_id(todo_id)
+    if not existing:
+        raise HTTPException(404, "Todo not found")
+
+    blocker = _get_todo_by_id(blocker_id)
+    if not blocker:
+        raise HTTPException(404, f"Blocker todo '{blocker_id}' not found")
+
+    if todo_id == blocker_id:
+        raise HTTPException(400, "A todo cannot block itself")
+
+    with get_db() as conn:
+        if _has_circular_dependency(conn, todo_id, blocker_id):
+            raise HTTPException(
+                422,
+                f"Circular dependency detected: '{blocker_id}' is already "
+                f"transitively blocked by '{todo_id}'. Adding this dependency "
+                "would create a cycle.",
+            )
+
+    dep_id = str(uuid.uuid4())
+
+    with get_db() as conn:
+        try:
+            conn.execute(
+                insert(todo_dependencies).values(
+                    id=dep_id,
+                    todo_id=todo_id,
+                    depends_on=blocker_id,
+                    dep_type="blocked_by",
+                )
+            )
+        except Exception as e:
+            if "UNIQUE constraint" in str(e):
+                raise HTTPException(409, "Dependency already exists")
+            raise HTTPException(500, f"Failed to create dependency: {e}")
+
+    event_bus.emit("todo.dependency.created", {
+        "todo_id": todo_id,
+        "depends_on": blocker_id,
+        "dep_type": "blocked_by",
+    })
+    return {
+        "id": dep_id,
+        "todo_id": todo_id,
+        "blocker_id": blocker_id,
+        "depends_on": blocker_id,
+        "dep_type": "blocked_by",
+        "blocker_title": blocker.get("title", ""),
+        "blocker_status": blocker.get("status", ""),
+    }
+
+
+@router.delete("/api/todos/{todo_id}/blocked_by/{blocker_id}", status_code=204)
+def remove_blocked_by(todo_id: str, blocker_id: str):
+    """Remove the blocked_by edge from `todo_id` to `blocker_id`."""
+    with get_db() as conn:
+        row = conn.execute(
+            select(todo_dependencies.c.id)
+            .where(todo_dependencies.c.todo_id == todo_id)
+            .where(todo_dependencies.c.depends_on == blocker_id)
+            .where(todo_dependencies.c.dep_type == "blocked_by")
+        ).fetchone()
+        if not row:
+            raise HTTPException(404, "blocked_by edge not found")
+
+        conn.execute(
+            delete(todo_dependencies).where(todo_dependencies.c.id == row.id)
+        )
+
+    event_bus.emit("todo.dependency.deleted", {
+        "todo_id": todo_id,
+        "dep_id": row.id,
+        "blocker_id": blocker_id,
+    })
+    return None

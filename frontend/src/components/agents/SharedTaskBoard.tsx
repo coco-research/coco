@@ -7,9 +7,8 @@
  */
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Users, ArrowDownRight } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { apiFetch, apiTransition } from '../../lib/api';
-import { cn } from '../../lib/utils';
 import { BoardView } from '../shared/BoardView';
 import { TASK_STATES } from '../../lib/state-machine';
 

@@ -20,6 +20,9 @@ LOGS_DIR = COCO_DIR / "logs"
 
 PLATFORM_PORT = int(os.getenv("PLATFORM_PORT", "8000"))
 MAX_CONCURRENT_AGENTS = int(os.getenv("MAX_CONCURRENT_AGENTS", "3"))
+# Cap on concurrent claude-CLI subprocess spawns to prevent OOM from too many
+# parallel agents. Applies across all async spawn sites (chat, agents, etc.).
+COCO_MAX_PARALLEL_AGENTS = int(os.getenv("COCO_MAX_PARALLEL_AGENTS", "5"))
 AGENT_TIMEOUT_MINUTES = int(os.getenv("AGENT_TIMEOUT_MINUTES", "30"))
 CHAT_TIMEOUT_MINUTES = int(os.getenv("CHAT_TIMEOUT_MINUTES", "5"))
 DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY", "")

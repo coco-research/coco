@@ -19,6 +19,7 @@ import { apiFetch, apiPost, apiPatch, apiDelete } from '../lib/api';
 import type { TreeNode } from '../context/ScopeContext';
 import { AnalyzeFolderDialog } from '../components/tree/AnalyzeFolderDialog';
 import { AnalysisResults } from '../components/tree/AnalysisResults';
+import { ErrorState } from '../components/shared/ErrorState';
 
 // ─── Types ──────────────────────────────────────────────────────────
 
@@ -48,13 +49,15 @@ const selectCls = inputCls;
 
 // ─── Helpers ────────────────────────────────────────────────────────
 
-function flattenTree(node: TreeNode): TreeNode[] {
+// flattenTree retained for future bulk-action surfaces over the full tree.
+function _flattenTree(node: TreeNode): TreeNode[] {
   const result: TreeNode[] = [node];
   node.children?.forEach(child => {
-    result.push(...flattenTree(child));
+    result.push(..._flattenTree(child));
   });
   return result;
 }
+void _flattenTree;
 
 function getDescendantIds(node: TreeNode): Set<string> {
   const ids = new Set<string>();
@@ -130,7 +133,7 @@ function TreeNodeRow({
 
   // Droppable
   const rowRef = useRef<HTMLDivElement>(null);
-  const { setNodeRef: setDropRef, isOver } = useDroppable({
+  const { setNodeRef: setDropRef } = useDroppable({
     id: `drop-${node.id}`,
     data: { node },
     disabled: isInvalidTarget,
@@ -826,7 +829,7 @@ function FolderPickerDialog({ open, onOpenChange, onSelect, initialPath = '~' }:
 
 // ─── Detail Panel ────────────────────────────────────────────────
 
-function DetailPanel({ node, tree, onOpenMove }: DetailPanelProps) {
+function DetailPanel({ node, onOpenMove }: DetailPanelProps) {
   const queryClient = useQueryClient();
   const [label, setLabel] = useState(node.label);
   const [nodeType, setNodeType] = useState<NodeType>(node.node_type);
@@ -1150,11 +1153,11 @@ export default function TreePage() {
   );
 
   // Queries
-  const { data: tree = null, isLoading } = useQuery<TreeNode | null>({
+  const { data: tree = null, isLoading, isError: treeIsError, error: treeError, refetch: refetchTree } = useQuery<TreeNode | null>({
     queryKey: ['tree'],
     queryFn: async () => {
       const res = await fetch('/api/tree');
-      if (!res.ok) return null;
+      if (!res.ok) throw new Error(`Failed to load tree (HTTP ${res.status})`);
       const data = await res.json();
       // API returns array of root nodes — take the first one
       if (Array.isArray(data)) return data[0] ?? null;
@@ -1430,6 +1433,12 @@ export default function TreePage() {
             <div className="h-64 bg-muted/50 rounded-xl animate-pulse" />
           </div>
         </div>
+      ) : treeIsError ? (
+        <ErrorState
+          error={treeError}
+          title="Couldn't load tree"
+          onRetry={() => void refetchTree()}
+        />
       ) : !tree ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <FolderTree size={40} className="mb-3 opacity-30" />

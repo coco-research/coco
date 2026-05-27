@@ -161,7 +161,7 @@ def execute_search_articles(query: str, limit: int = 5, project: str | None = No
     """Execute search_articles tool. Returns JSON string."""
     # Try semantic search first
     try:
-        import search as knowledge_search_mod
+        import search as knowledge_search_mod  # noqa: lazy import (external sys.path module)
         results = knowledge_search_mod.search(query, project=project, limit=min(limit, 10))
         items = []
         for r in results:
@@ -459,7 +459,7 @@ def ultrathink_qa(
     if not api_key:
         raise RuntimeError("ANTHROPIC_API_KEY not set — required for ultrathink mode")
 
-    import anthropic
+    import anthropic  # noqa: lazy import (optional dep)
     client = anthropic.Anthropic(api_key=api_key)
 
     messages = [{"role": "user", "content": question}]

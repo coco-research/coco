@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { MessageSquarePlus, MessageSquare, X, Loader2 } from 'lucide-react';
-import { apiFetch, apiPost, apiDelete } from '../../lib/api';
+import { apiFetch, apiDelete } from '../../lib/api';
 import { cn } from '../../lib/utils';
 
 export interface ChatSession {

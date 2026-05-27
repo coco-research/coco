@@ -5,7 +5,6 @@ import { apiPatch } from '../../lib/api';
 import { cn } from '../../lib/utils';
 import {
   CheckCircle2,
-  ExternalLink,
   Clock,
   AlertTriangle,
   ChevronDown,

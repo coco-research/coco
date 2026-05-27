@@ -34,14 +34,35 @@ function mapEventToNotification(
       actionUrl: '/agents',
     };
   }
-  if (type === 'agent.failed') {
+  if (type === 'agent.failed' || type === 'agent.crashed') {
     const name = (data.name as string) || (data.agent_id as string) || 'Agent';
+    const verb = type === 'agent.crashed' ? 'crashed' : 'failed';
     return {
       type: 'urgent',
-      title: `${name} failed`,
+      title: `${name} ${verb}`,
       description: (data.error as string) || (data.message as string) || undefined,
       timestamp: (data.timestamp as string) || new Date().toISOString(),
       actionUrl: '/agents',
+    };
+  }
+
+  // Generic notification pushed by backend (notification.created)
+  // Payload shape: { type, title, description?, severity?, action_url?/actionUrl?, timestamp? }
+  if (type === 'notification.created' || type === 'notification_created') {
+    const severity = (data.severity as string) || (data.level as string) || 'info';
+    const notifType =
+      severity === 'critical' || severity === 'error' || severity === 'urgent'
+        ? 'urgent'
+        : severity === 'warning'
+          ? 'health'
+          : ((data.kind as Notification['type']) || 'info');
+    const title = (data.title as string) || 'Notification';
+    return {
+      type: notifType,
+      title,
+      description: (data.description as string) || (data.message as string) || undefined,
+      timestamp: (data.timestamp as string) || new Date().toISOString(),
+      actionUrl: (data.action_url as string) || (data.actionUrl as string) || undefined,
     };
   }
 
@@ -181,8 +202,15 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       }
 
       // Desktop notifications for urgent events:
-      // agent.failed, agent.completed, budget exceeded
-      const desktopTypes = new Set(['agent.failed', 'agent.completed', 'budget_warning', 'cost.budget_warning']);
+      // agent.failed, agent.crashed, agent.completed, budget exceeded, todo.overdue
+      const desktopTypes = new Set([
+        'agent.failed',
+        'agent.crashed',
+        'agent.completed',
+        'budget_warning',
+        'cost.budget_warning',
+        'todo.overdue',
+      ]);
       const resolvedType = eventType !== 'message' ? eventType : (payload.type as string | undefined);
       const shouldDesktopNotify =
         notif.type === 'urgent' ||

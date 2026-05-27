@@ -181,7 +181,7 @@ def generate_script(data: dict) -> str:
     Target: 300-450 words, 2-3 minutes at ~150 wpm.
     """
     try:
-        from app.services.agent_sdk_client import create_message
+        from app.services.agent_sdk_client import create_message  # noqa: lazy import (optional dep)
 
         prompt_data = _format_data_for_prompt(data)
 
@@ -307,7 +307,7 @@ async def synthesize_audio(
 
     Returns (file_path, duration_seconds) or None if synthesis fails.
     """
-    import edge_tts
+    import edge_tts  # noqa: lazy import (optional dep)
 
     if podcast_id is None:
         podcast_id = uuid.uuid4().hex[:12]

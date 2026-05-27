@@ -6,6 +6,7 @@ import { DraftPreview } from './DraftPreview';
 
 export interface DecisionItem {
   id: string;
+  human_id?: string | null;
   priority: number;
   type: 'urgent' | 'draft_approval' | 'classify' | 'health' | 'overdue';
   source_id: string;
@@ -59,6 +60,14 @@ export function DecisionCard({ item }: { item: DecisionItem }) {
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
+              {item.human_id && (
+                <span
+                  className="inline-flex items-center rounded bg-accent/30 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-muted-foreground"
+                  title={item.id}
+                >
+                  {item.human_id}
+                </span>
+              )}
               <span className="inline-flex items-center rounded-lg bg-accent/50 px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
                 P{item.priority}
               </span>

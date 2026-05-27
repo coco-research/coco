@@ -1,22 +1,117 @@
-"""Pytest fixtures for Phase 11 tests.
+"""Test fixtures for backend tests.
 
-Provides an isolated platform.db tempfile so auth/audit tests can write to
-the DB without polluting `~/.coco/platform.db`. Engine is patched in place
-via SA Core dispose+recreate.
+This module sets COCO_DIR and DATABASE_URL to per-session temp paths BEFORE
+the app modules import, so that `app.config` picks up the test paths and
+`app.db.engine` builds an engine pointing at the test database.
+
+For tests that need a fresh database per test function, use the `fresh_db`
+fixture — it rebuilds platform.db via SA Core metadata.create_all() and
+disposes the engine pool to avoid stale connections.
+
+For phase-11 auth/audit/telemetry tests that need to monkey-patch engines,
+use the `isolated_db` fixture.
 """
+
 from __future__ import annotations
 
 import os
 import tempfile
+from pathlib import Path
+
 import pytest
+
+# ---------------------------------------------------------------------------
+# Session-wide environment setup — must run BEFORE app imports
+# ---------------------------------------------------------------------------
+
+_TEST_TMP = Path(tempfile.mkdtemp(prefix="coco-tests-"))
+_COCO_DIR = _TEST_TMP / "coco"
+_HUB_DIR = _TEST_TMP / "hub"
+_COCO_DIR.mkdir(parents=True, exist_ok=True)
+_HUB_DIR.mkdir(parents=True, exist_ok=True)
+
+# Set BEFORE any `from app...` import below
+os.environ["COCO_DIR"] = str(_COCO_DIR)
+os.environ["HUB_DIR"] = str(_HUB_DIR)
+_DB_PATH = _COCO_DIR / "platform.db"
+os.environ["DATABASE_URL"] = f"sqlite:///{_DB_PATH}"
+# Empty brain DB path to avoid touching the user's real brain DB
+os.environ["BRAIN_DB_PATH"] = str(_TEST_TMP / "project_brain.db")
+
+
+def _build_schema(db_path: Path) -> None:
+    """Create empty platform.db with all platform + hub mirror tables via SA Core."""
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    # Late import so env vars are honored
+    from app.db.engine import engine
+    from app.db.tables import metadata
+
+    metadata.create_all(engine, checkfirst=True)
+
+
+@pytest.fixture()
+def fresh_db():
+    """Reset platform.db to a clean schema-only state for each test."""
+    if _DB_PATH.exists():
+        _DB_PATH.unlink()
+    # Also wipe -wal / -shm so old data does not bleed in
+    for suffix in ("-wal", "-shm"):
+        sidecar = _DB_PATH.parent / (_DB_PATH.name + suffix)
+        if sidecar.exists():
+            sidecar.unlink()
+
+    # Dispose the engine first so create_all opens a fresh connection
+    # against the recreated file (avoids cached connections pointing at
+    # the deleted DB).
+    from app.db.engine import engine
+    engine.dispose()
+
+    _build_schema(_DB_PATH)
+
+    yield _DB_PATH
+
+    # Cleanup after test
+    engine.dispose()
+
+
+@pytest.fixture()
+def app_client(fresh_db):
+    """FastAPI TestClient with a fresh platform.db.
+
+    Builds a lightweight FastAPI app and lets each test include the routers
+    it needs via `register_router`. Keeping startup small avoids triggering
+    the full app lifespan (process_manager, hub_sync, etc.).
+    """
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+
+    app = FastAPI()
+
+    class _Builder:
+        def __init__(self, _app):
+            self._app = _app
+
+        def include(self, router):
+            self._app.include_router(router)
+            return self
+
+        def client(self):
+            return TestClient(self._app, raise_server_exceptions=False)
+
+    yield _Builder(app)
+
+
+# ---------------------------------------------------------------------------
+# Phase-11 fixture — isolated engine for auth/audit/telemetry tests
+# ---------------------------------------------------------------------------
 
 
 @pytest.fixture()
 def isolated_db(monkeypatch, tmp_path):
-    """Yield an isolated SQLite platform.db with all tables created.
+    """Yield an isolated SQLite platform.db with phase-11 tables created.
 
     The fixture patches `app.db.engine.engine` to point at a tempfile, ensures
-    schema is created via init_db, and stubs out `~/.coco` to a temp dir so
+    schema is created via SA Core, and stubs out `~/.coco` to a temp dir so
     secrets and telemetry tests don't read/write real user data.
     """
     # Isolate filesystem first

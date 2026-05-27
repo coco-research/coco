@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FolderKanban, FileText } from 'lucide-react';
-import { cn } from '../../lib/utils';
 
 interface ProjectData {
   id: string;

@@ -1,5 +1,11 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
   - name: Documentation
     url: https://github.com/rijulkalra2000/Project-Coco/tree/main/docs
-    about: Check the docs first
+    about: Check the docs first — most setup and usage questions are answered there.
+  - name: GitHub Discussions
+    url: https://github.com/rijulkalra2000/Project-Coco/discussions
+    about: Ask questions, share ideas, or chat with the community. Please use Discussions for open-ended topics instead of opening an issue.
+  - name: Good First Issues
+    url: https://github.com/rijulkalra2000/Project-Coco/tree/main/.github/good-first-issues
+    about: New contributor? Browse small, well-scoped tasks ready to pick up.

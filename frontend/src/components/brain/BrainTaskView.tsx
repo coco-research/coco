@@ -4,6 +4,7 @@ import { Loader2, ListTodo, ChevronDown, ChevronRight, Clock, User } from 'lucid
 import { apiFetch } from '../../lib/api';
 import { cn } from '../../lib/utils';
 import type { BrainTask } from '../../types/brain';
+import { ErrorState } from '../shared/ErrorState';
 
 interface BrainTaskViewProps {
   search?: string;
@@ -87,7 +88,7 @@ export function BrainTaskView({ search }: BrainTaskViewProps) {
   params.set('limit', String(LIMIT));
   params.set('offset', String(offset));
 
-  const { data, isLoading } = useQuery<TasksResponse>({
+  const { data, isLoading, isError, error, refetch } = useQuery<TasksResponse>({
     queryKey: ['brain-tasks', statusFilter, offset, search],
     queryFn: () => apiFetch<TasksResponse>(`/brain/tasks?${params.toString()}`),
   });
@@ -160,6 +161,14 @@ export function BrainTaskView({ search }: BrainTaskViewProps) {
           <div className="flex items-center justify-center py-20 text-muted-foreground text-sm gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
             Loading tasks...
+          </div>
+        ) : isError ? (
+          <div className="p-6">
+            <ErrorState
+              error={error}
+              title="Couldn't load tasks"
+              onRetry={() => void refetch()}
+            />
           </div>
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground text-sm gap-3">

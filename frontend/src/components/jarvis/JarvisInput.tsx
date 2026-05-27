@@ -1,16 +1,12 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mic, MicOff, Send, Loader2, Clock } from 'lucide-react';
+import { Mic, MicOff, Send, Loader2, Clock, Trash2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useVoiceInput } from '../../hooks/useVoiceInput';
 import { useTypewriter } from '../../hooks/useTypewriter';
 import { apiFetch, apiPost } from '../../lib/api';
+import { useJarvisStore } from '../../stores/jarvisStore';
 import type { CommandResponse } from '../../types/cards';
-
-interface HistoryEntry {
-  query: string;
-  reply: string;
-}
 
 interface JarvisHistoryItem {
   id: number;
@@ -48,7 +44,25 @@ export function JarvisInput({ onCommand, onSpeak, onChime, onInteract, delay = 0
   const [response, setResponse] = useState('');
   const [userQuery, setUserQuery] = useState('');
   const [suggestChat, setSuggestChat] = useState(false);
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const messages = useJarvisStore((s) => s.messages);
+  const addExchange = useJarvisStore((s) => s.addExchange);
+  const clearJarvis = useJarvisStore((s) => s.clear);
+  // Render as command/response pairs (user followed by assistant).
+  const history = useMemo(() => {
+    const pairs: { query: string; reply: string }[] = [];
+    for (let i = 0; i < messages.length; i++) {
+      const m = messages[i];
+      if (m.role === 'user') {
+        const next = messages[i + 1];
+        pairs.push({
+          query: m.text,
+          reply: next && next.role === 'assistant' ? next.text : '',
+        });
+        if (next && next.role === 'assistant') i++;
+      }
+    }
+    return pairs;
+  }, [messages]);
   const [recentCommands, setRecentCommands] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const voice = useVoiceInput();
@@ -89,8 +103,8 @@ export function JarvisInput({ onCommand, onSpeak, onChime, onInteract, delay = 0
         ? await onCommand(input.trim())
         : await apiPost<CommandResponse>('/jarvis/command', { text: input.trim(), context: history });
       setResponse(result.reply);
-      // Track in session history (keep last 5)
-      setHistory((prev) => [...prev.slice(-4), { query: input.trim(), reply: result.reply }]);
+      // Persist exchange to Jarvis store (survives navigations + reloads)
+      addExchange(input.trim(), result.reply);
       // Update recent commands for suggestions
       setRecentCommands((prev) => {
         const lower = input.trim().toLowerCase();
@@ -117,7 +131,7 @@ export function JarvisInput({ onCommand, onSpeak, onChime, onInteract, delay = 0
     } finally {
       setIsProcessing(false);
     }
-  }, [isProcessing, onSpeak, onChime, onInteract, navigate]);
+  }, [isProcessing, onSpeak, onChime, onInteract, navigate, addExchange]);
 
   const toggleMic = () => {
     if (voice.isListening) {
@@ -143,10 +157,31 @@ export function JarvisInput({ onCommand, onSpeak, onChime, onInteract, delay = 0
       {/* Session history — last few command-response pairs */}
       {history.length > 0 && (
         <div className="max-w-xl mx-auto space-y-2 mb-4">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-white/30">
+              Session ({history.length})
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                clearJarvis();
+                setResponse('');
+                setUserQuery('');
+                setSuggestChat(false);
+              }}
+              className="flex items-center gap-1 text-[10px] font-mono text-white/30 hover:text-[#FF453A]/80 transition-colors"
+              aria-label="Clear Jarvis session"
+            >
+              <Trash2 size={10} />
+              Clear
+            </button>
+          </div>
           {history.slice(-5).map((h, i) => (
             <div key={i} className="text-xs text-white/40">
               <span className="font-mono text-sky-400/60">&gt; {h.query}</span>
-              <p className="ml-4 text-white/25">{h.reply.slice(0, 100)}{h.reply.length > 100 ? '...' : ''}</p>
+              {h.reply && (
+                <p className="ml-4 text-white/25">{h.reply.slice(0, 100)}{h.reply.length > 100 ? '...' : ''}</p>
+              )}
             </div>
           ))}
         </div>

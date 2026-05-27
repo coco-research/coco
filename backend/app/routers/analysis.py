@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import uuid
 
 from fastapi import APIRouter, HTTPException
@@ -17,7 +18,7 @@ from sqlalchemy import insert, select, update
 
 from app.db.session import get_db
 from app.db.compat import now
-from app.db.tables import agents, agent_output, analysis_jobs, nodes
+from app.db.tables import agents, agent_output, analysis_jobs, nodes, hub_todos
 from app.services.folder_scanner import (
     build_folder_summary,
     read_file_content,
@@ -572,7 +573,6 @@ def extract_todos_from_analysis(job_id: str):
         combined = "\n\n---\n\n".join(all_output)
 
         # Use simple regex extraction for action items
-        import re
         todo_patterns = [
             r'- \[ \] (.+)',               # Markdown checkbox
             r'- \*\*(.+?)\*\*',            # Bold list items
@@ -594,7 +594,6 @@ def extract_todos_from_analysis(job_id: str):
             unique_items.append(item)
 
         # Create todos in platform DB
-        from app.db.tables import hub_todos
         created = 0
         for title in unique_items[:20]:  # Cap at 20
             todo_id = str(uuid.uuid4())

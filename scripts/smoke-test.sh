@@ -65,11 +65,14 @@ check_sse() {
   TOTAL=$((TOTAL + 1))
   local label="SSE $path (connect+disconnect)"
 
-  # curl with 2-second timeout; any 200 response header = success
-  STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 "${BASE}${path}" 2>/dev/null || echo "000")
+  # curl writes %{http_code} via -w before --max-time fires. On timeout, curl exits 28,
+  # so we must NOT append a fallback string — that produced "200000" when both fired.
+  # Capture http_code and exit code separately and treat timeout-after-200 as success.
+  STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 "${BASE}${path}" 2>/dev/null) || true
+  STATUS="${STATUS:-000}"
 
-  # SSE endpoints return 200 even if we disconnect early (curl exits 28 on timeout)
-  # Re-check: a 000 from timeout actually means the connection was accepted (SSE streams forever)
+  # 200 = headers received before timeout (expected for SSE)
+  # 000 = curl never got headers (possible if endpoint streams headers lazily)
   if [ "$STATUS" = "200" ] || [ "$STATUS" = "000" ]; then
     echo -e "  ${GREEN}✓${RESET} ${label} -> connected"
     PASS=$((PASS + 1))

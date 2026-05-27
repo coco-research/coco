@@ -1,4 +1,5 @@
 import asyncio
+import json
 import subprocess
 import os
 import signal
@@ -179,7 +180,7 @@ class ProcessManager:
 
         # --- SDK path ---
         if USE_AGENT_SDK:
-            from app.services.agent_sdk_client import agent_sdk
+            from app.services.agent_sdk_client import agent_sdk  # noqa: lazy import (optional dep)
             if agent_sdk.is_available():
                 self._agent_meta[agent_id] = {"node_id": node_id, "role": role or "custom"}
                 sdk_thread = threading.Thread(
@@ -190,6 +191,26 @@ class ProcessManager:
                 )
                 sdk_thread.start()
                 self._readers[agent_id] = sdk_thread
+                try:
+                    name = None
+                    try:
+                        with get_db() as conn:
+                            srow = conn.exec_driver_sql(
+                                "SELECT name FROM agents WHERE id = ?", (agent_id,)
+                            ).fetchone()
+                            if srow:
+                                name = srow._mapping["name"]
+                    except Exception:
+                        pass
+                    event_bus.emit("agent.spawned", {
+                        "agent_id": agent_id,
+                        "name": name,
+                        "pid": 0,
+                        "status": "running",
+                        "role": role,
+                    })
+                except Exception as e:
+                    log.debug("agent_spawned_emit_failed", agent_id=agent_id, error=str(e))
                 return 0
 
         # --- Subprocess path (fallback) ---
@@ -222,6 +243,30 @@ class ProcessManager:
         reader.start()
         self._readers[agent_id] = reader
 
+        # Emit lifecycle event so SSE consumers (e.g. useAgentSSE) update without
+        # waiting for the next poll. Idempotent — duplicate spawn events from
+        # the route layer simply overwrite the same agent in the client Map.
+        try:
+            name = None
+            try:
+                with get_db() as conn:
+                    row = conn.exec_driver_sql(
+                        "SELECT name FROM agents WHERE id = ?", (agent_id,)
+                    ).fetchone()
+                    if row:
+                        name = row._mapping["name"]
+            except Exception:
+                pass
+            event_bus.emit("agent.spawned", {
+                "agent_id": agent_id,
+                "name": name,
+                "pid": proc.pid,
+                "status": "running",
+                "role": role,
+            })
+        except Exception as e:
+            log.debug("agent_spawned_emit_failed", agent_id=agent_id, error=str(e))
+
         return proc.pid
 
     def _run_sdk_agent_sync(self, agent_id: str, task: str, model: str,
@@ -236,7 +281,7 @@ class ProcessManager:
     async def _run_sdk_agent(self, agent_id: str, task: str, model: str,
                              node_id: str | None, role: str | None):
         """Async SDK agent execution with output recording and cost tracking."""
-        from app.services.agent_sdk_client import agent_sdk
+        from app.services.agent_sdk_client import agent_sdk  # noqa: lazy import (optional dep)
 
         status = "completed"
         exit_code = 0
@@ -264,7 +309,7 @@ class ProcessManager:
                     (agent_id,),
                 )
 
-            from app.services.agent_sdk_client import record_sdk_cost
+            from app.services.agent_sdk_client import record_sdk_cost  # noqa: lazy import (optional dep)
             record_sdk_cost(
                 model=response_model,
                 input_tokens=input_tokens,
@@ -331,9 +376,8 @@ class ProcessManager:
         want the actual assistant text, not system/hook/tool metadata.
         Returns the text fragment or None if the line should be skipped.
         """
-        import json as _json
         try:
-            obj = _json.loads(raw_line)
+            obj = json.loads(raw_line)
         except (ValueError, TypeError):
             # Not JSON — could be plain text from --verbose; keep it
             return raw_line if raw_line.strip() else None
@@ -375,6 +419,8 @@ class ProcessManager:
             timeout_seconds = AGENT_TIMEOUT_MINUTES * 60
             batch: list[str] = []
             last_commit = time.monotonic()
+            last_heartbeat_emit = time.monotonic()
+            heartbeat_emit_interval = 10.0  # seconds between agent.heartbeat events
             # Use raw DBAPI connection for the hot loop (thread-safe, avoids SA overhead)
             raw_conn = engine.raw_connection()
             raw_conn.execute("PRAGMA journal_mode=WAL")
@@ -413,6 +459,15 @@ class ProcessManager:
                             raw_conn.commit()
                             batch.clear()
                             last_commit = now
+                            if (now - last_heartbeat_emit) >= heartbeat_emit_interval:
+                                try:
+                                    event_bus.emit("agent.heartbeat", {
+                                        "agent_id": agent_id,
+                                        "status": "running",
+                                    })
+                                except Exception:
+                                    pass
+                                last_heartbeat_emit = now
 
                 if batch:
                     raw_conn.execute(
@@ -504,12 +559,11 @@ class ProcessManager:
             if not row:
                 return
 
-        from app.services.self_improve import self_improve_service
+        from app.services.self_improve import self_improve_service  # noqa: lazy import (cycle)
         self_improve_service.on_agent_completed(agent_id, agent_status)
 
     def _check_analysis_job_completion(self, agent_id: str, agent_status: str):
         """Check if this agent's completion should update an analysis job."""
-        import json
 
         with get_db() as conn:
             jobs = conn.exec_driver_sql(

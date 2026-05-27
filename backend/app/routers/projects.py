@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select, func, insert, update, text
 from app.db.session import get_db
@@ -102,7 +104,6 @@ def update_project(project_id: str, body: ProjectUpdate):
                 .values(**updates)
             )
         else:
-            import uuid
             conn.execute(
                 insert(project_overrides).values(
                     id=str(uuid.uuid4()),

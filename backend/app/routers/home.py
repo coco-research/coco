@@ -2,7 +2,7 @@ import asyncio
 import json
 import random
 import subprocess
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import structlog
@@ -15,6 +15,7 @@ from app.db.tables import (
     hub_content, hub_project_content, hub_drafts, hub_todos,
     hub_projects, hub_api_costs, hub_sync_state,
     tasks, cost_ledger, draft_decisions,
+    self_improve_cycles, self_improve_improvements,
 )
 
 log = structlog.get_logger()
@@ -348,34 +349,40 @@ def get_home():
 
         # Self-improve stats
         try:
-            from datetime import timedelta
             week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
 
-            cycles_week_row = conn.exec_driver_sql(
-                "SELECT COUNT(*) as cnt FROM self_improve_cycles "
-                "WHERE started_at >= ? AND status IN ('completed', 'rejected', 'failed')",
-                (week_ago,),
+            cycles_week_row = conn.execute(
+                select(func.count().label("cnt"))
+                .select_from(self_improve_cycles)
+                .where(self_improve_cycles.c.started_at >= week_ago)
+                .where(self_improve_cycles.c.status.in_(("completed", "rejected", "failed")))
             ).fetchone()
-            cycles_this_week = cycles_week_row._mapping["cnt"] if cycles_week_row else 0
+            cycles_this_week = cycles_week_row.cnt if cycles_week_row else 0
 
-            files_improved_row = conn.exec_driver_sql(
-                "SELECT COUNT(*) as cnt FROM self_improve_improvements i "
-                "JOIN self_improve_cycles c ON i.cycle_id = c.id "
-                "WHERE c.started_at >= ? AND i.status IN ('approved_by_human', 'merged')",
-                (week_ago,),
+            files_improved_row = conn.execute(
+                select(func.count().label("cnt"))
+                .select_from(
+                    self_improve_improvements.join(
+                        self_improve_cycles,
+                        self_improve_improvements.c.cycle_id == self_improve_cycles.c.id,
+                    )
+                )
+                .where(self_improve_cycles.c.started_at >= week_ago)
+                .where(self_improve_improvements.c.status.in_(("approved_by_human", "merged")))
             ).fetchone()
-            files_improved = files_improved_row._mapping["cnt"] if files_improved_row else 0
+            files_improved = files_improved_row.cnt if files_improved_row else 0
 
-            active_cycle_row = conn.exec_driver_sql(
-                "SELECT id, status FROM self_improve_cycles "
-                "WHERE status NOT IN ('completed', 'rejected', 'failed') "
-                "ORDER BY created_at DESC LIMIT 1",
+            active_cycle_row = conn.execute(
+                select(self_improve_cycles.c.id, self_improve_cycles.c.status)
+                .where(self_improve_cycles.c.status.notin_(("completed", "rejected", "failed")))
+                .order_by(self_improve_cycles.c.created_at.desc())
+                .limit(1)
             ).fetchone()
             active_cycle = None
             if active_cycle_row:
                 active_cycle = {
-                    "id": active_cycle_row._mapping["id"],
-                    "status": active_cycle_row._mapping["status"],
+                    "id": active_cycle_row.id,
+                    "status": active_cycle_row.status,
                 }
 
             result["self_improve"] = {
@@ -536,14 +543,17 @@ def _write_snapshot(data: dict) -> None:
 SOURCE_DISPLAY = {"jira": "Jira", "confluence": "Confluence", "email": "Email", "voice": "Voice"}
 
 
-def _display_source(name: str) -> str:
+def _display_source(name: str | None) -> str:
+    if not name:
+        return "Unknown"
     return SOURCE_DISPLAY.get(name, name.title())
 
 
-def _build_briefing(current: dict) -> dict:
+def _build_briefing(current: dict | None) -> dict:
     """Generate a structured, Jarvis-style briefing with typed scenes."""
     scenes: list[dict] = []
-    prev = _read_snapshot()
+    current = current or {}
+    prev = _read_snapshot() or {}
 
     hour = datetime.now().hour
     greetings = {
@@ -567,7 +577,7 @@ def _build_briefing(current: dict) -> dict:
     greeting_text = random.choice(greetings[period])
     scenes.append({"type": "greeting", "text": greeting_text})
 
-    since = current.get("since_last_session", {})
+    since = current.get("since_last_session") or {}
     hours_ago = since.get("hours_ago")
     if hours_ago is not None:
         if hours_ago < 0.5:
@@ -595,8 +605,8 @@ def _build_briefing(current: dict) -> dict:
 
         newly_stale = [h for h in stale if h.get("source", "") not in prev_stale_sources]
         if newly_stale:
-            names = " and ".join(_display_source(h["source"]) for h in newly_stale)
-            hrs = newly_stale[0].get("stale_hours")
+            names = " and ".join(_display_source(h.get("source")) for h in newly_stale)
+            hrs = newly_stale[0].get("stale_hours") or 0
             scenes.append({
                 "type": "alert",
                 "text": f"{names} {'has' if len(newly_stale) == 1 else 'have'} gone stale — last sync {hrs / 24:.0f} days ago." if hrs and hrs > 48
@@ -633,8 +643,8 @@ def _build_briefing(current: dict) -> dict:
 
     else:
         if stale:
-            names = " and ".join(_display_source(h["source"]) for h in stale)
-            hrs = stale[0].get("stale_hours")
+            names = " and ".join(_display_source(h.get("source")) for h in stale)
+            hrs = stale[0].get("stale_hours") or 0
             scenes.append({
                 "type": "alert",
                 "text": f"{names} {'has' if len(stale) == 1 else 'have'} gone dark — last sync was {hrs / 24:.0f} days ago." if hrs and hrs > 48
@@ -670,7 +680,7 @@ def _build_briefing(current: dict) -> dict:
             if top_open > prev_top_count or top_id not in prev_projects:
                 scenes.append({
                     "type": "spotlight",
-                    "text": f"{top.get('name', 'A project')} is picking up — now at {top_open} open items.",
+                    "text": f"{top.get('name') or 'A project'} is picking up — now at {top_open} open items.",
                     "project": top_id,
                     "value": top_open,
                 })
@@ -692,7 +702,7 @@ def _build_briefing(current: dict) -> dict:
         },
         "projects": [
             {"id": p.get("id"), "name": p.get("name"), "todo_open": p.get("todo_open", 0)}
-            for p in projects
+            for p in projects if p
         ],
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })

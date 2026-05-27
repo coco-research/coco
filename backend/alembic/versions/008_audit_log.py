@@ -1,19 +1,20 @@
 """Phase 11 — audit_log table for destructive actions.
 
-Revision ID: 004
-Revises: 001
+Revision ID: 008_audit_log
+Revises: 007_brain_merge_log
 Create Date: 2026-05-27
 
-Note: We chain off 001 because no 002/003 currently exist in this branch.
-If 002/003 land later, update down_revision accordingly.
+Note: Re-chained from 001 to 007_brain_merge_log when reconciling main into
+merge/wave-3 — the linear chain now is 001 -> 002 -> 003 -> 004 -> 005 ->
+006_dead_letter_queue -> 140054f726ca -> 007_brain_merge_log -> 008_audit_log.
 """
 from typing import Sequence, Union
 
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "004"
-down_revision: Union[str, None] = "001"
+revision: str = "008_audit_log"
+down_revision: Union[str, None] = "007_brain_merge_log"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

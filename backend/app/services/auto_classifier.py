@@ -242,7 +242,7 @@ def _llm_classify(
     title: str, body: str | None, source: str | None, sender: str | None
 ) -> dict | None:
     try:
-        from app.services.agent_sdk_client import agent_sdk, record_sdk_cost
+        from app.services.agent_sdk_client import agent_sdk, record_sdk_cost  # noqa: lazy import (optional dep)
     except ImportError:
         return None
 
@@ -332,8 +332,8 @@ def _apply_classification(
                         "classified_at": now(),
                         "created_at": now(),
                     },
-                    conflict_cols=["hub_content_id"],
-                    update_cols=[
+                    conflict_columns=["hub_content_id"],
+                    update_columns=[
                         "classified_project_id", "project_id", "confidence",
                         "reasoning", "auto_classified", "status", "action", "classified_at",
                     ],
@@ -362,8 +362,8 @@ def _save_suggestion(content_id: str, project_id: str, confidence: float, reason
                         "classified_at": now(),
                         "created_at": now(),
                     },
-                    conflict_cols=["hub_content_id"],
-                    update_cols=[
+                    conflict_columns=["hub_content_id"],
+                    update_columns=[
                         "classified_project_id", "suggested_project_id", "confidence",
                         "reasoning", "auto_classified", "status", "action", "classified_at",
                     ],

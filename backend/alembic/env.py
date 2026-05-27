@@ -69,6 +69,10 @@ def run_migrations_online() -> None:
         with context.begin_transaction():
             context.run_migrations()
 
+        # Persist all changes (Alembic detected an external transaction
+        # because of the PRAGMA above and won't commit on its own).
+        connection.commit()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

@@ -1,5 +1,6 @@
 """Triggers & Webhooks -- CRUD + webhook receiver."""
 
+import asyncio
 import json
 import uuid
 from datetime import datetime, timezone
@@ -11,8 +12,7 @@ from sqlalchemy import insert, select, delete
 import structlog
 
 from app.db.session import get_db
-from app.db.tables import triggers, trigger_log, agents, todo_overrides
-from app.services.event_bus import event_bus
+from app.db.tables import triggers, trigger_log
 
 log = structlog.get_logger()
 
@@ -22,11 +22,15 @@ webhook_router = APIRouter(prefix="/api/webhooks", tags=["Webhooks"])
 
 # -- Pydantic models --
 
+_TRIGGER_TYPE_RE = r"^(cron|webhook|file_watch)$"
+_ACTION_TYPE_RE = r"^(spawn_agent|run_command|create_todo|notify|self_improve_auto|podcast_generate)$"
+
+
 class TriggerCreate(BaseModel):
     name: str
-    trigger_type: str = Field(..., pattern=r"^(cron|webhook|file_watch)$")
+    trigger_type: str = Field(..., pattern=_TRIGGER_TYPE_RE)
     config: dict = {}
-    action_type: str = Field(..., pattern=r"^(spawn_agent|run_command|create_todo|notify)$")
+    action_type: str = Field(..., pattern=_ACTION_TYPE_RE)
     action_config: dict = {}
     node_id: Optional[str] = None
     enabled: bool = True
@@ -34,9 +38,9 @@ class TriggerCreate(BaseModel):
 
 class TriggerUpdate(BaseModel):
     name: Optional[str] = None
-    trigger_type: Optional[str] = Field(None, pattern=r"^(cron|webhook|file_watch)$")
+    trigger_type: Optional[str] = Field(None, pattern=_TRIGGER_TYPE_RE)
     config: Optional[dict] = None
-    action_type: Optional[str] = Field(None, pattern=r"^(spawn_agent|run_command|create_todo|notify)$")
+    action_type: Optional[str] = Field(None, pattern=_ACTION_TYPE_RE)
     action_config: Optional[dict] = None
     node_id: Optional[str] = None
     enabled: Optional[bool] = None
@@ -57,129 +61,14 @@ def _row_to_dict(row) -> dict:
 
 
 async def _execute_trigger_action(trigger: dict, context: dict | None = None) -> dict:
-    """Execute the action for a trigger. Dispatches to real action handlers."""
-    from app.services.process_manager import process_manager
+    """Execute the action for a trigger.
 
-    action_type = trigger["action_type"]
-    action_config = trigger["action_config"]
-    if isinstance(action_config, str):
-        action_config = json.loads(action_config)
+    Thin wrapper around the registry in app.services.trigger_actions; kept
+    here for backwards compatibility with imports from trigger_engine.
+    """
+    from app.services.trigger_actions import dispatch_action
 
-    trigger_name = trigger.get("name", "unknown")
-    node_id = trigger.get("node_id")
-
-    if action_type == "spawn_agent":
-        agent_name = action_config.get("agent_name", f"trigger-{trigger_name}")
-        task = action_config.get("task", f"Triggered by automation: {trigger_name}")
-        model = action_config.get("model", "sonnet")
-        cwd = action_config.get("cwd")
-        role = action_config.get("role", "custom")
-
-        if context:
-            task += f"\n\nTrigger context:\n```json\n{json.dumps(context, indent=2)}\n```"
-
-        agent_id = str(uuid.uuid4())
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        with get_db() as conn:
-            conn.execute(
-                insert(agents).values(
-                    id=agent_id,
-                    name=agent_name,
-                    node_id=node_id,
-                    model=model,
-                    role=role,
-                    task_description=task,
-                    status="running",
-                    started_at=now,
-                )
-            )
-
-        try:
-            pid = process_manager.spawn(agent_id, task, cwd=cwd, model=model, node_id=node_id, role=role)
-            with get_db() as conn:
-                conn.exec_driver_sql("UPDATE agents SET pid = ? WHERE id = ?", (pid, agent_id))
-            return {"status": "success", "result": f"Spawned agent '{agent_name}' (pid={pid})", "agent_id": agent_id}
-        except RuntimeError as e:
-            with get_db() as conn:
-                conn.exec_driver_sql(
-                    "UPDATE agents SET status = 'failed', stopped_at = datetime('now') WHERE id = ?",
-                    (agent_id,),
-                )
-            return {"status": "failed", "error": str(e)}
-
-    elif action_type == "create_todo":
-        title = action_config.get("title", f"Auto-todo from {trigger_name}")
-        priority = action_config.get("priority", "medium")
-        todo_id = f"trigger-{uuid.uuid4().hex[:12]}"
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        with get_db() as conn:
-            conn.execute(
-                insert(todo_overrides).values(
-                    hub_todo_id=todo_id,
-                    title=title,
-                    status="open",
-                    priority=priority,
-                    node_id=node_id,
-                    is_platform_native=1,
-                    created_at=now,
-                    updated_at=now,
-                )
-            )
-        event_bus.emit("todo.created", {"todo_id": todo_id, "title": title, "source": "trigger"})
-        return {"status": "success", "result": f"Created todo: {title}", "todo_id": todo_id}
-
-    elif action_type == "notify":
-        message = action_config.get("message", f"Trigger fired: {trigger_name}")
-        event_bus.emit("trigger.notification", {
-            "trigger_id": trigger["id"],
-            "trigger_name": trigger_name,
-            "message": message,
-            "context": context,
-        })
-        log.info("trigger_notification", trigger_id=trigger["id"], message=message)
-        return {"status": "success", "result": f"Notification sent: {message}"}
-
-    elif action_type == "run_command":
-        import asyncio
-        command = action_config.get("command", "")
-        if not command:
-            return {"status": "failed", "error": "No command specified"}
-        try:
-            proc = await asyncio.create_subprocess_shell(
-                command,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=30)
-            output = stdout.decode("utf-8", errors="replace").strip()
-            err_output = stderr.decode("utf-8", errors="replace").strip()
-            if proc.returncode == 0:
-                return {"status": "success", "result": output[:2000] or "Command succeeded"}
-            else:
-                return {"status": "failed", "error": f"Exit code {proc.returncode}: {err_output[:1000]}"}
-        except asyncio.TimeoutError:
-            return {"status": "failed", "error": "Command timed out after 30 seconds"}
-        except Exception as e:
-            return {"status": "failed", "error": str(e)}
-
-    elif action_type == "self_improve_auto":
-        from app.services.self_improve_scheduler import auto_start_cycle
-        result = auto_start_cycle()
-        if result["action"] == "started":
-            return {"status": "success", "result": f"Started self-improve cycle {result['cycle_id']}", "cycle_id": result["cycle_id"]}
-        else:
-            return {"status": "skipped", "result": result.get("reason", "Skipped")}
-
-    elif action_type == "podcast_generate":
-        from app.services.podcast import generate_podcast as _gen_podcast
-        voice = action_config.get("voice", "andrew")
-        try:
-            result = await _gen_podcast(voice=voice)
-            return {"status": "success", "result": f"Podcast generated: {result.get('id')}", "podcast_id": result.get("id")}
-        except Exception as e:
-            return {"status": "failed", "error": str(e)}
-
-    return {"status": "skipped", "result": "Unknown action type"}
+    return await dispatch_action(trigger, context=context)
 
 
 def _log_trigger_fire(conn, trigger_id: str, status: str, result: str = None, error: str = None):
@@ -207,7 +96,7 @@ async def list_triggers(
     node_id: Optional[str] = Query(None),
     enabled: Optional[int] = Query(None),
 ):
-    """List all triggers, optionally filtered by node_id and/or enabled."""
+    """List all triggers (with last_log attached), optionally filtered."""
     clauses = []
     params = []
     if node_id is not None:
@@ -223,7 +112,30 @@ async def list_triggers(
             f"SELECT * FROM triggers{where} ORDER BY created_at DESC",
             tuple(params),
         ).fetchall()
-    return [_row_to_dict(r) for r in rows]
+        items = [_row_to_dict(r) for r in rows]
+
+        # Attach the most recent log entry per trigger so the UI can render
+        # last-fire status without an N+1 round trip.
+        if items:
+            ids = [t["id"] for t in items]
+            placeholders = ",".join("?" * len(ids))
+            log_rows = conn.exec_driver_sql(
+                f"""
+                SELECT l.* FROM trigger_log l
+                INNER JOIN (
+                    SELECT trigger_id, MAX(fired_at) AS max_at
+                    FROM trigger_log
+                    WHERE trigger_id IN ({placeholders})
+                    GROUP BY trigger_id
+                ) latest
+                ON l.trigger_id = latest.trigger_id AND l.fired_at = latest.max_at
+                """,
+                tuple(ids),
+            ).fetchall()
+            by_id = {row._mapping["trigger_id"]: dict(row._mapping) for row in log_rows}
+            for t in items:
+                t["last_log"] = by_id.get(t["id"])
+    return items
 
 
 @router.get("/{trigger_id}")
@@ -378,8 +290,17 @@ async def get_trigger_logs(
 # -- Webhook receiver --
 
 @webhook_router.post("/{trigger_id}")
-async def receive_webhook(trigger_id: str, request: Request):
-    """Webhook receiver -- validates trigger exists with type='webhook', fires action, logs result."""
+async def receive_webhook(
+    trigger_id: str,
+    request: Request,
+    token: Optional[str] = Query(None),
+):
+    """Webhook receiver -- validates trigger, fires action, logs result.
+
+    If the trigger's config has a 'token' set, the caller must pass it as
+    either a `?token=` query param or `X-Webhook-Token` header. Triggers
+    without a token configured are open (anyone with the URL can fire).
+    """
     with get_db() as conn:
         row = conn.execute(
             select(triggers).where(triggers.c.id == trigger_id)
@@ -393,6 +314,12 @@ async def receive_webhook(trigger_id: str, request: Request):
 
     if not trigger["enabled"]:
         raise HTTPException(status_code=409, detail="Trigger is disabled")
+
+    expected_token = (trigger.get("config") or {}).get("token")
+    if expected_token:
+        provided = token or request.headers.get("x-webhook-token") or request.headers.get("X-Webhook-Token")
+        if provided != expected_token:
+            raise HTTPException(status_code=401, detail="Invalid or missing webhook token")
 
     context = None
     try:

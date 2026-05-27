@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Sparkles, RefreshCw, Filter, Loader2 } from 'lucide-react';
+import { Sparkles, Filter, Loader2 } from 'lucide-react';
 import { apiFetch, apiPost } from '../../lib/api';
 import { cn } from '../../lib/utils';
 import { InsightCard } from './InsightCard';

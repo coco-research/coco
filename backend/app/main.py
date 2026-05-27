@@ -75,8 +75,7 @@ async def lifespan(app: FastAPI):
     (Path.home() / ".coco" / "podcasts").mkdir(parents=True, exist_ok=True)
     log.info("platform_db_initialized")
     # Ensure replays directory exists
-    from pathlib import Path as _Path
-    (_Path.home() / ".coco" / "replays").mkdir(parents=True, exist_ok=True)
+    (Path.home() / ".coco" / "replays").mkdir(parents=True, exist_ok=True)
     process_manager.reconcile_on_startup()
     log.info("orphan_reconciliation_done")
     deleted = event_bus.cleanup(max_age_hours=24)

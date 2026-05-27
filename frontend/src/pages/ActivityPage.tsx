@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Activity } from 'lucide-react';
 import { timeAgo } from '../lib/utils';
+import { ErrorState } from '../components/shared/ErrorState';
 
 interface ActivityEntry {
   id: number;
@@ -35,7 +36,7 @@ async function fetchActivity(action: string): Promise<ActivityEntry[]> {
 export default function ActivityPage() {
   const [actionFilter, setActionFilter] = useState('all');
 
-  const { data: entries = [], isLoading } = useQuery({
+  const { data: entries = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['activity', actionFilter],
     queryFn: () => fetchActivity(actionFilter),
     refetchInterval: 30_000,
@@ -46,6 +47,7 @@ export default function ActivityPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold text-foreground">Activity</h1>
         <select
+          aria-label="Filter activity by action type"
           value={actionFilter}
           onChange={(e) => setActionFilter(e.target.value)}
           className="bg-card border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
@@ -64,6 +66,12 @@ export default function ActivityPage() {
             <div key={i} className="h-10 bg-muted/50 rounded-lg animate-pulse" />
           ))}
         </div>
+      ) : isError ? (
+        <ErrorState
+          error={error}
+          title="Couldn't load activity"
+          onRetry={() => void refetch()}
+        />
       ) : entries.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <Activity size={40} className="mb-3 opacity-30" />

@@ -8,6 +8,7 @@ into a concise system prompt that stays under ~2000 tokens.
 from __future__ import annotations
 
 import logging
+import sqlite3
 from datetime import datetime, timezone
 
 from sqlalchemy import (
@@ -22,8 +23,9 @@ from sqlalchemy import (
     select,
 )
 
-from app.config import BRAIN_JSON_PATH, QUEUE_JSON_PATH, CONFIG_JSON_PATH, HUB_DB_PATH
+from app.config import BRAIN_JSON_PATH, QUEUE_JSON_PATH, CONFIG_JSON_PATH, HUB_DB_PATH, KNOWLEDGE_DB_PATH
 from app.db.session import get_db
+from app.services.collaboration_context import build_knowledge_context
 from app.db.tables import (
     hub_projects, hub_content, hub_todos, hub_sync_state,
     nodes, agents, governance_log,
@@ -138,7 +140,6 @@ def build_chat_context(
         sections.append(knowledge_section)
 
     try:
-        from app.services.collaboration_context import build_knowledge_context
         knowledge_ctx = build_knowledge_context(
             node_id=node_id, project_id=project_id, token_budget=1500
         )
@@ -161,7 +162,6 @@ def _build_knowledge_engine_section(project_id: str | None = None) -> str | None
     Uses SA Core expressions against a cached read-only engine for the
     knowledge DB (separate from platform.db).
     """
-    from app.config import KNOWLEDGE_DB_PATH
     if not KNOWLEDGE_DB_PATH.exists():
         return None
 

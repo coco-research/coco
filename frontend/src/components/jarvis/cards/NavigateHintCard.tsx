@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from '../../../lib/utils';
 import type { NavigateHintData } from '../../../types/cards';
 
@@ -18,9 +18,21 @@ export function NavigateHintCard({
 }: NavigateHintCardProps) {
   const isJarvis = variant === 'jarvis';
   const navigate = useNavigate();
+  const location = useLocation();
   const [progress, setProgress] = useState(0);
   const [cancelled, setCancelled] = useState(false);
   const rafRef = useRef<number>(0);
+  const initialPathRef = useRef<string>(location.pathname);
+
+  // Cancel pending auto-nav if the user navigates manually first
+  useEffect(() => {
+    if (cancelled) return;
+    if (location.pathname !== initialPathRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      setCancelled(true);
+      setProgress(0);
+    }
+  }, [location.pathname, cancelled]);
 
   useEffect(() => {
     if (cancelled) return;

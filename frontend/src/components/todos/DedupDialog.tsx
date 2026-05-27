@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { X, Merge, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { X, Merge, Loader2, CheckCircle } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch, apiPost } from '../../lib/api';
 import { cn } from '../../lib/utils';
@@ -24,7 +24,7 @@ export function DedupDialog({ open, onOpenChange }: DedupDialogProps) {
   const [merging, setMerging] = useState<number | 'all' | null>(null);
   const [merged, setMerged] = useState<Set<number>>(new Set());
 
-  const { data: groups = [], isLoading, refetch } = useQuery<DuplicateGroup[]>({
+  const { data: groups = [], isLoading } = useQuery<DuplicateGroup[]>({
     queryKey: ['todo-duplicates', threshold],
     queryFn: () => apiFetch<DuplicateGroup[]>(`/todos/duplicates?threshold=${threshold}`),
     enabled: open,

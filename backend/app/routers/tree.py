@@ -1,3 +1,4 @@
+import os
 import uuid
 from fastapi import APIRouter, HTTPException
 import structlog
@@ -11,6 +12,7 @@ from app.db.tables import (
     comments, agent_roles, hub_projects,
 )
 from app.services.event_bus import event_bus
+from app.services.folder_scanner import categorize_file, FILE_CATEGORIES
 from app.models.tree import CreateNodeBody, MoveNodeBody, PatchNodeBody, ReorderItem
 
 log = structlog.get_logger()
@@ -118,7 +120,6 @@ def get_subtree(node_id: str):
 
 @router.post("/api/tree", status_code=201)
 def create_node(body: CreateNodeBody):
-    import os
     if body.folder_path:
         real = os.path.realpath(os.path.expanduser(body.folder_path))
         if not real.startswith(os.path.expanduser("~")):
@@ -181,7 +182,6 @@ def create_node(body: CreateNodeBody):
 
 @router.patch("/api/tree/{node_id}")
 def patch_node(node_id: str, body: PatchNodeBody):
-    import os
     if body.folder_path:
         real = os.path.realpath(os.path.expanduser(body.folder_path))
         if not real.startswith(os.path.expanduser("~")):
@@ -340,7 +340,6 @@ def reorder_nodes(items: list[ReorderItem]):
 @router.get("/api/tree/{node_id}/folder")
 def get_folder_contents(node_id: str):
     """Return folder listing for a node's linked folder_path."""
-    import os
     with get_db() as conn:
         row = conn.execute(
             select(nodes.c.folder_path).where(nodes.c.id == node_id)
@@ -355,8 +354,6 @@ def get_folder_contents(node_id: str):
         real_path = os.path.realpath(folder_path)
         if not real_path.startswith(home):
             return {"path": folder_path, "exists": False, "files": [], "error": "Path outside home directory"}
-
-        from app.services.folder_scanner import categorize_file, FILE_CATEGORIES
 
         files = []
         category_counts: dict[str, int] = {}
@@ -389,7 +386,6 @@ def get_folder_contents(node_id: str):
 @router.get("/api/filesystem/browse")
 def browse_filesystem(path: str = "~"):
     """Browse local filesystem directories for the folder picker."""
-    import os
     resolved = os.path.expanduser(path)
     home = os.path.expanduser("~")
     resolved = os.path.realpath(resolved)
@@ -419,7 +415,7 @@ def backfill_agents():
     Creates agents in hierarchy order (root first) and sets reports_to
     based on the DEFAULT_HIERARCHY defined in agents.py.
     """
-    from app.routers.agents import DEFAULT_HIERARCHY, _resolve_reports_to
+    from app.routers.agents import DEFAULT_HIERARCHY, _resolve_reports_to  # noqa: lazy import (cycle)
 
     with get_db() as conn:
         # Find nodes with no agents

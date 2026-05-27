@@ -1,13 +1,17 @@
 name: Bug Report
 description: Report a bug in CoCo Platform
 title: "[Bug]: "
-labels: ["bug"]
+labels: ["bug", "triage"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug! Please search existing issues first to avoid duplicates.
   - type: textarea
     id: description
     attributes:
       label: Describe the bug
-      description: A clear description of what the bug is.
+      description: A clear and concise description of what the bug is.
     validations:
       required: true
   - type: textarea
@@ -28,6 +32,13 @@ body:
       description: What did you expect to happen?
     validations:
       required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened? Include logs, screenshots, or stack traces if available.
+    validations:
+      required: false
   - type: dropdown
     id: edition
     attributes:
@@ -37,8 +48,36 @@ body:
         - Studio
     validations:
       required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Frontend (React/Vite)
+        - Backend (FastAPI)
+        - CLI
+        - Knowledge Hub
+        - Brain / Memory
+        - Cron / Scheduler
+        - Docs
+        - Other / not sure
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit SHA
+      placeholder: v0.1.0 or git SHA
   - type: input
     id: os
     attributes:
       label: Operating System
       placeholder: macOS 15.3, Ubuntu 24.04, etc.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste any relevant log output here. This will be automatically rendered as code.
+      render: shell

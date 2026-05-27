@@ -15,8 +15,14 @@ interface Toast {
   type: ToastType;
 }
 
+interface ToastObjectInput {
+  title: string;
+  description?: string;
+  variant?: 'default' | 'destructive' | ToastType;
+}
+
 interface ToastContextValue {
-  toast: (message: string, type?: ToastType) => void;
+  toast: (input: string | ToastObjectInput, type?: ToastType) => void;
 }
 
 const ToastContext = createContext<ToastContextValue>({
@@ -32,9 +38,19 @@ let nextId = 0;
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const toast = useCallback((message: string, type: ToastType = 'info') => {
+  const toast = useCallback((input: string | ToastObjectInput, type: ToastType = 'info') => {
+    let message: string;
+    let resolvedType: ToastType = type;
+    if (typeof input === 'string') {
+      message = input;
+    } else {
+      message = input.description ? `${input.title}: ${input.description}` : input.title;
+      if (input.variant === 'destructive' || input.variant === 'error') resolvedType = 'error';
+      else if (input.variant === 'success') resolvedType = 'success';
+      else if (input.variant === 'info') resolvedType = 'info';
+    }
     const id = nextId++;
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts((prev) => [...prev, { id, message, type: resolvedType }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 3000);

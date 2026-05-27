@@ -16,6 +16,7 @@ from sqlalchemy import (
     Table,
     Text,
     UniqueConstraint,
+    text,
 )
 
 metadata = MetaData()
@@ -71,6 +72,7 @@ agents = Table(
     Column("exit_code", Integer),
     Column("config", Text, server_default="{}"),
     Column("reports_to", Text),
+    Column("human_id", Text, unique=True),
     Column("created_at", Text, nullable=False),
     Column("updated_at", Text, nullable=False),
 )
@@ -110,6 +112,21 @@ agent_output = Table(
     Column("stream", Text, nullable=False),
     Column("chunk", Text, nullable=False),
     Column("timestamp", Text, nullable=False),
+)
+
+# Inter-agent delegation queue. Stays in sync with init_db.SCHEMA.
+agent_tasks = Table(
+    "agent_tasks",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("from_agent_id", Text),
+    Column("to_agent_id", Text, nullable=False),
+    Column("prompt", Text, nullable=False),
+    Column("status", Text, nullable=False, server_default="pending"),
+    Column("created_at", Text, nullable=False),
+    Column("claimed_at", Text),
+    Column("completed_at", Text),
+    Column("result", Text),
 )
 
 # ---------------------------------------------------------------------------
@@ -355,7 +372,7 @@ draft_decisions = Table(
     Column("hub_draft_id", Text, nullable=False),
     Column("status", Text, nullable=False),
     Column("decided_by", Text, server_default="user"),
-    Column("decided_at", Text, nullable=False),
+    Column("decided_at", Text, nullable=False, server_default=text("(datetime('now'))")),
 )
 
 content_classifications = Table(
@@ -425,6 +442,7 @@ todo_overrides = Table(
     Column("source_type", Text),
     Column("source_content_id", Text),
     Column("is_platform_native", Integer, server_default="0"),
+    Column("human_id", Text, unique=True),
     Column("created_at", Text),
     Column("updated_at", Text),
 )
@@ -629,7 +647,7 @@ inbox_notifications = Table(
     Column("title", Text, nullable=False),
     Column("body", Text),
     Column("metadata_json", Text, server_default="{}"),
-    Column("created_at", Text, nullable=False),
+    Column("created_at", Text, nullable=False, server_default=text("(datetime('now'))")),
 )
 
 # ---------------------------------------------------------------------------
@@ -772,7 +790,7 @@ hub_project_content = Table(
 
 hub_api_costs = Table(
     "hub_api_costs", metadata,
-    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("id", Text, primary_key=True),
     Column("timestamp", Text, key="created_at"),  # alias
     Column("model", Text),
     Column("feature", Text),

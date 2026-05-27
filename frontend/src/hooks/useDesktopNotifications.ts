@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useEventSource } from '../lib/sse';
 import { isEnabled, notify } from '../lib/desktop-notifications';
 

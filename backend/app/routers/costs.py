@@ -2,7 +2,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select, func
 from app.db.session import get_db
-from app.db.tables import cost_ledger, budgets, hub_api_costs
+from app.db.tables import cost_ledger, budgets, hub_api_costs, nodes
 from app.db.compat import days_ago, date_trunc_day, upsert
 from app.db.tree_utils import build_node_id_filter
 from app.models.costs import CreateBudgetBody
@@ -203,7 +203,6 @@ def _resolve_node_ids(conn, node_id: str | None, subtree: bool) -> list[str] | N
     if not node_id:
         return None
     if subtree:
-        from app.db.tables import nodes
         row = conn.execute(
             select(nodes.c.path).where(nodes.c.id == node_id)
         ).fetchone()

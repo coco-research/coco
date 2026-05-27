@@ -157,7 +157,7 @@ function deepMergePatches(base: Record<string, unknown>, patch: Record<string, u
 function buildFullPerTool(profilePerTool: Partial<PerToolConfig>): PerToolConfig {
   return Object.fromEntries(
     perToolActions.map(({ key, defaultLevel }) => [key, profilePerTool[key] ?? defaultLevel]),
-  ) as PerToolConfig;
+  ) as unknown as PerToolConfig;
 }
 
 // --- Component ---

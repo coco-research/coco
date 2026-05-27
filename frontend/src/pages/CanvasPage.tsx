@@ -20,7 +20,6 @@ import '@xyflow/react/dist/style.css';
 import { graphlib, layout as dagreLayout } from '@dagrejs/dagre';
 import { Loader2, LayoutGrid, Maximize2 } from 'lucide-react';
 import { apiFetch } from '../lib/api';
-import { cn } from '../lib/utils';
 import { EntityNode, type EntityNodeData } from '../components/canvas/EntityNode';
 import { ArticleNode } from '../components/canvas/ArticleNode';
 import { ClusterNode } from '../components/canvas/ClusterNode';
@@ -29,6 +28,9 @@ import {
   CanvasContextMenu,
   type ContextMenuState,
 } from '../components/canvas/CanvasContextMenu';
+import { EmptyState } from '../components/shared/EmptyState';
+import { ErrorState } from '../components/shared/ErrorState';
+import { Waypoints } from 'lucide-react';
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -62,11 +64,13 @@ interface GodNodesResponse {
 
 // ── Custom node types ────────────────────────────────────────────────────
 
+// Cast away strict NodeProps generics — xyflow's NodeTypes index signature
+// is incompatible with discriminated NodeProps<Node<Data, Type>> components.
 const nodeTypes = {
   entity: EntityNode,
   article: ArticleNode,
   cluster: ClusterNode,
-};
+} as unknown as import('@xyflow/react').NodeTypes;
 
 // ── Dagre layout helper ──────────────────────────────────────────────────
 
@@ -118,8 +122,8 @@ function CanvasInner() {
   const navigate = useNavigate();
   const { fitView } = useReactFlow();
 
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [pinnedNodes, setPinnedNodes] = useState<Set<string>>(new Set());
@@ -128,7 +132,7 @@ function CanvasInner() {
   edgesRef.current = edges; // keep ref in sync for reading inside setNodes callbacks
 
   // ── Fetch initial god nodes ──────────────────────────────────────────
-  const { data: godNodes, isLoading: godLoading } = useQuery({
+  const { data: godNodes, isLoading: godLoading, isError: godError, error: godErr, refetch: godRefetch } = useQuery({
     queryKey: ['canvas-god-nodes'],
     queryFn: () => apiFetch<GodNodesResponse>('/graph/god-nodes?top_n=30'),
   });
@@ -407,6 +411,24 @@ function CanvasInner() {
               <Loader2 className="h-8 w-8 animate-spin text-accent" />
               <span className="text-sm text-muted-foreground">Loading brain map...</span>
             </div>
+          </div>
+        )}
+        {godError && (
+          <div className="absolute inset-0 flex items-center justify-center z-20 bg-background/80 p-8">
+            <ErrorState
+              error={godErr}
+              title="Couldn't load canvas"
+              onRetry={() => void godRefetch()}
+            />
+          </div>
+        )}
+        {!godLoading && !godError && godNodes && godNodes.items.length === 0 && nodes.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center z-10 p-8">
+            <EmptyState
+              icon={<Waypoints className="h-10 w-10" />}
+              title="Canvas is empty"
+              description="No entities to map yet. Ingest content to seed the brain map."
+            />
           </div>
         )}
 

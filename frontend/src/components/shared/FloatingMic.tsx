@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Mic, MicOff, Loader2, X } from 'lucide-react';
+import { Mic, MicOff, Loader2, X, ExternalLink } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useVoiceInput } from '../../hooks/useVoiceInput';
+import { getBrowserHelpUrl, getBrowserHelpLabel } from '../../lib/micPermission';
 
 type MicState = 'idle' | 'listening' | 'processing' | 'speaking';
 
@@ -30,8 +31,9 @@ export function FloatingMic() {
   const [micState, setMicState] = useState<MicState>('idle');
   const [response, setResponse] = useState<string | null>(null);
   const [showBubble, setShowBubble] = useState(false);
-  const autoDismissRef = useRef<ReturnType<typeof setTimeout>>();
-  const inactivityRef = useRef<ReturnType<typeof setTimeout>>();
+  const [permissionDismissed, setPermissionDismissed] = useState(false);
+  const autoDismissRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const inactivityRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const lastTranscriptRef = useRef('');
 
   // Auto-dismiss transcript bubble after 5s of inactivity (no new text)
@@ -106,6 +108,7 @@ export function FloatingMic() {
     } else {
       setResponse(null);
       setShowBubble(false);
+      setPermissionDismissed(false);
       setMicState('listening');
       lastTranscriptRef.current = '';
       voice.start(handleResult);
@@ -132,11 +135,72 @@ export function FloatingMic() {
   const isListening = micState === 'listening' || voice.isListening;
   const isProcessing = micState === 'processing';
   const isSpeaking = micState === 'speaking';
+  const isPermissionDenied = voice.errorKind === 'permission-denied';
+  const showPermissionBubble = isPermissionDenied && !permissionDismissed;
 
   const providerLabel = voice.provider === 'deepgram' ? 'Deepgram' : 'Web Speech';
+  const helpUrl = getBrowserHelpUrl();
+  const helpLabel = getBrowserHelpLabel();
+
+  const dismissPermissionBubble = () => setPermissionDismissed(true);
+
+  const retryPermissionFlow = () => {
+    setPermissionDismissed(true);
+    voice.retryPermission();
+    // Re-trigger the prompt — note this only works if the browser actually
+    // allows re-prompting (some browsers persist denial until the user
+    // changes the site setting manually, which is exactly why we link out).
+    setResponse(null);
+    setShowBubble(false);
+    setMicState('listening');
+    lastTranscriptRef.current = '';
+    voice.start(handleResult);
+  };
 
   return (
-    <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2">
+    <div className="fixed bottom-6 right-[5.5rem] z-40 flex flex-col items-end gap-2">
+      {/* Permission-denied bubble — explicit remediation guidance with a
+          browser-specific help link. Takes priority over the listening UI. */}
+      {showPermissionBubble && (
+        <div
+          role="alert"
+          className="floating-mic-bubble floating-mic-bubble-enter relative max-w-[280px] border border-destructive/40"
+        >
+          <button
+            onClick={dismissPermissionBubble}
+            className="absolute top-1.5 right-1.5 text-muted-foreground hover:text-foreground p-0.5 rounded-full hover:bg-secondary/80"
+            aria-label="Dismiss microphone permission notice"
+          >
+            <X size={12} />
+          </button>
+          <div className="pr-5">
+            <p className="text-sm font-medium text-foreground leading-snug">
+              Microphone access denied
+            </p>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              Enable in browser settings to use voice input.
+            </p>
+            <div className="flex items-center gap-3 mt-2">
+              <a
+                href={helpUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-accent hover:underline"
+              >
+                {helpLabel}
+                <ExternalLink size={10} />
+              </a>
+              <button
+                onClick={retryPermissionFlow}
+                className="text-xs text-accent hover:underline"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Streaming transcript bubble (while listening) */}
       {isListening && (
         <div className="floating-mic-bubble floating-mic-bubble-enter">
@@ -241,8 +305,9 @@ export function FloatingMic() {
         </button>
       </div>
 
-      {/* Voice error */}
-      {voice.error && (
+      {/* Voice error (generic only — permission-denied uses the rich bubble
+          above so the user gets a help link and retry button). */}
+      {voice.error && !isPermissionDenied && (
         <p className="text-[10px] text-destructive max-w-[200px] text-right mt-1">
           {voice.error}
         </p>

@@ -106,8 +106,10 @@ body[data-density="comfortable"] {
   --secondary: oklch(0.965 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.965 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.623 0.214 259.815);
+  /* WCAG AA: 4.5:1 contrast against white background (was 0.556 → ~3.6:1). */
+  --muted-foreground: oklch(0.45 0 0);
+  /* Darkened from 0.623 → 0.48 so white text reaches 4.5:1 on the accent fill. */
+  --accent: oklch(0.48 0.218 259.815);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
@@ -147,8 +149,10 @@ body[data-density="comfortable"] {
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.488 0.243 264.376);
+  /* WCAG AA: 4.5:1 contrast against dark background. */
+  --muted-foreground: oklch(0.78 0 0);
+  /* Darkened to satisfy 4.5:1 with white text on accent fill (was 0.488 → ~3.9:1). */
+  --accent: oklch(0.45 0.225 264.376);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.637 0.237 25.331);
   --destructive-foreground: oklch(0.985 0 0);
@@ -338,6 +342,16 @@ textarea,
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
+/* Live agent indicator — 1s loop, 0.6 → 1.0 opacity.
+   Drives the pulsing status dot for agents in the `running` state. */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.agent-pulse {
+  animation: pulse 1s ease-in-out infinite;
+}
+
 /* Page enter transition */
 @keyframes page-enter {
   from { opacity: 0; transform: translateY(4px); }
@@ -376,6 +390,7 @@ textarea,
   .animate-activity-enter,
   .animate-inbox-dismiss,
   .animate-pulse-dot,
+  .agent-pulse,
   .animate-notif-enter,
   .animate-notif-seen,
   .animate-notif-dismiss,
@@ -509,10 +524,10 @@ textarea,
   50% { opacity: 0.5; }
 }
 
-/* Audio waveform bars — GPU-accelerated via scaleY instead of height */
+/* Audio waveform bars — GPU-accelerated via scaleY instead of height (no reflow) */
 @keyframes jarvis-waveform {
-  0% { transform: scaleY(1); }
-  100% { transform: scaleY(4); }
+  0% { transform: scaleY(0.2); }
+  100% { transform: scaleY(0.9); }
 }
 
 /* Orb pulse — gentle glow, not sci-fi */

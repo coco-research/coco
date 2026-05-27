@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import select, func, text, update
 from app.db.session import get_db
-from app.db.compat import now
+from app.db.compat import now, upsert
 from app.db.tables import (
     hub_content, hub_project_content, hub_projects,
     content_classifications,
@@ -35,25 +35,27 @@ def list_content(
 ):
     try:
         with get_db() as conn:
-            # FTS search path — use text() since SA doesn't support FTS5 natively
+            # FTS search path — SQLite FTS5 — no PG equivalent yet
+            # (FTS5 virtual table not in SA metadata; raw text() with bindparams.)
             if q:
                 try:
-                    count_row = conn.execute(
-                        text("SELECT COUNT(*) as cnt FROM content_fts WHERE content_fts MATCH :q"),
-                        {"q": q},
-                    ).fetchone()
+                    # SQLite FTS5 — no PG equivalent yet
+                    count_stmt = text(
+                        "SELECT COUNT(*) AS cnt FROM content_fts "
+                        "WHERE content_fts MATCH :q"
+                    ).bindparams(q=q)
+                    count_row = conn.execute(count_stmt).fetchone()
                     total = count_row.cnt if count_row else 0
 
-                    rows = conn.execute(
-                        text(
-                            "SELECT c.* FROM hub_content c "
-                            "JOIN content_fts f ON c.id = f.rowid "
-                            "WHERE content_fts MATCH :q "
-                            "ORDER BY rank "
-                            "LIMIT :limit OFFSET :offset"
-                        ),
-                        {"q": q, "limit": limit, "offset": offset},
-                    ).fetchall()
+                    # SQLite FTS5 — no PG equivalent yet
+                    rows_stmt = text(
+                        "SELECT c.* FROM hub_content c "
+                        "JOIN content_fts f ON c.id = f.rowid "
+                        "WHERE content_fts MATCH :q "
+                        "ORDER BY rank "
+                        "LIMIT :limit OFFSET :offset"
+                    ).bindparams(q=q, limit=limit, offset=offset)
+                    rows = conn.execute(rows_stmt).fetchall()
                     return {"items": [dict(r._mapping) for r in rows], "total": total}
                 except Exception as fts_err:
                     log.warning("fts5_search_fallback", query=q, error=str(fts_err),
@@ -177,11 +179,18 @@ def classify_content(content_id: str, body: ClassifyContentBody):
                 raise HTTPException(404, "Content not found")
 
             conn.execute(
-                text(
-                    "INSERT OR REPLACE INTO content_classifications "
-                    "(id, hub_content_id, project_id, action) VALUES (:id, :cid, :pid, 'classify')"
-                ),
-                {"id": str(uuid.uuid4()), "cid": content_id, "pid": project_id},
+                upsert(
+                    content_classifications,
+                    {
+                        "id": str(uuid.uuid4()),
+                        "hub_content_id": content_id,
+                        "project_id": project_id,
+                        "action": "classify",
+                        "classified_at": now(),
+                    },
+                    conflict_columns=["id"],
+                    update_columns=["hub_content_id", "project_id", "action"],
+                )
             )
 
         return {"status": "classified", "content_id": content_id, "project_id": project_id}
@@ -203,11 +212,17 @@ def dismiss_content(content_id: str):
                 raise HTTPException(404, "Content not found")
 
             conn.execute(
-                text(
-                    "INSERT OR REPLACE INTO content_classifications "
-                    "(id, hub_content_id, action) VALUES (:id, :cid, 'dismiss')"
-                ),
-                {"id": str(uuid.uuid4()), "cid": content_id},
+                upsert(
+                    content_classifications,
+                    {
+                        "id": str(uuid.uuid4()),
+                        "hub_content_id": content_id,
+                        "action": "dismiss",
+                        "classified_at": now(),
+                    },
+                    conflict_columns=["id"],
+                    update_columns=["hub_content_id", "action"],
+                )
             )
 
         return {"status": "dismissed", "content_id": content_id}
@@ -360,7 +375,7 @@ def reject_suggestion(content_id: str):
 
 def _run_classifier_impl(limit: int = 50):
     try:
-        from app.services.auto_classifier import process_unsorted
+        from app.services.auto_classifier import process_unsorted  # noqa: lazy import (cycle)
 
         stats = process_unsorted(limit=limit)
         return {"status": "ok", **stats}
@@ -424,7 +439,7 @@ def extract_actions(content_id: str):
 
         content_text = f"{row.title or ''}\n{row.body or ''}"
 
-        from app.services.collaboration_context import create_platform_todos_from_text
+        from app.services.collaboration_context import create_platform_todos_from_text  # noqa: lazy import (cycle)
 
         created = create_platform_todos_from_text(
             content_text,

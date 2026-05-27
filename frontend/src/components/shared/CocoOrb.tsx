@@ -61,7 +61,6 @@ interface OrbPanelProps {
 }
 
 function OrbPanel({
-  orbState,
   onClose,
   textInput,
   setTextInput,
@@ -199,7 +198,7 @@ export function CocoOrb() {
   const [responseText, setResponseText] = useState('');
   const [cards, setCards] = useState<CardData[]>([]);
 
-  const autoCollapseTimer = useRef<ReturnType<typeof setTimeout>>();
+  const autoCollapseTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const resetAutoCollapse = () => {
     clearTimeout(autoCollapseTimer.current);

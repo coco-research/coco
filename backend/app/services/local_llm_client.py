@@ -15,9 +15,11 @@ Task types and their model routing:
 
 import fcntl
 import os
+import shutil
 import subprocess
 import sys
 import threading
+import time as _time
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -140,7 +142,6 @@ _MLX_SERVER_HEALTH_CACHE: dict = {"model": None, "checked_at": 0.0, "ok": False}
 def _warm_server_model() -> str | None:
     """Return the model currently loaded in the warm MLX server, or None if
     unreachable. Cached 60s to avoid hammering /health per call."""
-    import time as _time
     now = _time.time()
     if now - _MLX_SERVER_HEALTH_CACHE["checked_at"] < 60:
         return _MLX_SERVER_HEALTH_CACHE["model"] if _MLX_SERVER_HEALTH_CACHE["ok"] else None
@@ -364,7 +365,6 @@ class LocalLLMClient:
         Uses CLI check (not Python import) because MLX may be installed in the
         system Python while the backend runs in a venv.
         """
-        import shutil
         # Check for mlx_lm CLI or fallback to checking via python3 -c import
         if shutil.which("mlx_lm.generate"):
             return True

@@ -38,6 +38,14 @@ from app.services.ingest.dedup import (
     source_hash as compute_source_hash,
 )
 
+# Phase 7 / Brain B3: identity-resolution hook. Imported lazily-safe; the
+# resolver itself has no DB deps so the import is cheap.
+from app.services.brain.entity_resolver import (
+    EntityResolver,
+    InMemoryStore,
+    resolve_person_for_ingest,
+)
+
 
 # --- Hooks --------------------------------------------------------------------
 
@@ -97,6 +105,11 @@ class IngestDeps:
     project_centroids: dict[str, Sequence[float]] = field(default_factory=dict)
     embedder: Callable[[str], Sequence[float]] | None = None
     candidate_projects: Sequence[str] = field(default_factory=tuple)
+    # Phase 7 / Brain B3: identity resolver. When supplied, the dispatcher
+    # resolves the envelope's sender → canonical person_id *before* persist,
+    # and maintains the bidirectional `person ↔ document` link in the
+    # resolver's store after a successful write.
+    resolver: EntityResolver | None = None
 
 
 # --- Source-specific handlers -------------------------------------------------
@@ -170,6 +183,25 @@ register_handler("screenshot", _link_handler)
 def _extract_sender(req: IngestRequest) -> str | None:
     md = req.metadata or {}
     return md.get("sender_email") or md.get("sender_handle") or md.get("sender")
+
+
+def _resolve_sender_to_person(
+    req: IngestRequest, resolver: EntityResolver | None
+) -> str | None:
+    """Phase 7 / Brain B3: resolve the envelope's sender to a canonical
+    person_id using the EntityResolver. Returns None if no resolver is
+    bound or nothing matched.
+    """
+    if resolver is None:
+        return None
+    md = req.metadata or {}
+    return resolve_person_for_ingest(
+        resolver,
+        sender_email=md.get("sender_email"),
+        sender_handle=md.get("sender_handle"),
+        sender_name=md.get("sender_name") or md.get("sender"),
+        candidate_project=req.project_id,
+    )
 
 
 def dispatch(request: IngestRequest, deps: IngestDeps | None = None) -> IngestResult:
@@ -247,6 +279,17 @@ def dispatch(request: IngestRequest, deps: IngestDeps | None = None) -> IngestRe
             }
         )
 
+    # 5b. Identity resolution (Phase 7 / Brain B3) — runs *before* persist
+    # so the resolved person_id is observable even when persist is a no-op.
+    resolved_person_id: str | None = None
+    try:
+        resolved_person_id = _resolve_sender_to_person(request, deps.resolver)
+    except Exception as exc:  # pragma: no cover
+        notes.append(f"resolver_error:{type(exc).__name__}")
+        resolved_person_id = None
+    if resolved_person_id is not None:
+        notes.append(f"resolved_person:{resolved_person_id}")
+
     # 6. Persist
     document_id = f"doc_{uuid4().hex[:24]}"
     persisted = False
@@ -265,6 +308,13 @@ def dispatch(request: IngestRequest, deps: IngestDeps | None = None) -> IngestRe
             notes.append(f"persist_error:{type(exc).__name__}")
             persisted = False
 
+    # 6b. Bidirectional link maintenance — only after successful persist
+    if persisted and resolved_person_id and deps.resolver is not None:
+        try:
+            deps.resolver.store.link_document(resolved_person_id, document_id)
+        except Exception as exc:  # pragma: no cover
+            notes.append(f"bidi_link_error:{type(exc).__name__}")
+
     # 7. Emit SSE
     if deps.emit is not None and persisted:
         try:
@@ -276,6 +326,7 @@ def dispatch(request: IngestRequest, deps: IngestDeps | None = None) -> IngestRe
                     "project_id": classification.project_id,
                     "classification": classification.method,
                     "near_duplicate_of": near[0] if near else None,
+                    "person_id": resolved_person_id,
                 },
             )
         except Exception as exc:  # pragma: no cover

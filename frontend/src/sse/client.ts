@@ -117,6 +117,7 @@ export function connectPlatformSSE(opts: PlatformSSEOptions): PlatformSSEHandle 
     'queue.item.added',
     'queue.item.decided',
     'queue.drained',
+    'queue.side_effect_confirmed',
     'costs.updated',
     'costs.budget.breached',
     'agent.spawned',

@@ -55,6 +55,32 @@ export interface QueueDrainedEvent {
   ts: string;
 }
 
+export interface QueueSideEffect {
+  kind:
+    | 'todo_created'
+    | 'draft_queued'
+    | 'slack_replied'
+    | 'email_drafted'
+    | 'cost_recorded'
+    | 'agent_spawned';
+  ref_id: string | null;
+  ts: string;
+}
+
+/**
+ * Emitted *after* the downstream side-effect of a triage action has landed
+ * (todo row inserted, draft queued, Slack reply posted, etc.). See
+ * `.planning/v3/INTEGRATION.md` §C-8 and §4.8.
+ */
+export interface QueueSideEffectConfirmedEvent {
+  type: 'queue.side_effect_confirmed';
+  item_id: string;
+  applied_ts: string;
+  observable_at: string;
+  side_effects: QueueSideEffect[];
+  ts: string;
+}
+
 // ---------- Cost ledger ----------
 
 export interface CostsUpdatedEvent {
@@ -110,6 +136,7 @@ export type PlatformSSEEvent =
   | QueueItemAddedEvent
   | QueueItemDecidedEvent
   | QueueDrainedEvent
+  | QueueSideEffectConfirmedEvent
   | CostsUpdatedEvent
   | CostsBudgetBreachedEvent
   | AgentSpawnedEvent

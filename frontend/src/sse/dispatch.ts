@@ -49,6 +49,26 @@ export function dispatchSSEEvent(
       queryClient.invalidateQueries({ queryKey: ['queue'] });
       return;
 
+    case 'queue.side_effect_confirmed':
+      // Server has finished applying the side-effects of a triage action.
+      // Clear any lingering optimistic state and invalidate dependent caches
+      // (queue + todos — see INTEGRATION.md §5 SideEffectConfirmed).
+      useQueueStore.getState().clearOptimistic(evt.item_id);
+      queryClient.invalidateQueries({ queryKey: ['queue'] });
+      queryClient.invalidateQueries({ queryKey: ['resolved'] });
+      for (const se of evt.side_effects) {
+        if (se.kind === 'todo_created') {
+          queryClient.invalidateQueries({ queryKey: ['todos'] });
+        } else if (se.kind === 'draft_queued') {
+          queryClient.invalidateQueries({ queryKey: ['drafts'] });
+        } else if (se.kind === 'cost_recorded') {
+          queryClient.invalidateQueries({ queryKey: ['costs'] });
+        } else if (se.kind === 'agent_spawned') {
+          queryClient.invalidateQueries({ queryKey: ['agents'] });
+        }
+      }
+      return;
+
     case 'costs.updated':
       useCostsStore.getState().setCents(evt.cents, evt.ts);
       queryClient.invalidateQueries({ queryKey: ['costs'] });

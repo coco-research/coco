@@ -963,3 +963,24 @@ idempotency_keys = Table(
     Column("created_at", Text, nullable=False),
     UniqueConstraint("key", "route", name="uq_idempotency_keys_key_route"),
 )
+
+# ---------------------------------------------------------------------------
+# Dead-letter queue (Phase 10 — watchers + crons)
+# ---------------------------------------------------------------------------
+# Background jobs and file-watcher-triggered ingest tasks that fail are
+# enqueued here for bounded retry. After max retries, rows are marked
+# `archived` and surfaced to the operator via the admin DLQ endpoint.
+
+dead_letter_queue = Table(
+    "dead_letter_queue",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("source_task", Text, nullable=False),
+    Column("payload_json", Text, nullable=False, server_default="{}"),
+    Column("error", Text, nullable=False, server_default=""),
+    Column("retry_count", Integer, nullable=False, server_default="0"),
+    Column("status", Text, nullable=False, server_default="pending"),
+    Column("created_at", Text, nullable=False),
+    Column("next_retry_at", Text),
+    Column("last_attempt_at", Text),
+)

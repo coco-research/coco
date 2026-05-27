@@ -8,6 +8,7 @@ import { InlineEditor } from '../components/shared/InlineEditor';
 import { PropertiesPanel } from '../components/shared/PropertiesPanel';
 import { PropertyField } from '../components/shared/PropertyField';
 import { useToast } from '../components/shared/Toast';
+import { ErrorState } from '../components/shared/ErrorState';
 
 interface Goal {
   id: string;
@@ -227,7 +228,7 @@ export default function GoalsPage() {
 
   const queryClient = useQueryClient();
 
-  const { data: goals = [], isLoading } = useQuery<Goal[]>({
+  const { data: goals = [], isLoading, isError, error, refetch } = useQuery<Goal[]>({
     queryKey: ['goals', selectedNodeId, scopeProjectIds],
     queryFn: async () => {
       const url = scopeProjectIds.length === 1
@@ -236,7 +237,7 @@ export default function GoalsPage() {
           ? `/api/goals?project_ids=${scopeProjectIds.join(',')}`
           : '/api/goals';
       const res = await fetch(url);
-      if (!res.ok) return [];
+      if (!res.ok) throw new Error(`Failed to load goals (HTTP ${res.status})`);
       return res.json();
     },
   });
@@ -273,6 +274,12 @@ export default function GoalsPage() {
             <div key={i} className="h-10 bg-muted/50 rounded-md animate-pulse" />
           ))}
         </div>
+      ) : isError ? (
+        <ErrorState
+          error={error}
+          title="Couldn't load goals"
+          onRetry={() => void refetch()}
+        />
       ) : rootGoals.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <Target size={40} className="mb-3 opacity-30" />

@@ -11,6 +11,8 @@ from app.config import COCO_CORS_ORIGINS
 from app.api.error_envelope import register_exception_handlers
 from app.middleware.auth import AuthMiddleware, AUTH_TOKEN
 from app.middleware.rate_limit import RateLimitMiddleware, RATE_LIMIT_ENABLED
+from app.middleware.idempotency import IdempotencyMiddleware
+from app.middleware.csp import CSPMiddleware
 from app.db.init_db import init_platform_db
 from app.services.event_bus import event_bus
 from app.services.process_manager import process_manager
@@ -153,6 +155,15 @@ if AUTH_TOKEN:
 # Rate limiting middleware — active by default, disable with COCO_RATE_LIMIT=false
 if RATE_LIMIT_ENABLED:
     app.add_middleware(RateLimitMiddleware)
+
+# Idempotency middleware — enforces Idempotency-Key on mutating endpoints.
+# See .planning/v3/backend/DESIGN.md §7.
+app.add_middleware(IdempotencyMiddleware)
+
+# Default CSP middleware — applies a hardened default for API responses.
+# (Per-response SPA-friendly CSP from the security-headers handler below
+# takes precedence where it sets the header.)
+app.add_middleware(CSPMiddleware)
 
 # Security headers middleware
 @app.middleware("http")

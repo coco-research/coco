@@ -884,6 +884,7 @@ attention_events = Table(
 )
 
 # ---------------------------------------------------------------------------
+<<<<<<< HEAD
 # project_brain.db — separate read-only DB (NOT platform.db)
 #
 # These tables live in a distinct MetaData so they do not conflict with
@@ -946,4 +947,20 @@ brain_entities = Table(
     Column("metadata_json", Text, server_default="{}"),
     Column("created_at", Text, nullable=False),
     Column("updated_at", Text, nullable=False),
+)
+
+# ---------------------------------------------------------------------------
+# Idempotency (Phase 2 Foundation Hardening) — see .planning/v3/backend/DESIGN.md §7
+# ---------------------------------------------------------------------------
+
+idempotency_keys = Table(
+    "idempotency_keys",
+    metadata,
+    Column("key", Text, nullable=False),
+    Column("route", Text, nullable=False),
+    Column("request_hash", Text, nullable=False),
+    Column("response_status", Integer, nullable=False),
+    Column("response_body", Text, nullable=False),
+    Column("created_at", Text, nullable=False),
+    UniqueConstraint("key", "route", name="uq_idempotency_keys_key_route"),
 )

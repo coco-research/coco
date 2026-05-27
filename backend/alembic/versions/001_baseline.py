@@ -384,10 +384,29 @@ ALL_TABLES = [
 ]
 
 
+def _split_statements(sql: str) -> list[str]:
+    """Split a SQL script into individual statements on ``;``.
+
+    SQLite's DBAPI cursor (which Alembic's ``op.execute`` ultimately uses) only
+    allows a single statement per ``execute()`` call. ``init_db.py`` works
+    around this by using ``conn.executescript()``, but that helper is not
+    available through Alembic's migration context, so we split manually.
+
+    The ``TABLES`` block in this file only contains plain DDL — no triggers,
+    no string literals containing semicolons — so a naive split on ``;`` is
+    safe and keeps this migration trivial to audit.
+    """
+    return [stmt.strip() for stmt in sql.split(";") if stmt.strip()]
+
+
 def upgrade() -> None:
-    # Create all tables (IF NOT EXISTS — safe for existing databases)
-    op.execute(TABLES)
-    # Create all indexes
+    # Create all tables (IF NOT EXISTS — safe for existing databases).
+    # Split into individual statements: SQLite's DBAPI only executes one
+    # statement per call, so ``op.execute(TABLES)`` would raise
+    # ``sqlite3.ProgrammingError: You can only execute one statement at a time``.
+    for stmt in _split_statements(TABLES):
+        op.execute(stmt)
+    # Create all indexes (each entry in INDEXES is already a single statement).
     for idx_sql in INDEXES:
         op.execute(idx_sql)
 

@@ -217,7 +217,12 @@ export function BriefingCard(props: BriefingCardProps) {
       )}
 
       {/* Summary stats */}
-      <div className="flex gap-x-4 text-xs text-muted-foreground border-t border-border/30 pt-3 mt-3 whitespace-nowrap overflow-x-auto">
+      <div
+        role="region"
+        aria-label="Summary statistics"
+        tabIndex={0}
+        className="flex gap-x-4 text-xs text-muted-foreground border-t border-border/30 pt-3 mt-3 whitespace-nowrap overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      >
         <span>{todos.total_open} open tasks</span>
         <span className="text-border">·</span>
         <span>{todos.high_priority.length} high priority</span>

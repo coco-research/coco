@@ -13,6 +13,7 @@ import { useInViewport } from '../hooks/useInViewport';
 import { useToast } from '../components/shared/Toast';
 import { useListNavigation } from '../hooks/useListNavigation';
 import { VoiceDecisionCard, type VoiceDecisionItem } from '../components/inbox/VoiceDecisionCard';
+import { ErrorState } from '../components/shared/ErrorState';
 
 type ReadState = 'unread' | 'seen' | 'dismissed';
 type InboxTab = 'all' | 'urgent' | 'drafts' | 'classify' | 'suggestions' | 'health' | 'auto_handled' | 'actions';
@@ -272,7 +273,7 @@ export default function InboxPage() {
 
   // ─── Server-persisted read states ────────────────────────────────
 
-  const { data: serverReadStates, isLoading: isLoadingReadStates, refetch: refetchReadStates } = useQuery({
+  const { data: serverReadStates, isLoading: isLoadingReadStates, isError: readStatesError, error: readStatesErr, refetch: refetchReadStates } = useQuery({
     queryKey: ['inbox-read-states'],
     queryFn: () => apiFetch<Record<string, ReadState>>('/inbox/read-states'),
     staleTime: 5_000,
@@ -941,6 +942,17 @@ export default function InboxPage() {
           )}
         </div>
       </div>
+
+      {/* Error state for failed initial fetch */}
+      {readStatesError && !isLoadingReadStates && (
+        <div className="py-6">
+          <ErrorState
+            error={readStatesErr}
+            title="Couldn't load inbox"
+            onRetry={() => void refetchReadStates()}
+          />
+        </div>
+      )}
 
       {/* Skeleton loading state for initial data fetch */}
       <Skeleton name="inbox-list" loading={isLoadingReadStates} animate="pulse">

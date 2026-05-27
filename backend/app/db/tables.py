@@ -884,7 +884,6 @@ attention_events = Table(
 )
 
 # ---------------------------------------------------------------------------
-<<<<<<< HEAD
 # project_brain.db — separate read-only DB (NOT platform.db)
 #
 # These tables live in a distinct MetaData so they do not conflict with

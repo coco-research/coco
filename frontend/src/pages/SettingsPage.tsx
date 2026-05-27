@@ -16,6 +16,20 @@ import {
   setEnabled as setNotifEnabled,
   requestPermission,
 } from '../lib/desktop-notifications';
+import {
+  getDensity,
+  setDensity,
+  subscribeDensity,
+  type DensityMode,
+} from '../lib/density';
+import {
+  getLocale,
+  setLocale,
+  subscribeLocale,
+  SUPPORTED_LOCALES,
+  t,
+  type Locale,
+} from '../lib/i18n';
 
 type SaveStatus = 'idle' | 'saving' | 'saved';
 
@@ -96,6 +110,87 @@ function NotificationToggle() {
   );
 }
 
+function DensityToggle() {
+  const [mode, setMode] = useState<DensityMode>(() => getDensity());
+
+  useEffect(() => subscribeDensity(setMode), []);
+
+  const options: { value: DensityMode; label: string }[] = [
+    { value: 'compact', label: t('settings.density.compact', 'Compact') },
+    { value: 'cozy', label: t('settings.density.cozy', 'Cozy') },
+    { value: 'comfortable', label: t('settings.density.comfortable', 'Comfortable') },
+  ];
+
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-border">
+      <div>
+        <p className="text-sm font-medium text-foreground">
+          {t('settings.density.title', 'Density')}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {t(
+            'settings.density.help',
+            'Adjusts spacing and font scale across the app.',
+          )}
+        </p>
+      </div>
+      <div className="inline-flex rounded-md border border-border overflow-hidden" role="radiogroup" aria-label="UI density">
+        {options.map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            role="radio"
+            aria-checked={mode === opt.value}
+            onClick={() => setDensity(opt.value)}
+            className={cn(
+              'px-3 py-1.5 text-xs font-medium transition-colors',
+              mode === opt.value
+                ? 'bg-accent text-accent-foreground'
+                : 'bg-secondary text-secondary-foreground hover:bg-accent/40',
+            )}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LocalePicker() {
+  const [locale, setLocaleState] = useState<Locale>(() => getLocale());
+
+  useEffect(() => subscribeLocale(setLocaleState), []);
+
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-border">
+      <div>
+        <p className="text-sm font-medium text-foreground">
+          {t('settings.locale.title', 'Language')}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {t(
+            'settings.locale.help',
+            'Only English is shipped today. More locales coming soon.',
+          )}
+        </p>
+      </div>
+      <select
+        value={locale}
+        onChange={(e) => setLocale(e.target.value as Locale)}
+        className="px-3 py-1.5 text-xs font-medium bg-secondary text-secondary-foreground rounded-md border border-border"
+        aria-label="Interface language"
+      >
+        {SUPPORTED_LOCALES.map((l) => (
+          <option key={l.code} value={l.code} disabled={l.code !== 'en'}>
+            {l.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 function AutomationsTab() {
   const [editingTrigger, setEditingTrigger] = useState<Trigger | null>(null);
 
@@ -167,6 +262,8 @@ export default function SettingsPage() {
           <DisplaySettings onSaveStatus={setSaveStatus} />
           <div className="max-w-lg">
             <NotificationToggle />
+            <DensityToggle />
+            <LocalePicker />
           </div>
         </Tabs.Content>
 

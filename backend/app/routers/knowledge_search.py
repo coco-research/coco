@@ -58,10 +58,13 @@ def _cache_set(key: str, data: dict):
         del _semantic_cache[oldest]
     _semantic_cache[key] = (time.time(), data)
 
-# Make knowledge engine's search.py importable
+# Knowledge engine's search.py lives outside the backend package — see
+# ``_get_search_module`` for the scoped sys.path insertion. We deliberately
+# do NOT modify sys.path at module-import time: inserting KNOWLEDGE_DIR at
+# index 0 process-wide shadows stdlib modules with the same name (most
+# notably "search" itself, but also "scripts"/"index"/"ingest") and can
+# corrupt unrelated imports across the entire process.
 _knowledge_dir = str(KNOWLEDGE_DIR)
-if _knowledge_dir not in sys.path:
-    sys.path.insert(0, _knowledge_dir)
 
 log = logging.getLogger(__name__)
 router = APIRouter(tags=["Knowledge"])
@@ -798,13 +801,36 @@ def get_knowledge_article(gid: str):
 # ---------------------------------------------------------------------------
 
 def _get_search_module():
-    """Lazy-import knowledge engine's search.py. Returns None if unavailable."""
+    """Lazy-import knowledge engine's search.py. Returns None if unavailable.
+
+    sys.path is mutated only for the duration of this call: we append the
+    knowledge dir at the END of sys.path (so stdlib + site-packages still win
+    by name), attempt the import, then restore sys.path in a finally block.
+    This prevents the historical bug where ``sys.path.insert(0, ...)`` at
+    module-import time shadowed stdlib modules process-wide.
+    """
+    if not _knowledge_dir:
+        return None
+    # Check sys.modules cache first — the import only needs to run once.
+    cached = sys.modules.get("search")
+    if cached is not None and getattr(cached, "__file__", "").startswith(_knowledge_dir):
+        return cached
+    appended = False
+    if _knowledge_dir not in sys.path:
+        sys.path.append(_knowledge_dir)
+        appended = True
     try:
         import search as knowledge_search_mod
         return knowledge_search_mod
     except ImportError:
         log.debug("knowledge search.py not importable from %s", KNOWLEDGE_DIR)
         return None
+    finally:
+        if appended:
+            try:
+                sys.path.remove(_knowledge_dir)
+            except ValueError:
+                pass
 
 
 @router.get("/api/knowledge/semantic")
@@ -1179,8 +1205,12 @@ def personal_file_detail(brain_slug: str, entity_id: int):
 # Media-memory search (Wave 3 — media unification)
 # ---------------------------------------------------------------------------
 
-_MEDIA_MEMORY_VENV_PYTHON = Path.home() / ".claude" / "media-memory" / ".venv" / "bin" / "python3"
-_MEDIA_MEMORY_SEARCH_SCRIPT = Path.home() / ".claude" / "media-memory" / "scripts" / "search.py"
+_MEDIA_MEMORY_DIR = Path(
+    os.environ.get("COCO_MEDIA_MEMORY_DIR")
+    or (Path.home() / ".claude" / "media-memory")
+).expanduser()
+_MEDIA_MEMORY_VENV_PYTHON = _MEDIA_MEMORY_DIR / ".venv" / "bin" / "python3"
+_MEDIA_MEMORY_SEARCH_SCRIPT = _MEDIA_MEMORY_DIR / "scripts" / "search.py"
 
 _media_cache: dict[str, tuple[float, dict]] = {}
 _MEDIA_CACHE_TTL = 300  # 5 minutes

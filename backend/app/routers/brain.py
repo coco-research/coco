@@ -1,6 +1,7 @@
 import json
 import logging
 import secrets
+import threading
 from datetime import datetime, timezone
 from typing import Any
 
@@ -369,6 +370,7 @@ def get_config():
 # ---------------------------------------------------------------------------
 
 _brain_engine: Engine | None = None
+_brain_engine_lock = threading.Lock()
 
 
 def _get_brain_engine() -> Engine | None:
@@ -376,15 +378,23 @@ def _get_brain_engine() -> Engine | None:
 
     Returns None if the brain DB file does not exist, so callers can short-
     circuit to empty results without touching the disk on every request.
+
+    Thread-safe lazy init: guarded by a module-level lock so concurrent
+    requests cannot race and create two engines pointing at the same file
+    (which leaks file handles and bypasses SA's connection pool).
     """
     global _brain_engine
     if not BRAIN_DB_PATH.exists():
         return None
+    # Double-checked locking: fast-path the common case (engine already built)
+    # without taking the lock; only acquire on the cold-init path.
     if _brain_engine is None:
-        # SQLite read-only via URI. The SA URL form uses the `uri=true` query
-        # param to pass through to sqlite3's connect(uri=True).
-        url = f"sqlite:///file:{BRAIN_DB_PATH}?mode=ro&uri=true"
-        _brain_engine = create_engine(url, connect_args={"timeout": 5})
+        with _brain_engine_lock:
+            if _brain_engine is None:
+                # SQLite read-only via URI. The SA URL form uses the `uri=true`
+                # query param to pass through to sqlite3's connect(uri=True).
+                url = f"sqlite:///file:{BRAIN_DB_PATH}?mode=ro&uri=true"
+                _brain_engine = create_engine(url, connect_args={"timeout": 5})
     return _brain_engine
 
 

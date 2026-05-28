@@ -8,8 +8,10 @@ into a concise system prompt that stays under ~2000 tokens.
 from __future__ import annotations
 
 import logging
+import os
 import sqlite3
 from datetime import datetime, timezone
+from pathlib import Path
 
 from sqlalchemy import (
     Column,
@@ -24,6 +26,15 @@ from sqlalchemy import (
 )
 
 from app.config import BRAIN_JSON_PATH, QUEUE_JSON_PATH, CONFIG_JSON_PATH, HUB_DB_PATH, KNOWLEDGE_DB_PATH
+
+# Media-memory directory — overridable via env var for portability. Defaults to
+# the historical ~/.claude/media-memory location used by the Claude Code
+# media-memory subsystem. Kept here so chat-context builders can surface
+# media-memory availability uniformly across services.
+MEDIA_MEMORY_DIR = Path(
+    os.environ.get("COCO_MEDIA_MEMORY_DIR")
+    or (Path.home() / ".claude" / "media-memory")
+).expanduser()
 from app.db.session import get_db
 from app.services.collaboration_context import build_knowledge_context
 from app.db.tables import (

@@ -24,6 +24,14 @@ from app.config import KNOWLEDGE_DB_PATH, KNOWLEDGE_DIR
 
 log = logging.getLogger(__name__)
 
+# Media-memory directory — overridable via env var for portability across
+# machines and CI environments. Defaults to the historical ~/.claude/media-memory
+# location used by the Claude Code media-memory subsystem.
+MEDIA_MEMORY_DIR = Path(
+    os.environ.get("COCO_MEDIA_MEMORY_DIR")
+    or (Path.home() / ".claude" / "media-memory")
+).expanduser()
+
 # Make knowledge engine's search.py importable
 _knowledge_dir = str(KNOWLEDGE_DIR)
 if _knowledge_dir not in sys.path:

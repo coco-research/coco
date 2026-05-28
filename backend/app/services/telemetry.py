@@ -72,22 +72,83 @@ def _write_pref_flag(flag: bool) -> None:
             conn.execute(insert(preferences).values(key=PREF_KEY, value=val))
 
 
+def _ui_opt_out_path() -> Path:
+    """Sidecar file at ``~/.coco/telemetry.json`` that records the user's
+    explicit UI opt-out. SEC-FIX L4-W2#7: independent of the env var so a
+    later ``COCO_TELEMETRY=true`` cannot silently re-enable telemetry.
+    """
+    return Path(COCO_DIR) / "telemetry.json"
+
+
+def _read_ui_opt_out() -> bool:
+    """Return True if the user has explicitly opted OUT via the UI."""
+    p = _ui_opt_out_path()
+    if not p.exists():
+        return False
+    try:
+        data = json.loads(p.read_text(encoding="utf-8") or "{}")
+    except (OSError, json.JSONDecodeError):
+        return False
+    return bool(data.get("opted_out", False))
+
+
+def _write_ui_opt_out(opted_out: bool) -> None:
+    """Atomically persist the UI opt-out flag."""
+    p = _ui_opt_out_path()
+    p.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "opted_out": bool(opted_out),
+        "updated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+    }
+    tmp = p.with_suffix(p.suffix + ".tmp")
+    tmp.write_text(json.dumps(payload), encoding="utf-8")
+    os.replace(tmp, p)
+
+
 def is_enabled() -> bool:
-    """Env override wins; otherwise read preference. Cached after first read."""
+    """Resolve effective telemetry state.
+
+    SEC-FIX L4-W2#7: precedence is now:
+      1. UI opt-out wins absolutely — if the user opted out via the UI, no
+         env var can re-enable.
+      2. ``COCO_TELEMETRY`` may DISABLE telemetry (env=false) but cannot
+         re-enable on its own when the UI flag is off.
+      3. Otherwise the persisted preference table value applies.
+    """
     global _cached_flag
+
+    # 1) UI opt-out is the hard kill switch.
+    if _read_ui_opt_out():
+        return False
+
     env = os.getenv(ENV_OVERRIDE)
     if env is not None:
-        return env.lower() in ("true", "1", "yes", "on")
+        env_truthy = env.lower() in ("true", "1", "yes", "on")
+        # Env can only DISABLE; if env is true, it still defers to the
+        # persisted preference (so a stray export can't re-enable).
+        if not env_truthy:
+            return False
+
     if _cached_flag is None:
         _cached_flag = _read_pref_flag()
     return bool(_cached_flag)
 
 
 def set_enabled(flag: bool, actor: str = "user") -> bool:
-    """Persist the opt-in flag. Returns the new state."""
+    """Persist the opt-in flag. Returns the new state.
+
+    SEC-FIX L4-W2#7: explicit ``False`` also writes a UI opt-out sidecar so
+    a later ``COCO_TELEMETRY=true`` env cannot bypass the user's choice.
+    Setting ``True`` clears the sidecar.
+    """
     global _cached_flag
     flag = bool(flag)
     _write_pref_flag(flag)
+    try:
+        _write_ui_opt_out(opted_out=not flag)
+    except OSError:
+        # Sidecar is best-effort — preference table is authoritative.
+        pass
     _cached_flag = flag
     return flag
 
@@ -138,9 +199,16 @@ def list_recent_events(limit: int = 50) -> list[dict]:
 
 
 def clear_cache() -> None:
-    """Test-only — reset cached enabled flag."""
+    """Test-only — reset cached enabled flag and the UI opt-out sidecar."""
     global _cached_flag
     _cached_flag = None
+    # SEC-FIX L4-W2#7: tests rely on a clean slate; remove the opt-out file.
+    try:
+        p = _ui_opt_out_path()
+        if p.exists():
+            p.unlink()
+    except OSError:
+        pass
 
 
 __all__ = [

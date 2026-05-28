@@ -19,6 +19,7 @@ from app.config import (
     QUEUE_JSON_PATH,
     COCO_AUTH_TOKEN,
 )
+from app.services import auth as auth_service
 
 router = APIRouter(tags=["System"])
 _start_time = time.time()
@@ -142,7 +143,10 @@ def health_detail():
         "status": "ready" if (reachable and not missing) else "degraded",
         "version": PLATFORM_VERSION,
         "uptime_seconds": int(time.time() - _start_time),
-        "pin_required": bool(COCO_AUTH_TOKEN),
+        # SEC-FIX L4-W2#2: report the true PIN state, not the env-flag.
+        # ``COCO_AUTH_TOKEN`` is the legacy bearer-token toggle; the new PIN
+        # mode lives in the auth service. Either configured source counts.
+        "pin_required": bool(COCO_AUTH_TOKEN) or auth_service.is_pin_set(),
         "platform_db": {
             "reachable": reachable,
             "missing_tables": missing,

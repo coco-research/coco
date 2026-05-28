@@ -22,7 +22,9 @@ import hashlib
 import hmac
 import os
 import secrets
+import threading
 import time
+from collections import OrderedDict
 from dataclasses import dataclass
 from typing import Optional
 
@@ -58,15 +60,50 @@ class _Session:
     expires_at: float
 
 
-_sessions: dict[str, _Session] = {}
+# SEC-FIX L4-W2#5: bound the session store. Use an OrderedDict so we can
+# evict the oldest (LRU) when the cap is hit, and run a background sweeper
+# that purges expired sessions even when nothing accesses the store.
+_MAX_SESSIONS = 1000
+_BACKGROUND_PURGE_INTERVAL_S = 60.0
+
+_sessions: "OrderedDict[str, _Session]" = OrderedDict()
+_sessions_lock = threading.Lock()
+_purger_thread: Optional[threading.Thread] = None
 
 
 def _purge_expired() -> None:
     """Remove expired sessions (called on access)."""
     now = time.time()
-    expired = [tok for tok, s in _sessions.items() if s.expires_at <= now]
-    for tok in expired:
-        _sessions.pop(tok, None)
+    with _sessions_lock:
+        expired = [tok for tok, s in _sessions.items() if s.expires_at <= now]
+        for tok in expired:
+            _sessions.pop(tok, None)
+
+
+def _ensure_purger_running() -> None:
+    """Start a daemon thread that periodically purges expired sessions.
+
+    Cheap insurance against the store growing if traffic stops touching
+    ``validate_session``/``sessions_count`` for a long stretch.
+    """
+    global _purger_thread
+    if _purger_thread is not None and _purger_thread.is_alive():
+        return
+
+    def _loop() -> None:
+        while True:
+            time.sleep(_BACKGROUND_PURGE_INTERVAL_S)
+            try:
+                _purge_expired()
+            except Exception:
+                # Never let the sweeper die from a transient error.
+                pass
+
+    t = threading.Thread(
+        target=_loop, name="coco-auth-session-purger", daemon=True
+    )
+    t.start()
+    _purger_thread = t
 
 
 # ---------------------------------------------------------------------------
@@ -195,30 +232,59 @@ def check_rate_limit_ok(client_key: str = "default") -> bool:
 
 
 def _issue_session() -> str:
+    """Mint a new session and enforce the 1000-session LRU cap.
+
+    SEC-FIX L4-W2#5: evicts the oldest session first when capacity is
+    reached and lazily purges expired entries on every issuance.
+    """
+    _ensure_purger_running()
     token = secrets.token_urlsafe(32)
     now = time.time()
-    _sessions[token] = _Session(
-        token=token, issued_at=now, expires_at=now + SESSION_TTL_SECONDS
-    )
+    with _sessions_lock:
+        # Inline purge of expired entries before measuring capacity.
+        expired = [tok for tok, s in _sessions.items() if s.expires_at <= now]
+        for tok in expired:
+            _sessions.pop(tok, None)
+        # Evict oldest until we are strictly under the cap.
+        while len(_sessions) >= _MAX_SESSIONS:
+            try:
+                _sessions.popitem(last=False)
+            except KeyError:
+                break
+        _sessions[token] = _Session(
+            token=token, issued_at=now, expires_at=now + SESSION_TTL_SECONDS
+        )
+        # Move-to-end is implicit for fresh inserts on an OrderedDict.
     return token
 
 
 def validate_session(token: Optional[str]) -> bool:
-    """Returns True if token is a known, non-expired session."""
+    """Returns True if token is a known, non-expired session.
+
+    SEC-FIX L4-W2#5: touches the LRU ordering on hit so frequently-used
+    sessions are evicted last when the cap is reached.
+    """
     if not token:
         return False
     _purge_expired()
-    sess = _sessions.get(token)
-    if not sess:
-        return False
-    if sess.expires_at <= time.time():
-        _sessions.pop(token, None)
-        return False
+    with _sessions_lock:
+        sess = _sessions.get(token)
+        if not sess:
+            return False
+        if sess.expires_at <= time.time():
+            _sessions.pop(token, None)
+            return False
+        # Refresh LRU position.
+        try:
+            _sessions.move_to_end(token, last=True)
+        except KeyError:
+            pass
     return True
 
 
 def revoke_session(token: str) -> None:
-    _sessions.pop(token, None)
+    with _sessions_lock:
+        _sessions.pop(token, None)
 
 
 def sessions_count() -> int:

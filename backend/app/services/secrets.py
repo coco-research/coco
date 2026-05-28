@@ -8,12 +8,16 @@ external `chmod`/`echo > file` rotation is picked up automatically.
 """
 from __future__ import annotations
 
+import logging
 import os
+import stat as _stat
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
 from app.config import COCO_DIR
+
+logger = logging.getLogger(__name__)
 
 # Known secrets registry — name -> filename (relative to COCO_DIR)
 KNOWN_SECRETS: dict[str, str] = {
@@ -50,13 +54,63 @@ def _secret_path(name: str) -> Path:
     return Path(COCO_DIR) / fname
 
 
+def _is_secret_file_safe(p: Path) -> tuple[bool, Optional[str]]:
+    """SEC-FIX L4-W2#4: verify the secret file is not symlinked, not
+    group/other-readable, and owned by the current uid. Returns
+    ``(ok, reason)``. ``reason`` is set when the file should be rejected.
+
+    On non-POSIX platforms (no real uid/mode semantics) this is a no-op.
+    """
+    try:
+        # Refuse symlinks outright — they can redirect to untrusted paths.
+        if p.is_symlink():
+            return False, "symlink"
+        st = p.lstat()
+    except OSError as exc:
+        return False, f"stat_failed:{exc.__class__.__name__}"
+
+    # Skip POSIX-specific checks on Windows (no meaningful mode/uid).
+    if os.name != "posix":
+        return True, None
+
+    # Reject group/other readable or writable bits.
+    mode = _stat.S_IMODE(st.st_mode)
+    if mode & 0o077:
+        return False, f"mode_too_open:0o{mode:03o}"
+
+    # Reject foreign-owned files. (Root-owned files readable by current uid
+    # are still permitted only when uid matches, by design.)
+    try:
+        current_uid = os.geteuid()
+    except AttributeError:
+        return True, None
+    if st.st_uid != current_uid:
+        return False, f"wrong_owner:uid={st.st_uid}"
+
+    return True, None
+
+
 def get_secret(name: str) -> Optional[str]:
     """Read a secret by name, using mtime-invalidated cache. Strips trailing
-    whitespace. Returns None if absent."""
+    whitespace. Returns None if absent.
+
+    SEC-FIX L4-W2#4: refuses to read the file if it is a symlink, has group
+    or other read/write bits set, or is owned by a different uid.
+    """
     p = _secret_path(name)
     if not p.exists():
         # Drop cache entry if file deleted
         _cache.pop(name, None)
+        return None
+    safe, reason = _is_secret_file_safe(p)
+    if not safe:
+        _cache.pop(name, None)
+        logger.warning(
+            "secret_file_unsafe name=%s reason=%s path=%s",
+            name,
+            reason,
+            str(p),
+        )
         return None
     try:
         stat = p.stat()

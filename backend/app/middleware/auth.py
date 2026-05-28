@@ -19,7 +19,9 @@ Exempt paths (no auth, no origin check): /api/health/*, /api/auth/*,
 from __future__ import annotations
 
 import os
+import re
 from typing import Iterable
+from urllib.parse import urlsplit
 
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -67,19 +69,37 @@ def _is_public_path(path: str) -> bool:
     return False
 
 
-def _origin_allowed(origin: str | None) -> bool:
-    """Validate the Origin header is localhost-bound."""
+_ALLOWED_ORIGIN_IPV6: tuple[str, ...] = ("::1",)
+
+
+def _origin_allowed(origin: str | None, *, require_present: bool = False) -> bool:
+    """Validate the Origin header is localhost-bound.
+
+    SEC-FIX L4-W2#1: Uses ``urllib.parse.urlsplit`` so IPv6 bracketed hosts
+    (``http://[::1]:3001``) parse correctly. When ``require_present`` is True
+    (state-changing methods), an absent Origin header is rejected — only
+    explicit localhost origins pass.
+    """
     if not origin:
-        # Same-origin requests and non-browser clients (curl) omit Origin.
+        # State-changing methods MUST carry an Origin header — otherwise an
+        # attacker-controlled non-browser client could bypass the check.
+        if require_present:
+            return False
+        # GET / read-only: allow missing Origin (same-origin and curl).
         return True
-    # Origin format: scheme://host[:port]
     try:
-        rest = origin.split("://", 1)[1]
-        host = rest.split("/", 1)[0]
-        host_only = host.split(":", 1)[0].lower()
-    except (IndexError, ValueError):
+        parts = urlsplit(origin)
+        host = parts.hostname  # urlsplit handles IPv6 brackets correctly
+    except (ValueError, AttributeError):
         return False
-    return host_only in _ALLOWED_ORIGIN_HOSTS
+    if not host:
+        return False
+    host_lower = host.lower()
+    if host_lower in _ALLOWED_ORIGIN_HOSTS:
+        return True
+    if host_lower in _ALLOWED_ORIGIN_IPV6:
+        return True
+    return False
 
 
 def _extract_session_token(request: Request) -> str | None:
@@ -89,6 +109,35 @@ def _extract_session_token(request: Request) -> str | None:
         return tok
     hdr = request.headers.get("X-Coco-Session") or request.headers.get("x-coco-session")
     return hdr
+
+
+# SEC-FIX L4-W2#8: X-Request-ID format validation.
+_REQUEST_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
+
+
+def _sanitize_request_id(request: Request) -> None:
+    """If the inbound X-Request-ID is malformed, strip it from the ASGI scope.
+
+    Downstream middleware in main.py will then generate a fresh UUID rather
+    than echoing attacker-controlled bytes (which could enable header
+    smuggling, log injection, or response splitting).
+    """
+    incoming = request.headers.get("X-Request-ID") or request.headers.get(
+        "x-request-id"
+    )
+    if incoming is None:
+        return
+    if _REQUEST_ID_RE.fullmatch(incoming):
+        return
+    # Strip from ASGI scope headers (the only authoritative source).
+    raw_headers = request.scope.get("headers")
+    if not isinstance(raw_headers, list):
+        return
+    request.scope["headers"] = [
+        (name, value)
+        for (name, value) in raw_headers
+        if name.lower() != b"x-request-id"
+    ]
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -109,13 +158,36 @@ class AuthMiddleware(BaseHTTPMiddleware):
         path = request.url.path
         method = request.method.upper()
 
+        # SEC-FIX L4-W2#8: validate X-Request-ID format and sanitize if bogus,
+        # so downstream observability middleware never echoes attacker-controlled
+        # content. We strip the header from the ASGI scope; main.py will then
+        # generate a fresh UUID on receipt.
+        _sanitize_request_id(request)
+
         # 1) Origin check for state-changing methods
+        # SEC-FIX L4-W2#1: parse Origin with urlsplit (IPv6 brackets ok, ::1
+        # accepted). For absent Origin on /api/* writes, fall back to the
+        # Sec-Fetch-Site / Sec-Fetch-Mode browser fetch-metadata signals to
+        # reject obvious cross-site browser requests while still allowing
+        # non-browser clients (curl, integration tests) that send neither
+        # Origin nor Sec-Fetch-* headers.
         if method in STATE_CHANGING_METHODS:
-            if not _origin_allowed(request.headers.get("origin")):
-                return JSONResponse(
-                    status_code=403,
-                    content={"detail": "Origin not allowed"},
-                )
+            origin = request.headers.get("origin")
+            if origin is not None:
+                if not _origin_allowed(origin):
+                    return JSONResponse(
+                        status_code=403,
+                        content={"detail": "Origin not allowed"},
+                    )
+            else:
+                # Missing Origin — consult fetch-metadata as a fallback.
+                sec_site = (request.headers.get("sec-fetch-site") or "").lower()
+                if sec_site in ("cross-site", "same-site"):
+                    # Cross-origin / sibling-origin browser request → block.
+                    return JSONResponse(
+                        status_code=403,
+                        content={"detail": "Origin not allowed"},
+                    )
 
         # 2) Public paths bypass auth
         if _is_public_path(path) or path in self._extra_public:

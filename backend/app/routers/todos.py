@@ -536,8 +536,8 @@ def delete_todo(todo_id: str):
                         "is_platform_native": 0,
                         "updated_at": now(),
                     },
-                    conflict_cols=["hub_todo_id"],
-                    update_cols=["status", "updated_at"],
+                    conflict_columns=["hub_todo_id"],
+                    update_columns=["status", "updated_at"],
                 )
             )
 

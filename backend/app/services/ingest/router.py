@@ -18,10 +18,13 @@ Phase 5 status:
 
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import dataclass, field
 from typing import Callable, Protocol, Sequence
 from uuid import uuid4
+
+logger = logging.getLogger(__name__)
 
 from app.services.ingest.classifier import (
     JiraPrefixRule,
@@ -228,9 +231,23 @@ def dispatch(request: IngestRequest, deps: IngestDeps | None = None) -> IngestRe
     else:
         request = handler(request)
 
-    # 2. Compute source_hash if absent
-    sha = request.source_hash or compute_source_hash(request.raw_text)
+    # 2. Compute source_hash. The IngestRequest.source_hash field is a
+    # convenience for callers that already hashed canonical-form raw_text on
+    # their side (saves a round-trip recompute). It is NOT a trust boundary:
+    # the canonical hash is whatever the server computes from the bytes it
+    # sees, and we always recompute here. A mismatch is logged so callers can
+    # detect canonicalisation drift, but the server-computed hash always wins.
+    server_sha = compute_source_hash(request.raw_text)
     notes: list[str] = []
+    if request.source_hash and request.source_hash != server_sha:
+        logger.warning(
+            "source_hash mismatch: caller-supplied=%s server-computed=%s "
+            "(using server value; check canonical form on the caller)",
+            request.source_hash,
+            server_sha,
+        )
+        notes.append("source_hash_mismatch_caller_recomputed")
+    sha = server_sha
 
     # 3. Exact dedup
     if not request.force and deps.seen_hashes(sha):

@@ -65,7 +65,10 @@ def _idem_put(idem_key: str, sha: str, result: IngestResult) -> None:
         _idem_cache.move_to_end(ck)
         while len(_idem_cache) > _IDEM_MAX:
             oldest_ck, _ = _idem_cache.popitem(last=False)
-            stale_key = oldest_ck.split(":", 1)[0]
+            # Composite key is `<idem_key>:<source_hash>`. Idempotency-Key
+            # itself may contain colons, so we must strip the fixed sha
+            # suffix from the right rather than splitting on the first ':'.
+            stale_key = oldest_ck.rsplit(":", 1)[0]
             # Only drop the key->hash entry if it still points to that ck
             if _idem_key_to_hash.get(stale_key) and oldest_ck.endswith(
                 _idem_key_to_hash[stale_key]

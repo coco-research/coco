@@ -54,8 +54,15 @@ class IngestRequest(BaseModel):
     source_hash: str | None = Field(
         default=None,
         description=(
-            "Optional pre-computed sha256 of canonical text. If omitted, the "
-            "dispatcher computes it from raw_text."
+            "Optional pre-computed sha256 of canonical text. NOT a trust "
+            "boundary — the server ALWAYS recomputes the hash from "
+            "`raw_text` and uses its own value. If a caller-supplied value "
+            "is present and disagrees with the server-computed value, the "
+            "dispatcher logs a warning ('source_hash_mismatch_caller_recomputed' "
+            "appears in IngestResult.notes) so callers can detect "
+            "canonicalisation drift. Callers MUST produce this hash from the "
+            "same canonical form (UTF-8 bytes of `raw_text` post-handler "
+            "normalisation) that the server expects."
         ),
     )
     content_type: ContentType

@@ -255,7 +255,20 @@ def repair_bidirectional(store: InMemoryStore) -> RepairOutcome:
     skipped = 0
     notes: list[str] = []
 
-    broken = detect_broken_bidirectional(store)
+    # Dedup broken links by subject_id. `detect_broken_bidirectional` can
+    # surface the same subject multiple times when it has multiple stale
+    # document references, but each subject only needs one repair pass —
+    # without dedup the fixed/skipped counts double-count and the notes list
+    # grows N× the actual repair count, which is misleading in admin output.
+    broken_raw = detect_broken_bidirectional(store)
+    seen_subjects: set[str] = set()
+    broken = []
+    for link in broken_raw:
+        key = f"{link.subject_type}:{link.subject_id}"
+        if key in seen_subjects:
+            continue
+        seen_subjects.add(key)
+        broken.append(link)
     for link in broken:
         if link.subject_type == "person" and link.subject_id not in store.people:
             # canonical gone — drop inverted-index entry
@@ -482,6 +495,7 @@ class MergeLogRow:
     performed_by: Optional[str] = None
     reversible_until: Optional[str] = None
     undone_at: Optional[str] = None
+    merged_alias_ids: str = ""  # comma-joined alias IDs that were moved
 
 
 # In-process buffer of merge-log rows. Production code mirrors these
@@ -509,13 +523,18 @@ def record_merge_to_log(event: str, payload: dict) -> None:
     """
     if event != "merge_recorded":
         return
+    # merged_from MUST be the canonical id that disappeared, not the
+    # comma-joined alias ids. The alias-id string is preserved separately
+    # so undo flows can still locate the moved aliases.
+    other_canonical = payload.get("other_canonical_id") or ""
     row = MergeLogRow(
         id=payload["merge_id"],
-        merged_from=payload.get("merged_alias_id", ""),
+        merged_from=other_canonical,
         merged_into=payload["canonical_id"],
         performed_at=datetime.now(timezone.utc).isoformat(),
         performed_by=payload.get("performed_by"),
         reversible_until=payload.get("reversible_until"),
+        merged_alias_ids=payload.get("merged_alias_id", ""),
     )
     _MERGE_LOG.append(row)
 

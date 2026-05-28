@@ -410,10 +410,10 @@ class InMemoryStore:
                 if not still_has:
                     self._domain_index[domain].discard(a.canonical_id)
                 self._domain_index[domain].add(new_canonical_id)
-        # Migrate bidirectional inverted index entries
-        docs = self.person_documents.pop(old_canonical, None)
-        if docs:
-            self.person_documents.setdefault(new_canonical_id, set()).update(docs)
+        # NOTE: Do NOT migrate person_documents here. A single alias
+        # reassignment does not transfer document ownership — `old_canonical`
+        # may still own other aliases whose docs would vanish if we popped the
+        # whole set. Document ownership transfers belong in `merge()` only.
         _emit_link(
             "alias_reassigned",
             {
@@ -460,6 +460,7 @@ class InMemoryStore:
         method: MergeMethod,
         similarity: Optional[float],
         secondary_signal: Optional[str],
+        other_canonical_id: Optional[str] = None,
     ) -> MergeRecord:
         mid = f"merge:{uuid.uuid4().hex[:12]}"
         rec = MergeRecord(
@@ -478,6 +479,7 @@ class InMemoryStore:
                 "merge_id": mid,
                 "canonical_id": canonical_id,
                 "merged_alias_id": merged_alias_id,
+                "other_canonical_id": other_canonical_id,
                 "method": method.value,
             },
         )
@@ -593,6 +595,38 @@ class EntityResolver:
                 candidate_aliases=[c[2] for c in candidates],
             )
 
+        # Pre-flight cluster-integrity check. If adding this alias would push
+        # the cluster's min pairwise name similarity below the integrity floor,
+        # we must NOT record an auto-merge — the merge log would mis-label a
+        # demoted decision as a confirmed AUTO merge, polluting the audit
+        # trail. Persist the alias as PENDING and queue for human review.
+        projected_integrity = self._projected_cluster_integrity(
+            best_canonical, alias_value, alias_type
+        )
+        if projected_integrity < self.cluster_integrity_min:
+            new_alias = self.store.add_alias(
+                canonical_id=best_canonical,
+                alias_value=alias_value,
+                alias_type=alias_type,
+                confidence=best_score,
+                status=MergeStatus.PENDING,
+                source="resolver",
+            )
+            self.store.demoted.add(best_canonical)
+            self.store.pending_queue.append(
+                dict(
+                    alias_value=alias_value,
+                    alias_type=alias_type.value,
+                    candidate_canonical=best_canonical,
+                    similarity=best_score,
+                    reason="auto_demoted_low_cluster_integrity",
+                )
+            )
+            return ResolveResult(
+                False, best_canonical, best_score, "queued",
+                candidate_aliases=[new_alias.id],
+            )
+
         # Auto-merge: add alias under canonical, record merge
         new_alias = self.store.add_alias(
             canonical_id=best_canonical,
@@ -610,21 +644,43 @@ class EntityResolver:
             secondary_signal=secondary,
         )
 
-        integrity = self.cluster_integrity(best_canonical)
-        if integrity < self.cluster_integrity_min:
-            self.store.aliases[new_alias.id] = Alias(
-                id=new_alias.id,
-                canonical_id=new_alias.canonical_id,
-                alias_value=new_alias.alias_value,
-                alias_type=new_alias.alias_type,
-                confidence=new_alias.confidence,
-                status=MergeStatus.PENDING,
-                source=new_alias.source,
-            )
-            self.store.demoted.add(best_canonical)
-
         return ResolveResult(True, best_canonical, best_score, "fuzzy",
                              candidate_aliases=[new_alias.id])
+
+    def _projected_cluster_integrity(
+        self,
+        canonical_id: str,
+        new_alias_value: str,
+        new_alias_type: AliasType,
+    ) -> float:
+        """Return the value `cluster_integrity()` *would* have if
+        `new_alias_value` were added to `canonical_id`. Used pre-merge so we
+        can refuse to record an auto-merge that would immediately demote."""
+        if new_alias_type not in (
+            AliasType.NAME_STRING,
+            AliasType.VOICE_TRANSCRIPTION,
+        ):
+            # Non-name aliases don't affect name-based cluster integrity.
+            return self.cluster_integrity(canonical_id)
+        names = [
+            a.alias_value
+            for a in self.store.aliases_for_person(canonical_id)
+            if a.alias_type
+            in (AliasType.NAME_STRING, AliasType.VOICE_TRANSCRIPTION)
+        ]
+        person = self.store.get_person(canonical_id)
+        if person is not None:
+            names.append(person.canonical_name)
+        names.append(new_alias_value)
+        if len(names) < 2:
+            return 1.0
+        min_sim = 1.0
+        for i in range(len(names)):
+            for j in range(i + 1, len(names)):
+                s = name_similarity(names[i], names[j])
+                if s < min_sim:
+                    min_sim = s
+        return min_sim
 
     # ----- merge / undo -----
 
@@ -686,6 +742,7 @@ class EntityResolver:
             method=method,
             similarity=similarity,
             secondary_signal=secondary_signal,
+            other_canonical_id=other_canonical_id,
         )
         return rec
 

@@ -20,6 +20,8 @@ the unit tests run without DB wiring.
 """
 from __future__ import annotations
 
+import hashlib
+import logging
 import math
 import os
 import re
@@ -32,6 +34,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Callable, Optional, Sequence
+
+logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -236,12 +240,19 @@ def decay_factor(
 Embedder = Callable[[str], list[float]]
 
 
+def _stable_token_hash(tok: str) -> int:
+    """Deterministic hash for fake_embedder. Python's builtin `hash()` is salted
+    per-process (PEP 456) so identical text produces different vectors across
+    runs — that breaks embedding caches and cross-process tests. Use md5 → int."""
+    return int.from_bytes(hashlib.md5(tok.encode("utf-8")).digest()[:4], "big")
+
+
 def fake_embedder(text: str, dim: int = 8) -> list[float]:
     """Deterministic toy embedder. Hash-bucket BoW; used when sqlite-vec absent
-    or for unit tests."""
+    or for unit tests. Deterministic across processes (md5-backed)."""
     vec = [0.0] * dim
     for tok in tokenize(text):
-        idx = (hash(tok) % dim + dim) % dim
+        idx = _stable_token_hash(tok) % dim
         vec[idx] += 1.0
     norm = math.sqrt(sum(v * v for v in vec))
     if norm > 0:
@@ -363,13 +374,40 @@ class RetrievalPipeline:
         if q.use_rerank and self.reranker is not None and decayed:
             top_for_rerank = [self.chunks[cid] for cid, _ in decayed[:50]]
             rerank_scores = self.reranker(q.text, top_for_rerank)
-            paired = list(zip([c.id for c in top_for_rerank], rerank_scores))
+            # Guard against a mis-sized reranker: silent zip truncation would
+            # drop hits without warning. Use strict=True to force a clean
+            # failure, but degrade gracefully (fall back to decay order).
+            try:
+                paired = list(
+                    zip(
+                        [c.id for c in top_for_rerank],
+                        rerank_scores,
+                        strict=True,
+                    )
+                )
+            except ValueError:
+                logger.warning(
+                    "reranker returned %d scores for %d chunks; falling back "
+                    "to decay-ordered hits",
+                    len(rerank_scores) if rerank_scores is not None else -1,
+                    len(top_for_rerank),
+                )
+                paired = [(cid, score) for cid, score in decayed[:50]]
             paired.sort(key=lambda x: -x[1])
             tail = decayed[50:]
             decayed = paired + tail
 
-        # Stage 5: top-k truncation
+        # Stage 5: top-k truncation. When reranking, scores on the head (rerank
+        # scale) and the tail (RRF * decay scale) are not comparable. Cap top_k
+        # to the rerank window so we never mix scales in the returned ranking.
         top_k = q.top_k or SURFACE_TOP_K[q.surface]
+        if q.use_rerank and self.reranker is not None and top_k > 50:
+            logger.debug(
+                "use_rerank=True; capping top_k from %d to 50 to avoid mixing "
+                "rerank and RRF score scales in returned hits",
+                top_k,
+            )
+            top_k = 50
         ranked = decayed[:top_k]
 
         # Stage 6: token-budget pack
@@ -425,18 +463,98 @@ def make_pipeline(chunks: list[Chunk], **kwargs) -> RetrievalPipeline:
 # ---------------------------------------------------------------------------
 
 
-def _decode_blob_embedding(blob: bytes, dim: Optional[int]) -> Optional[list[float]]:
+def _decode_blob_embedding(
+    blob: bytes,
+    dim: Optional[int],
+    chunk_id: Optional[str] = None,
+) -> Optional[list[float]]:
     if not blob:
         return None
+    # BLOB layout: native float32 array (matches sqlite-vec wire format).
+    # If the byte length isn't a clean multiple of 4 the blob is corrupt /
+    # written in a different encoding — silently truncating produces a vector
+    # that's plausibly-valid-but-wrong, which is worse than logging + skipping.
+    if len(blob) % 4 != 0:
+        logger.warning(
+            "embedding blob length %d is not a multiple of 4 for chunk %s; "
+            "skipping (silent truncation would yield a wrong vector)",
+            len(blob),
+            chunk_id or "<unknown>",
+        )
+        return None
     try:
-        # BLOB layout: native float32 array (matches sqlite-vec wire format).
         n = len(blob) // 4
-        vals = list(struct.unpack(f"{n}f", blob[: n * 4]))
+        vals = list(struct.unpack(f"{n}f", blob))
         if dim is not None and dim > 0 and len(vals) >= dim:
             vals = vals[:dim]
         return vals
     except struct.error:
         return None
+
+
+def fts5_prefilter_chunk_ids(
+    db_path: str,
+    query_text: str,
+    *,
+    project_id: Optional[str] = None,
+    limit: int = 200,
+) -> Optional[list[str]]:
+    """Use brain_chunks_fts (FTS5 MATCH) to pre-filter candidate chunk_ids.
+
+    Returns a list of chunk_ids ranked by FTS5 bm25 if the virtual table
+    exists and the query parses, else None (caller should fall back to
+    brute-force keyword search). Uses parameterised SQL via sqlite's `?`
+    placeholders for the MATCH argument — never f-string interpolation.
+    """
+    if not query_text or not query_text.strip():
+        return None
+    if not os.path.exists(db_path):
+        return None
+    conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    try:
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        # Confirm the FTS5 virtual table is present before touching MATCH.
+        row = cur.execute(
+            "SELECT name FROM sqlite_master "
+            "WHERE name='brain_chunks_fts' AND type='table'"
+        ).fetchone()
+        if not row:
+            return None
+        # FTS5 MATCH expects a single token-soup string. Strip punctuation that
+        # FTS5 treats as syntax (quotes, parens, NEAR, AND/OR/NOT) — anything
+        # else gets passed through. Bail to brute force on parse errors.
+        safe_q = re.sub(r'[\"\(\)\*\^]', " ", query_text).strip()
+        if not safe_q:
+            return None
+        sql_match = (
+            "SELECT chunk_id FROM brain_chunks_fts "
+            "WHERE brain_chunks_fts MATCH ? "
+            "ORDER BY bm25(brain_chunks_fts) LIMIT ?"
+        )
+        try:
+            rows = cur.execute(sql_match, (safe_q, int(limit))).fetchall()
+        except sqlite3.OperationalError as exc:
+            logger.debug("FTS5 MATCH failed (%s); falling back to brute force", exc)
+            return None
+        cids = [r["chunk_id"] for r in rows]
+        if not cids or project_id is None:
+            return cids
+        # Optional project filter (FTS5 virtual table typically doesn't carry
+        # project_id columns, so join via brain_documents).
+        placeholders = ",".join("?" for _ in cids)
+        try:
+            filtered = cur.execute(
+                f"SELECT c.id FROM brain_chunks c "
+                f"JOIN brain_documents d ON d.id = c.document_id "
+                f"WHERE c.id IN ({placeholders}) AND d.project_id = ?",
+                (*cids, project_id),
+            ).fetchall()
+            return [r[0] for r in filtered]
+        except sqlite3.OperationalError:
+            return cids
+    finally:
+        conn.close()
 
 
 def db_chunk_loader(
@@ -448,6 +566,11 @@ def db_chunk_loader(
     """Load chunks from `platform.db`. Returns empty list if tables/file absent.
 
     SQLITE-ONLY: uses raw sqlite3 (FTS5 + vec0 are SQLite-specific).
+
+    NOTE: This loader returns *all* candidate chunks for the in-memory
+    `RetrievalPipeline` to score. For keyword-targeted lookups against very
+    large corpora, prefer `fts5_prefilter_chunk_ids()` upstream and pass the
+    resulting subset through a project_id filter.
     """
     if db_path is None:
         db_path = os.path.expanduser("~/.coco/platform.db")
@@ -480,21 +603,62 @@ def db_chunk_loader(
         except sqlite3.OperationalError:
             return []
 
-        # Best-effort embedding load (BLOB fallback). If sqlite-vec virtual
-        # table is in use, raw SELECT on it from Python may fail — that's OK,
-        # vector_search just skips chunks without an embedding.
+        # Best-effort embedding load. Detect whether brain_chunks_vec is a
+        # vec0 virtual table or the BLOB-backed fallback before querying so
+        # we surface a clear warning if the production vec0 path is missing
+        # a compatible loader (otherwise the system silently degrades to
+        # keyword-only search).
         emb_by_chunk: dict[str, list[float]] = {}
-        try:
-            for r in cur.execute(
-                "SELECT chunk_id, embedding, COALESCE(dim, 0) AS dim "
-                "FROM brain_chunks_vec"
-            ).fetchall():
-                vec = _decode_blob_embedding(r["embedding"], r["dim"] or None)
-                if vec is not None:
-                    emb_by_chunk[r["chunk_id"]] = vec
-        except sqlite3.OperationalError:
-            # vec0 virtual table or schema mismatch — skip embeddings.
-            pass
+        schema_row = cur.execute(
+            "SELECT sql FROM sqlite_master WHERE name='brain_chunks_vec'"
+        ).fetchone()
+        schema_sql = (schema_row["sql"] if schema_row else "") or ""
+        is_vec0 = "USING vec0" in schema_sql or "USING VEC0" in schema_sql.upper()
+        if is_vec0:
+            # vec0 virtual table — try vec_to_json() first (sqlite-vec API).
+            try:
+                import json as _json
+
+                for r in cur.execute(
+                    "SELECT chunk_id, vec_to_json(embedding) AS emb_json "
+                    "FROM brain_chunks_vec"
+                ).fetchall():
+                    raw = r["emb_json"]
+                    if raw:
+                        try:
+                            parsed = _json.loads(raw)
+                            if isinstance(parsed, list):
+                                emb_by_chunk[r["chunk_id"]] = [
+                                    float(x) for x in parsed
+                                ]
+                        except (ValueError, TypeError):
+                            continue
+            except sqlite3.OperationalError as exc:
+                logger.warning(
+                    "brain_chunks_vec uses vec0 but vec_to_json() failed (%s); "
+                    "vector search will be degraded to keyword-only. Load the "
+                    "sqlite-vec extension or migrate to the BLOB schema.",
+                    exc,
+                )
+        else:
+            try:
+                for r in cur.execute(
+                    "SELECT chunk_id, embedding, COALESCE(dim, 0) AS dim "
+                    "FROM brain_chunks_vec"
+                ).fetchall():
+                    vec = _decode_blob_embedding(
+                        r["embedding"],
+                        r["dim"] or None,
+                        chunk_id=r["chunk_id"],
+                    )
+                    if vec is not None:
+                        emb_by_chunk[r["chunk_id"]] = vec
+            except sqlite3.OperationalError as exc:
+                logger.warning(
+                    "brain_chunks_vec BLOB load failed (%s); vector search "
+                    "will be degraded to keyword-only.",
+                    exc,
+                )
 
         chunks: list[Chunk] = []
         for r in rows:
@@ -580,6 +744,7 @@ __all__ = [
     "age_days",
     "fake_embedder",
     "db_chunk_loader",
+    "fts5_prefilter_chunk_ids",
     "get_retrieval_service",
     "set_retrieval_service",
     "SURFACE_TOKEN_BUDGET",

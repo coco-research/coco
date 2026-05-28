@@ -157,7 +157,15 @@ class DefaultProcessRunner:
 # ---------------------------------------------------------------------------
 
 class StationRepo:
-    """SA Core writes, scoped to the stations table.
+    """SA Core writes, scoped to the agents / agent_output / cost_ledger tables.
+
+    Tables ``stations`` / ``station_output`` / ``cost_events`` were renamed to
+    ``agents`` / ``agent_output`` / ``cost_ledger`` in init_db.py:71-82.
+    The ``agents`` table lacks station-only columns (``task_id``, ``autonomy``,
+    ``cwd``, ``prompt_preview``, ``idempotency_key``, ``project_name_snapshot``,
+    ``cost_usd``, ``input_tokens``, ``output_tokens``, ``notes``); we encode
+    those into the agent's ``config`` JSON blob, while ``cwd`` is also stored
+    on ``working_directory`` for parity with how other agent code reads it.
 
     All writes happen inside engine.begin() — which issues ``BEGIN IMMEDIATE``
     on SQLite when isolation_level is left default.
@@ -166,28 +174,59 @@ class StationRepo:
     def __init__(self, engine: Engine):
         self.engine = engine
 
+    # ----- config-blob helpers -------------------------------------------------
+
+    def _read_config(self, conn, station_id: str) -> dict:
+        row = conn.execute(
+            text("SELECT config FROM agents WHERE id=:id"),
+            dict(id=station_id),
+        ).first()
+        if not row or not row[0]:
+            return {}
+        try:
+            return json.loads(row[0])
+        except Exception:
+            return {}
+
+    def _write_config(self, conn, station_id: str, cfg: dict) -> None:
+        conn.execute(
+            text("UPDATE agents SET config=:c WHERE id=:id"),
+            dict(c=json.dumps(cfg, sort_keys=True), id=station_id),
+        )
+
+    # ----- writes --------------------------------------------------------------
+
     def insert_pending(self, st: Station, *, idempotency_key: str | None) -> None:
+        cfg = json.dumps({
+            "task_id": st.task_id,
+            "project_name_snapshot": st.project_name,
+            "autonomy": st.autonomy,
+            "cwd": st.cwd,
+            "prompt_preview": "",
+            "idempotency_key": idempotency_key,
+            "cost_usd": 0.0,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "notes": None,
+        }, sort_keys=True)
         with self.engine.begin() as conn:
             conn.execute(text(
-                """INSERT INTO stations
-                   (id, task_id, project_id, project_name_snapshot, model, pid,
-                    status, autonomy, cwd, prompt_preview, idempotency_key,
-                    started_at, last_heartbeat)
-                   VALUES (:id, :task_id, :project_id, :project_name, :model, :pid,
-                           :status, :autonomy, :cwd, :prompt, :idem,
-                           :started_at, :hb)"""
+                """INSERT INTO agents
+                   (id, name, project_id, model, pid, status,
+                    working_directory, config,
+                    started_at, last_heartbeat, created_at, updated_at)
+                   VALUES (:id, :name, :project_id, :model, :pid, :status,
+                           :wd, :config,
+                           :started_at, :hb, :started_at, :started_at)"""
             ), dict(
                 id=st.id,
-                task_id=st.task_id,
+                name=st.project_name,
                 project_id=st.project_id,
-                project_name=st.project_name,
                 model=st.model,
                 pid=st.pid,
                 status=st.status,
-                autonomy=st.autonomy,
-                cwd=st.cwd,
-                prompt="",
-                idem=idempotency_key,
+                wd=st.cwd,
+                config=cfg,
                 started_at=st.started_at,
                 hb=st.last_heartbeat,
             ))
@@ -196,7 +235,7 @@ class StationRepo:
         ts = _utcnow_iso()
         with self.engine.begin() as conn:
             conn.execute(text(
-                "UPDATE stations SET pid=:pid, status='running', started_at=:t,"
+                "UPDATE agents SET pid=:pid, status='running', started_at=:t,"
                 " last_heartbeat=:t, updated_at=:t WHERE id=:id"
             ), dict(pid=pid, id=station_id, t=ts))
 
@@ -204,67 +243,95 @@ class StationRepo:
                       notes: str | None = None) -> None:
         ts = _utcnow_iso()
         with self.engine.begin() as conn:
+            if notes is not None:
+                cfg = self._read_config(conn, station_id)
+                cfg["notes"] = notes
+                self._write_config(conn, station_id, cfg)
             conn.execute(text(
-                "UPDATE stations SET status=:s, exit_code=:rc, notes=COALESCE(:n, notes),"
+                "UPDATE agents SET status=:s, exit_code=:rc,"
                 " stopped_at=CASE WHEN :s IN ('completed','failed','killed') THEN :t ELSE stopped_at END,"
                 " updated_at=:t WHERE id=:id"
-            ), dict(s=status, rc=exit_code, n=notes, id=station_id, t=ts))
+            ), dict(s=status, rc=exit_code, id=station_id, t=ts))
 
     def update_cost(self, station_id: str, *, cost_usd: float, in_tok: int, out_tok: int) -> None:
         ts = _utcnow_iso()
         with self.engine.begin() as conn:
+            cfg = self._read_config(conn, station_id)
+            cfg["cost_usd"] = float(cost_usd)
+            cfg["input_tokens"] = int(in_tok)
+            cfg["output_tokens"] = int(out_tok)
+            self._write_config(conn, station_id, cfg)
             conn.execute(text(
-                "UPDATE stations SET cost_usd=:c, input_tokens=:i, output_tokens=:o,"
-                " updated_at=:t WHERE id=:id"
-            ), dict(c=cost_usd, i=in_tok, o=out_tok, id=station_id, t=ts))
+                "UPDATE agents SET updated_at=:t WHERE id=:id"
+            ), dict(id=station_id, t=ts))
 
     def heartbeat(self, station_id: str) -> None:
         ts = _utcnow_iso()
         with self.engine.begin() as conn:
             conn.execute(text(
-                "UPDATE stations SET last_heartbeat=:t, updated_at=:t WHERE id=:id"
+                "UPDATE agents SET last_heartbeat=:t, updated_at=:t WHERE id=:id"
             ), dict(id=station_id, t=ts))
 
     def append_output(self, station_id: str, stream: str, chunk: str) -> None:
+        ts = _utcnow_iso()
         with self.engine.begin() as conn:
             conn.execute(text(
-                "INSERT INTO station_output (station_id, stream, chunk) "
-                "VALUES (:id, :s, :c)"
-            ), dict(id=station_id, s=stream, c=chunk))
+                "INSERT INTO agent_output (agent_id, stream, chunk, timestamp) "
+                "VALUES (:id, :s, :c, :t)"
+            ), dict(id=station_id, s=stream, c=chunk, t=ts))
 
     def insert_cost_event(self, *, station_id: str, project_id: str, project_name: str,
                           model: str, cost_usd: float, in_tok: int, out_tok: int,
                           source: str = "api_token") -> None:
+        ts = _utcnow_iso()
         with self.engine.begin() as conn:
             conn.execute(text(
-                """INSERT INTO cost_events
-                   (id, station_id, project_id, project_name_snapshot, model, feature,
-                    source, input_tokens, output_tokens, cost_usd)
-                   VALUES (:id, :sid, :pid, :pn, :m, 'station', :src, :i, :o, :c)"""
-            ), dict(id=_ulid(), sid=station_id, pid=project_id, pn=project_name,
-                    m=model, src=source, i=in_tok, o=out_tok, c=cost_usd))
+                """INSERT INTO cost_ledger
+                   (id, agent_id, project_id, model,
+                    source, input_tokens, output_tokens, cost_usd, created_at)
+                   VALUES (:id, :sid, :pid, :m, :src, :i, :o, :c, :t)"""
+            ), dict(id=_ulid(), sid=station_id, pid=project_id,
+                    m=model, src=source, i=in_tok, o=out_tok, c=cost_usd, t=ts))
 
     def fetch(self, station_id: str) -> dict | None:
         with self.engine.connect() as conn:
             row = conn.execute(text(
-                "SELECT id, task_id, project_id, project_name_snapshot, model, pid,"
-                " status, cost_usd, input_tokens, output_tokens, exit_code,"
-                " started_at, stopped_at, last_heartbeat, notes"
-                " FROM stations WHERE id=:id"
+                "SELECT id, project_id, model, pid,"
+                " status, exit_code, config,"
+                " started_at, stopped_at, last_heartbeat"
+                " FROM agents WHERE id=:id"
             ), dict(id=station_id)).mappings().first()
-            return dict(row) if row else None
+            if not row:
+                return None
+            out = dict(row)
+            cfg = {}
+            if out.get("config"):
+                try:
+                    cfg = json.loads(out["config"])
+                except Exception:
+                    cfg = {}
+            # Surface station-only fields onto the dict for legacy callers.
+            for k in ("task_id", "autonomy", "cwd", "prompt_preview",
+                      "idempotency_key", "project_name_snapshot",
+                      "cost_usd", "input_tokens", "output_tokens", "notes"):
+                if k in cfg:
+                    out[k] = cfg[k]
+            out.setdefault("cost_usd", 0.0)
+            out.setdefault("input_tokens", 0)
+            out.setdefault("output_tokens", 0)
+            return out
 
     def fetch_running(self) -> list[dict]:
         with self.engine.connect() as conn:
             rows = conn.execute(text(
-                "SELECT id, pid FROM stations WHERE status='running'"
+                "SELECT id, pid FROM agents WHERE status='running'"
             )).mappings().all()
             return [dict(r) for r in rows]
 
     def fetch_zombies(self, threshold_iso: str) -> list[dict]:
         with self.engine.connect() as conn:
             rows = conn.execute(text(
-                "SELECT id, pid, last_heartbeat FROM stations"
+                "SELECT id, pid, last_heartbeat FROM agents"
                 " WHERE status='running' AND last_heartbeat < :t"
             ), dict(t=threshold_iso)).mappings().all()
             return [dict(r) for r in rows]
@@ -341,9 +408,30 @@ class StationManager:
         self.allowed_roots = allowed_roots
         self.clock = clock
         self._sem = asyncio.Semaphore(max_concurrent)
+        # Tracks how many semaphore slots we currently hold. Avoids touching
+        # the private ``Semaphore._value`` attribute, which is not part of the
+        # public API and is fragile across Python versions.
+        self._sem_held = 0
+        self._sem_count_lock = asyncio.Lock()
         self._procs: dict[str, ProcessHandle] = {}
         self._readers: dict[str, asyncio.Task] = {}
         self._spawn_lock = asyncio.Lock()  # guards platform.db inserts (race-safe)
+
+    # ----- semaphore counter helpers -------------------------------------------
+
+    def _release_slot_if_held(self) -> None:
+        """Release one slot if we currently hold any.
+
+        Uses an explicit counter rather than the private ``Semaphore._value``
+        so we never over-release past the cap on duplicate kill/reap calls.
+        """
+        if self._sem_held > 0:
+            self._sem_held -= 1
+            try:
+                self._sem.release()
+            except ValueError:
+                # Defensive: semaphore at max — restore counter and swallow.
+                self._sem_held += 1
 
     # ----- core operations -----
 
@@ -360,14 +448,18 @@ class StationManager:
         if not os.path.exists(req.cwd):
             raise FileNotFoundError(req.cwd)
 
-        # Concurrency cap. Acquire with timeout so callers see backpressure.
+        # Concurrency cap. If the semaphore is at zero, fail fast rather than
+        # waiting indefinitely; otherwise acquire normally. Uses the public
+        # ``locked()`` instead of the private ``_value``.
         try:
-            if self._sem.locked() and self._sem._value == 0:
+            if self._sem.locked():
+                # Fully saturated — surface backpressure to caller immediately.
                 await asyncio.wait_for(self._sem.acquire(), timeout=0.001)
             else:
                 await self._sem.acquire()
         except asyncio.TimeoutError:
             raise OverflowError("MAX_CONCURRENT_STATIONS reached")
+        self._sem_held += 1
 
         try:
             async with self._spawn_lock:  # serialize DB writes for race-safety
@@ -381,13 +473,33 @@ class StationManager:
                 )
                 self.repo.insert_pending(station, idempotency_key=req.idempotency_key)
 
-                # Spawn
-                env = {
-                    "PATH": os.environ.get("PATH", ""),
-                    "HOME": os.environ.get("HOME", ""),
+                # Spawn with an allow-listed env so the subprocess gets the
+                # variables it actually needs (ANTHROPIC_API_KEY for Claude
+                # auth, locale vars for correct text decoding, plus PATH /
+                # HOME / USER) without inheriting the entire parent env.
+                env: dict[str, str] = {
                     "COCO_STATION_ID": station_id,
                     "COCO_PROJECT_ID": req.project_id,
                 }
+                # Pass through allow-listed env vars iff set in the parent.
+                # Skipping unset vars keeps the child env minimal.
+                _ENV_ALLOWLIST = (
+                    "PATH",
+                    "HOME",
+                    "USER",
+                    "LANG",
+                    "LC_ALL",
+                    "LC_CTYPE",
+                    "ANTHROPIC_API_KEY",
+                )
+                for _key in _ENV_ALLOWLIST:
+                    _val = os.environ.get(_key)
+                    if _val is not None:
+                        env[_key] = _val
+                # PATH / HOME must always be present; supply a safe default if
+                # the parent process somehow lacks them.
+                env.setdefault("PATH", "/usr/bin:/bin:/usr/sbin:/sbin")
+                env.setdefault("HOME", os.path.expanduser("~"))
                 argv = ["claude", "-p", "--output-format", "stream-json", req.prompt or ""]
                 proc = await self.runner.spawn(argv, cwd=req.cwd, env=env)
                 self._procs[station_id] = proc
@@ -402,7 +514,7 @@ class StationManager:
                 return station
         except Exception:
             # If anything fails after sem acquire, release it.
-            self._sem.release()
+            self._release_slot_if_held()
             raise
 
     async def kill(self, station_id: str, *, reason: str = "user",
@@ -426,9 +538,8 @@ class StationManager:
             reader = self._readers.pop(station_id, None)
             if reader is not None and not reader.done():
                 reader.cancel()
-            # Release the semaphore slot — best-effort.
-            if self._sem._value < self.max_concurrent:
-                self._sem.release()
+            # Release the semaphore slot — tracked counter avoids over-release.
+            self._release_slot_if_held()
 
         self.repo.update_status(station_id, "killed", exit_code=rc, notes=reason)
         await self.bus.emit("station.killed", {"station_id": station_id, "reason": reason})
@@ -442,8 +553,7 @@ class StationManager:
         self.repo.update_status(station_id, "failed", exit_code=-1, notes="zombie_reaped")
         await self.bus.emit("station.zombie_detected", {"station_id": station_id,
                                                         "last_heartbeat": None})
-        if self._sem._value < self.max_concurrent:
-            self._sem.release()
+        self._release_slot_if_held()
 
     async def monitor(self, station_id: str) -> dict[str, Any]:
         """Return a snapshot of the station's process state."""

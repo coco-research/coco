@@ -200,7 +200,8 @@ export default function InboxPage(): ReactElement {
   // ── Derived view model ──
 
   const decisions: DecisionCardData[] = useMemo(() => {
-    return (queueQ.data ?? [])
+    const items = Array.isArray(queueQ.data) ? queueQ.data : [];
+    return items
       .filter((it) => !optimistic[it.id])
       .map(toCard);
   }, [queueQ.data, optimistic]);

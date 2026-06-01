@@ -256,10 +256,53 @@ def cleanup_stale_worktrees(max_age_hours: int = 24):
 
 
 class SelfImproveService:
+    # Non-terminal states that require a live driving process. The state
+    # machine only advances while a spawned agent is alive and emitting
+    # completion events, so a cycle found in one of these after a restart was
+    # interrupted by a crash/restart and is dead. 'awaiting_approval' is
+    # EXCLUDED — it intentionally waits for a human and survives restarts.
+    _INTERRUPTED_STATES = (
+        "planning", "architecting", "developing", "testing",
+        "reviewing", "documenting", "merging", "integrating",
+    )
+
     def __init__(self):
         self.worktree_mgr = WorktreeManager()
         self._active_cycle_id: str | None = None
         self._lock = threading.Lock()
+
+    def recover_interrupted_cycles(self) -> int:
+        """Fail any cycle left mid-flight by a crash/restart. Returns count.
+
+        Call ONCE at app startup (lifespan), when nothing is driving a cycle.
+        Marks every cycle stuck in a processing state as 'failed' (recording
+        the reason), clears in-memory active state, and releases the lock file
+        so a new cycle can start cleanly. This is what prevents a crashed cycle
+        from wedging in 'planning' forever (the failure mode that left cycle
+        9faac75d stuck for 24 days). Idempotent.
+        """
+        now = datetime.now(timezone.utc).isoformat()
+        placeholders = ",".join("?" for _ in self._INTERRUPTED_STATES)
+        with get_db() as db:
+            rows = db.exec_driver_sql(
+                f"SELECT id FROM self_improve_cycles WHERE status IN ({placeholders})",
+                tuple(self._INTERRUPTED_STATES),
+            ).fetchall()
+            ids = [r._mapping["id"] for r in rows]
+            for cid in ids:
+                db.exec_driver_sql(
+                    "UPDATE self_improve_cycles SET status = 'failed', "
+                    "error = COALESCE(NULLIF(error, ''), ?), completed_at = ? "
+                    "WHERE id = ?",
+                    ("Interrupted by restart (no active driver process)", now, cid),
+                )
+        if ids:
+            with self._lock:
+                if self._active_cycle_id in ids:
+                    self._active_cycle_id = None
+            _release_lock()
+            log.info("recovered_interrupted_cycles", count=len(ids), cycle_ids=ids)
+        return len(ids)
 
     # ------------------------------------------------------------------
     # Cycle CRUD
@@ -313,18 +356,32 @@ class SelfImproveService:
             _release_lock()
             raise
 
-        # Spawn PM agent to analyze codebase
-        focus_clause = ""
-        if focus_areas:
-            focus_clause = f"Focus areas: {', '.join(focus_areas)}. "
+        # Spawn PM agent to analyze codebase.
+        #
+        # CRITICAL: everything below runs *after* the lock-guarded try/except
+        # above, so any failure here (prompt build, agent spawn) used to wedge
+        # the cycle in 'planning' forever and leak the lock file with no error
+        # recorded. Guard it: on failure, mark the cycle 'failed' (records the
+        # error) and release the lock via _fail_cycle so the system is left in
+        # a recoverable state and a new cycle can start.
+        try:
+            focus_clause = ""
+            if focus_areas:
+                focus_clause = f"Focus areas: {', '.join(focus_areas)}. "
 
-        prompt = SQUAD_ROLES["pm"]["prompt_template"].format(
-            repo_root=REPO_ROOT,
-            max_improvements=max_improvements,
-            focus_clause=focus_clause,
-        )
+            prompt = SQUAD_ROLES["pm"]["prompt_template"].format(
+                repo_root=REPO_ROOT,
+                max_improvements=max_improvements,
+                focus_clause=focus_clause,
+            )
 
-        self._spawn_squad_agent(cycle_id, "pm", prompt)
+            self._spawn_squad_agent(cycle_id, "pm", prompt)
+        except Exception as e:
+            log.error("start_cycle_spawn_failed", cycle_id=cycle_id, error=str(e))
+            # _fail_cycle records the error, clears _active_cycle_id, and
+            # releases the lock (idempotent if already released).
+            self._fail_cycle(cycle_id, f"Failed to spawn PM agent: {e}")
+            raise
 
         event_bus.emit("self_improve.cycle_started", {
             "cycle_id": cycle_id,
@@ -1378,13 +1435,18 @@ class SelfImproveService:
                 ),
             )
 
-            # Link to cycle
+            # Link to cycle. Both INSERTs share this single get_db()
+            # transaction (conn.begin()): get_db commits on clean exit and
+            # rolls back on exception, so the agents row and its
+            # self_improve_agents link are written atomically — both or
+            # neither. (Previously an explicit db.commit() here made the two
+            # inserts non-atomic and could leave an orphan agents row with no
+            # cycle link.)
             db.exec_driver_sql(
                 "INSERT INTO self_improve_agents (id, cycle_id, improvement_id, agent_id, role, status, started_at, created_at) "
                 "VALUES (?, ?, ?, ?, ?, 'running', ?, ?)",
                 (str(uuid.uuid4()), cycle_id, improvement_id, agent_id, role, now, now),
             )
-            db.commit()
 
         # Check budget before spawning
         if not self._check_budget(cycle_id):
@@ -1442,9 +1504,14 @@ class SelfImproveService:
                 return True
 
             placeholders = ",".join("?" for _ in agent_ids)
+            # NOTE: params MUST be a tuple. Passing the raw list makes
+            # exec_driver_sql treat it as executemany (expecting a list of
+            # tuples/dicts) and raise "List argument must consist only of
+            # tuples or dictionaries" -- which broke the budget check on the
+            # very first agent spawn.
             cost_row = db.exec_driver_sql(
                 f"SELECT COALESCE(SUM(cost_usd), 0.0) as total FROM cost_ledger WHERE agent_id IN ({placeholders})",
-                agent_ids,
+                tuple(agent_ids),
             ).fetchone()
             total_spent = cost_row._mapping["total"] if cost_row else 0.0
 

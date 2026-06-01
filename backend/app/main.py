@@ -87,6 +87,11 @@ async def lifespan(app: FastAPI):
     log.info("trigger_engine_started")
     _register_si_listeners()
     log.info("self_improve_scheduler_listeners_registered")
+    try:
+        _si_recovered = self_improve_service.recover_interrupted_cycles()
+        log.info("self_improve_cycles_recovered", count=_si_recovered)
+    except Exception as exc:  # never block startup
+        log.warning("self_improve_recovery_failed", error=str(exc))
     hub_sync_task = asyncio.create_task(hub_sync.start())
     log.info("hub_sync_started")
     knowledge_sync_task = asyncio.create_task(knowledge_sync.start())

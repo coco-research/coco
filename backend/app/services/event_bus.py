@@ -12,7 +12,7 @@ import json
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Callable
 
 import structlog
 from sqlalchemy import delete, insert, select
@@ -42,6 +42,37 @@ class EventBus:
 
     def __init__(self) -> None:
         self._subscribers: list[asyncio.Queue] = []
+        # Synchronous in-process listeners: (event_type | None, callback).
+        # event_type None means "all events". Invoked inside emit().
+        self._listeners: list[tuple[str | None, Callable[[dict], None]]] = []
+
+    # -- synchronous listener API -----------------------------------------
+
+    def on(self, event_type: str | None, callback: Callable[[dict], None]) -> None:
+        """Register a synchronous listener invoked on every matching emit().
+
+        Args:
+            event_type: Exact event type to match, or ``None`` for all events.
+            callback: Called as ``callback(data)`` where ``data`` is the emit
+                payload dict.
+
+        Idempotent: registering the same ``(event_type, callback)`` pair more
+        than once is a no-op, so callers may safely re-run their registration
+        (e.g. repeated app startup in tests or a reload) without stacking
+        duplicate listeners.
+        """
+        for et, cb in self._listeners:
+            if et == event_type and cb == callback:
+                return
+        self._listeners.append((event_type, callback))
+
+    def off(self, event_type: str | None, callback: Callable[[dict], None]) -> None:
+        """Remove a previously registered listener. No-op if not present."""
+        self._listeners = [
+            (et, cb)
+            for et, cb in self._listeners
+            if not (et == event_type and cb == callback)
+        ]
 
     # -- persistence helpers (fire-and-forget, never block emit) ----------
 
@@ -90,6 +121,20 @@ class EventBus:
 
         # Bridge to events.jsonl for CLI visibility
         self._append_jsonl(event_type, data)
+
+        # Notify synchronous in-process listeners. Iterate a snapshot so a
+        # listener that emits re-entrantly (e.g. emits another event) cannot
+        # mutate the list mid-iteration. Listener errors never break emit.
+        for et, cb in list(self._listeners):
+            if et is None or et == event_type:
+                try:
+                    cb(data)
+                except Exception as exc:
+                    log.warning(
+                        "event_listener_error",
+                        event_type=event_type,
+                        error=str(exc),
+                    )
 
     # -- events.jsonl bridge ------------------------------------------------
 

@@ -235,20 +235,11 @@ def on_cycle_completed(data: dict) -> None:
 def register_event_listeners() -> None:
     """Wire up the cycle completion handler to the event bus.
 
-    Called during app startup (lifespan).
+    Called during app startup (lifespan). Idempotent: ``EventBus.on`` dedupes
+    by ``(event_type, callback)``, so repeated startups/reloads do not stack
+    duplicate listeners (previously this monkey-patched ``event_bus.emit`` and
+    re-registration stacked wrappers, double-firing the handler and growing
+    call depth).
     """
-    # The event bus is sync (emit is sync), but we store a reference
-    # for the completion handler.  We hook it by monkey-patching emit
-    # to also call our handler for the specific event type.
-    _original_emit = event_bus.emit
-
-    def _patched_emit(event_type: str, data: dict) -> None:
-        _original_emit(event_type, data)
-        if event_type == "self_improve.cycle_completed":
-            try:
-                on_cycle_completed(data)
-            except Exception as e:
-                log.warning("cycle_completed_listener_error", error=str(e))
-
-    event_bus.emit = _patched_emit  # type: ignore[assignment]
+    event_bus.on("self_improve.cycle_completed", on_cycle_completed)
     log.info("self_improve_scheduler_listeners_registered")

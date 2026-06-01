@@ -611,7 +611,7 @@ find ~/.claude ~/.cursor -type l \
 <tr><td><strong>Version</strong></td><td>0.1.0</td></tr>
 <tr><td><strong>License</strong></td><td><a href="https://opensource.org/license/mit">MIT</a></td></tr>
 <tr><td><strong>Skills</strong></td><td>59 (+68 in GSD bundle, +6 in Brain bundle)</td></tr>
-<tr><td><strong>Slash commands</strong></td><td>35 across 6 namespaces (+75 SI commands in the Superintelligence bundle)</td></tr>
+<tr><td><strong>Slash commands</strong></td><td>35 across 6 namespaces</td></tr>
 <tr><td><strong>Agents</strong></td><td>10 core + 24 GSD subagents (in bundle) = 34 specialized roles</td></tr>
 <tr><td><strong>System bundles</strong></td><td>4 (GSD, Brain, Team, Superintelligence) — opt-in</td></tr>
 <tr><td><strong>Cross-IDE rules</strong></td><td>15</td></tr>

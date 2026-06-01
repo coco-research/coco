@@ -444,7 +444,9 @@ class VerificationService:
                     )
                 )
         except Exception as e:
-            log.warning("verification_gate_persist_failed", error=str(e))
+            # Loud, not swallowed: a schema mismatch here silently kept
+            # verification_results empty despite gates running.
+            log.error("verification_gate_persist_failed", error=str(e))
 
     def get_history(self, entity_type: str | None = None, entity_id: str | None = None,
                     node_id: str | None = None, limit: int = 20) -> list[dict]:

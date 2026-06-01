@@ -370,6 +370,7 @@ def generate_insights(limit: int = 50) -> list[dict]:
                     status="new",
                     entity_ids=json.dumps(ins["entity_ids"]),
                     content_ids=json.dumps(ins["content_ids"]),
+                    sources=json.dumps(ins.get("sources", [])),
                     metadata_json=ins.get("metadata_json", "{}"),
                     created_at=now,
                     updated_at=now,

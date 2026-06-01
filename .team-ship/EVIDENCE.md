@@ -71,3 +71,27 @@ Backup taken before migration: `~/.coco/platform.db.pre009.<ts>`.
 
 1. `content_classifications.hub_content_id` lacked `UNIQUE` in `tables.py` → `ON CONFLICT` failed on fresh DBs (live had it). Fixed (parity).
 2. `process_content` read `.get("body")` but `row._mapping` is keyed `raw_text`/`processed_text` → extraction always empty → zero actions, ever. Fixed.
+
+---
+
+# Wave 0.2 — Schema Reconcile (#4 insights, #5 verification, #10 tasks)
+
+## Tests
+```
+$ uv run pytest tests/test_wave02_schema.py -q
+8 passed
+$ uv run pytest -q          # full suite
+386 passed, 9 skipped
+```
+- #4 is red→green (insights insert with metadata_json/updated_at: CompileError before tables.py gained the columns).
+- #5 and #10 are live-migration fixes (fresh create_all DBs already match tables.py); tests guard the canonical schema + the get_history JOIN.
+
+## Live migration 010 (applied, backup `platform.db.pre010.<ts>`)
+```
+$ uv run alembic upgrade head   # 009 -> 010
+$ PRAGMA table_info(insights) | grep         -> metadata_json, updated_at   (#4)
+$ .schema verification_results | grep        -> gate TEXT NOT NULL          (#5, was gate_name/passed/score)
+$ .schema tasks | grep status                -> status TEXT NOT NULL DEFAULT 'open'   (no CHECK)  (#10)
+$ INSERT tasks ... status='backlog'          -> backlog OK                 (#10, old CHECK rejected it)
+$ SELECT status,COUNT(*) FROM tasks          -> done|17 (rows preserved)
+```

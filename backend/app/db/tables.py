@@ -903,7 +903,9 @@ insights = Table(
     Column("content_ids", Text, default="[]"),
     Column("sources", Text, default="[]"),
     Column("status", Text, default="new"),
+    Column("metadata_json", Text, server_default="{}"),
     Column("created_at", Text),
+    Column("updated_at", Text),
 )
 
 # ---------------------------------------------------------------------------

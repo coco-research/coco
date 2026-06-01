@@ -1,8 +1,22 @@
 # /team — Hard Test-Evidence Gate (anti test-theater)
 
-**Status:** Queued (not started)
+**Status:** IMPLEMENTED 2026-05-31 (superseded/expanded by the ship-pipeline plan below)
 **Priority:** High
 **Logged:** 2026-05-30
+
+> **Implemented.** The richer forensic plan
+> `team-ship-testing-integrity-fix-plan-2026-05-30.md` (this directory) was
+> verified against the real `~/Marvin` repo (all 8 PR-#473 commit SHAs confirmed;
+> CI confirmed to run pytest with no Postgres/DSN) and implemented in both source
+> (`~/coco/commands/team/`) and live (`~/.claude/commands/`):
+> - New shared protocol `commands/team/evidence.md` (Test Evidence Protocol).
+> - `ship.md` expanded with 7 hard gates (Stages 7–13) + PR-open gate (Stage 14).
+> - `test.md`, `develop.md`, `verify.md` rewired to run the protocol and capture `EVIDENCE.md`.
+> - `roles.md` qa-test-architect anti-theater rule; `toolkit.md` protocol entry.
+> - Regression guard `tests/check-evidence-gate.sh` wired into smoke + CI.
+>
+> The 5 edits below were the original (lighter) framing; the implemented version
+> is the superset described above.
 
 ## Problem
 

@@ -29,8 +29,9 @@ L1 agents focus on:
   1. Read source module to understand behavior
   2. Identify untested edge cases and error paths
   3. Write tests following existing patterns
-  4. Run tests to verify they pass
-  5. Commit: `test({module}): add missing tests for {description}`
+  4. Follow TDD red-green for each new test: prove it is RED before the implementation exists (for the right failure reason), then GREEN after. A test that was never red — or is empty, a placeholder, `assert True`, or unconditionally skipped — is rejected.
+  5. Run the authoritative gate per the Test Evidence Protocol (`team:evidence.md`): use the CI-pinned tool versions, provision integration dependencies (e.g. Postgres + DSN) so gated tests actually execute, treat any skip as `UNVERIFIED` (never a pass), and capture command + exit code + summary to `EVIDENCE.md`.
+  6. Commit: `test({module}): add missing tests for {description}`
 
 **Toolkit integration:**
 - Check team:toolkit.md for "Test-Driven Development" entry
@@ -42,9 +43,10 @@ L3 agents verify:
 - No test interdependence or shared mutable state
 - Edge cases covered (null, empty, boundary, error paths)
 - Test names describe the scenario being tested
+- **Execution is real, not narrated:** confirm via `EVIDENCE.md` that the suite actually ran (captured exit 0, no skips on the covered surface). Reviewing test descriptions is not a substitute for verifying execution. A green claim without captured evidence is a finding, not a pass.
 
 ### Full Regression
-Run complete test suite after all L2 agents commit. Report coverage delta.
+Run the CI-equivalent authoritative gate with integration dependencies provisioned, per the Test Evidence Protocol (`team:evidence.md`). Report the parsed pytest summary (passed / skipped / failed) and the measured coverage (`--cov --cov-branch`). Any skipped test blocks a "pass" claim — resolve by provisioning the dependency or explicitly label the gap. Capture all output to `EVIDENCE.md`.
 
 ## GSD Integration
 

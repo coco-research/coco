@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 34 commands across 6 namespaces.**
+**Total: 35 commands across 6 namespaces.**
 
 ## design
 
@@ -44,6 +44,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [`/team:communicate`](team/communicate.md) |  |
 | [`/team:develop`](team/develop.md) |  |
 | [`/team:document`](team/document.md) |  |
+| [`/team:evidence`](team/evidence.md) |  |
 | [`/team:feedback`](team/feedback.md) |  |
 | [`/team:fix`](team/fix.md) |  |
 | [`/team:plan`](team/plan.md) |  |

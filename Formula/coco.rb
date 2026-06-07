@@ -3,7 +3,7 @@
 # Distribution path A — homebrew-tap (recommended):
 #   1. Create a github.com/rkz91/homebrew-coco repo
 #   2. Copy this file to that repo as `Formula/coco.rb`
-#   3. Tag a release on rkz91/coco with `v0.1.0`
+#   3. Tag a release on rkz91/coco with `v1.0.0`
 #   4. Update sha256 below to match the release tarball
 #   5. Users install via: `brew install rkz91/coco/coco`
 #
@@ -14,10 +14,10 @@
 class Coco < Formula
   desc "Open-source AI workflow framework — skills, agents, commands, multi-agent orchestration"
   homepage "https://github.com/rkz91/coco"
-  url "https://github.com/rkz91/coco/archive/refs/tags/v0.1.0.tar.gz"
+  url "https://github.com/rkz91/coco/archive/refs/tags/v1.0.0.tar.gz"
   sha256 "REPLACE_WITH_RELEASE_SHA256"
   license "MIT"
-  version "0.1.0"
+  version "1.0.0"
 
   depends_on "git"
   depends_on "bash"

@@ -4,7 +4,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
-## [Unreleased]
+## [1.0.0] — 2026-06-07
+
+First stable release. Establishes the Superintelligence board, the update notifier, and accurate docs.
 
 ### Added
 

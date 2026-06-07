@@ -12,7 +12,7 @@ Free | MIT License | 90-Second Onboarding
 <br>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/license/mit)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue?style=for-the-badge)](CHANGELOG.md)
 [![Skills](https://img.shields.io/badge/skills-142-emerald?style=for-the-badge)](skills/)
 [![Commands](https://img.shields.io/badge/commands-277-indigo?style=for-the-badge)](commands/)
 [![Personas](https://img.shields.io/badge/personas-389-violet?style=for-the-badge)](systems/superintelligence/)
@@ -570,7 +570,7 @@ npx @rkz91/coco-cli update
 ## Technical Specifications
 
 <table>
-<tr><td><strong>Spec Version</strong></td><td>0.1.0</td></tr>
+<tr><td><strong>Spec Version</strong></td><td>1.0.0</td></tr>
 <tr><td><strong>License</strong></td><td><a href="https://opensource.org/license/mit">MIT</a></td></tr>
 <tr><td><strong>Total Skills Available</strong></td><td>142 with all bundles installed (59 Core + 68 GSD + 6 Brain + 9 Superintelligence)</td></tr>
 <tr><td><strong>Slash Commands</strong></td><td>277 with all bundles installed — 35 Core (shipped) + 242 Superintelligence (225 per-team + 17 cross-team, generated at install of the Superintelligence bundle)</td></tr>

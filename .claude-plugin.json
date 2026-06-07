@@ -2,7 +2,7 @@
   "name": "coco",
   "displayName": "Coco",
   "description": "An entire team. Wherever your AI lives. 59 skills, 34 commands, 10 agents, 3 system bundles for project orchestration, knowledge tracking, and multi-agent pipelines. MIT, vendor-neutral.",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "author": "Coco Inc",
   "license": "MIT",
   "homepage": "https://github.com/rkz91/coco",

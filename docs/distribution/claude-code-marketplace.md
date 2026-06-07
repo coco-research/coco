@@ -15,7 +15,7 @@ Anthropic maintains a curated plugin marketplace at https://github.com/anthropic
 - CODE_OF_CONDUCT ✓
 - SECURITY ✓
 - Working `bash install.sh` ✓
-- v0.1.0 tagged ✓
+- v1.0.0 tagged ✓
 
 ## Plugin manifest
 
@@ -26,7 +26,7 @@ Create `.claude-plugin.json` at repo root:
   "name": "coco",
   "displayName": "Coco",
   "description": "An entire team. Wherever your AI lives. Open-source AI workflow framework with skills, agents, commands, and multi-agent orchestration.",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "author": "Coco Inc",
   "license": "MIT",
   "homepage": "https://github.com/rkz91/coco",

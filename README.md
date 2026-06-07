@@ -55,7 +55,7 @@ git clone https://github.com/rkz91/coco.git && cd coco && bash install.sh
 
 <sub>USER-INVOKABLE</sub>
 
-<h1>93</h1>
+<h1>94</h1>
 
 <sub>things you can invoke right after install</sub>
 
@@ -64,7 +64,7 @@ git clone https://github.com/rkz91/coco.git && cd coco && bash install.sh
 <table align="center">
 <tr>
 <td align="center" width="14%"><h3>59</h3><sub>Skills</sub></td>
-<td align="center" width="14%"><h3>34</h3><sub>Commands</sub></td>
+<td align="center" width="14%"><h3>35</h3><sub>Commands</sub></td>
 <td align="center" width="14%"><h3>10</h3><sub>Agents</sub><br><sub><sub>(spawned)</sub></sub></td>
 <td align="center" width="14%"><h3>3</h3><sub>Systems</sub></td>
 <td align="center" width="14%"><h3>4</h3><sub>Adapters</sub></td>
@@ -89,7 +89,7 @@ git clone https://github.com/rkz91/coco.git && cd coco && bash install.sh
 
 ### A team. <br>Not a single coder.
 
-`/team:ship` runs **7 stages** with role-appropriate agents at each layer. Researcher → Architect → Planner → Reviewer → Fixer → 4× Builders → Verifier. You approve once. The team handles the rest.
+`/team:ship` runs **6 build stages + 7 hard verification gates** with role-appropriate agents. Research → Architect → Plan → Review → Build — then every test/lint/coverage claim must clear an evidence gate (skip ≠ pass, independent re-run) before a PR opens. You approve once; the team can't report fake green.
 
 </td>
 <td width="33%" valign="top">
@@ -309,7 +309,7 @@ bash install.sh --systems brain
 /email:thread <subject>
 ```
 
-> Daily summary, today's mail, drafted replies, threading, search, save-to-folder. Reads your real Outlook.
+> Daily summary, today's mail, drafted replies, threading, search, save-to-folder. Reads your real Outlook — auto-detects Legacy (AppleScript) vs New Outlook (MIME/HxStore extraction).
 
 </td>
 </tr>
@@ -407,7 +407,7 @@ bash adapters/codex/install.sh
 /code-verification
 ```
 
-> Before claiming "done," Coco runs verification: build, lint, imports, references, tests, behavior. Auto-blocks "looks good!" output without proof.
+> Before claiming "done," Coco runs verification: build, lint, imports, references, tests, behavior. Auto-blocks "looks good!" output without proof. `/team` pipelines add a **Test Evidence Protocol** — every test/lint/coverage claim needs a captured command + output (skip ≠ pass) or it's stripped and the PR blocked.
 
 </td>
 </tr>
@@ -597,7 +597,7 @@ find ~/.claude ~/.cursor -type l \
 <tr><td><strong>Version</strong></td><td>0.1.0</td></tr>
 <tr><td><strong>License</strong></td><td><a href="https://opensource.org/license/mit">MIT</a></td></tr>
 <tr><td><strong>Skills</strong></td><td>59 (+68 in GSD bundle, +6 in Brain bundle)</td></tr>
-<tr><td><strong>Slash commands</strong></td><td>34 across 6 namespaces</td></tr>
+<tr><td><strong>Slash commands</strong></td><td>35 across 6 namespaces</td></tr>
 <tr><td><strong>Agents</strong></td><td>10 core + 24 GSD subagents (in bundle) = 34 specialized roles</td></tr>
 <tr><td><strong>System bundles</strong></td><td>3 (GSD, Brain, Team) — opt-in</td></tr>
 <tr><td><strong>Cross-IDE rules</strong></td><td>15</td></tr>

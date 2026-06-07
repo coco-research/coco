@@ -31,21 +31,22 @@ L1 agents focus on:
 ### Layer 2: Execution
 - **Mode:** `bypassPermissions`
 - Each agent gets a specific issue set with file ownership
-- Agents write failing test first, then fix, then verify test passes
+- Agents write a failing test first that reproduces the bug (prove it is RED for the right reason), then fix, then prove it is GREEN. A regression test that was never red does not prove the fix.
+- Run the authoritative gate per the Test Evidence Protocol (`team:evidence.md`): CI-pinned tool versions, integration dependencies provisioned, any skip treated as `UNVERIFIED` (never a pass), and capture command + exit code + summary to `EVIDENCE.md`. "Fixed + tested" is not a valid claim without that evidence.
 - Atomic commits per fix: `fix({scope}): {description}`
 
 **Toolkit integration:**
-- Check team-toolkit.md for "Systematic Debugging" entry
+- Check team:toolkit.md for "Systematic Debugging" entry
 - Apply systematic-debugging methodology for complex bugs
 
 ### Layer 3: Fix Verification
 L3 agents verify:
 - Root cause actually addressed (not just symptom masked)
 - No new issues introduced
-- Test coverage for the fixed code path
+- Test coverage for the fixed code path, confirmed against `EVIDENCE.md` (the bug-reproducing test actually ran and is now green) — not by reading test descriptions
 
 ### Regression Tests
-Run after all Layer 2 agents complete. If any test fails, include in REVIEW-PACKAGE.md.
+Run after all Layer 2 agents complete, per the Test Evidence Protocol (`team:evidence.md`): run the CI-equivalent authoritative gate with integration dependencies provisioned, capture the parsed summary + coverage to `EVIDENCE.md`, and surface skips/`UNVERIFIED` explicitly. Any failing test BLOCKS — loop back to fix (max 3 rounds); do not merely note it in REVIEW-PACKAGE.md.
 
 ## GSD Integration
 

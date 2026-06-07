@@ -39,7 +39,7 @@ L1 agents determine:
 **If GSD active:** Map findings back to requirements from REQUIREMENTS.md.
 
 **Toolkit integration:**
-- Check team-toolkit.md for "Code Review" entry for review methodology
+- Check team:toolkit.md for "Code Review" entry for review methodology
 - If GSD active, use GSD phase context for requirements traceability
 
 ### Layer 3: Cross-Review

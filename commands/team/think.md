@@ -28,7 +28,7 @@ L2 agents produce structured options:
 - Engineers frame options from technical perspective
 
 **Toolkit integration:**
-- Check team-toolkit.md for brainstorming tools
+- Check team:toolkit.md for brainstorming tools
 - Apply structured thinking frameworks (MECE, first principles, inversion)
 
 ### Layer 3: Stress Testing

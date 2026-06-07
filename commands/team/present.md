@@ -39,7 +39,7 @@ Agents work in sequence within L2 (not parallel — narrative must come first):
 3. **data-viz-specialist** (parallel with #2) → Creates chart specifications for all data slides
 
 **Toolkit integration:**
-- Check team-toolkit.md for "Architecture Review Decks" if ARB format
+- Check team:toolkit.md for "Architecture Review Decks" if ARB format
 - If /pmstudio-arb recommended → use it as starting point, then specialists refine
 - Apply quality notes (e.g., "data viz sections need improvement")
 

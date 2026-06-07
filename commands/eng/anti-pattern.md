@@ -8,10 +8,17 @@ Help the user systematically fix error handling anti-patterns detected by the au
 
 ## Process
 
-1. **Run the detector:**
+1. **Locate and run the detector** (do not assume a fixed path — discover it in the target repo):
    ```bash
-   bun run scripts/anti-pattern-test/detect-error-handling-antipatterns.ts
+   det=$(ls scripts/**/detect-error-handling-antipattern*.* scripts/*antipattern* 2>/dev/null | head -1)
+   [ -z "$det" ] && det=$(grep -rl "error-handling-antipattern\|anti-pattern" --include='*.ts' --include='*.js' --include='*.py' . 2>/dev/null | grep -i script | head -1)
+   if [ -n "$det" ]; then
+     case "$det" in *.ts|*.js) bun run "$det" 2>/dev/null || node "$det";; *.py) python3 "$det";; esac
+   else
+     echo "No anti-pattern detector found in this repo."
+   fi
    ```
+   If no detector exists in the target project, fall back to a manual scan (grep for empty/silent catch blocks: `catch {}`, `except: pass`, catch-and-continue with no logging) and ask the user for the detector path if they have one.
 
 2. **Analyze the results:**
    - Count CRITICAL, HIGH, MEDIUM, and APPROVED_OVERRIDE issues
@@ -66,7 +73,7 @@ Only approve overrides when ALL of these are true:
 
 ## Critical Path Rules
 
-For files in the CRITICAL_PATHS list (SDKAgent.ts, GeminiAgent.ts, OpenRouterAgent.ts, SessionStore.ts, worker-service.ts):
+For files on the project's critical paths — derive these per project from its `CLAUDE.md` / architecture docs (typically the request/agent entry points, session/state stores, and worker/service entry points; ask the user if unclear):
 
 - **NEVER** approve overrides on critical paths without exceptional justification
 - Errors on critical paths MUST be visible (logged) or fatal (thrown)

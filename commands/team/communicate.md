@@ -37,7 +37,7 @@ L1 agents determine:
 - Marketing specialist (if present) adds positioning and impact framing
 
 **Toolkit integration:**
-- Check team-toolkit.md for "Stakeholder Communications" entry
+- Check team:toolkit.md for "Stakeholder Communications" entry
 - If /pmstudio-comms recommended → use it, then apply quality notes
 - Apply feedback: "shorten subject lines", "add TL;DR for long emails"
 

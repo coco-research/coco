@@ -15,7 +15,7 @@
 >
 > **Context window budget:** This file should stay under 200 lines.
 > When approaching the limit, archive old `applied` entries to
-> `team-feedback-archive.md`.
+> `team:feedback-archive.md`.
 
 ---
 

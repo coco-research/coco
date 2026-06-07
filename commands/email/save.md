@@ -9,6 +9,6 @@ allowed-tools:
 
 # /email-save — Save emails to project folder
 
-Parse the argument for sender/subject and target folder. Use the `/email` skill with subcommand `save`.
+Parse the argument for sender/subject and target folder. Use the `/email` command with subcommand `save`.
 
-Invoke the Skill tool: `email` with args `save <argument>`.
+Read `~/.claude/commands/email.md`, run its Preflight (detect Outlook variant), then follow its `save <argument>` subcommand instructions.

@@ -98,6 +98,17 @@
 - **Alternative:** Manual phasing with /team plan
 - **When to skip tool:** Single-session scope or < 3 phases
 
+## Test Evidence Protocol
+
+- **Best tool:** `team:evidence.md` (the canonical Test Evidence Protocol)
+- **Quality notes:**
+  - Any quality claim (tests pass, lint clean, coverage N%) MUST follow this protocol and produce `EVIDENCE.md`. Evidence or it didn't happen.
+  - Determine the authoritative gate from CI config (`.github/workflows`, `Makefile`); use the CI-pinned tool versions, never a weaker local equivalent.
+  - Skipped tests are `UNVERIFIED`, never a pass. Provision integration deps (e.g. Postgres + DSN) so gated tests actually run, or label the gap.
+  - Coverage must be measured (`--cov --cov-branch`) and captured, not narrated.
+- **Alternative:** None — this is mandatory for any pipeline that reports test/lint/coverage results.
+- **When to skip tool:** Never for code that ships via PR. (Pure-docs runs have no test gate.)
+
 ## Test-Driven Development
 
 - **Best tool:** superpowers:test-driven-development

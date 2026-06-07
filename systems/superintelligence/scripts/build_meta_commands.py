@@ -16,8 +16,12 @@ Usage:  python3 superintelligence/scripts/build_meta_commands.py
 """
 import os, pathlib
 
-REPO = "/Users/user/projects/coco-platform"
-OUT = pathlib.Path(os.path.expanduser("~/.claude/commands"))
+# REPO is the directory that CONTAINS `superintelligence/` — derived from this file's location
+# (this file lives at <REPO>/superintelligence/scripts/build_meta_commands.py) so generated bodies
+# reference the user's actual checkout. Overridable via COCO_SI_REPO.
+REPO = os.environ.get("COCO_SI_REPO") or str(pathlib.Path(__file__).resolve().parents[2])
+# Output dir: honor COCO_SI_COMMANDS_DIR (set by the installer/adapter), else ~/.claude/commands.
+OUT = pathlib.Path(os.environ.get("COCO_SI_COMMANDS_DIR") or os.path.expanduser("~/.claude/commands"))
 META_REGISTRY = f"{REPO}/superintelligence/registry.json"
 
 # verb title -> (one-line desc, verb-specific output shape)

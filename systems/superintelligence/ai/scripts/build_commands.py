@@ -30,11 +30,16 @@ Re-run any time the header, a verb body, or a team config changes.
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
-COMMANDS_DIR = Path.home() / ".claude" / "commands"
-REPO = Path("/Users/user/projects/coco-platform")
+# Output dir: honor COCO_SI_COMMANDS_DIR (set by the installer/adapter), else ~/.claude/commands.
+COMMANDS_DIR = Path(os.environ.get("COCO_SI_COMMANDS_DIR") or (Path.home() / ".claude" / "commands"))
+# REPO is the directory that CONTAINS `superintelligence/` — derived from this file's location
+# so generated command bodies reference the user's actual checkout (portable across machines and
+# repo layouts). This file lives at <REPO>/superintelligence/ai/scripts/build_commands.py.
+REPO = Path(os.environ.get("COCO_SI_REPO") or Path(__file__).resolve().parents[3])
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TEAM REGISTRY — add a team here, re-run, get 25 commands. That is the whole

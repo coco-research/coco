@@ -93,12 +93,18 @@ link_system() {
     done
   fi
   # Superintelligence: SI-* commands are generated from per-team registries, not shipped as files.
+  #   build_commands.py      → per-team scoped commands  (/SI-<Team>-<Verb>, 225)
+  #   build_meta_commands.py → cross-team orchestrator    (/SI, /SI-Orchestrate, /SI-<Verb>, 17)
+  # Both are run so the full 242 SI command family is delivered, not just the per-team half.
   if [[ -f "$sys_dir/ai/scripts/build_commands.py" ]]; then
     if command -v python3 >/dev/null 2>&1; then
       run env COCO_SI_COMMANDS_DIR="$TARGET_HOME/commands" python3 "$sys_dir/ai/scripts/build_commands.py"
-      echo "Generated SI-* commands into $TARGET_HOME/commands"
+      if [[ -f "$sys_dir/scripts/build_meta_commands.py" ]]; then
+        run env COCO_SI_COMMANDS_DIR="$TARGET_HOME/commands" python3 "$sys_dir/scripts/build_meta_commands.py"
+      fi
+      echo "Generated SI-* commands (per-team + meta-orchestrator) into $TARGET_HOME/commands"
     else
-      echo "Skip SI generation: python3 not found. Run $sys_dir/ai/scripts/build_commands.py manually."
+      echo "Skip SI generation: python3 not found. Run $sys_dir/ai/scripts/build_commands.py and $sys_dir/scripts/build_meta_commands.py manually."
     fi
   fi
 }

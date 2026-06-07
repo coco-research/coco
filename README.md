@@ -532,15 +532,17 @@ bash install.sh --adapter generic
 <table>
 <tr><td><strong>Spec Version</strong></td><td>0.1.0</td></tr>
 <tr><td><strong>License</strong></td><td><a href="https://opensource.org/license/mit">MIT</a></td></tr>
-<tr><td><strong>Total Skills Available</strong></td><td>142 (59 Core + 68 GSD + 6 Brain + 9 Superintelligence)</td></tr>
-<tr><td><strong>Slash Commands</strong></td><td>277 (35 Core + 242 Superintelligence)</td></tr>
+<tr><td><strong>Total Skills Available</strong></td><td>142 with all bundles installed (59 Core + 68 GSD + 6 Brain + 9 Superintelligence)</td></tr>
+<tr><td><strong>Slash Commands</strong></td><td>277 with all bundles installed — 35 Core (shipped) + 242 Superintelligence (225 per-team + 17 cross-team, generated at install of the Superintelligence bundle)</td></tr>
 <tr><td><strong>Specialized Agents</strong></td><td>34 (10 Core + 24 GSD Bundle)</td></tr>
-<tr><td><strong>System Bundles</strong></td><td>4 (GSD, Brain, Team, Superintelligence)</td></tr>
+<tr><td><strong>System Bundles</strong></td><td>4 (GSD, Brain, Team, Superintelligence) — opt in with <code>--systems &lt;name&gt;</code></td></tr>
 <tr><td><strong>Cross-IDE Rules</strong></td><td>15 (.mdc files)</td></tr>
 <tr><td><strong>Workflows Defined</strong></td><td>3 (.md pipelines)</td></tr>
 <tr><td><strong>Install Time</strong></td><td>&le; 90 seconds</td></tr>
 <tr><td><strong>Telemetry / SaaS</strong></td><td>None — 100% Local Files</td></tr>
 </table>
+
+<sub>Core install ships 59 skills + 35 commands + 10 agents. The counts above reflect a full install with all four system bundles enabled (<code>bash install.sh --systems gsd,brain,team,superintelligence</code>). Superintelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely.</sub>
 
 ---
 

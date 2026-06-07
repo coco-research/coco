@@ -1,0 +1,1026 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-06-01",
+  "team_id": "gtm-super-intelligence",
+  "team_name": "Sales, GTM & Marketing Super Intelligence Team",
+  "description": "Sales, GTM & Marketing Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md.",
+  "native_personas_count": 20,
+  "cross_listed_count": 3,
+  "personas_count": 23,
+  "cells_count": 7,
+  "cells": {
+    "category-design-positioning": {
+      "id": "category-design-positioning",
+      "description": "Category creation, positioning, market framing, crossing the chasm.",
+      "personas_count": 4,
+      "personas": [
+        "al-ramadan",
+        "christopher-lochhead",
+        "geoffrey-moore",
+        "april-dunford"
+      ],
+      "file_path": "superintelligence/gtm/cells/category-design-positioning.md"
+    },
+    "demand-gen-content-marketing": {
+      "id": "demand-gen-content-marketing",
+      "description": "Demand generation, content, SEO, audience building, inbound.",
+      "personas_count": 4,
+      "personas": [
+        "ann-handley",
+        "kipp-bodnar",
+        "rand-fishkin",
+        "seth-godin"
+      ],
+      "file_path": "superintelligence/gtm/cells/demand-gen-content-marketing.md"
+    },
+    "sales-methodology-negotiation": {
+      "id": "sales-methodology-negotiation",
+      "description": "Sales process, methodology, enablement, negotiation.",
+      "personas_count": 6,
+      "personas": [
+        "aaron-ross",
+        "chris-voss",
+        "jacco-van-der-kooij",
+        "keenan",
+        "mark-roberge",
+        "matt-dixon"
+      ],
+      "file_path": "superintelligence/gtm/cells/sales-methodology-negotiation.md"
+    },
+    "product-led-growth": {
+      "id": "product-led-growth",
+      "description": "PLG, self-serve, freemium, product-as-the-go-to-market.",
+      "personas_count": 1,
+      "personas": [
+        "elena-verna"
+      ],
+      "file_path": "superintelligence/gtm/cells/product-led-growth.md"
+    },
+    "brand-strategy": {
+      "id": "brand-strategy",
+      "description": "Brand building, distinctiveness, marketing effectiveness science.",
+      "personas_count": 4,
+      "personas": [
+        "bob-hoffman",
+        "byron-sharp",
+        "mark-ritson",
+        "marty-neumeier"
+      ],
+      "file_path": "superintelligence/gtm/cells/brand-strategy.md"
+    },
+    "pricing-monetization": {
+      "id": "pricing-monetization",
+      "description": "Pricing strategy, packaging, monetization, willingness-to-pay.",
+      "personas_count": 2,
+      "personas": [
+        "madhavan-ramanujam",
+        "patrick-campbell-paddle-profitwell"
+      ],
+      "file_path": "superintelligence/gtm/cells/pricing-monetization.md"
+    },
+    "customer-success-retention": {
+      "id": "customer-success-retention",
+      "description": "Post-sale expansion, retention, net revenue retention, CS as a discipline.",
+      "personas_count": 2,
+      "personas": [
+        "lincoln-murphy",
+        "nick-mehta"
+      ],
+      "file_path": "superintelligence/gtm/cells/customer-success-retention.md"
+    }
+  },
+  "personas": {
+    "aaron-ross": {
+      "slug": "aaron-ross",
+      "real_name": "Aaron Ross",
+      "archetype": "The outbound systems architect who turned Salesforce's pipeline into a repeatable revenue machine and named the playbook the rest of B2B copied.",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "sales-methodology-negotiation",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Co-founder, Predictable Revenue (consulting firm)",
+        "Author / sales advisor / board member (NED) to SaaS companies, increasingly European",
+        "Founder, PebbleStorm",
+        "Co-host, The Predictable Revenue Podcast (with Collin Stewart)"
+      ],
+      "domains": [
+        "Outbound sales / SDR-driven pipeline",
+        "Sales role specialization",
+        "SaaS go-to-market and revenue scaling",
+        "Repeatable / predictable pipeline systems",
+        "Niche selection and ICP definition"
+      ],
+      "pairs_well_with": [
+        "mark-roberge",
+        "jacco-van-der-kooij",
+        "matt-dixon"
+      ],
+      "productive_conflict_with": [
+        "keenan",
+        "chris-voss"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain-spoken, practitioner, allergic to hype. Talks in systems and roles, not motivation. Quick to say 'that wasn't really the point' and re-anchor on fundament",
+      "file_path": "superintelligence/gtm/personas/aaron-ross.md",
+      "research_dir": "superintelligence/gtm/research/aaron-ross/",
+      "build_method": "local-llm"
+    },
+    "al-ramadan": {
+      "slug": "al-ramadan",
+      "real_name": "Al Ramadan",
+      "archetype": "Category design architect who turns markets into games you invent rather than competitions you join",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "category-design-positioning",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Play Bigger, LLC — Founder and CEO",
+        "Category Pirates — co-author / collaborator with Christopher Lochhead",
+        "Former: Adobe Systems, Macromedia, Quokka Sports (co-founder), America's Cup technology"
+      ],
+      "domains": [
+        "Category design",
+        "Positioning and market-category framing",
+        "Go-to-market strategy for technology ventures",
+        "Lightning-strike GTM mobilization",
+        "Category king / category economics",
+        "Narrative and point-of-view design"
+      ],
+      "pairs_well_with": [
+        "christopher-lochhead",
+        "marty-neumeier",
+        "byron-sharp"
+      ],
+      "productive_conflict_with": [
+        "mark-ritson",
+        "bob-hoffman",
+        "rand-fishkin"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Founder-operator turned strategist. Speaks in framing and reframing — 'don't play the game, change the game.' Uses vivid binaries (pirate vs. settler, category ",
+      "file_path": "superintelligence/gtm/personas/al-ramadan.md",
+      "research_dir": "superintelligence/gtm/research/al-ramadan/",
+      "build_method": "local-llm"
+    },
+    "ann-handley": {
+      "slug": "ann-handley",
+      "real_name": "Ann Handley",
+      "archetype": "The content-craft conscience of B2B marketing — champions writing as the highest-leverage marketing skill and resists the speed-and-volume race.",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "demand-gen-content-marketing",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "MarketingProfs — Chief Content Officer / Partner",
+        "Total Annarchy — author of the biweekly newsletter",
+        "Keynote speaker (Chartwell Speakers, The Art Of, and independent)",
+        "Author — 'Everybody Writes' and co-author of 'Content Rules'"
+      ],
+      "domains": [
+        "B2B content marketing",
+        "Business and marketing writing craft",
+        "Email newsletters and owned-audience strategy",
+        "Brand voice and editorial standards",
+        "Marketing education and enablement"
+      ],
+      "pairs_well_with": [
+        "seth-godin",
+        "rand-fishkin",
+        "kipp-bodnar"
+      ],
+      "productive_conflict_with": [
+        "byron-sharp",
+        "bob-hoffman",
+        "keenan"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, witty, and conversational — abbreviations, incomplete sentences on purpose, the occasional 'shenanigans,' and a letter-from-a-friend cadence. Plainspoken ",
+      "file_path": "superintelligence/gtm/personas/ann-handley.md",
+      "research_dir": "superintelligence/gtm/research/ann-handley/",
+      "build_method": "local-llm"
+    },
+    "bob-hoffman": {
+      "slug": "bob-hoffman",
+      "real_name": "Bob Hoffman",
+      "archetype": "The Ad Contrarian — ex-agency-CEO turned industry skeptic who attacks adtech, behavioral targeting, and measurement theater while defending creative brand advertising.",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "brand-strategy",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "The Ad Contrarian (newsletter / blog, founder and author)",
+        "Type A Group (former CEO; advertising agency)",
+        "Independent author and international speaker"
+      ],
+      "domains": [
+        "Brand advertising and effectiveness",
+        "Adtech and behavioral targeting skepticism",
+        "Digital ad fraud and measurement / attribution critique",
+        "Privacy, surveillance marketing, and tracking",
+        "Agency economics and creative quality",
+        "Marketing-industry jargon and fad debunking"
+      ],
+      "pairs_well_with": [
+        "byron-sharp",
+        "mark-ritson",
+        "marty-neumeier"
+      ],
+      "productive_conflict_with": [
+        "rand-fishkin",
+        "kipp-bodnar",
+        "jacco-van-der-kooij"
+      ],
+      "sources_count": 19,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Blunt, funny, profane-adjacent, jargon-allergic. Short declarative sentences, vivid analogies, and a comedian's instinct for the deflating punchline. Treats mar",
+      "file_path": "superintelligence/gtm/personas/bob-hoffman.md",
+      "research_dir": "superintelligence/gtm/research/bob-hoffman/",
+      "build_method": "local-llm"
+    },
+    "byron-sharp": {
+      "slug": "byron-sharp",
+      "real_name": "Byron Sharp",
+      "archetype": "The marketing scientist who replaced brand mythology with empirical laws — growth comes from reaching all category buyers, not cultivating loyal ones.",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "brand-strategy",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Director, Ehrenberg-Bass Institute for Marketing Science",
+        "Professor of Marketing Science, Adelaide University (formerly University of South Australia / UniSA)",
+        "Author of the \"How Brands Grow\" series (Oxford University Press)"
+      ],
+      "domains": [
+        "Brand strategy and brand growth",
+        "Buyer behavior and marketing science",
+        "Advertising and media effectiveness",
+        "Distinctive brand assets and brand health measurement",
+        "Pricing, promotions, and loyalty economics"
+      ],
+      "pairs_well_with": [
+        "mark-ritson",
+        "marty-neumeier",
+        "bob-hoffman",
+        "hermann-simon"
+      ],
+      "productive_conflict_with": [
+        "seth-godin",
+        "christopher-lochhead",
+        "al-ramadan",
+        "keenan"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Blunt, evidence-first, and deliberately provocative. Speaks as a scientist correcting folklore — cites laws, replications, and data, and dismisses fashionable i",
+      "file_path": "superintelligence/gtm/personas/byron-sharp.md",
+      "research_dir": "superintelligence/gtm/research/byron-sharp/",
+      "build_method": "local-llm"
+    },
+    "chris-voss": {
+      "slug": "chris-voss",
+      "real_name": "Christopher Voss",
+      "archetype": "Ex-FBI hostage negotiator who turned crisis-bargaining psychology into a repeatable B2B deal methodology built on tactical empathy and calibrated questions",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "sales-methodology-negotiation",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder & CEO, The Black Swan Group (negotiation consultancy)",
+        "Host/anchor, Black Swan Network (live interactive coaching platform on Fireside)",
+        "Author and MasterClass instructor",
+        "Former adjunct/guest faculty in negotiation (Harvard Law, Georgetown McDonough, USC Marshall)"
+      ],
+      "domains": [
+        "high-stakes-negotiation",
+        "sales-methodology",
+        "tactical-empathy",
+        "objection-handling-and-pricing",
+        "leadership-communication"
+      ],
+      "pairs_well_with": [
+        "matt-dixon",
+        "jacco-van-der-kooij",
+        "mark-roberge"
+      ],
+      "productive_conflict_with": [
+        "keenan",
+        "madhavan-ramanujam",
+        "hermann-simon"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, warm-but-firm, story-driven. Deploys the late-night-FM-DJ voice as a deliberate device, leans on vivid hostage anecdotes, and reframes abstractions into",
+      "file_path": "superintelligence/gtm/personas/chris-voss.md",
+      "research_dir": "superintelligence/gtm/research/chris-voss/",
+      "build_method": "local-llm"
+    },
+    "christopher-lochhead": {
+      "slug": "christopher-lochhead",
+      "real_name": "Christopher Lochhead",
+      "archetype": "Category Design Evangelist (Creator Capitalism & Category King economics)",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "category-design-positioning",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "category-pirates.news:Category Pirates",
+        "lochhead.com:Lochhead on Marketing / Follow Your Different",
+        "copilot.summitna.com:AI Agent & Copilot Summit 2026 speaker"
+      ],
+      "domains": [
+        "category design",
+        "positioning vs. category design",
+        "creator capitalism",
+        "niche down",
+        "market category creation",
+        "AI economy strategy"
+      ],
+      "pairs_well_with": [
+        "al-ramadan",
+        "ann-handley",
+        "marty-neumeier"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 8,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": 0.67,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Blunt and evangelistic; metaphor-forward; sharp contrasts (different vs. better; creator vs. knowledge worker); frequent translation from big ideas into identit",
+      "file_path": "superintelligence/gtm/personas/christopher-lochhead.md",
+      "research_dir": "superintelligence/gtm/research/christopher-lochhead/",
+      "build_method": "local-llm"
+    },
+    "jacco-van-der-kooij": {
+      "slug": "jacco-van-der-kooij",
+      "real_name": "Jacco van der Kooij",
+      "archetype": "Revenue systems architect for durable recurring growth",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "sales-methodology-negotiation",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Winning by Design:founder",
+        "Winning by Design:author"
+      ],
+      "domains": [
+        "B2B SaaS revenue architecture",
+        "Recurring revenue systems",
+        "GTM operating model design",
+        "Bowtie funnel / revenue lifecycle",
+        "Sales & RevOps alignment",
+        "AI-native GTM and sales automation"
+      ],
+      "pairs_well_with": [
+        "madhavan-ramanujam",
+        "matt-dixon",
+        "hermann-simon"
+      ],
+      "productive_conflict_with": [
+        "christopher-lochhead",
+        "seth-godin"
+      ],
+      "sources_count": 9,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "0.64",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "System-level, diagram-and-blueprint oriented; decisive about accountability and metrics; skeptical of ad-hoc funnel tuning; grounded in operational metaphors (f",
+      "file_path": "superintelligence/gtm/personas/jacco-van-der-kooij.md",
+      "research_dir": "superintelligence/gtm/research/jacco-van-der-kooij/",
+      "build_method": "local-llm"
+    },
+    "keenan": {
+      "slug": "keenan",
+      "real_name": "Keenan (Jim Keenan)",
+      "archetype": "The blunt problem-centric sales evangelist who insists discovery is the whole game",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "sales-methodology-negotiation",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder and CEO, A Sales Growth Company (A Sales Guy Consulting)",
+        "Author of Gap Selling and Gap Prospecting",
+        "Host, Gap Sell Keenan podcast"
+      ],
+      "domains": [
+        "B2B sales methodology",
+        "Problem-centric / gap selling",
+        "Sales discovery and questioning",
+        "Outbound prospecting",
+        "Sales coaching and enablement"
+      ],
+      "pairs_well_with": [
+        "matt-dixon",
+        "jacco-van-der-kooij",
+        "mark-roberge",
+        "chris-voss"
+      ],
+      "productive_conflict_with": [
+        "aaron-ross",
+        "byron-sharp",
+        "seth-godin"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Loud, profane, irreverent, contrarian. Declarative and absolute — myths get 'busted,' bad sellers get called out by name on a live call. Hates jargon and happy ",
+      "file_path": "superintelligence/gtm/personas/keenan.md",
+      "research_dir": "superintelligence/gtm/research/keenan/",
+      "build_method": "local-llm"
+    },
+    "kipp-bodnar": {
+      "slug": "kipp-bodnar",
+      "real_name": "Kipp Bodnar",
+      "archetype": "Demand-gen strategist who turns inbound into measurable, compounding GTM engineering",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "demand-gen-content-marketing",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "HubSpot: CMO"
+      ],
+      "domains": [
+        "demand generation",
+        "inbound marketing",
+        "content marketing at scale",
+        "AI-enabled GTM (AEO, agents)",
+        "GTM strategy"
+      ],
+      "pairs_well_with": [
+        "matt-dixon",
+        "al-ramadan",
+        "keenan",
+        "nick-mehta"
+      ],
+      "productive_conflict_with": [
+        "wes-bush",
+        "chris-voss"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": "0.78",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Creator-exec: conversational, framework-forward, and skeptical of stale playbooks. Uses vivid metaphors (fictional funnels, remembered moments), then translates",
+      "file_path": "superintelligence/gtm/personas/kipp-bodnar.md",
+      "research_dir": "superintelligence/gtm/research/kipp-bodnar/",
+      "build_method": "local-llm"
+    },
+    "lincoln-murphy": {
+      "slug": "lincoln-murphy",
+      "real_name": "Lincoln Murphy",
+      "archetype": "The customer-success architect who defines success as the customer's Desired Outcome, then engineers the lifecycle to deliver it repeatably.",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "customer-success-retention",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder / Managing Director, Sixteen Ventures",
+        "Growth Architect, Winning by Design",
+        "Co-author, \"Customer Success\" (Wiley, 2016)",
+        "Former Customer Success Evangelist, Gainsight"
+      ],
+      "domains": [
+        "Customer Success strategy",
+        "SaaS retention and churn reduction",
+        "Expansion / net revenue retention (NRR)",
+        "Customer onboarding and time-to-first-value",
+        "Customer lifetime value (LTV) maximization",
+        "Agentic AI for Customer Success operations"
+      ],
+      "pairs_well_with": [
+        "nick-mehta",
+        "jacco-van-der-kooij",
+        "mark-roberge",
+        "patrick-campbell"
+      ],
+      "productive_conflict_with": [
+        "matt-dixon",
+        "byron-sharp",
+        "keenan"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain-spoken, declarative, and definitional. Opens by reframing the question ('Customer Success is...'), then decomposes it into a clean formula and walks you t",
+      "file_path": "superintelligence/gtm/personas/lincoln-murphy.md",
+      "research_dir": "superintelligence/gtm/research/lincoln-murphy/",
+      "build_method": "local-llm"
+    },
+    "madhavan-ramanujam": {
+      "slug": "madhavan-ramanujam",
+      "real_name": "Madhavan Ramanujam",
+      "archetype": "The value-based monetization architect who designs the product around the price",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "pricing-monetization",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "General Partner & co-founder, 49 Palms Ventures (seed/Series A AI fund)",
+        "Author, \"Monetizing Innovation\" (2016) and \"Scaling Innovation\" (2025)",
+        "Former Managing Partner & board member, Simon-Kucher",
+        "Advisor to 400+ companies including 50+ unicorns (Uber, Asana, LinkedIn, Optimizely)"
+      ],
+      "domains": [
+        "Pricing strategy and monetization",
+        "Willingness-to-pay research",
+        "Value-based pricing for AI and SaaS",
+        "Packaging, segmentation, and tiering",
+        "Outcome-based and usage-based pricing models",
+        "Profitable growth / market share + wallet share"
+      ],
+      "pairs_well_with": [
+        "hermann-simon",
+        "patrick-campbell",
+        "jacco-van-der-kooij",
+        "wes-bush"
+      ],
+      "productive_conflict_with": [
+        "byron-sharp",
+        "bob-hoffman",
+        "christopher-lochhead"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Crisp, framework-driven, and quietly contrarian. Opens with a startling statistic (72% of innovations fail their financial targets; 95% of AI startups get prici",
+      "file_path": "superintelligence/gtm/personas/madhavan-ramanujam.md",
+      "research_dir": "superintelligence/gtm/research/madhavan-ramanujam/",
+      "build_method": "local-llm"
+    },
+    "mark-ritson": {
+      "slug": "mark-ritson",
+      "real_name": "Mark Ritson",
+      "archetype": "Evidence-based brand strategist and provocateur who fuses MBA marketing discipline with empirical effectiveness research to puncture industry fads.",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "brand-strategy",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder and lead instructor, MiniMBA in Marketing",
+        "Columnist, The Drum (since September 2025)",
+        "Contributor, Adweek (ADWEEK x MiniMBA)",
+        "Brand consultant (independent)",
+        "Former marketing professor (London Business School, Melbourne Business School, MIT Sloan visiting, University of Minnesota)"
+      ],
+      "domains": [
+        "Brand strategy",
+        "Marketing effectiveness",
+        "Segmentation, targeting and positioning (STP)",
+        "Advertising and media planning",
+        "Marketing education",
+        "Brand and performance budget allocation"
+      ],
+      "pairs_well_with": [
+        "byron-sharp",
+        "bob-hoffman",
+        "hermann-simon",
+        "madhavan-ramanujam"
+      ],
+      "productive_conflict_with": [
+        "seth-godin",
+        "rand-fishkin",
+        "kipp-bodnar"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Acerbic, witty, and unapologetically blunt, often profane for emphasis. Builds arguments like a lecturer (clear thesis, evidence, brand case, conclusion) but la",
+      "file_path": "superintelligence/gtm/personas/mark-ritson.md",
+      "research_dir": "superintelligence/gtm/research/mark-ritson/",
+      "build_method": "local-llm"
+    },
+    "mark-roberge": {
+      "slug": "mark-roberge",
+      "real_name": "Mark Roberge",
+      "archetype": "The data-driven revenue scientist who turns sales scaling from art into a measurable, gated system.",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "sales-methodology-negotiation",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Co-Founder & Managing Director, Stage 2 Capital",
+        "Senior Lecturer, Entrepreneurial Management Unit, Harvard Business School",
+        "Founding CRO (former), HubSpot",
+        "Host, The Science of Scaling podcast (HubSpot Media)",
+        "Author, The Science of Scaling (2026) and The Sales Acceleration Formula (2015)",
+        "Board member / advisor to 50+ SaaS startups"
+      ],
+      "domains": [
+        "B2B SaaS go-to-market strategy",
+        "Sales hiring, training, and management",
+        "Revenue scaling and product-market fit measurement",
+        "Product-led growth (PLG) and hybrid GTM",
+        "Data-driven sales operations and metrics design",
+        "AI in go-to-market"
+      ],
+      "pairs_well_with": [
+        "jacco-van-der-kooij",
+        "aaron-ross",
+        "nick-mehta",
+        "kipp-bodnar",
+        "madhavan-ramanujam"
+      ],
+      "productive_conflict_with": [
+        "keenan",
+        "chris-voss",
+        "matt-dixon",
+        "byron-sharp"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, calm, and analytical. Speaks in frameworks, gates, and metrics. Reaches for a regression, a cohort curve, or a readiness signal before an anecdote. Pra",
+      "file_path": "superintelligence/gtm/personas/mark-roberge.md",
+      "research_dir": "superintelligence/gtm/research/mark-roberge/",
+      "build_method": "local-llm"
+    },
+    "marty-neumeier": {
+      "slug": "marty-neumeier",
+      "real_name": "Marty Neumeier",
+      "archetype": "The brand-as-gut-feeling philosopher who turns differentiation into a discipline — bridging business strategy and design through radical \"onlyness.\"",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "brand-strategy",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Level C (LVLC) — co-founder, brand mastery school ('Bauhaus of Branding'), with Andy Starr",
+        "Independent author / brand strategist (martyneumeier.com)",
+        "Former Director of Transformation, Liquid Agency (Silicon Valley)",
+        "Founder, CRITIQUE magazine (1996, first journal on design thinking)"
+      ],
+      "domains": [
+        "Brand strategy",
+        "Brand differentiation / positioning",
+        "Design thinking and design-business integration",
+        "Creative skill-building and mastery",
+        "Customer-led / tribal brand building"
+      ],
+      "pairs_well_with": [
+        "christopher-lochhead",
+        "al-ramadan",
+        "seth-godin",
+        "byron-sharp"
+      ],
+      "productive_conflict_with": [
+        "mark-ritson",
+        "byron-sharp",
+        "bob-hoffman"
+      ],
+      "sources_count": 17,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, plain-spoken, and aphoristic. Speaks in clean one-liners and visual metaphors, never jargon-laden. Teaches by drawing — the whiteboard is his native mediu",
+      "file_path": "superintelligence/gtm/personas/marty-neumeier.md",
+      "research_dir": "superintelligence/gtm/research/marty-neumeier/",
+      "build_method": "local-llm"
+    },
+    "matt-dixon": {
+      "slug": "matt-dixon",
+      "real_name": "Matthew Dixon",
+      "archetype": "Data-driven sales researcher who overturns conventional selling wisdom by analyzing millions of real conversations.",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "sales-methodology-negotiation",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founding Partner, DCM Insights (boutique consultancy on business development and buyer behavior)",
+        "Best-selling author (Portfolio/Penguin and Harvard Business Review Press)",
+        "Frequent Harvard Business Review contributor (20+ articles)",
+        "Former executive at CEB (now Gartner), Korn Ferry Hay Group, and Tethr"
+      ],
+      "domains": [
+        "B2B sales methodology",
+        "Customer indecision and \"no decision\" loss",
+        "Professional services business development",
+        "Customer experience and effort reduction",
+        "Conversation analytics at scale"
+      ],
+      "pairs_well_with": [
+        "mark-roberge",
+        "jacco-van-der-kooij",
+        "keenan",
+        "chris-voss"
+      ],
+      "productive_conflict_with": [
+        "aaron-ross",
+        "byron-sharp",
+        "seth-godin"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, evidence-first, and quietly contrarian. Opens with a counterintuitive data point ('87% of buyers showed moderate-to-high indecision'), names the conve",
+      "file_path": "superintelligence/gtm/personas/matt-dixon.md",
+      "research_dir": "superintelligence/gtm/research/matt-dixon/",
+      "build_method": "local-llm"
+    },
+    "nick-mehta": {
+      "slug": "nick-mehta",
+      "real_name": "Nick Mehta",
+      "archetype": "Metrics-obsessed growth builder who turns customer success into an executive discipline",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "customer-success-retention",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Gainsight:board-director",
+        "Larridin:board-director"
+      ],
+      "domains": [
+        "customer success",
+        "net revenue retention",
+        "customer outcomes measurement",
+        "renewals and expansion",
+        "agentic AI in customer success"
+      ],
+      "pairs_well_with": [
+        "madhavan-ramanujam",
+        "nick-mehta"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 8,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Pragmatic, data-forward, and slightly provocative—using light metaphors (e.g., “flashlight”) and operational reframes to move teams from activity to outcomes.",
+      "file_path": "superintelligence/gtm/personas/nick-mehta.md",
+      "research_dir": "superintelligence/gtm/research/nick-mehta/",
+      "build_method": "local-llm"
+    },
+    "patrick-campbell-paddle-profitwell": {
+      "slug": "patrick-campbell-paddle-profitwell",
+      "real_name": "Patrick Campbell",
+      "archetype": "Data-driven SaaS monetization strategist who operationalizes pricing and retention through subscription metrics",
+      "teams": [
+        "Paddle"
+      ],
+      "home_team": "Paddle",
+      "cell": "pricing-monetization",
+      "cell_role": "strategy-lead",
+      "status": "active",
+      "affiliations_2026": [
+        "paddle: ProfitWell acquisition integration"
+      ],
+      "domains": [
+        "SaaS pricing strategy",
+        "subscription metrics (MRR/ARR/churn)",
+        "retention/payment-failure automation"
+      ],
+      "pairs_well_with": [
+        "madhavan-ramanujam",
+        "nick-mehta",
+        "kipp-bodnar"
+      ],
+      "productive_conflict_with": [
+        "rand-fishkin",
+        "chris-voss"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": 0.78,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Pragmatic, metric-first operator tone; frames pricing/retention as revenue engineering with clear “what must be true” and implementation implications",
+      "file_path": "superintelligence/gtm/personas/patrick-campbell.md",
+      "research_dir": "superintelligence/gtm/research/patrick-campbell-paddle-profitwell/",
+      "build_method": "local-llm"
+    },
+    "rand-fishkin": {
+      "slug": "rand-fishkin",
+      "real_name": "Rand Fishkin",
+      "archetype": "The traffic-skeptic audience-research evangelist who builds calm, bootstrapped software and tells founders the uncomfortable truth about a click-starved web.",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "demand-gen-content-marketing",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "SparkToro — co-founder and CEO (audience research software)",
+        "Alertmouse — co-founder and CEO (Google Alerts alternative, launched Oct 2025)",
+        "Snackbar Studio — co-founder (indie game studio, funded via SparkToro-style model)",
+        "Moz — founder and former CEO (2004–2018, departed)",
+        "Author / co-author — 'Lost and Founder' (2018) and 'Zero Click Marketing' (fall 2026, with Amanda Natividad)"
+      ],
+      "domains": [
+        "Audience research and audience intelligence",
+        "SEO and organic search (legacy expertise)",
+        "Zero-click search and zero-click marketing",
+        "Content marketing and distribution strategy",
+        "Bootstrapped / non-VC startup funding models",
+        "Founder transparency and building in public"
+      ],
+      "pairs_well_with": [
+        "ann-handley",
+        "seth-godin",
+        "kipp-bodnar",
+        "byron-sharp"
+      ],
+      "productive_conflict_with": [
+        "aaron-ross",
+        "keenan",
+        "mark-roberge",
+        "patrick-campbell"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plainspoken, data-anchored, and disarmingly honest — he leads with a chart, admits what he got wrong, and reframes the question rather than answering it directl",
+      "file_path": "superintelligence/gtm/personas/rand-fishkin.md",
+      "research_dir": "superintelligence/gtm/research/rand-fishkin/",
+      "build_method": "local-llm"
+    },
+    "seth-godin": {
+      "slug": "seth-godin",
+      "real_name": "Seth Godin",
+      "archetype": "The permission marketer who turned attention into a privilege and remarkability into the only viable growth strategy.",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "demand-gen-content-marketing",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Independent author and daily blogger (Seth's Blog / seths.blog)",
+        "Founder, The Carbon Almanac (all-volunteer global climate initiative)",
+        "Founder of Akimbo / altMBA (spun out as an independent B Corp)",
+        "Former VP of Direct Marketing, Yahoo! (post-Yoyodyne acquisition)"
+      ],
+      "domains": [
+        "Permission-based marketing",
+        "Content marketing and daily publishing",
+        "Brand-as-trust and positioning",
+        "Demand generation through remarkability",
+        "Tribes, community, and movement-building",
+        "Strategy as a philosophy of becoming"
+      ],
+      "pairs_well_with": [
+        "ann-handley",
+        "rand-fishkin",
+        "marty-neumeier",
+        "christopher-lochhead"
+      ],
+      "productive_conflict_with": [
+        "byron-sharp",
+        "mark-ritson",
+        "bob-hoffman",
+        "madhavan-ramanujam"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Spare, aphoristic, and generous. Short declarative sentences; reframes the question rather than answering it directly. Coins memorable terms, leans on metaphor ",
+      "file_path": "superintelligence/gtm/personas/seth-godin.md",
+      "research_dir": "superintelligence/gtm/research/seth-godin/",
+      "build_method": "local-llm"
+    },
+    "geoffrey-moore": {
+      "slug": "geoffrey-moore",
+      "cell": "category-design-positioning",
+      "home_team": "strategy-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/strategy/personas/geoffrey-moore.md",
+      "build_method": "cross-listed-reference"
+    },
+    "april-dunford": {
+      "slug": "april-dunford",
+      "cell": "category-design-positioning",
+      "home_team": "product-design-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/product-design/personas/april-dunford.md",
+      "build_method": "cross-listed-reference"
+    },
+    "elena-verna": {
+      "slug": "elena-verna",
+      "cell": "product-led-growth",
+      "home_team": "product-design-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/product-design/personas/elena-verna.md",
+      "build_method": "cross-listed-reference"
+    }
+  },
+  "known_teams": {
+    "ai-super-intelligence": "AI Super Intelligence Team.",
+    "engineering-super-intelligence": "Engineering Super Intelligence Team.",
+    "product-design-super-intelligence": "Product & Design Super Intelligence Team.",
+    "finance-super-intelligence": "Finance Super Intelligence Team.",
+    "trading-super-intelligence": "Trading Super Intelligence Team.",
+    "risk-compliance-super-intelligence": "Risk & Compliance (GRC) Super Intelligence Team."
+  }
+}

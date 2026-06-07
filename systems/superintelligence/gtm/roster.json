@@ -1,0 +1,52 @@
+{
+  "team_id": "gtm-super-intelligence",
+  "team_name": "Sales, GTM & Marketing Super Intelligence Team",
+  "command_short": "GTM",
+  "locked": "2026-06-01",
+  "build_method": "local-first (LM Studio + retriever + validator); Claude top-up on thin signals",
+  "notes": "Go-to-market: category design, demand gen, sales methodology, PLG, brand, pricing, customer success. Loud public voices (books, podcasts, frameworks). Boundary: product strategy/discovery => Product&Design; growth-as-product-analytics overlaps Data. geoffrey-moore cross-listed from Strategy (built earlier in the same queue).",
+  "cells": {
+    "category-design-positioning": "Category creation, positioning, market framing, crossing the chasm.",
+    "demand-gen-content-marketing": "Demand generation, content, SEO, audience building, inbound.",
+    "sales-methodology-negotiation": "Sales process, methodology, enablement, negotiation.",
+    "product-led-growth": "PLG, self-serve, freemium, product-as-the-go-to-market.",
+    "brand-strategy": "Brand building, distinctiveness, marketing effectiveness science.",
+    "pricing-monetization": "Pricing strategy, packaging, monetization, willingness-to-pay.",
+    "customer-success-retention": "Post-sale expansion, retention, net revenue retention, CS as a discipline."
+  },
+  "personas": [
+    {"slug":"christopher-lochhead","name":"Christopher Lochhead","cell":"category-design-positioning","role":"lead-driver","anchor":"'Play Bigger', 'Niche Down'; category design, 'category king' economics, 3x ex-CMO"},
+    {"slug":"al-ramadan","name":"Al Ramadan","cell":"category-design-positioning","role":"specialist","anchor":"Play Bigger co-founder/'Play Bigger' lead author; category design + lightning-strike GTM"},
+    {"slug":"seth-godin","name":"Seth Godin","cell":"demand-gen-content-marketing","role":"lead-driver","anchor":"'Permission Marketing','Purple Cow','This is Marketing'; permission, remarkability, tribes"},
+    {"slug":"rand-fishkin","name":"Rand Fishkin","cell":"demand-gen-content-marketing","role":"specialist","anchor":"founder Moz + SparkToro; SEO/audience research, 'Lost and Founder', zero-click marketing"},
+    {"slug":"ann-handley","name":"Ann Handley","cell":"demand-gen-content-marketing","role":"specialist","anchor":"'Everybody Writes'; content marketing standard, MarketingProfs, B2B content craft"},
+    {"slug":"kipp-bodnar","name":"Kipp Bodnar","cell":"demand-gen-content-marketing","role":"specialist","anchor":"HubSpot CMO; inbound/demand-gen at scale, the 'Marketing Against the Grain' POV"},
+
+    {"slug":"jacco-van-der-kooij","name":"Jacco van der Kooij","cell":"sales-methodology-negotiation","role":"lead-driver","anchor":"founder Winning by Design; the SaaS revenue architecture / bowtie funnel, recurring-revenue selling"},
+    {"slug":"mark-roberge","name":"Mark Roberge","cell":"sales-methodology-negotiation","role":"lead-driver","anchor":"ex-HubSpot CRO; 'The Sales Acceleration Formula', metrics-driven sales hiring + scaling, HBS"},
+    {"slug":"matt-dixon","name":"Matt Dixon","cell":"sales-methodology-negotiation","role":"specialist","anchor":"'The Challenger Sale','The JOLT Effect'; teach-tailor-take-control, indecision research"},
+    {"slug":"aaron-ross","name":"Aaron Ross","cell":"sales-methodology-negotiation","role":"specialist","anchor":"'Predictable Revenue'; the Salesforce outbound/SDR model, specialized sales roles"},
+    {"slug":"keenan","name":"Keenan","cell":"sales-methodology-negotiation","role":"specialist","anchor":"'Gap Selling'; problem-centric selling, the current-state/future-state gap, blunt sales POV"},
+    {"slug":"chris-voss","name":"Chris Voss","cell":"sales-methodology-negotiation","role":"specialist","anchor":"'Never Split the Difference'; ex-FBI hostage negotiator, tactical empathy, calibrated questions"},
+
+    {"slug":"wes-bush","name":"Wes Bush","cell":"product-led-growth","role":"lead-driver","anchor":"'Product-Led Growth'; founder ProductLed, the PLG playbook, free-model design"},
+    {"slug":"blake-bartlett","name":"Blake Bartlett","cell":"product-led-growth","role":"specialist","anchor":"OpenView; coined 'product-led growth', the end-user era, PLG benchmarks"},
+
+    {"slug":"marty-neumeier","name":"Marty Neumeier","cell":"brand-strategy","role":"lead-driver","anchor":"'The Brand Gap','Zag'; brand-as-gut-feeling, radical differentiation, design+brand"},
+    {"slug":"byron-sharp","name":"Byron Sharp","cell":"brand-strategy","role":"lead-driver","anchor":"Ehrenberg-Bass; 'How Brands Grow', mental/physical availability, light-buyers, distinctiveness over differentiation"},
+    {"slug":"mark-ritson","name":"Mark Ritson","cell":"brand-strategy","role":"specialist","anchor":"Marketing Week columnist; evidence-based marketing, anti-fluff, brand+performance balance"},
+    {"slug":"bob-hoffman","name":"Bob Hoffman","cell":"brand-strategy","role":"specialist","anchor":"'The Ad Contrarian'; skeptic of adtech/targeting hype, brand-advertising effectiveness"},
+
+    {"slug":"madhavan-ramanujam","name":"Madhavan Ramanujam","cell":"pricing-monetization","role":"lead-driver","anchor":"Simon-Kucher; 'Monetizing Innovation', design-the-product-around-the-price, willingness-to-pay"},
+    {"slug":"patrick-campbell","name":"Patrick Campbell","cell":"pricing-monetization","role":"specialist","anchor":"founder ProfitWell/Paddle; SaaS pricing + retention data, value-metric pricing"},
+    {"slug":"hermann-simon","name":"Hermann Simon","cell":"pricing-monetization","role":"specialist","anchor":"founder Simon-Kucher; 'Confessions of the Pricing Man', price-as-profit-lever, hidden champions"},
+
+    {"slug":"nick-mehta","name":"Nick Mehta","cell":"customer-success-retention","role":"lead-driver","anchor":"CEO Gainsight; 'Customer Success', NRR-as-the-metric, the CS discipline"},
+    {"slug":"lincoln-murphy","name":"Lincoln Murphy","cell":"customer-success-retention","role":"specialist","anchor":"'Customer Success' co-author; success-milestones, churn/expansion, desired-outcome framing"}
+  ],
+  "cross_listed": [
+    {"slug":"geoffrey-moore","home_team":"strategy-super-intelligence","cell":"category-design-positioning"},
+    {"slug":"april-dunford","home_team":"product-design-super-intelligence","cell":"category-design-positioning"},
+    {"slug":"elena-verna","home_team":"product-design-super-intelligence","cell":"product-led-growth"}
+  ]
+}

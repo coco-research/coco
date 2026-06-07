@@ -34,17 +34,76 @@
       "team_id": "finance-super-intelligence",
       "name": "Finance Super Intelligence Team",
       "dir": "superintelligence/finance",
-      "personas": 0,
-      "cells": 0,
-      "built": false
+      "personas": 39,
+      "cells": 7,
+      "build_method": "local-first (LM Studio qwen3.6 + retriever + validator)",
+      "built": true
     },
-    "compliance": {
-      "team_id": "compliance-super-intelligence",
-      "name": "Compliance Super Intelligence Team",
-      "dir": "superintelligence/compliance",
-      "personas": 0,
-      "cells": 0,
-      "built": false
+    "trading": {
+      "team_id": "trading-super-intelligence",
+      "name": "Trading Super Intelligence Team",
+      "dir": "superintelligence/trading",
+      "personas": 43,
+      "cells": 8,
+      "note": "Roster LOCKED 2026-06-01 (roster.json, post-ultra-think): macro-discretionary, quant-systematic, derivatives-volatility, microstructure-execution, fixed-income-rates, risk-systemic, crypto-digital-assets, trader-craft-psychology. Build pending (after Finance).",
+      "built": true
+    },
+    "risk-compliance": {
+      "team_id": "risk-compliance-super-intelligence",
+      "name": "Risk & Compliance (GRC) Super Intelligence Team",
+      "dir": "superintelligence/risk-compliance",
+      "personas": 28,
+      "cells": 7,
+      "cross_listed": 12,
+      "note": "Merged Risk + Compliance. Roster LOCKED 2026-06-01 (roster.json, post-ultra-think; cells restructured to where public voices exist): privacy-data-protection, ai-governance-responsible-ai, regulatory-tech-policy, security-governance(x-list Eng), erm-grc-leadership, financial-crime-aml, model-systemic-risk(x-list Trading). 30 native + 12 cross-listed. Build pending; expect heavy Claude top-up (thin public-voice domain).",
+      "built": true
+    },
+    "strategy": {
+      "team_id": "strategy-super-intelligence",
+      "name": "Strategy Super Intelligence Team",
+      "dir": "superintelligence/strategy",
+      "personas": 23,
+      "cells": 7,
+      "cross_listed": 2,
+      "note": "Roster LOCKED 2026-06-01 (roster.json): competitive-strategy-advantage, growth-innovation, corporate-portfolio-strategy, strategy-execution-org, game-theory-decision, behavioral-strategy-bias, platform-ecosystem-strategy. 29 native (Porter/Rumelt/Helmer/Roger Martin/McGrath/Kim/Mauborgne...) + 2 cross-listed from Product&Design (Christensen, Ben Thompson). Build queued (queue-2, after GRC).",
+      "built": true
+    },
+    "data-analytics": {
+      "team_id": "data-analytics-super-intelligence",
+      "name": "Data & Analytics Super Intelligence Team",
+      "dir": "superintelligence/data-analytics",
+      "personas": 25,
+      "cells": 7,
+      "note": "Roster LOCKED 2026-06-01 (roster.json): data-engineering-architecture, analytics-engineering-modern-stack, mlops-ml-systems, data-science-statistics, data-visualization, data-governance-quality, experimentation-causal-inference. 29 native (Reis/Dehghani/Huyen/Wickham/McKinney/Tufte/Kohavi/Pearl...). Build queued (queue-2).",
+      "built": true
+    },
+    "gtm": {
+      "team_id": "gtm-super-intelligence",
+      "name": "Sales, GTM & Marketing Super Intelligence Team",
+      "dir": "superintelligence/gtm",
+      "personas": 20,
+      "cells": 7,
+      "cross_listed": 3,
+      "note": "Roster LOCKED 2026-06-01 (roster.json): category-design-positioning, demand-gen-content-marketing, sales-methodology-negotiation, product-led-growth, brand-strategy, pricing-monetization, customer-success-retention. 23 native (Lochhead/Ramadan/Godin/Challenger/Winning-by-Design/Byron Sharp/Ramanujam...) + 3 cross-listed (geoffrey-moore from Strategy; Dunford + Verna from Product&Design). Build queued (queue-2).",
+      "built": true
+    }
+  },
+  "roadmap": [
+    "finance (building, 24/47)",
+    "trading (roster LOCKED, build pending)",
+    "risk-compliance / GRC (roster LOCKED, build pending)",
+    "cross-team meta-orchestrator engine (build deterministic selector once >=5 teams live)",
+    "strategy, data-analytics, gtm (rosters LOCKED 2026-06-01, queued in queue-2 after GRC)"
+  ],
+  "planned_capabilities": {
+    "cross_team_meta_orchestrator": {
+      "summary": "Top-level /SI router that selects voices ACROSS teams for cross-domain decisions, not just within one team.",
+      "design": "1) read this meta-registry (team + cell descriptions only, light); 2) classify prompt -> relevant teams (1-4); 3) invoke each selected team's orchestrator with a shared 16-32 cross-team budget weighted by relevance; 4) merged approval gate grouped by team; 5) execute verb, attribution names persona+team. Scores at team+cell granularity first to avoid loading everything.",
+      "commands": "full top-level family: /SI (dispatcher) + /SI-Orchestrate + 15 /SI-<Verb> (all-teams). Per-team /SI-<team>-* remain for scoped use.",
+      "surface": "LOCKED: full /SI family + CoCo-hosted (CoCo NL router invokes /SI-*). Auto-delegate on single-domain; pure-proportional budget.",
+      "generator": "superintelligence/scripts/build_meta_commands.py (reads this meta-registry live; teams auto-join as built flips)",
+      "design_doc": "superintelligence/META-ORCHESTRATOR-DESIGN.md",
+      "status": "built 2026-06-01 (17 commands installed; CoCo routing wired). Covers AI+Eng+PD now; Finance/Trading/GRC auto-join on built=true."
     }
   },
   "shared": {

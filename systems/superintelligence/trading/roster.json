@@ -1,0 +1,74 @@
+{
+  "team_id": "trading-super-intelligence",
+  "team_name": "Trading Super Intelligence Team",
+  "command_short": "Trade",
+  "locked": "2026-06-01",
+  "build_method": "local-first (LM Studio + retriever + validator); Claude top-up on flagged/pseudonymous",
+  "finance_trading_boundary": "Systematic/quant/markets-execution/derivatives/macro-trading/crypto-trading => Trading. Fundamental/discretionary + corporate finance => Finance. Macro ECONOMISTS stay in Finance; hedge-fund macro TRADERS are here.",
+  "notes": "Exclude collapsed/fraud names (SBF, Do Kwon, Su Zhu). Pseudonymous personas (Cobie, Hasu) carry lower identity-confidence. Archetypes use persistent_signals.",
+  "cells": {
+    "macro-discretionary": "Discretionary global-macro and hedge-fund trading.",
+    "quant-systematic": "Systematic/quant strategies, factors, ML-in-markets.",
+    "derivatives-volatility": "Options, volatility, tail risk, derivatives.",
+    "microstructure-execution": "Market microstructure, execution, HFT, technical trading.",
+    "fixed-income-rates": "Bonds, rates, credit, monetary plumbing.",
+    "risk-systemic": "Trading/market risk management and systemic risk.",
+    "crypto-digital-assets": "Crypto/digital-asset trading and market structure.",
+    "trader-craft-psychology": "What makes great traders — psychology, discipline, the meta-craft."
+  },
+  "personas": [
+    {"slug":"stanley-druckenmiller","name":"Stanley Druckenmiller","cell":"macro-discretionary","role":"lead-driver","anchor":"Duquesne; legendary global-macro; concentration + liquidity; ex-Soros (broke the BoE)"},
+    {"slug":"ray-dalio","name":"Ray Dalio","cell":"macro-discretionary","role":"lead-driver","anchor":"Bridgewater founder; All-Weather, debt-cycle framework, 'Principles', radical transparency"},
+    {"slug":"george-soros","name":"George Soros","cell":"macro-discretionary","role":"validator","anchor":"reflexivity theory; the trade that broke the pound — archetype (b.1930, inactive trader)"},
+    {"slug":"paul-tudor-jones","name":"Paul Tudor Jones","cell":"macro-discretionary","role":"specialist","anchor":"Tudor; macro + technicals, risk-first, '1987' call, asymmetric bets"},
+    {"slug":"david-tepper","name":"David Tepper","cell":"macro-discretionary","role":"specialist","anchor":"Appaloosa; distressed + macro, 'don't fight the Fed'"},
+    {"slug":"kyle-bass","name":"Kyle Bass","cell":"macro-discretionary","role":"specialist","anchor":"Hayman; structural macro shorts, tail-risk theses"},
+    {"slug":"jeffrey-gundlach","name":"Jeffrey Gundlach","cell":"macro-discretionary","role":"specialist","anchor":"DoubleLine; 'Bond King', rates + macro market calls"},
+    {"slug":"danielle-dimartino-booth","name":"Danielle DiMartino Booth","cell":"macro-discretionary","role":"specialist","anchor":"QI Research; ex-Dallas Fed; Fed-watching, credit-cycle, prolific macro commentary"},
+
+    {"slug":"cliff-asness","name":"Cliff Asness","cell":"quant-systematic","role":"lead-driver","anchor":"AQR; factor investing, value/momentum, 'efficiently inefficient', sharp public writing"},
+    {"slug":"jim-simons","name":"Jim Simons","cell":"quant-systematic","role":"validator","anchor":"Renaissance/Medallion; the greatest quant track record — archetype (d.2024)"},
+    {"slug":"ed-thorp","name":"Ed Thorp","cell":"quant-systematic","role":"validator","anchor":"Kelly criterion, card-counting-to-markets, 'A Man for All Markets' — archetype (b.1932)"},
+    {"slug":"robert-litterman","name":"Robert Litterman","cell":"quant-systematic","role":"specialist","anchor":"Black-Litterman model; ex-Goldman risk; climate-risk pricing"},
+    {"slug":"marcos-lopez-de-prado","name":"Marcos Lopez de Prado","cell":"quant-systematic","role":"specialist","anchor":"'Advances in Financial ML'; ML pitfalls, backtest overfitting, meta-labeling"},
+    {"slug":"ernest-chan","name":"Ernest Chan","cell":"quant-systematic","role":"specialist","anchor":"QTS/PredictNow; retail-accessible algo trading, ML for strategy"},
+    {"slug":"andrew-lo","name":"Andrew Lo","cell":"quant-systematic","role":"specialist","anchor":"MIT; Adaptive Markets Hypothesis; bridges efficient-markets, quant, and behavioral"},
+
+    {"slug":"emanuel-derman","name":"Emanuel Derman","cell":"derivatives-volatility","role":"lead-driver","anchor":"'My Life as a Quant'; ex-Goldman quant; models-as-metaphors, volatility smile"},
+    {"slug":"nassim-taleb","name":"Nassim Taleb","cell":"derivatives-volatility","role":"lead-driver","anchor":"'Black Swan'/'Antifragile'/'Dynamic Hedging'; tail risk, convexity, anti-fragility"},
+    {"slug":"euan-sinclair","name":"Euan Sinclair","cell":"derivatives-volatility","role":"specialist","anchor":"'Volatility Trading'; options market-making, edge + variance"},
+    {"slug":"sheldon-natenberg","name":"Sheldon Natenberg","cell":"derivatives-volatility","role":"specialist","anchor":"'Option Volatility & Pricing' — the options-education canon"},
+    {"slug":"benn-eifert","name":"Benn Eifert","cell":"derivatives-volatility","role":"specialist","anchor":"QVR Advisors; vol/derivatives, prolific debunker of retail vol myths"},
+    {"slug":"christopher-cole","name":"Christopher Cole","cell":"derivatives-volatility","role":"specialist","anchor":"Artemis Capital; long-vol/tail hedging, 'Dragon' portfolio, convexity"},
+
+    {"slug":"larry-harris","name":"Larry Harris","cell":"microstructure-execution","role":"lead-driver","anchor":"USC; 'Trading and Exchanges' — the microstructure canon; ex-SEC chief economist"},
+    {"slug":"maureen-ohara","name":"Maureen O'Hara","cell":"microstructure-execution","role":"specialist","anchor":"Cornell; market microstructure theory, liquidity, high-frequency markets"},
+    {"slug":"joe-saluzzi","name":"Joe Saluzzi","cell":"microstructure-execution","role":"specialist","anchor":"Themis Trading; 'Broken Markets', HFT/structure critic"},
+    {"slug":"haim-bodek","name":"Haim Bodek","cell":"microstructure-execution","role":"specialist","anchor":"'the HFT whistleblower'; order-type gaming, exchange microstructure"},
+    {"slug":"peter-brandt","name":"Peter Brandt","cell":"microstructure-execution","role":"specialist","anchor":"50-yr veteran technical/classical-charting trader; risk-of-ruin discipline"},
+
+    {"slug":"bill-gross","name":"Bill Gross","cell":"fixed-income-rates","role":"validator","anchor":"ex-PIMCO 'Bond King' — archetype (retired 2019); total-return bond investing"},
+    {"slug":"riccardo-rebonato","name":"Riccardo Rebonato","cell":"fixed-income-rates","role":"specialist","anchor":"EDHEC; rates modeling, volatility, 'Bond Pricing and Yield Curve Modeling'"},
+    {"slug":"frank-fabozzi","name":"Frank Fabozzi","cell":"fixed-income-rates","role":"specialist","anchor":"the fixed-income textbook authority; bond math, structured products"},
+    {"slug":"lacy-hunt","name":"Lacy Hunt","cell":"fixed-income-rates","role":"specialist","anchor":"Hoisington; secular-disinflation/debt-overhang thesis, long bonds"},
+    {"slug":"jim-bianco","name":"Jim Bianco","cell":"fixed-income-rates","role":"specialist","anchor":"Bianco Research; rates/macro/market-structure, prolific public analysis"},
+
+    {"slug":"aaron-brown","name":"Aaron Brown","cell":"risk-systemic","role":"lead-driver","anchor":"'Red-Blooded Risk'; ex-AQR risk manager, gambling-to-markets risk thinking"},
+    {"slug":"richard-bookstaber","name":"Richard Bookstaber","cell":"risk-systemic","role":"specialist","anchor":"'A Demon of Our Own Design'/'The End of Theory'; systemic/complexity risk"},
+    {"slug":"kenneth-grant","name":"Kenneth Grant","cell":"risk-systemic","role":"specialist","anchor":"'Trading Risk'; position-sizing, drawdown control, risk-as-edge"},
+    {"slug":"til-schuermann","name":"Til Schuermann","cell":"risk-systemic","role":"specialist","anchor":"Oliver Wyman; stress testing, model risk, ex-NY Fed"},
+    {"slug":"jon-danielsson","name":"Jon Danielsson","cell":"risk-systemic","role":"specialist","anchor":"LSE Systemic Risk Centre; endogenous risk, risk-of-risk-models, AI-and-financial-stability"},
+
+    {"slug":"arthur-hayes","name":"Arthur Hayes","cell":"crypto-digital-assets","role":"lead-driver","anchor":"BitMEX co-founder; macro-crypto essays, perp-swap pioneer, liquidity/CB-plumbing lens"},
+    {"slug":"nic-carter","name":"Nic Carter","cell":"crypto-digital-assets","role":"specialist","anchor":"Castle Island; on-chain data, bitcoin/macro, banking-crypto policy"},
+    {"slug":"hasu","name":"Hasu","cell":"crypto-digital-assets","role":"specialist","anchor":"Flashbots strategy lead; MEV, market structure — pseudonymous (lower identity-confidence)"},
+    {"slug":"cobie","name":"Cobie","cell":"crypto-digital-assets","role":"specialist","anchor":"'UpOnly' podcast; crypto-market psychology/cycles — pseudonymous (lower identity-confidence)"},
+    {"slug":"caitlin-long","name":"Caitlin Long","cell":"crypto-digital-assets","role":"specialist","anchor":"Custodia Bank; crypto-banking, custody, Wall-St-meets-crypto plumbing"},
+    {"slug":"vitalik-buterin","name":"Vitalik Buterin","cell":"crypto-digital-assets","role":"specialist","anchor":"Ethereum; crypto-economics, mechanism design, market-structure ethics"},
+
+    {"slug":"jack-schwager","name":"Jack Schwager","cell":"trader-craft-psychology","role":"lead-driver","anchor":"'Market Wizards' series — the canonical study of what separates great traders"},
+    {"slug":"brett-steenbarger","name":"Brett Steenbarger","cell":"trader-craft-psychology","role":"specialist","anchor":"trading psychologist; 'The Daily Trading Coach', performance under uncertainty"},
+    {"slug":"mark-douglas","name":"Mark Douglas","cell":"trader-craft-psychology","role":"validator","anchor":"'Trading in the Zone' — probabilistic mindset — archetype (d.2015)"},
+    {"slug":"linda-raschke","name":"Linda Raschke","cell":"trader-craft-psychology","role":"specialist","anchor":"veteran short-term trader (Market Wizard); pattern discipline, risk control"}
+  ]
+}

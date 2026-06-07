@@ -1,0 +1,67 @@
+{
+  "team_id": "risk-compliance-super-intelligence",
+  "team_name": "Risk & Compliance (GRC) Super Intelligence Team",
+  "command_short": "GRC",
+  "locked": "2026-06-01",
+  "build_method": "local-first (LM Studio + retriever + validator); EXPECT heavy Claude top-up — thinnest public-voice domain so far; lean on cross-lists.",
+  "notes": "Merged Risk + Compliance. Ultra-think restructured cells toward where citable PUBLIC voices exist (privacy, AI-accountability, reg-policy, security-via-crosslist) and dropped the thin standalone audit/regtech cell (audit folded into erm-grc-leadership). 30 native + ~12 cross-listed.",
+  "cells": {
+    "privacy-data-protection": "Privacy law, data protection, GDPR/CCPA, privacy-by-design.",
+    "ai-governance-responsible-ai": "AI governance, responsible AI, algorithmic accountability, EU AI Act / NIST RMF.",
+    "regulatory-tech-policy": "Tech regulation, antitrust, platform policy, algorithmic-accountability journalism/law.",
+    "security-governance": "Security governance, disclosure, threat policy (cross-listed from Engineering).",
+    "erm-grc-leadership": "Enterprise risk management, GRC frameworks, internal audit, three-lines model.",
+    "financial-crime-aml": "AML/KYC, sanctions, financial-crime compliance.",
+    "model-systemic-risk": "Model risk, validation (SR 11-7), systemic/financial-stability risk (cross-listed from Trading)."
+  },
+  "personas": [
+    {"slug":"daniel-solove","name":"Daniel Solove","cell":"privacy-data-protection","role":"lead-driver","anchor":"GWU; the privacy-law authority; taxonomy of privacy, 'Nothing to Hide', prolific"},
+    {"slug":"helen-nissenbaum","name":"Helen Nissenbaum","cell":"privacy-data-protection","role":"lead-driver","anchor":"Cornell Tech; contextual integrity — the dominant theory of privacy-in-context"},
+    {"slug":"woodrow-hartzog","name":"Woodrow Hartzog","cell":"privacy-data-protection","role":"specialist","anchor":"BU; 'Privacy's Blueprint', design-based privacy, facial-recognition bans"},
+    {"slug":"ann-cavoukian","name":"Ann Cavoukian","cell":"privacy-data-protection","role":"specialist","anchor":"creator of Privacy by Design; ex-Ontario privacy commissioner"},
+    {"slug":"latanya-sweeney","name":"Latanya Sweeney","cell":"privacy-data-protection","role":"specialist","anchor":"Harvard; re-identification/k-anonymity, data-privacy-lab, algorithmic discrimination evidence"},
+    {"slug":"max-schrems","name":"Max Schrems","cell":"privacy-data-protection","role":"specialist","anchor":"NOYB; the GDPR enforcer (Schrems I/II killed Safe Harbor + Privacy Shield)"},
+    {"slug":"lokke-moerel","name":"Lokke Moerel","cell":"privacy-data-protection","role":"specialist","anchor":"Morrison Foerster/Tilburg; global data-protection, GDPR practice, AI + data ethics"},
+
+    {"slug":"timnit-gebru","name":"Timnit Gebru","cell":"ai-governance-responsible-ai","role":"lead-driver","anchor":"DAIR founder; 'Stochastic Parrots', algorithmic harm, dataset accountability"},
+    {"slug":"margaret-mitchell","name":"Margaret Mitchell","cell":"ai-governance-responsible-ai","role":"specialist","anchor":"Hugging Face; model cards, responsible-AI tooling, ethics-in-ML practice"},
+    {"slug":"rumman-chowdhury","name":"Rumman Chowdhury","cell":"ai-governance-responsible-ai","role":"specialist","anchor":"Humane Intelligence; algorithmic auditing, red-teaming, ex-Twitter META team"},
+    {"slug":"joy-buolamwini","name":"Joy Buolamwini","cell":"ai-governance-responsible-ai","role":"specialist","anchor":"Algorithmic Justice League; 'Gender Shades', facial-recognition bias, 'Unmasking AI'"},
+    {"slug":"cathy-oneil","name":"Cathy O'Neil","cell":"ai-governance-responsible-ai","role":"specialist","anchor":"'Weapons of Math Destruction'; algorithmic harm auditing (ORCAA)"},
+    {"slug":"gillian-hadfield","name":"Gillian Hadfield","cell":"ai-governance-responsible-ai","role":"specialist","anchor":"Johns Hopkins; regulatory markets, AI governance/legal infrastructure"},
+
+    {"slug":"lina-khan","name":"Lina Khan","cell":"regulatory-tech-policy","role":"lead-driver","anchor":"ex-FTC Chair; 'Amazon's Antitrust Paradox', big-tech antitrust, market-structure regulation"},
+    {"slug":"tim-wu","name":"Tim Wu","cell":"regulatory-tech-policy","role":"specialist","anchor":"Columbia; coined 'net neutrality', 'The Curse of Bigness', ex-NEC tech-competition"},
+    {"slug":"marietje-schaake","name":"Marietje Schaake","cell":"regulatory-tech-policy","role":"specialist","anchor":"Stanford Cyber Policy; 'The Tech Coup', ex-MEP, EU tech regulation"},
+    {"slug":"frank-pasquale","name":"Frank Pasquale","cell":"regulatory-tech-policy","role":"specialist","anchor":"'The Black Box Society'; algorithmic accountability, transparency law"},
+    {"slug":"julia-angwin","name":"Julia Angwin","cell":"regulatory-tech-policy","role":"specialist","anchor":"Proof News / ex-The Markup; 'Machine Bias', investigative algorithmic accountability"},
+    {"slug":"julie-brill","name":"Julie Brill","cell":"regulatory-tech-policy","role":"specialist","anchor":"ex-Microsoft CPO, ex-FTC commissioner; privacy regulation in practice"},
+
+    {"slug":"james-lam","name":"James Lam","cell":"erm-grc-leadership","role":"lead-driver","anchor":"ERM pioneer; 'Enterprise Risk Management' (coined CRO role), board risk governance"},
+    {"slug":"norman-marks","name":"Norman Marks","cell":"erm-grc-leadership","role":"lead-driver","anchor":"prolific GRC/internal-audit author-blogger; risk-management-that-matters, agile GRC"},
+    {"slug":"michael-rasmussen","name":"Michael Rasmussen","cell":"erm-grc-leadership","role":"specialist","anchor":"'the GRC Pundit'; coined GRC; GRC tech/process taxonomy"},
+    {"slug":"richard-chambers","name":"Richard Chambers","cell":"erm-grc-leadership","role":"specialist","anchor":"ex-IIA president; internal audit thought-leadership, 'Agents of Change', prolific"},
+    {"slug":"john-fraser","name":"John Fraser","cell":"erm-grc-leadership","role":"specialist","anchor":"ERM practitioner-author; 'Implementing Enterprise Risk Management', risk-appetite"},
+    {"slug":"carol-williams","name":"Carol Williams","cell":"erm-grc-leadership","role":"specialist","anchor":"ERM Insights; practical ERM for non-financial firms, risk-culture"},
+
+    {"slug":"graham-barrow","name":"Graham Barrow","cell":"financial-crime-aml","role":"lead-driver","anchor":"'The Dark Money Files'; shell-company/AML investigations, very public educator"},
+    {"slug":"jim-richards","name":"Jim Richards","cell":"financial-crime-aml","role":"specialist","anchor":"RegTech Consulting; ex-Wells Fargo BSA officer; AML program design"},
+    {"slug":"ross-delston","name":"Ross Delston","cell":"financial-crime-aml","role":"specialist","anchor":"ex-FDIC; AML/CFT expert witness, correspondent-banking, de-risking"},
+    {"slug":"sarah-beth-felix","name":"Sarah Beth Felix","cell":"financial-crime-aml","role":"specialist","anchor":"Acuevo; AML/sanctions advisory, trade-finance crime"},
+    {"slug":"john-cusack","name":"John Cusack","cell":"financial-crime-aml","role":"specialist","anchor":"Global Coalition to Fight Financial Crime chair; ex-Wolfsberg Group, AML standards"}
+  ],
+  "cross_listed": [
+    {"slug":"helen-toner","home_team":"ai-super-intelligence","cell":"ai-governance-responsible-ai"},
+    {"slug":"dan-hendrycks","home_team":"ai-super-intelligence","cell":"ai-governance-responsible-ai"},
+    {"slug":"bruce-schneier","home_team":"engineering-super-intelligence","cell":"security-governance"},
+    {"slug":"alex-stamos","home_team":"engineering-super-intelligence","cell":"security-governance"},
+    {"slug":"katie-moussouris","home_team":"engineering-super-intelligence","cell":"security-governance"},
+    {"slug":"window-snyder","home_team":"engineering-super-intelligence","cell":"security-governance"},
+    {"slug":"matthew-green","home_team":"engineering-super-intelligence","cell":"security-governance"},
+    {"slug":"jon-danielsson","home_team":"trading-super-intelligence","cell":"model-systemic-risk"},
+    {"slug":"til-schuermann","home_team":"trading-super-intelligence","cell":"model-systemic-risk"},
+    {"slug":"marcos-lopez-de-prado","home_team":"trading-super-intelligence","cell":"model-systemic-risk"},
+    {"slug":"riccardo-rebonato","home_team":"trading-super-intelligence","cell":"model-systemic-risk"},
+    {"slug":"aaron-brown","home_team":"trading-super-intelligence","cell":"model-systemic-risk"}
+  ]
+}

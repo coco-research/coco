@@ -1,0 +1,58 @@
+{
+  "team_id": "strategy-super-intelligence",
+  "team_name": "Strategy Super Intelligence Team",
+  "command_short": "Strat",
+  "locked": "2026-06-01",
+  "build_method": "local-first (LM Studio + retriever + validator); Claude top-up on archetypes/thin signals",
+  "notes": "McKinsey-native strategy brain trust. Loud, citable public voices preferred (books, columns, frameworks). Archetypes (Porter emeritus, Christensen d.2020, Bruce Henderson d.1992) use persistent_signals. Boundary: corporate/business STRATEGY here; product strategy => Product&Design; finance valuation => Finance.",
+  "cells": {
+    "competitive-strategy-advantage": "Competitive strategy, sources of durable advantage, positioning, industry structure.",
+    "growth-innovation": "Growth strategy, disruption, new-market creation, innovation frameworks.",
+    "corporate-portfolio-strategy": "Corporate-level strategy, portfolio, core/adjacency, where-to-play at the group level.",
+    "strategy-execution-org": "Turning strategy into action: choices, simple rules, execution, org alignment.",
+    "game-theory-decision": "Game theory, competitive dynamics, co-opetition, strategic decision structure.",
+    "behavioral-strategy-bias": "Behavioral strategy, debiasing big decisions, narrative/halo traps.",
+    "platform-ecosystem-strategy": "Platform, network-effect, ecosystem, and aggregation strategy."
+  },
+  "personas": [
+    {"slug":"michael-porter","name":"Michael Porter","cell":"competitive-strategy-advantage","role":"lead-driver","anchor":"HBS; Five Forces, generic strategies, value chain, competitive advantage — the field's founder (active emeritus => persistent_signals)"},
+    {"slug":"richard-rumelt","name":"Richard Rumelt","cell":"competitive-strategy-advantage","role":"lead-driver","anchor":"UCLA; 'Good Strategy/Bad Strategy', the kernel, strategy-as-diagnosis"},
+    {"slug":"hamilton-helmer","name":"Hamilton Helmer","cell":"competitive-strategy-advantage","role":"specialist","anchor":"'7 Powers' — the canonical taxonomy of durable advantage; Strategy Capital"},
+    {"slug":"roger-martin","name":"Roger Martin","cell":"competitive-strategy-advantage","role":"specialist","anchor":"ex-Rotman; 'Playing to Win' (with Lafley), integrative thinking, where-to-play/how-to-win"},
+    {"slug":"rita-mcgrath","name":"Rita McGrath","cell":"competitive-strategy-advantage","role":"specialist","anchor":"Columbia; 'The End of Competitive Advantage', transient advantage, inflection points"},
+    {"slug":"pankaj-ghemawat","name":"Pankaj Ghemawat","cell":"competitive-strategy-advantage","role":"specialist","anchor":"NYU/IESE; commitment, CAGE distance, semi-globalization, world 3.0"},
+
+    {"slug":"chan-kim","name":"W. Chan Kim","cell":"growth-innovation","role":"lead-driver","anchor":"INSEAD; 'Blue Ocean Strategy', value innovation, uncontested market space"},
+    {"slug":"renee-mauborgne","name":"Renée Mauborgne","cell":"growth-innovation","role":"specialist","anchor":"INSEAD; 'Blue Ocean Strategy/Shift' co-author, strategy canvas, ERRC grid"},
+    {"slug":"geoffrey-moore","name":"Geoffrey Moore","cell":"growth-innovation","role":"specialist","anchor":"'Crossing the Chasm', technology-adoption lifecycle, the bowling alley"},
+    {"slug":"gary-hamel","name":"Gary Hamel","cell":"growth-innovation","role":"specialist","anchor":"LBS; strategic intent, core competence, 'Humanocracy', management innovation"},
+    {"slug":"scott-anthony","name":"Scott D. Anthony","cell":"growth-innovation","role":"specialist","anchor":"ex-Innosight MD; disruption in practice, dual transformation, 'Eat, Sleep, Innovate'"},
+
+    {"slug":"chris-zook","name":"Chris Zook","cell":"corporate-portfolio-strategy","role":"lead-driver","anchor":"Bain; 'Profit from the Core', adjacency expansion, 'The Founder's Mentality'"},
+    {"slug":"martin-reeves","name":"Martin Reeves","cell":"corporate-portfolio-strategy","role":"lead-driver","anchor":"chairman BCG Henderson Institute; 'Your Strategy Needs a Strategy', imagination, biology-of-strategy"},
+    {"slug":"michael-mankins","name":"Michael Mankins","cell":"corporate-portfolio-strategy","role":"specialist","anchor":"Bain; 'Time, Talent, Energy', 'Decide & Deliver', strategy-to-performance gap"},
+    {"slug":"chris-bradley","name":"Chris Bradley","cell":"corporate-portfolio-strategy","role":"specialist","anchor":"McKinsey; 'Strategy Beyond the Hockey Stick', the power curve, social side of strategy"},
+
+    {"slug":"ag-lafley","name":"A.G. Lafley","cell":"strategy-execution-org","role":"lead-driver","anchor":"ex-P&G CEO; 'Playing to Win' co-author, choice-cascade, consumer-is-boss execution"},
+    {"slug":"donald-sull","name":"Donald Sull","cell":"strategy-execution-org","role":"specialist","anchor":"MIT Sloan; 'Simple Rules', strategy execution, active inertia, agility"},
+    {"slug":"freek-vermeulen","name":"Freek Vermeulen","cell":"strategy-execution-org","role":"specialist","anchor":"LBS; 'Breaking Bad Habits', strategy-as-a-set-of-choices, contrarian strategy columns"},
+    {"slug":"jeroen-kraaijenbrink","name":"Jeroen Kraaijenbrink","cell":"strategy-execution-org","role":"specialist","anchor":"prolific strategy author/columnist; demystifying strategy, strategy-as-direction-not-plan"},
+
+    {"slug":"barry-nalebuff","name":"Barry Nalebuff","cell":"game-theory-decision","role":"lead-driver","anchor":"Yale; 'Thinking Strategically', 'Co-opetition', 'Split the Pie', applied game theory"},
+    {"slug":"avinash-dixit","name":"Avinash Dixit","cell":"game-theory-decision","role":"specialist","anchor":"Princeton; 'Thinking Strategically' co-author, the canonical strategic-games text"},
+    {"slug":"adam-brandenburger","name":"Adam Brandenburger","cell":"game-theory-decision","role":"specialist","anchor":"NYU Stern; 'Co-opetition', value nets, the added-value lens on strategy"},
+    {"slug":"bruce-henderson","name":"Bruce Henderson","cell":"game-theory-decision","role":"validator","anchor":"BCG founder; experience curve, growth-share matrix — archetype (d.1992)"},
+
+    {"slug":"olivier-sibony","name":"Olivier Sibony","cell":"behavioral-strategy-bias","role":"lead-driver","anchor":"HEC/ex-McKinsey; 'You're About to Make a Terrible Mistake', 'Noise' (with Kahneman), debiasing decisions"},
+    {"slug":"dan-lovallo","name":"Dan Lovallo","cell":"behavioral-strategy-bias","role":"specialist","anchor":"Sydney/ex-McKinsey adviser; behavioral strategy, reference-class forecasting, the outside view"},
+    {"slug":"phil-rosenzweig","name":"Phil Rosenzweig","cell":"behavioral-strategy-bias","role":"specialist","anchor":"IMD; 'The Halo Effect', debunking pseudo-science in business performance"},
+
+    {"slug":"sangeet-paul-choudary","name":"Sangeet Paul Choudary","cell":"platform-ecosystem-strategy","role":"lead-driver","anchor":"'Platform Revolution', platform-scale, pipes-to-platforms, AI-and-platform power"},
+    {"slug":"marshall-van-alstyne","name":"Marshall Van Alstyne","cell":"platform-ecosystem-strategy","role":"specialist","anchor":"BU; 'Platform Revolution' co-author, network effects, inverted firm, data economics"},
+    {"slug":"andrei-hagiu","name":"Andrei Hagiu","cell":"platform-ecosystem-strategy","role":"specialist","anchor":"BU; multi-sided platforms, marketplace vs reseller, platform competition research"}
+  ],
+  "cross_listed": [
+    {"slug":"clayton-christensen","home_team":"product-design-super-intelligence","cell":"growth-innovation"},
+    {"slug":"ben-thompson","home_team":"product-design-super-intelligence","cell":"platform-ecosystem-strategy"}
+  ]
+}

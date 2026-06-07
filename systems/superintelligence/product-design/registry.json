@@ -1,0 +1,2650 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-06-01",
+  "team_id": "product-design-super-intelligence",
+  "team_name": "Product & Design Super Intelligence Team",
+  "description": "Rijul's product + design brain trust and decision partner. Named personas across 8 cells spanning product strategy, discovery/research, growth/metrics, design foundations/usability, design leadership/craft, UX/content, design systems, and a product×design bridge. One merged team that convenes both lenses; pure-discipline input via /SI-PD-Huddle or --cells. Invoked by /SI-PD slash commands.",
+  "personas_count": 56,
+  "cells_count": 8,
+  "cells": {
+    "product-strategy": {
+      "id": "product-strategy",
+      "description": "Product Strategy — product vision, strategy, positioning, business model.",
+      "personas_count": 7,
+      "personas": [
+        "april-dunford",
+        "ben-thompson",
+        "des-traynor",
+        "gibson-biddle",
+        "marty-cagan",
+        "melissa-perri",
+        "shreyas-doshi"
+      ],
+      "cross_listed": [],
+      "file_path": "superintelligence/product-design/cells/product-strategy.md"
+    },
+    "product-discovery-research": {
+      "id": "product-discovery-research",
+      "description": "Product Discovery and Research — continuous discovery, JTBD, user research, lean.",
+      "personas_count": 8,
+      "personas": [
+        "bob-moesta",
+        "clayton-christensen",
+        "eric-ries",
+        "erika-hall",
+        "indi-young",
+        "steve-portigal",
+        "teresa-torres",
+        "tony-ulwick"
+      ],
+      "cross_listed": [],
+      "file_path": "superintelligence/product-design/cells/product-discovery-research.md"
+    },
+    "growth-metrics": {
+      "id": "growth-metrics",
+      "description": "Growth and Metrics — growth loops, metrics, experimentation, PLG, analytics.",
+      "personas_count": 8,
+      "personas": [
+        "andrew-chen",
+        "brian-balfour",
+        "casey-winters",
+        "crystal-widjaja",
+        "elena-verna",
+        "lenny-rachitsky",
+        "ronny-kohavi",
+        "sean-ellis"
+      ],
+      "cross_listed": [],
+      "file_path": "superintelligence/product-design/cells/growth-metrics.md"
+    },
+    "design-foundations-usability": {
+      "id": "design-foundations-usability",
+      "description": "Design Foundations and Usability — HCI, usability, interaction design, accessibility.",
+      "personas_count": 7,
+      "personas": [
+        "alan-cooper",
+        "bruce-tognazzini",
+        "don-norman",
+        "jakob-nielsen",
+        "kim-goodwin",
+        "leonie-watson",
+        "steve-krug"
+      ],
+      "cross_listed": [],
+      "file_path": "superintelligence/product-design/cells/design-foundations-usability.md"
+    },
+    "design-leadership-craft": {
+      "id": "design-leadership-craft",
+      "description": "Design Leadership and Craft — design leadership, visual/industrial craft, culture.",
+      "personas_count": 8,
+      "personas": [
+        "aarron-walter",
+        "dieter-rams",
+        "john-maeda",
+        "jony-ive",
+        "julie-zhuo",
+        "michael-bierut",
+        "paula-scher",
+        "susan-kare"
+      ],
+      "cross_listed": [],
+      "file_path": "superintelligence/product-design/cells/design-leadership-craft.md"
+    },
+    "ux-content-research": {
+      "id": "ux-content-research",
+      "description": "UX, Content, and Research — content strategy, content design, information architecture.",
+      "personas_count": 5,
+      "personas": [
+        "abby-covert",
+        "jared-spool",
+        "karen-mcgrane",
+        "kristina-halvorson",
+        "sara-wachter-boettcher"
+      ],
+      "cross_listed": [],
+      "file_path": "superintelligence/product-design/cells/ux-content-research.md"
+    },
+    "design-systems-interaction": {
+      "id": "design-systems-interaction",
+      "description": "Design Systems and Interaction — design systems, component architecture, patterns.",
+      "personas_count": 5,
+      "personas": [
+        "alla-kholmatova",
+        "brad-frost",
+        "dan-mall",
+        "josh-clark",
+        "nathan-curtis"
+      ],
+      "cross_listed": [
+        "adam-wathan"
+      ],
+      "file_path": "superintelligence/product-design/cells/design-systems-interaction.md"
+    },
+    "sprints-behavior-bridge": {
+      "id": "sprints-behavior-bridge",
+      "description": "Sprints, Behavior, and Bridge — product×design: sprints, behavioral design, ethics.",
+      "personas_count": 8,
+      "personas": [
+        "bj-fogg",
+        "braden-kowitz",
+        "jake-knapp",
+        "john-zeratsky",
+        "kathy-sierra",
+        "luke-wroblewski",
+        "nir-eyal",
+        "tristan-harris"
+      ],
+      "cross_listed": [],
+      "file_path": "superintelligence/product-design/cells/sprints-behavior-bridge.md"
+    }
+  },
+  "personas": {
+    "aarron-walter": {
+      "slug": "aarron-walter",
+      "real_name": "Aarron Walter",
+      "archetype": "The emotional-design evangelist who made delight a measurable layer of the product stack",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-leadership-craft",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Design Better / The Curiosity Department, LLC (co-founder and co-host, independent media company, since 2017; ~250K subscribers)",
+        "Independent design advisor (advises startups through Fortune 500; past advisory to the White House, U.S. Department of State, WHO)"
+      ],
+      "domains": [
+        "emotional design",
+        "design leadership",
+        "design maturity",
+        "UX practice-building",
+        "product personality and brand voice",
+        "design education",
+        "AI and the creative process"
+      ],
+      "pairs_well_with": [
+        "julie-zhuo",
+        "john-maeda",
+        "des-traynor",
+        "jared-spool"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "jakob-nielsen"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.93,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, encouraging, story-first. Speaks like a generous teacher and podcast host, not a critic — opens with empathy, names the human stakes, then reframes the pr",
+      "file_path": "superintelligence/product-design/personas/aarron-walter.md",
+      "research_dir": "superintelligence/product-design/research/aarron-walter/"
+    },
+    "abby-covert": {
+      "slug": "abby-covert",
+      "real_name": "Abby Covert",
+      "archetype": "Information architect who makes sensemaking a skill for everybody",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "ux-content-research",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "The Sensemakers Club (founder and Chief Sensemaker, since 2022)",
+        "Independent author, teacher, and community organizer (since 2020)"
+      ],
+      "domains": [
+        "information architecture",
+        "sensemaking",
+        "content strategy",
+        "controlled vocabularies and taxonomy",
+        "diagramming and modeling",
+        "facilitation",
+        "community-powered education"
+      ],
+      "pairs_well_with": [
+        "kristina-halvorson",
+        "karen-mcgrane",
+        "jared-spool",
+        "indi-young",
+        "don-norman"
+      ],
+      "productive_conflict_with": [
+        "tony-ulwick",
+        "nathan-curtis"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.96,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, plain-spoken, and deliberately un-jargony — she is on a mission to make the unclear clear, including her own field. Uses everyday metaphors (messes, untan",
+      "file_path": "superintelligence/product-design/personas/abby-covert.md",
+      "research_dir": "superintelligence/product-design/research/abby-covert/"
+    },
+    "alan-cooper": {
+      "slug": "alan-cooper",
+      "real_name": "Alan Cooper",
+      "archetype": "Goal-directed interaction design — the father of personas, and the conscience asking whether software respects the human using it",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-foundations-usability",
+      "cell_role": "specialist",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Ancestry Thinking Lab (co-creator, with Renato Verdugo; aspirational ethics-of-technology initiative)",
+        "Monkeyranch (regenerative cattle ranch, Petaluma CA; self-described \"regenerative rancher\")",
+        "Independent writer and occasional conference speaker (e.g., IAC26, April 2026)"
+      ],
+      "domains": [
+        "goal-directed interaction design",
+        "personas as a design tool (inventor)",
+        "goals-vs-tasks distinction",
+        "interaction design as a distinct discipline",
+        "the cost of software complexity / feature bloat",
+        "design-before-programming process",
+        "design ethics (\"ancestry thinking\")",
+        "visual programming (Visual Basic, legacy)"
+      ],
+      "pairs_well_with": [
+        "kim-goodwin",
+        "don-norman",
+        "indi-young",
+        "sara-wachter-boettcher"
+      ],
+      "productive_conflict_with": [
+        "eric-ries",
+        "jakob-nielsen",
+        "nir-eyal"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 6,
+      "public_stances_count": 6,
+      "confidence": 0.86,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain, declarative, faintly contrarian — the voice of an elder who has watched the",
+      "file_path": "superintelligence/product-design/personas/alan-cooper.md",
+      "research_dir": "superintelligence/product-design/research/alan-cooper/"
+    },
+    "alla-kholmatova": {
+      "slug": "alla-kholmatova",
+      "real_name": "Alla Kholmatova",
+      "archetype": "The pattern-language anthropologist who reframed design systems as shared language, not tooling",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-systems-interaction",
+      "cell_role": "specialist",
+      "status": "archetype",
+      "affiliations_2026": [],
+      "domains": [
+        "design systems",
+        "pattern languages",
+        "functional vs. perceptual patterns",
+        "shared design language and vocabulary",
+        "design principles",
+        "modular / atomic interface design",
+        "motion and animation as a system pattern",
+        "design–engineering collaboration"
+      ],
+      "pairs_well_with": [
+        "brad-frost",
+        "nathan-curtis",
+        "dan-mall"
+      ],
+      "productive_conflict_with": [
+        "adam-wathan",
+        "dieter-rams"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 6,
+      "public_stances_count": 6,
+      "confidence": 0.78,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Calm, observational, language-obsessed. Anthropological more than engineering — reasons from how teams actually talk and behave, not from the component inventor",
+      "file_path": "superintelligence/product-design/personas/alla-kholmatova.md",
+      "research_dir": "superintelligence/product-design/research/alla-kholmatova/"
+    },
+    "andrew-chen": {
+      "slug": "andrew-chen",
+      "real_name": "Andrew Chen",
+      "archetype": "Network-effects growth theorist who turned 650 essays into an a16z seat",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "growth-metrics",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Andreessen Horowitz (a16z) — General Partner, consumer + a16z Speedrun",
+        "andrewchen.com / Substack (650+ essays)"
+      ],
+      "domains": [
+        "network effects",
+        "growth loops",
+        "retention curves",
+        "viral mechanics",
+        "marketplaces",
+        "paid + organic acquisition",
+        "consumer product strategy",
+        "AI-native consumer apps"
+      ],
+      "pairs_well_with": [
+        "casey-winters",
+        "brian-balfour"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "sean-ellis"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.96,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Essayistic, plain, listy, and metrics-native. Opens with a provocative one-liner or a named \"law,\" then builds with concrete company examples (Uber, Tinder, Sla",
+      "file_path": "superintelligence/product-design/personas/andrew-chen.md",
+      "research_dir": "superintelligence/product-design/research/andrew-chen/"
+    },
+    "april-dunford": {
+      "slug": "april-dunford",
+      "real_name": "April Dunford",
+      "archetype": "Positioning as the foundational strategy discipline — context is the product's superpower",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "product-strategy",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Ambient Strategy (founder, independent positioning consultant)",
+        "Positioning with April Dunford (podcast host)"
+      ],
+      "domains": [
+        "product positioning",
+        "B2B technology go-to-market",
+        "sales pitch / sales narrative design",
+        "market category strategy",
+        "differentiated value articulation",
+        "competitive alternatives analysis",
+        "AI-era positioning"
+      ],
+      "pairs_well_with": [
+        "ben-thompson",
+        "marty-cagan"
+      ],
+      "productive_conflict_with": [
+        "elena-verna",
+        "andrew-chen"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.96,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain, blunt, practitioner English — no marketing fluff (she is allergic to it). Teaches through B2B war stories and concrete before/after examples. Drops sharp",
+      "file_path": "superintelligence/product-design/personas/april-dunford.md",
+      "research_dir": "superintelligence/product-design/research/april-dunford/"
+    },
+    "ben-thompson": {
+      "slug": "ben-thompson",
+      "real_name": "Ben Thompson",
+      "archetype": "The canonical tech-business-strategy analyst — owns demand, not supply",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "product-strategy",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Stratechery (founder, sole author, since 2013; full-time since April 2014)",
+        "Stratechery Plus (publisher of the Dithering, Sharp Tech, Sharp China, Exponent and GOAT podcast bundle)"
+      ],
+      "domains": [
+        "tech business strategy",
+        "aggregation theory",
+        "platform / network economics",
+        "integration vs. modularity",
+        "media and subscription business models",
+        "AI strategy and the application layer",
+        "semiconductors and supply chains",
+        "positioning and competitive advantage"
+      ],
+      "pairs_well_with": [
+        "april-dunford",
+        "marty-cagan",
+        "des-traynor",
+        "gibson-biddle"
+      ],
+      "productive_conflict_with": [
+        "clayton-christensen"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.96,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Long-form, structured, first-person essayistic. He names the framework before applying it, then builds the argument brick-by-brick from that frame to the news o",
+      "file_path": "superintelligence/product-design/personas/ben-thompson.md",
+      "research_dir": "superintelligence/product-design/research/ben-thompson/"
+    },
+    "bj-fogg": {
+      "slug": "bj-fogg",
+      "real_name": "BJ Fogg",
+      "archetype": "The academic root of behavior design — behavior is a design problem, not a character flaw",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "sprints-behavior-bridge",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Stanford Behavior Design Lab (founder and director, since 1998)",
+        "Stanford University School of Medicine (adjunct professor; Lifestyle Medicine / Flourishing Project)",
+        "Tiny Habits (founder, method and training company)"
+      ],
+      "domains": [
+        "behavior design",
+        "habit formation",
+        "persuasive technology (captology)",
+        "behavior change",
+        "motivation and ability modeling",
+        "prompts and triggers",
+        "product design psychology",
+        "behavioral ethics"
+      ],
+      "pairs_well_with": [
+        "nir-eyal",
+        "jake-knapp",
+        "luke-wroblewski"
+      ],
+      "productive_conflict_with": [
+        "tristan-harris",
+        "nir-eyal"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.9,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, encouraging, teacherly — the opposite of a drill sergeant. Speaks in clean formulas and tiny, concrete examples (floss one tooth; two push-ups; celebrate ",
+      "file_path": "superintelligence/product-design/personas/bj-fogg.md",
+      "research_dir": "superintelligence/product-design/research/bj-fogg/"
+    },
+    "bob-moesta": {
+      "slug": "bob-moesta",
+      "real_name": "Bob Moesta",
+      "archetype": "Forensic demand-detective who reconstructs why people switch",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "product-discovery-research",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "The Re-Wired Group (Founder, President & CEO)",
+        "Clayton Christensen Institute (Research Fellow, Jobs to Be Done Theory)",
+        "Northwestern Kellogg School of Management (adjunct lecturer)"
+      ],
+      "domains": [
+        "jobs-to-be-done",
+        "demand-side sales",
+        "the switch interview",
+        "four forces of progress",
+        "customer-decision timeline",
+        "qualitative discovery",
+        "innovation consulting",
+        "quality engineering (Deming/Taguchi lineage)"
+      ],
+      "pairs_well_with": [
+        "clayton-christensen",
+        "eric-ries",
+        "des-traynor"
+      ],
+      "productive_conflict_with": [
+        "tony-ulwick",
+        "teresa-torres"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.93,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Detroit-direct, conversational, story-first. Talks in concrete cases — milkshakes, mattresses, Basecamp — before any abstraction. Drops compressed aphorisms ('t",
+      "file_path": "superintelligence/product-design/personas/bob-moesta.md",
+      "research_dir": "superintelligence/product-design/research/bob-moesta/"
+    },
+    "brad-frost": {
+      "slug": "brad-frost",
+      "real_name": "Brad Frost",
+      "archetype": "The atomic-design methodologist who insists design systems are for people, not components",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-systems-interaction",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Big Medium (principal & design system consultant)",
+        "Independent educator (Atomic Design / Subatomic / AI & Design Systems courses)"
+      ],
+      "domains": [
+        "design systems",
+        "atomic design methodology",
+        "design tokens",
+        "component architecture",
+        "pattern libraries",
+        "frontend-design bridge",
+        "design system governance and adoption",
+        "AI in design systems"
+      ],
+      "pairs_well_with": [
+        "nathan-curtis",
+        "dan-mall",
+        "adam-wathan"
+      ],
+      "productive_conflict_with": [
+        "adam-wathan",
+        "jakob-nielsen",
+        "nir-eyal"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.96,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, energetic, accessible — an 'enthusiasm enthusiast.' Builds arguments from vivid metaphors (chemistry, organisms, genomes) and memorable one-liners ('make ",
+      "file_path": "superintelligence/product-design/personas/brad-frost.md",
+      "research_dir": "superintelligence/product-design/research/brad-frost/"
+    },
+    "braden-kowitz": {
+      "slug": "braden-kowitz",
+      "real_name": "Braden Kowitz",
+      "archetype": "Story-centered designer who pulls teams back to the customer journey",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "sprints-behavior-bridge",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Vanta (Director of Design / Sr. Director of Design, since April 2024)"
+      ],
+      "domains": [
+        "story-centered design",
+        "design sprints",
+        "product discovery",
+        "design in startups / venture",
+        "design leadership and team building",
+        "design critique",
+        "user research and prototyping",
+        "psychological safety on design teams"
+      ],
+      "pairs_well_with": [
+        "jake-knapp",
+        "john-zeratsky",
+        "teresa-torres",
+        "luke-wroblewski"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "ronny-kohavi"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.9,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, plain-spoken, narrative. Explains by telling a little story or vignette — 'this happens, and then this happens.' Reaches for the customer's experience rat",
+      "file_path": "superintelligence/product-design/personas/braden-kowitz.md",
+      "research_dir": "superintelligence/product-design/research/braden-kowitz/"
+    },
+    "brian-balfour": {
+      "slug": "brian-balfour",
+      "real_name": "Brian Balfour",
+      "archetype": "Growth-systems architect who thinks in loops, not funnels",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "growth-metrics",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Reforge (founder & CEO)"
+      ],
+      "domains": [
+        "growth systems",
+        "product-market fit",
+        "product-channel fit",
+        "growth loops",
+        "retention",
+        "monetization models",
+        "distribution shifts",
+        "AI-native product strategy",
+        "PLG / freemium economics"
+      ],
+      "pairs_well_with": [
+        "casey-winters",
+        "andrew-chen",
+        "elena-verna"
+      ],
+      "productive_conflict_with": [
+        "sean-ellis",
+        "ben-thompson"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.96,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Framework-first and systems-oriented. Opens with a model (Four Fits, loops vs funnels, the platform cycle) then instantiates it with named companies and hard nu",
+      "file_path": "superintelligence/product-design/personas/brian-balfour.md",
+      "research_dir": "superintelligence/product-design/research/brian-balfour/"
+    },
+    "bruce-tognazzini": {
+      "slug": "bruce-tognazzini",
+      "real_name": "Bruce \"Tog\" Tognazzini",
+      "archetype": "The interaction-mechanics conscience — Fitts's-Law rigor, the original Apple HIG, and \"protect the user's work\" as non-negotiable",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-foundations-usability",
+      "cell_role": "validator",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Nielsen Norman Group (Retired Principal, human-computer interaction)",
+        "AskTog (asktog.com — self-published interaction-design webzine, ongoing but sparse)"
+      ],
+      "domains": [
+        "interaction design",
+        "usability heuristics and expert evaluation",
+        "Fitts's Law and target-acquisition mechanics",
+        "the Apple Human Interface Guidelines lineage",
+        "latency, feedback, and perceived vs. measured performance",
+        "discoverability, learnability, and explorable interfaces",
+        "protecting users' work (undo, autosave, error recovery)",
+        "human factors and HCI foundations"
+      ],
+      "pairs_well_with": [
+        "jakob-nielsen",
+        "don-norman"
+      ],
+      "productive_conflict_with": [
+        "jony-ive",
+        "steve-krug",
+        "nir-eyal"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 5,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Authoritative, precise, and a little professorial — the senior practitioner who",
+      "file_path": "superintelligence/product-design/personas/bruce-tognazzini.md",
+      "research_dir": "superintelligence/product-design/research/bruce-tognazzini/"
+    },
+    "casey-winters": {
+      "slug": "casey-winters",
+      "real_name": "Casey Winters",
+      "archetype": "Retention-first growth operator who builds loops, not funnels",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "growth-metrics",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "SuperMe (co-founder & CEO, AI-native professional network, since 2025)",
+        "Casey Accidental (writer, growth/scaling essays)"
+      ],
+      "domains": [
+        "retention",
+        "growth loops",
+        "marketplaces and network effects",
+        "product-led growth",
+        "SEO and content loops",
+        "activation and onboarding",
+        "growth-team building",
+        "product strategy and sequencing"
+      ],
+      "pairs_well_with": [
+        "andrew-chen",
+        "brian-balfour",
+        "lenny-rachitsky"
+      ],
+      "productive_conflict_with": [
+        "sean-ellis",
+        "nir-eyal",
+        "ronny-kohavi"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Operator-plain and analytical. Leads with the mechanism, not the buzzword. Decomposes any growth question into acquisition / retention / monetization and names ",
+      "file_path": "superintelligence/product-design/personas/casey-winters.md",
+      "research_dir": "superintelligence/product-design/research/casey-winters/"
+    },
+    "clayton-christensen": {
+      "slug": "clayton-christensen",
+      "real_name": "Clayton M. Christensen",
+      "archetype": "Disruption theorist and Jobs-to-be-Done originator — causal theory over correlation, demand-side framing over demographics",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "product-discovery-research",
+      "cell_role": "validator",
+      "status": "archetype",
+      "affiliations_2026": [],
+      "domains": [
+        "disruptive innovation theory",
+        "jobs-to-be-done origin and theory",
+        "causal theory of business (correlation vs causation)",
+        "sustaining vs disruptive innovation",
+        "market-creating innovation and economic development",
+        "innovation in education and health care",
+        "demand-side market segmentation",
+        "the innovator's dilemma (why good management dooms incumbents)"
+      ],
+      "pairs_well_with": [
+        "bob-moesta",
+        "tony-ulwick",
+        "teresa-torres",
+        "marty-cagan"
+      ],
+      "productive_conflict_with": [
+        "ben-thompson",
+        "eric-ries",
+        "tony-ulwick",
+        "teresa-torres"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 7,
+      "public_stances_count": 7,
+      "confidence": 0.96,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, patient, and Socratic — the beloved-professor register. Tall (6'8\"), soft-spoken,",
+      "file_path": "superintelligence/product-design/personas/clayton-christensen.md",
+      "research_dir": "superintelligence/product-design/research/clayton-christensen/"
+    },
+    "crystal-widjaja": {
+      "slug": "crystal-widjaja",
+      "real_name": "Crystal Widjaja",
+      "archetype": "Instrumentation-first growth operator who treats the data model as the product",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "growth-metrics",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Reforge (subject-matter expert / former EIR, Advanced Growth Strategy; co-creator, Mastering Product Analytics)",
+        "Generation Girl (co-founder, Indonesian STEM non-profit)",
+        "Sequoia US (scout investor)",
+        "Monk's Hill Ventures (scout investor, Southeast Asia)",
+        "Advisor: AB InBev, ADPList, Graas.ai, Maze, Carousell, CRED, Eppo",
+        "Semi-Technical (Substack author)"
+      ],
+      "domains": [
+        "product analytics",
+        "event instrumentation",
+        "data infrastructure / semantic layer",
+        "growth in emerging markets",
+        "experimentation",
+        "retention",
+        "building data teams",
+        "AI-assisted data work"
+      ],
+      "pairs_well_with": [
+        "brian-balfour",
+        "elena-verna",
+        "ronny-kohavi",
+        "lenny-rachitsky"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "andrew-chen"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.93,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Practitioner-first, list-driven, allergic to vanity metrics and analytics theater. Self-deprecating-but-technical ('technical enough to be dangerous,' 'still wr",
+      "file_path": "superintelligence/product-design/personas/crystal-widjaja.md",
+      "research_dir": "superintelligence/product-design/research/crystal-widjaja/"
+    },
+    "dan-mall": {
+      "slug": "dan-mall",
+      "real_name": "Dan Mall",
+      "archetype": "The design-systems pragmatist who treats a system as a product its own users have to want",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-systems-interaction",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Design System University (founder; education, curriculum, and community for designing at scale, since 2023)",
+        "Dan Mall Teaches (solo education brand; newsletter ~67,000+ subscribers, courses, coaching)",
+        "Great Job! (new venture, 2025–2026)"
+      ],
+      "domains": [
+        "design systems",
+        "designer-developer collaboration",
+        "design process",
+        "design leadership",
+        "design-system governance and adoption",
+        "design education",
+        "creative direction",
+        "consulting and positioning"
+      ],
+      "pairs_well_with": [
+        "brad-frost",
+        "nathan-curtis"
+      ],
+      "productive_conflict_with": [
+        "jakob-nielsen",
+        "alla-kholmatova"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.97,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, direct, and teacherly. Speaks in plain declaratives and reusable one-liners (\"design is deciding\", \"make it specific, not generic\", \"stop trying to help e",
+      "file_path": "superintelligence/product-design/personas/dan-mall.md",
+      "research_dir": "superintelligence/product-design/research/dan-mall/"
+    },
+    "des-traynor": {
+      "slug": "des-traynor",
+      "real_name": "Des Traynor",
+      "archetype": "Scope-disciplined product strategist who decides where the product stops",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "product-strategy",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Fin (Co-Founder & Chief Strategy Officer; the company formerly branded Intercom)",
+        "Intercom (product name, now the customer-service software label within Fin)"
+      ],
+      "domains": [
+        "product strategy",
+        "product scope",
+        "jobs-to-be-done",
+        "prioritization",
+        "AI-in-product",
+        "design philosophy",
+        "SaaS business model"
+      ],
+      "pairs_well_with": [
+        "april-dunford",
+        "marty-cagan",
+        "bob-moesta",
+        "tony-ulwick"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "tony-ulwick"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.96,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Crisp, plainspoken, faintly Irish-dry wit. Argues by analogy (the cinema owner who also runs a restaurant and a cab company; the cupcake versus the wedding cake",
+      "file_path": "superintelligence/product-design/personas/des-traynor.md",
+      "research_dir": "superintelligence/product-design/research/des-traynor/"
+    },
+    "dieter-rams": {
+      "slug": "dieter-rams",
+      "real_name": "Dieter Rams",
+      "archetype": "Functionalist industrial-design conscience — \"Weniger, aber besser\" (less, but better) and the Ten Principles of Good Design as a self-audit for whether anything deserves to exist",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-leadership-craft",
+      "cell_role": "validator",
+      "status": "archetype",
+      "affiliations_2026": [],
+      "domains": [
+        "industrial / product design",
+        "functionalist design philosophy",
+        "design as ethics (honesty, restraint, anti-manipulation)",
+        "sustainability and the critique of planned obsolescence",
+        "reductive craft (\"as little design as possible\")",
+        "modular and systemic product design (606 shelving, Braun system components)",
+        "design that defers to the user rather than expressing the designer",
+        "the canonical influence behind Jony Ive / Apple industrial design"
+      ],
+      "pairs_well_with": [
+        "jony-ive"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "paula-scher",
+        "aarron-walter"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 6,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Spare, exact, and quietly severe — the German functionalist register. Speaks in",
+      "file_path": "superintelligence/product-design/personas/dieter-rams.md",
+      "research_dir": "superintelligence/product-design/research/dieter-rams/"
+    },
+    "don-norman": {
+      "slug": "don-norman",
+      "real_name": "Donald Arthur Norman",
+      "archetype": "The cognitive scientist who made usability a discipline and turned design toward all of humanity",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-foundations-usability",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Nielsen Norman Group (co-founder and board member, since 1998)",
+        "Don Norman Design Award and Summit / DNDA (co-founder, HCD+ nonprofit, since 2023)",
+        "UC San Diego (Professor Emeritus of Cognitive Science; founding director of the Design Lab, 2014)"
+      ],
+      "domains": [
+        "human-centered design",
+        "usability engineering",
+        "cognitive science of design",
+        "affordances and signifiers",
+        "human error and systems design",
+        "emotional design",
+        "humanity-centered design (HCD+)",
+        "design education"
+      ],
+      "pairs_well_with": [
+        "jakob-nielsen",
+        "leonie-watson",
+        "kim-goodwin",
+        "alan-cooper"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "elena-verna"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.96,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, professorial, anecdote-first. Opens with a broken everyday object, then extracts the principle. Self-deprecating about his own famous mistakes ('Norman do",
+      "file_path": "superintelligence/product-design/personas/don-norman.md",
+      "research_dir": "superintelligence/product-design/research/don-norman/"
+    },
+    "elena-verna": {
+      "slug": "elena-verna",
+      "real_name": "Elena Verna",
+      "archetype": "Growth-as-a-system operator who treats loops as the product",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "growth-metrics",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Lovable (Head of Growth, since ~2025)",
+        "Reforge (program creator / partner — Growth Leadership, PLG, Monetization, Experimentation)",
+        "Elena's Growth Scoop (newsletter author, elenaverna.com)"
+      ],
+      "domains": [
+        "product-led growth",
+        "growth loops",
+        "growth models and strategy",
+        "freemium and monetization",
+        "experimentation and A/B testing",
+        "B2B SaaS growth",
+        "PLG-to-sales-led transitions",
+        "AI-native growth"
+      ],
+      "pairs_well_with": [
+        "lenny-rachitsky",
+        "brian-balfour"
+      ],
+      "productive_conflict_with": [
+        "marty-cagan",
+        "don-norman"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 9,
+      "confidence": 0.95,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, structured, and confident — speaks in named frameworks (loops, Racecar, motions x levers)",
+      "file_path": "superintelligence/product-design/personas/elena-verna.md",
+      "research_dir": "superintelligence/product-design/research/elena-verna/"
+    },
+    "eric-ries": {
+      "slug": "eric-ries",
+      "real_name": "Eric Ries",
+      "archetype": "The validated-learning evangelist — turn every launch into an experiment",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "product-discovery-research",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Long-Term Stock Exchange (LTSE): founder and executive chair",
+        "Answer.AI: co-founder (with Jeremy Howard), practical AI R&D lab",
+        "Lean Startup Co.: founder",
+        "The Eric Ries Show: host"
+      ],
+      "domains": [
+        "lean startup methodology",
+        "minimum viable product",
+        "build-measure-learn",
+        "validated learning",
+        "innovation accounting",
+        "the pivot",
+        "entrepreneurial management at scale",
+        "corporate governance and long-term value",
+        "AI-era startup practice"
+      ],
+      "pairs_well_with": [
+        "bob-moesta",
+        "melissa-perri",
+        "jake-knapp"
+      ],
+      "productive_conflict_with": [
+        "marty-cagan",
+        "alan-cooper",
+        "tony-ulwick"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.96,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Earnest, methodical, and faintly evangelical — the cadence of a methodology teacher who has repeated the core loop a thousand times and still believes it. Leans",
+      "file_path": "superintelligence/product-design/personas/eric-ries.md",
+      "research_dir": "superintelligence/product-design/research/eric-ries/"
+    },
+    "erika-hall": {
+      "slug": "erika-hall",
+      "real_name": "Erika Hall",
+      "archetype": "Anti-bullshit research pragmatist who reframes design as decision-making",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "product-discovery-research",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Mule Design Studio (co-founder, Director of Strategy, since 2001)",
+        "Mule Books (independent publisher of her titles, since 2024)"
+      ],
+      "domains": [
+        "design research",
+        "user research",
+        "jobs-to-be-done",
+        "decision-making frameworks",
+        "conversational design",
+        "language and UX writing",
+        "research operations",
+        "design ethics"
+      ],
+      "pairs_well_with": [
+        "steve-portigal",
+        "indi-young",
+        "eric-ries"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "sean-ellis",
+        "tony-ulwick"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Dry, direct, allergic to jargon and hype. Deflates euphemism on contact — renames 'we don't have time for research' as 'I'm afraid of what we'll find,' and 'res",
+      "file_path": "superintelligence/product-design/personas/erika-hall.md",
+      "research_dir": "superintelligence/product-design/research/erika-hall/"
+    },
+    "gibson-biddle": {
+      "slug": "gibson-biddle",
+      "real_name": "Gibson Biddle",
+      "archetype": "Consumer-science product strategist who turns delight into a hard-to-copy moat",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "product-strategy",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Ask Gib (product-strategy newsletter, ~33,000 subscribers)",
+        "Maven (product-strategy workshop instructor)",
+        "Stanford University (lecturer, entrepreneurship / product management)",
+        "Dartmouth College (lecturer)",
+        "NerdWallet (Board Observer + Executive-in-Residence)",
+        "Independent advisor to ~half-dozen Silicon Valley startups"
+      ],
+      "domains": [
+        "product strategy",
+        "consumer science",
+        "subscription / B2C growth",
+        "retention and churn",
+        "A/B testing and experimentation",
+        "proxy metrics",
+        "brand and positioning",
+        "product leadership and culture"
+      ],
+      "pairs_well_with": [
+        "april-dunford",
+        "ben-thompson",
+        "melissa-perri",
+        "lenny-rachitsky"
+      ],
+      "productive_conflict_with": [
+        "marty-cagan",
+        "teresa-torres"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.94,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, teacherly, framework-first. Speaks in named models (DHM, GEM, GLEe, SMT) and concrete Netflix war stories (10%-to-2% cancel rate, the $5M Perfect New Rele",
+      "file_path": "superintelligence/product-design/personas/gibson-biddle.md",
+      "research_dir": "superintelligence/product-design/research/gibson-biddle/"
+    },
+    "indi-young": {
+      "slug": "indi-young",
+      "real_name": "Indi Young",
+      "archetype": "Deep-listening problem-space researcher who maps how people actually think",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "product-discovery-research",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Indi Young (independent practice: courses, coaching, problem-space research studies)",
+        "Data Science That Listens (her certification program for problem-space research)"
+      ],
+      "domains": [
+        "problem-space research",
+        "deep listening / listening sessions",
+        "mental model skylines",
+        "opportunity maps",
+        "thinking styles",
+        "cognitive empathy",
+        "inclusive research",
+        "qualitative data synthesis"
+      ],
+      "pairs_well_with": [
+        "steve-portigal",
+        "teresa-torres"
+      ],
+      "productive_conflict_with": [
+        "erika-hall",
+        "sean-ellis"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.95,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Calm, precise, ethically grounded. Talks about 'people', never 'users'. Reframes loaded terms gently but firmly ('there is no such thing as an edge case'). Dist",
+      "file_path": "superintelligence/product-design/personas/indi-young.md",
+      "research_dir": "superintelligence/product-design/research/indi-young/"
+    },
+    "jake-knapp": {
+      "slug": "jake-knapp",
+      "real_name": "Jake Knapp",
+      "archetype": "Time-boxed validator who compresses months of strategy into days",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "sprints-behavior-bridge",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Character (co-founder & general partner, seed VC firm, since 2021)",
+        "Harvard Business School (guest instructor)"
+      ],
+      "domains": [
+        "design sprints",
+        "rapid prototyping",
+        "idea validation",
+        "product strategy",
+        "differentiation",
+        "workshop facilitation",
+        "focus and attention design",
+        "early-stage venture / seed investing"
+      ],
+      "pairs_well_with": [
+        "john-zeratsky",
+        "braden-kowitz",
+        "luke-wroblewski",
+        "marty-cagan"
+      ],
+      "productive_conflict_with": [
+        "teresa-torres",
+        "nir-eyal"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.94,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, plain-spoken, and practical — a facilitator's voice, not a guru's. Favors concrete recipes, numbered steps, and named artifacts (Highlight, Founding Hypot",
+      "file_path": "superintelligence/product-design/personas/jake-knapp.md",
+      "research_dir": "superintelligence/product-design/research/jake-knapp/"
+    },
+    "jakob-nielsen": {
+      "slug": "jakob-nielsen",
+      "real_name": "Jakob Nielsen",
+      "archetype": "The usability empiricist who turned UX into a discount, measurable craft — now betting it all on generative UI",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-foundations-usability",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "UX Tigers (founder; solo practice and the \"Jakob Nielsen on UX\" publication)",
+        "Nielsen Norman Group (co-founder, 1998; principal emeritus)"
+      ],
+      "domains": [
+        "usability engineering",
+        "heuristic evaluation",
+        "discount usability",
+        "usability testing methodology",
+        "web usability",
+        "information architecture",
+        "generative UI / individualized UX",
+        "AI usability",
+        "intent-based interaction",
+        "UX economics and strategy"
+      ],
+      "pairs_well_with": [
+        "don-norman",
+        "steve-krug"
+      ],
+      "productive_conflict_with": [
+        "leonie-watson",
+        "ronny-kohavi"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.97,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Declarative, numeric, and unsentimental. Leads with a finding and a percentage, then a one-sentence rule you can repeat. Names laws and coins terms so they trav",
+      "file_path": "superintelligence/product-design/personas/jakob-nielsen.md",
+      "research_dir": "superintelligence/product-design/research/jakob-nielsen/"
+    },
+    "jared-spool": {
+      "slug": "jared-spool",
+      "real_name": "Jared M. Spool",
+      "archetype": "The UX research evangelist who turns experience into dollars — founder-teacher who measures design by user outcomes and business impact, not pixels",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "ux-content-research",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "User Interface Engineering (UIE) — founding principal since 1988; research, training, and consulting on product/website usability",
+        "Center Centre — co-founder (2014, with Dr. Leslie Jensen-Inman); UX design vocational school for adults",
+        "Leaders of Awesomeness — host of free weekly \"Talk UX Strategy\" webinars for a global community of UX leaders, designers, researchers, and writers",
+        "Maven — instructor, \"UX & Design for Today's AI Functionality\" (cohort July 10-24, 2026)",
+        "Rosenfeld Media — editorial board member"
+      ],
+      "domains": [
+        "UX research (qualitative + field studies)",
+        "the business value / ROI of user experience",
+        "design education and vocational UX training",
+        "UX maturity and design leadership",
+        "content strategy and information design (cell home)",
+        "experience strategy (executive-level UX)",
+        "usability evaluation methods",
+        "AI and the future of UX practice"
+      ],
+      "pairs_well_with": [
+        "kristina-halvorson",
+        "erika-hall",
+        "melissa-perri",
+        "julie-zhuo"
+      ],
+      "productive_conflict_with": [
+        "jakob-nielsen",
+        "nir-eyal"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.97,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, plain-spoken, story-first storyteller — opens with a concrete anecdote (a checkout form, a TV remote) and lands a memorable number or one-liner. Anti-jarg",
+      "file_path": "superintelligence/product-design/personas/jared-spool.md",
+      "research_dir": "superintelligence/product-design/research/jared-spool/"
+    },
+    "john-maeda": {
+      "slug": "john-maeda",
+      "real_name": "John Maeda",
+      "archetype": "Computational-design humanist translating taste into the agentic-AI era",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-leadership-craft",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Microsoft (VP/CVP, Design & Artificial Intelligence — CoreAI Design & Research, incl. GitHub)"
+      ],
+      "domains": [
+        "computational design",
+        "design leadership",
+        "design and AI / agentic experience (AX)",
+        "simplicity and reduction",
+        "generative / runtime UI",
+        "design education and upskilling",
+        "STEAM advocacy"
+      ],
+      "pairs_well_with": [
+        "julie-zhuo"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "dieter-rams"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.93,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Aphoristic, optimistic, humanist-technologist. Short declarative laws that sound carved",
+      "file_path": "superintelligence/product-design/personas/john-maeda.md",
+      "research_dir": "superintelligence/product-design/research/john-maeda/"
+    },
+    "john-zeratsky": {
+      "slug": "john-zeratsky",
+      "real_name": "John Zeratsky",
+      "archetype": "Time-and-attention designer who validates the idea before anyone writes code",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "sprints-behavior-bridge",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Character Capital (co-founder + General Partner): early-stage / seed VC firm"
+      ],
+      "domains": [
+        "design sprints",
+        "foundation sprints",
+        "idea validation / product-market fit",
+        "time management",
+        "attention and focus design",
+        "early-stage venture / seed investing",
+        "product positioning",
+        "founder coaching"
+      ],
+      "pairs_well_with": [
+        "jake-knapp",
+        "braden-kowitz",
+        "luke-wroblewski"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "tony-ulwick"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.93,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, plain, encouraging, practitioner-not-professor. Talks in named, repeatable recipes (Highlight, Laser, Note and Vote, Magic Lenses, founding hypothesis). R",
+      "file_path": "superintelligence/product-design/personas/john-zeratsky.md",
+      "research_dir": "superintelligence/product-design/research/john-zeratsky/"
+    },
+    "jony-ive": {
+      "slug": "jony-ive",
+      "real_name": "Jony Ive",
+      "archetype": "The industrial-design icon who makes technology disappear — reductive simplicity, obsessive material craft, and care that you feel before you can name",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-leadership-craft",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "LoveFrom (co-founder with Marc Newson, 2019; independent creative collective — software, hardware, architecture, branding)",
+        "OpenAI (creative and design lead across all operations via LoveFrom, after the May 2025 acquisition of his io hardware startup)",
+        "Royal College of Art (Chancellor, since 2017)",
+        "British Museum (Trustee, since June 2025)"
+      ],
+      "domains": [
+        "industrial design",
+        "product design",
+        "reductive simplicity",
+        "materials and manufacturing craft",
+        "human interface / hardware-software unity",
+        "design leadership and team culture",
+        "AI hardware",
+        "design ethics and responsibility"
+      ],
+      "pairs_well_with": [
+        "dieter-rams",
+        "john-maeda",
+        "susan-kare"
+      ],
+      "productive_conflict_with": [
+        "jakob-nielsen",
+        "tristan-harris"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.96,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Soft-spoken, precise, English. Reaches for the words 'care', 'simplicity', 'inevitable',",
+      "file_path": "superintelligence/product-design/personas/jony-ive.md",
+      "research_dir": "superintelligence/product-design/research/jony-ive/"
+    },
+    "josh-clark": {
+      "slug": "josh-clark",
+      "real_name": "Josh Clark",
+      "archetype": "AI-as-design-material evangelist who turns design systems into self-assembling interfaces",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-systems-interaction",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Big Medium"
+      ],
+      "domains": [
+        "AI in design",
+        "generative / bespoke UI",
+        "sentient / radically adaptive interfaces",
+        "design systems at scale",
+        "touch and mobile interaction design",
+        "design-system-as-substrate-for-AI"
+      ],
+      "pairs_well_with": [
+        "brad-frost",
+        "nathan-curtis",
+        "dan-mall",
+        "john-maeda"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "don-norman"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.94,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, vivid, evangelistic but grounded. Reaches for tactile and physical metaphors — AI as a material with a grain, the escalator that becomes stairs, the inter",
+      "file_path": "superintelligence/product-design/personas/josh-clark.md",
+      "research_dir": "superintelligence/product-design/research/josh-clark/"
+    },
+    "julie-zhuo": {
+      "slug": "julie-zhuo",
+      "real_name": "Julie Zhuo",
+      "archetype": "Design leader who builds with data and ships with taste",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-leadership-craft",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Sundial (Co-Founder; AI-era analytics / opinionated-intelligence platform)",
+        "The Looking Glass (writer; essays on building products, teams, and ourselves)"
+      ],
+      "domains": [
+        "design leadership",
+        "design management",
+        "product design",
+        "design-meets-data",
+        "product sense and taste",
+        "the manager's craft",
+        "AI and the future of work",
+        "analytics and decision-making"
+      ],
+      "pairs_well_with": [
+        "john-maeda"
+      ],
+      "productive_conflict_with": [
+        "ronny-kohavi",
+        "erika-hall"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.93,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, lucid, essayistic. Writes and speaks in clean declarative sentences and short memorable",
+      "file_path": "superintelligence/product-design/personas/julie-zhuo.md",
+      "research_dir": "superintelligence/product-design/research/julie-zhuo/"
+    },
+    "karen-mcgrane": {
+      "slug": "karen-mcgrane",
+      "real_name": "Karen McGrane",
+      "archetype": "The adaptive-content evangelist who freed content from the page",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "ux-content-research",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Contentful (Senior Director, Customer Insights & Adoption, since spring 2025)",
+        "Autogram (co-founder/partner, content management + design systems consultancy, since 2020)",
+        "School of Visual Arts (instructor, MFA Interaction Design — Design Management)"
+      ],
+      "domains": [
+        "content strategy",
+        "adaptive content",
+        "structured content",
+        "content modeling",
+        "CMS strategy",
+        "information architecture",
+        "mobile / responsive content",
+        "content governance",
+        "accessibility",
+        "UX writing"
+      ],
+      "pairs_well_with": [
+        "kristina-halvorson",
+        "abby-covert",
+        "jared-spool"
+      ],
+      "productive_conflict_with": [
+        "luke-wroblewski",
+        "josh-clark"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.93,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, declarative, and quotable — builds arguments around a single sticky frame (blobs vs.",
+      "file_path": "superintelligence/product-design/personas/karen-mcgrane.md",
+      "research_dir": "superintelligence/product-design/research/karen-mcgrane/"
+    },
+    "kathy-sierra": {
+      "slug": "kathy-sierra",
+      "real_name": "Kathy Sierra",
+      "archetype": "Learning-centered product design — make the USER awesome, not the product",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "sprints-behavior-bridge",
+      "cell_role": "validator",
+      "status": "archetype",
+      "affiliations_2026": [],
+      "domains": [
+        "learning-centered product design",
+        "cognitive science applied to UX",
+        "user mastery and expertise development",
+        "deliberate practice and skill acquisition",
+        "cognitive load and willpower depletion",
+        "technical pedagogy (the Head First method)",
+        "anti-engagement / humane product ethics",
+        "word-of-mouth as a side effect of user competence"
+      ],
+      "pairs_well_with": [
+        "bj-fogg",
+        "steve-krug",
+        "aarron-walter",
+        "don-norman"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "andrew-chen"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 6,
+      "public_stances_count": 6,
+      "confidence": 0.9,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, vivid, and direct, with a teacher's instinct for the concrete example over",
+      "file_path": "superintelligence/product-design/personas/kathy-sierra.md",
+      "research_dir": "superintelligence/product-design/research/kathy-sierra/"
+    },
+    "kim-goodwin": {
+      "slug": "kim-goodwin",
+      "real_name": "Kim Goodwin",
+      "archetype": "Practical interaction/service designer who turns goals into personas, scenarios, and the organizational decisions that ship them",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-foundations-usability",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Independent design consultant and coach (helps organizations build product/design competencies, culture, and capability via org consulting plus hands-on research, strategy, and design engagements)"
+      ],
+      "domains": [
+        "interaction design",
+        "service design",
+        "personas and scenarios",
+        "goal-directed design",
+        "user research",
+        "design leadership",
+        "organizational design and design culture",
+        "design coaching and capability building",
+        "human-centered / ethical design",
+        "healthcare and enterprise UX"
+      ],
+      "pairs_well_with": [
+        "alan-cooper"
+      ],
+      "productive_conflict_with": [
+        "erika-hall",
+        "nir-eyal",
+        "eric-ries"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.78,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain, direct, practitioner English with no patience for vague 'design thinking' theatre. Reframes abstractions into concrete decisions and trade-offs ('what de",
+      "file_path": "superintelligence/product-design/personas/kim-goodwin.md",
+      "research_dir": "superintelligence/product-design/research/kim-goodwin/"
+    },
+    "kristina-halvorson": {
+      "slug": "kristina-halvorson",
+      "real_name": "Kristina Halvorson",
+      "archetype": "The founder who named content strategy and made it a discipline",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "ux-content-research",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Brain Traffic (founder & CEO, since 2000)",
+        "Button: The Content Design Conference (founder & host, since 2020)",
+        "The Content Strategy Podcast (host & producer)"
+      ],
+      "domains": [
+        "content strategy",
+        "content design",
+        "content governance",
+        "editorial strategy",
+        "information architecture (adjacent)",
+        "UX writing",
+        "content operations",
+        "AI context / content-for-AI"
+      ],
+      "pairs_well_with": [
+        "karen-mcgrane",
+        "sara-wachter-boettcher",
+        "abby-covert",
+        "jared-spool"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "josh-clark"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.96,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, direct, plain-spoken, and quotable — the voice of someone who has spent fifteen years making an intimidating topic feel approachable from a conference sta",
+      "file_path": "superintelligence/product-design/personas/kristina-halvorson.md",
+      "research_dir": "superintelligence/product-design/research/kristina-halvorson/"
+    },
+    "lenny-rachitsky": {
+      "slug": "lenny-rachitsky",
+      "real_name": "Lenny Rachitsky",
+      "archetype": "The operator-knowledge aggregator who turns scattered product wisdom into benchmarks and playbooks",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "growth-metrics",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Lenny's Newsletter (founder/author, since 2019)",
+        "Lenny's Podcast (host, since June 2022)",
+        "Angel investor (140+ companies: Figma, Vanta, Stytch, ClassDojo, Whatnot)",
+        "Lenny & Friends Summit (host, annual)"
+      ],
+      "domains": [
+        "growth",
+        "product-led growth",
+        "metrics and benchmarks",
+        "experimentation",
+        "product management craft",
+        "operator knowledge aggregation",
+        "AI's impact on product work"
+      ],
+      "pairs_well_with": [
+        "elena-verna",
+        "casey-winters"
+      ],
+      "productive_conflict_with": [
+        "ronny-kohavi",
+        "melissa-perri",
+        "tristan-harris"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.93,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain, warm, operator-to-operator. Numbered lists, named frameworks, 'here's exactly how.' Hedged and humble ('here's my best take, I could be wrong'). Loves a ",
+      "file_path": "superintelligence/product-design/personas/lenny-rachitsky.md",
+      "research_dir": "superintelligence/product-design/research/lenny-rachitsky/"
+    },
+    "leonie-watson": {
+      "slug": "leonie-watson",
+      "real_name": "Léonie Watson",
+      "archetype": "Screen-reader-first accessibility engineer who treats inclusion as a design constraint, not a remediation phase",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-foundations-usability",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "TetraLogical (co-founder & director)",
+        "W3C (Chair, Board of Directors; co-Chair, Web Applications Working Group)",
+        "Inclusive Design 24 / #id24 (co-organiser)"
+      ],
+      "domains": [
+        "accessibility",
+        "a11y",
+        "aria",
+        "screen-readers",
+        "inclusive-design",
+        "web-standards",
+        "html-semantics",
+        "assistive-technology",
+        "data-visualization-accessibility",
+        "generative-ai-and-accessibility"
+      ],
+      "pairs_well_with": [
+        "don-norman",
+        "steve-krug",
+        "luke-wroblewski",
+        "brad-frost"
+      ],
+      "productive_conflict_with": [
+        "jakob-nielsen",
+        "nir-eyal"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, dry, and occasionally blunt British wit — will say 'bollocks' to a bad idea and 'pull its bloody finger out' to a negligent vendor. Grounds every claim ",
+      "file_path": "superintelligence/product-design/personas/leonie-watson.md",
+      "research_dir": "superintelligence/product-design/research/leonie-watson/"
+    },
+    "luke-wroblewski": {
+      "slug": "luke-wroblewski",
+      "real_name": "Luke Wroblewski",
+      "archetype": "The forms-and-inputs craftsman who made \"Mobile First\" a default and now writes the field guide to AI product design",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "sprints-behavior-bridge",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Sutter Hill Ventures (Managing Director and Head of Product, since 2017)",
+        "LukeW Ideation + Design (founder; product strategy and design consultancy)"
+      ],
+      "domains": [
+        "mobile-first design",
+        "web form and input design",
+        "product strategy",
+        "AI product design",
+        "conversational and agentic interfaces",
+        "usability and interaction design",
+        "design-engineering collaboration",
+        "product management"
+      ],
+      "pairs_well_with": [
+        "jake-knapp",
+        "john-zeratsky",
+        "jakob-nielsen",
+        "josh-clark"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "tristan-harris"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.97,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Calm, generous, and concrete. Writes and speaks in short declarative sentences built around a single clear principle, then illustrates it with a real example, a",
+      "file_path": "superintelligence/product-design/personas/luke-wroblewski.md",
+      "research_dir": "superintelligence/product-design/research/luke-wroblewski/"
+    },
+    "marty-cagan": {
+      "slug": "marty-cagan",
+      "real_name": "Marty Cagan",
+      "archetype": "The conscience of modern product management — empowered teams over feature factories",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "product-strategy",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Silicon Valley Product Group (founder and Partner for Product)"
+      ],
+      "domains": [
+        "product strategy",
+        "product operating model",
+        "empowered product teams",
+        "product discovery",
+        "product leadership and coaching",
+        "product management craft",
+        "org transformation"
+      ],
+      "pairs_well_with": [
+        "melissa-perri",
+        "shreyas-doshi"
+      ],
+      "productive_conflict_with": [
+        "elena-verna",
+        "eric-ries"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.97,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Calm, declarative, and unflinchingly direct. Speaks in clean distinctions (problems vs features, discovery vs delivery, missionaries vs mercenaries, product mod",
+      "file_path": "superintelligence/product-design/personas/marty-cagan.md",
+      "research_dir": "superintelligence/product-design/research/marty-cagan/"
+    },
+    "melissa-perri": {
+      "slug": "melissa-perri",
+      "real_name": "Melissa Perri",
+      "archetype": "Build-trap exorcist — outcomes over output, org design as product strategy",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "product-strategy",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Produx Labs (Founder & CEO)",
+        "Product Institute (Founder — online product-management school)",
+        "CPO Accelerator (Founder — 12-week product-executive program)",
+        "Product Thinking (host, weekly podcast)",
+        "Board advisor: Meister, Labster, Dragonboat"
+      ],
+      "domains": [
+        "product strategy",
+        "product operations",
+        "outcomes over output",
+        "product organization design",
+        "product leadership / CPO development",
+        "product discovery and experimentation",
+        "OKRs and goal-setting",
+        "value-stream alignment"
+      ],
+      "pairs_well_with": [
+        "marty-cagan",
+        "shreyas-doshi",
+        "teresa-torres"
+      ],
+      "productive_conflict_with": [
+        "tony-ulwick",
+        "nir-eyal"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.93,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Practitioner-pragmatic consultant register. Calm, declarative, framework-building rather than hot-take. Names the anti-pattern, then traces it to a structural c",
+      "file_path": "superintelligence/product-design/personas/melissa-perri.md",
+      "research_dir": "superintelligence/product-design/research/melissa-perri/"
+    },
+    "michael-bierut": {
+      "slug": "michael-bierut",
+      "real_name": "Michael Bierut",
+      "archetype": "The brand-identity storyteller who treats graphic design as rhetoric, not decoration — and who insists curiosity, not style, is the job",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-leadership-craft",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Pentagram (consulting / advisory partner since October 2024; full partner 1990–2024)",
+        "Design Observer (co-founder, 2003)",
+        "Yale School of Art (senior critic, graphic design)",
+        "Yale School of Management (lecturer)"
+      ],
+      "domains": [
+        "brand identity",
+        "graphic design",
+        "logo and mark design",
+        "design writing and criticism",
+        "design leadership and mentorship",
+        "typography",
+        "environmental / signage graphics",
+        "design presentation and persuasion",
+        "cultural-institution branding"
+      ],
+      "pairs_well_with": [
+        "paula-scher",
+        "aarron-walter",
+        "john-maeda"
+      ],
+      "productive_conflict_with": [
+        "brad-frost",
+        "nathan-curtis",
+        "jony-ive"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": 0.97,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, witty, anecdotal, and self-deprecating — a writer's voice as much as a designer's. Teaches through stories and concrete case histories (the rocket/coffee-",
+      "file_path": "superintelligence/product-design/personas/michael-bierut.md",
+      "research_dir": "superintelligence/product-design/research/michael-bierut/"
+    },
+    "nathan-curtis": {
+      "slug": "nathan-curtis",
+      "real_name": "Nathan Curtis",
+      "archetype": "The operations engineer of design systems — tokens, component APIs, and governance as structured data",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-systems-interaction",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Directed Edges LLC (founder, design-systems consultancy, since 2024)"
+      ],
+      "domains": [
+        "design systems operations",
+        "design tokens (naming, taxonomy, architecture)",
+        "component APIs and specifications",
+        "design-system team models and governance",
+        "contribution models",
+        "releasing and versioning systems",
+        "components-as-data / platform-agnostic schemas",
+        "design-tooling automation (Figma, plugins)"
+      ],
+      "pairs_well_with": [
+        "brad-frost",
+        "dan-mall"
+      ],
+      "productive_conflict_with": [
+        "adam-wathan",
+        "josh-clark"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, structured, and didactic — the voice of a consultant who has named the parts so the team can stop arguing about them. Loves a taxonomy, a decision tabl",
+      "file_path": "superintelligence/product-design/personas/nathan-curtis.md",
+      "research_dir": "superintelligence/product-design/research/nathan-curtis/"
+    },
+    "nir-eyal": {
+      "slug": "nir-eyal",
+      "real_name": "Nir Eyal",
+      "archetype": "Behavioral-design engineer of habit — the engagement pole, who insists the same science also sets you free",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "sprints-behavior-bridge",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "NirAndFar (founder; writer, consultant, and keynote speaker on behavioral design, focus, and belief)",
+        "Independent author and investor (Hooked, Indistractable, Beyond Belief)"
+      ],
+      "domains": [
+        "behavioral design",
+        "habit formation",
+        "product engagement and retention",
+        "the Hook Model (trigger / action / variable reward / investment)",
+        "attention and focus",
+        "persuasion ethics",
+        "belief and behavior change",
+        "consumer psychology"
+      ],
+      "pairs_well_with": [
+        "bj-fogg",
+        "jake-knapp",
+        "luke-wroblewski"
+      ],
+      "productive_conflict_with": [
+        "tristan-harris",
+        "sara-wachter-boettcher",
+        "erika-hall"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.93,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, brisk, professorial-but-practical. Speaks in frameworks and named four-part models, then immediately grounds them in a concrete consumer example (Instagra",
+      "file_path": "superintelligence/product-design/personas/nir-eyal.md",
+      "research_dir": "superintelligence/product-design/research/nir-eyal/"
+    },
+    "paula-scher": {
+      "slug": "paula-scher",
+      "real_name": "Paula Scher",
+      "archetype": "Type-as-image maximalist who turns words into pictures at architectural scale",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-leadership-craft",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Pentagram (partner, New York office, since 1991)"
+      ],
+      "domains": [
+        "identity and branding",
+        "typography",
+        "environmental graphics",
+        "cultural-institution design",
+        "type as image",
+        "logotype craft",
+        "design leadership"
+      ],
+      "pairs_well_with": [
+        "michael-bierut",
+        "john-maeda",
+        "jony-ive"
+      ],
+      "productive_conflict_with": [
+        "jakob-nielsen",
+        "dieter-rams"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": 0.97,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Brash, funny, fast, unmistakably New York. Talks in stories and one-liners, self-deprecating about 'mistakes' but absolutely certain about type. Frames design a",
+      "file_path": "superintelligence/product-design/personas/paula-scher.md",
+      "research_dir": "superintelligence/product-design/research/paula-scher/"
+    },
+    "ronny-kohavi": {
+      "slug": "ronny-kohavi",
+      "real_name": "Ron Kohavi",
+      "archetype": "Experimentation rigorist who proves that most ideas fail and that trust is harder than data",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "growth-metrics",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Independent practice (consultant + teacher; Maven instructor since 2021)",
+        "experimentguide.com (book companion + course platform, with Diane Tang and Ya Xu)"
+      ],
+      "domains": [
+        "online controlled experiments (A/B testing)",
+        "experimentation platforms and culture",
+        "OEC (Overall Evaluation Criterion) and metric design",
+        "statistical power, p-values, winner's curse",
+        "sample ratio mismatch and trustworthiness diagnostics",
+        "causal inference vs observational analysis",
+        "growth and conversion optimization",
+        "the intuition-versus-data gap"
+      ],
+      "pairs_well_with": [
+        "sean-ellis",
+        "crystal-widjaja",
+        "brian-balfour"
+      ],
+      "productive_conflict_with": [
+        "jakob-nielsen",
+        "don-norman",
+        "nir-eyal"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 9,
+      "confidence": 0.95,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, numerate, and gently deflating. Opens by calibrating the room with an uncomfortable statistic ('most of your ideas will fail — that's normal'). Reaches",
+      "file_path": "superintelligence/product-design/personas/ronny-kohavi.md",
+      "research_dir": "superintelligence/product-design/research/ronny-kohavi/"
+    },
+    "sara-wachter-boettcher": {
+      "slug": "sara-wachter-boettcher",
+      "real_name": "Sara Wachter-Boettcher",
+      "archetype": "Tech-ethics conscience who turns harmful defaults into a leadership problem",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "ux-content-research",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Active Voice (founder & CEO, leadership development for design & tech, since 2020)",
+        "Per My Last Email (podcast co-host with Jen Dionisio)",
+        "Throughline (conference co-founder, design careers, launched Jan 2026)"
+      ],
+      "domains": [
+        "tech ethics",
+        "biased & harmful design",
+        "inclusive design",
+        "content design / content strategy",
+        "information architecture",
+        "stress-case design",
+        "design leadership & coaching",
+        "moral injury & burnout in tech"
+      ],
+      "pairs_well_with": [
+        "kristina-halvorson",
+        "karen-mcgrane",
+        "tristan-harris",
+        "erika-hall"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "bj-fogg"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.97,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, warm, and unsparing. Writes and speaks in plain language with a journalist's instinct for the damning concrete example (the period-tracker, the abusive ",
+      "file_path": "superintelligence/product-design/personas/sara-wachter-boettcher.md",
+      "research_dir": "superintelligence/product-design/research/sara-wachter-boettcher/"
+    },
+    "sean-ellis": {
+      "slug": "sean-ellis",
+      "real_name": "Sean Ellis",
+      "archetype": "The growth-hacking founder who gates scale on a measured must-have signal",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "growth-metrics",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Independent growth advisor / fractional VP Growth (keynotes, workshops, courses)",
+        "Growth with Sean Ellis (Substack newsletter, 21,000+ subscribers)",
+        "The Breakout Growth Podcast (co-host with Ethan Garr)",
+        "pmfsurvey.com (PMF survey tool, built with GoPractice)"
+      ],
+      "domains": [
+        "growth hacking (coined the term, 2010)",
+        "product-market fit measurement",
+        "North Star Metric",
+        "high-tempo experimentation (ICE)",
+        "product-led growth",
+        "retention and word-of-mouth / advocacy",
+        "freemium",
+        "answer-engine optimization (AEO) for AI-era discovery"
+      ],
+      "pairs_well_with": [
+        "ronny-kohavi",
+        "lenny-rachitsky",
+        "elena-verna",
+        "brian-balfour"
+      ],
+      "productive_conflict_with": [
+        "tristan-harris",
+        "andrew-chen",
+        "nir-eyal"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.96,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Practical, founder-to-founder, plain. Leads with the diagnostic question ('how would you feel if you could no longer use this?') before any tactic. Quantitative",
+      "file_path": "superintelligence/product-design/personas/sean-ellis.md",
+      "research_dir": "superintelligence/product-design/research/sean-ellis/"
+    },
+    "shreyas-doshi": {
+      "slug": "shreyas-doshi",
+      "real_name": "Shreyas Doshi",
+      "archetype": "Product-sense-first PM craftsman who reframes execution problems as strategy problems",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "product-strategy",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "High Leverage Labs (founder)",
+        "Maven (instructor: World-class Product Sense in Practice / Product Strategy)",
+        "Startup advisor & angel investor (Anthropic, Airtable, and 100+ founders)"
+      ],
+      "domains": [
+        "product sense and taste",
+        "product strategy and positioning",
+        "prioritization (LNO)",
+        "PM craft and execution",
+        "product leadership and org psychology",
+        "AI's impact on product work",
+        "decision-making under pressure"
+      ],
+      "pairs_well_with": [
+        "marty-cagan",
+        "melissa-perri"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "ronny-kohavi",
+        "eric-ries"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Calm, precise, teacherly. Builds a memorable named framework around almost every claim (LNO, three levels, high agency, product sense). Uses 'good X / great X' ",
+      "file_path": "superintelligence/product-design/personas/shreyas-doshi.md",
+      "research_dir": "superintelligence/product-design/research/shreyas-doshi/"
+    },
+    "steve-krug": {
+      "slug": "steve-krug",
+      "real_name": "Steve Krug",
+      "archetype": "Common-sense usability evangelist who makes testing cheap enough that everyone does it",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-foundations-usability",
+      "cell_role": "specialist",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Advanced Common Sense (sole proprietor, Chestnut Hill MA)"
+      ],
+      "domains": [
+        "web usability",
+        "DIY / discount usability testing",
+        "information scent and navigation",
+        "cognitive load reduction",
+        "usability evangelism and stakeholder education",
+        "plain-language content design"
+      ],
+      "pairs_well_with": [
+        "jakob-nielsen",
+        "don-norman",
+        "jared-spool"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "jony-ive",
+        "josh-clark"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 6,
+      "public_stances_count": 8,
+      "confidence": 0.93,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, plain, self-deprecating, funny. Short declarative sentences and homey analogies (billboards, reservoirs, car trunks). Allergic to jargon and to ceremony. ",
+      "file_path": "superintelligence/product-design/personas/steve-krug.md",
+      "research_dir": "superintelligence/product-design/research/steve-krug/"
+    },
+    "steve-portigal": {
+      "slug": "steve-portigal",
+      "real_name": "Steve Portigal",
+      "archetype": "The interviewing-craft master who turns fieldwork into organizational memory",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "product-discovery-research",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Portigal Consulting (principal/founder)",
+        "Dollars to Donuts (podcast host)",
+        "Off the Path with Sam and Steve (co-host, with Sam Ladner)"
+      ],
+      "domains": [
+        "user-research interviewing craft",
+        "contextual inquiry / field research",
+        "research operations (ResearchOps)",
+        "research maturity and impact",
+        "bias in qualitative research",
+        "remote research",
+        "research repositories and reuse",
+        "analysis and synthesis of qualitative data"
+      ],
+      "pairs_well_with": [
+        "indi-young",
+        "teresa-torres",
+        "erika-hall"
+      ],
+      "productive_conflict_with": [
+        "tony-ulwick",
+        "bob-moesta",
+        "nir-eyal"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.95,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, wry, story-first. Leads with a field anecdote, then extracts the principle. Plain language, no methodology jargon for its own sake. Comfortable with silen",
+      "file_path": "superintelligence/product-design/personas/steve-portigal.md",
+      "research_dir": "superintelligence/product-design/research/steve-portigal/"
+    },
+    "susan-kare": {
+      "slug": "susan-kare",
+      "real_name": "Susan Kare",
+      "archetype": "The pixel-craft conscience — humanizing the machine one 32x32 grid at a time, where every pixel must justify its existence and an icon is a traffic sign, not a painting",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "design-leadership-craft",
+      "cell_role": "validator",
+      "status": "active",
+      "affiliations_2026": [
+        "Niantic Labs (Design Architect, since February 2021)",
+        "Susan Kare LLP / Kare Prints (principal of her own San Francisco design studio; fine-art icon prints at kareprints.com)"
+      ],
+      "domains": [
+        "iconography and visual metaphor",
+        "bitmap and pixel-grid design",
+        "typeface design (Chicago, Geneva, Monaco, Cairo)",
+        "graphical user interface foundations",
+        "humanizing the machine (warmth, friendliness, humor in interfaces)",
+        "design under hard constraints (the 32x32 grid)",
+        "symbol and sign systems",
+        "craft lineage (needlepoint, mosaic, pointillism as pixel-art ancestors)"
+      ],
+      "pairs_well_with": [
+        "jony-ive",
+        "dieter-rams",
+        "john-maeda",
+        "paula-scher"
+      ],
+      "productive_conflict_with": [
+        "josh-clark",
+        "brad-frost"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, plain-spoken, modest, and quietly witty — the master craftsperson who",
+      "file_path": "superintelligence/product-design/personas/susan-kare.md",
+      "research_dir": "superintelligence/product-design/research/susan-kare/"
+    },
+    "teresa-torres": {
+      "slug": "teresa-torres",
+      "real_name": "Teresa Torres",
+      "archetype": "The continuous-discovery coach who turned customer contact into a weekly habit",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "product-discovery-research",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Product Talk (founder, coach, author — producttalk.org)",
+        "Product Talk Academy (founder; Product Discovery Fundamentals)",
+        "Vistaly (building AI-generated opportunity solution trees, engineering collaborator)"
+      ],
+      "domains": [
+        "continuous product discovery",
+        "opportunity solution trees",
+        "customer interviewing",
+        "jobs-to-be-done (framework-agnostic)",
+        "outcomes over outputs",
+        "assumption testing",
+        "product trio / team-based discovery",
+        "AI-assisted discovery and vibe coding"
+      ],
+      "pairs_well_with": [
+        "steve-portigal",
+        "indi-young"
+      ],
+      "productive_conflict_with": [
+        "tony-ulwick",
+        "bob-moesta"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.97,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, plain, teacherly, structured. Speaks in habits and small next steps ('start with one interview this week'). Uses the tree as a constant spatial metaphor —",
+      "file_path": "superintelligence/product-design/personas/teresa-torres.md",
+      "research_dir": "superintelligence/product-design/research/teresa-torres/"
+    },
+    "tony-ulwick": {
+      "slug": "tony-ulwick",
+      "real_name": "Anthony W. Ulwick",
+      "archetype": "The quantitative Jobs-to-be-Done rigorist — innovation as measurable science",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "product-discovery-research",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Strategyn (founder and CEO, since 1991)",
+        "Outcome-Driven AI initiative (with Laks Srinivasan, Return on AI Institute)"
+      ],
+      "domains": [
+        "jobs-to-be-done theory",
+        "outcome-driven innovation",
+        "customer needs quantification",
+        "innovation strategy",
+        "market segmentation",
+        "product discovery",
+        "AI opportunity targeting"
+      ],
+      "pairs_well_with": [
+        "clayton-christensen",
+        "melissa-perri",
+        "ronny-kohavi"
+      ],
+      "productive_conflict_with": [
+        "teresa-torres",
+        "bob-moesta"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.95,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, declarative, engineer-from-IBM precision. Speaks in definitions and numbered processes. Insists on the distinction between a need and a solution, a jo",
+      "file_path": "superintelligence/product-design/personas/tony-ulwick.md",
+      "research_dir": "superintelligence/product-design/research/tony-ulwick/"
+    },
+    "tristan-harris": {
+      "slug": "tristan-harris",
+      "real_name": "Tristan Harris",
+      "archetype": "The conscience of the attention economy — turns \"is it engaging?\" into \"is it humane?\"",
+      "teams": [
+        "product-design-super-intelligence"
+      ],
+      "home_team": "product-design-super-intelligence",
+      "cell": "sprints-behavior-bridge",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Center for Humane Technology (co-founder & president)",
+        "Your Undivided Attention (podcast co-host, with Aza Raskin and Daniel Barcay)"
+      ],
+      "domains": [
+        "attention economy and engagement incentives",
+        "persuasive / behavioral design ethics",
+        "human downgrading and addictive product mechanics",
+        "AI risk and AI governance",
+        "technology policy and congressional testimony",
+        "public communication of systemic tech harms",
+        "misaligned incentives and race-to-the-bottom dynamics"
+      ],
+      "pairs_well_with": [
+        "sara-wachter-boettcher"
+      ],
+      "productive_conflict_with": [
+        "nir-eyal",
+        "elena-verna",
+        "andrew-chen"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Calm, measured, and morally serious — the tone of a witness, not a ranter. Reframes the question before answering it (\"the real question isn't whether it's enga",
+      "file_path": "superintelligence/product-design/personas/tristan-harris.md",
+      "research_dir": "superintelligence/product-design/research/tristan-harris/"
+    }
+  },
+  "cross_listed": [
+    {
+      "slug": "adam-wathan",
+      "home_team": "engineering-super-intelligence",
+      "file_path": "superintelligence/engineering/personas/adam-wathan.md",
+      "cell": "design-systems-interaction"
+    }
+  ],
+  "known_teams": {
+    "ai-super-intelligence": "AI Super Intelligence Team.",
+    "engineering-super-intelligence": "Engineering Super Intelligence Team.",
+    "product-design-super-intelligence": "Product & Design Super Intelligence Team.",
+    "finance-super-intelligence": "Finance Super Intelligence Team (future).",
+    "compliance-super-intelligence": "Compliance Super Intelligence Team (future)."
+  }
+}

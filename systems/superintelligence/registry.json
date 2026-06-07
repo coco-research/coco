@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "kind": "superintelligence-meta",
+  "default_team": "ai",
+  "teams": {
+    "ai": {
+      "team_id": "ai-super-intelligence",
+      "name": "AI Super Intelligence Team",
+      "dir": "superintelligence/ai",
+      "personas": 59,
+      "cells": 8,
+      "built": true
+    },
+    "engineering": {
+      "team_id": "engineering-super-intelligence",
+      "name": "Engineering Super Intelligence Team",
+      "dir": "superintelligence/engineering",
+      "personas": 70,
+      "cells": 11,
+      "cross_listed_from_ai": 9,
+      "built": true
+    },
+    "product-design": {
+      "team_id": "product-design-super-intelligence",
+      "name": "Product & Design Super Intelligence Team",
+      "dir": "superintelligence/product-design",
+      "personas": 56,
+      "cells": 8,
+      "cross_listed": 1,
+      "note": "Merged Product + Design team (2026-06-01). Replaces the separate product and design stubs.",
+      "built": true
+    },
+    "finance": {
+      "team_id": "finance-super-intelligence",
+      "name": "Finance Super Intelligence Team",
+      "dir": "superintelligence/finance",
+      "personas": 0,
+      "cells": 0,
+      "built": false
+    },
+    "compliance": {
+      "team_id": "compliance-super-intelligence",
+      "name": "Compliance Super Intelligence Team",
+      "dir": "superintelligence/compliance",
+      "personas": 0,
+      "cells": 0,
+      "built": false
+    }
+  },
+  "shared": {
+    "templates": "superintelligence/templates",
+    "command_generator": "superintelligence/ai/scripts/build_commands.py"
+  }
+}

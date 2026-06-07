@@ -77,3 +77,12 @@ if [[ ${#ARGS[@]} -gt 0 ]]; then
 else
   bash "$ADAPTER_DIR/install.sh"
 fi
+
+# Report installed version + how to stay current (no network call here).
+if [[ -z "$DRY_RUN" ]]; then
+  VER="$(python3 -c "import json;print(json.load(open('$REPO_ROOT/package.json'))['version'])" 2>/dev/null || echo "?")"
+  echo
+  echo "Coco v$VER installed. Check for updates anytime:"
+  echo "  bash \"$REPO_ROOT/scripts/check-update.sh\"      # git clones"
+  echo "  npx @rkz91/coco-cli version                      # npm installs"
+fi

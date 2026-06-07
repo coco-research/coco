@@ -17,8 +17,76 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
+const https = require('https');
+
 const REPO = 'https://github.com/rkz91/coco.git';
 const DEFAULT_DIR = path.join(process.cwd(), 'coco');
+
+// ── Update notifier ─────────────────────────────────────────────────────────
+// Privacy: contacts only github.com (the source), no analytics/telemetry. Result
+// is cached for 24h in ~/.coco/.update-check.json. Disable with COCO_NO_UPDATE_CHECK=1.
+const PKG_VERSION = (() => {
+  try { return require('../package.json').version || '0.0.0'; } catch (_) { return '0.0.0'; }
+})();
+const UPDATE_CACHE = path.join(os.homedir(), '.coco', '.update-check.json');
+const LATEST_URL = 'https://raw.githubusercontent.com/rkz91/coco/main/package.json';
+
+function semverGt(a, b) {
+  const pa = String(a).split('.').map(n => parseInt(n, 10) || 0);
+  const pb = String(b).split('.').map(n => parseInt(n, 10) || 0);
+  for (let i = 0; i < 3; i++) { if ((pa[i] || 0) > (pb[i] || 0)) return true; if ((pa[i] || 0) < (pb[i] || 0)) return false; }
+  return false;
+}
+
+function readCache() {
+  try { return JSON.parse(fs.readFileSync(UPDATE_CACHE, 'utf8')); } catch (_) { return null; }
+}
+function writeCache(latest) {
+  try {
+    fs.mkdirSync(path.dirname(UPDATE_CACHE), { recursive: true });
+    fs.writeFileSync(UPDATE_CACHE, JSON.stringify({ checkedAt: Date.now(), latest }));
+  } catch (_) { /* best-effort */ }
+}
+
+function fetchLatestVersion(cb) {
+  let done = false;
+  const finish = (v) => { if (!done) { done = true; cb(v); } };
+  try {
+    const req = https.get(LATEST_URL, { headers: { 'User-Agent': 'coco-cli' } }, (res) => {
+      if (res.statusCode !== 200) { res.resume(); return finish(null); }
+      let body = '';
+      res.on('data', (d) => { body += d; });
+      res.on('end', () => { try { finish(JSON.parse(body).version || null); } catch (_) { finish(null); } });
+    });
+    req.setTimeout(2500, () => { req.destroy(); finish(null); });
+    req.on('error', () => finish(null));
+  } catch (_) { finish(null); }
+}
+
+function banner(latest) {
+  if (latest && semverGt(latest, PKG_VERSION)) {
+    console.log(`\n  ⬆  Coco ${latest} is available (you have ${PKG_VERSION}).`);
+    console.log(`     Update:  npx @rkz91/coco-cli update     (or: git -C <clone> pull --ff-only && bash install.sh)\n`);
+  }
+}
+
+// Non-blocking: prints a one-line banner if a newer version exists. Silent on
+// offline/error. `force` bypasses the 24h cache (used by the `version` command).
+function checkForUpdate(force) {
+  if (process.env.COCO_NO_UPDATE_CHECK) return;
+  const cache = readCache();
+  const fresh = cache && (Date.now() - (cache.checkedAt || 0) < 24 * 3600 * 1000);
+  if (fresh && !force) { banner(cache.latest); return; }
+  fetchLatestVersion((latest) => {
+    if (latest) { writeCache(latest); banner(latest); }
+    else if (cache) { banner(cache.latest); }
+  });
+}
+
+function cmdVersion() {
+  console.log(`@rkz91/coco-cli v${PKG_VERSION}`);
+  checkForUpdate(true);
+}
 
 function help() {
   console.log(`Coco — open-source AI workflow framework
@@ -28,7 +96,10 @@ Usage:
   npx @rkz91/coco-cli install [flags]   clone + install with flags
   npx @rkz91/coco-cli update [dir]      pull latest in existing clone
   npx @rkz91/coco-cli uninstall [dir]   remove symlinks + clone
+  npx @rkz91/coco-cli version           show version + check for updates
   npx @rkz91/coco-cli --help            this message
+
+Update checks contact only github.com (no telemetry); disable with COCO_NO_UPDATE_CHECK=1.
 
 Install flags (passed to install.sh):
   --adapter <name>                      claude-code | cursor | codex | generic
@@ -138,9 +209,16 @@ function main() {
     case '-h':
     case 'help':
       help();
+      checkForUpdate(false);
+      break;
+    case 'version':
+    case '--version':
+    case '-v':
+      cmdVersion();
       break;
     case 'install':
       cmdInstall(rest);
+      checkForUpdate(false);
       break;
     case 'update':
       cmdUpdate(rest);
@@ -151,6 +229,7 @@ function main() {
     default:
       // any unknown subcommand → pass through to install (e.g., npx @rkz91/coco-cli --adapter cursor)
       cmdInstall(argv);
+      checkForUpdate(false);
   }
 }
 

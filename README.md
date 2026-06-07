@@ -78,9 +78,9 @@ Coco's signature differentiator is Superintelligence. It allows you to summon cu
 *   **Cross-Team Meta-Orchestration**: For complex queries spanning domains ("build and sell an AI audit tool"), a Stage-A local router uses nomic-embed to score the prompt against team registries and cells, greedily picking a proportional 16-32 person panel.
 *   **Citable and Grounded**: Every stance is verified from public sources and carries a direct evidence URL. Personas are validated against a strict anti-fabrication gate.
 
-### The Two-Stage Selection Algorithm
+### The Selection Algorithm (Two-Stage Routing + Approval)
 
-The Meta-Orchestrator uses a highly optimized two-stage algorithm to avoid loading massive file systems at runtime:
+The Meta-Orchestrator uses a staged algorithm to avoid loading massive file systems at runtime — two routing stages (team/cell, then scoped personas) followed by an approval-and-execution step:
 
 1.  **Stage A: Team and Cell Routing (Cheap)**: Reads the meta-registry (`superintelligence/registry.json`) and scans only the team descriptions and cell definitions. It scores team relevance using keyword and domain overlap, selecting the top 1-4 teams. If a single team dominates, it delegates to that team's normal orchestrator.
 2.  **Stage B: Scoped Persona Selection (Scoped)**: Loads compact persona records (slugs, cells, domains, stances, conflict mappings) for only the selected teams. It allocates the 16-32 panel budget proportionally to team relevance, runs the greedy scorer (`0.40·domain + 0.30·cell-coverage + 0.30·conflict-pairing`), and applies a cross-team tension pass to pair opposing viewpoints (e.g., security vs. growth).
@@ -359,10 +359,11 @@ bash install.sh --systems brain
 
 ### Scheduled & Loop Agents
 ```bash
+# Host-native scheduling (e.g. Claude Code) pointed at any Coco command:
 /schedule run /team:review every Monday
-/loop 5m /watch-deploy
+/loop 5m /team:verify
 ```
-> Sets up background cron jobs or interval monitors that trigger specialized agents to inspect workspace changes.
+> Coco does not ship its own scheduler. Where your host CLI provides scheduling or looping (such as Claude Code's `/schedule` and `/loop`), point it at any Coco command — `/team:review`, `/team:verify`, `/code-verification` — to run reviews or watches unattended.
 
 </td>
 <td valign="top">
@@ -478,6 +479,45 @@ bash install.sh --adapter generic
 
 ---
 
+## Staying Current
+
+Coco tells you when a newer version is available — it checks the GitHub repository (the source) at most once per day, prints a one-line banner, and sends **no telemetry**. Disable with `COCO_NO_UPDATE_CHECK=1`.
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+**git clones**
+
+```bash
+# print version + update status
+bash scripts/check-update.sh
+
+# apply an update
+git pull --ff-only && bash install.sh
+```
+
+</td>
+<td width="50%" valign="top">
+
+**npm installs**
+
+```bash
+# print version + check for updates
+npx @rkz91/coco-cli version
+
+# apply an update
+npx @rkz91/coco-cli update
+```
+
+</td>
+</tr>
+</table>
+
+<sub>Releases are tracked in [`CHANGELOG.md`](CHANGELOG.md) and on the <a href="https://github.com/rkz91/coco/releases">GitHub Releases</a> page.</sub>
+
+---
+
 ## System Compatibility
 
 <table>
@@ -514,8 +554,8 @@ bash install.sh --adapter generic
 <tr>
 <td><strong>VS Code (Continue)</strong></td>
 <td><code>vscode-continue</code></td>
-<td>Beta</td>
-<td>Links config and prompt files. Planned for full v0.2.</td>
+<td>Experimental (stub)</td>
+<td>Scaffold only — full wiring tracked in <a href="https://github.com/rkz91/coco/issues/4">#4</a>, targeted for v0.2.</td>
 </tr>
 <tr>
 <td><strong>Antigravity (Google)</strong></td>
@@ -571,6 +611,20 @@ This removes only the links pointing back to your Coco repository folder.
 <summary><strong>What happens if I switch my AI assistant later?</strong></summary>
 Simply re-run the installer with the new adapter flag (e.g. `bash install.sh --adapter cursor`). All your custom skills and workflows will immediately follow you.
 </details>
+
+---
+
+## Contributing & Community
+
+Coco is MIT-licensed and contributions are welcome.
+
+- **Start here:** [`CONTRIBUTING.md`](CONTRIBUTING.md) — how to add a skill, command, agent, or adapter.
+- **Good first issues:** [help wanted / good first issue](https://github.com/rkz91/coco/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) — small, well-scoped tasks for newcomers.
+- **Report a bug / request a feature:** [open an issue](https://github.com/rkz91/coco/issues/new/choose).
+- **Security:** see [`SECURITY.md`](SECURITY.md) for responsible disclosure.
+- **Conduct:** see [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
+
+Before opening a PR, validate locally — the CI runs a frontmatter linter, manifest validation, and an install-script syntax check.
 
 ---
 

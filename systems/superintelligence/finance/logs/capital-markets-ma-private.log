@@ -1,0 +1,8 @@
+building 5 persona(s) with qwen/qwen3.6-35b-a3b
+[1/5] jay-ritter               ERROR HTTPError: HTTP Error 400: Bad Request
+[2/5] steve-kaplan             ERROR HTTPError: HTTP Error 400: Bad Request
+[3/5] edward-altman            ERROR HTTPError: HTTP Error 400: Bad Request
+[4/5] ludovic-phalippou        ERROR HTTPError: HTTP Error 400: Bad Request
+[5/5] dan-rasmussen            ERROR HTTPError: HTTP Error 400: Bad Request
+
+DONE: 0/5 PASS

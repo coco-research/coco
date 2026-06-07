@@ -1,0 +1,16 @@
+building 4 persona(s) with qwen/qwen3.6-35b-a3b
+[1/4] claudia-sahm             NEEDS-TOPUP urls 0/0 578s  YAML PARSE ERROR: ValueError: frontmatter not a mapping
+[2/4] joseph-wang              NEEDS-TOPUP urls 4/4 532s  recent_signal_12mo 2<3; sources 4<8
+[3/4] jason-furman             NEEDS-TOPUP urls 0/0 644s  YAML PARSE ERROR: ValueError: frontmatter not a mapping
+[4/4] lyn-alden                PASS        urls 14/14 710s  
+
+DONE: 1/4 PASS
+building 6 persona(s) with qwen/qwen3.6-35b-a3b
+[1/6] richard-thaler           NEEDS-TOPUP urls 0/0 731s  YAML PARSE ERROR: ParserError: while parsing a block mapping
+[2/6] robert-shiller           PASS        urls 9/9 737s  
+[3/6] daniel-kahneman          NEEDS-TOPUP urls 19/19 648s  archetype persistent_signals 0<3
+[4/6] morgan-housel            NEEDS-TOPUP urls 0/0 594s  no leading frontmatter delimiter
+[5/6] annie-duke               NEEDS-TOPUP urls 0/0 584s  no leading frontmatter delimiter
+[6/6] meir-statman             NEEDS-TOPUP urls 0/0 624s  YAML PARSE ERROR: ValueError: frontmatter not a mapping
+
+DONE: 1/6 PASS

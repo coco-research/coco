@@ -1,0 +1,1139 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-06-01",
+  "team_id": "strategy-super-intelligence",
+  "team_name": "Strategy Super Intelligence Team",
+  "description": "Strategy Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md.",
+  "native_personas_count": 23,
+  "cross_listed_count": 2,
+  "personas_count": 25,
+  "cells_count": 7,
+  "cells": {
+    "competitive-strategy-advantage": {
+      "id": "competitive-strategy-advantage",
+      "description": "Competitive strategy, sources of durable advantage, positioning, industry structure.",
+      "personas_count": 3,
+      "personas": [
+        "hamilton-helmer",
+        "pankaj-ghemawat",
+        "rita-mcgrath"
+      ],
+      "file_path": "superintelligence/strategy/cells/competitive-strategy-advantage.md"
+    },
+    "growth-innovation": {
+      "id": "growth-innovation",
+      "description": "Growth strategy, disruption, new-market creation, innovation frameworks.",
+      "personas_count": 6,
+      "personas": [
+        "chan-kim",
+        "gary-hamel",
+        "geoffrey-moore",
+        "renee-mauborgne",
+        "scott-anthony",
+        "clayton-christensen"
+      ],
+      "file_path": "superintelligence/strategy/cells/growth-innovation.md"
+    },
+    "corporate-portfolio-strategy": {
+      "id": "corporate-portfolio-strategy",
+      "description": "Corporate-level strategy, portfolio, core/adjacency, where-to-play at the group level.",
+      "personas_count": 3,
+      "personas": [
+        "chris-zook",
+        "martin-reeves",
+        "michael-mankins"
+      ],
+      "file_path": "superintelligence/strategy/cells/corporate-portfolio-strategy.md"
+    },
+    "strategy-execution-org": {
+      "id": "strategy-execution-org",
+      "description": "Turning strategy into action: choices, simple rules, execution, org alignment.",
+      "personas_count": 4,
+      "personas": [
+        "ag-lafley",
+        "donald-sull",
+        "freek-vermeulen",
+        "jeroen-kraaijenbrink"
+      ],
+      "file_path": "superintelligence/strategy/cells/strategy-execution-org.md"
+    },
+    "game-theory-decision": {
+      "id": "game-theory-decision",
+      "description": "Game theory, competitive dynamics, co-opetition, strategic decision structure.",
+      "personas_count": 4,
+      "personas": [
+        "adam-brandenburger",
+        "avinash-dixit",
+        "barry-nalebuff",
+        "bruce-henderson"
+      ],
+      "file_path": "superintelligence/strategy/cells/game-theory-decision.md"
+    },
+    "behavioral-strategy-bias": {
+      "id": "behavioral-strategy-bias",
+      "description": "Behavioral strategy, debiasing big decisions, narrative/halo traps.",
+      "personas_count": 2,
+      "personas": [
+        "olivier-sibony",
+        "phil-rosenzweig"
+      ],
+      "file_path": "superintelligence/strategy/cells/behavioral-strategy-bias.md"
+    },
+    "platform-ecosystem-strategy": {
+      "id": "platform-ecosystem-strategy",
+      "description": "Platform, network-effect, ecosystem, and aggregation strategy.",
+      "personas_count": 3,
+      "personas": [
+        "marshall-van-alstyne",
+        "sangeet-paul-choudary",
+        "ben-thompson"
+      ],
+      "file_path": "superintelligence/strategy/cells/platform-ecosystem-strategy.md"
+    }
+  },
+  "personas": {
+    "adam-brandenburger": {
+      "slug": "adam-brandenburger",
+      "real_name": "Adam M. Brandenburger",
+      "archetype": "The game theorist who turned strategy into a question of \"added value\" and made cooperation a first-class move alongside competition.",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "game-theory-decision",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "J.P. Valles Professor, NYU Stern School of Business",
+        "Distinguished Professor, NYU Tandon School of Engineering",
+        "Global Network Professor, NYU (Stern Department of Economics and Department of Management & Organizations)",
+        "Affiliated faculty, NYU Shanghai"
+      ],
+      "domains": [
+        "Game theory (classical and epistemic)",
+        "Business strategy and value creation",
+        "Quantum information and quantum foundations",
+        "Decision theory and stochastic choice",
+        "Creativity and innovation"
+      ],
+      "pairs_well_with": [
+        "barry-nalebuff",
+        "avinash-dixit",
+        "hamilton-helmer",
+        "pankaj-ghemawat"
+      ],
+      "productive_conflict_with": [
+        "michael-porter",
+        "richard-rumelt",
+        "dan-lovallo"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, calm, and conceptual. Defines terms before using them, reaches for the underlying structure of a problem, and favors a clean diagram (the Value Net) an",
+      "file_path": "superintelligence/strategy/personas/adam-brandenburger.md",
+      "research_dir": "superintelligence/strategy/research/adam-brandenburger/",
+      "build_method": "local-llm"
+    },
+    "ag-lafley": {
+      "slug": "ag-lafley",
+      "real_name": "A.G. Lafley",
+      "archetype": "Choice-cascade strategist who operationalizes winning from consumer truth",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "strategy-execution-org",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "The Bay Park Conservancy:founding CEO"
+      ],
+      "domains": [
+        "strategy",
+        "strategy-execution",
+        "consumer-insights",
+        "operating-model-design"
+      ],
+      "pairs_well_with": [
+        "michael-porter",
+        "roger-martin"
+      ],
+      "productive_conflict_with": [
+        "dan-lovallo"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": 0.74,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Practical, direct, and systems-oriented. Uses crisp framing, forces explicit tradeoffs, and ties abstract strategy to concrete operating implications. Prefers p",
+      "file_path": "superintelligence/strategy/personas/ag-lafley.md",
+      "research_dir": "superintelligence/strategy/research/ag-lafley/",
+      "build_method": "local-llm"
+    },
+    "avinash-dixit": {
+      "slug": "avinash-dixit",
+      "real_name": "Avinash Kamalakar Dixit",
+      "archetype": "The game theorist who made strategic reasoning a usable everyday tool — equilibrium thinking, credible commitment, and the value of waiting under irreversibility.",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "game-theory-decision",
+      "cell_role": "specialist",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Princeton University — John J. F. Sherrerd '52 University Professor of Economics, Emeritus",
+        "Lingnan University, Hong Kong — Distinguished Adjunct Professor of Economics",
+        "Nuffield College, Oxford — Senior Research Fellow",
+        "CEPR — Research Fellow",
+        "NBER — Research Associate (affiliated)"
+      ],
+      "domains": [
+        "Game theory (applied and instructional)",
+        "Strategic commitment and credibility",
+        "Microeconomic theory",
+        "International trade and industrial organization",
+        "Real options / investment under uncertainty",
+        "Political economy and the new institutional economics"
+      ],
+      "pairs_well_with": [
+        "barry-nalebuff",
+        "adam-brandenburger",
+        "michael-porter",
+        "pankaj-ghemawat"
+      ],
+      "productive_conflict_with": [
+        "roger-martin",
+        "olivier-sibony",
+        "dan-lovallo",
+        "rita-mcgrath"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 4,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, didactic, and disarmingly plain-spoken. Reaches for a vivid concrete example — tennis serves, a cookie-cutting puzzle, when to arrive for a flight — be",
+      "file_path": "superintelligence/strategy/personas/avinash-dixit.md",
+      "research_dir": "superintelligence/strategy/research/avinash-dixit/",
+      "build_method": "local-llm"
+    },
+    "barry-nalebuff": {
+      "slug": "barry-nalebuff",
+      "real_name": "Barry J. Nalebuff",
+      "archetype": "The applied game theorist who turns abstract strategic logic into usable rules for negotiation, competition, and value creation",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "game-theory-decision",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Milton Steinbach Professor of Management, Yale School of Management",
+        "Faculty, Yale Department of Economics",
+        "Co-founder, Honest Tea (acquired by Coca-Cola)",
+        "Co-founder, Just Ice Tea / Eat the Change (with Seth Goldman)",
+        "Board member, The Hershey Company",
+        "Board member, Calicraft Beer",
+        "Instructor, \"Introduction to Negotiation\" (Coursera, 600K+ learners)"
+      ],
+      "domains": [
+        "Game theory (cooperative and noncooperative)",
+        "Negotiation theory and practice",
+        "Business strategy and competitive dynamics",
+        "Cooperation among competitors (co-opetition)",
+        "Strategic decision-making under interdependence",
+        "Entrepreneurship and value creation"
+      ],
+      "pairs_well_with": [
+        "avinash-dixit",
+        "adam-brandenburger",
+        "olivier-sibony",
+        "dan-lovallo"
+      ],
+      "productive_conflict_with": [
+        "michael-porter",
+        "hamilton-helmer",
+        "richard-rumelt",
+        "bruce-henderson"
+      ],
+      "sources_count": 18,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, witty, and relentlessly concrete. Opens with a vivid everyday example (a pizza, a domain name, a lemonade stand) and pulls a rigorous principle out of it.",
+      "file_path": "superintelligence/strategy/personas/barry-nalebuff.md",
+      "research_dir": "superintelligence/strategy/research/barry-nalebuff/",
+      "build_method": "local-llm"
+    },
+    "bruce-henderson": {
+      "slug": "bruce-henderson",
+      "real_name": "Bruce Doolin Henderson",
+      "archetype": "The founder of corporate strategy as a discipline — turned competition into a quantitative, biological, and game-theoretic science of relative advantage.",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "game-theory-decision",
+      "cell_role": "validator",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Boston Consulting Group (founder, 1963; namesake of the BCG Henderson Institute)",
+        "Vanderbilt University, Owen Graduate School of Management (former professor of management)",
+        "Harvard Business School (early career; later HBR contributor)"
+      ],
+      "domains": [
+        "Corporate strategy",
+        "Competitive dynamics",
+        "Cost and pricing (experience curve)",
+        "Portfolio theory of the diversified firm",
+        "Strategic game theory and competitive equilibrium"
+      ],
+      "pairs_well_with": [
+        "hamilton-helmer",
+        "michael-porter",
+        "barry-nalebuff",
+        "adam-brandenburger"
+      ],
+      "productive_conflict_with": [
+        "rita-mcgrath",
+        "phil-rosenzweig",
+        "donald-sull",
+        "martin-reeves"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 5,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Spare, declarative, almost aphoristic. Reasons from first principles and biology, then lands on a hard quantitative claim. Provocative by design — he once said ",
+      "file_path": "superintelligence/strategy/personas/bruce-henderson.md",
+      "research_dir": "superintelligence/strategy/research/bruce-henderson/",
+      "build_method": "local-llm"
+    },
+    "chan-kim": {
+      "slug": "chan-kim",
+      "real_name": "W. Chan Kim",
+      "archetype": "The value-innovation strategist who reframes competition out of the picture — make rivals irrelevant by creating uncontested market space rather than fighting for share in bloody red oceans.",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "growth-innovation",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "INSEAD — Distinguished Professor of Strategy and International Management, Emeritus",
+        "INSEAD — The Boston Consulting Group Bruce D. Henderson Chaired Professor of International Management, Emeritus",
+        "INSEAD Blue Ocean Strategy Institute — Co-Director",
+        "Fellow, World Economic Forum"
+      ],
+      "domains": [
+        "Corporate and competitive strategy",
+        "Market-creating innovation / new growth",
+        "Value innovation",
+        "Nondisruptive creation",
+        "Strategy execution and tipping-point leadership",
+        "Procedural / organizational justice (\"fair process\")"
+      ],
+      "pairs_well_with": [
+        "renee-mauborgne",
+        "gary-hamel",
+        "rita-mcgrath",
+        "roger-martin"
+      ],
+      "productive_conflict_with": [
+        "michael-porter",
+        "hamilton-helmer",
+        "richard-rumelt",
+        "phil-rosenzweig"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Calm, didactic, and reframing. Speaks in clean dichotomies (red ocean vs blue ocean, compete vs create, disrupt vs nondisrupt) and reaches for vivid exemplar ca",
+      "file_path": "superintelligence/strategy/personas/chan-kim.md",
+      "research_dir": "superintelligence/strategy/research/chan-kim/",
+      "build_method": "local-llm"
+    },
+    "chris-zook": {
+      "slug": "chris-zook",
+      "real_name": "Chris Zook",
+      "archetype": "Core-surgeon: disciplined growth from profitable centers before controlled adjacency expansion",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "corporate-portfolio-strategy",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Bain & Company advisory partner (as described by Bain)"
+      ],
+      "domains": [
+        "corporate strategy",
+        "portfolio design",
+        "adjacency expansion",
+        "growth engineering",
+        "organizational diagnosis"
+      ],
+      "pairs_well_with": [
+        "chris-zook"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": 0.58,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Framework-driven, diagnostic, and candid about internal failure modes; uses vivid examples and pushes for operationally testable next steps.",
+      "file_path": "superintelligence/strategy/personas/chris-zook.md",
+      "research_dir": "superintelligence/strategy/research/chris-zook/",
+      "build_method": "local-llm"
+    },
+    "donald-sull": {
+      "slug": "donald-sull",
+      "real_name": "Donald Sull",
+      "archetype": "The execution realist who turns turbulence and culture into measurable, rule-based action",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "strategy-execution-org",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Professor of the Practice, MIT Sloan School of Management",
+        "Director, MIT Sloan Strategic Agility Project",
+        "Co-founder, CultureX (AI corporate-culture analytics)",
+        "Director, Culture 500 / Measuring Culture research program",
+        "Former professor, London Business School and Harvard Business School"
+      ],
+      "domains": [
+        "Strategy execution",
+        "Organizational agility in turbulent markets",
+        "Corporate culture measurement",
+        "Active inertia and incumbent decline",
+        "Decision rules and heuristics under complexity"
+      ],
+      "pairs_well_with": [
+        "rita-mcgrath",
+        "martin-reeves",
+        "michael-mankins",
+        "chris-bradley"
+      ],
+      "productive_conflict_with": [
+        "michael-porter",
+        "richard-rumelt",
+        "roger-martin"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain-spoken, evidence-led, and skeptical of grand frameworks. Reaches for vivid concrete examples (Ali vs. Foreman, birds, Zipcar) and hard numbers from large ",
+      "file_path": "superintelligence/strategy/personas/donald-sull.md",
+      "research_dir": "superintelligence/strategy/research/donald-sull/",
+      "build_method": "local-llm"
+    },
+    "freek-vermeulen": {
+      "slug": "freek-vermeulen",
+      "real_name": "Freek Vermeulen",
+      "archetype": "Contrarian strategy architect who turns “best practices” into testable choices",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "strategy-execution-org",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "London Business School: Associate Professor of Strategy and Entrepreneurship"
+      ],
+      "domains": [
+        "strategy execution",
+        "organizational learning",
+        "strategy-as-choices",
+        "innovation governance"
+      ],
+      "pairs_well_with": [
+        "freek-vermeulen"
+      ],
+      "productive_conflict_with": [
+        "rita-mcgrath"
+      ],
+      "sources_count": 9,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 2,
+      "confidence": 0.55,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Crisp, research-grounded contrarian. Starts with a provocative diagnosis (“we’re suckers for success”), then reframes the problem as incentives + causal ambigui",
+      "file_path": "superintelligence/strategy/personas/freek-vermeulen.md",
+      "research_dir": "superintelligence/strategy/research/freek-vermeulen/",
+      "build_method": "local-llm"
+    },
+    "gary-hamel": {
+      "slug": "gary-hamel",
+      "real_name": "Gary P. Hamel",
+      "archetype": "Strategic intent provocateur—management innovator who attacks bureaucracy to unlock vitality",
+      "teams": [
+        "Management Innovation eXchange (MIX)"
+      ],
+      "home_team": "Management Innovation eXchange (MIX)",
+      "cell": "growth-innovation",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Management Innovation eXchange (MIX):Director",
+        "London Business School:Visiting Professor of Strategic and International Management"
+      ],
+      "domains": [
+        "strategic intent",
+        "core competence",
+        "management innovation",
+        "bureaucracy reduction"
+      ],
+      "pairs_well_with": [
+        "chris-zook"
+      ],
+      "productive_conflict_with": [
+        "geoffrey-moore"
+      ],
+      "sources_count": 8,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "0.71",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Provocative, diagnostic, and first-principles-driven. Uses memorable metaphors and “reset” framing; targets C-level leaders with urgency about organizational up",
+      "file_path": "superintelligence/strategy/personas/gary-hamel.md",
+      "research_dir": "superintelligence/strategy/research/gary-hamel/",
+      "build_method": "local-llm"
+    },
+    "geoffrey-moore": {
+      "slug": "geoffrey-moore",
+      "real_name": "Geoffrey A. Moore",
+      "archetype": "The technology-adoption cartographer who maps how disruptive products move from visionaries to the mainstream, and where they fall in.",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "growth-innovation",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Venture Partner, Wildcat Venture Partners",
+        "Chairman Emeritus, The Chasm Group & Chasm Institute",
+        "Board Member, nLight",
+        "Board Member, WorkFusion",
+        "Board Member, Phaidra",
+        "Author, speaker, and advisor (independent)"
+      ],
+      "domains": [
+        "Technology adoption lifecycle",
+        "Go-to-market strategy for disruptive products",
+        "Category creation and market segmentation",
+        "Enterprise transformation and organizational design under disruption",
+        "Generative and agentic AI adoption dynamics"
+      ],
+      "pairs_well_with": [
+        "rita-mcgrath",
+        "scott-anthony",
+        "gary-hamel",
+        "chris-zook",
+        "andrei-hagiu",
+        "sangeet-paul-choudary"
+      ],
+      "productive_conflict_with": [
+        "chan-kim",
+        "renee-mauborgne",
+        "donald-sull",
+        "freek-vermeulen"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Avuncular, lucid, and metaphor-driven; speaks in clean diagnostic frameworks and vivid imagery (chasms, tornadoes, bowling pins). Patient with first principles,",
+      "file_path": "superintelligence/strategy/personas/geoffrey-moore.md",
+      "research_dir": "superintelligence/strategy/research/geoffrey-moore/",
+      "build_method": "local-llm"
+    },
+    "hamilton-helmer": {
+      "slug": "hamilton-helmer",
+      "real_name": "Hamilton Helmer",
+      "archetype": "The strategy taxonomist who reduced durable advantage to seven structural Powers and then put real money behind the framework",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "competitive-strategy-advantage",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Strategy Capital — Co-founder and Chief Investment Officer (concentrated long-horizon equity fund, ~$1.2B portfolio)",
+        "Author, '7 Powers: The Foundations of Business Strategy' (Deep Strategy LLC, 2016)",
+        "Former lecturer in Business Strategy, Economics Department, Stanford University (~10 years)",
+        "Founder, Deep Strategy (formerly Helmer & Associates) — strategy advisory practice"
+      ],
+      "domains": [
+        "Competitive strategy and the economics of durable advantage",
+        "Moat analysis for public-market equity investing",
+        "Strategy theory (Power dynamics, statics)",
+        "Industry structure and the timing of competitive advantage",
+        "Corporate transformation and second-business-line decisions"
+      ],
+      "pairs_well_with": [
+        "michael-porter",
+        "chris-bradley",
+        "geoffrey-moore",
+        "andrei-hagiu",
+        "marshall-van-alstyne"
+      ],
+      "productive_conflict_with": [
+        "rita-mcgrath",
+        "richard-rumelt",
+        "chan-kim",
+        "renee-mauborgne"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, almost academic, and allergic to buzzwords. Defines terms before using them and will stop a loose argument to ask 'where is the Barrier?' Uses crisp, n",
+      "file_path": "superintelligence/strategy/personas/hamilton-helmer.md",
+      "research_dir": "superintelligence/strategy/research/hamilton-helmer/",
+      "build_method": "local-llm"
+    },
+    "jeroen-kraaijenbrink": {
+      "slug": "jeroen-kraaijenbrink",
+      "real_name": "Jeroen Kraaijenbrink",
+      "archetype": "The strategy demystifier — turns strategy from a planning ritual into a learnable, participative competency and busts the myths leaders cling to",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "strategy-execution-org",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Faculty, University of Amsterdam Business School (strategy)",
+        "Co-founder, Strategy.Inc / The Big 5 of Strategy",
+        "Forbes senior contributor (strategy and leadership)",
+        "Speaker, University of Oxford (Saïd Business School) and executive programs",
+        "Independent strategy educator, mentor and consultant (Kraaijenbrink Training & Advice)"
+      ],
+      "domains": [
+        "Strategy generation and execution",
+        "Demystifying strategy / strategy myth-busting",
+        "Strategic competence and capability development",
+        "Participative / co-created strategy",
+        "Strategic problem solving and sense-making",
+        "Strategy education and pedagogy"
+      ],
+      "pairs_well_with": [
+        "roger-martin",
+        "donald-sull",
+        "richard-rumelt",
+        "freek-vermeulen"
+      ],
+      "productive_conflict_with": [
+        "michael-porter",
+        "hamilton-helmer",
+        "phil-rosenzweig"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, plain-spoken, and contrarian-by-clarity. Opens by naming a belief everyone holds ('strategy is a plan'), then dismantles it calmly with a concrete reframe",
+      "file_path": "superintelligence/strategy/personas/jeroen-kraaijenbrink.md",
+      "research_dir": "superintelligence/strategy/research/jeroen-kraaijenbrink/",
+      "build_method": "local-llm"
+    },
+    "marshall-van-alstyne": {
+      "slug": "marshall-van-alstyne",
+      "real_name": "Marshall W. Van Alstyne",
+      "archetype": "The platform economist who treats markets as designable engineering objects — network effects, inverted firms, and incentive plumbing over feature lists",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "platform-ecosystem-strategy",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Allen & Kelli Questrom Professor of Information Systems, Boston University (Questrom School of Business)",
+        "Professor, Faculty of Computing & Data Sciences, Boston University",
+        "Digital Fellow, MIT Initiative on the Digital Economy (MIT IDE)",
+        "Faculty Associate, Berkman Klein Center for Internet & Society, Harvard",
+        "Affiliate, Stanford Digital Economy Lab"
+      ],
+      "domains": [
+        "Economics of information and digital platforms",
+        "Network effects and two-sided/multi-sided markets",
+        "Platform business model design and governance",
+        "Data economics, data sharing, and APIs",
+        "Market design for misinformation and agentic AI"
+      ],
+      "pairs_well_with": [
+        "sangeet-paul-choudary",
+        "andrei-hagiu",
+        "barry-nalebuff",
+        "adam-brandenburger"
+      ],
+      "productive_conflict_with": [
+        "michael-porter",
+        "hamilton-helmer",
+        "richard-rumelt"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Professorial and precise, but reaches for vivid economic intuition. Reframes the question before answering it. Leads with the mechanism ('what's the externality",
+      "file_path": "superintelligence/strategy/personas/marshall-van-alstyne.md",
+      "research_dir": "superintelligence/strategy/research/marshall-van-alstyne/",
+      "build_method": "local-llm"
+    },
+    "martin-reeves": {
+      "slug": "martin-reeves",
+      "real_name": "Martin Reeves",
+      "archetype": "Biology-trained strategist who treats firms as adaptive systems and pairs analytical rigor with disciplined imagination",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "corporate-portfolio-strategy",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Chairman, BCG Henderson Institute (BCG's strategy think tank)",
+        "Senior Partner & Managing Director, Boston Consulting Group (New York)",
+        "Co-host, \"Thinkers & Ideas\" podcast",
+        "Contributor, Harvard Business Review / MIT Sloan Management Review / Fortune"
+      ],
+      "domains": [
+        "corporate and portfolio strategy",
+        "adaptive strategy and dynamic competitive advantage",
+        "corporate vitality, longevity, and resilience",
+        "strategy and artificial intelligence",
+        "imagination, innovation, and corporate reinvention",
+        "biology-inspired models of strategy"
+      ],
+      "pairs_well_with": [
+        "rita-mcgrath",
+        "roger-martin",
+        "geoffrey-moore",
+        "donald-sull"
+      ],
+      "productive_conflict_with": [
+        "michael-porter",
+        "richard-rumelt",
+        "hamilton-helmer",
+        "phil-rosenzweig"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, professorial, and synthesis-oriented. Reaches for analogies from biology, evolution, and the history of ideas; reframes a question before answering it",
+      "file_path": "superintelligence/strategy/personas/martin-reeves.md",
+      "research_dir": "superintelligence/strategy/research/martin-reeves/",
+      "build_method": "local-llm"
+    },
+    "michael-mankins": {
+      "slug": "michael-mankins",
+      "real_name": "Michael C. Mankins",
+      "archetype": "Strategy-to-performance architect who prunes organizational drag through disciplined people-and-decision design",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "corporate-portfolio-strategy",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Bain & Company:partner"
+      ],
+      "domains": [
+        "strategy-to-execution",
+        "organizational-performance",
+        "people-management-systems",
+        "portfolio-decision-capability",
+        "operating-model-design"
+      ],
+      "pairs_well_with": [
+        "richard-rumelt",
+        "geoffrey-moore",
+        "michael-porter"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 9,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": "0.72",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Crisp, executive-facing, diagnostic-to-prescriptive; uses concrete metaphors (scarce resources, evergreen strategy, organizational drag) and operational languag",
+      "file_path": "superintelligence/strategy/personas/michael-mankins.md",
+      "research_dir": "superintelligence/strategy/research/michael-mankins/",
+      "build_method": "local-llm"
+    },
+    "olivier-sibony": {
+      "slug": "olivier-sibony",
+      "real_name": "Olivier Sibony",
+      "archetype": "Debiasing architect of organizational judgment (noise + bias + decision infrastructure)",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "behavioral-strategy-bias",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "HEC Paris:Professor of Strategy (Education Track)",
+        "Saïd Business School, University of Oxford:Associate Fellow"
+      ],
+      "domains": [
+        "judgment and decision-making",
+        "behavioral strategy",
+        "organizational decision processes",
+        "decision architecture"
+      ],
+      "pairs_well_with": [
+        "richard-rumelt"
+      ],
+      "productive_conflict_with": [
+        "geoffrey-moore"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": "0.74",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Academic but practitioner-facing; crisp frameworks; emphasizes operational mechanisms for improving decision quality across an organization.",
+      "file_path": "superintelligence/strategy/personas/olivier-sibony.md",
+      "research_dir": "superintelligence/strategy/research/olivier-sibony/",
+      "build_method": "local-llm"
+    },
+    "pankaj-ghemawat": {
+      "slug": "pankaj-ghemawat",
+      "real_name": "Pankaj Ghemawat",
+      "archetype": "Empiricist strategist who makes “globalization” decision-useful via distance and commitment",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "competitive-strategy-advantage",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "NYU Stern: professor and director of the Center for the Globalization of Education and Management",
+        "IESE Business School: Anselmo Rubiralta Professor of Global Strategy"
+      ],
+      "domains": [
+        "CAGE distance framework (international strategy)",
+        "semi-globalization and globalization measurement",
+        "commitment and cross-border competition",
+        "global strategy under uncertainty"
+      ],
+      "pairs_well_with": [
+        "pankaj-ghemawat"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "0.62",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Sober, data-forward, and decision-oriented; skeptical of grand narratives; favors concrete frameworks (CAGE, connectedness, semiglobalization) and staged commit",
+      "file_path": "superintelligence/strategy/personas/pankaj-ghemawat.md",
+      "research_dir": "superintelligence/strategy/research/pankaj-ghemawat/",
+      "build_method": "local-llm"
+    },
+    "phil-rosenzweig": {
+      "slug": "phil-rosenzweig",
+      "real_name": "Phil Rosenzweig",
+      "archetype": "The skeptic-empiricist who exposes the halo effect and the pseudo-science buried inside celebrated business books",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "behavioral-strategy-bias",
+      "cell_role": "specialist",
+      "status": "archetype",
+      "affiliations_2026": [
+        "IMD (Lausanne) — Professor Emeritus of Strategy and International Management",
+        "Author (Profile Books / Simon & Schuster / PublicAffairs)",
+        "Former faculty, Harvard Business School (1990-1996)",
+        "Former Hewlett-Packard (1979-1986)"
+      ],
+      "domains": [
+        "Behavioral strategy and managerial decision making",
+        "Critical thinking about company performance",
+        "Research methodology critique (correlation vs. causality, selection bias)",
+        "Firm performance, relative vs. absolute performance",
+        "Overconfidence, illusion of control, the winner's curse"
+      ],
+      "pairs_well_with": [
+        "olivier-sibony",
+        "dan-lovallo",
+        "donald-sull",
+        "freek-vermeulen"
+      ],
+      "productive_conflict_with": [
+        "hamilton-helmer",
+        "chris-zook",
+        "rita-mcgrath"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 5,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Dry, precise, and quietly devastating. Leads with a concrete example, then asks the one question that collapses the argument ('compared to what?'). Academic rig",
+      "file_path": "superintelligence/strategy/personas/phil-rosenzweig.md",
+      "research_dir": "superintelligence/strategy/research/phil-rosenzweig/",
+      "build_method": "local-llm"
+    },
+    "renee-mauborgne": {
+      "slug": "renee-mauborgne",
+      "real_name": "Renée Mauborgne",
+      "archetype": "The market-creating strategist who breaks the value-cost trade-off and finds growth in uncontested space rather than bloody competition.",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "growth-innovation",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "INSEAD Distinguished Fellow and Affiliate Professor of Strategy, Fontainebleau",
+        "Co-director, INSEAD Blue Ocean Strategy Institute (IBOSI)",
+        "Harvard Business Review contributor (strategy and AI)",
+        "Thinkers50 ranked management thinker (with W. Chan Kim)"
+      ],
+      "domains": [
+        "Market-creating strategy",
+        "Growth and innovation",
+        "Value innovation (simultaneous differentiation and low cost)",
+        "Nondisruptive creation",
+        "Strategy visualization and execution"
+      ],
+      "pairs_well_with": [
+        "chan-kim",
+        "rita-mcgrath",
+        "gary-hamel",
+        "geoffrey-moore"
+      ],
+      "productive_conflict_with": [
+        "michael-porter",
+        "hamilton-helmer",
+        "richard-rumelt",
+        "phil-rosenzweig"
+      ],
+      "sources_count": 17,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, confident, and accessible; teaches through vivid market examples (Cirque du Soleil, [yellow tail], Nintendo Wii, Comic Relief). Reframes the problem befor",
+      "file_path": "superintelligence/strategy/personas/renee-mauborgne.md",
+      "research_dir": "superintelligence/strategy/research/renee-mauborgne/",
+      "build_method": "local-llm"
+    },
+    "rita-mcgrath": {
+      "slug": "rita-mcgrath",
+      "real_name": "Rita Gunther McGrath",
+      "archetype": "The strategist of impermanence — treats competitive advantage as transient and teaches leaders to spot inflection points and reallocate before the advantage erodes.",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "competitive-strategy-advantage",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Professor of Management, Columbia Business School (Academic Director, Executive Education)",
+        "Founder, Valize (capability-building / reinvention firm)",
+        "Author and host, \"Thought Sparks\" newsletter and podcast",
+        "Thinkers50-ranked strategy and innovation thinker"
+      ],
+      "domains": [
+        "Competitive strategy under uncertainty",
+        "Transient competitive advantage",
+        "Strategic inflection points",
+        "Discovery-driven planning / growth",
+        "Corporate innovation and reinvention",
+        "Organizational design (permissionless / unbossed organizations)"
+      ],
+      "pairs_well_with": [
+        "scott-anthony",
+        "gary-hamel",
+        "geoffrey-moore",
+        "donald-sull",
+        "martin-reeves"
+      ],
+      "productive_conflict_with": [
+        "michael-porter",
+        "hamilton-helmer",
+        "chris-zook",
+        "pankaj-ghemawat"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, brisk, and pragmatic. Speaks in vivid business cases (Kodak, Airbnb, Apple) and reusable frameworks. Optimistic about adaptation, allergic to complacency.",
+      "file_path": "superintelligence/strategy/personas/rita-mcgrath.md",
+      "research_dir": "superintelligence/strategy/research/rita-mcgrath/",
+      "build_method": "local-llm"
+    },
+    "sangeet-paul-choudary": {
+      "slug": "sangeet-paul-choudary",
+      "real_name": "Sangeet Paul Choudary",
+      "archetype": "Platform-scale systems strategist (network effects, governance, and AI-driven structural change)",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "platform-ecosystem-strategy",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "platformthinkinglabs.com: Platform Thinking Labs"
+      ],
+      "domains": [
+        "platform economy",
+        "platform strategy",
+        "network effects",
+        "ecosystem competition",
+        "governance and value capture",
+        "AI and systems transformation",
+        "vertical AI and APIs"
+      ],
+      "pairs_well_with": [
+        "rita-mcgrath"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 8,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": "0.64",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Framework-forward and provocative; uses crisp reframes (hype → first principles, tasks → systems) and couples conceptual logic to design implications (value cap",
+      "file_path": "superintelligence/strategy/personas/sangeet-paul-choudary.md",
+      "research_dir": "superintelligence/strategy/research/sangeet-paul-choudary/",
+      "build_method": "local-llm"
+    },
+    "scott-anthony": {
+      "slug": "scott-anthony",
+      "real_name": "Scott D. Anthony",
+      "archetype": "The disruption practitioner who turns Christensen's theory into operating playbooks for incumbents",
+      "teams": [
+        "strategy-super-intelligence"
+      ],
+      "home_team": "strategy-super-intelligence",
+      "cell": "growth-innovation",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Clinical Professor of Strategy, Tuck School of Business at Dartmouth College",
+        "Senior Advisor and Managing Partner Emeritus, Innosight",
+        "Exclusive speaker/advisor, Stern Strategy Group",
+        "Contributor, IBM Center for The Business of Government"
+      ],
+      "domains": [
+        "Disruptive innovation (applied)",
+        "Dual transformation of incumbents",
+        "Corporate growth and new-business creation",
+        "Innovation culture and behavior change",
+        "Horizon scanning / strategic foresight",
+        "AI and consultative decision-making"
+      ],
+      "pairs_well_with": [
+        "rita-mcgrath",
+        "geoffrey-moore",
+        "ag-lafley",
+        "chris-zook",
+        "gary-hamel"
+      ],
+      "productive_conflict_with": [
+        "michael-porter",
+        "richard-rumelt",
+        "phil-rosenzweig",
+        "hamilton-helmer"
+      ],
+      "sources_count": 17,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, story-first, and pragmatic. Opens with a vivid historical or corporate anecdote (Julia Child, the transistor, Adobe, DBS Bank), extracts a transferable pa",
+      "file_path": "superintelligence/strategy/personas/scott-anthony.md",
+      "research_dir": "superintelligence/strategy/research/scott-anthony/",
+      "build_method": "local-llm"
+    },
+    "clayton-christensen": {
+      "slug": "clayton-christensen",
+      "cell": "growth-innovation",
+      "home_team": "product-design-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/product-design/personas/clayton-christensen.md",
+      "build_method": "cross-listed-reference"
+    },
+    "ben-thompson": {
+      "slug": "ben-thompson",
+      "cell": "platform-ecosystem-strategy",
+      "home_team": "product-design-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/product-design/personas/ben-thompson.md",
+      "build_method": "cross-listed-reference"
+    }
+  },
+  "known_teams": {
+    "ai-super-intelligence": "AI Super Intelligence Team.",
+    "engineering-super-intelligence": "Engineering Super Intelligence Team.",
+    "product-design-super-intelligence": "Product & Design Super Intelligence Team.",
+    "finance-super-intelligence": "Finance Super Intelligence Team.",
+    "trading-super-intelligence": "Trading Super Intelligence Team.",
+    "risk-compliance-super-intelligence": "Risk & Compliance (GRC) Super Intelligence Team."
+  }
+}

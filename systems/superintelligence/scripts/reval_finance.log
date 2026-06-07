@@ -1,0 +1,75 @@
+WARN: skipping claudia-sahm.md: while parsing a block collection
+  in "<unicode string>", line 30, column 3:
+      - "Direct Stimulus Payments to I ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 30, column 47:
+     ... imulus Payments to Individuals" chapter in "Recession Ready" (Ha ... 
+                                         ^
+WARN: skipping frank-rotman.md: while parsing a block collection
+  in "<unicode string>", line 27, column 3:
+      - "The Copernican Revolution in  ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 27, column 44:
+     ... pernican Revolution in Banking" (QED publication / presentation)
+                                         ^
+WARN: skipping glenn-hopper.md: while parsing a block collection
+  in "<unicode string>", line 25, column 3:
+      - Insists on data readiness as t ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 28, column 24:
+      - "Trust but verify" posture toward AI-generated anal ... 
+                           ^
+WARN: skipping howard-marks.md: while parsing a block collection
+  in "<unicode string>", line 27, column 3:
+      - "The Most Important Thing: Unc ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 27, column 76:
+     ... se for the Thoughtful Investor" (2011)
+                                         ^
+WARN: skipping jack-mccullough.md: while parsing a block collection
+  in "<unicode string>", line 30, column 3:
+      - "Secrets of Rockstar CFOs" (20 ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 30, column 32:
+      - "Secrets of Rockstar CFOs" (2019) — traits common to elite  ... 
+                                   ^
+WARN: skipping ludovic-phalippou.md: while parsing a block collection
+  in "<unicode string>", line 28, column 3:
+      - "Private Equity Laid Bare" (bo ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 28, column 32:
+      - "Private Equity Laid Bare" (book, self-published, multiple  ... 
+                                   ^
+WARN: skipping matt-harris.md: while parsing a block collection
+  in "<unicode string>", line 30, column 3:
+      - "Fintech: The Fourth Platform" ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 30, column 36:
+      - "Fintech: The Fourth Platform" (two-part essay, 2019) — the the ... 
+                                       ^
+WARN: skipping michael-mauboussin.md: while parsing a block collection
+  in "<unicode string>", line 30, column 3:
+      - "Expectations Investing: Readi ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 30, column 71:
+     ... tock Prices for Better Returns" (with Alfred Rappaport, revised  ... 
+                                         ^
+Wrote /Users/Rijul_Kalra/projects/coco-platform/superintelligence/finance/registry.json (39 personas, 7 cells).
+  wrote cells/valuation-corporate-finance.md (6 personas, 3 tensions)
+  wrote cells/investing-capital-allocation.md (7 personas, 7 tensions)
+  wrote cells/accounting-fpa-reporting.md (4 personas, 0 tensions)
+  wrote cells/macro-economics.md (7 personas, 8 tensions)
+  wrote cells/fintech-payments.md (5 personas, 0 tensions)
+  wrote cells/behavioral-decision-science.md (6 personas, 0 tensions)
+  wrote cells/capital-markets-ma-private.md (4 personas, 0 tensions)
+Wrote 7 cell docs.
+finance: 25/47 PASS, 22 NEEDS-TOPUP -> /Users/Rijul_Kalra/projects/coco-platform/superintelligence/finance/VALIDATION.md
+NEEDS-TOPUP: bennett-stewart cathie-wood claudia-sahm daniel-kahneman edward-altman frank-rotman glenn-hopper howard-marks howard-schilit jack-mccullough joel-greenblatt joseph-wang ludovic-phalippou matt-harris meir-statman michael-mauboussin nouriel-roubini pablo-fernandez paul-barnhurst simon-taylor steve-kaplan tim-koller

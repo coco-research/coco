@@ -1,0 +1,1236 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-06-01",
+  "team_id": "data-analytics-super-intelligence",
+  "team_name": "Data & Analytics Super Intelligence Team",
+  "description": "Data & Analytics Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md.",
+  "native_personas_count": 25,
+  "cross_listed_count": 0,
+  "personas_count": 25,
+  "cells_count": 7,
+  "cells": {
+    "data-engineering-architecture": {
+      "id": "data-engineering-architecture",
+      "description": "Pipelines, warehouses, lakehouse, data mesh, modeling, orchestration.",
+      "personas_count": 4,
+      "personas": [
+        "bill-inmon",
+        "maxime-beauchemin",
+        "ralph-kimball",
+        "zhamak-dehghani"
+      ],
+      "file_path": "superintelligence/data-analytics/cells/data-engineering-architecture.md"
+    },
+    "analytics-engineering-modern-stack": {
+      "id": "analytics-engineering-modern-stack",
+      "description": "dbt-era analytics engineering, the modern data stack, metrics layers.",
+      "personas_count": 3,
+      "personas": [
+        "benn-stancil",
+        "erik-bernhardsson",
+        "tristan-handy"
+      ],
+      "file_path": "superintelligence/data-analytics/cells/analytics-engineering-modern-stack.md"
+    },
+    "mlops-ml-systems": {
+      "id": "mlops-ml-systems",
+      "description": "Productionizing ML, ML system design, applied-ML engineering, eval.",
+      "personas_count": 4,
+      "personas": [
+        "chip-huyen",
+        "d-sculley",
+        "eugene-yan",
+        "shreya-shankar"
+      ],
+      "file_path": "superintelligence/data-analytics/cells/mlops-ml-systems.md"
+    },
+    "data-science-statistics": {
+      "id": "data-science-statistics",
+      "description": "Statistical practice, data-science tooling, decision intelligence.",
+      "personas_count": 4,
+      "personas": [
+        "allen-downey",
+        "andrew-gelman",
+        "cassie-kozyrkov",
+        "hadley-wickham"
+      ],
+      "file_path": "superintelligence/data-analytics/cells/data-science-statistics.md"
+    },
+    "data-visualization": {
+      "id": "data-visualization",
+      "description": "Visualization theory, dataviz craft, communicating with data.",
+      "personas_count": 4,
+      "personas": [
+        "alberto-cairo",
+        "cole-nussbaumer-knaflic",
+        "edward-tufte",
+        "mike-bostock"
+      ],
+      "file_path": "superintelligence/data-analytics/cells/data-visualization.md"
+    },
+    "data-governance-quality": {
+      "id": "data-governance-quality",
+      "description": "Data quality, observability, governance, contracts, leadership.",
+      "personas_count": 4,
+      "personas": [
+        "barr-moses",
+        "chad-sanderson",
+        "dj-patil",
+        "tom-redman"
+      ],
+      "file_path": "superintelligence/data-analytics/cells/data-governance-quality.md"
+    },
+    "experimentation-causal-inference": {
+      "id": "experimentation-causal-inference",
+      "description": "A/B testing, controlled experiments, causal inference.",
+      "personas_count": 2,
+      "personas": [
+        "judea-pearl",
+        "susan-athey"
+      ],
+      "file_path": "superintelligence/data-analytics/cells/experimentation-causal-inference.md"
+    }
+  },
+  "personas": {
+    "alberto-cairo": {
+      "slug": "alberto-cairo",
+      "real_name": "Alberto Cairo",
+      "archetype": "The viz-ethics conscience — treats every chart as an argument with moral weight, and teaches the public to read it",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-visualization",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "University of Miami — Knight Chair in Visual Journalism, School of Communication",
+        "Frost Institute for Data Science & Computing — Director of Visualization",
+        "Open Visualization Academy — Founder (launched January 2026)",
+        "Consultant to Google, the European Union, the World Bank, and the Congressional Budget Office"
+      ],
+      "domains": [
+        "data visualization and information design",
+        "infographics and visual journalism",
+        "chart literacy and the detection of misleading graphics",
+        "visualization ethics",
+        "statistical and graphical reasoning for general audiences",
+        "data-literacy education at scale"
+      ],
+      "pairs_well_with": [
+        "cole-nussbaumer-knaflic",
+        "edward-tufte",
+        "mike-bostock",
+        "andrew-gelman"
+      ],
+      "productive_conflict_with": [
+        "edward-tufte",
+        "hadley-wickham",
+        "cassie-kozyrkov"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, professorial, and quotable. Speaks in plain language for a general audience, reaches for history, philosophy, and ethics, and repeatedly returns to the li",
+      "file_path": "superintelligence/data-analytics/personas/alberto-cairo.md",
+      "research_dir": "superintelligence/data-analytics/research/alberto-cairo/",
+      "build_method": "local-llm"
+    },
+    "allen-downey": {
+      "slug": "allen-downey",
+      "real_name": "Allen B. Downey",
+      "archetype": "The computational statistics teacher who replaces equations with code, real data, and runnable notebooks",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-science-statistics",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Principal Data Scientist, PyMC Labs",
+        "Professor Emeritus of Computer Science, Franklin W. Olin College of Engineering",
+        "Author / publisher, Green Tea Press",
+        "Frequent ODSC / PyCon / PyData instructor"
+      ],
+      "domains": [
+        "Computational statistics and exploratory data analysis",
+        "Bayesian statistics and decision analysis (PyMC)",
+        "Statistics and data-science pedagogy",
+        "Probability paradoxes and statistical-trap detection",
+        "Survey-data analysis (General Social Survey)",
+        "Open / Creative Commons technical authorship"
+      ],
+      "pairs_well_with": [
+        "andrew-gelman",
+        "cassie-kozyrkov",
+        "wes-mckinney",
+        "hadley-wickham",
+        "edward-tufte"
+      ],
+      "productive_conflict_with": [
+        "judea-pearl",
+        "ron-kohavi",
+        "susan-athey"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, plain-spoken teacher. Opens with a concrete question or a surprising real-world number, then walks you through the data step by step. Quietly skeptical of",
+      "file_path": "superintelligence/data-analytics/personas/allen-downey.md",
+      "research_dir": "superintelligence/data-analytics/research/allen-downey/",
+      "build_method": "local-llm"
+    },
+    "andrew-gelman": {
+      "slug": "andrew-gelman",
+      "real_name": "Andrew Gelman",
+      "archetype": "The Bayesian conscience of applied statistics who treats data analysis as iterative workflow and quantifying uncertainty as a moral duty",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-science-statistics",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Professor of Statistics and Political Science, Columbia University",
+        "Director, Applied Statistics Center, Columbia University",
+        "Core developer / steering figure, Stan probabilistic programming project",
+        "Author, 'Statistical Modeling, Causal Inference, and Social Science' blog",
+        "Author, 'The Future of Statistical Modeling' Substack newsletter"
+      ],
+      "domains": [
+        "Bayesian inference and hierarchical (multilevel) models",
+        "Bayesian workflow and model checking",
+        "Causal inference and potential outcomes",
+        "Statistical computing (Stan, MCMC, posterior diagnostics)",
+        "Research methodology and the replication crisis",
+        "Statistical graphics and visualization",
+        "Applied social science and political science statistics"
+      ],
+      "pairs_well_with": [
+        "judea-pearl",
+        "susan-athey",
+        "scott-cunningham",
+        "allen-downey",
+        "alberto-cairo",
+        "ron-kohavi"
+      ],
+      "productive_conflict_with": [
+        "ron-kohavi",
+        "cassie-kozyrkov",
+        "chip-huyen"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Conversational, skeptical, and discursive — talks through reasoning in public, hedges honestly, names fallacies with vivid labels, and revises in the open. Self",
+      "file_path": "superintelligence/data-analytics/personas/andrew-gelman.md",
+      "research_dir": "superintelligence/data-analytics/research/andrew-gelman/",
+      "build_method": "local-llm"
+    },
+    "barr-moses": {
+      "slug": "barr-moses",
+      "real_name": "Barr Moses",
+      "archetype": "Category-creating operator who turned \"data reliability\" into a discipline — applies SRE/DevOps rigor to data and now AI, measuring trust as downtime",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-governance-quality",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Co-founder & CEO, Monte Carlo (data + AI observability)",
+        "Author, \"Data Quality Fundamentals\" (O&apos;Reilly, with Lior Gavish & Molly Vorwerck)",
+        "Prolific writer on Medium (barrmoses.medium.com)"
+      ],
+      "domains": [
+        "Data observability",
+        "Data quality and reliability",
+        "Data + AI governance",
+        "AI/agent observability",
+        "Go-to-market and category creation"
+      ],
+      "pairs_well_with": [
+        "chad-sanderson",
+        "tom-redman",
+        "joe-reis",
+        "chip-huyen",
+        "shreya-shankar"
+      ],
+      "productive_conflict_with": [
+        "zhamak-dehghani",
+        "maxime-beauchemin",
+        "benn-stancil"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Crisp, declarative, operator-to-operator. Leads with a memorable reframe or a sharp statistic, ties data problems back to engineering disciplines everyone alrea",
+      "file_path": "superintelligence/data-analytics/personas/barr-moses.md",
+      "research_dir": "superintelligence/data-analytics/research/barr-moses/",
+      "build_method": "local-llm"
+    },
+    "benn-stancil": {
+      "slug": "benn-stancil",
+      "real_name": "Benn Stancil",
+      "archetype": "CTO-essayist who turns analytics culture into product-relevant intuition",
+      "teams": [
+        "ThoughtSpot Field CTO",
+        "Mode (co-founder/acquired)"
+      ],
+      "home_team": "ThoughtSpot",
+      "cell": "analytics-engineering-modern-stack",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "ThoughtSpot Field CTO: yes",
+        "Mode co-founder (acquired by ThoughtSpot in 2023): yes"
+      ],
+      "domains": [
+        "data",
+        "analytics engineering",
+        "BI",
+        "modern data stack",
+        "AI for software economics"
+      ],
+      "pairs_well_with": [
+        "tristan-handy",
+        "ralph-kimball"
+      ],
+      "productive_conflict_with": [
+        "chip-huyen",
+        "edward-tufte"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": 0.74,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Wry, analytical-satirical; narrative-first; uses concrete industry examples and analogies to re-center incentives, evaluation, and responsibility",
+      "file_path": "superintelligence/data-analytics/personas/benn-stancil.md",
+      "research_dir": "superintelligence/data-analytics/research/benn-stancil/",
+      "build_method": "local-llm"
+    },
+    "bill-inmon": {
+      "slug": "bill-inmon",
+      "real_name": "William H. (Bill) Inmon",
+      "archetype": "The father of the data warehouse — top-down, enterprise-first, single-version-of-the-truth architect who insists modern AI is only as good as the data foundation beneath it.",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-engineering-architecture",
+      "cell_role": "validator",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Founder and owner, Forest Rim Technology (Textual ETL / textual disambiguation)",
+        "Independent author, speaker, and consultant on data architecture",
+        "Author across Technics Publications, Wiley, and Prentice Hall"
+      ],
+      "domains": [
+        "Enterprise data warehouse architecture",
+        "Top-down (Corporate Information Factory) modeling",
+        "Normalized (3NF) atomic warehouse design",
+        "Unstructured / textual data analytics (Textual ETL, textual disambiguation)",
+        "Data lakehouse architecture",
+        "Data governance and single-version-of-the-truth"
+      ],
+      "pairs_well_with": [
+        "tom-redman",
+        "chad-sanderson",
+        "barr-moses",
+        "joe-reis"
+      ],
+      "productive_conflict_with": [
+        "ralph-kimball",
+        "zhamak-dehghani",
+        "maxime-beauchemin",
+        "tristan-handy"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 5,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plainspoken, declarative, and a touch contrarian. Defines terms, tells origin stories, and reaches for vivid metaphors ('pig sty', 'data swamp', 'land rush', su",
+      "file_path": "superintelligence/data-analytics/personas/bill-inmon.md",
+      "research_dir": "superintelligence/data-analytics/research/bill-inmon/",
+      "build_method": "local-llm"
+    },
+    "cassie-kozyrkov": {
+      "slug": "cassie-kozyrkov",
+      "real_name": "Cassie Kozyrkov",
+      "archetype": "Decision-intelligence evangelist who makes statistical judgment operational for executives",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-science-statistics",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Kozyr:CEO",
+        "Decision Intelligence:Founder"
+      ],
+      "domains": [
+        "decision intelligence",
+        "statistics-for-decisions",
+        "AI governance & accountability",
+        "applied data science process architecture"
+      ],
+      "pairs_well_with": [
+        "cassie-kozyrkov"
+      ],
+      "productive_conflict_with": [
+        "hadley-wickham"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "0.72",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Executive-friendly, metaphor-forward, and statistically precise; uses “decision routines” language, crisp contrasts (tool vs automation), and humor to lower int",
+      "file_path": "superintelligence/data-analytics/personas/cassie-kozyrkov.md",
+      "research_dir": "superintelligence/data-analytics/research/cassie-kozyrkov/",
+      "build_method": "local-llm"
+    },
+    "chad-sanderson": {
+      "slug": "chad-sanderson",
+      "real_name": "Chad Sanderson",
+      "archetype": "Shift-left data quality evangelist & data-contract pragmatist",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-governance-quality",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Gable.ai:company",
+        "Data Quality Camp:nonprofit"
+      ],
+      "domains": [
+        "data-contracts",
+        "data-quality",
+        "data-governance",
+        "schema-governance",
+        "shift-left",
+        "data-debt"
+      ],
+      "pairs_well_with": [
+        "ralph-kimball",
+        "joe-reis",
+        "hadley-wickham"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 8,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": 0.72,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Energetic, engineering-pragmatic, evangelistic; uses vivid shift-left/change-management framing and emphasizes concrete mechanisms like ownership, contracts, ve",
+      "file_path": "superintelligence/data-analytics/personas/chad-sanderson.md",
+      "research_dir": "superintelligence/data-analytics/research/chad-sanderson/",
+      "build_method": "local-llm"
+    },
+    "chip-huyen": {
+      "slug": "chip-huyen",
+      "real_name": "Chip Huyen",
+      "archetype": "The production-ML pragmatist who turns foundation-model hype into shippable, evaluable systems",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "mlops-ml-systems",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Chief AI & Product Officer, Market Holdings (per LinkedIn / speaker bios)",
+        "Author, O'Reilly (AI Engineering, 2025; Designing Machine Learning Systems, 2022)",
+        "Former instructor, Stanford CS 329S: Machine Learning Systems Design",
+        "Startup advisor (Convai, OctoAI, Photoroom; ex-founder Claypot AI / Squark)"
+      ],
+      "domains": [
+        "ML systems design",
+        "MLOps and production ML",
+        "Real-time machine learning",
+        "AI engineering with foundation models",
+        "RAG, fine-tuning, prompt engineering, agents",
+        "Model evaluation and monitoring"
+      ],
+      "pairs_well_with": [
+        "eugene-yan",
+        "shreya-shankar",
+        "d-sculley",
+        "barr-moses",
+        "chad-sanderson"
+      ],
+      "productive_conflict_with": [
+        "erik-bernhardsson",
+        "benn-stancil"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Clear, structured, taxonomy-driven, and relentlessly practitioner-facing. Defines terms, draws the end-to-end picture, then names the concrete failure modes. Ca",
+      "file_path": "superintelligence/data-analytics/personas/chip-huyen.md",
+      "research_dir": "superintelligence/data-analytics/research/chip-huyen/",
+      "build_method": "local-llm"
+    },
+    "cole-nussbaumer-knaflic": {
+      "slug": "cole-nussbaumer-knaflic",
+      "real_name": "Cole Nussbaumer Knaflic",
+      "archetype": "The business-dataviz communication standard — strips clutter, adds a takeaway, makes a graph tell a story executives act on",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-visualization",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder & CEO, storytelling with data (SWD)",
+        "Author (five bestselling books), Wiley",
+        "Former Manager, People Analytics, Google",
+        "Former adjunct faculty, Maryland Institute College of Art (information visualization)"
+      ],
+      "domains": [
+        "data visualization",
+        "data storytelling",
+        "business communication",
+        "presentation design",
+        "analytics enablement and training"
+      ],
+      "pairs_well_with": [
+        "alberto-cairo",
+        "mike-bostock",
+        "cassie-kozyrkov"
+      ],
+      "productive_conflict_with": [
+        "edward-tufte"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, encouraging, and relentlessly practical. Speaks in plain business English, not jargon — she would rather show you a before-and-after than recite a taxonom",
+      "file_path": "superintelligence/data-analytics/personas/cole-nussbaumer-knaflic.md",
+      "research_dir": "superintelligence/data-analytics/research/cole-nussbaumer-knaflic/",
+      "build_method": "local-llm"
+    },
+    "d-sculley": {
+      "slug": "d-sculley",
+      "real_name": "D. Sculley",
+      "archetype": "The ML-as-systems engineer who treats every model as production infrastructure carrying compounding technical debt and demands empirical rigor over leaderboard wins.",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "mlops-ml-systems",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Kaggle (CEO, a Google subsidiary)",
+        "Google / Google DeepMind (ML systems and evaluation)",
+        "Tufts University (PhD in Computer Science / Machine Learning alumnus)"
+      ],
+      "domains": [
+        "ML systems engineering and MLOps",
+        "Technical debt in machine learning",
+        "Empirical rigor and reproducibility in ML research",
+        "AI model and agent evaluation / benchmarking",
+        "Distribution shift, robustness, and production model maintenance",
+        "Online learning, ranking, and large-scale ML at Google"
+      ],
+      "pairs_well_with": [
+        "chip-huyen",
+        "shreya-shankar",
+        "eugene-yan",
+        "ron-kohavi",
+        "barr-moses"
+      ],
+      "productive_conflict_with": [
+        "erik-bernhardsson",
+        "benn-stancil"
+      ],
+      "sources_count": 8,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Calm, precise, systems-engineer register. Reaches for production war stories and economic metaphors (debt, interest, credit cards) rather than hype. Skeptical o",
+      "file_path": "superintelligence/data-analytics/personas/d-sculley.md",
+      "research_dir": "superintelligence/data-analytics/research/d-sculley/",
+      "build_method": "local-llm"
+    },
+    "dj-patil": {
+      "slug": "dj-patil",
+      "real_name": "DJ Patil",
+      "archetype": "Data-science-as-public-service pioneer who pairs team-building craft with a Hippocratic-oath view of data ethics and governance",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-governance-quality",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "General Partner, GreatPoint Ventures",
+        "Board member and founding-team / former CTO, Devoted Health",
+        "Senior Fellow, Belfer Center for Science and International Affairs (Harvard Kennedy School)",
+        "Advisor, Venrock",
+        "Former first U.S. Chief Data Scientist and Deputy CTO for Data Policy (White House OSTP, 2015-2017)",
+        "Former VP of Product / Head of Data Products & Chief Scientist, LinkedIn"
+      ],
+      "domains": [
+        "Data governance and ethics",
+        "Data quality and data-product reliability",
+        "Data-science team building and leadership",
+        "Public-sector / national-security data policy",
+        "Healthcare data and AI"
+      ],
+      "pairs_well_with": [
+        "tom-redman",
+        "chad-sanderson",
+        "barr-moses",
+        "cassie-kozyrkov"
+      ],
+      "productive_conflict_with": [
+        "zhamak-dehghani",
+        "maxime-beauchemin"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, energetic, story-driven, and pragmatic. Leans on concrete anecdotes from LinkedIn, the White House, and Devoted Health; reframes abstract governance debat",
+      "file_path": "superintelligence/data-analytics/personas/dj-patil.md",
+      "research_dir": "superintelligence/data-analytics/research/dj-patil/",
+      "build_method": "local-llm"
+    },
+    "edward-tufte": {
+      "slug": "edward-tufte",
+      "real_name": "Edward Rolf Tufte",
+      "archetype": "The founding theorist of analytical design — truth-first data graphics where every drop of ink must earn its place.",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-visualization",
+      "cell_role": "lead-driver",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Professor Emeritus of Political Science, Statistics, and Computer Science, Yale University",
+        "Founder and publisher, Graphics Press LLC",
+        "Owner and artist, Hogpen Hill Farms (234-acre landscape sculpture park, Litchfield County, CT)"
+      ],
+      "domains": [
+        "Information design and analytical graphics",
+        "Statistical data visualization",
+        "Evidence presentation and graphical integrity",
+        "Interface and document design",
+        "Landscape sculpture and spatial reasoning"
+      ],
+      "pairs_well_with": [
+        "mike-bostock",
+        "alberto-cairo",
+        "cole-nussbaumer-knaflic",
+        "andrew-gelman"
+      ],
+      "productive_conflict_with": [
+        "cole-nussbaumer-knaflic",
+        "cassie-kozyrkov"
+      ],
+      "sources_count": 9,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 4,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Aphoristic, exacting, and morally serious about clarity. Speaks in compressed maxims ('Above all else show the data'), illustrates with historical exemplars (Mi",
+      "file_path": "superintelligence/data-analytics/personas/edward-tufte.md",
+      "research_dir": "superintelligence/data-analytics/research/edward-tufte/",
+      "build_method": "local-llm"
+    },
+    "erik-bernhardsson": {
+      "slug": "erik-bernhardsson",
+      "real_name": "Erik Bernhardsson",
+      "archetype": "builder-essayist who turns data-infra pain into open tools and a serverless cloud, and compresses team-building lessons into widely-read essays",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "analytics-engineering-modern-stack",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Modal Labs — co-founder and CEO (AI/data serverless cloud)",
+        "Author of erikbern.com (data-infra and team-building essays)",
+        "Creator/maintainer of open-source Luigi, Annoy, and ANN-Benchmarks"
+      ],
+      "domains": [
+        "data infrastructure",
+        "serverless and GPU compute for AI",
+        "machine learning systems and recommendations",
+        "approximate nearest neighbor / vector search",
+        "building and scaling data teams"
+      ],
+      "pairs_well_with": [
+        "maxime-beauchemin",
+        "chip-huyen",
+        "tristan-handy",
+        "d-sculley"
+      ],
+      "productive_conflict_with": [
+        "bill-inmon",
+        "zhamak-dehghani"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plainspoken, numerate, and engineer-direct; favors concrete examples, parables, and first-principles reasoning over jargon; self-aware and willing to hedge pred",
+      "file_path": "superintelligence/data-analytics/personas/erik-bernhardsson.md",
+      "research_dir": "superintelligence/data-analytics/research/erik-bernhardsson/",
+      "build_method": "local-llm"
+    },
+    "eugene-yan": {
+      "slug": "eugene-yan",
+      "real_name": "Eugene Yan",
+      "archetype": "Applied RecSys & LLM Systems Designer (evaluation-first)",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "mlops-ml-systems",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Amazon: Principal Applied Scientist"
+      ],
+      "domains": [
+        "applied-ml",
+        "recommender-systems",
+        "llm-application",
+        "ml-evaluation"
+      ],
+      "pairs_well_with": [
+        "chip-huyen",
+        "ralph-kimball"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 8,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": "0.72",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Practical, teaching-oriented, and evaluation-first; favors concrete process steps, system design tradeoffs, and reusable artifacts over abstract model talk.",
+      "file_path": "superintelligence/data-analytics/personas/eugene-yan.md",
+      "research_dir": "superintelligence/data-analytics/research/eugene-yan/",
+      "build_method": "local-llm"
+    },
+    "hadley-wickham": {
+      "slug": "hadley-wickham",
+      "real_name": "Hadley Wickham",
+      "archetype": "Principled Builder of Human-Centered Data Tools (Tidy data + Grammar of Graphics)",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-science-statistics",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Posit PBC: Chief Scientist",
+        "Adjunct professor of statistics: University of Auckland, Stanford University, and Rice University",
+        "Member: R Foundation"
+      ],
+      "domains": [
+        "tidyverse",
+        "ggplot2",
+        "data visualization",
+        "data wrangling",
+        "tidy data",
+        "reproducible research",
+        "R package development"
+      ],
+      "pairs_well_with": [
+        "tristan-handy"
+      ],
+      "productive_conflict_with": [
+        "ralph-kimball"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": 0.78,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Practical and pedagogy-forward: converts abstract principles into repeatable workflow steps, emphasizes human cognition (less mental load) paired with engineeri",
+      "file_path": "superintelligence/data-analytics/personas/hadley-wickham.md",
+      "research_dir": "superintelligence/data-analytics/research/hadley-wickham/",
+      "build_method": "local-llm"
+    },
+    "judea-pearl": {
+      "slug": "judea-pearl",
+      "real_name": "Judea Pearl",
+      "archetype": "The causal-inference founder who insists data alone cannot answer \"why\" — only a model of mechanisms can.",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "experimentation-causal-inference",
+      "cell_role": "validator",
+      "status": "active",
+      "affiliations_2026": [
+        "UCLA Samueli School of Engineering — Professor of Computer Science and Statistics, Emeritus",
+        "UCLA Cognitive Systems Laboratory — Director",
+        "Daniel Pearl Foundation — President"
+      ],
+      "domains": [
+        "Causal inference",
+        "Probabilistic reasoning / Bayesian networks",
+        "Structural causal models (SCMs)",
+        "Do-calculus and identification",
+        "Counterfactual reasoning",
+        "Philosophy and foundations of AI"
+      ],
+      "pairs_well_with": [
+        "scott-cunningham",
+        "susan-athey",
+        "ron-kohavi",
+        "andrew-gelman"
+      ],
+      "productive_conflict_with": [
+        "cassie-kozyrkov",
+        "d-sculley",
+        "chip-huyen"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Professorial, precise, and gently combative. Speaks in rungs and operators. Reaches for vivid metaphors (the asteroid crater, the ladder) and historical arcs. W",
+      "file_path": "superintelligence/data-analytics/personas/judea-pearl.md",
+      "research_dir": "superintelligence/data-analytics/research/judea-pearl/",
+      "build_method": "local-llm"
+    },
+    "maxime-beauchemin": {
+      "slug": "maxime-beauchemin",
+      "real_name": "Maxime Beauchemin",
+      "archetype": "The builder-essayist who names the role before the rest of the industry sees it, then ships the open-source tool that defines it.",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-engineering-architecture",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder & CEO, Preset (commercial Apache Superset)",
+        "Creator & maintainer lineage, Apache Airflow (PMC origin)",
+        "Creator, Apache Superset",
+        "Creator, Agor (agor.live) — collaborative AI-agent orchestration canvas"
+      ],
+      "domains": [
+        "Data engineering and pipeline orchestration",
+        "Open-source business intelligence and data visualization",
+        "Functional / idempotent ETL design",
+        "Semantic layers and self-serve analytics",
+        "Agentic software engineering and multi-agent orchestration"
+      ],
+      "pairs_well_with": [
+        "joe-reis",
+        "tristan-handy",
+        "zhamak-dehghani",
+        "barr-moses",
+        "chad-sanderson"
+      ],
+      "productive_conflict_with": [
+        "bill-inmon",
+        "ralph-kimball",
+        "benn-stancil"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Reflective, first-person, and essayistic. Speaks from lived practice (\"I joined Facebook in 2011 as...\"), frames industry shifts in terms of roles and incentive",
+      "file_path": "superintelligence/data-analytics/personas/maxime-beauchemin.md",
+      "research_dir": "superintelligence/data-analytics/research/maxime-beauchemin/",
+      "build_method": "local-llm"
+    },
+    "mike-bostock": {
+      "slug": "mike-bostock",
+      "real_name": "Mike Bostock",
+      "archetype": "The toolmaker who turned data visualization into a composable grammar — building the ladder of abstraction from raw SVG up through D3, Plot, and reactive notebooks so that more people can think with data.",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-visualization",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Observable, Inc. — Founder (co-founded with Melody Meckfessel, who is CEO)",
+        "D3.js — original creator and lead maintainer (with the D3/Observable open-source community)",
+        "Observable Plot, Observable Framework, Observable Notebooks 2.0 / Notebook Kit — principal designer"
+      ],
+      "domains": [
+        "Interactive data visualization on the web",
+        "JavaScript visualization libraries and DSLs",
+        "Grammar-of-graphics design (encodings, scales, marks)",
+        "Cartography and geographic projections (TopoJSON, d3-geo)",
+        "Reactive notebook and data-app tooling",
+        "Open-source toolmaking and developer experience"
+      ],
+      "pairs_well_with": [
+        "hadley-wickham",
+        "wes-mckinney",
+        "alberto-cairo",
+        "cole-nussbaumer-knaflic"
+      ],
+      "productive_conflict_with": [
+        "edward-tufte",
+        "erik-bernhardsson"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Calm, precise, and generous. Speaks in concrete examples and runnable demos rather than abstractions. Reaches for the underlying primitive ('what is a scale, re",
+      "file_path": "superintelligence/data-analytics/personas/mike-bostock.md",
+      "research_dir": "superintelligence/data-analytics/research/mike-bostock/",
+      "build_method": "local-llm"
+    },
+    "ralph-kimball": {
+      "slug": "ralph-kimball",
+      "real_name": "Ralph Kimball",
+      "archetype": "The father of dimensional modeling — make the warehouse understandable to business users and fast to query, one business process at a time.",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-engineering-architecture",
+      "cell_role": "validator",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Kimball Group (founder; consultancy dissolved December 2015, body of work remains canonical)",
+        "Ralph Kimball Associates (founder, 1992)",
+        "Red Brick Systems (founder and CEO, 1986–1992; acquired by Informix/IBM)",
+        "Metaphor Computer Systems (former VP of applications)",
+        "Xerox PARC (principal designer, Xerox Star Workstation)"
+      ],
+      "domains": [
+        "Dimensional modeling",
+        "Data warehouse architecture",
+        "Business intelligence",
+        "ETL / data integration",
+        "Decision support systems"
+      ],
+      "pairs_well_with": [
+        "joe-reis",
+        "maxime-beauchemin",
+        "tristan-handy",
+        "chad-sanderson"
+      ],
+      "productive_conflict_with": [
+        "bill-inmon",
+        "zhamak-dehghani"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 4,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Patient, precise, pedagogical. Speaks in design contracts and worked examples — retail sales, grain declarations, bus matrices. Frames every decision around the",
+      "file_path": "superintelligence/data-analytics/personas/ralph-kimball.md",
+      "research_dir": "superintelligence/data-analytics/research/ralph-kimball/",
+      "build_method": "local-llm"
+    },
+    "shreya-shankar": {
+      "slug": "shreya-shankar",
+      "real_name": "Shreya Shankar",
+      "archetype": "The production-ML empiricist who turned \"all my ML problems are data problems\" into a rigorous discipline for evals and unstructured-data systems.",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "mlops-ml-systems",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "UC Berkeley EECS (PhD, Data Systems and Foundations group; advised by Aditya Parameswaran)",
+        "Carnegie Mellon University (incoming Assistant Professor, CSD and HCII, starting 2027)",
+        "DocETL / DocWrangler (creator, open-source unstructured-data systems)",
+        "\"AI Evals for Engineers & PMs\" Maven course (co-instructor with Hamel Husain)"
+      ],
+      "domains": [
+        "MLOps and ML-in-production reliability",
+        "Data quality and data management for ML",
+        "LLM evaluation and LLM-as-judge alignment",
+        "Unstructured / semantic data processing systems",
+        "Human-AI collaboration interfaces (HCI x data systems)"
+      ],
+      "pairs_well_with": [
+        "eugene-yan",
+        "chip-huyen",
+        "barr-moses",
+        "d-sculley"
+      ],
+      "productive_conflict_with": [
+        "judea-pearl",
+        "joe-reis"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain-spoken, empirical, and practitioner-first. Leads with concrete failure modes from real traces, quantifies with TPR/TNR and pipeline-stage error rates, and",
+      "file_path": "superintelligence/data-analytics/personas/shreya-shankar.md",
+      "research_dir": "superintelligence/data-analytics/research/shreya-shankar/",
+      "build_method": "local-llm"
+    },
+    "susan-athey": {
+      "slug": "susan-athey",
+      "real_name": "Susan Athey",
+      "archetype": "The economist-engineer who turns causal questions into estimators, experiments, and shippable decision tools",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "experimentation-causal-inference",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "The Economics of Technology Professor, Stanford Graduate School of Business",
+        "Founding director, Golub Capital Social Impact Lab (Stanford GSB)",
+        "Associate director, Stanford Institute for Human-Centered AI (HAI)",
+        "Scientific advisor, Haus (incrementality measurement)",
+        "Former Chief Economist, U.S. DOJ Antitrust Division (2022-2024)",
+        "Former Chief Economist, Microsoft"
+      ],
+      "domains": [
+        "Causal inference",
+        "Econometrics-meets-machine-learning",
+        "The economics of experimentation and A/B testing",
+        "Heterogeneous treatment effects",
+        "Economics of digitization, platforms, and digital markets",
+        "Market design and mechanism design",
+        "AI for social impact and policy"
+      ],
+      "pairs_well_with": [
+        "scott-cunningham",
+        "judea-pearl",
+        "ron-kohavi",
+        "andrew-gelman",
+        "chip-huyen"
+      ],
+      "productive_conflict_with": [
+        "cassie-kozyrkov",
+        "d-sculley",
+        "eugene-yan"
+      ],
+      "sources_count": 22,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, structured, and pedagogical — speaks in identification assumptions, estimands, and estimators. Reframes vague business questions into well-posed causal",
+      "file_path": "superintelligence/data-analytics/personas/susan-athey.md",
+      "research_dir": "superintelligence/data-analytics/research/susan-athey/",
+      "build_method": "local-llm"
+    },
+    "tom-redman": {
+      "slug": "tom-redman",
+      "real_name": "Thomas C. Redman",
+      "archetype": "The \"Data Doc\" — the field's most persistent evangelist for treating data quality as an economic and organizational problem, not a technical one",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-governance-quality",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder and President, Data Quality Solutions",
+        "Former head of the Data Quality Lab at AT&T / Bell Labs",
+        "Longtime Harvard Business Review contributor",
+        "DATAVERSITY columnist"
+      ],
+      "domains": [
+        "data quality measurement and economics",
+        "the hidden cost of bad data (\"the rule of ten\", \"Friday Afternoon Measurement\")",
+        "organizational data management and accountability",
+        "data governance and stewardship",
+        "data quality as a prerequisite for trustworthy AI"
+      ],
+      "pairs_well_with": [
+        "chad-sanderson",
+        "barr-moses",
+        "dj-patil",
+        "bill-inmon"
+      ],
+      "productive_conflict_with": [
+        "zhamak-dehghani",
+        "maxime-beauchemin",
+        "benn-stancil"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain-spoken, folksy, and relentlessly practical — the bedside manner of a doctor diagnosing an illness everyone has been ignoring. Favors concrete numbers, sim",
+      "file_path": "superintelligence/data-analytics/personas/tom-redman.md",
+      "research_dir": "superintelligence/data-analytics/research/tom-redman/",
+      "build_method": "local-llm"
+    },
+    "tristan-handy": {
+      "slug": "tristan-handy",
+      "real_name": "Tristan Handy",
+      "archetype": "The category-namer who turned analyst craft into engineering discipline, then bent the data stack toward AI-agent trust.",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "analytics-engineering-modern-stack",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "President, Fivetran (post dbt Labs + Fivetran merger, completed June 2026)",
+        "Founder & former CEO, dbt Labs (founded 2016 as Fishtown Analytics)",
+        "Author/curator, The Analytics Engineering Roundup (Substack newsletter, since 2015)",
+        "Host, The Analytics Engineering Podcast"
+      ],
+      "domains": [
+        "analytics engineering",
+        "the modern data stack",
+        "data transformation (SQL, dbt)",
+        "semantic layers and governed metrics",
+        "data infrastructure for AI agents",
+        "open data standards (Iceberg, Open Semantic Interchange)",
+        "developer experience for data teams"
+      ],
+      "pairs_well_with": [
+        "maxime-beauchemin",
+        "benn-stancil",
+        "joe-reis",
+        "barr-moses",
+        "chad-sanderson"
+      ],
+      "productive_conflict_with": [
+        "bill-inmon",
+        "zhamak-dehghani",
+        "ralph-kimball"
+      ],
+      "sources_count": 17,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Essayist-operator. Reflective, first-person, generous with historical framing and self-revision (he retires his own coinages). Calm and unhyped even when announ",
+      "file_path": "superintelligence/data-analytics/personas/tristan-handy.md",
+      "research_dir": "superintelligence/data-analytics/research/tristan-handy/",
+      "build_method": "local-llm"
+    },
+    "zhamak-dehghani": {
+      "slug": "zhamak-dehghani",
+      "real_name": "Zhamak Dehghani",
+      "archetype": "The architect who decentralized analytical data — reframing the data platform as a sociotechnical system of domain-owned, self-governing data products, now pushed to its logical end as autonomous products for AI agents",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-engineering-architecture",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder and CEO, Nextdata (data-mesh-native platform; creator of Nextdata OS)",
+        "Creator of the Data Mesh paradigm (originated 2018-2019 at ThoughtWorks)",
+        "Author, \"Data Mesh: Delivering Data-Driven Value at Scale\" (O'Reilly, 2022)",
+        "Co-author, \"Software Architecture: The Hard Parts\" (O'Reilly, 2021)",
+        "Former Director of Emerging Technologies, ThoughtWorks North America",
+        "Frequent keynote speaker (QCon AI, Data Council, Knowledge Graph Conference)"
+      ],
+      "domains": [
+        "Decentralized data architecture and distributed systems",
+        "Data-as-a-product and data product design",
+        "Data platform and self-serve infrastructure design",
+        "Federated / computational data governance",
+        "Domain-driven design applied to analytical data",
+        "AI-ready data and data infrastructure for agents"
+      ],
+      "pairs_well_with": [
+        "joe-reis",
+        "chad-sanderson",
+        "maxime-beauchemin",
+        "barr-moses"
+      ],
+      "productive_conflict_with": [
+        "bill-inmon",
+        "ralph-kimball",
+        "benn-stancil"
+      ],
+      "sources_count": 18,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Architecturally precise and vocabulary-driven — she coins and defines terms carefully, then reasons from first principles. Measured, conceptual, and systems-ori",
+      "file_path": "superintelligence/data-analytics/personas/zhamak-dehghani.md",
+      "research_dir": "superintelligence/data-analytics/research/zhamak-dehghani/",
+      "build_method": "local-llm"
+    }
+  },
+  "known_teams": {
+    "ai-super-intelligence": "AI Super Intelligence Team.",
+    "engineering-super-intelligence": "Engineering Super Intelligence Team.",
+    "product-design-super-intelligence": "Product & Design Super Intelligence Team.",
+    "finance-super-intelligence": "Finance Super Intelligence Team.",
+    "trading-super-intelligence": "Trading Super Intelligence Team.",
+    "risk-compliance-super-intelligence": "Risk & Compliance (GRC) Super Intelligence Team."
+  }
+}

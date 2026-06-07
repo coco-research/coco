@@ -1,0 +1,35 @@
+WARN: skipping gillian-hadfield.md: while parsing a block collection
+  in "<unicode string>", line 29, column 3:
+      - "Rules for a Flat World: Why H ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 29, column 107:
+     ... t for a Complex Global Economy" (Oxford University Press, 2017;  ... 
+                                         ^
+WARN: skipping graham-barrow.md: while parsing a block collection
+  in "<unicode string>", line 34, column 3:
+      - "Laundromats" (essay, The Fina ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 34, column 19:
+      - "Laundromats" (essay, The Financial Crime News)
+                      ^
+WARN: skipping latanya-sweeney.md: while parsing a block collection
+  in "<unicode string>", line 29, column 3:
+      - "k-Anonymity: A Model for Prot ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 29, column 51:
+     ... A Model for Protecting Privacy" (2002) — the formal privacy mode ... 
+                                         ^
+Wrote /Users/Rijul_Kalra/projects/coco-platform/superintelligence/risk-compliance/registry.json (39 personas [27 native + 12 cross-listed], 7 cells).
+  wrote cells/privacy-data-protection.md (6 personas, 7 tensions)
+  wrote cells/ai-governance-responsible-ai.md (7 personas, 0 tensions)
+  wrote cells/regulatory-tech-policy.md (6 personas, 2 tensions)
+  wrote cells/security-governance.md (5 personas, 0 tensions)
+  wrote cells/erm-grc-leadership.md (6 personas, 4 tensions)
+  wrote cells/financial-crime-aml.md (4 personas, 1 tensions)
+  wrote cells/model-systemic-risk.md (5 personas, 0 tensions)
+Wrote 7 cell docs.
+risk-compliance: 21/30 PASS, 9 NEEDS-TOPUP -> /Users/Rijul_Kalra/projects/coco-platform/superintelligence/risk-compliance/VALIDATION.md
+NEEDS-TOPUP: carol-williams gillian-hadfield graham-barrow james-lam jim-richards john-cusack latanya-sweeney marietje-schaake ross-delston

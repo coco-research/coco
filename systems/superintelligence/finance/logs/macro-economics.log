@@ -1,0 +1,7 @@
+building 4 persona(s) with qwen/qwen3.6-35b-a3b
+[1/4] claudia-sahm             ERROR HTTPError: HTTP Error 400: Bad Request
+[2/4] joseph-wang              ERROR HTTPError: HTTP Error 400: Bad Request
+[3/4] jason-furman             ERROR HTTPError: HTTP Error 400: Bad Request
+[4/4] lyn-alden                ERROR HTTPError: HTTP Error 400: Bad Request
+
+DONE: 0/4 PASS

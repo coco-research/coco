@@ -1,0 +1,36 @@
+WARN: skipping aaron-brown.md: while parsing a block collection
+  in "<unicode string>", line 32, column 3:
+      - "Red-Blooded Risk: The Secret  ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 32, column 59:
+     ...  Secret History of Wall Street" (2012)
+                                         ^
+WARN: skipping maureen-ohara.md: while parsing a block collection
+  in "<unicode string>", line 30, column 3:
+      - "Market Microstructure Theory" ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 30, column 36:
+      - "Market Microstructure Theory" (1995/1997) — the field's standa ... 
+                                       ^
+WARN: skipping nic-carter.md: while parsing a block collection
+  in "<unicode string>", line 30, column 3:
+      - "It's the Settlement Assurance ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 30, column 46:
+     ...  Settlement Assurances, Stupid" (essay defining bitcoin's value  ... 
+                                         ^
+Wrote /Users/Rijul_Kalra/projects/coco-platform/superintelligence/trading/registry.json (43 personas [43 native + 0 cross-listed], 8 cells).
+  wrote cells/macro-discretionary.md (8 personas, 5 tensions)
+  wrote cells/quant-systematic.md (7 personas, 3 tensions)
+  wrote cells/derivatives-volatility.md (6 personas, 6 tensions)
+  wrote cells/microstructure-execution.md (4 personas, 2 tensions)
+  wrote cells/fixed-income-rates.md (5 personas, 1 tensions)
+  wrote cells/risk-systemic.md (4 personas, 2 tensions)
+  wrote cells/crypto-digital-assets.md (5 personas, 4 tensions)
+  wrote cells/trader-craft-psychology.md (4 personas, 0 tensions)
+Wrote 8 cell docs.
+trading: 24/46 PASS, 22 NEEDS-TOPUP -> /Users/Rijul_Kalra/projects/coco-platform/superintelligence/trading/VALIDATION.md
+NEEDS-TOPUP: aaron-brown benn-eifert bill-gross brett-steenbarger cliff-asness danielle-dimartino-booth ed-thorp ernest-chan euan-sinclair frank-fabozzi george-soros haim-bodek jack-schwager kenneth-grant larry-harris mark-douglas maureen-ohara nic-carter riccardo-rebonato robert-litterman stanley-druckenmiller til-schuermann

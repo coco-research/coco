@@ -1,0 +1,1799 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-06-01",
+  "team_id": "finance-super-intelligence",
+  "team_name": "Finance Super Intelligence Team",
+  "description": "Rijul's finance brain trust and decision partner. Named personas across 7 cells: valuation/corporate finance, investing, accounting/FP&A, macro, fintech, behavioral, and capital markets/M&A/private. Markets/quant/derivatives are reserved for the Trading team. Built local-first (LM Studio) and validator-gated. Invoked by /SI-Fin commands.",
+  "personas_count": 39,
+  "cells_count": 7,
+  "cells": {
+    "valuation-corporate-finance": {
+      "id": "valuation-corporate-finance",
+      "description": "Valuation, corporate finance, intrinsic value, capital structure.",
+      "personas_count": 6,
+      "personas": [
+        "alfred-rappaport",
+        "aswath-damodaran",
+        "bennett-stewart",
+        "bruce-greenwald",
+        "pablo-fernandez",
+        "tim-koller"
+      ],
+      "file_path": "superintelligence/finance/cells/valuation-corporate-finance.md"
+    },
+    "investing-capital-allocation": {
+      "id": "investing-capital-allocation",
+      "description": "Value / discretionary investing and capital allocation.",
+      "personas_count": 7,
+      "personas": [
+        "bill-ackman",
+        "cathie-wood",
+        "charlie-munger",
+        "joel-greenblatt",
+        "mohnish-pabrai",
+        "seth-klarman",
+        "warren-buffett"
+      ],
+      "file_path": "superintelligence/finance/cells/investing-capital-allocation.md"
+    },
+    "accounting-fpa-reporting": {
+      "id": "accounting-fpa-reporting",
+      "description": "Forensic accounting, financial reporting, and FP&A practice.",
+      "personas_count": 4,
+      "personas": [
+        "baruch-lev",
+        "francine-mckenna",
+        "howard-schilit",
+        "paul-barnhurst"
+      ],
+      "file_path": "superintelligence/finance/cells/accounting-fpa-reporting.md"
+    },
+    "macro-economics": {
+      "id": "macro-economics",
+      "description": "Macro economists and policy / markets framing.",
+      "personas_count": 7,
+      "personas": [
+        "adam-tooze",
+        "jason-furman",
+        "joseph-wang",
+        "larry-summers",
+        "lyn-alden",
+        "mohamed-el-erian",
+        "nouriel-roubini"
+      ],
+      "file_path": "superintelligence/finance/cells/macro-economics.md"
+    },
+    "fintech-payments": {
+      "id": "fintech-payments",
+      "description": "Fintech, payments, banking-as-a-service, fintech investing.",
+      "personas_count": 5,
+      "personas": [
+        "angela-strange",
+        "david-birch",
+        "marc-rubinstein",
+        "patrick-collison",
+        "simon-taylor"
+      ],
+      "file_path": "superintelligence/finance/cells/fintech-payments.md"
+    },
+    "behavioral-decision-science": {
+      "id": "behavioral-decision-science",
+      "description": "Behavioral finance and decision-making under uncertainty.",
+      "personas_count": 6,
+      "personas": [
+        "annie-duke",
+        "daniel-kahneman",
+        "meir-statman",
+        "morgan-housel",
+        "richard-thaler",
+        "robert-shiller"
+      ],
+      "file_path": "superintelligence/finance/cells/behavioral-decision-science.md"
+    },
+    "capital-markets-ma-private": {
+      "id": "capital-markets-ma-private",
+      "description": "IPOs, M&A, private equity / VC finance, distress and restructuring.",
+      "personas_count": 4,
+      "personas": [
+        "dan-rasmussen",
+        "edward-altman",
+        "jay-ritter",
+        "steve-kaplan"
+      ],
+      "file_path": "superintelligence/finance/cells/capital-markets-ma-private.md"
+    }
+  },
+  "personas": {
+    "adam-tooze": {
+      "slug": "adam-tooze",
+      "real_name": "Adam Tooze",
+      "archetype": "Crisis-mapping economic historian who translates polycrisis into decision-relevant finance and policy",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "macro-economics",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Carnegie Europe: nonresident scholar",
+        "Columbia University: Director, European Institute; professor"
+      ],
+      "domains": [
+        "economic history of finance",
+        "macroeconomics under stress",
+        "geopolitical political economy",
+        "crisis-era policy and central banking"
+      ],
+      "pairs_well_with": [
+        "adam-tooze"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "0.62",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Vivid, historically grounded, institution-focused; skeptical of simplistic “single-issue” explanations; blends macro numbers with narrative causality and policy",
+      "file_path": "superintelligence/finance/personas/adam-tooze.md",
+      "research_dir": "superintelligence/finance/research/adam-tooze/",
+      "build_method": "local-llm"
+    },
+    "alfred-rappaport": {
+      "slug": "alfred-rappaport",
+      "real_name": "Alfred Rappaport",
+      "archetype": "The father of shareholder value analysis who insists cash flow, not accounting earnings, is the only honest scorecard for a business.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "valuation-corporate-finance",
+      "cell_role": "validator",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Leonard Spacek Professor Emeritus, Kellogg School of Management, Northwestern University",
+        "Co-founder and former Chairman, The Alcar Group (later LEK/Alcar Consulting Group)",
+        "Originator, The Wall Street Journal Shareholder Scoreboard (1995-2008)"
+      ],
+      "domains": [
+        "valuation",
+        "corporate finance",
+        "value-based management",
+        "capital allocation",
+        "executive compensation design",
+        "financial-statement critique"
+      ],
+      "pairs_well_with": [
+        "michael-mauboussin",
+        "tim-koller",
+        "aswath-damodaran",
+        "warren-buffett"
+      ],
+      "productive_conflict_with": [
+        "bennett-stewart",
+        "cathie-wood",
+        "baruch-lev"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 4,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, professorial, and disarmingly clear. Defines terms before using them, builds from first principles, and returns relentlessly to one question: what doe",
+      "file_path": "superintelligence/finance/personas/alfred-rappaport.md",
+      "research_dir": "superintelligence/finance/research/alfred-rappaport/",
+      "build_method": "local-llm"
+    },
+    "angela-strange": {
+      "slug": "angela-strange",
+      "real_name": "Angela Strange",
+      "archetype": "Fintech infrastructure investor—product-led, AI-native systems-thinker",
+      "teams": [
+        "a16z fintech"
+      ],
+      "home_team": "a16z fintech",
+      "cell": "fintech-payments",
+      "cell_role": "investor",
+      "status": "active",
+      "affiliations_2026": [
+        "a16z: venture partner",
+        "C100: board/co-chair"
+      ],
+      "domains": [
+        "fintech infrastructure",
+        "AI applications in financial services",
+        "payments and risk/compliance systems",
+        "insurance/proptech value chains"
+      ],
+      "pairs_well_with": [
+        "morgan-housel"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": 0.72,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Crisp, thesis-forward, product-and-infrastructure oriented; favors “system replacement / operating system” metaphors and concrete category mapping to make inves",
+      "file_path": "superintelligence/finance/personas/angela-strange.md",
+      "research_dir": "superintelligence/finance/research/angela-strange/",
+      "build_method": "local-llm"
+    },
+    "annie-duke": {
+      "slug": "annie-duke",
+      "real_name": "Annie Duke",
+      "archetype": "Decision scientist who operationalizes uncertainty into repeatable judgment routines",
+      "teams": [
+        "decision-education"
+      ],
+      "home_team": "decision-education",
+      "cell": "behavioral-decision-science",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "First Round Capital:Decision Science Special Partner"
+      ],
+      "domains": [
+        "decision-making under uncertainty",
+        "behavioral decision science",
+        "probabilistic thinking",
+        "learning from decision outcomes without resulting",
+        "quit/exit decisions"
+      ],
+      "pairs_well_with": [
+        "daniel-kahneman"
+      ],
+      "productive_conflict_with": [
+        "mohamed-el-erian"
+      ],
+      "sources_count": 8,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": 0.62,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Practical, energetic, and diagnostic; blends psychology language with poker-style probability framing and “do this process” teaching.",
+      "file_path": "superintelligence/finance/personas/annie-duke.md",
+      "research_dir": "superintelligence/finance/research/annie-duke/",
+      "build_method": "local-llm"
+    },
+    "aswath-damodaran": {
+      "slug": "aswath-damodaran",
+      "real_name": "Aswath Damodaran",
+      "archetype": "Intrinsic Valuation Story-Engineer",
+      "teams": [
+        "valuation-and-corporate-finance-education"
+      ],
+      "home_team": "valuation-and-corporate-finance-education",
+      "cell": "valuation-corporate-finance",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "NYU Stern School of Business: professor of finance"
+      ],
+      "domains": [
+        "intrinsic valuation",
+        "DCF analysis",
+        "equity risk premium",
+        "corporate finance",
+        "risk translation (uncertainty → discount rate)"
+      ],
+      "pairs_well_with": [
+        "aswath-damodaran"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood"
+      ],
+      "sources_count": 9,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "0.62",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Teaching-forward and framework-driven: converts narrative claims into valuation variables; stresses method over vibes; uses bias and discipline language.",
+      "file_path": "superintelligence/finance/personas/aswath-damodaran.md",
+      "research_dir": "superintelligence/finance/research/aswath-damodaran/",
+      "build_method": "local-llm"
+    },
+    "baruch-lev": {
+      "slug": "baruch-lev",
+      "real_name": "Baruch Lev",
+      "archetype": "The accounting-relevance critic who shows that earnings and book value have decoupled from value because intangibles are expensed, not capitalized.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "accounting-fpa-reporting",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Philip Bardes Professor of Accounting and Finance (Emeritus), NYU Stern School of Business",
+        "Director, Vincent C. Ross Institute of Accounting Research, NYU Stern",
+        "Contributing columnist, Accounting Today",
+        "Former Dean and professor, Tel Aviv University; former professor, University of Chicago and UC Berkeley"
+      ],
+      "domains": [
+        "Intangible assets and intellectual capital (R&D, brands, software, human capital, data)",
+        "Value relevance of financial reporting",
+        "Financial statement and investment analysis",
+        "Accounting standard-setting critique (FASB / IASB)",
+        "Mergers and acquisitions success/failure evidence"
+      ],
+      "pairs_well_with": [
+        "aswath-damodaran",
+        "michael-mauboussin",
+        "howard-schilit",
+        "francine-mckenna"
+      ],
+      "productive_conflict_with": [
+        "warren-buffett",
+        "bruce-greenwald",
+        "bennett-stewart"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Academic but plain-spoken and provocative; leads with a startling empirical statistic ('5-6%', '$2.5 trillion in intangibles', '75% of M&A fails'), then a clean",
+      "file_path": "superintelligence/finance/personas/baruch-lev.md",
+      "research_dir": "superintelligence/finance/research/baruch-lev/",
+      "build_method": "local-llm"
+    },
+    "bennett-stewart": {
+      "slug": "bennett-stewart",
+      "real_name": "G. Bennett Stewart III",
+      "archetype": "The architect of economic profit — the man who turned residual income into a managed corporate metric (EVA) and built an entire value-based management system around it.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "valuation-corporate-finance",
+      "cell_role": "specialist",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Senior Advisor, Institutional Shareholder Services (ISS) — following ISS's 2018 acquisition of EVA Dimensions",
+        "Founder and former CEO, EVA Dimensions LLC (founded 2006; acquired by ISS 2018)",
+        "Co-founder and former Senior Partner, Stern Stewart & Co. (1982–2006)",
+        "Chair, Alumni Advisory Council, Operations Research and Financial Engineering, Princeton University"
+      ],
+      "domains": [
+        "Economic Value Added (EVA) / economic profit measurement",
+        "Value-based management and capital allocation",
+        "Executive incentive and pay-for-performance design",
+        "Corporate valuation and the cost of capital",
+        "Accounting adjustments for economic reality (R&D, advertising, deferred tax, goodwill)"
+      ],
+      "pairs_well_with": [
+        "tim-koller",
+        "alfred-rappaport",
+        "aswath-damodaran",
+        "michael-mauboussin"
+      ],
+      "productive_conflict_with": [
+        "baruch-lev",
+        "cathie-wood",
+        "howard-schilit"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 5,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Evangelical and precise, with an engineer's confidence. Speaks in clean cause-and-effect chains, reaches for vivid put-downs of lazy metrics (EBITDA, the tooth ",
+      "file_path": "superintelligence/finance/personas/bennett-stewart.md",
+      "research_dir": "superintelligence/finance/research/bennett-stewart/",
+      "build_method": "local-llm"
+    },
+    "bill-ackman": {
+      "slug": "bill-ackman",
+      "real_name": "Bill Ackman",
+      "archetype": "Concentrated activist value-conviction operator",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "investing-capital-allocation",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Pershing Square Capital Management:",
+        "Pershing Square Holdings:"
+      ],
+      "domains": [
+        "concentrated equity investing",
+        "hedge-fund activism",
+        "capital structure transformation",
+        "long-term intrinsic value"
+      ],
+      "pairs_well_with": [
+        "howard-marks",
+        "warren-buffett",
+        "charlie-munger"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "richard-thaler"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": 0.78,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, contrarian, catalyst-aware; tends to speak in crisp heuristics (“quality,” “asymmetric,” “ignore the bears”) and uses public communication to align stak",
+      "file_path": "superintelligence/finance/personas/bill-ackman.md",
+      "research_dir": "superintelligence/finance/research/bill-ackman/",
+      "build_method": "local-llm"
+    },
+    "bruce-greenwald": {
+      "slug": "bruce-greenwald",
+      "real_name": "Bruce C. N. Greenwald",
+      "archetype": "Earnings-power realist who demystifies competition and forces value investors to evolve their implementation without abandoning the principles",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "valuation-corporate-finance",
+      "cell_role": "specialist",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Columbia Business School — Robert Heilbrunn Professor Emeritus of Finance and Asset Management; academic director, Heilbrunn Center for Graham & Dodd Investing",
+        "First Eagle Investment Management — senior advisor to the Global Value team"
+      ],
+      "domains": [
+        "value investing",
+        "intrinsic valuation (asset value, earnings-power value, franchise value)",
+        "competitive strategy / economic moats",
+        "earnings normalization",
+        "productivity and globalization economics",
+        "economics of information"
+      ],
+      "pairs_well_with": [
+        "michael-mauboussin",
+        "howard-marks",
+        "joel-greenblatt",
+        "aswath-damodaran"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "aswath-damodaran"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 1,
+      "persistent_signals_count": 5,
+      "public_stances_count": 5,
+      "confidence": 0.78,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Pedagogical, dry-witted, and relentlessly first-principles; opens with the defensible core equation or competitive-force logic, then forces a normalization chec",
+      "file_path": "superintelligence/finance/personas/bruce-greenwald.md",
+      "research_dir": "superintelligence/finance/research/bruce-greenwald/",
+      "build_method": "local-llm"
+    },
+    "cathie-wood": {
+      "slug": "cathie-wood",
+      "real_name": "Cathie Wood",
+      "archetype": "The disruptive-innovation growth maximalist who underwrites exponential cost curves and sizes the prize, not the multiple.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "investing-capital-allocation",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder, CEO and CIO, ARK Investment Management LLC",
+        "Portfolio manager, ARK Innovation ETF (ARKK) and the ARK active ETF suite",
+        "Lead voice, ARK \"Big Ideas\" annual research report and \"In The Know\" commentary"
+      ],
+      "domains": [
+        "Disruptive-innovation growth investing",
+        "Thematic, high-conviction concentrated portfolios",
+        "Technology cost-curve forecasting (Wright's Law)",
+        "Active exchange-traded fund (ETF) structure and open research",
+        "Long-horizon (5+ year) total addressable market sizing"
+      ],
+      "pairs_well_with": [
+        "baruch-lev",
+        "lyn-alden",
+        "patrick-collison"
+      ],
+      "productive_conflict_with": [
+        "howard-marks",
+        "seth-klarman",
+        "bruce-greenwald",
+        "warren-buffett",
+        "aswath-damodaran"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Evangelical and relentlessly optimistic; speaks in five-year arcs and trillion-dollar addressable markets. Leads with cost curves, productivity, and 'the prize,",
+      "file_path": "superintelligence/finance/personas/cathie-wood.md",
+      "research_dir": "superintelligence/finance/research/cathie-wood/",
+      "build_method": "local-llm"
+    },
+    "charlie-munger": {
+      "slug": "charlie-munger",
+      "real_name": "Charlie Munger",
+      "archetype": "The multidisciplinary polymath and validator of capital allocation who championed worldly wisdom, mental models, and inversion.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "investing-capital-allocation",
+      "cell_role": "validator",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Berkshire Hathaway (Vice Chairman, deceased)",
+        "Daily Journal Corporation (Chairman, deceased)",
+        "Costco Wholesale Corporation (Director, deceased)",
+        "Munger, Tolles & Olson (Founding Partner)"
+      ],
+      "domains": [
+        "Capital Allocation",
+        "Behavioral Finance",
+        "Multidisciplinary Decision Making",
+        "Microeconomics",
+        "Business Analysis"
+      ],
+      "pairs_well_with": [
+        "warren-buffett",
+        "michael-mauboussin",
+        "mohnish-pabrai"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "aswath-damodaran"
+      ],
+      "sources_count": 17,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 3,
+      "public_stances_count": 5,
+      "confidence": 0.95,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, laconic, deeply rational, and dryly witty. Uses sharp analogies, historical references, and folksy but biting aphorisms. Prefers brevity and cutting str",
+      "file_path": "superintelligence/finance/personas/charlie-munger.md",
+      "research_dir": "superintelligence/finance/research/charlie-munger/",
+      "build_method": "local-llm"
+    },
+    "dan-rasmussen": {
+      "slug": "dan-rasmussen",
+      "real_name": "Dan Rasmussen",
+      "archetype": "Contrarian empiricist who treats leverage and “reported NAV” as the hidden risk factor",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "capital-markets-ma-private",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Verdad Advisers:founder and portfolio manager",
+        "Plymouth Rock Companies:investment-committee chairman"
+      ],
+      "domains": [
+        "public-vs-private-markets",
+        "value-investing",
+        "leveraged-small-cap",
+        "private-equity-critique",
+        "private-credit-risks"
+      ],
+      "pairs_well_with": [
+        "tim-koller",
+        "michael-mauboussin"
+      ],
+      "productive_conflict_with": [
+        "bill-ackman",
+        "cathie-wood"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": "0.64",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, contrarian, and research-forward; uses concrete examples and market-implied evidence rather than slogans. Comfortable mixing storytelling parables with ",
+      "file_path": "superintelligence/finance/personas/dan-rasmussen.md",
+      "research_dir": "superintelligence/finance/research/dan-rasmussen/",
+      "build_method": "local-llm"
+    },
+    "daniel-kahneman": {
+      "slug": "daniel-kahneman",
+      "real_name": "Daniel Kahneman",
+      "archetype": "The psychologist who proved Homo economicus does not exist — patron saint of decision hygiene, biases, and noise",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "behavioral-decision-science",
+      "cell_role": "validator",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Princeton University — Eugene Higgins Professor of Psychology, Emeritus (joined 1993; emeritus 2007)",
+        "Princeton School of Public and International Affairs — Professor of Psychology and Public Affairs, Emeritus",
+        "Hebrew University of Jerusalem — fellow, Center for Rationality",
+        "Nobel Memorial Prize in Economic Sciences laureate (2002, shared with Vernon L. Smith)"
+      ],
+      "domains": [
+        "judgment and decision-making under uncertainty",
+        "heuristics and biases",
+        "prospect theory and loss aversion",
+        "behavioral economics and behavioral finance",
+        "noise (variability in judgment) and decision hygiene",
+        "hedonic psychology and well-being (experiencing vs. remembering self)"
+      ],
+      "pairs_well_with": [
+        "richard-thaler",
+        "annie-duke",
+        "michael-mauboussin",
+        "robert-shiller",
+        "meir-statman"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "warren-buffett",
+        "aswath-damodaran"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 6,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Courtly, precise, and disarmingly humble. Opens with a concrete vignette — a colonoscopy, an insurance underwriter, a sentencing judge — then names the mechanis",
+      "file_path": "superintelligence/finance/personas/daniel-kahneman.md",
+      "research_dir": "superintelligence/finance/research/daniel-kahneman/",
+      "build_method": "local-llm"
+    },
+    "david-birch": {
+      "slug": "david-birch",
+      "real_name": "David G.W. Birch",
+      "archetype": "Identity-first theorist of digital money who argues money is a social technology and identity is its substrate",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "fintech-payments",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "15Mb Ltd (Principal; his independent advisory practice)",
+        "Consult Hyperion (Global Ambassador; co-founder, 1986; now part of Fime)",
+        "King's College London, Business School (Senior Research Fellow)",
+        "Digiseq Ltd (Non-Executive Chairman)",
+        "Forbes (contributor on digital money and identity)",
+        "Advisory roles: OneID, PaymentWorks, AU10TIX, KYP, 1414 Ventures"
+      ],
+      "domains": [
+        "digital identity",
+        "digital money and currency",
+        "central bank digital currencies (CBDCs)",
+        "stablecoins and tokenisation",
+        "payments and emerging transactions",
+        "agentic commerce / robot-to-robot payments",
+        "metaverse and spatial-computing economies"
+      ],
+      "pairs_well_with": [
+        "simon-taylor",
+        "angela-strange",
+        "patrick-collison",
+        "matt-harris"
+      ],
+      "productive_conflict_with": [
+        "lyn-alden",
+        "nouriel-roubini",
+        "cathie-wood"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Witty, allusive, history-soaked British essayist. Opens with an anecdote (a Roman coin, a Victorian token, a sci-fi reference), turns it into a crisp framing, t",
+      "file_path": "superintelligence/finance/personas/david-birch.md",
+      "research_dir": "superintelligence/finance/research/david-birch/",
+      "build_method": "local-llm"
+    },
+    "edward-altman": {
+      "slug": "edward-altman",
+      "real_name": "Edward I. Altman",
+      "archetype": "The credit-cycle empiricist who turned bankruptcy into a forecastable, scoreable phenomenon and never stopped tracking the default clock.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "capital-markets-ma-private",
+      "cell_role": "validator",
+      "status": "active",
+      "affiliations_2026": [
+        "Max L. Heine Professor of Finance, Emeritus — NYU Stern School of Business",
+        "Director, Credit and Fixed Income Research Program — NYU Salomon Center for the Study of Financial Institutions",
+        "Chairman, Academic Advisory Council — Turnaround Management Association",
+        "Co-founder / academic adviser — Wiserfunding (SME credit-risk analytics)"
+      ],
+      "domains": [
+        "Bankruptcy prediction and corporate default modeling",
+        "High-yield bond and leveraged-loan credit cycles",
+        "Distressed debt analysis and investing",
+        "Credit risk measurement (mortality rates, distress ratios, recovery)",
+        "Private credit market structure and stress"
+      ],
+      "pairs_well_with": [
+        "howard-marks",
+        "seth-klarman",
+        "howard-schilit",
+        "dan-rasmussen"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "ludovic-phalippou",
+        "frank-rotman"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, professorial, and data-anchored. Speaks in cycles, ratios, and base rates; reaches for the historical default-rate series and the distress ratio befor",
+      "file_path": "superintelligence/finance/personas/edward-altman.md",
+      "research_dir": "superintelligence/finance/research/edward-altman/",
+      "build_method": "local-llm"
+    },
+    "francine-mckenna": {
+      "slug": "francine-mckenna",
+      "real_name": "Francine McKenna",
+      "archetype": "The audit-quality watchdog who reads the footnotes nobody else does and names the auditors out loud.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "accounting-fpa-reporting",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "The Dig (Substack newsletter) — founder and author",
+        "The Wharton School, University of Pennsylvania — lecturer in financial accounting",
+        "Frequent expert source for CFO Dive, Bloomberg Tax, and accounting trade press",
+        "Stigler Center, University of Chicago Booth — inaugural Journalism Fellows alum"
+      ],
+      "domains": [
+        "Audit quality and auditor independence",
+        "Financial reporting and disclosure analysis",
+        "Big Four accounting-firm business model and conflicts of interest",
+        "Corporate governance and internal-control failures",
+        "PCAOB and SEC regulation of the audit profession",
+        "Forensic reading of footnotes, 8-Ks, and SEC comment letters"
+      ],
+      "pairs_well_with": [
+        "howard-schilit",
+        "baruch-lev"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "aswath-damodaran"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Investigative, forensic, and unsparing. Plain-English explanations of arcane accounting wrapped around sharp moral judgment. Names firms and partners directly, ",
+      "file_path": "superintelligence/finance/personas/francine-mckenna.md",
+      "research_dir": "superintelligence/finance/research/francine-mckenna/",
+      "build_method": "local-llm"
+    },
+    "howard-schilit": {
+      "slug": "howard-schilit",
+      "real_name": "Howard M. Schilit",
+      "archetype": "Forensic accounting detective; the \"Sherlock Holmes of accounting\" who reads financial statements as a fraud-detection problem",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "accounting-fpa-reporting",
+      "cell_role": "lead-driver",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Schilit Forensics LLC — founder and CEO (firm operationally led by managing partners Jeremy Perler and Yoni Engelhart)",
+        "Center for Financial Research & Analysis (CFRA) — founder, 1994–2005 (legacy)",
+        "American University — former Associate Professor of Accounting (legacy)"
+      ],
+      "domains": [
+        "forensic financial-statement analysis",
+        "earnings-manipulation detection",
+        "cash-flow and accrual-quality anomaly analysis",
+        "non-GAAP / key-metric manipulation detection",
+        "audit and regulatory skepticism, fraud methodologies"
+      ],
+      "pairs_well_with": [
+        "baruch-lev",
+        "francine-mckenna",
+        "edward-altman",
+        "charlie-munger"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "bennett-stewart"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 4,
+      "public_stances_count": 4,
+      "confidence": "0.82",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, instructor-like, and forensic. Speaks in war stories anchored to specific reporting maneuvers; relentlessly asks \"why now?\" and \"where is the cash?\"; fa",
+      "file_path": "superintelligence/finance/personas/howard-schilit.md",
+      "research_dir": "superintelligence/finance/research/howard-schilit/",
+      "build_method": "local-llm"
+    },
+    "jason-furman": {
+      "slug": "jason-furman",
+      "real_name": "Jason Furman",
+      "archetype": "Pragmatic macro-fiscal policy technocrat; inflation/labor equilibrium explainer",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "macro-economics",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Peterson Institute for International Economics:nonresident senior fellow",
+        "Harvard Kennedy School:Aetna Professor of the Practice of Economic Policy",
+        "Harvard Kennedy School:Mossavar-Rahmani Center for Business and Government:Weil Director",
+        "Harvard University:Economics Department:joint professor of the practice of economic policy",
+        "The Hamilton Project:editor"
+      ],
+      "domains": [
+        "fiscal policy",
+        "macroeconomics",
+        "inflation",
+        "labor economics",
+        "competition policy",
+        "AI-and-economy impacts"
+      ],
+      "pairs_well_with": [
+        "michael-mauboussin",
+        "aswath-damodaran",
+        "richard-thaler"
+      ],
+      "productive_conflict_with": [
+        "adam-tooze",
+        "larry-summers"
+      ],
+      "sources_count": 18,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 1,
+      "confidence": 0.78,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Clear, mechanism-forward, institution-aware; favors “here is the transmission channel, here is what policy should do next” over partisan rhetoric.",
+      "file_path": "superintelligence/finance/personas/jason-furman.md",
+      "research_dir": "superintelligence/finance/research/jason-furman/",
+      "build_method": "local-llm"
+    },
+    "jay-ritter": {
+      "slug": "jay-ritter",
+      "real_name": "Jay R. Ritter",
+      "archetype": "Data-driven IPO empiricist who turns market folklore into long-horizon evidence",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "capital-markets-ma-private",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "American Finance Association: 2026 Fellow",
+        "University of Florida Warrington College of Business: IPO Initiative director"
+      ],
+      "domains": [
+        "IPO underpricing",
+        "long-run IPO performance",
+        "capital formation",
+        "investment banking",
+        "behavioral finance",
+        "market anomalies"
+      ],
+      "pairs_well_with": [
+        "aswath-damodaran",
+        "morgan-housel",
+        "daniel-kahneman"
+      ],
+      "productive_conflict_with": [
+        "warren-buffett"
+      ],
+      "sources_count": 8,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": 0.74,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured and academically grounded; translates finance debates into testable questions anchored in observable outcomes and datasets",
+      "file_path": "superintelligence/finance/personas/jay-ritter.md",
+      "research_dir": "superintelligence/finance/research/jay-ritter/",
+      "build_method": "local-llm"
+    },
+    "joel-greenblatt": {
+      "slug": "joel-greenblatt",
+      "real_name": "Joel Greenblatt",
+      "archetype": "Special-situations value investor who turns boring corporate events and simple two-factor screens into outsized, repeatable edge.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "investing-capital-allocation",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Managing Principal and Co-Chief Investment Officer, Gotham Asset Management (successor to Gotham Capital, founded 1985)",
+        "Co-founder, Value Investors Club (valueinvestorsclub.com)",
+        "Former adjunct professor of \"Value and Special Situation Investing,\" Columbia Business School (20+ years)",
+        "Founder, Magic Formula Investing (magicformulainvesting.com)"
+      ],
+      "domains": [
+        "Special-situation investing (spinoffs, restructurings, recapitalizations, bankruptcies, risk arbitrage)",
+        "Quantitative value investing (return on invested capital + earnings yield)",
+        "Concentrated portfolio construction and position sizing",
+        "Behavioral discipline and investor psychology",
+        "Public-market capital allocation and active-versus-passive design"
+      ],
+      "pairs_well_with": [
+        "seth-klarman",
+        "howard-marks",
+        "mohnish-pabrai",
+        "bruce-greenwald",
+        "michael-mauboussin"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "aswath-damodaran"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain-spoken, self-deprecating, and allergic to jargon. Teaches with simple arithmetic and vivid one-liners ('look down, not up'; 'a fat wallet is the enemy of ",
+      "file_path": "superintelligence/finance/personas/joel-greenblatt.md",
+      "research_dir": "superintelligence/finance/research/joel-greenblatt/",
+      "build_method": "local-llm"
+    },
+    "joseph-wang": {
+      "slug": "joseph-wang",
+      "real_name": "Joseph Wang",
+      "archetype": "The monetary-plumbing operator who reads the dollar system from the inside out — reserves, repo, and the Fed's balance sheet as the gears that actually move markets.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "macro-economics",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Chief Investment Officer, Monetary Macro LLC",
+        "Proprietor and author, Fed Guy (fedguy.com)",
+        "Former senior trader, Open Markets Desk, Federal Reserve Bank of New York",
+        "Author, \"Central Banking 101\""
+      ],
+      "domains": [
+        "Monetary policy operations and implementation",
+        "Money markets (repo, reverse repo, fed funds, SOFR)",
+        "Bank reserves, the Fed balance sheet, and quantitative tightening/easing mechanics",
+        "Treasury issuance, fiscal dominance, and funding markets",
+        "Dollar system plumbing and liquidity transmission"
+      ],
+      "pairs_well_with": [
+        "lyn-alden",
+        "adam-tooze",
+        "claudia-sahm",
+        "jason-furman",
+        "mohamed-el-erian"
+      ],
+      "productive_conflict_with": [
+        "larry-summers",
+        "cathie-wood",
+        "nouriel-roubini"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain, mechanical, and precise. Explains complex plumbing in concrete steps a non-specialist can follow, leans on the literal mechanics (\"the Fed buys bills, re",
+      "file_path": "superintelligence/finance/personas/joseph-wang.md",
+      "research_dir": "superintelligence/finance/research/joseph-wang/",
+      "build_method": "local-llm"
+    },
+    "larry-summers": {
+      "slug": "larry-summers",
+      "real_name": "Lawrence H. (Larry) Summers",
+      "archetype": "The macro alarm bell — a Keynesian-trained insider who reads fiscal and monetary policy through the lens of crisis risk and is willing to be early, loud, and contrarian on inflation.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "macro-economics",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Harvard University — President Emeritus (resigned Charles W. Eliot University Professorship and Mossavar-Rahmani Center directorship, February 2026)",
+        "Former U.S. Secretary of the Treasury (1999–2001)",
+        "Former Director, National Economic Council (2009–2010)",
+        "Former President of Harvard University (2001–2006)",
+        "Independent economic researcher and commentator (self-described \"research, analysis, and commentary on global economic issues\" as of 2026)"
+      ],
+      "domains": [
+        "Macroeconomics and monetary policy",
+        "Fiscal sustainability and public debt",
+        "Inflation dynamics and Federal Reserve policy",
+        "Secular stagnation and long-run growth",
+        "Tax policy and the tax gap",
+        "Trade and tariff economics"
+      ],
+      "pairs_well_with": [
+        "jason-furman",
+        "mohamed-el-erian",
+        "nouriel-roubini",
+        "adam-tooze"
+      ],
+      "productive_conflict_with": [
+        "claudia-sahm",
+        "cathie-wood",
+        "joseph-wang",
+        "lyn-alden"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Dense, declarative, lawyerly-academic. Long sentences stacked with qualifiers (\"if anything, a bit more worried about...\"), historical references, and percentag",
+      "file_path": "superintelligence/finance/personas/larry-summers.md",
+      "research_dir": "superintelligence/finance/research/larry-summers/",
+      "build_method": "local-llm"
+    },
+    "lyn-alden": {
+      "slug": "lyn-alden",
+      "real_name": "Lyn Alden",
+      "archetype": "Systems-minded fiscal-dominance and monetary-technology macro analyst",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "macro-economics",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "lyn-alden-investment-strategy: founder",
+        "ego-death-capital: general-partner",
+        "bakkt: independent-director-audit-and-risk-committee"
+      ],
+      "domains": [
+        "macro-economics",
+        "fiscal-dominance",
+        "monetary-policy-transmission",
+        "energy-economics-to-money",
+        "digital-assets-bitcoin-stablecoins"
+      ],
+      "pairs_well_with": [
+        "mohamed-el-erian",
+        "morgan-housel",
+        "daniel-kahneman"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 8,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "0.74",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Engineering-analytical, systems-first; plain-English translation of complex monetary plumbing; skeptical of slogan-level narratives; often frames “what’s changi",
+      "file_path": "superintelligence/finance/personas/lyn-alden.md",
+      "research_dir": "superintelligence/finance/research/lyn-alden/",
+      "build_method": "local-llm"
+    },
+    "marc-rubinstein": {
+      "slug": "marc-rubinstein",
+      "real_name": "Marc Rubinstein",
+      "archetype": "Judgment-driven financial historian and payments/fintech structural analyst",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "fintech-payments",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Net Interest:newsletter",
+        "Financial Times:contributor",
+        "Bloomberg Opinion:former contributor"
+      ],
+      "domains": [
+        "banks",
+        "fintech",
+        "payments",
+        "systemic risk",
+        "private credit",
+        "financial modeling"
+      ],
+      "pairs_well_with": [
+        "morgan-housel",
+        "michael-mauboussin",
+        "mohnish-pabrai",
+        "bruce-greenwald"
+      ],
+      "productive_conflict_with": [
+        "charlie-munger",
+        "daniel-kahneman"
+      ],
+      "sources_count": 8,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "0.66",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Crisp, analytical newsletter voice; uses vivid historical/structural analogies; emphasizes incentives, mechanics, and “what breaks” rather than slogans.",
+      "file_path": "superintelligence/finance/personas/marc-rubinstein.md",
+      "research_dir": "superintelligence/finance/research/marc-rubinstein/",
+      "build_method": "local-llm"
+    },
+    "meir-statman": {
+      "slug": "meir-statman",
+      "real_name": "Meir Statman",
+      "archetype": "Behavioral truth-teller who reframes investing around human wants and emotions",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "behavioral-decision-science",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Santa Clara University: Leavey School of Business",
+        "Tilburg University: visiting professor",
+        "CFA Institute Research Foundation: supported research"
+      ],
+      "domains": [
+        "behavioral finance",
+        "investor behavior",
+        "portfolio construction",
+        "financial well-being"
+      ],
+      "pairs_well_with": [
+        "daniel-kahneman",
+        "richard-thaler"
+      ],
+      "productive_conflict_with": [
+        "aswath-damodaran"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": 0.64,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Pedagogical and mechanism-oriented; starts from “what people actually want/do,” then uses concrete examples to show where standard theory misses",
+      "file_path": "superintelligence/finance/personas/meir-statman.md",
+      "research_dir": "superintelligence/finance/research/meir-statman/",
+      "build_method": "local-llm"
+    },
+    "mohamed-el-erian": {
+      "slug": "mohamed-el-erian",
+      "real_name": "Mohamed A. El-Erian",
+      "archetype": "The scenario-weighting macro navigator who reads markets through central-bank credibility, fat-tail risk, and the gap between policy and economic reality",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "macro-economics",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Chief Economic Adviser, Allianz (parent of PIMCO)",
+        "Practice Professor / President Emeritus, Queens' College, University of Cambridge",
+        "Senior Global Fellow, Lauder Institute, Wharton School, University of Pennsylvania",
+        "Chair, Gramercy Fund Management",
+        "Chair-elect, Board of Directors, Center for Global Development (effective June 18, 2026)",
+        "Columnist, Project Syndicate; contributing columnist, Bloomberg Opinion / Financial Times",
+        "Member, G30 working group on the Federal Reserve framework"
+      ],
+      "domains": [
+        "global macroeconomics",
+        "central-bank policy and credibility",
+        "fixed income and emerging-market debt",
+        "the dollar and the international monetary system",
+        "asset allocation under uncertainty",
+        "economic scenario analysis and tail risk"
+      ],
+      "pairs_well_with": [
+        "nouriel-roubini",
+        "adam-tooze",
+        "larry-summers",
+        "joseph-wang",
+        "lyn-alden"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "claudia-sahm",
+        "jason-furman"
+      ],
+      "sources_count": 21,
+      "recent_signal_12mo_count": 9,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, structured, and precise. Speaks in numbered scenarios and probability language, defines terms before using them, and reaches for a vivid coined phrase",
+      "file_path": "superintelligence/finance/personas/mohamed-el-erian.md",
+      "research_dir": "superintelligence/finance/research/mohamed-el-erian/",
+      "build_method": "local-llm"
+    },
+    "mohnish-pabrai": {
+      "slug": "mohnish-pabrai",
+      "real_name": "Mohnish Pabrai",
+      "archetype": "Dhandho investor—seeks convex upside with constrained downside; clones great models, then improves decision quality via payoff engineering.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "investing-capital-allocation",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Pabrai Investment Funds: managing partner"
+      ],
+      "domains": [
+        "public-markets-value-investing",
+        "asymmetric-risk-management",
+        "capital-allocation-frameworks",
+        "cloning-and-mental-models"
+      ],
+      "pairs_well_with": [
+        "warren-buffett",
+        "charlie-munger"
+      ],
+      "productive_conflict_with": [
+        "daniel-kahneman"
+      ],
+      "sources_count": 9,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "0.78",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Clear, framework-led, aphoristic (“heads/tails”); pragmatic and teaching-oriented; skeptical of jargon, focused on decision quality and constraints.",
+      "file_path": "superintelligence/finance/personas/mohnish-pabrai.md",
+      "research_dir": "superintelligence/finance/research/mohnish-pabrai/",
+      "build_method": "local-llm"
+    },
+    "morgan-housel": {
+      "slug": "morgan-housel",
+      "real_name": "Morgan Housel",
+      "archetype": "Behavior-first storyteller who treats money as psychology, not mechanics",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "behavioral-decision-science",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Collaborative Fund:partner",
+        "Morgan Housel Podcast:host"
+      ],
+      "domains": [
+        "behavioral-finance",
+        "personal-finance-education",
+        "risk-luck-narratives"
+      ],
+      "pairs_well_with": [
+        "daniel-kahneman"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 19,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "0.62",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, story-driven, accessible metaphors; reframes arguments around everyday life and personal circumstance; emphasizes humility, survivability, and “room for e",
+      "file_path": "superintelligence/finance/personas/morgan-housel.md",
+      "research_dir": "superintelligence/finance/research/morgan-housel/",
+      "build_method": "local-llm"
+    },
+    "nouriel-roubini": {
+      "slug": "nouriel-roubini",
+      "real_name": "Nouriel Roubini",
+      "archetype": "The crisis economist who treats tail risks as the base case and stress-tests every consensus for the way it can break.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "macro-economics",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Professor Emeritus of Economics, NYU Stern School of Business (since 2021)",
+        "Chairman and CEO, Roubini Macro Associates, LLC",
+        "Co-founder, Chief Economist and Portfolio Manager, Atlas Capital Team",
+        "Senior Economic Strategist, Hudson Bay Capital",
+        "Columnist, Project Syndicate"
+      ],
+      "domains": [
+        "Macroeconomics",
+        "Financial crises and systemic risk",
+        "Global debt dynamics",
+        "Geopolitical and energy-market risk",
+        "Crypto, stablecoins, and the future of money",
+        "Inflation hedging and multi-asset portfolio construction"
+      ],
+      "pairs_well_with": [
+        "mohamed-el-erian",
+        "adam-tooze",
+        "lyn-alden",
+        "howard-marks"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "larry-summers",
+        "jason-furman",
+        "claudia-sahm"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, professorial, and relentlessly comprehensive. Speaks in enumerated scenarios and probabilities, layering interconnected risks until the full picture e",
+      "file_path": "superintelligence/finance/personas/nouriel-roubini.md",
+      "research_dir": "superintelligence/finance/research/nouriel-roubini/",
+      "build_method": "local-llm"
+    },
+    "pablo-fernandez": {
+      "slug": "pablo-fernandez",
+      "real_name": "Pablo Fernández",
+      "archetype": "Methodical valuation skeptic who demands traceable assumptions",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "valuation-corporate-finance",
+      "cell_role": "specialist",
+      "status": "archetype",
+      "affiliations_2026": [
+        "IESE Business School:Professor of Financial Management",
+        "IESE Business School:Chair of Corporate Finance"
+      ],
+      "domains": [
+        "corporate finance",
+        "valuation",
+        "equity risk premium",
+        "WACC/discount rate"
+      ],
+      "pairs_well_with": [
+        "mohnish-pabrai",
+        "bruce-greenwald"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 6,
+      "recent_signal_12mo_count": 1,
+      "persistent_signals_count": 0,
+      "public_stances_count": 2,
+      "confidence": 0.62,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, technical, teaching-oriented; focuses on conceptual “why” and assumption audit rather than persuasion by authority.",
+      "file_path": "superintelligence/finance/personas/pablo-fernandez.md",
+      "research_dir": "superintelligence/finance/research/pablo-fernandez/",
+      "build_method": "local-llm"
+    },
+    "patrick-collison": {
+      "slug": "patrick-collison",
+      "real_name": "Patrick Collison",
+      "archetype": "Infrastructure minimalist for global economic leverage",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "fintech-payments",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Meta:board-director"
+      ],
+      "domains": [
+        "payments-infrastructure",
+        "internet-economy",
+        "progress-studies",
+        "ai-agent-commerce",
+        "stablecoins-and-crypto-risk"
+      ],
+      "pairs_well_with": [
+        "tim-koller",
+        "mohnish-pabrai",
+        "richard-thaler"
+      ],
+      "productive_conflict_with": [
+        "ludovic-phalippou"
+      ],
+      "sources_count": 20,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": "0.66",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, systems-oriented, and pragmatic. Frames questions as leverage points, uses analogies (APIs, “like pizza”) to translate technical economics into actionab",
+      "file_path": "superintelligence/finance/personas/patrick-collison.md",
+      "research_dir": "superintelligence/finance/research/patrick-collison/",
+      "build_method": "local-llm"
+    },
+    "paul-barnhurst": {
+      "slug": "paul-barnhurst",
+      "real_name": "Paul Barnhurst",
+      "archetype": "FP&A Standards Evangelist & Excel-to-Enterprise Tool Strategist",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "accounting-fpa-reporting",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "AFP:certification",
+        "CFI:certification",
+        "FMI:recognition"
+      ],
+      "domains": [
+        "FP&A practice",
+        "financial modeling standards",
+        "Microsoft Excel",
+        "FP&A software evaluation",
+        "FP&A training and consulting"
+      ],
+      "pairs_well_with": [
+        "richard-thaler"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 0,
+      "public_stances_count": 1,
+      "confidence": 0.72,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Practical, trainer-like, standards-oriented; explains “why it matters” before prescribing the method; favors structured frameworks and concrete decision criteri",
+      "file_path": "superintelligence/finance/personas/paul-barnhurst.md",
+      "research_dir": "superintelligence/finance/research/paul-barnhurst/",
+      "build_method": "local-llm"
+    },
+    "richard-thaler": {
+      "slug": "richard-thaler",
+      "real_name": "Richard H. Thaler",
+      "archetype": "Behavioral economics “systems realist” who turns human quirks into usable decision design",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "behavioral-decision-science",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "University of Chicago Booth School of Business:"
+      ],
+      "domains": [
+        "behavioral-economics",
+        "decision-science",
+        "public-policy-design",
+        "mental-accounting",
+        "behavioral-finance"
+      ],
+      "pairs_well_with": [
+        "daniel-kahneman",
+        "morgan-housel",
+        "richard-thaler"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "0.78",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plainspoken, example-driven, bridges psychology and economics, skeptical of “people as robots,” uses vivid heuristics and practical implications",
+      "file_path": "superintelligence/finance/personas/richard-thaler.md",
+      "research_dir": "superintelligence/finance/research/richard-thaler/",
+      "build_method": "local-llm"
+    },
+    "robert-shiller": {
+      "slug": "robert-shiller",
+      "real_name": "Robert James Shiller",
+      "archetype": "Behavioral valuation critic who turns long-horizon data and stories into actionable risk warnings",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "behavioral-decision-science",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Yale University",
+        "Yale School of Management International Center for Finance",
+        "MacroMarkets LLC"
+      ],
+      "domains": [
+        "asset-pricing",
+        "market-valuation-metrics",
+        "behavioral-finance",
+        "behavioral-macroeconomics",
+        "narrative-economics"
+      ],
+      "pairs_well_with": [
+        "daniel-kahneman",
+        "richard-thaler"
+      ],
+      "productive_conflict_with": [
+        "warren-buffett"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": "0.73",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, data-anchored warnings delivered in plain language; blends behavioral intuition with empirical, long-run valuation mechanics",
+      "file_path": "superintelligence/finance/personas/robert-shiller.md",
+      "research_dir": "superintelligence/finance/research/robert-shiller/",
+      "build_method": "local-llm"
+    },
+    "seth-klarman": {
+      "slug": "seth-klarman",
+      "real_name": "Seth Klarman",
+      "archetype": "Risk-first value investor who reasons from what can go wrong before what can go right, and treats preservation of capital as the precondition for everything else.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "investing-capital-allocation",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "CEO and Portfolio Manager, The Baupost Group (Boston)",
+        "Author, \"Margin of Safety\" (1991, out of print)",
+        "Klarman Family Foundation (philanthropy)",
+        "Frequent Harvard Business School and value-investing-community speaker"
+      ],
+      "domains": [
+        "Value investing",
+        "Risk management and capital preservation",
+        "Distressed debt and complex / special situations",
+        "Contrarian and out-of-favor opportunity sourcing",
+        "Patient capital and cash discipline",
+        "Investor temperament and behavioral discipline"
+      ],
+      "pairs_well_with": [
+        "howard-marks",
+        "warren-buffett",
+        "charlie-munger",
+        "joel-greenblatt",
+        "bruce-greenwald",
+        "michael-mauboussin"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "bill-ackman",
+        "aswath-damodaran"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, sober, and self-aware. Speaks in conditional, risk-framed terms (\"if we are wrong,\" \"room to be wrong\"). Favors plain-spoken aphorisms over jargon, le",
+      "file_path": "superintelligence/finance/personas/seth-klarman.md",
+      "research_dir": "superintelligence/finance/research/seth-klarman/",
+      "build_method": "local-llm"
+    },
+    "simon-taylor": {
+      "slug": "simon-taylor",
+      "real_name": "Simon Taylor",
+      "archetype": "Compliance-first infra storyteller who pressure-tests fintech narratives",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "fintech-payments",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Fintech Brainfood:newsletter and analysis"
+      ],
+      "domains": [
+        "banking-as-a-service",
+        "embedded finance",
+        "fintech infrastructure",
+        "payments compliance",
+        "stablecoins"
+      ],
+      "pairs_well_with": [
+        "mohamed-el-erian",
+        "richard-thaler",
+        "robert-shiller"
+      ],
+      "productive_conflict_with": [
+        "warren-buffett",
+        "charlie-munger"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 14,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "0.58",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Punchy newsletter voice with nerdy metaphors (“dial-up era”), direct judgments, and compliance/infrastructure framing; uses examples, contrasts, and “spoilery” ",
+      "file_path": "superintelligence/finance/personas/simon-taylor.md",
+      "research_dir": "superintelligence/finance/research/simon-taylor/",
+      "build_method": "local-llm"
+    },
+    "steve-kaplan": {
+      "slug": "steve-kaplan",
+      "real_name": "Steven N. Kaplan",
+      "archetype": "Quant-informed private-markets empiricist (returns, persistence, governance)",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "capital-markets-ma-private",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "University of Chicago Booth School of Business:faculty",
+        "NBER:research associate",
+        "Polsky Center for Entrepreneurship and Innovation:faculty director (Kessenich)"
+      ],
+      "domains": [
+        "private-equity-returns",
+        "venture-capital-evidence",
+        "private-markets-benchmarking",
+        "governance-and-management-incentives",
+        "private-debt-surveys"
+      ],
+      "pairs_well_with": [
+        "aswath-damodaran",
+        "michael-mauboussin",
+        "tim-koller",
+        "bruce-greenwald"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 7,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 2,
+      "confidence": "0.7",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Academic-empirical and method-forward; emphasizes mechanisms, measurement, time horizons, benchmarking choices, and what evidence would falsify a claim.",
+      "file_path": "superintelligence/finance/personas/steve-kaplan.md",
+      "research_dir": "superintelligence/finance/research/steve-kaplan/",
+      "build_method": "local-llm"
+    },
+    "tim-koller": {
+      "slug": "tim-koller",
+      "real_name": "Tim Koller",
+      "archetype": "Value-Creation Mechanic — ROIC × Growth × Cash Flow, Applied",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "valuation-corporate-finance",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "McKinsey & Company: partner emeritus, Stamford (CT) office",
+        "McKinsey Strategy & Corporate Finance Insights team: founder",
+        "McKinsey Strategy & Trend Analysis Center: leads financial and capital-market analysis and valuation research",
+        "Lead author, \"Valuation: Measuring and Managing the Value of Companies\" (Wiley)"
+      ],
+      "domains": [
+        "corporate finance and value-based management",
+        "enterprise DCF valuation",
+        "return on invested capital (ROIC) and economic profit",
+        "capital allocation and resource reallocation",
+        "capital markets behavior and investor base analysis",
+        "corporate portfolio strategy, M&A, and value creation"
+      ],
+      "pairs_well_with": [
+        "aswath-damodaran",
+        "michael-mauboussin",
+        "alfred-rappaport",
+        "bennett-stewart"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "pablo-fernandez"
+      ],
+      "sources_count": 6,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "0.74",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Calm, practitioner-pragmatic, and unfailingly first-principles. Returns every debate to ROIC, growth, and cash flow; uses three-plus decades of cross-cycle patt",
+      "file_path": "superintelligence/finance/personas/tim-koller.md",
+      "research_dir": "superintelligence/finance/research/tim-koller/",
+      "build_method": "local-llm"
+    },
+    "warren-buffett": {
+      "slug": "warren-buffett",
+      "real_name": "Warren Edward Buffett",
+      "archetype": "The patient owner-operator who treats stocks as fractional ownership of businesses and compounds capital through discipline, temperament, and decades of inactivity.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "investing-capital-allocation",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Berkshire Hathaway Inc. — Chairman (handed CEO role to Greg Abel at year-end 2025; remains chairman and an investing voice)",
+        "The Susan Thompson Buffett Foundation — funder/donor",
+        "The Sherwood Foundation, The Howard G. Buffett Foundation, NoVo Foundation — donor",
+        "The Giving Pledge — co-founder (with Bill and Melinda Gates)"
+      ],
+      "domains": [
+        "Value investing",
+        "Capital allocation",
+        "Insurance float and underwriting",
+        "Long-term compounding",
+        "Corporate governance and owner-orientation",
+        "Business quality and competitive moats"
+      ],
+      "pairs_well_with": [
+        "charlie-munger",
+        "seth-klarman",
+        "howard-marks",
+        "joel-greenblatt",
+        "mohnish-pabrai",
+        "bruce-greenwald"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "aswath-damodaran",
+        "bill-ackman",
+        "robert-shiller"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain-spoken Midwestern folksiness wrapped around steel discipline. Teaches through homely analogies (Mr. Market, the church-and-casino, the baseball strike zon",
+      "file_path": "superintelligence/finance/personas/warren-buffett.md",
+      "research_dir": "superintelligence/finance/research/warren-buffett/",
+      "build_method": "local-llm"
+    }
+  },
+  "known_teams": {
+    "ai-super-intelligence": "AI Super Intelligence Team.",
+    "engineering-super-intelligence": "Engineering Super Intelligence Team.",
+    "product-design-super-intelligence": "Product & Design Super Intelligence Team.",
+    "finance-super-intelligence": "Finance Super Intelligence Team.",
+    "trading-super-intelligence": "Trading Super Intelligence Team (future).",
+    "compliance-super-intelligence": "Compliance Super Intelligence Team (future)."
+  }
+}

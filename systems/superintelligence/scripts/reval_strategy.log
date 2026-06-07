@@ -1,0 +1,59 @@
+WARN: skipping andrei-hagiu.md: while parsing a block collection
+  in "<unicode string>", line 33, column 3:
+      - "Invisible Engines: How Softwa ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 33, column 91:
+     ... ation and Transform Industries" (with David Evans and Richard Sc ... 
+                                         ^
+WARN: skipping chris-bradley.md: while parsing a block collection
+  in "<unicode string>", line 27, column 3:
+      - "Strategy Beyond the Hockey St ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 27, column 40:
+     ... rategy Beyond the Hockey Stick" (2018, with Martin Hirt and Sven ... 
+                                         ^
+WARN: skipping dan-lovallo.md: while parsing a block collection
+  in "<unicode string>", line 28, column 3:
+      - "Timid Choices and Bold Foreca ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 28, column 80:
+     ... ive Perspective on Risk Taking" (with Daniel Kahneman, Managemen ... 
+                                         ^
+WARN: skipping michael-porter.md: while parsing a block collection
+  in "<unicode string>", line 96, column 3:
+      - Framework assumes relatively s ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 99, column 27:
+      - "Stuck in the middle" doctrine is contested by firms ( ... 
+                              ^
+WARN: skipping richard-rumelt.md: while parsing a block collection
+  in "<unicode string>", line 11, column 3:
+      - UCLA Anderson School of Manage ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 13, column 31:
+      - "The Rumelt Perspectives" (Substack publication, renamed J ... 
+                                  ^
+WARN: skipping roger-martin.md: while parsing a block collection
+  in "<unicode string>", line 22, column 3:
+      - Strategy Choice Cascade — five ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 23, column 35:
+      - "What would have to be true?" — reverse-testing the conditions ... 
+                                      ^
+Wrote /Users/Rijul_Kalra/projects/coco-platform/superintelligence/strategy/registry.json (25 personas [23 native + 2 cross-listed], 7 cells).
+  wrote cells/competitive-strategy-advantage.md (3 personas, 2 tensions)
+  wrote cells/growth-innovation.md (6 personas, 3 tensions)
+  wrote cells/corporate-portfolio-strategy.md (3 personas, 0 tensions)
+  wrote cells/strategy-execution-org.md (4 personas, 0 tensions)
+  wrote cells/game-theory-decision.md (4 personas, 1 tensions)
+  wrote cells/behavioral-strategy-bias.md (2 personas, 0 tensions)
+  wrote cells/platform-ecosystem-strategy.md (3 personas, 0 tensions)
+Wrote 7 cell docs.
+strategy: 15/29 PASS, 14 NEEDS-TOPUP -> /Users/Rijul_Kalra/projects/coco-platform/superintelligence/strategy/VALIDATION.md
+NEEDS-TOPUP: adam-brandenburger andrei-hagiu chris-bradley dan-lovallo donald-sull geoffrey-moore hamilton-helmer jeroen-kraaijenbrink marshall-van-alstyne michael-porter phil-rosenzweig richard-rumelt rita-mcgrath roger-martin

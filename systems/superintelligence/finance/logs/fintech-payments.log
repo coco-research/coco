@@ -1,0 +1,10 @@
+building 7 persona(s) with qwen/qwen3.6-35b-a3b
+[1/7] patrick-collison         ERROR HTTPError: HTTP Error 400: Bad Request
+[2/7] simon-taylor             ERROR HTTPError: HTTP Error 400: Bad Request
+[3/7] marc-rubinstein          ERROR HTTPError: HTTP Error 400: Bad Request
+[4/7] angela-strange           ERROR HTTPError: HTTP Error 400: Bad Request
+[5/7] frank-rotman             ERROR HTTPError: HTTP Error 400: Bad Request
+[6/7] matt-harris              ERROR HTTPError: HTTP Error 400: Bad Request
+[7/7] david-birch              NEEDS-TOPUP urls 0/0 363s  no leading frontmatter delimiter
+
+DONE: 0/7 PASS

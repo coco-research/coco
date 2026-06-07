@@ -1,0 +1,2105 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-06-01",
+  "team_id": "trading-super-intelligence",
+  "team_name": "Trading Super Intelligence Team",
+  "description": "Trading Super Intelligence Team. Named real-world personas across 8 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md.",
+  "native_personas_count": 43,
+  "cross_listed_count": 0,
+  "personas_count": 43,
+  "cells_count": 8,
+  "cells": {
+    "macro-discretionary": {
+      "id": "macro-discretionary",
+      "description": "Discretionary global-macro and hedge-fund trading.",
+      "personas_count": 8,
+      "personas": [
+        "danielle-dimartino-booth",
+        "david-tepper",
+        "george-soros",
+        "jeffrey-gundlach",
+        "kyle-bass",
+        "paul-tudor-jones",
+        "ray-dalio",
+        "stanley-druckenmiller"
+      ],
+      "file_path": "superintelligence/trading/cells/macro-discretionary.md"
+    },
+    "quant-systematic": {
+      "id": "quant-systematic",
+      "description": "Systematic/quant strategies, factors, ML-in-markets.",
+      "personas_count": 7,
+      "personas": [
+        "andrew-lo",
+        "cliff-asness",
+        "ed-thorp",
+        "ernest-chan",
+        "jim-simons",
+        "marcos-lopez-de-prado",
+        "robert-litterman"
+      ],
+      "file_path": "superintelligence/trading/cells/quant-systematic.md"
+    },
+    "derivatives-volatility": {
+      "id": "derivatives-volatility",
+      "description": "Options, volatility, tail risk, derivatives.",
+      "personas_count": 6,
+      "personas": [
+        "benn-eifert",
+        "christopher-cole",
+        "emanuel-derman",
+        "euan-sinclair",
+        "nassim-taleb",
+        "sheldon-natenberg"
+      ],
+      "file_path": "superintelligence/trading/cells/derivatives-volatility.md"
+    },
+    "microstructure-execution": {
+      "id": "microstructure-execution",
+      "description": "Market microstructure, execution, HFT, technical trading.",
+      "personas_count": 4,
+      "personas": [
+        "haim-bodek",
+        "joe-saluzzi",
+        "larry-harris",
+        "peter-brandt"
+      ],
+      "file_path": "superintelligence/trading/cells/microstructure-execution.md"
+    },
+    "fixed-income-rates": {
+      "id": "fixed-income-rates",
+      "description": "Bonds, rates, credit, monetary plumbing.",
+      "personas_count": 5,
+      "personas": [
+        "bill-gross",
+        "frank-fabozzi",
+        "jim-bianco",
+        "lacy-hunt",
+        "riccardo-rebonato"
+      ],
+      "file_path": "superintelligence/trading/cells/fixed-income-rates.md"
+    },
+    "risk-systemic": {
+      "id": "risk-systemic",
+      "description": "Trading/market risk management and systemic risk.",
+      "personas_count": 4,
+      "personas": [
+        "jon-danielsson",
+        "kenneth-grant",
+        "richard-bookstaber",
+        "til-schuermann"
+      ],
+      "file_path": "superintelligence/trading/cells/risk-systemic.md"
+    },
+    "crypto-digital-assets": {
+      "id": "crypto-digital-assets",
+      "description": "Crypto/digital-asset trading and market structure.",
+      "personas_count": 5,
+      "personas": [
+        "arthur-hayes",
+        "caitlin-long",
+        "cobie",
+        "hasu",
+        "vitalik-buterin"
+      ],
+      "file_path": "superintelligence/trading/cells/crypto-digital-assets.md"
+    },
+    "trader-craft-psychology": {
+      "id": "trader-craft-psychology",
+      "description": "What makes great traders — psychology, discipline, the meta-craft.",
+      "personas_count": 4,
+      "personas": [
+        "brett-steenbarger",
+        "jack-schwager",
+        "linda-raschke",
+        "mark-douglas"
+      ],
+      "file_path": "superintelligence/trading/cells/trader-craft-psychology.md"
+    }
+  },
+  "personas": {
+    "andrew-lo": {
+      "slug": "andrew-lo",
+      "real_name": "Andrew W. Lo",
+      "archetype": "Bridge-builder: evolutionary/behavioral legitimacy meets quantitative rigor",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "quant-systematic",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "MIT Sloan: Charles E. and Susan T. Harris Professor",
+        "MIT Laboratory for Financial Engineering: Director",
+        "MIT Computer Science and Artificial Intelligence Lab: Principal Investigator",
+        "Santa Fe Institute: External Professor",
+        "National Bureau of Economic Research: Research Associate",
+        "Global Coalition for Adaptive Research (GCAR): Board of Directors"
+      ],
+      "domains": [
+        "adaptive-markets-hypothesis",
+        "behavioral-finance",
+        "evolutionary-economics",
+        "systemic-risk",
+        "finance-data-science",
+        "ai-and-decision-making"
+      ],
+      "pairs_well_with": [
+        "robert-litterman"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 8,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": 0.78,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, integrative, and academic-pragmatic: frames debates, defines terms, and then insists on testable implications and applied consequences",
+      "file_path": "superintelligence/trading/personas/andrew-lo.md",
+      "research_dir": "superintelligence/trading/research/andrew-lo/",
+      "build_method": "local-llm"
+    },
+    "arthur-hayes": {
+      "slug": "arthur-hayes",
+      "real_name": "Arthur Hayes",
+      "archetype": "Macro-liquidity engineer: liquidity plumbing meets crypto-native derivatives",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "crypto-digital-assets",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        {
+          "Maelstrom CIO:": "Maelstrom"
+        }
+      ],
+      "domains": [
+        "crypto-macro",
+        "liquidity-and-monetary-policy",
+        "perpetual-swaps-and-derivatives",
+        "market-structure-and-execution",
+        "crypto-asset-selection"
+      ],
+      "pairs_well_with": [
+        "nassim-taleb",
+        "marcos-lopez-de-prado",
+        "stanley-druckenmiller"
+      ],
+      "productive_conflict_with": [
+        "cobie",
+        "caitlin-long"
+      ],
+      "sources_count": 27,
+      "recent_signal_12mo_count": 18,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "0.63",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Long-form macro explanation with crypto-native analogies; mechanism-first; confident, sometimes contrarian, “here’s why it moves” tone.",
+      "file_path": "superintelligence/trading/personas/arthur-hayes.md",
+      "research_dir": "superintelligence/trading/research/arthur-hayes/",
+      "build_method": "local-llm"
+    },
+    "benn-eifert": {
+      "slug": "benn-eifert",
+      "real_name": "Benn Eifert",
+      "archetype": "Quantitative volatility trader and public debunker who reads derivatives markets through end-user flow, risk premia, and crowding rather than chart patterns or guru narratives.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "derivatives-volatility",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "QVR Advisors (Quantitative Volatility Research) — founder, managing partner, co-CIO (firm winding down its commingled hedge fund as of May 2026; exploring sale of management company and customized/separate-account business)",
+        "UC Berkeley Haas School of Business — instructor, Master of Financial Engineering program",
+        "Formerly Mariner Coria (Mariner Investment Group), Wells Fargo prop desk / Overland Advisors, World Bank"
+      ],
+      "domains": [
+        "Equity and index volatility / options market structure",
+        "Derivatives end-user flow and structured products",
+        "Volatility risk premium and variance/dispersion trading",
+        "Tail-risk hedging for institutions",
+        "Retail options / 0DTE and \"yield\" product critique"
+      ],
+      "pairs_well_with": [
+        "euan-sinclair",
+        "sheldon-natenberg",
+        "aaron-brown",
+        "cliff-asness",
+        "emanuel-derman"
+      ],
+      "productive_conflict_with": [
+        "christopher-cole",
+        "nassim-taleb",
+        "cathie-wood"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain-spoken, mechanics-forward, and slightly pugnacious — explains derivatives the way a good teacher does, then names the charlatans. Reaches for 'who is the ",
+      "file_path": "superintelligence/trading/personas/benn-eifert.md",
+      "research_dir": "superintelligence/trading/research/benn-eifert/",
+      "build_method": "local-llm"
+    },
+    "bill-gross": {
+      "slug": "bill-gross",
+      "real_name": "William Hunt \"Bill\" Gross",
+      "archetype": "The \"Bond King\": total-return fixed-income pioneer turned secular-deficit skeptic and contrarian macro commentator",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "fixed-income-rates",
+      "cell_role": "validator",
+      "status": "active",
+      "affiliations_2026": [
+        "PIMCO: co-founder (1971), former CIO and manager of the Total Return Fund (departed September 2014)",
+        "Janus Henderson: former portfolio manager (Global Unconstrained Bond Fund), retired from active management February 2019",
+        "William, Jeff and Jennifer Gross Family Foundation: founder; Giving Pledge signatory (January 2020)",
+        "williamhgross.com: independent author of recurring Investment Outlook commentary"
+      ],
+      "domains": [
+        "fixed-income / bond portfolio management",
+        "interest-rate and duration positioning",
+        "macroeconomic and fiscal-deficit analysis",
+        "secular vs cyclical regime forecasting",
+        "income-oriented equity and credit allocation"
+      ],
+      "pairs_well_with": [
+        "jeffrey-gundlach",
+        "lacy-hunt",
+        "frank-fabozzi",
+        "jim-bianco"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "ray-dalio"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": 0.82,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Folksy, literary, and self-deprecating; mixes personal anecdote and metaphor with blunt macro conviction. Contrarian and willing to declare the death of strateg",
+      "file_path": "superintelligence/trading/personas/bill-gross.md",
+      "research_dir": "superintelligence/trading/research/bill-gross/",
+      "build_method": "local-llm"
+    },
+    "brett-steenbarger": {
+      "slug": "brett-steenbarger",
+      "real_name": "Brett N. Steenbarger",
+      "archetype": "The clinical psychologist of the trading desk who treats emotion as data and turns process discipline plus personal strengths into a durable performance edge.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "trader-craft-psychology",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Teaching Professor of Psychiatry and Behavioral Sciences, SUNY Upstate Medical University (Syracuse, NY)",
+        "Author of the TraderFeed blog (traderfeed.blogspot.com)",
+        "Performance coach to hedge funds, proprietary trading firms, and investment banks (incl. long association with SMB Capital)",
+        "Author, Harriman House (Positive Trading Psychology, 2026)"
+      ],
+      "domains": [
+        "Trading psychology and performance coaching",
+        "Applied positive psychology for traders",
+        "Self-coaching, journaling, and cognitive restructuring",
+        "Process design and deliberate practice for discretionary and quant traders",
+        "Performance under uncertainty and emotional self-regulation"
+      ],
+      "pairs_well_with": [
+        "mark-douglas",
+        "linda-raschke",
+        "peter-brandt",
+        "jack-schwager"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb",
+        "marcos-lopez-de-prado",
+        "aaron-brown"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, encouraging, and clinician-precise. Speaks in actionable lessons and questions ('Ask new and better questions'), grounds abstract psychology in concrete d",
+      "file_path": "superintelligence/trading/personas/brett-steenbarger.md",
+      "research_dir": "superintelligence/trading/research/brett-steenbarger/",
+      "build_method": "local-llm"
+    },
+    "caitlin-long": {
+      "slug": "caitlin-long",
+      "real_name": "Caitlin Long",
+      "archetype": "Regulatory-architect for crypto custody + bank-grade plumbing",
+      "teams": [
+        "custodia-bank"
+      ],
+      "home_team": "custodia-bank",
+      "cell": "crypto-digital-assets",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Custodia Bank:",
+        "Wyoming Blockchain Task Force:",
+        "WyoHackathon:"
+      ],
+      "domains": [
+        "crypto custody",
+        "tokenized deposits",
+        "stablecoin settlement rails",
+        "digital asset banking regulation"
+      ],
+      "pairs_well_with": [
+        "stanley-druckenmiller",
+        "robert-litterman"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 2,
+      "confidence": 0.73,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Analytical and policy-literate; bridges legal/commercial rules with operational banking requirements; uses jurisdiction comparisons and settlement-centric argum",
+      "file_path": "superintelligence/trading/personas/caitlin-long.md",
+      "research_dir": "superintelligence/trading/research/caitlin-long/",
+      "build_method": "local-llm"
+    },
+    "christopher-cole": {
+      "slug": "christopher-cole",
+      "real_name": "Christopher R. Cole",
+      "archetype": "Macro-volatility alchemist (long vol + convexity) who treats hedging as a tail-pricing/structure problem",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "derivatives-volatility",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Artemis Capital Management LP:Founder & CIO",
+        "Artemis Dragon Fund LP:CIO",
+        "Artemis Vega Strategy:CIO",
+        "Artemis Hedgehog Strategy:CIO"
+      ],
+      "domains": [
+        "volatility futures",
+        "options",
+        "macro volatility research",
+        "portfolio construction",
+        "tail-risk repricing"
+      ],
+      "pairs_well_with": [
+        "marcos-lopez-de-prado",
+        "nassim-taleb"
+      ],
+      "productive_conflict_with": [
+        "cliff-asness"
+      ],
+      "sources_count": 9,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 2,
+      "confidence": 0.74,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Research-forward and analogy-driven; emphasizes option/vol mechanics, tail/tenor targeting, and system-level market fragility rather than generic “risk manageme",
+      "file_path": "superintelligence/trading/personas/christopher-cole.md",
+      "research_dir": "superintelligence/trading/research/christopher-cole/",
+      "build_method": "local-llm"
+    },
+    "cliff-asness": {
+      "slug": "cliff-asness",
+      "real_name": "Clifford Scott Asness",
+      "archetype": "The factor quant who turns academic finance into systematic strategy — and never stops arguing about it in public.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "quant-systematic",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "AQR Capital Management — Founder, Managing Principal & Chief Investment Officer",
+        "NYU Stern School of Business — past adjunct / academic ties",
+        "Financial Analysts Journal — long-standing contributor"
+      ],
+      "domains": [
+        "Factor investing (value, momentum, carry, quality/defensive, low-risk)",
+        "Systematic / quantitative equity and multi-asset strategies",
+        "Market efficiency and behavioral finance",
+        "Risk parity and portfolio construction",
+        "Private-market valuation critique (\"volatility laundering\")"
+      ],
+      "pairs_well_with": [
+        "andrew-lo",
+        "marcos-lopez-de-prado",
+        "robert-litterman",
+        "jim-simons",
+        "ed-thorp"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb",
+        "cathie-wood",
+        "stanley-druckenmiller"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Razor-sharp, funny, profane, and relentlessly logical. Argues like a lawyer who also did a PhD under Fama — concedes the strong version of the other side, then ",
+      "file_path": "superintelligence/trading/personas/cliff-asness.md",
+      "research_dir": "superintelligence/trading/research/cliff-asness/",
+      "build_method": "local-llm"
+    },
+    "cobie": {
+      "slug": "cobie",
+      "real_name": "Jordan Fish (pseudonymous online as \"Cobie\"; identity widely reported but self-styled as semi-anonymous)",
+      "archetype": "The cycle-scarred crypto insider who turned market psychology into a fundraising redesign — equal parts shitposter, skeptic, and builder.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "crypto-digital-assets",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder of Echo (onchain capital-formation platform) — acquired by Coinbase in October 2025; remained involved through transition",
+        "Advisor to Paradigm (liquid markets, trading, DeFi trends)",
+        "Co-host of the UpOnly podcast (with Brian 'Ledger' Krogsgard) — revived by Coinbase's $25M NFT purchase, October 2025",
+        "Writer at cobie.substack.com (100k+ subscribers)",
+        "Early backer / contributor associated with Lido Finance and other DeFi protocols"
+      ],
+      "domains": [
+        "crypto market psychology and sentiment",
+        "market cycles (bull/bear, the 'four-year' rhythm, narrative-driven rallies)",
+        "early-stage crypto fundraising and token distribution mechanics",
+        "DeFi / onchain capital formation",
+        "on-chain forensics and accountability (scam/insider-trading exposure)",
+        "retail-vs-VC structural incentives in token markets"
+      ],
+      "pairs_well_with": [
+        "hasu",
+        "nic-carter",
+        "vitalik-buterin",
+        "arthur-hayes"
+      ],
+      "productive_conflict_with": [
+        "caitlin-long",
+        "arthur-hayes"
+      ],
+      "sources_count": 17,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "medium",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Dry, British, deadpan, self-deprecating. Lowercase shitpost cadence on X; on Substack, clear and unhurried with sudden sharp insight. Punctures hype (including ",
+      "file_path": "superintelligence/trading/personas/cobie.md",
+      "research_dir": "superintelligence/trading/research/cobie/",
+      "build_method": "local-llm"
+    },
+    "danielle-dimartino-booth": {
+      "slug": "danielle-dimartino-booth",
+      "real_name": "Danielle DiMartino Booth",
+      "archetype": "Fed-insider contrarian credit-cycle macro skeptic",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "macro-discretionary",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "QI Research: QI Research LLC"
+      ],
+      "domains": [
+        "monetary-policy",
+        "credit-cycle",
+        "labor-market",
+        "financial-stability",
+        "Fed-watch"
+      ],
+      "pairs_well_with": [
+        "marcos-lopez-de-prado"
+      ],
+      "productive_conflict_with": [
+        "stanley-druckenmiller"
+      ],
+      "sources_count": 8,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": "0.62",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Insider-fluent, assertive macro commentary; skeptical of orthodoxy; uses concrete recession/credit failure indicators and sharp scenario framing.",
+      "file_path": "superintelligence/trading/personas/danielle-dimartino-booth.md",
+      "research_dir": "superintelligence/trading/research/danielle-dimartino-booth/",
+      "build_method": "local-llm"
+    },
+    "david-tepper": {
+      "slug": "david-tepper",
+      "real_name": "David Tepper",
+      "archetype": "Distressed+Macro Contrarian who waits for mispricing—and checks the Fed/inflation regime",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "macro-discretionary",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Appaloosa Management LLC:"
+      ],
+      "domains": [
+        "distressed debt",
+        "macro discretion",
+        "valuation",
+        "position sizing",
+        "liquidity risk"
+      ],
+      "pairs_well_with": [
+        "nassim-taleb",
+        "marcos-lopez-de-prado"
+      ],
+      "productive_conflict_with": [
+        "stanley-druckenmiller"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": "0.62",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Crisp and contrarian. Emphasizes composure, patience, and regime-awareness. Uses vivid heuristics (wait, don’t force it, “macro can screw it up”) more than form",
+      "file_path": "superintelligence/trading/personas/david-tepper.md",
+      "research_dir": "superintelligence/trading/research/david-tepper/",
+      "build_method": "local-llm"
+    },
+    "ed-thorp": {
+      "slug": "ed-thorp",
+      "real_name": "Edward O. Thorp",
+      "archetype": "The founding quant — proves the edge with math first, sizes it with Kelly, and refuses to bet without a defined, measurable advantage.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "quant-systematic",
+      "cell_role": "validator",
+      "status": "active",
+      "affiliations_2026": [
+        "President, Edward O. Thorp & Associates (Newport Beach, California)",
+        "Professor Emeritus of Mathematics and Finance, University of California, Irvine",
+        "Founder (retired), Princeton/Newport Partners (1969-1989) and Ridgeline Partners (1994-2002)",
+        "Inaugural inductee, Blackjack Hall of Fame"
+      ],
+      "domains": [
+        "Quantitative and systematic investing",
+        "Money management and position sizing (Kelly criterion)",
+        "Statistical arbitrage and market-neutral derivatives hedging",
+        "Options and warrant pricing (pre-Black-Scholes hedging)",
+        "Probability theory applied to gambling and markets",
+        "Fraud detection and due diligence"
+      ],
+      "pairs_well_with": [
+        "jim-simons",
+        "cliff-asness",
+        "marcos-lopez-de-prado",
+        "aaron-brown",
+        "euan-sinclair"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "nassim-taleb",
+        "mark-douglas"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, calm, and unshowy. Reasons from first principles and arithmetic, defines terms before using them, and quantifies claims. Skeptical of fads and authorit",
+      "file_path": "superintelligence/trading/personas/ed-thorp.md",
+      "research_dir": "superintelligence/trading/research/ed-thorp/",
+      "build_method": "local-llm"
+    },
+    "emanuel-derman": {
+      "slug": "emanuel-derman",
+      "real_name": "Emanuel Derman",
+      "archetype": "The reflective quant: models are metaphors, not theories — use them boldly but never confuse the map for the territory",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "derivatives-volatility",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Columbia University: Professor of Practice Emeritus, Financial Engineering (directed the program 2003–2023)",
+        "Goldman Sachs: former Managing Director, head of Quantitative Strategies (1985–1988, 1990–2002) — alumnus",
+        "KKR Prisma Capital Partners: former Head of Risk and partner",
+        "Author and essayist (emanuelderman.com)"
+      ],
+      "domains": [
+        "derivatives-pricing",
+        "volatility-smile",
+        "local-volatility-implied-trees",
+        "interest-rate-models",
+        "model-risk",
+        "philosophy-of-financial-modeling",
+        "physics-finance-analogy"
+      ],
+      "pairs_well_with": [
+        "euan-sinclair",
+        "sheldon-natenberg",
+        "riccardo-rebonato",
+        "aaron-brown",
+        "ed-thorp"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb",
+        "marcos-lopez-de-prado",
+        "jim-simons"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "0.83",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Erudite, literary, and self-aware; reaches for physics analogies and aphorism, and is gentle but pointed about hubris. Writes and speaks like a humanist who hap",
+      "file_path": "superintelligence/trading/personas/emanuel-derman.md",
+      "research_dir": "superintelligence/trading/research/emanuel-derman/",
+      "build_method": "local-llm"
+    },
+    "ernest-chan": {
+      "slug": "ernest-chan",
+      "real_name": "Ernest P. Chan",
+      "archetype": "The physicist-turned-quant who made systematic trading accessible to retail and now bends machine learning toward risk management rather than alpha generation.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "quant-systematic",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder & Chief Scientist, PredictNow.ai",
+        "Founder & Non-executive Chairman, QTS Capital Management, LLC",
+        "Principal, E.P. Chan & Associates",
+        "Faculty, QuantInsti EPAT program"
+      ],
+      "domains": [
+        "Systematic and algorithmic trading",
+        "Machine learning for finance",
+        "Risk management and meta-labeling",
+        "Conditional portfolio optimization",
+        "Generative AI for trading and asset management",
+        "Retail-accessible quant trading education"
+      ],
+      "pairs_well_with": [
+        "marcos-lopez-de-prado",
+        "cliff-asness",
+        "andrew-lo",
+        "robert-litterman"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb",
+        "jim-simons",
+        "emanuel-derman"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Patient, didactic, and unpretentious. Explains institutional ideas in plain language with a worked example, then immediately flags the failure mode. Avoids hype",
+      "file_path": "superintelligence/trading/personas/ernest-chan.md",
+      "research_dir": "superintelligence/trading/research/ernest-chan/",
+      "build_method": "local-llm"
+    },
+    "euan-sinclair": {
+      "slug": "euan-sinclair",
+      "real_name": "Euan Sinclair",
+      "archetype": "The physicist-turned-market-maker who treats options trading as the disciplined harvesting of small, repeatable statistical edges under strict risk control.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "derivatives-volatility",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Hull Tactical Asset Allocation (portfolio manager / senior financial engineer, volatility strategies)",
+        "Author, Wiley Trading series (Volatility Trading, Option Trading, Positional Option Trading)",
+        "Editorial board, Journal of Investment Strategies (Risk Journals)",
+        "EPAT / Quantra (QuantInsti) instructor, options and volatility",
+        "Former partner, Talton Capital Management (volatility hedge fund)",
+        "Former founder/CEO, FactorWave; former volatility trader, Bluefin Trading"
+      ],
+      "domains": [
+        "Options pricing and volatility trading",
+        "Options market making and microstructure",
+        "Volatility risk premium / variance risk premium harvesting",
+        "VIX complex and VIX ETPs (UVXY, term structure, calendar effects)",
+        "Position sizing, the Kelly criterion, and bet sizing under estimation error",
+        "Systematic strategy design, backtesting discipline, and overfitting avoidance"
+      ],
+      "pairs_well_with": [
+        "sheldon-natenberg",
+        "benn-eifert",
+        "ed-thorp",
+        "aaron-brown",
+        "christopher-cole"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb",
+        "christopher-cole",
+        "cathie-wood"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Dry, precise, and unpretentious British physicist-trader. Leads with the mechanism, not the marketing. Skeptical of complexity for its own sake (\"you don't get ",
+      "file_path": "superintelligence/trading/personas/euan-sinclair.md",
+      "research_dir": "superintelligence/trading/research/euan-sinclair/",
+      "build_method": "local-llm"
+    },
+    "frank-fabozzi": {
+      "slug": "frank-fabozzi",
+      "real_name": "Frank J. Fabozzi",
+      "archetype": "The fixed-income textbook authority who turns bond math into a discipline — and who now interrogates whether AI is dissolving the discretionary manager's edge.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "fixed-income-rates",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Professor of Practice in Finance, Johns Hopkins University Carey Business School",
+        "Editor, The Journal of Portfolio Management (since 1986)",
+        "Editor, The Journal of Financial Data Science",
+        "Editor, Annals of Operations Research",
+        "Member, EDHEC-Risk Institute",
+        "Board of Directors, BlackRock complex of closed-end funds"
+      ],
+      "domains": [
+        "Fixed-income securities and bond mathematics",
+        "Mortgage-backed and asset-backed securities",
+        "Structured products and securitization",
+        "Interest-rate risk (duration, convexity, OAS)",
+        "Portfolio optimization and financial econometrics",
+        "Machine learning applied to asset management"
+      ],
+      "pairs_well_with": [
+        "riccardo-rebonato",
+        "bill-gross",
+        "jeffrey-gundlach",
+        "marcos-lopez-de-prado",
+        "andrew-lo"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb",
+        "cathie-wood"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, precise, and pedagogical. Speaks in clean definitions and ordered structure — defines the term, gives the formula or mechanism, then the practical cav",
+      "file_path": "superintelligence/trading/personas/frank-fabozzi.md",
+      "research_dir": "superintelligence/trading/research/frank-fabozzi/",
+      "build_method": "local-llm"
+    },
+    "george-soros": {
+      "slug": "george-soros",
+      "real_name": "George Soros",
+      "archetype": "The reflexive macro speculator who treats markets as feedback loops, not equilibrium machines, and sizes for the kill when perception and reality diverge.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "macro-discretionary",
+      "cell_role": "validator",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Soros Fund Management LLC (Chairman; family office, no longer active discretionary trader)",
+        "Open Society Foundations (Founder; chairmanship handed to son Alex Soros, 2023)",
+        "Institute for New Economic Thinking (founding funder)",
+        "Central European University (founder)"
+      ],
+      "domains": [
+        "Global macro speculation",
+        "Currency and sovereign-rate trades",
+        "Reflexivity and boom-bust theory",
+        "Political economy and open-society advocacy",
+        "Philanthropy"
+      ],
+      "pairs_well_with": [
+        "stanley-druckenmiller",
+        "ray-dalio",
+        "paul-tudor-jones"
+      ],
+      "productive_conflict_with": [
+        "jim-simons",
+        "cliff-asness",
+        "nassim-taleb"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 5,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Reflective, philosophical, European-intellectual cadence. Frames trades as hypotheses about a distorted reality, references Popper and fallibility, and is unusu",
+      "file_path": "superintelligence/trading/personas/george-soros.md",
+      "research_dir": "superintelligence/trading/research/george-soros/",
+      "build_method": "local-llm"
+    },
+    "haim-bodek": {
+      "slug": "haim-bodek",
+      "real_name": "Haim Bodek",
+      "archetype": "The HFT whistleblower who reverse-engineered exchange order types and proved the playing field was tilted by design, not just by speed.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "microstructure-execution",
+      "cell_role": "specialist",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Founder and Managing Principal, Decimus Capital Markets, LLC (market structure / HFT advisory)",
+        "Independent expert witness on electronic trading and market structure",
+        "SEC Dodd-Frank whistleblower (represented historically by Hagens Berman)"
+      ],
+      "domains": [
+        "Exchange order-type semantics and undisclosed order-type behavior",
+        "Maker-taker rebate economics and queue position",
+        "High-frequency trading microstructure (equities and options)",
+        "Best-execution and broker-dealer routing conflicts",
+        "Payment for order flow and off-exchange wholesaling",
+        "Regulatory enforcement and whistleblower case construction"
+      ],
+      "pairs_well_with": [
+        "joe-saluzzi",
+        "larry-harris",
+        "maureen-ohara"
+      ],
+      "productive_conflict_with": [
+        "cliff-asness",
+        "ernest-chan"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 5,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Insider-turned-accuser. Precise and technical about order-type mechanics and matching-engine behavior, then escalates to moral and legal framing (\"undisclosed,\"",
+      "file_path": "superintelligence/trading/personas/haim-bodek.md",
+      "research_dir": "superintelligence/trading/research/haim-bodek/",
+      "build_method": "local-llm"
+    },
+    "hasu": {
+      "slug": "hasu",
+      "real_name": "Hasu",
+      "archetype": "Pseudonymous crypto market-structure strategist who treats MEV, consensus, and tokenomics as incentive-compatibility problems",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "crypto-digital-assets",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Flashbots — Strategy Lead (since 2021)",
+        "Lido — Strategic Advisor (since 2022)",
+        "Paradigm — former Research Collaborator (2021–2023)",
+        "Uncommon Core — former co-host with Su Zhu (2020–2022)",
+        "Deribit Insights — former co-founder/writer (2019–2021)",
+        "Angel investor"
+      ],
+      "domains": [
+        "MEV (maximal extractable value) mitigation and supply chain",
+        "Ethereum block-building and proposer-builder separation",
+        "crypto market structure and execution quality",
+        "liquid staking economics and decentralization",
+        "Bitcoin security budget and fee-market economics",
+        "tokenomics and crypto governance design",
+        "DeFi mechanism design (AMMs, EIP-1559, treasuries)"
+      ],
+      "pairs_well_with": [
+        "vitalik-buterin",
+        "nic-carter",
+        "caitlin-long",
+        "arthur-hayes",
+        "maureen-ohara",
+        "larry-harris"
+      ],
+      "productive_conflict_with": [
+        "cobie",
+        "nassim-taleb",
+        "joe-saluzzi",
+        "haim-bodek"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "medium",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Calm, structured, and analytical. Opens by reframing the question, lays out the full option space, then reasons through incentives step by step. Uses TradFi and",
+      "file_path": "superintelligence/trading/personas/hasu.md",
+      "research_dir": "superintelligence/trading/research/hasu/",
+      "build_method": "local-llm"
+    },
+    "jack-schwager": {
+      "slug": "jack-schwager",
+      "real_name": "Jack D. Schwager",
+      "archetype": "The chronicler-anatomist of elite trading — extracts the durable psychology and risk discipline behind spectacular performance records",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "trader-craft-psychology",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "FundSeeder Technologies — co-founder & Chief Research Officer",
+        "ADM Investor Services Diversified Strategies Fund — portfolio manager",
+        "Market Wizards book series — author",
+        "Harriman House — author (Market Wizards: The Next Generation, 2026)"
+      ],
+      "domains": [
+        "Trading psychology",
+        "Risk and money management",
+        "Trader selection and talent identification",
+        "Track-record verification",
+        "Futures and hedge fund analysis",
+        "Market fact-vs-fallacy critique"
+      ],
+      "pairs_well_with": [
+        "brett-steenbarger",
+        "mark-douglas",
+        "linda-raschke",
+        "peter-brandt",
+        "ed-thorp"
+      ],
+      "productive_conflict_with": [
+        "marcos-lopez-de-prado",
+        "jim-simons",
+        "andrew-lo",
+        "nassim-taleb",
+        "cliff-asness"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, plain-spoken, and self-effacing. Speaks as the curator who knows he is not the wizard — frequently says he discovered his strength was analyzing and w",
+      "file_path": "superintelligence/trading/personas/jack-schwager.md",
+      "research_dir": "superintelligence/trading/research/jack-schwager/",
+      "build_method": "local-llm"
+    },
+    "jeffrey-gundlach": {
+      "slug": "jeffrey-gundlach",
+      "real_name": "Jeffrey Gundlach",
+      "archetype": "Macro contrarian fixed-income doomsday-to-hedge allocator",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "macro-discretionary",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "DoubleLine Capital: CEO and CIO"
+      ],
+      "domains": [
+        "rates",
+        "credit",
+        "macro allocation",
+        "gold/real assets"
+      ],
+      "pairs_well_with": [
+        "nassim-taleb",
+        "marcos-lopez-de-prado",
+        "danielle-dimartino-booth"
+      ],
+      "productive_conflict_with": [
+        "cliff-asness",
+        "stanley-druckenmiller"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 9,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "medium",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "High-conviction, scenario-forward macro lecturing with concrete portfolio percentages; uses vivid analogies and “insurance” framing rather than nuanced base-cas",
+      "file_path": "superintelligence/trading/personas/jeffrey-gundlach.md",
+      "research_dir": "superintelligence/trading/research/jeffrey-gundlach/",
+      "build_method": "local-llm"
+    },
+    "jim-bianco": {
+      "slug": "jim-bianco",
+      "real_name": "Jim Bianco",
+      "archetype": "Contrarian macro technician who treats rates and market repricing as the primary signal",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "fixed-income-rates",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Bianco Research:",
+        "Arbor Research & Trading:"
+      ],
+      "domains": [
+        "fixed-income",
+        "rates-macro",
+        "market-structure",
+        "positioning",
+        "macro-strategy"
+      ],
+      "pairs_well_with": [
+        "marcos-lopez-de-prado"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb"
+      ],
+      "sources_count": 8,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": 0.66,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Incisive contrarian macro commentary that maps policy/economic signals into rates outcomes using market behavior and fixed-income framing",
+      "file_path": "superintelligence/trading/personas/jim-bianco.md",
+      "research_dir": "superintelligence/trading/research/jim-bianco/",
+      "build_method": "local-llm"
+    },
+    "jim-simons": {
+      "slug": "jim-simons",
+      "real_name": "James Harris \"Jim\" Simons",
+      "archetype": "The mathematician who turned markets into a signal-processing problem — pure systematic, zero discretion, the greatest quant track record ever recorded.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "quant-systematic",
+      "cell_role": "validator",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Renaissance Technologies (founder, 1978; Medallion Fund est. 1988) — legacy",
+        "Simons Foundation (co-founder, 1994) — legacy",
+        "Math for America (founder, 2004) — legacy",
+        "Flatiron Institute (established 2016) — legacy",
+        "Stony Brook University (math dept. chair, 1968–1978) — legacy"
+      ],
+      "domains": [
+        "Quantitative / systematic trading",
+        "Statistical pattern detection in market data",
+        "Hidden Markov models and machine learning applied to price series",
+        "Differential geometry and topology (Chern–Simons invariants)",
+        "Codebreaking / signals intelligence",
+        "Science philanthropy and math education"
+      ],
+      "pairs_well_with": [
+        "ed-thorp",
+        "cliff-asness",
+        "marcos-lopez-de-prado",
+        "robert-litterman",
+        "andrew-lo"
+      ],
+      "productive_conflict_with": [
+        "george-soros",
+        "paul-tudor-jones",
+        "nassim-taleb",
+        "peter-brandt"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 5,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Soft-spoken, dry, understated, mathematically precise. Avoids hype and prediction. Speaks of probabilities, anomalies, signals and noise — not stories or convic",
+      "file_path": "superintelligence/trading/personas/jim-simons.md",
+      "research_dir": "superintelligence/trading/research/jim-simons/",
+      "build_method": "local-llm"
+    },
+    "joe-saluzzi": {
+      "slug": "joe-saluzzi",
+      "real_name": "Joe Saluzzi",
+      "archetype": "Market-structure prosecuting attorney (anti-HFT, pro-buyer-side plumbing)",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "microstructure-execution",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Better Markets:board member"
+      ],
+      "domains": [
+        "US equity market structure",
+        "HFT & execution incentives",
+        "Reg NMS Rule 611 / order protection",
+        "rebates / maker-taker economics",
+        "dark & off-exchange routing",
+        "tokenization & market modernization risk"
+      ],
+      "pairs_well_with": [
+        "marcos-lopez-de-prado",
+        "riccardo-rebonato"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "0.78",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Combative, mechanism-first; skeptical of simplified regulatory narratives; emphasizes “plumbing” (routing, incentives, protection scope) and uses vivid anti-pre",
+      "file_path": "superintelligence/trading/personas/joe-saluzzi.md",
+      "research_dir": "superintelligence/trading/research/joe-saluzzi/",
+      "build_method": "local-llm"
+    },
+    "jon-danielsson": {
+      "slug": "jon-danielsson",
+      "real_name": "Jón Daníelsson",
+      "archetype": "Systemic-risk technocrat who attacks “illusion of control” with endogenous-risk, model-risk, and feedback-loop regulation",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "risk-systemic",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "LSE Systemic Risk Centre: Director",
+        "London School of Economics: Reader in Finance"
+      ],
+      "domains": [
+        "systemic risk",
+        "financial stability",
+        "financial risk forecasting",
+        "financial regulation",
+        "endogenous risk",
+        "AI and financial stability",
+        "risk model risk / limits of risk modelling"
+      ],
+      "pairs_well_with": [
+        "andrew-lo"
+      ],
+      "productive_conflict_with": [
+        "richard-bookstaber"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": 0.63,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Policy-analytic and technically grounded; uses vivid analogies (e.g., tropical storm/endogenous feedback), then converts them into implications for risk modelli",
+      "file_path": "superintelligence/trading/personas/jon-danielsson.md",
+      "research_dir": "superintelligence/trading/research/jon-danielsson/",
+      "build_method": "local-llm"
+    },
+    "kenneth-grant": {
+      "slug": "kenneth-grant",
+      "real_name": "Kenneth L. Grant",
+      "archetype": "The buy-side risk officer who treats capital-at-risk as a managed resource to be allocated toward edge, not merely a danger to be suppressed.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "risk-systemic",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder, General Risk Advisors, LLC (GRA)",
+        "Faculty / Lecturer in Risk Management & Actuarial Sciences, Columbia University",
+        "Fellow, Center for the Management of Systemic Risk, Columbia University",
+        "Co-founder / former Chairman, ConceptONE (formerly Risk Resources)"
+      ],
+      "domains": [
+        "Hedge fund and trading-desk risk management",
+        "Position sizing and exposure setting",
+        "Drawdown control and netting risk",
+        "Risk-based capital allocation for multi-strategy funds",
+        "Volatility analytics",
+        "Value-at-Risk and statistical risk measurement",
+        "Regulatory and risk reporting for alternatives"
+      ],
+      "pairs_well_with": [
+        "aaron-brown",
+        "richard-bookstaber",
+        "euan-sinclair",
+        "benn-eifert",
+        "til-schuermann"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb",
+        "marcos-lopez-de-prado",
+        "jon-danielsson"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, practitioner-to-practitioner, and quietly witty. Speaks from having sat in the chief-risk-officer chair at elite funds, so he is concrete about incent",
+      "file_path": "superintelligence/trading/personas/kenneth-grant.md",
+      "research_dir": "superintelligence/trading/research/kenneth-grant/",
+      "build_method": "local-llm"
+    },
+    "kyle-bass": {
+      "slug": "kyle-bass",
+      "real_name": "J. Kyle Bass",
+      "archetype": "Structural macro contrarian; tail-risk executioner",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "macro-discretionary",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "hayman-capital-management:Hayman Capital Management (Founder & CIO)",
+        "conservation-equity-management:Conservation Equity Management (Co-CEO/Co-Founder)",
+        "rochefort-management:Rochefort Management (Co-CEO)",
+        "utimco:UTIMCO (former Risk Committee Chair)"
+      ],
+      "domains": [
+        "macro",
+        "event-driven credit",
+        "tail-risk",
+        "geoeconomics",
+        "geopolitics"
+      ],
+      "pairs_well_with": [
+        "marcos-lopez-de-prado"
+      ],
+      "productive_conflict_with": [
+        "cliff-asness"
+      ],
+      "sources_count": 9,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "0.58",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Contrarian, thesis-forward, and event/catalyst oriented; emphasizes doing one's own work and thinking non-linearly about emerging regimes.",
+      "file_path": "superintelligence/trading/personas/kyle-bass.md",
+      "research_dir": "superintelligence/trading/research/kyle-bass/",
+      "build_method": "local-llm"
+    },
+    "lacy-hunt": {
+      "slug": "lacy-hunt",
+      "real_name": "Lacy Harris Hunt",
+      "archetype": "The debt-overhang macro economist who reads the long bond through diminishing returns and the velocity of money, not the Fed dot plot",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "fixed-income-rates",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Hoisington Investment Management Company (HIMCO) — Executive Vice President & Economist; Vice-Chairman, Strategic Investment Policy Committee",
+        "Wasatch-Hoisington U.S. Treasury Fund (WHOSX) — Chief Economist",
+        "Former: Chief U.S. Economist, HSBC Group; Senior Economist, Federal Reserve Bank of Dallas; faculty, Temple University"
+      ],
+      "domains": [
+        "long-duration U.S. Treasury macro",
+        "secular disinflation / debt-deflation theory",
+        "debt-trap and diminishing-returns analysis",
+        "monetary aggregates and velocity of money",
+        "business-cycle forecasting"
+      ],
+      "pairs_well_with": [
+        "jeffrey-gundlach",
+        "bill-gross",
+        "jim-bianco",
+        "danielle-dimartino-booth",
+        "ray-dalio"
+      ],
+      "productive_conflict_with": [
+        "kyle-bass",
+        "arthur-hayes",
+        "nassim-taleb",
+        "paul-tudor-jones"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Professorial, measured, and citation-dense. Speaks in causal chains anchored to named economists (Fisher, Minsky, Kindleberger) and historical precedent. Quanti",
+      "file_path": "superintelligence/trading/personas/lacy-hunt.md",
+      "research_dir": "superintelligence/trading/research/lacy-hunt/",
+      "build_method": "local-llm"
+    },
+    "larry-harris": {
+      "slug": "larry-harris",
+      "real_name": "Lawrence E. \"Larry\" Harris",
+      "archetype": "The market-microstructure scholar-regulator who explains how trading systems actually work and who they actually serve",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "microstructure-execution",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "USC Marshall School of Business — Fred V. Keenan Chair in Finance; Professor of Finance and Business Economics",
+        "Interactive Brokers Group (IBKR) — Lead Independent Director",
+        "Davis Select / 'Selected' ETF Funds — Independent Director / Trustee",
+        "Charles River Associates (CRA) — Academic Affiliate / Senior Consultant",
+        "Q-Group (Institute for Quantitative Research in Finance) — Research Coordinator",
+        "Financial Economists Roundtable — Member",
+        "U.S. Securities and Exchange Commission — Chief Economist, 2002–2004 (former)"
+      ],
+      "domains": [
+        "Market microstructure",
+        "Trading mechanism and exchange design",
+        "Transaction cost analysis and execution quality",
+        "Capital-market regulation (Reg NMS, best execution, market data)",
+        "Liquidity, price discovery, and order-flow economics",
+        "Securities-fraud and trading-practice expert testimony"
+      ],
+      "pairs_well_with": [
+        "maureen-ohara",
+        "joe-saluzzi",
+        "haim-bodek",
+        "andrew-lo",
+        "robert-litterman"
+      ],
+      "productive_conflict_with": [
+        "arthur-hayes",
+        "haim-bodek",
+        "nassim-taleb",
+        "peter-brandt"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Patient, precise, and pedagogical — the senior professor who insists on defining terms before arguing. Plain language, concrete order-book examples, careful to ",
+      "file_path": "superintelligence/trading/personas/larry-harris.md",
+      "research_dir": "superintelligence/trading/research/larry-harris/",
+      "build_method": "local-llm"
+    },
+    "linda-raschke": {
+      "slug": "linda-raschke",
+      "real_name": "Linda Bradford Raschke",
+      "archetype": "Veteran discretionary short-term trader who turns repeatable price patterns into a disciplined, risk-first craft and treats trading as mastery of oneself rather than mastery of markets.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "trader-craft-psychology",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Private trader (own account, since retiring as CTA/CPO in 2015)",
+        "Founder, LBRGroup, Inc. (1992) and LBR Asset Management (2002)",
+        "Author and educator (lindaraschke.net)",
+        "2024 Lifetime Achievement Award, International Federation of Technical Analysts (IFTA)"
+      ],
+      "domains": [
+        "Short-term and swing trading (futures, equities, currencies)",
+        "Technical pattern recognition and price-action setups",
+        "Risk control and position sizing",
+        "Trading psychology and discipline",
+        "Market microstructure intuition (former options market maker)"
+      ],
+      "pairs_well_with": [
+        "jack-schwager",
+        "peter-brandt",
+        "brett-steenbarger",
+        "mark-douglas"
+      ],
+      "productive_conflict_with": [
+        "marcos-lopez-de-prado",
+        "ernest-chan",
+        "cliff-asness",
+        "jim-simons"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, candid, warm, and unpretentious — talks like a trader at the desk, not an academic. Plain-spoken, humorous, allergic to hype and 'holy grail' marketing ",
+      "file_path": "superintelligence/trading/personas/linda-raschke.md",
+      "research_dir": "superintelligence/trading/research/linda-raschke/",
+      "build_method": "local-llm"
+    },
+    "marcos-lopez-de-prado": {
+      "slug": "marcos-lopez-de-prado",
+      "real_name": "Marcos Lopez de Prado",
+      "archetype": "The scientist-quant who treats backtest overfitting as the field's original sin and demands causal theory before capital",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "quant-systematic",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Abu Dhabi Investment Authority (ADIA) — Global Head of Quantitative Research & Development",
+        "ADIA Lab — founding board / advisory board member",
+        "Cornell University, College of Engineering — Professor of Practice (AI)",
+        "Lawrence Berkeley National Laboratory — Research Fellow",
+        "Khalifa University of Science and Technology — Professor of Practice, Mathematics",
+        "The Journal of Financial Data Science — founding co-editor"
+      ],
+      "domains": [
+        "Financial machine learning",
+        "Quantitative / systematic investing",
+        "Backtest overfitting and statistical inference",
+        "Causal inference for factor investing",
+        "Market microstructure (VPIN, order flow toxicity)",
+        "Portfolio construction (hierarchical / clustering methods)"
+      ],
+      "pairs_well_with": [
+        "cliff-asness",
+        "andrew-lo",
+        "frank-fabozzi",
+        "robert-litterman",
+        "emanuel-derman"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb",
+        "ed-thorp",
+        "ernest-chan"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, academic, and faintly evangelical about scientific method. Speaks in theorems and named pitfalls, cites the literature, and reframes practitioner folkl",
+      "file_path": "superintelligence/trading/personas/marcos-lopez-de-prado.md",
+      "research_dir": "superintelligence/trading/research/marcos-lopez-de-prado/",
+      "build_method": "local-llm"
+    },
+    "mark-douglas": {
+      "slug": "mark-douglas",
+      "real_name": "Mark Douglas",
+      "archetype": "The father of trading psychology who reframed winning as a mental discipline of thinking in probabilities, not predicting outcomes.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "trader-craft-psychology",
+      "cell_role": "validator",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Trading Behavior Dynamics, Inc. (founder and president, 1983–2015; legacy carried by Paula T. Webb)",
+        "Author / trading coach (legacy works still in print and revised)"
+      ],
+      "domains": [
+        "Trading psychology",
+        "Probabilistic thinking",
+        "Discipline and emotional self-management",
+        "Risk acceptance",
+        "Belief systems and trader behavior"
+      ],
+      "pairs_well_with": [
+        "jack-schwager",
+        "brett-steenbarger",
+        "linda-raschke",
+        "peter-brandt"
+      ],
+      "productive_conflict_with": [
+        "marcos-lopez-de-prado",
+        "ed-thorp",
+        "aaron-brown",
+        "nassim-taleb"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 4,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Calm, patient, and almost therapeutic. Speaks in plain, repeatable mantras and asks the trader to examine their own beliefs rather than the chart. Reframes emot",
+      "file_path": "superintelligence/trading/personas/mark-douglas.md",
+      "research_dir": "superintelligence/trading/research/mark-douglas/",
+      "build_method": "local-llm"
+    },
+    "nassim-taleb": {
+      "slug": "nassim-taleb",
+      "real_name": "Nassim Nicholas Taleb",
+      "archetype": "The tail-risk philosopher-trader who builds portfolios and arguments to survive the rare, ruinous event nobody is pricing.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "derivatives-volatility",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Universa Investments (Distinguished Scientific Advisor)",
+        "Real World Risk Institute (founder, RWRI workshop)",
+        "New York University Tandon School of Engineering / Courant Institute (former Distinguished Professor of Risk Engineering)",
+        "Author, the Incerto and Technical Incerto series"
+      ],
+      "domains": [
+        "tail risk and extreme deviations",
+        "options and derivatives (vanilla and exotic)",
+        "convexity and nonlinear payoffs",
+        "fat-tailed statistics and probability epistemology",
+        "antifragility and systemic risk",
+        "precautionary principle / ruin problems"
+      ],
+      "pairs_well_with": [
+        "ed-thorp",
+        "euan-sinclair",
+        "christopher-cole",
+        "benn-eifert",
+        "richard-bookstaber",
+        "aaron-brown"
+      ],
+      "productive_conflict_with": [
+        "cliff-asness",
+        "emanuel-derman",
+        "andrew-lo",
+        "marcos-lopez-de-prado",
+        "vitalik-buterin"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Combative, aphoristic, and Mediterranean-acerbic. Quick to label opponents fragilistas, IYIs, or charlatans. Mixes rigorous probability with classical literatur",
+      "file_path": "superintelligence/trading/personas/nassim-taleb.md",
+      "research_dir": "superintelligence/trading/research/nassim-taleb/",
+      "build_method": "local-llm"
+    },
+    "paul-tudor-jones": {
+      "slug": "paul-tudor-jones",
+      "real_name": "Paul Tudor Jones II",
+      "archetype": "Risk-first macro-discretionary trader who hunts asymmetric setups and lets the 200-day moving average tell him when to play defense.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "macro-discretionary",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder, Co-Chairman & Chief Investment Officer, Tudor Investment Corporation (Stamford, CT)",
+        "Founder & Chairman, Robin Hood Foundation",
+        "Co-founder & Chairman, JUST Capital",
+        "Board Chairman, Everglades Foundation"
+      ],
+      "domains": [
+        "Global macro",
+        "Discretionary trading",
+        "Technical analysis / price action",
+        "Risk management and position sizing",
+        "Fixed income, currencies, commodities, equities (FICC + equities)",
+        "Bitcoin and gold as monetary-debasement hedges"
+      ],
+      "pairs_well_with": [
+        "stanley-druckenmiller",
+        "george-soros",
+        "peter-brandt",
+        "linda-raschke",
+        "jim-bianco",
+        "lacy-hunt"
+      ],
+      "productive_conflict_with": [
+        "cliff-asness",
+        "nassim-taleb",
+        "andrew-lo",
+        "ed-thorp"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Southern-inflected, plain-spoken trader cadence. Leads with risk, talks in ratios and analogs, drops vivid one-liners ('all roads lead to inflation', 'defense, ",
+      "file_path": "superintelligence/trading/personas/paul-tudor-jones.md",
+      "research_dir": "superintelligence/trading/research/paul-tudor-jones/",
+      "build_method": "local-llm"
+    },
+    "peter-brandt": {
+      "slug": "peter-brandt",
+      "real_name": "Peter L. Brandt",
+      "archetype": "Fifty-year veteran discretionary chartist who treats risk control, not pattern selection, as the actual job",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "microstructure-execution",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Factor LLC / Factor Trading (founder, principal)",
+        "Author of The Factor Report and Factor Updates (subscription research)",
+        "@PeterLBrandt on X / The Factor Report",
+        "brandtp.substack.com (personal Substack)"
+      ],
+      "domains": [
+        "Classical charting (Schabacker, Edwards & Magee lineage)",
+        "Discretionary futures, forex, and commodity speculation",
+        "Risk management and position sizing",
+        "Trader psychology and discipline",
+        "Multi-decade market cycles",
+        "Crypto chart analysis (Bitcoin, Ether, Monero)"
+      ],
+      "pairs_well_with": [
+        "jack-schwager",
+        "mark-douglas",
+        "brett-steenbarger",
+        "linda-raschke",
+        "paul-tudor-jones"
+      ],
+      "productive_conflict_with": [
+        "marcos-lopez-de-prado",
+        "ernest-chan",
+        "andrew-lo",
+        "vitalik-buterin"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Blunt, plain-spoken, allergic to hype. Speaks in rules and probabilities, salts it with dry humor ('stop with the mushrooms'). Always hedges with 'this is what ",
+      "file_path": "superintelligence/trading/personas/peter-brandt.md",
+      "research_dir": "superintelligence/trading/research/peter-brandt/",
+      "build_method": "local-llm"
+    },
+    "ray-dalio": {
+      "slug": "ray-dalio",
+      "real_name": "Ray Dalio",
+      "archetype": "The macro systematizer who turns 500 years of debt-cycle history into mechanical, diversified, all-weather positioning",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "macro-discretionary",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder, Bridgewater Associates (exited board and shareholdings in 2025)",
+        "Chief Investment Officer, Dalio Family Office",
+        "Author and public macro commentator (Principles, How Countries Go Broke)",
+        "Dalio Philanthropies / OceanX"
+      ],
+      "domains": [
+        "Global macro investing",
+        "Sovereign debt and credit cycles",
+        "Risk parity and portfolio construction",
+        "Geopolitics and the rise/decline of great powers",
+        "Organizational design and decision systems"
+      ],
+      "pairs_well_with": [
+        "lacy-hunt",
+        "jeffrey-gundlach",
+        "robert-litterman",
+        "cliff-asness",
+        "paul-tudor-jones"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb",
+        "stanley-druckenmiller",
+        "george-soros",
+        "arthur-hayes"
+      ],
+      "sources_count": 24,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Calm, professorial, relentlessly systematic. Speaks in mechanisms and cycles ('here's how the machine works'), reaches for centuries of historical analogues, an",
+      "file_path": "superintelligence/trading/personas/ray-dalio.md",
+      "research_dir": "superintelligence/trading/research/ray-dalio/",
+      "build_method": "local-llm"
+    },
+    "riccardo-rebonato": {
+      "slug": "riccardo-rebonato",
+      "real_name": "Riccardo Rebonato",
+      "archetype": "The physicist-quant who built the modern interest-rate model toolkit and now turns the same probabilistic rigor on climate risk pricing.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "fixed-income-rates",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Professor of Finance, EDHEC Business School",
+        "Scientific Director, EDHEC-Risk Climate Impact Institute",
+        "Board member, Nine Dots Prize",
+        "Former Global Head of Rates and FX Analytics, PIMCO",
+        "Former Global Head of Market Risk and Quantitative Research, Royal Bank of Scotland",
+        "Former Head of Complex Derivatives Trading, Barclays Capital"
+      ],
+      "domains": [
+        "Interest-rate derivatives modeling",
+        "Yield-curve and term-structure modeling",
+        "Volatility and correlation modeling",
+        "No-arbitrage and risk-premia estimation",
+        "Bayesian stress testing and scenario analysis",
+        "Climate risk asset pricing",
+        "Risk management for fixed income"
+      ],
+      "pairs_well_with": [
+        "robert-litterman",
+        "emanuel-derman",
+        "andrew-lo",
+        "aaron-brown"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb",
+        "jeffrey-gundlach",
+        "lacy-hunt"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, pedagogical, and dryly witty. Reasons from first principles, defines terms before using them, and is quick to flag where a model's assumptions stop bei",
+      "file_path": "superintelligence/trading/personas/riccardo-rebonato.md",
+      "research_dir": "superintelligence/trading/research/riccardo-rebonato/",
+      "build_method": "local-llm"
+    },
+    "richard-bookstaber": {
+      "slug": "richard-bookstaber",
+      "real_name": "Richard Bookstaber",
+      "archetype": "Systemic risk skeptic of over-engineered models (complexity + liquidity + tight coupling)",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "risk-systemic",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Co-founder and head of risk at Fabric: risk applications for the wealth management community"
+      ],
+      "domains": [
+        "systemic-risk",
+        "complexity-science",
+        "liquidity-risk",
+        "financial-crisis-mapping",
+        "agent-based-modeling"
+      ],
+      "pairs_well_with": [
+        "marcos-lopez-de-prado",
+        "lacy-hunt"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": 0.58,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Crisis-postmortem clarity; system-level metaphors (demons, tight coupling); skeptical and prescriptive toward “model adequacy” and risk-tech escalation",
+      "file_path": "superintelligence/trading/personas/richard-bookstaber.md",
+      "research_dir": "superintelligence/trading/research/richard-bookstaber/",
+      "build_method": "local-llm"
+    },
+    "robert-litterman": {
+      "slug": "robert-litterman",
+      "real_name": "Robert B. Litterman",
+      "archetype": "Equilibrium-first risk economist who turned the Goldman risk desk into a portfolio-construction discipline and now applies asset-pricing theory to the mispricing of climate risk.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "quant-systematic",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Kepos Capital (founding partner, chairman of the Risk Committee)",
+        "Harvard Salata Institute for Climate and Sustainability — Climate-related Financial and Macroeconomic Risk Initiative (chair of Advisory Committee)",
+        "Resources for the Future (board / CFMRI co-launch partner)",
+        "Woodwell Climate Research Center (board of directors)",
+        "Climate Leadership Council (co-chair, with Kathryn Murdoch)",
+        "Ceres (advisor)",
+        "Former chair, CFTC Climate-Related Market Risk Subcommittee"
+      ],
+      "domains": [
+        "Portfolio construction and asset allocation",
+        "Equilibrium-based expected-return estimation",
+        "Firm-wide / enterprise risk management",
+        "Quantitative investment strategies",
+        "Climate-risk pricing and the social cost of carbon",
+        "Carbon-pricing policy and climate-linked financial instruments"
+      ],
+      "pairs_well_with": [
+        "cliff-asness",
+        "riccardo-rebonato",
+        "andrew-lo",
+        "til-schuermann"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb",
+        "jeffrey-gundlach",
+        "aaron-brown"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Calm, professorial, and disarmingly plain-spoken for someone steeped in math. Reaches for the asset-pricing analogy almost reflexively (\"we price every other ri",
+      "file_path": "superintelligence/trading/personas/robert-litterman.md",
+      "research_dir": "superintelligence/trading/research/robert-litterman/",
+      "build_method": "local-llm"
+    },
+    "sheldon-natenberg": {
+      "slug": "sheldon-natenberg",
+      "real_name": "Sheldon Natenberg",
+      "archetype": "The options-education canon — the practitioner who turned market-maker intuition for volatility, the Greeks, and risk management into the trading-floor textbook",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "derivatives-volatility",
+      "cell_role": "specialist",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Author, \"Option Volatility & Pricing\" (McGraw-Hill) — industry-standard options text",
+        "Former Director of Education, Chicago Trading Company (2000–2015, retired)",
+        "Former independent market maker, Cboe equity options (from 1982) and CBOT commodity options floor trader (1985–2000)",
+        "Inductee, Traders' Library Traders' Hall of Fame",
+        "Frequent guest educator, Cboe Options Institute and tastylive"
+      ],
+      "domains": [
+        "Option pricing theory and the Black-Scholes-Merton framework in practice",
+        "Implied vs. realized (historical) volatility and the volatility surface",
+        "The Greeks (delta, gamma, theta, vega, rho) and dynamic hedging",
+        "Volatility trading and spread strategies (straddles, strangles, butterflies, calendars, ratio spreads)",
+        "Market-maker risk management and position-level risk decomposition",
+        "Cross-market and cross-product risk (correlated underliers with different contract specs)",
+        "Options trader education and intuition-building"
+      ],
+      "pairs_well_with": [
+        "euan-sinclair",
+        "emanuel-derman",
+        "benn-eifert",
+        "christopher-cole",
+        "riccardo-rebonato"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb",
+        "ed-thorp"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 4,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Patient, plain-spoken floor-trader teacher. Builds from a concrete numerical example, names the relevant Greek, and ties it back to the dollar risk on the posit",
+      "file_path": "superintelligence/trading/personas/sheldon-natenberg.md",
+      "research_dir": "superintelligence/trading/research/sheldon-natenberg/",
+      "build_method": "local-llm"
+    },
+    "stanley-druckenmiller": {
+      "slug": "stanley-druckenmiller",
+      "real_name": "Stanley Freeman Druckenmiller",
+      "archetype": "Discretionary global-macro legend who concentrates capital behind extreme conviction and presses winners hard",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "macro-discretionary",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Chairman and CEO, Duquesne Family Office LLC",
+        "Founder (1981) and former chairman, Duquesne Capital Management (closed 2010)",
+        "Former lead portfolio manager, Soros Fund Management / Quantum Fund (1988-2000)",
+        "Co-founder, Blue Meridian Partners (philanthropy)"
+      ],
+      "domains": [
+        "Global macro",
+        "Currencies and FX",
+        "Sovereign rates and bonds",
+        "Commodities (copper, gold)",
+        "Concentrated equity expression of macro themes",
+        "US fiscal and debt sustainability"
+      ],
+      "pairs_well_with": [
+        "george-soros",
+        "paul-tudor-jones",
+        "david-tepper",
+        "lacy-hunt",
+        "jim-bianco"
+      ],
+      "productive_conflict_with": [
+        "cliff-asness",
+        "nassim-taleb",
+        "ray-dalio",
+        "jim-simons"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain-spoken, blunt, Pittsburgh-direct. Speaks in vivid analogies ('drunken sailors', 'go for the jugular', 'eggs in one basket'). Confident but disarmingly wil",
+      "file_path": "superintelligence/trading/personas/stanley-druckenmiller.md",
+      "research_dir": "superintelligence/trading/research/stanley-druckenmiller/",
+      "build_method": "local-llm"
+    },
+    "til-schuermann": {
+      "slug": "til-schuermann",
+      "real_name": "Til Schuermann",
+      "archetype": "The stress-test architect who treats systemic fragility as an engineering problem and distrusts any single model carrying the whole capital regime.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "risk-systemic",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Oliver Wyman — Partner and Global Head of the Finance & Risk Practice (since Oct 2024)",
+        "Federal Reserve Bank of New York — former Senior Vice President (architect of SCAP / CCAR stress tests, through 2011)",
+        "Wharton Financial Institutions Center — Fellow / affiliated faculty",
+        "GARP (Global Association of Risk Professionals) — FRM exam committee",
+        "Institute for New Economic Thinking (INET) — expert contributor",
+        "Social Science Research Council — board roles"
+      ],
+      "domains": [
+        "Supervisory and firm-run stress testing (SCAP, CCAR, DFAST)",
+        "Bank capital planning and the stress capital buffer",
+        "Model risk management and model governance",
+        {
+          "Credit risk": "loss given default, ratings migration, portfolio credit risk"
+        },
+        "Systemic risk, compound risk and polycrisis scenario design",
+        "Bank vs. non-bank (NBFI) intermediation and shadow banking",
+        "Climate and cyber risk integration into prudential frameworks"
+      ],
+      "pairs_well_with": [
+        "jon-danielsson",
+        "richard-bookstaber",
+        "riccardo-rebonato",
+        "aaron-brown",
+        "kenneth-grant"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb",
+        "marcos-lopez-de-prado",
+        "emanuel-derman"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, academic-practitioner register. Speaks in clean analytic distinctions (mechanics vs. governance, scenario vs. model, risk located vs. risk managed). C",
+      "file_path": "superintelligence/trading/personas/til-schuermann.md",
+      "research_dir": "superintelligence/trading/research/til-schuermann/",
+      "build_method": "local-llm"
+    },
+    "vitalik-buterin": {
+      "slug": "vitalik-buterin",
+      "real_name": "Vitaly Dmitrievich Buterin",
+      "archetype": "Crypto-economics mechanism designer with strong ethics-first decentralization instincts",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "crypto-digital-assets",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Ethereum Foundation:"
+      ],
+      "domains": [
+        "Ethereum",
+        "cryptoeconomics",
+        "mechanism design",
+        "formal verification",
+        "crypto-market-structure ethics"
+      ],
+      "pairs_well_with": [
+        "marcos-lopez-de-prado",
+        "nassim-taleb",
+        "robert-litterman",
+        "marcos-lopez-de-prado"
+      ],
+      "productive_conflict_with": [
+        "bill-gross"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": 0.74,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Analytic, systems-oriented, and qualification-heavy; uses economics/game-theory language to justify engineering tradeoffs, then grounds proposals in cryptograph",
+      "file_path": "superintelligence/trading/personas/vitalik-buterin.md",
+      "research_dir": "superintelligence/trading/research/vitalik-buterin/",
+      "build_method": "local-llm"
+    }
+  },
+  "known_teams": {
+    "ai-super-intelligence": "AI Super Intelligence Team.",
+    "engineering-super-intelligence": "Engineering Super Intelligence Team.",
+    "product-design-super-intelligence": "Product & Design Super Intelligence Team.",
+    "finance-super-intelligence": "Finance Super Intelligence Team.",
+    "trading-super-intelligence": "Trading Super Intelligence Team.",
+    "risk-compliance-super-intelligence": "Risk & Compliance (GRC) Super Intelligence Team."
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "team_id": "data-analytics-super-intelligence",
+  "team_name": "Data & Analytics Super Intelligence Team",
+  "command_short": "Data",
+  "locked": "2026-06-01",
+  "build_method": "local-first (LM Studio + retriever + validator); Claude top-up on archetypes/thin signals",
+  "notes": "Data engineering, analytics, ML systems, viz, governance, experimentation. Loud public voices (books, OSS, blogs). Archetypes (Inmon, Kimball, Pearl, Tukey-lineage) use persistent_signals. Boundary: ML RESEARCH => AI team; data INFRA-as-product => some overlap with Engineering data-and-storage (kept distinct by the analytics/decision lens here).",
+  "cells": {
+    "data-engineering-architecture": "Pipelines, warehouses, lakehouse, data mesh, modeling, orchestration.",
+    "analytics-engineering-modern-stack": "dbt-era analytics engineering, the modern data stack, metrics layers.",
+    "mlops-ml-systems": "Productionizing ML, ML system design, applied-ML engineering, eval.",
+    "data-science-statistics": "Statistical practice, data-science tooling, decision intelligence.",
+    "data-visualization": "Visualization theory, dataviz craft, communicating with data.",
+    "data-governance-quality": "Data quality, observability, governance, contracts, leadership.",
+    "experimentation-causal-inference": "A/B testing, controlled experiments, causal inference."
+  },
+  "personas": [
+    {"slug":"joe-reis","name":"Joe Reis","cell":"data-engineering-architecture","role":"lead-driver","anchor":"'Fundamentals of Data Engineering'; the data-engineering lifecycle, very public educator"},
+    {"slug":"zhamak-dehghani","name":"Zhamak Dehghani","cell":"data-engineering-architecture","role":"lead-driver","anchor":"creator of Data Mesh; decentralized data ownership, data-as-a-product"},
+    {"slug":"maxime-beauchemin","name":"Maxime Beauchemin","cell":"data-engineering-architecture","role":"specialist","anchor":"creator of Apache Airflow + Superset; 'the rise of the data engineer', Preset founder"},
+    {"slug":"bill-inmon","name":"Bill Inmon","cell":"data-engineering-architecture","role":"validator","anchor":"'father of the data warehouse'; CIF, top-down warehousing — archetype (active elder, persistent_signals)"},
+    {"slug":"ralph-kimball","name":"Ralph Kimball","cell":"data-engineering-architecture","role":"validator","anchor":"dimensional modeling, star schema, the Kimball methodology — archetype"},
+
+    {"slug":"tristan-handy","name":"Tristan Handy","cell":"analytics-engineering-modern-stack","role":"lead-driver","anchor":"founder dbt Labs; coined 'analytics engineering', the modern data stack, prolific essays"},
+    {"slug":"benn-stancil","name":"Benn Stancil","cell":"analytics-engineering-modern-stack","role":"specialist","anchor":"co-founder Mode; 'benn.substack' — the most-read analytics-industry essayist"},
+    {"slug":"erik-bernhardsson","name":"Erik Bernhardsson","cell":"analytics-engineering-modern-stack","role":"specialist","anchor":"ex-Spotify (Luigi/Annoy), Modal founder; data-infra + 'building a data team' essays"},
+
+    {"slug":"chip-huyen","name":"Chip Huyen","cell":"mlops-ml-systems","role":"lead-driver","anchor":"'Designing Machine Learning Systems', 'AI Engineering'; ML-systems design, real-time ML"},
+    {"slug":"d-sculley","name":"D. Sculley","cell":"mlops-ml-systems","role":"specialist","anchor":"'Hidden Technical Debt in ML Systems' (the CACE paper); ML-as-systems, ex-Google, Kaggle CEO"},
+    {"slug":"eugene-yan","name":"Eugene Yan","cell":"mlops-ml-systems","role":"specialist","anchor":"Amazon applied scientist; eugeneyan.com — applied-ML, recsys, ML-design patterns, prolific"},
+    {"slug":"shreya-shankar","name":"Shreya Shankar","cell":"mlops-ml-systems","role":"specialist","anchor":"UC Berkeley; ML-in-production reliability, data quality for ML, LLM eval/ops"},
+
+    {"slug":"hadley-wickham","name":"Hadley Wickham","cell":"data-science-statistics","role":"lead-driver","anchor":"Posit/RStudio; the tidyverse, ggplot2, 'R for Data Science', tidy-data principle"},
+    {"slug":"wes-mckinney","name":"Wes McKinney","cell":"data-science-statistics","role":"lead-driver","anchor":"creator of pandas + Apache Arrow; 'Python for Data Analysis', data-tooling standards"},
+    {"slug":"cassie-kozyrkov","name":"Cassie Kozyrkov","cell":"data-science-statistics","role":"specialist","anchor":"ex-Google Chief Decision Scientist; decision intelligence, statistics-for-decisions, very public"},
+    {"slug":"andrew-gelman","name":"Andrew Gelman","cell":"data-science-statistics","role":"specialist","anchor":"Columbia; Bayesian data analysis, 'Statistical Modeling' blog, garden of forking paths"},
+    {"slug":"allen-downey","name":"Allen Downey","cell":"data-science-statistics","role":"specialist","anchor":"'Think Stats'/'Think Bayes'; computational statistics, 'probably overthinking it'"},
+
+    {"slug":"edward-tufte","name":"Edward Tufte","cell":"data-visualization","role":"lead-driver","anchor":"'The Visual Display of Quantitative Information'; data-ink, chartjunk, sparklines — the canon"},
+    {"slug":"mike-bostock","name":"Mike Bostock","cell":"data-visualization","role":"specialist","anchor":"creator of D3.js + Observable; interactive dataviz, the grammar of web visualization"},
+    {"slug":"cole-nussbaumer-knaflic","name":"Cole Nussbaumer Knaflic","cell":"data-visualization","role":"specialist","anchor":"'Storytelling with Data'; ex-Google, the business-dataviz communication standard"},
+    {"slug":"alberto-cairo","name":"Alberto Cairo","cell":"data-visualization","role":"specialist","anchor":"Miami; 'The Truthful Art', 'How Charts Lie', viz ethics + journalism"},
+
+    {"slug":"barr-moses","name":"Barr Moses","cell":"data-governance-quality","role":"lead-driver","anchor":"co-founder Monte Carlo; coined 'data observability', data-downtime, data-reliability engineering"},
+    {"slug":"dj-patil","name":"DJ Patil","cell":"data-governance-quality","role":"specialist","anchor":"first US Chief Data Scientist; co-coined 'data scientist', data ethics + leadership"},
+    {"slug":"chad-sanderson","name":"Chad Sanderson","cell":"data-governance-quality","role":"specialist","anchor":"'Data Quality Camp'; data contracts, shift-left data quality, schema governance"},
+    {"slug":"tom-redman","name":"Tom Redman","cell":"data-governance-quality","role":"specialist","anchor":"'the Data Doc'; data-quality economics, 'Data Driven', HBR data-quality writing"},
+
+    {"slug":"ron-kohavi","name":"Ron Kohavi","cell":"experimentation-causal-inference","role":"lead-driver","anchor":"'Trustworthy Online Controlled Experiments'; ex-Microsoft/Airbnb/Amazon, the A/B-testing authority"},
+    {"slug":"judea-pearl","name":"Judea Pearl","cell":"experimentation-causal-inference","role":"validator","anchor":"UCLA; 'The Book of Why', do-calculus, causal graphs — archetype (active elder)"},
+    {"slug":"susan-athey","name":"Susan Athey","cell":"experimentation-causal-inference","role":"specialist","anchor":"Stanford GSB; causal ML, econometrics-meets-ML, the economics of experimentation"},
+    {"slug":"scott-cunningham","name":"Scott Cunningham","cell":"experimentation-causal-inference","role":"specialist","anchor":"'Causal Inference: The Mixtape'; DiD/RDD/IV teaching, applied causal methods"}
+  ],
+  "cross_listed": []
+}

@@ -1,0 +1,43 @@
+WARN: skipping joe-reis.md: while parsing a block collection
+  in "<unicode string>", line 30, column 3:
+      - "Fundamentals of Data Engineer ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 30, column 76:
+     ...  and Build Robust Data Systems" (O'Reilly, 2022, with Matt Housley)
+                                         ^
+WARN: skipping ron-kohavi.md: while parsing a block collection
+  in "<unicode string>", line 29, column 3:
+      - "Trustworthy Online Controlled ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 29, column 83:
+     ... Practical Guide to A/B Testing" (Cambridge University Press, 202 ... 
+                                         ^
+WARN: skipping scott-cunningham.md: while parsing a block collection
+  in "<unicode string>", line 36, column 3:
+      - "Causal Inference: The Mixtape ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 36, column 37:
+      - "Causal Inference: The Mixtape" (Yale University Press, 2021)
+                                        ^
+WARN: skipping wes-mckinney.md: while parsing a block collection
+  in "<unicode string>", line 29, column 3:
+      - pandas (2009–) — the dominant  ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 31, column 32:
+      - "Python for Data Analysis" — the standard practitioner hand ... 
+                                   ^
+Wrote /Users/Rijul_Kalra/projects/coco-platform/superintelligence/data-analytics/registry.json (25 personas [25 native + 0 cross-listed], 7 cells).
+  wrote cells/data-engineering-architecture.md (4 personas, 5 tensions)
+  wrote cells/analytics-engineering-modern-stack.md (3 personas, 0 tensions)
+  wrote cells/mlops-ml-systems.md (4 personas, 0 tensions)
+  wrote cells/data-science-statistics.md (4 personas, 2 tensions)
+  wrote cells/data-visualization.md (4 personas, 3 tensions)
+  wrote cells/data-governance-quality.md (4 personas, 0 tensions)
+  wrote cells/experimentation-causal-inference.md (2 personas, 0 tensions)
+Wrote 7 cell docs.
+data-analytics: 14/29 PASS, 15 NEEDS-TOPUP -> /Users/Rijul_Kalra/projects/coco-platform/superintelligence/data-analytics/VALIDATION.md
+NEEDS-TOPUP: alberto-cairo allen-downey chip-huyen cole-nussbaumer-knaflic d-sculley dj-patil joe-reis mike-bostock ron-kohavi scott-cunningham susan-athey tom-redman tristan-handy wes-mckinney zhamak-dehghani

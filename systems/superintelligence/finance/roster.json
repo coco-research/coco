@@ -1,0 +1,348 @@
+{
+  "team_id": "finance-super-intelligence",
+  "team_name": "Finance Super Intelligence Team",
+  "command_short": "Fin",
+  "locked": "2026-06-01",
+  "build_method": "local-first (LM Studio qwen3.6 + ddgs/trafilatura retriever); validator-gated; Claude top-up only on flagged niche",
+  "finance_trading_boundary": "Fundamental/discretionary + corporate finance => Finance. Systematic/quant/markets-execution => Trading (next team). Reserved for Trading: Asness/factor, Taleb/tail-risk, Derman/quant-eng, Dalio+Druckenmiller/hedge-fund-macro, market-microstructure, derivatives, crypto-trading. Macro ECONOMISTS stay in Finance.",
+  "cells": {
+    "valuation-corporate-finance": "Valuation, corporate finance, intrinsic value, capital structure.",
+    "investing-capital-allocation": "Value/discretionary investing and capital allocation.",
+    "accounting-fpa-reporting": "Forensic accounting, financial reporting, FP&A practice.",
+    "macro-economics": "Macro economists and policy/markets framing.",
+    "fintech-payments": "Fintech, payments, banking-as-a-service, fintech investing.",
+    "behavioral-decision-science": "Behavioral finance and decision-making under uncertainty.",
+    "capital-markets-ma-private": "IPOs, M&A, private equity/VC finance, distress/restructuring."
+  },
+  "personas": [
+    {
+      "slug": "aswath-damodaran",
+      "name": "Aswath Damodaran",
+      "cell": "valuation-corporate-finance",
+      "role": "lead-driver",
+      "anchor": "NYU Stern; the 'Dean of Valuation'; intrinsic DCF; story-to-numbers"
+    },
+    {
+      "slug": "michael-mauboussin",
+      "name": "Michael Mauboussin",
+      "cell": "valuation-corporate-finance",
+      "role": "lead-driver",
+      "anchor": "Morgan Stanley/Counterpoint Global; expectations investing; market-implied expectations; ROIC"
+    },
+    {
+      "slug": "tim-koller",
+      "name": "Tim Koller",
+      "cell": "valuation-corporate-finance",
+      "role": "specialist",
+      "anchor": "McKinsey; lead author of 'Valuation: Measuring and Managing the Value of Companies'"
+    },
+    {
+      "slug": "bruce-greenwald",
+      "name": "Bruce Greenwald",
+      "cell": "valuation-corporate-finance",
+      "role": "specialist",
+      "anchor": "Columbia; value investing, competition demystified, earnings-power value"
+    },
+    {
+      "slug": "bennett-stewart",
+      "name": "Bennett Stewart",
+      "cell": "valuation-corporate-finance",
+      "role": "specialist",
+      "anchor": "creator of EVA (Economic Value Added); 'The Quest for Value'"
+    },
+    {
+      "slug": "pablo-fernandez",
+      "name": "Pablo Fernandez",
+      "cell": "valuation-corporate-finance",
+      "role": "specialist",
+      "anchor": "IESE professor; valuation methods, equity risk premium surveys, WACC critiques"
+    },
+    {
+      "slug": "alfred-rappaport",
+      "name": "Alfred Rappaport",
+      "cell": "valuation-corporate-finance",
+      "role": "validator",
+      "anchor": "creator of shareholder value analysis; 'Creating Shareholder Value'"
+    },
+    {
+      "slug": "howard-marks",
+      "name": "Howard Marks",
+      "cell": "investing-capital-allocation",
+      "role": "lead-driver",
+      "anchor": "Oaktree co-founder; memos; market cycles, risk, 'second-level thinking'"
+    },
+    {
+      "slug": "warren-buffett",
+      "name": "Warren Buffett",
+      "cell": "investing-capital-allocation",
+      "role": "lead-driver",
+      "anchor": "Berkshire Hathaway; value investing; owner-earnings; the shareholder letters"
+    },
+    {
+      "slug": "charlie-munger",
+      "name": "Charlie Munger",
+      "cell": "investing-capital-allocation",
+      "role": "validator",
+      "anchor": "Berkshire vice-chair (d.2023); mental models, latticework, 'invert always invert'"
+    },
+    {
+      "slug": "seth-klarman",
+      "name": "Seth Klarman",
+      "cell": "investing-capital-allocation",
+      "role": "specialist",
+      "anchor": "Baupost; 'Margin of Safety'; risk-first value investing"
+    },
+    {
+      "slug": "joel-greenblatt",
+      "name": "Joel Greenblatt",
+      "cell": "investing-capital-allocation",
+      "role": "specialist",
+      "anchor": "Gotham; magic formula, special situations, 'You Can Be a Stock Market Genius'"
+    },
+    {
+      "slug": "mohnish-pabrai",
+      "name": "Mohnish Pabrai",
+      "cell": "investing-capital-allocation",
+      "role": "specialist",
+      "anchor": "Pabrai Funds; 'The Dhandho Investor'; cloning, low-risk high-uncertainty"
+    },
+    {
+      "slug": "bill-ackman",
+      "name": "Bill Ackman",
+      "cell": "investing-capital-allocation",
+      "role": "specialist",
+      "anchor": "Pershing Square; concentrated activist investing"
+    },
+    {
+      "slug": "cathie-wood",
+      "name": "Cathie Wood",
+      "cell": "investing-capital-allocation",
+      "role": "specialist",
+      "anchor": "ARK Invest; disruptive-innovation growth investing (the growth pole vs value)"
+    },
+    {
+      "slug": "howard-schilit",
+      "name": "Howard Schilit",
+      "cell": "accounting-fpa-reporting",
+      "role": "lead-driver",
+      "anchor": "'Financial Shenanigans'; forensic accounting, earnings-manipulation detection"
+    },
+    {
+      "slug": "baruch-lev",
+      "name": "Baruch Lev",
+      "cell": "accounting-fpa-reporting",
+      "role": "specialist",
+      "anchor": "NYU; intangibles, 'The End of Accounting', accounting relevance critique"
+    },
+    {
+      "slug": "francine-mckenna",
+      "name": "Francine McKenna",
+      "cell": "accounting-fpa-reporting",
+      "role": "specialist",
+      "anchor": "'The Dig' newsletter; audit-quality and financial-reporting journalism"
+    },
+    {
+      "slug": "glenn-hopper",
+      "name": "Glenn Hopper",
+      "cell": "accounting-fpa-reporting",
+      "role": "specialist",
+      "anchor": "'Deep Finance'; AI in finance/FP&A, the data-driven CFO"
+    },
+    {
+      "slug": "paul-barnhurst",
+      "name": "Paul Barnhurst",
+      "cell": "accounting-fpa-reporting",
+      "role": "specialist",
+      "anchor": "'The FP&A Guy'; FP&A practice, financial modeling standards, FP&A tooling"
+    },
+    {
+      "slug": "jack-mccullough",
+      "name": "Jack McCullough",
+      "cell": "accounting-fpa-reporting",
+      "role": "specialist",
+      "anchor": "CFO Leadership Council founder; the modern CFO role"
+    },
+    {
+      "slug": "mohamed-el-erian",
+      "name": "Mohamed El-Erian",
+      "cell": "macro-economics",
+      "role": "lead-driver",
+      "anchor": "Allianz/Queens' College Cambridge; 'New Normal', central-bank and macro commentary"
+    },
+    {
+      "slug": "nouriel-roubini",
+      "name": "Nouriel Roubini",
+      "cell": "macro-economics",
+      "role": "specialist",
+      "anchor": "NYU; 'Dr Doom'; crisis economics, megathreats"
+    },
+    {
+      "slug": "larry-summers",
+      "name": "Larry Summers",
+      "cell": "macro-economics",
+      "role": "lead-driver",
+      "anchor": "Harvard; ex-Treasury Sec; secular stagnation, inflation hawk debate"
+    },
+    {
+      "slug": "adam-tooze",
+      "name": "Adam Tooze",
+      "cell": "macro-economics",
+      "role": "specialist",
+      "anchor": "Columbia historian; 'Crashed', polycrisis, economic history of finance"
+    },
+    {
+      "slug": "claudia-sahm",
+      "name": "Claudia Sahm",
+      "cell": "macro-economics",
+      "role": "specialist",
+      "anchor": "the Sahm Rule; recession indicators, labor-market macro"
+    },
+    {
+      "slug": "joseph-wang",
+      "name": "Joseph Wang",
+      "cell": "macro-economics",
+      "role": "specialist",
+      "anchor": "'Fed Guy'; monetary plumbing, repo, reserves, QT mechanics"
+    },
+    {
+      "slug": "jason-furman",
+      "name": "Jason Furman",
+      "cell": "macro-economics",
+      "role": "specialist",
+      "anchor": "Harvard; ex-CEA chair; fiscal policy, inflation, labor economics"
+    },
+    {
+      "slug": "lyn-alden",
+      "name": "Lyn Alden",
+      "cell": "macro-economics",
+      "role": "specialist",
+      "anchor": "independent macro/markets analyst; 'Broken Money', fiscal-dominance lens"
+    },
+    {
+      "slug": "patrick-collison",
+      "name": "Patrick Collison",
+      "cell": "fintech-payments",
+      "role": "lead-driver",
+      "anchor": "Stripe co-founder/CEO; payments infrastructure, internet economy, progress studies"
+    },
+    {
+      "slug": "simon-taylor",
+      "name": "Simon Taylor",
+      "cell": "fintech-payments",
+      "role": "specialist",
+      "anchor": "'Fintech Brainfood'; banking-as-a-service, embedded finance, fintech infrastructure"
+    },
+    {
+      "slug": "marc-rubinstein",
+      "name": "Marc Rubinstein",
+      "cell": "fintech-payments",
+      "role": "specialist",
+      "anchor": "'Net Interest'; banks/fintech analysis, ex-hedge-fund analyst"
+    },
+    {
+      "slug": "angela-strange",
+      "name": "Angela Strange",
+      "cell": "fintech-payments",
+      "role": "specialist",
+      "anchor": "a16z GP; 'every company will be a fintech company', infrastructure investing"
+    },
+    {
+      "slug": "frank-rotman",
+      "name": "Frank Rotman",
+      "cell": "fintech-payments",
+      "role": "specialist",
+      "anchor": "QED Investors founding partner; credit/lending fintech, unit economics"
+    },
+    {
+      "slug": "matt-harris",
+      "name": "Matt Harris",
+      "cell": "fintech-payments",
+      "role": "specialist",
+      "anchor": "Bain Capital Ventures; fintech-as-the-fourth-platform thesis"
+    },
+    {
+      "slug": "david-birch",
+      "name": "David Birch",
+      "cell": "fintech-payments",
+      "role": "specialist",
+      "anchor": "identity & digital money author; CBDCs, the future of money/identity"
+    },
+    {
+      "slug": "richard-thaler",
+      "name": "Richard Thaler",
+      "cell": "behavioral-decision-science",
+      "role": "lead-driver",
+      "anchor": "Chicago; Nobel laureate; 'Nudge', mental accounting, behavioral economics founder"
+    },
+    {
+      "slug": "robert-shiller",
+      "name": "Robert Shiller",
+      "cell": "behavioral-decision-science",
+      "role": "lead-driver",
+      "anchor": "Yale; Nobel laureate; 'Irrational Exuberance', narrative economics, CAPE"
+    },
+    {
+      "slug": "daniel-kahneman",
+      "name": "Daniel Kahneman",
+      "cell": "behavioral-decision-science",
+      "role": "validator",
+      "anchor": "(d.2024) 'Thinking, Fast and Slow'; prospect theory, biases, 'Noise'"
+    },
+    {
+      "slug": "morgan-housel",
+      "name": "Morgan Housel",
+      "cell": "behavioral-decision-science",
+      "role": "specialist",
+      "anchor": "'The Psychology of Money'; behavior over spreadsheets, long-term"
+    },
+    {
+      "slug": "annie-duke",
+      "name": "Annie Duke",
+      "cell": "behavioral-decision-science",
+      "role": "specialist",
+      "anchor": "'Thinking in Bets'/'Quit'; decision-making under uncertainty, resulting"
+    },
+    {
+      "slug": "meir-statman",
+      "name": "Meir Statman",
+      "cell": "behavioral-decision-science",
+      "role": "specialist",
+      "anchor": "Santa Clara; behavioral portfolio theory, what investors really want"
+    },
+    {
+      "slug": "jay-ritter",
+      "name": "Jay Ritter",
+      "cell": "capital-markets-ma-private",
+      "role": "lead-driver",
+      "anchor": "University of Florida; the 'IPO dean'; IPO underpricing/long-run data"
+    },
+    {
+      "slug": "steve-kaplan",
+      "name": "Steve Kaplan",
+      "cell": "capital-markets-ma-private",
+      "role": "specialist",
+      "anchor": "Chicago Booth; private equity and VC returns research, buyouts"
+    },
+    {
+      "slug": "edward-altman",
+      "name": "Edward Altman",
+      "cell": "capital-markets-ma-private",
+      "role": "validator",
+      "anchor": "NYU; the Altman Z-score; bankruptcy prediction, distressed debt"
+    },
+    {
+      "slug": "ludovic-phalippou",
+      "name": "Ludovic Phalippou",
+      "cell": "capital-markets-ma-private",
+      "role": "specialist",
+      "anchor": "Oxford Said; 'Private Equity Laid Bare'; critic of PE fees and IRR framing"
+    },
+    {
+      "slug": "dan-rasmussen",
+      "name": "Dan Rasmussen",
+      "cell": "capital-markets-ma-private",
+      "role": "specialist",
+      "anchor": "Verdad; public-vs-private empirics, leveraged small-value, PE skepticism"
+    }
+  ]
+}

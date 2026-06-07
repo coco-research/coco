@@ -1,0 +1,43 @@
+WARN: skipping blake-bartlett.md: while parsing a block collection
+  in "<unicode string>", line 21, column 3:
+      - Coining and popularizing "prod ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 24, column 45:
+     ... lue before you ask for payment" — free/trial as table stakes, no ... 
+                                         ^
+WARN: skipping hermann-simon.md: while parsing a block collection
+  in "<unicode string>", line 31, column 3:
+      - "Hidden Champions" (1996) and  ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 31, column 24:
+      - "Hidden Champions" (1996) and "Hidden Champions of  ... 
+                           ^
+WARN: skipping madhavan-ramanujam.md: while parsing a block collection
+  in "<unicode string>", line 23, column 3:
+      - Design the product around the  ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 28, column 21:
+      - "Single breath" test for pricing simplicity
+                        ^
+WARN: skipping wes-bush.md: while parsing a block collection
+  in "<unicode string>", line 30, column 3:
+      - "Product-Led Growth: How to Bu ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 30, column 68:
+     ... ld a Product That Sells Itself" (2019; 2nd edition for 2026)
+                                         ^
+Wrote /Users/Rijul_Kalra/projects/coco-platform/superintelligence/gtm/registry.json (22 personas [19 native + 3 cross-listed], 7 cells).
+  wrote cells/category-design-positioning.md (4 personas, 0 tensions)
+  wrote cells/demand-gen-content-marketing.md (4 personas, 0 tensions)
+  wrote cells/sales-methodology-negotiation.md (6 personas, 7 tensions)
+  wrote cells/product-led-growth.md (1 personas, 0 tensions)
+  wrote cells/brand-strategy.md (4 personas, 3 tensions)
+  wrote cells/pricing-monetization.md (1 personas, 0 tensions)
+  wrote cells/customer-success-retention.md (2 personas, 0 tensions)
+Wrote 7 cell docs.
+gtm: 11/23 PASS, 12 NEEDS-TOPUP -> /Users/Rijul_Kalra/projects/coco-platform/superintelligence/gtm/VALIDATION.md
+NEEDS-TOPUP: aaron-ross ann-handley blake-bartlett bob-hoffman byron-sharp hermann-simon lincoln-murphy madhavan-ramanujam mark-roberge marty-neumeier matt-dixon wes-bush

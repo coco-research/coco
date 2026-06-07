@@ -1,0 +1,251 @@
+[20:12:10] STEP 1: nano YAML-repair across all teams
+scanning 204 files; 45 unparseable -> repairing (20 parallel)
+  patrick-collison: still-broken
+  glenn-hopper: still-broken
+  graham-barrow: still-broken
+  nic-carter: still-broken
+  frank-rotman: still-broken
+  gillian-hadfield: still-broken
+  jack-mccullough: still-broken
+  howard-marks: still-broken
+  michael-mauboussin: still-broken
+  claudia-sahm: still-broken
+  maureen-ohara: still-broken
+  matt-harris: still-broken
+  ludovic-phalippou: still-broken
+  aaron-brown: still-broken
+  latanya-sweeney: still-broken
+  scott-cunningham: still-broken
+  michael-porter: still-broken
+  roger-martin: still-broken
+  ron-kohavi: still-broken
+  joe-reis: still-broken
+  andrei-hagiu: still-broken
+  dan-lovallo: still-broken
+  richard-rumelt: still-broken
+  chris-bradley: still-broken
+  wes-mckinney: still-broken
+  wes-bush: still-broken
+  blake-bartlett: still-broken
+  hermann-simon: still-broken
+  madhavan-ramanujam: still-broken
+
+REPAIRED 16 | failed 29 | (parseable now: 175/204)
+[20:13:29] STEP 2 (finance): registry -> cells -> validate
+WARN: skipping claudia-sahm.md: while parsing a block collection
+  in "<unicode string>", line 30, column 3:
+      - "Direct Stimulus Payments to I ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 30, column 47:
+     ... imulus Payments to Individuals" chapter in "Recession Ready" (Ha ... 
+                                         ^
+WARN: skipping frank-rotman.md: while parsing a block collection
+  in "<unicode string>", line 27, column 3:
+      - "The Copernican Revolution in  ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 27, column 44:
+     ... pernican Revolution in Banking" (QED publication / presentation)
+                                         ^
+WARN: skipping glenn-hopper.md: while parsing a block collection
+  in "<unicode string>", line 25, column 3:
+      - Insists on data readiness as t ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 28, column 24:
+      - "Trust but verify" posture toward AI-generated anal ... 
+                           ^
+WARN: skipping howard-marks.md: while parsing a block collection
+  in "<unicode string>", line 27, column 3:
+      - "The Most Important Thing: Unc ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 27, column 76:
+     ... se for the Thoughtful Investor" (2011)
+                                         ^
+WARN: skipping jack-mccullough.md: while parsing a block collection
+  in "<unicode string>", line 30, column 3:
+      - "Secrets of Rockstar CFOs" (20 ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 30, column 32:
+      - "Secrets of Rockstar CFOs" (2019) — traits common to elite  ... 
+                                   ^
+WARN: skipping ludovic-phalippou.md: while parsing a block collection
+  in "<unicode string>", line 28, column 3:
+      - "Private Equity Laid Bare" (bo ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 28, column 32:
+      - "Private Equity Laid Bare" (book, self-published, multiple  ... 
+                                   ^
+WARN: skipping matt-harris.md: while parsing a block collection
+  in "<unicode string>", line 30, column 3:
+      - "Fintech: The Fourth Platform" ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 30, column 36:
+      - "Fintech: The Fourth Platform" (two-part essay, 2019) — the the ... 
+                                       ^
+WARN: skipping michael-mauboussin.md: while parsing a block collection
+  in "<unicode string>", line 30, column 3:
+      - "Expectations Investing: Readi ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 30, column 71:
+     ... tock Prices for Better Returns" (with Alfred Rappaport, revised  ... 
+                                         ^
+WARN: skipping patrick-collison.md: while parsing a block mapping
+  in "<unicode string>", line 43, column 5:
+      - title: 'Stripe CEO\'s AI-era sof ... 
+        ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 43, column 25:
+      - title: 'Stripe CEO\'s AI-era software pitch: Start s ... 
+                            ^
+Wrote /Users/Rijul_Kalra/projects/coco-platform/superintelligence/finance/registry.json (38 personas, 7 cells).
+  wrote cells/valuation-corporate-finance.md (6 personas, 3 tensions)
+  wrote cells/investing-capital-allocation.md (7 personas, 7 tensions)
+  wrote cells/accounting-fpa-reporting.md (4 personas, 0 tensions)
+  wrote cells/macro-economics.md (7 personas, 8 tensions)
+  wrote cells/fintech-payments.md (4 personas, 0 tensions)
+  wrote cells/behavioral-decision-science.md (6 personas, 0 tensions)
+  wrote cells/capital-markets-ma-private.md (4 personas, 0 tensions)
+Wrote 7 cell docs.
+finance: 23/47 PASS, 24 NEEDS-TOPUP -> /Users/Rijul_Kalra/projects/coco-platform/superintelligence/finance/VALIDATION.md
+NEEDS-TOPUP: bennett-stewart cathie-wood claudia-sahm dan-rasmussen daniel-kahneman edward-altman frank-rotman glenn-hopper howard-marks howard-schilit jack-mccullough joel-greenblatt joseph-wang ludovic-phalippou matt-harris meir-statman michael-mauboussin nouriel-roubini pablo-fernandez patrick-collison paul-barnhurst simon-taylor steve-kaplan tim-koller
+[20:21:40]   finance: 23/47 PASS
+[20:21:40] STEP 2 (trading): registry -> cells -> validate
+WARN: skipping aaron-brown.md: while parsing a block collection
+  in "<unicode string>", line 32, column 3:
+      - "Red-Blooded Risk: The Secret  ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 32, column 59:
+     ...  Secret History of Wall Street" (2012)
+                                         ^
+WARN: skipping maureen-ohara.md: while parsing a block collection
+  in "<unicode string>", line 30, column 3:
+      - "Market Microstructure Theory" ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 30, column 36:
+      - "Market Microstructure Theory" (1995/1997) — the field's standa ... 
+                                       ^
+WARN: skipping nic-carter.md: while parsing a block collection
+  in "<unicode string>", line 30, column 3:
+      - "It's the Settlement Assurance ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 30, column 46:
+     ...  Settlement Assurances, Stupid" (essay defining bitcoin's value  ... 
+                                         ^
+Wrote /Users/Rijul_Kalra/projects/coco-platform/superintelligence/trading/registry.json (43 personas [43 native + 0 cross-listed], 8 cells).
+  wrote cells/macro-discretionary.md (8 personas, 5 tensions)
+  wrote cells/quant-systematic.md (7 personas, 3 tensions)
+  wrote cells/derivatives-volatility.md (6 personas, 6 tensions)
+  wrote cells/microstructure-execution.md (4 personas, 2 tensions)
+  wrote cells/fixed-income-rates.md (5 personas, 1 tensions)
+  wrote cells/risk-systemic.md (4 personas, 2 tensions)
+  wrote cells/crypto-digital-assets.md (5 personas, 4 tensions)
+  wrote cells/trader-craft-psychology.md (4 personas, 0 tensions)
+Wrote 8 cell docs.
+trading: 23/46 PASS, 23 NEEDS-TOPUP -> /Users/Rijul_Kalra/projects/coco-platform/superintelligence/trading/VALIDATION.md
+NEEDS-TOPUP: aaron-brown benn-eifert bill-gross brett-steenbarger cliff-asness danielle-dimartino-booth ed-thorp ernest-chan euan-sinclair frank-fabozzi george-soros haim-bodek jack-schwager kenneth-grant larry-harris mark-douglas maureen-ohara nic-carter riccardo-rebonato richard-bookstaber robert-litterman stanley-druckenmiller til-schuermann
+[20:30:55]   trading: 23/46 PASS
+[20:30:55] STEP 2 (risk-compliance): registry -> cells -> validate
+WARN: skipping gillian-hadfield.md: while parsing a block collection
+  in "<unicode string>", line 29, column 3:
+      - "Rules for a Flat World: Why H ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 29, column 107:
+     ... t for a Complex Global Economy" (Oxford University Press, 2017;  ... 
+                                         ^
+WARN: skipping graham-barrow.md: while parsing a block collection
+  in "<unicode string>", line 34, column 3:
+      - "Laundromats" (essay, The Fina ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 34, column 19:
+      - "Laundromats" (essay, The Financial Crime News)
+                      ^
+WARN: skipping latanya-sweeney.md: while parsing a block collection
+  in "<unicode string>", line 29, column 3:
+      - "k-Anonymity: A Model for Prot ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 29, column 51:
+     ... A Model for Protecting Privacy" (2002) — the formal privacy mode ... 
+                                         ^
+Wrote /Users/Rijul_Kalra/projects/coco-platform/superintelligence/risk-compliance/registry.json (39 personas [27 native + 12 cross-listed], 7 cells).
+  wrote cells/privacy-data-protection.md (6 personas, 7 tensions)
+  wrote cells/ai-governance-responsible-ai.md (7 personas, 0 tensions)
+  wrote cells/regulatory-tech-policy.md (6 personas, 2 tensions)
+  wrote cells/security-governance.md (5 personas, 0 tensions)
+  wrote cells/erm-grc-leadership.md (6 personas, 4 tensions)
+  wrote cells/financial-crime-aml.md (4 personas, 1 tensions)
+  wrote cells/model-systemic-risk.md (5 personas, 0 tensions)
+Wrote 7 cell docs.
+risk-compliance: 20/30 PASS, 10 NEEDS-TOPUP -> /Users/Rijul_Kalra/projects/coco-platform/superintelligence/risk-compliance/VALIDATION.md
+NEEDS-TOPUP: carol-williams gillian-hadfield graham-barrow james-lam jim-richards john-cusack latanya-sweeney lokke-moerel marietje-schaake ross-delston
+[20:36:19]   risk-compliance: 20/30 PASS
+[20:36:19] STEP 2 (strategy): registry -> cells -> validate
+WARN: skipping andrei-hagiu.md: while parsing a block collection
+  in "<unicode string>", line 33, column 3:
+      - "Invisible Engines: How Softwa ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 33, column 91:
+     ... ation and Transform Industries" (with David Evans and Richard Sc ... 
+                                         ^
+WARN: skipping chris-bradley.md: while parsing a block collection
+  in "<unicode string>", line 27, column 3:
+      - "Strategy Beyond the Hockey St ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 27, column 40:
+     ... rategy Beyond the Hockey Stick" (2018, with Martin Hirt and Sven ... 
+                                         ^
+WARN: skipping dan-lovallo.md: while parsing a block collection
+  in "<unicode string>", line 28, column 3:
+      - "Timid Choices and Bold Foreca ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 28, column 80:
+     ... ive Perspective on Risk Taking" (with Daniel Kahneman, Managemen ... 
+                                         ^
+WARN: skipping michael-porter.md: while parsing a block collection
+  in "<unicode string>", line 96, column 3:
+      - Framework assumes relatively s ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 99, column 27:
+      - "Stuck in the middle" doctrine is contested by firms ( ... 
+                              ^
+WARN: skipping richard-rumelt.md: while parsing a block collection
+  in "<unicode string>", line 11, column 3:
+      - UCLA Anderson School of Manage ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 13, column 31:
+      - "The Rumelt Perspectives" (Substack publication, renamed J ... 
+                                  ^
+WARN: skipping roger-martin.md: while parsing a block collection
+  in "<unicode string>", line 22, column 3:
+      - Strategy Choice Cascade — five ... 
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 23, column 35:
+      - "What would have to be true?" — reverse-testing the conditions ... 
+                                      ^
+Wrote /Users/Rijul_Kalra/projects/coco-platform/superintelligence/strategy/registry.json (25 personas [23 native + 2 cross-listed], 7 cells).
+  wrote cells/competitive-strategy-advantage.md (3 personas, 2 tensions)
+  wrote cells/growth-innovation.md (6 personas, 3 tensions)
+  wrote cells/corporate-portfolio-strategy.md (3 personas, 0 tensions)
+  wrote cells/strategy-execution-org.md (4 personas, 0 tensions)
+  wrote cells/game-theory-decision.md (4 personas, 1 tensions)
+  wrote cells/behavioral-strategy-bias.md (2 personas, 0 tensions)
+  wrote cells/platform-ecosystem-strategy.md (3 personas, 0 tensions)
+Wrote 7 cell docs.

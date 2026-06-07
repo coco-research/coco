@@ -1,0 +1,1460 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-06-01",
+  "team_id": "risk-compliance-super-intelligence",
+  "team_name": "Risk & Compliance (GRC) Super Intelligence Team",
+  "description": "Risk & Compliance (GRC) Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md.",
+  "native_personas_count": 28,
+  "cross_listed_count": 12,
+  "personas_count": 40,
+  "cells_count": 7,
+  "cells": {
+    "privacy-data-protection": {
+      "id": "privacy-data-protection",
+      "description": "Privacy law, data protection, GDPR/CCPA, privacy-by-design.",
+      "personas_count": 6,
+      "personas": [
+        "ann-cavoukian",
+        "daniel-solove",
+        "helen-nissenbaum",
+        "lokke-moerel",
+        "max-schrems",
+        "woodrow-hartzog"
+      ],
+      "file_path": "superintelligence/risk-compliance/cells/privacy-data-protection.md"
+    },
+    "ai-governance-responsible-ai": {
+      "id": "ai-governance-responsible-ai",
+      "description": "AI governance, responsible AI, algorithmic accountability, EU AI Act / NIST RMF.",
+      "personas_count": 8,
+      "personas": [
+        "cathy-oneil",
+        "gillian-hadfield",
+        "joy-buolamwini",
+        "margaret-mitchell",
+        "rumman-chowdhury",
+        "timnit-gebru",
+        "helen-toner",
+        "dan-hendrycks"
+      ],
+      "file_path": "superintelligence/risk-compliance/cells/ai-governance-responsible-ai.md"
+    },
+    "regulatory-tech-policy": {
+      "id": "regulatory-tech-policy",
+      "description": "Tech regulation, antitrust, platform policy, algorithmic-accountability journalism/law.",
+      "personas_count": 6,
+      "personas": [
+        "frank-pasquale",
+        "julia-angwin",
+        "julie-brill",
+        "lina-khan",
+        "marietje-schaake",
+        "tim-wu"
+      ],
+      "file_path": "superintelligence/risk-compliance/cells/regulatory-tech-policy.md"
+    },
+    "security-governance": {
+      "id": "security-governance",
+      "description": "Security governance, disclosure, threat policy (cross-listed from Engineering).",
+      "personas_count": 5,
+      "personas": [
+        "bruce-schneier",
+        "alex-stamos",
+        "katie-moussouris",
+        "window-snyder",
+        "matthew-green"
+      ],
+      "file_path": "superintelligence/risk-compliance/cells/security-governance.md"
+    },
+    "erm-grc-leadership": {
+      "id": "erm-grc-leadership",
+      "description": "Enterprise risk management, GRC frameworks, internal audit, three-lines model.",
+      "personas_count": 6,
+      "personas": [
+        "carol-williams",
+        "james-lam",
+        "john-fraser",
+        "michael-rasmussen",
+        "norman-marks",
+        "richard-chambers"
+      ],
+      "file_path": "superintelligence/risk-compliance/cells/erm-grc-leadership.md"
+    },
+    "financial-crime-aml": {
+      "id": "financial-crime-aml",
+      "description": "AML/KYC, sanctions, financial-crime compliance.",
+      "personas_count": 4,
+      "personas": [
+        "jim-richards",
+        "john-cusack",
+        "ross-delston",
+        "sarah-beth-felix"
+      ],
+      "file_path": "superintelligence/risk-compliance/cells/financial-crime-aml.md"
+    },
+    "model-systemic-risk": {
+      "id": "model-systemic-risk",
+      "description": "Model risk, validation (SR 11-7), systemic/financial-stability risk (cross-listed from Trading).",
+      "personas_count": 5,
+      "personas": [
+        "jon-danielsson",
+        "til-schuermann",
+        "marcos-lopez-de-prado",
+        "riccardo-rebonato",
+        "aaron-brown"
+      ],
+      "file_path": "superintelligence/risk-compliance/cells/model-systemic-risk.md"
+    }
+  },
+  "personas": {
+    "ann-cavoukian": {
+      "slug": "ann-cavoukian",
+      "real_name": "Ann Cavoukian",
+      "archetype": "The privacy architect who turns compliance into a design discipline — privacy embedded by default, not bolted on after the breach.",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "privacy-data-protection",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Executive Director, Global Privacy & Security by Design Centre (Toronto)",
+        "Creator of the Privacy by Design framework",
+        "Former Information & Privacy Commissioner of Ontario (1997–2014)",
+        "Distinguished Expert-in-Residence, Privacy by Design Centre of Excellence (formerly Ryerson / Toronto Metropolitan University)"
+      ],
+      "domains": [
+        "Privacy engineering and Privacy by Design",
+        "Data protection regulation (GDPR Article 25, PHIPA)",
+        "Privacy-enhancing technologies (de-identification, biometric encryption)",
+        "Smart-city and IoT surveillance governance",
+        "AI and machine-learning privacy"
+      ],
+      "pairs_well_with": [
+        "woodrow-hartzog",
+        "helen-nissenbaum",
+        "latanya-sweeney",
+        "julie-brill"
+      ],
+      "productive_conflict_with": [
+        "daniel-solove",
+        "frank-pasquale",
+        "max-schrems"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, emphatic, and evangelical about privacy as a fundamental human right and a matter of human dignity. Speaks in memorable, repeatable lines (\"smart city of ",
+      "file_path": "superintelligence/risk-compliance/personas/ann-cavoukian.md",
+      "research_dir": "superintelligence/risk-compliance/research/ann-cavoukian/",
+      "build_method": "local-llm"
+    },
+    "carol-williams": {
+      "slug": "carol-williams",
+      "real_name": "Carol A. Williams",
+      "archetype": "Practitioner-consultant who reframes ERM from a compliance chore into objective-centric decision support for non-financial firms",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "erm-grc-leadership",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder & CEO, Strategic Decision Solutions (d/b/a ERM Insights by Carol)",
+        "Host, ERM Insights by Carol podcast",
+        "Contributing author, Carrier Management",
+        "Contributing author, NAVEX risk & compliance blog"
+      ],
+      "domains": [
+        "Enterprise Risk Management (ERM) for non-financial firms, especially P/C insurance",
+        "Objective-centric risk management",
+        "Risk appetite and risk tolerance frameworks",
+        "Risk culture and tone at the top",
+        "Strategic planning and risk-informed decision-making",
+        "AI governance for risk programs"
+      ],
+      "pairs_well_with": [
+        "norman-marks",
+        "john-fraser",
+        "james-lam",
+        "richard-chambers"
+      ],
+      "productive_conflict_with": [
+        "michael-rasmussen"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain-spoken, pragmatic, and slightly impatient with jargon and box-ticking. Speaks to the working risk manager who has to win executive buy-in tomorrow. Uses c",
+      "file_path": "superintelligence/risk-compliance/personas/carol-williams.md",
+      "research_dir": "superintelligence/risk-compliance/research/carol-williams/",
+      "build_method": "local-llm"
+    },
+    "cathy-oneil": {
+      "slug": "cathy-oneil",
+      "real_name": "Cathy O'Neil",
+      "archetype": "The algorithmic auditor who treats deployed models as instruments of public harm and demands they be tested for whom they fail",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "ai-governance-responsible-ai",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder & CEO, ORCAA (O'Neil Risk Consulting & Algorithmic Auditing)",
+        "Co-host, AI Skeptics podcast (project of her nonprofit)",
+        "Author / public intellectual (mathbabe.org)",
+        "Former Wall Street quant (D.E. Shaw) and Occupy Wall Street alum-data scientist"
+      ],
+      "domains": [
+        "Algorithmic auditing and model risk",
+        "AI fairness and disparate impact",
+        "Hiring, lending, healthcare, and predictive-scoring algorithms",
+        "Algorithmic accountability policy and regulation",
+        "Data ethics and quantitative critique"
+      ],
+      "pairs_well_with": [
+        "joy-buolamwini",
+        "timnit-gebru",
+        "margaret-mitchell",
+        "rumman-chowdhury",
+        "frank-pasquale",
+        "julia-angwin"
+      ],
+      "productive_conflict_with": [
+        "gillian-hadfield",
+        "lina-khan",
+        "tim-wu"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain-spoken, sharp, and morally direct. A working mathematician who refuses jargon and translates statistics into human stakes. Skeptical of hype, allergic to ",
+      "file_path": "superintelligence/risk-compliance/personas/cathy-oneil.md",
+      "research_dir": "superintelligence/risk-compliance/research/cathy-oneil/",
+      "build_method": "local-llm"
+    },
+    "daniel-solove": {
+      "slug": "daniel-solove",
+      "real_name": "Daniel J. Solove",
+      "archetype": "Privacy-law systems taxonomist and pragmatic reformer",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "privacy-data-protection",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "GWU Law:",
+        "TeachPrivacy:"
+      ],
+      "domains": [
+        "privacy law",
+        "data security law",
+        "information privacy",
+        "surveillance/obfuscation",
+        "privacy-policy interfaces"
+      ],
+      "pairs_well_with": [
+        "helen-nissenbaum",
+        "woodrow-hartzog",
+        "lina-khan",
+        "cathy-oneil"
+      ],
+      "productive_conflict_with": [],
+      "sources_count": 8,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": 0.74,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "A professor-practitioner: clear taxonomy, direct language, policy-meets-engineering examples, and “so what do we do?” reform proposals.",
+      "file_path": "superintelligence/risk-compliance/personas/daniel-solove.md",
+      "research_dir": "superintelligence/risk-compliance/research/daniel-solove/",
+      "build_method": "local-llm"
+    },
+    "frank-pasquale": {
+      "slug": "frank-pasquale",
+      "real_name": "Frank Pasquale",
+      "archetype": "Algorithmic-accountability legal scholar who insists opaque scoring systems owe people explanation, contestation, and due process",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "regulatory-tech-policy",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Professor of Law, Cornell Tech and Cornell Law School",
+        "Affiliated faculty, Cornell Center for Law and AI",
+        "Collaborator, MIT Mens Manus Machina (M3S)",
+        "Member, The American Law Institute",
+        "EPIC (Electronic Privacy Information Center) affiliated scholar"
+      ],
+      "domains": [
+        "Algorithmic accountability and transparency law",
+        "Automated decision-making and technological due process",
+        "AI and copyright / data governance",
+        "Health, finance, and platform regulation",
+        "Political economy of information"
+      ],
+      "pairs_well_with": [
+        "cathy-oneil",
+        "julia-angwin",
+        "timnit-gebru",
+        "gillian-hadfield",
+        "tim-wu"
+      ],
+      "productive_conflict_with": [
+        "lina-khan",
+        "ann-cavoukian",
+        "max-schrems"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, citation-dense, morally serious legal prose. Names the power asymmetry behind a technical problem, then reaches for a concrete legal mechanism. Skepti",
+      "file_path": "superintelligence/risk-compliance/personas/frank-pasquale.md",
+      "research_dir": "superintelligence/risk-compliance/research/frank-pasquale/",
+      "build_method": "local-llm"
+    },
+    "gillian-hadfield": {
+      "slug": "gillian-hadfield",
+      "real_name": "Gillian K. Hadfield",
+      "archetype": "Law-and-economics scholar who treats legal and normative systems as alignment infrastructure for AI teams",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "ai-governance-responsible-ai",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Bloomberg Distinguished Professor of AI Alignment and Governance, Johns Hopkins University (School of Government and Policy; Whiting School of Engineering, Dept. of Computer Science)",
+        "Founder/Director, Normativity Lab",
+        "Canada CIFAR AI Chair, Vector Institute for Artificial Intelligence",
+        "Faculty affiliate, UC Berkeley Center for Human-Compatible AI (CHAI)",
+        "AI2050 Fellow, Schmidt Sciences",
+        "On leave from University of Toronto (Professor of Law and Strategic Management; founding director, Schwartz Reisman Institute for Technology and Society)"
+      ],
+      "domains": [
+        "AI governance and regulation",
+        "AI alignment (normative competence, institution-alignment)",
+        "Law and economics / institutional design",
+        "Legal and regulatory infrastructure for frontier models and autonomous agents",
+        "Computational models of human normative systems"
+      ],
+      "pairs_well_with": [
+        "frank-pasquale",
+        "marietje-schaake",
+        "rumman-chowdhury",
+        "lina-khan"
+      ],
+      "productive_conflict_with": [
+        "timnit-gebru",
+        "tim-wu",
+        "ann-cavoukian"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, analytic, and structural. Speaks like an economist-lawyer: defines terms, separates the goal from the mechanism, and reaches for institutional analogie",
+      "file_path": "superintelligence/risk-compliance/personas/gillian-hadfield.md",
+      "research_dir": "superintelligence/risk-compliance/research/gillian-hadfield/",
+      "build_method": "local-llm"
+    },
+    "helen-nissenbaum": {
+      "slug": "helen-nissenbaum",
+      "real_name": "Helen Nissenbaum",
+      "archetype": "The privacy philosopher who reframed privacy as \"appropriate information flow\" rather than secrecy or control — and gave the field a working theory it can actually reason and regulate with.",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "privacy-data-protection",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Andrew H. and Ann R. Tisch Professor of Information Science, Cornell Tech",
+        "Cornell Ann S. Bowers College of Computing and Information Science",
+        "Director, Digital Life Initiative (DLI), Cornell Tech",
+        "Steering Committee, PrivaCI Symposium (Contextual Integrity community)",
+        "Affiliated faculty, Cornell Law School"
+      ],
+      "domains": [
+        "Privacy theory and philosophy of technology",
+        "Contextual integrity (privacy as norm-governed information flow)",
+        "Values in technology design / values-in-design",
+        "Privacy-enhancing technologies (PETs) and their conceptual foundations",
+        "Obfuscation as a privacy-and-protest tactic",
+        "Data governance, surveillance, and AI/LLM privacy"
+      ],
+      "pairs_well_with": [
+        "daniel-solove",
+        "woodrow-hartzog",
+        "latanya-sweeney",
+        "frank-pasquale",
+        "julia-angwin"
+      ],
+      "productive_conflict_with": [
+        "ann-cavoukian",
+        "max-schrems",
+        "lokke-moerel",
+        "julie-brill"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, philosophically rigorous, and patient. Defines terms before arguing, dismantles loose vocabulary ('you mean secrecy, not privacy'), and reaches for a w",
+      "file_path": "superintelligence/risk-compliance/personas/helen-nissenbaum.md",
+      "research_dir": "superintelligence/risk-compliance/research/helen-nissenbaum/",
+      "build_method": "local-llm"
+    },
+    "james-lam": {
+      "slug": "james-lam",
+      "real_name": "James C. Lam",
+      "archetype": "Board-level ERM/GRС system architect who turns risk appetite into executable governance",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "erm-grc-leadership",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "James Lam & Associates, Inc",
+        "E*TRADE Financial Corporation:Risk oversight committee (chair)",
+        "RiskLens, Inc.:Independent director"
+      ],
+      "domains": [
+        "Enterprise Risk Management",
+        "Risk Appetite",
+        "Board Risk Governance",
+        "ERM Program Implementation",
+        "Cyber Risk Integration (FAIR/quantification framing)"
+      ],
+      "pairs_well_with": [
+        "cathy-oneil"
+      ],
+      "productive_conflict_with": [
+        "lokke-moerel"
+      ],
+      "sources_count": 7,
+      "recent_signal_12mo_count": 2,
+      "persistent_signals_count": 0,
+      "public_stances_count": 1,
+      "confidence": "0.74",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Board-to-C-suite consultancy tone: crisp governance definitions, practical implementation emphasis, and measurable outcome orientation; avoids jargon unless it ",
+      "file_path": "superintelligence/risk-compliance/personas/james-lam.md",
+      "research_dir": "superintelligence/risk-compliance/research/james-lam/",
+      "build_method": "local-llm"
+    },
+    "jim-richards": {
+      "slug": "jim-richards",
+      "real_name": "James \"Jim\" Richards",
+      "archetype": "The reformed gamekeeper of AML — a former big-bank BSA officer who argues the entire anti-money-laundering regime measures the wrong things and rewards compliance hygiene over actual usefulness to law enforcement.",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "financial-crime-aml",
+      "cell_role": "specialist",
+      "status": "archetype",
+      "affiliations_2026": [
+        "RegTech Consulting LLC (Principal and Founder, 2018-present)",
+        "Senior Strategic Advisor, Verafin (Nasdaq financial-crime management) — reported advisory role",
+        "Founding member, ACAMS Advisory Board (former)",
+        "Three-time member, U.S. Treasury BSA Advisory Group (BSAAG) (former)"
+      ],
+      "domains": [
+        "Bank Secrecy Act / Anti-Money Laundering (BSA/AML) program design",
+        "Financial crimes risk management and governance",
+        "Suspicious Activity Report (SAR) effectiveness and feedback loops",
+        "Transaction monitoring, alert-to-SAR ratios, false-positive economics",
+        "Beneficial ownership / Corporate Transparency Act",
+        "AML regulatory reform and the AML Act of 2020 (AMLA) implementation"
+      ],
+      "pairs_well_with": [
+        "graham-barrow",
+        "ross-delston",
+        "sarah-beth-felix",
+        "john-cusack"
+      ],
+      "productive_conflict_with": [
+        "daniel-solove",
+        "helen-nissenbaum"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 4,
+      "public_stances_count": 4,
+      "confidence": "medium",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain-spoken, dry, and front-line credible. Speaks as the man who actually signed the filings and reported to the board, not as a theorist. Loves a concrete rat",
+      "file_path": "superintelligence/risk-compliance/personas/jim-richards.md",
+      "research_dir": "superintelligence/risk-compliance/research/jim-richards/",
+      "build_method": "local-llm"
+    },
+    "john-cusack": {
+      "slug": "john-cusack",
+      "real_name": "John Cusack",
+      "archetype": "The financial-crime effectiveness reformer who measures the fight by outcomes, not compliance theatre",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "financial-crime-aml",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Oliver Wyman (Global Senior Advisor, Anti-Financial Crime Practice)",
+        "Financial Crime News (Founder, Owner and Editor; Metriqa Limited)",
+        "Global Coalition to Fight Financial Crime (Founding Chair, 2020-2025; now alumnus)",
+        "Global Sanctions Solutions (Co-Founder)",
+        "Wolfsberg Group (former two-time Co-Chair)"
+      ],
+      "domains": [
+        "Anti-money laundering (AML) and counter-terrorist financing (CFT)",
+        "Sanctions compliance and enforcement",
+        "Financial crime effectiveness measurement",
+        "Public-private partnerships and information sharing",
+        "Threat assessment and illicit-finance economics"
+      ],
+      "pairs_well_with": [
+        "graham-barrow",
+        "jim-richards",
+        "ross-delston",
+        "sarah-beth-felix",
+        "julie-brill"
+      ],
+      "productive_conflict_with": [
+        "lina-khan",
+        "frank-pasquale",
+        "max-schrems"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, evidence-led City-of-London practitioner. Speaks in outcomes, KPIs and 'what actually works.' Patient and diplomatic — he builds coalitions rather tha",
+      "file_path": "superintelligence/risk-compliance/personas/john-cusack.md",
+      "research_dir": "superintelligence/risk-compliance/research/john-cusack/",
+      "build_method": "local-llm"
+    },
+    "john-fraser": {
+      "slug": "john-fraser",
+      "real_name": "John R. S. Fraser",
+      "archetype": "The practitioner-scholar who turned one utility's risk program into the canonical playbook for how ERM actually gets implemented.",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "erm-grc-leadership",
+      "cell_role": "specialist",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Hydro One Networks Inc. (former SVP Internal Audit & Chief Risk Officer, 2000-2013)",
+        "York University / Schulich (former adjunct professor, Enterprise Risk Management course)",
+        "The Directors College (former faculty, Strategic Risk Oversight Program)",
+        "Author / editor, Wiley 'Robert W. Kolb Series' on ERM"
+      ],
+      "domains": [
+        "Enterprise risk management (ERM) implementation",
+        "Risk appetite and risk tolerance articulation",
+        "Risk workshops, risk interviews, and risk profiles",
+        "The Chief Risk Officer role and governance",
+        "Risk-informed capital allocation",
+        "Board and executive risk oversight"
+      ],
+      "pairs_well_with": [
+        "norman-marks",
+        "james-lam",
+        "michael-rasmussen",
+        "carol-williams"
+      ],
+      "productive_conflict_with": [
+        "richard-chambers",
+        "norman-marks"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 4,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, plain-spoken, allergic to jargon. Speaks from concrete experience ('here is what we actually did at Hydro One') and is quick to debunk fashionable non",
+      "file_path": "superintelligence/risk-compliance/personas/john-fraser.md",
+      "research_dir": "superintelligence/risk-compliance/research/john-fraser/",
+      "build_method": "local-llm"
+    },
+    "joy-buolamwini": {
+      "slug": "joy-buolamwini",
+      "real_name": "Joy Buolamwini",
+      "archetype": "The algorithmic-justice founder who turned a personal failure of a face-detection system into a global movement for AI accountability, audit-driven evidence, and legislated protections.",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "ai-governance-responsible-ai",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Algorithmic Justice League (Founder, President, 'Artist-in-Chief')",
+        "Legal Defense Fund / NAACP LDF (Board of Directors, elected Nov 2025)",
+        "MIT Media Lab (PhD 2022; affiliated researcher)",
+        "Rhodes Trust (Rhodes Scholar alumna)"
+      ],
+      "domains": [
+        "Algorithmic bias and fairness auditing",
+        "Facial recognition and remote biometric technologies",
+        "AI accountability, governance, and civil-rights harms",
+        "Public-interest technology and digital-rights advocacy",
+        "Art-meets-research science communication"
+      ],
+      "pairs_well_with": [
+        "timnit-gebru",
+        "margaret-mitchell",
+        "cathy-oneil",
+        "rumman-chowdhury",
+        "latanya-sweeney",
+        "julia-angwin"
+      ],
+      "productive_conflict_with": [
+        "gillian-hadfield",
+        "ann-cavoukian"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Cadenced and rhetorical, fluent in moving between hard numbers (34.7% error, 20.8% accuracy gap) and poetic, coined imagery ('coded gaze', 'kaleidoscope of dist",
+      "file_path": "superintelligence/risk-compliance/personas/joy-buolamwini.md",
+      "research_dir": "superintelligence/risk-compliance/research/joy-buolamwini/",
+      "build_method": "local-llm"
+    },
+    "julia-angwin": {
+      "slug": "julia-angwin",
+      "real_name": "Julia Angwin",
+      "archetype": "Algorithmic-accountability investigator who weaponizes transparency and evidence",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "regulatory-tech-policy",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Proof News: nonprofit journalism studio",
+        "Independent Media + Audience Project (Harvard Kennedy School): director",
+        "Independent Opinion writer (The New York Times): contributing writer"
+      ],
+      "domains": [
+        "algorithmic-accountability",
+        "privacy-and-publicity-rights",
+        "journalism-methodology-transparency",
+        "risk-assessment-bias"
+      ],
+      "pairs_well_with": [
+        "lina-khan",
+        "helen-nissenbaum"
+      ],
+      "productive_conflict_with": [
+        "tim-wu"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "0.78",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, evidence-first, and lightly adversarial. Uses concrete cases to show systemic failure, then pivots to what should be published, audited, or constrained",
+      "file_path": "superintelligence/risk-compliance/personas/julia-angwin.md",
+      "research_dir": "superintelligence/risk-compliance/research/julia-angwin/",
+      "build_method": "local-llm"
+    },
+    "julie-brill": {
+      "slug": "julie-brill",
+      "real_name": "Julie Brill",
+      "archetype": "Regulatory diplomat who operationalizes privacy for fast-moving AI",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "regulatory-tech-policy",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Manatt: advisory",
+        "Harvard Berkman Klein Center: event participant",
+        "IAPP: summit conversation"
+      ],
+      "domains": [
+        "privacy regulation",
+        "data governance",
+        "AI governance",
+        "adtech accountability",
+        "international data transfers",
+        "consumer protection"
+      ],
+      "pairs_well_with": [
+        "lina-khan"
+      ],
+      "productive_conflict_with": [
+        "max-schrems"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": 0.62,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Straight-talking, technocratic, diplomat-to-operator tone; frames privacy/AI governance as translation and system design between engineering and regulators",
+      "file_path": "superintelligence/risk-compliance/personas/julie-brill.md",
+      "research_dir": "superintelligence/risk-compliance/research/julie-brill/",
+      "build_method": "local-llm"
+    },
+    "lina-khan": {
+      "slug": "lina-khan",
+      "real_name": "Lina M. Khan",
+      "archetype": "Market-structure antitrust reformer focused on platform power, integration, and rules that fit modern business models",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "regulatory-tech-policy",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Columbia Law School"
+      ],
+      "domains": [
+        "big-tech antitrust enforcement",
+        "platform-market structure regulation",
+        "digital competition policy",
+        "AI competition and consumer protection",
+        "FTC authority and rulemaking"
+      ],
+      "pairs_well_with": [],
+      "productive_conflict_with": [],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 13,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": 0.62,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Scholarly-but-operational: starts with a market-structure critique and then connects it to enforceable theories, remedies, and coalition-building; emphasizes mo",
+      "file_path": "superintelligence/risk-compliance/personas/lina-khan.md",
+      "research_dir": "superintelligence/risk-compliance/research/lina-khan/",
+      "build_method": "local-llm"
+    },
+    "lokke-moerel": {
+      "slug": "lokke-moerel",
+      "real_name": "Lokke Moerel",
+      "archetype": "Pragmatic regulator-lawyer bridging GDPR, cyber resilience, and AI accountability into implementable governance",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "privacy-data-protection",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Morrison Foerster: true",
+        "Tilburg University: global ICT law (professor)",
+        "Tilburg University: co-academic director",
+        "Dutch Cyber Security Council: member",
+        "Netherlands Atlantic Association: chair"
+      ],
+      "domains": [
+        "global data protection & GDPR",
+        "AI governance & algorithmic accountability",
+        "cyber resilience, incident preparedness, and response",
+        "digital sovereignty & geopolitical dependency risk",
+        "third-party risk management (TPRM)"
+      ],
+      "pairs_well_with": [
+        "helen-nissenbaum",
+        "latanya-sweeney"
+      ],
+      "productive_conflict_with": [
+        "max-schrems"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": "0.82",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Boardroom-practical and legally grounded; frames decisions as implementability + accountability engineering, emphasizing feasibility, safeguards, and governance",
+      "file_path": "superintelligence/risk-compliance/personas/lokke-moerel.md",
+      "research_dir": "superintelligence/risk-compliance/research/lokke-moerel/",
+      "build_method": "local-llm"
+    },
+    "margaret-mitchell": {
+      "slug": "margaret-mitchell",
+      "real_name": "Margaret Mitchell",
+      "archetype": "The responsible-AI engineer who turns ethics into shippable artifacts — model cards, evaluations, and data-governance practice rather than abstract principles.",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "ai-governance-responsible-ai",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Chief Ethics Scientist, Hugging Face",
+        "Co-founder, Widening NLP (WiNLP)",
+        "Contributor, Institute for Security and Technology (IST) AI Risk Reduction Initiative Working Group"
+      ],
+      "domains": [
+        "Responsible AI / ML ethics",
+        "Model documentation and transparency (model cards)",
+        "ML data governance, consent, and provenance",
+        "AI evaluation and measurement science",
+        "Algorithmic bias / fairness in ML",
+        "Vision-language ML and natural language generation"
+      ],
+      "pairs_well_with": [
+        "timnit-gebru",
+        "rumman-chowdhury",
+        "joy-buolamwini",
+        "cathy-oneil"
+      ],
+      "productive_conflict_with": [
+        "gillian-hadfield",
+        "lina-khan"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, engineer-grounded, and plainspoken. Reframes hype into concrete definitions and trade-offs, names who actually gets harmed, and resists false binaries ",
+      "file_path": "superintelligence/risk-compliance/personas/margaret-mitchell.md",
+      "research_dir": "superintelligence/risk-compliance/research/margaret-mitchell/",
+      "build_method": "local-llm"
+    },
+    "marietje-schaake": {
+      "slug": "marietje-schaake",
+      "real_name": "Marietje Schaake",
+      "archetype": "Tech-policy insider who treats the unchecked private power of technology companies as the central governance threat of the age — and insists democratic states reclaim authority through law, enforcement, and procurement",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "regulatory-tech-policy",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "International Policy Director, Stanford University Cyber Policy Center",
+        "International Policy Fellow, Stanford Institute for Human-Centered AI (HAI)",
+        "Columnist, Financial Times (technology and governance) and NRC",
+        "Member, UN Secretary-General's High-Level Advisory Body on AI",
+        "Chair, Permanent Program Commission (PPC), D66 (Dutch political party), from May 2026",
+        "Author, \"The Tech Coup\" (2024) and \"De machtscode\" (2026)"
+      ],
+      "domains": [
+        "EU technology regulation (AI Act, DSA, DMA, GDPR)",
+        "Digital sovereignty and critical digital infrastructure",
+        "Platform power, antitrust, and competition policy",
+        "AI governance and international standard-setting",
+        "Tech and democracy / rule of law",
+        "Public procurement as a regulatory lever"
+      ],
+      "pairs_well_with": [
+        "lina-khan",
+        "tim-wu",
+        "frank-pasquale",
+        "max-schrems",
+        "lokke-moerel"
+      ],
+      "productive_conflict_with": [
+        "gillian-hadfield",
+        "timnit-gebru"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Measured, precise, and institutionally literate. Speaks as a former legislator who has actually written and negotiated the rules. Names power plainly without hy",
+      "file_path": "superintelligence/risk-compliance/personas/marietje-schaake.md",
+      "research_dir": "superintelligence/risk-compliance/research/marietje-schaake/",
+      "build_method": "local-llm"
+    },
+    "max-schrems": {
+      "slug": "max-schrems",
+      "real_name": "Maximilian Schrems",
+      "archetype": "Strategic GDPR litigator who turns legal theory into operational enforcement pressure",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "privacy-data-protection",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "NOYB: founder"
+      ],
+      "domains": [
+        "GDPR enforcement",
+        "EU-US data transfers",
+        "transatlantic adequacy litigation",
+        "AI data protection"
+      ],
+      "pairs_well_with": [
+        "daniel-solove"
+      ],
+      "productive_conflict_with": [
+        "lina-khan"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "0.76",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, adversarial, legally grounded; uses concrete framework comparisons (“Safe Harbor/Privacy Shield/DPF”) and focuses on enforceability/redress mechanics; s",
+      "file_path": "superintelligence/risk-compliance/personas/max-schrems.md",
+      "research_dir": "superintelligence/risk-compliance/research/max-schrems/",
+      "build_method": "local-llm"
+    },
+    "michael-rasmussen": {
+      "slug": "michael-rasmussen",
+      "real_name": "Michael Rasmussen",
+      "archetype": "The GRC Pundit — the analyst who named and modeled the GRC market and still arbitrates what \"good\" GRC architecture looks like",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "erm-grc-leadership",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "GRC 20/20 Research, LLC (founder, GRC Analyst & Pundit)",
+        "OCEG (Leadership Council member; OCEG Fellow)",
+        "Host, \"Risk Is Our Business\" podcast",
+        "Host, \"Hitchhiker's Guide to the GRC Technology Galaxy\" podcast",
+        "Former VP & Top Analyst, Forrester Research (where he defined GRC in Feb 2002)"
+      ],
+      "domains": [
+        "Governance, risk management, and compliance (GRC)",
+        "GRC technology market analysis and vendor evaluation",
+        "Enterprise/integrated risk management architecture",
+        "Corporate compliance and policy management",
+        "Operational resilience and third-party risk management (TPRM)"
+      ],
+      "pairs_well_with": [
+        "norman-marks",
+        "james-lam",
+        "john-fraser",
+        "carol-williams",
+        "richard-chambers"
+      ],
+      "productive_conflict_with": [
+        "cathy-oneil",
+        "frank-pasquale"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Authoritative, taxonomy-first, and quotable. Opens by defining the term under debate, then diagnoses where reality diverges from the brochure. Fond of literary ",
+      "file_path": "superintelligence/risk-compliance/personas/michael-rasmussen.md",
+      "research_dir": "superintelligence/risk-compliance/research/michael-rasmussen/",
+      "build_method": "local-llm"
+    },
+    "norman-marks": {
+      "slug": "norman-marks",
+      "real_name": "Norman Marks",
+      "archetype": "The objectives-first GRC evangelist who insists risk management exists to help organizations succeed, not to file risk registers",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "erm-grc-leadership",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Independent author, blogger, trainer, and speaker on governance, risk, and internal audit (retired full-time 2013)",
+        "OCEG Fellow (GRC thought leadership)",
+        "Honorary Fellow, Institute of Risk Management (IRM)",
+        "IIA American Hall of Distinguished Practitioners (inducted 2018)",
+        "Contributor, GRC Report"
+      ],
+      "domains": [
+        "Enterprise risk management (ERM)",
+        "Internal audit",
+        "Governance, risk, and compliance (GRC)",
+        "SOX / internal control over financial reporting",
+        "Risk appetite and decision-making",
+        "AI's impact on audit and assurance"
+      ],
+      "pairs_well_with": [
+        "james-lam",
+        "john-fraser",
+        "richard-chambers",
+        "carol-williams"
+      ],
+      "productive_conflict_with": [
+        "michael-rasmussen"
+      ],
+      "sources_count": 24,
+      "recent_signal_12mo_count": 11,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, conversational, and contrarian. Writes short plain-English blog posts that pose a provocative question, take a clear position, name the framework or fir",
+      "file_path": "superintelligence/risk-compliance/personas/norman-marks.md",
+      "research_dir": "superintelligence/risk-compliance/research/norman-marks/",
+      "build_method": "local-llm"
+    },
+    "richard-chambers": {
+      "slug": "richard-chambers",
+      "real_name": "Richard F. Chambers",
+      "archetype": "Internal audit futurist who turns risk thinking into operational change",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "erm-grc-leadership",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "AuditBoard:Senior Internal Audit Advisor",
+        "Optro:Authored \"Focus on the Future 2026\" research",
+        "ICGFM:Board Member",
+        "Nanjing Audit University:Overseas Honorary Dean"
+      ],
+      "domains": [
+        "internal-audit-leadership",
+        "risk-governance",
+        "ai-governance-and-controls",
+        "audit-technology-adoption",
+        "trusted-advisor-skill-building"
+      ],
+      "pairs_well_with": [
+        "tim-wu",
+        "helen-nissenbaum"
+      ],
+      "productive_conflict_with": [
+        "cathy-oneil",
+        "lina-khan"
+      ],
+      "sources_count": 9,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 3,
+      "confidence": "0.62",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Executive, persuasive, and practical—uses mission language (“agents of change”), then anchors recommendations in research and measurable imperatives; balances u",
+      "file_path": "superintelligence/risk-compliance/personas/richard-chambers.md",
+      "research_dir": "superintelligence/risk-compliance/research/richard-chambers/",
+      "build_method": "local-llm"
+    },
+    "ross-delston": {
+      "slug": "ross-delston",
+      "real_name": "Ross S. Delston",
+      "archetype": "The regulator-turned-expert-witness of financial crime — a former FDIC counsel and IMF AML/CFT assessor who reads a bank's onboarding file the way a prosecutor reads a confession, and who argues the United States itself is the world's most comfortable laundromat.",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "financial-crime-aml",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Law Office of Ross Delston (independent attorney, expert witness, and consultant; Washington, D.C. and St. Louis, MO)",
+        "Certified Anti-Money Laundering Specialist (CAMS) and CipherTrace / Certified Cryptocurrency Tracing Examiner (CTCE)",
+        "Consulting Counsel to the International Monetary Fund on AML/CFT and banking matters (since 1997)",
+        "Adjunct / visiting faculty, Middlebury Institute of International Studies at Monterey (financial crime and AML)",
+        "Standing expert source for ICIJ and OCCRP investigative-journalism financial-crime projects"
+      ],
+      "domains": [
+        "Bank Secrecy Act / Anti-Money Laundering (BSA/AML) and Combating the Financing of Terrorism (CFT)",
+        "Correspondent banking, offshore financial centers, and de-risking",
+        "Customer due diligence (CDD/EDD), KYC, onboarding red flags, and ongoing monitoring",
+        "Trade-based money laundering (TBML) and trade finance controls",
+        "Beneficial ownership, shell companies, and the Corporate Transparency Act",
+        "Expert-witness testimony in civil forfeiture, fraud, and AML-failure litigation",
+        "Cryptocurrency tracing and crypto-exchange AML risk"
+      ],
+      "pairs_well_with": [
+        "jim-richards",
+        "graham-barrow",
+        "john-cusack",
+        "sarah-beth-felix"
+      ],
+      "productive_conflict_with": [
+        "jim-richards"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, lawyerly, and quotable. Delston speaks like a regulator who has since learned to address juries and journalists — he leads with the dispositive questio",
+      "file_path": "superintelligence/risk-compliance/personas/ross-delston.md",
+      "research_dir": "superintelligence/risk-compliance/research/ross-delston/",
+      "build_method": "local-llm"
+    },
+    "rumman-chowdhury": {
+      "slug": "rumman-chowdhury",
+      "real_name": "Rumman Chowdhury",
+      "archetype": "Operational responsible AI auditor; socio-technical red-teaming evangelist",
+      "teams": [
+        "ai-governance-and-responsible-ai"
+      ],
+      "home_team": "ai-governance-and-responsible-ai",
+      "cell": "ai-governance-responsible-ai",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Humane Intelligence:PBC—Founder and CEO",
+        "Berkman Klein Center for Internet & Society (Harvard):Responsible AI Fellow",
+        "Minderoo Center for Democracy and Technology (Cambridge):Research Affiliate",
+        "NYU Tandon School of Engineering:Visiting researcher",
+        "CNAS AI Governance Forum:Member",
+        "UK Center for Data Ethics and Innovation:Board member",
+        "UNESCO Broadband Commission for Sustainable Development:Contributor"
+      ],
+      "domains": [
+        "algorithmic auditing",
+        "AI red-teaming",
+        "responsible AI governance",
+        "bias detection and mitigation",
+        "community-driven evaluation",
+        "model evaluation and incident response"
+      ],
+      "pairs_well_with": [
+        "james-lam",
+        "lina-khan"
+      ],
+      "productive_conflict_with": [
+        "max-schrems"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": 0.7,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Pragmatic, operational, and systems-oriented; skeptical of “ethics theater”; emphasizes concrete evaluation artifacts (red teams, bounties, contextual evals) an",
+      "file_path": "superintelligence/risk-compliance/personas/rumman-chowdhury.md",
+      "research_dir": "superintelligence/risk-compliance/research/rumman-chowdhury/",
+      "build_method": "local-llm"
+    },
+    "sarah-beth-felix": {
+      "slug": "sarah-beth-felix",
+      "real_name": "Sarah Beth Felix",
+      "archetype": "Operational AML/sanctions strategist who turns regulatory guidance into enforceable controls",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "financial-crime-aml",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Palmera Consulting:AML/Sanctions advisory",
+        "Acceleron Bank (in formation):Co-Founder & Chief AML Officer",
+        "Hyper-S Research:Co-founder"
+      ],
+      "domains": [
+        "AML program effectiveness",
+        "trade-finance financial crime risk",
+        "sanctions operationalization",
+        "correspondent banking & de-risking",
+        "transaction monitoring design & validation",
+        "case management and disposition quality",
+        "BSA modernization (threats/vulnerabilities, SAR utility)"
+      ],
+      "pairs_well_with": [
+        "helen-nissenbaum",
+        "lina-khan"
+      ],
+      "productive_conflict_with": [
+        "cathy-oneil"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": 0.62,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Pragmatic, operational, and action-oriented; uses concrete payment/banking workflow examples and “attacker POV” framing; emphasizes converting standards into ac",
+      "file_path": "superintelligence/risk-compliance/personas/sarah-beth-felix.md",
+      "research_dir": "superintelligence/risk-compliance/research/sarah-beth-felix/",
+      "build_method": "local-llm"
+    },
+    "tim-wu": {
+      "slug": "tim-wu",
+      "real_name": "Tim Wu",
+      "archetype": "The trustbuster-theorist who names the problem before he litigates it — coins the vocabulary (net neutrality, the curse of bigness, the age of extraction) that turns diffuse anxiety about concentrated tech power into actionable competition policy.",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "regulatory-tech-policy",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Julius Silver Professor of Law, Science and Technology, Columbia Law School",
+        "Knight First Amendment Institute (affiliated scholar)",
+        "Former Special Assistant to the President for Technology and Competition Policy, U.S. National Economic Council (2021-2023)",
+        "Former senior enforcement counsel, New York State Office of the Attorney General"
+      ],
+      "domains": [
+        "antitrust and competition policy",
+        "telecommunications and net neutrality",
+        "platform power and structural regulation",
+        "attention economy and information industries",
+        "technology and competition policy in government"
+      ],
+      "pairs_well_with": [
+        "lina-khan",
+        "frank-pasquale",
+        "marietje-schaake",
+        "julia-angwin"
+      ],
+      "productive_conflict_with": [
+        "gillian-hadfield",
+        "lokke-moerel"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Lucid, historically grounded, and quotable. Builds arguments from concrete historical analogies (Roosevelt, Brandeis, AT&T, the trusts) toward a single crisp co",
+      "file_path": "superintelligence/risk-compliance/personas/tim-wu.md",
+      "research_dir": "superintelligence/risk-compliance/research/tim-wu/",
+      "build_method": "local-llm"
+    },
+    "timnit-gebru": {
+      "slug": "timnit-gebru",
+      "real_name": "Timnit W. Gebru",
+      "archetype": "Accountability-first AI harm auditor challenging Big Tech incentives",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "ai-governance-responsible-ai",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "DAIR:Distributed Artificial Intelligence Research Institute",
+        "Black in AI:advocacy/nonprofit",
+        "AddisCoder:board"
+      ],
+      "domains": [
+        "algorithmic bias",
+        "dataset accountability",
+        "LLM harm and evaluation",
+        "AI governance and ethics",
+        "organizational accountability"
+      ],
+      "pairs_well_with": [
+        "lina-khan",
+        "joy-buolamwini",
+        "woodrow-hartzog"
+      ],
+      "productive_conflict_with": [
+        "max-schrems"
+      ],
+      "sources_count": 8,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "0.74",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, audit-oriented, narrative-to-mechanism; skeptical of hype; uses concrete case studies and institutional process language over abstract ethics rhetoric.",
+      "file_path": "superintelligence/risk-compliance/personas/timnit-gebru.md",
+      "research_dir": "superintelligence/risk-compliance/research/timnit-gebru/",
+      "build_method": "local-llm"
+    },
+    "woodrow-hartzog": {
+      "slug": "woodrow-hartzog",
+      "real_name": "Woodrow Hartzog",
+      "archetype": "Design-based privacy architect; institutional accountability skeptic",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "privacy-data-protection",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Berkman Klein Center for Internet & Society: faculty associate",
+        "Cordell Institute for Policy in Medicine & Law at Washington University: non-resident fellow",
+        "Center for Internet and Society at Stanford Law School: affiliate scholar",
+        "Cybersecurity and Privacy Institute at Northeastern University: external affiliate",
+        "Electronic Privacy Information Center: advisory board member",
+        "Future of Privacy Forum: advisory board member"
+      ],
+      "domains": [
+        "privacy law",
+        "data protection by design",
+        "facial recognition regulation",
+        "AI governance and institutional legitimacy",
+        "data security law failure modes"
+      ],
+      "pairs_well_with": [
+        "daniel-solove",
+        "helen-nissenbaum"
+      ],
+      "productive_conflict_with": [
+        "max-schrems",
+        "lina-khan"
+      ],
+      "sources_count": 9,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 1,
+      "confidence": 0.68,
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Crisp, theory-to-practice; policy-architect tone; emphasizes design constraints, institutional legitimacy, and enforceability as recurring organizing concepts.",
+      "file_path": "superintelligence/risk-compliance/personas/woodrow-hartzog.md",
+      "research_dir": "superintelligence/risk-compliance/research/woodrow-hartzog/",
+      "build_method": "local-llm"
+    },
+    "helen-toner": {
+      "slug": "helen-toner",
+      "cell": "ai-governance-responsible-ai",
+      "home_team": "ai-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/ai/personas/helen-toner.md",
+      "build_method": "cross-listed-reference"
+    },
+    "dan-hendrycks": {
+      "slug": "dan-hendrycks",
+      "cell": "ai-governance-responsible-ai",
+      "home_team": "ai-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/ai/personas/dan-hendrycks.md",
+      "build_method": "cross-listed-reference"
+    },
+    "bruce-schneier": {
+      "slug": "bruce-schneier",
+      "cell": "security-governance",
+      "home_team": "engineering-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/engineering/personas/bruce-schneier.md",
+      "build_method": "cross-listed-reference"
+    },
+    "alex-stamos": {
+      "slug": "alex-stamos",
+      "cell": "security-governance",
+      "home_team": "engineering-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/engineering/personas/alex-stamos.md",
+      "build_method": "cross-listed-reference"
+    },
+    "katie-moussouris": {
+      "slug": "katie-moussouris",
+      "cell": "security-governance",
+      "home_team": "engineering-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/engineering/personas/katie-moussouris.md",
+      "build_method": "cross-listed-reference"
+    },
+    "window-snyder": {
+      "slug": "window-snyder",
+      "cell": "security-governance",
+      "home_team": "engineering-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/engineering/personas/window-snyder.md",
+      "build_method": "cross-listed-reference"
+    },
+    "matthew-green": {
+      "slug": "matthew-green",
+      "cell": "security-governance",
+      "home_team": "engineering-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/engineering/personas/matthew-green.md",
+      "build_method": "cross-listed-reference"
+    },
+    "jon-danielsson": {
+      "slug": "jon-danielsson",
+      "cell": "model-systemic-risk",
+      "home_team": "trading-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/trading/personas/jon-danielsson.md",
+      "build_method": "cross-listed-reference"
+    },
+    "til-schuermann": {
+      "slug": "til-schuermann",
+      "cell": "model-systemic-risk",
+      "home_team": "trading-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/trading/personas/til-schuermann.md",
+      "build_method": "cross-listed-reference"
+    },
+    "marcos-lopez-de-prado": {
+      "slug": "marcos-lopez-de-prado",
+      "cell": "model-systemic-risk",
+      "home_team": "trading-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/trading/personas/marcos-lopez-de-prado.md",
+      "build_method": "cross-listed-reference"
+    },
+    "riccardo-rebonato": {
+      "slug": "riccardo-rebonato",
+      "cell": "model-systemic-risk",
+      "home_team": "trading-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/trading/personas/riccardo-rebonato.md",
+      "build_method": "cross-listed-reference"
+    },
+    "aaron-brown": {
+      "slug": "aaron-brown",
+      "cell": "model-systemic-risk",
+      "home_team": "trading-super-intelligence",
+      "cross_listed": true,
+      "file_path": "superintelligence/trading/personas/aaron-brown.md",
+      "build_method": "cross-listed-reference"
+    }
+  },
+  "known_teams": {
+    "ai-super-intelligence": "AI Super Intelligence Team.",
+    "engineering-super-intelligence": "Engineering Super Intelligence Team.",
+    "product-design-super-intelligence": "Product & Design Super Intelligence Team.",
+    "finance-super-intelligence": "Finance Super Intelligence Team.",
+    "trading-super-intelligence": "Trading Super Intelligence Team.",
+    "risk-compliance-super-intelligence": "Risk & Compliance (GRC) Super Intelligence Team."
+  }
+}

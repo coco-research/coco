@@ -1,0 +1,65 @@
+[13:47:57] QUEUE START (pid 72678). Stage 0: wait for in-flight Finance workers.
+[15:14:34] Stage 1: Finance idle -> finalize.
+[15:14:34]   finalize finance: registry -> cells -> validate
+WARN: skipping adam-tooze.md: adam-tooze.md: no leading frontmatter delimiter
+WARN: skipping annie-duke.md: annie-duke.md: no leading frontmatter delimiter
+WARN: skipping bill-ackman.md: bill-ackman.md: no closing frontmatter delimiter
+WARN: skipping cathie-wood.md: cathie-wood.md: no closing frontmatter delimiter
+WARN: skipping charlie-munger.md: charlie-munger.md: no closing frontmatter delimiter
+WARN: skipping claudia-sahm.md: claudia-sahm.md: no closing frontmatter delimiter
+WARN: skipping dan-rasmussen.md: dan-rasmussen.md: no closing frontmatter delimiter
+WARN: skipping david-birch.md: david-birch.md: no leading frontmatter delimiter
+WARN: skipping frank-rotman.md: frank-rotman.md: no leading frontmatter delimiter
+WARN: howard-marks unknown cell 'Investment Committee'
+WARN: skipping howard-schilit.md: howard-schilit.md: no leading frontmatter delimiter
+WARN: jack-mccullough unknown cell 'Independent'
+WARN: skipping jason-furman.md: jason-furman.md: no closing frontmatter delimiter
+WARN: skipping jay-ritter.md: jay-ritter.md: no closing frontmatter delimiter
+WARN: skipping larry-summers.md: larry-summers.md: no closing frontmatter delimiter
+WARN: skipping marc-rubinstein.md: marc-rubinstein.md: no leading frontmatter delimiter
+WARN: skipping matt-harris.md: matt-harris.md: no closing frontmatter delimiter
+WARN: skipping meir-statman.md: meir-statman.md: no closing frontmatter delimiter
+WARN: skipping mohamed-el-erian.md: while parsing a block mapping
+  in "<unicode string>", line 45, column 5:
+      - title: 'Mohamed El-Erian Sounds  ... 
+        ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 45, column 52:
+     ...  El-Erian Sounds Alarm As China's US Treasury Share Hits 15-Year ... 
+                                         ^
+WARN: skipping mohnish-pabrai.md: while parsing a block collection
+  in "<unicode string>", line 53, column 3:
+      - asymmetric payoff structures
+      ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 58, column 16:
+      - 'abhimanyu's dilemma'
+                   ^
+WARN: skipping morgan-housel.md: morgan-housel.md: no leading frontmatter delimiter
+WARN: skipping nouriel-roubini.md: nouriel-roubini.md: no closing frontmatter delimiter
+WARN: skipping richard-thaler.md: while parsing a block mapping
+  in "<unicode string>", line 37, column 5:
+      - title: ''The Winner’s Curse’ Rev ... 
+        ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 37, column 14:
+      - title: ''The Winner’s Curse’ Review: Irra ... 
+                 ^
+WARN: skipping seth-klarman.md: seth-klarman.md: no closing frontmatter delimiter
+WARN: skipping simon-taylor.md: simon-taylor.md: no closing frontmatter delimiter
+WARN: skipping tim-koller.md: tim-koller.md: no closing frontmatter delimiter
+WARN: skipping warren-buffett.md: warren-buffett.md: no closing frontmatter delimiter
+Wrote /Users/Rijul_Kalra/projects/coco-platform/superintelligence/finance/registry.json (22 personas, 7 cells).
+  wrote cells/valuation-corporate-finance.md (6 personas, 0 tensions)
+  wrote cells/investing-capital-allocation.md (1 personas, 0 tensions)
+  wrote cells/accounting-fpa-reporting.md (4 personas, 1 tensions)
+  wrote cells/macro-economics.md (2 personas, 0 tensions)
+  wrote cells/fintech-payments.md (2 personas, 0 tensions)
+  wrote cells/behavioral-decision-science.md (2 personas, 0 tensions)
+  wrote cells/capital-markets-ma-private.md (3 personas, 0 tensions)
+Wrote 7 cell docs.
+finance: 0/47 PASS, 47 NEEDS-TOPUP -> /Users/Rijul_Kalra/projects/coco-platform/superintelligence/finance/VALIDATION.md
+NEEDS-TOPUP: adam-tooze alfred-rappaport angela-strange annie-duke aswath-damodaran baruch-lev bennett-stewart bill-ackman bruce-greenwald cathie-wood charlie-munger claudia-sahm dan-rasmussen daniel-kahneman david-birch edward-altman francine-mckenna frank-rotman glenn-hopper howard-marks howard-schilit jack-mccullough jason-furman jay-ritter joel-greenblatt joseph-wang larry-summers ludovic-phalippou lyn-alden marc-rubinstein matt-harris meir-statman michael-mauboussin mohamed-el-erian mohnish-pabrai morgan-housel nouriel-roubini pablo-fernandez patrick-collison paul-barnhurst richard-thaler robert-shiller seth-klarman simon-taylor steve-kaplan tim-koller warren-buffett
+[15:15:30]   finance finalized: 47 persona files; see finance/VALIDATION.md
+[15:15:30] Stage 2: Trading (46 personas / 8 cells).
+[15:15:30] === TEAM trading: launch 2 workers ===

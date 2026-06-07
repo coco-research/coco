@@ -1,0 +1,9 @@
+building 6 persona(s) with qwen/qwen3.6-35b-a3b
+[1/6] richard-thaler           ERROR HTTPError: HTTP Error 400: Bad Request
+[2/6] robert-shiller           ERROR HTTPError: HTTP Error 400: Bad Request
+[3/6] daniel-kahneman          ERROR HTTPError: HTTP Error 400: Bad Request
+[4/6] morgan-housel            ERROR HTTPError: HTTP Error 400: Bad Request
+[5/6] annie-duke               ERROR HTTPError: HTTP Error 400: Bad Request
+[6/6] meir-statman             ERROR HTTPError: HTTP Error 400: Bad Request
+
+DONE: 0/6 PASS

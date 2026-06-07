@@ -35,7 +35,7 @@ technical-writer compiles all L1 findings into a unified research document:
 
 **Toolkit integration:**
 - No specific toolkit entries apply — agents use WebSearch/WebFetch directly
-- Check team-toolkit.md only if outputting a formal document (e.g., research report)
+- Check team:toolkit.md only if outputting a formal document (e.g., research report)
 
 ### Layer 3: Source Verification
 domain-accuracy spot-checks:

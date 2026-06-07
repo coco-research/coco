@@ -60,6 +60,14 @@ sys.exit(1 if errors else 0)
 PY
 
 echo ""
+echo "=== Smoke test: command cross-references ==="
+bash tests/check-command-refs.sh && pass "command cross-references resolve" || fail "command cross-references broken"
+
+echo ""
+echo "=== Smoke test: /team evidence-gate integrity ==="
+bash tests/check-evidence-gate.sh && pass "/team evidence-gate present" || fail "/team evidence-gate incomplete"
+
+echo ""
 echo "=== Summary ==="
 echo "  passed: $PASS"
 echo "  failed: $FAIL"

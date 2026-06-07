@@ -36,7 +36,7 @@ Each L1 agent gets a specific research angle to prevent overlap:
 - Deduplicates and resolves conflicting findings
 
 **Toolkit integration:**
-- Check team-toolkit.md for document compilation tools if producing a formal research report
+- Check team:toolkit.md for document compilation tools if producing a formal research report
 - If outputting to Confluence, check "Confluence Publishing" entry for API notes
 
 ### Layer 3: Accuracy Check

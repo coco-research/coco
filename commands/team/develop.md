@@ -41,7 +41,7 @@ L2 agents receive file ownership boundaries (I10):
 - Agents commit atomically per feature/fix
 
 **Toolkit integration:**
-- Check team-toolkit.md for "Code Implementation" entry
+- Check team:toolkit.md for "Code Implementation" entry
 - If Superpowers pipeline recommended → agent follows brainstorm → plan → execute pattern
 - If GSD active → agent reads `.planning/` context and follows phase conventions
 
@@ -50,12 +50,12 @@ L2 agents receive file ownership boundaries (I10):
 ### Layer 3: Review
 L3 agents focus on:
 - Code correctness and edge cases (domain-accuracy)
-- Test coverage adequacy (doc-quality reviewing test descriptions)
+- Test coverage adequacy verified against `EVIDENCE.md` — confirm the suite actually executed (captured exit 0, skips accounted for), not by reading test descriptions
 - Architecture alignment with existing patterns
 - Security review of auth, data handling, API boundaries (security-analyst, if selected)
 
 ### Regression Tests
-Run after Layer 2, before Layer 3. Include results in REVIEW-PACKAGE.md.
+Run after Layer 2, before Layer 3, per the Test Evidence Protocol (`team:evidence.md`): run the CI-equivalent authoritative gate with integration dependencies provisioned, capture command + exit code + parsed summary + measured coverage to `EVIDENCE.md`. Surface skips and failures explicitly in REVIEW-PACKAGE.md (with the skip count and any `UNVERIFIED` surface) — never hide them inside a "passed" summary.
 
 ## GSD Integration (C4)
 

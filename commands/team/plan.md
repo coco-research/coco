@@ -30,7 +30,7 @@ L1 agents assess:
   - Success criteria per phase
 
 **Toolkit integration:**
-- Check team-toolkit.md for "Project Orchestration" entry
+- Check team:toolkit.md for "Project Orchestration" entry
 - If GSD active → create PLAN.md files compatible with GSD format (frontmatter: wave, depends_on, files_modified, autonomous, requirements, must_haves)
 - If no GSD → create standalone plan documents
 

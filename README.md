@@ -86,11 +86,6 @@ The Meta-Orchestrator uses a highly optimized two-stage algorithm to avoid loadi
 2.  **Stage B: Scoped Persona Selection (Scoped)**: Loads compact persona records (slugs, cells, domains, stances, conflict mappings) for only the selected teams. It allocates the 16-32 panel budget proportionally to team relevance, runs the greedy scorer (`0.40·domain + 0.30·cell-coverage + 0.30·conflict-pairing`), and applies a cross-team tension pass to pair opposing viewpoints (e.g., security vs. growth).
 3.  **Stage C: Approval and Execution**: Presents the roster grouped by team with a one-line selection rationale. The executing action verb consumes the approved roster, and the resulting output includes full line-by-line attribution (e.g., "Aswath Damodaran (Finance): ...").
 
-### Persona Build and Validation Pipeline
-
-The 389-persona roster was compiled using a systematic multi-tier workflow:
-- **Generation**: Evaluated Local Qwen 3.6 (via LM Studio) -> GPT-5-Nano (via QB Gateway) -> Gemini 3.5 Flash -> Claude Research Agents (web search). Claude research agents proved to be the quality winner for resolving historical data and cited Signal.
-- **Validation Gate**: Run via `validate_persona.py`, enforcing that every persona must have at least 4 live, non-404 cited evidence URLs, a valid home team, no fabricated quotes, and at least 2 verified signals within the last 12 months (or archetype persistent signals for historical figures).
 
 ---
 

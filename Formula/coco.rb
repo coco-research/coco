@@ -15,7 +15,7 @@ class Coco < Formula
   desc "Open-source AI workflow framework — skills, agents, commands, multi-agent orchestration"
   homepage "https://github.com/rkz91/coco"
   url "https://github.com/rkz91/coco/archive/refs/tags/v1.0.0.tar.gz"
-  sha256 "REPLACE_WITH_RELEASE_SHA256"
+  sha256 "8b34573808129125d123bced8fdf770c2be58c33718e0acf4b444a5989a8187e"
   license "MIT"
   version "1.0.0"
 

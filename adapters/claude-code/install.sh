@@ -92,6 +92,15 @@ link_system() {
       link_dir "$c" "$TARGET_HOME/commands/$name"
     done
   fi
+  # Superintelligence: SI-* commands are generated from per-team registries, not shipped as files.
+  if [[ -f "$sys_dir/ai/scripts/build_commands.py" ]]; then
+    if command -v python3 >/dev/null 2>&1; then
+      run env COCO_SI_COMMANDS_DIR="$TARGET_HOME/commands" python3 "$sys_dir/ai/scripts/build_commands.py"
+      echo "Generated SI-* commands into $TARGET_HOME/commands"
+    else
+      echo "Skip SI generation: python3 not found. Run $sys_dir/ai/scripts/build_commands.py manually."
+    fi
+  fi
 }
 
 link_rules() {

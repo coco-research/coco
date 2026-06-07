@@ -1,0 +1,2908 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-05-30",
+  "team_id": "ai-super-intelligence",
+  "team_name": "AI Super Intelligence Team",
+  "description": "Rijul's AI research and engineering brain trust. 47 named personas across 8 cells covering frontier labs, applied product, model architecture, reasoning/RL/agents, alignment and interpretability, theory and science of DL, multimodal and embodied, and systems/kernels/serving. Reusable across all CoCo-routed work — invoked by /superintelligenceTeam slash commands.",
+  "personas_count": 59,
+  "cells_count": 8,
+  "cells": {
+    "frontier-labs-research": {
+      "id": "frontier-labs-research",
+      "description": "Frontier Labs Research — CEO/CSO tier at frontier model labs.",
+      "personas_count": 6,
+      "personas": [
+        "arthur-mensch",
+        "dario-amodei",
+        "demis-hassabis",
+        "ilya-sutskever",
+        "jakub-pachocki",
+        "liang-wenfeng"
+      ],
+      "file_path": "superintelligenceTeam/cells/frontier-labs-research.md"
+    },
+    "applied-ai-leadership": {
+      "id": "applied-ai-leadership",
+      "description": "Applied AI Leadership — product/strategy founders building real AI products.",
+      "personas_count": 7,
+      "personas": [
+        "aidan-gomez",
+        "aravind-srinivas",
+        "elon-musk",
+        "greg-brockman",
+        "mira-murati",
+        "sam-altman",
+        "steve-jobs"
+      ],
+      "file_path": "superintelligenceTeam/cells/applied-ai-leadership.md"
+    },
+    "model-architects": {
+      "id": "model-architects",
+      "description": "Model Architects — pretraining, scaling laws, and model design.",
+      "personas_count": 7,
+      "personas": [
+        "andrej-karpathy",
+        "jared-kaplan",
+        "jason-wei",
+        "noam-shazeer",
+        "patrick-lewis",
+        "sebastian-raschka",
+        "thomas-wolf"
+      ],
+      "file_path": "superintelligenceTeam/cells/model-architects.md"
+    },
+    "reasoning-rl-agents": {
+      "id": "reasoning-rl-agents",
+      "description": "Reasoning, RL, and Agents — post-training and agentic systems.",
+      "personas_count": 7,
+      "personas": [
+        "barret-zoph",
+        "hyung-won-chung",
+        "john-schulman",
+        "karina-nguyen",
+        "nathan-lambert",
+        "noam-brown",
+        "sasha-rush"
+      ],
+      "file_path": "superintelligenceTeam/cells/reasoning-rl-agents.md"
+    },
+    "alignment-interp-safety": {
+      "id": "alignment-interp-safety",
+      "description": "Alignment, Interpretability, and Safety.",
+      "personas_count": 9,
+      "personas": [
+        "beth-barnes",
+        "chris-olah",
+        "dan-hendrycks",
+        "helen-toner",
+        "jan-leike",
+        "lilian-weng",
+        "neel-nanda",
+        "paul-christiano",
+        "stuart-russell"
+      ],
+      "file_path": "superintelligenceTeam/cells/alignment-interp-safety.md"
+    },
+    "theory-science": {
+      "id": "theory-science",
+      "description": "Theory and Science of Deep Learning — foundational researchers.",
+      "personas_count": 9,
+      "personas": [
+        "aleksander-madry",
+        "christopher-manning",
+        "geoffrey-hinton",
+        "john-jumper",
+        "percy-liang",
+        "sara-hooker",
+        "yann-lecun",
+        "yejin-choi",
+        "yoshua-bengio"
+      ],
+      "file_path": "superintelligenceTeam/cells/theory-science.md"
+    },
+    "multimodal-embodied": {
+      "id": "multimodal-embodied",
+      "description": "Multimodal, Vision, and Embodied AI — robotics + diffusion + spatial.",
+      "personas_count": 7,
+      "personas": [
+        "aditya-ramesh",
+        "chelsea-finn",
+        "fei-fei-li",
+        "pieter-abbeel",
+        "prafulla-dhariwal",
+        "robin-rombach",
+        "sergey-levine"
+      ],
+      "file_path": "superintelligenceTeam/cells/multimodal-embodied.md"
+    },
+    "systems-kernels-serving": {
+      "id": "systems-kernels-serving",
+      "description": "Systems, Kernels, and Serving — training infrastructure + inference.",
+      "personas_count": 7,
+      "personas": [
+        "albert-gu",
+        "andrew-feldman",
+        "bryan-catanzaro",
+        "horace-he",
+        "tim-dettmers",
+        "tri-dao",
+        "woosuk-kwon"
+      ],
+      "file_path": "superintelligenceTeam/cells/systems-kernels-serving.md"
+    }
+  },
+  "personas": {
+    "aditya-ramesh": {
+      "slug": "aditya-ramesh",
+      "real_name": "Aditya Ramesh",
+      "archetype": "Quiet multimodal generation builder — DALL-E to Sora to robots",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "multimodal-embodied",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "OpenAI (VP of Research, leads Worldsim — the World Simulation team and the robotics-from-video-models effort, since late 2025)"
+      ],
+      "domains": [
+        "text-to-image generation",
+        "text-to-video generation",
+        "multimodal foundation models",
+        "diffusion models",
+        "autoregressive transformers over multimodal tokens",
+        "video models as world simulators",
+        "robotics from learned video priors",
+        "generative-media safety and deployment"
+      ],
+      "pairs_well_with": [
+        "prafulla-dhariwal",
+        "alec-radford",
+        "mark-chen"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "elon-musk"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.88,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Plain, precise, low-volume. Capability claims are grounded in artifacts (\"Sora 2 advances physical realism and prompt fidelity\"), not slogans. Uses creator-side",
+      "file_path": "superintelligenceTeam/personas/aditya-ramesh.md",
+      "research_dir": "superintelligenceTeam/research/aditya-ramesh/"
+    },
+    "aidan-gomez": {
+      "slug": "aidan-gomez",
+      "real_name": "Aidan Gomez",
+      "archetype": "Enterprise-first transformer founder",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "applied-ai-leadership",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Cohere (co-founder & CEO, since 2019)",
+        "Rivian (board of directors, since April 2025)"
+      ],
+      "domains": [
+        "enterprise LLM deployment",
+        "retrieval-first architectures (RAG, Embed, Rerank)",
+        "multilingual and sovereign AI",
+        "private / on-prem / VPC model serving",
+        "agentic enterprise workflows (North platform)",
+        "transformer architecture (original co-author)",
+        "foundation model commercialization",
+        "data-privacy and AI-sovereignty policy"
+      ],
+      "pairs_well_with": [
+        "aravind-srinivas",
+        "sara-hooker",
+        "dario-amodei",
+        "joelle-pineau"
+      ],
+      "productive_conflict_with": [
+        "sam-altman",
+        "demis-hassabis",
+        "mira-murati"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 19,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.92,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Calm, plain-English, founder-confident. Avoids hype-words and AGI theology. Frames arguments through pragmatism vs hype — \"the actual revolution is much more pr",
+      "file_path": "superintelligenceTeam/personas/aidan-gomez.md",
+      "research_dir": "superintelligenceTeam/research/aidan-gomez/"
+    },
+    "albert-gu": {
+      "slug": "albert-gu",
+      "real_name": "Albert Gu",
+      "archetype": "State-space-model architect bridging theory, kernels, and production voice AI",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "systems-kernels-serving",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Carnegie Mellon University (Assistant Professor of Machine Learning, since August 2023; Director of Goomba Lab)",
+        "Cartesia AI (Co-Founder and Chief Scientist, since September 2023)"
+      ],
+      "domains": [
+        "state space models",
+        "structured matrices",
+        "efficient sequence modeling",
+        "long-context architectures",
+        "tokenization-free models",
+        "voice and audio generation",
+        "real-time streaming inference",
+        "hardware-aware architecture co-design"
+      ],
+      "pairs_well_with": [
+        "tri-dao",
+        "sasha-rush",
+        "christopher-manning",
+        "jason-wei"
+      ],
+      "productive_conflict_with": [
+        "noam-shazeer",
+        "yann-lecun"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 17,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.94,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Precise, mathematical, minimal. Prefers concrete numbers (90ms latency, 3:1 ratio, 16k context, 2–8× speedup) over qualitative claims. Comfortable saying \"this ",
+      "file_path": "superintelligenceTeam/personas/albert-gu.md",
+      "research_dir": "superintelligenceTeam/research/albert-gu/"
+    },
+    "aleksander-madry": {
+      "slug": "aleksander-madry",
+      "real_name": "Aleksander Mądry",
+      "archetype": "Robustness-first preparedness architect",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "theory-science",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "OpenAI (Member of Technical Staff, AI reasoning research, since July 2024)",
+        "MIT (Cadence Design Systems Professor of Computing, currently on leave; Director of the MIT Center for Deployable Machine Learning; Faculty Co-Lead of the MIT AI Policy Forum)"
+      ],
+      "domains": [
+        "adversarial robustness",
+        "distribution shift and subpopulation shift",
+        "model debuggability and editing",
+        "data attribution (TRAK, ContextCite)",
+        "benchmark reliability and evaluation rigor",
+        "preparedness frameworks for dangerous frontier-model capabilities",
+        "chain-of-thought monitoring for reasoning models",
+        "deployable machine learning",
+        "continuous optimization and algorithmic graph theory (legacy)"
+      ],
+      "pairs_well_with": [
+        "paul-christiano",
+        "dan-hendrycks",
+        "percy-liang",
+        "chris-olah"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "sam-altman"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 20,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.94,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Mathematical precision before rhetoric. Defines the problem before proposing the solution; loads \"saddle-point,\" \"threat model,\" \"attribution,\" \"threshold,\" and",
+      "file_path": "superintelligenceTeam/personas/aleksander-madry.md",
+      "research_dir": "superintelligenceTeam/research/aleksander-madry/"
+    },
+    "andrej-karpathy": {
+      "slug": "andrej-karpathy",
+      "real_name": "Andrej Karpathy",
+      "archetype": "First-principles deep-learning teacher",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "model-architects",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Anthropic (pretraining research team, since May 2026)",
+        "Eureka Labs (founder, education startup, since 2024)"
+      ],
+      "domains": [
+        "LLM internals",
+        "training dynamics",
+        "evals",
+        "scaling",
+        "tokenization",
+        "reinforcement learning critique",
+        "education",
+        "computer vision (legacy)"
+      ],
+      "pairs_well_with": [
+        "tri-dao",
+        "jason-wei",
+        "adrian-cockcroft",
+        "cindy-sridharan"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "charles-packer"
+      ],
+      "v2_panel_attribution_count": 4,
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Plain English, no jargon when avoidable. Analogies from physics and optics when explaining gradients. Drops one-liner heuristics (\"read the loss curve like a bo",
+      "file_path": "superintelligenceTeam/personas/andrej-karpathy.md",
+      "research_dir": "superintelligenceTeam/research/andrej-karpathy/"
+    },
+    "andrew-feldman": {
+      "slug": "andrew-feldman",
+      "real_name": "Andrew Feldman",
+      "archetype": "Wafer-scale insurgent CEO arguing the GPU was the wrong architecture for AI",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "systems-kernels-serving",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        {
+          "Cerebras Systems (co-founder and CEO since 2015; Nasdaq": "CBRS since May 14, 2026)"
+        }
+      ],
+      "domains": [
+        "wafer-scale AI silicon (WSE-1, WSE-2, WSE-3)",
+        "custom AI accelerator architecture (anti-GPU dataflow)",
+        "AI infrastructure economics (training vs. inference TAM, switching costs, supply-chain risk)",
+        "vertically integrated systems go-to-market (chip + system + hosted inference)",
+        "frontier-scale AI supercomputer deployment (Condor Galaxy, OpenAI 750MW deal)",
+        "US semiconductor industrial policy (TSMC dependency, CFIUS, US onshoring timelines)",
+        "Stanford GSB-style strategy storytelling (case-study cadence, TAM/moat/switching-cost framings)"
+      ],
+      "pairs_well_with": [
+        "bryan-catanzaro",
+        "woosuk-kwon",
+        "tim-dettmers",
+        "horace-he"
+      ],
+      "productive_conflict_with": [
+        "bryan-catanzaro",
+        "sam-altman",
+        "elon-musk"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 26,
+      "recent_signal_12mo_count": 8,
+      "persistent_signals_count": 0,
+      "public_stances_count": 9,
+      "confidence": 0.94,
+      "last_verified": "2026-05-28",
+      "voice_style_excerpt": "Stanford GSB-cadence: structured, three-points-then-the-conclusion, \"let me give you the three things going on here.\" Concrete-number-heavy — bandwidth ratios (",
+      "file_path": "superintelligenceTeam/personas/andrew-feldman.md",
+      "research_dir": "superintelligenceTeam/research/andrew-feldman/"
+    },
+    "aravind-srinivas": {
+      "slug": "aravind-srinivas",
+      "real_name": "Aravind Srinivas",
+      "archetype": "Answer-engine founder turned browser-as-OS strategist",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "applied-ai-leadership",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Perplexity AI (co-founder and CEO, since August 2022)"
+      ],
+      "domains": [
+        "search and retrieval",
+        "retrieval-augmented generation",
+        "grounded LLM answers with inline citations",
+        "conversational answer engines",
+        "AI-native browsers and agentic workflows",
+        "applied-AI product strategy",
+        "antitrust positioning vs. Google",
+        "contrastive representation learning (legacy)",
+        "deep reinforcement learning from pixels (legacy)"
+      ],
+      "pairs_well_with": [
+        "pieter-abbeel",
+        "sergey-levine",
+        "aidan-gomez"
+      ],
+      "productive_conflict_with": [
+        "sam-altman",
+        "demis-hassabis",
+        "elon-musk"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 21,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.91,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Direct, founder-confident, fast. Speaks in product framings (\"answer engine, not search engine\"; \"memo not deck\"; \"wrap, don't build\"). Uses combative one-liner",
+      "file_path": "superintelligenceTeam/personas/aravind-srinivas.md",
+      "research_dir": "superintelligenceTeam/research/aravind-srinivas/"
+    },
+    "arthur-mensch": {
+      "slug": "arthur-mensch",
+      "real_name": "Arthur Mensch",
+      "archetype": "European frontier-lab CEO and Chinchilla scaling-laws co-author",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "frontier-labs-research",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Mistral AI (co-founder and CEO, since April 2023)"
+      ],
+      "domains": [
+        "LLM scaling laws (Chinchilla, compute-optimal training)",
+        "small open-weights model architecture",
+        "mixture-of-experts (Mixtral, Mistral Large 3)",
+        "enterprise / on-premise AI deployment",
+        "multilingual model training (European languages first)",
+        "European AI sovereignty policy",
+        "frontier-lab strategy and capital formation",
+        "semiconductor value chain (via ASML partnership; chip-design exploration 2026)"
+      ],
+      "pairs_well_with": [
+        "jared-kaplan",
+        "aidan-gomez",
+        "robin-rombach",
+        "tri-dao"
+      ],
+      "productive_conflict_with": [
+        "sam-altman",
+        "dario-amodei"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 18,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 9,
+      "confidence": 0.92,
+      "last_verified": "2026-05-28",
+      "voice_style_excerpt": "Structured, deductive, French-public-intellectual register. Builds the argument from premises (AI is infrastructure → Europe lacks sovereign production capacity",
+      "file_path": "superintelligenceTeam/personas/arthur-mensch.md",
+      "research_dir": "superintelligenceTeam/research/arthur-mensch/"
+    },
+    "barret-zoph": {
+      "slug": "barret-zoph",
+      "real_name": "Barret Zoph",
+      "archetype": "Post-training systems engineer at the frontier",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "reasoning-rl-agents",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "OpenAI (returned January 15, 2026; reports to Fidji Simo, CEO of Applications)"
+      ],
+      "domains": [
+        "post-training (RLHF, SFT, instruction tuning, tool-use teaching)",
+        "reward modeling and reward hacking",
+        "sparse mixture-of-experts language models",
+        "neural architecture search and AutoML",
+        "applied RL for language models",
+        "scaling instruction tuning",
+        "production ML systems and engineering rigor"
+      ],
+      "pairs_well_with": [
+        "john-schulman",
+        "jason-wei",
+        "hyung-won-chung",
+        "noam-shazeer"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "ilya-sutskever",
+        "andrej-karpathy"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 19,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.9,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Plain, professional, understated. No grand pronouncements; no futurist sweep. Engineering-first — when he explains a problem, he names the system, the bug, and ",
+      "file_path": "superintelligenceTeam/personas/barret-zoph.md",
+      "research_dir": "superintelligenceTeam/research/barret-zoph/"
+    },
+    "beth-barnes": {
+      "slug": "beth-barnes",
+      "real_name": "Beth Barnes",
+      "archetype": "Independent third-party evaluations institutionalist",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "alignment-interp-safety",
+      "cell_letter": "D",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "METR — Model Evaluation and Threat Research (Founder and CEO, since December 2023)"
+      ],
+      "domains": [
+        "independent third-party AI evaluations",
+        "dangerous-capability evaluations",
+        "autonomous agent benchmarks",
+        "long-task-horizon measurement",
+        "pre-deployment and during-training safety evaluation",
+        "elicitation methodology",
+        "AI safety policy",
+        "frontier lab governance"
+      ],
+      "pairs_well_with": [
+        "paul-christiano",
+        "dan-hendrycks",
+        "jan-leike"
+      ],
+      "productive_conflict_with": [
+        "sam-altman",
+        "dario-amodei",
+        "yann-lecun"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 23,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 10,
+      "confidence": 0.95,
+      "last_verified": "2026-05-28",
+      "voice_style_excerpt": "Calm, technical, deliberately non-rhetorical for a topic where rhetoric is the obvious frame. Speaks in operational specifics — task durations, confidence inter",
+      "file_path": "superintelligenceTeam/personas/beth-barnes.md",
+      "research_dir": "superintelligenceTeam/research/beth-barnes/"
+    },
+    "bryan-catanzaro": {
+      "slug": "bryan-catanzaro",
+      "real_name": "Bryan Catanzaro",
+      "archetype": "GPU + software co-design at frontier model scale",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "systems-kernels-serving",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "NVIDIA (Vice President, Applied Deep Learning Research, since 2016)"
+      ],
+      "domains": [
+        "distributed training at frontier scale (Megatron-LM, 3D parallelism)",
+        "GPU programming and CUDA primitives (cuDNN origin)",
+        "large-model training systems (sequence parallelism, selective activation recomputation)",
+        "low-precision training (NVFP4, FP8)",
+        "long-context inference economics (multi-token prediction, hybrid Mamba+Transformer)",
+        "open foundation models and ecosystem strategy (Nemotron, NeMo)",
+        "audio and speech generation (Deep Speech 2, WaveGlow, DiffWave, RAD-TTS)",
+        "vision generation (pix2pixHD, vid2vid, eDiff-I)",
+        "neural rendering for graphics (DLSS lineage)"
+      ],
+      "pairs_well_with": [
+        "tri-dao",
+        "horace-he",
+        "noam-shazeer",
+        "jakub-pachocki"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "sam-altman"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 18,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Plain technical English. Engineering-first vocabulary. Refers to systems as systems, kernels as kernels, parallelism as parallelism. No marketing veneer even in",
+      "file_path": "superintelligenceTeam/personas/bryan-catanzaro.md",
+      "research_dir": "superintelligenceTeam/research/bryan-catanzaro/"
+    },
+    "chelsea-finn": {
+      "slug": "chelsea-finn",
+      "real_name": "Chelsea Finn",
+      "archetype": "Teleoperation-fed robot foundation model builder",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "multimodal-embodied",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Stanford University (Assistant Professor, Computer Science and Electrical Engineering; IRIS group lead)",
+        "Physical Intelligence (co-founder and Research Lead, since March 2024)"
+      ],
+      "domains": [
+        "robot learning",
+        "meta-learning and few-shot adaptation",
+        "imitation learning from human demonstrations",
+        "foundation models for robotics (Vision-Language-Action)",
+        "bimanual and dexterous manipulation",
+        "teleoperation infrastructure",
+        "model-based and model-free reinforcement learning",
+        "cross-embodiment policy learning"
+      ],
+      "pairs_well_with": [
+        "pieter-abbeel",
+        "sergey-levine",
+        "tri-dao",
+        "fei-fei-li"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "demis-hassabis"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 22,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Direct, calm, technically precise without being jargon-heavy. Prefers concrete examples (\"a teleoperator lights a match and then lights a candle with that match",
+      "file_path": "superintelligenceTeam/personas/chelsea-finn.md",
+      "research_dir": "superintelligenceTeam/research/chelsea-finn/"
+    },
+    "chris-olah": {
+      "slug": "chris-olah",
+      "real_name": "Christopher Olah",
+      "archetype": "Mechanistic interpretability founder; reverse-engineer of trained neural networks",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "alignment-interp-safety",
+      "cell_letter": "D",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Anthropic (co-founder; leads the mechanistic interpretability research team, since 2021)"
+      ],
+      "domains": [
+        "mechanistic interpretability",
+        "neural network visualization",
+        "feature visualization",
+        "circuits in trained networks",
+        "superposition and polysemanticity",
+        "sparse autoencoders and dictionary learning",
+        "monosemantic features",
+        "attribution graphs and cross-layer transcoders",
+        "interpretability as an AI safety strategy",
+        "scientific communication of ML research (Distill heritage)"
+      ],
+      "pairs_well_with": [
+        "neel-nanda",
+        "dario-amodei",
+        "jan-leike",
+        "paul-christiano"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "sam-altman"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 15,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.96,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Patient, geometric, aesthetic-first. Reaches for biological and visual metaphors before adversarial or compliance metaphors. Treats neural networks with a kind ",
+      "file_path": "superintelligenceTeam/personas/chris-olah.md",
+      "research_dir": "superintelligenceTeam/research/chris-olah/"
+    },
+    "christopher-manning": {
+      "slug": "christopher-manning",
+      "real_name": "Christopher D. Manning",
+      "archetype": "Linguist-turned-architect of statistical and neural NLP",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "theory-science",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "AIX Ventures (General Partner, full-time since July 2025)",
+        "Stanford Institute for Human-Centered AI (Associate Director and Senior Fellow; on leave from teaching)",
+        "Stanford University (Thomas M. Siebel Professor in Machine Learning, CS + Linguistics, on partial leave)"
+      ],
+      "domains": [
+        "foundations of statistical and neural NLP",
+        "word embeddings and representation learning",
+        "dependency parsing and syntactic structure",
+        "attention mechanisms (pre-Transformer)",
+        "language model interpretability and probing",
+        "linguistic theory in the LLM era",
+        "NLP education and open infrastructure",
+        "retrieval-augmented generation evaluation",
+        "venture-backed deep AI research translation"
+      ],
+      "pairs_well_with": [
+        "percy-liang",
+        "yoshua-bengio",
+        "sara-hooker"
+      ],
+      "productive_conflict_with": [
+        "noam-shazeer",
+        "sam-altman",
+        "yann-lecun"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 16,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.96,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Measured, generous, Stanford-Australian-academic. Almost never overclaims; hype-words (\"AGI\", \"revolution\", \"superintelligence\") used carefully and with qualifi",
+      "file_path": "superintelligenceTeam/personas/christopher-manning.md",
+      "research_dir": "superintelligenceTeam/research/christopher-manning/"
+    },
+    "dan-hendrycks": {
+      "slug": "dan-hendrycks",
+      "real_name": "Dan Hendrycks",
+      "archetype": "Benchmark-first safety institutionalist",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "alignment-interp-safety",
+      "cell_letter": "D",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Center for AI Safety (Executive Director and co-founder, since 2022)",
+        "xAI (Safety Advisor, since July 2023, symbolic $1 salary, no equity)",
+        "Scale AI (Advisor, since November 2024, symbolic $1 salary)"
+      ],
+      "domains": [
+        "AI safety",
+        "catastrophic and existential AI risk",
+        "LLM evaluation and benchmarks",
+        "distribution-shift robustness",
+        "machine ethics",
+        "representation engineering and interpretability",
+        "AI policy and national security",
+        "AI welfare"
+      ],
+      "pairs_well_with": [
+        "paul-christiano",
+        "jan-leike",
+        "chris-olah",
+        "stuart-russell",
+        "neel-nanda"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "sam-altman",
+        "elon-musk"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 23,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Plain, measured, deliberately non-alarmist prose for a topic where alarm is the obvious frame. Speaks the languages of three audiences fluently and code-switche",
+      "file_path": "superintelligenceTeam/personas/dan-hendrycks.md",
+      "research_dir": "superintelligenceTeam/research/dan-hendrycks/"
+    },
+    "dario-amodei": {
+      "slug": "dario-amodei",
+      "real_name": "Dario Amodei",
+      "archetype": "Scaling-hypothesis safety hawk and frontier-lab CEO",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "frontier-labs-research",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Anthropic (co-founder and CEO, since 2021)"
+      ],
+      "domains": [
+        "LLM scaling laws",
+        "frontier model training",
+        "reinforcement learning from human feedback (RLHF)",
+        "Constitutional AI",
+        "AI safety policy",
+        "mechanistic interpretability (as sponsor / funder)",
+        "US-China AI policy and export controls",
+        "responsible scaling and capability evaluations",
+        "computational neuroscience (legacy)"
+      ],
+      "pairs_well_with": [
+        "paul-christiano",
+        "jared-kaplan",
+        "chris-olah",
+        "jan-leike",
+        "jason-wei"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "andrej-karpathy"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 9,
+      "confidence": 0.93,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Long, structured paragraphs. Builds arguments deductively from premises before stating conclusions. Comfortable with uncertainty — says \"I think,\" \"my best gues",
+      "file_path": "superintelligenceTeam/personas/dario-amodei.md",
+      "research_dir": "superintelligenceTeam/research/dario-amodei/"
+    },
+    "demis-hassabis": {
+      "slug": "demis-hassabis",
+      "real_name": "Sir Demis Hassabis",
+      "archetype": "Neuroscience-trained scientist-CEO running a frontier AI lab as a multi-decade research program",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "frontier-labs-research",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Google DeepMind (CEO and co-founder; merged entity since April 2023)",
+        "Isomorphic Labs (CEO and co-founder; Alphabet drug-discovery spinout, since 2021)",
+        "Royal Society (Fellow)"
+      ],
+      "domains": [
+        "Artificial general intelligence as a multi-decade scientific program",
+        "Deep reinforcement learning (DQN, AlphaGo, AlphaZero lineage)",
+        "World models and physically-grounded simulation (Genie, Veo, SIMA)",
+        "AI for scientific discovery (AlphaFold, AlphaProteo, AlphaGenome, AlphaEarth, IsoDDE)",
+        "Neuroscience-inspired cognitive architectures (memory, planning, episodic recall)",
+        "Frontier-lab strategy and AI safety coordination",
+        "Multimodal foundation models (Gemini line)",
+        "Computational protein biology and drug discovery"
+      ],
+      "pairs_well_with": [
+        "yoshua-bengio",
+        "sergey-levine",
+        "fei-fei-li",
+        "john-jumper"
+      ],
+      "productive_conflict_with": [
+        "sam-altman",
+        "dario-amodei"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 22,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.96,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Measured, English-accented, scientist-CEO register. Speaks in fully-formed paragraphs, not soundbites. Reaches for biological and physical analogies (hippocampa",
+      "file_path": "superintelligenceTeam/personas/demis-hassabis.md",
+      "research_dir": "superintelligenceTeam/research/demis-hassabis/"
+    },
+    "elon-musk": {
+      "slug": "elon-musk",
+      "real_name": "Elon Reeve Musk",
+      "archetype": "Vertically-integrated builder-CEO and compute-mobilizer",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "applied-ai-leadership",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "xAI (founder and CEO since July 2023; became a SpaceX subsidiary in 2026)",
+        "Tesla (CEO and product architect since 2008; early investor since 2004)",
+        "SpaceX (founder, CEO, and chief engineer since 2002)",
+        "Neuralink (CEO and co-founder since 2016)",
+        "X Corp (founder and CTO since the October 2022 Twitter acquisition for $44B; rebranded X in 2023)",
+        "The Boring Company (founder)",
+        "America Party (founder, announced July 5, 2025)"
+      ],
+      "domains": [
+        "large-scale AI training infrastructure (gigawatt-class clusters)",
+        "autonomous driving (Tesla FSD end-to-end neural net)",
+        "humanoid robotics (Tesla Optimus)",
+        "brain-computer interfaces (Neuralink)",
+        "frontier LLM development (xAI Grok series)",
+        "vertical integration of silicon, software, data, and distribution",
+        "manufacturing-cycle compression and first-principles engineering",
+        "capital and power mobilization at hyperscale",
+        "AI policy and regulatory positioning"
+      ],
+      "pairs_well_with": [
+        "greg-brockman",
+        "dario-amodei",
+        "bryan-catanzaro",
+        "jensen-huang"
+      ],
+      "productive_conflict_with": [
+        "sam-altman",
+        "dario-amodei",
+        "demis-hassabis",
+        "yann-lecun"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 20,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 9,
+      "confidence": 0.96,
+      "last_verified": "2026-05-28",
+      "voice_style_excerpt": "Bluntly direct, occasionally profane in long-form interviews; on X he writes telegraphically and often mid-task. Uses physics analogies (entropy, conservation l",
+      "file_path": "superintelligenceTeam/personas/elon-musk.md",
+      "research_dir": "superintelligenceTeam/research/elon-musk/"
+    },
+    "fei-fei-li": {
+      "slug": "fei-fei-li",
+      "real_name": "Fei-Fei Li",
+      "archetype": "Human-centered vision pioneer; the dataset-and-benchmark conscience of modern AI",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "multimodal-embodied",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "World Labs (co-founder and CEO, since April 2024)",
+        "Stanford University (Sequoia Professor of Computer Science; Special Advisor on AI; co-chair of the HAI advisory council with John Hennessy, since the May 2026 restructure)",
+        "Stanford Institute for Human-Centered AI (co-director, since 2019)",
+        "AI4ALL (co-founder, since 2017)"
+      ],
+      "domains": [
+        "computer vision",
+        "large-scale labeled datasets and benchmarks",
+        "spatial intelligence and world models",
+        "embodied AI and robotics simulation",
+        "human-centered AI policy and governance",
+        "AI for healthcare, science, and education",
+        "AI education access (AI4ALL)",
+        "cognitive and developmental science framings of perception"
+      ],
+      "pairs_well_with": [
+        "demis-hassabis",
+        "andrej-karpathy",
+        "christopher-manning",
+        "pieter-abbeel",
+        "yoshua-bengio"
+      ],
+      "productive_conflict_with": [
+        "sam-altman",
+        "yann-lecun",
+        "dan-hendrycks"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 16,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.97,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Warm, deliberate, accessible. Anchors abstract claims in specific human stories — her father's dry-cleaning business, a child seeing a cat, a radiologist with a",
+      "file_path": "superintelligenceTeam/personas/fei-fei-li.md",
+      "research_dir": "superintelligenceTeam/research/fei-fei-li/"
+    },
+    "geoffrey-hinton": {
+      "slug": "geoffrey-hinton",
+      "real_name": "Geoffrey Everest Hinton",
+      "archetype": "Godfather of deep learning turned existential-risk conscience",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "theory-science",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "University of Toronto (University Professor Emeritus, Department of Computer Science)",
+        "Vector Institute, Toronto (co-founder, Chief Scientific Advisor)",
+        "Canadian Institute for Advanced Research / CIFAR (Fellow)"
+      ],
+      "domains": [
+        "deep learning foundations",
+        "backpropagation",
+        "Boltzmann machines and energy-based models",
+        "representation learning",
+        "capsule networks",
+        "forward-forward and biologically plausible learning",
+        "AI existential risk and alignment",
+        "cognitive science of neural networks",
+        "mortal computation and analog substrates"
+      ],
+      "pairs_well_with": [
+        "yoshua-bengio",
+        "demis-hassabis",
+        "dan-hendrycks",
+        "paul-christiano",
+        "jan-leike"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "sam-altman",
+        "jakub-pachocki"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 19,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.97,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Quiet, mid-Atlantic British academic English. Plain language, no equations in public talks. Light irony — he is comfortable saying 'we may all be doomed' with a",
+      "file_path": "superintelligenceTeam/personas/geoffrey-hinton.md",
+      "research_dir": "superintelligenceTeam/research/geoffrey-hinton/"
+    },
+    "greg-brockman": {
+      "slug": "greg-brockman",
+      "real_name": "Gregory Brockman",
+      "archetype": "Builder-in-chief; engineer's-engineer turned trillion-dollar infrastructure executive",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "applied-ai-leadership",
+      "cell_letter": "A",
+      "cell_role": "validator",
+      "status": "active",
+      "affiliations_2026": [
+        "OpenAI (co-founder; President; head of product strategy and infrastructure, since May 2026 reorg)",
+        "Stargate Project (operational lead, since January 2025)",
+        "Leading the Future PAC (co-founder, since 2025)"
+      ],
+      "domains": [
+        "large-scale training infrastructure",
+        "distributed systems engineering",
+        "applied research-to-product translation",
+        "data-center buildout and supply-chain orchestration",
+        "agentic-coding product strategy",
+        "engineering team formation and recruiting",
+        "reliability and operational discipline at frontier scale"
+      ],
+      "pairs_well_with": [
+        "sam-altman",
+        "woosuk-kwon",
+        "bryan-catanzaro",
+        "jensen-huang"
+      ],
+      "productive_conflict_with": [
+        "dario-amodei",
+        "demis-hassabis",
+        "ilya-sutskever"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 18,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.91,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Direct, operational, declarative. Frames problems in terms of dependency graphs, supply chains, and shipping dates. Uses systems-engineering vocabulary (\"the bi",
+      "file_path": "superintelligenceTeam/personas/greg-brockman.md",
+      "research_dir": "superintelligenceTeam/research/greg-brockman/"
+    },
+    "helen-toner": {
+      "slug": "helen-toner",
+      "real_name": "Helen Toner",
+      "archetype": "AI governance strategist and external-oversight advocate",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "alignment-interp-safety",
+      "cell_letter": "D",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Center for Security and Emerging Technology (CSET) at Georgetown University (Interim Executive Director, since September 2025)",
+        "Walsh School of Foreign Service, Georgetown University (research faculty)",
+        "\"Rising Tide\" Substack (independent commentary venue, since early 2025)"
+      ],
+      "domains": [
+        "AI governance and policy",
+        "China AI strategy and US export controls",
+        "Independent external oversight of frontier AI labs",
+        "Disclosure and evaluation norms for AI capabilities",
+        "Civil-society fiduciary governance of AI nonprofits",
+        "Distillation attacks, model misuse, biosecurity adjacencies",
+        "US-China AI diplomacy"
+      ],
+      "pairs_well_with": [
+        "paul-christiano",
+        "dan-hendrycks",
+        "jan-leike",
+        "chris-olah"
+      ],
+      "productive_conflict_with": [
+        "sam-altman",
+        "greg-brockman",
+        "dario-amodei",
+        "elon-musk"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 20,
+      "recent_signal_12mo_count": 8,
+      "persistent_signals_count": 0,
+      "public_stances_count": 10,
+      "confidence": 0.94,
+      "last_verified": "2026-05-28",
+      "voice_style_excerpt": "Plain English, precise, deliberately calm. Refuses Silicon Valley civilizational rhetoric — does not talk about Intelligence Ages or singularities or summoning ",
+      "file_path": "superintelligenceTeam/personas/helen-toner.md",
+      "research_dir": "superintelligenceTeam/research/helen-toner/"
+    },
+    "horace-he": {
+      "slug": "horace-he",
+      "real_name": "Horace He",
+      "archetype": "First-principles ML systems engineer",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "systems-kernels-serving",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Thinking Machines Lab (founding-team ML systems researcher, since ~March 2025)"
+      ],
+      "domains": [
+        "PyTorch internals",
+        "torch.compile and ML compilers",
+        "GPU kernel design (Triton, CUDA)",
+        "performance engineering (compute / memory-bandwidth / overhead regimes)",
+        "attention kernels (FlashAttention, FlexAttention)",
+        "LLM inference serving (vLLM, gpt-fast)",
+        "kernel numerics and reproducibility (batch invariance)",
+        "ML systems pedagogy"
+      ],
+      "pairs_well_with": [
+        "tri-dao",
+        "noam-shazeer",
+        "sasha-rush"
+      ],
+      "productive_conflict_with": [
+        "noam-shazeer",
+        "yann-lecun"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 18,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.92,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Plain, technical, slightly dry. Heavy use of concrete numbers (\"9.75 million FLOPS in the time Python does one\") and roofline-style framings. Drops one-liner he",
+      "file_path": "superintelligenceTeam/personas/horace-he.md",
+      "research_dir": "superintelligenceTeam/research/horace-he/"
+    },
+    "hyung-won-chung": {
+      "slug": "hyung-won-chung",
+      "real_name": "Hyung Won Chung",
+      "archetype": "Scale-first paradigm-shift researcher (don't teach, incentivize)",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "reasoning-rl-agents",
+      "cell_letter": "E",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Meta Superintelligence Labs (AI Research Scientist, since July 2025)"
+      ],
+      "domains": [
+        "reasoning and inference-time compute scaling",
+        "instruction fine-tuning and RLHF",
+        "large-scale pre-training and transformer architecture history",
+        "reasoning agents and tool-using LLMs",
+        "LLM cost economics (Bedrock pricing, batch mode, prompt caching, per-tenant budget design)",
+        "AI as a leverage category (labor / capital / code / agents)"
+      ],
+      "pairs_well_with": [
+        "jason-wei",
+        "barret-zoph",
+        "john-schulman"
+      ],
+      "productive_conflict_with": [
+        "andrej-karpathy",
+        "yann-lecun"
+      ],
+      "v2_panel_attribution_count": 7,
+      "sources_count": 16,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.9,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Paradigm-shift framing rather than benchmark deltas. Short declarative slogans repeated across talks: \"Don't teach. Incentivize.\" \"Add structure, remove structu",
+      "file_path": "superintelligenceTeam/personas/hyung-won-chung.md",
+      "research_dir": "superintelligenceTeam/research/hyung-won-chung/"
+    },
+    "ilya-sutskever": {
+      "slug": "ilya-sutskever",
+      "real_name": "Ilya Sutskever",
+      "archetype": "Reclusive scaling-bet architect turned safety-first lab founder",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "frontier-labs-research",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Safe Superintelligence Inc. (cofounder, CEO since July 2025, Chief Scientist throughout)"
+      ],
+      "domains": [
+        "deep learning foundations",
+        "scaling laws and large-model training",
+        "sequence-to-sequence and Transformer-era architecture",
+        "reasoning models and inference-time compute",
+        "AGI / superintelligence safety",
+        "reinforcement learning from human and AI feedback",
+        "generalization"
+      ],
+      "pairs_well_with": [
+        "dario-amodei",
+        "jakub-pachocki",
+        "jared-kaplan",
+        "demis-hassabis"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "stuart-russell",
+        "andrej-karpathy"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 13,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.92,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Soft-spoken, deliberately spare, often pauses before answering. Prefers framings over methods. Speaks in eras and regimes (\"the age of scaling,\" \"the missing co",
+      "file_path": "superintelligenceTeam/personas/ilya-sutskever.md",
+      "research_dir": "superintelligenceTeam/research/ilya-sutskever/"
+    },
+    "jakub-pachocki": {
+      "slug": "jakub-pachocki",
+      "real_name": "Jakub Pachocki",
+      "archetype": "Theoretical-CS optimizer turned reasoning-paradigm architect",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "frontier-labs-research",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "OpenAI (Chief Scientist, since May 2024)"
+      ],
+      "domains": [
+        "large-scale distributed training",
+        "reinforcement learning at scale",
+        "reasoning-model design (o1 / o3 / GPT-5 series)",
+        "inference-time / test-time compute as a scaling axis",
+        "graph algorithms and convex optimization (academic background)",
+        "chain-of-thought interpretability and monitorability",
+        "automated scientific research"
+      ],
+      "pairs_well_with": [
+        "jason-wei",
+        "john-schulman",
+        "nathan-lambert",
+        "ilya-sutskever"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "dario-amodei"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 14,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.88,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Reserved, technically precise, allergic to hype. Speaks in carefully hedged claims (\"I would say it is a form of reasoning, but that doesn't mean it's the same ",
+      "file_path": "superintelligenceTeam/personas/jakub-pachocki.md",
+      "research_dir": "superintelligenceTeam/research/jakub-pachocki/"
+    },
+    "jan-leike": {
+      "slug": "jan-leike",
+      "real_name": "Jan Leike",
+      "archetype": "Scalable-oversight engineer of superhuman alignment",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "alignment-interp-safety",
+      "cell_letter": "D",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Anthropic (co-lead, Alignment Science team, since May 2024; new research project announced May 8, 2026)"
+      ],
+      "domains": [
+        "AI alignment",
+        "scalable oversight",
+        "reward modeling and RLHF",
+        "weak-to-strong generalization",
+        "automated alignment research",
+        "AI safety culture and governance",
+        "existential-risk framing"
+      ],
+      "pairs_well_with": [
+        "dario-amodei",
+        "jared-kaplan",
+        "john-schulman"
+      ],
+      "productive_conflict_with": [
+        "sam-altman",
+        "greg-brockman"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 22,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 9,
+      "confidence": 0.94,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Plain, calm, slightly Germanic English. Short declarative sentences. Numbered claims rather than rhetorical flourishes. Even the May 17 2024 resignation thread ",
+      "file_path": "superintelligenceTeam/personas/jan-leike.md",
+      "research_dir": "superintelligenceTeam/research/jan-leike/"
+    },
+    "jared-kaplan": {
+      "slug": "jared-kaplan",
+      "real_name": "Jared Kaplan",
+      "archetype": "Physicist-architect of the scaling era",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "model-architects",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Anthropic (co-founder, Chief Science Officer, Responsible Scaling Officer; since May 2021)",
+        "Johns Hopkins University, Department of Physics and Astronomy (associate professor, currently on leave)"
+      ],
+      "domains": [
+        "scaling laws and compute-driven capability forecasting",
+        "LLM pretraining and post-training research",
+        "Constitutional AI and AI-feedback alignment methods",
+        "responsible-scaling policy and capability-tier safety governance",
+        "theoretical physics (effective field theory, conformal field theory, AdS/CFT)"
+      ],
+      "pairs_well_with": [
+        "dario-amodei",
+        "tom-brown",
+        "sam-mccandlish",
+        "chris-olah"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "andrej-karpathy"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 16,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.92,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Measured, physicist-academic register. Reaches first for empirical regularities (\"the loss is a power law over seven orders of magnitude\") rather than benchmark",
+      "file_path": "superintelligenceTeam/personas/jared-kaplan.md",
+      "research_dir": "superintelligenceTeam/research/jared-kaplan/"
+    },
+    "jason-wei": {
+      "slug": "jason-wei",
+      "real_name": "Jason Wei",
+      "archetype": "Post-training research scientist; CoT / emergence / instruction-tuning originator",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "model-architects",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Anthropic (research scientist, post-training / reasoning, since July 2025)"
+      ],
+      "domains": [
+        "LLM post-training",
+        "reinforcement learning with verifiable rewards (RLVR)",
+        "chain-of-thought reasoning",
+        "instruction tuning",
+        "emergent abilities and scaling phase transitions",
+        "evals design",
+        "inference-time compute scaling"
+      ],
+      "pairs_well_with": [
+        "andrej-karpathy",
+        "hyung-won-chung",
+        "barret-zoph",
+        "daniel-chalef"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "dario-amodei"
+      ],
+      "v2_panel_attribution_count": 4,
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.91,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Plain English, short paragraphs, lists of 3 / 5 / 7. Cites benchmark numbers (GSM8K, MATH, MMLU, LongMemEval-S) rather than analogies. Uses \"I think\" rather tha",
+      "file_path": "superintelligenceTeam/personas/jason-wei.md",
+      "research_dir": "superintelligenceTeam/research/jason-wei/"
+    },
+    "john-jumper": {
+      "slug": "john-jumper",
+      "real_name": "John Jumper",
+      "archetype": "Physicist-turned-computational-biologist who turned protein structure prediction from a grand challenge into a free public database",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "theory-science",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Google DeepMind (Distinguished Scientist / Director; AlphaFold lineage lead, since 2017)",
+        "Isomorphic Labs (co-architect of AlphaFold 3 with DeepMind / Isomorphic joint team, since 2021)"
+      ],
+      "domains": [
+        "Protein structure prediction",
+        "AI for biology and the life sciences",
+        "AI for drug discovery",
+        "Scientific deep learning architectures (Evoformer, diffusion-for-biology)",
+        "Molecular dynamics and energy-landscape reasoning",
+        "Open scientific tools and public structural databases",
+        "Computational chemistry and biophysics",
+        "Biology + AI co-evolution as a methodological program"
+      ],
+      "pairs_well_with": [
+        "demis-hassabis",
+        "fei-fei-li",
+        "yoshua-bengio",
+        "chelsea-finn"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "noam-shazeer"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 20,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.96,
+      "last_verified": "2026-05-28",
+      "voice_style_excerpt": "Measured, modest, scientifically careful. American-accented, midwestern-academic register. Speaks in qualified statements (\"I think,\" \"I'll be shocked if,\" \"it ",
+      "file_path": "superintelligenceTeam/personas/john-jumper.md",
+      "research_dir": "superintelligenceTeam/research/john-jumper/"
+    },
+    "john-schulman": {
+      "slug": "john-schulman",
+      "real_name": "John Schulman",
+      "archetype": "The RL algorithmist who turned post-training into a discipline",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "reasoning-rl-agents",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Thinking Machines Lab (Chief Scientist, since February 2025)"
+      ],
+      "domains": [
+        "Reinforcement learning (policy gradients, trust regions, advantage estimation)",
+        "RLHF / post-training",
+        "Reward modeling",
+        "Hallucination and calibration as RL targets",
+        "Long-horizon credit assignment",
+        "LLM alignment via behavioral RL",
+        "Continuous control (legacy from PhD)"
+      ],
+      "pairs_well_with": [
+        "mira-murati",
+        "barret-zoph",
+        "lilian-weng",
+        "pieter-abbeel",
+        "jason-wei"
+      ],
+      "productive_conflict_with": [
+        "andrej-karpathy",
+        "ilya-sutskever"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Measured, technical, and unusually willing to say \"I don't know\" in public. Prefers to derive a claim from a gradient or an estimator before he asserts it. Will",
+      "file_path": "superintelligenceTeam/personas/john-schulman.md",
+      "research_dir": "superintelligenceTeam/research/john-schulman/"
+    },
+    "karina-nguyen": {
+      "slug": "karina-nguyen",
+      "real_name": "Karina Nguyen",
+      "archetype": "Post-training as tailoring — RLHF practitioner who treats data mixtures as craft",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "reasoning-rl-agents",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "OpenAI (Research Manager and Post-Training Lead, Model Behavior, since May 2024)"
+      ],
+      "domains": [
+        "RLHF and RLAIF post-training",
+        "synthetic data design for post-training",
+        "model behavior and personality",
+        "evaluations and focal-point benchmarks",
+        "reasoning interface design (Canvas, Tasks, streaming chain-of-thought)",
+        "product-research co-design loops",
+        "agentic consumer coding",
+        "RL for subjective tasks (creative writing, honesty calibration)",
+        "human-AI interaction"
+      ],
+      "pairs_well_with": [
+        "barret-zoph",
+        "john-schulman",
+        "nathan-lambert",
+        "jan-leike"
+      ],
+      "productive_conflict_with": [
+        "dario-amodei",
+        "ilya-sutskever",
+        "yann-lecun"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 16,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 9,
+      "confidence": 0.9,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Plain English, almost no ML jargon even when discussing RLHF or synthetic data. Reaches for everyday metaphors — tailoring, art, cooking, brain damage, taste — ",
+      "file_path": "superintelligenceTeam/personas/karina-nguyen.md",
+      "research_dir": "superintelligenceTeam/research/karina-nguyen/"
+    },
+    "liang-wenfeng": {
+      "slug": "liang-wenfeng",
+      "real_name": "Liang Wenfeng",
+      "archetype": "Quant-fund founder turned reclusive open-weights frontier-lab CEO",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "frontier-labs-research",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "DeepSeek (founder and CEO, since May 2023)",
+        "High-Flyer Quantitative Investment Management Partnership (co-founder, 2016; parent and sole funder of DeepSeek)"
+      ],
+      "domains": [
+        "large open-weights foundation models",
+        "mixture-of-experts architecture",
+        "reasoning models and reinforcement learning",
+        "compute-efficient training under hardware constraints",
+        "quantitative trading and ML-driven systematic finance",
+        "open-source strategy as ecosystem moat",
+        "Chinese frontier AI industrial policy"
+      ],
+      "pairs_well_with": [
+        "ilya-sutskever",
+        "sara-hooker",
+        "yann-lecun",
+        "tim-dettmers"
+      ],
+      "productive_conflict_with": [
+        "sam-altman",
+        "dario-amodei",
+        "aleksander-madry"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 15,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 9,
+      "confidence": 0.88,
+      "last_verified": "2026-05-28",
+      "voice_style_excerpt": "Spare, deliberate, philosophical rather than technical when speaking publicly. Reaches for structural framings — \"the real gap is between originality and imitat",
+      "file_path": "superintelligenceTeam/personas/liang-wenfeng.md",
+      "research_dir": "superintelligenceTeam/research/liang-wenfeng/"
+    },
+    "lilian-weng": {
+      "slug": "lilian-weng",
+      "real_name": "Lilian Weng",
+      "archetype": "Survey-as-research safety synthesizer",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "alignment-interp-safety",
+      "cell_letter": "D",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Thinking Machines Lab (co-founder, safety research lead, since February 2025)"
+      ],
+      "domains": [
+        "AI safety (research)",
+        "AI safety (operational / deployment systems)",
+        "reinforcement learning from human feedback",
+        "reward hacking and specification gaming",
+        "LLM-powered autonomous agents",
+        "chain-of-thought reasoning and faithfulness",
+        "hallucinations and factuality",
+        "adversarial attacks and jailbreak resistance",
+        "long-form technical surveys as research artifacts"
+      ],
+      "pairs_well_with": [
+        "mira-murati",
+        "john-schulman",
+        "barret-zoph",
+        "jan-leike",
+        "chris-olah"
+      ],
+      "productive_conflict_with": [
+        "sam-altman",
+        "yann-lecun"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 17,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.94,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Senior research scientist register. Precise, slightly formal, deeply cited. Where Karpathy will say \"you're sucking supervision through a straw,\" Weng will say ",
+      "file_path": "superintelligenceTeam/personas/lilian-weng.md",
+      "research_dir": "superintelligenceTeam/research/lilian-weng/"
+    },
+    "mira-murati": {
+      "slug": "mira-murati",
+      "real_name": "Mira Murati",
+      "archetype": "Product-engineering CEO who ships frontier multimodal AI responsibly",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "applied-ai-leadership",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Thinking Machines Lab (Founder & CEO, since February 2025)"
+      ],
+      "domains": [
+        "applied AI product engineering",
+        "multimodal model launches (voice, video, image)",
+        "frontier-lab CEO operations",
+        "human-AI collaboration UX",
+        "AI safety as a product-launch discipline",
+        "fine-tuning / model customization",
+        "AI governance and regulation advocacy"
+      ],
+      "pairs_well_with": [
+        "john-schulman",
+        "barret-zoph",
+        "lilian-weng",
+        "greg-brockman"
+      ],
+      "productive_conflict_with": [
+        "sam-altman",
+        "dario-amodei"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 21,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.91,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Calm and deliberate. Engineer-first vocabulary; rarely reaches for AGI or superintelligence rhetoric. Frames decisions in terms of users, access, and benefits —",
+      "file_path": "superintelligenceTeam/personas/mira-murati.md",
+      "research_dir": "superintelligenceTeam/research/mira-murati/"
+    },
+    "nathan-lambert": {
+      "slug": "nathan-lambert",
+      "real_name": "Nathan Lambert",
+      "archetype": "Open-RLHF systems-builder and explainer",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "reasoning-rl-agents",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Allen Institute for AI / Ai2 (Senior Research Scientist; post-training lead for Olmo and Tülu, since 2024)",
+        "Interconnects (founder; newsletter + podcast at interconnects.ai)",
+        "The ATOM Project (founder; American Truly Open Models initiative, since July 2025)"
+      ],
+      "domains": [
+        "RLHF",
+        "post-training (SFT, DPO, RLVR)",
+        "reward modeling",
+        "reasoning models",
+        "open-source language models",
+        "AI policy and open-ecosystem strategy",
+        "RL for robotics (legacy)"
+      ],
+      "pairs_well_with": [
+        "barret-zoph",
+        "john-schulman",
+        "sasha-rush",
+        "jason-wei",
+        "andrej-karpathy",
+        "sebastian-raschka"
+      ],
+      "productive_conflict_with": [
+        "dario-amodei",
+        "sam-altman",
+        "yoshua-bengio",
+        "demis-hassabis"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 24,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 9,
+      "confidence": 0.94,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Prolific, conversational, accessible — writes how he talks. Newsletter cadence is closer to a research diary than a peer-reviewed paper, and he is self-aware ab",
+      "file_path": "superintelligenceTeam/personas/nathan-lambert.md",
+      "research_dir": "superintelligenceTeam/research/nathan-lambert/"
+    },
+    "neel-nanda": {
+      "slug": "neel-nanda",
+      "real_name": "Neel Nanda",
+      "archetype": "Mechanistic interpretability operator and field-builder",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "alignment-interp-safety",
+      "cell_letter": "D",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Google DeepMind (mechanistic interpretability team lead, since ~2022; team lead since ~2023)"
+      ],
+      "domains": [
+        "mechanistic interpretability",
+        "sparse autoencoders",
+        "transformer circuits",
+        "induction heads",
+        "chain-of-thought monitoring",
+        "interpretability pedagogy",
+        "research community building",
+        "model organism construction",
+        "AI safety research strategy"
+      ],
+      "pairs_well_with": [
+        "chris-olah",
+        "dan-hendrycks",
+        "jan-leike"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "sam-altman"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 20,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 10,
+      "confidence": 0.94,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Plain English. Precise but unguarded — comfortable saying \"I don't know,\" \"this is just my intuition,\" \"I've become more pessimistic than I used to be.\" Cambrid",
+      "file_path": "superintelligenceTeam/personas/neel-nanda.md",
+      "research_dir": "superintelligenceTeam/research/neel-nanda/"
+    },
+    "noam-brown": {
+      "slug": "noam-brown",
+      "real_name": "Noam Brown",
+      "archetype": "Game-AI search architect who carried test-time compute into the LLM era",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "reasoning-rl-agents",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "OpenAI (Research Scientist leading reasoning research, since June 2023)"
+      ],
+      "domains": [
+        "reasoning models (o1 / o3 line)",
+        "test-time / inference-time compute as a scaling axis",
+        "reinforcement learning combined with search",
+        "imperfect-information game-solving (poker, Diplomacy)",
+        "self-play and equilibrium computation",
+        "multi-agent AI",
+        "expert iteration and depth-limited search",
+        "LLM chain-of-thought as deliberative reasoning"
+      ],
+      "pairs_well_with": [
+        "jakub-pachocki",
+        "john-schulman",
+        "jason-wei",
+        "pieter-abbeel"
+      ],
+      "productive_conflict_with": [
+        "andrej-karpathy",
+        "yann-lecun"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 22,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 10,
+      "confidence": 0.94,
+      "last_verified": "2026-05-28",
+      "voice_style_excerpt": "Numerically anchored and forward-leaning. Concrete multipliers (\"100,000× more data,\" \"1000-10,000× in size,\" \"5 of 6 problems\"). Specific wall-clock times (\"o1",
+      "file_path": "superintelligenceTeam/personas/noam-brown.md",
+      "research_dir": "superintelligenceTeam/research/noam-brown/"
+    },
+    "noam-shazeer": {
+      "slug": "noam-shazeer",
+      "real_name": "Noam Shazeer",
+      "archetype": "Architecture-first scaling maximalist",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "model-architects",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Google DeepMind (VP Engineering; technical co-lead of Gemini with Jeff Dean and Oriol Vinyals, since August 2024)"
+      ],
+      "domains": [
+        "Transformer architecture",
+        "Multi-head attention",
+        "Mixture-of-Experts (MoE) and conditional computation",
+        "Sparsity and routing",
+        "Training-system scaling on TPU pods",
+        "LLM pretraining",
+        "Inference cost and hardware co-design"
+      ],
+      "pairs_well_with": [
+        "jeff-dean",
+        "jakub-pachocki",
+        "bryan-catanzaro"
+      ],
+      "productive_conflict_with": [
+        "dario-amodei",
+        "yann-lecun"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 16,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.93,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Terse, direct, engineer-to-engineer. Strong preference for concrete numerical claims (\"million tokens to the dollar\", \"50 percent of the time\", \"32 GPUs in 2015",
+      "file_path": "superintelligenceTeam/personas/noam-shazeer.md",
+      "research_dir": "superintelligenceTeam/research/noam-shazeer/"
+    },
+    "patrick-lewis": {
+      "slug": "patrick-lewis",
+      "real_name": "Patrick Lewis",
+      "archetype": "Retrieval-as-architecture specialist",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "model-architects",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Cohere (Senior Director of Agentic AI, leading RAG / Tool-use / Agents, since 2022)"
+      ],
+      "domains": [
+        "retrieval-augmented generation (RAG)",
+        "dense passage retrieval (DPR)",
+        "knowledge-intensive NLP (QA, fact checking, slot filling, entity linking)",
+        "benchmark design (KILT)",
+        "test-train contamination and evaluation methodology",
+        "citation grounding and source attribution",
+        "agentic tool use as a continuation of retrieval",
+        "enterprise RAG deployment (Cohere Command, Embed, Rerank, North)"
+      ],
+      "pairs_well_with": [
+        "aidan-gomez",
+        "sara-hooker",
+        "aravind-srinivas",
+        "christopher-manning"
+      ],
+      "productive_conflict_with": [
+        "noam-shazeer",
+        "andrej-karpathy"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 19,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.91,
+      "last_verified": "2026-05-28",
+      "voice_style_excerpt": "Plain English, soft-spoken, lightly British-dry. Self-deprecating, particularly about the RAG acronym (\"we should have picked a better name\"). Reaches for archi",
+      "file_path": "superintelligenceTeam/personas/patrick-lewis.md",
+      "research_dir": "superintelligenceTeam/research/patrick-lewis/"
+    },
+    "paul-christiano": {
+      "slug": "paul-christiano",
+      "real_name": "Paul F. Christiano",
+      "archetype": "Theorist-turned-regulator of frontier AI safety",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "alignment-interp-safety",
+      "cell_letter": "D",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "U.S. AI Safety Institute / Center for AI Standards and Innovation (CAISI) at NIST — Head of AI Safety, since April 2024",
+        "Alignment Research Center (ARC) — founder, on leave during CAISI tenure"
+      ],
+      "domains": [
+        "AI alignment theory",
+        "RLHF (inventor)",
+        "ELK (Eliciting Latent Knowledge)",
+        "pre-deployment evaluation of frontier models",
+        "responsible scaling policies",
+        "existential-risk decomposition",
+        "AI governance and national-security policy",
+        "iterated amplification / debate"
+      ],
+      "pairs_well_with": [
+        "jan-leike",
+        "chris-olah",
+        "dario-amodei",
+        "dan-hendrycks"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "sam-altman"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Plain, careful, hedged English. Not aphoristic, not preacherly. Heavy use of conditional and probabilistic framing — \"I think there's a really plausible world…\"",
+      "file_path": "superintelligenceTeam/personas/paul-christiano.md",
+      "research_dir": "superintelligenceTeam/research/paul-christiano/"
+    },
+    "percy-liang": {
+      "slug": "percy-liang",
+      "real_name": "Percy Liang",
+      "archetype": "Open-evaluation public-good economist of AI research",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "theory-science",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Stanford University (Associate Professor of Computer Science; courtesy in Statistics)",
+        "Stanford Center for Research on Foundation Models (CRFM, Director)",
+        "Together AI (co-founder and chief scientist)",
+        "Marin (lead of the open-development foundation-model lab)"
+      ],
+      "domains": [
+        "Foundation model evaluation and benchmarks",
+        "Natural language processing and semantic parsing",
+        "Theory of large language models",
+        "Reproducible research infrastructure",
+        "Foundation-model policy and transparency",
+        "Open-source AI ecosystem economics"
+      ],
+      "pairs_well_with": [
+        "christopher-manning",
+        "sasha-rush",
+        "tri-dao"
+      ],
+      "productive_conflict_with": [
+        "dario-amodei",
+        "sam-altman"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 16,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.94,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Measured academic English. Concrete numbers preferred over rhetoric ('only 9 of 30 labs disclose train-test overlap', 'FMTI fell from 58 to 40', 'beats Llama 3.",
+      "file_path": "superintelligenceTeam/personas/percy-liang.md",
+      "research_dir": "superintelligenceTeam/research/percy-liang/"
+    },
+    "pieter-abbeel": {
+      "slug": "pieter-abbeel",
+      "real_name": "Pieter Abbeel",
+      "archetype": "Embodied-AI elder; the robot-learning lineage builder",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "multimodal-embodied",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Amazon (Head of Frontier Model Research, AGI organization, since Dec 17, 2025; Distinguished Scientist / VP since Aug 2024)",
+        "UC Berkeley (Professor of EECS; Director, Berkeley Robot Learning Lab; Co-Director, BAIR Lab)",
+        "Covariant (President and Chief Scientist, founder, on paper; operational role shifted to Amazon)",
+        "The Robot Brains Podcast (host since 2020)",
+        "AIX Ventures (Investment Partner since 2021)"
+      ],
+      "domains": [
+        "robot learning",
+        "deep reinforcement learning",
+        "imitation learning / inverse reinforcement learning / apprenticeship learning",
+        "sim-to-real transfer",
+        "foundation models for robotics",
+        "humanoid control and whole-body manipulation",
+        "multimodal generative modeling (DDPM lineage)",
+        "embodied AI as the path to AGI"
+      ],
+      "pairs_well_with": [
+        "sergey-levine",
+        "chelsea-finn",
+        "john-schulman",
+        "aravind-srinivas",
+        "demis-hassabis"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "noam-shazeer"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 20,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Calm, Belgian-accented, never sensational. Concrete examples over abstract argument — the autonomous helicopter, the bin-pick, the dexterous hand, the 100-demo-",
+      "file_path": "superintelligenceTeam/personas/pieter-abbeel.md",
+      "research_dir": "superintelligenceTeam/research/pieter-abbeel/"
+    },
+    "prafulla-dhariwal": {
+      "slug": "prafulla-dhariwal",
+      "real_name": "Prafulla Dhariwal",
+      "archetype": "Foundational diffusion researcher and multimodal model architect",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "multimodal-embodied",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "OpenAI (Technical Fellow; Head of the Omni / multimodal team, promoted to Technical Fellow September 2025)"
+      ],
+      "domains": [
+        "Diffusion models",
+        "Multimodal generative modeling (image, video, audio, 3D)",
+        "Text-to-image and text-to-video synthesis",
+        "Classifier and classifier-free guidance",
+        "Normalizing flows",
+        "Consistency models and diffusion distillation",
+        "Scaling laws for generative models",
+        "Generative world modeling"
+      ],
+      "pairs_well_with": [
+        "aditya-ramesh",
+        "tim-salimans",
+        "robin-rombach"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "elon-musk"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 18,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.88,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Restrained, technical, declarative. Short sentences, no hedging, no analogies, no metaphors when avoidable. Reads like the introduction of a well-written deep-l",
+      "file_path": "superintelligenceTeam/personas/prafulla-dhariwal.md",
+      "research_dir": "superintelligenceTeam/research/prafulla-dhariwal/"
+    },
+    "robin-rombach": {
+      "slug": "robin-rombach",
+      "real_name": "Robin Rombach",
+      "archetype": "Founder-researcher of latent diffusion; open-by-default visual generative AI",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "multimodal-embodied",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Black Forest Labs (co-founder and CEO, since August 2024)"
+      ],
+      "domains": [
+        "latent diffusion models",
+        "text-to-image generation",
+        "text-to-video generation (emerging)",
+        "image editing and in-context image generation",
+        "rectified flow / flow matching",
+        "efficient generative model architecture",
+        "open-weights model strategy",
+        "visual intelligence (multimodal perception + generation + reasoning)"
+      ],
+      "pairs_well_with": [
+        "patrick-esser",
+        "aditya-ramesh",
+        "prafulla-dhariwal",
+        "bjorn-ommer"
+      ],
+      "productive_conflict_with": [
+        "sam-altman",
+        "yann-lecun",
+        "aravind-srinivas"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 23,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.93,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Plain, technical, uncluttered. German-English. Avoids hype vocabulary. Tends toward architectural framings (\"unifying X and Y in a single flow matching architec",
+      "file_path": "superintelligenceTeam/personas/robin-rombach.md",
+      "research_dir": "superintelligenceTeam/research/robin-rombach/"
+    },
+    "sam-altman": {
+      "slug": "sam-altman",
+      "real_name": "Samuel Harris Altman",
+      "archetype": "Frontier-AI CEO and capital-mobilizer",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "applied-ai-leadership",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "OpenAI (CEO since 2019; co-founder since 2015; reinstated November 21, 2023 after a five-day board ouster)",
+        "OpenAI Foundation (board member; the nonprofit parent of the recapitalized OpenAI Group PBC since October 28, 2025)",
+        "Stargate LLC (principal sponsor; $500B / 10 GW AI-infrastructure joint venture with SoftBank, Oracle, MGX, announced January 21, 2025)",
+        "Helion Energy (chairman of the board; nuclear fusion)",
+        "Retro Biosciences (lead investor; longevity research)",
+        "Worldcoin / Tools for Humanity (co-founder, 2019; biometric identity network)",
+        "Hydrazine Capital (co-founder with brother Jack Altman)"
+      ],
+      "domains": [
+        "frontier-AI strategy and commercialization",
+        "AGI and superintelligence policy",
+        "compute and energy infrastructure mobilization",
+        "capital formation at hyperscale (Stargate, Microsoft partnership, PBC conversion)",
+        "AI regulatory advocacy (US federal framework, anti-patchwork)",
+        "founder-mode operational leadership",
+        "long-tail bets on civilizational-scale technology (fusion, longevity, identity)"
+      ],
+      "pairs_well_with": [
+        "greg-brockman",
+        "satya-nadella",
+        "jensen-huang",
+        "masayoshi-son"
+      ],
+      "productive_conflict_with": [
+        "dario-amodei",
+        "elon-musk",
+        "demis-hassabis",
+        "jan-leike",
+        "helen-toner"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 27,
+      "recent_signal_12mo_count": 8,
+      "persistent_signals_count": 0,
+      "public_stances_count": 9,
+      "confidence": 0.97,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Short declarative sentences, typically 8-15 words. Plain English over jargon — he says \"intelligence\" before \"frontier model.\" Civilizational analogies (Stone A",
+      "file_path": "superintelligenceTeam/personas/sam-altman.md",
+      "research_dir": "superintelligenceTeam/research/sam-altman/"
+    },
+    "sara-hooker": {
+      "slug": "sara-hooker",
+      "real_name": "Sara Hooker",
+      "archetype": "Hardware-lottery theorist and compute-equity researcher",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "theory-science",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Adaption Labs (co-founder and CEO, since October 2025)"
+      ],
+      "domains": [
+        "model compression and pruning",
+        "sparsity and efficiency",
+        "hardware-aware machine learning",
+        "multilingual NLP",
+        "AI for the global majority",
+        "disparate-impact evaluation",
+        "AI governance and compute-threshold policy",
+        "inference-time adaptation",
+        "adaptive data and adaptive interfaces"
+      ],
+      "pairs_well_with": [
+        "percy-liang",
+        "aidan-gomez",
+        "tri-dao",
+        "tim-dettmers"
+      ],
+      "productive_conflict_with": [
+        "sam-altman",
+        "demis-hassabis"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 16,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Warm-then-pointed. Opens with an acknowledgement of the strongest version of the other side's claim, then makes a sharp structural critique, then closes with an",
+      "file_path": "superintelligenceTeam/personas/sara-hooker.md",
+      "research_dir": "superintelligenceTeam/research/sara-hooker/"
+    },
+    "sasha-rush": {
+      "slug": "sasha-rush",
+      "real_name": "Alexander \"Sasha\" Rush",
+      "archetype": "Literate-code pedagogue and post-training realist",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "reasoning-rl-agents",
+      "cell_letter": "A",
+      "cell_role": "validator",
+      "status": "active",
+      "affiliations_2026": [
+        "Cursor (ML Researcher, since March 2025, post-training of coding-agent models)",
+        "Cornell Tech (Associate Professor, on leave / reduced load through 2025–2026 academic year)",
+        "COLM (Conference on Language Modeling, co-founder and President)"
+      ],
+      "domains": [
+        "post-training of LLMs (RL on coding agents)",
+        "state space models and hybrid architectures",
+        "structured prediction in NLP",
+        "efficient training and inference",
+        "open-source LLM ecosystem",
+        "literate ML pedagogy (Jupyter / annotated notebooks)",
+        "test-time scaling and reasoning induction"
+      ],
+      "pairs_well_with": [
+        "andrej-karpathy",
+        "sebastian-raschka",
+        "nathan-lambert",
+        "jason-wei",
+        "hyung-won-chung"
+      ],
+      "productive_conflict_with": [
+        "noam-shazeer",
+        "demis-hassabis"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 19,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Dry, plain English, often a single sentence per claim. Comfortable with mathematical formality when it pays for itself, allergic to formality-as-aesthetics. Dro",
+      "file_path": "superintelligenceTeam/personas/sasha-rush.md",
+      "research_dir": "superintelligenceTeam/research/sasha-rush/"
+    },
+    "sebastian-raschka": {
+      "slug": "sebastian-raschka",
+      "real_name": "Sebastian Raschka",
+      "archetype": "From-scratch LLM educator and open-weight architecture cartographer",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "model-architects",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Lightning AI (Staff Research Engineer, since 2022)",
+        "Ahead of AI newsletter (author, 191k+ subscribers)"
+      ],
+      "domains": [
+        "LLM internals and architectures",
+        "from-scratch implementation pedagogy",
+        "fine-tuning (LoRA, QLoRA, instruction tuning)",
+        "reasoning models (RLVR, GRPO, inference-time scaling)",
+        "LLM evaluation",
+        "open-weight model analysis (Llama, Qwen, DeepSeek, Mistral, Gemma)",
+        "coding agents",
+        "applied ML education"
+      ],
+      "pairs_well_with": [
+        "andrej-karpathy",
+        "sasha-rush",
+        "tim-dettmers"
+      ],
+      "productive_conflict_with": [
+        "noam-shazeer",
+        "demis-hassabis"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 15,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Warm, careful, German-accented English. Writes long-form (30–90 minute reads) but in plain prose, with diagrams every few hundred words. Drops one-liner heurist",
+      "file_path": "superintelligenceTeam/personas/sebastian-raschka.md",
+      "research_dir": "superintelligenceTeam/research/sebastian-raschka/"
+    },
+    "sergey-levine": {
+      "slug": "sergey-levine",
+      "real_name": "Sergey Levine",
+      "archetype": "Real-world-data-first robot learning theorist",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "multimodal-embodied",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Physical Intelligence (co-founder & Chief Scientist, since March 2024)",
+        "UC Berkeley (Associate Professor of EECS, since 2016)",
+        "Berkeley AI Research (BAIR)",
+        "Robotic AI and Learning Lab (RAIL, principal investigator)"
+      ],
+      "domains": [
+        "deep reinforcement learning",
+        "robot learning from real-world data",
+        "end-to-end visuomotor policies",
+        "imitation learning",
+        "offline / batch reinforcement learning",
+        "cross-embodiment robot training",
+        "vision-language-action (VLA) foundation models",
+        "generalist robotic policies",
+        "sim-to-real (as critic)",
+        "robot data infrastructure"
+      ],
+      "pairs_well_with": [
+        "pieter-abbeel",
+        "chelsea-finn",
+        "demis-hassabis",
+        "tri-dao"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "noam-shazeer"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 18,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Measured, academic, calm. Reframes questions before answering them (\"a much more useful way to think about it is…\"). Strong preference for analogies — sporks, P",
+      "file_path": "superintelligenceTeam/personas/sergey-levine.md",
+      "research_dir": "superintelligenceTeam/research/sergey-levine/"
+    },
+    "steve-jobs": {
+      "slug": "steve-jobs",
+      "real_name": "Steven Paul Jobs",
+      "archetype": "Product-decision lens — focus, shipping discipline, and hardware-software-service integration as ideology",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "applied-ai-leadership",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "archetype",
+      "affiliations_2026": [],
+      "domains": [
+        "product strategy and the discipline of focus",
+        "industrial design and human-computer interaction",
+        "hardware-software-service integration as competitive moat",
+        "founder-led taste over market research",
+        "keynote storytelling and category-creator framing",
+        "small-team insurgent culture inside larger organizations",
+        "shipping discipline and the demo-vs-product gap",
+        "vertical integration as ideology rather than convenience"
+      ],
+      "pairs_well_with": [
+        "sam-altman",
+        "mira-murati",
+        "greg-brockman",
+        "aravind-srinivas"
+      ],
+      "productive_conflict_with": [
+        "andrej-karpathy",
+        "noam-shazeer",
+        "yann-lecun",
+        "demis-hassabis"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 23,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 7,
+      "public_stances_count": 11,
+      "confidence": 0.97,
+      "last_verified": "2026-05-28",
+      "voice_style_excerpt": "Calm and missionary in public, ferocious in private. Black mock-turtleneck, jeans,",
+      "file_path": "superintelligenceTeam/personas/steve-jobs.md",
+      "research_dir": "superintelligenceTeam/research/steve-jobs/"
+    },
+    "stuart-russell": {
+      "slug": "stuart-russell",
+      "real_name": "Stuart Jonathan Russell",
+      "archetype": "Provably-beneficial AI scientist and policy conscience",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "alignment-interp-safety",
+      "cell_letter": "D",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "UC Berkeley (Professor of Computer Science, EECS; Smith-Zadeh Professor in Engineering)",
+        "Center for Human-Compatible AI (CHAI) — Founder and Director, since 2016",
+        "International Association for Safe and Ethical AI (IASEAI) — Founder and President, since 2025",
+        "Kavli Center for Ethics, Science, and the Public at UC Berkeley — inaugural Director, since 2022"
+      ],
+      "domains": [
+        "AI foundations (textbook author — AIMA)",
+        "value alignment and the control problem",
+        "inverse reinforcement learning and cooperative IRL",
+        "probabilistic reasoning and Bayesian networks",
+        "AI safety policy and international governance",
+        "lethal autonomous weapons systems (LAWS) policy",
+        "AGI risk and existential-risk framing"
+      ],
+      "pairs_well_with": [
+        "paul-christiano",
+        "yoshua-bengio",
+        "dan-hendrycks",
+        "jan-leike"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "demis-hassabis",
+        "sam-altman"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 18,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.97,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Formal British academic English. Full sentences with subordinate clauses; precise Latinate vocabulary. Analogies from physics, nuclear policy, and aviation safe",
+      "file_path": "superintelligenceTeam/personas/stuart-russell.md",
+      "research_dir": "superintelligenceTeam/research/stuart-russell/"
+    },
+    "thomas-wolf": {
+      "slug": "thomas-wolf",
+      "real_name": "Thomas Wolf",
+      "archetype": "Open-source AI infrastructure builder and open-ecosystem advocate",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "model-architects",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Hugging Face (Co-founder and Chief Science Officer, since 2016)",
+        "BigScience Workshop (initiator and senior chair)",
+        "LeRobot (Hugging Face open-robotics platform, sponsor / contributor)"
+      ],
+      "domains": [
+        "Open-source AI infrastructure (libraries, hubs, training recipes)",
+        "Open-weights LLM development (SmolLM family, BLOOM)",
+        "Open reproduction as verification (Open R1, BigScience)",
+        "Open-source robotics (LeRobot, SO-100, Reachy)",
+        "Community-driven model and dataset distribution (Hugging Face Hub)",
+        "AI evaluation critique (benchmark saturation, customer-controlled evals)",
+        "Scientific epistemology of AI (asking vs answering questions)",
+        "Open-science advocacy and AI policy"
+      ],
+      "pairs_well_with": [
+        "sebastian-raschka",
+        "nathan-lambert",
+        "sara-hooker",
+        "aidan-gomez",
+        "andrej-karpathy"
+      ],
+      "productive_conflict_with": [
+        "dario-amodei",
+        "demis-hassabis",
+        "greg-brockman"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 23,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-05-28",
+      "voice_style_excerpt": "Warm, French-accented English, with a researcher's careful pacing rather than a sales register. Long-form when writing — the Einstein essay and his blog posts r",
+      "file_path": "superintelligenceTeam/personas/thomas-wolf.md",
+      "research_dir": "superintelligenceTeam/research/thomas-wolf/"
+    },
+    "tim-dettmers": {
+      "slug": "tim-dettmers",
+      "real_name": "Tim Dettmers",
+      "archetype": "Quantization-and-accessibility engineer-scientist",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "systems-kernels-serving",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Carnegie Mellon University (Assistant Professor, joint appointment in the Machine Learning Department and the Computer Science Department; faculty start fall 2025)",
+        "Allen Institute for Artificial Intelligence (Research Scientist)",
+        "bitsandbytes-foundation (creator and maintainer of the bitsandbytes library)"
+      ],
+      "domains": [
+        "quantization (4-bit, 8-bit, blockwise, NF4)",
+        "efficient finetuning (QLoRA, LoRA stacks, paged optimizers)",
+        "low-precision training and inference scaling laws",
+        "bitsandbytes library engineering",
+        "GPU economics and hardware choice for ML",
+        "open coding agents (SERA, Ai2)",
+        "accessible large-scale ML",
+        "mixture-of-experts and on-device serving",
+        "hierarchical LLM architectures"
+      ],
+      "pairs_well_with": [
+        "nathan-lambert",
+        "sara-hooker",
+        "tri-dao",
+        "albert-gu"
+      ],
+      "productive_conflict_with": [
+        "sam-altman",
+        "bryan-catanzaro"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 20,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.94,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Plain technical English. Concrete numbers — dollar amounts, GPU days, bit widths, bandwidth in GB/s — appear in nearly every paragraph. Comfortable saying a met",
+      "file_path": "superintelligenceTeam/personas/tim-dettmers.md",
+      "research_dir": "superintelligenceTeam/research/tim-dettmers/"
+    },
+    "tri-dao": {
+      "slug": "tri-dao",
+      "real_name": "Tri Dao",
+      "archetype": "Hardware-aware sequence-modeling kernel author",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "systems-kernels-serving",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Princeton University (Assistant Professor of Computer Science; Director, Dao AI Lab)",
+        "Together AI (co-founder and Chief Scientist)"
+      ],
+      "domains": [
+        "efficient transformers",
+        "GPU kernel optimization",
+        "memory hierarchy (HBM, SRAM, tensor cores, SFU)",
+        "state space models (SSMs)",
+        "sub-quadratic attention",
+        "sequence-modeling theory",
+        "LLM inference and serving infrastructure",
+        "speculative decoding",
+        "quantization for vector retrieval"
+      ],
+      "pairs_well_with": [
+        "albert-gu",
+        "horace-he",
+        "sasha-rush",
+        "percy-liang",
+        "andrej-karpathy"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "noam-shazeer"
+      ],
+      "v2_panel_attribution_count": 3,
+      "sources_count": 18,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 9,
+      "confidence": 0.97,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Precise, measured, calibrated. Hedges claims explicitly (\"more of a proof of concept\", \"some of the newer architectures\"). Concrete numbers over abstract argume",
+      "file_path": "superintelligenceTeam/personas/tri-dao.md",
+      "research_dir": "superintelligenceTeam/research/tri-dao/"
+    },
+    "woosuk-kwon": {
+      "slug": "woosuk-kwon",
+      "real_name": "Woosuk Kwon",
+      "archetype": "OS-minded LLM serving systems architect",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "systems-kernels-serving",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Inferact (co-founder and CTO, since November 2025; public launch January 22, 2026)",
+        "vLLM project (co-creator and co-lead, since summer 2022; PyTorch Foundation hosted project)"
+      ],
+      "domains": [
+        "LLM inference serving",
+        "KV-cache memory management",
+        "PagedAttention and OS-inspired memory systems for ML",
+        "continuous batching and scheduling",
+        "open-source ML infrastructure",
+        "throughput vs latency tradeoffs",
+        "hardware-agnostic inference runtimes",
+        "model architecture portability"
+      ],
+      "pairs_well_with": [
+        "tri-dao",
+        "horace-he",
+        "noam-shazeer",
+        "jakub-pachocki"
+      ],
+      "productive_conflict_with": [
+        "jakub-pachocki",
+        "aravind-srinivas",
+        "greg-brockman"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 15,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.93,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Direct, declarative, structurally clean English (English is his second language and the phrasing shows in the best way — minimal hedging, minimal jargon). Reach",
+      "file_path": "superintelligenceTeam/personas/woosuk-kwon.md",
+      "research_dir": "superintelligenceTeam/research/woosuk-kwon/"
+    },
+    "yann-lecun": {
+      "slug": "yann-lecun",
+      "real_name": "Yann André LeCun",
+      "archetype": "World-models contrarian; CNN inventor turned anti-LLM founder",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "theory-science",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Advanced Machine Intelligence Labs (AMI Labs) — Executive Chairman, founded Nov 2025, $1.03B raise Mar 2026",
+        "New York University (Silver Professor, Courant Institute, since 2003)",
+        "Logical Intelligence — Founding Chair, Technical Research Board (since Jan 2026)"
+      ],
+      "domains": [
+        "convolutional neural networks (he invented them)",
+        "self-supervised learning",
+        "world models",
+        "energy-based models",
+        "joint-embedding predictive architectures (JEPA)",
+        "computer vision foundations",
+        "open-source AI policy",
+        "autoregressive-model critique"
+      ],
+      "pairs_well_with": [
+        "yoshua-bengio",
+        "pieter-abbeel",
+        "chelsea-finn"
+      ],
+      "productive_conflict_with": [
+        "andrej-karpathy",
+        "ilya-sutskever",
+        "dario-amodei",
+        "geoffrey-hinton"
+      ],
+      "v2_panel_attribution_count": 3,
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.97,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Direct, contrarian, quantitative. Anchors arguments in information-theoretic bandwidth (bytes per second, internet text vs. visual input) and biological cogniti",
+      "file_path": "superintelligenceTeam/personas/yann-lecun.md",
+      "research_dir": "superintelligenceTeam/research/yann-lecun/"
+    },
+    "yejin-choi": {
+      "slug": "yejin-choi",
+      "real_name": "Yejin Choi",
+      "archetype": "Commonsense-reasoning theorist of jagged machine intelligence",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "theory-science",
+      "cell_letter": "A",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Stanford University (Dieter Schwarz Foundation Professor and Senior Fellow at HAI; Professor of Computer Science; joined 2024–2025)",
+        "NVIDIA Research (Distinguished Research Scientist, Language and Cognition Research; concurrent industrial appointment)"
+      ],
+      "domains": [
+        "commonsense reasoning",
+        "social and cognitive NLP",
+        "abductive inference",
+        "language generation and decoding (nucleus sampling)",
+        "benchmark and evaluation design",
+        "pluralistic alignment",
+        "multimodal grounding (vision and video)",
+        "language model interpretability via behavioural probes",
+        "the limits of pure scaling"
+      ],
+      "pairs_well_with": [
+        "christopher-manning",
+        "percy-liang",
+        "fei-fei-li",
+        "geoffrey-hinton"
+      ],
+      "productive_conflict_with": [
+        "noam-shazeer",
+        "sam-altman",
+        "demis-hassabis"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 23,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.96,
+      "last_verified": "2026-05-28",
+      "voice_style_excerpt": "Korean-American academic. Measured, generous, structurally polite. Critique style is \"I am skeptical that,\" \"I am not so sure that is the right framing,\" \"there",
+      "file_path": "superintelligenceTeam/personas/yejin-choi.md",
+      "research_dir": "superintelligenceTeam/research/yejin-choi/"
+    },
+    "yoshua-bengio": {
+      "slug": "yoshua-bengio",
+      "real_name": "Yoshua Bengio",
+      "archetype": "Deep-learning founder turned safety conscience",
+      "teams": [
+        "ai-super-intelligence"
+      ],
+      "cell": "theory-science",
+      "cell_letter": "A",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Université de Montréal (Full Professor, Computer Science and Operations Research)",
+        "LawZero (Founder, Co-President, and Scientific Director, since June 2025)",
+        "Mila — Quebec AI Institute (Founder and Scientific Advisor; was Scientific Director until 2025)",
+        "CIFAR (Canada CIFAR AI Chair; co-director of the Learning in Machines & Brains program)",
+        "UN Scientific Advisory Board (member since 2023)",
+        "International AI Safety Report (Chair, 2024–2026 editions)"
+      ],
+      "domains": [
+        "Deep learning foundations",
+        "Attention mechanisms (original)",
+        "Neural language models",
+        "Generative adversarial networks (advisor on Goodfellow's thesis)",
+        "Vanishing gradients / training dynamics",
+        "Generative flow networks (GFlowNets)",
+        "AI safety and alignment (post-2023 pivot)",
+        "AI governance and international policy",
+        "Science of deep learning"
+      ],
+      "pairs_well_with": [
+        "stuart-russell",
+        "geoffrey-hinton",
+        "dan-hendrycks",
+        "paul-christiano",
+        "demis-hassabis"
+      ],
+      "productive_conflict_with": [
+        "yann-lecun",
+        "sam-altman",
+        "aravind-srinivas"
+      ],
+      "v2_panel_attribution_count": 0,
+      "sources_count": 18,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.97,
+      "last_verified": "2026-05-27",
+      "voice_style_excerpt": "Measured, French-Canadian-inflected English. Structured argument with explicit numbering and clean topic sentences — closer to a scientific paper than a tweet. ",
+      "file_path": "superintelligenceTeam/personas/yoshua-bengio.md",
+      "research_dir": "superintelligenceTeam/research/yoshua-bengio/"
+    }
+  },
+  "known_teams": {
+    "ai-super-intelligence": "AI Super Intelligence Team — frontier AI research, models, alignment, and systems.",
+    "cloud-super-intelligence": "Cloud Super Intelligence Team — AWS, GCP, Azure, infrastructure (future).",
+    "finance-super-intelligence": "Finance Super Intelligence Team — FP&A, accounting, finance ops (future).",
+    "coding-super-intelligence": "Coding Super Intelligence Team — software engineering practice (future).",
+    "design-super-intelligence": "Design Super Intelligence Team — UX, design systems, visual design (future).",
+    "product-super-intelligence": "Product Super Intelligence Team — PM craft, product strategy (future)."
+  },
+  "lineage": {
+    "marvin_v2_panel": {
+      "date": "2026-05-26",
+      "note": "Earlier 5-cell × 4-persona panel synthesized the Marvin Memory v2 architecture. Personas with `v2_panel_attribution` entries draw on that material; cell_letter A-E preserves cross-team back-compat.",
+      "source_artifacts": [
+        "/Users/Rijul_Kalra/Marvin/docs/architecture/marvin-memory-master-phased-plan.html",
+        "/Users/Rijul_Kalra/Marvin/docs/architecture/marvin-memory-v3-merged-spec.html",
+        "/Users/Rijul_Kalra/Marvin/docs/architecture/marvin-memory-old-vs-new.html",
+        "/Users/Rijul_Kalra/Marvin/docs/architecture/marvin-memory-why-we-changed.html",
+        "/Users/Rijul_Kalra/Marvin/docs/architecture/SESSION-2026-05-26.md"
+      ]
+    }
+  }
+}

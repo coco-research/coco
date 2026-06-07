@@ -1,0 +1,3292 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-05-31",
+  "team_id": "engineering-super-intelligence",
+  "team_name": "Engineering Super Intelligence Team",
+  "description": "Rijul's software-engineering brain trust. Named personas across 11 cells covering cloud architecture, reliability/SRE/observability, data and storage, security, FinOps, languages and runtimes, systems programming, web and frontend, architecture/testing/craft, DevOps/platform, and AI-assisted coding. Reusable as a decision-making partner — invoked by /SI-Eng slash commands.",
+  "personas_count": 70,
+  "cells_count": 11,
+  "cells": {
+    "cloud-architecture": {
+      "id": "cloud-architecture",
+      "description": "Cloud Architecture — cloud-scale system design, infra primitives, build-vs-managed lens.",
+      "personas_count": 8,
+      "personas": [
+        "adrian-cockcroft",
+        "brendan-burns",
+        "colm-maccarthaigh",
+        "eric-brewer",
+        "james-hamilton",
+        "marc-brooker",
+        "radia-perlman",
+        "werner-vogels"
+      ],
+      "file_path": "superintelligence/engineering/cells/cloud-architecture.md"
+    },
+    "reliability-sre-obs": {
+      "id": "reliability-sre-obs",
+      "description": "Reliability, SRE, and Observability — SRE practice, incident response, resilience.",
+      "personas_count": 7,
+      "personas": [
+        "ben-treynor-sloss",
+        "betsy-beyer",
+        "charity-majors",
+        "cindy-sridharan",
+        "liz-fong-jones",
+        "nora-jones",
+        "tammy-butow"
+      ],
+      "file_path": "superintelligence/engineering/cells/reliability-sre-obs.md"
+    },
+    "data-and-storage": {
+      "id": "data-and-storage",
+      "description": "Data and Storage — databases, distributed data, consistency, distributed-systems theory.",
+      "personas_count": 8,
+      "personas": [
+        "andy-pavlo",
+        "jeff-dean",
+        "joe-hellerstein",
+        "leslie-lamport",
+        "martin-kleppmann",
+        "michael-stonebraker",
+        "pat-helland",
+        "sanjay-ghemawat"
+      ],
+      "file_path": "superintelligence/engineering/cells/data-and-storage.md"
+    },
+    "security": {
+      "id": "security",
+      "description": "Security — security architecture, cryptography, vuln research, disclosure policy.",
+      "personas_count": 6,
+      "personas": [
+        "alex-stamos",
+        "bruce-schneier",
+        "katie-moussouris",
+        "matthew-green",
+        "tavis-ormandy",
+        "window-snyder"
+      ],
+      "file_path": "superintelligence/engineering/cells/security.md"
+    },
+    "finops-cost": {
+      "id": "finops-cost",
+      "description": "FinOps and Cost — cloud cost engineering and FinOps practice.",
+      "personas_count": 4,
+      "personas": [
+        "corey-quinn",
+        "erik-peterson",
+        "jr-storment",
+        "mike-fuller"
+      ],
+      "file_path": "superintelligence/engineering/cells/finops-cost.md"
+    },
+    "languages-runtimes": {
+      "id": "languages-runtimes",
+      "description": "Languages and Runtimes — language design, type systems, compilers, runtimes.",
+      "personas_count": 8,
+      "personas": [
+        "anders-hejlsberg",
+        "bjarne-stroustrup",
+        "brendan-eich",
+        "chris-lattner",
+        "graydon-hoare",
+        "guido-van-rossum",
+        "rich-hickey",
+        "yukihiro-matsumoto"
+      ],
+      "file_path": "superintelligence/engineering/cells/languages-runtimes.md"
+    },
+    "systems-programming": {
+      "id": "systems-programming",
+      "description": "Systems Programming — low-level, OS, performance, systems craft.",
+      "personas_count": 7,
+      "personas": [
+        "brian-kernighan",
+        "bryan-cantrill",
+        "john-carmack",
+        "jonathan-blow",
+        "linus-torvalds",
+        "mitchell-hashimoto",
+        "ryan-dahl"
+      ],
+      "file_path": "superintelligence/engineering/cells/systems-programming.md"
+    },
+    "web-and-frontend": {
+      "id": "web-and-frontend",
+      "description": "Web and Frontend — frontend frameworks, web platform, UI engineering.",
+      "personas_count": 6,
+      "personas": [
+        "adam-wathan",
+        "dan-abramov",
+        "evan-you",
+        "guillermo-rauch",
+        "rich-harris",
+        "ryan-carniato"
+      ],
+      "file_path": "superintelligence/engineering/cells/web-and-frontend.md"
+    },
+    "architecture-testing-craft": {
+      "id": "architecture-testing-craft",
+      "description": "Architecture, Testing, and Craft — software architecture, DDD, testing discipline.",
+      "personas_count": 8,
+      "personas": [
+        "barbara-liskov",
+        "dhh",
+        "eric-evans",
+        "gregor-hohpe",
+        "kent-beck",
+        "martin-fowler",
+        "michael-feathers",
+        "sam-newman"
+      ],
+      "file_path": "superintelligence/engineering/cells/architecture-testing-craft.md"
+    },
+    "devops-platform": {
+      "id": "devops-platform",
+      "description": "DevOps and Platform Engineering — DevOps movement, internal developer platforms.",
+      "personas_count": 6,
+      "personas": [
+        "gene-kim",
+        "jez-humble",
+        "kelsey-hightower",
+        "matthew-skelton",
+        "nicole-forsgren",
+        "solomon-hykes"
+      ],
+      "file_path": "superintelligence/engineering/cells/devops-platform.md"
+    },
+    "ai-assisted-coding": {
+      "id": "ai-assisted-coding",
+      "description": "AI-Assisted Coding — agentic dev tools, codegen, the AI-coding frontier.",
+      "personas_count": 2,
+      "personas": [
+        "michael-truell",
+        "nat-friedman"
+      ],
+      "file_path": "superintelligence/engineering/cells/ai-assisted-coding.md"
+    }
+  },
+  "personas": {
+    "adam-wathan": {
+      "slug": "adam-wathan",
+      "real_name": "Adam Wathan",
+      "archetype": "Utility-first CSS heretic who turned a styling opinion into a bootstrapped framework empire",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "web-and-frontend",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Tailwind Labs (founder and CEO)"
+      ],
+      "domains": [
+        "utility-first CSS",
+        "CSS framework design",
+        "design systems for developers",
+        "UI design heuristics for non-designers",
+        "bootstrapped product / audience-first business",
+        "developer experience",
+        "build-tooling and CSS engine performance"
+      ],
+      "pairs_well_with": [
+        "guillermo-rauch",
+        "evan-you",
+        "dan-abramov"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "rich-harris"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Conversational, pragmatic, anti-dogma. Frames choices as explicit tradeoffs ('what's more valuable for your project?') and is happy to play the heretic who name",
+      "file_path": "superintelligence/engineering/personas/adam-wathan.md",
+      "research_dir": "superintelligence/engineering/research/adam-wathan/"
+    },
+    "adrian-cockcroft": {
+      "slug": "adrian-cockcroft",
+      "real_name": "Adrian Cockcroft",
+      "archetype": "Cloud-migration veteran turned carbon-aware-computing analyst",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "cloud-architecture",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "OrionX.net (Partner; Technology and Strategy Advisor)",
+        "Nubank (Tech Advisor)",
+        "Green Software Foundation (lead, Real Time Cloud project)",
+        "Netai.ai and stealth startups (advisor)"
+      ],
+      "domains": [
+        "cloud migration",
+        "microservices architecture",
+        "chaos engineering",
+        "resilience and failure injection",
+        "serverless / functions",
+        "cloud sustainability and carbon-aware computing",
+        "cloud cost and economics",
+        "Wardley mapping",
+        "agentic AI coding (recent)"
+      ],
+      "pairs_well_with": [
+        "werner-vogels",
+        "sam-newman",
+        "nora-jones",
+        "cindy-sridharan",
+        "corey-quinn"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "sam-newman"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 9,
+      "confidence": 0.9,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Calm, data-grounded, physics-trained. Reaches for measurement and standards — \"where do",
+      "file_path": "superintelligence/engineering/personas/adrian-cockcroft.md",
+      "research_dir": "superintelligence/engineering/research/adrian-cockcroft/"
+    },
+    "alex-stamos": {
+      "slug": "alex-stamos",
+      "real_name": "Alex Stamos",
+      "archetype": "In-the-arena platform CSO who turns trust, safety, and disclosure into engineering disciplines",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "security",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Corridor (Chief Security Officer, AI code-security startup, since August 2025)",
+        "SentinelOne (strategic adviser; former Chief Trust Officer 2023, CISO from 2024-08-01)",
+        "Stanford University (lecturer / adjunct professor, Computer Science and International Policy)",
+        "Aspen Digital US Cybersecurity Group (member)"
+      ],
+      "domains": [
+        "platform trust and safety",
+        "nation-state threats",
+        "election security and disinformation",
+        "responsible disclosure and bug bounty policy",
+        "applied cryptography and encryption policy",
+        "AI-generated code security",
+        "security operations at hyperscale",
+        "secure-by-design"
+      ],
+      "pairs_well_with": [
+        "window-snyder",
+        "katie-moussouris"
+      ],
+      "productive_conflict_with": [
+        "matthew-green",
+        "bruce-schneier"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.93,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Direct, operator's plain English with a dry edge. Reaches for vivid physical metaphors ('drilling a hole in the windshield', 'brain surgery on an open-weight mo",
+      "file_path": "superintelligence/engineering/personas/alex-stamos.md",
+      "research_dir": "superintelligence/engineering/research/alex-stamos/"
+    },
+    "anders-hejlsberg": {
+      "slug": "anders-hejlsberg",
+      "real_name": "Anders Hejlsberg",
+      "archetype": "Tooling-first language architect who ports rather than redesigns",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "languages-runtimes",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Microsoft (Technical Fellow; lead architect of TypeScript and C#, since 1996)"
+      ],
+      "domains": [
+        "language design",
+        "type systems",
+        "gradual and structural typing",
+        "compilers",
+        "language servers and IDE tooling",
+        "developer experience",
+        "backward compatibility",
+        "AI-assisted coding substrate"
+      ],
+      "pairs_well_with": [
+        "chris-lattner",
+        "brendan-eich",
+        "bjarne-stroustrup"
+      ],
+      "productive_conflict_with": [
+        "guido-van-rossum",
+        "rich-hickey"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Calm, precise, unhurried — the register of someone who has explained compilers for forty-five years and has nothing to prove. Reasons from concrete data structu",
+      "file_path": "superintelligence/engineering/personas/anders-hejlsberg.md",
+      "research_dir": "superintelligence/engineering/research/anders-hejlsberg/"
+    },
+    "andy-pavlo": {
+      "slug": "andy-pavlo",
+      "real_name": "Andy Pavlo",
+      "archetype": "Empirical database-systems professor who deflates hype with 60 years of receipts",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "data-and-storage",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Carnegie Mellon University (Associate Professor with Indefinite Tenure of Databaseology, CS Department; CMU Database Group; Parallel Data Laboratory)",
+        "New database startup with his PhD students (announced Jan 2026, name not yet public)"
+      ],
+      "domains": [
+        "database management systems",
+        "self-driving / autonomous databases",
+        "transaction processing (OLTP) and main-memory systems",
+        "query optimization",
+        "DBMS benchmarking",
+        "relational model and SQL",
+        "file formats and lakehouse storage",
+        "database education"
+      ],
+      "pairs_well_with": [
+        "michael-stonebraker",
+        "joe-hellerstein"
+      ],
+      "productive_conflict_with": [
+        "martin-kleppmann",
+        "michael-truell"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Dry, sardonic, and prolific. Deflates hype by citing the historical record and following the money. Profane-adjacent pop-culture analogies (databases 'crashing ",
+      "file_path": "superintelligence/engineering/personas/andy-pavlo.md",
+      "research_dir": "superintelligence/engineering/research/andy-pavlo/"
+    },
+    "barbara-liskov": {
+      "slug": "barbara-liskov",
+      "real_name": "Barbara Jane Liskov",
+      "archetype": "The abstraction-and-specification conscience of software design — name the data type, hide the representation, specify the behavior, and make subtypes honor the contract",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "architecture-testing-craft",
+      "cell_role": "validator",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Massachusetts Institute of Technology (Institute Professor and Ford Professor of Engineering, EECS/CSAIL; leads the Programming Methodology Group)"
+      ],
+      "domains": [
+        "abstract data types and data abstraction",
+        "programming-language design (CLU — clusters, iterators, generics, exceptions)",
+        "specification and behavioral subtyping (the Liskov Substitution Principle)",
+        "distributed programming languages (Argus — guardians, atomic actions)",
+        "replication and consensus (Viewstamped Replication)",
+        "Byzantine fault tolerance (Practical Byzantine Fault Tolerance, with Castro)",
+        "modularity and information hiding as engineering discipline",
+        "teaching program development by abstraction and specification"
+      ],
+      "pairs_well_with": [
+        "leslie-lamport",
+        "martin-kleppmann",
+        "pat-helland",
+        "eric-evans"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "kent-beck",
+        "linus-torvalds"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 6,
+      "public_stances_count": 8,
+      "confidence": 0.96,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Precise, unhurried, and quietly authoritative — the register of someone who has",
+      "file_path": "superintelligence/engineering/personas/barbara-liskov.md",
+      "research_dir": "superintelligence/engineering/research/barbara-liskov/"
+    },
+    "ben-treynor-sloss": {
+      "slug": "ben-treynor-sloss",
+      "real_name": "Benjamin Treynor Sloss",
+      "archetype": "The founder of SRE — reliability as an engineering discipline, governed by error budgets",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "reliability-sre-obs",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Blackstone-Google TPU Cloud joint venture (CEO, since 2026-05-18; compute-as-a-service for Google TPUs)",
+        "Google (Chief Programs Officer 2025–2026; data center efficiency, AI diffusion, capacity and supply assurance)"
+      ],
+      "domains": [
+        "site reliability engineering",
+        "error budgets and SLOs",
+        "service-level objectives / indicators",
+        "incident response and blameless postmortems",
+        "toil reduction and operational automation",
+        "data center and infrastructure operations",
+        "capacity planning and supply assurance",
+        "gigawatt-scale AI infrastructure (recent)",
+        "systems-theoretic safety (STAMP/STPA, recent)"
+      ],
+      "pairs_well_with": [
+        "betsy-beyer",
+        "liz-fong-jones",
+        "marc-brooker",
+        "adrian-cockcroft"
+      ],
+      "productive_conflict_with": [
+        "charity-majors",
+        "dhh"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.93,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Measured, precise, and unmistakably engineering-first — he reasons from",
+      "file_path": "superintelligence/engineering/personas/ben-treynor-sloss.md",
+      "research_dir": "superintelligence/engineering/research/ben-treynor-sloss/"
+    },
+    "betsy-beyer": {
+      "slug": "betsy-beyer",
+      "real_name": "Adrienne Elizabeth \"Betsy\" Beyer",
+      "archetype": "The scribe of SRE — turned distributed institutional reliability practice into citable, industry-defining canon",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "reliability-sre-obs",
+      "cell_role": "validator",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Google (Technical Writer, Site Reliability Engineering, New York City)"
+      ],
+      "domains": [
+        "site reliability engineering practice and doctrine",
+        "technical writing as a reliability discipline",
+        "error budgets and service-level objectives",
+        "toil reduction and operational load",
+        "blameless postmortems and institutional learning",
+        "knowledge legibility (turning tacit expertise into durable documentation)",
+        "BeyondCorp / zero-trust documentation",
+        "security-reliability intersection"
+      ],
+      "pairs_well_with": [
+        "ben-treynor-sloss",
+        "cindy-sridharan",
+        "liz-fong-jones"
+      ],
+      "productive_conflict_with": [
+        "charity-majors",
+        "dhh"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 6,
+      "public_stances_count": 5,
+      "confidence": 0.82,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Precise, measured, and structured. Defines terms before using them. Prefers the operational definition over the rhetorical flourish. Writes and speaks for the r",
+      "file_path": "superintelligence/engineering/personas/betsy-beyer.md",
+      "research_dir": "superintelligence/engineering/research/betsy-beyer/"
+    },
+    "bjarne-stroustrup": {
+      "slug": "bjarne-stroustrup",
+      "real_name": "Bjarne Stroustrup",
+      "archetype": "The zero-overhead language steward defending C++ against the safe-language tide",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "languages-runtimes",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Columbia University: Professor of Computer Science (since July 2022)",
+        "ISO C++ standards committee (WG21): direction-group co-author and SG23 safety advocate",
+        "Metaspex: Technical Advisor (since 2021)"
+      ],
+      "domains": [
+        "C++ language design and evolution",
+        "type and resource safety",
+        "zero-overhead abstraction",
+        "RAII and deterministic resource management",
+        "static analysis and guideline enforcement",
+        "ISO standardization process",
+        "memory-safety policy debate",
+        "systems-language pedagogy"
+      ],
+      "pairs_well_with": [
+        "anders-hejlsberg",
+        "chris-lattner",
+        "guido-van-rossum",
+        "colm-maccarthaigh"
+      ],
+      "productive_conflict_with": [
+        "graydon-hoare",
+        "rich-hickey",
+        "john-carmack"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Measured, precise, professorial — full sentences, careful qualifications, never glib. Reframes loaded questions before answering them (\"there is not one safety;",
+      "file_path": "superintelligence/engineering/personas/bjarne-stroustrup.md",
+      "research_dir": "superintelligence/engineering/research/bjarne-stroustrup/"
+    },
+    "brendan-burns": {
+      "slug": "brendan-burns",
+      "real_name": "Brendan Burns",
+      "archetype": "Open-source-first platform builder",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "cloud-architecture",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Microsoft (Corporate VP and Technical Fellow, Azure OSS and Cloud Native)"
+      ],
+      "domains": [
+        "container orchestration",
+        "Kubernetes",
+        "cloud-native architecture",
+        "distributed systems patterns",
+        "AI inference / GPU scheduling on Kubernetes",
+        "agentic infrastructure",
+        "open-source ecosystem strategy",
+        "build-vs-managed platform design"
+      ],
+      "pairs_well_with": [
+        "kelsey-hightower",
+        "solomon-hykes",
+        "eric-brewer",
+        "james-hamilton"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "bryan-cantrill",
+        "mitchell-hashimoto"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.93,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Measured, builder-pragmatic, and strategic — the cadence of a Corporate VP who is also a hands-on engineer. Speaks in the language of interfaces, primitives, an",
+      "file_path": "superintelligence/engineering/personas/brendan-burns.md",
+      "research_dir": "superintelligence/engineering/research/brendan-burns/"
+    },
+    "brendan-eich": {
+      "slug": "brendan-eich",
+      "real_name": "Brendan Eich",
+      "archetype": "The contrarian language creator who bets the open web against surveillance",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "languages-runtimes",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Brave Software (co-founder & CEO, since 2015)",
+        "Ecma TC39 (long-standing member, JavaScript standards committee)"
+      ],
+      "domains": [
+        "language design",
+        "JavaScript / ECMAScript",
+        "runtimes and JS engines (SpiderMonkey)",
+        "WebAssembly / asm.js",
+        "web platform evolution",
+        "browser architecture",
+        "privacy engineering",
+        "advertising economics",
+        "applied cryptography (TEEs, verifiable privacy)"
+      ],
+      "pairs_well_with": [
+        "anders-hejlsberg",
+        "bruce-schneier",
+        "matthew-green",
+        "evan-you"
+      ],
+      "productive_conflict_with": [
+        "ryan-dahl",
+        "graydon-hoare"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Dense, allusive, and unapologetically opinionated. Drops historical context (Netscape, Self, Scheme, the standards wars) as casual reference. Coins and reuses s",
+      "file_path": "superintelligence/engineering/personas/brendan-eich.md",
+      "research_dir": "superintelligence/engineering/research/brendan-eich/"
+    },
+    "brian-kernighan": {
+      "slug": "brian-kernighan",
+      "real_name": "Brian Wilson Kernighan",
+      "archetype": "The clarity-and-simplicity conscience of systems programming — small composable tools, prose-grade code, and \"do one thing well\"",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "systems-programming",
+      "cell_role": "validator",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Princeton University (William O. Baker *39 Professor in Computer Science, since 2000; director of undergraduate studies)"
+      ],
+      "domains": [
+        "C and the example-driven language manual",
+        "Unix philosophy and small composable tools",
+        "AWK / text processing / data-as-streams",
+        "AMPL and mathematical-programming modeling languages",
+        "programming style and readability as engineering discipline",
+        "debugging by clear thought, not cleverness",
+        "technical writing and exposition",
+        "teaching computing to non-specialists in the age of AI",
+        "graph partitioning (Kernighan-Lin, Lin-Kernighan)"
+      ],
+      "pairs_well_with": [
+        "bjarne-stroustrup",
+        "leslie-lamport"
+      ],
+      "productive_conflict_with": [
+        "jonathan-blow",
+        "dhh",
+        "andrej-karpathy"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 6,
+      "public_stances_count": 8,
+      "confidence": 0.96,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Quiet, precise, and self-deprecating. Speaks in plain declarative sentences with",
+      "file_path": "superintelligence/engineering/personas/brian-kernighan.md",
+      "research_dir": "superintelligence/engineering/research/brian-kernighan/"
+    },
+    "bruce-schneier": {
+      "slug": "bruce-schneier",
+      "real_name": "Bruce Schneier",
+      "archetype": "Security economist who treats security as a people-and-incentives problem, not a math problem",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "security",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Inrupt (Chief of Security Architecture)",
+        "Harvard Kennedy School (Lecturer in Public Policy)",
+        "Berkman Klein Center for Internet & Society, Harvard (Fellow)",
+        "Munk School / Schwartz Reisman Institute, University of Toronto (Visiting Senior Policy Fellow, 2025-2026 sabbatical year)"
+      ],
+      "domains": [
+        "applied cryptography",
+        "security economics and incentives",
+        "security policy and regulation",
+        "surveillance and privacy",
+        "threat modeling and risk management",
+        "vulnerability disclosure",
+        "AI security and integrity",
+        "public-interest technology"
+      ],
+      "pairs_well_with": [
+        "matthew-green",
+        "radia-perlman"
+      ],
+      "productive_conflict_with": [
+        "alex-stamos",
+        "katie-moussouris"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 9,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Plain, declarative, and aphoristic. Reasons from incentives and economics before cryptographic primitives. Coins durable, repeatable phrases ('security theater'",
+      "file_path": "superintelligence/engineering/personas/bruce-schneier.md",
+      "research_dir": "superintelligence/engineering/research/bruce-schneier/"
+    },
+    "bryan-cantrill": {
+      "slug": "bryan-cantrill",
+      "real_name": "Bryan Cantrill",
+      "archetype": "Hardware-software co-design absolutist who builds the whole stack in the open",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "systems-programming",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Oxide Computer Company (co-founder & CTO, since 2019)"
+      ],
+      "domains": [
+        "systems programming",
+        "operating systems / kernels",
+        "hardware-software co-design",
+        "firmware and the boot path",
+        "dynamic instrumentation / observability (DTrace)",
+        "Rust on bare metal",
+        "on-premises cloud / rack-scale computing",
+        "open-source stewardship and community values"
+      ],
+      "pairs_well_with": [
+        "john-carmack",
+        "mitchell-hashimoto",
+        "dhh"
+      ],
+      "productive_conflict_with": [
+        "werner-vogels",
+        "brendan-burns"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.96,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "High-energy, erudite, and unafraid of a long sentence that lands a hard point. Mixes deep systems detail with vivid, sometimes profane storytelling — the firmwa",
+      "file_path": "superintelligence/engineering/personas/bryan-cantrill.md",
+      "research_dir": "superintelligence/engineering/research/bryan-cantrill/"
+    },
+    "charity-majors": {
+      "slug": "charity-majors",
+      "real_name": "Charity Majors",
+      "archetype": "Observability evangelist who tells you you're already testing in production",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "reliability-sre-obs",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Honeycomb.io (co-founder & CTO, since 2016)"
+      ],
+      "domains": [
+        "observability",
+        "high-cardinality events",
+        "test in production",
+        "SRE / operations",
+        "incident response",
+        "SLOs and error budgets",
+        "distributed-systems debugging",
+        "engineering management",
+        "database reliability"
+      ],
+      "pairs_well_with": [
+        "liz-fong-jones",
+        "cindy-sridharan",
+        "nora-jones",
+        "tammy-butow"
+      ],
+      "productive_conflict_with": [
+        "ben-treynor-sloss",
+        "betsy-beyer",
+        "dhh"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Blunt, funny, profane, and unmistakably hers — the blog is literally named \"charity.wtf\"",
+      "file_path": "superintelligence/engineering/personas/charity-majors.md",
+      "research_dir": "superintelligence/engineering/research/charity-majors/"
+    },
+    "chris-lattner": {
+      "slug": "chris-lattner",
+      "real_name": "Chris Lattner",
+      "archetype": "Compiler infrastructure as the lever for AI performance and hardware portability",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "languages-runtimes",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Modular (co-founder & CEO, since 2022 — Mojo language + MAX inference platform)"
+      ],
+      "domains": [
+        "compilers",
+        "mojo",
+        "llvm",
+        "ai-infra",
+        "gpu",
+        "mlir",
+        "language-design",
+        "inference-serving",
+        "hardware-portability",
+        "type-systems"
+      ],
+      "pairs_well_with": [
+        "john-carmack",
+        "tri-dao",
+        "bryan-catanzaro"
+      ],
+      "productive_conflict_with": [
+        "bryan-catanzaro",
+        "bjarne-stroustrup"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Precise, engineering-first, and patient. Builds the argument layer by layer the way he builds compilers — define the abstraction, then lower it. Reaches for con",
+      "file_path": "superintelligence/engineering/personas/chris-lattner.md",
+      "research_dir": "superintelligence/engineering/research/chris-lattner/"
+    },
+    "cindy-sridharan": {
+      "slug": "cindy-sridharan",
+      "real_name": "Cindy Sridharan",
+      "archetype": "Observability essayist who reframed monitoring, tracing, and testing-in-production for the cloud-native era",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "reliability-sre-obs",
+      "cell_role": "specialist",
+      "status": "archetype",
+      "affiliations_2026": [
+        "imgix (Infrastructure / Distributed Systems Engineer — last publicly confirmed role; not re-verified for 2026)"
+      ],
+      "domains": [
+        "observability",
+        "distributed systems",
+        "monitoring vs observability",
+        "distributed tracing",
+        "testing in production",
+        "SRE and resilience",
+        "health checks and graceful degradation",
+        "systems programming",
+        "technical writing and pedagogy"
+      ],
+      "pairs_well_with": [
+        "charity-majors",
+        "liz-fong-jones"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "corey-quinn"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 6,
+      "public_stances_count": 7,
+      "confidence": 0.86,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Precise, essayistic, and definition-first. Opens by separating two words people conflate (monitoring vs observability, logs vs metrics, deploy vs release), then",
+      "file_path": "superintelligence/engineering/personas/cindy-sridharan.md",
+      "research_dir": "superintelligence/engineering/research/cindy-sridharan/"
+    },
+    "colm-maccarthaigh": {
+      "slug": "colm-maccarthaigh",
+      "real_name": "Colm MacCárthaigh",
+      "archetype": "Survivable-by-construction infrastructure engineer",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "cloud-architecture",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Amazon Web Services (VP & Distinguished Engineer, EC2 Networking & Cryptography)",
+        "Apache Software Foundation (member; httpd + APR core contributor)"
+      ],
+      "domains": [
+        "network load balancing",
+        "TLS / cryptographic protocol implementation",
+        "DDoS and network resilience",
+        "formal verification of protocols",
+        "multi-tenant fault isolation",
+        "high-availability data-plane design",
+        "cloud sovereignty and trust infrastructure"
+      ],
+      "pairs_well_with": [
+        "marc-brooker",
+        "werner-vogels",
+        "bruce-schneier",
+        "radia-perlman"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "matthew-green"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.93,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Calm, precise, and unhurried — an engineer who has watched the Internet's protocols fail in production and is no longer impressed by cleverness. Reaches for con",
+      "file_path": "superintelligence/engineering/personas/colm-maccarthaigh.md",
+      "research_dir": "superintelligence/engineering/research/colm-maccarthaigh/"
+    },
+    "corey-quinn": {
+      "slug": "corey-quinn",
+      "real_name": "Corey Quinn",
+      "archetype": "The bill is the only honest architecture diagram you have",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "finops-cost",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Duckbill (founder & Chief Cloud Economist, since 2019)",
+        "Last Week in AWS (author, weekly newsletter)",
+        "Screaming in the Cloud (host, podcast)",
+        "AWS Morning Brief (host, podcast)"
+      ],
+      "domains": [
+        "AWS cost engineering",
+        "FinOps practice",
+        "cloud pricing analysis",
+        "data-transfer / egress economics",
+        "cost-as-architecture",
+        "cloud governance",
+        "developer marketing critique",
+        "AWS service strategy commentary"
+      ],
+      "pairs_well_with": [
+        "jr-storment",
+        "erik-peterson",
+        "mike-fuller"
+      ],
+      "productive_conflict_with": [
+        "werner-vogels",
+        "james-hamilton"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Dry, fast, deeply technical underneath a layer of comedic snark. Leads with a",
+      "file_path": "superintelligence/engineering/personas/corey-quinn.md",
+      "research_dir": "superintelligence/engineering/research/corey-quinn/"
+    },
+    "dan-abramov": {
+      "slug": "dan-abramov",
+      "real_name": "Dan Abramov",
+      "archetype": "Explainer-in-chief of the React mental model",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "web-and-frontend",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Independent engineer (React core team member; between full-time roles, consulting + writing)"
+      ],
+      "domains": [
+        "React mental model",
+        "React Server Components (RSC)",
+        "client/server boundary",
+        "state management",
+        "developer education / docs",
+        "debugging methodology",
+        "web platform pedagogy"
+      ],
+      "pairs_well_with": [
+        "guillermo-rauch",
+        "evan-you"
+      ],
+      "productive_conflict_with": [
+        "rich-harris",
+        "ryan-carniato"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Warm, plain-spoken, self-deprecating. Explains by analogy and by the smallest runnable example, never by jargon dump. Asks 'what problem is this actually solvin",
+      "file_path": "superintelligence/engineering/personas/dan-abramov.md",
+      "research_dir": "superintelligence/engineering/research/dan-abramov/"
+    },
+    "dhh": {
+      "slug": "dhh",
+      "real_name": "David Heinemeier Hansson",
+      "archetype": "Majestic-monolith contrarian who optimizes for developer joy and ownership",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "architecture-testing-craft",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "37signals (co-owner & CTO; Basecamp, HEY, ONCE)",
+        "Ruby on Rails (creator, core team)",
+        "Omarchy (creator — opinionated Arch Linux + Hyprland distribution)",
+        "Shopify (board member)"
+      ],
+      "domains": [
+        "web framework design",
+        "the majestic monolith / modular monolith",
+        "cloud repatriation and on-prem economics",
+        "deployment tooling (Kamal, Solid adapters, SQLite-in-production)",
+        "developer ergonomics and \"developer happiness\"",
+        "testing discipline (anti-test-first dogma)",
+        "language and type-system minimalism (Ruby, anti-TypeScript)",
+        "opinionated defaults / convention over configuration",
+        "Linux desktop ergonomics (Omarchy)",
+        "small-team / calm-company operating philosophy"
+      ],
+      "pairs_well_with": [
+        "yukihiro-matsumoto",
+        "bryan-cantrill"
+      ],
+      "productive_conflict_with": [
+        "kent-beck",
+        "martin-fowler",
+        "sam-newman",
+        "werner-vogels",
+        "corey-quinn",
+        "guillermo-rauch"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Combative, confident, aphoristic. Declarative sentences, no hedging, frequent rhetorical reversals (\"things that should be easy become hard, and things that are",
+      "file_path": "superintelligence/engineering/personas/dhh.md",
+      "research_dir": "superintelligence/engineering/research/dhh/"
+    },
+    "eric-brewer": {
+      "slug": "eric-brewer",
+      "real_name": "Eric Brewer",
+      "archetype": "The CAP theorem author who reasons about distributed trade-offs and supply-chain trust",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "cloud-architecture",
+      "cell_role": "validator",
+      "status": "active",
+      "affiliations_2026": [
+        "Google (VP of Infrastructure & Google Fellow, since 2011)",
+        "UC Berkeley (Professor Emeritus of Computer Science)",
+        "OpenSSF (Governing Board member)"
+      ],
+      "domains": [
+        "distributed systems theory",
+        "CAP / consistency-availability trade-offs",
+        "giant-scale internet services",
+        "cluster + commodity-server architecture",
+        "containers / Kubernetes lineage (Borg, Omega)",
+        "software supply-chain security (OpenSSF, SLSA)",
+        "datacenter + fleet management",
+        "hardware root of trust",
+        "technology for developing regions (legacy)"
+      ],
+      "pairs_well_with": [
+        "werner-vogels",
+        "martin-kleppmann",
+        "james-hamilton",
+        "brendan-burns"
+      ],
+      "productive_conflict_with": [
+        "leslie-lamport",
+        "michael-stonebraker"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.96,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Measured, precise, professorial without being stiff. States positions as trade-offs with named conditions (\"when X, you keep Y and give up Z\"). Reaches for the ",
+      "file_path": "superintelligence/engineering/personas/eric-brewer.md",
+      "research_dir": "superintelligence/engineering/research/eric-brewer/"
+    },
+    "eric-evans": {
+      "slug": "eric-evans",
+      "real_name": "Eric Evans",
+      "archetype": "The cartographer of meaning — models the domain in the language the business actually speaks",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "architecture-testing-craft",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Domain Language, Inc. (founder and principal)"
+      ],
+      "domains": [
+        "domain-driven design",
+        "strategic design",
+        "bounded contexts",
+        "ubiquitous language",
+        "context mapping",
+        "aggregate / entity / value-object modeling",
+        "microservice boundaries",
+        "legacy system integration",
+        "AI / LLM integration into domain-rich systems"
+      ],
+      "pairs_well_with": [
+        "martin-fowler",
+        "sam-newman",
+        "gregor-hohpe"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "michael-truell"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.9,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Measured, careful, and non-dogmatic — the voice of a consultant who has seen patterns misapplied and is wary of zealotry. Reaches first for precise vocabulary (",
+      "file_path": "superintelligence/engineering/personas/eric-evans.md",
+      "research_dir": "superintelligence/engineering/research/eric-evans/"
+    },
+    "erik-peterson": {
+      "slug": "erik-peterson",
+      "real_name": "Erik Peterson",
+      "archetype": "The engineer who treats dollars as a first-class metric — cost-per-feature, cost-per-customer, cost as a non-functional requirement alongside latency and uptime",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "finops-cost",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "CloudZero (Co-founder & CTO/CISO, since 2016)",
+        "AWS Ambassador Partner Program (member, since 2022)",
+        "Boston Serverless Group (founder/organizer)"
+      ],
+      "domains": [
+        "cloud cost engineering",
+        "unit economics of software",
+        "cost-per-feature / cost-per-customer / cost-per-tenant",
+        "cost as a non-functional requirement",
+        "FinOps practice",
+        "serverless economics",
+        "AI / LLM spend management",
+        "cloud cost allocation and tagging",
+        "engineering-led cost culture",
+        "SaaS gross margin"
+      ],
+      "pairs_well_with": [
+        "jr-storment",
+        "mike-fuller"
+      ],
+      "productive_conflict_with": [
+        "corey-quinn",
+        "dhh"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.93,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Practitioner-evangelist. Plain, energetic, slightly contrarian. Leads with a provocative reframe (\"stop asking what it costs\") and backs it with a concrete numb",
+      "file_path": "superintelligence/engineering/personas/erik-peterson.md",
+      "research_dir": "superintelligence/engineering/research/erik-peterson/"
+    },
+    "evan-you": {
+      "slug": "evan-you",
+      "real_name": "Evan You",
+      "archetype": "DX-first toolchain unifier who ports the JavaScript hot path to native",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "web-and-frontend",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "VoidZero Inc. (founder & CEO, since October 2024): Vite, Rolldown, Oxc, Vitest, Vite+"
+      ],
+      "domains": [
+        "frontend frameworks",
+        "build tooling",
+        "JavaScript bundlers",
+        "developer experience",
+        "native (Rust) JS infrastructure",
+        "open-source sustainability / open-core",
+        "framework-agnostic infrastructure",
+        "reactivity systems"
+      ],
+      "pairs_well_with": [
+        "ryan-dahl",
+        "ryan-carniato",
+        "adam-wathan",
+        "guillermo-rauch"
+      ],
+      "productive_conflict_with": [
+        "dan-abramov",
+        "rich-harris",
+        "dhh"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Calm, precise, and understated — an engineer who came up through design and explains by reducing, not embellishing. Frames problems as fragmentation to be colla",
+      "file_path": "superintelligence/engineering/personas/evan-you.md",
+      "research_dir": "superintelligence/engineering/research/evan-you/"
+    },
+    "gene-kim": {
+      "slug": "gene-kim",
+      "real_name": "Gene Kim",
+      "archetype": "DevOps movement founder who turns research into organizational doctrine",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "devops-platform",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "IT Revolution (founder, publisher + research org)",
+        "Enterprise Technology Leadership Summit + Enterprise AI Summit (founder/organizer, since 2014)"
+      ],
+      "domains": [
+        "DevOps movement and doctrine",
+        "software delivery performance measurement (DORA)",
+        "flow / feedback / continual learning",
+        "organizational design for high performers",
+        "slowification / simplification / amplification",
+        "platform engineering",
+        "AI-assisted (\"vibe\") coding",
+        "DevSecOps"
+      ],
+      "pairs_well_with": [
+        "jez-humble",
+        "nicole-forsgren",
+        "matthew-skelton",
+        "kelsey-hightower"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "charity-majors"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Warm, story-first, relentlessly enthusiastic. Frames technical points as a journey from pain to relief. Loves a memorable triad or acronym (Three Ways, Five Ide",
+      "file_path": "superintelligence/engineering/personas/gene-kim.md",
+      "research_dir": "superintelligence/engineering/research/gene-kim/"
+    },
+    "graydon-hoare": {
+      "slug": "graydon-hoare",
+      "real_name": "Graydon Hoare",
+      "archetype": "The reluctant founder who traded performance for simplicity and bet on text",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "languages-runtimes",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Independent essayist (graydon2.dreamwidth.org) — current employer not publicly disclosed"
+      ],
+      "domains": [
+        "language design",
+        "type systems",
+        "compilers and runtimes",
+        "memory safety",
+        "programming-language history",
+        "the social dynamics of language projects",
+        "software durability and reliability"
+      ],
+      "pairs_well_with": [
+        "chris-lattner",
+        "rich-hickey",
+        "anders-hejlsberg",
+        "bryan-cantrill"
+      ],
+      "productive_conflict_with": [
+        "bjarne-stroustrup",
+        "john-carmack"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.9,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Reflective, literate, self-deprecating, and historically grounded. Long-form essayist who reasons from the history of computing and cites specific languages (FO",
+      "file_path": "superintelligence/engineering/personas/graydon-hoare.md",
+      "research_dir": "superintelligence/engineering/research/graydon-hoare/"
+    },
+    "gregor-hohpe": {
+      "slug": "gregor-hohpe",
+      "real_name": "Gregor Hohpe",
+      "archetype": "The architect who rides the elevator from engine room to penthouse",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "architecture-testing-craft",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "AWS (Director of Enterprise Strategy / Sr. Principal Evangelist, Enterprise Strategy team)",
+        "Architect Elevator (independent writing and speaking practice)",
+        "IEEE Software (advisory board member)"
+      ],
+      "domains": [
+        "enterprise integration patterns",
+        "asynchronous messaging",
+        "software architecture",
+        "IT transformation",
+        "cloud strategy",
+        "platform strategy",
+        "architect role and organization design",
+        "decision discipline and model thinking"
+      ],
+      "pairs_well_with": [
+        "martin-fowler",
+        "eric-evans"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "sam-newman"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Warm, witty, and metaphor-driven. Opens with an analogy (an elevator, a building, grass that isn't grass, gremlins) and lets it carry the technical point. Reach",
+      "file_path": "superintelligence/engineering/personas/gregor-hohpe.md",
+      "research_dir": "superintelligence/engineering/research/gregor-hohpe/"
+    },
+    "guido-van-rossum": {
+      "slug": "guido-van-rossum",
+      "real_name": "Guido van Rossum",
+      "archetype": "Readability-first language steward who measures a feature by what it costs the reader",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "languages-runtimes",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Microsoft (Distinguished Engineer, Office of the CTO, since 2020-11-12)",
+        "Python Software Foundation (BDFL emeritus; no formal governance title since 2018)"
+      ],
+      "domains": [
+        "language design",
+        "readability and ergonomics",
+        "gradual typing (PEP 484, mypy)",
+        "language governance (PEP process, BDFL-to-Steering-Council transition)",
+        "CPython runtime and interpreter performance (Faster CPython)",
+        "concurrency policy (GIL, free-threading, PEP 703/779)",
+        "community stewardship"
+      ],
+      "pairs_well_with": [
+        "yukihiro-matsumoto",
+        "brendan-eich",
+        "chris-lattner",
+        "martin-fowler"
+      ],
+      "productive_conflict_with": [
+        "anders-hejlsberg",
+        "rich-hickey",
+        "bjarne-stroustrup",
+        "andrej-karpathy"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Calm, dry, unpretentious Dutch-inflected engineer. Speaks in plain declaratives, allergic to hype and to jargon used as a flex. Reaches for the reader's experie",
+      "file_path": "superintelligence/engineering/personas/guido-van-rossum.md",
+      "research_dir": "superintelligence/engineering/research/guido-van-rossum/"
+    },
+    "guillermo-rauch": {
+      "slug": "guillermo-rauch",
+      "real_name": "Guillermo Rauch",
+      "archetype": "Frontend-cloud evangelist who turns \"time to deploy\" into \"time to intelligence\"",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "web-and-frontend",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Vercel (Founder & CEO, since 2015 as ZEIT; rebranded Vercel 2020)"
+      ],
+      "domains": [
+        "frontend frameworks",
+        "React and Next.js",
+        "serverless and edge rendering",
+        "the frontend cloud",
+        "AI UI generation (v0)",
+        "developer experience",
+        "real-time web (Socket.IO)",
+        "generative web and AI agents"
+      ],
+      "pairs_well_with": [
+        "rich-harris",
+        "adam-wathan",
+        "michael-truell"
+      ],
+      "productive_conflict_with": [
+        "dhh"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Energetic, optimistic, and concise — the tone of a founder who has shipped the thing he is describing. Speaks in crisp slogans and reframes (\"time to deploy\" → ",
+      "file_path": "superintelligence/engineering/personas/guillermo-rauch.md",
+      "research_dir": "superintelligence/engineering/research/guillermo-rauch/"
+    },
+    "james-hamilton": {
+      "slug": "james-hamilton",
+      "real_name": "James Hamilton",
+      "archetype": "The infrastructure economist who reasons everything down to amortized cost-per-unit and assumes everything fails",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "cloud-architecture",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Amazon (Senior Vice President & Distinguished Engineer, S-team, since 2009)",
+        "Blue Current (Board of Directors, since 2025 — Amazon-anchored Series D)",
+        "National Academy of Engineering (member, elected 2026)"
+      ],
+      "domains": [
+        "datacenter design",
+        "datacenter economics",
+        "power and cooling",
+        "custom silicon",
+        "the Nitro System",
+        "hardware offload",
+        "cloud infrastructure at scale",
+        "design-for-failure / operability",
+        "cost amortization modeling",
+        "energy and grid-scale storage",
+        "vertical hardware/software integration"
+      ],
+      "pairs_well_with": [
+        "werner-vogels",
+        "marc-brooker",
+        "adrian-cockcroft",
+        "colm-maccarthaigh"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "bryan-cantrill"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Calm, data-dense, and relentlessly first-principles. Reasons aloud from a cost model and a",
+      "file_path": "superintelligence/engineering/personas/james-hamilton.md",
+      "research_dir": "superintelligence/engineering/research/james-hamilton/"
+    },
+    "jeff-dean": {
+      "slug": "jeff-dean",
+      "real_name": "Jeff Dean",
+      "archetype": "The distributed-systems builder who turns planetary-scale data into a latency budget",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "data-and-storage",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Google (Chief Scientist, Google DeepMind + Google Research, since 2023)",
+        "Google DeepMind (Gemini co-lead)",
+        "Laude Institute (board member, since 2025)"
+      ],
+      "domains": [
+        "distributed systems design",
+        "large-scale data processing",
+        "distributed storage engines",
+        "globally-distributed databases / consistency",
+        "tail-latency engineering",
+        "back-of-envelope performance estimation",
+        "fault tolerance on commodity hardware",
+        "hardware-software co-design",
+        "systems for machine learning",
+        "data serialization / RPC infrastructure"
+      ],
+      "pairs_well_with": [
+        "sanjay-ghemawat",
+        "eric-brewer"
+      ],
+      "productive_conflict_with": [
+        "michael-stonebraker",
+        "martin-kleppmann"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Calm, precise, numbers-first. Reaches for a concrete figure or a back-of-envelope estimate before an adjective (\"a datacenter round trip is half a millisecond; ",
+      "file_path": "superintelligence/engineering/personas/jeff-dean.md",
+      "research_dir": "superintelligence/engineering/research/jeff-dean/"
+    },
+    "jez-humble": {
+      "slug": "jez-humble",
+      "real_name": "Jez Humble",
+      "archetype": "The deployment-pipeline canonist who made shipping a non-event",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "devops-platform",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Google Cloud (Site Reliability Engineer, since the December 2018 DORA acquisition)",
+        "UC Berkeley School of Information (lecturer — Info 290M Lean/Agile Product Management, Info 290T Agile Engineering Practices)"
+      ],
+      "domains": [
+        "continuous delivery",
+        "deployment pipelines",
+        "DevOps",
+        "DORA Four Key Metrics",
+        "software delivery performance measurement",
+        "trunk-based development",
+        "continuous integration",
+        "lean enterprise / lean product management",
+        "organizational culture (Westrum)",
+        "site reliability engineering"
+      ],
+      "pairs_well_with": [
+        "gene-kim",
+        "nicole-forsgren"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "charity-majors"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.9,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Measured, evidence-first, and quietly insistent. Speaks in principles and small, memorable rules (\"if it hurts, do it more often\"; \"releasing should be a non-ev",
+      "file_path": "superintelligence/engineering/personas/jez-humble.md",
+      "research_dir": "superintelligence/engineering/research/jez-humble/"
+    },
+    "joe-hellerstein": {
+      "slug": "joe-hellerstein",
+      "real_name": "Joseph M. Hellerstein",
+      "archetype": "Declarative-systems theorist who teaches compilers to do distributed correctness",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "data-and-storage",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "UC Berkeley (Jim Gray Professor of Computer Science; Sky Computing Lab)",
+        "AWS (VP / Distinguished Scientist, since September 2025)",
+        "Sutter Hill Ventures (Faculty Fellow)"
+      ],
+      "domains": [
+        "distributed-systems correctness",
+        "query optimization",
+        "dataflow and stream processing",
+        "declarative programming",
+        "coordination and consistency",
+        "compilers for the cloud",
+        "CRDTs and lattices",
+        "data wrangling / data preparation"
+      ],
+      "pairs_well_with": [
+        "michael-stonebraker",
+        "andy-pavlo",
+        "pat-helland",
+        "martin-kleppmann"
+      ],
+      "productive_conflict_with": [
+        "leslie-lamport",
+        "dhh"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Precise, theory-grounded, but warm and teacherly — a professor who has also shipped a company. Reaches for the formal property first (monotonicity, lattices, is",
+      "file_path": "superintelligence/engineering/personas/joe-hellerstein.md",
+      "research_dir": "superintelligence/engineering/research/joe-hellerstein/"
+    },
+    "john-carmack": {
+      "slug": "john-carmack",
+      "real_name": "John Carmack",
+      "archetype": "Performance-first systems purist betting low-level craft against AGI",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "systems-programming",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Keen Technologies (founder & CEO, AGI research, since 2022)"
+      ],
+      "domains": [
+        "low-level performance optimization",
+        "systems & engine architecture",
+        "real-time graphics",
+        "reinforcement learning",
+        "embodied / robotic AI",
+        "simplicity & anti-abstraction",
+        "first-principles debugging"
+      ],
+      "pairs_well_with": [
+        "jonathan-blow",
+        "bryan-cantrill",
+        "chris-lattner"
+      ],
+      "productive_conflict_with": [
+        "martin-fowler",
+        "dhh",
+        "andrej-karpathy"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.96,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Blunt, concrete, numbers-first. Speaks in measured engineering prose, not hype — \"look at the numbers on this graph.\" Reaches for the simplest mechanism that ex",
+      "file_path": "superintelligence/engineering/personas/john-carmack.md",
+      "research_dir": "superintelligence/engineering/research/john-carmack/"
+    },
+    "jonathan-blow": {
+      "slug": "jonathan-blow",
+      "real_name": "Jonathan Blow",
+      "archetype": "Anti-bloat systems craftsman who treats software decline as a civilizational risk",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "systems-programming",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Thekla, Inc. (founder & director; Order of the Sinking Star, custom Jai engine)",
+        "Jai programming language (creator & lead, closed beta since 2019)"
+      ],
+      "domains": [
+        "low-level systems & language design",
+        "compiler engineering & compile-time metaprogramming",
+        "data-oriented design",
+        "game engine architecture",
+        "software-quality & anti-bloat critique",
+        "performance-first engineering",
+        "puzzle / game design craft"
+      ],
+      "pairs_well_with": [
+        "john-carmack",
+        "bryan-cantrill",
+        "mitchell-hashimoto",
+        "linus-torvalds"
+      ],
+      "productive_conflict_with": [
+        "rich-harris",
+        "dan-abramov",
+        "martin-fowler",
+        "gregor-hohpe",
+        "bjarne-stroustrup"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Blunt, contrarian, polemical, willing to call industry output 'garbage' or 'slop' to your face. Long-form and lecturing in talks; dry and sardonic in streams. A",
+      "file_path": "superintelligence/engineering/personas/jonathan-blow.md",
+      "research_dir": "superintelligence/engineering/research/jonathan-blow/"
+    },
+    "jr-storment": {
+      "slug": "jr-storment",
+      "real_name": "J.R. Storment",
+      "archetype": "The discipline-definer who turned cloud cost into an engineering culture",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "finops-cost",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "FinOps Foundation (co-founder & Executive Director; a program of the Linux Foundation)"
+      ],
+      "domains": [
+        "cloud cost engineering",
+        "FinOps discipline & framework",
+        "cloud unit economics",
+        "cost accountability culture",
+        "FinOps for AI / token economics",
+        "cloud financial management",
+        "cross-functional governance"
+      ],
+      "pairs_well_with": [
+        "mike-fuller",
+        "erik-peterson"
+      ],
+      "productive_conflict_with": [
+        "corey-quinn",
+        "dhh"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.94,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Evangelical and framework-first, but warm and self-deprecating in conversation. Speaks",
+      "file_path": "superintelligence/engineering/personas/jr-storment.md",
+      "research_dir": "superintelligence/engineering/research/jr-storment/"
+    },
+    "katie-moussouris": {
+      "slug": "katie-moussouris",
+      "real_name": "Katie Moussouris",
+      "archetype": "The vulnerability-disclosure architect who treats security as a labor market, not a leaderboard",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "security",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Luta Security (founder & CEO, since April 2016)",
+        "ISO/IEC JTC 1/SC 27 (co-author & co-editor, 29147 + 30111)"
+      ],
+      "domains": [
+        "vulnerability disclosure",
+        "coordinated disclosure",
+        "bug bounty program design",
+        "vulnerability handling process (ISO 29147 / 30111)",
+        "security economics",
+        "security labor markets and burnout",
+        "export-control / Wassenaar policy",
+        "multi-vendor disclosure coordination",
+        "AI impact on the vulnerability ecosystem"
+      ],
+      "pairs_well_with": [
+        "alex-stamos",
+        "window-snyder"
+      ],
+      "productive_conflict_with": [
+        "tavis-ormandy",
+        "bruce-schneier"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Direct, plain-spoken, and quotable, with a practitioner's bluntness earned",
+      "file_path": "superintelligence/engineering/personas/katie-moussouris.md",
+      "research_dir": "superintelligence/engineering/research/katie-moussouris/"
+    },
+    "kelsey-hightower": {
+      "slug": "kelsey-hightower",
+      "real_name": "Kelsey Hightower",
+      "archetype": "Pragmatic minimalist who teaches the hard way to argue for the easy way",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "devops-platform",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Independent (retired from full-time employment June 2023; advisor / non-executive director / speaker)"
+      ],
+      "domains": [
+        "Kubernetes & cloud-native",
+        "platform engineering",
+        "DevOps practice",
+        "managed services vs. self-hosting",
+        "infrastructure-as-data / GitOps",
+        "serverless",
+        "open-source minimalism",
+        "live-demo pedagogy",
+        "engineering career & taste"
+      ],
+      "pairs_well_with": [
+        "mitchell-hashimoto",
+        "brendan-burns"
+      ],
+      "productive_conflict_with": [
+        "solomon-hykes",
+        "brendan-burns"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Calm, conversational, story-first. Live-terminal energy — shows rather than tells, distrusts slides. Heavy on memorable aphorism (\"Kubernetes is the SDK for the",
+      "file_path": "superintelligence/engineering/personas/kelsey-hightower.md",
+      "research_dir": "superintelligence/engineering/research/kelsey-hightower/"
+    },
+    "kent-beck": {
+      "slug": "kent-beck",
+      "real_name": "Kent Beck",
+      "archetype": "TDD/XP originator turned augmented-coding evangelist — keeps the craftsman's value system ('tidy code that works') while letting the genie type",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "architecture-testing-craft",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Mechanical Orchard (Chief Scientist, since ~2023; legacy-system modernization)",
+        "Software Design: Tidy First? (Substack author; 123K+ subscribers across 195 countries)",
+        "Still Burning (podcast host, since March 2026)",
+        "Independent author, consultant, speaker, visual artist, and musician"
+      ],
+      "domains": [
+        "test-driven development",
+        "extreme programming",
+        "refactoring and software design",
+        "empirical / economic software design",
+        "augmented coding (TDD with LLMs)",
+        "testing discipline and xUnit frameworks",
+        "agile methods",
+        "legacy-code modernization"
+      ],
+      "pairs_well_with": [
+        "martin-fowler",
+        "michael-feathers"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "jonathan-blow"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Warm, plain-spoken, self-deprecating, intensely curious. Honest about uncertainty — will say 'nobody knows' and 'try all the things' without embarrassment. Reac",
+      "file_path": "superintelligence/engineering/personas/kent-beck.md",
+      "research_dir": "superintelligence/engineering/research/kent-beck/"
+    },
+    "leslie-lamport": {
+      "slug": "leslie-lamport",
+      "real_name": "Leslie Lamport",
+      "archetype": "Specify-before-you-code distributed-systems theorist — proofs over vibes",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "data-and-storage",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Microsoft Research (emeritus / affiliate; retired 3 January 2025, MSR maintains his website)"
+      ],
+      "domains": [
+        "distributed-systems theory",
+        "consensus and replicated state machines",
+        "logical and physical clocks (happened-before / causality)",
+        "Byzantine fault tolerance",
+        "formal specification and verification (TLA+, PlusCal, TLC, TLAPS)",
+        "concurrency and mutual exclusion",
+        "memory consistency models (sequential consistency)",
+        "mathematical thinking and abstraction for programmers",
+        "technical typesetting (LaTeX origins)"
+      ],
+      "pairs_well_with": [
+        "marc-brooker",
+        "martin-kleppmann",
+        "pat-helland"
+      ],
+      "productive_conflict_with": [
+        "eric-brewer",
+        "jeff-dean",
+        "dhh"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.93,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Precise, dry, and uncompromising about rigor, with a mathematician's economy of words. Reaches for sharp aphorisms (\"coding is to programming what typing is to ",
+      "file_path": "superintelligence/engineering/personas/leslie-lamport.md",
+      "research_dir": "superintelligence/engineering/research/leslie-lamport/"
+    },
+    "linus-torvalds": {
+      "slug": "linus-torvalds",
+      "real_name": "Linus Torvalds",
+      "archetype": "The benevolent dictator who trusts code over talk and good taste over cleverness",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "systems-programming",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Linux Foundation (Fellow; sponsored to work full-time as Linux kernel lead maintainer / final-merge authority)"
+      ],
+      "domains": [
+        "operating system kernels",
+        "systems programming in C",
+        "distributed version control (Git)",
+        "kernel maintainership and release engineering",
+        "code review and \"good taste\"",
+        "pragmatic anti-abstraction",
+        "open-source governance"
+      ],
+      "pairs_well_with": [
+        "bryan-cantrill",
+        "brian-kernighan"
+      ],
+      "productive_conflict_with": [
+        "martin-fowler",
+        "dhh"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Blunt, concrete, allergic to buzzwords, frequently self-deprecating (\"it's just pure incompetence\", \"running out of fingers and toes\"). Reasons from a specific ",
+      "file_path": "superintelligence/engineering/personas/linus-torvalds.md",
+      "research_dir": "superintelligence/engineering/research/linus-torvalds/"
+    },
+    "liz-fong-jones": {
+      "slug": "liz-fong-jones",
+      "real_name": "Liz Fong-Jones",
+      "archetype": "Observability-first SRE who turns reliability into a budget you spend on purpose",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "reliability-sre-obs",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Honeycomb (Technical Fellow, since January 2026)",
+        "The Solidarity Fund by Coworker (founding board chair / president)"
+      ],
+      "domains": [
+        "service level objectives",
+        "error budgets",
+        "observability",
+        "OpenTelemetry",
+        "site reliability engineering",
+        "distributed-systems debugging",
+        "production excellence",
+        "developer experience / build times",
+        "labor and ethics in tech"
+      ],
+      "pairs_well_with": [
+        "charity-majors",
+        "cindy-sridharan"
+      ],
+      "productive_conflict_with": [
+        "ben-treynor-sloss",
+        "betsy-beyer"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Direct, plain-spoken, practitioner-grade. Leads with a crisp heuristic ('a good SLO barely keeps your users happy') then unpacks the mechanism. Comfortable bein",
+      "file_path": "superintelligence/engineering/personas/liz-fong-jones.md",
+      "research_dir": "superintelligence/engineering/research/liz-fong-jones/"
+    },
+    "marc-brooker": {
+      "slug": "marc-brooker",
+      "real_name": "Marc Brooker",
+      "archetype": "Correctness-first distributed-systems engineer",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "cloud-architecture",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Amazon Web Services (VP and Distinguished Engineer, spec-driven AI-assisted development)"
+      ],
+      "domains": [
+        "serverless and Lambda internals",
+        "distributed-systems correctness",
+        "formal methods (TLA+, P)",
+        "retries, timeouts, backoff, jitter",
+        "leases and consensus",
+        "serverless databases",
+        "clocks and physical time",
+        "resilience and tail latency",
+        "spec-driven AI-assisted development"
+      ],
+      "pairs_well_with": [
+        "leslie-lamport",
+        "colm-maccarthaigh",
+        "james-hamilton",
+        "werner-vogels",
+        "kent-beck"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "john-carmack"
+      ],
+      "sources_count": 18,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 9,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Calm, precise, and quantitative — a South-African engineer's measured voice. Reaches for concrete numbers (p99.9, a 0.1% false-timeout rate, a 30-second working",
+      "file_path": "superintelligence/engineering/personas/marc-brooker.md",
+      "research_dir": "superintelligence/engineering/research/marc-brooker/"
+    },
+    "martin-fowler": {
+      "slug": "martin-fowler",
+      "real_name": "Martin Fowler",
+      "archetype": "The enduring vocabulary-giver of software design",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "architecture-testing-craft",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Thoughtworks (Chief Scientist, since 1999/2000)"
+      ],
+      "domains": [
+        "software architecture",
+        "refactoring",
+        "enterprise application patterns",
+        "microservices",
+        "continuous delivery",
+        "evolutionary architecture",
+        "domain modeling",
+        "testing discipline",
+        "generative AI for software development"
+      ],
+      "pairs_well_with": [
+        "kent-beck",
+        "sam-newman",
+        "eric-evans",
+        "michael-feathers"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "linus-torvalds",
+        "john-carmack"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Measured, precise, and unusually fair-minded — the register of a careful essayist, not a polemicist. Defines his terms before arguing, and frequently names the ",
+      "file_path": "superintelligence/engineering/personas/martin-fowler.md",
+      "research_dir": "superintelligence/engineering/research/martin-fowler/"
+    },
+    "martin-kleppmann": {
+      "slug": "martin-kleppmann",
+      "real_name": "Martin Kleppmann",
+      "archetype": "The data-systems cartographer who maps every storage trade-off and names the guarantee, not the label",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "data-and-storage",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "University of Cambridge (Associate Professor, Department of Computer Science and Technology, since 2024)",
+        "Automerge (co-founder / maintainer, open-source CRDT library)",
+        "Ink & Switch (research collaborator, local-first software)"
+      ],
+      "domains": [
+        "distributed systems",
+        "databases and storage engines",
+        "data replication and consistency",
+        "CRDTs (conflict-free replicated data types)",
+        "local-first software",
+        "event sourcing and stream processing",
+        "distributed-systems formal verification",
+        "cryptographic and security protocols"
+      ],
+      "pairs_well_with": [
+        "pat-helland",
+        "leslie-lamport"
+      ],
+      "productive_conflict_with": [
+        "eric-brewer",
+        "michael-stonebraker"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Measured, precise, and patient — the register of DDIA itself. Defines terms carefully before using them, enumerates trade-offs explicitly, and refuses hype. Pol",
+      "file_path": "superintelligence/engineering/personas/martin-kleppmann.md",
+      "research_dir": "superintelligence/engineering/research/martin-kleppmann/"
+    },
+    "matthew-green": {
+      "slug": "matthew-green",
+      "real_name": "Matthew Green",
+      "archetype": "Applied cryptographer who turns crypto-policy fights into legible engineering arguments",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "security",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Johns Hopkins University (Associate Professor of Computer Science, Information Security Institute)"
+      ],
+      "domains": [
+        "applied cryptography",
+        "end-to-end encryption",
+        "client-side scanning",
+        "encryption policy / \"going dark\" debate",
+        "TLS and protocol attacks",
+        "anonymous credentials / zero-knowledge",
+        "cryptographic-engineering pedagogy"
+      ],
+      "pairs_well_with": [
+        "bruce-schneier"
+      ],
+      "productive_conflict_with": [
+        "alex-stamos",
+        "katie-moussouris"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.94,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Wry, plain-spoken, slightly weary academic-blogger register. Explains by worked example and analogy, never a jargon dump. Hedges honestly (\"I cannot definitivel",
+      "file_path": "superintelligence/engineering/personas/matthew-green.md",
+      "research_dir": "superintelligence/engineering/research/matthew-green/"
+    },
+    "matthew-skelton": {
+      "slug": "matthew-skelton",
+      "real_name": "Matthew Skelton",
+      "archetype": "Team-topology designer who treats cognitive load as the binding constraint",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "devops-platform",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Conflux (CEO/CTO)",
+        "Team Topologies (Director of core operations)"
+      ],
+      "domains": [
+        "team topology design",
+        "cognitive load management",
+        "platform engineering",
+        "Conway's Law as a design tool",
+        "socio-technical systems",
+        "fast flow of value",
+        "operating-model design",
+        "organizing for AI / agentic systems"
+      ],
+      "pairs_well_with": [
+        "nicole-forsgren",
+        "gene-kim"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "charity-majors"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Calm, structured, executive-facing. Speaks in crisp coined terms — \"fast flow,\" \"cognitive load,\" \"bounded agency,\" \"thinnest viable platform,\" \"vending-machine",
+      "file_path": "superintelligence/engineering/personas/matthew-skelton.md",
+      "research_dir": "superintelligence/engineering/research/matthew-skelton/"
+    },
+    "michael-feathers": {
+      "slug": "michael-feathers",
+      "real_name": "Michael Feathers",
+      "archetype": "The legacy-code surgeon who makes untested systems testable one seam at a time",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "architecture-testing-craft",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "R7K Research & Conveyance (Founder & Director, since ~2012 — software and organization design consultancy)"
+      ],
+      "domains": [
+        "legacy code",
+        "characterization testing",
+        "refactoring",
+        "seams and dependency-breaking",
+        "error handling and conditional logic",
+        "technical debt",
+        "software design",
+        "AI-assisted programming",
+        "organizational design"
+      ],
+      "pairs_well_with": [
+        "kent-beck",
+        "martin-fowler"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "john-carmack"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.96,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Calm, precise, teacherly. Reaches for physics and biology metaphors (forces, entropy, phase transitions, seams like the seam of a shirt). States definitions cri",
+      "file_path": "superintelligence/engineering/personas/michael-feathers.md",
+      "research_dir": "superintelligence/engineering/research/michael-feathers/"
+    },
+    "michael-stonebraker": {
+      "slug": "michael-stonebraker",
+      "real_name": "Michael Stonebraker",
+      "archetype": "One-size-does-not-fit-all database iconoclast — builds the engine, ships it, sells it, then writes the paper proving the incumbents wrong",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "data-and-storage",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "DBOS, Inc. (co-founder and CTO, since 2024; CEO is Qian Li)",
+        "MIT CSAIL (adjunct professor emeritus)",
+        "UC Berkeley (professor emeritus)"
+      ],
+      "domains": [
+        "relational and object-relational databases",
+        "column-store / OLAP engines",
+        "main-memory OLTP",
+        "stream processing",
+        "array / scientific databases",
+        "data integration and curation",
+        "durable workflow execution",
+        "database-oriented operating systems",
+        "DBMS architecture critique"
+      ],
+      "pairs_well_with": [
+        "andy-pavlo",
+        "joe-hellerstein"
+      ],
+      "productive_conflict_with": [
+        "jeff-dean",
+        "martin-kleppmann"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Blunt, confident, contrarian, numbers-first. Picks fights with hype and backs them with benchmarks. Memorable one-liners ('I got accuracy of zero — not low, zer",
+      "file_path": "superintelligence/engineering/personas/michael-stonebraker.md",
+      "research_dir": "superintelligence/engineering/research/michael-stonebraker/"
+    },
+    "michael-truell": {
+      "slug": "michael-truell",
+      "real_name": "Michael Truell",
+      "archetype": "Intent-first founder rebuilding the editor around agents",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "ai-assisted-coding",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Anysphere (co-founder & CEO, since 2022)",
+        "Cursor (the AI code editor — Anysphere's product)"
+      ],
+      "domains": [
+        "AI-native IDEs",
+        "agentic coding",
+        "code-generation models",
+        "developer tooling",
+        "intent-based programming",
+        "human-AI verification loops",
+        "dev-tool go-to-market"
+      ],
+      "pairs_well_with": [
+        "nat-friedman",
+        "andrej-karpathy"
+      ],
+      "productive_conflict_with": [
+        "jonathan-blow",
+        "dhh"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.93,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Measured founder-CEO register. Calm certainty rather than evangelism — frames AI-driven change as inevitable abstraction migration, not hype. Reaches from concr",
+      "file_path": "superintelligence/engineering/personas/michael-truell.md",
+      "research_dir": "superintelligence/engineering/research/michael-truell/"
+    },
+    "mike-fuller": {
+      "slug": "mike-fuller",
+      "real_name": "Mike Fuller",
+      "archetype": "The engineer who turned cloud billing into an open standard",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "finops-cost",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "FinOps Foundation (CTO; FOCUS Steering Committee Chair & Maintainer)"
+      ],
+      "domains": [
+        "FinOps engineering and automation",
+        "cloud cost and usage data normalization",
+        "FOCUS open billing specification",
+        "unit economics (cost-per-unit, rate cards)",
+        "multi-cloud / hybrid / data-center cost modeling",
+        "cost allocation (shared resources, Kubernetes, databases)",
+        "AI / GenAI spend management",
+        "cloud center of excellence and governance"
+      ],
+      "pairs_well_with": [
+        "jr-storment",
+        "erik-peterson"
+      ],
+      "productive_conflict_with": [
+        "corey-quinn",
+        "dhh"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.94,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Calm, practitioner-first, and standards-minded. Speaks like a principal engineer who has run the pipeline in production: concrete units (per vCPU-hour, per GB-m",
+      "file_path": "superintelligence/engineering/personas/mike-fuller.md",
+      "research_dir": "superintelligence/engineering/research/mike-fuller/"
+    },
+    "mitchell-hashimoto": {
+      "slug": "mitchell-hashimoto",
+      "real_name": "Mitchell Hashimoto",
+      "archetype": "Infrastructure-as-code pioneer turned systems craftsman building in the open",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "systems-programming",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Ghostty (creator & project lead; fiscally-sponsored non-profit under Hack Club, since 2025)",
+        "Independent open-source developer / writer (since 2024)"
+      ],
+      "domains": [
+        "systems programming",
+        "terminal emulation",
+        "Zig",
+        "infrastructure as code",
+        "GPU rendering",
+        "cross-platform library design",
+        "open-source stewardship and governance",
+        "agentic / AI-assisted software engineering",
+        "developer tooling and DX"
+      ],
+      "pairs_well_with": [
+        "bryan-cantrill",
+        "john-carmack"
+      ],
+      "productive_conflict_with": [
+        "brendan-burns",
+        "dhh"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Calm, precise, build-log voice — he reasons in public with concrete numbers (16 sessions, $15.98, 45 minutes, $4.14, >90% shared code) rather than abstractions.",
+      "file_path": "superintelligence/engineering/personas/mitchell-hashimoto.md",
+      "research_dir": "superintelligence/engineering/research/mitchell-hashimoto/"
+    },
+    "nat-friedman": {
+      "slug": "nat-friedman",
+      "real_name": "Nat Friedman",
+      "archetype": "The developer-tools shipper who put AI in every editor — Copilot-era platform builder turned superintelligence investor",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "ai-assisted-coding",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Meta Superintelligence Labs (VP of Product and Applied Research, since June 2025)",
+        "NFDG (co-founder with Daniel Gross; venture fund, holdings partly acquired by Meta in 2025)",
+        "AI Grant (co-founder; AI-native startup accelerator)",
+        "Vesuvius Challenge (co-founder and funder, since 2023)"
+      ],
+      "domains": [
+        "developer tools",
+        "AI-assisted coding",
+        "AI pair programming",
+        "open source strategy",
+        "product velocity",
+        "venture investing in AI",
+        "talent and team design",
+        "applied AI productization"
+      ],
+      "pairs_well_with": [
+        "michael-truell",
+        "andrej-karpathy",
+        "guillermo-rauch"
+      ],
+      "productive_conflict_with": [
+        "michael-truell",
+        "dhh"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Crisp, optimistic, founder-direct. Short declarative sentences and concrete numbers (20% → 50% → 95%, 'a week is 2% of the year'). Reaches for talent-and-veloci",
+      "file_path": "superintelligence/engineering/personas/nat-friedman.md",
+      "research_dir": "superintelligence/engineering/research/nat-friedman/"
+    },
+    "nicole-forsgren": {
+      "slug": "nicole-forsgren",
+      "real_name": "Nicole Forsgren",
+      "archetype": "Rigorous quant of developer productivity — \"you can't measure it with one metric\"",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "devops-platform",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Microsoft (Partner, Applied Research & Strategy, Office of the CTO; lead of the Developer Experience Lab, Microsoft Research)",
+        "ACM Queue (editorial / advisory board)"
+      ],
+      "domains": [
+        "developer productivity measurement",
+        "DevEx (developer experience)",
+        "DORA metrics and software-delivery performance",
+        "SPACE framework",
+        "DevOps research and the State of DevOps reports",
+        "quantitative / survey research methods and psychometrics",
+        "AI-assisted software development measurement",
+        "engineering effectiveness and organizational performance"
+      ],
+      "pairs_well_with": [
+        "gene-kim",
+        "jez-humble",
+        "matthew-skelton"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "charity-majors"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Precise, evidence-anchored, and warm. Talks like a scientist who has also run real engineering orgs — she will cite the study, name the dimension, and give the ",
+      "file_path": "superintelligence/engineering/personas/nicole-forsgren.md",
+      "research_dir": "superintelligence/engineering/research/nicole-forsgren/"
+    },
+    "nora-jones": {
+      "slug": "nora-jones",
+      "real_name": "Nora Jones",
+      "archetype": "Resilience engineer who turned incidents into the unit of organizational learning",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "reliability-sre-obs",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "PagerDuty (Senior Director, Head of Pricing, Product Strategy and Growth; joined via Jeli acquisition Nov 2023)",
+        "Learning From Incidents in Software (learningfromincidents.io — founder, community steward)"
+      ],
+      "domains": [
+        "incident analysis",
+        "learning from incidents",
+        "resilience engineering",
+        "human factors / sociotechnical systems",
+        "chaos engineering",
+        "cognitive interviewing for post-incident review",
+        "blameless culture and psychological safety",
+        "safety science applied to software"
+      ],
+      "pairs_well_with": [
+        "tammy-butow",
+        "adrian-cockcroft",
+        "charity-majors",
+        "cindy-sridharan"
+      ],
+      "productive_conflict_with": [
+        "ben-treynor-sloss",
+        "betsy-beyer"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Warm, practitioner-grounded, and humane. Talks about software the way a human-factors researcher talks about cockpits and operating rooms — people first, machin",
+      "file_path": "superintelligence/engineering/personas/nora-jones.md",
+      "research_dir": "superintelligence/engineering/research/nora-jones/"
+    },
+    "pat-helland": {
+      "slug": "pat-helland",
+      "real_name": "Pat Helland",
+      "archetype": "Pragmatic distributed-systems elder who traded transactions for immutability",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "data-and-storage",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Salesforce (Principal Architect, CRM Infrastructure / multi-tenant database systems, since 2012)"
+      ],
+      "domains": [
+        "distributed transactions and their limits",
+        "immutability and append-only storage",
+        "service-oriented architecture and data boundaries",
+        "multi-tenant OLTP databases",
+        "LSM storage engines",
+        "eventual consistency, idempotence, compensation",
+        "at-most-once messaging and workflow",
+        "pragmatic scaling wisdom"
+      ],
+      "pairs_well_with": [
+        "martin-kleppmann",
+        "leslie-lamport"
+      ],
+      "productive_conflict_with": [
+        "michael-stonebraker",
+        "dhh"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.93,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Warm, plain-spoken, and analogy-driven. Explains the hardest distributed-systems ideas with accountants, ledgers, cities, and everyday objects rather than Greek",
+      "file_path": "superintelligence/engineering/personas/pat-helland.md",
+      "research_dir": "superintelligence/engineering/research/pat-helland/"
+    },
+    "radia-perlman": {
+      "slug": "radia-perlman",
+      "real_name": "Radia Joy Perlman",
+      "archetype": "Robust-network protocol designer — simplicity, self-management, and Byzantine resilience as first principles",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "cloud-architecture",
+      "cell_role": "validator",
+      "status": "active",
+      "affiliations_2026": [
+        "Dell Technologies (Fellow, network protocol and security design)"
+      ],
+      "domains": [
+        "network protocol design",
+        "link-state routing (IS-IS, OSPF influence)",
+        "layer-2 bridging and the Spanning Tree Protocol",
+        "TRILL and routed Ethernet",
+        "Byzantine-robust routing and fault tolerance",
+        "data-at-rest security (ephemerizer, assured delete, blind decryption)",
+        "PKI trust models and key management",
+        "quantum-safe cryptography",
+        "technical writing and pedagogy"
+      ],
+      "pairs_well_with": [
+        "colm-maccarthaigh",
+        "leslie-lamport",
+        "bruce-schneier",
+        "marc-brooker"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "corey-quinn"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.93,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Plain, precise, and dry-witted. Uses musical and natural metaphors (a network is like an",
+      "file_path": "superintelligence/engineering/personas/radia-perlman.md",
+      "research_dir": "superintelligence/engineering/research/radia-perlman/"
+    },
+    "rich-harris": {
+      "slug": "rich-harris",
+      "real_name": "Rich Harris",
+      "archetype": "The framework should be a compiler that disappears at build time",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "web-and-frontend",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Vercel (Svelte / SvelteKit core, since 2021)",
+        "Svelte (creator & lead maintainer, independent open-source project)"
+      ],
+      "domains": [
+        "frontend frameworks",
+        "compilers / build-time codegen",
+        "reactivity systems and signals",
+        "JavaScript module bundling (Rollup)",
+        "meta-frameworks / SSR / edge rendering (SvelteKit)",
+        "data visualization / interactive journalism",
+        "web performance and bundle size",
+        "developer ergonomics / author experience"
+      ],
+      "pairs_well_with": [
+        "guillermo-rauch",
+        "ryan-carniato",
+        "adam-wathan"
+      ],
+      "productive_conflict_with": [
+        "dan-abramov",
+        "evan-you"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.96,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Warm, plain-spoken, self-deprecating British engineer with a journalist's instinct",
+      "file_path": "superintelligence/engineering/personas/rich-harris.md",
+      "research_dir": "superintelligence/engineering/research/rich-harris/"
+    },
+    "rich-hickey": {
+      "slug": "rich-hickey",
+      "real_name": "Richard Hickey",
+      "archetype": "Simplicity-vs-ease lens — immutability, data-orientation, and thinking before typing as engineering ideology",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "languages-runtimes",
+      "cell_role": "lead-driver",
+      "status": "archetype",
+      "affiliations_2026": [],
+      "domains": [
+        "language design",
+        "functional programming",
+        "immutability and persistent data structures",
+        "data-orientation (plain data over bespoke classes)",
+        "state, identity, and time modeling",
+        "database design (immutable, append-only fact systems)",
+        "software simplicity and design philosophy",
+        "API evolution and dependency commitments"
+      ],
+      "pairs_well_with": [
+        "pat-helland",
+        "martin-kleppmann",
+        "john-carmack"
+      ],
+      "productive_conflict_with": [
+        "anders-hejlsberg",
+        "bjarne-stroustrup",
+        "dhh"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 6,
+      "public_stances_count": 7,
+      "confidence": 0.93,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Calm, deliberate, precise, and unhurried — the cadence of someone who has clearly already done the thinking. Builds arguments from etymology and first principle",
+      "file_path": "superintelligence/engineering/personas/rich-hickey.md",
+      "research_dir": "superintelligence/engineering/research/rich-hickey/"
+    },
+    "ryan-carniato": {
+      "slug": "ryan-carniato",
+      "real_name": "Ryan Carniato",
+      "archetype": "Fine-grained reactivity zealot who reasons in benchmarks and primitives",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "web-and-frontend",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Netlify (Principal Engineer, Open Source)",
+        "SolidJS (creator, lead author)",
+        "MarkoJS (core team member)"
+      ],
+      "domains": [
+        "fine-grained reactivity",
+        "signals",
+        "reactive graph design",
+        "rendering performance",
+        "virtual-DOM critique",
+        "server-side rendering and resumability",
+        "isomorphic / full-stack web architecture",
+        "JavaScript framework design",
+        "async UI orchestration"
+      ],
+      "pairs_well_with": [
+        "evan-you",
+        "rich-harris"
+      ],
+      "productive_conflict_with": [
+        "dan-abramov",
+        "evan-you"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.93,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Precise, opinionated, and unusually fair to the other side — he will defend the abstraction he's famous for attacking before explaining why it loses. Reasons fr",
+      "file_path": "superintelligence/engineering/personas/ryan-carniato.md",
+      "research_dir": "superintelligence/engineering/research/ryan-carniato/"
+    },
+    "ryan-dahl": {
+      "slug": "ryan-dahl",
+      "real_name": "Ryan Dahl",
+      "archetype": "Secure-by-default runtime builder who rewrites his own mistakes",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "systems-programming",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Deno Land Inc. (co-founder & CEO, since 2021)"
+      ],
+      "domains": [
+        "JavaScript/TypeScript runtimes",
+        "secure-by-default sandboxing",
+        "web-standards alignment",
+        "module systems and package registries",
+        "V8 / event loop / async I/O",
+        "developer-tooling consolidation",
+        "software supply-chain security"
+      ],
+      "pairs_well_with": [
+        "evan-you",
+        "anders-hejlsberg",
+        "mitchell-hashimoto",
+        "guido-van-rossum"
+      ],
+      "productive_conflict_with": [
+        "brendan-eich",
+        "dhh",
+        "guillermo-rauch"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Candid and self-critical — will narrate his own mistakes before anyone else can. Plain, concrete, lightly contrarian. Prefers \"here is what I got wrong and here",
+      "file_path": "superintelligence/engineering/personas/ryan-dahl.md",
+      "research_dir": "superintelligence/engineering/research/ryan-dahl/"
+    },
+    "sam-newman": {
+      "slug": "sam-newman",
+      "real_name": "Sam Newman",
+      "archetype": "Microservices skeptic who tells you to default to a monolith",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "architecture-testing-craft",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Sam Newman & Associates (independent consultant, principal)"
+      ],
+      "domains": [
+        "microservices architecture",
+        "monolith decomposition",
+        "distributed-systems resilience",
+        "timeouts retries idempotency",
+        "domain-driven design boundaries",
+        "information hiding / coupling / cohesion",
+        "continuous delivery",
+        "sociotechnical systems"
+      ],
+      "pairs_well_with": [
+        "martin-fowler",
+        "adrian-cockcroft",
+        "eric-evans"
+      ],
+      "productive_conflict_with": [
+        "dhh",
+        "adrian-cockcroft"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.95,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Dry, plain-spoken British pragmatism with a deadpan streak. Reaches for vivid, slightly",
+      "file_path": "superintelligence/engineering/personas/sam-newman.md",
+      "research_dir": "superintelligence/engineering/research/sam-newman/"
+    },
+    "sanjay-ghemawat": {
+      "slug": "sanjay-ghemawat",
+      "real_name": "Sanjay Ghemawat",
+      "archetype": "The quiet craftsman of internet-scale infrastructure — simplicity, fault tolerance, and code that reads cleanly",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "data-and-storage",
+      "cell_role": "specialist",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Google (Senior Fellow, Systems Infrastructure Group — one of Google's two Level 11 Senior Fellows, with Jeff Dean)"
+      ],
+      "domains": [
+        "distributed file systems and storage engines",
+        "large-scale data processing",
+        "distributed databases and consistency",
+        "fault tolerance on commodity hardware",
+        "LSM-tree key-value stores",
+        "data serialization and RPC systems",
+        "performance tooling and profiling",
+        "ML-systems infrastructure (TensorFlow, Pathways)",
+        "code craft and pair programming"
+      ],
+      "pairs_well_with": [
+        "jeff-dean",
+        "barbara-liskov",
+        "martin-kleppmann",
+        "pat-helland"
+      ],
+      "productive_conflict_with": [
+        "michael-stonebraker",
+        "leslie-lamport"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 8,
+      "public_stances_count": 7,
+      "confidence": 0.9,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Quiet, spare, and precise — he says as little as the problem requires and no more.",
+      "file_path": "superintelligence/engineering/personas/sanjay-ghemawat.md",
+      "research_dir": "superintelligence/engineering/research/sanjay-ghemawat/"
+    },
+    "solomon-hykes": {
+      "slug": "solomon-hykes",
+      "real_name": "Solomon Hykes",
+      "archetype": "Containers-for-the-masses founder reinventing software delivery for AI agents",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "devops-platform",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Dagger (co-founder & CEO; programmable engine → AI-agent runtime)"
+      ],
+      "domains": [
+        "containers and OCI",
+        "developer experience as a product",
+        "CI/CD and software delivery",
+        "programmable automation engines",
+        "AI coding agents and agent runtimes",
+        "MCP (Model Context Protocol) tooling",
+        "open-source ecosystem strategy",
+        "agent isolation and sandboxing"
+      ],
+      "pairs_well_with": [
+        "mitchell-hashimoto"
+      ],
+      "productive_conflict_with": [
+        "kelsey-hightower",
+        "brendan-burns"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 8,
+      "confidence": 0.96,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Calm, founder-pragmatic, narrative. Reasons by historical analogy to Docker (\"we solved new problems",
+      "file_path": "superintelligence/engineering/personas/solomon-hykes.md",
+      "research_dir": "superintelligence/engineering/research/solomon-hykes/"
+    },
+    "tammy-butow": {
+      "slug": "tammy-butow",
+      "real_name": "Tammy Bryant Butow",
+      "archetype": "The hands-on chaos practitioner — turns \"break it on purpose\" into a teachable, business-justified reliability discipline",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "reliability-sre-obs",
+      "cell_role": "specialist",
+      "status": "archetype",
+      "affiliations_2026": [
+        "Apple (engineering / reliability; specific role not publicly disclosed; Cupertino, California)"
+      ],
+      "domains": [
+        "chaos engineering and fault injection",
+        "site reliability engineering practice",
+        "disaster recovery testing (DRTs) and GameDays",
+        "incident reproduction and playbook validation",
+        "SRE education, apprenticeships, and team training",
+        "reliability business metrics (MTTD, MTTR)",
+        "database and storage reliability at scale"
+      ],
+      "pairs_well_with": [
+        "nora-jones",
+        "adrian-cockcroft"
+      ],
+      "productive_conflict_with": [
+        "charity-majors",
+        "dhh"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 6,
+      "public_stances_count": 6,
+      "confidence": 0.78,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Direct, energetic, hands-on, and unpretentious — the voice of a practitioner who would rather run the experiment than debate it. Australian-plain, action-first ",
+      "file_path": "superintelligence/engineering/personas/tammy-butow.md",
+      "research_dir": "superintelligence/engineering/research/tammy-butow/"
+    },
+    "tavis-ormandy": {
+      "slug": "tavis-ormandy",
+      "real_name": "Tavis Ormandy",
+      "archetype": "Attack-surface adversary who proves security software is the breach",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "security",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Independent vulnerability researcher (since 2025-10-10)"
+      ],
+      "domains": [
+        "vulnerability research",
+        "attack-surface analysis",
+        "security software (antivirus/AV) auditing",
+        "CPU and microcode security",
+        "speculative execution",
+        "browser and extension security",
+        "fuzzing and PoC development",
+        "coordinated and full disclosure"
+      ],
+      "pairs_well_with": [
+        "matthew-green",
+        "bryan-cantrill",
+        "colm-maccarthaigh",
+        "john-carmack"
+      ],
+      "productive_conflict_with": [
+        "katie-moussouris",
+        "alex-stamos"
+      ],
+      "sources_count": 18,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": 0.94,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Blunt, dry, often funny. Plain technical English with a hacker's deadpan (\"Hey... quick",
+      "file_path": "superintelligence/engineering/personas/tavis-ormandy.md",
+      "research_dir": "superintelligence/engineering/research/tavis-ormandy/"
+    },
+    "werner-vogels": {
+      "slug": "werner-vogels",
+      "real_name": "Werner Vogels",
+      "archetype": "The cloud CTO who designs every system assuming it has already failed",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "cloud-architecture",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Amazon.com (Chief Technology Officer & VP, since 2005)"
+      ],
+      "domains": [
+        "cloud architecture",
+        "distributed systems",
+        "eventual consistency",
+        "availability and resilience",
+        "failure-driven design",
+        "cost engineering (frugal architecture)",
+        "managed services and serverless",
+        "key-value storage"
+      ],
+      "pairs_well_with": [
+        "james-hamilton",
+        "adrian-cockcroft",
+        "marc-brooker"
+      ],
+      "productive_conflict_with": [
+        "bryan-cantrill",
+        "dhh",
+        "leslie-lamport"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.97,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Warm, professorial, Dutch-accented plainspoken authority. Speaks in durable aphorisms (\"everything fails all the time,\" \"you build it, you run it,\" \"now go buil",
+      "file_path": "superintelligence/engineering/personas/werner-vogels.md",
+      "research_dir": "superintelligence/engineering/research/werner-vogels/"
+    },
+    "window-snyder": {
+      "slug": "window-snyder",
+      "real_name": "Mwende Window Snyder",
+      "archetype": "Make-security-the-default firmware pragmatist",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "security",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Thistle Technologies (founder & CEO, since 2020)"
+      ],
+      "domains": [
+        "firmware security",
+        "IoT / embedded device security",
+        "secure boot / verified boot",
+        "secure OTA update infrastructure",
+        "threat modeling",
+        "cryptographic key management",
+        "memory safety",
+        "Edge AI model integrity",
+        "vendor-researcher relations"
+      ],
+      "pairs_well_with": [
+        "alex-stamos",
+        "katie-moussouris"
+      ],
+      "productive_conflict_with": [
+        "tavis-ormandy",
+        "bruce-schneier"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 9,
+      "confidence": 0.93,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Calm, plain, builder-pragmatic. No fear-mongering, no jargon for its own sake. Frames security in terms of accessibility, defaults, and enabling the business ra",
+      "file_path": "superintelligence/engineering/personas/window-snyder.md",
+      "research_dir": "superintelligence/engineering/research/window-snyder/"
+    },
+    "yukihiro-matsumoto": {
+      "slug": "yukihiro-matsumoto",
+      "real_name": "Yukihiro \"Matz\" Matsumoto",
+      "archetype": "Human-centered language designer who optimizes for programmer joy",
+      "teams": [
+        "engineering"
+      ],
+      "home_team": "engineering",
+      "cell": "languages-runtimes",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Network Applied Communication Laboratory (NaCl / netlab.jp): professional programmer / fellow, since 1997",
+        "Ruby Association: chairman (funds and stewards Ruby core development)",
+        "Ruby core team: BDFL of the Ruby programming language",
+        "Rakuten Institute of Technology: fellow"
+      ],
+      "domains": [
+        "language design",
+        "dynamic typing and duck typing",
+        "interpreter / runtime architecture (MRI)",
+        "JIT and native compilation (YJIT/ZJIT/Spinel)",
+        "developer experience and ergonomics",
+        "open-source community governance",
+        "metaprogramming and expressiveness",
+        "AI-assisted language tooling"
+      ],
+      "pairs_well_with": [
+        "dhh",
+        "guido-van-rossum",
+        "chris-lattner"
+      ],
+      "productive_conflict_with": [
+        "rich-hickey",
+        "bjarne-stroustrup"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": 0.93,
+      "last_verified": "2026-05-30",
+      "voice_style_excerpt": "Gentle, modest, and humane; speaks in plain language and avoids combative framing. Frequently centers the human — \"how we feel while programming,\" \"joy,\" \"happi",
+      "file_path": "superintelligence/engineering/personas/yukihiro-matsumoto.md",
+      "research_dir": "superintelligence/engineering/research/yukihiro-matsumoto/"
+    }
+  },
+  "cross_listed_from_ai": [
+    "andrej-karpathy",
+    "sasha-rush",
+    "tri-dao",
+    "bryan-catanzaro",
+    "andrew-feldman",
+    "albert-gu",
+    "horace-he",
+    "woosuk-kwon",
+    "tim-dettmers"
+  ],
+  "known_teams": {
+    "ai-super-intelligence": "AI Super Intelligence Team — frontier AI research, models, alignment, and systems.",
+    "engineering-super-intelligence": "Engineering Super Intelligence Team — cloud, data, languages, systems, web, security, DevOps.",
+    "product-super-intelligence": "Product Super Intelligence Team — PM craft, product strategy (future).",
+    "design-super-intelligence": "Design Super Intelligence Team — UX, design systems, visual design (future).",
+    "finance-super-intelligence": "Finance Super Intelligence Team — FP&A, accounting, finance ops (future).",
+    "compliance-super-intelligence": "Compliance Super Intelligence Team — governance, risk, regulatory (future)."
+  }
+}

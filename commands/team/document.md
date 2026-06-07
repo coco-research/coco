@@ -39,7 +39,7 @@ L1 agents collect:
 - Secondary roles contribute specialized sections
 
 **Toolkit integration:**
-- Check team-toolkit.md for the relevant document type
+- Check team:toolkit.md for the relevant document type
 - If a PM Studio skill is recommended → invoke it, then L3 reviews the output
 - Apply all quality notes from previous runs
 - If toolkit says "skip tool" for this case → write directly

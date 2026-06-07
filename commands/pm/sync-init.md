@@ -14,7 +14,7 @@ allowed-tools:
 
 # /pmstudio-sync-init — Set Up Automated Sync for a New Project Folder
 
-This is an alias for `/project-sync init`. Run it inside any project folder to set up:
+Run it inside any project folder to set up automated sync. Execute the init process (Steps 1–6 below) directly — there is no separate `project-sync` skill; this command performs the setup and drives `~/.claude/scripts/project-sync-orchestrator.sh`. This sets up:
 
 1. **Email extraction** — Searches Outlook via AppleScript (Legacy Outlook, primary) for project-specific emails by keywords, stakeholders, and subject patterns. Falls back to MIME cache + HxStore binary extraction if AppleScript fails (New Outlook).
 2. **File monitoring** — Detects new meeting notes, research docs, source files in watched directories
@@ -162,10 +162,12 @@ These `/email-*` commands work alongside the sync cron:
 
 ## Managing After Setup
 
-- `/project-sync status` — Check last run, pending changes, auto-update results
-- `/project-sync configure` — Edit keywords, senders, budget, watch dirs
-- `/project-sync list` — Show all active sync jobs across projects
-- `/project-sync teardown` — Remove cron job, plist, wrapper script
+There is no `/project-sync` skill — manage the job directly:
+
+- **Status** — `cat ~/.claude/state/<safe-name>/email-sync.log` and check `~/.claude/state/<safe-name>/.last-email-check`; run `/bin/bash ~/.claude/scripts/run-sync-<safe-name>.sh` to trigger now.
+- **Configure** — edit `.sync-watch.json` in the project root, then re-cache by running the wrapper once.
+- **List** — `launchctl list | grep project-sync` (all active sync jobs).
+- **Teardown** — `launchctl unload ~/Library/LaunchAgents/com.claude.project-sync.<safe-name>.plist` then `rm` the plist + `~/.claude/scripts/run-sync-<safe-name>.sh`.
 
 ## Known Issues & Workarounds
 
@@ -179,6 +181,4 @@ These `/email-*` commands work alongside the sync cron:
 
 ---
 
-Now invoke the `/project-sync` skill with the `init` subcommand:
-
-Use the Skill tool to call `project-sync` with args `init`.
+Now execute the init process: run Steps 1–6 above (gather project info → write `.sync-watch.json` → create the wrapper script → create the launchd plist → activate & cache → verify). This command performs the setup itself; do not look for a separate `project-sync` skill.

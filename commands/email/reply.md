@@ -8,6 +8,6 @@ allowed-tools:
 
 # /email-reply — Draft a reply
 
-Parse the argument as a subject to find. Use the `/email` skill with subcommand `reply-draft`.
+Parse the argument as a subject to find. Use the `/email` command with subcommand `reply-draft`.
 
-Invoke the Skill tool: `email` with args `reply-draft <subject from argument>`.
+Read `~/.claude/commands/email.md`, run its Preflight (detect Outlook variant), then follow its `reply-draft <subject from argument>` subcommand instructions.

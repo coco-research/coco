@@ -8,6 +8,6 @@ allowed-tools:
 
 # /email-thread — View email thread
 
-Parse the argument as a subject to search for. Use the `/email` skill with subcommand `thread`.
+Parse the argument as a subject to search for. Use the `/email` command with subcommand `thread`.
 
-Invoke the Skill tool: `email` with args `thread <subject from argument>`.
+Read `~/.claude/commands/email.md`, run its Preflight (detect Outlook variant), then follow its `thread <subject from argument>` subcommand instructions.

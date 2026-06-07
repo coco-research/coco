@@ -8,4 +8,4 @@ allowed-tools:
 
 # /email-unread — Show unread emails
 
-Invoke the Skill tool: `email` with args `unread`.
+Read `~/.claude/commands/email.md`, run its Preflight (detect Outlook variant), then follow its `unread` subcommand instructions.

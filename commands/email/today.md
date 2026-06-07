@@ -8,4 +8,4 @@ allowed-tools:
 
 # /email-today — Today's emails
 
-Invoke the Skill tool: `email` with args `today`.
+Read `~/.claude/commands/email.md`, run its Preflight (detect Outlook variant), then follow its `today` subcommand instructions.

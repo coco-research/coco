@@ -9,4 +9,4 @@ allowed-tools:
 
 # /email-summary — Summarize today's emails
 
-Invoke the Skill tool: `email` with args `summary`.
+Read `~/.claude/commands/email.md`, run its Preflight (detect Outlook variant), then follow its `summary` subcommand instructions.

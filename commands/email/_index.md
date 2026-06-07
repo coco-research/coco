@@ -1,5 +1,5 @@
 ---
-description: "Read, search, and manage Outlook emails via AppleScript. Subcommands: read, unread, search, today, thread, save, summary, reply-draft. Requires Legacy Outlook for Mac."
+description: "Read, search, and manage Outlook emails. Auto-detects Legacy Outlook (AppleScript) vs New Outlook (MIME/HxStore extraction). Subcommands: read, unread, search, today, thread, save, summary, reply-draft."
 allowed-tools:
   - Bash
   - Read
@@ -13,7 +13,20 @@ allowed-tools:
 
 # /email — Outlook Email Commands
 
-You manage Outlook email access via AppleScript (Legacy Outlook for Mac). Parse the user's argument to determine which subcommand to run.
+You manage Outlook email access. Parse the user's argument to determine which subcommand to run.
+
+## Preflight: Detect Outlook variant (REQUIRED — run first)
+
+Outlook for Mac has two incompatible variants. Detect which one is running before doing anything:
+
+```bash
+defaults read com.microsoft.Outlook IsRunningNewOutlook 2>/dev/null || echo 0
+```
+
+- Output `0` or unset → **Legacy Outlook** → use the AppleScript templates below.
+- Output `1` → **New Outlook** → AppleScript is NOT supported (it will silently fail or error). Use **New Outlook (MIME) Mode** below instead. Do NOT attempt AppleScript.
+
+If an AppleScript call errors with "Microsoft Outlook got an error" or the app is unscriptable, treat it as New Outlook and switch to MIME mode rather than retrying.
 
 ## CRITICAL: AppleScript Sender Pattern
 
@@ -155,6 +168,38 @@ end repeat
 ### `folders`
 1. List all mail folders with message counts
 2. Show as table: Folder | Messages | Unread
+
+---
+
+## New Outlook (MIME) Mode
+
+New Outlook stores mail in a proprietary binary index (`HxStore.hxd`) with no AppleScript or local API. There is **no clean full-inbox read** — extract best-effort from the on-disk caches below, in priority order.
+
+**Paths** (under `~/Library/Group Containers/UBF8T346G9.Office/Outlook/Outlook 15 Profiles/Main Profile/Files/S0/4/`):
+- `MimeFiles/` — full RFC822 messages (cleanest, but **often empty** — not every install populates it).
+- `Attachments/0/*.eml` — received/forwarded messages saved as clean RFC822 `.eml` (reliable when present).
+- `HxStore.hxd` (one level up, in `Main Profile/`) — the real store; binary, no per-message delimiters. `strings` + grep yields sender/subject fragments only (last resort, messy).
+
+**Approach** (covers `read`, `search`, `today`, `this-week`, `thread`, `summary`, `save`):
+```bash
+P="$HOME/Library/Group Containers/UBF8T346G9.Office/Outlook/Outlook 15 Profiles/Main Profile/Files/S0/4"
+# Tiers 1+2: clean RFC822 from MimeFiles + .eml attachments, most-recent first.
+# Use find (not a glob) so it is portable across bash/zsh and survives an empty MimeFiles dir.
+{ find "$P/MimeFiles" -type f -print0 2>/dev/null; find "$P/Attachments/0" -maxdepth 1 -name '*.eml' -print0 2>/dev/null; } \
+  | xargs -0 ls -t 2>/dev/null | head -200 | while IFS= read -r f; do
+  subj=$(grep -a -m1 -i '^Subject:' "$f"); [ -z "$subj" ] && continue
+  from=$(grep -a -m1 -i '^From:' "$f"); date=$(grep -a -m1 -i '^Date:' "$f")
+  printf '%s\t%s\t%s\t%s\n' "$date" "$from" "$subj" "$f"
+done
+# Tier 3 (only if the above returns nothing): subject/sender awareness from the binary store
+#   strings "$P/../../HxStore.hxd" | grep -aiE '^(Subject|From):' | head -50
+```
+- Filter by sender (`read <name>`), keyword (`search`), or date (`today`/`this-week`). Body/`summary`: parse the matched file. `save <query> to <folder>`: copy the matched file into the target folder.
+
+**Limitations on New Outlook (state honestly — do not guess):**
+- This is **partial, not the full inbox**: `MimeFiles/` is frequently empty, and `.eml` attachments only cover received/forwarded messages. For complete access, use Legacy Outlook or the Microsoft Graph API — say so rather than implying full coverage.
+- `unread` count / read state, `folders`, mark-as-read, and sending a `reply-draft` need the app API — unavailable. For `reply-draft`, still draft text for copy/paste.
+- `HxStore.hxd` is binary; never present its raw `strings` dump as if it were clean email — use it only for awareness.
 
 ---
 

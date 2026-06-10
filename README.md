@@ -4,9 +4,9 @@
 
 <img src="assets/logo-light.svg" alt="Coco" width="160" height="220">
 
-# Coco: The Universal AI Agent Orchestration Framework
+# Meet Coco.
 
-### Transform your AI coding assistant into a high-performance engineering team, backed by an advisory board of 389 world-class minds.
+### A superintelligent agent framework powered by an advisory board of 389 world-class minds. Scale your AI assistant into a complete engineering department.
 Free | MIT License | 90-Second Onboarding
 
 <br>

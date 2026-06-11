@@ -69,6 +69,12 @@
   .vg li:last-child { border-bottom: none; }
   .vg li code { font-weight: 600; }
   .vg li span { color: var(--muted); }
+  .tabs { display: flex; gap: 6px; margin: 0 0 10px; }
+  .tabbtn { font-size: 0.72rem; letter-spacing: 0.03em; border-radius: 99px; padding: 3px 12px; border: 1px solid var(--border); background: #fff; cursor: pointer; color: var(--muted); }
+  .tabbtn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .vg ul.hidden, .exwrap.hidden { display: none; }
+  .vg li code.ex { font-weight: 400; font-size: 0.78rem; display: block; white-space: pre-wrap; background: var(--code-bg); color: var(--code-fg); border: none; padding: 6px 9px; border-radius: 6px; margin-top: 3px; }
+  .vg li b.exv { font-size: 0.82rem; }
 </style>
 </head>
 <body>
@@ -146,11 +152,35 @@
   CV -->|&quot;no (max 4 rounds)&quot;| RT
   CV -->|&quot;yes&quot;| FIN[&quot;Converged verdict<br/>or an honest SPLIT<br/>+ round transcript&quot;]"></div>
   <table>
-    <tr><th>Mode</th><th>Cost</th><th>When</th></tr>
-    <tr><td><code>(no flag)</code></td><td>Cheapest &mdash; single pass</td><td>Default. Quick takes, routine reviews.</td></tr>
-    <tr><td><code>--debate</code></td><td>Moderate &mdash; rounds run in-session</td><td>Contested calls where positions should be tested against each other.</td></tr>
-    <tr><td><code>--debate=full</code></td><td>Expensive &mdash; one subagent per expert per round</td><td>High-stakes, irreversible decisions only.</td></tr>
+    <tr><th>Mode</th><th>Cost</th><th>When</th><th>Example</th></tr>
+    <tr><td><code>(no flag)</code></td><td>Cheapest &mdash; single pass</td><td>Default. Quick takes, routine reviews.</td><td><code>/SI-Decide "ship Friday or wait for the fix?"</code></td></tr>
+    <tr><td><code>--debate</code></td><td>Moderate &mdash; rounds run in-session</td><td>Contested calls where positions should be tested against each other.</td><td><code>/SI-Decide --debate "sunset the v1 API or support both?"</code></td></tr>
+    <tr><td><code>--debate=full</code></td><td>Expensive &mdash; one subagent per expert per round</td><td>High-stakes, irreversible decisions only.</td><td><code>/SI-Decide --debate=full "migrate all customers to the new platform?"</code></td></tr>
   </table>
+
+  <h3>Copy-paste debate examples</h3>
+  <pre class="cmd"><span class="dim"># You never need the flag — saying it in the prompt works:</span>
+/SI "keep building the custom dashboard or adopt the vendor one? <span class="c">make them argue it out</span>"
+
+<span class="dim"># Debate on each verb that supports it:</span>
+/SI-Decide       --debate "build the integration in-house or buy the connector?"
+/SI-Tradeoff     --debate "monorepo vs polyrepo for a six-person team"
+/SI-Analyse      --debate "what does on-device AI mean for our roadmap?"
+/SI-Review       --debate "review docs/pricing-proposal.md"
+/SI-Pre-Mortem   --debate "we migrate billing to the new provider next quarter"
+/SI-Post-Mortem  --debate "the launch missed signup targets by 60%"
+/SI-Stress-Test  --debate "our plan to deprecate the v1 API in 90 days"
+/SI-Plan         --debate "roll out SSO to every enterprise customer this quarter"
+/SI-Design       --debate "notification service fanning out to email, chat, and in-app"
+/SI-Debug        --debate "p99 latency tripled after the deploy but CPU is flat"
+/SI-Defend       --debate "we should stay on SQLite instead of moving to Postgres"
+/SI-Re-Analyse   --debate --prior notes/pricing-analysis.md --evidence "competitor cut prices 30%"
+/SI-Full-Cycle   --debate "evaluate and decide on the new vendor platform"   <span class="dim"># heaviest combo — it will warn first</span>
+
+<span class="dim"># Team-scoped versions take it too:</span>
+/SI-PD-Decide    --debate "infinite scroll or pagination for the activity feed?"
+/SI-Eng-Design   --debate "event bus vs direct service calls for order processing"
+/SI-GRC-Stress-Test --debate "our data-retention policy before the audit"</pre>
   <p><code>Vote</code> and <code>Roast</code> deliberately don't take the flag &mdash; a binary tally and a one-liner roast have nothing to debate.</p>
 </section>
 
@@ -167,64 +197,121 @@
   <h3>The 9 teams</h3>
   <table>
     <tr><th>Code</th><th>Team</th><th>Experts</th><th>Reach for it when the question is about&hellip;</th></tr>
-    <tr><td><code>PD</code></td><td>Product &amp; Design</td><td>56</td><td>product strategy, UX, design systems, user research, what to build</td></tr>
-    <tr><td><code>Eng</code></td><td>Engineering</td><td>70</td><td>architecture, code, infrastructure, reliability, security engineering</td></tr>
-    <tr><td><code>AI</code></td><td>AI</td><td>59</td><td>models, agents, ML systems, evals, AI safety and capability</td></tr>
-    <tr><td><code>Data</code></td><td>Data &amp; Analytics</td><td>29</td><td>pipelines, metrics, experimentation, analytics engineering</td></tr>
-    <tr><td><code>Fin</code></td><td>Finance</td><td>47</td><td>budgets, unit economics, valuation, capital allocation</td></tr>
-    <tr><td><code>Trade</code></td><td>Trading</td><td>46</td><td>markets, risk models, derivatives, market microstructure</td></tr>
-    <tr><td><code>GRC</code></td><td>Risk &amp; Compliance</td><td>30</td><td>governance, privacy, regulatory exposure, audit, controls</td></tr>
-    <tr><td><code>Strat</code></td><td>Strategy</td><td>29</td><td>competitive positioning, market entry, long-range bets</td></tr>
-    <tr><td><code>GTM</code></td><td>Sales, GTM &amp; Marketing</td><td>23</td><td>pricing, positioning, launch, pipeline, growth</td></tr>
+    <tr><td><code>PD</code></td><td>Product &amp; Design</td><td>56</td><td>product strategy, UX, design systems, user research, what to build<br><code>/SI-PD "infinite scroll or pagination for the activity feed?"</code></td></tr>
+    <tr><td><code>Eng</code></td><td>Engineering</td><td>70</td><td>architecture, code, infrastructure, reliability, security engineering<br><code>/SI-Eng "event bus or direct service calls for order processing?"</code></td></tr>
+    <tr><td><code>AI</code></td><td>AI</td><td>59</td><td>models, agents, ML systems, evals, AI safety and capability<br><code>/SI-AI "fine-tune a small model or prompt a frontier one for triage?"</code></td></tr>
+    <tr><td><code>Data</code></td><td>Data &amp; Analytics</td><td>29</td><td>pipelines, metrics, experimentation, analytics engineering<br><code>/SI-Data "is this A/B test result real or peeking bias?"</code></td></tr>
+    <tr><td><code>Fin</code></td><td>Finance</td><td>47</td><td>budgets, unit economics, valuation, capital allocation<br><code>/SI-Fin "does annual prepay discounting actually improve our cash position?"</code></td></tr>
+    <tr><td><code>Trade</code></td><td>Trading</td><td>46</td><td>markets, risk models, derivatives, market microstructure<br><code>/SI-Trade "stress-test our exposure if rates jump 100bps"</code></td></tr>
+    <tr><td><code>GRC</code></td><td>Risk &amp; Compliance</td><td>30</td><td>governance, privacy, regulatory exposure, audit, controls<br><code>/SI-GRC "review our data-retention policy before the audit, be brutal"</code></td></tr>
+    <tr><td><code>Strat</code></td><td>Strategy</td><td>29</td><td>competitive positioning, market entry, long-range bets<br><code>/SI-Strat "enter the SMB segment or double down on enterprise?"</code></td></tr>
+    <tr><td><code>GTM</code></td><td>Sales, GTM &amp; Marketing</td><td>23</td><td>pricing, positioning, launch, pipeline, growth<br><code>/SI-GTM "usage-based pricing or seats for the new tier?"</code></td></tr>
   </table>
 
   <h3>The verbs, grouped by what you want</h3>
+  <p style="color:var(--muted);font-size:0.88rem">Every card has two tabs &mdash; flip to <strong>Examples</strong> for a ready-to-paste command per verb.</p>
   <div class="verbgroups">
-    <div class="vg"><h4>Make a call</h4><ul>
-      <li><code>Decide</code> <span>&mdash; pick between options, named dissent</span></li>
-      <li><code>Tradeoff</code> <span>&mdash; A-vs-B scored on 4&ndash;7 dimensions</span></li>
-      <li><code>Vote</code> <span>&mdash; yes/no tally on a binary question</span></li>
-    </ul></div>
-    <div class="vg"><h4>Examine</h4><ul>
-      <li><code>Analyse</code> <span>&mdash; multi-lens read of a topic</span></li>
-      <li><code>Review</code> <span>&mdash; critique a doc, PR, or design</span></li>
-      <li><code>Re-Analyse</code> <span>&mdash; rerun a prior analysis with new evidence</span></li>
-      <li><code>Debug</code> <span>&mdash; ranked root-cause hypotheses + test order</span></li>
-    </ul></div>
-    <div class="vg"><h4>De-risk</h4><ul>
-      <li><code>Pre-Mortem</code> <span>&mdash; what kills this in 12 months</span></li>
-      <li><code>Post-Mortem</code> <span>&mdash; 5-whys root cause after a failure</span></li>
-      <li><code>Stress-Test</code> <span>&mdash; adversarial attack, no diplomacy</span></li>
-      <li><code>Roast</code> <span>&mdash; one cutting line per expert</span></li>
-      <li><code>Defend</code> <span>&mdash; steelman a position properly</span></li>
-    </ul></div>
-    <div class="vg"><h4>Build</h4><ul>
-      <li><code>Plan</code> <span>&mdash; phased plan with owners and risks</span></li>
-      <li><code>Design</code> <span>&mdash; architecture pass, per-decision attribution</span></li>
-      <li><code>Full-Cycle</code> <span>&mdash; review &rarr; analyse &rarr; mitigate &rarr; decide (heavy, ~5&times; latency)</span></li>
-    </ul></div>
-    <div class="vg"><h4>Talk to the experts <em style="color:var(--muted);font-style:normal">(team-scoped only)</em></h4><ul>
-      <li><code>Ask &lt;slug&gt;</code> <span>&mdash; 1-on-1 with one expert in their voice</span></li>
-      <li><code>Huddle &lt;cell&gt;</code> <span>&mdash; one specialist cell synthesizes</span></li>
-      <li><code>Meeting</code> <span>&mdash; the entire team convenes</span></li>
-      <li><code>Read &lt;slug&gt;</code> <span>&mdash; print an expert's profile</span></li>
-    </ul></div>
-    <div class="vg"><h4>Team admin <em style="color:var(--muted);font-style:normal">(rarely needed)</em></h4><ul>
-      <li><code>Orchestrate</code> <span>&mdash; panel selection only (verbs call this for you)</span></li>
-      <li><code>Recruit</code> <span>&mdash; propose new experts for a gap</span></li>
-      <li><code>Refresh</code> <span>&mdash; update stale expert profiles</span></li>
-      <li><code>VoiceCheck</code> / <code>Verify</code> <span>&mdash; quality checks on voices and citations</span></li>
-    </ul></div>
+    <div class="vg"><h4>Make a call</h4>
+      <div class="tabs"><button class="tabbtn on">What it does</button><button class="tabbtn">Examples</button></div>
+      <ul class="t-what">
+        <li><code>Decide</code> <span>&mdash; pick between options, named dissent</span></li>
+        <li><code>Tradeoff</code> <span>&mdash; A-vs-B scored on 4&ndash;7 dimensions</span></li>
+        <li><code>Vote</code> <span>&mdash; yes/no tally on a binary question</span></li>
+      </ul>
+      <ul class="t-ex hidden">
+        <li><b class="exv">Decide</b><code class="ex">/SI-Decide "build the export feature in-house or buy the vendor tool?"</code></li>
+        <li><b class="exv">Tradeoff</b><code class="ex">/SI-Tradeoff "monorepo vs polyrepo for a six-person team"</code></li>
+        <li><b class="exv">Vote</b><code class="ex">/SI-Vote "should we ship this behind a feature flag this week?"</code></li>
+      </ul>
+    </div>
+    <div class="vg"><h4>Examine</h4>
+      <div class="tabs"><button class="tabbtn on">What it does</button><button class="tabbtn">Examples</button></div>
+      <ul class="t-what">
+        <li><code>Analyse</code> <span>&mdash; multi-lens read of a topic</span></li>
+        <li><code>Review</code> <span>&mdash; critique a doc, PR, or design</span></li>
+        <li><code>Re-Analyse</code> <span>&mdash; rerun a prior analysis with new evidence</span></li>
+        <li><code>Debug</code> <span>&mdash; ranked root-cause hypotheses + test order</span></li>
+      </ul>
+      <ul class="t-ex hidden">
+        <li><b class="exv">Analyse</b><code class="ex">/SI-Analyse "what does on-device AI mean for our product roadmap?"</code></li>
+        <li><b class="exv">Review</b><code class="ex">/SI-Eng-Review "review backend/app/routers/auth.py"
+/SI-Review "https://github.com/org/repo/pull/123"</code></li>
+        <li><b class="exv">Re-Analyse</b><code class="ex">/SI-Re-Analyse --prior notes/pricing-analysis.md --evidence "competitor cut prices 30%"</code></li>
+        <li><b class="exv">Debug</b><code class="ex">/SI-Eng-Debug "p99 latency tripled after the deploy but CPU is flat"</code></li>
+      </ul>
+    </div>
+    <div class="vg"><h4>De-risk</h4>
+      <div class="tabs"><button class="tabbtn on">What it does</button><button class="tabbtn">Examples</button></div>
+      <ul class="t-what">
+        <li><code>Pre-Mortem</code> <span>&mdash; what kills this in 12 months</span></li>
+        <li><code>Post-Mortem</code> <span>&mdash; 5-whys root cause after a failure</span></li>
+        <li><code>Stress-Test</code> <span>&mdash; adversarial attack, no diplomacy</span></li>
+        <li><code>Roast</code> <span>&mdash; one cutting line per expert</span></li>
+        <li><code>Defend</code> <span>&mdash; steelman a position properly</span></li>
+      </ul>
+      <ul class="t-ex hidden">
+        <li><b class="exv">Pre-Mortem</b><code class="ex">/SI-Pre-Mortem "we migrate billing to the new provider next quarter"</code></li>
+        <li><b class="exv">Post-Mortem</b><code class="ex">/SI-Post-Mortem "the launch missed signup targets by 60%"</code></li>
+        <li><b class="exv">Stress-Test</b><code class="ex">/SI-Stress-Test "our plan to deprecate the v1 API in 90 days"</code></li>
+        <li><b class="exv">Roast</b><code class="ex">/SI-Roast "this landing page headline: 'Synergize your workflows'"</code></li>
+        <li><b class="exv">Defend</b><code class="ex">/SI-Defend "we should stay on SQLite instead of moving to Postgres"</code></li>
+      </ul>
+    </div>
+    <div class="vg"><h4>Build</h4>
+      <div class="tabs"><button class="tabbtn on">What it does</button><button class="tabbtn">Examples</button></div>
+      <ul class="t-what">
+        <li><code>Plan</code> <span>&mdash; phased plan with owners and risks</span></li>
+        <li><code>Design</code> <span>&mdash; architecture pass, per-decision attribution</span></li>
+        <li><code>Full-Cycle</code> <span>&mdash; review &rarr; analyse &rarr; mitigate &rarr; decide (heavy, ~5&times; latency)</span></li>
+      </ul>
+      <ul class="t-ex hidden">
+        <li><b class="exv">Plan</b><code class="ex">/SI-Plan "roll out SSO to every enterprise customer this quarter"</code></li>
+        <li><b class="exv">Design</b><code class="ex">/SI-Design "notification service fanning out to email, chat, and in-app"</code></li>
+        <li><b class="exv">Full-Cycle</b><code class="ex">/SI-Full-Cycle "evaluate and decide on the new vendor risk platform"</code></li>
+      </ul>
+    </div>
+    <div class="vg"><h4>Talk to the experts <em style="color:var(--muted);font-style:normal">(team-scoped only)</em></h4>
+      <div class="tabs"><button class="tabbtn on">What it does</button><button class="tabbtn">Examples</button></div>
+      <ul class="t-what">
+        <li><code>Ask &lt;slug&gt;</code> <span>&mdash; 1-on-1 with one expert in their voice</span></li>
+        <li><code>Huddle &lt;cell&gt;</code> <span>&mdash; one specialist cell synthesizes</span></li>
+        <li><code>Meeting</code> <span>&mdash; the entire team convenes</span></li>
+        <li><code>Read &lt;slug&gt;</code> <span>&mdash; print an expert's profile</span></li>
+      </ul>
+      <ul class="t-ex hidden">
+        <li><b class="exv">Ask</b><code class="ex">/SI-GRC-Ask ann-cavoukian "how would you redesign our consent flow?"
+/SI-Strat-Ask michael-porter "is our moat real or just operational effectiveness?"</code></li>
+        <li><b class="exv">Huddle</b><code class="ex">/SI-GRC-Huddle privacy-data-protection "retention limits for chat logs"</code></li>
+        <li><b class="exv">Meeting</b><code class="ex">/SI-Fin-Meeting "assumptions behind the 2027 budget"</code></li>
+        <li><b class="exv">Read</b><code class="ex">/SI-Strat-Read richard-rumelt</code></li>
+      </ul>
+    </div>
+    <div class="vg"><h4>Team admin <em style="color:var(--muted);font-style:normal">(rarely needed)</em></h4>
+      <div class="tabs"><button class="tabbtn on">What it does</button><button class="tabbtn">Examples</button></div>
+      <ul class="t-what">
+        <li><code>Orchestrate</code> <span>&mdash; panel selection only (verbs call this for you)</span></li>
+        <li><code>Recruit</code> <span>&mdash; propose new experts for a gap</span></li>
+        <li><code>Refresh</code> <span>&mdash; update stale expert profiles</span></li>
+        <li><code>VoiceCheck</code> / <code>Verify</code> <span>&mdash; quality checks on voices and citations</span></li>
+      </ul>
+      <ul class="t-ex hidden">
+        <li><b class="exv">Orchestrate</b><code class="ex">/SI-Orchestrate "who should weigh in on usage-based pricing?"</code></li>
+        <li><b class="exv">Recruit</b><code class="ex">/SI-GTM-Recruit partnerships "nobody on the roster covers channel/alliance strategy"</code></li>
+        <li><b class="exv">Refresh</b><code class="ex">/SI-PD-Refresh --stale</code></li>
+        <li><b class="exv">VoiceCheck / Verify</b><code class="ex">/SI-Eng-VoiceCheck
+/SI-Fin-Verify   <span class="dim"># re-checks the last output's citations</span></code></li>
+      </ul>
+    </div>
   </div>
 
   <h3>Flags (all optional &mdash; plain-English wording in the prompt sets the same dials)</h3>
   <table>
-    <tr><th>Flag</th><th>Effect</th></tr>
-    <tr><td><code>--deep</code></td><td>Full per-expert detail. Default output is the short tier: verdict + top dissents, ~10&ndash;20 lines.</td></tr>
-    <tr><td><code>--debate</code> / <code>--debate=full</code></td><td>Reacting rounds before synthesis (see above).</td></tr>
-    <tr><td><code>--no-orchestrate</code></td><td>Skip selection; use the whole team.</td></tr>
-    <tr><td><code>--cells a,b</code> / <code>--personas x,y</code></td><td>Hand-pick the scope; skips orchestration.</td></tr>
-    <tr><td><code>--coco-off</code></td><td>Use the standalone selector instead of CoCo's context-aware routing.</td></tr>
+    <tr><th>Flag</th><th>Effect</th><th>Example</th></tr>
+    <tr><td><code>--deep</code></td><td>Full per-expert detail. Default output is the short tier: verdict + top dissents, ~10&ndash;20 lines.</td><td><code>/SI-Analyse --deep "our churn doubled in Q2"</code><br><span style="color:var(--muted);font-size:0.82rem">or just say &ldquo;in depth&rdquo; in the prompt</span></td></tr>
+    <tr><td><code>--debate</code> / <code>--debate=full</code></td><td>Reacting rounds before synthesis (see above).</td><td><code>/SI-Decide --debate "kill or keep the v1 UI?"</code><br><span style="color:var(--muted);font-size:0.82rem">or just say &ldquo;make them argue&rdquo;</span></td></tr>
+    <tr><td><code>--no-orchestrate</code></td><td>Skip selection; use the whole team.</td><td><code>/SI-PD-Review --no-orchestrate "the new onboarding flow"</code></td></tr>
+    <tr><td><code>--cells a,b</code> / <code>--personas x,y</code></td><td>Hand-pick the scope; skips orchestration.</td><td><code>/SI-GRC-Analyse --cells privacy-data-protection "chat-log retention"</code><br><code>/SI-Strat-Decide --personas michael-porter,roger-martin "enter the SMB market?"</code></td></tr>
+    <tr><td><code>--coco-off</code></td><td>Use the standalone selector instead of CoCo's context-aware routing.</td><td><code>/SI-Decide --coco-off "A or B?"</code></td></tr>
   </table>
 </section>
 
@@ -268,6 +355,18 @@
 
 </div>
 
+<script>
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.tabbtn');
+    if (!btn) return;
+    const vg = btn.closest('.vg');
+    if (!vg) return;
+    vg.querySelectorAll('.tabbtn').forEach((b) => b.classList.toggle('on', b === btn));
+    const showEx = btn.textContent.trim() === 'Examples';
+    vg.querySelector('.t-what').classList.toggle('hidden', showEx);
+    vg.querySelector('.t-ex').classList.toggle('hidden', !showEx);
+  });
+</script>
 <script type="module">
   import { renderMermaidSVGAsync } from 'https://esm.sh/beautiful-mermaid@1.1.3';
   const theme = { bg: '#ffffff', fg: '#0f1d3a', line: '#475569', accent: '#1a73e8' };

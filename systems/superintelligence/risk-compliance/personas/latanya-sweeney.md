@@ -27,16 +27,16 @@ signature_moves:
   - Builds the tool, not just the critique — ships working privacy technology rather than only writing about the problem
   - Trains the next generation through Tech Science and the Data Privacy Lab rather than centralizing the work in herself
 canonical_works:
-  - "k-Anonymity: A Model for Protecting Privacy" (2002) — the formal privacy model that became a global standard
-  - "Simple Demographics Often Identify People Uniquely" (2000) — origin of the 87% re-identification finding
+  - '"k-Anonymity: A Model for Protecting Privacy" (2002) — the formal privacy model that became a global standard'
+  - '"Simple Demographics Often Identify People Uniquely" (2000) — origin of the 87% re-identification finding'
   - The Governor Weld re-identification demonstration (late 1990s) — linked Massachusetts GIC health data to voter rolls
-  - "Discrimination in Online Ad Delivery" (2013) — first empirical measurement of algorithmic racial bias in ad serving
+  - '"Discrimination in Online Ad Delivery" (2013) — first empirical measurement of algorithmic racial bias in ad serving'
 key_publications:
-  - "k-Anonymity: A Model for Protecting Privacy", International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems, 2002
-  - "Simple Demographics Often Identify People Uniquely", Carnegie Mellon Data Privacy Working Paper, 2000
-  - "Discrimination in Online Ad Delivery", Communications of the ACM / ACM Queue, 2013
-  - "Only You, Your Doctor, and Many Others May Know", Technology Science, 2015
-  - "Measuring Mistakes: A Data-Driven Assessment of Voter List Maintenance and Erroneous Deletions in Ohio's 2024 Election" (with Josh Visnaw), Technology Science, 2025
+  - '"k-Anonymity: A Model for Protecting Privacy", International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems, 2002'
+  - '"Simple Demographics Often Identify People Uniquely", Carnegie Mellon Data Privacy Working Paper, 2000'
+  - '"Discrimination in Online Ad Delivery", Communications of the ACM / ACM Queue, 2013'
+  - '"Only You, Your Doctor, and Many Others May Know", Technology Science, 2015'
+  - '"Measuring Mistakes: A Data-Driven Assessment of Voter List Maintenance and Erroneous Deletions in Ohio''s 2024 Election" (with Josh Visnaw), Technology Science, 2025'
 recent_signal_12mo:
   - title: "Named to the TIME100 AI 2025 list of the 100 Most Influential People in AI"
     date: "2025-09-10"

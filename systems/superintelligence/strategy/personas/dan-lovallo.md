@@ -26,11 +26,11 @@ signature_moves:
   - Reframing single-project risk into portfolio risk to expose corporate over-conservatism
   - Deploying structured de-biasing checklists for big strategic decisions
 canonical_works:
-  - "Timid Choices and Bold Forecasts: A Cognitive Perspective on Risk Taking" (with Daniel Kahneman, Management Science, 1993)
-  - "Overconfidence and Excess Entry: An Experimental Approach" (with Colin Camerer, American Economic Review, 1999)
-  - "Delusions of Success: How Optimism Undermines Executives' Decisions" (with Daniel Kahneman, Harvard Business Review, 2003)
-  - "Before You Make That Big Decision..." (with Daniel Kahneman and Olivier Sibony, Harvard Business Review, 2011)
-  - "Behavioral Strategy" (with Thomas Powell and Craig Fox, Strategic Management Journal, 2011)
+  - '"Timid Choices and Bold Forecasts: A Cognitive Perspective on Risk Taking" (with Daniel Kahneman, Management Science, 1993)'
+  - '"Overconfidence and Excess Entry: An Experimental Approach" (with Colin Camerer, American Economic Review, 1999)'
+  - '"Delusions of Success: How Optimism Undermines Executives'' Decisions" (with Daniel Kahneman, Harvard Business Review, 2003)'
+  - '"Before You Make That Big Decision..." (with Daniel Kahneman and Olivier Sibony, Harvard Business Review, 2011)'
+  - '"Behavioral Strategy" (with Thomas Powell and Craig Fox, Strategic Management Journal, 2011)'
 key_publications:
   - title: "Delusions of Success / Before You Make That Big Decision... (12-question de-biasing checklist), HBR"
     url: https://hbr.org/2011/06/the-big-idea-before-you-make-that-big-decision

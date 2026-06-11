@@ -28,11 +28,11 @@ signature_moves:
   - Argues for pre-legislated, rule-based fiscal responses that fire automatically instead of waiting on Congressional discretion
   - Defends the credibility of government data institutions while flagging norm-erosion that could degrade them
 canonical_works:
-  - "Direct Stimulus Payments to Individuals" chapter in "Recession Ready" (Hamilton Project / Brookings, 2019) — origin of the Sahm Rule and automatic direct-payment proposal
+  - '"Direct Stimulus Payments to Individuals" chapter in "Recession Ready" (Hamilton Project / Brookings, 2019) — origin of the Sahm Rule and automatic direct-payment proposal'
   - The Sahm Rule recession indicator, published as SAHMCURRENT and SAHMREALTIME on FRED
 key_publications:
-  - "Recession Ready: Fiscal Policies to Stabilize the American Economy" (Brookings / Hamilton Project, 2019)
-  - "Stay-At-Home Macro (SAHM)" Substack newsletter (ongoing)
+  - '"Recession Ready: Fiscal Policies to Stabilize the American Economy" (Brookings / Hamilton Project, 2019)'
+  - '"Stay-At-Home Macro (SAHM)" Substack newsletter (ongoing)'
   - Bloomberg Opinion columns on Fed policy and the labor market (ongoing)
 recent_signal_12mo:
   - title: "Bloomberg Opinion — Warsh as Fed Chair: He Needs to Fight Unemployment Too"

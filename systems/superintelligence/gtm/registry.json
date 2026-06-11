@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-01",
+  "generated_at": "2026-06-11",
   "team_id": "gtm-super-intelligence",
   "team_name": "Sales, GTM & Marketing Super Intelligence Team",
   "description": "Sales, GTM & Marketing Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md.",
-  "native_personas_count": 20,
+  "native_personas_count": 23,
   "cross_listed_count": 3,
-  "personas_count": 23,
+  "personas_count": 26,
   "cells_count": 7,
   "cells": {
     "category-design-positioning": {
@@ -50,8 +50,10 @@
     "product-led-growth": {
       "id": "product-led-growth",
       "description": "PLG, self-serve, freemium, product-as-the-go-to-market.",
-      "personas_count": 1,
+      "personas_count": 3,
       "personas": [
+        "blake-bartlett",
+        "wes-bush",
         "elena-verna"
       ],
       "file_path": "superintelligence/gtm/cells/product-led-growth.md"
@@ -71,10 +73,11 @@
     "pricing-monetization": {
       "id": "pricing-monetization",
       "description": "Pricing strategy, packaging, monetization, willingness-to-pay.",
-      "personas_count": 2,
+      "personas_count": 3,
       "personas": [
+        "hermann-simon",
         "madhavan-ramanujam",
-        "patrick-campbell-paddle-profitwell"
+        "patrick-campbell"
       ],
       "file_path": "superintelligence/gtm/cells/pricing-monetization.md"
     },
@@ -222,6 +225,52 @@
       "voice_style_excerpt": "Warm, witty, and conversational — abbreviations, incomplete sentences on purpose, the occasional 'shenanigans,' and a letter-from-a-friend cadence. Plainspoken ",
       "file_path": "superintelligence/gtm/personas/ann-handley.md",
       "research_dir": "superintelligence/gtm/research/ann-handley/",
+      "build_method": "local-llm"
+    },
+    "blake-bartlett": {
+      "slug": "blake-bartlett",
+      "real_name": "Blake Bartlett",
+      "archetype": "The investor-evangelist who named product-led growth and turned the end-user era into a measurable GTM playbook",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "product-led-growth",
+      "cell_role": "specialist",
+      "status": "archetype",
+      "affiliations_2026": [
+        "OpenView (Partner; firm entered voluntary wind-down December 2023, portfolio support and content continue)",
+        "PLG123 / BUILD with Blake Bartlett (creator-host)",
+        "Board/advisor roles at portfolio companies including Calendly, Highspot, Expensify, Cypress.io"
+      ],
+      "domains": [
+        "product-led growth (PLG)",
+        "B2B SaaS go-to-market",
+        "bottom-up adoption and self-service",
+        "growth-stage venture investing",
+        "SaaS benchmarking and metrics"
+      ],
+      "pairs_well_with": [
+        "wes-bush",
+        "lincoln-murphy",
+        "kipp-bodnar",
+        "jacco-van-der-kooij"
+      ],
+      "productive_conflict_with": [
+        "mark-roberge",
+        "aaron-ross",
+        "keenan",
+        "madhavan-ramanujam"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 0,
+      "persistent_signals_count": 4,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Evangelist-investor cadence — coins memorable labels (\"end-user era,\" \"PLG123\"), reasons in named frameworks and numbered pillars, anchors claims to portfolio e",
+      "file_path": "superintelligence/gtm/personas/blake-bartlett.md",
+      "research_dir": "superintelligence/gtm/research/blake-bartlett/",
       "build_method": "local-llm"
     },
     "bob-hoffman": {
@@ -399,6 +448,53 @@
       "voice_style_excerpt": "Blunt and evangelistic; metaphor-forward; sharp contrasts (different vs. better; creator vs. knowledge worker); frequent translation from big ideas into identit",
       "file_path": "superintelligence/gtm/personas/christopher-lochhead.md",
       "research_dir": "superintelligence/gtm/research/christopher-lochhead/",
+      "build_method": "local-llm"
+    },
+    "hermann-simon": {
+      "slug": "hermann-simon",
+      "real_name": "Hermann Simon",
+      "archetype": "The pricing economist who reframes price as the single most powerful, most-neglected profit lever — and treats profit, not market share, as the only honest corporate goal.",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "pricing-monetization",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder and Honorary Chairman, Simon-Kucher (co-founded 1985)",
+        "Thinkers50 Hall of Fame inductee (2019)",
+        "Honorary Professor, University of International Business and Economics, Beijing",
+        "Former professor of business administration and marketing, Universities of Mainz and Bielefeld",
+        "Former visiting professor at Harvard Business School, Stanford, MIT, INSEAD"
+      ],
+      "domains": [
+        "Pricing strategy and price management",
+        "Profit orientation versus market-share orientation",
+        "Value-based pricing and willingness-to-pay measurement",
+        "Hidden champions (mid-market global market leaders)",
+        "Inflation and tariff pass-through pricing",
+        "B2B and industrial commercial strategy"
+      ],
+      "pairs_well_with": [
+        "madhavan-ramanujam",
+        "patrick-campbell",
+        "byron-sharp"
+      ],
+      "productive_conflict_with": [
+        "keenan",
+        "wes-bush",
+        "christopher-lochhead"
+      ],
+      "sources_count": 10,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Professorial, precise, and quietly contrarian. Speaks in crisp economic logic with memorable numbers and aphorisms ('no company ever went broke turning a profit",
+      "file_path": "superintelligence/gtm/personas/hermann-simon.md",
+      "research_dir": "superintelligence/gtm/research/hermann-simon/",
       "build_method": "local-llm"
     },
     "jacco-van-der-kooij": {
@@ -854,14 +950,14 @@
       "research_dir": "superintelligence/gtm/research/nick-mehta/",
       "build_method": "local-llm"
     },
-    "patrick-campbell-paddle-profitwell": {
-      "slug": "patrick-campbell-paddle-profitwell",
+    "patrick-campbell": {
+      "slug": "patrick-campbell",
       "real_name": "Patrick Campbell",
       "archetype": "Data-driven SaaS monetization strategist who operationalizes pricing and retention through subscription metrics",
       "teams": [
-        "Paddle"
+        "gtm-super-intelligence"
       ],
-      "home_team": "Paddle",
+      "home_team": "gtm-super-intelligence",
       "cell": "pricing-monetization",
       "cell_role": "strategy-lead",
       "status": "active",
@@ -890,7 +986,7 @@
       "last_verified": "2026-06-01",
       "voice_style_excerpt": "Pragmatic, metric-first operator tone; frames pricing/retention as revenue engineering with clear “what must be true” and implementation implications",
       "file_path": "superintelligence/gtm/personas/patrick-campbell.md",
-      "research_dir": "superintelligence/gtm/research/patrick-campbell-paddle-profitwell/",
+      "research_dir": "superintelligence/gtm/research/patrick-campbell/",
       "build_method": "local-llm"
     },
     "rand-fishkin": {
@@ -988,6 +1084,56 @@
       "voice_style_excerpt": "Spare, aphoristic, and generous. Short declarative sentences; reframes the question rather than answering it directly. Coins memorable terms, leans on metaphor ",
       "file_path": "superintelligence/gtm/personas/seth-godin.md",
       "research_dir": "superintelligence/gtm/research/seth-godin/",
+      "build_method": "local-llm"
+    },
+    "wes-bush": {
+      "slug": "wes-bush",
+      "real_name": "Wes Bush",
+      "archetype": "The product-led growth systems-builder who turns the product itself into the primary acquisition, conversion, and expansion engine.",
+      "teams": [
+        "gtm-super-intelligence"
+      ],
+      "home_team": "gtm-super-intelligence",
+      "cell": "product-led-growth",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder & CEO, ProductLed (productled.com)",
+        {
+          "Author, \"Product-Led Growth": "How to Build a Product That Sells Itself\" (2019, 2nd ed. updated for 2026)"
+        },
+        "Author, \"The Product-Led Playbook\" (2024)",
+        "Host, ProductLed Podcast and ProductLed Summit",
+        "Creator, ProductLed System and ProductLed MBA program"
+      ],
+      "domains": [
+        "product-led growth (PLG) strategy",
+        "free model design (free trial vs. freemium vs. reverse trial)",
+        "user onboarding and activation",
+        "self-serve revenue and time-to-value",
+        "SaaS go-to-market motion design",
+        "pricing and packaging for self-serve"
+      ],
+      "pairs_well_with": [
+        "blake-bartlett",
+        "madhavan-ramanujam",
+        "lincoln-murphy",
+        "patrick-campbell"
+      ],
+      "productive_conflict_with": [
+        "mark-roberge",
+        "aaron-ross",
+        "keenan"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Practical, founder-to-founder, framework-first. Speaks in named systems and step sequences (UCD, Bowling Alley, MOAT). Direct and a little contrarian about lazy",
+      "file_path": "superintelligence/gtm/personas/wes-bush.md",
+      "research_dir": "superintelligence/gtm/research/wes-bush/",
       "build_method": "local-llm"
     },
     "geoffrey-moore": {

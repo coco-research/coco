@@ -11,7 +11,7 @@ status: active
 affiliations_2026:
   - UCLA Anderson School of Management (Professor Emeritus, Strategy)
   - Rumelt Advisory (independent strategy practice)
-  - "The Rumelt Perspectives" (Substack publication, renamed Jan 2026)
+  - '"The Rumelt Perspectives" (Substack publication, renamed Jan 2026)'
 domains:
   - Competitive strategy and sources of sustainable competitive advantage
   - Strategy as diagnosis and coherent action

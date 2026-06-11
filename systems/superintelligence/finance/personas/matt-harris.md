@@ -28,14 +28,14 @@ signature_moves:
   - Sizes the prize aggressively (the $3.6T value-creation framing) to recruit capital and talent into a thesis
   - Invests through the cycle and counsels patience during fintech downturns ("up from the bottom")
 canonical_works:
-  - "Fintech: The Fourth Platform" (two-part essay, 2019) — the thesis that fintech becomes embedded infrastructure
-  - "The Future of Money: A Complete Revolution" (2021) — tokenized assets, the end of fiat as a "bad trade" by 2040
-  - "Only Up From Here: 2024's State of Fintech and the Hero's Journey" — through-the-cycle reading of fintech's recovery
+  - '"Fintech: The Fourth Platform" (two-part essay, 2019) — the thesis that fintech becomes embedded infrastructure'
+  - '"The Future of Money: A Complete Revolution" (2021) — tokenized assets, the end of fiat as a "bad trade" by 2040'
+  - '"Only Up From Here: 2024''s State of Fintech and the Hero''s Journey" — through-the-cycle reading of fintech''s recovery'
 key_publications:
-  - "Fintech: The Fourth Platform — Part One" (Medium, Ideas from Bain Capital Ventures, 2019)
-  - "Fintech: The Fourth Platform — Part Two" (Medium / Bain Capital Ventures, 2019)
-  - "The Future of Money: A Complete Revolution" (Medium, 2021)
-  - "Only Up From Here: 2024's State of Fintech and the Hero's Journey" (Bain Capital Ventures)
+  - '"Fintech: The Fourth Platform — Part One" (Medium, Ideas from Bain Capital Ventures, 2019)'
+  - '"Fintech: The Fourth Platform — Part Two" (Medium / Bain Capital Ventures, 2019)'
+  - '"The Future of Money: A Complete Revolution" (Medium, 2021)'
+  - '"Only Up From Here: 2024''s State of Fintech and the Hero''s Journey" (Bain Capital Ventures)'
 recent_signal_12mo:
   - title: "Announces the 2026 BCV Labs Summer Fellowship (applications open, Jan 31, 2026 deadline), reinforcing his bet on AI-native technical builders entering fintech"
     date: "2025-12-04"

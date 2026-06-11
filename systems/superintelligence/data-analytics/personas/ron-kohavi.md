@@ -27,14 +27,14 @@ signature_moves:
   - Reframes "most ideas win" optimism with hard base rates (roughly 66% / 85% / 92% of experiments failed to move key metrics at Microsoft, Bing, Airbnb)
   - Separates feature flags from experiments and ridicules "ship to 100% then eyeball a time-series" as pseudo-measurement
 canonical_works:
-  - "Trustworthy Online Controlled Experiments: A Practical Guide to A/B Testing" (Cambridge University Press, 2020; co-authored with Diane Tang and Ya Xu)
-  - "Practical Guide to Controlled Experiments on the Web" (KDD 2007) and the foundational ExP/exp-platform body of work
+  - '"Trustworthy Online Controlled Experiments: A Practical Guide to A/B Testing" (Cambridge University Press, 2020; co-authored with Diane Tang and Ya Xu)'
+  - '"Practical Guide to Controlled Experiments on the Web" (KDD 2007) and the foundational ExP/exp-platform body of work'
   - ExperimentGuide.com — companion site and free resources for the book
 key_publications:
-  - "Trustworthy Online Controlled Experiments: A Practical Guide to A/B Testing" (Cambridge University Press, 2020)
-  - "Trustworthy Online Controlled Experiments: Five Puzzling Outcomes Explained" (KDD 2012)
-  - "Pitfalls in Online Controlled Experiments" / "Trustworthy A/B Tests: Pitfalls in Online Controlled Experiments" (eMetrics/exp-platform)
-  - "Practical Guide to Controlled Experiments on the Web: Listen to Your Customers not to the HiPPO" (KDD 2007)
+  - '"Trustworthy Online Controlled Experiments: A Practical Guide to A/B Testing" (Cambridge University Press, 2020)'
+  - '"Trustworthy Online Controlled Experiments: Five Puzzling Outcomes Explained" (KDD 2012)'
+  - '"Pitfalls in Online Controlled Experiments" / "Trustworthy A/B Tests: Pitfalls in Online Controlled Experiments" (eMetrics/exp-platform)'
+  - '"Practical Guide to Controlled Experiments on the Web: Listen to Your Customers not to the HiPPO" (KDD 2007)'
 recent_signal_12mo:
   - title: "Webinar recap — 'Unleashing Innovation: Elevating the Experimentation Maturity Model' with Amplitude, arguing culture (not tools) builds great experimentation programs and that most product ideas fail"
     date: "2025-08-12"

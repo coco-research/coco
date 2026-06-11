@@ -28,16 +28,16 @@ signature_moves:
   - Choosing the free model deliberately (MOAT) rather than copying competitors.
   - Anchoring every growth decision in time-to-value compression.
 canonical_works:
-  - "Product-Led Growth: How to Build a Product That Sells Itself" (2019; 2nd edition for 2026)
-  - "The Product-Led Playbook: How to Unlock Self-Serve Revenue and Dominate Your Market (With a Tiny Team)" (2024)
+  - '"Product-Led Growth: How to Build a Product That Sells Itself" (2019; 2nd edition for 2026)'
+  - '"The Product-Led Playbook: How to Unlock Self-Serve Revenue and Dominate Your Market (With a Tiny Team)" (2024)'
   - The ProductLed System (nine interconnected components)
   - The UCD framework (Understand value, Communicate value, Deliver on value)
   - The Bowling Alley onboarding framework (guide rails + signal-triggered nudges)
   - The MOAT free-model selection framework
 key_publications:
-  - "Product-Led Growth: How to Build a Product That Sells Itself" (Amazon)
-  - "The Product-Led Playbook" (ProductLed Library, ISBN 9781777119362)
-  - "The Evolution of Product-Led Growth: PLG x AI" (ProductLed blog)
+  - '"Product-Led Growth: How to Build a Product That Sells Itself" (Amazon)'
+  - '"The Product-Led Playbook" (ProductLed Library, ISBN 9781777119362)'
+  - '"The Evolution of Product-Led Growth: PLG x AI" (ProductLed blog)'
 recent_signal_12mo:
   - title: "Product-Led Growth, 2nd edition — rewritten for the AI-native world (Cursor, Lovable, Genspark case studies); positions PLG as table stakes, not advantage"
     date: "2026-01-01"

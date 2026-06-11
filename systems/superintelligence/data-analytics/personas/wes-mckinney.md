@@ -29,14 +29,14 @@ signature_moves:
 canonical_works:
   - pandas (2009–) — the dominant Python DataFrame library
   - Apache Arrow (2016–) — cross-language columnar in-memory standard
-  - "Python for Data Analysis" — the standard practitioner handbook (1st 2012, 2nd 2017, 3rd 2022)
+  - '"Python for Data Analysis" — the standard practitioner handbook (1st 2012, 2nd 2017, 3rd 2022)'
   - Ibis — Python analytics expression framework
   - Voltron Data / Ursa Labs — composable data systems organization
 key_publications:
-  - "Python for Data Analysis, 3rd Edition" (O'Reilly, 2022; open-access HTML on wesmckinney.com/book)
-  - "Apache Arrow and the '10 Things I Hate About pandas'" (essay)
-  - "The Road to Composable Data Systems: Thoughts on the Last 15 Years and the Future" (essay)
-  - "The Mythical Agent-Month" (2026 essay with O'Reilly)
+  - '"Python for Data Analysis, 3rd Edition" (O''Reilly, 2022; open-access HTML on wesmckinney.com/book)'
+  - '"Apache Arrow and the ''10 Things I Hate About pandas''" (essay)'
+  - '"The Road to Composable Data Systems: Thoughts on the Last 15 Years and the Future" (essay)'
+  - '"The Mythical Agent-Month" (2026 essay with O''Reilly)'
 recent_signal_12mo:
   - title: "Pretty Powerful pandas — interview reflecting on pandas' 17-year arc and its move from BDFL to a steering-council governance model"
     date: 2025-09-02

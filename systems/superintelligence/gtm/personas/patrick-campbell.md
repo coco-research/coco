@@ -1,10 +1,10 @@
 ---
-slug: 'patrick-campbell-paddle-profitwell'
+slug: 'patrick-campbell'
 real_name: 'Patrick Campbell'
 archetype: 'Data-driven SaaS monetization strategist who operationalizes pricing and retention through subscription metrics'
 teams:
-  - 'Paddle'
-home_team: 'Paddle'
+  - 'gtm-super-intelligence'
+home_team: 'gtm-super-intelligence'
 cell: 'pricing-monetization'
 cell_role: 'strategy-lead'
 status: 'active'

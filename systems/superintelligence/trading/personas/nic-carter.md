@@ -28,9 +28,9 @@ signature_moves:
   - Writes long-form investigative essays that move from crypto-native audiences to mainstream and Congressional attention
   - Separates "what the data shows" from "what I want to be true" and says so explicitly
 canonical_works:
-  - "It's the Settlement Assurances, Stupid" (essay defining bitcoin's value proposition as settlement assurances)
+  - '"It''s the Settlement Assurances, Stupid" (essay defining bitcoin''s value proposition as settlement assurances)'
   - Realized capitalization framework (developed with Coin Metrics)
-  - "Proof of Reserves for Policymakers" (Medium)
+  - '"Proof of Reserves for Policymakers" (Medium)'
   - Operation Choke Point 2.0 investigative series (Pirate Wires)
   - Bitcoin mining ESG / energy research rebutting the White House climate report on crypto mining
 key_publications:

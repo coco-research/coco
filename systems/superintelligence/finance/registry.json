@@ -1,21 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-01",
+  "generated_at": "2026-06-11",
   "team_id": "finance-super-intelligence",
   "team_name": "Finance Super Intelligence Team",
   "description": "Rijul's finance brain trust and decision partner. Named personas across 7 cells: valuation/corporate finance, investing, accounting/FP&A, macro, fintech, behavioral, and capital markets/M&A/private. Markets/quant/derivatives are reserved for the Trading team. Built local-first (LM Studio) and validator-gated. Invoked by /SI-Fin commands.",
-  "personas_count": 39,
+  "personas_count": 47,
   "cells_count": 7,
   "cells": {
     "valuation-corporate-finance": {
       "id": "valuation-corporate-finance",
       "description": "Valuation, corporate finance, intrinsic value, capital structure.",
-      "personas_count": 6,
+      "personas_count": 7,
       "personas": [
         "alfred-rappaport",
         "aswath-damodaran",
         "bennett-stewart",
         "bruce-greenwald",
+        "michael-mauboussin",
         "pablo-fernandez",
         "tim-koller"
       ],
@@ -24,11 +25,12 @@
     "investing-capital-allocation": {
       "id": "investing-capital-allocation",
       "description": "Value / discretionary investing and capital allocation.",
-      "personas_count": 7,
+      "personas_count": 8,
       "personas": [
         "bill-ackman",
         "cathie-wood",
         "charlie-munger",
+        "howard-marks",
         "joel-greenblatt",
         "mohnish-pabrai",
         "seth-klarman",
@@ -39,11 +41,13 @@
     "accounting-fpa-reporting": {
       "id": "accounting-fpa-reporting",
       "description": "Forensic accounting, financial reporting, and FP&A practice.",
-      "personas_count": 4,
+      "personas_count": 6,
       "personas": [
         "baruch-lev",
         "francine-mckenna",
+        "glenn-hopper",
         "howard-schilit",
+        "jack-mccullough",
         "paul-barnhurst"
       ],
       "file_path": "superintelligence/finance/cells/accounting-fpa-reporting.md"
@@ -51,9 +55,10 @@
     "macro-economics": {
       "id": "macro-economics",
       "description": "Macro economists and policy / markets framing.",
-      "personas_count": 7,
+      "personas_count": 8,
       "personas": [
         "adam-tooze",
+        "claudia-sahm",
         "jason-furman",
         "joseph-wang",
         "larry-summers",
@@ -66,11 +71,13 @@
     "fintech-payments": {
       "id": "fintech-payments",
       "description": "Fintech, payments, banking-as-a-service, fintech investing.",
-      "personas_count": 5,
+      "personas_count": 7,
       "personas": [
         "angela-strange",
         "david-birch",
+        "frank-rotman",
         "marc-rubinstein",
+        "matt-harris",
         "patrick-collison",
         "simon-taylor"
       ],
@@ -93,11 +100,12 @@
     "capital-markets-ma-private": {
       "id": "capital-markets-ma-private",
       "description": "IPOs, M&A, private equity / VC finance, distress and restructuring.",
-      "personas_count": 4,
+      "personas_count": 5,
       "personas": [
         "dan-rasmussen",
         "edward-altman",
         "jay-ritter",
+        "ludovic-phalippou",
         "steve-kaplan"
       ],
       "file_path": "superintelligence/finance/cells/capital-markets-ma-private.md"
@@ -565,6 +573,54 @@
       "research_dir": "superintelligence/finance/research/charlie-munger/",
       "build_method": "local-llm"
     },
+    "claudia-sahm": {
+      "slug": "claudia-sahm",
+      "real_name": "Claudia Sahm",
+      "archetype": "Real-time recession-signal macroeconomist who reads the labor market as the economy's early-warning system and argues for rules and automatic stabilizers over discretion.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "macro-economics",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Chief Economist, New Century Advisors (since April 2024)",
+        "Founder, Sahm Consulting",
+        "Author, \"Stay-At-Home Macro (SAHM)\" Substack newsletter",
+        "Bloomberg Opinion contributing columnist",
+        "Former Section Chief, Board of Governors of the Federal Reserve System (2007-2019)",
+        "Former Director of Macroeconomic Policy, Washington Center for Equitable Growth"
+      ],
+      "domains": [
+        "Business cycles and real-time recession detection",
+        "Labor-market macroeconomics (unemployment, hiring, labor supply)",
+        "Fiscal stimulus and automatic stabilizers",
+        "Federal Reserve policy and monetary-fiscal interaction",
+        "Integrity and quality of official US economic statistics"
+      ],
+      "pairs_well_with": [
+        "jason-furman",
+        "larry-summers",
+        "adam-tooze",
+        "joseph-wang"
+      ],
+      "productive_conflict_with": [
+        "nouriel-roubini",
+        "lyn-alden",
+        "mohamed-el-erian"
+      ],
+      "sources_count": 17,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain-spoken and accessible, with a teacher's instinct to translate jargon into household terms. Data-anchored but emotionally legible (\"I just don't have a goo",
+      "file_path": "superintelligence/finance/personas/claudia-sahm.md",
+      "research_dir": "superintelligence/finance/research/claudia-sahm/",
+      "build_method": "local-llm"
+    },
     "dan-rasmussen": {
       "slug": "dan-rasmussen",
       "real_name": "Dan Rasmussen",
@@ -794,6 +850,144 @@
       "research_dir": "superintelligence/finance/research/francine-mckenna/",
       "build_method": "local-llm"
     },
+    "frank-rotman": {
+      "slug": "frank-rotman",
+      "real_name": "Frank Rotman",
+      "archetype": "Credit-first fintech investor-operator who reasons from unit economics, loss curves, and first principles about how lending businesses actually make money",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "fintech-payments",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "QED Investors (co-founder, Partner Emeritus as of January 1, 2026; previously Chief Investment Officer)",
+        "Founder of new ventures, including a music-industry startup and a company aimed at \"financial nihilism\"",
+        "Former Capital One (early architect, ~13 years building credit-card analytics and underwriting)"
+      ],
+      "domains": [
+        "Fintech and embedded finance",
+        "Consumer and small-business credit / lending",
+        "Unit economics and underwriting analytics",
+        "Venture capital (early-stage fintech)",
+        "Banking business models and balance-sheet economics"
+      ],
+      "pairs_well_with": [
+        "simon-taylor",
+        "angela-strange",
+        "marc-rubinstein",
+        "matt-harris",
+        "michael-mauboussin"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "patrick-collison",
+        "david-birch"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Analytical, framework-driven, and patient — explains via decomposition and analogy (Copernicus, carbon vs. silicon), writes in long teaching threads rather than",
+      "file_path": "superintelligence/finance/personas/frank-rotman.md",
+      "research_dir": "superintelligence/finance/research/frank-rotman/",
+      "build_method": "local-llm"
+    },
+    "glenn-hopper": {
+      "slug": "glenn-hopper",
+      "real_name": "Glenn Hopper",
+      "archetype": "The data-driven, technology-minded CFO who translates AI hype into pragmatic, governed finance workflows.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "accounting-fpa-reporting",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder, RoboCFO (AI-in-finance consulting, operating under G3 Consulting)",
+        "Head of AI Research and Development, Eventus Advisory Group",
+        "Host, FP&A Today podcast (Datarails)",
+        "Co-host, Future Finance podcast (with Paul Barnhurst)",
+        "Instructor, Duke University Fuqua School of Business Executive Education",
+        "Instructor, Corporate Finance Institute (CFI), AICPA/CIMA, and LinkedIn Learning",
+        "Advisory board member (Preql, GENCFO USA, AI Leaders Council, Crews School of Accountancy at University of Memphis)"
+      ],
+      "domains": [
+        "AI and generative AI applications in corporate finance",
+        "FP&A (financial planning and analysis) transformation",
+        "Finance data governance and data readiness",
+        "The evolving CFO operating model and finance team design",
+        "Forecasting, variance analysis, and reconciliation automation"
+      ],
+      "pairs_well_with": [
+        "jack-mccullough",
+        "baruch-lev"
+      ],
+      "productive_conflict_with": [
+        "francine-mckenna",
+        "howard-schilit"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain-spoken, practitioner-first, and reassuring without being hype-driven. Leads with \"here is what actually works this quarter,\" grounds claims in real financ",
+      "file_path": "superintelligence/finance/personas/glenn-hopper.md",
+      "research_dir": "superintelligence/finance/research/glenn-hopper/",
+      "build_method": "local-llm"
+    },
+    "howard-marks": {
+      "slug": "howard-marks",
+      "real_name": "Howard Stanley Marks",
+      "archetype": "The cycle-reading risk philosopher who treats markets as a pendulum of psychology and insists you cannot predict but can prepare.",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "investing-capital-allocation",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Co-Chairman and co-founder, Oaktree Capital Management",
+        "Director, Brookfield Corporation",
+        "Author of the long-running \"Oaktree memos\""
+      ],
+      "domains": [
+        "Distressed debt and credit investing",
+        "Market cycles and investor psychology",
+        "Risk assessment and risk control",
+        "Contrarian value investing",
+        "Capital allocation under uncertainty"
+      ],
+      "pairs_well_with": [
+        "seth-klarman",
+        "warren-buffett",
+        "charlie-munger",
+        "michael-mauboussin",
+        "edward-altman"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "bill-ackman",
+        "nouriel-roubini"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Calm, lawyerly, and self-aware; writes and speaks in patient prose built from analogies, rhetorical questions, and qualifications. Quotes Mark Twain and Buffett",
+      "file_path": "superintelligence/finance/personas/howard-marks.md",
+      "research_dir": "superintelligence/finance/research/howard-marks/",
+      "build_method": "local-llm"
+    },
     "howard-schilit": {
       "slug": "howard-schilit",
       "real_name": "Howard M. Schilit",
@@ -836,6 +1030,53 @@
       "voice_style_excerpt": "Direct, instructor-like, and forensic. Speaks in war stories anchored to specific reporting maneuvers; relentlessly asks \"why now?\" and \"where is the cash?\"; fa",
       "file_path": "superintelligence/finance/personas/howard-schilit.md",
       "research_dir": "superintelligence/finance/research/howard-schilit/",
+      "build_method": "local-llm"
+    },
+    "jack-mccullough": {
+      "slug": "jack-mccullough",
+      "real_name": "Jack McCullough",
+      "archetype": "The community-builder of the modern CFO — narrator and convener of the role's shift from scorekeeper to strategic leader",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "accounting-fpa-reporting",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founder and President, The CFO Leadership Council (part of Chief Executive Group since 2021)",
+        "Founder and co-chair, MIT Sloan CFO Summit",
+        "Host, \"Secrets of Rockstar CFOs\" podcast",
+        "Contributor, Forbes CFO Network",
+        "Author and public speaker"
+      ],
+      "domains": [
+        "The modern CFO role and its evolution",
+        "Finance leadership and executive development",
+        "CFO community-building and peer networks",
+        "Strategy, communication, and executive presence for finance leaders",
+        "Finance technology adoption (AI, data science) from the leadership seat",
+        "CEO/CFO relationship dynamics"
+      ],
+      "pairs_well_with": [
+        "paul-barnhurst",
+        "glenn-hopper",
+        "tim-koller"
+      ],
+      "productive_conflict_with": [
+        "baruch-lev",
+        "howard-schilit",
+        "francine-mckenna"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, encouraging, and aphoristic — a convener's voice, not a controller's. Speaks in memorable frameworks and acronyms, leans on stories from named CFOs, and i",
+      "file_path": "superintelligence/finance/personas/jack-mccullough.md",
+      "research_dir": "superintelligence/finance/research/jack-mccullough/",
       "build_method": "local-llm"
     },
     "jason-furman": {
@@ -1068,6 +1309,54 @@
       "research_dir": "superintelligence/finance/research/larry-summers/",
       "build_method": "local-llm"
     },
+    "ludovic-phalippou": {
+      "slug": "ludovic-phalippou",
+      "real_name": "Ludovic Phalippou",
+      "archetype": "Oxford finance professor and empirical scourge of private equity's performance, fee, and benchmarking narratives",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "capital-markets-ma-private",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Professor of Financial Economics, Saïd Business School, University of Oxford",
+        "Head of the Finance, Accounting and Management Economics group, Oxford Saïd",
+        "Research affiliate, Institute for Private Capital (UNC)",
+        "Author and independent commentator (Substack, launched January 2026)"
+      ],
+      "domains": [
+        "Private equity and leveraged-buyout performance measurement",
+        "Fund benchmarking and public-market-equivalent (PME) analysis",
+        "Fee economics and carried interest",
+        "Private-markets data quality and methodology",
+        "Retail access / \"democratization\" of private assets"
+      ],
+      "pairs_well_with": [
+        "howard-schilit",
+        "baruch-lev",
+        "francine-mckenna",
+        "jay-ritter",
+        "steve-kaplan"
+      ],
+      "productive_conflict_with": [
+        "steve-kaplan",
+        "cathie-wood",
+        "bill-ackman",
+        "howard-marks"
+      ],
+      "sources_count": 18,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Dry, combative, evidence-first; punctures marketing language with arithmetic and a wry, almost prosecutorial wit. Speaks in concrete numbers (multiples, fee dol",
+      "file_path": "superintelligence/finance/personas/ludovic-phalippou.md",
+      "research_dir": "superintelligence/finance/research/ludovic-phalippou/",
+      "build_method": "local-llm"
+    },
     "lyn-alden": {
       "slug": "lyn-alden",
       "real_name": "Lyn Alden",
@@ -1153,6 +1442,57 @@
       "research_dir": "superintelligence/finance/research/marc-rubinstein/",
       "build_method": "local-llm"
     },
+    "matt-harris": {
+      "slug": "matt-harris",
+      "real_name": "Matt Harris",
+      "archetype": "Fintech venture investor who reframes financial services as embedded infrastructure — the \"fourth platform\" beneath every software company",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "fintech-payments",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Partner, Bain Capital Ventures (fintech investing)",
+        "Bain Capital (originally joined 1995; rejoined 2012)",
+        "Founder, Village Ventures (2000, early-stage fintech)",
+        "Sponsor/host, BCV Labs Summer Fellowship",
+        "Forbes contributor and prolific Medium / LinkedIn essayist"
+      ],
+      "domains": [
+        "Embedded finance and fintech infrastructure",
+        "Payments (B2B, real-time rails, settlement)",
+        "Lending, insurtech, capital markets, proptech",
+        "Stablecoins, tokenization, and the \"future of money\"",
+        "AI agents in financial services",
+        "Early-stage and growth venture capital"
+      ],
+      "pairs_well_with": [
+        "angela-strange",
+        "simon-taylor",
+        "frank-rotman",
+        "marc-rubinstein",
+        "patrick-collison",
+        "david-birch"
+      ],
+      "productive_conflict_with": [
+        "nouriel-roubini",
+        "howard-marks",
+        "seth-klarman",
+        "warren-buffett"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Essayistic and structured — opens with a reframe ('fintech is not X, it is Y'), builds with numbered arguments and a sizing of the prize, and lands on a forward",
+      "file_path": "superintelligence/finance/personas/matt-harris.md",
+      "research_dir": "superintelligence/finance/research/matt-harris/",
+      "build_method": "local-llm"
+    },
     "meir-statman": {
       "slug": "meir-statman",
       "real_name": "Meir Statman",
@@ -1191,6 +1531,55 @@
       "voice_style_excerpt": "Pedagogical and mechanism-oriented; starts from “what people actually want/do,” then uses concrete examples to show where standard theory misses",
       "file_path": "superintelligence/finance/personas/meir-statman.md",
       "research_dir": "superintelligence/finance/research/meir-statman/",
+      "build_method": "local-llm"
+    },
+    "michael-mauboussin": {
+      "slug": "michael-mauboussin",
+      "real_name": "Michael J. Mauboussin",
+      "archetype": "The expectations investor who reads the market's embedded forecast and tests it against base rates",
+      "teams": [
+        "finance-super-intelligence"
+      ],
+      "home_team": "finance-super-intelligence",
+      "cell": "valuation-corporate-finance",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Head of Consilient Research, Counterpoint Global (Morgan Stanley Investment Management)",
+        "Adjunct Professor of Finance, Columbia Business School (since 1993)",
+        "Affiliated with Harvard Kennedy School",
+        "External advisor, Santa Fe Institute (complex adaptive systems)"
+      ],
+      "domains": [
+        "Equity valuation and the drivers of intrinsic value",
+        "Return on invested capital (ROIC) and incremental ROIC (ROIIC)",
+        "Expectations investing and market-implied expectations",
+        "Capital allocation and the CFO pecking order",
+        "Base rates, the outside view, and probabilistic reasoning",
+        "Skill versus luck and complex adaptive systems",
+        "Intangible assets and the economics of the modern firm"
+      ],
+      "pairs_well_with": [
+        "alfred-rappaport",
+        "aswath-damodaran",
+        "tim-koller",
+        "howard-marks",
+        "annie-duke"
+      ],
+      "productive_conflict_with": [
+        "cathie-wood",
+        "bruce-greenwald",
+        "robert-shiller"
+      ],
+      "sources_count": 17,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Calm, professorial, and synthesis-driven. Reaches for a reference class and a base rate before an anecdote, defines terms precisely, and reframes the question (",
+      "file_path": "superintelligence/finance/personas/michael-mauboussin.md",
+      "research_dir": "superintelligence/finance/research/michael-mauboussin/",
       "build_method": "local-llm"
     },
     "mohamed-el-erian": {

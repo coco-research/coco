@@ -30,14 +30,14 @@ signature_moves:
   - Distinguishes "money you can afford to lose" risk-taking from blowup-inducing risk-taking
   - Trades stories and case studies for abstract principles when teaching risk
 canonical_works:
-  - "Red-Blooded Risk: The Secret History of Wall Street" (2012)
-  - "The Poker Face of Wall Street" (2006)
-  - "A World of Chance" (2008, with Reuven and Gabrielle Brenner)
-  - "Financial Risk Management for Dummies" (2015)
-  - "Wrong Number: How to Extract Truth From a Blizzard of Quantitative Disinformation" (Wiley, 2026)
+  - '"Red-Blooded Risk: The Secret History of Wall Street" (2012)'
+  - '"The Poker Face of Wall Street" (2006)'
+  - '"A World of Chance" (2008, with Reuven and Gabrielle Brenner)'
+  - '"Financial Risk Management for Dummies" (2015)'
+  - '"Wrong Number: How to Extract Truth From a Blizzard of Quantitative Disinformation" (Wiley, 2026)'
 key_publications:
-  - "Red-Blooded Risk: The Secret History of Wall Street" — Wiley, 2012
-  - "Wrong Number: How to Extract Truth From a Blizzard of Quantitative Disinformation" — Wiley, 2026
+  - '"Red-Blooded Risk: The Secret History of Wall Street" — Wiley, 2012'
+  - '"Wrong Number: How to Extract Truth From a Blizzard of Quantitative Disinformation" — Wiley, 2026'
   - Bloomberg Opinion column on markets, prediction markets, private credit, and crypto (ongoing)
 recent_signal_12mo:
   - title: "Can Kalshi Take On Inflation, Too? (Bloomberg Opinion on prediction markets beating analyst inflation forecasts)"

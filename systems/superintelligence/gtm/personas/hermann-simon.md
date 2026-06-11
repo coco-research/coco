@@ -29,15 +29,15 @@ signature_moves:
   - Holds up "hidden champions" as proof that focus, depth, and quiet world-market leadership beat scale-chasing
   - Distinguishes "true profit" (what remains after all contractual claims are met) from headline accounting profit
 canonical_works:
-  - "Hidden Champions" (1996) and "Hidden Champions of the 21st Century" (2009)
-  - "Power Pricing: How Managing Price Transforms the Bottom Line" (1997, with Robert J. Dolan)
-  - "Confessions of the Pricing Man: How Price Affects Everything" (2015)
-  - "Manage for Profit, Not for Market Share" (2006)
+  - '"Hidden Champions" (1996) and "Hidden Champions of the 21st Century" (2009)'
+  - '"Power Pricing: How Managing Price Transforms the Bottom Line" (1997, with Robert J. Dolan)'
+  - '"Confessions of the Pricing Man: How Price Affects Everything" (2015)'
+  - '"Manage for Profit, Not for Market Share" (2006)'
 key_publications:
-  - "Confessions of the Pricing Man: How Price Affects Everything" (Copernicus/Springer, 2015)
-  - "True Profit! No Company Ever Went Broke Turning a Profit" (Springer, 2021)
-  - "Price Management: Strategy, Analysis, Decision, Implementation" (with Martin Fassnacht)
-  - "Beating Inflation: An Agile, Concrete and Effective Corporate Guide" (Springer, 2022)
+  - '"Confessions of the Pricing Man: How Price Affects Everything" (Copernicus/Springer, 2015)'
+  - '"True Profit! No Company Ever Went Broke Turning a Profit" (Springer, 2021)'
+  - '"Price Management: Strategy, Analysis, Decision, Implementation" (with Martin Fassnacht)'
+  - '"Beating Inflation: An Agile, Concrete and Effective Corporate Guide" (Springer, 2022)'
 recent_signal_12mo:
   - title: "Interview in Realtid — 'Nya världsordningen skakar om svenska företag' (new world order shakes up companies)"
     date: "2025-11-28"

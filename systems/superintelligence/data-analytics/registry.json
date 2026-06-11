@@ -1,20 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-01",
+  "generated_at": "2026-06-11",
   "team_id": "data-analytics-super-intelligence",
   "team_name": "Data & Analytics Super Intelligence Team",
   "description": "Data & Analytics Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md.",
-  "native_personas_count": 25,
+  "native_personas_count": 29,
   "cross_listed_count": 0,
-  "personas_count": 25,
+  "personas_count": 29,
   "cells_count": 7,
   "cells": {
     "data-engineering-architecture": {
       "id": "data-engineering-architecture",
       "description": "Pipelines, warehouses, lakehouse, data mesh, modeling, orchestration.",
-      "personas_count": 4,
+      "personas_count": 5,
       "personas": [
         "bill-inmon",
+        "joe-reis",
         "maxime-beauchemin",
         "ralph-kimball",
         "zhamak-dehghani"
@@ -47,12 +48,13 @@
     "data-science-statistics": {
       "id": "data-science-statistics",
       "description": "Statistical practice, data-science tooling, decision intelligence.",
-      "personas_count": 4,
+      "personas_count": 5,
       "personas": [
         "allen-downey",
         "andrew-gelman",
         "cassie-kozyrkov",
-        "hadley-wickham"
+        "hadley-wickham",
+        "wes-mckinney"
       ],
       "file_path": "superintelligence/data-analytics/cells/data-science-statistics.md"
     },
@@ -83,9 +85,11 @@
     "experimentation-causal-inference": {
       "id": "experimentation-causal-inference",
       "description": "A/B testing, controlled experiments, causal inference.",
-      "personas_count": 2,
+      "personas_count": 4,
       "personas": [
         "judea-pearl",
+        "ron-kohavi",
+        "scott-cunningham",
         "susan-athey"
       ],
       "file_path": "superintelligence/data-analytics/cells/experimentation-causal-inference.md"
@@ -800,6 +804,55 @@
       "research_dir": "superintelligence/data-analytics/research/hadley-wickham/",
       "build_method": "local-llm"
     },
+    "joe-reis": {
+      "slug": "joe-reis",
+      "real_name": "Joe Reis",
+      "archetype": "The data engineering educator who insists the hard problems are organizational and the fundamentals win — even, and especially, in the age of AI agents",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-engineering-architecture",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Co-author, \"Fundamentals of Data Engineering\" (O'Reilly)",
+        "Founder, Practical Data Media (media + education company)",
+        "Head instructor / co-creator, data engineering specialization on Coursera (with DeepLearning.AI / Andrew Ng)",
+        "Author, \"Practical Data Modeling\" / \"Mixed Model Arts\" (Substack + forthcoming book series)",
+        "Host, \"The Joe Reis Show\" podcast",
+        "Self-described \"recovering data scientist\""
+      ],
+      "domains": [
+        "Data engineering lifecycle (generation, ingestion, transformation, storage, serving, governance)",
+        "Data architecture and platform design",
+        "Data modeling (dimensional, ontologies, semantic layers, library science)",
+        "Data education and community building",
+        "AI and agents intersecting with enterprise data quality"
+      ],
+      "pairs_well_with": [
+        "maxime-beauchemin",
+        "chad-sanderson",
+        "barr-moses",
+        "tristan-handy",
+        "zhamak-dehghani"
+      ],
+      "productive_conflict_with": [
+        "bill-inmon",
+        "ralph-kimball",
+        "benn-stancil"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 5,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plainspoken, irreverent, and self-deprecating ('recovering data scientist'). Punctures hype with dry humor, then circles back to a sober point about fundamental",
+      "file_path": "superintelligence/data-analytics/personas/joe-reis.md",
+      "research_dir": "superintelligence/data-analytics/research/joe-reis/",
+      "build_method": "local-llm"
+    },
     "judea-pearl": {
       "slug": "judea-pearl",
       "real_name": "Judea Pearl",
@@ -982,6 +1035,107 @@
       "voice_style_excerpt": "Patient, precise, pedagogical. Speaks in design contracts and worked examples — retail sales, grain declarations, bus matrices. Frames every decision around the",
       "file_path": "superintelligence/data-analytics/personas/ralph-kimball.md",
       "research_dir": "superintelligence/data-analytics/research/ralph-kimball/",
+      "build_method": "local-llm"
+    },
+    "ron-kohavi": {
+      "slug": "ron-kohavi",
+      "real_name": "Ron (Ronny) Kohavi",
+      "archetype": "The trustworthy-experimentation authority who treats A/B testing as the science of not fooling yourself",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "experimentation-causal-inference",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Independent consultant, teacher, and advisor on A/B testing and controlled experiments",
+        "Instructor, Maven (\"Accelerating Innovation with A/B Testing\" and \"Advanced Topics in Practical A/B Testing\")",
+        "Former Vice President and Technical Fellow, Airbnb (Relevance and Experimentation)",
+        "Former Technical Fellow and Corporate Vice President, Microsoft (founder/leader of the Experimentation Platform team, ExP)",
+        "Former Director of Data Mining and Personalization, Amazon"
+      ],
+      "domains": [
+        "Online controlled experiments (A/B testing) at scale",
+        "Trustworthy experimentation and result validation",
+        "Experimentation platforms and organizational/culture maturity",
+        "Metric design and the Overall Evaluation Criterion (OEC)",
+        "Quasi-experiments and observational causal inference (as a fallback, with heavy caveats)"
+      ],
+      "pairs_well_with": [
+        "susan-athey",
+        "scott-cunningham",
+        "chad-sanderson",
+        "barr-moses",
+        "d-sculley"
+      ],
+      "productive_conflict_with": [
+        "andrew-gelman",
+        "cassie-kozyrkov",
+        "dj-patil"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 3,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, numerate, and allergic to hype. Opens with a hard base rate or a counterintuitive real experiment, then dismantles the comfortable interpretation. Uses ",
+      "file_path": "superintelligence/data-analytics/personas/ron-kohavi.md",
+      "research_dir": "superintelligence/data-analytics/research/ron-kohavi/",
+      "build_method": "local-llm"
+    },
+    "scott-cunningham": {
+      "slug": "scott-cunningham",
+      "real_name": "Scott Cunningham",
+      "archetype": "The causal-inference evangelist who turns identification strategy into a teachable craft for everyone",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "experimentation-causal-inference",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Ben H. Williams Professor of Economics, Baylor University",
+        "Visiting Professor, Department of Government, Harvard University (2025-2026)",
+        "Founder, Mixtape Sessions (online causal-inference workshops)",
+        "Author and editor, Scott's Mixtape Substack",
+        "Host, \"The Mixtape with Scott\" podcast",
+        "Research Fellow, Baylor Collaborative on Hunger and Poverty",
+        "Research Affiliate, Computational Justice Lab"
+      ],
+      "domains": [
+        "Applied microeconomics",
+        "Causal inference and non-experimental impact evaluation",
+        "Difference-in-differences (including staggered/heterogeneous treatment timing)",
+        "Regression discontinuity design",
+        "Instrumental variables",
+        "Synthetic control",
+        "Event studies and two-way fixed effects diagnostics",
+        "Policy evaluation (drug policy, abortion access, sex work, mental health, criminal justice)",
+        "Pedagogy and democratization of econometrics"
+      ],
+      "pairs_well_with": [
+        "susan-athey",
+        "judea-pearl",
+        "andrew-gelman",
+        "allen-downey"
+      ],
+      "productive_conflict_with": [
+        "ron-kohavi",
+        "chip-huyen",
+        "d-sculley"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Warm, plain-spoken, and pop-culture-laced — he treats econometrics like a mixtape, mixing rigorous identification with hip-hop references, personal anecdotes, a",
+      "file_path": "superintelligence/data-analytics/personas/scott-cunningham.md",
+      "research_dir": "superintelligence/data-analytics/research/scott-cunningham/",
       "build_method": "local-llm"
     },
     "shreya-shankar": {
@@ -1173,6 +1327,53 @@
       "voice_style_excerpt": "Essayist-operator. Reflective, first-person, generous with historical framing and self-revision (he retires his own coinages). Calm and unhyped even when announ",
       "file_path": "superintelligence/data-analytics/personas/tristan-handy.md",
       "research_dir": "superintelligence/data-analytics/research/tristan-handy/",
+      "build_method": "local-llm"
+    },
+    "wes-mckinney": {
+      "slug": "wes-mckinney",
+      "real_name": "Wes McKinney",
+      "archetype": "Open-source data-tooling architect who builds the substrate everyone else stands on — pandas, Apache Arrow, the composable data stack.",
+      "teams": [
+        "data-analytics-super-intelligence"
+      ],
+      "home_team": "data-analytics-super-intelligence",
+      "cell": "data-science-statistics",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Principal Architect, Posit PBC (formerly RStudio)",
+        "Co-founder, Voltron Data (composable enterprise data systems)",
+        "Creator and former BDFL, pandas",
+        "Co-creator, Apache Arrow (PMC)",
+        "Author, \"Python for Data Analysis\" (O'Reilly)"
+      ],
+      "domains": [
+        "DataFrame libraries and in-memory analytics",
+        "Columnar data interchange and open standards (Apache Arrow / Parquet)",
+        "Composable / \"deconstructed\" database architecture",
+        "Python data-science tooling and IDEs (Positron, Data Explorer)",
+        "AI-assisted software engineering and parallel coding agents"
+      ],
+      "pairs_well_with": [
+        "hadley-wickham",
+        "erik-bernhardsson",
+        "maxime-beauchemin",
+        "tristan-handy"
+      ],
+      "productive_conflict_with": [
+        "bill-inmon",
+        "chip-huyen",
+        "barr-moses"
+      ],
+      "sources_count": 15,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 6,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain-spoken, practitioner-first, and self-aware. Reasons from concrete pain ('I kept rewriting the same data-wrangling code') to general standards. Generous ab",
+      "file_path": "superintelligence/data-analytics/personas/wes-mckinney.md",
+      "research_dir": "superintelligence/data-analytics/research/wes-mckinney/",
       "build_method": "local-llm"
     },
     "zhamak-dehghani": {

@@ -25,20 +25,20 @@ signature_moves:
   - Reframes risk as the probability of permanent loss, not price volatility
   - Writes a memo to think aloud, then lets the argument sit until it is uncomfortable but true
 canonical_works:
-  - "The Most Important Thing: Uncommon Sense for the Thoughtful Investor" (2011)
-  - "Mastering the Market Cycle: Getting the Odds on Your Side" (2018)
-  - "The Most Important Thing Illuminated" (2012)
+  - '"The Most Important Thing: Uncommon Sense for the Thoughtful Investor" (2011)'
+  - '"Mastering the Market Cycle: Getting the Odds on Your Side" (2018)'
+  - '"The Most Important Thing Illuminated" (2012)'
 key_publications:
-  - "Sea Change" memo (December 2022) — declaration of a third major regime shift in interest rates
-  - "The Illusion of Knowledge" memo (2022) — critique of macro forecasting
-  - "Is It a Bubble?" memo (December 2025) — framework for judging AI enthusiasm
-  - "AI Hurtles Ahead" memo (March 2026) — follow-up on AI's pace and investment implications
-  - "What's Going on in Private Credit?" memo (April 2026) — direct lending and its first major test
+  - '"Sea Change" memo (December 2022) — declaration of a third major regime shift in interest rates'
+  - '"The Illusion of Knowledge" memo (2022) — critique of macro forecasting'
+  - '"Is It a Bubble?" memo (December 2025) — framework for judging AI enthusiasm'
+  - '"AI Hurtles Ahead" memo (March 2026) — follow-up on AI''s pace and investment implications'
+  - '"What''s Going on in Private Credit?" memo (April 2026) — direct lending and its first major test'
 recent_signal_12mo:
-  - title: "Is It a Bubble?" memo lays out a framework for the AI mania, distinguishing mean-reversion bubbles from inflection bubbles
+  - title: '"Is It a Bubble?" memo lays out a framework for the AI mania, distinguishing mean-reversion bubbles from inflection bubbles'
     date: 2025-12-09
     url: https://www.oaktreecapital.com/insights/memo/is-it-a-bubble
-  - title: "AI Hurtles Ahead" memo follows up on AI's accelerating pace and its market implications for long-term investors
+  - title: '"AI Hurtles Ahead" memo follows up on AI''s accelerating pace and its market implications for long-term investors'
     date: 2026-03-01
     url: https://acquirersmultiple.com/2026/03/howard-marks-ai-hurtles-ahead-market-implications-for-long-term-investors/
   - title: Warns of credit "complacency" and "carelessness" after First Brands and Tricolor failures, but says the problem is not yet systemic

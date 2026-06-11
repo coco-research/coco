@@ -28,18 +28,18 @@ signature_moves:
   - Asking "who knows what, and how does the order flow leak it" before asking about price
   - Treating market structure (dealers, APs, exchanges, fragmentation) as first-class economic actors
 canonical_works:
-  - "Market Microstructure Theory" (1995/1997) — the field's standard graduate text
-  - "Price, Trade Size, and Information in Securities Markets" (Easley & O'Hara, 1987)
-  - "Time and the Process of Security Price Adjustment" (Easley & O'Hara, 1992)
-  - "Liquidity and Price Discovery" — AFA Presidential Address (Journal of Finance, 2003)
-  - "Information and the Cost of Capital" (Easley & O'Hara, 2004)
-  - "High-Frequency Trading: New Realities for Traders, Markets and Regulators" (co-edited, 2013)
+  - '"Market Microstructure Theory" (1995/1997) — the field''s standard graduate text'
+  - '"Price, Trade Size, and Information in Securities Markets" (Easley & O''Hara, 1987)'
+  - '"Time and the Process of Security Price Adjustment" (Easley & O''Hara, 1992)'
+  - '"Liquidity and Price Discovery" — AFA Presidential Address (Journal of Finance, 2003)'
+  - '"Information and the Cost of Capital" (Easley & O''Hara, 2004)'
+  - '"High-Frequency Trading: New Realities for Traders, Markets and Regulators" (co-edited, 2013)'
 key_publications:
-  - "Flow Toxicity and Liquidity in a High-Frequency World" (Easley, Lopez de Prado & O'Hara, Review of Financial Studies, 2012) — the VPIN paper
-  - "Microstructure in the Machine Age" (Review of Financial Studies, 2021)
-  - "The Electronic Evolution of Corporate Bond Dealers" (Journal of Financial Economics, 2021)
-  - "Innovation and Informed Trading: Evidence from Industry ETFs" (Review of Financial Studies, 2021)
-  - "Microstructure and Market Dynamics in Crypto Markets" (Easley, O'Hara, Yang & Zhang, Journal of Financial Markets, 2026)
+  - '"Flow Toxicity and Liquidity in a High-Frequency World" (Easley, Lopez de Prado & O''Hara, Review of Financial Studies, 2012) — the VPIN paper'
+  - '"Microstructure in the Machine Age" (Review of Financial Studies, 2021)'
+  - '"The Electronic Evolution of Corporate Bond Dealers" (Journal of Financial Economics, 2021)'
+  - '"Innovation and Informed Trading: Evidence from Industry ETFs" (Review of Financial Studies, 2021)'
+  - '"Microstructure and Market Dynamics in Crypto Markets" (Easley, O''Hara, Yang & Zhang, Journal of Financial Markets, 2026)'
 recent_signal_12mo:
   - title: "Microstructure and Market Dynamics in Crypto Markets — revised working paper showing liquidity and price-discovery microstructure measures (Roll, VPIN) predict crypto price dynamics, stable through crypto winter and the FTX collapse"
     date: "2025-07-03"

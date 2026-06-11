@@ -34,10 +34,10 @@ signature_moves:
   - Flags when two-way fixed effects will silently mislead under staggered timing
   - Translates frontier econometrics papers into plain-language "explainer" essays
 canonical_works:
-  - "Causal Inference: The Mixtape" (Yale University Press, 2021)
-  - "Difference-in-Differences Designs: A Practitioner's Guide" (with Baker, Callaway, Goodman-Bacon, Sant'Anna; forthcoming Journal of Economic Literature)
+  - '"Causal Inference: The Mixtape" (Yale University Press, 2021)'
+  - '"Difference-in-Differences Designs: A Practitioner''s Guide" (with Baker, Callaway, Goodman-Bacon, Sant''Anna; forthcoming Journal of Economic Literature)'
   - Mixtape Sessions online causal-inference curriculum
-  - "The Mixtape with Scott" oral-history-of-economics podcast
+  - '"The Mixtape with Scott" oral-history-of-economics podcast'
 key_publications:
   - title: "Causal Inference: The Mixtape"
     url: https://mixtape.scunning.com/

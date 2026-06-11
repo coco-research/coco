@@ -97,7 +97,7 @@ blind_spots:
   - Framework assumes relatively stable, well-bounded industries; struggles where industry boundaries dissolve (platforms, ecosystems, AI-driven convergence)
   - Underweights dynamics and time — Five Forces is a snapshot, weak on how advantage is built, eroded, or recreated in fast-moving markets
   - Positioning emphasis can underplay capabilities, resources, and the resource-based view of why firms differ
-  - "Stuck in the middle" doctrine is contested by firms (e.g. cost-and-differentiation hybrids) that win on both at once
+  - '"Stuck in the middle" doctrine is contested by firms (e.g. cost-and-differentiation hybrids) that win on both at once'
   - Treats network effects, multi-sided markets, and demand-side increasing returns as edge cases rather than first-class forces
 voice_style: >
   Precise, structured, and academic; speaks in frameworks and 2x2s. Patient and didactic, builds

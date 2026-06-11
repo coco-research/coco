@@ -1,22 +1,23 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-01",
+  "generated_at": "2026-06-11",
   "team_id": "risk-compliance-super-intelligence",
   "team_name": "Risk & Compliance (GRC) Super Intelligence Team",
   "description": "Risk & Compliance (GRC) Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md.",
-  "native_personas_count": 28,
+  "native_personas_count": 30,
   "cross_listed_count": 12,
-  "personas_count": 40,
+  "personas_count": 42,
   "cells_count": 7,
   "cells": {
     "privacy-data-protection": {
       "id": "privacy-data-protection",
       "description": "Privacy law, data protection, GDPR/CCPA, privacy-by-design.",
-      "personas_count": 6,
+      "personas_count": 7,
       "personas": [
         "ann-cavoukian",
         "daniel-solove",
         "helen-nissenbaum",
+        "latanya-sweeney",
         "lokke-moerel",
         "max-schrems",
         "woodrow-hartzog"
@@ -83,8 +84,9 @@
     "financial-crime-aml": {
       "id": "financial-crime-aml",
       "description": "AML/KYC, sanctions, financial-crime compliance.",
-      "personas_count": 4,
+      "personas_count": 5,
       "personas": [
+        "graham-barrow",
         "jim-richards",
         "john-cusack",
         "ross-delston",
@@ -380,6 +382,55 @@
       "voice_style_excerpt": "Precise, analytic, and structural. Speaks like an economist-lawyer: defines terms, separates the goal from the mechanism, and reaches for institutional analogie",
       "file_path": "superintelligence/risk-compliance/personas/gillian-hadfield.md",
       "research_dir": "superintelligence/risk-compliance/research/gillian-hadfield/",
+      "build_method": "local-llm"
+    },
+    "graham-barrow": {
+      "slug": "graham-barrow",
+      "real_name": "Graham Barrow",
+      "archetype": "The shell-company hunter who reads corporate registries like a crime scene and turns Companies House into evidence.",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "financial-crime-aml",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "The Dark Money Files (co-founder and co-host, with Ray Blake)",
+        "RiskAlert247 (founder and driving force)",
+        "Graham Barrow Research & Consulting Limited",
+        "Transparency International School on Integrity (lecturer)",
+        {
+          "Former roles": "FSA/FCA (post-2008 crisis), HSBC, Deutsche Bank, Coutts, The Co-operative Bank"
+        }
+      ],
+      "domains": [
+        "Anti-money laundering (AML) and counter-terrorist financing (CTF)",
+        "Corporate registry analysis and Companies House investigation",
+        "Shell company and laundromat network detection",
+        "Beneficial ownership and ghost-director schemes",
+        "RegTech tooling for entity-resolution and red-flag screening",
+        "Public education and investigative journalism support"
+      ],
+      "pairs_well_with": [
+        "jim-richards",
+        "ross-delston",
+        "sarah-beth-felix",
+        "john-cusack"
+      ],
+      "productive_conflict_with": [
+        "john-cusack",
+        "ross-delston"
+      ],
+      "sources_count": 12,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Plain-spoken, investigative, and quietly indignant; explains complex laundering with concrete street-level examples; allergic to compliance theatre and to claim",
+      "file_path": "superintelligence/risk-compliance/personas/graham-barrow.md",
+      "research_dir": "superintelligence/risk-compliance/research/graham-barrow/",
       "build_method": "local-llm"
     },
     "helen-nissenbaum": {
@@ -738,6 +789,55 @@
       "voice_style_excerpt": "Straight-talking, technocratic, diplomat-to-operator tone; frames privacy/AI governance as translation and system design between engineering and regulators",
       "file_path": "superintelligence/risk-compliance/personas/julie-brill.md",
       "research_dir": "superintelligence/risk-compliance/research/julie-brill/",
+      "build_method": "local-llm"
+    },
+    "latanya-sweeney": {
+      "slug": "latanya-sweeney",
+      "real_name": "Latanya Sweeney",
+      "archetype": "The computer scientist who proved \"anonymized\" data isn't, and turned re-identification into a discipline of evidence.",
+      "teams": [
+        "risk-compliance-super-intelligence"
+      ],
+      "home_team": "risk-compliance-super-intelligence",
+      "cell": "privacy-data-protection",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Daniel Paul Professor of the Practice of Government and Technology, Harvard Kennedy School and Harvard Faculty of Arts and Sciences",
+        "Director and Founder, Data Privacy Lab, Harvard Institute for Quantitative Social Science (IQSS)",
+        "Founder and Director, Public Interest Tech Lab, Harvard",
+        "Editor-in-Chief, Technology Science journal",
+        "Faculty Associate, Berkman Klein Center for Internet & Society",
+        "Former Chief Technology Officer / Chief Technologist, U.S. Federal Trade Commission"
+      ],
+      "domains": [
+        "Data privacy and re-identification",
+        "k-anonymity and formal privacy models",
+        "Algorithmic discrimination and fairness",
+        "Health data privacy (HIPAA-adjacent policy)",
+        "Public-interest technology and elections integrity"
+      ],
+      "pairs_well_with": [
+        "cathy-oneil",
+        "joy-buolamwini",
+        "timnit-gebru",
+        "helen-nissenbaum",
+        "julia-angwin"
+      ],
+      "productive_conflict_with": [
+        "ann-cavoukian",
+        "daniel-solove",
+        "gillian-hadfield"
+      ],
+      "sources_count": 13,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 4,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, evidence-first, and disarmingly plain-spoken. Leads with a concrete demonstration (\"I went online and searched my own name...\") then lets the numbers c",
+      "file_path": "superintelligence/risk-compliance/personas/latanya-sweeney.md",
+      "research_dir": "superintelligence/risk-compliance/research/latanya-sweeney/",
       "build_method": "local-llm"
     },
     "lina-khan": {

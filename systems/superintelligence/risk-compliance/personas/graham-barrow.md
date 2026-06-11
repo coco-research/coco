@@ -32,8 +32,8 @@ canonical_works:
   - RiskAlert247 (anti-fraud collaboration targeting fake business creation)
   - Long-running public campaign exposing Companies House as an enabler of fraud and kleptocracy
 key_publications:
-  - "Laundromats" (essay, The Financial Crime News)
-  - "Identifying patterns in Companies House data" (LinkedIn long-form)
+  - '"Laundromats" (essay, The Financial Crime News)'
+  - '"Identifying patterns in Companies House data" (LinkedIn long-form)'
   - Recurring commentary and oral evidence on Companies House reform and the Economic Crime and Corporate Transparency Act
 recent_signal_12mo:
   - title: "BBC News 'Exposed: The High Street Crime Crisis' — Barrow supported the year-long undercover investigation into illicit cigarettes/vapes, trafficking, and money laundering"

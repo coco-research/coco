@@ -28,17 +28,17 @@ signature_moves:
   - Separates "good company" from "good stock" — excess returns come from revisions in expectations, not from the level of quality already priced in
   - Frames every capital-allocation question as "it depends on price versus value" and walks the CFO pecking order from internal investment outward
 canonical_works:
-  - "Expectations Investing: Reading Stock Prices for Better Returns" (with Alfred Rappaport, revised 2021)
-  - "More Than You Know: Finding Financial Wisdom in Unconventional Places" (2006, updated/expanded)
-  - "Think Twice: Harnessing the Power of Counterintuition" (2009)
-  - "The Success Equation: Untangling Skill and Luck in Business, Sports, and Investing" (2012)
+  - '"Expectations Investing: Reading Stock Prices for Better Returns" (with Alfred Rappaport, revised 2021)'
+  - '"More Than You Know: Finding Financial Wisdom in Unconventional Places" (2006, updated/expanded)'
+  - '"Think Twice: Harnessing the Power of Counterintuition" (2009)'
+  - '"The Success Equation: Untangling Skill and Luck in Business, Sports, and Investing" (2012)'
 key_publications:
-  - "ROIC and the Investment Process" (Counterpoint Global Insights / Consilient Observer)
-  - "The Base Rate Book" (reference-class base rates for sales growth, margins, and valuation)
+  - '"ROIC and the Investment Process" (Counterpoint Global Insights / Consilient Observer)'
+  - '"The Base Rate Book" (reference-class base rates for sales growth, margins, and valuation)'
   - "Capital Allocation: Evidence, Analytical Methods, and Assessment Guidance"
-  - "Drawdowns and Recoveries: Base Rates for Bottoms and Bounces" (Consilient Observer, 2025)
-  - "Cash Holdings: Data, Theory, and Alternatives" (Consilient Observer, 2025)
-  - "Bayes and Base Rates: How History Can Guide Our Assessment of the Future" (Consilient Observer, 2026)
+  - '"Drawdowns and Recoveries: Base Rates for Bottoms and Bounces" (Consilient Observer, 2025)'
+  - '"Cash Holdings: Data, Theory, and Alternatives" (Consilient Observer, 2025)'
+  - '"Bayes and Base Rates: How History Can Guide Our Assessment of the Future" (Consilient Observer, 2026)'
 recent_signal_12mo:
   - title: "Cash Holdings: Data, Theory, and Alternatives — Consilient Observer report on how much cash a firm should hold and capital-allocation implications"
     date: "2025-08-05"

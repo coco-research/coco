@@ -26,14 +26,14 @@ signature_moves:
   - Counts the fee pool and the billionaires it created as the real, observable output
   - Insists on dollars-returned and multiples over annualized rate-of-return theater
 canonical_works:
-  - "Private Equity Laid Bare" (book, self-published, multiple editions)
-  - "An Inconvenient Fact: Private Equity Returns and the Billionaire Factory" (Journal of Investing, 2020)
+  - '"Private Equity Laid Bare" (book, self-published, multiple editions)'
+  - '"An Inconvenient Fact: Private Equity Returns and the Billionaire Factory" (Journal of Investing, 2020)'
 key_publications:
-  - "An Inconvenient Fact: Private Equity Returns & The Billionaire Factory" (SSRN 3623820; Journal of Investing, Dec 2020)
-  - "Private Markets for the People? Or Just More People for Private Markets?" (SSRN 5346980, 2025)
-  - "Navigating Private Equity Data: A Critical Review of Key Sources" (SSRN 6013335, Jan 2026)
-  - "Comments on the shift from public (quoted) to private (unquoted) markets" (SSRN 5263477, 2025)
-  - "Private Equity and Leveraged Buyouts" (SSRN 5359163, 2025)
+  - '"An Inconvenient Fact: Private Equity Returns & The Billionaire Factory" (SSRN 3623820; Journal of Investing, Dec 2020)'
+  - '"Private Markets for the People? Or Just More People for Private Markets?" (SSRN 5346980, 2025)'
+  - '"Navigating Private Equity Data: A Critical Review of Key Sources" (SSRN 6013335, Jan 2026)'
+  - '"Comments on the shift from public (quoted) to private (unquoted) markets" (SSRN 5263477, 2025)'
+  - '"Private Equity and Leveraged Buyouts" (SSRN 5359163, 2025)'
 recent_signal_12mo:
   - title: "Pushes back on Trump's 401(k) executive order opening retirement accounts to private equity: 'access is not empowerment'"
     date: "2025-08-14"

@@ -31,19 +31,19 @@ signature_moves:
   - Tests platform "moats" against multihoming and disintermediation pressure
   - Maps regulatory proposals (e.g., bans on dual-mode operation) onto their actual welfare consequences instead of intuitions
 canonical_works:
-  - "Invisible Engines: How Software Platforms Drive Innovation and Transform Industries" (with David Evans and Richard Schmalensee, MIT Press, 2006)
-  - "Marketplace or Reseller?" (with Julian Wright), Management Science, 2015
-  - "Multi-Sided Platforms" (with Julian Wright), International Journal of Industrial Organization, 2015
-  - "When Data Creates Competitive Advantage" (with Julian Wright), Harvard Business Review, 2020
-  - "Should platforms be allowed to sell on their own marketplaces?" (with Tat-How Teh and Julian Wright), RAND Journal of Economics, 2022
+  - '"Invisible Engines: How Software Platforms Drive Innovation and Transform Industries" (with David Evans and Richard Schmalensee, MIT Press, 2006)'
+  - '"Marketplace or Reseller?" (with Julian Wright), Management Science, 2015'
+  - '"Multi-Sided Platforms" (with Julian Wright), International Journal of Industrial Organization, 2015'
+  - '"When Data Creates Competitive Advantage" (with Julian Wright), Harvard Business Review, 2020'
+  - '"Should platforms be allowed to sell on their own marketplaces?" (with Tat-How Teh and Julian Wright), RAND Journal of Economics, 2022'
 key_publications:
-  - "Data-enabled learning, network effects, and competitive advantage" (with Julian Wright), RAND Journal of Economics, 2023
-  - "Marketplace Leakage" (with Julian Wright), Management Science, March 2024
-  - "Will That Marketplace Succeed?" (with Julian Wright), Harvard Business Review, July-August 2024
-  - "Optimal Discoverability on Platforms" (with Julian Wright), Management Science, November 2024
-  - "Artificial intelligence and competition policy" (with Julian Wright), International Journal of Industrial Organization, 2025
-  - "Could the GPT Store Turn ChatGPT into a Platform Powerhouse?" (with Julian Wright), Harvard Business Review, May 2025
-  - "Platform Traps" (with Julian Wright), working paper, 2025
+  - '"Data-enabled learning, network effects, and competitive advantage" (with Julian Wright), RAND Journal of Economics, 2023'
+  - '"Marketplace Leakage" (with Julian Wright), Management Science, March 2024'
+  - '"Will That Marketplace Succeed?" (with Julian Wright), Harvard Business Review, July-August 2024'
+  - '"Optimal Discoverability on Platforms" (with Julian Wright), Management Science, November 2024'
+  - '"Artificial intelligence and competition policy" (with Julian Wright), International Journal of Industrial Organization, 2025'
+  - '"Could the GPT Store Turn ChatGPT into a Platform Powerhouse?" (with Julian Wright), Harvard Business Review, May 2025'
+  - '"Platform Traps" (with Julian Wright), working paper, 2025'
 recent_signal_12mo:
   - title: "Platform Traps — working paper showing rational agents can be induced to join a platform despite being worse off than without it"
     date: "2025-06-04"

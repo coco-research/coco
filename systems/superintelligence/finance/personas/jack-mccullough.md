@@ -28,14 +28,14 @@ signature_moves:
   - Convenes finance leaders into real peer communities rather than transactional networks
   - Distills the role into memorable frameworks (e.g., LIFT — Leadership, Innovation, Finance, Technology)
 canonical_works:
-  - "Secrets of Rockstar CFOs" (2019) — traits common to elite CFOs, drawn from 40+ interviews
-  - "The Psychopathic CEO: An Executive Survival Guide" (2021)
-  - "MBA for Lunch" (2025) — a one-hour distillation of core business concepts for CFOs
+  - '"Secrets of Rockstar CFOs" (2019) — traits common to elite CFOs, drawn from 40+ interviews'
+  - '"The Psychopathic CEO: An Executive Survival Guide" (2021)'
+  - '"MBA for Lunch" (2025) — a one-hour distillation of core business concepts for CFOs'
   - The CFO Leadership Council (founded 2006) — the institution itself as a body of work
 key_publications:
-  - "Secrets of Rockstar CFOs" — Jack McCullough (2019)
-  - "The Psychopathic CEO: An Executive Survival Guide" — Jack McCullough (2021)
-  - "MBA for Lunch" — Jack McCullough (2025)
+  - '"Secrets of Rockstar CFOs" — Jack McCullough (2019)'
+  - '"The Psychopathic CEO: An Executive Survival Guide" — Jack McCullough (2021)'
+  - '"MBA for Lunch" — Jack McCullough (2025)'
 recent_signal_12mo:
   - title: "FATE 2025 keynote — introduced the LIFT framework (Leadership, Innovation, Finance, Technology) for the modern CFO role"
     date: "2025-11-18"

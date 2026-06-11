@@ -25,8 +25,8 @@ signature_moves:
   - Write long-form @fintechjunkie threads and essays that teach a framework rather than pitch a deal
   - Treat speed and capital efficiency as survival traits, not nice-to-haves, for startups
 canonical_works:
-  - "The Copernican Revolution in Banking" (QED publication / presentation)
-  - "It's Time For A Revolution" and the Copernican Revolution essay series (Confessions of a FinTech Junkie blog)
+  - '"The Copernican Revolution in Banking" (QED publication / presentation)'
+  - '"It''s Time For A Revolution" and the Copernican Revolution essay series (Confessions of a FinTech Junkie blog)'
   - The @fintechjunkie essay and thread corpus on unit economics, scaling risk, and venture math
 key_publications:
   - title: "The Copernican Revolution in Banking (Publication Version)"

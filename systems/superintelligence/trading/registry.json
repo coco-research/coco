@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-01",
+  "generated_at": "2026-06-11",
   "team_id": "trading-super-intelligence",
   "team_name": "Trading Super Intelligence Team",
   "description": "Trading Super Intelligence Team. Named real-world personas across 8 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md.",
-  "native_personas_count": 43,
+  "native_personas_count": 46,
   "cross_listed_count": 0,
-  "personas_count": 43,
+  "personas_count": 46,
   "cells_count": 8,
   "cells": {
     "macro-discretionary": {
@@ -57,11 +57,12 @@
     "microstructure-execution": {
       "id": "microstructure-execution",
       "description": "Market microstructure, execution, HFT, technical trading.",
-      "personas_count": 4,
+      "personas_count": 5,
       "personas": [
         "haim-bodek",
         "joe-saluzzi",
         "larry-harris",
+        "maureen-ohara",
         "peter-brandt"
       ],
       "file_path": "superintelligence/trading/cells/microstructure-execution.md"
@@ -82,8 +83,9 @@
     "risk-systemic": {
       "id": "risk-systemic",
       "description": "Trading/market risk management and systemic risk.",
-      "personas_count": 4,
+      "personas_count": 5,
       "personas": [
+        "aaron-brown",
         "jon-danielsson",
         "kenneth-grant",
         "richard-bookstaber",
@@ -94,12 +96,13 @@
     "crypto-digital-assets": {
       "id": "crypto-digital-assets",
       "description": "Crypto/digital-asset trading and market structure.",
-      "personas_count": 5,
+      "personas_count": 6,
       "personas": [
         "arthur-hayes",
         "caitlin-long",
         "cobie",
         "hasu",
+        "nic-carter",
         "vitalik-buterin"
       ],
       "file_path": "superintelligence/trading/cells/crypto-digital-assets.md"
@@ -118,6 +121,57 @@
     }
   },
   "personas": {
+    "aaron-brown": {
+      "slug": "aaron-brown",
+      "real_name": "Aaron C. Brown",
+      "archetype": "The gambler-quant risk manager who treats Wall Street as a casino with better data and defends Value at Risk as a tool for living with uncertainty, not abolishing it.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "risk-systemic",
+      "cell_role": "lead-driver",
+      "status": "active",
+      "affiliations_2026": [
+        "Bloomberg Opinion (markets and risk columnist)",
+        "New York University (statistics lecturer)",
+        "University of California, San Diego (statistics lecturer)",
+        "Wilmott Magazine (longtime columnist)",
+        "Former Chief Risk Officer / head of financial market research, AQR Capital Management",
+        "Active crypto investor and adviser to crypto firms"
+      ],
+      "domains": [
+        "Risk management and systemic risk",
+        "Value at Risk and risk metrics",
+        "Quantitative finance and derivatives",
+        "Gambling theory and probability",
+        "Statistical literacy and quantitative disinformation",
+        "Prediction markets",
+        "Crypto and digital assets"
+      ],
+      "pairs_well_with": [
+        "ed-thorp",
+        "euan-sinclair",
+        "cliff-asness",
+        "emanuel-derman",
+        "andrew-lo"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb",
+        "marcos-lopez-de-prado",
+        "richard-bookstaber"
+      ],
+      "sources_count": 14,
+      "recent_signal_12mo_count": 7,
+      "persistent_signals_count": 0,
+      "public_stances_count": 7,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Dry, contrarian, and conversational, with a card-table swagger. Reaches for a poker, blackjack, or horse-track analogy to cut through finance jargon. Delights i",
+      "file_path": "superintelligence/trading/personas/aaron-brown.md",
+      "research_dir": "superintelligence/trading/research/aaron-brown/",
+      "build_method": "local-llm"
+    },
     "andrew-lo": {
       "slug": "andrew-lo",
       "real_name": "Andrew W. Lo",
@@ -1566,6 +1620,54 @@
       "research_dir": "superintelligence/trading/research/mark-douglas/",
       "build_method": "local-llm"
     },
+    "maureen-ohara": {
+      "slug": "maureen-ohara",
+      "real_name": "Maureen O'Hara",
+      "archetype": "The market microstructure theorist who taught markets to measure their own information asymmetry",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "microstructure-execution",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Robert W. Purcell Professor of Finance, Samuel Curtis Johnson Graduate School of Management, Cornell University",
+        "Professor of Economics, Cornell University",
+        "Affiliated expert, Cornerstone Research",
+        "Affiliated expert, The Brattle Group",
+        "Past President, American Finance Association"
+      ],
+      "domains": [
+        "Market microstructure theory",
+        "Liquidity and price discovery",
+        "High-frequency trading and order flow toxicity",
+        "Corporate and municipal bond market structure",
+        "ETF market mechanics and bond ETF liquidity",
+        "Crypto and digital asset microstructure"
+      ],
+      "pairs_well_with": [
+        "marcos-lopez-de-prado",
+        "larry-harris",
+        "andrew-lo",
+        "emanuel-derman"
+      ],
+      "productive_conflict_with": [
+        "joe-saluzzi",
+        "haim-bodek",
+        "nassim-taleb"
+      ],
+      "sources_count": 16,
+      "recent_signal_12mo_count": 4,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Precise, structural, and pedagogically clear — the cadence of a theorist who has taught the canonical text for thirty years. Defines terms before using them, di",
+      "file_path": "superintelligence/trading/personas/maureen-ohara.md",
+      "research_dir": "superintelligence/trading/research/maureen-ohara/",
+      "build_method": "local-llm"
+    },
     "nassim-taleb": {
       "slug": "nassim-taleb",
       "real_name": "Nassim Nicholas Taleb",
@@ -1615,6 +1717,53 @@
       "voice_style_excerpt": "Combative, aphoristic, and Mediterranean-acerbic. Quick to label opponents fragilistas, IYIs, or charlatans. Mixes rigorous probability with classical literatur",
       "file_path": "superintelligence/trading/personas/nassim-taleb.md",
       "research_dir": "superintelligence/trading/research/nassim-taleb/",
+      "build_method": "local-llm"
+    },
+    "nic-carter": {
+      "slug": "nic-carter",
+      "real_name": "Nic Carter",
+      "archetype": "On-chain data empiricist and crypto-banking policy investigator who fuses cypherpunk first principles with institutional-grade measurement.",
+      "teams": [
+        "trading-super-intelligence"
+      ],
+      "home_team": "trading-super-intelligence",
+      "cell": "crypto-digital-assets",
+      "cell_role": "specialist",
+      "status": "active",
+      "affiliations_2026": [
+        "Founding/General Partner, Castle Island Ventures",
+        "Co-founder and Chairman, Coin Metrics (acquired by Talos, announced July 2025)",
+        "Co-host, \"On The Brink\" podcast (with Matt Walsh)",
+        "Contributor, Pirate Wires (Operation Choke Point 2.0 series)"
+      ],
+      "domains": [
+        "On-chain data and blockchain analytics",
+        "Bitcoin and macro / monetary economics",
+        "Banking-crypto policy and debanking",
+        "Proof of reserves and exchange transparency",
+        "Stablecoins and free banking",
+        "Bitcoin mining energy / ESG",
+        "Post-quantum cryptographic risk"
+      ],
+      "pairs_well_with": [
+        "caitlin-long",
+        "hasu",
+        "arthur-hayes"
+      ],
+      "productive_conflict_with": [
+        "nassim-taleb",
+        "vitalik-buterin",
+        "cobie"
+      ],
+      "sources_count": 11,
+      "recent_signal_12mo_count": 6,
+      "persistent_signals_count": 0,
+      "public_stances_count": 5,
+      "confidence": "high",
+      "last_verified": "2026-06-01",
+      "voice_style_excerpt": "Direct, data-anchored, and combative when warranted; writes in long-form investigative prose with explicit caveats about what the data does and does not show. C",
+      "file_path": "superintelligence/trading/personas/nic-carter.md",
+      "research_dir": "superintelligence/trading/research/nic-carter/",
       "build_method": "local-llm"
     },
     "paul-tudor-jones": {

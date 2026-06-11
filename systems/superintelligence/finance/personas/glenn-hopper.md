@@ -26,17 +26,17 @@ signature_moves:
   - Insists on data readiness as the precondition for any AI deployment
   - Pushes incremental, measurable AI wins over sweeping automation programs
   - Reframes the CFO role around strategy and data, with accounting rigor delegated to a CAO
-  - "Trust but verify" posture toward AI-generated analysis and code
+  - '"Trust but verify" posture toward AI-generated analysis and code'
   - Translates frontier-model news into concrete finance use cases on a weekly cadence
 canonical_works:
-  - "Deep Finance: Corporate Finance in the Information Age" (book)
-  - "AI Mastery for Finance Professionals: Foundations, Techniques, and Applications" (book)
-  - "The AI-Ready CFO: A Strategic Guide to Evaluating and Implementing AI, Automation, and Analytics" (book)
+  - '"Deep Finance: Corporate Finance in the Information Age" (book)'
+  - '"AI Mastery for Finance Professionals: Foundations, Techniques, and Applications" (book)'
+  - '"The AI-Ready CFO: A Strategic Guide to Evaluating and Implementing AI, Automation, and Analytics" (book)'
 key_publications:
-  - "Deep Finance: Corporate Finance in the Information Age" (Leaders Press)
-  - "AI Mastery for Finance Professionals" (Leaders Press, Oct 2024)
-  - "The AI-Ready CFO" (Wiley Finance)
-  - "AI and the Office of the CFO in 2025" (Substack, Dec 2025)
+  - '"Deep Finance: Corporate Finance in the Information Age" (Leaders Press)'
+  - '"AI Mastery for Finance Professionals" (Leaders Press, Oct 2024)'
+  - '"The AI-Ready CFO" (Wiley Finance)'
+  - '"AI and the Office of the CFO in 2025" (Substack, Dec 2025)'
 recent_signal_12mo:
   - title: "Substack essay 'AI and the Office of the CFO in 2025' — argues 2025 matured the stack while workflows stayed put, and 2026 is the year to make deliberate moves"
     date: "2025-12-12"

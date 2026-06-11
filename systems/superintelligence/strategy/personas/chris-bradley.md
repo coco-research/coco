@@ -25,9 +25,9 @@ signature_moves:
   - Quantifies the 10 levers (5 endowment, trends, moves) that predict who moves up the curve
   - Demands a portfolio of bold moves over incremental sandbagging
 canonical_works:
-  - "Strategy Beyond the Hockey Stick" (2018, with Martin Hirt and Sven Smit)
+  - '"Strategy Beyond the Hockey Stick" (2018, with Martin Hirt and Sven Smit)'
   - The Power Curve of economic profit (2,393-company empirical study)
-  - "A Century of Plenty" (2026, MGI co-author)
+  - '"A Century of Plenty" (2026, MGI co-author)'
 key_publications:
   - title: "Strategy Beyond the Hockey Stick: People, Probabilities, and Big Moves to Beat the Odds"
     url: https://www.amazon.com/Strategy-Beyond-Hockey-Stick-Probabilities/dp/1119487625

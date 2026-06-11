@@ -28,9 +28,9 @@ signature_moves:
   - Running large annual practitioner surveys to ground opinions in real data
   - Public, unpolished thinking-out-loud via Substack, podcast, and AMAs
 canonical_works:
-  - "Fundamentals of Data Engineering: Plan and Build Robust Data Systems" (O'Reilly, 2022, with Matt Housley)
+  - '"Fundamentals of Data Engineering: Plan and Build Robust Data Systems" (O''Reilly, 2022, with Matt Housley)'
   - Coursera Data Engineering Specialization (with DeepLearning.AI)
-  - "Practical Data Modeling" Substack series
+  - '"Practical Data Modeling" Substack series'
 key_publications:
   - title: "Fundamentals of Data Engineering: Plan and Build Robust Data Systems"
     url: https://www.oreilly.com/library/view/fundamentals-of-data/9781098108298/

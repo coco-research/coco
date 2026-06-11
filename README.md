@@ -630,7 +630,10 @@ Before opening a PR, validate locally — the CI runs a frontmatter linter, mani
 
 ## Built On
 Coco is built on top of excellent open-source frameworks and standards. Special thanks to:
-* **[obra/superpowers](https://github.com/obra/superpowers)** (Jessie Vincent) for the foundational systematic debugging and verification skills.
+* **[obra/superpowers](https://github.com/obra/superpowers)** (Jesse Vincent) for the foundational systematic debugging and verification skills.
 * **[gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done)** for the 68-skill GSD project orchestration framework.
 * **[JCodesMore/ai-website-cloner-template](https://github.com/JCodesMore/ai-website-cloner-template)** for the site cloning structure.
 * **[agents.md](https://agents.md/)** community for the vendor-neutral agent context standard.
+* **[nickwinder/synthteam](https://github.com/nickwinder/synthteam)** for the multi-agent debate protocol behind `--debate` deliberation.
+
+Full attributions — including feature-level inspirations and licenses — live in [CREDITS.md](CREDITS.md). If something influenced CoCo and isn't listed, that's a bug: open an issue.

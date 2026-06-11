@@ -50,6 +50,8 @@ NEVER use `name of sender of msg` directly — it will error.
 - **`summary`** — AI summary of today's/unread emails — key decisions, action items
 - **`reply-draft <subject>`** — Draft a reply to a specific email
 - **`folders`** — List all mail folders with message counts
+- **`triage`** — Scan unread, auto-mark known noise (per rules file), show the rest
+- **`noise`** — Show/add noise rules (`noise add auto|propose <field>=<value> [reason]`)
 
 If no subcommand given, default to `unread`.
 
@@ -168,6 +170,63 @@ end repeat
 ### `folders`
 1. List all mail folders with message counts
 2. Show as table: Folder | Messages | Unread
+
+### `triage` (Legacy Outlook only — needs mark-as-read)
+Mechanically de-noises the inbox using the **curated rules file**, never your own judgment.
+
+1. **Dump** the first 200 inbox messages as TSV (`idx \t U|R \t sender_addr \t subject`):
+   ```applescript
+   tell application "Microsoft Outlook"
+       set out to {}
+       set i to 0
+       set msgs to messages 1 thru 200 of inbox
+       repeat with m in msgs
+           try
+               set i to i + 1
+               set s to sender of m
+               set flag to "R"
+               if (is read of m) is false then set flag to "U"
+               set end of out to ((i as text) & "	" & flag & "	" & (address of s) & "	" & (subject of m))
+           end try
+       end repeat
+       set AppleScript's text item delimiters to linefeed
+       set t to out as text
+       set AppleScript's text item delimiters to ""
+       return t
+   end tell
+   ```
+2. **Classify** by piping that dump into the shared classifier (deterministic, rule-driven):
+   ```bash
+   <dump> | python3 ~/.coco/email-triage.py
+   ```
+   It emits `AUTO` / `PROPOSE` / `PROTECT` lines + a `#SUMMARY`. See `~/.coco/email-noise-rules.yaml`.
+3. **Auto-mark** every `AUTO` line read. Mark by matching first UNREAD message whose `address of sender` + `subject` equal the line's (robust against index drift); do NOT trust the raw index across calls:
+   ```applescript
+   -- for each (addr, subj) to mark:
+   repeat with m in (messages 1 thru 200 of inbox)
+       try
+           if (is read of m) is false and (address of sender of m) is "ADDR" and (subject of m) is "SUBJ" then
+               set is read of m to true
+               exit repeat
+           end if
+       end try
+   end repeat
+   ```
+4. **Show** the `PROPOSE` lines as a table (Date | From | Subject | rule_id) — these are candidates, NOT marked. Ask which to mark, and offer to promote a rule to `auto` if trusted.
+5. **Report**: N auto-marked (grouped by rule), N proposed, N protected, remaining unread count.
+
+NEVER mark anything not emitted as `AUTO`. If a message matched a noise rule but is `PROTECT`, surface it explicitly — it stays unread.
+
+### `noise` — manage the rules
+- **`noise`** (no args): print the current rules grouped by tier (`auto` / `propose`) + `protect`, with id, match, reason.
+- **`noise add <tier> <field>=<value> [reason: ...]`**: append a rule to `~/.coco/email-noise-rules.yaml`.
+  - `<tier>` ∈ `auto` | `propose`. Default new rules to **propose** unless the user says auto.
+  - `<field>` ∈ `sender_equals` | `sender_contains` | `sender_regex` | `subject_startswith` | `subject_contains`.
+  - Generate a kebab-case `id`, set `added:` to today's date, write `reason:`.
+  - After writing, re-read the file to confirm it parses (it's the source of truth).
+- **`noise protect <field>=<value>`**: add a protect entry (sender or subject) — always-keep override.
+
+**Rules file** = `~/.coco/email-noise-rules.yaml` (schema documented in-file). It is **manually curated and continuous**: start rules in `propose`, promote to `auto` only once trusted, delete anything wrong. The classifier `~/.coco/email-triage.py` only ever does what the file says — it cannot invent noise.
 
 ---
 

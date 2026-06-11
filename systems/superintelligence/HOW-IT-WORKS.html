@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Super Intelligence — How the Orchestrator Works</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #0f1d3a;
+    --line: #475569;
+    --accent: #1a73e8;
+    --muted: #64748b;
+    --soft: #f1f5f9;
+    --card: #f8fafc;
+    --border: #e2e8f0;
+    --good: #15803d;
+    --warn: #b45309;
+    --code-bg: #0f1d3a;
+    --code-fg: #e2e8f0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--fg); line-height: 1.6;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 28px 80px; }
+  header { padding: 56px 0 36px; border-bottom: 1px solid var(--border); }
+  header h1 { font-size: 2.1rem; letter-spacing: -0.02em; }
+  header p.sub { color: var(--muted); font-size: 1.08rem; margin-top: 10px; max-width: 760px; }
+  .stats { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 22px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; }
+  .stat b { display: block; font-size: 1.4rem; color: var(--accent); }
+  .stat span { font-size: 0.82rem; color: var(--muted); }
+  section { padding: 40px 0 8px; }
+  h2 { font-size: 1.45rem; letter-spacing: -0.01em; margin-bottom: 14px; }
+  h2 .pill { display: inline-block; font-size: 0.7rem; vertical-align: middle; background: var(--accent); color: #fff; border-radius: 99px; padding: 2px 10px; margin-left: 10px; letter-spacing: 0.04em; }
+  h3 { font-size: 1.05rem; margin: 22px 0 8px; }
+  p { margin: 8px 0; max-width: 820px; }
+  code { background: var(--soft); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 0.88em; }
+  pre.cmd {
+    background: var(--code-bg); color: var(--code-fg); border-radius: 10px;
+    padding: 16px 20px; margin: 12px 0; overflow-x: auto;
+    font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 0.92rem; line-height: 1.8;
+  }
+  pre.cmd .c { color: #7dd3fc; }
+  pre.cmd .dim { color: #94a3b8; }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 0.93rem; }
+  th { text-align: left; background: var(--soft); border-bottom: 2px solid var(--border); padding: 9px 12px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+  td { border-bottom: 1px solid var(--border); padding: 9px 12px; vertical-align: top; }
+  td code { white-space: nowrap; }
+  .three { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin: 18px 0; }
+  .bigcard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .bigcard .n { display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; background: var(--accent); color: #fff; border-radius: 50%; font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; }
+  .bigcard h3 { margin: 0 0 6px; }
+  .bigcard p { font-size: 0.9rem; color: var(--muted); }
+  .bigcard code.big { display: block; margin-top: 10px; padding: 8px 10px; font-size: 0.85rem; background: var(--code-bg); color: var(--code-fg); border: none; white-space: pre-wrap; }
+  .diagram { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin: 18px 0; overflow-x: auto; }
+  .diagram svg { max-width: 100%; height: auto; }
+  .note { background: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid var(--accent); border-radius: 8px; padding: 12px 16px; margin: 14px 0; font-size: 0.92rem; }
+  .ok { color: var(--good); font-weight: 600; }
+  .warn { color: var(--warn); font-weight: 600; }
+  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.82rem; }
+  .verbgroups { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; margin: 14px 0; }
+  .vg { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .vg h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin-bottom: 8px; }
+  .vg ul { list-style: none; }
+  .vg li { padding: 4px 0; font-size: 0.9rem; border-bottom: 1px dashed var(--border); }
+  .vg li:last-child { border-bottom: none; }
+  .vg li code { font-weight: 600; }
+  .vg li span { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Super Intelligence — the expert council, explained</h1>
+  <p class="sub">SI convenes a panel of 16&ndash;32 modeled experts to argue about your question and hand you an attributed verdict. There are 242 slash commands under the hood, but the system routes for you &mdash; <strong>you only need to remember one</strong>.</p>
+  <div class="stats">
+    <div class="stat"><b>9</b><span>expert teams</span></div>
+    <div class="stat"><b>389</b><span>modeled experts</span></div>
+    <div class="stat"><b>72</b><span>specialist cells</span></div>
+    <div class="stat"><b>242</b><span>slash commands</span></div>
+    <div class="stat"><b>1</b><span>command you need: <code>/SI</code></span></div>
+  </div>
+</header>
+
+<section id="start">
+  <h2>Start here <span class="pill">90% OF USES</span></h2>
+  <div class="three">
+    <div class="bigcard">
+      <div class="n">1</div>
+      <h3>Just ask</h3>
+      <p>The front door. It infers which teams, which verb, and which dials fit your question, confirms in one line, and runs.</p>
+      <code class="big">/SI "should we build the export feature or buy a vendor tool?"</code>
+    </div>
+    <div class="bigcard">
+      <div class="n">2</div>
+      <h3>Say it in the prompt &mdash; no flags needed</h3>
+      <p>The dials are inferred from your wording: &ldquo;make them argue&rdquo; turns on debate rounds, &ldquo;in depth&rdquo; turns on full detail, &ldquo;be brutal&rdquo; routes to Roast.</p>
+      <code class="big">/SI "kill the v1 UI or keep maintaining both? make them argue it out"</code>
+    </div>
+    <div class="bigcard">
+      <div class="n">3</div>
+      <h3>Scope to one team</h3>
+      <p>Already know the domain? The team front doors work the same way &mdash; plain English in, verb and dials inferred.</p>
+      <code class="big">/SI-PD "review this onboarding flow, be brutal"</code>
+    </div>
+  </div>
+  <div class="note">
+    That is the entire user manual: <code>/SI</code> (or <code>/SI-&lt;Team&gt;</code>) followed by plain English. Everything below this point is how it works under the hood, plus power-user shortcuts for when you want exact control.
+  </div>
+</section>
+
+<section id="how">
+  <h2>How the orchestrator works</h2>
+  <p>Every command follows the same pipeline: <strong>infer the verb &rarr; route to teams &rarr; select the panel &rarr; approve &rarr; run</strong>. The front door first maps your wording to a verb (an intent table: &ldquo;A or B&rdquo; &rarr; Decide, &ldquo;tear this apart&rdquo; &rarr; Stress-Test, and so on &mdash; if two genuinely fit, it asks one quick question). Team routing is done by a local embedding model that scores your prompt against each team's profile and specialist cells (no cloud call). Single-domain questions auto-delegate to that team; multi-domain questions get a cross-team panel with seats split proportionally to relevance.</p>
+  <div class="diagram" id="d1" data-code="flowchart TD
+  U[&quot;You type a prompt&quot;] --> SI[&quot;/SI front door&quot;]
+  SI --> MS[&quot;meta_select.py scores your prompt<br/>against all 9 teams + 72 cells<br/>(local embeddings)&quot;]
+  MS --> Q{&quot;How many domains?&quot;}
+  Q -->|&quot;one team dominates&quot;| TO[&quot;/SI-Team-Orchestrate<br/>picks 16-32 from that team&quot;]
+  Q -->|&quot;spans several&quot;| XO[&quot;/SI-Orchestrate<br/>picks 16-32 ACROSS teams,<br/>seats split by relevance&quot;]
+  TO --> SC[&quot;Scoring per expert:<br/>40% domain match<br/>30% cell coverage<br/>30% productive conflict&quot;]
+  XO --> SC
+  SC --> AG[&quot;Approval gate<br/>high confidence: auto-proceed<br/>low confidence: asks you&quot;]
+  AG --> VB[&quot;Verb runs the panel<br/>Decide / Review / Plan / Design ...&quot;]
+  VB --> OUT[&quot;Attributed answer:<br/>verdict + named dissents<br/>+ what this missed&quot;]"></div>
+  <p>Three details worth knowing:</p>
+  <table>
+    <tr><th>Mechanism</th><th>What it means for you</th></tr>
+    <tr><td><strong>Productive conflict pairing</strong></td><td>30% of an expert's selection score comes from how well they clash with others already on the panel. The roster is built to disagree, not to echo.</td></tr>
+    <tr><td><strong>Confidence-tiered approval</strong></td><td>When the pick is obviously right you get a one-line summary and it proceeds. When it's ambiguous or high-stakes, you get an approve / edit / re-pick gate.</td></tr>
+    <tr><td><strong>Stance validation</strong></td><td>Every claim in the output traces to that expert's documented public stances (with source URL) or is labeled <code>[extrapolated]</code>. Over 25% extrapolated triggers a low-grounding warning.</td></tr>
+  </table>
+</section>
+
+<section id="debate">
+  <h2>The <code>--debate</code> flag</h2>
+  <p>By default each expert speaks once and the verb synthesizes (fast, cheap). With <code>--debate</code>, the orchestrator runs the panel as reacting rounds before handing results to the verb. The round protocol lives in exactly one place &mdash; the orchestrator &mdash; so all 130 debate-capable verbs share the same mechanics.</p>
+  <div class="diagram" id="d2" data-code="flowchart LR
+  R1[&quot;Round 1<br/>independent positions<br/>+ one open question each&quot;] --> RT[&quot;Reactions routed by<br/>productive-conflict pairs<br/>(never all-to-all)&quot;]
+  RT --> RR[&quot;React rounds<br/>held / sharpened / updated /<br/>conceded / hardened&quot;]
+  RR --> CV{&quot;Positions stable?&quot;}
+  CV -->|&quot;no (max 4 rounds)&quot;| RT
+  CV -->|&quot;yes&quot;| FIN[&quot;Converged verdict<br/>or an honest SPLIT<br/>+ round transcript&quot;]"></div>
+  <table>
+    <tr><th>Mode</th><th>Cost</th><th>When</th></tr>
+    <tr><td><code>(no flag)</code></td><td>Cheapest &mdash; single pass</td><td>Default. Quick takes, routine reviews.</td></tr>
+    <tr><td><code>--debate</code></td><td>Moderate &mdash; rounds run in-session</td><td>Contested calls where positions should be tested against each other.</td></tr>
+    <tr><td><code>--debate=full</code></td><td>Expensive &mdash; one subagent per expert per round</td><td>High-stakes, irreversible decisions only.</td></tr>
+  </table>
+  <p><code>Vote</code> and <code>Roast</code> deliberately don't take the flag &mdash; a binary tally and a one-liner roast have nothing to debate.</p>
+</section>
+
+<section id="grammar">
+  <h2>The command grammar</h2>
+  <p>Every command follows one pattern. Once you know it, you know all 242:</p>
+  <pre class="cmd"><span class="c">/SI</span><span class="dim">[-Team][-Verb]</span> <span class="dim">"your prompt"</span> <span class="dim">[flags]</span>
+
+<span class="dim"># no team, no verb  →</span>  /SI "..."              <span class="dim">routes everything for you</span>
+<span class="dim"># verb only         →</span>  /SI-Decide "..."       <span class="dim">cross-team panel, that verb</span>
+<span class="dim"># team + verb       →</span>  /SI-PD-Decide "..."    <span class="dim">one team's roster, that verb</span>
+<span class="dim"># team only         →</span>  /SI-PD                 <span class="dim">prints that team's roster</span></pre>
+
+  <h3>The 9 teams</h3>
+  <table>
+    <tr><th>Code</th><th>Team</th><th>Experts</th><th>Reach for it when the question is about&hellip;</th></tr>
+    <tr><td><code>PD</code></td><td>Product &amp; Design</td><td>56</td><td>product strategy, UX, design systems, user research, what to build</td></tr>
+    <tr><td><code>Eng</code></td><td>Engineering</td><td>70</td><td>architecture, code, infrastructure, reliability, security engineering</td></tr>
+    <tr><td><code>AI</code></td><td>AI</td><td>59</td><td>models, agents, ML systems, evals, AI safety and capability</td></tr>
+    <tr><td><code>Data</code></td><td>Data &amp; Analytics</td><td>29</td><td>pipelines, metrics, experimentation, analytics engineering</td></tr>
+    <tr><td><code>Fin</code></td><td>Finance</td><td>47</td><td>budgets, unit economics, valuation, capital allocation</td></tr>
+    <tr><td><code>Trade</code></td><td>Trading</td><td>46</td><td>markets, risk models, derivatives, market microstructure</td></tr>
+    <tr><td><code>GRC</code></td><td>Risk &amp; Compliance</td><td>30</td><td>governance, privacy, regulatory exposure, audit, controls</td></tr>
+    <tr><td><code>Strat</code></td><td>Strategy</td><td>29</td><td>competitive positioning, market entry, long-range bets</td></tr>
+    <tr><td><code>GTM</code></td><td>Sales, GTM &amp; Marketing</td><td>23</td><td>pricing, positioning, launch, pipeline, growth</td></tr>
+  </table>
+
+  <h3>The verbs, grouped by what you want</h3>
+  <div class="verbgroups">
+    <div class="vg"><h4>Make a call</h4><ul>
+      <li><code>Decide</code> <span>&mdash; pick between options, named dissent</span></li>
+      <li><code>Tradeoff</code> <span>&mdash; A-vs-B scored on 4&ndash;7 dimensions</span></li>
+      <li><code>Vote</code> <span>&mdash; yes/no tally on a binary question</span></li>
+    </ul></div>
+    <div class="vg"><h4>Examine</h4><ul>
+      <li><code>Analyse</code> <span>&mdash; multi-lens read of a topic</span></li>
+      <li><code>Review</code> <span>&mdash; critique a doc, PR, or design</span></li>
+      <li><code>Re-Analyse</code> <span>&mdash; rerun a prior analysis with new evidence</span></li>
+      <li><code>Debug</code> <span>&mdash; ranked root-cause hypotheses + test order</span></li>
+    </ul></div>
+    <div class="vg"><h4>De-risk</h4><ul>
+      <li><code>Pre-Mortem</code> <span>&mdash; what kills this in 12 months</span></li>
+      <li><code>Post-Mortem</code> <span>&mdash; 5-whys root cause after a failure</span></li>
+      <li><code>Stress-Test</code> <span>&mdash; adversarial attack, no diplomacy</span></li>
+      <li><code>Roast</code> <span>&mdash; one cutting line per expert</span></li>
+      <li><code>Defend</code> <span>&mdash; steelman a position properly</span></li>
+    </ul></div>
+    <div class="vg"><h4>Build</h4><ul>
+      <li><code>Plan</code> <span>&mdash; phased plan with owners and risks</span></li>
+      <li><code>Design</code> <span>&mdash; architecture pass, per-decision attribution</span></li>
+      <li><code>Full-Cycle</code> <span>&mdash; review &rarr; analyse &rarr; mitigate &rarr; decide (heavy, ~5&times; latency)</span></li>
+    </ul></div>
+    <div class="vg"><h4>Talk to the experts <em style="color:var(--muted);font-style:normal">(team-scoped only)</em></h4><ul>
+      <li><code>Ask &lt;slug&gt;</code> <span>&mdash; 1-on-1 with one expert in their voice</span></li>
+      <li><code>Huddle &lt;cell&gt;</code> <span>&mdash; one specialist cell synthesizes</span></li>
+      <li><code>Meeting</code> <span>&mdash; the entire team convenes</span></li>
+      <li><code>Read &lt;slug&gt;</code> <span>&mdash; print an expert's profile</span></li>
+    </ul></div>
+    <div class="vg"><h4>Team admin <em style="color:var(--muted);font-style:normal">(rarely needed)</em></h4><ul>
+      <li><code>Orchestrate</code> <span>&mdash; panel selection only (verbs call this for you)</span></li>
+      <li><code>Recruit</code> <span>&mdash; propose new experts for a gap</span></li>
+      <li><code>Refresh</code> <span>&mdash; update stale expert profiles</span></li>
+      <li><code>VoiceCheck</code> / <code>Verify</code> <span>&mdash; quality checks on voices and citations</span></li>
+    </ul></div>
+  </div>
+
+  <h3>Flags (all optional &mdash; plain-English wording in the prompt sets the same dials)</h3>
+  <table>
+    <tr><th>Flag</th><th>Effect</th></tr>
+    <tr><td><code>--deep</code></td><td>Full per-expert detail. Default output is the short tier: verdict + top dissents, ~10&ndash;20 lines.</td></tr>
+    <tr><td><code>--debate</code> / <code>--debate=full</code></td><td>Reacting rounds before synthesis (see above).</td></tr>
+    <tr><td><code>--no-orchestrate</code></td><td>Skip selection; use the whole team.</td></tr>
+    <tr><td><code>--cells a,b</code> / <code>--personas x,y</code></td><td>Hand-pick the scope; skips orchestration.</td></tr>
+    <tr><td><code>--coco-off</code></td><td>Use the standalone selector instead of CoCo's context-aware routing.</td></tr>
+  </table>
+</section>
+
+<section id="cheat">
+  <h2>Cheat sheet — situation &rarr; command</h2>
+  <table>
+    <tr><th>You're thinking&hellip;</th><th>Type</th></tr>
+    <tr><td>&ldquo;I don't know who should look at this&rdquo;</td><td><code>/SI "&hellip;"</code></td></tr>
+    <tr><td>&ldquo;A or B?&rdquo;</td><td><code>/SI-Decide "A or B?"</code></td></tr>
+    <tr><td>&ldquo;This is a big, contested call&rdquo;</td><td><code>/SI-Decide --debate "&hellip;"</code></td></tr>
+    <tr><td>&ldquo;Tear this plan apart before I commit&rdquo;</td><td><code>/SI-Stress-Test "&hellip;"</code> or <code>/SI-Pre-Mortem "&hellip;"</code></td></tr>
+    <tr><td>&ldquo;Review this PR / doc / design&rdquo;</td><td><code>/SI-Eng-Review &lt;path&gt;</code> (or <code>PD</code>/<code>GRC</code> flavor)</td></tr>
+    <tr><td>&ldquo;Why did this fail?&rdquo;</td><td><code>/SI-Post-Mortem "&hellip;"</code> &middot; &ldquo;What's broken?&rdquo; &rarr; <code>/SI-Debug</code></td></tr>
+    <tr><td>&ldquo;Plan this out&rdquo; / &ldquo;architect this&rdquo;</td><td><code>/SI-Plan "&hellip;"</code> / <code>/SI-Design "&hellip;"</code></td></tr>
+    <tr><td>&ldquo;What would Ann Cavoukian say?&rdquo;</td><td><code>/SI-GRC-Ask ann-cavoukian "&hellip;"</code></td></tr>
+    <tr><td>&ldquo;Who's even on these teams?&rdquo;</td><td><code>/SI</code> (no args) or <code>/SI-PD</code> for one team</td></tr>
+    <tr><td>&ldquo;Be brutal&rdquo;</td><td><code>/SI-Roast "&hellip;"</code></td></tr>
+  </table>
+</section>
+
+<section id="health">
+  <h2>System health <span class="pill" style="background:var(--good)">AUDITED + REPAIRED 2026-06-11</span></h2>
+  <p>Full structural audit of the live installation, with every finding fixed the same day. Verdict: <span class="ok">the orchestrator is working, all known gaps closed.</span></p>
+  <table>
+    <tr><th>Check</th><th>Result</th></tr>
+    <tr><td>All 242 command files installed and loading</td><td class="ok">PASS</td></tr>
+    <tr><td>Every file path referenced by commands resolves</td><td class="ok">PASS</td></tr>
+    <tr><td>Embedding router <code>meta_select.py</code> live-tested</td><td class="ok">PASS &mdash; correct team + cell scores returned</td></tr>
+    <tr><td>All 9 team registries consistent; cross-team listings resolve; every expert file on disk registered and selectable</td><td class="ok">PASS &mdash; 0 broken references, 0 orphans</td></tr>
+    <tr><td>Debate wiring: protocol in exactly 10 orchestrators, 117 team verbs + 13 cross verbs forward the flag, Vote/Roast clean</td><td class="ok">PASS &mdash; matches design exactly</td></tr>
+    <tr><td>Generators portable (env-overridable repo path, no dead-checkout references); team metadata derived live from registries</td><td class="ok">PASS</td></tr>
+    <tr><td>27 experts (incl. Porter, Rumelt, Marks) were invisible to selection &mdash; root cause was broken YAML frontmatter; repaired deterministically and re-registered</td><td class="ok">FIXED 2026-06-11</td></tr>
+    <tr><td><code>ROSTER.md</code> generated for all 6 missing teams (new <code>build_roster_md.py</code>, regenerable from registries)</td><td class="ok">FIXED 2026-06-11</td></tr>
+    <tr><td><code>validate_all_generic.py</code> runs team-aware from the repo root; generator metadata drift eliminated</td><td class="ok">FIXED 2026-06-11</td></tr>
+  </table>
+</section>
+
+<footer>
+  Super Intelligence system &middot; source of truth: <code>systems/superintelligence/</code> (registry.json + per-team registries, personas, cells) &middot; commands generated by <code>build_meta_commands.py</code> (cross-team) and <code>build_commands.py</code> (per-team) &mdash; edit the generators, never the command files &middot; guide generated 2026-06-11.
+</footer>
+
+</div>
+
+<script type="module">
+  import { renderMermaidSVGAsync } from 'https://esm.sh/beautiful-mermaid@1.1.3';
+  const theme = { bg: '#ffffff', fg: '#0f1d3a', line: '#475569', accent: '#1a73e8' };
+  const els = document.querySelectorAll('.diagram[data-code]');
+  for (const el of els) {
+    await new Promise(r => requestAnimationFrame(r));
+    try {
+      el.innerHTML = await renderMermaidSVGAsync(el.dataset.code, theme);
+    } catch (e) {
+      el.innerHTML = '<pre style="white-space:pre-wrap;font-size:0.8rem;color:#475569">' + el.dataset.code + '</pre>';
+    }
+  }
+</script>
+</body>
+</html>

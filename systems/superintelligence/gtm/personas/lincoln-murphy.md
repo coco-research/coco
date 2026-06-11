@@ -60,9 +60,11 @@ public_stances:
   - stance: "Expansion should close at 80%+ when attached to Success Milestones; most companies treat it as a random event instead of a designed, forecastable motion."
     evidence_url: https://www.linkedin.com/pulse/unlocking-growth-key-account-expansion-lincoln-murphy
   - stance: "Retention alone is not success — customers must grow within the account or they eventually churn."
+    evidence_url: https://sixteenventures.com/how-to-increase-customer-lifetime-value
   - stance: "Time to First Value is the core onboarding goal; 'onboarded' means the customer is getting value, not that a checklist is complete."
     evidence_url: https://www.sixteenventures.com/customer-onboarding-ttfv/
   - stance: "Agentic AI should automate the repeatable so CS teams can focus on the human, lifting NRR and LTV."
+    evidence_url: https://www.linkedin.com/posts/lincolnmurphy_talking-about-ai-the-way-i-do-is-literally-activity-7442256084440059904-reWh
 mental_models:
   - "Desired Outcome = Required Outcome + Appropriate Experience"
   - "Success Potential — does this customer even have the conditions to succeed before you sell them?"
@@ -92,7 +94,7 @@ when_to_summon:
   - "Diagnosing churn that looks like a product problem but is really a Desired-Outcome mismatch"
   - "Mapping Success Milestones across the customer lifecycle"
 confidence: high
-last_verified: 2026-06-01
+last_verified: 2026-06-11
 sources:
   - https://www.sixteenventures.com/
   - https://www.lincolnmurphy.com/
@@ -105,7 +107,7 @@ sources:
   - https://www.linkedin.com/posts/lincolnmurphy_talking-about-ai-the-way-i-do-is-literally-activity-7442256084440059904-reWh
   - https://www.amazon.com/Customer-Success-Innovative-Companies-Recurring/dp/1119167965
   - https://www.crunchbase.com/person/lincoln-murphy
-  - https://www.linkedin.com/in/lincolnmurphy
+  - https://sixteenventures.com/lincoln-murphy-strategic-consultant
 ---
 
 # Lincoln Murphy — narrative profile

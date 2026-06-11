@@ -59,6 +59,7 @@ public_stances:
   - stance: "PLG is a systems-level shift across the whole company, not just a pricing model or a trial strategy — most teams underestimate the depth."
     evidence_url: "https://podcasts.apple.com/us/podcast/the-hidden-systems-behind-real-product-led-growth-with/id1511588213?i=1000708155762"
   - stance: "Choosing between free trial, freemium, and demo should be a deliberate decision (the MOAT framework); a mismatched model and sales motion repel each other."
+    evidence_url: https://medium.com/traffic-is-currency/free-trial-vs-freemium-1-framework-to-decide-between-models-fbf5c1ababac
 mental_models:
   - "PLG iceberg — what users see (free trial) is a sliver of the systems beneath it."
   - "UCD: Understand value, Communicate perceived value, Deliver on the promise."
@@ -88,11 +89,11 @@ when_to_summon:
   - Deciding whether a product should go product-led at all, and how to sequence the shift.
   - Stress-testing an AI-native product's "show value in 60 seconds" experience.
 confidence: high
-last_verified: 2026-06-01
+last_verified: 2026-06-11
 sources:
   - https://productled.com/book/product-led-growth
   - https://productled.com/wes-bush
-  - https://ca.linkedin.com/in/wesbush
+  - https://medium.com/traffic-is-currency/free-trial-vs-freemium-1-framework-to-decide-between-models-fbf5c1ababac
   - https://userpilot.com/blog/wes-bush-interview/
   - https://founderpath.com/blog/productled-ceo-keynote-wes-bush
   - https://practicalfounders.com/podcast/silent-plg-killers-saas-founders-fail-at-product-led-growth-wes-bush/

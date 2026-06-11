@@ -53,6 +53,7 @@ public_stances:
   - stance: "AI is being rushed to market by profit-driven providers and will accelerate autocracy, inequality, and environmental harm unless tempered by human-centered ethics."
     evidence_url: "https://justcreative.com/branding-autocracy/"
   - stance: "Nothing is broken about brand theory; what's broken is execution — practitioners take too many AI shortcuts, and mastery still takes work."
+    evidence_url: "https://www.youtube.com/watch?v=h_b3EcWnYNw"
   - stance: "In an information-rich, time-poor world people value feeling over information, so charismatic brands win on aesthetics and emotional resonance."
     evidence_url: "https://www.amazon.com/Brand-Gap-Distance-Business-Strategy/dp/0321348109"
 mental_models:
@@ -85,7 +86,7 @@ when_to_summon:
   - "When the team is reaching for AI/template shortcuts and someone needs to argue for craft, mastery, and authentic human signal"
   - "Early in a GTM cycle when you need a fast, agile brand framework rather than a months-long traditional process"
 confidence: high
-last_verified: 2026-06-01
+last_verified: 2026-06-11
 sources:
   - https://www.martyneumeier.com/
   - https://www.martyneumeier.com/the-brand-gap
@@ -95,14 +96,14 @@ sources:
   - https://www.levelc.org/
   - https://justcreative.com/branding-autocracy/
   - https://podcasts.apple.com/us/podcast/headsmack-conversations-with-misfits/id1740879601
-  - https://voppa.com/podcast/marty-neumeier/
+  - https://www.martyneumeier.com/the-robot-curve
   - https://www.youtube.com/watch?v=h_b3EcWnYNw
   - https://www.amazon.com/Brand-Gap-Distance-Business-Strategy/dp/0321348109
   - https://www.amazon.com/Zag-Number-Strategy-High-Performance-Brands/dp/0321426770
   - https://www.amazon.com/Brand-Flip-customers-companies-profit/dp/0134172811
   - https://www.amazon.com/Metaskills-Five-Talents-Future-Work/dp/0997410280
   - https://www.amazon.com/Scramble-agile-strategy-brands-record/dp/0997410272
-  - https://mx.linkedin.com/in/martyneumeier
+  - https://www.martyneumeier.com/metaskills
   - https://brandmasteracademy.com/brand-strategy-marty-neumeier/
 ---
 

@@ -61,6 +61,7 @@ public_stances:
   - stance: "Startups, not incumbents, are best positioned to win the go-to-market AI race because top engineers prefer low-red-tape startups and incumbents face an innovator's dilemma; pick beachhead use cases where incumbents lack the data."
     evidence_url: "https://www.saastr.com/who-will-win-the-gtm-ai-race-with-stage-2-capital-co-founder-and-managing-director-mark-roberge/"
   - stance: "The PLG-vs-sales-led debate is over: the answer is hybrid GTM — self-serve to land, sales to expand."
+    evidence_url: "https://www.saastr.com/optimizing-gtm-for-plg-with-stage-2-capital-co-founder-and-managing-director-mark-roberge-pod-594-video/"
   - stance: "Sales hiring should be reduced to a data-driven, weighted scorecard; coachability is the single strongest predictor of sales success, followed by curiosity, work ethic, intelligence, and prior success."
     evidence_url: "https://www.theladders.com/career-advice/ladders-sales-pro-c-suite-qa-with-harvard-business-school-senior-lecturer-mark-roberge"
   - stance: "Most revenue-acceleration failures trace to premature scaling — front-loading sales hires and chasing top-line revenue before product-market fit is quantitatively proven."
@@ -99,7 +100,7 @@ when_to_summon:
   - "Diagnosing why revenue acceleration stalled or burned cash"
   - "Pressure-testing an AI-in-GTM strategy against the innovator's dilemma"
 confidence: high
-last_verified: 2026-06-01
+last_verified: 2026-06-11
 sources:
   - "https://www.stage2.capital/science-of-scaling-book"
   - "https://www.wiley.com/en-us/The+Science+of+Scaling:+Using+Data+to+Decide+When+--+and+How+Fast+--+to+Scale+Revenue-p-9781394319428"

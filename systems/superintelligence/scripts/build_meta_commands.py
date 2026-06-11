@@ -51,6 +51,7 @@ ORCHESTRATE = f"""# /SI-Orchestrate — pick 16-32 personas ACROSS all built tea
 ## Flags
 - `--deep` — full output. `--teams <a,b,...>` — force-scope to these teams (skip Stage A).
 - `--no-orchestrate` — use all personas of the auto-selected teams. `--coco-off` — standalone (skip CoCo).
+- `--debate` — after selecting the panel, run it as reacting ROUNDS (Step 11) and return the converged positions + transcript, not just the roster. `--debate=full` — one subagent per persona per round (high-stakes only).
 
 ## Step 0 — Route via CoCo (when active)
 Unless `--coco-off` or `~/.coco/disabled` exists: hand the prompt + recent conversation context to CoCo and ask it to run the two-stage cross-team selection below. CoCo's context makes the team+persona pick sharper. Otherwise run standalone exactly as below.
@@ -74,7 +75,19 @@ Present the panel GROUPED BY TEAM, each persona one-line rationale + team tag.
 - LOW → AskUserQuestion: Approve / Drop / Add / Re-pick / Reject. Enforce 16-32 (out-of-band → confirm).
 
 ## Step 10 — Return
-Emit `APPROVED_ROSTER:` one `team:slug` per line for the calling verb. No caching — re-pick every invocation.
+Emit `APPROVED_ROSTER:` one `team:slug` per line for the calling verb. No caching — re-pick every invocation. If `--debate` is NOT set, stop here; the calling verb runs its single-pass output.
+
+## Step 11 — Deliberate (ONLY when `--debate`)
+Convene the approved roster as reacting rounds so positions can actually move, then hand the converged result to the calling verb. This is the one home for the round protocol — verbs do not redefine it.
+- `--debate` (light): you, the running session, voice all personas across the rounds in-context. Cheap, no subagents.
+- `--debate=full`: spawn ONE subagent per persona per round (real independence + web research). At 16-32 personas this is many runs — high-stakes only.
+
+1. **Round 1 — independent positions.** Each persona states: Position (1-2 sentences) · Reasoning (tied to cited stances) · one Open question routed `[for: <slug|anyone>]`. No reacting yet.
+2. **Route by productive conflict (NOT all-to-all).** You already scored `productive_conflict_with` during selection (Stage B step 7) — reuse it. Each persona reacts ONLY to (a) the on-panel slugs in its `productive_conflict_with` and (b) anyone who routed a question to it. Never all 16-32 — this bounds the debate and lands the friction where the roster was designed to clash.
+3. **React rounds.** Each persona returns: Stance change (`held | sharpened | updated | conceded | hardened`, plus one line on what moved) · Reaction engaging its counterparts BY NAME · Position (now). A concession is a real outcome, not a failure.
+4. **Convergence check.** Stop when no persona's stance change is `updated/conceded/hardened` (positions stable) AND no open question another persona could answer remains. Hard cap 4 rounds (Round 1 + up to 3 react rounds); always run at least one react round. State the round count and why you stopped.
+
+Hand the calling verb the converged per-persona positions + a condensed round-by-round transcript. The verb shapes them into its output and reports genuine splits rather than forcing a winner.
 
 ARGUMENTS: {{{{ARGUMENTS}}}}
 """
@@ -103,24 +116,55 @@ Read `{META_REGISTRY}`. List teams with `built: true` (name, persona/cell counts
 ARGUMENTS: {{{{ARGUMENTS}}}}
 """
 
-def verb_body(title, desc, shape):
+# Verbs where a reacting multi-round debate adds value (positions can move through argument).
+# Vote (binary by design) and Roast (one cutting line each, no reaction) are intentionally excluded.
+DEBATE_VERBS = {
+    "Analyse", "Decide", "Review", "Re-Analyse", "Pre-Mortem", "Post-Mortem",
+    "Full-Cycle", "Tradeoff", "Plan", "Design", "Stress-Test", "Defend", "Debug",
+}
+
+DELIBERATION_BLOCK = """
+## Step 2.5 — Use the deliberation (only when `--debate`)
+When `--debate` is set, the reacting rounds run inside `/SI-Orchestrate` (its Step 11 Deliberate: independent positions → route by `productive_conflict_with` → react rounds with stance changes → convergence, hard cap 4 rounds). Consume the converged per-persona positions and the round transcript it returns here, instead of a single one-shot pass. The protocol lives there, not in this verb.
+"""
+
+SPLIT_CLAUSE = """
+When `--debate` ran, map the deliberation honestly: **Consensus** · **Unresolved disagreements** (who holds what, and WHY it didn't resolve) · **Open questions for the user** · **Verdict**. If the panel genuinely split, write **SPLIT** with 2-3 decision criteria instead of forcing a winner — an honest split beats false confidence. Also give a condensed round-by-round transcript (per persona: position + what moved) so the verdict is auditable.
+"""
+
+
+def verb_body(title, desc, shape, debate=False):
     chain = title == "Full-Cycle"
+    flags = "- `--deep` (full output) · `--teams <a,b,...>` (force team scope) · `--no-orchestrate` · `--coco-off`"
+    if debate:
+        flags += "\n- `--debate` (run the panel as reacting ROUNDS, not one pass) · `--debate=full` (one subagent per persona per round — high-stakes only)"
+    deliberation = DELIBERATION_BLOCK if debate else ""
+    split_clause = SPLIT_CLAUSE if debate else ""
+    if debate:
+        step1 = ("Invoke `/SI-Orchestrate \"<prompt>\"`, forwarding `--debate`/`--debate=full` when set "
+                 "(unless `--no-orchestrate`/`--teams`/`--personas`). Capture `APPROVED_ROSTER` (each entry is `team:slug`); "
+                 "when `--debate` ran, also capture the converged deliberation (positions + transcript) it returns. "
+                 "Single-domain prompts will auto-delegate to one team's orchestrator — honor that.")
+    else:
+        step1 = ("Invoke `/SI-Orchestrate \"<prompt>\"` (unless `--no-orchestrate`/`--teams`/`--personas`). "
+                 "Capture `APPROVED_ROSTER` (each entry is `team:slug`). "
+                 "Single-domain prompts will auto-delegate to one team's orchestrator — honor that.")
     return f"""# /SI-{title} — all-teams {desc}
 
 > Cross-team action verb. Orchestrated through CoCo. Generated by `build_meta_commands.py`.
 
 ## Flags
-- `--deep` (full output) · `--teams <a,b,...>` (force team scope) · `--no-orchestrate` · `--coco-off`
+{flags}
 
 ## Step 1 — Cross-team orchestrate
-Invoke `/SI-Orchestrate "<prompt>"` (unless `--no-orchestrate`/`--teams`/`--personas`). Capture `APPROVED_ROSTER` (each entry is `team:slug`). Single-domain prompts will auto-delegate to one team's orchestrator — honor that.
+{step1}
 
 ## Step 2 — Read the approved personas
 For each `team:slug`, read `{REPO}/superintelligence/<team-dir>/personas/<slug>.md` (resolve `<team-dir>` from the meta-registry). Channel each persona via signature_moves + mental_models + voice_style.
-
+{deliberation}
 ## Step 3 — {title} output
 {shape}
-{"Chain each sub-step as a real `/SI-<step>` invocation; re-orchestrate per step (teams may differ)." if chain else ""}
+{split_clause}{"Chain each sub-step as a real `/SI-<step>` invocation; re-orchestrate per step (teams may differ)." if chain else ""}
 
 ## Attribution (mandatory)
 Every claim cites **persona + team** — e.g. *Aswath Damodaran (Finance)*. Synthesis MUST surface cross-team disagreement explicitly, not just within-team. No "the panel said."
@@ -135,7 +179,7 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     files = {"SI.md": DISPATCH, "SI-Orchestrate.md": ORCHESTRATE}
     for title, (desc, shape) in VERBS.items():
-        files[f"SI-{title}.md"] = verb_body(title, desc, shape)
+        files[f"SI-{title}.md"] = verb_body(title, desc, shape, debate=title in DEBATE_VERBS)
     for name, body in files.items():
         (OUT / name).write_text(body, encoding="utf-8")
     print(f"Wrote {len(files)} meta-orchestrator command files to {OUT}:")

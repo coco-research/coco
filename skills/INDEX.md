@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 59 skills** (top-level only — see `systems/<bundle>/skills/` for bundle-only skills).
+**Total: 63 skills** (top-level only — see `systems/<bundle>/skills/` for bundle-only skills).
 
 ## Design
 
@@ -42,8 +42,11 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [axiom-liquid-glass](axiom-liquid-glass/SKILL.md) | Apple Liquid Glass design system — comprehensive design philosophy, implementation guide, and technical API reference from WWDC 2025. Covers design principles ( |
 | [brainstorming](brainstorming/SKILL.md) | You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirem |
 | [browser-automation](browser-automation/SKILL.md) | Browser automation for AI agents. Two providers — agent-browser (local CLI with Playwright) and agentic-browser (cloud via inference.sh). Both use the same @e r |
+| [cli-anything](cli-anything/SKILL.md) | Wrap any command-line tool into a JSON-emitting agent skill. Use when you want to make a CLI reliably callable and parseable by an AI agent — introspect its --h |
 | [clone-website](clone-website/SKILL.md) | Clone any website into a pixel-perfect single-file HTML prototype. Extracts design tokens, assets, CSS computed styles, interaction patterns, and content via Pl |
+| [coco-cli](coco-cli/SKILL.md) | Install, update, version-check, or uninstall the Coco open-source AI workflow framework via its CLI (@rkz91/coco-cli, run with npx). Use when setting up Coco on |
 | [code-verification](code-verification/SKILL.md) | Post-implementation verification system that catches AI-introduced bugs. Covers 7 categories — TDZ errors, import mismatches, reference integrity, dead code, Re |
+| [design-taste-frontend](design-taste-frontend/SKILL.md) | Anti-slop frontend skill for landing pages, portfolios, and redesigns. The agent reads the brief, infers the right design direction, and ships interfaces that d |
 | [dispatching-parallel-agents](dispatching-parallel-agents/SKILL.md) | Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies |
 | [docx](docx/SKILL.md) | Comprehensive document creation, editing, and analysis with support for tracked changes, comments, formatting preservation, and text extraction. When Claude nee |
 | [executing-plans](executing-plans/SKILL.md) | Use when you have a written implementation plan to execute in a separate session with review checkpoints |
@@ -69,6 +72,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [pmstudio-sync](pmstudio-sync/SKILL.md) | Use when a project has linked documentation artifacts (PRDs, presentations, meeting notes, architecture maps) that must stay synchronized. Detects which source  |
 | [prd-generator](prd-generator/SKILL.md) | Generate comprehensive Product Requirements Documents (PRDs) for product managers. Use this skill when users ask to "create a PRD", "write product requirements" |
 | [receiving-code-review](receiving-code-review/SKILL.md) | Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical  |
+| [redesign-existing-projects](redesign-existing-projects/SKILL.md) | Upgrades existing websites and apps to premium quality. Audits current design, identifies generic AI patterns, and applies high-end design standards without bre |
 | [requesting-code-review](requesting-code-review/SKILL.md) | Use when completing tasks, implementing major features, or before merging to verify work meets requirements |
 | [skill-creator](skill-creator/SKILL.md) | Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabil |
 | [subagent-driven-development](subagent-driven-development/SKILL.md) | Use when executing implementation plans with independent tasks in the current session |

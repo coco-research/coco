@@ -33,6 +33,12 @@ Free | MIT License | 90-Second Onboarding
 
 </div>
 
+<p align="center">
+  <img src="assets/demo.gif" alt="/SI-Decide --debate: a routed expert panel argues in reacting rounds before an attributed verdict" width="720" />
+</p>
+
+<div align="center"><sub><em>A real <code>/SI-Decide --debate</code> run — Coco routes an expert panel, deliberates in reacting rounds, and returns an attributed verdict with named dissent.</em></sub></div>
+
 ---
 
 <div align="center">

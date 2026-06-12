@@ -13,7 +13,7 @@ Free | MIT License | 90-Second Onboarding
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/license/mit)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue?style=for-the-badge)](CHANGELOG.md)
-[![Skills](https://img.shields.io/badge/skills-142-emerald?style=for-the-badge)](skills/)
+[![Skills](https://img.shields.io/badge/skills-146-emerald?style=for-the-badge)](skills/)
 [![Commands](https://img.shields.io/badge/commands-277-indigo?style=for-the-badge)](commands/)
 [![Personas](https://img.shields.io/badge/personas-389-violet?style=for-the-badge)](systems/superintelligence/)
 [![CI](https://img.shields.io/github/actions/workflow/status/rkz91/coco/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/rkz91/coco/actions)
@@ -96,11 +96,11 @@ The 389-persona roster was compiled using a systematic multi-tier workflow:
 
 ## The Coco Asset Library
 
-A standard installation equips your workspace with a lightweight set of tools, while full activation unlocks up to 860 total assets to orchestrate any software engineering workflow:
+A standard installation equips your workspace with a lightweight set of tools, while full activation unlocks up to 864 total assets to orchestrate any software engineering workflow:
 
 <table align="center">
 <tr>
-<td align="center" width="20%"><h3>142</h3><sub>Skills</sub><br><small>59 Core + 83 Bundle</small></td>
+<td align="center" width="20%"><h3>146</h3><sub>Skills</sub><br><small>63 Core + 83 Bundle</small></td>
 <td align="center" width="20%"><h3>277</h3><sub>Slash Commands</sub><br><small>35 Core + 242 Bundle</small></td>
 <td align="center" width="20%"><h3>34</h3><sub>Specialized Agents</sub><br><small>10 Core + 24 Bundle</small></td>
 <td align="center" width="20%"><h3>389</h3><sub>Expert Personas</sub><br><small>Superintelligence Board</small></td>
@@ -109,7 +109,7 @@ A standard installation equips your workspace with a lightweight set of tools, w
 </table>
 
 <div align="center">
-  <sub><strong>Core Installation:</strong> 119 active assets (59 Skills, 35 Commands, 10 Agents, 15 Rules)</sub><br>
+  <sub><strong>Core Installation:</strong> 123 active assets (63 Skills, 35 Commands, 10 Agents, 15 Rules)</sub><br>
   <sub><strong>Orchestration Bundles:</strong> <strong>+68 GSD skills</strong> · <strong>+24 GSD agents</strong> · <strong>+6 Brain skills</strong> · <strong>+9 Superintelligence skills</strong> · <strong>+242 SI commands</strong> · <strong>3 Workflows</strong></sub>
 </div>
 
@@ -144,7 +144,7 @@ Coco compiles its rules, templates, and agent definitions into pure Markdown and
 
 ## Skills Catalog Deep-Dive
 
-Coco comes loaded with 142 skills. These are not basic prompt templates, but fully realized agent instructions containing state management, verification logic, and error handlers:
+Coco comes loaded with 146 skills. These are not basic prompt templates, but fully realized agent instructions containing state management, verification logic, and error handlers:
 
 ### Visual Design and Styling Systems
 *   **ui-ux-pro-max**: Generates modern visual presets containing 50+ styling tokens, 21 color palettes, font pairings, and responsive charts.
@@ -572,7 +572,7 @@ npx @rkz91/coco-cli update
 <table>
 <tr><td><strong>Spec Version</strong></td><td>1.0.0</td></tr>
 <tr><td><strong>License</strong></td><td><a href="https://opensource.org/license/mit">MIT</a></td></tr>
-<tr><td><strong>Total Skills Available</strong></td><td>142 with all bundles installed (59 Core + 68 GSD + 6 Brain + 9 Superintelligence)</td></tr>
+<tr><td><strong>Total Skills Available</strong></td><td>146 with all bundles installed (63 Core + 68 GSD + 6 Brain + 9 Superintelligence)</td></tr>
 <tr><td><strong>Slash Commands</strong></td><td>277 with all bundles installed — 35 Core (shipped) + 242 Superintelligence (225 per-team + 17 cross-team, generated at install of the Superintelligence bundle)</td></tr>
 <tr><td><strong>Specialized Agents</strong></td><td>34 (10 Core + 24 GSD Bundle)</td></tr>
 <tr><td><strong>System Bundles</strong></td><td>4 (GSD, Brain, Team, Superintelligence) — opt in with <code>--systems &lt;name&gt;</code></td></tr>
@@ -582,7 +582,7 @@ npx @rkz91/coco-cli update
 <tr><td><strong>Telemetry / SaaS</strong></td><td>None — 100% Local Files</td></tr>
 </table>
 
-<sub>Core install ships 59 skills + 35 commands + 10 agents. The counts above reflect a full install with all four system bundles enabled (<code>bash install.sh --systems gsd,brain,team,superintelligence</code>). Superintelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely.</sub>
+<sub>Core install ships 63 skills + 35 commands + 10 agents. The counts above reflect a full install with all four system bundles enabled (<code>bash install.sh --systems gsd,brain,team,superintelligence</code>). Superintelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely.</sub>
 
 ---
 

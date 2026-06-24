@@ -641,5 +641,6 @@ Coco is built on top of excellent open-source frameworks and standards. Special 
 * **[JCodesMore/ai-website-cloner-template](https://github.com/JCodesMore/ai-website-cloner-template)** for the site cloning structure.
 * **[agents.md](https://agents.md/)** community for the vendor-neutral agent context standard.
 * **[nickwinder/synthteam](https://github.com/nickwinder/synthteam)** for the multi-agent debate protocol behind `--debate` deliberation.
+* **[latent-spaces/brag](https://github.com/latent-spaces/brag)** (Shunit Haviv) and **[HyperFrames](https://www.npmjs.com/package/hyperframes)** (HeyGen) for the launch-video flow and local render engine behind the `coco-ads` skill.
 
 Full attributions — including feature-level inspirations and licenses — live in [CREDITS.md](CREDITS.md). If something influenced CoCo and isn't listed, that's a bug: open an issue.

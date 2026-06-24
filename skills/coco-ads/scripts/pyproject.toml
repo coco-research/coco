@@ -1,0 +1,14 @@
+[project]
+name = "brag"
+version = "0.1.0"
+description = "Development tooling for the /brag skill."
+requires-python = ">=3.11"
+dependencies = [
+  "librosa>=0.10.2",
+  "numpy>=1.26",
+  "scipy>=1.11",
+  "soundfile>=0.12",
+]
+
+[tool.uv]
+package = false

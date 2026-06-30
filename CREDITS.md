@@ -37,6 +37,7 @@ Some skills teach or wrap third-party platforms. These are original write-ups bu
 | **Apple** — Liquid Glass design system (WWDC 2025) | `axiom-liquid-glass`, `swiftui-liquid-glass` | https://developer.apple.com |
 | **OpenAI** — Agents SDK, Realtime / Chat / Batch APIs, Whisper | `openai-agents`, `openai-api`, `openai-apps-mcp`, `openai-whisper` | https://platform.openai.com/docs |
 | **Microsoft** — Agent Lightning (RL agent training) | `agent-lightning` | https://github.com/microsoft/agent-lightning |
+| **Cognee** by topoteretes (Apache-2.0) — knowledge-graph memory engine the `systems/cognee/` bundle wraps over its local HTTP API (no upstream code vendored; the bundle's skills are CoCo's own write-ups) | `cognee`, `cognee-store`, `cognee-recall` | https://github.com/topoteretes/cognee |
 
 ## How we credit
 

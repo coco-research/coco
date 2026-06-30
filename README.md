@@ -203,7 +203,15 @@ A local knowledge graph engine consisting of **6 skills** that connects email, c
 *   **Wiki Generator**: Automatically builds local, hyperlinked wiki articles for every recorded entity in the project.
 *   **Mail Sync**: Ingests and links project email threads directly to related code files.
 
-### 3. Team Bundle
+### 3. Cognee Bundle
+A knowledge graph memory backend consisting of **3 skills** that upgrades project memory from flat SQLite to a graph with embeddings.
+*   **Graph + Semantic Search**: 14 search modes across all projects — from lexical matching to graph completion and RAG retrieval.
+*   **Cross-Project Entity Linking**: Graph edges span datasets, so entities discovered in one project are queryable from another.
+*   **Auto-Recall Injection**: Automatically injects relevant past decisions and context into agent sessions before reasoning.
+*   **Coexists with Brain**: Brain stays as the zero-dependency default. Cognee is opt-in for users who want semantic search and graph memory.
+> Requires a running Cognee server. See [coco-research/cognee](https://github.com/coco-research/cognee).
+
+### 4. Team Bundle
 A workspace multi-agent pipeline engine.
 *   **Development Loop**: Spawns specialized subagents (Research, Architect, QA) to execute changes, review diffs, and write unit tests.
 *   **Deterministic Gates**: Intercepts merges and commits to run lints, import audits, reference checks, and verification suites.
@@ -326,10 +334,11 @@ A workspace multi-agent pipeline engine.
 
 ### Personal Knowledge Base
 ```bash
-bash install.sh --systems brain
+bash install.sh --systems brain,cognee
 /brain-init && /brain-update
+/cognee-init && /cognee-recall
 ```
-> Builds a local, SQLite-backed entity graph of your project. Automatically indexes decisions, terms, and file relations.
+> Builds a local knowledge graph of your project — SQLite for quick lookup (Brain) or graph + embeddings for semantic search (Cognee). Use one or both.
 
 </td>
 </tr>
@@ -578,17 +587,17 @@ npx @rkz91/coco-cli update
 <table>
 <tr><td><strong>Spec Version</strong></td><td>1.0.0</td></tr>
 <tr><td><strong>License</strong></td><td><a href="https://opensource.org/license/mit">MIT</a></td></tr>
-<tr><td><strong>Total Skills Available</strong></td><td>146 with all bundles installed (63 Core + 68 GSD + 6 Brain + 9 Superintelligence)</td></tr>
+<tr><td><strong>Total Skills Available</strong></td><td>149 with all bundles installed (63 Core + 68 GSD + 6 Brain + 3 Cognee + 9 Superintelligence)</td></tr>
 <tr><td><strong>Slash Commands</strong></td><td>277 with all bundles installed — 35 Core (shipped) + 242 Superintelligence (225 per-team + 17 cross-team, generated at install of the Superintelligence bundle)</td></tr>
 <tr><td><strong>Specialized Agents</strong></td><td>34 (10 Core + 24 GSD Bundle)</td></tr>
-<tr><td><strong>System Bundles</strong></td><td>4 (GSD, Brain, Team, Superintelligence) — opt in with <code>--systems &lt;name&gt;</code></td></tr>
+<tr><td><strong>System Bundles</strong></td><td>5 (GSD, Brain, Cognee, Team, Superintelligence) — opt in with <code>--systems &lt;name&gt;</code></td></tr>
 <tr><td><strong>Cross-IDE Rules</strong></td><td>15 (.mdc files)</td></tr>
 <tr><td><strong>Workflows Defined</strong></td><td>3 (.md pipelines)</td></tr>
 <tr><td><strong>Install Time</strong></td><td>&le; 90 seconds</td></tr>
 <tr><td><strong>Telemetry / SaaS</strong></td><td>None — 100% Local Files</td></tr>
 </table>
 
-<sub>Core install ships 63 skills + 35 commands + 10 agents. The counts above reflect a full install with all four system bundles enabled (<code>bash install.sh --systems gsd,brain,team,superintelligence</code>). Superintelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely.</sub>
+<sub>Core install ships 63 skills + 35 commands + 10 agents. The counts above reflect a full install with all five system bundles enabled (<code>bash install.sh --systems gsd,brain,cognee,team,superintelligence</code>). Superintelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely.</sub>
 
 ---
 

@@ -156,7 +156,7 @@ rm path/to/your/project/AGENTS.md
 
 ## Still stuck?
 
-[Open an issue](https://github.com/rkz91/coco/issues) with:
+[Open an issue](https://github.com/coco-research/coco/issues) with:
 - Which adapter you used
 - IDE version
 - OS

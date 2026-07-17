@@ -45,7 +45,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [cli-anything](cli-anything/SKILL.md) | Wrap any command-line tool into a JSON-emitting agent skill. Use when you want to make a CLI reliably callable and parseable by an AI agent — introspect its --h |
 | [clone-website](clone-website/SKILL.md) | Clone any website into a pixel-perfect single-file HTML prototype. Extracts design tokens, assets, CSS computed styles, interaction patterns, and content via Pl |
 | [coco-ads](coco-ads/SKILL.md) | Turn the project you just shipped into a short, polished, shareable launch video (an "ad") using HyperFrames. Use when someone says "/coco-ads", "make a launch  |
-| [coco-cli](coco-cli/SKILL.md) | Install, update, version-check, or uninstall the Coco open-source AI workflow framework via its CLI (@rkz91/coco-cli, run with npx). Use when setting up Coco on |
+| [coco-cli](coco-cli/SKILL.md) | Install, update, version-check, or uninstall the Coco open-source AI workflow framework via its CLI (@coco-research/coco-cli, run with npx). Use when setting up Coco on |
 | [code-verification](code-verification/SKILL.md) | Post-implementation verification system that catches AI-introduced bugs. Covers 7 categories — TDZ errors, import mismatches, reference integrity, dead code, Re |
 | [design-taste-frontend](design-taste-frontend/SKILL.md) | Anti-slop frontend skill for landing pages, portfolios, and redesigns. The agent reads the brief, infers the right design direction, and ships interfaces that d |
 | [dispatching-parallel-agents](dispatching-parallel-agents/SKILL.md) | Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies |

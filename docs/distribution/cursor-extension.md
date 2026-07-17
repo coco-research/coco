@@ -32,7 +32,7 @@ Coco's cursor adapter handles all three. Distribution = telling Cursor users how
 **Install instructions:**
 
 ```bash
-git clone https://github.com/rkz91/coco.git
+git clone https://github.com/coco-research/coco.git
 cd coco
 bash install.sh --adapter cursor
 ```

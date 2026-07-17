@@ -24,4 +24,4 @@ If you want VS Code support today, two options work:
 
 ## Tracking
 
-[Issue #4](https://github.com/rkz91/coco/issues/4) — labeled `good first issue` and `enhancement`. Open if you want to help build it.
+[Issue #4](https://github.com/coco-research/coco/issues/4) — labeled `good first issue` and `enhancement`. Open if you want to help build it.

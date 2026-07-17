@@ -4,13 +4,27 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [Unreleased]
+
+### Changed
+
+- **Rebranded to CoCo Super Intelligence.** The README now leads with the 389-persona advisory board as the hero capability, with the orchestration framework (skills, persistent state, portability) as the supporting layer. Added new brand lockups (`assets/logo-si.svg` / `logo-si-light.svg`) and a refreshed social card (`assets/og-image.svg`); the original `coco` mark (`logo.svg` / `logo-light.svg`) is preserved unchanged.
+- **Repository migrated to the `coco-research` GitHub org.** All URLs, the npm scope (`@coco-research/coco-cli`), the Homebrew tap reference, and the publish workflows now point to `coco-research` instead of `rkz91`.
+
+### Fixed
+
+- **Corrected asset counts.** Skills 146 → **147** (core 63 → 64 — `coco-ads` landed after the previous count fix), total addressable assets 864 → **865**, core install 123 → **124**. Replaced the stale `package.json` description ("59+ skills, 34+ commands") with accurate figures.
+- **Expanded attribution.** Added CREDITS.md entries for Vercel and vercel-labs (web guidelines), plus reference sources for Apple (Liquid Glass), OpenAI, and Microsoft (Agent Lightning).
+
+---
+
 ## [1.0.0] — 2026-06-07
 
 First stable release. Establishes the Superintelligence board, the update notifier, and accurate docs.
 
 ### Added
 
-- **Update notifier** — `npx @rkz91/coco-cli version` and `bash scripts/check-update.sh` report when a newer Coco is available. Checks the GitHub repo at most once per day, prints a one-line banner, sends no telemetry; opt out with `COCO_NO_UPDATE_CHECK=1`. The installer now prints the installed version and how to check for updates.
+- **Update notifier** — `npx @coco-research/coco-cli version` and `bash scripts/check-update.sh` report when a newer Coco is available. Checks the GitHub repo at most once per day, prints a one-line banner, sends no telemetry; opt out with `COCO_NO_UPDATE_CHECK=1`. The installer now prints the installed version and how to check for updates.
 - **Superintelligence board expanded to 389 personas across 9 teams** (added Finance, Trading, Risk & Compliance, Strategy, Data & Analytics, GTM) plus the cross-team meta-orchestrator.
 
 ### Fixed

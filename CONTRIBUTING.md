@@ -18,7 +18,7 @@ Coco gets better when its skills do. Open a PR.
 ## Open a PR
 
 ```bash
-gh repo fork rkz91/coco --clone
+gh repo fork coco-research/coco --clone
 cd coco
 git checkout -b feat/your-thing
 # ... make changes ...

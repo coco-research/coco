@@ -29,10 +29,10 @@ Create `.claude-plugin.json` at repo root:
   "version": "1.0.0",
   "author": "Coco Inc",
   "license": "MIT",
-  "homepage": "https://github.com/rkz91/coco",
+  "homepage": "https://github.com/coco-research/coco",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rkz91/coco.git"
+    "url": "git+https://github.com/coco-research/coco.git"
   },
   "install": {
     "command": "bash",

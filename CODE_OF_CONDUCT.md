@@ -16,7 +16,7 @@ Anyone whose actions consistently make the project less welcoming or less produc
 
 ## Reporting
 
-Concerns can be reported by [opening an issue](https://github.com/rkz91/coco/issues) (use the `private` label or email if sensitive). Reports are handled discreetly.
+Concerns can be reported by [opening an issue](https://github.com/coco-research/coco/issues) (use the `private` label or email if sensitive). Reports are handled discreetly.
 
 ## External reference
 

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  CoCo Super Intelligence — vertical lockup, LIGHT variant (transparent background)
+
+    • Mark: the original CoCo two interlocked C-arcs, geometry preserved verbatim.
+      Anchor C in deep midnight; accent C in a deeper gradient saturated for white.
+    • Wordmark: "CoCo" in deep midnight.
+    • Subtitle: "SUPER INTELLIGENCE" in the deeper gradient, letter-spaced.
+    • Transparent canvas so the lockup floats on GitHub's light theme.
+
+  Pair with logo-si.svg via <picture> + prefers-color-scheme.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 530" width="560" height="530" role="img" aria-label="CoCo Super Intelligence">
+  <defs>
+    <linearGradient id="intelligenceLight" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7B5CFF"/>
+      <stop offset="50%" stop-color="#3D7DFF"/>
+      <stop offset="100%" stop-color="#36C9A6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Mark: two interlocked C-arcs (unchanged geometry, recentred for the wider canvas) -->
+  <g transform="translate(24, -98)">
+    <path d="M 232 158 A 100 100 0 1 0 232 358"
+          stroke="#0A0F1F" stroke-width="24" stroke-linecap="round" fill="none"/>
+    <path d="M 280 158 A 100 100 0 1 1 280 358"
+          stroke="url(#intelligenceLight)" stroke-width="24" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="280" y="410"
+        font-family="-apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif"
+        font-size="128" font-weight="700" fill="#0A0F1F"
+        text-anchor="middle" letter-spacing="-4">CoCo</text>
+
+  <!-- Subtitle -->
+  <text x="280" y="468"
+        font-family="-apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif"
+        font-size="32" font-weight="600" fill="url(#intelligenceLight)"
+        text-anchor="middle" letter-spacing="5">SUPER INTELLIGENCE</text>
+</svg>

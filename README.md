@@ -13,11 +13,11 @@
 
 CoCo Super Intelligence is the orchestration layer that turns Claude Code, Cursor, or Codex into an entire engineering department: routed expert panels that deliberate and decide, then **147 skills**, **277 commands**, and disk-persistent state that ship what they decided.
 
-Free · MIT · installs in 90 seconds · 100% local · no telemetry
+Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds · 100% local · no telemetry
 
 <br>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/license/mit)
+[![License: Open-core](https://img.shields.io/badge/License-Open--core-yellow.svg?style=for-the-badge)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue?style=for-the-badge)](CHANGELOG.md)
 [![Skills](https://img.shields.io/badge/skills-147-emerald?style=for-the-badge)](skills/)
 [![Commands](https://img.shields.io/badge/commands-277-indigo?style=for-the-badge)](commands/)
@@ -612,8 +612,8 @@ npx @coco-research/coco-cli update
 ## Technical Specifications
 
 <table>
-<tr><td><strong>Spec Version</strong></td><td>1.0.0</td></tr>
-<tr><td><strong>License</strong></td><td><a href="https://opensource.org/license/mit">MIT</a></td></tr>
+<tr><td><strong>Spec Version</strong></td><td>1.1.0</td></tr>
+<tr><td><strong>License</strong></td><td>Open-core — <a href="LICENSE">MIT</a> core; Super Intelligence is <a href="systems/superintelligence/LICENSE">proprietary</a></td></tr>
 <tr><td><strong>Total Skills</strong></td><td>147 with all bundles installed (64 Core + 68 GSD + 6 Brain + 9 Super Intelligence)</td></tr>
 <tr><td><strong>Slash Commands</strong></td><td>277 with all bundles — 35 Core (shipped) + 242 Super Intelligence (225 per-team + 17 cross-team, generated at install)</td></tr>
 <tr><td><strong>Specialized Agents</strong></td><td>34 (10 Core + 24 GSD Bundle)</td></tr>
@@ -663,7 +663,7 @@ Re-run the installer with the new adapter flag (e.g. <code>bash install.sh --ada
 
 ## Contributing & Community
 
-CoCo is MIT-licensed and contributions are welcome.
+CoCo is open-core: the core is MIT-licensed and contributions are welcome. The Super Intelligence System (`systems/superintelligence/`) is proprietary — see [`systems/superintelligence/LICENSE`](systems/superintelligence/LICENSE).
 
 - **Start here:** [`CONTRIBUTING.md`](CONTRIBUTING.md) — how to add a skill, command, agent, or adapter.
 - **Good first issues:** [help wanted / good first issue](https://github.com/coco-research/coco/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) — small, well-scoped tasks for newcomers.

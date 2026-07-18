@@ -10,6 +10,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 - **Rebranded to CoCo Super Intelligence.** The README now leads with the 389-persona advisory board as the hero capability, with the orchestration framework (skills, persistent state, portability) as the supporting layer. Added new brand lockups (`assets/logo-si.svg` / `logo-si-light.svg`) and a refreshed social card (`assets/og-image.svg`); the original `coco` mark (`logo.svg` / `logo-light.svg`) is preserved unchanged.
 - **Repository migrated to the `coco-research` GitHub org.** All URLs, the npm scope (`@coco-research/coco-cli`), the Homebrew tap reference, and the publish workflows now point to `coco-research` instead of `rkz91`.
+- **Relicensed to open-core.** The CoCo core stays MIT, but the Super Intelligence System (`systems/superintelligence/`) is now proprietary — source-available for reference, all rights reserved (see `systems/superintelligence/LICENSE`). The root `LICENSE` carves it out; `package.json`/`.claude-plugin.json` now declare `SEE LICENSE IN LICENSE`, the Homebrew formula uses `:cannot_represent`, and the README badge/labels read "Open-core." Bumped **Spec Version 1.0.0 → 1.1.0**. Note: MIT grants already made on prior releases of the Super Intelligence System remain valid for those snapshots; the change is forward-only.
 
 ### Fixed
 

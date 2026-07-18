@@ -1,0 +1,42 @@
+CoCo Super Intelligence — Proprietary License
+
+Copyright (c) 2026 Coco Inc. All rights reserved.
+
+This directory (`systems/superintelligence/` and all of its contents — the
+expert persona registries, research corpora, team definitions, generators,
+and documentation, collectively the "Super Intelligence System") is
+PROPRIETARY and is NOT covered by the MIT license that governs the rest of
+this repository.
+
+No license or right is granted to any person to use, copy, modify, merge,
+publish, distribute, sublicense, sell, or create derivative works of the
+Super Intelligence System, in whole or in part, except as expressly
+authorized in writing by Coco Inc.
+
+The source of the Super Intelligence System is made visible in this
+repository for reference and transparency only. Visibility of the source
+does not grant any of the rights withheld above.
+
+Permitted without separate authorization:
+  - Running the Super Intelligence System locally as installed by this
+    project's installer for your own use.
+
+Not permitted without prior written authorization from Coco Inc:
+  - Redistributing the Super Intelligence System or any substantial portion
+    of it, modified or unmodified.
+  - Incorporating it, or derivatives of it, into any other product or
+    project, commercial or non-commercial.
+  - Publishing, mirroring, or repackaging it outside this repository.
+
+Third-party materials referenced or cited within the Super Intelligence
+System (for example, quoted public statements and linked sources) remain the
+property of their respective owners and are used for attribution and research.
+
+THE SUPER INTELLIGENCE SYSTEM IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO
+EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES,
+OR OTHER LIABILITY ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SUPER
+INTELLIGENCE SYSTEM OR ITS USE.
+
+For licensing inquiries, contact Coco Inc.

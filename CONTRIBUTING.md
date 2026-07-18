@@ -117,7 +117,9 @@ Frontmatter must validate against [`docs/architecture.md`](docs/architecture.md)
 
 ## Licensing
 
-Contributions are MIT-licensed under the project's [LICENSE](LICENSE). By submitting a PR, you agree your contribution is so licensed.
+CoCo is open-core. Contributions to the **core** are MIT-licensed under the project's [LICENSE](LICENSE); by submitting a PR touching the core, you agree your contribution is so licensed.
+
+The **Super Intelligence System** (`systems/superintelligence/`) is proprietary — see [`systems/superintelligence/LICENSE`](systems/superintelligence/LICENSE). It is not accepting external contributions under an open-source license; please open an issue before proposing changes there.
 
 ---
 

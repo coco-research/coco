@@ -6,6 +6,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+---
+
+## [1.1.0] — 2026-07-18
+
 ### Changed
 
 - **Rebranded to CoCo Super Intelligence.** The README now leads with the 389-persona advisory board as the hero capability, with the orchestration framework (skills, persistent state, portability) as the supporting layer. Added new brand lockups (`assets/logo-si.svg` / `logo-si-light.svg`) and a refreshed social card (`assets/og-image.svg`); the original `coco` mark (`logo.svg` / `logo-light.svg`) is preserved unchanged.

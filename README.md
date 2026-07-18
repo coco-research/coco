@@ -18,7 +18,7 @@ Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds
 <br>
 
 [![License: Open-core](https://img.shields.io/badge/License-Open--core-yellow.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue?style=for-the-badge)](CHANGELOG.md)
 [![Skills](https://img.shields.io/badge/skills-147-emerald?style=for-the-badge)](skills/)
 [![Commands](https://img.shields.io/badge/commands-277-indigo?style=for-the-badge)](commands/)
 [![Personas](https://img.shields.io/badge/personas-389-violet?style=for-the-badge)](systems/superintelligence/)

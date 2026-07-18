@@ -2,13 +2,13 @@
 // Coco CLI — clones Coco into a target dir and runs the installer.
 //
 // Usage:
-//   npx @rkz91/coco-cli               # clones to ./coco and installs (auto-detect adapter)
-//   npx @rkz91/coco-cli install       # same as above
-//   npx @rkz91/coco-cli install --adapter cursor
-//   npx @rkz91/coco-cli install --systems gsd,brain,team
-//   npx @rkz91/coco-cli update        # pull latest in existing clone
-//   npx @rkz91/coco-cli uninstall     # remove symlinks + clone
-//   npx @rkz91/coco-cli --help
+//   npx @coco-research/coco-cli               # clones to ./coco and installs (auto-detect adapter)
+//   npx @coco-research/coco-cli install       # same as above
+//   npx @coco-research/coco-cli install --adapter cursor
+//   npx @coco-research/coco-cli install --systems gsd,brain,team
+//   npx @coco-research/coco-cli update        # pull latest in existing clone
+//   npx @coco-research/coco-cli uninstall     # remove symlinks + clone
+//   npx @coco-research/coco-cli --help
 
 'use strict';
 
@@ -19,7 +19,7 @@ const os = require('os');
 
 const https = require('https');
 
-const REPO = 'https://github.com/rkz91/coco.git';
+const REPO = 'https://github.com/coco-research/coco.git';
 const DEFAULT_DIR = path.join(process.cwd(), 'coco');
 
 // ── Update notifier ─────────────────────────────────────────────────────────
@@ -29,7 +29,7 @@ const PKG_VERSION = (() => {
   try { return require('../package.json').version || '0.0.0'; } catch (_) { return '0.0.0'; }
 })();
 const UPDATE_CACHE = path.join(os.homedir(), '.coco', '.update-check.json');
-const LATEST_URL = 'https://raw.githubusercontent.com/rkz91/coco/main/package.json';
+const LATEST_URL = 'https://raw.githubusercontent.com/coco-research/coco/main/package.json';
 
 function semverGt(a, b) {
   const pa = String(a).split('.').map(n => parseInt(n, 10) || 0);
@@ -66,7 +66,7 @@ function fetchLatestVersion(cb) {
 function banner(latest) {
   if (latest && semverGt(latest, PKG_VERSION)) {
     console.log(`\n  ⬆  Coco ${latest} is available (you have ${PKG_VERSION}).`);
-    console.log(`     Update:  npx @rkz91/coco-cli update     (or: git -C <clone> pull --ff-only && bash install.sh)\n`);
+    console.log(`     Update:  npx @coco-research/coco-cli update     (or: git -C <clone> pull --ff-only && bash install.sh)\n`);
   }
 }
 
@@ -84,7 +84,7 @@ function checkForUpdate(force) {
 }
 
 function cmdVersion() {
-  console.log(`@rkz91/coco-cli v${PKG_VERSION}`);
+  console.log(`@coco-research/coco-cli v${PKG_VERSION}`);
   checkForUpdate(true);
 }
 
@@ -92,12 +92,12 @@ function help() {
   console.log(`Coco — open-source AI workflow framework
 
 Usage:
-  npx @rkz91/coco-cli                   clone + install (auto-detect)
-  npx @rkz91/coco-cli install [flags]   clone + install with flags
-  npx @rkz91/coco-cli update [dir]      pull latest in existing clone
-  npx @rkz91/coco-cli uninstall [dir]   remove symlinks + clone
-  npx @rkz91/coco-cli version           show version + check for updates
-  npx @rkz91/coco-cli --help            this message
+  npx @coco-research/coco-cli                   clone + install (auto-detect)
+  npx @coco-research/coco-cli install [flags]   clone + install with flags
+  npx @coco-research/coco-cli update [dir]      pull latest in existing clone
+  npx @coco-research/coco-cli uninstall [dir]   remove symlinks + clone
+  npx @coco-research/coco-cli version           show version + check for updates
+  npx @coco-research/coco-cli --help            this message
 
 Update checks contact only github.com (no telemetry); disable with COCO_NO_UPDATE_CHECK=1.
 
@@ -107,13 +107,13 @@ Install flags (passed to install.sh):
   --dry-run                             preview, no writes
 
 Examples:
-  npx @rkz91/coco-cli
-  npx @rkz91/coco-cli install --adapter cursor
-  npx @rkz91/coco-cli install --systems gsd,brain --adapter claude-code
-  npx @rkz91/coco-cli update
-  npx @rkz91/coco-cli uninstall
+  npx @coco-research/coco-cli
+  npx @coco-research/coco-cli install --adapter cursor
+  npx @coco-research/coco-cli install --systems gsd,brain --adapter claude-code
+  npx @coco-research/coco-cli update
+  npx @coco-research/coco-cli uninstall
 
-Repo: https://github.com/rkz91/coco
+Repo: https://github.com/coco-research/coco
 `);
 }
 
@@ -166,13 +166,13 @@ function cmdInstall(argv) {
   run('bash', [installScript, ...argv]);
 
   console.log(`\nDone. Coco installed at ${dir}.`);
-  console.log(`Re-run install / update later with:\n  npx @rkz91/coco-cli update`);
+  console.log(`Re-run install / update later with:\n  npx @coco-research/coco-cli update`);
 }
 
 function cmdUpdate(argv) {
   const dir = argv[0] && !argv[0].startsWith('--') ? argv[0] : DEFAULT_DIR;
   if (!fs.existsSync(path.join(dir, '.git'))) {
-    console.error(`Error: ${dir} is not a Coco clone. Run \`npx @rkz91/coco-cli install\` first.`);
+    console.error(`Error: ${dir} is not a Coco clone. Run \`npx @coco-research/coco-cli install\` first.`);
     process.exit(1);
   }
   cloneOrUpdate(dir);
@@ -227,7 +227,7 @@ function main() {
       cmdUninstall(rest);
       break;
     default:
-      // any unknown subcommand → pass through to install (e.g., npx @rkz91/coco-cli --adapter cursor)
+      // any unknown subcommand → pass through to install (e.g., npx @coco-research/coco-cli --adapter cursor)
       cmdInstall(argv);
       checkForUpdate(false);
   }

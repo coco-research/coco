@@ -10,7 +10,7 @@ You have an idea. You want a working prototype by Monday. Coco runs the team for
 
 ```bash
 # Install with the orchestration bundle
-git clone https://github.com/rkz91/coco.git
+git clone https://github.com/coco-research/coco.git
 cd coco
 bash install.sh --systems gsd,team
 ```

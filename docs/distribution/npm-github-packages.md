@@ -6,8 +6,8 @@ Reference: https://docs.github.com/en/packages/working-with-a-github-packages-re
 
 | File | Purpose |
 |------|---------|
-| `package.json` | Renamed package to `@rkz91/coco-cli`; added `publishConfig.registry` pointing to `https://npm.pkg.github.com` |
-| `.npmrc` | Tells npm to use GitHub Packages registry for the `@rkz91` scope |
+| `package.json` | Renamed package to `@coco-research/coco-cli`; added `publishConfig.registry` pointing to `https://npm.pkg.github.com` |
+| `.npmrc` | Tells npm to use GitHub Packages registry for the `@coco-research` scope |
 | `.github/workflows/publish-npm.yml` | CI workflow that publishes on `release: published` (or manual trigger) |
 
 ## How to publish a new version
@@ -30,7 +30,7 @@ The `publish-npm.yml` workflow fires on the release event and publishes to GitHu
 Push a commit, then:
 
 ```bash
-gh workflow run publish-npm.yml --repo rkz91/coco
+gh workflow run publish-npm.yml --repo coco-research/coco
 ```
 
 ### Option C — local publish
@@ -45,15 +45,15 @@ npm publish
 ## How users install
 
 ```bash
-# Configure registry for the @rkz91 scope (one-time)
-echo "@rkz91:registry=https://npm.pkg.github.com" >> ~/.npmrc
+# Configure registry for the @coco-research scope (one-time)
+echo "@coco-research:registry=https://npm.pkg.github.com" >> ~/.npmrc
 
 # Auth: GitHub Packages requires authentication even for public packages
 # Create a token at https://github.com/settings/tokens with `read:packages` scope
 echo "//npm.pkg.github.com/:_authToken=ghp_yourtoken" >> ~/.npmrc
 
 # Install
-npm install -g @rkz91/coco-cli
+npm install -g @coco-research/coco-cli
 coco install
 ```
 
@@ -84,6 +84,6 @@ For Coco's scope:
 | Issue | Fix |
 |-------|-----|
 | `403 Forbidden` on publish | Check workflow has `permissions: packages: write` |
-| `404 Not Found` on install | Verify scope name matches GH user (`@rkz91`) |
+| `404 Not Found` on install | Verify scope name matches GH user (`@coco-research`) |
 | `EAUTH` on install | Token needs `read:packages` scope |
 | Workflow doesn't fire | Confirm release event triggered (`gh release list`) |

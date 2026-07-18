@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_URL="https://github.com/rkz91/coco.git"
+REPO_URL="https://github.com/coco-research/coco.git"
 INSTALL_DIR="${COCO_DIR:-$HOME/.coco}"
 
 detect_adapter() {

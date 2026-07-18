@@ -19,14 +19,14 @@ jobs:
         with:
           node-version: '20'
           registry-url: 'https://npm.pkg.github.com'
-          scope: '@rkz91'
+          scope: '@coco-research'
 
       - name: Verify package.json
         run: |
           node -e "
           const pkg = require('./package.json');
-          if (!pkg.name.startsWith('@rkz91/')) {
-            console.error('package.json name must be scoped @rkz91/*');
+          if (!pkg.name.startsWith('@coco-research/')) {
+            console.error('package.json name must be scoped @coco-research/*');
             process.exit(1);
           }
           console.log('package.json valid:', pkg.name, pkg.version);

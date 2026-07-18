@@ -1,7 +1,7 @@
 name: Publish to npmjs.com
 
-# Publishes @rkz91/coco-cli to the public npmjs.com registry.
-# Frictionless install for users — no auth required: `npm install -g @rkz91/coco-cli`.
+# Publishes @coco-research/coco-cli to the public npmjs.com registry.
+# Frictionless install for users — no auth required: `npm install -g @coco-research/coco-cli`.
 #
 # Setup (one-time):
 #   1. Create npm account at https://www.npmjs.com/signup
@@ -25,14 +25,14 @@ jobs:
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
-          scope: '@rkz91'
+          scope: '@coco-research'
 
       - name: Verify package.json
         run: |
           node -e "
           const pkg = require('./package.json');
-          if (!pkg.name.startsWith('@rkz91/')) {
-            console.error('package.json name must be scoped @rkz91/*');
+          if (!pkg.name.startsWith('@coco-research/')) {
+            console.error('package.json name must be scoped @coco-research/*');
             process.exit(1);
           }
           console.log('package.json valid:', pkg.name, pkg.version);

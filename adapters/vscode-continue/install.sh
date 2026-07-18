@@ -2,7 +2,7 @@
 # VS Code (via Continue) adapter — STUB
 #
 # Status: Planned for v0.2.
-# Issue: https://github.com/rkz91/coco/issues/4
+# Issue: https://github.com/coco-research/coco/issues/4
 #
 # This stub exists so `bash install.sh --adapter vscode-continue` returns a
 # clear "not yet implemented" message instead of a confusing error.
@@ -18,7 +18,7 @@ set -euo pipefail
 cat <<'EOF'
 The VS Code (via Continue) adapter is planned for Coco v0.2.
 
-Track progress: https://github.com/rkz91/coco/issues/4
+Track progress: https://github.com/coco-research/coco/issues/4
 
 For now, you can use Coco with VS Code in two ways:
   1. Install the generic adapter; it generates AGENTS.md which Continue reads:

@@ -7,7 +7,7 @@ Five minutes. From zero to your first multi-agent run.
 ## Install
 
 ```bash
-git clone https://github.com/rkz91/coco.git
+git clone https://github.com/coco-research/coco.git
 cd coco
 bash install.sh
 ```

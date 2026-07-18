@@ -6,7 +6,7 @@ If you find a security issue in Coco, please **do not** open a public issue.
 
 Instead, report privately:
 
-1. Open a [draft security advisory](https://github.com/rkz91/coco/security/advisories/new) on GitHub, or
+1. Open a [draft security advisory](https://github.com/coco-research/coco/security/advisories/new) on GitHub, or
 2. Email the maintainer directly (contact via GitHub profile)
 
 Include:

@@ -1,7 +1,7 @@
 {
-  "name": "@rkz91/coco-cli",
+  "name": "@coco-research/coco-cli",
   "version": "1.0.0",
-  "description": "An entire team. Wherever your AI lives. Open-source AI workflow framework with 59+ skills, 34+ commands, and multi-agent orchestration. Vendor-neutral across Claude Code, Cursor, Codex, and AGENTS.md tools.",
+  "description": "CoCo Super Intelligence — summon an advisory board of 389 world-class minds inside your AI coding session. A vendor-neutral orchestration layer for Claude Code, Cursor, and Codex: 147 skills, 277 commands, 34 agents, and disk-persistent state. 100% local, no telemetry, MIT.",
   "bin": {
     "coco": "./bin/coco.js"
   },
@@ -28,13 +28,13 @@
   ],
   "author": "Coco Inc",
   "license": "MIT",
-  "homepage": "https://github.com/rkz91/coco",
+  "homepage": "https://github.com/coco-research/coco",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rkz91/coco.git"
+    "url": "git+https://github.com/coco-research/coco.git"
   },
   "bugs": {
-    "url": "https://github.com/rkz91/coco/issues"
+    "url": "https://github.com/coco-research/coco/issues"
   },
   "publishConfig": {
     "access": "public"

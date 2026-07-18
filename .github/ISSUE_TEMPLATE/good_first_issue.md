@@ -28,4 +28,4 @@ What needs to happen.
 
 ## Stuck?
 
-Ping us in [Discussions](https://github.com/rkz91/coco/discussions). Mention `@maintainers` in a comment for triage.
+Ping us in [Discussions](https://github.com/coco-research/coco/discussions). Mention `@maintainers` in a comment for triage.

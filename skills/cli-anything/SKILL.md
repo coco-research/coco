@@ -57,4 +57,4 @@ Standard structure so an agent can discover and drive the tool:
 
 ## Worked example
 
-`skills/coco-cli/SKILL.md` is a wrapper produced with this pattern over the `@rkz91/coco-cli` command — note how it documents the (human-only) output contract honestly rather than inventing a JSON mode the tool lacks.
+`skills/coco-cli/SKILL.md` is a wrapper produced with this pattern over the `@coco-research/coco-cli` command — note how it documents the (human-only) output contract honestly rather than inventing a JSON mode the tool lacks.

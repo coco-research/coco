@@ -2,6 +2,14 @@ MIT License
 
 Copyright (c) 2026 Coco Inc
 
+SCOPE: This MIT license governs the CoCo core — all contents of this
+repository EXCEPT the directory `systems/superintelligence/`. The Super
+Intelligence System in `systems/superintelligence/` is proprietary and is
+licensed separately under `systems/superintelligence/LICENSE`; the grant
+below does not apply to it. Certain vendored third-party components (for
+example, some skills under `skills/`) carry their own upstream licenses,
+which continue to govern those components; see `CREDITS.md`.
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights

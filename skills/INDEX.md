@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 65 skills** (top-level only — see `systems/<bundle>/skills/` for bundle-only skills).
+**Total: 66 skills** (top-level only — see `systems/<bundle>/skills/` for bundle-only skills).
 
 ## Design
 
@@ -76,6 +76,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [receiving-code-review](receiving-code-review/SKILL.md) | Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical  |
 | [redesign-existing-projects](redesign-existing-projects/SKILL.md) | Upgrades existing websites and apps to premium quality. Audits current design, identifies generic AI patterns, and applies high-end design standards without bre |
 | [requesting-code-review](requesting-code-review/SKILL.md) | Use when completing tasks, implementing major features, or before merging to verify work meets requirements |
+| [scroll-world](scroll-world/SKILL.md) | Build an immersive scroll-scrubbed "fly through the world" landing page for any industry or brand using Higgsfield. As the visitor scrolls, a pre-rendered camer |
 | [skill-creator](skill-creator/SKILL.md) | Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabil |
 | [subagent-driven-development](subagent-driven-development/SKILL.md) | Use when executing implementation plans with independent tasks in the current session |
 | [swiftui-liquid-glass](swiftui-liquid-glass/SKILL.md) | Implement, review, or improve SwiftUI features using the iOS 26+ Liquid Glass API. Use when asked to adopt Liquid Glass in new SwiftUI UI, refactor an existing  |

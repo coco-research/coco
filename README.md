@@ -612,7 +612,7 @@ npx @coco-research/coco-cli update
 ## Technical Specifications
 
 <table>
-<tr><td><strong>Spec Version</strong></td><td>1.1.0</td></tr>
+<tr><td><strong>Spec Version</strong></td><td>1.2.0</td></tr>
 <tr><td><strong>License</strong></td><td>Open-core — <a href="LICENSE">MIT</a> core; Super Intelligence is <a href="systems/superintelligence/LICENSE">proprietary</a></td></tr>
 <tr><td><strong>Total Skills</strong></td><td>149 with all bundles installed (66 Core + 68 GSD + 6 Brain + 9 Super Intelligence)</td></tr>
 <tr><td><strong>Slash Commands</strong></td><td>277 with all bundles — 35 Core (shipped) + 242 Super Intelligence (225 per-team + 17 cross-team, generated at install)</td></tr>

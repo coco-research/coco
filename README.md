@@ -181,7 +181,7 @@ A standard install equips your workspace with a lightweight core; full activatio
 CoCo ships **149 skills** (66 core + 83 across bundles). These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
 
 ### Visual design & styling
-`ui-ux-pro-max` (50 styles, 21 palettes, 50 font pairings, 9 stacks) · `frontend-design` · `design-taste-frontend` · `redesign-existing-projects` · `axiom-liquid-glass` (Apple Liquid Glass, WWDC 2025) · `swiftui-liquid-glass` · `web-design-guidelines` · `tailwind-patterns` (Tailwind v4) · `vercel-react-best-practices` · `clone-website` · `c4-architecture` · `arb-review` · `expo-api-routes` · `ai-product`.
+`ui-ux-pro-max` (50 styles, 21 palettes, 50 font pairings, 9 stacks) · `frontend-design` · `design-taste-frontend` · `redesign-existing-projects` · `axiom-liquid-glass` (Apple Liquid Glass, WWDC 2025) · `swiftui-liquid-glass` · `web-design-guidelines` · `tailwind-patterns` (Tailwind v4) · `vercel-react-best-practices` · `clone-website` · `c4-architecture` · `arb-review` · `expo-api-routes` · `ai-product` · `scroll-world` (scroll-scrubbed, cut-free camera flythrough landing pages, generated end to end via Higgsfield).
 
 ### Engineering discipline & quality
 `brainstorming` · `writing-plans` · `executing-plans` · `subagent-driven-development` · `dispatching-parallel-agents` · `test-driven-development` · `systematic-debugging` · `requesting-code-review` · `receiving-code-review` · `verification-before-completion` · `finishing-a-development-branch` · `using-git-worktrees` · `code-verification` (7 bug-vector audit) · `generate-tests` · `api-design-principles` · `cli-anything` · `workflow-routing`.
@@ -202,7 +202,7 @@ CoCo ships **149 skills** (66 core + 83 across bundles). These are not prompt sn
 `coco-ads` (launch videos via HyperFrames) · `media-memory` (multimodal embeddings) · `doc-sync` · `ultra-think` · `browser-automation`.
 
 ### The CoCo platform itself
-`coco` (conversational router) · `coco-cli` · `skill-creator` · `writing-skills` · `find-skills`.
+`coco` (conversational router) · `coco-cli` · `coco-loop` (compiles a plain-language goal into a confirmed charter, then runs a bounded, propose-only autonomous loop) · `skill-creator` · `writing-skills` · `find-skills`.
 
 <details>
 <summary><strong>▸ Full catalog — every one of the 149 skills</strong></summary>
@@ -517,7 +517,21 @@ bash install.sh --adapter generic
 
 </td>
 </tr>
+<tr>
+<td colspan="2" valign="top">
+
+**One-line remote install**
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/coco-research/coco/main/bin/coco-bootstrap.sh)
+```
+*Clones Coco to `~/.coco`, then pauses and prints the commit hash, date, and message so you can verify it against [the latest commit on `main`](https://github.com/coco-research/coco/commits/main) before it runs `install.sh`. Type `y` to proceed. Pass `--yes` or set `COCO_BOOTSTRAP_YES=1` to skip the prompt for CI or scripted installs, and pass adapter/systems flags after `--`, e.g. `-- --adapter cursor --systems gsd`.*
+
+</td>
+</tr>
 </table>
+
+The install paths above are deliberately conservative: the remote bootstrap never runs code before you have confirmed the commit it cloned, `install.sh` only ever reads and symlinks files already inside the repository, the CI workflows that build and publish Coco pin their `setup-node` and `setup-python` Actions to commit SHAs rather than mutable tags, and nothing Coco does locally or in CI sends data anywhere. See [`SECURITY.md`](SECURITY.md) for the full policy.
 
 ---
 

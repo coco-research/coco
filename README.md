@@ -695,6 +695,7 @@ CoCo Super Intelligence stands on the shoulders of excellent open-source work. S
 
 - **[obra/superpowers](https://github.com/obra/superpowers)** (Jesse Vincent) — the foundational engineering-discipline skills (brainstorming, systematic debugging, TDD, plan writing/execution, git worktrees, code-review flows, verification, and skill authoring).
 - **[gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done)** — the 68-skill / 24-agent GSD project-orchestration bundle.
+- **[heygen-com/hyperframes](https://github.com/heygen-com/hyperframes)** (HeyGen, Inc., Apache License 2.0) — the 20-skill HyperFrames video/motion bundle vendored under `systems/hyperframes/` (composition engine, CLI, animation, creative direction, registry, and the video-authoring suite).
 - **[JCodesMore/ai-website-cloner-template](https://github.com/JCodesMore/ai-website-cloner-template)** — the site-cloning structure behind `clone-website`.
 - **[agents.md](https://agents.md/)** community — the vendor-neutral agent-context standard CoCo's adapters follow.
 - **[nickwinder/synthteam](https://github.com/nickwinder/synthteam)** (Nick Winder) — the multi-agent debate protocol behind `--debate` deliberation.

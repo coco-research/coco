@@ -1,8 +1,13 @@
 # GitHub Sponsors / funding configuration
 # Enable Sponsors for the maintainer to surface a "Sponsor" button on the repo page.
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+#
+# Must stay in sync with the account that owns this repository. This previously read
+# `rkz91`, the account's name before the 2026-07-18 rename to `coco-research`. That
+# username was then registered by an unrelated third party, so the funding pointer no
+# longer referred to this project's maintainer.
 
-github: [rkz91]
+github: [coco-research]
 # patreon: ""
 # open_collective: ""
 # ko_fi: ""

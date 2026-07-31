@@ -93,6 +93,7 @@ For standalone documents or reports, use the ESM import pattern:
 <html>
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://esm.sh; connect-src 'self' https://esm.sh; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
 <title>Diagram</title>
 <style>
   body { font-family: Inter, system-ui, sans-serif; background: #1a1b26; color: #a9b1d6; max-width: 900px; margin: 40px auto; padding: 0 20px; }
@@ -177,7 +178,10 @@ If `beautiful-mermaid` cannot parse the diagram:
 
 ## Multi-Diagram Documents
 
-For documents with multiple diagrams (like PLATFORM-ANALYSIS.md):
+For documents with multiple diagrams (like PLATFORM-ANALYSIS.md). This is a `<script>`
+fragment, not a full document — ensure the `<head>` it's inserted into carries the same
+CSP meta tag as the standalone template above (`script-src`/`connect-src` scoped to
+`https://esm.sh`):
 
 ```html
 <script type="module">

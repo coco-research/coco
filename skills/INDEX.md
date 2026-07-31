@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 68 skills** (top-level only — see `systems/<bundle>/skills/` for bundle-only skills).
+**Total: 69 skills** (top-level only — see `systems/<bundle>/skills/` for bundle-only skills).
 
 ## Design
 
@@ -90,6 +90,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [using-superpowers](using-superpowers/SKILL.md) | Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions |
 | [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) | React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js c |
 | [verification-before-completion](verification-before-completion/SKILL.md) | Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output be |
+| [visual-explainer](visual-explainer/SKILL.md) | Generate self-contained HTML visual explanations for systems, code changes, plans, data, and technical concepts. Use for diagrams, architecture overviews, diff  |
 | [voice-ai](voice-ai/SKILL.md) | Voice AI architecture and implementation guide. Covers two architectures: speech-to-speech (OpenAI Realtime API, lowest latency) and pipeline (STT->LLM->TTS, mo |
 | [web-design-guidelines](web-design-guidelines/SKILL.md) | Review UI code for Web Interface Guidelines compliance. Use when asked to "review my UI", "check accessibility", "audit design", "review UX", or "check my site  |
 | [workflow-routing](workflow-routing/SKILL.md) | Use at the start of any task to route between Superpowers skills and GSD commands based on project state, task scope, and context signals. Fires before other sk |

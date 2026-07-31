@@ -31,6 +31,17 @@ Coco is a library of markdown artifacts and shell installers. The most likely se
 | Hardcoded credentials | high | Coco ships zero secrets; report any you find immediately |
 | Supply-chain via plugin recommendations | low | We link external plugins but don't bundle them |
 
+## Bootstrap installer behavior
+
+`bin/coco-bootstrap.sh` (the `bash <(curl -fsSL ...)` one-liner) now pauses for interactive
+confirmation before installing — it displays the cloned commit's hash, date, and message, and
+asks `[y/N]` before running `install.sh`. This is a deliberate behavior change from the prior
+zero-friction flow, added so users piping a remote script directly to their shell get a chance
+to verify what they're about to run.
+
+Pass `--yes` or set `COCO_BOOTSTRAP_YES=1` to preserve the old unattended behavior for CI or
+scripted installs.
+
 ## Out of scope
 
 - Issues in third-party AI tools (Claude Code, Cursor, Codex, etc.) — report to those projects

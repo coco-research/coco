@@ -32,6 +32,10 @@ Security contributions in this release are by [@imachiever](https://github.com/i
 
 - **Corrected asset counts** for the two new skills. Skills 147 to **149** (core 64 to **66**), total addressable assets 865 to **867**, core install 124 to **126** active assets.
 
+### Changed
+
+- **Bumped Spec Version 1.1.0 to 1.2.0** so that it tracks the release version.
+
 ---
 
 ## [1.1.0] — 2026-07-18

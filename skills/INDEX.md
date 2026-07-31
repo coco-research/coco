@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 67 skills** (top-level only — see `systems/<bundle>/skills/` for bundle-only skills).
+**Total: 68 skills** (top-level only — see `systems/<bundle>/skills/` for bundle-only skills).
 
 ## Design
 
@@ -57,6 +57,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [finishing-a-development-branch](finishing-a-development-branch/SKILL.md) | Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting stru |
 | [frontend-design](frontend-design/SKILL.md) | Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts,  |
 | [humanizer](humanizer/SKILL.md) | Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written. Based on Wikipedia's compreh |
+| [karpathy-guidelines](karpathy-guidelines/SKILL.md) | Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, reviewing, or refactoring code to avoid overcomplication, make surgical changes, s |
 | [meta:media](meta:media/SKILL.md) | Multimodal memory — ingest, embed, and search media (images, video, audio, files) with Gemini Embedding 2 + ChromaDB |
 | [openai-agents](openai-agents/SKILL.md) | Build AI applications with OpenAI Agents SDK - text agents, voice agents, multi-agent handoffs, tools with Zod schemas, guardrails, and streaming. Prevents 11 d |
 | [openai-api](openai-api/SKILL.md) | Build with OpenAI stateless APIs - Chat Completions (GPT-5.2, o3), Realtime voice, Batch API (50% savings), Embeddings, DALL-E 3, Whisper, and TTS. Prevents 16  |

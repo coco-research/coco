@@ -2,7 +2,7 @@
 # coco-bootstrap.sh — one-shot installer
 #
 # Usage:
-#   bash <(curl -fsSL https://raw.githubusercontent.com/rkz91/coco/main/bin/coco-bootstrap.sh)
+#   bash <(curl -fsSL https://raw.githubusercontent.com/coco-research/coco/main/bin/coco-bootstrap.sh)
 #   bash <(curl -fsSL ...) -- --adapter cursor --systems gsd
 #   bash <(curl -fsSL ...) -- --dry-run
 #   COCO_DIR=~/tools/coco bash <(curl -fsSL ...)
@@ -17,7 +17,8 @@
 #   This script does NOT execute anything from the network directly. It uses
 #   `git clone` to fetch the full repository (TLS-verified), then pauses so
 #   you can inspect the commit hash before proceeding.
-#   To skip the pause in CI, set COCO_BOOTSTRAP_YES=1 or pass --yes.
+#   To skip the pause in CI, set COCO_BOOTSTRAP_YES=1 or pass --yes. Only the exact
+#   value 1 (or --yes) skips it; anything else, including 0, keeps the prompt.
 set -euo pipefail
 
 REPO_URL="https://github.com/coco-research/coco.git"
@@ -91,11 +92,11 @@ echo "│  Date   : $COMMIT_DATE"
 echo "│  Message: $COMMIT_MSG"
 echo "│"
 echo "│  Confirm this matches the latest release on GitHub:"
-echo "│  https://github.com/rkz91/coco/commits/main"
+echo "│  https://github.com/coco-research/coco/commits/main"
 echo "└──────────────────────────────────────────────────────────────────────┘"
 echo ""
 
-if [[ -z "$YES" ]]; then
+if [[ "$YES" != "1" ]]; then
   read -r -p "Proceed with installation? [y/N] " REPLY
   case "$REPLY" in
     [yY][eE][sS]|[yY]) ;;

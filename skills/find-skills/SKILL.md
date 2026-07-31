@@ -94,6 +94,18 @@ npx skills add <owner/repo@skill> -g -y
 
 The `-g` flag installs globally (user-level) and `-y` skips confirmation prompts.
 
+**Before you run this command on the user's behalf**, the `owner/repo@skill` identifier
+came from search results you don't control (skills.sh, GitHub) — an attacker can publish
+a well-named, well-described malicious package that ranks for a target query. Since `-y`
+skips the CLI's own confirmation prompt, you are the only checkpoint before code from an
+arbitrary third party lands on the user's machine. So:
+
+1. Display the exact resolved `owner/repo@skill` string, the repo URL, and a short
+   description/README excerpt to the user.
+2. Get an explicit affirmative reply that references that specific package — a prior
+   generic "yes, install it" from earlier in the conversation is not sufficient.
+3. Only then run the install command above.
+
 ## Common Skill Categories
 
 When searching, consider these common categories:

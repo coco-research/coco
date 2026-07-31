@@ -20,10 +20,13 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-run() { [[ $DRY_RUN -eq 1 ]] && echo "DRY: $*" || "$@"; }
+run() {
+  if [[ $DRY_RUN -eq 1 ]]; then echo "DRY: $*"; else "$@"; fi
+}
 
 link_dir() {
   local src=$1 dst=$2
+  [[ -e "$dst" && ! -L "$dst" ]] && { echo "Skip (exists, not symlink): $dst"; return; }
   [[ -L "$dst" ]] && run rm "$dst"
   run mkdir -p "$(dirname "$dst")"
   run ln -sf "$src" "$dst"

@@ -118,7 +118,7 @@ The meta-orchestrator uses a staged algorithm so it never has to load the entire
 
 ### Persona build & validation pipeline
 
-The 389-persona roster was compiled with a systematic multi-tier workflow. Candidate generation was evaluated across local Qwen (via LM Studio), a hosted small model, and Gemini Flash, but **Claude research agents proved the quality winner** for resolving historical data and citing verifiable signal. Every persona then passes a validation gate (`validate_persona.py`) requiring at least 4 live, non-404 evidence URLs, a valid home team, zero fabricated quotes, and at least 2 verified recent signals (or persistent archetype signals for historical figures).
+The 389-persona roster was compiled with a systematic multi-tier workflow. Candidate generation was evaluated across local Qwen (via LM Studio), a hosted small model, and Gemini Flash, but **Claude research agents proved the quality winner** for resolving historical data and citing verifiable signal. Personas are checked by an advisory validation gate (`validate_persona.py`) that enforces five things: every required frontmatter field is present; at least 4 cited URLs resolve live (non-404); every `public_stance` carries an `evidence_url`, so no stance is uncited; at least 2 recent signals within 12 months (or 2 persistent signals for historical archetypes); and any `pairs_well_with` / `productive_conflict_with` slug refers to a real roster member. Two limits are worth stating plainly: the gate confirms that a stance is *cited*, not that a quotation is authentic, and `home_team` is only checked for presence, not validated against the list of real teams. A `NEEDS-TOPUP` verdict is advisory — it does not currently affect which personas a council selects at runtime.
 
 ---
 

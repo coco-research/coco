@@ -11,15 +11,15 @@
 
 ### Summon an advisory board of 389 world-class minds — right inside your AI coding session.
 
-CoCo Super Intelligence is the orchestration layer that turns Claude Code, Cursor, or Codex into an entire engineering department: routed expert panels that deliberate and decide, then **147 skills**, **277 commands**, and disk-persistent state that ship what they decided.
+CoCo Super Intelligence is the orchestration layer that turns Claude Code, Cursor, or Codex into an entire engineering department: routed expert panels that deliberate and decide, then **149 skills**, **277 commands**, and disk-persistent state that ship what they decided.
 
 Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds · 100% local · no telemetry
 
 <br>
 
 [![License: Open-core](https://img.shields.io/badge/License-Open--core-yellow.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.1.0-blue?style=for-the-badge)](CHANGELOG.md)
-[![Skills](https://img.shields.io/badge/skills-147-emerald?style=for-the-badge)](skills/)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue?style=for-the-badge)](CHANGELOG.md)
+[![Skills](https://img.shields.io/badge/skills-149-emerald?style=for-the-badge)](skills/)
 [![Commands](https://img.shields.io/badge/commands-277-indigo?style=for-the-badge)](commands/)
 [![Personas](https://img.shields.io/badge/personas-389-violet?style=for-the-badge)](systems/superintelligence/)
 [![CI](https://img.shields.io/github/actions/workflow/status/coco-research/coco/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/coco-research/coco/actions)
@@ -155,11 +155,11 @@ CoCo compiles its rules, templates, and agent definitions into pure Markdown and
 
 ## The CoCo Asset Library
 
-A standard install equips your workspace with a lightweight core; full activation unlocks up to **865 total assets** to orchestrate any software-engineering workflow.
+A standard install equips your workspace with a lightweight core; full activation unlocks up to **867 total assets** to orchestrate any software-engineering workflow.
 
 <table align="center">
 <tr>
-<td align="center" width="20%"><h3>147</h3><sub>Skills</sub><br><small>64 Core + 83 Bundle</small></td>
+<td align="center" width="20%"><h3>149</h3><sub>Skills</sub><br><small>66 Core + 83 Bundle</small></td>
 <td align="center" width="20%"><h3>277</h3><sub>Slash Commands</sub><br><small>35 Core + 242 Bundle</small></td>
 <td align="center" width="20%"><h3>34</h3><sub>Specialized Agents</sub><br><small>10 Core + 24 Bundle</small></td>
 <td align="center" width="20%"><h3>389</h3><sub>Expert Personas</sub><br><small>Super Intelligence Board</small></td>
@@ -168,7 +168,7 @@ A standard install equips your workspace with a lightweight core; full activatio
 </table>
 
 <div align="center">
-  <sub><strong>Core install:</strong> 124 active assets (64 Skills, 35 Commands, 10 Agents, 15 Rules)</sub><br>
+  <sub><strong>Core install:</strong> 126 active assets (66 Skills, 35 Commands, 10 Agents, 15 Rules)</sub><br>
   <sub><strong>Orchestration bundles:</strong> <strong>+68 GSD skills</strong> · <strong>+24 GSD agents</strong> · <strong>+6 Brain skills</strong> · <strong>+9 Super Intelligence skills</strong> · <strong>+242 SI commands</strong> · <strong>3 Workflows</strong></sub>
 </div>
 
@@ -178,10 +178,10 @@ A standard install equips your workspace with a lightweight core; full activatio
 
 ## Skills Catalog
 
-CoCo ships **147 skills** (64 core + 83 across bundles). These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
+CoCo ships **149 skills** (66 core + 83 across bundles). These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
 
 ### Visual design & styling
-`ui-ux-pro-max` (50 styles, 21 palettes, 50 font pairings, 9 stacks) · `frontend-design` · `design-taste-frontend` · `redesign-existing-projects` · `axiom-liquid-glass` (Apple Liquid Glass, WWDC 2025) · `swiftui-liquid-glass` · `web-design-guidelines` · `tailwind-patterns` (Tailwind v4) · `vercel-react-best-practices` · `clone-website` · `c4-architecture` · `arb-review` · `expo-api-routes` · `ai-product`.
+`ui-ux-pro-max` (50 styles, 21 palettes, 50 font pairings, 9 stacks) · `frontend-design` · `design-taste-frontend` · `redesign-existing-projects` · `axiom-liquid-glass` (Apple Liquid Glass, WWDC 2025) · `swiftui-liquid-glass` · `web-design-guidelines` · `tailwind-patterns` (Tailwind v4) · `vercel-react-best-practices` · `clone-website` · `c4-architecture` · `arb-review` · `expo-api-routes` · `ai-product` · `scroll-world` (scroll-scrubbed, cut-free camera flythrough landing pages, generated end to end via Higgsfield).
 
 ### Engineering discipline & quality
 `brainstorming` · `writing-plans` · `executing-plans` · `subagent-driven-development` · `dispatching-parallel-agents` · `test-driven-development` · `systematic-debugging` · `requesting-code-review` · `receiving-code-review` · `verification-before-completion` · `finishing-a-development-branch` · `using-git-worktrees` · `code-verification` (7 bug-vector audit) · `generate-tests` · `api-design-principles` · `cli-anything` · `workflow-routing`.
@@ -202,16 +202,16 @@ CoCo ships **147 skills** (64 core + 83 across bundles). These are not prompt sn
 `coco-ads` (launch videos via HyperFrames) · `media-memory` (multimodal embeddings) · `doc-sync` · `ultra-think` · `browser-automation`.
 
 ### The CoCo platform itself
-`coco` (conversational router) · `coco-cli` · `skill-creator` · `writing-skills` · `find-skills`.
+`coco` (conversational router) · `coco-cli` · `coco-loop` (compiles a plain-language goal into a confirmed charter, then runs a bounded, propose-only autonomous loop) · `skill-creator` · `writing-skills` · `find-skills`.
 
 <details>
-<summary><strong>▸ Full catalog — every one of the 147 skills</strong></summary>
+<summary><strong>▸ Full catalog — every one of the 149 skills</strong></summary>
 
 <br>
 
-**Core skills (64)**
+**Core skills (66)**
 
-`agent-lightning` · `ai-marketing-videos` · `ai-product` · `api-design-principles` · `arb-review` · `axiom-liquid-glass` · `brainstorming` · `browser-automation` · `c4-architecture` · `change-log` · `cli-anything` · `clone-website` · `coco` · `coco-ads` · `coco-cli` · `code-verification` · `design-taste-frontend` · `dispatching-parallel-agents` · `doc-sync` · `docx` · `dr-plan` · `executing-plans` · `expo-api-routes` · `find-skills` · `finishing-a-development-branch` · `frontend-design` · `generate-tests` · `irp` · `media-memory` · `meeting-notes` · `nfr-tracker` · `openai-agents` · `openai-api` · `openai-apps-mcp` · `openai-whisper` · `pdf` · `pmstudio` · `prd-generator` · `prd-mastery` · `project-docs` · `receiving-code-review` · `recovery-plan` · `redesign-existing-projects` · `requesting-code-review` · `skill-creator` · `stakeholder-comms` · `subagent-driven-development` · `swiftui-liquid-glass` · `systematic-debugging` · `tailwind-patterns` · `task-prd-creator` · `test-driven-development` · `ui-ux-pro-max` · `ultra-think` · `using-git-worktrees` · `using-superpowers` · `vercel-react-best-practices` · `verification-before-completion` · `voice-ai` · `web-design-guidelines` · `workflow-routing` · `writing-plans` · `writing-skills` · `xlsx`
+`agent-lightning` · `ai-marketing-videos` · `ai-product` · `api-design-principles` · `arb-review` · `axiom-liquid-glass` · `brainstorming` · `browser-automation` · `c4-architecture` · `change-log` · `cli-anything` · `clone-website` · `coco` · `coco-ads` · `coco-cli` · `coco-loop` · `code-verification` · `design-taste-frontend` · `dispatching-parallel-agents` · `doc-sync` · `docx` · `dr-plan` · `executing-plans` · `expo-api-routes` · `find-skills` · `finishing-a-development-branch` · `frontend-design` · `generate-tests` · `irp` · `media-memory` · `meeting-notes` · `nfr-tracker` · `openai-agents` · `openai-api` · `openai-apps-mcp` · `openai-whisper` · `pdf` · `pmstudio` · `prd-generator` · `prd-mastery` · `project-docs` · `receiving-code-review` · `recovery-plan` · `redesign-existing-projects` · `requesting-code-review` · `scroll-world` · `skill-creator` · `stakeholder-comms` · `subagent-driven-development` · `swiftui-liquid-glass` · `systematic-debugging` · `tailwind-patterns` · `task-prd-creator` · `test-driven-development` · `ui-ux-pro-max` · `ultra-think` · `using-git-worktrees` · `using-superpowers` · `vercel-react-best-practices` · `verification-before-completion` · `voice-ai` · `web-design-guidelines` · `workflow-routing` · `writing-plans` · `writing-skills` · `xlsx`
 
 **GSD bundle skills (68)** — the full `gsd-*` project-orchestration lifecycle: `gsd-new-project`, `gsd-plan-phase`, `gsd-execute-phase`, `gsd-verify-work`, `gsd-autonomous`, `gsd-debug`, `gsd-ui-phase`, `gsd-secure-phase`, `gsd-workstreams`, `gsd-forensics`, `gsd-milestone-summary`, `gsd-map-codebase`, `gsd-profile-user`, and 55 more (see [`systems/gsd/skills/`](systems/gsd/skills/)).
 
@@ -517,7 +517,21 @@ bash install.sh --adapter generic
 
 </td>
 </tr>
+<tr>
+<td colspan="2" valign="top">
+
+**One-line remote install**
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/coco-research/coco/main/bin/coco-bootstrap.sh)
+```
+*Clones Coco to `~/.coco`, then pauses and prints the commit hash, date, and message so you can verify it against [the latest commit on `main`](https://github.com/coco-research/coco/commits/main) before it runs `install.sh`. Type `y` to proceed. Pass `--yes` or set `COCO_BOOTSTRAP_YES=1` to skip the prompt for CI or scripted installs, and pass adapter/systems flags after `--`, e.g. `-- --adapter cursor --systems gsd`.*
+
+</td>
+</tr>
 </table>
+
+The install paths above are deliberately conservative: the remote bootstrap never runs code before you have confirmed the commit it cloned, `install.sh` only ever reads and symlinks files already inside the repository, the CI workflows that build and publish Coco pin their `setup-node` and `setup-python` Actions to commit SHAs rather than mutable tags, and nothing Coco does locally or in CI sends data anywhere. See [`SECURITY.md`](SECURITY.md) for the full policy.
 
 ---
 
@@ -612,21 +626,21 @@ npx @coco-research/coco-cli update
 ## Technical Specifications
 
 <table>
-<tr><td><strong>Spec Version</strong></td><td>1.1.0</td></tr>
+<tr><td><strong>Spec Version</strong></td><td>1.2.0</td></tr>
 <tr><td><strong>License</strong></td><td>Open-core — <a href="LICENSE">MIT</a> core; Super Intelligence is <a href="systems/superintelligence/LICENSE">proprietary</a></td></tr>
-<tr><td><strong>Total Skills</strong></td><td>147 with all bundles installed (64 Core + 68 GSD + 6 Brain + 9 Super Intelligence)</td></tr>
+<tr><td><strong>Total Skills</strong></td><td>149 with all bundles installed (66 Core + 68 GSD + 6 Brain + 9 Super Intelligence)</td></tr>
 <tr><td><strong>Slash Commands</strong></td><td>277 with all bundles — 35 Core (shipped) + 242 Super Intelligence (225 per-team + 17 cross-team, generated at install)</td></tr>
 <tr><td><strong>Specialized Agents</strong></td><td>34 (10 Core + 24 GSD Bundle)</td></tr>
 <tr><td><strong>Expert Personas</strong></td><td>389 across 9 departments and 70 cells</td></tr>
 <tr><td><strong>System Bundles</strong></td><td>4 (GSD, Brain, Team, Super Intelligence) — opt in with <code>--systems &lt;name&gt;</code></td></tr>
 <tr><td><strong>Cross-IDE Rules</strong></td><td>15 (.mdc files)</td></tr>
 <tr><td><strong>Workflows Defined</strong></td><td>3 (.md pipelines)</td></tr>
-<tr><td><strong>Total Addressable Assets</strong></td><td>865 with all bundles enabled</td></tr>
+<tr><td><strong>Total Addressable Assets</strong></td><td>867 with all bundles enabled</td></tr>
 <tr><td><strong>Install Time</strong></td><td>&le; 90 seconds</td></tr>
 <tr><td><strong>Telemetry / SaaS</strong></td><td>None — 100% local files</td></tr>
 </table>
 
-<sub>Core install ships 64 skills + 35 commands + 10 agents + 15 rules (124 active assets). The totals above reflect a full install with all four bundles (<code>bash install.sh --systems gsd,brain,team,superintelligence</code>). Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely.</sub>
+<sub>Core install ships 66 skills + 35 commands + 10 agents + 15 rules (126 active assets). The totals above reflect a full install with all four bundles (<code>bash install.sh --systems gsd,brain,team,superintelligence</code>). Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely.</sub>
 
 ---
 
@@ -681,6 +695,7 @@ CoCo Super Intelligence stands on the shoulders of excellent open-source work. S
 
 - **[obra/superpowers](https://github.com/obra/superpowers)** (Jesse Vincent) — the foundational engineering-discipline skills (brainstorming, systematic debugging, TDD, plan writing/execution, git worktrees, code-review flows, verification, and skill authoring).
 - **[gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done)** — the 68-skill / 24-agent GSD project-orchestration bundle.
+- **[heygen-com/hyperframes](https://github.com/heygen-com/hyperframes)** (HeyGen, Inc., Apache License 2.0) — the 20-skill HyperFrames video/motion bundle vendored under `systems/hyperframes/` (composition engine, CLI, animation, creative direction, registry, and the video-authoring suite).
 - **[JCodesMore/ai-website-cloner-template](https://github.com/JCodesMore/ai-website-cloner-template)** — the site-cloning structure behind `clone-website`.
 - **[agents.md](https://agents.md/)** community — the vendor-neutral agent-context standard CoCo's adapters follow.
 - **[nickwinder/synthteam](https://github.com/nickwinder/synthteam)** (Nick Winder) — the multi-agent debate protocol behind `--debate` deliberation.

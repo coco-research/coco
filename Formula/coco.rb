@@ -14,12 +14,12 @@
 class Coco < Formula
   desc "Open-source AI workflow framework — skills, agents, commands, multi-agent orchestration"
   homepage "https://github.com/coco-research/coco"
-  url "https://github.com/coco-research/coco/archive/refs/tags/v1.1.0.tar.gz"
-  sha256 "e6024602266408f51f8fef2f7e4abc8d7c67c98ee5fae45b00ea799684d86cf0"
+  url "https://github.com/coco-research/coco/archive/refs/tags/v1.2.0.tar.gz"
+  sha256 "3ef5ebf532f6404a385f053e0ad36813ad08da1fc04249fb3e3e3ac79631528f"
   # Open-core: MIT core (see LICENSE) + proprietary Super Intelligence
   # (see systems/superintelligence/LICENSE). Not a single SPDX identifier.
   license :cannot_represent
-  version "1.1.0"
+  version "1.2.0"
 
   depends_on "git"
   depends_on "bash"

@@ -1,0 +1,32 @@
+MIT License
+
+This skill is vendored from the "andrej-karpathy-skills" plugin
+(https://github.com/multica-ai/andrej-karpathy-skills), authored by
+forrestchang, per the `author` field in that repository's
+`.claude-plugin/plugin.json` manifest, which also declares the plugin
+license as MIT.
+
+NOTE ON ATTRIBUTION: the upstream repository does not include a LICENSE
+file, so there is no canonical "Copyright (c) <year> <name>" notice to
+quote here. This file is provided to satisfy the MIT terms declared in
+the plugin manifest and reproduces the standard MIT permission grant
+below; no copyright line is fabricated. If forrestchang publishes a
+LICENSE file upstream, this file should be updated to match it exactly.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above notice and this permission notice shall be included in all copies
+or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

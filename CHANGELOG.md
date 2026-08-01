@@ -8,6 +8,36 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [1.2.0] — 2026-07-31
+
+### Added
+
+- **`coco-loop` skill.** Turns a plain-language goal into a readable charter that the person confirms, then arms and runs a bounded autonomous loop in propose-only mode. It never commits on its own. Requires the [coco-loops](https://github.com/coco-research/coco-loops) framework, which the skill now links with install instructions.
+- **`scroll-world` skill.** Builds an immersive scroll-scrubbed landing page in which a pre-rendered camera flies from outside each scene into its interior and then on to the next with no cuts. Contributed upstream by cyw under the MIT license, with the original license retained at `skills/scroll-world/LICENSE`.
+
+### Security
+
+- **Corrected the funding pointer.** `.github/FUNDING.yml` still referenced `rkz91`, the account name used before the 2026-07-18 rename to `coco-research`. An unrelated third party had since registered the vacated username, so the repository's Sponsor configuration pointed at a stranger. No funds could have been misdirected, because that account has no Sponsors listing, but the window is now closed.
+- **Removed the remaining stale account references from the installer.** The documented `curl`-pipe-to-`bash` command and the commit-verification link in `bin/coco-bootstrap.sh` both pointed at the reclaimed `rkz91` username, which would have resolved to third-party content had that account created a repository named `coco`.
+- **Added a commit-verification gate to `bin/coco-bootstrap.sh`.** The installer now clones first, prints the commit hash, date, and message, and waits for explicit confirmation before running `install.sh`. The default is fail-closed. Only `COCO_BOOTSTRAP_YES=1` or `--yes` skips it; a previous form of this check treated any non-empty value, including `0`, as consent.
+- **Pinned GitHub Actions to commit SHAs** and scoped the workflows to `permissions: contents: read`. Pins target `actions/setup-node` v7 and `actions/setup-python` v5, each verified to exist upstream and to match the commit its tag currently points to.
+- **Fixed a DOM cross-site-scripting vector** in `skills/brainstorming/scripts/helper.js`, which built its selection indicator by concatenating a label into `innerHTML`. It now assigns `textContent`.
+- **Hardened the Cursor adapter installer.** `link_dir()` could silently overwrite a real file, and an `A && B || C` pattern could execute a real command when the dry-run echo failed.
+- **Added a Content-Security-Policy** to the generated diagram artifacts, and raised the floor versions of `@modelcontextprotocol/sdk`, `hono`, `vite`, and `wrangler` in the `openai-apps-mcp` template.
+- **Added prompt-injection guidance** to `find-skills`, requiring the resolved package name to be surfaced and confirmed before an agent installs a skill on someone's behalf.
+
+Security contributions in this release are by [@imachiever](https://github.com/imachiever) (Rajat Bhatia).
+
+### Fixed
+
+- **Corrected asset counts** for the two new skills. Skills 147 to **149** (core 64 to **66**), total addressable assets 865 to **867**, core install 124 to **126** active assets.
+
+### Changed
+
+- **Bumped Spec Version 1.1.0 to 1.2.0** so that it tracks the release version.
+
+---
+
 ## [1.1.0] — 2026-07-18
 
 ### Changed

@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 66 skills** (top-level only — see `systems/<bundle>/skills/` for bundle-only skills).
+**Total: 70 skills** (top-level only — see `systems/<bundle>/skills/` for bundle-only skills).
 
 ## Design
 
@@ -56,6 +56,9 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [find-skills](find-skills/SKILL.md) | Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express int |
 | [finishing-a-development-branch](finishing-a-development-branch/SKILL.md) | Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting stru |
 | [frontend-design](frontend-design/SKILL.md) | Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts,  |
+| [humanizer](humanizer/SKILL.md) | Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written. Based on Wikipedia's compreh |
+| [journey-map](journey-map/SKILL.md) | Loads full context for a React Flow (@xyflow/react) user journey mapping project. Use when working on, extending, debugging, or building features for the journe |
+| [karpathy-guidelines](karpathy-guidelines/SKILL.md) | Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, reviewing, or refactoring code to avoid overcomplication, make surgical changes, s |
 | [meta:media](meta:media/SKILL.md) | Multimodal memory — ingest, embed, and search media (images, video, audio, files) with Gemini Embedding 2 + ChromaDB |
 | [openai-agents](openai-agents/SKILL.md) | Build AI applications with OpenAI Agents SDK - text agents, voice agents, multi-agent handoffs, tools with Zod schemas, guardrails, and streaming. Prevents 11 d |
 | [openai-api](openai-api/SKILL.md) | Build with OpenAI stateless APIs - Chat Completions (GPT-5.2, o3), Realtime voice, Batch API (50% savings), Embeddings, DALL-E 3, Whisper, and TTS. Prevents 16  |
@@ -88,6 +91,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [using-superpowers](using-superpowers/SKILL.md) | Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions |
 | [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) | React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js c |
 | [verification-before-completion](verification-before-completion/SKILL.md) | Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output be |
+| [visual-explainer](visual-explainer/SKILL.md) | Generate self-contained HTML visual explanations for systems, code changes, plans, data, and technical concepts. Use for diagrams, architecture overviews, diff  |
 | [voice-ai](voice-ai/SKILL.md) | Voice AI architecture and implementation guide. Covers two architectures: speech-to-speech (OpenAI Realtime API, lowest latency) and pipeline (STT->LLM->TTS, mo |
 | [web-design-guidelines](web-design-guidelines/SKILL.md) | Review UI code for Web Interface Guidelines compliance. Use when asked to "review my UI", "check accessibility", "audit design", "review UX", or "check my site  |
 | [workflow-routing](workflow-routing/SKILL.md) | Use at the start of any task to route between Superpowers skills and GSD commands based on project state, task scope, and context signals. Fires before other sk |

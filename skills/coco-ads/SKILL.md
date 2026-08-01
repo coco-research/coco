@@ -11,7 +11,7 @@ You built it. Now let CoCo make the ad.
 
 `/coco-ads` turns the current project into a short (15–25s), polished, shareable launch video using the HyperFrames toolchain, rendered **locally**. It is narrow, opinionated, and fast.
 
-> **Credit / lineage.** This skill adapts the launch-video flow from [**brag** by Shunit Haviv](https://github.com/latent-spaces/brag) and runs on the [**HyperFrames**](https://www.npmjs.com/package/hyperframes) HTML-composition + render engine by HeyGen. Bundled music is "Happy Beats / Business Moves" by ende.app; bundled SFX are CC0 (Kenney.nl). See [`CREDITS.md`](../../CREDITS.md). Re-implemented in CoCo's voice with attribution; upstream `brag` ships without an explicit license.
+> **Credit / lineage.** This skill adapts the launch-video flow from [**brag** by Shunit Haviv](https://github.com/latent-spaces/brag) and runs on the [**HyperFrames**](https://www.npmjs.com/package/hyperframes) HTML-composition + render engine by HeyGen. Bundled music is "Happy Beats / Business Moves" by ende.app; bundled SFX are CC0 (Kenney.nl). See [`CREDITS.md`](../../CREDITS.md). Re-implemented in CoCo's voice with attribution. Upstream `brag` is MIT-licensed (Copyright (c) 2026 Shunit Haviv Hakimi); its notice is retained at [`LICENSE`](LICENSE) in this skill directory.
 
 ## Requirements
 

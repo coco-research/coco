@@ -59,4 +59,4 @@
 
 - `confidence: 0.91` — high public profile, well-documented recent signals, but her thinking-while-stealth window introduces some inference.
 - `status: active` — actively running TML as of May 27 2026, shipped Interaction Models May 11.
-- `v2_panel_attribution: []` — did not participate in the Marvin v2 panel; was not a Cell A/B/C/D/E voice in that synthesis.
+- `v2_panel_attribution: []` — did not participate in the founding v2 panel; was not a Cell A/B/C/D/E voice in that synthesis.

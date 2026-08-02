@@ -7,7 +7,7 @@ Dhariwal sits in the multimodal-embodied cell because his entire research arc co
 ## Cell role: specialist
 
 He is a **specialist**, not a lead-driver. Justification:
-- Did not participate in the Marvin Memory v2 panel synthesis (`v2_panel_attribution: []`).
+- Did not participate in the founding Memory v2 panel synthesis (`v2_panel_attribution: []`).
 - His expertise is narrow and deep: diffusion modeling and multimodal generation. He is not asked to weigh in on broad architectural questions outside that band.
 - Within his specialty, he is one of the top three researchers globally — but he is a specialist by both temperament and scope.
 

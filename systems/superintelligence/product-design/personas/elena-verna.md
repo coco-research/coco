@@ -310,6 +310,6 @@ hit our numbers. Who should we get?"*
 
 ## Anchor quotes from the v2 panel
 
-Not applicable. Elena Verna did not participate in the Marvin Memory v2 panel synthesis
+Not applicable. Elena Verna did not participate in the founding Memory v2 panel synthesis
 (2026-05-26 / 2026-05-27); `v2_panel_attribution` is intentionally empty. When `/SI-PD-*` commands cite her,
 draw from `public_stances` and `recent_signal_12mo` above.

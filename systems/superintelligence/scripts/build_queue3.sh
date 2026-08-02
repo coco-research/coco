@@ -6,7 +6,9 @@
 #
 # Run detached:  nohup bash superintelligence/scripts/build_queue3.sh >/dev/null 2>&1 &
 set -u
-ROOT=/Users/user/projects/coco-platform/superintelligence
+# Derived from this script's own location so the queue runs from any checkout.
+# Override with SI_ROOT=/path/to/superintelligence if you need a different tree.
+ROOT="${SI_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 cd "$ROOT" || exit 1
 LOG="$ROOT/scripts/queue3.log"
 : > "$LOG"

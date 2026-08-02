@@ -18,7 +18,7 @@ The schema's `recent_signal_12mo` field (which requires entries dated within the
 - A `persistent_signals:` field replaces it, carrying **enduring frameworks/positions** with historical dates (1997–2020) plus posthumous institutional continuation (the Christensen Institute, the annual "Essential Christensen" HBR collection, ongoing JTBD practice). Each entry carries a real URL.
 - **No recent activity is fabricated.** All dated signals are real historical events or genuinely ongoing institutional stewardship of his work.
 
-This mirrors the Steve Jobs archetype handling exactly: `recent_signal_12mo: []`, `persistent_signals` with historical + posthumous dates, and `v2_panel_attribution: []` (he did not and could not participate in the Marvin Memory v2 panel of May 2026).
+This mirrors the Steve Jobs archetype handling exactly: `recent_signal_12mo: []`, `persistent_signals` with historical + posthumous dates, and `v2_panel_attribution: []` (he did not and could not participate in the founding Memory v2 panel of May 2026).
 
 ---
 

@@ -48,7 +48,7 @@ The researchers who design the actual models — pretraining objectives, archite
 
 ## v2 panel attribution
 
-This cell carries the largest concentration of Marvin Memory v2 panelists:
+This cell carries the largest concentration of founding Memory v2 panelists:
 
 - **Karpathy** (4 attributions): L4-floor hot path, "make the right thing default," NER triage gate, tail-latency framing.
 - **Wei** (4 attributions): L5 NER triage gate (co-signer with Karpathy), don't-single-vendor MemoryProvider Protocol, power-law SR-3 load test, CoT-retrieval token budget.

@@ -3,7 +3,7 @@ slug: cindy-sridharan
 teams: [engineering]
 home_team: engineering
 cell: reliability-sre-obs
-cell_letter: E                       # back-compat with Marvin v2 panel artifacts (E = obs/ops/privacy)
+cell_letter: E                       # back-compat with founding v2 panel artifacts (E = obs/ops/privacy)
 cell_role: specialist
 
 real_name: Cindy Sridharan

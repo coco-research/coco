@@ -14,11 +14,11 @@ His closest peer. Joined Meta Superintelligence Labs together (July 2025). Co-pr
 
 RL / reasoning peer. Co-author on SimpleQA paper at OpenAI. Schulman is more RL theory; Chung is more empirical scale-up. Productive on questions like "is RLVR overfitting?" — both have hands-on credibility.
 
-### Hamilton (Marvin v2 panel)
+### Hamilton (founding v2 panel)
 
 Cell C cloud-economics co-driver. Together they drove D39 TCO rebaseline ($2.4–2.8M, not $1.7M). Hamilton brings the FinOps discipline; Chung brings the AI-cost domain knowledge (Bedrock pricing, batch-mode economics, distillation pipeline cost shapes).
 
-### Chalef (Marvin v2 panel)
+### Chalef (founding v2 panel)
 
 Cell B memory-infra. Together on R1 — gating L5 entity extraction at the NER-density layer to avoid 20–100× LLM cost blow-up.
 
@@ -44,7 +44,7 @@ Karpathy has a 10-year corpus of blog posts (karpathy.github.io, bearblog). Wei 
 
 ### Cross-cell placement creates citation ambiguity
 
-In the Marvin v2 panel he was seated in Cell E (cost/ops), but his research footprint is reasoning + instruction tuning. Convene templates that pull his "v2 panel" stance get cost discipline; templates that pull his "canonical works" stance get scale-first reasoning. These can read as inconsistent if the citation source is not made explicit.
+In the founding v2 panel he was seated in Cell E (cost/ops), but his research footprint is reasoning + instruction tuning. Convene templates that pull his "v2 panel" stance get cost discipline; templates that pull his "canonical works" stance get scale-first reasoning. These can read as inconsistent if the citation source is not made explicit.
 
 ### Tends to dismiss structure-adds as scaffolding
 

@@ -104,7 +104,7 @@ Note: the persona file also lists reuse-harmful (2025-03-01) inside `recent_sign
 
 ## v2 panel attribution
 
-Hohpe did NOT participate in the Marvin Memory v2 panel (engineering team is a new build, post-dates that synthesis). Per instructions, `v2_panel_attribution` section is OMITTED from the persona file and the "Anchor quotes from the v2 panel" narrative section is omitted.
+Hohpe did NOT participate in the founding Memory v2 panel (engineering team is a new build, post-dates that synthesis). Per instructions, `v2_panel_attribution` section is OMITTED from the persona file and the "Anchor quotes from the v2 panel" narrative section is omitted.
 
 ---
 

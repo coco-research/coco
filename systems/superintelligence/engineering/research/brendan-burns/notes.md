@@ -139,6 +139,6 @@ Conflict sources:
 - Sources: 12+ real URLs gathered. ✅ (>=8)
 - Recent signals (post-2025-05-30): 4 verified with dates. ✅ (>=3)
 - Every public_stance has an evidence_url. ✅
-- v2 panel: Burns did NOT participate in the Marvin Memory v2 panel (that panel is AI-team / cloud-super-intelligence). v2_panel_attribution = empty list; narrative "Anchor quotes" section omitted/noted as N/A.
+- v2 panel: Burns did NOT participate in the founding Memory v2 panel (that panel is AI-team / cloud-super-intelligence). v2_panel_attribution = empty list; narrative "Anchor quotes" section omitted/noted as N/A.
 - last_verified: 2026-05-30.
 - confidence: 0.93 (identity rock-solid; some figures like "1,400 engineers" single-sourced to The New Stack; stances well-cited and recent).

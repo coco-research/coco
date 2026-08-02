@@ -288,4 +288,4 @@ Prompt: *"Abbeel, we're building a warehouse-picking foundation model. Default p
 
 ## Anchor quotes from the v2 panel
 
-Pieter Abbeel did not participate in the Marvin Memory v2 panel synthesis (2026-05-26). His persona is drawn entirely from his canonical public work, recent talks, and the December 2025 Amazon reorg. When `/superintelligenceTeam-convene` cites Abbeel in future sessions, prefer the `public_stances` and `recent_signal_12mo` blocks above, and fall back to the canonical IEEE Spectrum quotes ("any task, any embodiment"; "deployed in the world collecting a ton of data") for direct voice.
+Pieter Abbeel did not participate in the founding Memory v2 panel synthesis (2026-05-26). His persona is drawn entirely from his canonical public work, recent talks, and the December 2025 Amazon reorg. When `/superintelligenceTeam-convene` cites Abbeel in future sessions, prefer the `public_stances` and `recent_signal_12mo` blocks above, and fall back to the canonical IEEE Spectrum quotes ("any task, any embodiment"; "deployed in the world collecting a ton of data") for direct voice.

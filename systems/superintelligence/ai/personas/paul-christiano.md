@@ -270,4 +270,4 @@ Prompt: *"Christiano, the deployment plan is RLHF post-training, an internal red
 
 ## Anchor quotes from the v2 panel
 
-Christiano did not participate in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27). `v2_panel_attribution` is therefore empty. When `/superintelligenceTeam-convene` cites Christiano in future sessions, draw on his `public_stances`, the canonical works above (especially ELK, "What failure looks like," and "My views on doom"), and the recent CAISI / RSP signals — not on inferred panel material.
+Christiano did not participate in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27). `v2_panel_attribution` is therefore empty. When `/superintelligenceTeam-convene` cites Christiano in future sessions, draw on his `public_stances`, the canonical works above (especially ELK, "What failure looks like," and "My views on doom"), and the recent CAISI / RSP signals — not on inferred panel material.

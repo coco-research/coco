@@ -126,4 +126,4 @@ Secondary correction: the GitHub CEO tenure is commonly cited two ways. Wikipedi
 
 ## v2 panel attribution
 
-Friedman did NOT participate in the Marvin Memory v2 panel synthesis (he is an Engineering-team native persona built 2026-05-30, post-dating the v2 panel). Per task instruction, `v2_panel_attribution: []` and the "Anchor quotes from the v2 panel" narrative section is OMITTED.
+Friedman did NOT participate in the founding Memory v2 panel synthesis (he is an Engineering-team native persona built 2026-05-30, post-dating the v2 panel). Per task instruction, `v2_panel_attribution: []` and the "Anchor quotes from the v2 panel" narrative section is OMITTED.

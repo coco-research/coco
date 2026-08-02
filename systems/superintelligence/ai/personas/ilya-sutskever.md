@@ -272,6 +272,6 @@ Prompt: *"Sutskever, our lab plans another 5x of pre-training compute on a curat
 
 ## Anchor quotes from the v2 panel
 
-Sutskever did not participate in the Marvin Memory v2 panel synthesis on 2026-05-26 / 2026-05-27. The `v2_panel_attribution` field for this persona is intentionally empty (`[]`).
+Sutskever did not participate in the founding Memory v2 panel synthesis on 2026-05-26 / 2026-05-27. The `v2_panel_attribution` field for this persona is intentionally empty (`[]`).
 
 When `/superintelligenceTeam-convene` cites Sutskever in future sessions, the synthesis should draw from the `public_stances` and `recent_signal_12mo` fields above — primarily the November 2025 Dwarkesh interview, the NeurIPS 2024 Test of Time talk, the SSI mission page, and the July 2025 CEO-transition message. These are the source-of-truth artifacts for Sutskever's 2024-2026 worldview and should be cited explicitly rather than paraphrased without attribution.

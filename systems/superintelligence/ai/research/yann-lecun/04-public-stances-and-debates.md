@@ -48,7 +48,7 @@ Source: https://x.com/ylecun/status/1816823628098425096 (Awesome piece on AI exi
 ### vs. Andrej Karpathy (autoregressive scaling vs. world models)
 - Karpathy is invested in the LLM autoregressive paradigm but acknowledges its limits ("we're summoning ghosts, not building animals" — Oct 2025 Dwarkesh appearance).
 - LeCun goes further: he says the entire AR / next-token-prediction frame is incompatible with planning.
-- Both are Cell A AI/research personas in the Marvin v2 panel — but they disagree on whether to fix LLMs or replace them.
+- Both are Cell A AI/research personas in the founding v2 panel — but they disagree on whether to fix LLMs or replace them.
 
 ### vs. Ilya Sutskever (pre-training as path)
 - LeCun: "Pre-training is this crappy evolution" (paraphrased from Path Towards AMI framing).

@@ -52,4 +52,4 @@ For high-stakes architecture or strategy decisions, this cell argues the "is the
 
 ## Cross-team back-compat
 
-All six personas carry `cell_letter: A` for back-compat with the Marvin Memory v2 panel convention (Cell A = AI / research). None participated in the Marvin v2 panel themselves — their canonical works and 2024-2026 public stances are the convene-time anchor instead.
+All six personas carry `cell_letter: A` for back-compat with the founding Memory v2 panel convention (Cell A = AI / research). None participated in the founding v2 panel themselves — their canonical works and 2024-2026 public stances are the convene-time anchor instead.

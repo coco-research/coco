@@ -11,7 +11,7 @@
 # built as `status: active` with a populated `recent_signal_12mo` field; the
 # `persistent_signals` field is omitted. The ROSTER's archetype label is a
 # wrong assumption and is corrected here — see research/susan-kare/notes.md for
-# the full documented decision. She did not participate in the Marvin Memory v2
+# the full documented decision. She did not participate in the founding Memory v2
 # panel (May 2026), so v2_panel_attribution is an empty list and the
 # corresponding narrative section is omitted per the brief. No recent signal
 # was fabricated; all four are real and individually sourced.
@@ -150,7 +150,7 @@ mental_models:
   - "Humanize the machine — friendliness, warmth, and humor lower the threshold of adoption far more than raw capability; the smiling Mac did more for trust than any spec."
   - "Universality as inclusion — the simplest legible symbol excludes the fewest people; simplicity is an accessibility and reach decision, not only a taste decision."
 
-# Susan Kare did not participate in the Marvin Memory v2 panel synthesis
+# Susan Kare did not participate in the founding Memory v2 panel synthesis
 # (2026-05-26 / 2026-05-27). Empty list per the build brief; the corresponding
 # narrative section is omitted.
 v2_panel_attribution: []

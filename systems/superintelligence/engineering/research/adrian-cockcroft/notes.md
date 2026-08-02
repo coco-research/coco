@@ -254,6 +254,6 @@ coding his own house automation with agent swarms in retirement).
 - Pairs/conflict use real ROSTER.md slugs: YES (werner-vogels, sam-newman, nora-jones,
   cindy-sridharan, corey-quinn / dhh, sam-newman).
 - v2_panel_attribution: Cockcroft is referenced as a co-signer in the Karpathy exemplar's
-  panel attributions (marvin-memory-old-vs-new.html "Reversal 2"; master-phased-plan
+  panel attributions (the founding architecture comparison "Reversal 2"; master-phased-plan
   "Reversal 2"; why-we-changed "Slide 4 hot path"). Included as anchor material.
 - Confidence: 0.9.

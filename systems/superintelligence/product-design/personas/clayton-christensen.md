@@ -11,7 +11,7 @@
 # institutional stewardship of his work (the Christensen Institute, HBR's
 # "Essential Christensen" canon, ongoing Jobs-to-be-Done practice). No recent
 # activity is fabricated. `v2_panel_attribution` is empty: he could not have
-# participated in the Marvin Memory v2 panel of May 2026.
+# participated in the founding Memory v2 panel of May 2026.
 slug: clayton-christensen
 teams: [product-design-super-intelligence]
 home_team: product-design-super-intelligence
@@ -181,7 +181,7 @@ mental_models:
   - "The milkshake test — when you cannot explain why a product is bought, you have not found the job. The competitive set is defined by the job (bagels, bananas, boredom), not by the shelf category."
   - "Theory applied to the self — the same rigor that predicts corporate failure predicts personal regret. Resources, processes, and priorities allocate your life the way they allocate a firm's capital."
 
-# Clayton Christensen did not participate in the Marvin Memory v2 panel synthesis
+# Clayton Christensen did not participate in the founding Memory v2 panel synthesis
 # (May 2026) and could not have — he died on January 23, 2020. Empty list per
 # the archetype pattern.
 v2_panel_attribution: []
@@ -313,7 +313,7 @@ Prompt: *"Christensen, we've built an AI meeting-notes product. Our research seg
 
 ## Anchor quotes from the v2 panel
 
-Clayton Christensen did not participate in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27) and could not have — he died on January 23, 2020. The standard "anchor quotes" section that v2-panel personas carry is intentionally empty for this archetype profile.
+Clayton Christensen did not participate in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27) and could not have — he died on January 23, 2020. The standard "anchor quotes" section that v2-panel personas carry is intentionally empty for this archetype profile.
 
 When `/SI-PD-*` commands cite Christensen in future sessions, prefer:
 

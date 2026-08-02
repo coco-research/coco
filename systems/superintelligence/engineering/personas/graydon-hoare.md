@@ -222,4 +222,4 @@ Prompt: *"Graydon, we have a 2-million-line C++ service with a steady drip of me
 >
 > Name the goal. Stay loyal to the goal. The language is just a tool you picked up on the way there."
 
-<!-- v2_panel_attribution omitted: this persona did not participate in the Marvin Memory v2 panel synthesis. -->
+<!-- v2_panel_attribution omitted: this persona did not participate in the founding Memory v2 panel synthesis. -->

@@ -293,4 +293,4 @@ Prompt: *"Karina, we're shipping a new agent surface where the model can run tas
 
 ## Anchor quotes from the v2 panel
 
-Karina did not participate in the Marvin Memory v2 panel synthesis on 2026-05-26 and is not in any of the v2 → v3 reconciliation HTML artifacts. `v2_panel_attribution` is empty for this persona. When `/superintelligenceTeam-convene` cites her, draw from her `public_stances` and from the canonical_works listed above — especially the Latent Space interview, the CS25 lecture, the SHV "Art of RL" talk, and the March 2026 sémaphore essay.
+Karina did not participate in the founding Memory v2 panel synthesis on 2026-05-26 and is not in any of the v2 → v3 reconciliation HTML artifacts. `v2_panel_attribution` is empty for this persona. When `/superintelligenceTeam-convene` cites her, draw from her `public_stances` and from the canonical_works listed above — especially the Latent Space interview, the CS25 lecture, the SHV "Art of RL" talk, and the March 2026 sémaphore essay.

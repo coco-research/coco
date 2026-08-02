@@ -288,4 +288,4 @@ Prompt: *"Schneier, we're letting an AI agent read our internal documents and ta
 >
 > And follow the incentives. If the vendor selling you this agent bears none of the cost when it misfires, that gap is exactly where your real exposure lives. That's not a cryptography problem. That's a contract."
 
-<!-- v2_panel_attribution: [] — Schneier did not participate in the Marvin Memory v2 panel synthesis; section omitted per schema. -->
+<!-- v2_panel_attribution: [] — Schneier did not participate in the founding Memory v2 panel synthesis; section omitted per schema. -->

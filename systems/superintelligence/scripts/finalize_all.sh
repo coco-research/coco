@@ -2,7 +2,9 @@
 # Post-Claude-build finalize chain: YAML-repair -> per-team registry/cells/validate -> activate.
 #   nohup bash superintelligence/scripts/finalize_all.sh >/dev/null 2>&1 &
 set -u
-ROOT=/Users/user/projects/coco-platform/superintelligence
+# Derived from this script's own location so the queue runs from any checkout.
+# Override with SI_ROOT=/path/to/superintelligence if you need a different tree.
+ROOT="${SI_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 cd "$ROOT" || exit 1
 LOG="$ROOT/scripts/finalize.log"; : > "$LOG"
 say(){ echo "[$(date +%H:%M:%S)] $*" | tee -a "$LOG"; }

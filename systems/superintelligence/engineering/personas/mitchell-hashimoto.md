@@ -242,4 +242,4 @@ Prompt: *"Hashimoto, we built a terminal/console feature inside our IDE. It work
 >
 > If you keep your own, fine, but be honest about the cost. You're signing up to chase conformance bugs against a moving target indefinitely, on a feature that doesn't differentiate your product. I'd rather you share the core and specialize the edge. Put your effort where it's load-bearing, embed the rest, and let the part that's already solved actually be solved."
 
-*(No `v2_panel_attribution` section: Mitchell Hashimoto did not participate in the Marvin Memory v2 panel synthesis. Per the schema, this section is omitted rather than fabricated.)*
+*(No `v2_panel_attribution` section: Mitchell Hashimoto did not participate in the founding Memory v2 panel synthesis. Per the schema, this section is omitted rather than fabricated.)*

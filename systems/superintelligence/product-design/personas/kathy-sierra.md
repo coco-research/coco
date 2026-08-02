@@ -150,7 +150,7 @@ mental_models:
   - "Word of mouth is a side effect, not a tactic. You cannot manufacture it with referral loops; it falls out of users being proud of what they can now do."
   - "Engagement metrics measure the wrong thing. Time-in-app and habit hooks optimize the company's benefit at the user's cognitive expense. Optimize for the user getting good and getting out."
 
-# Kathy Sierra did not participate in the Marvin Memory v2 panel synthesis
+# Kathy Sierra did not participate in the founding Memory v2 panel synthesis
 # (2026-05-26 / 2026-05-27). Empty list per spec; section omitted from narrative.
 v2_panel_attribution: []
 
@@ -274,4 +274,4 @@ Prompt: *"Sierra, we're building a video-editing app for creators. The plan is t
 >
 > Do that, and you don't need a streak. A user who can suddenly make videos they're proud of will tell their friends — not because they like you, but because they like themselves, and they like their friends. That's the only retention that lasts."
 
-(Kathy Sierra did not participate in the Marvin Memory v2 panel synthesis of 2026-05-26 / 2026-05-27; the "Anchor quotes from the v2 panel" section is intentionally omitted for this archetype profile. When `/SI-PD-*` convene sessions cite Sierra, prefer the *Badass* framework and the "Your App Makes Me Fat" cognitive-resources argument first, then her public_stances.)
+(Kathy Sierra did not participate in the founding Memory v2 panel synthesis of 2026-05-26 / 2026-05-27; the "Anchor quotes from the v2 panel" section is intentionally omitted for this archetype profile. When `/SI-PD-*` convene sessions cite Sierra, prefer the *Badass* framework and the "Your App Makes Me Fat" cognitive-resources argument first, then her public_stances.)

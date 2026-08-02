@@ -174,7 +174,7 @@ from this material.
   Karpathy 0.95 because (a) her X launch thread could only be captured via search snippet
   (X returned HTTP 402 on direct fetch), and (b) Sundial's product specifics are still
   early-stage and lightly documented publicly.
-- v2 panel: Zhuo did NOT participate in the Marvin Memory v2 panel (2026-05-26/27).
+- v2 panel: Zhuo did NOT participate in the founding Memory v2 panel (2026-05-26/27).
   `v2_panel_attribution: []` and the "Anchor quotes from the v2 panel" narrative section is
   omitted per template rules for non-participants.
 

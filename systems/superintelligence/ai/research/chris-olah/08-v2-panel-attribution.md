@@ -1,8 +1,8 @@
-# Chris Olah — Marvin Memory v2 Panel Attribution (2026-05-26 / 2026-05-27)
+# Chris Olah — Founding Memory v2 Panel Attribution (2026-05-26 / 2026-05-27)
 
 ## Status: Not a v2 panel participant
 
-Chris Olah did **NOT** participate in the 20-persona Marvin Memory v2 → v3 reconciliation panel. The Marvin v2 panel was organized around a Cell A (AI/research) → Cell E (operations) functional decomposition centered on memory/retrieval architecture for the Marvin product. The relevant alignment / interpretability voice in that panel was filled by other Anthropic-adjacent personas; Olah's specialty (mechanistic interpretability of trained model internals) was not directly on point for the v2 architectural reversals being argued.
+Chris Olah did **NOT** participate in the 20-persona founding Memory v2 → v3 reconciliation panel. The founding v2 panel was organized around a Cell A (AI/research) → Cell E (operations) functional decomposition centered on memory/retrieval architecture for the founding product. The relevant alignment / interpretability voice in that panel was filled by other Anthropic-adjacent personas; Olah's specialty (mechanistic interpretability of trained model internals) was not directly on point for the v2 architectural reversals being argued.
 
 ## v2_panel_attribution field
 
@@ -12,9 +12,9 @@ The Markdown "Anchor quotes from the v2 panel" section is therefore omitted from
 
 ## Why Olah is still on the AI Super Intelligence roster
 
-The AI Super Intelligence Team roster covers a wider domain than the Marvin v2 panel. Olah's cell — `alignment-interp-safety`, retroactively assigned `cell_letter: D` for back-compat with v2 panel attribution mechanics — covers a research area (mechanistic interpretability of LLM internals) that:
+The AI Super Intelligence Team roster covers a wider domain than the founding v2 panel. Olah's cell — `alignment-interp-safety`, retroactively assigned `cell_letter: D` for back-compat with v2 panel attribution mechanics — covers a research area (mechanistic interpretability of LLM internals) that:
 
-1. Will become relevant in **future** Marvin / CoCo Platform sessions when alignment-of-the-model-itself becomes a live question (as opposed to retrieval architecture, which was the v2 frame).
+1. Will become relevant in **future** CoCo Platform sessions when alignment-of-the-model-itself becomes a live question (as opposed to retrieval architecture, which was the v2 frame).
 2. Provides a natural counterweight in convene sessions to capability-first voices like Karpathy (model architects) and Schulman / Wei (reasoning RL). Olah's reflex is "what is the internal feature structure that makes this safe?" rather than "what is the eval that measures whether this works?"
 3. Is required for any session that touches on the safety implications of agent autonomy, model deception, hidden goals, or RLHF-induced behavioral artifacts — all topics his published 2025 work directly addresses.
 

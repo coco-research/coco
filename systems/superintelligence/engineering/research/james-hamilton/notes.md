@@ -220,7 +220,7 @@ respectful of constraints.
 
 ## v2 panel attribution
 
-NO EVIDENCE FOUND that James Hamilton participated in the Marvin Memory v2 panel synthesis (2026-05-26/27).
+NO EVIDENCE FOUND that James Hamilton participated in the founding Memory v2 panel synthesis (2026-05-26/27).
 The exemplar (Karpathy) was a Cell A lead-driver in that panel; the engineering-team build does not assert
 Hamilton spoke there. Setting `v2_panel_attribution: []` and OMITTING the "Anchor quotes from the v2 panel"
 narrative section per the schema's instruction to skip it for non-participants. (cell_role: lead-driver here

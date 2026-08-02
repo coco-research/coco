@@ -283,6 +283,6 @@ Prompt: *"Barnes, an applied-AI team is rolling out an autonomous coding agent t
 
 ## Anchor quotes from the v2 panel
 
-Beth Barnes did not participate in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27). The Marvin v2 panel was scoped to memory-architecture cells (A, B, C, D, E in the v2 schema corresponding to AI/research, memory, cloud, data/security, observability/operations), and the alignment-interp-safety cell as instantiated here for the AI Super Intelligence Team is a separate roster constructed after v2.
+Beth Barnes did not participate in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27). The founding v2 panel was scoped to memory-architecture cells (A, B, C, D, E in the v2 schema corresponding to AI/research, memory, cloud, data/security, observability/operations), and the alignment-interp-safety cell as instantiated here for the AI Super Intelligence Team is a separate roster constructed after v2.
 
 When `/superintelligenceTeam-convene` cites Barnes in future sessions, draw from her `public_stances` and `recent_signal_12mo` rather than from v2 panel material. The primary citables are the seven-month rule paper (March 2025), the GPT-5 evaluation report (August 2025), the developer productivity study and its February 2026 revision, the May 8 2026 review of Anthropic's risk report, and the May 19 2026 Frontier Risk Report.

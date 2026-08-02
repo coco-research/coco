@@ -116,4 +116,4 @@ Note: these themes are from works she edited/authored. The persona attributes th
 
 ## v2 panel attribution
 
-Beyer did NOT participate in the Marvin Memory v2 panel synthesis (she is not in the AI-team roster, and the engineering team is a later build). `v2_panel_attribution` is omitted entirely per the brief. No "Anchor quotes from the v2 panel" narrative section either (archetype, non-participant).
+Beyer did NOT participate in the founding Memory v2 panel synthesis (she is not in the AI-team roster, and the engineering team is a later build). `v2_panel_attribution` is omitted entirely per the brief. No "Anchor quotes from the v2 panel" narrative section either (archetype, non-participant).

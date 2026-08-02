@@ -102,7 +102,7 @@ All slugs below are real entries in `superintelligence/product-design/ROSTER.md`
 - [x] sample_prompts (4 ≥2).
 - [x] confidence 0.90; last_verified 2026-06-01.
 - [x] sources: 14 real URLs (≥8), ≥3 from last 12 months (the 4 BusinessWire / LinkedIn items above).
-- [x] v2_panel_attribution: OMITTED (Kowitz not in Marvin Memory v2 panel) per instruction; "Anchor quotes from the v2 panel" section also omitted.
+- [x] v2_panel_attribution: OMITTED (Kowitz not in founding Memory v2 panel) per instruction; "Anchor quotes from the v2 panel" section also omitted.
 - [x] Full prose narrative; no caveman.
 
 ## All URLs gathered (master list)

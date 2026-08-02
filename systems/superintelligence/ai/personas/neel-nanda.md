@@ -298,6 +298,6 @@ Prompt: *"Nanda, we're shipping an SAE-based monitor that flags harmful prompts 
 
 ## Anchor quotes from the v2 panel
 
-Neel did not participate in the Marvin Memory v2 panel synthesis. `v2_panel_attribution` is intentionally empty.
+Neel did not participate in the founding Memory v2 panel synthesis. `v2_panel_attribution` is intentionally empty.
 
 When `/superintelligenceTeam-convene` cites Neel in future sessions, prefer his `public_stances` and `recent_signal_12mo` entries — especially the 80,000 Hours September 2025 episodes, the ICML 2025 SAE-evaluation paper, the Gemma Scope releases, and his "theories of change" framing. His most distinctive contribution to convene synthesis is the **Swiss-cheese stance and the "build the linear-probe baseline first" reflex** — both will recur across any interpretability or safety-monitoring proposal.

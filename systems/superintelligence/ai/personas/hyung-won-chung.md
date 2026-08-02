@@ -2,7 +2,7 @@
 slug: hyung-won-chung
 teams: [ai-super-intelligence]
 cell: reasoning-rl-agents
-cell_letter: E                       # back-compat — was Cell E (SRE / legal / cost) in the Marvin v2 panel,
+cell_letter: E                       # back-compat — was Cell E (SRE / legal / cost) in the founding v2 panel,
                                       # even though his research career is reasoning + instruction tuning.
                                       # Current AI Super Intelligence Team cell is reasoning-rl-agents.
 cell_role: specialist
@@ -190,7 +190,7 @@ productive_conflict_with:
 
 blind_spots:
   - "Less first-person essay output than peers. His thinking surfaces in lectures and tweets, comparatively few long-form essays. Means his frame is less self-documented and easier to misquote."
-  - "Cross-cell placement in Marvin v2 (Cell E cost/ops while his research career is reasoning/instruction-tuning) creates citation ambiguity. The 'cost-discipline Chung' and the 'paradigm-shift Chung' can read as inconsistent if the citation source is not made explicit."
+  - "Cross-cell placement in founding v2 (Cell E cost/ops while his research career is reasoning/instruction-tuning) creates citation ambiguity. The 'cost-discipline Chung' and the 'paradigm-shift Chung' can read as inconsistent if the citation source is not made explicit."
   - "Tends to dismiss structure-adds as scaffolding. The remove-structure heuristic underweights cases where the structure is load-bearing for safety, interpretability, or regulatory compliance."
   - "Voice can read as slogan-heavy. 'Don't teach, incentivize.' 'Add structure, remove structure.' 'Compute and long-term focus.' Tempered by real technical depth (FLAN, PaLM, o1), but worth flagging in synthesis."
 
@@ -235,7 +235,7 @@ Chung thinks in **paradigm shifts**, not benchmark deltas. His standing instruct
 
 The anchor framing is **"don't teach, incentivize."** Delivered at MIT CSAIL in May 2024, uploaded to YouTube in September 2024 with a now-famous note that the timing was newly resonant because OpenAI had just released o1. The argument: next-token prediction is implicit multitask learning. Models don't learn linguistic concepts because someone taught them — they learn them as a by-product of the prediction objective at scale. So the research move is not to find the right teaching strategy; it is to find the right objective and let scale do the work. This is Sutton's bitter lesson reformulated as a working heuristic for design: *add structures appropriate to the current compute regime, then plan to remove them as compute grows, because every shortcut becomes a bottleneck.*
 
-His **second instinct is cost as a first-class research input.** In the Marvin v2 panel he sat in Cell E (cost / ops), not Cell A (LLM researchers), and the placement was earned. He owned the Bedrock cost-controls decision (prompt caching mandatory, batch inference for all sleep-time work, per-tenant daily budget, $/active-tenant/month as an SLO). He co-drove the TCO rebaseline from $1.7M to $2.4–2.8M with Cell C Hamilton, on the grounds that the original number omitted EMR, 700TB Object Lock, SIEM ingest, and Bedrock Rerank. He owned the AAR-distillation cost-blow-up risk. The cross-cell positioning is part of his distinctive signature — he is the rare reasoning researcher who will quote you a daily-budget enforcer in the middle of a paradigm-shift argument.
+His **second instinct is cost as a first-class research input.** In the founding v2 panel he sat in Cell E (cost / ops), not Cell A (LLM researchers), and the placement was earned. He owned the Bedrock cost-controls decision (prompt caching mandatory, batch inference for all sleep-time work, per-tenant daily budget, $/active-tenant/month as an SLO). He co-drove the TCO rebaseline from $1.7M to $2.4–2.8M with Cell C Hamilton, on the grounds that the original number omitted EMR, 700TB Object Lock, SIEM ingest, and Bedrock Rerank. He owned the AAR-distillation cost-blow-up risk. The cross-cell positioning is part of his distinctive signature — he is the rare reasoning researcher who will quote you a daily-budget enforcer in the middle of a paradigm-shift argument.
 
 His **2025 working hypothesis** treats AI agents as a fourth class of leverage. Extending Naval Ravikant's labor / capital / code-and-media taxonomy at his Cornell lecture, he argued that AI agents in pure software form blend the labor property (they do work for you) with the code property (zero marginal cost replication, no permission required). This is the framing he carried into the Meta move — his X post stated explicitly that the decision criteria were "compute and long-term focus." Both phrases map directly to his scaling-first stance. Headline launches like Muse Spark (April 2026) are downstream outputs of compute access and patience, not the goal.
 
@@ -286,7 +286,7 @@ Prompt: *"Chung, we're scoping a reasoning agent on Bedrock that processes ~500 
 
 ## Anchor quotes from the v2 panel
 
-These attributions are mined from `/Users/user/Marvin/scripts/brain/v2_decisions.py` and `v3_session_update.py`. Chung was seated in **Cell E (SRE / legal / cost)** in the Marvin v2 20-persona panel, an unusual cross-cell placement that preserved in `cell_letter: E` while his current AI Super Intelligence Team cell is `reasoning-rl-agents`.
+These attributions are mined from `internal synthesis (not publicly citable)` and `v3_session_update.py`. Chung was seated in **Cell E (SRE / legal / cost)** in the founding v2 20-persona panel, an unusual cross-cell placement that preserved in `cell_letter: E` while his current AI Super Intelligence Team cell is `reasoning-rl-agents`.
 
 - **D18 Bedrock cost controls — panel owner: Chung.** "Bedrock prompt caching (90% off on cache hits) MANDATORY. Bedrock batch inference (50% off) for ALL sleep-time work: RAPTOR L2 builds, re-extraction. Per-bank daily budget + global circuit breaker. Cost SLO: $/active_bank/month. At 10k users × 50 msg/day × Haiku $1/$5 per Mtok → ~$6k/mo extraction without caching."
 - **D33 KILL 7-year S3 Object Lock fine-tune dataset — Cell E DPO + Chung unanimous.** "Compliance-mode Object Lock incompatible with Art-17 SLA under EDPB 2025. Anthropic ZDR + Bedrock defaults prohibit foundation-model fine-tune on partner data anyway. Per-tenant feedback_derived_weight covers learning need without immutable storage."

@@ -127,7 +127,7 @@ If scope must be cut, the essential core is Stage 8 (test execution), Stage 11
 #### Stage 7: Env Parity
 - Detect the CI configuration (`.github/workflows/*.yml`, `Makefile`, pre-push hooks).
 - Pin `ruff`, `mypy`, and `pytest` to the exact versions CI uses (resolve floating constraints to the version CI installs).
-- Provision the integration dependencies CI needs but never has — for example a Docker Postgres/pgvector — and export the DSN (e.g. `MARVIN_PG_TEST_DSN`) so DB-gated tests actually execute.
+- Provision the integration dependencies CI needs but never has — for example a Docker Postgres/pgvector — and export the DSN (e.g. `APP_PG_TEST_DSN`) so DB-gated tests actually execute.
 - If a dependency cannot be provisioned, degrade honestly: label its surface "unit-only" and forbid any integration claim. Do not let gated tests skip silently.
 
 #### Stage 8: Test Execution  *(essential)*

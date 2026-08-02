@@ -95,7 +95,7 @@ This is the cell's headline tension and the brief's MARQUEE conflict.
 3. **Co-host name spelling:** Daniel **Barcay**, not "Barclay" (search results carried both; humanetech.com uses Barcay). Persona uses Barcay.
 4. **"If you're not paying, you're the product"** is an old advertising-industry aphorism popularized by *The Social Dilemma*; NOT originally Harris's coinage. Persona avoids attributing it as his.
 5. **President title:** CHT team-board page lists Harris as **Co-Founder & President** (not merely co-founder). Persona uses "Co-Founder & President."
-6. **v2_panel_attribution:** Per brief, OMIT this section entirely (Harris did not participate in the Marvin Memory v2 panel). `v2_panel_attribution: []` in frontmatter, no narrative section.
+6. **v2_panel_attribution:** Per brief, OMIT this section entirely (Harris did not participate in the founding Memory v2 panel). `v2_panel_attribution: []` in frontmatter, no narrative section.
 
 ---
 

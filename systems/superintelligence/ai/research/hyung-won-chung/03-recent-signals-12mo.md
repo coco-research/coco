@@ -22,7 +22,7 @@ The lookback window is **2025-05-27 → 2026-05-27**. Anchor signals dated and c
 - **Date:** ~May 2025 (talk); X post 2025-07-16 with status ID 1945355238187393257.
 - **Source:** [x.com/hwchung27/status/1945355238187393257](https://x.com/hwchung27/status/1945355238187393257), [globalvlabs.com](https://globalvlabs.com/ai-as-an-ultimate-form-of-leverage-hyung-won-chung/), [36kr](https://eu.36kr.com/en/p/3383893455698952).
 - **Core quote:** "How do I increase my output without increasing input as much?"
-- **Takeaway:** Extends his next-token-prediction framing into an economic / agency framing — AI agents as the next leverage class. Useful for cost / FinOps framings (consistent with his Marvin v2 Cell E "cost owner" role).
+- **Takeaway:** Extends his next-token-prediction framing into an economic / agency framing — AI agents as the next leverage class. Useful for cost / FinOps framings (consistent with his founding v2 Cell E "cost owner" role).
 
 ## (Continued OpenAI contribution before move) — Deep Research launch
 

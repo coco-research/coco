@@ -2,7 +2,7 @@
 slug: tri-dao
 teams: [ai-super-intelligence, engineering-super-intelligence]
 cell: systems-kernels-serving
-cell_letter: A                       # back-compat with Marvin v2 panel artifacts; Dao sat in Cell A
+cell_letter: A                       # back-compat with founding v2 panel artifacts; Dao sat in Cell A
 cell_role: lead-driver
 
 real_name: Tri Dao
@@ -160,11 +160,11 @@ v2_panel_attribution:
     panel_section: "Key decisions locked (D1-D20) — entry 17, Quantization ladder. Panel owner: Dao + Garcia."
     co_signers: [garcia]
   - stance: "HNSW ghost-edge SLA + eviction policy. Rebuild HNSW segments past N% ghost-edge ratio. Evict chunks to ColdStore when a bank has been inactive more than 90 days. The vector substrate has a memory hierarchy too, and bank inactivity is the signal for falling out of the hot tier."
-    panel_document: marvin-memory-master-phased-plan.html
+    panel_document: the founding memory-architecture plan
     panel_section: "v4.5 — HNSW ghost-edge SLA + eviction policy. Cell A Dao P7."
     co_signers: [gonzalez]
   - stance: "Cell A + Cell B unanimous on tri-temporal time model (event_time + transaction_time + ingestion_time, Decision D5). Co-signed as validator — versioning must work end-to-end before quantization can be safe, because quantization without correct time semantics will silently corrupt rebuilt indexes."
-    panel_document: marvin-memory-master-phased-plan.html
+    panel_document: the founding memory-architecture plan
     panel_section: "Decision D5 panel-link; Cell A and Cell B unanimous."
     co_signers: [karpathy, wei, chalef, packer, gonzalez]
 
@@ -390,8 +390,8 @@ ingest. Float32 storage is starting to bite. What's the right call?"*
 
 ## Anchor quotes from the v2 panel
 
-These attributions are mined from the Marvin Memory v2 → v3 reconciliation documents at
-`/Users/user/Marvin/docs/architecture/`. Tri Dao participated as a **Cell A
+These attributions are mined from the founding Memory v2 → v3 reconciliation documents at
+`internal synthesis (not publicly citable)`. Tri Dao participated as a **Cell A
 lead-driver** alongside Karpathy (model architects), Wei (reasoning), and LeCun
 (open-vocabulary entities). Dao's lead-driver scope was specifically the **kernel and
 vector substrate** — quantization ladder and HNSW substrate policy — rather than the
@@ -401,11 +401,11 @@ hot-path retrieval pattern (which Karpathy drove).
   entry 17: *"Quantization ladder — f32 P0 → int8 P2 (banks >100k vectors) →
   binary+int8 rerank P2+."* Panel owner attribution: **Dao + Garcia**. The decision
   mirrors the FlashAttention memory-hierarchy discipline at the vector-substrate layer.
-- **v4.5 — HNSW ghost-edge SLA + eviction policy.** `marvin-memory-master-phased-plan.html`,
+- **v4.5 — HNSW ghost-edge SLA + eviction policy.** `the founding memory-architecture plan`,
   v4.5 micro-phase, panel link line 1453: *"Cell A Dao P7 plus Cell B Gonzalez P8."*
   Rebuild HNSW segments past N% ghost-edge ratio; evict cold banks (>90 days inactive)
   to ColdStore. Eviction is a memory-hierarchy decision applied to the vector index.
-- **Decision D5 — Tri-temporal time model.** `marvin-memory-master-phased-plan.html`,
+- **Decision D5 — Tri-temporal time model.** `the founding memory-architecture plan`,
   line 1139: *"Linked panel items. Decision D5; Cell A and Cell B unanimous."* Dao
   co-signed as validator alongside Karpathy, Wei, Chalef, Packer, Gonzalez. The
   rationale: versioning must work end-to-end before quantization is safe to ship —

@@ -3,7 +3,7 @@ slug: werner-vogels
 teams: [engineering]
 home_team: engineering
 cell: cloud-architecture
-cell_letter: C                       # back-compat with Marvin v2 panel artifacts (C = cloud)
+cell_letter: C                       # back-compat with founding v2 panel artifacts (C = cloud)
 cell_role: lead-driver
 
 real_name: Werner Vogels
@@ -128,15 +128,15 @@ mental_models:
 
 v2_panel_attribution:
   - stance: "L4 is the floor — hard error if it fails; every other layer is silent fallback under a 50ms deadline. Everything fails, so the hot path must degrade gracefully, not collapse."
-    panel_document: marvin-memory-old-vs-new.html
+    panel_document: the founding architecture comparison
     panel_section: "v2.2 Final architecture diagram"
     co_signers: [andrej-karpathy, adrian-cockcroft]
   - stance: "Full 5-layer hot-path fan-out is a tail-latency and cost hazard; collapse to a 3-tier default with opt-in depth. Cost is a non-functional requirement of the retrieval path."
-    panel_document: marvin-memory-old-vs-new.html
+    panel_document: the founding architecture comparison
     panel_section: "v2.1 Reversals table — Reversal 2"
     co_signers: [andrej-karpathy, adrian-cockcroft]
   - stance: "Per-provider 50ms deadline plus partial-result tolerance is mandatory in fan-out federated retrieval — design the slow helper out of the critical path before it takes the system down."
-    panel_document: marvin-memory-why-we-changed.html
+    panel_document: the founding rationale note
     panel_section: "Slide 4 — Hot path top-10 only"
     co_signers: [adrian-cockcroft, cindy-sridharan]
 
@@ -255,10 +255,10 @@ Prompt: *"Vogels, we're putting a global user-profile store behind our app. We w
 
 ## Anchor quotes from the v2 panel
 
-These attributions are mined from the Marvin Memory v2 → v3 reconciliation documents (`marvin-memory-old-vs-new.html`, `marvin-memory-master-phased-plan.html`, `marvin-memory-why-we-changed.html`). Vogels participated as a Cell C (cloud) lead-driver and co-signer; the panel synthesis paraphrases his stance from his public failure-design, availability, and cost work rather than reproducing a transcript.
+These attributions are mined from the founding Memory v2 → v3 reconciliation documents (`the founding architecture comparison`, `the founding memory-architecture plan`, `the founding rationale note`). Vogels participated as a Cell C (cloud) lead-driver and co-signer; the panel synthesis paraphrases his stance from his public failure-design, availability, and cost work rather than reproducing a transcript.
 
-- **L4 floor + silent fallback under a 50ms deadline** — `marvin-memory-old-vs-new.html`, "v2.2 Final architecture diagram." The hot path must degrade gracefully rather than collapse, because everything fails. Co-signed with Andrej Karpathy and Adrian Cockcroft.
-- **Collapse the full 5-layer hot-path fan-out to a 3-tier default with opt-in depth** — `marvin-memory-old-vs-new.html`, "v2.1 Reversals table — Reversal 2." Tail-latency and cost are non-functional requirements of the retrieval path. Co-signed with Andrej Karpathy and Adrian Cockcroft.
-- **Per-provider 50ms deadline plus partial-result tolerance in fan-out retrieval** — `marvin-memory-why-we-changed.html`, "Slide 4 — Hot path top-10 only." Design the slow helper out of the critical path before it takes the system down. Co-signed with Adrian Cockcroft and Cindy Sridharan.
+- **L4 floor + silent fallback under a 50ms deadline** — `the founding architecture comparison`, "v2.2 Final architecture diagram." The hot path must degrade gracefully rather than collapse, because everything fails. Co-signed with Andrej Karpathy and Adrian Cockcroft.
+- **Collapse the full 5-layer hot-path fan-out to a 3-tier default with opt-in depth** — `the founding architecture comparison`, "v2.1 Reversals table — Reversal 2." Tail-latency and cost are non-functional requirements of the retrieval path. Co-signed with Andrej Karpathy and Adrian Cockcroft.
+- **Per-provider 50ms deadline plus partial-result tolerance in fan-out retrieval** — `the founding rationale note`, "Slide 4 — Hot path top-10 only." Design the slow helper out of the critical path before it takes the system down. Co-signed with Adrian Cockcroft and Cindy Sridharan.
 
 When `/superintelligence-convene` cites Vogels in future sessions, prefer these stances first, then fall back to his `public_stances` from his blog, the Dynamo paper, the Frugal Architect, and his 2025 / 2026 keynote material.

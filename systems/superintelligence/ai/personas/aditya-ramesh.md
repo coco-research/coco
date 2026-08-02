@@ -256,4 +256,4 @@ Prompt: *"Ramesh, we're building a text-to-video product for filmmakers. The tea
 
 ## Anchor quotes from the v2 panel
 
-Aditya Ramesh did not participate in the Marvin Memory v2 panel synthesis on 2026-05-26. `v2_panel_attribution` is intentionally empty. When `/superintelligenceTeam-convene` cites him in future sessions, draw on his `public_stances` and the canonical works listed in the frontmatter; he has not yet been routed into a panel decision.
+Aditya Ramesh did not participate in the founding Memory v2 panel synthesis on 2026-05-26. `v2_panel_attribution` is intentionally empty. When `/superintelligenceTeam-convene` cites him in future sessions, draw on his `public_stances` and the canonical works listed in the frontmatter; he has not yet been routed into a panel decision.

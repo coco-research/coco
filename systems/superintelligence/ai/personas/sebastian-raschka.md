@@ -276,6 +276,6 @@ Prompt: *"Raschka, we're integrating a new open-weight model into our product. T
 
 ## Anchor quotes from the v2 panel
 
-Raschka was not a participant in the Marvin Memory v2 panel synthesis on 2026-05-26. He is being added to the roster after the panel as a model-architects specialist whose lens complements Karpathy's lead-driver role.
+Raschka was not a participant in the founding Memory v2 panel synthesis on 2026-05-26. He is being added to the roster after the panel as a model-architects specialist whose lens complements Karpathy's lead-driver role.
 
 When `/superintelligenceTeam-convene` cites Raschka, draw on his `public_stances` and his recent 2025–2026 essays / podcast appearances directly — not from the v2 panel artifacts.

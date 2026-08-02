@@ -147,4 +147,4 @@ All slugs verified present in ROSTER.md.
 
 ## v2 panel attribution
 
-Zeratsky did **not** participate in the Marvin Memory v2 panel synthesis (that was the AI/Engineering super-intelligence teams). Per quality-bar instruction, `v2_panel_attribution: []` and the "Anchor quotes from the v2 panel" narrative section is **omitted**.
+Zeratsky did **not** participate in the founding Memory v2 panel synthesis (that was the AI/Engineering super-intelligence teams). Per quality-bar instruction, `v2_panel_attribution: []` and the "Anchor quotes from the v2 panel" narrative section is **omitted**.

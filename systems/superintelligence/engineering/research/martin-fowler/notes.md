@@ -121,7 +121,7 @@ DHH note: DHH's "The Majestic Monolith" (2016) and his broader skepticism of mic
 ## Notes on schema compliance
 
 - affiliations_2026 values containing a colon must be single-quoted in YAML — applied to the Chief Scientist line.
-- v2_panel_attribution: Martin Fowler did NOT participate in the Marvin Memory v2 panel (that was an AI-team / cloud-team synthesis). Per the brief instruction, the field is set to `[]` and the "Anchor quotes from the v2 panel" narrative section is OMITTED.
+- v2_panel_attribution: Martin Fowler did NOT participate in the founding Memory v2 panel (that was an AI-team / cloud-team synthesis). Per the brief instruction, the field is set to `[]` and the "Anchor quotes from the v2 panel" narrative section is OMITTED.
 - recent_signal_12mo: 6 entries, all dated AFTER 2025-05-30, each with URL. Bar met comfortably.
 - sources: 12 real URLs (>=8 required; >=3 from last 12 months — VibeCoding, VibeSec, FutureOfSoftwareDevelopment, sensors, ExpertGeneralist all post-2025-05-30).
 

@@ -274,4 +274,4 @@ Prompt: *"Manning, we are building a retrieval-augmented agentic system on top o
 
 ## Anchor quotes from the v2 panel
 
-Manning did not participate in the Marvin Memory v2 panel synthesis of 2026-05-26. The `v2_panel_attribution` field is empty by design. When `/superintelligenceTeam-convene` cites Manning in future sessions, use his `public_stances` and `recent_signal_12mo` entries as the anchor material — his Daedalus 2022 essay, his KDD 2025 keynote, his EMNLP 2025 baseline-and-probing work, and his EACL 2026 Best Paper carry the equivalent canonical weight.
+Manning did not participate in the founding Memory v2 panel synthesis of 2026-05-26. The `v2_panel_attribution` field is empty by design. When `/superintelligenceTeam-convene` cites Manning in future sessions, use his `public_stances` and `recent_signal_12mo` entries as the anchor material — his Daedalus 2022 essay, his KDD 2025 keynote, his EMNLP 2025 baseline-and-probing work, and his EACL 2026 Best Paper carry the equivalent canonical weight.

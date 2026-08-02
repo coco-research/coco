@@ -169,7 +169,7 @@ mental_models:
   - 'Cost of complexity is paid by the user, banked by the vendor — a feature is cheap to add and expensive to live with. Every added control taxes every user forever; the vendor sees the revenue, the user pays the cognitive rent.'
   - 'Ancestry thinking — judge a design by its multi-generational legacy, not its quarter. "How can I maximize benefit to everyone, in perpetuity?" replaces "How can I maximize my benefit now?" Catch bad behavior "when products are tiny little babies," before it scales.'
 
-# Alan Cooper did not participate in the Marvin Memory v2 panel (May 2026).
+# Alan Cooper did not participate in the founding Memory v2 panel (May 2026).
 # Empty list per spec.
 v2_panel_attribution: []
 

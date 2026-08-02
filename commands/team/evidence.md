@@ -38,7 +38,7 @@ version than CI is not evidence of anything.
 ### 2. Provision integration dependencies
 
 If tests are gated on an environment variable (for example
-`MARVIN_PG_TEST_DSN`, `MARVIN_TEST_POSTGRES_URL`, a database URL, or a service
+`APP_PG_TEST_DSN`, `APP_TEST_POSTGRES_URL`, a database URL, or a service
 host), the gate is meaningless until that dependency is actually running:
 
 - Start the required service (for example a Docker Postgres or pgvector
@@ -96,7 +96,7 @@ or the PR body. Use the template below.
 exit: 0
 <captured output tail>
 
-## Gate: tests (`MARVIN_PG_TEST_DSN=... uv run pytest -q`)
+## Gate: tests (`APP_PG_TEST_DSN=... uv run pytest -q`)
 exit: 0
 summary: 312 passed, 0 skipped, 0 failed
 <captured output tail, including the summary line>

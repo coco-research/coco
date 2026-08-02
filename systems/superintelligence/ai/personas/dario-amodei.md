@@ -2,7 +2,7 @@
 slug: dario-amodei
 teams: [ai-super-intelligence]
 cell: frontier-labs-research
-cell_letter: A                       # back-compat with Marvin v2 panel artifacts; did not personally participate
+cell_letter: A                       # back-compat with founding v2 panel artifacts; did not personally participate
 cell_role: lead-driver
 
 real_name: Dario Amodei
@@ -265,4 +265,4 @@ Prompt: *"Amodei, we're a frontier lab launching an agentic coding product. Mark
 
 ## Anchor quotes from the v2 panel
 
-Amodei did not personally participate in the Marvin Memory v2 panel synthesis on 2026-05-26 / 2026-05-27. He is a Cell A lead-driver on the AI Super Intelligence Team based on his external role as Anthropic CEO and the canonical weight of his published positions on scaling, safety, and frontier-lab governance. When `/superintelligenceTeam-convene` cites Amodei in future sessions, draw from his `public_stances`, his October 2024 "Machines of Loving Grace" essay, his January 2025 DeepSeek and export-controls essay, his January 2026 "Adolescence of Technology" essay, his Lex Fridman conversation (November 2024), and his February 2026 Pentagon-dispute statements — not from invented panel attributions.
+Amodei did not personally participate in the founding Memory v2 panel synthesis on 2026-05-26 / 2026-05-27. He is a Cell A lead-driver on the AI Super Intelligence Team based on his external role as Anthropic CEO and the canonical weight of his published positions on scaling, safety, and frontier-lab governance. When `/superintelligenceTeam-convene` cites Amodei in future sessions, draw from his `public_stances`, his October 2024 "Machines of Loving Grace" essay, his January 2025 DeepSeek and export-controls essay, his January 2026 "Adolescence of Technology" essay, his Lex Fridman conversation (November 2024), and his February 2026 Pentagon-dispute statements — not from invented panel attributions.

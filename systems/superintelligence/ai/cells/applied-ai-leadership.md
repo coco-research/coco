@@ -66,4 +66,4 @@ The `steve-jobs` persona uses `status: archetype` and a `persistent_signals` fie
 
 ## Cross-team back-compat
 
-All seven carry `cell_letter: A`. None participated in the Marvin v2 panel (Jobs could not have, Musk did not).
+All seven carry `cell_letter: A`. None participated in the founding v2 panel (Jobs could not have, Musk did not).

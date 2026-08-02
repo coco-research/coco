@@ -270,4 +270,4 @@ Prompt: *"Dhariwal, we are designing a next-generation generative system that pr
 
 ## Anchor quotes from the v2 panel
 
-Dhariwal did not participate in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27). The panel concerned a corporate-memory retrieval architecture, which falls outside his multimodal-embodied specialty. `v2_panel_attribution` is intentionally empty. When `/superintelligenceTeam-convene` cites him, prefer his `public_stances` and the canonical_works framing sections — not invented panel material.
+Dhariwal did not participate in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27). The panel concerned a corporate-memory retrieval architecture, which falls outside his multimodal-embodied specialty. `v2_panel_attribution` is intentionally empty. When `/superintelligenceTeam-convene` cites him, prefer his `public_stances` and the canonical_works framing sections — not invented panel material.

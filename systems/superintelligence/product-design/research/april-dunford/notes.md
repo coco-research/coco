@@ -158,4 +158,4 @@ From `superintelligence/product-design/ROSTER.md`:
 
 - YouTube "Do-Over" exact publish date (2026-04-21) is from search metadata, not a verified page fetch (transcript unavailable). Title and thesis confirmed.
 - positioning.show episode index returned HTTP 502 at fetch time; show is confirmed active via Apple/Spotify listings.
-- `v2_panel_attribution` intentionally omitted — Dunford did not participate in the Marvin Memory v2 panel (which was an AI/infra panel). Per task instruction, section omitted entirely.
+- `v2_panel_attribution` intentionally omitted — Dunford did not participate in the founding Memory v2 panel (which was an AI/infra panel). Per task instruction, section omitted entirely.

@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 179 skills** — 68 core, 111 across 6 bundles.
+**Total: 183 skills** — 68 core, 115 across 7 bundles.
 
 ## Design (14)
 
@@ -228,6 +228,15 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [slideshow](../systems/hyperframes/skills/slideshow/SKILL.md) | Author a HyperFrames slideshow — a presentation, pitch deck, or interactive deck with discrete slides, fragment reveals, branching, hotspot navigation, and buil |
 | [talking-head-recut](../systems/hyperframes/skills/talking-head-recut/SKILL.md) | Package an existing talking-head / interview / podcast video with timed, designed GRAPHIC OVERLAY cards — kinetic titles, lower-thirds, data callouts, quotes, s |
 | [website-to-video](../systems/hyperframes/skills/website-to-video/SKILL.md) | Capture a general website/URL and turn it into a video OF the site — tour, showcase, or social clip built from captured screenshots and the site's own brand ass |
+
+## Bundle: m0 (4 skills)
+
+| Skill | Description |
+|-------|-------------|
+| [m0](../systems/m0/skills/m0/SKILL.md) | Cross-tool agent memory control plane. Start, stop, and check the M0 operational-thread server; find the store; drain deferred writes; wire the MCP tools and se |
+| [m0-handoff](../systems/m0/skills/m0-handoff/SKILL.md) | Session handoff and resume for M0. Write a compact_checkpoint before a session ends or context is compacted, and resume from the latest one at the start of a se |
+| [m0-recall](../systems/m0/skills/m0-recall/SKILL.md) | Read the recent M0 operational thread for a project, newest first, to pick up work started in this or another tool. Answers 'where were we' and 'what is next' b |
+| [m0-remember](../systems/m0/skills/m0-remember/SKILL.md) | Write one entry to the M0 operational thread so the next session, in this tool or any other, can continue the work. Records a completed step, a decision, a veri |
 
 ## Bundle: superintelligence (9 skills)
 

@@ -7,6 +7,7 @@
 
 | Action | Purpose |
 |--------|---------|
+| `/team arch [build\|drift\|check]` | Build, reconcile, or check the architecture index |
 | `/team research <topic>` | Deep multi-angle investigation |
 | `/team think <problem>` | Analysis, brainstorm, options exploration |
 | `/team develop <feature>` | Build working code/config |
@@ -29,19 +30,38 @@
 ## Step 1: Parse Command
 
 Extract from `$ARGUMENTS`:
-- **First token** → action (research, think, develop, build, review, verify, document, present, communicate, test, fix, plan, reanalyse, scrape, ship, stop)
+- **First token** → action (research, think, develop, build, review, verify, document, present, communicate, test, fix, plan, reanalyse, scrape, ship, arch, stop)
 - `build` is a synonym for `develop` — route to team:develop.md
+- `arch` routes to team:arch.md. Its own first remaining token may be `build`, `drift`,
+  or `check`; `arch build` is the architecture-index build and is **not** `develop`.
+  Resolve the `arch` prefix before applying the `build` → `develop` synonym rule.
 - **Remaining tokens** → scope
-- **Flags:** `--domain <value>` overrides auto-detection, `--roles <comma-list>` forces specific role IDs
+- **Flags:** `--domain <value>` overrides auto-detection, `--roles <comma-list>` forces specific role IDs, `--no-arch` disables every architecture-index step for this run
 
 If first token doesn't match any action → **ad-hoc mode** (see below).
 
 ### Input Validation
 
 **Scope required for:** develop, build, fix, test, verify, scrape, document, present, communicate
-**Scope optional for:** review (whole project), think (open brainstorm), plan (whole project), research (project domain), reanalyse (all phases)
+**Scope optional for:** review (whole project), think (open brainstorm), plan (whole project), research (project domain), reanalyse (all phases), arch (whole repository)
 
 If scope is required but empty → ask user: "What should I {action}? Example: `/team {action} {example}`" and STOP.
+
+### --no-arch Handling
+
+`--no-arch` is a real, checkable flag, not a matter of judgement. When it is present:
+
+- Skip every architecture-index step in every stage, including the Stage 1 baseline in
+  `team:ship.md`.
+- The architecture-conformance gate reports `DISABLED (--no-arch)`. This is distinct from
+  a pass, distinct from `NOT APPLICABLE`, and must be reported in those words.
+- Do not write, read, or advance anything under `.arch/`.
+
+Without the flag, the deciding condition is only whether `.arch/index.json` exists. An
+absent index means the repository has not opted in, and the gate reports
+`NOT APPLICABLE`. Never infer from context that an index "is not wanted" — either the
+flag is present or the file is absent. There is no third signal, because a condition an
+agent has to guess at is not a condition.
 
 ### --roles Validation
 
@@ -60,6 +80,14 @@ Not sure which action to use? Follow this:
 - Built something and want to verify it matches the spec? → `verify`
 - Want a general quality/architecture audit? → `review`
 - Re-checking previously reviewed work for regressions? → `reanalyse`
+
+**Need to know which files implement which component?** → `arch`
+- No index yet? → `arch build`
+- Index exists and the code has moved on? → `arch drift`
+- Just need the gate re-run and captured as evidence? → `arch check`
+- Note what `arch` is *not*: it does not design anything. The index is reverse-only and
+  describes code that exists. For forward design use `think`, the `SI-*-Design`
+  councils, or `/util:create-architecture-documentation`.
 
 **Researching?**
 - Have specific URLs to fetch? → `scrape`
@@ -197,6 +225,8 @@ Read `~/.claude/commands/team:roles.md`.
 - If action is `document` and domain includes `docs` → include confluence-specialist
 - If domain includes `infrastructure` → include senior-cloud-architect and sre-devops
 - If action is any type → always include at least one `all`-tagged reviewer in L3 (grammar-editor or doc-quality)
+- If action is `arch` → always include solution-architect in L2 and architecture-reviewer in L3. `build` is never fast-pathed.
+- If `.arch/index.json` exists and action is `develop`, `review`, or `verify` → include architecture-reviewer in L3. It is the only reviewer that evaluates decomposition; the rest check structure, tone, template conformance, and factual accuracy.
 
 ---
 
@@ -253,6 +283,15 @@ Spawn all L2 agents:
 
   CONTEXT FROM RESEARCH TEAM:
   {contents of CONTEXT-BRIEF.md}
+
+  ARCHITECTURE CONTEXT (advisory — only when .arch/index.json exists and is CURRENT):
+  {component table from .arch/INDEX.md — max 25 lines}
+
+  This tells you where code for each component lives. It is at C4-Container
+  altitude, so a single component may own thousands of files. It is NOT your file
+  ownership boundary — YOUR FILES below is authoritative for that. If the index is
+  STALE (its pinned commit is behind HEAD), omit this block entirely rather than
+  quoting it. See team:architecture.md.
 
   AVAILABLE TOOLS (from team:toolkit.md):
   {relevant toolkit entries — max 30 lines}
@@ -452,6 +491,7 @@ For code-producing actions (develop, fix, test, ship): any failing test or `UNVE
 Total prompt budget per agent: ~4000 tokens (role prompt + context + instructions)
 - Role system prompt: ~500-800 tokens (from team:roles.md)
 - Context brief: ~800 tokens (compressed L1 output)
+- Architecture context: ~250 tokens (component table only, and only when CURRENT)
 - Toolkit excerpt: ~300 tokens (relevant entries only)
 - Feedback excerpt: ~200 tokens (relevant entries only)
 - Mission + domain: ~200 tokens

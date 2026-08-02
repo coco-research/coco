@@ -9,6 +9,7 @@ description: |
   product video, explainer video, ad creative, video ad, facebook ad video,
   youtube ad, instagram ad, tiktok ad, promotional video, launch video
 allowed-tools: Bash(infsh *)
+domain: design
 ---
 
 # AI Marketing Videos

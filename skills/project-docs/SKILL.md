@@ -1,6 +1,7 @@
 ---
 name: pmstudio-init
 description: Use when starting a new project, onboarding to an existing product, or setting up a documentation ecosystem for any initiative. Scaffolds the standard document set, folder structure, project memory, and doc-sync config. Works for software products, consulting engagements, platform implementations, and governance programs.
+domain: pm
 ---
 
 # Project Docs — Standard Document Ecosystem

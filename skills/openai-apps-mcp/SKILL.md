@@ -6,6 +6,7 @@ description: |
   Use when: developing ChatGPT extensions, implementing MCP servers, or troubleshooting CORS, widget 404s, MIME types, ASSETS binding errors, Next.js integration issues, or edge platform limitations.
 user-invocable: true
 allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
+domain: engineering
 ---
 
 # Building OpenAI Apps with Stateless MCP Servers

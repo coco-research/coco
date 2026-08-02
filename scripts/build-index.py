@@ -45,6 +45,22 @@ SKILL_SOURCES = [
 ]
 
 
+# Display names for the six declared domains. `str.title()` renders "pm" as "Pm",
+# which is wrong for an initialism and is user-facing in every generated index.
+DOMAIN_LABELS = {
+    'foundational': 'Foundational',
+    'pm': 'PM',
+    'engineering': 'Engineering',
+    'design': 'Design',
+    'ops': 'Ops',
+    'meta': 'Meta',
+}
+
+
+def domain_label(slug):
+    return DOMAIN_LABELS.get(slug, slug.replace('-', ' ').title())
+
+
 def parse_frontmatter(path, strict=True):
     """Return the frontmatter mapping, or None when there is no frontmatter block.
 
@@ -170,7 +186,7 @@ def write_skills_index(skills):
         return built
 
     for domain in sorted(by_domain):
-        lines += [f'## {domain.title()} ({len(by_domain[domain])})', '']
+        lines += [f'## {domain_label(domain)} ({len(by_domain[domain])})', '']
         lines += _skill_table(rows(by_domain[domain])) + ['']
 
     for bundle in sorted(by_bundle):
@@ -307,7 +323,7 @@ def write_by_domain_views(skills):
             continue
         slug = domain.replace('/', '-')
         out = out_dir / f'{slug}.md'
-        lines = [f'# {domain.title()} skills', '',
+        lines = [f'# {domain_label(domain)} skills', '',
                  f'Auto-generated view. Filtered to `domain: {domain}` skills.', '',
                  f'**{len(items)} skills.**', '',
                  '| Skill | Description |', '|-------|-------------|']

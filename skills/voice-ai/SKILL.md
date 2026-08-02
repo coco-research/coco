@@ -2,6 +2,7 @@
 name: voice-ai
 description: "Voice AI architecture and implementation guide. Covers two architectures: speech-to-speech (OpenAI Realtime API, lowest latency) and pipeline (STT->LLM->TTS, more control). Includes provider-specific patterns for OpenAI Realtime, Vapi, Deepgram, ElevenLabs, and LiveKit. Use when building voice agents, voice-enabled apps, or real-time conversational AI."
 source: vibeship-spawner-skills (Apache 2.0)
+domain: engineering
 ---
 
 # Voice AI — Architecture & Implementation

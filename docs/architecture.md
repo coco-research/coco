@@ -88,9 +88,13 @@ deprecated: <reason>           # if set, artifact is hidden from default views
 | `meta` | Tooling about tooling (skill creation, artifact lint) |
 
 Domain is used to:
-- Generate `docs/by-domain/<domain>.md` indexes
-- Filter listings (`coco list skills --domain=pm`)
-- Apply role-based install flags (`install.sh --domains pm,foundational`)
+- Generate `docs/by-domain/<domain>.md` indexes, and group `skills/INDEX.md` by domain.
+  Both are produced by `scripts/build-index.py`.
+
+Domain-based *filtering* is not implemented. There is no `coco list` subcommand and
+`install.sh` accepts no `--domains` flag; earlier revisions of this document described
+both as though they existed. Every skill now declares a domain, so either could be
+built on top of that, but neither ships today.
 
 ### Adapters
 

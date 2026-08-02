@@ -1,6 +1,7 @@
 ---
 name: pmstudio-changelog
 description: Create or update a structured change log for a product or platform. Use when someone asks to "create a change log", "log this change", "what changed", "update the change log", "release notes", or "changelog". Reads project memory (CLAUDE.local.md Recent Changes) and meeting notes to build chronological change records. Supports init (backfill from memory), update (append new entries), and release (summarize for a version).
+domain: pm
 ---
 
 # Change Log — Running Product Change Record

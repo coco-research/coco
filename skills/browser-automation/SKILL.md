@@ -2,6 +2,7 @@
 name: browser-automation
 description: Browser automation for AI agents. Two providers — agent-browser (local CLI with Playwright) and agentic-browser (cloud via inference.sh). Both use the same @e ref-based workflow for navigating pages, filling forms, clicking buttons, taking screenshots, extracting data, and automating browser tasks.
 allowed-tools: Bash(agent-browser:*), Bash(infsh *)
+domain: engineering
 ---
 
 # Browser Automation

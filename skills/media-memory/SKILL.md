@@ -11,6 +11,7 @@ trigger: |
   ALSO proactively query when:
   - User discusses a topic and a past media asset might be relevant
   - User references "that screenshot", "the diagram from last week", etc.
+domain: engineering
 ---
 
 # /media-memory — Multimodal Memory System

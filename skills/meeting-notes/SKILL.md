@@ -1,6 +1,7 @@
 ---
 name: pmstudio-meeting-notes
 description: Generate structured meeting notes from transcripts or pasted text. Use when someone says "meeting notes", "process this transcript", "summarize this call", "notes from today's meeting", or pastes/references a meeting transcript. Auto-enriches attendees from stakeholder directory, routes output to correct project subfolder, flags downstream artifact impacts (PRD, deck, architecture), and proposes CLAUDE.local.md updates. Produces date-first Markdown files.
+domain: pm
 ---
 
 # Meeting Notes — Transcript-to-Artifact Generator

@@ -1,6 +1,7 @@
 ---
 name: cli-anything
 description: Wrap any command-line tool into a JSON-emitting agent skill. Use when you want to make a CLI reliably callable and parseable by an AI agent — introspect its --help, define a structured-output (--json) contract and a stable error contract, then generate a SKILL.md wrapper with verified examples. Triggers on "wrap this CLI", "make X agent-usable", "generate a skill for this command", "turn a tool into an agent skill".
+domain: meta
 ---
 
 <!-- Methodology adapted from HKUDS/CLI-Anything (https://github.com/HKUDS/CLI-Anything) — Apache-2.0. -->

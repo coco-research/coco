@@ -1,6 +1,7 @@
 ---
 name: redesign-existing-projects
 description: Upgrades existing websites and apps to premium quality. Audits current design, identifies generic AI patterns, and applies high-end design standards without breaking functionality. Works with any CSS framework or vanilla CSS.
+domain: design
 ---
 
 <!-- Vendored from Leonxlnx/taste-skill (https://github.com/Leonxlnx/taste-skill) — MIT License, (c) 2026 Leonxlnx. -->

@@ -5,6 +5,7 @@ description: |
 
   Use when: implementing GPT-5 chat, streaming, function calling, embeddings for RAG, or troubleshooting rate limits (429), API errors, TypeScript issues, model name errors.
 user-invocable: true
+domain: engineering
 ---
 
 # OpenAI API - Complete Guide

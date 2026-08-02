@@ -1,6 +1,7 @@
 ---
 name: agent-lightning
 description: Train and optimize AI agents using Microsoft's Agent Lightning framework with reinforcement learning. Use when setting up agent training, instrumenting agents with tracing, configuring LightningStore, implementing reward functions, or optimizing prompts with RL/APO algorithms.
+domain: engineering
 ---
 
 # Agent Lightning

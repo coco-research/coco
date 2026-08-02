@@ -5,6 +5,7 @@ user-invocable: true
 skill_type: discipline
 version: 1.2.0
 apple_platforms: iOS 26+, iPadOS 26+, macOS Tahoe+, visionOS 3+
+domain: design
 ---
 
 # Liquid Glass — Apple's Design System

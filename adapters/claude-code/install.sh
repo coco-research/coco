@@ -29,13 +29,32 @@ run() {
   if [[ $DRY_RUN -eq 1 ]]; then echo "DRY: $*"; else "$@"; fi
 }
 
+STALE_COUNT=0
+
 link_dir() {
   local src=$1 dst=$2
-  [[ -e "$dst" && ! -L "$dst" ]] && { echo "Skip (exists, not symlink): $dst"; return; }
+  # A real file or directory at the target is NOT overwritten, because it may be the
+  # user's own work. But it is reported loudly and counted, because a silent skip means
+  # the target keeps serving a stale copy through every future re-install and nobody
+  # finds out. Copies predating this guard have gone months out of date in practice.
+  if [[ -e "$dst" && ! -L "$dst" ]]; then
+    echo "STALE: $dst is a real file, not a symlink — NOT updated. Remove it to let the installer manage it."
+    STALE_COUNT=$((STALE_COUNT + 1))
+    return
+  fi
+  # A dangling symlink is removed and relinked. These accumulate whenever the repo moves.
   [[ -L "$dst" ]] && run rm "$dst"
   run mkdir -p "$(dirname "$dst")"
   run ln -sf "$src" "$dst"
   echo "Linked: $dst -> $src"
+}
+
+report_stale() {
+  [[ $STALE_COUNT -eq 0 ]] && return 0
+  echo
+  echo "WARNING: $STALE_COUNT target(s) were real files rather than symlinks and were left"
+  echo "untouched. They will keep serving stale content until you remove them. Re-run this"
+  echo "installer afterwards to link them."
 }
 
 link_skills() {
@@ -171,5 +190,7 @@ link_rules
 for sys in "${SYSTEMS[@]:-}"; do
   [[ -n "$sys" ]] && link_system "$sys"
 done
+
+report_stale
 
 echo "Done."

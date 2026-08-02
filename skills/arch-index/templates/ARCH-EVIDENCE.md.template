@@ -1,0 +1,49 @@
+# Architecture Index Evidence — {{BRANCH}} — {{ISO_TIMESTAMP}}
+
+## Pin
+- index pinnedCommit: {{INDEX_PIN}}
+- git rev-parse HEAD:  {{HEAD}}
+- currency: {{CURRENT_OR_STALE}}
+
+## Gate: validate (`python3 skills/arch-index/scripts/validate_index.py .arch/index.json --repo-root .`)
+exit: {{EXIT_CODE}}
+
+| # | Check | Result | Detail |
+|---|-------|--------|--------|
+| 1 | schemaVersion known | {{R1}} | {{D1}} |
+| 2 | component count in 3..8 | {{R2}} | {{D2}} |
+| 3 | ids unique, kebab-case | {{R3}} | {{D3}} |
+| 4 | every component has primary paths | {{R4}} | {{D4}} |
+| 5 | every primary path resolves on disk | {{R5}} | {{D5}} |
+| 6 | every shared path resolves on disk | {{R6}} | {{D6}} |
+| 7 | no orphan components | {{R7}} | {{D7}} |
+| 8 | connections bidirectional | {{R8}} | {{D8}} |
+| 9 | connectionLabels keys resolve to real edges | {{R9}} | {{D9}} |
+| 10 | no negative or wishful titles | {{R10}} | {{D10}} |
+| 11 | no pure-infrastructure titles | {{R11}} | {{D11}} |
+| 12 | every rationale non-empty | {{R12}} | {{D12}} |
+
+paths verified: {{VERIFIED}} | paths missing: {{MISSING}} | untracked-but-present: {{UNTRACKED}}
+
+## Gate: drift (`python3 skills/arch-index/scripts/arch_drift.py --repo-root .`)
+gate: {{DRIFT_GATE}}
+files changed since pin: {{FILES_CHANGED}} | lines changed: {{LINES_CHANGED}}
+
+| Component | Verdict | Surviving | Dead |
+|---|---|---|---|
+| {{ID}} | {{VERDICT}} | {{SURVIVING}} | {{DEAD}} |
+
+unclaimed added files: {{UNCLAIMED_COUNT}}
+unclaimed top-level directories: {{UNCLAIMED_DIRS}}
+
+## Tree
+depth used: {{DEPTH}} | files seen: {{TREE_FILES}} | truncated: {{TRUNCATED}}
+
+## Scope limit
+Structural drift only. Semantic drift — a datastore swapped inside an already-claimed
+directory, a component rewritten end to end, a boundary violated entirely within
+claimed paths — is NOT detected by this gate. A `NO DRIFT` result means no structural
+drift was found, and licenses no broader claim.
+
+Read budgets are prose-enforced and are NOT verified here; there is no way to count a
+subagent's tool calls from outside it.

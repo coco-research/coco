@@ -15,7 +15,9 @@
 
 ### Layer 1: Scope Research
 L1 agents assess:
-- Current state of the system/project
+- Current state of the system/project. When `.arch/index.json` exists and is CURRENT, read
+  `.arch/INDEX.md` for the component map instead of re-deriving the structure — it is a
+  validated artifact in which every path has been confirmed to exist.
 - What's already been built vs what's needed
 - Dependencies and sequencing constraints
 - Risk areas that need mitigation in the plan
@@ -31,7 +33,7 @@ L1 agents assess:
 
 **Toolkit integration:**
 - Check team:toolkit.md for "Project Orchestration" entry
-- If GSD active → create PLAN.md files compatible with GSD format (frontmatter: wave, depends_on, files_modified, autonomous, requirements, must_haves)
+- If GSD active → create PLAN.md files compatible with GSD format (frontmatter: wave, depends_on, files_modified, autonomous, requirements, must_haves). When `.arch/index.json` exists and is CURRENT, populate `files_modified` from the primary paths of the components the phase touches, then narrow it to the actual files — component paths are the starting set, never the final answer, because a component may own thousands of files.
 - If no GSD → create standalone plan documents
 
 ### GSD Integration (C4)

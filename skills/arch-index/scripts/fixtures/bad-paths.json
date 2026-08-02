@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "1.0",
+  "pinnedCommit": "0000000000000000000000000000000000000000",
+  "generatedAt": "2026-07-31T19:00:00Z",
+  "source": "fixture",
+  "ecosystem": {
+    "manifest": "package.json",
+    "languages": ["markdown"],
+    "framework": null,
+    "treeDepthUsed": 4,
+    "treeTruncated": false
+  },
+  "components": [
+    {
+      "id": "skill-library",
+      "title": "Agent Skill Library",
+      "purpose": "Delivers reusable agent capabilities through self-contained skill directories that each carry a SKILL.md manifest.",
+      "connections": ["command-surface", "phantom-service"],
+      "codeOwnership": {
+        "primary": {
+          "directories": ["skills"],
+          "files": [],
+          "rationale": "Every skill definition lives here."
+        }
+      }
+    },
+    {
+      "id": "command-surface",
+      "title": "Slash Command Surface",
+      "purpose": "Delivers namespaced slash commands through flat markdown files under the commands directory.",
+      "connections": ["skill-library", "phantom-service"],
+      "codeOwnership": {
+        "primary": {
+          "directories": ["commands"],
+          "files": [],
+          "rationale": "All command definitions live here."
+        }
+      }
+    },
+    {
+      "id": "phantom-service",
+      "title": "Webhook Ingestion Service",
+      "purpose": "Receives inbound webhooks and dispatches them to handlers. This component is a fixture fabrication whose paths do not exist in the repository.",
+      "connections": ["skill-library", "command-surface"],
+      "codeOwnership": {
+        "primary": {
+          "directories": ["src/nonexistent"],
+          "files": ["src/nonexistent/handler.py"],
+          "rationale": "Fabricated paths, present so the validator has something to reject."
+        }
+      }
+    }
+  ],
+  "connectionLabels": {},
+  "notes": "Fixture: exercises checks 5 and 6. Every primary path under phantom-service is fabricated."
+}

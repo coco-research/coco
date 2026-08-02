@@ -1,0 +1,35 @@
+# Architecture Index — {{REPO_NAME}}
+
+**Pinned at:** {{SHORT_SHA}} ({{DATE}}) · **Validator:** exit {{EXIT}}, {{VERIFIED}} paths verified
+**Source:** {{SOURCE_DESCRIPTION}} · **Altitude:** C4-Container
+
+Structural index only. Component paths describe where code lives; they are not
+work-assignment boundaries, and a single component may legitimately own thousands of
+files. Drift detection covers structural change only — a component whose datastore was
+swapped inside its own already-claimed directory produces no drift. See
+`team:architecture.md` for the protocol and its stated limits.
+
+| Component | Purpose | Primary paths |
+|---|---|---|
+| {{TITLE}} | {{PURPOSE_SHORT}} | {{PRIMARY_PATHS}} |
+
+## Diagram
+
+```mermaid
+C4Container
+  title Architecture Index — {{REPO_NAME}}
+  Container({{ID_UNDERSCORED}}, "{{TITLE}}", "{{TECH_SUMMARY}}")
+  Rel({{FROM_ID}}, {{TO_ID}}, "{{EDGE_LABEL}}")
+```
+
+Render with `design:mermaid` (beautiful-mermaid), never the standard Mermaid CDN.
+
+## Regenerating
+
+This file is derived from `.arch/index.json` and is rewritten on every build. Edit the
+JSON, never this file; if the two disagree, the JSON wins.
+
+```bash
+python3 skills/arch-index/scripts/validate_index.py .arch/index.json --repo-root .
+python3 skills/arch-index/scripts/arch_drift.py --repo-root .
+```

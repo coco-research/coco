@@ -8,7 +8,7 @@
 |-------|----------------|-------|
 | L1 | technical-analyst, security-analyst | 2 |
 | L2 | senior-backend-eng, senior-frontend-eng, senior-cloud-architect, qa-test-architect, senior-data-eng, sre-devops, mcp-integration, performance-eng (if perf-related) | 3-5 (domain-dependent) |
-| L3 | domain-accuracy, doc-quality, security-analyst (if api/backend/infrastructure) | 2-4 |
+| L3 | domain-accuracy, doc-quality, security-analyst (if api/backend/infrastructure), architecture-reviewer (if `.arch/index.json` exists) | 2-5 |
 | L4 | principal-architect | 1 |
 
 ### Domain-Specific Selection
@@ -39,6 +39,20 @@ L2 agents receive file ownership boundaries (I10):
   DO NOT TOUCH: [files owned by other agents]
   ```
 - Agents commit atomically per feature/fix
+
+**Architecture context is advisory, not an allocation mechanism.** When
+`.arch/index.json` exists and its pin is CURRENT, inline the component table from
+`.arch/INDEX.md` into each L2 prompt (max 25 lines) so agents know where each
+component's code lives.
+
+Do **not** derive `YOUR FILES` from the index. The index sits at C4-Container altitude
+while work is sharded at module altitude, and the two do not line up: in this repository
+a legal five-component index assigns `skills/` — 1,087 files — to a single component. A
+typical feature also spans three components at once. Scope-based splitting stays
+authoritative for ownership; the index only tells an agent which boundary it is working
+inside.
+
+If the index is STALE, omit the block rather than quoting it.
 
 **Toolkit integration:**
 - Check team:toolkit.md for "Code Implementation" entry

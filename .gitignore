@@ -33,3 +33,10 @@ __pycache__/
 *.bak
 *.backup
 *-backup
+
+# Architecture index — derived scratch only.
+# .arch/index.json, .arch/pinned-commit, .arch/INDEX.md, .arch/ARCH-EVIDENCE.md and
+# .arch/ANALYSIS.md ARE committed on purpose: the index is only useful if it is
+# diffable across runs and present in the clean checkout that /team ship verifies from.
+.arch/DRIFT.json
+.arch/tree.json

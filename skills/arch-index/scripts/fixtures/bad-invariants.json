@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0",
+  "pinnedCommit": "0000000000000000000000000000000000000000",
+  "generatedAt": "2026-07-31T19:00:00Z",
+  "source": "fixture",
+  "ecosystem": {
+    "manifest": "package.json",
+    "languages": ["markdown"],
+    "framework": null,
+    "treeDepthUsed": 3,
+    "treeTruncated": false
+  },
+  "components": [
+    {
+      "id": "request-router",
+      "title": "Request Routing Layer",
+      "purpose": "Routes inbound requests to the handler that owns them. Present so the fixture has a well-formed component alongside the deliberately broken one.",
+      "connections": ["cache-tier"],
+      "codeOwnership": {
+        "primary": {
+          "directories": ["commands"],
+          "files": [],
+          "rationale": "Stands in for a routing surface; the path resolves so checks 5 and 6 stay clean."
+        }
+      }
+    },
+    {
+      "id": "cache-tier",
+      "title": "Recommended Cache Layer",
+      "purpose": "A component that does not exist yet, named with an aspirational title, and wired with a one-directional edge so the fixture trips exactly three invariant checks plus the count check.",
+      "connections": [],
+      "codeOwnership": {
+        "primary": {
+          "directories": ["skills"],
+          "files": [],
+          "rationale": "Path resolves deliberately, so the only failures are the invariant ones."
+        }
+      }
+    }
+  ],
+  "connectionLabels": {},
+  "notes": "Fixture: expects exactly four violations — check 2 (only two components), check 7 (cache-tier is an orphan), check 8 (request-router to cache-tier is asymmetric), and check 10 (the title contains 'Recommended')."
+}

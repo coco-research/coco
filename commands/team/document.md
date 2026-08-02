@@ -15,8 +15,16 @@
 ### Document Type Detection
 
 Parse scope to detect document type:
-- "PRD" / "requirements" → senior-pm as L2 lead, use /pmstudio-prd from toolkit
-- "architecture" / "design doc" → senior-cloud-architect or senior-backend-eng in L2
+- "PRD" / "requirements" → senior-pm as L2 lead, use prd-generator from toolkit
+- "architecture" / "design doc" → this action WRITES UP an architecture for an audience;
+  it does not decide one. Put technical-writer + solution-architect in L2. Add
+  architecture-reviewer and domain-accuracy to the L3 roster, because the default roster
+  of doc-quality, grammar-editor, and standards-reviewer checks structure, tone, and
+  template conformance only — none of them can tell whether the architecture being
+  described is technically sound. If `.arch/index.json` is absent, offer `/team arch build`
+  first, so the document rests on a validated component map rather than an improvised one.
+  For a formal published document, prefer /util:create-architecture-documentation, which
+  produces C4, arc42, ADR, PlantUML, and Structurizr output.
 - "runbook" / "playbook" → sre-devops in L2
 - "API docs" → technical-writer + senior-backend-eng in L2
 - "onboarding" / "guide" → technical-writer + ux-researcher in L1

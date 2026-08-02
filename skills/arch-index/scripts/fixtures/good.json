@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1.0",
+  "pinnedCommit": "0000000000000000000000000000000000000000",
+  "generatedAt": "2026-07-31T19:00:00Z",
+  "source": "fixture",
+  "ecosystem": {
+    "manifest": "package.json",
+    "languages": ["markdown", "python", "shell"],
+    "framework": null,
+    "treeDepthUsed": 5,
+    "treeTruncated": false
+  },
+  "components": [
+    {
+      "id": "skill-library",
+      "title": "Agent Skill Library",
+      "purpose": "Delivers reusable agent capabilities through self-contained skill directories, each carrying a SKILL.md with YAML frontmatter plus optional references, scripts, and templates.",
+      "connections": ["command-surface", "install-adapters"],
+      "codeOwnership": {
+        "primary": {
+          "directories": ["skills"],
+          "files": [],
+          "rationale": "Every skill definition and its bundled references live here; this directory is the component."
+        },
+        "shared": {
+          "directories": ["templates"],
+          "files": ["scripts/build-index.py"],
+          "rationale": "Skill scaffolding templates and the index generator are consumed by the command surface as well."
+        }
+      }
+    },
+    {
+      "id": "command-surface",
+      "title": "Slash Command Surface",
+      "purpose": "Delivers namespaced slash commands through flat markdown files under commands/<namespace>/, where the team namespace additionally carries the four-layer orchestration router.",
+      "connections": ["skill-library", "install-adapters", "system-bundles"],
+      "codeOwnership": {
+        "primary": {
+          "directories": ["commands"],
+          "files": [],
+          "rationale": "All command definitions and the /team orchestration router live here."
+        }
+      }
+    },
+    {
+      "id": "system-bundles",
+      "title": "Project Orchestration Systems",
+      "purpose": "Delivers multi-phase project orchestration and persona-council capabilities through bundled system directories that ship their own nested skills and agents.",
+      "connections": ["command-surface"],
+      "codeOwnership": {
+        "primary": {
+          "directories": ["systems", "agents"],
+          "files": [],
+          "rationale": "The GSD, brain, superintelligence, and team bundles together with the core agent definitions they dispatch."
+        }
+      }
+    },
+    {
+      "id": "install-adapters",
+      "title": "Editor Install Adapters",
+      "purpose": "Delivers per-editor installation by symlinking skills, commands, and agents into each tool's configuration directory under a namespace mapping.",
+      "connections": ["skill-library", "command-surface"],
+      "codeOwnership": {
+        "primary": {
+          "directories": ["adapters", "bin"],
+          "files": ["install.sh"],
+          "rationale": "The namespace mapping and symlink logic that make the repository installable across editors."
+        }
+      }
+    }
+  ],
+  "connectionLabels": {
+    "skill-library-to-command-surface": "Capability invocation",
+    "command-surface-to-install-adapters": "Command registration",
+    "skill-library-to-install-adapters": "Skill registration",
+    "system-bundles-to-command-surface": "Bundled command registration"
+  },
+  "notes": "Structural index only. Component altitude is C4-Container; these paths are not work-assignment boundaries."
+}

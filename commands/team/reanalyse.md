@@ -16,14 +16,28 @@
 
 ### Layer 1: Delta Analysis
 L1 agents determine:
-- What has changed since the original implementation/last review
+- What has changed since the original implementation/last review. When `.arch/index.json`
+  exists, its pin is the natural baseline for "since" — `git diff --name-status <pin>..HEAD`.
 - Which requirements need re-verification
 - What new code interacts with previously reviewed modules
 
 ### Layer 2: Re-Verification
 - **Mode:** `bypassPermissions` for any domain involving tests or runtime behavior (agents must be able to re-run the gate); `default` (read-only) for static/doc domains.
 - Each agent re-checks their domain against current code
-- Reports: STILL GOOD | REGRESSION | NEW ISSUE | IMPROVEMENT
+- Reports: STILL GOOD | REGRESSION | NEW ISSUE | IMPROVEMENT | ARCHITECTURAL REGRESSION
+- **ARCHITECTURAL REGRESSION** is reserved for structural drift against `.arch/index.json`
+  and requires the deterministic scan, not a reading:
+
+  ```bash
+  python3 skills/arch-index/scripts/arch_drift.py --repo-root .
+  ```
+
+  Report it when a component's primary paths have died (`REMOVE` or `PRUNE`), or when new
+  code has landed in a top-level directory no component claims. Quote the verdict from
+  `.arch/DRIFT.json`. Structural drift only — a component reworked inside its own already
+  claimed directory is not an architectural regression by this definition, and if that is
+  what you found, report it as REGRESSION or NEW ISSUE instead. If the index pin is behind
+  HEAD, the finding is SUSPECTED rather than confirmed until `/team arch drift` reconciles it.
 - **A regression in test or runtime behavior must be confirmed by re-running the authoritative gate** per the Test Evidence Protocol (`team:evidence.md`), capturing the before/after summary in `EVIDENCE.md`. A regression claimed from code-reading alone (no captured run) is reported as SUSPECTED, not confirmed.
 - Focus on interactions between modules that changed independently
 

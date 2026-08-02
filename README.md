@@ -133,7 +133,7 @@ The board decides. The framework ships. Three pillars turn the verdict into merg
 <td width="33%" valign="top">
 
 ### 1. Autonomous team execution
-`/team:ship` runs a fully coordinated build pipeline — 6 development stages and 7 hard verification gates. Specialized agents act in their domains (Research, Architecture, Plan, Review, Build, QA). Code must clear the Test Evidence Protocol (independent re-runs, strict coverage, skip-prevention) before a pull request is opened.
+`/team:ship` runs a fully coordinated build pipeline — 6 development stages, 7 hard verification gates, and 2 architecture conformance gates. Specialized agents act in their domains (Research, Architecture, Plan, Review, Build, QA). Code must clear the Test Evidence Protocol (independent re-runs, strict coverage, skip-prevention) **and land where the plan said it would** before a pull request is opened.
 
 </td>
 <td width="33%" valign="top">
@@ -150,6 +150,63 @@ CoCo compiles its rules, templates, and agent definitions into pure Markdown and
 </td>
 </tr>
 </table>
+
+---
+
+## Architecture conformance: the gate tests cannot give you
+
+Every test suite in existence shares one blind spot. **Tests fail when behaviour breaks — not when your architecture quietly dissolves.** A component can be relocated, folded into another module, or deleted outright, and a green build will tell you nothing. Requirements pass. Coverage holds. The design you agreed to is gone.
+
+`/team` now closes that gap in both directions, and both are enforced by Python scripts with real exit codes — not by instructions an agent can narrate its way around.
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### ◀ Backwards — drift detection
+
+A commit-pinned index at **`.arch/index.json`** maps every architectural component to the real directories and files that implement it. `/team:verify` gained failure mode **`(e)`**: structural drift against that index.
+
+Twelve validator checks run on every index. The central one is blunt and unfakeable: **every claimed path must resolve on disk.** A fabricated path exits non-zero and names itself.
+
+</td>
+<td width="50%" valign="top">
+
+### ▶ Forwards — built as declared
+
+`/team:ship` Stage 3 now declares its intended architecture to **`.team-ship/ARCH-PLAN.json`** — where each component will live, and what is explicitly out of scope.
+
+After the build, the **built-as-declared gate** checks it. A component you declared and then quietly dropped is a **BLOCK**. A file that lands in a path the plan ruled out of scope is a **BLOCK**. Neither appears in any test result.
+
+</td>
+</tr>
+</table>
+
+**Why this works.** Path existence cannot be checked at planning time, because nothing is built yet. So the plan is *written* when the knowledge exists and *tested* when the evidence exists. Deferring the check rather than weakening it is exactly what makes a forward architecture declaration enforceable.
+
+### Use it
+
+```bash
+/team arch build      # map this repository into a committed, commit-pinned index
+/team arch drift      # reconcile an existing index against the current tree
+/team arch check      # run the validator alone — no model calls, no writes to the index
+/team verify          # now includes failure mode (e): architecture abandoned
+/team ship            # declares intended architecture, then proves the build matches
+/team ship --no-arch  # opt out entirely; every gate reports DISABLED, never a silent pass
+```
+
+The approval gate now shows you the intended architecture as a table before the build starts. That is the cheapest moment to disagree with it.
+
+### What it does not do
+
+A gate that overstates its reach is worse than no gate, so these limits are stated in the artifacts themselves and are not marketing hedges.
+
+- **Structural drift only.** A component whose datastore was swapped *inside* its own already-claimed directory produces no drift. Every artifact says "structural drift only" in those words, deliberately.
+- **Not a work-allocation mechanism.** The index sits at C4-Container altitude, so one component can legitimately own thousands of files. Three separate design reviews rejected deriving per-agent file ownership from it.
+- **Currency is not yet mechanically enforced.** Comparing the index pin to `HEAD` is prose an agent follows, not a script. A stale index degrades every gate to `UNVERIFIED` rather than to a pass — but instrumenting this is the next piece of work, and it is named as such.
+- **A clean result licenses no claim** about whether the code at those paths does what the component promised. That remains a review judgement.
+
+Requires only Python 3 and `git`. No new dependencies. Design adapted from [lak7/devildev](https://github.com/lak7/devildev) (Apache-2.0); no upstream code was copied — see [`CREDITS.md`](CREDITS.md).
 
 ---
 

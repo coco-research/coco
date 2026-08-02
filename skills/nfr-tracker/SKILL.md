@@ -1,6 +1,7 @@
 ---
 name: pmstudio-nfr
 description: Detailed completeness audit of all project documents. Use when someone asks "are we ready for production", "audit our docs", "readiness check", "nfr tracker", or "what's missing". Do NOT use for a quick command listing — use /pmstudio instead. Scans every document for section-level completeness, reports staleness, and gives prioritized gap-closure recommendations.
+domain: ops
 ---
 
 # NFR Tracker — Operational Readiness Auditor

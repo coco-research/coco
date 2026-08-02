@@ -10,6 +10,7 @@ tags:
   - documentation
   - project-management
 auto_activate: true
+domain: pm
 ---
 
 # Task & PRD Creator

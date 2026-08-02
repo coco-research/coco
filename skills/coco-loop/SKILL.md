@@ -7,6 +7,7 @@ description: >
   proposes fixes and never commits on its own. Turns a vague goal into a readable
   charter the user confirms, then arms and runs the loop propose-only under the
   coco-loops governance framework.
+domain: meta
 ---
 
 # coco-loop

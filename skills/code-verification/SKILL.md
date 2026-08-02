@@ -1,6 +1,7 @@
 ---
 name: code-verification
 description: Post-implementation verification system that catches AI-introduced bugs. Covers 7 categories — TDZ errors, import mismatches, reference integrity, dead code, React state/effects, mock isolation, and CSS integrity. Run after every code change, after writing tests, or before marking a task complete. Triggers on "verify", "check code quality", "run verification", "audit code", "quality gate", "pre-commit check".
+domain: engineering
 ---
 
 # Code Verification Skill

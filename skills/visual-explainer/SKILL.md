@@ -6,6 +6,7 @@ compatibility: Requires a browser to view generated HTML files. Optional surf-cl
 metadata:
   author: nicobailon
   version: "0.8.1"
+domain: design
 ---
 
 # Visual Explainer

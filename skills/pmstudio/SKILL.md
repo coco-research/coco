@@ -1,6 +1,7 @@
 ---
 name: pmstudio
 description: PM Studio command center. Use for a quick overview of available commands and document inventory. Use when someone says "pmstudio", "show commands", "what can I generate", or "project status". Do NOT use for detailed completeness audits — use /pmstudio-nfr instead. Shows document coverage dashboard and recommends which /pmstudio-* command to run next.
+domain: pm
 ---
 
 # PM Studio — Command Center

@@ -1,6 +1,7 @@
 ---
 name: pmstudio-irp
 description: Generate an Incident Response Plan (IRP) with severity classification, escalation procedures, and communication templates. Use when someone asks to "create an incident response plan", "IRP", "incident procedures", "escalation matrix", "incident playbook", or needs to document how to handle incidents for a product/platform. Reads PRD, stakeholder directory, and project memory to build product-specific response procedures. Complementary to DR plan (DR = restore service; IRP = manage the incident while it's happening).
+domain: ops
 ---
 
 # IRP — Incident Response Plan

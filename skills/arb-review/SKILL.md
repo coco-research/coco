@@ -1,6 +1,7 @@
 ---
 name: pmstudio-arb
 description: Generate an Architecture Review Board (ARB) presentation in Coco Inc's standard 11-slide format. Use when someone asks to "create an ARB deck", "architecture review presentation", "prepare for architecture review board", "ARB slides", or needs to present a product/platform architecture for sign-off. Reads PRD, architecture maps, and project memory to pre-fill technical content. Produces a self-contained HTML slide deck.
+domain: ops
 ---
 
 # ARB Review — Architecture Review Board Presentation

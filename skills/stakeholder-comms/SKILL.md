@@ -1,6 +1,7 @@
 ---
 name: pmstudio-comms
 description: Generate templated stakeholder communications from project context. Use when someone asks to "write a go-live email", "create a status update", "onboard someone", "write an announcement", "steerco update", "incident summary", "change notification", or any stakeholder communication task. Reads project memory, stakeholder directory, PRD, and meeting notes to pre-fill real names, dates, and context. Produces ready-to-send Markdown.
+domain: pm
 ---
 
 # Stakeholder Comms — Templated Communications Generator

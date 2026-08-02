@@ -2,6 +2,7 @@
 name: openai-whisper
 description: Speech-to-text transcription via OpenAI Whisper. Supports two modes — Local CLI (no API key, runs on-device) and Cloud API (fast, scalable, requires OPENAI_API_KEY). Use when the user needs to transcribe audio files, translate speech, or convert audio to text.
 homepage: https://openai.com/research/whisper
+domain: engineering
 ---
 
 # OpenAI Whisper — Speech-to-Text

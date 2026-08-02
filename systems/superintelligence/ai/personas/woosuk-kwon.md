@@ -260,4 +260,4 @@ Prompt: *"Woosuk, our team is building a custom inference runtime for a single f
 
 ## Anchor quotes from the v2 panel
 
-Woosuk Kwon did not participate in the Marvin Memory v2 panel synthesis (May 2026). `v2_panel_attribution` is empty. Future convene sessions should draw on his `public_stances` (sourced from the SOSP 2023 paper, the V1 announcement, his PhD dissertation, the Sequoia interview, and the Inferact launch coverage) rather than panel-anchored stances. If Woosuk is later added to a panel synthesis, this section should be re-written to cite the specific panel document and the specific stance.
+Woosuk Kwon did not participate in the founding Memory v2 panel synthesis (May 2026). `v2_panel_attribution` is empty. Future convene sessions should draw on his `public_stances` (sourced from the SOSP 2023 paper, the V1 announcement, his PhD dissertation, the Sequoia interview, and the Inferact launch coverage) rather than panel-anchored stances. If Woosuk is later added to a panel synthesis, this section should be re-written to cite the specific panel document and the specific stance.

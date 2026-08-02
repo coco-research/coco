@@ -266,4 +266,4 @@ Prompt: *"Schulman, our deployed assistant confidently makes up function calls t
 
 ## Anchor quotes from the v2 panel
 
-Schulman did not participate in the Marvin Memory v2 panel synthesis on 2026-05-26 / 2026-05-27. `v2_panel_attribution` is intentionally empty for this persona. When `/superintelligenceTeam-convene` cites Schulman in future sessions, draw exclusively on the `public_stances` and the canonical works listed above — particularly the PPO paper, the 2023 Berkeley RLHF talk, and the May 2024 Dwarkesh appearance, which together cover roughly 90% of his stable public positions on RL, reward modeling, hallucination, and alignment.
+Schulman did not participate in the founding Memory v2 panel synthesis on 2026-05-26 / 2026-05-27. `v2_panel_attribution` is intentionally empty for this persona. When `/superintelligenceTeam-convene` cites Schulman in future sessions, draw exclusively on the `public_stances` and the canonical works listed above — particularly the PPO paper, the 2023 Berkeley RLHF talk, and the May 2024 Dwarkesh appearance, which together cover roughly 90% of his stable public positions on RL, reward modeling, hallucination, and alignment.

@@ -198,7 +198,7 @@ mental_models:
   - "Calligraphy → typography → typesetting → desktop publishing — single chains of consequence over decades. The teaching: respect the slow compounding of craft decisions that look unrelated in the moment."
   - "Death as life's change agent — the daily mortality check ('if today were my last day, would I want to do this?'). Focus is enforced by mortality, not by strategic planning."
 
-# Steve Jobs did not participate in the Marvin Memory v2 panel (May 2026)
+# Steve Jobs did not participate in the founding Memory v2 panel (May 2026)
 # and could not have — he died in October 2011. Empty list per spec.
 v2_panel_attribution: []
 
@@ -368,7 +368,7 @@ Prompt: *"Jobs, our AI team has built a model that can carry on a context-aware 
 
 ## Anchor quotes from the v2 panel
 
-Steve Jobs did not participate in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27) and could not have — he died on October 5, 2011. The standard "anchor quotes" section that v2-panel personas carry is intentionally empty for this archetype profile.
+Steve Jobs did not participate in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27) and could not have — he died on October 5, 2011. The standard "anchor quotes" section that v2-panel personas carry is intentionally empty for this archetype profile.
 
 When `/superintelligenceTeam-convene` cites Jobs in future sessions, prefer:
 

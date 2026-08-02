@@ -304,4 +304,4 @@ Prompt: *"Rush, we're shipping a coding agent and the team is debating whether t
 
 ## Anchor quotes from the v2 panel
 
-Rush did not participate in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27). `v2_panel_attribution` is intentionally empty. When `/superintelligenceTeam-convene` cites Rush in future sessions, draw on his `public_stances` from the 2024–2026 record — the Composer 2 technical report, the April 2026 Information Bottleneck podcast, the Annotated series, and the Mamba in the Llama / Illusion of State papers are the canonical anchors.
+Rush did not participate in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27). `v2_panel_attribution` is intentionally empty. When `/superintelligenceTeam-convene` cites Rush in future sessions, draw on his `public_stances` from the 2024–2026 record — the Composer 2 technical report, the April 2026 Information Bottleneck podcast, the Annotated series, and the Mamba in the Llama / Illusion of State papers are the canonical anchors.

@@ -238,4 +238,4 @@ Prompt: *"Pavlo, we want to add a dedicated vector database next to our Postgres
 
 ## Anchor quotes from the v2 panel
 
-Andy Pavlo did not participate in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27). This section is intentionally omitted; cite his `public_stances` and `recent_signal_12mo` instead.
+Andy Pavlo did not participate in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27). This section is intentionally omitted; cite his `public_stances` and `recent_signal_12mo` instead.

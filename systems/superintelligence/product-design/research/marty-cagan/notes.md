@@ -86,7 +86,7 @@ The persona uses the three strongest, most quotable, clearly-dated items for `re
 
 ## 4. Productive-conflict mapping (against real ROSTER.md slugs)
 
-ROSTER.md slugs verified by reading `/Users/user/projects/coco-platform/superintelligence/product-design/ROSTER.md`.
+ROSTER.md slugs verified by reading `systems/superintelligence/product-design/ROSTER.md`.
 
 - **`eric-ries` (product-discovery-research cell) — MVP definition.** Cagan explicitly argues an MVP "should never be a product," directly contesting the Lean Startup framing where an MVP is the minimum buildable product shipped to learn. Cagan reframes the MVP as a prototype/experiment in discovery. Real, documented disagreement.
   - Evidence: https://www.svpg.com/product-success/ ; https://wind4change.com/product-management-discovery-delivery-inspired-empowered-marty-cagan/

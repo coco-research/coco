@@ -4,7 +4,7 @@ Synthesis pass used to draft `personas/jason-wei.md`. Not a duplicate of the per
 
 ## One-line identity
 
-Jason Wei: post-training research scientist; coined Chain-of-Thought, instruction tuning (FLAN), and emergent abilities; ex-OpenAI; now at Anthropic since July 2025; prolific essayist on jasonwei.net; cell A specialist in the Marvin Memory v2 panel.
+Jason Wei: post-training research scientist; coined Chain-of-Thought, instruction tuning (FLAN), and emergent abilities; ex-OpenAI; now at Anthropic since July 2025; prolific essayist on jasonwei.net; cell A specialist in the founding Memory v2 panel.
 
 ## Five signature moves (extracted from work + writing)
 
@@ -32,7 +32,7 @@ Jason Wei: post-training research scientist; coined Chain-of-Thought, instructio
 5. **Inference-time compute is the new scaling axis.** — jasonwei.net + 2025 talks. Evidence: https://www.jasonwei.net/
 6. **Research taste matters more than research effort.** — "How to do high-impact research." Evidence: https://www.jasonwei.net/blog/how-to-do-high-impact-research
 7. **A successful eval has high signal, high coverage, low noise.** — "Successful language model evals." Evidence: https://www.jasonwei.net/blog/evals
-8. **Don't single-vendor at the recall layer.** — Marvin v2 panel attribution. Evidence: `/Users/user/Marvin/docs/architecture/marvin-memory-master-phased-plan.html`
+8. **Don't single-vendor at the recall layer.** — founding v2 panel attribution. Evidence: `internal synthesis (not publicly citable)`
 
 ## Pairs / conflicts
 

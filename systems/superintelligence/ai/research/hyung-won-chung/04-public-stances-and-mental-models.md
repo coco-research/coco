@@ -42,7 +42,7 @@ Every stance below is anchored to a citable URL. None inferred.
 3. **The hidden trap: we fail to remove old structure as methods update.** Most "novel" architecture work is reinventing scaffolding that scale would dissolve.
 4. **Levers compound when they don't need permission.** AI agents are valuable precisely because they inherit code's permissionless-copy property.
 5. **Inference compute is the new scaling axis** — once pretraining plateaus, you scale at test time (o1 line).
-6. **Cost is a research input, not an afterthought.** Per-tenant budget caps and batch-mode discounts (50% off) are first-class design constraints, not finance-team concerns. (This is the framing that made him "Cell E cost owner" in the Marvin v2 panel.)
+6. **Cost is a research input, not an afterthought.** Per-tenant budget caps and batch-mode discounts (50% off) are first-class design constraints, not finance-team concerns. (This is the framing that made him "Cell E cost owner" in the founding v2 panel.)
 
 ## Voice signature
 

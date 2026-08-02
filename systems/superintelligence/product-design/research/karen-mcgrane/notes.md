@@ -169,7 +169,7 @@ From **"The Mobile Content Mandate"**
 - recent_signal_12mo: **3 verified**, all post-2025-06-01 (Oct 2025, Dec 2025, Jan 2026). MET.
 - public_stances: each carries an evidence_url (talks + Contentful posts + podcast). MET.
 - sources: 12 real URLs (>=8 required, >=3 recent). MET.
-- v2_panel_attribution: McGrane did NOT participate in the Marvin Memory v2 panel (that was the
+- v2_panel_attribution: McGrane did NOT participate in the founding Memory v2 panel (that was the
   AI/Engineering team synthesis). Field set to `[]`; panel-quotes narrative section omitted
   per instruction.
 - confidence: 0.93 (strong identity + deep public record; small uncertainty only on the exact

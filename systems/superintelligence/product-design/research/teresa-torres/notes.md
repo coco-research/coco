@@ -109,7 +109,7 @@ Source: https://www.producttalk.org/author/teresa/
 - The 2025–2026 AI/engineering pivot is genuine but recent; her vibe-coding guidance is practitioner-grade, not security/architecture-grade — she defers to engineers on the hard parts (consistent with her own framing).
 
 ## v2 panel attribution
-Teresa Torres did **not** participate in the Marvin Memory v2 panel (that panel was AI/infra-domain: Karpathy, Cockcroft, Vogels, Wei, Chalef, Sridharan, etc.). Per template, `v2_panel_attribution: []` and the "Anchor quotes from the v2 panel" narrative section is omitted.
+Teresa Torres did **not** participate in the founding Memory v2 panel (that panel was AI/infra-domain: Karpathy, Cockcroft, Vogels, Wei, Chalef, Sridharan, etc.). Per template, `v2_panel_attribution: []` and the "Anchor quotes from the v2 panel" narrative section is omitted.
 
 ## Source URLs (all real, accessed 2026-06-01)
 1. https://www.producttalk.org/ — Product Talk home

@@ -284,6 +284,6 @@ Prompt: *"Liang, our company is planning to release our next foundation model un
 
 ## Anchor quotes from the v2 panel
 
-Liang Wenfeng did not participate in the Marvin Memory v2 panel synthesis on 2026-05-26 / 2026-05-27. The `v2_panel_attribution` field for this persona is intentionally empty (`[]`).
+Liang Wenfeng did not participate in the founding Memory v2 panel synthesis on 2026-05-26 / 2026-05-27. The `v2_panel_attribution` field for this persona is intentionally empty (`[]`).
 
 When `/superintelligenceTeam-convene` cites Liang in future sessions, the synthesis should draw from the `public_stances` and `recent_signal_12mo` fields above — primarily the July 2024 TheChinaAcademy interview ("we're done following"), the January 20, 2025 R1 release and Premier Li Qiang symposium, the February 17, 2025 Xi Jinping symposium, the TIME 100 AI 2025 Leaders listing, and the April 2026 V4 release announced via Chen Deli's X post during Liang's continued public silence. These are the source-of-truth artifacts for Liang's 2024–2026 worldview and should be cited explicitly rather than paraphrased without attribution. Direct quotes from him in 2026 do not exist; any first-person 2026 framing in convene synthesis is by definition an extrapolation and should be marked as such.

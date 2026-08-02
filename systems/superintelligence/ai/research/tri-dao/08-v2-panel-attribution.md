@@ -1,9 +1,9 @@
-# Tri Dao — v2 Panel Attribution (Marvin Memory)
+# Tri Dao — v2 Panel Attribution (Founding Memory Synthesis)
 
 Sources (file paths):
-- /Users/user/Marvin/docs/architecture/marvin-memory-master-phased-plan.html
-- /Users/user/Marvin/docs/architecture/SESSION-2026-05-26.md
-- /Users/user/Marvin/docs/architecture/marvin-memory-old-vs-new.html (cell context)
+- internal synthesis (not publicly citable)
+- internal synthesis (not publicly citable)
+- internal synthesis (not publicly citable) (cell context)
 
 Extracted: 2026-05-27
 
@@ -16,7 +16,7 @@ Extracted: 2026-05-27
   Dao (kernel + vector substrate — v4.5).
 
 The panel synthesis is documented in
-`marvin-memory-master-phased-plan.html`, which explicitly identifies the five panel
+`the founding memory-architecture plan`, which explicitly identifies the five panel
 cells:
 
 > "Cell A: AI and retrieval research; Cell B: agent runtime and Letta-style patterns;
@@ -45,7 +45,7 @@ This is the exact memory-hierarchy discipline that defines Tri Dao's published w
 
 ## Mined attribution #2 — v4.5 HNSW ghost-edge SLA + eviction policy
 
-Source: `marvin-memory-master-phased-plan.html`, line 1453 (v4.5 micro-phase):
+Source: `the founding memory-architecture plan`, line 1453 (v4.5 micro-phase):
 
 > "**Linked panel items.** Cell A Dao P7 plus Cell B Gonzalez P8."
 
@@ -66,7 +66,7 @@ voice.
 
 ## Mined attribution #3 — Cell A unanimous on Decision D5
 
-Source: `marvin-memory-master-phased-plan.html`, line 1139:
+Source: `the founding memory-architecture plan`, line 1139:
 
 > "**Linked panel items.** Decision D5; Cell A and Cell B unanimous."
 
@@ -110,11 +110,11 @@ v2_panel_attribution:
     panel_section: "Key decisions locked (D1-D20), entry 17 — Quantization ladder. Panel owner: Dao + Garcia."
     co_signers: [garcia]
   - stance: "HNSW ghost-edge SLA + eviction. Rebuild HNSW segments past N% ghost-edge ratio. Evict chunks to ColdStore when a bank has been inactive >90 days. Memory-hierarchy discipline at the vector-substrate layer."
-    panel_document: marvin-memory-master-phased-plan.html
+    panel_document: the founding memory-architecture plan
     panel_section: "v4.5 — HNSW ghost-edge SLA + eviction policy. Cell A Dao P7."
     co_signers: [gonzalez]
   - stance: "Cell A + Cell B unanimous on tri-temporal time model (event_time + transaction_time + ingestion_time, Decision D5). Co-signed as validator — versioning must work end-to-end before quantization can be safe."
-    panel_document: marvin-memory-master-phased-plan.html
+    panel_document: the founding memory-architecture plan
     panel_section: "Decision D5 panel-link; Cell A and Cell B unanimous."
     co_signers: [karpathy, wei, chalef, packer, gonzalez]
 ```

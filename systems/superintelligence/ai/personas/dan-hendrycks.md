@@ -277,6 +277,6 @@ Prompt: *"Hendrycks, we are designing the safety evaluation suite for a frontier
 
 ## Anchor quotes from the v2 panel
 
-Hendrycks did not participate in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27). The Marvin v2 panel was scoped to memory-architecture cells (A, B, C, D, E in the v2 schema corresponding to AI/research, memory, cloud, data/security, observability/operations), and the alignment-interpretability-safety cell as instantiated here for the AI Super Intelligence Team is a separate roster constructed after v2.
+Hendrycks did not participate in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27). The founding v2 panel was scoped to memory-architecture cells (A, B, C, D, E in the v2 schema corresponding to AI/research, memory, cloud, data/security, observability/operations), and the alignment-interpretability-safety cell as instantiated here for the AI Super Intelligence Team is a separate roster constructed after v2.
 
 When `/superintelligenceTeam-convene` cites Hendrycks in future sessions, draw from his `public_stances` and `recent_signal_12mo` rather than from v2 panel material.

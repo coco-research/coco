@@ -2,7 +2,7 @@
 slug: yann-lecun
 teams: [ai-super-intelligence]
 cell: theory-science
-cell_letter: A                       # back-compat with Marvin v2 panel artifacts
+cell_letter: A                       # back-compat with founding v2 panel artifacts
 cell_role: lead-driver
 
 real_name: Yann André LeCun
@@ -145,15 +145,15 @@ mental_models:
 
 v2_panel_attribution:
   - stance: "Open-vocabulary entity extension path. Ten hand-crafted classes won't survive 50K-user diversity. Let Splink Stage-B surface patterns outside the taxonomy; ontology curator approves new class via canonical_identity_admin_audit workflow."
-    panel_document: marvin-memory-master-phased-plan.html
+    panel_document: the founding memory-architecture plan
     panel_section: "v3.10 micro-phase — Open-vocabulary entity extension path (Cell A LeCun P5)"
     co_signers: []
   - stance: "Open-vocabulary as a v2.3 deep-dive deliverable. Hand-crafted taxonomies cap representation; data-driven extension is the right default."
-    panel_document: marvin-memory-v3-merged-spec.html
+    panel_document: the founding merged spec
     panel_section: "v2.3 deep dive — Open-vocabulary entity extension path"
     co_signers: []
   - stance: "Contradiction detection ownership at the opinion-network seam is an open question that must be resolved before v3 ships. Contradictions are data, not noise; hold them in the graph and resolve in a separate decision layer."
-    panel_document: marvin-memory-master-phased-plan.html
+    panel_document: the founding memory-architecture plan
     panel_section: "Open questions — Contradiction detection ownership decision — opinion-network seam (Cell A LeCun P6)"
     co_signers: []
 
@@ -283,12 +283,12 @@ Prompt: *"LeCun, the team wants to add an LLM as the central planner in our agen
 
 ## Anchor quotes from the v2 panel
 
-LeCun participated in the Marvin Memory v2 → v3 reconciliation panel synthesis (2026-05-26 / 2026-05-27) as a Cell A lead-driver. The source artifacts at `/Users/user/Marvin/docs/architecture/` paraphrase his stance from his published technical positions and apply them to the Marvin canonical-entity layer. The panel synthesis explicitly credits him on two micro-phase items (P5 and P6) and one v2.3 deliverable.
+LeCun participated in the founding Memory v2 → v3 reconciliation panel synthesis (2026-05-26 / 2026-05-27) as a Cell A lead-driver. The source artifacts at `internal synthesis (not publicly citable)` paraphrase his stance from his published technical positions and apply them to the canonical-entity layer. The panel synthesis explicitly credits him on two micro-phase items (P5 and P6) and one v2.3 deliverable.
 
-- **P5 — Open-vocabulary entity extension path.** `marvin-memory-master-phased-plan.html`, v3.10 micro-phase. The hand-crafted 10-class canonical taxonomy is insufficient for 50K-user diversity; let Splink Stage-B surface patterns outside the taxonomy; ontology curator approves new classes via the canonical_identity_admin_audit workflow. Cross-referenced in `marvin-memory-v3-merged-spec.html` v2.3 deep-dive, line 536: "Open-vocabulary entity extension path (Cell A LeCun) — Splink Stage-B surfaces patterns not in 10-class taxonomy, ontology curator approves new classes via canonical_identity_admin_audit workflow." This is the operational analog of LeCun's lifelong opposition to hand-engineered feature spaces (CNNs replaced HOG/SIFT; representation learning replaces enumerated ontologies).
+- **P5 — Open-vocabulary entity extension path.** `the founding memory-architecture plan`, v3.10 micro-phase. The hand-crafted 10-class canonical taxonomy is insufficient for 50K-user diversity; let Splink Stage-B surface patterns outside the taxonomy; ontology curator approves new classes via the canonical_identity_admin_audit workflow. Cross-referenced in `the founding merged spec` v2.3 deep-dive, line 536: "Open-vocabulary entity extension path (Cell A LeCun) — Splink Stage-B surfaces patterns not in 10-class taxonomy, ontology curator approves new classes via canonical_identity_admin_audit workflow." This is the operational analog of LeCun's lifelong opposition to hand-engineered feature spaces (CNNs replaced HOG/SIFT; representation learning replaces enumerated ontologies).
 
-- **P6 — Contradiction detection ownership at the opinion-network seam.** `marvin-memory-master-phased-plan.html`, Open Questions list: "Contradiction detection ownership decision — opinion-network seam (Cell A LeCun P6)." Position carried forward from his energy-based-model framework (2006 tutorial; JEPA 2022): conflicting claims are joint configurations of variables that the system must hold and score, not collapse. Open question in v2.3, to be resolved before v3 ships.
+- **P6 — Contradiction detection ownership at the opinion-network seam.** `the founding memory-architecture plan`, Open Questions list: "Contradiction detection ownership decision — opinion-network seam (Cell A LeCun P6)." Position carried forward from his energy-based-model framework (2006 tutorial; JEPA 2022): conflicting claims are joint configurations of variables that the system must hold and score, not collapse. Open question in v2.3, to be resolved before v3 ships.
 
-- **v2.3 — Open-vocabulary as a confirmed deliverable.** `marvin-memory-v3-merged-spec.html` v2.3 deep-dive locks the open-vocabulary path into the phased plan. Confirms LeCun's P5 stance moved from proposal to commitment.
+- **v2.3 — Open-vocabulary as a confirmed deliverable.** `the founding merged spec` v2.3 deep-dive locks the open-vocabulary path into the phased plan. Confirms LeCun's P5 stance moved from proposal to commitment.
 
 When `/superintelligenceTeam-convene` cites LeCun in future sessions, prefer these stances first, then fall back to his recent_signal_12mo (V-JEPA 2 release, Meta departure, AMI Labs raise) for current strategic posture, then to his public_stances for long-running technical positions. Distinguish him sharply from Karpathy — both are Cell A AI/research personas, but Karpathy drove the hot-path 3-tier reversal and NER triage gate, while LeCun drove the open-vocabulary and contradiction-detection items. They share a cell letter; they do not share a lead-driver scope.

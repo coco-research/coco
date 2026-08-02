@@ -12,7 +12,7 @@ schema_version: 1.0
 Rijul's AI research + engineering brain trust **and decision-making partner**. 59 named personas drawn from the world's frontier model labs (US, UK, China, France), top AI universities, the open-source ecosystem, the independent-evaluation and AI-governance ecosystem, and product-history archetypes. Reusable across any CoCo-routed prompt — invoked by `/superintelligenceTeam-*` slash commands. The team's primary purpose is to **help take decisions**, not just review work after the fact — every cell carries a decision-relevant lens that convene synthesis explicitly draws on.
 
 > **Status:** All three phases complete.
-> - **Phase 1:** 49 personas across 8 cells (baseline roster + Marvin v2 panelists).
+> - **Phase 1:** 49 personas across 8 cells (baseline roster + founding v2 panelists).
 > - **Phase 2:** 10 priority additions from the [EXPANSION.md](EXPANSION.md) gap analysis (roster grew to 59).
 > - **Phase 3:** 22 slash commands installed at `~/.claude/commands/superintelligenceTeam*.md` — orchestrator-first action surface plus explicit-override identity surface. See [Slash Commands](#slash-commands) section below.
 
@@ -26,7 +26,7 @@ When a CoCo prompt is high-stakes enough to deserve a parallel review panel, the
 - Anchor stances to citable evidence (every public_stance in every persona has an `evidence_url`).
 - Stay honest about who actually drove which decision (lead-driver vs validator vs specialist vs swing).
 
-The 5-cell × 4-persona Marvin Memory v2 panel from May 26-27, 2026 was the **first consumer**. This team supersedes that roster: five of those panelists (Karpathy, Wei, LeCun, Tri Dao, Hyung Won Chung) continue here with their `v2_panel_attribution` records preserved. The rest of the Marvin v2 panel (memory / cloud / security / privacy personas) belong to future Super Intelligence Teams (Memory Systems, Cloud, Data, Compliance) and are not part of this AI-focused roster.
+The 5-cell × 4-persona founding Memory v2 panel from May 26-27, 2026 was the **first consumer**. This team supersedes that roster: five of those panelists (Karpathy, Wei, LeCun, Tri Dao, Hyung Won Chung) continue here with their `v2_panel_attribution` records preserved. The rest of the founding v2 panel (memory / cloud / security / privacy personas) belong to future Super Intelligence Teams (Memory Systems, Cloud, Data, Compliance) and are not part of this AI-focused roster.
 
 ## Cells (8)
 
@@ -168,7 +168,7 @@ All teams share the same schema (`teams: [...]` array on each persona, functiona
 - **Registry regeneration:** run `python3 superintelligenceTeam/scripts/build_registry.py` after any persona edit.
 - **Caveman mode does NOT apply** to persona files, cell files, or this SKILL.md. Documentation is always full English prose per the project rule.
 - **Citation is mandatory.** Every `public_stance` has an `evidence_url`. No uncited claims.
-- **v2 panel preservation.** Personas with `v2_panel_attribution` entries anchor to actual material from the Marvin Memory v2 synthesis on 2026-05-26. Convene uses those first.
+- **v2 panel preservation.** Personas with `v2_panel_attribution` entries anchor to actual material from the founding Memory v2 synthesis on 2026-05-26. Convene uses those first.
 - **Confidence calibration.** `confidence < 0.85` means we suspect identifier or biographical detail may need re-verification. Persona is still usable but flag in convene.
 
 ## Build provenance

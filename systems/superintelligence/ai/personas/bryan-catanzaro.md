@@ -299,6 +299,6 @@ Prompt: *"Catanzaro, we're planning a 200B-parameter open frontier model for ear
 
 ## Anchor quotes from the v2 panel
 
-Catanzaro did not participate in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27); the v2 deliberations centered on memory-systems and reasoning-layer personas rather than training-systems leadership. The `v2_panel_attribution` field is therefore empty.
+Catanzaro did not participate in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27); the v2 deliberations centered on memory-systems and reasoning-layer personas rather than training-systems leadership. The `v2_panel_attribution` field is therefore empty.
 
 When `/superintelligenceTeam-convene` cites him, prefer in order: (1) his `public_stances` with their evidence URLs, (2) his `recent_signal_12mo` artifacts (Nemotron 3 paper, Nemotron Nano v2 release, Interconnects podcast, Open Secret blog post), and (3) the founding quotes from the DeepLearning.AI "Working AI" interview and the Fast Company / Medium retellings of the cuDNN-to-Jensen "OIALO" story. If a future cross-team panel on training infrastructure, GPU kernel co-design, open-model strategy, or long-context inference economics is convened, Catanzaro is the canonical Cell A systems-kernels-serving lead-driver candidate, and this section should be updated with verbatim panel attributions at that point.

@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 67 skills** (top-level only — see `systems/<bundle>/skills/` for bundle-only skills).
+**Total: 68 skills** (top-level only — see `systems/<bundle>/skills/` for bundle-only skills).
 
 ## Design
 
@@ -14,6 +14,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
 | Skill | Description |
 |-------|-------------|
+| [arch-index](arch-index/SKILL.md) | Build and validate .arch/index.json — a committed map from each architectural component of this repository to the real directories and files that implement it,  |
 | [c4-architecture](c4-architecture/SKILL.md) | Generate architecture documentation using C4 model Mermaid diagrams. Use when asked to create architecture diagrams, document system architecture, visualize sof |
 | [generate-tests](generate-tests/SKILL.md) | Generate complete test coverage for any file, component, or module. Covers unit tests, integration tests, edge cases, error handling, and mocking — adapted to w |
 

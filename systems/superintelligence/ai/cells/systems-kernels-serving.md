@@ -56,4 +56,4 @@ Convene-time, this cell is asked **after** the architecture / algorithm question
 
 ## Cross-team back-compat
 
-All seven carry `cell_letter: A`. Only Tri Dao participated in the Marvin v2 panel.
+All seven carry `cell_letter: A`. Only Tri Dao participated in the founding v2 panel.

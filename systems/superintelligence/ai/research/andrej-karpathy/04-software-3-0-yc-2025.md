@@ -58,4 +58,4 @@ Karpathy positions LLMs as **fundamental utilities** — comparable to cloud com
 
 ## Why this matters for v2_panel_attribution
 
-The "make the right thing the default" framing in the Marvin Memory v2 panel synthesis (specifically the L4-floor + L1-drill-up + L5-NER-gated hot path, NOT all 5 layers) is Karpathy's stance carried over from this talk. Default = fast, deep retrieval is opt-in. Same shape as his Cursor autonomy slider — depth comes by request, not by default.
+The "make the right thing the default" framing in the founding Memory v2 panel synthesis (specifically the L4-floor + L1-drill-up + L5-NER-gated hot path, NOT all 5 layers) is Karpathy's stance carried over from this talk. Default = fast, deep retrieval is opt-in. Same shape as his Cursor autonomy slider — depth comes by request, not by default.

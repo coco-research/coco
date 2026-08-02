@@ -304,7 +304,7 @@ Prompt: *"Liskov, we have a `PaymentProcessor` base class and a `RefundProcessor
 
 ## Anchor quotes from the v2 panel
 
-Barbara Liskov did not participate in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27); `v2_panel_attribution` is intentionally empty for this archetype profile.
+Barbara Liskov did not participate in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27); `v2_panel_attribution` is intentionally empty for this archetype profile.
 
 When `/SI-Eng` or the convene templates cite Liskov in future sessions, prefer, in order:
 

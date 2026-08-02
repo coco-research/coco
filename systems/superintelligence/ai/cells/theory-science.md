@@ -53,7 +53,7 @@ The cell contains the **canonical Turing-laureate split** on existential risk:
 
 ## v2 panel attribution
 
-- **LeCun** (3 attributions): drove the open-vocabulary entity extension path (Marvin v2.3 spec), validator on related Cell A reversals.
+- **LeCun** (3 attributions): drove the open-vocabulary entity extension path (founding v2.3 spec), validator on related Cell A reversals.
 
 ## How this cell maps to /superintelligenceTeam-convene
 
@@ -61,4 +61,4 @@ Convene-time, this cell is asked to **interrogate claims at the foundation level
 
 ## Cross-team back-compat
 
-`cell_letter: A` for all nine. Only LeCun was in the Marvin v2 panel.
+`cell_letter: A` for all nine. Only LeCun was in the founding v2 panel.

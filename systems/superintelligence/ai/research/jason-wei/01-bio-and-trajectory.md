@@ -32,8 +32,8 @@ He is also the originator (or co-originator) of three of the most-cited promptin
 ## Persona slot in the AI Super Intelligence Team
 
 - **Team:** ai-super-intelligence
-- **Cell:** model-architects (cell letter A in Marvin v2 panel back-compat)
-- **Cell role:** specialist — not a lead-driver in Marvin v2, but a credited co-signer of Karpathy's L5 NER triage stance and an independent voice cited at v3.0 for SR-3 load-test scoping and CoT-retrieval token budget.
+- **Cell:** model-architects (cell letter A in founding v2 panel back-compat)
+- **Cell role:** specialist — not a lead-driver in founding v2, but a credited co-signer of Karpathy's L5 NER triage stance and an independent voice cited at v3.0 for SR-3 load-test scoping and CoT-retrieval token budget.
 
 ## Sources
 

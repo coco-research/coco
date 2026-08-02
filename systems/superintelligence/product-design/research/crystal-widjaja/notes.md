@@ -246,5 +246,5 @@ Productive conflict with (sharpen by disagreeing):
 - Exact founding year of Generation Girl not pinned; confirmed she is co-founder (multiple sources).
 - "30K→5M" vs "20K→5M" orders/day: used 30K→5M (her own materials + Reforge). Noted variance.
 - No formal academic publications — `key_publications` left empty (correct for a practitioner).
-- v2 panel: she did not participate in the Marvin Memory v2 panel → `v2_panel_attribution: []`,
+- v2 panel: she did not participate in the founding Memory v2 panel → `v2_panel_attribution: []`,
   section omitted per instructions.

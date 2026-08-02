@@ -92,7 +92,7 @@ Additional 2025 posts seen in archive (not all used): "More Hope" (2025-11-22), 
 
 ## v2 panel attribution
 
-Indi Young did **not** participate in the Marvin Memory v2 panel (an AI/Engineering-team artifact). Per task instruction, `v2_panel_attribution` is omitted from the persona file entirely (section dropped, not left empty in the narrative).
+Indi Young did **not** participate in the founding Memory v2 panel (an AI/Engineering-team artifact). Per task instruction, `v2_panel_attribution` is omitted from the persona file entirely (section dropped, not left empty in the narrative).
 
 ---
 

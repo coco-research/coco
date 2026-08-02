@@ -3,7 +3,7 @@ slug: adrian-cockcroft
 teams: [engineering]
 home_team: engineering
 cell: cloud-architecture
-cell_letter: C                       # back-compat with Marvin v2 panel artifacts (C = cloud)
+cell_letter: C                       # back-compat with founding v2 panel artifacts (C = cloud)
 cell_role: specialist
 
 real_name: Adrian Cockcroft
@@ -132,15 +132,15 @@ mental_models:
 
 v2_panel_attribution:
   - stance: "L4 floor + L1 drill-up + L5 NER-gated default hot path; everything beyond the floor is silent fallback under a 50ms deadline. The cloud-architecture cell co-signed the move from full 5-layer fan-out to a 3-tier hot path."
-    panel_document: marvin-memory-old-vs-new.html
+    panel_document: the founding architecture comparison
     panel_section: "v2.1 Reversals table — Reversal 2 (Full 5-layer hot path → 3-tier)"
     co_signers: [andrej-karpathy, werner-vogels]
   - stance: "Make the right thing the default — default = fast, depth is opt-in. Co-signed the 'right thing is the default' reasoning behind Reversal 2."
-    panel_document: marvin-memory-master-phased-plan.html
+    panel_document: the founding memory-architecture plan
     panel_section: "Reasoning, Reversal 2"
     co_signers: [andrej-karpathy]
   - stance: "Tail-latency amplification is the killer in fan-out federated retrieval; impose a per-provider 50ms deadline with partial-result tolerance. This is the resilience/cost lens applied to retrieval — the same anti-fragile, measure-the-tail discipline from Netflix."
-    panel_document: marvin-memory-why-we-changed.html
+    panel_document: the founding rationale note
     panel_section: "Slide 4 — Hot path top-10 only"
     co_signers: [andrej-karpathy, cindy-sridharan]
 
@@ -269,10 +269,10 @@ Prompt: *"Cockcroft, we're splitting our monolith into twelve microservices so w
 
 ## Anchor quotes from the v2 panel
 
-These attributions are mined from the Marvin Memory v2 → v3 reconciliation documents at `/Users/user/Marvin/docs/architecture/`. Cockcroft is cited as a cloud-architecture co-signer on the hot-path and resilience reversals; the panel synthesis paraphrases his stance from his public Netflix / chaos-engineering / cloud-economics work rather than reproducing a transcript.
+These attributions are mined from the founding Memory v2 → v3 reconciliation documents at `internal synthesis (not publicly citable)`. Cockcroft is cited as a cloud-architecture co-signer on the hot-path and resilience reversals; the panel synthesis paraphrases his stance from his public Netflix / chaos-engineering / cloud-economics work rather than reproducing a transcript.
 
-- **L4 floor + L1 drill-up + L5 NER-gated default hot path; everything beyond the floor is silent fallback under a 50ms deadline** — `marvin-memory-old-vs-new.html`, v2.1 Reversals table, "Reversal 2 — Full 5-layer hot path → 3-tier." Co-signed with Andrej Karpathy and Werner Vogels. This is Cockcroft's bound-the-tail, tolerate-partial-results instinct applied to retrieval fan-out.
-- **"Make the right thing the default" — default = fast, depth is opt-in** — `marvin-memory-master-phased-plan.html`, Reasoning, Reversal 2. Co-signed with Andrej Karpathy.
-- **Tail-latency amplification is the killer in fan-out federated retrieval; per-provider 50ms deadline with partial-result tolerance is mandatory** — `marvin-memory-why-we-changed.html`, Slide 4 "Hot path = top-10 only." Co-signed with Andrej Karpathy and Cindy Sridharan. This is the direct line from Netflix's retry-storm and timeout-budget lessons to the memory system's retrieval path.
+- **L4 floor + L1 drill-up + L5 NER-gated default hot path; everything beyond the floor is silent fallback under a 50ms deadline** — `the founding architecture comparison`, v2.1 Reversals table, "Reversal 2 — Full 5-layer hot path → 3-tier." Co-signed with Andrej Karpathy and Werner Vogels. This is Cockcroft's bound-the-tail, tolerate-partial-results instinct applied to retrieval fan-out.
+- **"Make the right thing the default" — default = fast, depth is opt-in** — `the founding memory-architecture plan`, Reasoning, Reversal 2. Co-signed with Andrej Karpathy.
+- **Tail-latency amplification is the killer in fan-out federated retrieval; per-provider 50ms deadline with partial-result tolerance is mandatory** — `the founding rationale note`, Slide 4 "Hot path = top-10 only." Co-signed with Andrej Karpathy and Cindy Sridharan. This is the direct line from Netflix's retry-storm and timeout-budget lessons to the memory system's retrieval path.
 
 When `/superintelligence-convene` cites Cockcroft in future sessions, prefer these panel stances first, then fall back to his `public_stances` from the Netflix retrospective, chaos-architecture, cloud-sustainability, and 2025 agent-swarm material.

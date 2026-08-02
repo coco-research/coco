@@ -157,19 +157,19 @@ def main() -> None:
         (
             "lineage",
             {
-                "marvin_v2_panel": {
+                "founding_v2_panel": {
                     "date": "2026-05-26",
                     "note": (
-                        "Earlier 5-cell × 4-persona panel synthesized the Marvin Memory v2 "
+                        "Earlier 5-cell × 4-persona panel synthesized the founding Memory v2 "
                         "architecture. Personas with `v2_panel_attribution` entries draw on "
                         "that material; cell_letter A-E preserves cross-team back-compat."
                     ),
                     "source_artifacts": [
-                        "/Users/user/Marvin/docs/architecture/marvin-memory-master-phased-plan.html",
-                        "/Users/user/Marvin/docs/architecture/marvin-memory-v3-merged-spec.html",
-                        "/Users/user/Marvin/docs/architecture/marvin-memory-old-vs-new.html",
-                        "/Users/user/Marvin/docs/architecture/marvin-memory-why-we-changed.html",
-                        "/Users/user/Marvin/docs/architecture/SESSION-2026-05-26.md",
+                        "internal synthesis (not publicly citable)",
+                        "internal synthesis (not publicly citable)",
+                        "internal synthesis (not publicly citable)",
+                        "internal synthesis (not publicly citable)",
+                        "internal synthesis (not publicly citable)",
                     ],
                 },
             },
@@ -187,7 +187,7 @@ def main() -> None:
         if not slugs:
             print(f"WARN: cell {cell_id} is empty", file=sys.stderr)
     panel_count = sum(1 for p in personas.values() if p["v2_panel_attribution_count"] > 0)
-    print(f"  Marvin v2 panel-attributed personas: {panel_count}")
+    print(f"  founding v2 panel-attributed personas: {panel_count}")
 
 
 if __name__ == "__main__":

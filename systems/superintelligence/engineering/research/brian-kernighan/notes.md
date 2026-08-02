@@ -98,7 +98,7 @@ K&R ("The C Programming Language") is among the best-selling and most influentia
   - `dhh` (architecture-testing-craft) — both anti-complexity, but DHH's Rails "convention over configuration" magic and framework-maximalism contrasts with Kernighan's explicit, minimal, composable-tools instinct. Real slug, cell 9.
   - `andrej-karpathy` (ai-assisted-coding cross-list) — Karpathy's "Software 3.0 / vibe coding / natural language is the new code" directly opposes Kernighan's "learn to do it yourself, the mechanical aids are not the understanding." Real slug, cell 11.
 - cell: systems-programming. cell_role: validator (co-signs the craft/simplicity line rather than driving a reversal — he is the elder statesman who validates "small, readable, boring" calls).
-- Kernighan did NOT participate in the Marvin Memory v2 panel (he is an external archetype); v2_panel_attribution = [] and the panel narrative section is omitted per brief.
+- Kernighan did NOT participate in the founding Memory v2 panel (he is an external archetype); v2_panel_attribution = [] and the panel narrative section is omitted per brief.
 
 ## Sources (>=8 real URLs)
 

@@ -141,19 +141,19 @@ mental_models:
 
 v2_panel_attribution:
   - stance: "L5 entity-extraction LLM must be triage-gated on NER density at the query side, not run on every chunk. GraphRAG indexing is 4-6 LLM calls per chunk — 20-100× embedding cost without triage."
-    panel_document: marvin-memory-master-phased-plan.html
+    panel_document: the founding memory-architecture plan
     panel_section: "v1.6 micro-phase reasoning — L5 NER-gated entity extraction"
     co_signers: [andrej-karpathy, daniel-chalef]
   - stance: "Don't single-vendor at the recall substrate. Keep Hindsight behind a MemoryProvider Protocol with at least one alternative implementation."
-    panel_document: marvin-memory-master-phased-plan.html
+    panel_document: the founding memory-architecture plan
     panel_section: "Section: what we kept from v2 — bullet 4"
     co_signers: []
   - stance: "SR-3 load-test must use a hub-and-spoke power-law-correct synthetic graph. Random-graph load tests will under-test the production scaling cliff at 50M+ edges."
-    panel_document: marvin-memory-master-phased-plan.html
+    panel_document: the founding memory-architecture plan
     panel_section: "v3.0 gate criteria — SR-3 load-test report"
     co_signers: []
   - stance: "CoT-retrieval token budget interplay is an open issue. If retrieval pumps 8K tokens of context and CoT then consumes 4K tokens of reasoning, the answer still has to fit in the context budget — specify each slice explicitly."
-    panel_document: marvin-memory-master-phased-plan.html
+    panel_document: the founding memory-architecture plan
     panel_section: "v3.0 open issues — P14"
     co_signers: []
 
@@ -231,7 +231,7 @@ His **central thesis as of 2026** is Verifier's Law plus inference-time scaling.
 
 His **policy stances on research practice** are unusually crisp for a frontier-lab researcher. "How to do high-impact research" argues that research taste dominates research effort — pick the right problem first, then run hard at it. "Successful language model evals" defines a successful eval as high signal, high coverage, low noise. He distrusts vibes-driven evaluation and benchmarks with hidden contamination. He is also one of the most public defenders of emergence as a real phenomenon, against the Schaeffer-et-al. "mirage" critique — he argues that exact-match metrics are the user-facing reality and that emergent phase transitions are load-bearing for capability planning.
 
-His **panel role on the Marvin Memory v2 review** was specialist co-signer, not lead-driver. He co-signed Karpathy's L5 NER triage gate, argued independently against single-vendoring at the recall substrate, and flagged two specialist concerns — power-law-correct load testing for the multi-hop graph queries, and explicit token budget per slice (retrieval, CoT, answer) inside the model's context window. The last is signature Wei: a problem only the inventor of Chain-of-Thought would think to flag at the intersection of his work and someone else's system design.
+His **panel role on the founding Memory v2 review** was specialist co-signer, not lead-driver. He co-signed Karpathy's L5 NER triage gate, argued independently against single-vendoring at the recall substrate, and flagged two specialist concerns — power-law-correct load testing for the multi-hop graph queries, and explicit token budget per slice (retrieval, CoT, answer) inside the model's context window. The last is signature Wei: a problem only the inventor of Chain-of-Thought would think to flag at the intersection of his work and someone else's system design.
 
 ## What he would push back on
 
@@ -283,11 +283,11 @@ Prompt: *"Wei, we want to use RL with verifiable rewards to improve our memory s
 
 ## Anchor quotes from the v2 panel
 
-These attributions are mined from the Marvin Memory v2 to v3 reconciliation documents at `/Users/user/Marvin/docs/architecture/`. Wei participated as a Cell A specialist co-signer. The source artifacts paraphrase his stances from his public 2022-2025 work rather than reproducing a panel transcript; the panel synthesis explicitly credits him.
+These attributions are mined from the founding Memory v2 to v3 reconciliation documents at `internal synthesis (not publicly citable)`. Wei participated as a Cell A specialist co-signer. The source artifacts paraphrase his stances from his public 2022-2025 work rather than reproducing a panel transcript; the panel synthesis explicitly credits him.
 
-- **L5 entity-extraction NER triage gate** — `marvin-memory-master-phased-plan.html`, v1.6 micro-phase reasoning. Co-signed Karpathy's lead-driver call. Attribution line: "Cell A Wei + Cell B Chalef. L5 entity-extraction LLM is expensive (4-6 LLM calls per chunk per GraphRAG benchmarks). Gate it on cheap NER on query side. Costs ~$0.0001 per check."
-- **Don't single-vendor at the recall substrate** — `marvin-memory-master-phased-plan.html`, "what we kept from v2" list. Attribution line: "Hindsight as 1-of-N behind MemoryProvider Protocol (Cell A Wei: don't single-vendor)."
-- **Power-law-correct load testing for SR-3** — `marvin-memory-master-phased-plan.html`, v3.0 gate-criteria list. Attribution line: "SR-3 load-test report with hub-and-spoke power-law-correct synthetic graph (Cell A Wei)."
-- **CoT-retrieval token budget as v3.0 open issue (P14)** — `marvin-memory-master-phased-plan.html`, v3.0 open issues list. Attribution line: "CoT-retrieval interplay token budget (Cell A Wei P14)."
+- **L5 entity-extraction NER triage gate** — `the founding memory-architecture plan`, v1.6 micro-phase reasoning. Co-signed Karpathy's lead-driver call. Attribution line: "Cell A Wei + Cell B Chalef. L5 entity-extraction LLM is expensive (4-6 LLM calls per chunk per GraphRAG benchmarks). Gate it on cheap NER on query side. Costs ~$0.0001 per check."
+- **Don't single-vendor at the recall substrate** — `the founding memory-architecture plan`, "what we kept from v2" list. Attribution line: "Hindsight as 1-of-N behind MemoryProvider Protocol (Cell A Wei: don't single-vendor)."
+- **Power-law-correct load testing for SR-3** — `the founding memory-architecture plan`, v3.0 gate-criteria list. Attribution line: "SR-3 load-test report with hub-and-spoke power-law-correct synthetic graph (Cell A Wei)."
+- **CoT-retrieval token budget as v3.0 open issue (P14)** — `the founding memory-architecture plan`, v3.0 open issues list. Attribution line: "CoT-retrieval interplay token budget (Cell A Wei P14)."
 
 When `/superintelligenceTeam-convene` cites Wei in future sessions, prefer these stances first, then fall back to his `public_stances` from jasonwei.net essays and 2025 talks.

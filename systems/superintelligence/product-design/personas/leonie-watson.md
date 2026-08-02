@@ -238,4 +238,4 @@ Prompt: *"Léonie, we're shipping a custom autocomplete combobox. We've added `r
 
 ## Anchor quotes from the v2 panel
 
-Not applicable. Léonie Watson did not participate in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27); she is a Product & Design Super Intelligence Team persona built from public sources. `v2_panel_attribution` is intentionally omitted.
+Not applicable. Léonie Watson did not participate in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27); she is a Product & Design Super Intelligence Team persona built from public sources. `v2_panel_attribution` is intentionally omitted.

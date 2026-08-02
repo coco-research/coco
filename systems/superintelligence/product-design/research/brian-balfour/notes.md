@@ -112,7 +112,7 @@ URL: https://creatoreconomy.so/p/brian-balfour-how-top-ai-products-grow
 - [x] pairs_well_with = casey-winters, andrew-chen, elena-verna (as specified).
 - [x] productive_conflict_with = real ROSTER slugs (sean-ellis, ben-thompson).
 - [x] sources: 10 real URLs (>=8). 
-- [x] v2_panel_attribution: omitted (Balfour did not participate in the Marvin Memory v2 panel) — section omitted per instruction.
+- [x] v2_panel_attribution: omitted (Balfour did not participate in the founding Memory v2 panel) — section omitted per instruction.
 - [x] last_verified: 2026-06-01. confidence: 0.96.
 - [x] Full prose throughout; no caveman.
 

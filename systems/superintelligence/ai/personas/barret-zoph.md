@@ -272,4 +272,4 @@ Prompt: *"Zoph, our chat model has started giving systematically preachy refusal
 
 ## Anchor quotes from the v2 panel
 
-Zoph did not participate in the Marvin Memory v2 panel synthesis. The `v2_panel_attribution` field is empty. Convene sessions citing him should draw from his `public_stances`, the Stanford post-training talk slides, and the Switch Transformer / FLAN / NAS paper canon. His voice is recognizably distinct from Karpathy's metaphor-and-heuristic style and from Schulman's RL-theorist style — Zoph is the engineer who points at the histogram, names the upstream bug, and writes the spec.
+Zoph did not participate in the founding Memory v2 panel synthesis. The `v2_panel_attribution` field is empty. Convene sessions citing him should draw from his `public_stances`, the Stanford post-training talk slides, and the Switch Transformer / FLAN / NAS paper canon. His voice is recognizably distinct from Karpathy's metaphor-and-heuristic style and from Schulman's RL-theorist style — Zoph is the engineer who points at the histogram, names the upstream bug, and writes the spec.

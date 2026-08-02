@@ -13,7 +13,7 @@
 # (post-2025-06-01) — the World Design Medal awarded 9 September 2025 and the
 # CAFA "Less, but Better" Asian retrospective, 14 September – 8 October 2025 — and
 # are cited as such. No recent design activity is fabricated. `v2_panel_attribution`
-# is empty: Rams did not and could not have participated in the Marvin Memory v2
+# is empty: Rams did not and could not have participated in the founding Memory v2
 # panel of May 2026.
 slug: dieter-rams
 teams: [product-design-super-intelligence]
@@ -162,7 +162,7 @@ mental_models:
   - "Systems over statements — design open, modular grids (the 606, the Braun component stacks) that the user completes over time, rather than closed finished objects that the designer signs."
   - "Self-explanation as the test of completeness — if the product needs a manual, the design is unfinished. Clarity of structure is the designer's obligation, not the user's homework."
 
-# Dieter Rams did not participate in the Marvin Memory v2 panel synthesis
+# Dieter Rams did not participate in the founding Memory v2 panel synthesis
 # (May 2026) and could not have. Empty list per the archetype pattern.
 v2_panel_attribution: []
 
@@ -295,7 +295,7 @@ Prompt: *"Rams, we've designed an AI writing assistant. The interface has an ani
 
 ## Anchor quotes from the v2 panel
 
-Dieter Rams did not participate in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27) and could not have — he is a retired industrial designer with no involvement in the project. The standard "anchor quotes" section that v2-panel personas carry is intentionally empty for this archetype profile.
+Dieter Rams did not participate in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27) and could not have — he is a retired industrial designer with no involvement in the project. The standard "anchor quotes" section that v2-panel personas carry is intentionally empty for this archetype profile.
 
 When `/SI-PD-*` commands cite Rams in future sessions, prefer:
 

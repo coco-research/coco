@@ -277,4 +277,4 @@ Prompt: *"Madry, we are about to deploy a frontier reasoning agent that can auto
 
 ## Anchor quotes from the v2 panel
 
-Madry did not participate in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27); `v2_panel_attribution` is empty. When `/superintelligenceTeam-convene` cites Madry in future sessions, draw from his `public_stances` above and from the canonical works — particularly the saddle-point formulation, the data-attribution stance, the platinum-benchmarks stance, and the Preparedness Framework's threshold-and-veto institutional design.
+Madry did not participate in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27); `v2_panel_attribution` is empty. When `/superintelligenceTeam-convene` cites Madry in future sessions, draw from his `public_stances` above and from the canonical works — particularly the saddle-point formulation, the data-attribution stance, the platinum-benchmarks stance, and the Preparedness Framework's threshold-and-veto institutional design.

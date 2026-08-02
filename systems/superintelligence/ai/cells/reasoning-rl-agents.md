@@ -16,7 +16,7 @@ Post-training, reinforcement learning, and agentic systems. This cell is where t
 |---|---|---|---|---|
 | `john-schulman` | John Schulman | Thinking Machines Lab CSO | lead-driver | PPO algorithm author; ChatGPT post-training co-lead; "RL works if you do it right" |
 | `noam-brown` | Noam Brown | OpenAI Research (reasoning lead) | lead-driver | Libratus/Pluribus/CICERO → o1; test-time compute as a fundamental scaling axis; "reasoning could have arrived 20 years ago" |
-| `hyung-won-chung` | Hyung Won Chung | Meta Superintelligence Labs (from OpenAI 2025) | specialist | "Don't teach. Incentivize."; FLAN/T5 instruction tuning; Marvin v2 cost-economics specialist |
+| `hyung-won-chung` | Hyung Won Chung | Meta Superintelligence Labs (from OpenAI 2025) | specialist | "Don't teach. Incentivize."; FLAN/T5 instruction tuning; founding v2 cost-economics specialist |
 | `nathan-lambert` | Nathan Lambert | Allen Institute for AI (Ai2) | specialist | Interconnects newsletter; Tulu/Olmo post-training; ATOM Project; open RLHF practitioner |
 | `barret-zoph` | Barret Zoph | OpenAI Applications (from TML 2026) | specialist | NAS first-author; ChatGPT post-training co-lead; FLAN co-author; switch transformer co-author |
 | `karina-nguyen` | Karina Nguyen | OpenAI Research (post-Anthropic) | specialist | RLHF process craft, "tailoring," Constitutional AI alum, designer-to-researcher trajectory |
@@ -47,7 +47,7 @@ Post-training, reinforcement learning, and agentic systems. This cell is where t
 
 ## v2 panel attribution
 
-- **Chung** (7 attributions): largest panel-attribution count on the roster. He carried the cost / FinOps / cloud-economics voice in Marvin v2 — D18 cost controls, D33 KILL 7-year S3 fine-tune dataset, D39 TCO rebaseline at $2.4-2.8M, K2 distillation budget, K9 Anthropic Memory for Managed Agents adoption, R1 L5 extraction triage, R6 RAPTOR rollup policy. His `cell_letter: E` preserves that history.
+- **Chung** (7 attributions): largest panel-attribution count on the roster. He carried the cost / FinOps / cloud-economics voice in founding v2 — D18 cost controls, D33 KILL 7-year S3 fine-tune dataset, D39 TCO rebaseline at $2.4-2.8M, K2 distillation budget, K9 Anthropic Memory for Managed Agents adoption, R1 L5 extraction triage, R6 RAPTOR rollup policy. His `cell_letter: E` preserves that history.
 
 ## How this cell maps to /superintelligenceTeam-convene
 

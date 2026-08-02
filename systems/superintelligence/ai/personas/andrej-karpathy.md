@@ -2,7 +2,7 @@
 slug: andrej-karpathy
 teams: [ai-super-intelligence, engineering-super-intelligence]
 cell: model-architects
-cell_letter: A                       # back-compat with Marvin v2 panel artifacts
+cell_letter: A                       # back-compat with founding v2 panel artifacts
 cell_role: lead-driver
 
 real_name: Andrej Karpathy
@@ -143,19 +143,19 @@ mental_models:
 
 v2_panel_attribution:
   - stance: "Hot path default = L4 floor + L1 drill-up + L5 NER-gated, not full 5-layer fan-out. L4 is the floor (hard error if fails); all other layers are silent fallback under a 50ms deadline."
-    panel_document: marvin-memory-old-vs-new.html
+    panel_document: the founding architecture comparison
     panel_section: "v2.1 reversals table — Reversal 2"
     co_signers: [adrian-cockcroft, werner-vogels]
   - stance: "Make the right thing the default. Default = fast. Want depth? Opt in."
-    panel_document: marvin-memory-master-phased-plan.html
+    panel_document: the founding memory-architecture plan
     panel_section: "Reasoning, Reversal 2"
     co_signers: [adrian-cockcroft]
   - stance: "L5 entity extraction must be triage-gated on NER density at query side, never run on every chunk. GraphRAG without triage is 20-100x cost blow-up."
-    panel_document: marvin-memory-master-phased-plan.html
+    panel_document: the founding memory-architecture plan
     panel_section: "v1.6 micro-phase reasoning"
     co_signers: [jason-wei, daniel-chalef]
   - stance: "Tail-latency amplification is the killer in fan-out federated retrieval. Per-provider 50ms deadline + partial-result tolerance is mandatory."
-    panel_document: marvin-memory-why-we-changed.html
+    panel_document: the founding rationale note
     panel_section: "Slide 4 — Hot path top-10 only"
     co_signers: [adrian-cockcroft, cindy-sridharan]
 
@@ -276,11 +276,11 @@ Prompt: *"Karpathy, we're building a 5-layer hierarchical retrieval system for a
 
 ## Anchor quotes from the v2 panel
 
-These attributions are mined from the Marvin Memory v2 → v3 reconciliation documents at `/Users/user/Marvin/docs/architecture/`. Karpathy participated as a Cell A lead-driver. The source artifacts paraphrase his stance from public 2025 talks rather than reproducing a panel transcript; the panel synthesis explicitly credits him.
+These attributions are mined from the founding Memory v2 → v3 reconciliation documents at `internal synthesis (not publicly citable)`. Karpathy participated as a Cell A lead-driver. The source artifacts paraphrase his stance from public 2025 talks rather than reproducing a panel transcript; the panel synthesis explicitly credits him.
 
-- **L4 floor + L1 drill-up + L5 NER-gated default hot path** — `marvin-memory-old-vs-new.html`, v2.1 Reversals table, "Reversal 2 — Full 5-layer hot path → 3-tier." Co-signed by Adrian Cockcroft and Werner Vogels.
-- **"Make the right thing the default"** — `marvin-memory-master-phased-plan.html`, Section 2 Reasoning, Reversal 2. Co-signed by Adrian Cockcroft.
-- **NER triage gate at query side** — `marvin-memory-master-phased-plan.html`, v1.6 micro-phase reasoning ("L5 entity-extraction LLM is expensive… Gate it on cheap NER on query side"). Co-signed by Jason Wei and Daniel Chalef.
-- **Tail-latency amplification framing** — `marvin-memory-why-we-changed.html`, Slide 4 "Hot path = top-10 only." Karpathy's framing carried over from his 2025 Software 3.0 talk and applied to the retrieval-fan-out problem.
+- **L4 floor + L1 drill-up + L5 NER-gated default hot path** — `the founding architecture comparison`, v2.1 Reversals table, "Reversal 2 — Full 5-layer hot path → 3-tier." Co-signed by Adrian Cockcroft and Werner Vogels.
+- **"Make the right thing the default"** — `the founding memory-architecture plan`, Section 2 Reasoning, Reversal 2. Co-signed by Adrian Cockcroft.
+- **NER triage gate at query side** — `the founding memory-architecture plan`, v1.6 micro-phase reasoning ("L5 entity-extraction LLM is expensive… Gate it on cheap NER on query side"). Co-signed by Jason Wei and Daniel Chalef.
+- **Tail-latency amplification framing** — `the founding rationale note`, Slide 4 "Hot path = top-10 only." Karpathy's framing carried over from his 2025 Software 3.0 talk and applied to the retrieval-fan-out problem.
 
 When `/superintelligenceTeam-convene` cites Karpathy in future sessions, prefer these stances first, then fall back to his `public_stances` from 2025 / 2026 essays and podcasts.

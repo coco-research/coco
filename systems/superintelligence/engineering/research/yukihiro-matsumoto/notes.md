@@ -224,7 +224,7 @@ Status: **active**. Easily clears the >=3 recent-signal bar. No need for `status
 - recent_signal_12mo: 5 entries, all dated after 2025-05-30 with URLs (>=3 met).
 - every public_stance carries an evidence_url (met).
 - frontmatter colon-values single-quoted where needed (met).
-- v2_panel_attribution: omitted per brief (Matz did not participate in the Marvin v2 panel).
+- v2_panel_attribution: omitted per brief (Matz did not participate in the founding v2 panel).
 - confidence: 0.93 — strong identity certainty and deep public record; minor uncertainty
   only on the precise current-employer line (NaCl vs Ruby Association funding split) and on
   the lack of verbatim Spinel quotes (coverage is paraphrased via attendees).

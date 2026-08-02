@@ -247,5 +247,5 @@ Source: https://www.sans.org/profiles/katie-moussouris
 - `recent_signal_12mo` has 6 entries, all dated after 2025-05-30. (Bar: >=3.)
 - `sources` has >=8 real URLs, of which >=3 are within the last 12 months.
 - `v2_panel_attribution` section OMITTED per instruction (she did not participate
-  in the Marvin Memory v2 panel; she is a new Engineering-team native persona).
+  in the founding Memory v2 panel; she is a new Engineering-team native persona).
 - Any affiliation value containing a colon is single-quoted in YAML.

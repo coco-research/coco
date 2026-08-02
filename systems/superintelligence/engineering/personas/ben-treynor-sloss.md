@@ -3,7 +3,7 @@ slug: ben-treynor-sloss
 teams: [engineering]
 home_team: engineering
 cell: reliability-sre-obs
-cell_letter: E                       # back-compat with Marvin v2 panel artifacts (E = obs/ops)
+cell_letter: E                       # back-compat with founding v2 panel artifacts (E = obs/ops)
 cell_role: lead-driver
 
 real_name: Benjamin Treynor Sloss

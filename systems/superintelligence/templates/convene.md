@@ -10,8 +10,8 @@ A convene session has three phases: **inputs**, **per-cell stances**, and **synt
 
 ```yaml
 ---
-convene_id: 2026-05-27-marvin-memory-v3-synthesis   # ISO date + topic-slug
-topic: "Marvin Memory v2 → v3 — substrate, hot path, erasure"
+convene_id: 2026-05-27-memory-v3-synthesis   # ISO date + topic-slug
+topic: "founding Memory v2 → v3 — substrate, hot path, erasure"
 caller: rijul-kalra
 date: 2026-05-27
 mode: full-panel                                    # full-panel (20) | cell (4) | duo (2) | solo (1)
@@ -23,9 +23,9 @@ personas_active:                                    # explicit roster for the se
   - tri-dao
   # ...
 artifacts_reviewed:                                 # what the panel was asked to review
-  - path: /Users/user/Marvin/docs/architecture/marvin-memory-old-vs-new.html
+  - path: internal synthesis (not publicly citable)
     role: source
-  - path: /Users/user/Marvin/docs/architecture/partner-profile-memory-handoff.html
+  - path: internal synthesis (not publicly citable)
     role: counterproposal
 verdict_format: reversals-fixes-pending             # reversals-fixes-pending | take-leave | go-no-go | decision-matrix
 status: ratified                                    # draft | ratified | superseded
@@ -94,7 +94,7 @@ A short section listing the points where cells disagree. Every disagreement name
 
 The final verdict, structured by `verdict_format` from the frontmatter. Every line of the verdict MUST cite which persona or cell drove it.
 
-For `reversals-fixes-pending` format (the format used by the Marvin v2→v3 synthesis):
+For `reversals-fixes-pending` format (the format used by the founding v2→v3 synthesis):
 
 ```markdown
 ## Synthesis verdict — reversals/fixes/pending
@@ -172,7 +172,7 @@ A final section preserving exact wording from the panel. Each quote attributed t
 ## Rules for `/superintelligenceTeam-convene`
 
 1. **Always cite who said what.** No bare "the panel agreed." Either name a persona or name a cell.
-2. **Mine `v2_panel_attribution` first.** If a persona has a stance recorded from the Marvin v2 panel, USE IT verbatim before generating new opinion in their voice.
+2. **Mine `v2_panel_attribution` first.** If a persona has a stance recorded from the founding v2 panel, USE IT verbatim before generating new opinion in their voice.
 3. **Surface dissent explicitly.** Smoothing over disagreement loses signal. Convene's job is to make disagreement legible.
 4. **Cell-role hierarchy.** Lead-drivers > validators > specialists > swings. In a tie, lead-drivers prevail. Mark this explicitly.
 5. **Recency bias** — when a persona's `recent_signal_12mo` contradicts an older `canonical_works` entry, recent wins. Note the shift in synthesis.

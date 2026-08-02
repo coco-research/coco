@@ -1,8 +1,8 @@
-# Hyung Won Chung — Marvin v2 Panel Attribution
+# Hyung Won Chung — founding v2 Panel Attribution
 
-Mined from `/Users/user/Marvin/scripts/brain/v2_decisions.py`, `v3_session_update.py`, and the architecture HTML artifacts in `/Users/user/Marvin/docs/architecture/`.
+Mined from `internal synthesis (not publicly citable)`, `v3_session_update.py`, and the architecture HTML artifacts in `internal synthesis (not publicly citable)`.
 
-In the Marvin Memory v2 → v3 panel synthesis (May 2026), Chung was seated as **Cell E** ("SRE / legal / cost"), not Cell A (LLM researchers). The cross-team placement is unusual: his research footprint is reasoning + instruction tuning, but in the panel he represented the **cost / FinOps / cloud-economics** frame. This is preserved in `cell_letter: E` for back-compat while his current AI Super Intelligence Team cell is `reasoning-rl-agents` (Cell A in the team rubric, but distinct from the v2 panel letter).
+In the founding Memory v2 → v3 panel synthesis (May 2026), Chung was seated as **Cell E** ("SRE / legal / cost"), not Cell A (LLM researchers). The cross-team placement is unusual: his research footprint is reasoning + instruction tuning, but in the panel he represented the **cost / FinOps / cloud-economics** frame. This is preserved in `cell_letter: E` for back-compat while his current AI Super Intelligence Team cell is `reasoning-rl-agents` (Cell A in the team rubric, but distinct from the v2 panel letter).
 
 ## v2 panel persona roster (system prompt to panel agent)
 
@@ -86,7 +86,7 @@ From `v2_decisions.py` line 125:
 
 ## Synthesis
 
-Chung's Marvin v2 voice was **the cost-aware reasoning researcher** — the rare panelist who could simultaneously argue for aggressive RL/reasoning investment AND demand per-tenant budget enforcers, batch-mode mandates, and TCO rebaselines. He paired naturally with:
+Chung's founding v2 voice was **the cost-aware reasoning researcher** — the rare panelist who could simultaneously argue for aggressive RL/reasoning investment AND demand per-tenant budget enforcers, batch-mode mandates, and TCO rebaselines. He paired naturally with:
 
 - **Hamilton** (Cell C, cloud economics) on TCO rebaselines and cost variance analysis (D39, K11).
 - **Chalef** (Cell B, memory infra) on triage gating extraction (R1).

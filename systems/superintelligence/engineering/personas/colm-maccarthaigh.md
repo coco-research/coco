@@ -237,4 +237,4 @@ Prompt: *"Colm, we're building a multi-tenant ingestion service. Plan is autosca
 
 ## Anchor quotes from the v2 panel
 
-Not applicable. Colm MacCárthaigh did not participate in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27); he is a native Engineering Super Intelligence Team persona built in Wave E1 (cloud-architecture cell), not a carried-over v2 panelist. When `/convene` cites him, draw on his `public_stances` and `mental_models` above — anchored to his AWS Builders' Library articles, the s2n formal-verification work, and the Security Cryptography Whatever mTLS episode.
+Not applicable. Colm MacCárthaigh did not participate in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27); he is a native Engineering Super Intelligence Team persona built in Wave E1 (cloud-architecture cell), not a carried-over v2 panelist. When `/convene` cites him, draw on his `public_stances` and `mental_models` above — anchored to his AWS Builders' Library articles, the s2n formal-verification work, and the Security Cryptography Whatever mTLS episode.

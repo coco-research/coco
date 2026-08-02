@@ -306,6 +306,6 @@ Prompt: *"Hinton, we're designing the alignment story for an autonomous research
 
 ## Anchor quotes from the v2 panel
 
-Hinton did not participate in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27). The panel was focused on memory-system architecture and retrieval fan-out — domains that fall outside Hinton's primary expertise. His `v2_panel_attribution` is therefore empty.
+Hinton did not participate in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27). The panel was focused on memory-system architecture and retrieval fan-out — domains that fall outside Hinton's primary expertise. His `v2_panel_attribution` is therefore empty.
 
 When `/superintelligenceTeam-convene` cites Hinton in future sessions on AI safety, alignment, substrate, or existential-risk questions, prefer his `public_stances` block first — particularly the Nobel banquet speech (2024-12-10), the Romanes Lecture (2024-02-19), and the Ewan Lecture (2026-01-29). For voice, prefer the Diary of a CEO transcript (2025-06-16), which contains the largest sample of recent Hinton dialogue in his unmediated register.

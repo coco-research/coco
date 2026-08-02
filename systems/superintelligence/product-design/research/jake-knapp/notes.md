@@ -124,7 +124,7 @@ Note: *Click* (Apr 22, 2025) and *Introducing the Foundation Sprint* (Jan 28, 20
 
 ## v2 panel attribution
 
-Jake Knapp did **not** participate in the Marvin Memory v2 panel (an AI/infra-systems synthesis). `v2_panel_attribution` is omitted from the persona per task instruction. No "Anchor quotes from the v2 panel" section in the narrative.
+Jake Knapp did **not** participate in the founding Memory v2 panel (an AI/infra-systems synthesis). `v2_panel_attribution` is omitted from the persona per task instruction. No "Anchor quotes from the v2 panel" section in the narrative.
 
 ---
 

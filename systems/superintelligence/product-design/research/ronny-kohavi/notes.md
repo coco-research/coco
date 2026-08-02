@@ -134,4 +134,4 @@ All five slugs (sean-ellis, jakob-nielsen, don-norman, nir-eyal, crystal-widjaja
 - every public_stance has evidence_url: yes (10 stances, all cited).
 - productive_conflict_with uses real ROSTER slugs: yes (jakob-nielsen, don-norman, nir-eyal).
 - pairs_well_with includes sean-ellis: yes.
-- v2_panel_attribution: omit (Kohavi did not participate in the Marvin Memory v2 panel).
+- v2_panel_attribution: omit (Kohavi did not participate in the founding Memory v2 panel).

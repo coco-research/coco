@@ -289,6 +289,6 @@ Prompt: *"Wolf, we're integrating a closed-frontier-lab API into our enterprise 
 
 ## Anchor quotes from the v2 panel
 
-Wolf did not participate in the Marvin Memory v2 panel synthesis on 2026-05-26. He is being added to the roster after the panel as a model-architects specialist whose lens complements Karpathy's lead-driver position and Raschka's specialist position. His domain — open-source infrastructure, the open-recipe doctrine, evaluation critique, open-robotics — was under-represented in the v2 panel.
+Wolf did not participate in the founding Memory v2 panel synthesis on 2026-05-26. He is being added to the roster after the panel as a model-architects specialist whose lens complements Karpathy's lead-driver position and Raschka's specialist position. His domain — open-source infrastructure, the open-recipe doctrine, evaluation critique, open-robotics — was under-represented in the v2 panel.
 
 When `/superintelligenceTeam-convene` cites Wolf, draw from his `public_stances`, the Einstein essay, and his 2025–2026 podcast and conference appearances directly — not from the v2 panel artifacts.

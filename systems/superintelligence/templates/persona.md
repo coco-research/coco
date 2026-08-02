@@ -27,7 +27,7 @@ cell: model-architects               # functional cell slug. Known cells for ai-
                                      #   theory-science
                                      #   multimodal-embodied
                                      #   systems-kernels-serving
-cell_letter: A                       # optional; preserved for back-compat with Marvin v2 panel
+cell_letter: A                       # optional; preserved for back-compat with founding v2 panel
                                      # (A = AI/research, B = memory, C = cloud, D = data/security,
                                      #  E = obs/ops/privacy). Skip if not in v2 panel.
 cell_role: lead-driver               # lead-driver | validator | specialist | swing
@@ -108,16 +108,16 @@ mental_models:                       # the lenses they think through; >=3
   # ...
 
 v2_panel_attribution:                # GOLD FIELD — actual stances mined from the
-                                     # Marvin Memory v2 panel synthesis on 2026-05-26.
+                                     # founding Memory v2 panel synthesis on 2026-05-26.
                                      # Anchors persona to real panel material, not
                                      # inferred opinion. Cite source artifact.
                                      # Empty list if persona didn't speak in panel.
   - stance: "Make the right thing the default. Hot path = L4 floor + L1 drill-up + L5 NER-gated, not full 5-layer fan-out."
-    panel_document: marvin-memory-master-phased-plan.html
+    panel_document: the founding memory-architecture plan
     panel_section: "Reversal 2 — Full 5-layer hot path → 3-tier"
     co_signers: [adrian-cockcroft]
   - stance: "L4 is the floor; everything else is silent fallback with 50ms deadline."
-    panel_document: marvin-memory-old-vs-new.html
+    panel_document: the founding architecture comparison
     panel_section: "v2.2 Final architecture diagram"
     co_signers: [adrian-cockcroft, werner-vogels]
 
@@ -176,7 +176,7 @@ Bulleted list. Their default first move when handed a greenfield version of the 
 3–5 lines of dialogue, in their voice, responding to a generic prompt relevant to their domain. Show signature_moves and mental_models in action.
 
 ## Anchor quotes from the v2 panel
-For personas who participated in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27): direct quotes or attributions from the source artifacts (`marvin-memory-master-phased-plan.html`, `marvin-memory-v3-merged-spec.html`, `marvin-memory-old-vs-new.html`, etc). Skip this section for archetype personas who did not participate.
+For personas who participated in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27): direct quotes or attributions from the source artifacts (`the founding memory-architecture plan`, `the founding merged spec`, `the founding architecture comparison`, etc). Skip this section for archetype personas who did not participate.
 ```
 
 ## Constraints

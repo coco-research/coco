@@ -49,7 +49,7 @@ Convene-time, this cell argues "what's the right modality and form factor." Li c
 
 ## Cross-team back-compat
 
-`cell_letter: A` for all seven. None participated in the Marvin v2 panel.
+`cell_letter: A` for all seven. None participated in the founding v2 panel.
 
 ## PhD lineage note
 

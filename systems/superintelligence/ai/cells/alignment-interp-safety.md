@@ -57,4 +57,4 @@ Convene-time, this cell holds veto power over capability-velocity decisions when
 
 ## Cross-team back-compat
 
-`cell_letter: D` for all nine preserves back-compat with the Marvin v2 panel convention (Cell D = data/security in v2). The functional name `alignment-interp-safety` is the cross-team-correct label.
+`cell_letter: D` for all nine preserves back-compat with the founding v2 panel convention (Cell D = data/security in v2). The functional name `alignment-interp-safety` is the cross-team-correct label.

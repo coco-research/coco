@@ -33,7 +33,7 @@ Pulled 2026-05-27. Anchors `pairs_well_with` and `productive_conflict_with` in t
 
 ## V2 panel attribution
 
-Karina did NOT participate in the Marvin Memory v2 panel synthesis on 2026-05-26. She is not in any of the v2 → v3 reconciliation HTML artifacts. `v2_panel_attribution: []`.
+Karina did NOT participate in the founding Memory v2 panel synthesis on 2026-05-26. She is not in any of the v2 → v3 reconciliation HTML artifacts. `v2_panel_attribution: []`.
 
 ## Sources
 

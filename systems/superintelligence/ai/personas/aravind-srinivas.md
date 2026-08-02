@@ -285,4 +285,4 @@ Prompt: *"Aravind, we're shipping an enterprise answer-engine for legal research
 
 ## Anchor quotes from the v2 panel
 
-Aravind Srinivas did not participate in the Marvin Memory v2 panel synthesis on 2026-05-26 / 2026-05-27. This section is intentionally blank. When `/superintelligenceTeam-convene` cites him, draw from his `public_stances` and `recent_signal_12mo` instead — the Perplexity-product, answer-engine, browser-as-OS, wrap-don't-build, and citations-as-trust-contract framings are the highest-fidelity source of his actual voice.
+Aravind Srinivas did not participate in the founding Memory v2 panel synthesis on 2026-05-26 / 2026-05-27. This section is intentionally blank. When `/superintelligenceTeam-convene` cites him, draw from his `public_stances` and `recent_signal_12mo` instead — the Perplexity-product, answer-engine, browser-as-OS, wrap-don't-build, and citations-as-trust-contract framings are the highest-fidelity source of his actual voice.

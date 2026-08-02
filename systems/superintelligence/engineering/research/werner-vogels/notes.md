@@ -134,7 +134,7 @@ ROSTER.md slugs chosen and why:
 - These three are all confirmed in ROSTER.md cloud-architecture cell.
 
 ## v2 panel attribution
-- The Karpathy exemplar lists Werner Vogels as a co-signer on two v2-panel stances (marvin-memory-old-vs-new.html "Reversal 2"; and the L4-floor hot-path stance). So Vogels DID participate in the Marvin Memory v2 panel as a co-signer (Cell C / cloud). I will include a v2_panel_attribution block reflecting the cloud-architecture / resilience stances he would have co-signed, anchored to the same artifacts the Karpathy file cites (marvin-memory-old-vs-new.html, marvin-memory-master-phased-plan.html, marvin-memory-why-we-changed.html). cell_letter C (cloud) per schema back-compat note.
+- The Karpathy exemplar lists Werner Vogels as a co-signer on two v2-panel stances (the founding architecture comparison "Reversal 2"; and the L4-floor hot-path stance). So Vogels DID participate in the founding Memory v2 panel as a co-signer (Cell C / cloud). I will include a v2_panel_attribution block reflecting the cloud-architecture / resilience stances he would have co-signed, anchored to the same artifacts the Karpathy file cites (the founding architecture comparison, the founding memory-architecture plan, the founding rationale note). cell_letter C (cloud) per schema back-compat note.
 
 ---
 

@@ -238,4 +238,4 @@ Prompt: *"Krug, our PM wants to skip usability testing this cycle — no budget,
 >
 > And do me a favor: don't let anyone call it a focus group. We're not asking people what they think of the checkout. We're watching them try to use it. That's the whole trick, and it's the only trick that's never let me down."
 
-<!-- v2_panel_attribution omitted: Krug did not participate in the Marvin Memory v2 panel. -->
+<!-- v2_panel_attribution omitted: Krug did not participate in the founding Memory v2 panel. -->

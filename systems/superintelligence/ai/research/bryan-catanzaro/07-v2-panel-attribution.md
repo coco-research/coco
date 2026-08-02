@@ -2,7 +2,7 @@
 
 ## Status: not in v2 panel
 
-Bryan Catanzaro did not participate in the Marvin Memory v2 panel synthesis (2026-05-26 / 2026-05-27). The v2 panel composition was centered on memory-systems and reasoning-layer personas (Karpathy, Cockcroft, Vogels, Wei, Chalef, Sridharan, etc.). Catanzaro's systems-kernels-serving expertise was not the focus of the v2 deliberations.
+Bryan Catanzaro did not participate in the founding Memory v2 panel synthesis (2026-05-26 / 2026-05-27). The v2 panel composition was centered on memory-systems and reasoning-layer personas (Karpathy, Cockcroft, Vogels, Wei, Chalef, Sridharan, etc.). Catanzaro's systems-kernels-serving expertise was not the focus of the v2 deliberations.
 
 ## Required field
 
@@ -18,7 +18,7 @@ Convene sessions should draw from:
 3. The Interconnects podcast quotes (research/03-interconnects-podcast-open-models.md).
 4. The Working AI / DeepLearning.AI interview quotes (research/05-jensen-huang-cudnn-origin-story.md).
 
-NOT from the marvin-memory-* artifacts, since he was not a panelist there.
+NOT from the founding memory-architecture artifacts, since he was not a panelist there.
 
 ## Future panels
 

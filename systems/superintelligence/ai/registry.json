@@ -2893,15 +2893,15 @@
     "product-super-intelligence": "Product Super Intelligence Team — PM craft, product strategy (future)."
   },
   "lineage": {
-    "marvin_v2_panel": {
+    "founding_v2_panel": {
       "date": "2026-05-26",
-      "note": "Earlier 5-cell × 4-persona panel synthesized the Marvin Memory v2 architecture. Personas with `v2_panel_attribution` entries draw on that material; cell_letter A-E preserves cross-team back-compat.",
+      "note": "Earlier 5-cell × 4-persona panel synthesized the founding Memory v2 architecture. Personas with `v2_panel_attribution` entries draw on that material; cell_letter A-E preserves cross-team back-compat.",
       "source_artifacts": [
-        "/Users/user/Marvin/docs/architecture/marvin-memory-master-phased-plan.html",
-        "/Users/user/Marvin/docs/architecture/marvin-memory-v3-merged-spec.html",
-        "/Users/user/Marvin/docs/architecture/marvin-memory-old-vs-new.html",
-        "/Users/user/Marvin/docs/architecture/marvin-memory-why-we-changed.html",
-        "/Users/user/Marvin/docs/architecture/SESSION-2026-05-26.md"
+        "internal synthesis (not publicly citable)",
+        "internal synthesis (not publicly citable)",
+        "internal synthesis (not publicly citable)",
+        "internal synthesis (not publicly citable)",
+        "internal synthesis (not publicly citable)"
       ]
     }
   }

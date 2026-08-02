@@ -17,6 +17,12 @@ CoCo stands on the shoulders of excellent open-source work. This file credits ev
 | **HyperFrames** by HeyGen | The HTML-composition + local render engine `coco-ads` drives via `npx hyperframes` (lint / validate / render) | https://www.npmjs.com/package/hyperframes | See upstream |
 | **"Happy Beats / Business Moves"** by ende.app | Bundled music beds used by `coco-ads` | https://ende.app | See upstream |
 | **Kenney.nl** | Bundled CC0 sound effects used by `coco-ads` | https://kenney.nl | CC0 (public domain) |
+| **Anthropic** | The `skill-creator` and `frontend-design` skills, vendored verbatim from Anthropic's published Agent Skills repository. Note that Anthropic ships these under Apache-2.0 with the appendix removed, so the bundled `LICENSE.txt` files name no copyright holder; ownership is established from the publisher rather than from the file. Attribution here satisfies Apache-2.0 section 4. | https://github.com/anthropics/skills | Apache-2.0 |
+| **vtake-skills** by leeoxiang | The `talking-head-recut` skill inside the HyperFrames bundle, adapted from the upstream `vtake-cut` project. Upstream notice retained at `systems/hyperframes/skills/talking-head-recut/NOTICE.md`. | https://github.com/notedit/vtake-skills | MIT |
+| **scroll-world** by cyw | The `scroll-world` skill — frame-locked scroll-scrub storytelling engine; upstream MIT notice retained at `skills/scroll-world/LICENSE` | https://github.com/oso95/scroll-world | MIT (Copyright (c) 2026 cyw) |
+| **vibeship-spawner-skills** | The `voice-ai` skill, which declares its own upstream in frontmatter as `source: vibeship-spawner-skills (Apache 2.0)` | https://github.com/vibeship | Apache-2.0 |
+| **prd-mastery** by Callum Bir | The `prd-mastery` skill — token-efficient PRD authoring with a fixed output folder structure; author declared in the skill's own frontmatter | — | See upstream |
+| **openai-agents** by Jeremy Dawes (Jezweb) | The `openai-agents` skill. Previously listed below as an original write-up on public OpenAI documentation, which was wrong: the skill ships a third-party MIT notice at `skills/openai-agents/LICENSE`. | https://github.com/jezweb | MIT (Copyright (c) 2025 Jeremy Dawes) |
 
 ## Feature inspirations
 
@@ -36,8 +42,10 @@ Some skills teach or wrap third-party platforms. These are original write-ups bu
 | Source | Skill(s) | Upstream |
 |---|---|---|
 | **Apple** — Liquid Glass design system (WWDC 2025) | `axiom-liquid-glass`, `swiftui-liquid-glass` | https://developer.apple.com |
-| **OpenAI** — Agents SDK, Realtime / Chat / Batch APIs, Whisper | `openai-agents`, `openai-api`, `openai-apps-mcp`, `openai-whisper` | https://platform.openai.com/docs |
+| **OpenAI** — Realtime / Chat / Batch APIs, Whisper | `openai-api`, `openai-apps-mcp`, `openai-whisper` | https://platform.openai.com/docs |
 | **Microsoft** — Agent Lightning (RL agent training) | `agent-lightning` | https://github.com/microsoft/agent-lightning |
+| **React Flow / xyflow** (MIT) — the node-graph library `journey-map` builds on; the skill itself is CoCo's own write-up and vendors no upstream code | `journey-map` | https://github.com/xyflow/xyflow |
+| **Expo** — Router and EAS Hosting API-route conventions | `expo-api-routes` | https://docs.expo.dev |
 | **Cognee** by topoteretes (Apache-2.0) — knowledge-graph memory engine the `systems/cognee/` bundle wraps over its local HTTP API (no upstream code vendored; the bundle's skills are CoCo's own write-ups) | `cognee`, `cognee-store`, `cognee-recall` | https://github.com/topoteretes/cognee |
 
 ## How we credit

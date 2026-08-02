@@ -66,7 +66,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
 | Slash | Description |
 |-------|-------------|
-| [`/util:architecture-review`](util/architecture-review.md) |  |
+| [`/util:architecture-review`](util/architecture-review.md) | Comprehensive architecture review with design patterns analysis and improvement recommendations |
 | [`/util:create-architecture-documentation`](util/create-architecture-documentation.md) | Generate comprehensive architecture documentation with diagrams, ADRs, and interactive visualization |
 | [`/util:refactor-code`](util/refactor-code.md) |  |
 | [`/util:ss`](util/ss.md) | View the latest N screenshots from Desktop (default 1) |

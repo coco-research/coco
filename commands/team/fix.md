@@ -27,6 +27,14 @@ L1 agents focus on:
 - Root cause analysis for each reported issue
 - File mapping — which files need changes
 - Impact assessment — what else might break
+- **Component triage.** When `.arch/index.json` exists and is CURRENT, name the component
+  each issue falls inside, from `.arch/INDEX.md`. This is a triage and communication aid:
+  it groups related issues and tells a reviewer which boundary is under repair. It is not
+  a constraint on which files the fix may touch — a legitimate fix routinely spans several
+  components, and the index is at a coarser altitude than the change. Do not escalate a
+  cross-component fix as a boundary violation.
+- If a fix genuinely deletes or relocates a component's primary paths, note it so
+  `/team arch drift` can reconcile the index afterwards.
 
 ### Layer 2: Execution
 - **Mode:** `bypassPermissions`

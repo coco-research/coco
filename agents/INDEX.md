@@ -2,6 +2,8 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
+**Total: 34 agents** — 10 core, 24 across 1 bundles.
+
 ## Core agents (10)
 
 | Agent | Description |
@@ -17,31 +19,31 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [typescript-pro](typescript-pro.md) | name: typescript-pro |
 | [ui-ux-designer](ui-ux-designer.md) | name: ui-ux-designer |
 
-## Bundle: systems (24 agents)
+## Bundle: gsd (24 agents)
 
 | Agent | Description |
 |-------|-------------|
-| [gsd-advisor-researcher](../systems/systems/agents/gsd-advisor-researcher.md) | name: gsd-advisor-researcher |
-| [gsd-assumptions-analyzer](../systems/systems/agents/gsd-assumptions-analyzer.md) | name: gsd-assumptions-analyzer |
-| [gsd-code-fixer](../systems/systems/agents/gsd-code-fixer.md) | name: gsd-code-fixer |
-| [gsd-code-reviewer](../systems/systems/agents/gsd-code-reviewer.md) | name: gsd-code-reviewer |
-| [gsd-codebase-mapper](../systems/systems/agents/gsd-codebase-mapper.md) | name: gsd-codebase-mapper |
-| [gsd-debugger](../systems/systems/agents/gsd-debugger.md) | name: gsd-debugger |
-| [gsd-doc-verifier](../systems/systems/agents/gsd-doc-verifier.md) | name: gsd-doc-verifier |
-| [gsd-doc-writer](../systems/systems/agents/gsd-doc-writer.md) | name: gsd-doc-writer |
-| [gsd-executor](../systems/systems/agents/gsd-executor.md) | name: gsd-executor |
-| [gsd-integration-checker](../systems/systems/agents/gsd-integration-checker.md) | name: gsd-integration-checker |
-| [gsd-intel-updater](../systems/systems/agents/gsd-intel-updater.md) | name: gsd-intel-updater |
-| [gsd-nyquist-auditor](../systems/systems/agents/gsd-nyquist-auditor.md) | name: gsd-nyquist-auditor |
-| [gsd-phase-researcher](../systems/systems/agents/gsd-phase-researcher.md) | name: gsd-phase-researcher |
-| [gsd-plan-checker](../systems/systems/agents/gsd-plan-checker.md) | name: gsd-plan-checker |
-| [gsd-planner](../systems/systems/agents/gsd-planner.md) | name: gsd-planner |
-| [gsd-project-researcher](../systems/systems/agents/gsd-project-researcher.md) | name: gsd-project-researcher |
-| [gsd-research-synthesizer](../systems/systems/agents/gsd-research-synthesizer.md) | name: gsd-research-synthesizer |
-| [gsd-roadmapper](../systems/systems/agents/gsd-roadmapper.md) | name: gsd-roadmapper |
-| [gsd-security-auditor](../systems/systems/agents/gsd-security-auditor.md) | name: gsd-security-auditor |
-| [gsd-ui-auditor](../systems/systems/agents/gsd-ui-auditor.md) | name: gsd-ui-auditor |
-| [gsd-ui-checker](../systems/systems/agents/gsd-ui-checker.md) | name: gsd-ui-checker |
-| [gsd-ui-researcher](../systems/systems/agents/gsd-ui-researcher.md) | name: gsd-ui-researcher |
-| [gsd-user-profiler](../systems/systems/agents/gsd-user-profiler.md) | name: gsd-user-profiler |
-| [gsd-verifier](../systems/systems/agents/gsd-verifier.md) | name: gsd-verifier |
+| [gsd-advisor-researcher](../systems/gsd/agents/gsd-advisor-researcher.md) | name: gsd-advisor-researcher |
+| [gsd-assumptions-analyzer](../systems/gsd/agents/gsd-assumptions-analyzer.md) | name: gsd-assumptions-analyzer |
+| [gsd-code-fixer](../systems/gsd/agents/gsd-code-fixer.md) | name: gsd-code-fixer |
+| [gsd-code-reviewer](../systems/gsd/agents/gsd-code-reviewer.md) | name: gsd-code-reviewer |
+| [gsd-codebase-mapper](../systems/gsd/agents/gsd-codebase-mapper.md) | name: gsd-codebase-mapper |
+| [gsd-debugger](../systems/gsd/agents/gsd-debugger.md) | name: gsd-debugger |
+| [gsd-doc-verifier](../systems/gsd/agents/gsd-doc-verifier.md) | name: gsd-doc-verifier |
+| [gsd-doc-writer](../systems/gsd/agents/gsd-doc-writer.md) | name: gsd-doc-writer |
+| [gsd-executor](../systems/gsd/agents/gsd-executor.md) | name: gsd-executor |
+| [gsd-integration-checker](../systems/gsd/agents/gsd-integration-checker.md) | name: gsd-integration-checker |
+| [gsd-intel-updater](../systems/gsd/agents/gsd-intel-updater.md) | name: gsd-intel-updater |
+| [gsd-nyquist-auditor](../systems/gsd/agents/gsd-nyquist-auditor.md) | name: gsd-nyquist-auditor |
+| [gsd-phase-researcher](../systems/gsd/agents/gsd-phase-researcher.md) | name: gsd-phase-researcher |
+| [gsd-plan-checker](../systems/gsd/agents/gsd-plan-checker.md) | name: gsd-plan-checker |
+| [gsd-planner](../systems/gsd/agents/gsd-planner.md) | name: gsd-planner |
+| [gsd-project-researcher](../systems/gsd/agents/gsd-project-researcher.md) | name: gsd-project-researcher |
+| [gsd-research-synthesizer](../systems/gsd/agents/gsd-research-synthesizer.md) | name: gsd-research-synthesizer |
+| [gsd-roadmapper](../systems/gsd/agents/gsd-roadmapper.md) | name: gsd-roadmapper |
+| [gsd-security-auditor](../systems/gsd/agents/gsd-security-auditor.md) | name: gsd-security-auditor |
+| [gsd-ui-auditor](../systems/gsd/agents/gsd-ui-auditor.md) | name: gsd-ui-auditor |
+| [gsd-ui-checker](../systems/gsd/agents/gsd-ui-checker.md) | name: gsd-ui-checker |
+| [gsd-ui-researcher](../systems/gsd/agents/gsd-ui-researcher.md) | name: gsd-ui-researcher |
+| [gsd-user-profiler](../systems/gsd/agents/gsd-user-profiler.md) | name: gsd-user-profiler |
+| [gsd-verifier](../systems/gsd/agents/gsd-verifier.md) | name: gsd-verifier |

@@ -21,7 +21,7 @@ Per-adapter detail. For the 30-second version, see [`README.md`](../README.md).
 |------|--------|
 | `--dry-run` | Print what would happen, don't write |
 | `--help` | Show usage |
-| `--systems gsd,brain,team` | Install one or more system bundles (claude-code, cursor only) |
+| `--systems gsd,brain` | Install one or more system bundles. Accepted by the claude-code, codex and generic adapters; the cursor adapter does not accept this flag |
 
 ---
 
@@ -82,7 +82,9 @@ The `generic` adapter is the same script under a different name — for users of
 |--------|------|---------|
 | `gsd` | 68-skill project orchestration | `--systems gsd` |
 | `brain` | 6-skill local knowledge tracker | `--systems brain` |
-| `team` | Multi-agent pipeline conventions | `--systems team` |
+| `cognee` | 3-skill knowledge-graph memory | `--systems cognee` |
+| `hyperframes` | 20-skill video and motion suite | `--systems hyperframes` |
+| `superintelligence` | 389-persona expert board, generates 242 commands at install | `--systems superintelligence` |
 
 Combine freely:
 

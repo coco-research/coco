@@ -12,9 +12,9 @@
 
 ## By artifact type
 
-- [Skills](../skills/) — flat library of 60 skills
+- [Skills](../skills/) — flat library of 68 core skills (179 including bundles)
 - [Agents](../agents/) — 11 subagent definitions
-- [Commands](../commands/) — 34 slash commands grouped by namespace
+- [Commands](../commands/) — 37 slash commands grouped by namespace
 - [Workflows](../workflows/) — multi-step playbooks
 - [Templates](../templates/) — memory templates
 - [Rules](../rules/) — cross-IDE rules

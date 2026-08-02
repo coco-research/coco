@@ -11,7 +11,7 @@
 
 ### Summon an advisory board of 389 world-class minds — right inside your AI coding session.
 
-CoCo Super Intelligence is the orchestration layer that turns Claude Code, Cursor, or Codex into an entire engineering department: routed expert panels that deliberate and decide, then **149 skills**, **277 commands**, and disk-persistent state that ship what they decided.
+CoCo Super Intelligence is the orchestration layer that turns Claude Code, Cursor, or Codex into an entire engineering department: routed expert panels that deliberate and decide, then **179 skills**, **279 commands**, and disk-persistent state that ship what they decided.
 
 Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds · 100% local · no telemetry
 
@@ -212,12 +212,12 @@ Requires only Python 3 and `git`. No new dependencies. Design adapted from [lak7
 
 ## The CoCo Asset Library
 
-A standard install equips your workspace with a lightweight core; full activation unlocks up to **867 total assets** to orchestrate any software-engineering workflow.
+A standard install equips your workspace with a lightweight core; full activation unlocks up to **896 total assets** to orchestrate any software-engineering workflow.
 
 <table align="center">
 <tr>
-<td align="center" width="20%"><h3>149</h3><sub>Skills</sub><br><small>66 Core + 83 Bundle</small></td>
-<td align="center" width="20%"><h3>277</h3><sub>Slash Commands</sub><br><small>35 Core + 242 Bundle</small></td>
+<td align="center" width="20%"><h3>179</h3><sub>Skills</sub><br><small>68 Core + 111 Bundle</small></td>
+<td align="center" width="20%"><h3>279</h3><sub>Slash Commands</sub><br><small>37 Core + 242 Generated</small></td>
 <td align="center" width="20%"><h3>34</h3><sub>Specialized Agents</sub><br><small>10 Core + 24 Bundle</small></td>
 <td align="center" width="20%"><h3>389</h3><sub>Expert Personas</sub><br><small>Super Intelligence Board</small></td>
 <td align="center" width="20%"><h3>15</h3><sub>Cross-IDE Rules</sub><br><small>Cursor MDC Rules</small></td>
@@ -225,7 +225,7 @@ A standard install equips your workspace with a lightweight core; full activatio
 </table>
 
 <div align="center">
-  <sub><strong>Core install:</strong> 126 active assets (66 Skills, 35 Commands, 10 Agents, 15 Rules)</sub><br>
+  <sub><strong>Core install:</strong> 130 active assets (68 Skills, 37 Commands, 10 Agents, 15 Rules)</sub><br>
   <sub><strong>Orchestration bundles:</strong> <strong>+68 GSD skills</strong> · <strong>+24 GSD agents</strong> · <strong>+6 Brain skills</strong> · <strong>+9 Super Intelligence skills</strong> · <strong>+242 SI commands</strong> · <strong>3 Workflows</strong></sub>
 </div>
 
@@ -235,7 +235,7 @@ A standard install equips your workspace with a lightweight core; full activatio
 
 ## Skills Catalog
 
-CoCo ships **149 skills** (66 core + 83 across bundles). These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
+CoCo ships **179 skills** (68 core + 111 across bundles). These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
 
 ### Visual design & styling
 `ui-ux-pro-max` (50 styles, 21 palettes, 50 font pairings, 9 stacks) · `frontend-design` · `design-taste-frontend` · `redesign-existing-projects` · `axiom-liquid-glass` (Apple Liquid Glass, WWDC 2025) · `swiftui-liquid-glass` · `web-design-guidelines` · `tailwind-patterns` (Tailwind v4) · `vercel-react-best-practices` · `clone-website` · `c4-architecture` · `arb-review` · `expo-api-routes` · `ai-product` · `scroll-world` (scroll-scrubbed, cut-free camera flythrough landing pages, generated end to end via Higgsfield).
@@ -259,7 +259,7 @@ CoCo ships **149 skills** (66 core + 83 across bundles). These are not prompt sn
 `coco` (conversational router) · `coco-cli` · `coco-loop` (compiles a plain-language goal into a confirmed charter, then runs a bounded, propose-only autonomous loop) · `skill-creator` · `writing-skills` · `find-skills`.
 
 <details>
-<summary><strong>▸ Full catalog — every one of the 149 skills</strong></summary>
+<summary><strong>▸ Full catalog — every one of the 179 skills</strong></summary>
 
 <br>
 
@@ -551,7 +551,7 @@ coco
 
 ```bash
 # Enable GSD, Brain, and Team systems
-bash install.sh --systems gsd,brain,team
+bash install.sh --systems gsd,brain
 
 # Enable the Super Intelligence board
 bash install.sh --systems superintelligence
@@ -686,15 +686,15 @@ npx @coco-research/coco-cli update
 <tr><td><strong>Slash Commands</strong></td><td>277 with all bundles — 35 Core (shipped) + 242 Super Intelligence (225 per-team + 17 cross-team, generated at install)</td></tr>
 <tr><td><strong>Specialized Agents</strong></td><td>34 (10 Core + 24 GSD Bundle)</td></tr>
 <tr><td><strong>Expert Personas</strong></td><td>389 across 9 departments and 70 cells</td></tr>
-<tr><td><strong>System Bundles</strong></td><td>4 (GSD, Brain, Team, Super Intelligence) — opt in with <code>--systems &lt;name&gt;</code></td></tr>
+<tr><td><strong>System Bundles</strong></td><td>5 (GSD, Brain, Cognee, HyperFrames, Super Intelligence) — opt in with <code>--systems &lt;name&gt;</code>. <code>/team</code> is core and needs no flag.</td></tr>
 <tr><td><strong>Cross-IDE Rules</strong></td><td>15 (.mdc files)</td></tr>
 <tr><td><strong>Workflows Defined</strong></td><td>3 (.md pipelines)</td></tr>
-<tr><td><strong>Total Addressable Assets</strong></td><td>867 with all bundles enabled</td></tr>
+<tr><td><strong>Total Addressable Assets</strong></td><td>896 with all bundles enabled</td></tr>
 <tr><td><strong>Install Time</strong></td><td>&le; 90 seconds</td></tr>
 <tr><td><strong>Telemetry / SaaS</strong></td><td>None — 100% local files</td></tr>
 </table>
 
-<sub>Core install ships 66 skills + 35 commands + 10 agents + 15 rules (126 active assets). The totals above reflect a full install with all four bundles (<code>bash install.sh --systems gsd,brain,team,superintelligence</code>). Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely.</sub>
+<sub>Core install ships 68 skills + 37 commands + 10 agents + 15 rules (130 active assets). The totals above reflect a full install with every bundle (<code>bash install.sh --systems gsd,brain,cognee,hyperframes,superintelligence</code>). Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely.</sub>
 
 ---
 

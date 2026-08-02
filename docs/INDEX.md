@@ -21,9 +21,19 @@
 
 ## By system bundle
 
-- [GSD](../systems/gsd/) — project orchestration (68 skills)
+Installable with `install.sh --systems <name>`:
+
+- [GSD](../systems/gsd/) — project orchestration (68 skills, 24 agents)
+- [HyperFrames](../systems/hyperframes/) — video and motion suite (20 skills)
+- [Superintelligence](../systems/superintelligence/) — 389-persona expert board (9 team skills; generates 242 commands at install)
 - [Brain](../systems/brain/) — local knowledge tracker (6 skills)
-- [Team](../systems/team/) — multi-agent pipelines
+- [M0](../systems/m0/) — cross-tool agent memory (4 skills)
+- [Cognee](../systems/cognee/) — knowledge-graph memory (3 skills)
+
+See [systems/INDEX.md](../systems/INDEX.md) for the generated bundle table with live counts.
+
+`/team` is **not** a bundle — it is core, and its commands are installed by a plain
+`bash install.sh`. See [systems/team/](../systems/team/) for the design notes.
 
 ## By IDE adapter
 

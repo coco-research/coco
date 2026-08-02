@@ -3,6 +3,7 @@ name: coco-ads
 description: Turn the project you just shipped into a short, polished, shareable launch video (an "ad") using HyperFrames. Use when someone says "/coco-ads", "make a launch video", "brag about this", "turn this into a promo", "make an ad for this", or wants to share what they built. Reads the project code directly — no live URL or screenshots needed. Renders locally.
 argument-hint: "[--tone <preset|freeform>] [--format landscape|vertical|square] [--duration <s>] [--no-music] [--title <name>]"
 user-invocable: true
+domain: design
 ---
 
 # /coco-ads — launch videos from your repo

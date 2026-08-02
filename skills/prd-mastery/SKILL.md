@@ -4,6 +4,7 @@ description: "A skill that blends the wisdom of top industry experts, ensures to
 version: "1.0"
 author: "Callum Bir"
 keywords: ["PRD", "product requirements", "business analysis", "product management", "documentation", "Cagan", "Torres", "Biddle"]
+domain: pm
 ---
 
 # PRD Mastery Skills

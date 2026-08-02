@@ -7,6 +7,7 @@ description: >
   "work on journey map", "build user journey", "react flow journey project",
   "journey-map app", or any request to add features like swimlanes,
   emotion curves, persona nodes, touchpoints, or pain point markers.
+domain: design
 ---
 
 # Journey Map Project

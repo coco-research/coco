@@ -1,6 +1,7 @@
 ---
 name: coco-cli
 description: Install, update, version-check, or uninstall the Coco open-source AI workflow framework via its CLI (@coco-research/coco-cli, run with npx). Use when setting up Coco on a machine, pulling the latest into an existing clone, checking the installed version, or removing it. Triggers on "install coco", "update coco", "set up coco", "coco cli", "uninstall coco".
+domain: meta
 ---
 
 <!-- Wrapper generated with the cli-anything skill. Methodology: HKUDS/CLI-Anything (https://github.com/HKUDS/CLI-Anything) — Apache-2.0. -->

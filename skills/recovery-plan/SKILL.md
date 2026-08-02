@@ -1,6 +1,7 @@
 ---
 name: pmstudio-recovery
 description: Generate detailed service restoration runbooks with step-by-step procedures. Use when someone asks to "create recovery procedures", "restoration runbook", "recovery steps", "how to restore service", or needs tactical step-by-step procedures for recovering from disaster scenarios. This is the execution companion to the DR plan — DR defines what and when, recovery-plan defines exactly how. Requires a DR plan to exist (will prompt to run /pmstudio-dr first if missing).
+domain: ops
 ---
 
 # Recovery Plan — Service Restoration Runbooks

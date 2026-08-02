@@ -14,6 +14,7 @@ description: >
   "browse-through-the-industry" hero, a scroll cinematic, a diorama landing, or to
   turn a business into a scrollable world.
 allowed-tools: Bash, Read, Write, Edit, AskUserQuestion, Skill
+domain: design
 ---
 
 # scroll-world

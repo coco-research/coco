@@ -5,6 +5,7 @@ description: |
 
   Use when: building agents with tools, voice agents with WebRTC, multi-agent workflows, or troubleshooting MaxTurnsExceededError, tool call failures, reasoning defaults, JSON output leaks.
 user-invocable: true
+domain: engineering
 ---
 
 # OpenAI Agents SDK

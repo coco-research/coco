@@ -1,6 +1,7 @@
 ---
 name: subagent-driven-development
 description: Use when executing implementation plans with independent tasks in the current session
+domain: foundational
 ---
 
 # Subagent-Driven Development

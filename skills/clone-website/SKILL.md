@@ -3,6 +3,7 @@ name: clone-website
 description: Clone any website into a pixel-perfect single-file HTML prototype. Extracts design tokens, assets, CSS computed styles, interaction patterns, and content via Playwright. Outputs a self-contained HTML file with real data injection. Use when the user wants to clone, replicate, reverse-engineer, or create a pixel-perfect copy of any website or web app. Provide one or more target URLs as arguments.
 argument-hint: "<url1> [<url2> ...]"
 user-invocable: true
+domain: design
 ---
 
 # Clone Website --- Single-File HTML Prototype Builder

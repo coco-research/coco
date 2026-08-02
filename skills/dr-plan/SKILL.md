@@ -1,6 +1,7 @@
 ---
 name: pmstudio-dr
 description: Generate a Disaster Recovery plan with RTO/RPO targets. Use when someone asks to "create a DR plan", "disaster recovery", "business continuity", or "RTO RPO". Do NOT use for step-by-step restoration runbooks — use /pmstudio-recovery instead. Designed for SaaS platform products where Coco Inc is the customer — focuses on service continuity, data recovery, and vendor dependency management rather than infrastructure rebuild.
+domain: ops
 ---
 
 # DR Plan — Disaster Recovery Plan

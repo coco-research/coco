@@ -1,6 +1,7 @@
 ---
 name: pmstudio-sync
 description: Use when a project has linked documentation artifacts (PRDs, presentations, meeting notes, architecture maps) that must stay synchronized. Detects which source files changed, identifies downstream documents needing updates, reads new content, and proposes specific edits with diffs before applying. Also use when a .sync-report.md exists in the project or user says "process sync report".
+domain: pm
 ---
 
 # Doc Sync — Cascading Document Updater

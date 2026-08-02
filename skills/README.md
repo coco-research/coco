@@ -49,11 +49,6 @@ Skills organized by category. Each skill provides deep reference material for a 
 - **ai-product** — Production patterns for AI/LLM integration
 - **ai-marketing-videos** — AI marketing video creation
 
-## Documents
-- **pdf** — PDF manipulation (extraction, creation, OCR, forms)
-- **docx** — Word document creation/editing with tracked changes
-- **xlsx** — Spreadsheet work: programmatic + Excel Online (merged)
-
 ## Diagrams
 - **c4-architecture** — C4 architecture diagramming with Mermaid
 

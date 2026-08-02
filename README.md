@@ -192,9 +192,6 @@ CoCo ships **149 skills** (66 core + 83 across bundles). These are not prompt sn
 ### Product management & communication
 `prd-generator` · `prd-mastery` · `task-prd-creator` · `project-docs` · `pmstudio` · `nfr-tracker` · `stakeholder-comms` · `meeting-notes` · `change-log`.
 
-### Documents & files
-`docx` · `xlsx` · `pdf`.
-
 ### Operations, safety & recovery
 `dr-plan` (RTO/RPO) · `irp` (incident response) · `recovery-plan`.
 
@@ -211,7 +208,7 @@ CoCo ships **149 skills** (66 core + 83 across bundles). These are not prompt sn
 
 **Core skills (66)**
 
-`agent-lightning` · `ai-marketing-videos` · `ai-product` · `api-design-principles` · `arb-review` · `axiom-liquid-glass` · `brainstorming` · `browser-automation` · `c4-architecture` · `change-log` · `cli-anything` · `clone-website` · `coco` · `coco-ads` · `coco-cli` · `coco-loop` · `code-verification` · `design-taste-frontend` · `dispatching-parallel-agents` · `doc-sync` · `docx` · `dr-plan` · `executing-plans` · `expo-api-routes` · `find-skills` · `finishing-a-development-branch` · `frontend-design` · `generate-tests` · `irp` · `media-memory` · `meeting-notes` · `nfr-tracker` · `openai-agents` · `openai-api` · `openai-apps-mcp` · `openai-whisper` · `pdf` · `pmstudio` · `prd-generator` · `prd-mastery` · `project-docs` · `receiving-code-review` · `recovery-plan` · `redesign-existing-projects` · `requesting-code-review` · `scroll-world` · `skill-creator` · `stakeholder-comms` · `subagent-driven-development` · `swiftui-liquid-glass` · `systematic-debugging` · `tailwind-patterns` · `task-prd-creator` · `test-driven-development` · `ui-ux-pro-max` · `ultra-think` · `using-git-worktrees` · `using-superpowers` · `vercel-react-best-practices` · `verification-before-completion` · `voice-ai` · `web-design-guidelines` · `workflow-routing` · `writing-plans` · `writing-skills` · `xlsx`
+`agent-lightning` · `ai-marketing-videos` · `ai-product` · `api-design-principles` · `arb-review` · `axiom-liquid-glass` · `brainstorming` · `browser-automation` · `c4-architecture` · `change-log` · `cli-anything` · `clone-website` · `coco` · `coco-ads` · `coco-cli` · `coco-loop` · `code-verification` · `design-taste-frontend` · `dispatching-parallel-agents` · `doc-sync` · `dr-plan` · `executing-plans` · `expo-api-routes` · `find-skills` · `finishing-a-development-branch` · `frontend-design` · `generate-tests` · `irp` · `media-memory` · `meeting-notes` · `nfr-tracker` · `openai-agents` · `openai-api` · `openai-apps-mcp` · `openai-whisper` · `pmstudio` · `prd-generator` · `prd-mastery` · `project-docs` · `receiving-code-review` · `recovery-plan` · `redesign-existing-projects` · `requesting-code-review` · `scroll-world` · `skill-creator` · `stakeholder-comms` · `subagent-driven-development` · `swiftui-liquid-glass` · `systematic-debugging` · `tailwind-patterns` · `task-prd-creator` · `test-driven-development` · `ui-ux-pro-max` · `ultra-think` · `using-git-worktrees` · `using-superpowers` · `vercel-react-best-practices` · `verification-before-completion` · `voice-ai` · `web-design-guidelines` · `workflow-routing` · `writing-plans` · `writing-skills`
 
 **GSD bundle skills (68)** — the full `gsd-*` project-orchestration lifecycle: `gsd-new-project`, `gsd-plan-phase`, `gsd-execute-phase`, `gsd-verify-work`, `gsd-autonomous`, `gsd-debug`, `gsd-ui-phase`, `gsd-secure-phase`, `gsd-workstreams`, `gsd-forensics`, `gsd-milestone-summary`, `gsd-map-codebase`, `gsd-profile-user`, and 55 more (see [`systems/gsd/skills/`](systems/gsd/skills/)).
 

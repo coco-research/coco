@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 70 skills** (top-level only — see `systems/<bundle>/skills/` for bundle-only skills).
+**Total: 67 skills** (top-level only — see `systems/<bundle>/skills/` for bundle-only skills).
 
 ## Design
 
@@ -50,7 +50,6 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [code-verification](code-verification/SKILL.md) | Post-implementation verification system that catches AI-introduced bugs. Covers 7 categories — TDZ errors, import mismatches, reference integrity, dead code, Re |
 | [design-taste-frontend](design-taste-frontend/SKILL.md) | Anti-slop frontend skill for landing pages, portfolios, and redesigns. The agent reads the brief, infers the right design direction, and ships interfaces that d |
 | [dispatching-parallel-agents](dispatching-parallel-agents/SKILL.md) | Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies |
-| [docx](docx/SKILL.md) | Comprehensive document creation, editing, and analysis with support for tracked changes, comments, formatting preservation, and text extraction. When Claude nee |
 | [executing-plans](executing-plans/SKILL.md) | Use when you have a written implementation plan to execute in a separate session with review checkpoints |
 | [expo-api-routes](expo-api-routes/SKILL.md) | Guidelines for creating API routes in Expo Router with EAS Hosting |
 | [find-skills](find-skills/SKILL.md) | Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express int |
@@ -63,7 +62,6 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [openai-agents](openai-agents/SKILL.md) | Build AI applications with OpenAI Agents SDK - text agents, voice agents, multi-agent handoffs, tools with Zod schemas, guardrails, and streaming. Prevents 11 d |
 | [openai-api](openai-api/SKILL.md) | Build with OpenAI stateless APIs - Chat Completions (GPT-5.2, o3), Realtime voice, Batch API (50% savings), Embeddings, DALL-E 3, Whisper, and TTS. Prevents 16  |
 | [openai-whisper](openai-whisper/SKILL.md) | Speech-to-text transcription via OpenAI Whisper. Supports two modes — Local CLI (no API key, runs on-device) and Cloud API (fast, scalable, requires OPENAI_API_ |
-| [pdf](pdf/SKILL.md) | Comprehensive PDF manipulation toolkit for extracting text and tables, creating new PDFs, merging/splitting documents, and handling forms. When Claude needs to  |
 | [pmstudio](pmstudio/SKILL.md) | PM Studio command center. Use for a quick overview of available commands and document inventory. Use when someone says "pmstudio", "show commands", "what can I  |
 | [pmstudio-arb](pmstudio-arb/SKILL.md) | Generate an Architecture Review Board (ARB) presentation in Coco Inc's standard 11-slide format. Use when someone asks to "create an ARB deck", "architecture re |
 | [pmstudio-changelog](pmstudio-changelog/SKILL.md) | Create or update a structured change log for a product or platform. Use when someone asks to "create a change log", "log this change", "what changed", "update t |
@@ -97,4 +95,3 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [workflow-routing](workflow-routing/SKILL.md) | Use at the start of any task to route between Superpowers skills and GSD commands based on project state, task scope, and context signals. Fires before other sk |
 | [writing-plans](writing-plans/SKILL.md) | Use when you have a spec or requirements for a multi-step task, before touching code |
 | [writing-skills](writing-skills/SKILL.md) | Use when creating new skills, editing existing skills, or verifying skills work before deployment |
-| [xlsx](xlsx/SKILL.md) | Spreadsheet creation, editing, and analysis. Two approaches: Programmatic (openpyxl/pandas for .xlsx files with formulas, formatting, and data analysis) and Bro |

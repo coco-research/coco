@@ -27,7 +27,7 @@ Coco's cursor adapter handles all three. Distribution = telling Cursor users how
 **Tagline:** Cursor + Coco = a curated team of skills.
 
 **Description:**
-> Coco gives Cursor 59 skills, 34 namespaced commands, 10 agents, and 15 cross-IDE rules. Install in 90 seconds, then invoke `/clone-website`, `/code-verification`, `/team:ship`, `/dr-plan`, `/c4-architecture`, and dozens more from inside Cursor. The same skills also work in Claude Code, Codex, and any AGENTS.md tool — switch IDEs anytime, your skills follow.
+> Coco gives Cursor 73 skills, 37 namespaced commands, 10 agents, and 15 cross-IDE rules. Install in 90 seconds, then invoke `/clone-website`, `/code-verification`, `/team:ship`, `/dr-plan`, `/c4-architecture`, and dozens more from inside Cursor. The same skills also work in Claude Code, Codex, and any AGENTS.md tool — switch IDEs anytime, your skills follow.
 
 **Install instructions:**
 

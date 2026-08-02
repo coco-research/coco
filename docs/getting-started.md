@@ -21,7 +21,7 @@ Coco auto-detects your AI tool. Override if needed:
 | Codex CLI | `bash install.sh --adapter codex` |
 | Aider, Continue, Windsurf, Cline | `bash install.sh --adapter generic` |
 
-That's it. Your AI now has 59 skills, 34 commands, 11 agents.
+That's it. Your AI now has 68 skills, 37 commands, 10 agents.
 
 ---
 

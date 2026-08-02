@@ -6,7 +6,7 @@ Honest comparison. Helps you decide whether to switch.
 |---|---|---|---|---|---|
 | **Format** | Markdown + frontmatter | Custom YAML config | Markdown rules | Cursor rules `.mdc` | Python / TS code |
 | **Skills (curated)** | 59 (+74 in bundles) | community marketplace | examples in repo | starter set | none (you build) |
-| **Slash commands** | 34 namespaced | yes (custom commands) | yes (custom modes) | yes (rules-as-commands) | n/a |
+| **Slash commands** | 37 namespaced (279 with all bundles) | yes (custom commands) | yes (custom modes) | yes (rules-as-commands) | n/a |
 | **Subagents** | 10 + 24 in GSD | no | no | no | yes (chains/agents) |
 | **Multi-agent orchestration** | yes (`/team:ship`, GSD waves) | no | no | no | yes (LangGraph) |
 | **Project state persistence** | yes (`.planning/`, atomic commits) | no | no | no | yes (memory modules) |

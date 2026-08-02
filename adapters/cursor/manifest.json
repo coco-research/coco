@@ -12,6 +12,13 @@
     "flatten commands/<ns>/<name>.md to <ns>:<name>.md because Cursor does not recurse into subdirectories of ~/.cursor/commands",
     "prune command symlinks pointing outside the current repo, which dangle after the repo is moved"
   ],
-  "supports_systems": ["gsd", "brain", "team"],
-  "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
+  "supports_systems": [],
+  "domains": [
+    "foundational",
+    "pm",
+    "engineering",
+    "design",
+    "ops",
+    "meta"
+  ]
 }

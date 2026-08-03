@@ -4,7 +4,15 @@ Vendored skill bundle from HeyGen's [`hyperframes`](https://github.com/heygen-co
 
 ## License
 
-This entire bundle (`systems/hyperframes/`) is vendored third-party code, **not** part of Coco's MIT core. It is licensed under **Apache License 2.0**, Copyright 2026 HeyGen, Inc. — see [`LICENSE`](LICENSE) in this directory, which governs every file under `systems/hyperframes/skills/`. Upstream: <https://github.com/heygen-com/hyperframes>.
+This entire bundle (`systems/hyperframes/`) is vendored third-party code, **not** part of Coco's MIT core. The bundle as a whole is licensed under **Apache License 2.0**, Copyright 2026 HeyGen, Inc. — see [`LICENSE`](LICENSE) in this directory. Upstream: <https://github.com/heygen-com/hyperframes>.
+
+That `LICENSE` does **not** govern every file underneath it, and an earlier version of this section wrongly said it did. Some skills carry material from other parties under other terms, so check for a nearer notice before reusing any individual file:
+
+- **`skills/talking-head-recut/`** carries its own [`NOTICE.md`](skills/talking-head-recut/NOTICE.md). It is adapted from [`notedit/vtake-skills`](https://github.com/notedit/vtake-skills) under the **MIT** licence, copyright leeoxiang, not from HeyGen.
+- **Two vendored GSAP builds** (`gsap.min.js`, reachable from the motion-primitives assets) are GreenSock's, under GreenSock's own **Standard License** rather than Apache-2.0.
+- **57 bundled font files** across the caption and stroke-font assets, including Hershey stroke fonts and Fontsource redistributions of Google Fonts, each carry their originating font licence. Fourteen files in the bundle reference GreenSock, Hershey or Fontsource directly.
+
+Where a file or directory has a nearer `LICENSE` or `NOTICE`, that nearer one wins.
 
 ## Install
 
@@ -28,4 +36,4 @@ This wires the 20 HyperFrames skills into your IDE's skill location.
 
 ## Why a separate system
 
-All 20 skills come from one upstream (`heygen-com/hyperframes`) under one license. Bundling them under `systems/hyperframes/` — rather than 20 individual entries under `skills/` — keeps the vendor boundary explicit, lets one `LICENSE` file unambiguously govern the whole set, and matches the opt-in `--systems <bundle>` install pattern already used for `gsd`, `brain`, and `team`.
+Nineteen of the 20 skills come from one upstream (`heygen-com/hyperframes`); `talking-head-recut` is adapted from `notedit/vtake-skills` and carries its own notice. Bundling them under `systems/hyperframes/` — rather than 20 individual entries under `skills/` — keeps the vendor boundary explicit and matches the opt-in `--systems <bundle>` install pattern already used for `gsd`, `brain`, `cognee` and `m0`. It does not collapse them to a single licence, as the section above sets out.

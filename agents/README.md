@@ -6,6 +6,37 @@
 
 Use agents when you need deep domain expertise beyond general-purpose AI. Each agent is a specialist role definition that can be loaded as context.
 
+## What counts as an installable agent
+
+An installable agent is a `.md` file with YAML frontmatter, living either directly in this
+directory or in `systems/<bundle>/agents/`. Those are the files `install.sh` links and
+`scripts/build-index.py` catalogs into `agents/INDEX.md`. There are **34**: 10 here and 24 in
+`systems/gsd/agents/`.
+
+A `find` for every `agents/*.md` in the repository returns **37**, and the extra three are not
+missing or misplaced. They are `builder.md`, `director.md` and `finalize.md` under
+`systems/hyperframes/skills/motion-graphics/agents/`. They carry no frontmatter and are not
+role definitions; they are prompt bodies that the `motion-graphics` skill dispatches at named
+stages of its own pipeline, listed in the `prompt` column of the stage table in that skill's
+`SKILL.md`. They are internal to one skill, so they are deliberately neither linked nor
+indexed, and moving them here would change behaviour rather than fix anything.
+
+So a 37-versus-34 discrepancy is expected. The convention is that `agents/` nested inside a
+skill directory belongs to that skill. If you add such a directory, keep the files free of
+frontmatter so the indexer continues to skip them.
+
+## Three separate role populations
+
+Worth knowing, because they are easy to confuse and none is a subset of another:
+
+- the **10 core agents** in this directory, plus the **24 GSD agents** in `systems/gsd/agents/`
+- the **`/team` roles** defined inline in `commands/team/roles.md`, spawned by the `/team`
+  commands across four layers (research, execution, review, synthesis). They share no names
+  with the files here. No count is quoted because three different counting methods over that
+  file disagree, depending on whether the `## Role Template` placeholder and each role's
+  `### System Prompt` subheading are counted; read the file rather than trusting a figure.
+- the **389 Super Intelligence personas** under `systems/superintelligence/*/personas/`
+
 ## Agents
 
 | Agent | Domain | When to Use |

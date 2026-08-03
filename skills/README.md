@@ -13,7 +13,6 @@ Skills organized by category. Each skill provides deep reference material for a 
 | Design | 5 | UI/UX, frontend, CSS, React |
 | AI/APIs | 6 | OpenAI, voice, agent training |
 | AI Product | 2 | Building AI products |
-| Documents | 3 | PDF, DOCX, XLSX |
 | Diagrams | 1 | C4 architecture |
 | Browser | 1 | Web automation |
 | Analysis | 1 | Deep thinking |

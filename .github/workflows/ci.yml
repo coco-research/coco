@@ -87,7 +87,7 @@ jobs:
         run: |
           python3 scripts/build-index.py
           # confirm all expected outputs exist
-          for f in skills/INDEX.md commands/INDEX.md agents/INDEX.md docs/by-domain/pm.md docs/by-domain/engineering.md; do
+          for f in skills/INDEX.md commands/INDEX.md agents/INDEX.md systems/INDEX.md docs/by-domain/pm.md docs/by-domain/engineering.md; do
             test -f "$f" || { echo "Missing: $f"; exit 1; }
           done
           echo "INDEX files generated successfully."
@@ -95,9 +95,71 @@ jobs:
       - name: Verify INDEX is up to date
         run: |
           python3 scripts/build-index.py
-          if ! git diff --quiet skills/INDEX.md commands/INDEX.md agents/INDEX.md docs/by-domain/; then
+          # systems/INDEX.md is generated too and was previously omitted from this gate, so it
+          # could drift silently for as long as nobody happened to regenerate and look.
+          if ! git diff --quiet skills/INDEX.md commands/INDEX.md agents/INDEX.md systems/INDEX.md docs/by-domain/; then
             echo "INDEX files are out of date. Run: python3 scripts/build-index.py"
-            git diff skills/INDEX.md commands/INDEX.md agents/INDEX.md docs/by-domain/ | head -50
+            git diff skills/INDEX.md commands/INDEX.md agents/INDEX.md systems/INDEX.md docs/by-domain/ | head -50
             exit 1
           fi
           echo "INDEX files up to date."
+
+      - name: Bundle install gate (every advertised bundle must change the install plan)
+        run: |
+          # Each adapter manifest declares supports_systems. This gate makes that declaration
+          # enforceable: for every bundle an adapter advertises, passing --systems <bundle> must
+          # actually change that adapter's install plan. Without it, a bundle that installs
+          # nothing is indistinguishable from one that works, which is how the phantom
+          # "--systems team" survived, and how the generic adapter came to advertise six bundles
+          # it never implemented. An empty supports_systems is a valid, checked claim.
+          fail=0
+          for manifest in adapters/*/manifest.json; do
+            adapter=$(basename "$(dirname "$manifest")")
+            # Newline-delimited and read with `while read` rather than relying on unquoted
+            # word-splitting, which bash does and zsh does not. A maintainer running this by
+            # hand in zsh would otherwise silently test only the first bundle.
+            bundles=$(python3 -c "import json; print('\n'.join(json.load(open('$manifest'))['supports_systems']))")
+            if [ -z "$bundles" ]; then
+              # Declaring no bundles is fine, but the adapter must not silently accept the flag
+              # and do nothing with it. Either reject it, or leave the plan provably unchanged.
+              h=$(mktemp -d)
+              if bash "adapters/$adapter/install.sh" --dry-run --systems gsd >/dev/null 2>&1; then
+                if ! diff -q <(CLAUDE_HOME="$h/a" bash "adapters/$adapter/install.sh" --dry-run 2>&1) \
+                             <(CLAUDE_HOME="$h/b" bash "adapters/$adapter/install.sh" --dry-run --systems gsd 2>&1) >/dev/null 2>&1; then
+                  echo "FAIL: $adapter declares no bundles yet --systems changes its plan"
+                  fail=1
+                else
+                  echo "PASS: $adapter declares no bundles and ignores the flag inertly"
+                fi
+              else
+                echo "PASS: $adapter declares no bundles and rejects the flag"
+              fi
+              continue
+            fi
+            while IFS= read -r bundle; do
+              [ -n "$bundle" ] || continue
+              h=$(mktemp -d)
+              if diff -q <(CLAUDE_HOME="$h/a" bash "adapters/$adapter/install.sh" --dry-run 2>&1) \
+                         <(CLAUDE_HOME="$h/b" bash "adapters/$adapter/install.sh" --dry-run --systems "$bundle" 2>&1) >/dev/null 2>&1; then
+                echo "FAIL: $adapter advertises '$bundle' but --systems $bundle leaves the plan unchanged"
+                fail=1
+              else
+                echo "PASS: $adapter installs $bundle"
+              fi
+            done <<< "$bundles"
+          done
+          [ "$fail" -eq 0 ] || exit 1
+
+      - name: Run the standalone test suites
+        run: |
+          # These three suites pass locally but were invoked nowhere in CI, so nothing stopped
+          # them rotting. m0-smoke.sh and run_fixtures.sh had no CI coverage at all.
+          bash tests/smoke.sh
+          bash skills/arch-index/scripts/run_fixtures.sh
+          bash systems/m0/tests/m0-smoke.sh
+          # tests/smoke.sh writes into the tree; fail loudly rather than leaving it dirty.
+          if ! git diff --quiet; then
+            echo "A test suite left the tree dirty:"
+            git diff --stat
+            exit 1
+          fi

@@ -250,6 +250,24 @@ def write_agents_index(agents):
     print(f'Wrote {out.relative_to(ROOT)}')
 
 
+# Generated artifacts must not be counted. The file tally below feeds systems/INDEX.md,
+# which CI checks for freshness, so counting anything a local run can create makes the
+# generated file environment-dependent and turns CI red for the wrong reason. Running the
+# m0 smoke test, for instance, leaves a __pycache__/*.pyc behind and shifted the m0 row
+# from 9 to 10.
+_ARTIFACT_DIRS = {'__pycache__', '.git', 'node_modules', '.pytest_cache', '.ruff_cache'}
+_ARTIFACT_SUFFIXES = {'.pyc', '.pyo'}
+
+
+def _ships(path):
+    """True when a file is part of the distributable rather than a local artifact."""
+    if any(part in _ARTIFACT_DIRS for part in path.parts):
+        return False
+    if path.suffix in _ARTIFACT_SUFFIXES:
+        return False
+    return path.name != '.DS_Store'
+
+
 def write_systems_index(skills, agents):
     """Catalog every bundle-like container under systems/ and adapters/.
 
@@ -280,7 +298,7 @@ def write_systems_index(skills, agents):
                 'skills': skills_by_bundle.get(d.name, 0),
                 'agents': agents_by_bundle.get(d.name, 0),
                 'commands': n_cmds,
-                'files': sum(1 for f in d.rglob('*') if f.is_file()),
+                'files': sum(1 for f in d.rglob('*') if f.is_file() and _ships(f)),
             })
 
     lines = ['# System Bundles Index', '',

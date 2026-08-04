@@ -2,13 +2,13 @@
 // Coco CLI — clones Coco into a target dir and runs the installer.
 //
 // Usage:
-//   npx @coco-research/coco-cli               # clones to ./coco and installs (auto-detect adapter)
-//   npx @coco-research/coco-cli install       # same as above
-//   npx @coco-research/coco-cli install --adapter cursor
-//   npx @coco-research/coco-cli install --systems gsd,brain,m0
-//   npx @coco-research/coco-cli update        # pull latest in existing clone
-//   npx @coco-research/coco-cli uninstall     # remove symlinks + clone
-//   npx @coco-research/coco-cli --help
+//   npx cocosuperintelligence               # clones to ./coco and installs (auto-detect adapter)
+//   npx cocosuperintelligence install       # same as above
+//   npx cocosuperintelligence install --adapter cursor
+//   npx cocosuperintelligence install --systems gsd,brain,m0
+//   npx cocosuperintelligence update        # pull latest in existing clone
+//   npx cocosuperintelligence uninstall     # remove symlinks + clone
+//   npx cocosuperintelligence --help
 
 'use strict';
 
@@ -66,7 +66,7 @@ function fetchLatestVersion(cb) {
 function banner(latest) {
   if (latest && semverGt(latest, PKG_VERSION)) {
     console.log(`\n  ⬆  Coco ${latest} is available (you have ${PKG_VERSION}).`);
-    console.log(`     Update:  npx @coco-research/coco-cli update     (or: git -C <clone> pull --ff-only && bash install.sh)\n`);
+    console.log(`     Update:  npx cocosuperintelligence update     (or: git -C <clone> pull --ff-only && bash install.sh)\n`);
   }
 }
 
@@ -84,7 +84,7 @@ function checkForUpdate(force) {
 }
 
 function cmdVersion() {
-  console.log(`@coco-research/coco-cli v${PKG_VERSION}`);
+  console.log(`cocosuperintelligence v${PKG_VERSION}`);
   checkForUpdate(true);
 }
 
@@ -92,12 +92,12 @@ function help() {
   console.log(`Coco — open-source AI workflow framework
 
 Usage:
-  npx @coco-research/coco-cli                   clone + install (auto-detect)
-  npx @coco-research/coco-cli install [flags]   clone + install with flags
-  npx @coco-research/coco-cli update [dir]      pull latest in existing clone
-  npx @coco-research/coco-cli uninstall [dir]   remove symlinks + clone
-  npx @coco-research/coco-cli version           show version + check for updates
-  npx @coco-research/coco-cli --help            this message
+  npx cocosuperintelligence                   clone + install (auto-detect)
+  npx cocosuperintelligence install [flags]   clone + install with flags
+  npx cocosuperintelligence update [dir]      pull latest in existing clone
+  npx cocosuperintelligence uninstall [dir]   remove symlinks + clone
+  npx cocosuperintelligence version           show version + check for updates
+  npx cocosuperintelligence --help            this message
 
 Update checks contact only github.com (no telemetry); disable with COCO_NO_UPDATE_CHECK=1.
 
@@ -108,11 +108,11 @@ Install flags (passed to install.sh):
   --dry-run                             preview, no writes
 
 Examples:
-  npx @coco-research/coco-cli
-  npx @coco-research/coco-cli install --adapter cursor
-  npx @coco-research/coco-cli install --systems gsd,brain --adapter claude-code
-  npx @coco-research/coco-cli update
-  npx @coco-research/coco-cli uninstall
+  npx cocosuperintelligence
+  npx cocosuperintelligence install --adapter cursor
+  npx cocosuperintelligence install --systems gsd,brain --adapter claude-code
+  npx cocosuperintelligence update
+  npx cocosuperintelligence uninstall
 
 Repo: https://github.com/coco-research/coco
 `);
@@ -167,13 +167,13 @@ function cmdInstall(argv) {
   run('bash', [installScript, ...argv]);
 
   console.log(`\nDone. Coco installed at ${dir}.`);
-  console.log(`Re-run install / update later with:\n  npx @coco-research/coco-cli update`);
+  console.log(`Re-run install / update later with:\n  npx cocosuperintelligence update`);
 }
 
 function cmdUpdate(argv) {
   const dir = argv[0] && !argv[0].startsWith('--') ? argv[0] : DEFAULT_DIR;
   if (!fs.existsSync(path.join(dir, '.git'))) {
-    console.error(`Error: ${dir} is not a Coco clone. Run \`npx @coco-research/coco-cli install\` first.`);
+    console.error(`Error: ${dir} is not a Coco clone. Run \`npx cocosuperintelligence install\` first.`);
     process.exit(1);
   }
   cloneOrUpdate(dir);
@@ -228,7 +228,7 @@ function main() {
       cmdUninstall(rest);
       break;
     default:
-      // any unknown subcommand → pass through to install (e.g., npx @coco-research/coco-cli --adapter cursor)
+      // any unknown subcommand → pass through to install (e.g., npx cocosuperintelligence --adapter cursor)
       cmdInstall(argv);
       checkForUpdate(false);
   }

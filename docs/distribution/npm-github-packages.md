@@ -6,7 +6,7 @@ Reference: https://docs.github.com/en/packages/working-with-a-github-packages-re
 
 | File | Purpose |
 |------|---------|
-| `package.json` | Renamed package to `@coco-research/coco-cli`; added `publishConfig.registry` pointing to `https://npm.pkg.github.com` |
+| `package.json` | Renamed package to `cocosuperintelligence`; added `publishConfig.registry` pointing to `https://npm.pkg.github.com` |
 | `.npmrc` | Tells npm to use GitHub Packages registry for the `@coco-research` scope |
 | `.github/workflows/publish-npm.yml` | CI workflow that publishes on `release: published` (or manual trigger) |
 
@@ -53,7 +53,7 @@ echo "@coco-research:registry=https://npm.pkg.github.com" >> ~/.npmrc
 echo "//npm.pkg.github.com/:_authToken=ghp_yourtoken" >> ~/.npmrc
 
 # Install
-npm install -g @coco-research/coco-cli
+npm install -g cocosuperintelligence
 coco install
 ```
 

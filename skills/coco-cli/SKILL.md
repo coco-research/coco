@@ -1,6 +1,6 @@
 ---
 name: coco-cli
-description: Install, update, version-check, or uninstall the Coco open-source AI workflow framework via its CLI (@coco-research/coco-cli, run with npx). Use when setting up Coco on a machine, pulling the latest into an existing clone, checking the installed version, or removing it. Triggers on "install coco", "update coco", "set up coco", "coco cli", "uninstall coco".
+description: Install, update, version-check, or uninstall the Coco open-source AI workflow framework via its CLI (cocosuperintelligence, run with npx). Use when setting up Coco on a machine, pulling the latest into an existing clone, checking the installed version, or removing it. Triggers on "install coco", "update coco", "set up coco", "coco cli", "uninstall coco".
 domain: meta
 ---
 
@@ -8,18 +8,18 @@ domain: meta
 
 # coco-cli — manage the Coco framework
 
-Thin agent wrapper over `@coco-research/coco-cli` (run via `npx`). Drives the real CLI; does not reimplement it.
+Thin agent wrapper over `cocosuperintelligence` (run via `npx`). Drives the real CLI; does not reimplement it.
 
 ## Commands
 
 | Command | Purpose | Invocation |
 |---|---|---|
-| (default) | clone + install, auto-detecting the adapter | `npx @coco-research/coco-cli` |
-| `install` | clone + install with explicit flags | `npx @coco-research/coco-cli install [flags]` |
-| `update` | pull latest in an existing clone | `npx @coco-research/coco-cli update [dir]` |
-| `uninstall` | remove symlinks + the clone | `npx @coco-research/coco-cli uninstall [dir]` |
-| `version` | print version + check for updates | `npx @coco-research/coco-cli version` |
-| `--help` | print usage | `npx @coco-research/coco-cli --help` |
+| (default) | clone + install, auto-detecting the adapter | `npx cocosuperintelligence` |
+| `install` | clone + install with explicit flags | `npx cocosuperintelligence install [flags]` |
+| `update` | pull latest in an existing clone | `npx cocosuperintelligence update [dir]` |
+| `uninstall` | remove symlinks + the clone | `npx cocosuperintelligence uninstall [dir]` |
+| `version` | print version + check for updates | `npx cocosuperintelligence version` |
+| `--help` | print usage | `npx cocosuperintelligence --help` |
 
 ## Install flags (passed through to install.sh)
 
@@ -29,17 +29,17 @@ Thin agent wrapper over `@coco-research/coco-cli` (run via `npx`). Drives the re
 
 ## Examples
 
-- Install for Cursor: `npx @coco-research/coco-cli install --adapter cursor`
-- Selective systems: `npx @coco-research/coco-cli install --systems gsd,brain --adapter claude-code`
-- Preview without writing: `npx @coco-research/coco-cli install --dry-run`
-- Update an existing clone: `npx @coco-research/coco-cli update`
+- Install for Cursor: `npx cocosuperintelligence install --adapter cursor`
+- Selective systems: `npx cocosuperintelligence install --systems gsd,brain --adapter claude-code`
+- Preview without writing: `npx cocosuperintelligence install --dry-run`
+- Update an existing clone: `npx cocosuperintelligence update`
 
 ## Output contract
 
 This CLI is human-output-oriented; it has **no native `--json` mode**. For agent use:
 
 - Treat **exit code 0 = success**, non-zero = failure.
-- `version` prints `@coco-research/coco-cli vX.Y.Z` plus an update hint — parse the `vX.Y.Z` token.
+- `version` prints `cocosuperintelligence vX.Y.Z` plus an update hint — parse the `vX.Y.Z` token.
 - Capture stdout/stderr and branch on the exit code; do not assume machine-readable JSON.
 
 ## Errors

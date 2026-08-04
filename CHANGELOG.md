@@ -6,6 +6,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed
+
+- **The npm package is now `cocosuperintelligence`, published unscoped.** It was previously named `@coco-research/coco-cli` and had never been published, so no installed version of the old name exists anywhere and nothing downstream breaks. The new name matches the product as the README presents it, and shortens the install to `npx cocosuperintelligence`. Renamed across `package.json`, `bin/coco.js`, `README.md`, `install.sh`, `skills/coco-cli/SKILL.md`, `skills/cli-anything/SKILL.md`, `docs/distribution/npm-github-packages.md` and the publish workflow. `publishConfig.access` was dropped because it only applies to scoped packages; unscoped packages are public by default. Dated entries below that mention the old name are left as written, because they record what was true at the time.
+
 ### Fixed
 
 - **`/team ship` no longer reconciles the architecture index mid-pipeline.** Stage 1 previously ran `/team arch build` or `/team arch drift` whenever the index was absent or behind HEAD, which meant every ship following a few commits silently paid for a full index reconciliation, with agents, before any product work began. Stage 1 now only records the pin alongside HEAD and continues, which costs nothing. Refreshing the index is a separate explicit act, and a stale baseline degrades the conformance gate to `UNVERIFIED`, which is the honest outcome.

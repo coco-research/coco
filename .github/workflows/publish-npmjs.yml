@@ -1,7 +1,7 @@
 name: Publish to npmjs.com
 
-# Publishes @coco-research/coco-cli to the public npmjs.com registry.
-# Frictionless install for users — no auth required: `npm install -g @coco-research/coco-cli`.
+# Publishes cocosuperintelligence to the public npmjs.com registry.
+# Frictionless install for users — no auth required: `npm install -g cocosuperintelligence`.
 #
 # Setup (one-time):
 #   1. Create npm account at https://www.npmjs.com/signup

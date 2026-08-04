@@ -538,7 +538,7 @@ echo "@coco-research:registry=https://npm.pkg.github.com" >> ~/.npmrc
 echo "//npm.pkg.github.com/:_authToken=YOUR_TOKEN" >> ~/.npmrc
 
 # Install and launch
-npm install -g @coco-research/coco-cli
+npm install -g cocosuperintelligence
 coco
 ```
 
@@ -614,10 +614,10 @@ git pull --ff-only && bash install.sh
 
 ```bash
 # print version + check for updates
-npx @coco-research/coco-cli version
+npx cocosuperintelligence version
 
 # apply an update
-npx @coco-research/coco-cli update
+npx cocosuperintelligence update
 ```
 
 </td>

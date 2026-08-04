@@ -5,7 +5,7 @@
 //   npx @coco-research/coco-cli               # clones to ./coco and installs (auto-detect adapter)
 //   npx @coco-research/coco-cli install       # same as above
 //   npx @coco-research/coco-cli install --adapter cursor
-//   npx @coco-research/coco-cli install --systems gsd,brain,team
+//   npx @coco-research/coco-cli install --systems gsd,brain,m0
 //   npx @coco-research/coco-cli update        # pull latest in existing clone
 //   npx @coco-research/coco-cli uninstall     # remove symlinks + clone
 //   npx @coco-research/coco-cli --help
@@ -103,7 +103,8 @@ Update checks contact only github.com (no telemetry); disable with COCO_NO_UPDAT
 
 Install flags (passed to install.sh):
   --adapter <name>                      claude-code | cursor | codex | generic
-  --systems <list>                      e.g., gsd,brain,team
+  --systems <list>                      gsd | brain | cognee | hyperframes | m0 |
+                                        superintelligence   (comma-separated)
   --dry-run                             preview, no writes
 
 Examples:

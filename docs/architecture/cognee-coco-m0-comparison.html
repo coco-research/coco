@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cognee vs Coco M0 — Architecture Visuals</title>
+<style>
+:root {
+  --bg:       #080e1c;
+  --surf:     #0d1525;
+  --surf2:    #121d30;
+  --border:   #1a2840;
+  --border2:  #213150;
+  --t1:       #e6ecf5;
+  --t2:       #7a8faa;
+  --t3:       #3e526e;
+
+  --ci1: #818cf8; --ci2: #a78bfa; --ci3: #c4b5fd; --ci4: #ddd6fe;
+  --cd:  rgba(129,140,248,.08); --cb: rgba(129,140,248,.22);
+
+  --cg1: #34d399; --cg2: #22d3ee; --cg3: #6ee7b7; --cg4: #a7f3d0;
+  --gd:  rgba(52,211,153,.08);  --gb: rgba(52,211,153,.22);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;line-height:1.55;padding:2rem 1.75rem}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── header ── */
+.pg-head{text-align:center;margin-bottom:2.75rem}
+.pg-head h1{font-size:1.75rem;font-weight:800;letter-spacing:-.03em;background:linear-gradient(120deg,var(--ci2),var(--cg2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.pg-head .sub{margin-top:.4rem;color:var(--t2);font-size:.8rem}
+
+/* ── section ── */
+.sec{margin-bottom:3.5rem}
+.sec-label{font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);display:flex;align-items:center;gap:.7rem;margin-bottom:1.25rem}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── two-col grid ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+
+/* ── panel ── */
+.panel{background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:1.25rem;position:relative;overflow:hidden}
+.panel.coco{border-color:var(--cb);background:linear-gradient(140deg,var(--cd),var(--surf) 55%)}
+.panel.coco::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--ci1),var(--ci2))}
+.panel.cogn{border-color:var(--gb);background:linear-gradient(140deg,var(--gd),var(--surf) 55%)}
+.panel.cogn::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cg1),var(--cg2))}
+
+.ph{display:flex;align-items:center;gap:.65rem;margin-bottom:1.1rem}
+.ph-icon{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.coco .ph-icon{background:rgba(129,140,248,.15)}
+.cogn .ph-icon{background:rgba(52,211,153,.15)}
+.ph-name{font-size:.82rem;font-weight:700}
+.ph-ver{font-size:.65rem;color:var(--t2);font-weight:400}
+
+/* ── memory stack ── */
+.mstack{display:flex;flex-direction:column}
+.ml{padding:.7rem .85rem;border:1px solid var(--border);border-bottom:none;cursor:default;transition:filter .15s}
+.ml:first-child{border-radius:8px 8px 0 0}
+.ml:last-child{border-radius:0 0 8px 8px;border-bottom:1px solid var(--border)}
+.ml:hover{filter:brightness(1.12)}
+.ml-row{display:flex;align-items:center;gap:.55rem}
+.ml-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;flex-shrink:0}
+.ml-name{font-size:.75rem;font-weight:700;flex:1}
+.ml-tags{display:flex;gap:3px;flex-wrap:wrap}
+.tag{font-size:.57rem;padding:1px 5px;border-radius:3px;font-weight:700;letter-spacing:.03em}
+.ml-desc{font-size:.67rem;color:var(--t2);margin-top:.3rem;padding-left:1.55rem;display:none}
+.ml:hover .ml-desc{display:block}
+
+/* coco layer colors */
+.coco .ml.l4{background:rgba(167,139,250,.07)} .coco .l4 .ml-num{background:rgba(167,139,250,.2);color:#c4b5fd} .coco .l4 .tag{background:rgba(167,139,250,.14);color:#c4b5fd}
+.coco .ml.l3{background:rgba(129,140,248,.07)} .coco .l3 .ml-num{background:rgba(129,140,248,.2);color:#a5b4fc} .coco .l3 .tag{background:rgba(129,140,248,.14);color:#a5b4fc}
+.coco .ml.l2{background:rgba(99,102,241,.07)}  .coco .l2 .ml-num{background:rgba(99,102,241,.2);color:#818cf8}  .coco .l2 .tag{background:rgba(99,102,241,.14);color:#818cf8}
+.coco .ml.l1{background:rgba(79,80,180,.05)}   .coco .l1 .ml-num{background:rgba(79,80,180,.2);color:#6366f1}   .coco .l1 .tag{background:rgba(79,80,180,.14);color:#6366f1}
+
+/* cognee layer colors */
+.cogn .ml.l4{background:rgba(52,211,153,.07)}  .cogn .l4 .ml-num{background:rgba(52,211,153,.2);color:#6ee7b7}  .cogn .l4 .tag{background:rgba(52,211,153,.14);color:#6ee7b7}
+.cogn .ml.l3{background:rgba(34,211,238,.07)}  .cogn .l3 .ml-num{background:rgba(34,211,238,.2);color:#67e8f9}  .cogn .l3 .tag{background:rgba(34,211,238,.14);color:#67e8f9}
+.cogn .ml.l2{background:rgba(16,185,129,.07)}  .cogn .l2 .ml-num{background:rgba(16,185,129,.2);color:#34d399}  .cogn .l2 .tag{background:rgba(16,185,129,.14);color:#34d399}
+.cogn .ml.l1{background:rgba(6,182,212,.05)}   .cogn .l1 .ml-num{background:rgba(6,182,212,.2);color:#22d3ee}   .cogn .l1 .tag{background:rgba(6,182,212,.14);color:#22d3ee}
+
+.mfoot{margin-top:.85rem;padding-top:.7rem;border-top:1px solid var(--border);font-size:.63rem;color:var(--t3);display:flex;gap:1.1rem}
+
+/* ── stat bar ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem;margin-bottom:1.5rem}
+.stat{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:.65rem;text-align:center}
+.stat .n{font-size:1.35rem;font-weight:800;letter-spacing:-.03em}
+.stat .l{font-size:.58rem;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-top:1px}
+.coco .stat .n{color:var(--ci1)} .cogn .stat .n{color:var(--cg1)}
+
+/* ── flow ── */
+.flow{display:flex;flex-direction:column;gap:5px;font-size:.7rem}
+.frow{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.fb{padding:3px 7px;border-radius:4px;font-weight:600;white-space:nowrap}
+.fa{color:var(--t3);font-size:.75rem;flex-shrink:0}
+.fdesc{padding-left:1rem;color:var(--t3);font-size:.6rem}
+.fgrid{display:grid;gap:4px}
+.fcard{padding:6px 8px;border-radius:6px;border:1px solid;font-size:.65rem}
+.coco .fb{background:rgba(129,140,248,.1);color:var(--ci1)}
+.coco .fcard{border-color:rgba(129,140,248,.2);background:rgba(99,102,241,.05)}
+.cogn .fb{background:rgba(52,211,153,.1);color:var(--cg1)}
+.cogn .fcard{border-color:rgba(52,211,153,.2);background:rgba(16,185,129,.05)}
+.fcard-title{font-weight:700;margin-bottom:3px}
+.coco .fcard-title{color:var(--ci1)} .cogn .fcard-title{color:var(--cg1)}
+.fcard li{color:var(--t2);margin-left:.8rem;line-height:1.6}
+.fbadge{padding:2px 6px;border-radius:3px;font-size:.58rem;font-weight:700}
+.coco .fbadge{background:rgba(167,139,250,.12);color:var(--ci2)}
+.cogn .fbadge{background:rgba(52,211,153,.12);color:var(--cg1)}
+
+/* ── comparison table ── */
+.ctable{width:100%;border-collapse:collapse;font-size:.72rem}
+.ctable th,.ctable td{padding:.5rem .7rem;text-align:left;border-bottom:1px solid var(--border)}
+.ctable th{font-size:.58rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--t3)}
+.ctable tbody tr:hover td{background:var(--surf2)}
+.ctable .dim{color:var(--t2)}
+.ctable .cv{color:var(--ci1)} .ctable .gv{color:var(--cg1)}
+.ok{color:#34d399} .no{color:#f87171} .half{color:#fbbf24}
+
+/* ── legend ── */
+.legend{display:flex;flex-direction:column;gap:4px;margin-top:.8rem}
+.li{display:flex;align-items:center;gap:7px;font-size:.68rem}
+.ld{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.lx{color:var(--t2)} .lc{color:var(--t3);font-size:.62rem}
+
+/* ── badge row ── */
+.badges{display:flex;align-items:center;justify-content:center;gap:.75rem;margin-bottom:.9rem}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:.65rem;font-weight:700;letter-spacing:.04em;border:1px solid}
+.badge.ci{background:rgba(129,140,248,.1);color:var(--ci1);border-color:rgba(129,140,248,.3)}
+.badge.cg{background:rgba(52,211,153,.1);color:var(--cg1);border-color:rgba(52,211,153,.3)}
+.vs{color:var(--t3)}
+
+/* ── SVG cone ── */
+.cone-svg{width:100%;display:block}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════ HEADER -->
+<header class="pg-head">
+  <div class="badges">
+    <span class="badge ci">⬡ Coco M0 · v1.0.0</span>
+    <span class="vs">vs</span>
+    <span class="badge cg">◉ Cognee · v1.2.2</span>
+  </div>
+  <h1>Architecture Visual</h1>
+  <p class="sub">4-Layer Memory Structure · Conical Spine · Full System Flow · Matrix</p>
+</header>
+
+<!-- ═══════════════════════════════════════════ STATS -->
+<section class="sec">
+  <div class="sec-label">At a glance</div>
+  <div class="grid2">
+
+    <div class="panel coco">
+      <div class="ph"><div class="ph-icon">⬡</div><div><div class="ph-name">Coco M0</div><div class="ph-ver">Workflow-scoped · local-only · zero infra</div></div></div>
+      <div class="stats">
+        <div class="stat"><div class="n">146</div><div class="l">Skills</div></div>
+        <div class="stat"><div class="n">389</div><div class="l">Personas</div></div>
+        <div class="stat"><div class="n">34</div><div class="l">Agents</div></div>
+        <div class="stat"><div class="n">0</div><div class="l">Infra Req.</div></div>
+      </div>
+    </div>
+
+    <div class="panel cogn">
+      <div class="ph"><div class="ph-icon">◉</div><div><div class="ph-name">Cognee 1.2.2</div><div class="ph-ver">Agent memory infra · Apache-2.0 · 23k ★</div></div></div>
+      <div class="stats">
+        <div class="stat"><div class="n">20+</div><div class="l">Retrievers</div></div>
+        <div class="stat"><div class="n">30+</div><div class="l">Data Sources</div></div>
+        <div class="stat"><div class="n">4</div><div class="l">Mem Layers</div></div>
+        <div class="stat"><div class="n">0.79</div><div class="l">BEAM Score</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ 4-LAYER MEMORY -->
+<section class="sec">
+  <div class="sec-label">4-Layer Memory Architecture — hover each layer for detail</div>
+  <div class="grid2">
+
+    <!-- COCO STACK -->
+    <div class="panel coco">
+      <div class="ph"><div class="ph-icon">⬡</div><div><div class="ph-name">Coco M0</div><div class="ph-ver">Project-scoped · git-anchored · optional vectors</div></div></div>
+      <div class="mstack">
+        <div class="ml l4">
+          <div class="ml-row">
+            <div class="ml-num">4</div>
+            <div class="ml-name">Vector Corpus</div>
+            <div class="ml-tags"><span class="tag">ChromaDB</span><span class="tag">Upstash</span><span class="tag">Gemini</span></div>
+          </div>
+          <div class="ml-desc">Optional add-on (Multimodal Memory skill). Embeds diagrams, audio, docs via Gemini Embedding. Semantic similarity retrieval. Not installed by default — zero-config path omits this layer entirely.</div>
+        </div>
+        <div class="ml l3">
+          <div class="ml-row">
+            <div class="ml-num">3</div>
+            <div class="ml-name">Phase State</div>
+            <div class="ml-tags"><span class="tag">Git</span><span class="tag">.planning/</span><span class="tag">Atomic</span></div>
+          </div>
+          <div class="ml-desc">GSD system. Per-phase Markdown docs: CONTEXT (locked decisions), PLAN (task waves), VERIFICATION (7-gate audit results). Every phase commits atomically — fully reversible. Survives any context reset.</div>
+        </div>
+        <div class="ml l2">
+          <div class="ml-row">
+            <div class="ml-num">2</div>
+            <div class="ml-name">Project Brain</div>
+            <div class="ml-tags"><span class="tag">SQLite</span><span class="tag">project_brain.db</span></div>
+          </div>
+          <div class="ml-desc">Cross-session project knowledge. Entities: code classes, business decisions, domain terms, stakeholders. Populated via brain-update / brain-rescan. SQL joins only — no graph traversal. Auto-generates CLAUDE.local.md for L1.</div>
+        </div>
+        <div class="ml l1">
+          <div class="ml-row">
+            <div class="ml-num">1</div>
+            <div class="ml-name">Session Context</div>
+            <div class="ml-tags"><span class="tag">In-context</span><span class="tag">Volatile</span></div>
+          </div>
+          <div class="ml-desc">Active IDE session window. Ephemeral — evaporates on context reset. Re-hydrated on next session from L2 via CLAUDE.local.md injection. No persistence guarantee; never write source-of-truth here.</div>
+        </div>
+      </div>
+      <div class="mfoot">
+        <span>L1 → volatile</span><span>L2 → session-persistent</span><span>L3 → phase-locked</span><span>L4 → corpus (optional)</span>
+      </div>
+    </div>
+
+    <!-- COGNEE STACK -->
+    <div class="panel cogn">
+      <div class="ph"><div class="ph-icon">◉</div><div><div class="ph-name">Cognee 1.2.2</div><div class="ph-ver">Agent-scoped · property graph · self-improving</div></div></div>
+      <div class="mstack">
+        <div class="ml l4">
+          <div class="ml-row">
+            <div class="ml-num">4</div>
+            <div class="ml-name">Graph Store</div>
+            <div class="ml-tags"><span class="tag">Neo4j</span><span class="tag">Ladybug/Kuzu</span><span class="tag">Neptune</span></div>
+          </div>
+          <div class="ml-desc">Typed entity-relationship graph. Nodes + edges with ontology validation (RDF/XML). Multi-hop k-hop subgraph extraction. Temporal validity intervals (Graphiti adapter). Edge feedback weights updated by memify(). NL→Cypher retriever targets this layer.</div>
+        </div>
+        <div class="ml l3">
+          <div class="ml-row">
+            <div class="ml-num">3</div>
+            <div class="ml-name">Vector Store</div>
+            <div class="ml-tags"><span class="tag">pgvector</span><span class="tag">LanceDB</span><span class="tag">Fastembed</span></div>
+          </div>
+          <div class="ml-desc">Semantic embeddings for all entities, chunks, code, summaries. Truth-subspace reranking: accepted session learnings → centroid vectors → chunk alignment scores → promote/demote in results. Cosine distance search.</div>
+        </div>
+        <div class="ml l2">
+          <div class="ml-row">
+            <div class="ml-num">2</div>
+            <div class="ml-name">Relational Store</div>
+            <div class="ml-tags"><span class="tag">PostgreSQL</span><span class="tag">SQLAlchemy</span><span class="tag">Alembic</span></div>
+          </div>
+          <div class="ml-desc">Document metadata, raw chunks, provenance stamps (pipeline + task + user). Source of truth for chunk lineage. In "unified mode", pgvector extension runs here too — single Postgres instance handles L2+L3 for ~10% faster search.</div>
+        </div>
+        <div class="ml l1">
+          <div class="ml-row">
+            <div class="ml-num">1</div>
+            <div class="ml-name">Session Cache</div>
+            <div class="ml-tags"><span class="tag">Redis</span><span class="tag">SQL cache</span><span class="tag">Ephemeral</span></div>
+          </div>
+          <div class="ml-desc">Ephemeral conversation context. Fast lookups per turn. Session distillation pipeline (distill.py) runs at session end: interactions → lesson nodes → promoted to L4 graph. Closes the short-term→long-term memory loop.</div>
+        </div>
+      </div>
+      <div class="mfoot" style="color:var(--t3)">
+        <span>L1 → volatile</span><span>L2–3 → permanent</span><span>L4 → permanent + temporal</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ CONICAL SPINE -->
+<section class="sec">
+  <div class="sec-label">The Conical Spine — Routing &amp; Extraction Architecture</div>
+  <div class="grid2">
+
+    <!-- COCO CONE: SI inverted funnel -->
+    <div class="panel coco">
+      <div class="ph"><div class="ph-icon">⬡</div><div><div class="ph-name">Superintelligence Spine</div><div class="ph-ver">Wide advisory board → attributed single verdict</div></div></div>
+
+      <svg viewBox="0 0 340 370" class="cone-svg" aria-label="Coco Superintelligence routing funnel">
+        <defs>
+          <linearGradient id="cg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#a78bfa" stop-opacity=".32"/><stop offset="100%" stop-color="#6366f1" stop-opacity=".06"/></linearGradient>
+          <linearGradient id="cg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#818cf8" stop-opacity=".28"/><stop offset="100%" stop-color="#6366f1" stop-opacity=".06"/></linearGradient>
+          <linearGradient id="cg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6366f1" stop-opacity=".32"/><stop offset="100%" stop-color="#4f46e5" stop-opacity=".08"/></linearGradient>
+        </defs>
+
+        <!-- Funnel guide lines (ghost) -->
+        <line x1="10"  y1="14"  x2="138" y2="282" stroke="#6366f1" stroke-width=".6" stroke-opacity=".12" stroke-dasharray="5,4"/>
+        <line x1="330" y1="14"  x2="202" y2="282" stroke="#6366f1" stroke-width=".6" stroke-opacity=".12" stroke-dasharray="5,4"/>
+
+        <!-- Stage 0: 389 personas (full width) -->
+        <rect x="10" y="10" width="320" height="58" rx="6" fill="url(#cg1)" stroke="#a78bfa" stroke-width="1" stroke-opacity=".4"/>
+        <!-- persona dots -->
+        <g opacity=".9">
+          <circle cx="35"  cy="28" r="3.5" fill="#c4b5fd"/><circle cx="50"  cy="28" r="3.5" fill="#a78bfa"/>
+          <circle cx="65"  cy="28" r="3.5" fill="#818cf8"/><circle cx="80"  cy="28" r="3.5" fill="#c4b5fd"/>
+          <circle cx="95"  cy="28" r="3.5" fill="#a78bfa"/><circle cx="110" cy="28" r="3.5" fill="#818cf8"/>
+          <circle cx="125" cy="28" r="3.5" fill="#c4b5fd"/><circle cx="140" cy="28" r="3.5" fill="#a78bfa"/>
+          <circle cx="155" cy="28" r="3.5" fill="#818cf8"/>
+          <circle cx="42"  cy="40" r="3"   fill="#a78bfa"/><circle cx="57"  cy="40" r="3" fill="#818cf8"/>
+          <circle cx="72"  cy="40" r="3"   fill="#c4b5fd"/><circle cx="87"  cy="40" r="3" fill="#a78bfa"/>
+          <circle cx="102" cy="40" r="3"   fill="#818cf8"/><circle cx="117" cy="40" r="3" fill="#c4b5fd"/>
+          <circle cx="132" cy="40" r="3"   fill="#a78bfa"/><circle cx="147" cy="40" r="3" fill="#818cf8"/>
+        </g>
+        <text x="175" y="33" fill="#94a3b8" font-size="9.5" font-family="monospace">… 389 personas</text>
+        <text x="175" y="47" fill="#64748b" font-size="8.5">9 teams · Eng · AI · Finance · Trading · GRC · Strategy · Data · GTM · Product</text>
+        <text x="170" y="62" fill="#8b5cf6" font-size="9" font-weight="700" text-anchor="middle">FULL ADVISORY BOARD</text>
+
+        <!-- arrow 1 -->
+        <line x1="170" y1="68" x2="170" y2="82" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="3,2" stroke-opacity=".7"/>
+        <polygon points="165,80 175,80 170,87" fill="#6366f1" opacity=".7"/>
+        <text x="178" y="79" fill="#3e526e" font-size="8" font-family="monospace">Stage A — registry keyword scan</text>
+
+        <!-- Stage A: 1-4 teams (narrower) -->
+        <rect x="45" y="90" width="250" height="50" rx="6" fill="url(#cg2)" stroke="#818cf8" stroke-width="1" stroke-opacity=".4"/>
+        <text x="170" y="108" fill="#a5b4fc" font-size="11" font-weight="700" text-anchor="middle">1 – 4 Teams Selected</text>
+        <text x="170" y="124" fill="#64748b" font-size="9" text-anchor="middle">team registry · cell definitions · domain overlap score</text>
+        <text x="170" y="135" fill="#4f617e" font-size="8.5" text-anchor="middle">single-team dominance → delegates to team orchestrator directly</text>
+
+        <!-- arrow 2 -->
+        <line x1="170" y1="140" x2="170" y2="154" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="3,2" stroke-opacity=".7"/>
+        <polygon points="165,152 175,152 170,159" fill="#6366f1" opacity=".7"/>
+        <text x="178" y="150" fill="#3e526e" font-size="8" font-family="monospace">Stage B — greedy scorer per persona</text>
+
+        <!-- Stage B: 16-32 panel (narrower) -->
+        <rect x="80" y="162" width="180" height="50" rx="6" fill="url(#cg2)" stroke="#818cf8" stroke-width="1" stroke-opacity=".45"/>
+        <text x="170" y="181" fill="#a5b4fc" font-size="11" font-weight="700" text-anchor="middle">16 – 32 Expert Panel</text>
+        <text x="170" y="196" fill="#64748b" font-size="9" text-anchor="middle">0.40·domain + 0.30·cell-coverage + 0.30·conflict</text>
+        <text x="170" y="207" fill="#4f617e" font-size="8.5" text-anchor="middle">cross-team tension pass → opposing views forced in</text>
+
+        <!-- arrow 3 -->
+        <line x1="170" y1="212" x2="170" y2="226" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="3,2" stroke-opacity=".7"/>
+        <polygon points="165,224 175,224 170,231" fill="#6366f1" opacity=".7"/>
+        <text x="178" y="222" fill="#3e526e" font-size="8" font-family="monospace">Stage C — debate rounds + attribution</text>
+
+        <!-- Stage C: debate (narrow) -->
+        <rect x="105" y="234" width="130" height="44" rx="6" fill="url(#cg3)" stroke="#6366f1" stroke-width="1" stroke-opacity=".5"/>
+        <text x="170" y="252" fill="#818cf8" font-size="11" font-weight="700" text-anchor="middle">Debate Rounds</text>
+        <text x="170" y="267" fill="#64748b" font-size="9" text-anchor="middle">reacting rounds · named dissent logged</text>
+
+        <!-- arrow 4 -->
+        <line x1="170" y1="278" x2="170" y2="290" stroke="#6366f1" stroke-width="1.5" stroke-opacity=".9"/>
+        <polygon points="165,288 175,288 170,295" fill="#6366f1"/>
+
+        <!-- APEX -->
+        <rect x="120" y="298" width="100" height="40" rx="20" fill="rgba(99,102,241,.22)" stroke="#6366f1" stroke-width="1.8"/>
+        <text x="170" y="315" fill="#a5b4fc" font-size="10" font-weight="800" text-anchor="middle">ATTRIBUTED</text>
+        <text x="170" y="330" fill="#a5b4fc" font-size="10" font-weight="800" text-anchor="middle">VERDICT</text>
+        <text x="170" y="355" fill="#4f617e" font-size="8.5" text-anchor="middle">line-by-line attribution · cited evidence URL · dissent noted</text>
+      </svg>
+
+      <div class="legend">
+        <div class="li"><div class="ld" style="background:#c4b5fd"></div><span class="lx">389 personas across 9 departments</span></div>
+        <div class="li"><div class="ld" style="background:#818cf8"></div><span class="lx">Stage A: 1-4 teams via registry scan</span><span class="lc">(cheap — no persona loading)</span></div>
+        <div class="li"><div class="ld" style="background:#6366f1"></div><span class="lx">Stage B: 16-32 panel via greedy scorer</span></div>
+        <div class="li"><div class="ld" style="background:#4f46e5"></div><span class="lx">Stage C: debate → single attributed verdict</span></div>
+      </div>
+    </div>
+
+    <!-- COGNEE CONE: ECL hourglass -->
+    <div class="panel cogn">
+      <div class="ph"><div class="ph-icon">◉</div><div><div class="ph-name">ECL Pipeline Spine</div><div class="ph-ver">Extract → Cognify → Load (hourglass shape)</div></div></div>
+
+      <svg viewBox="0 0 340 370" class="cone-svg" aria-label="Cognee ECL pipeline hourglass">
+        <defs>
+          <linearGradient id="gg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#34d399" stop-opacity=".3"/><stop offset="100%" stop-color="#10b981" stop-opacity=".06"/></linearGradient>
+          <linearGradient id="gg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22d3ee" stop-opacity=".25"/><stop offset="100%" stop-color="#06b6d4" stop-opacity=".05"/></linearGradient>
+          <linearGradient id="gg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#10b981" stop-opacity=".28"/><stop offset="100%" stop-color="#34d399" stop-opacity=".08"/></linearGradient>
+        </defs>
+
+        <!-- Top-cone guide (ingest narrows) -->
+        <line x1="14"  y1="14"  x2="128" y2="204" stroke="#10b981" stroke-width=".5" stroke-opacity=".12" stroke-dasharray="5,4"/>
+        <line x1="326" y1="14"  x2="212" y2="204" stroke="#10b981" stroke-width=".5" stroke-opacity=".12" stroke-dasharray="5,4"/>
+        <!-- Bottom-cone guide (retrieval expands) -->
+        <line x1="128" y1="224" x2="22"  y2="340" stroke="#22d3ee" stroke-width=".5" stroke-opacity=".12" stroke-dasharray="5,4"/>
+        <line x1="212" y1="224" x2="318" y2="340" stroke="#22d3ee" stroke-width=".5" stroke-opacity=".12" stroke-dasharray="5,4"/>
+
+        <!-- Stage 0: 30+ data sources (wide) -->
+        <rect x="14" y="10" width="312" height="46" rx="6" fill="url(#gg1)" stroke="#34d399" stroke-width="1" stroke-opacity=".4"/>
+        <text x="170" y="28" fill="#6ee7b7" font-size="11" font-weight="700" text-anchor="middle">30+ DATA SOURCES</text>
+        <text x="170" y="43" fill="#64748b" font-size="9" text-anchor="middle">docs · PDFs · SQL DBs (FK→edges) · S3 · APIs · audio · images · dlt streams</text>
+
+        <!-- arrow -->
+        <line x1="170" y1="56" x2="170" y2="68" stroke="#10b981" stroke-width="1.4" stroke-dasharray="3,2" stroke-opacity=".7"/>
+        <polygon points="165,66 175,66 170,73" fill="#10b981" opacity=".7"/>
+        <text x="178" y="65" fill="#2d5c4a" font-size="8" font-family="monospace">classify + chunk (8 strategies)</text>
+
+        <!-- Stage 1: chunks (slightly narrower) -->
+        <rect x="38" y="76" width="264" height="42" rx="6" fill="url(#gg2)" stroke="#22d3ee" stroke-width="1" stroke-opacity=".38"/>
+        <text x="170" y="93" fill="#67e8f9" font-size="11" font-weight="700" text-anchor="middle">Document Chunks</text>
+        <text x="170" y="108" fill="#64748b" font-size="9" text-anchor="middle">word · sentence · paragraph · overlap · CSV · row · LangChain · fixed-size</text>
+
+        <!-- arrow -->
+        <line x1="170" y1="118" x2="170" y2="130" stroke="#10b981" stroke-width="1.4" stroke-dasharray="3,2" stroke-opacity=".7"/>
+        <polygon points="165,128 175,128 170,135" fill="#10b981" opacity=".7"/>
+        <text x="178" y="127" fill="#2d5c4a" font-size="8" font-family="monospace">parallel LLM extraction (asyncio.gather)</text>
+
+        <!-- Stage 2: triplets (narrower) -->
+        <rect x="68" y="138" width="204" height="40" rx="6" fill="url(#gg1)" stroke="#34d399" stroke-width="1" stroke-opacity=".42"/>
+        <text x="170" y="155" fill="#6ee7b7" font-size="11" font-weight="700" text-anchor="middle">Entity / Relation Triplets</text>
+        <text x="170" y="168" fill="#64748b" font-size="9" text-anchor="middle">subject – predicate – object  ·  V2 cascade: 3 rounds</text>
+
+        <!-- arrow -->
+        <line x1="170" y1="178" x2="170" y2="190" stroke="#10b981" stroke-width="1.4" stroke-dasharray="3,2" stroke-opacity=".7"/>
+        <polygon points="165,188 175,188 170,195" fill="#10b981" opacity=".7"/>
+        <text x="178" y="187" fill="#2d5c4a" font-size="8" font-family="monospace">ontology validation + provenance stamp</text>
+
+        <!-- WAIST: Knowledge Graph node -->
+        <rect x="108" y="198" width="124" height="38" rx="19" fill="rgba(16,185,129,.22)" stroke="#10b981" stroke-width="2"/>
+        <text x="170" y="215" fill="#34d399" font-size="10.5" font-weight="800" text-anchor="middle">Knowledge Graph</text>
+        <text x="170" y="229" fill="#34d399" font-size="9" font-weight="600" text-anchor="middle">Nodes + Edges  L3+L4</text>
+
+        <!-- expansion arrows -->
+        <line x1="170" y1="236" x2="170" y2="248" stroke="#22d3ee" stroke-width="1.4" stroke-opacity=".8"/>
+        <polygon points="165,246 175,246 170,253" fill="#22d3ee"/>
+        <text x="178" y="247" fill="#2d5c4a" font-size="8" font-family="monospace">auto-route → retriever selection</text>
+
+        <!-- Stage R: retrieval expands -->
+        <rect x="58" y="256" width="224" height="42" rx="6" fill="url(#gg2)" stroke="#22d3ee" stroke-width="1" stroke-opacity=".38"/>
+        <text x="170" y="274" fill="#67e8f9" font-size="11" font-weight="700" text-anchor="middle">20+ Retriever Strategies</text>
+        <text x="170" y="288" fill="#64748b" font-size="9" text-anchor="middle">Hybrid · CoT-loop · Decomp · Agentic(ReAct) · NL→Cypher · BM25…</text>
+
+        <!-- arrow -->
+        <line x1="170" y1="298" x2="170" y2="310" stroke="#10b981" stroke-width="1.4" stroke-dasharray="3,2" stroke-opacity=".7"/>
+        <polygon points="165,308 175,308 170,315" fill="#10b981" opacity=".7"/>
+        <text x="178" y="307" fill="#2d5c4a" font-size="8" font-family="monospace">truth-subspace reranking + synthesis</text>
+
+        <!-- Stage Output: wide again -->
+        <rect x="22" y="318" width="296" height="40" rx="6" fill="url(#gg3)" stroke="#10b981" stroke-width="1" stroke-opacity=".4"/>
+        <text x="170" y="335" fill="#6ee7b7" font-size="11" font-weight="700" text-anchor="middle">Grounded Answer + Provenance</text>
+        <text x="170" y="350" fill="#64748b" font-size="9" text-anchor="middle">source chunks · graph path · trust score · improve() feedback → L4</text>
+      </svg>
+
+      <div class="legend">
+        <div class="li"><div class="ld" style="background:#34d399"></div><span class="lx">Top cone: 30+ sources → precise graph nodes (ingest)</span></div>
+        <div class="li"><div class="ld" style="background:#10b981"></div><span class="lx">Waist: knowledge graph — the persistent spine</span></div>
+        <div class="li"><div class="ld" style="background:#22d3ee"></div><span class="lx">Bottom cone: 20+ retrievers → grounded answer (recall)</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ FULL SYSTEM FLOW -->
+<section class="sec">
+  <div class="sec-label">Full System Architecture Flow</div>
+  <div class="grid2">
+
+    <!-- COCO FLOW -->
+    <div class="panel coco">
+      <div class="ph"><div class="ph-icon">⬡</div><div><div class="ph-name">Coco M0 — System Flow</div></div></div>
+      <div class="flow">
+
+        <div class="frow">
+          <span class="fb">User</span><span class="fa">→</span>
+          <span class="fb">IDE (Claude Code / Cursor / Codex)</span><span class="fa">→</span>
+          <span class="fb">Adapter</span>
+        </div>
+        <div class="fdesc">↓ skill / command / agent lookup in canonical artifact library</div>
+
+        <div class="fgrid" style="grid-template-columns:1fr 1fr;gap:5px">
+          <div class="fcard">
+            <div class="fcard-title">Skills (146)</div>
+            <ul><li>6 domains</li><li>foundational→meta</li><li>vendor-neutral frontmatter</li></ul>
+          </div>
+          <div class="fcard">
+            <div class="fcard-title">Commands (277)</div>
+            <ul><li>34 namespaced</li><li>242 SI commands</li><li>auto-generated on install</li></ul>
+          </div>
+          <div class="fcard">
+            <div class="fcard-title">GSD Bundle</div>
+            <ul><li>68 skills + 24 agents</li><li>phase planning + gates</li><li>atomic git commits</li></ul>
+          </div>
+          <div class="fcard">
+            <div class="fcard-title">SI Board (389)</div>
+            <ul><li>2-stage routing</li><li>16-32 expert panel</li><li>cited evidence</li></ul>
+          </div>
+        </div>
+
+        <div class="fdesc">↓ memory reads / writes during execution</div>
+
+        <div class="fgrid" style="grid-template-columns:1fr 1fr;gap:4px">
+          <span class="fbadge" style="text-align:center">L4 Vector ↔ semantic recall</span>
+          <span class="fbadge" style="text-align:center">L3 Phase ↔ git commits</span>
+          <span class="fbadge" style="text-align:center">L2 Brain ↔ entity SQL</span>
+          <span class="fbadge" style="text-align:center">L1 Session ← .local.md</span>
+        </div>
+
+        <div class="fdesc">↓ 7-gate verification before commit: lints · imports · coverage · mocks · CSS · dead-code · skip-tests</div>
+
+        <div class="frow">
+          <span class="fb">Code + Commits</span><span class="fa">+</span>
+          <span class="fb">Phase Docs</span><span class="fa">+</span>
+          <span class="fb">SI Verdicts</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- COGNEE FLOW -->
+    <div class="panel cogn">
+      <div class="ph"><div class="ph-icon">◉</div><div><div class="ph-name">Cognee 1.2.2 — System Flow</div></div></div>
+      <div class="flow">
+
+        <div class="frow">
+          <span class="fb">Data Sources</span><span class="fa">→</span>
+          <span class="fb">cognee.add() / dlt pipeline</span>
+        </div>
+        <div class="fdesc">↓ classify · chunk (8 strategies) · permission check</div>
+
+        <div class="fgrid" style="grid-template-columns:1fr 1fr;gap:5px">
+          <div class="fcard">
+            <div class="fcard-title">cognify() 6-stage</div>
+            <ul><li>classify + permissions</li><li>chunk documents</li><li>LLM triplet extract (‖)</li><li>ontology validate</li><li>generate summaries</li><li>embed + commit stores</li></ul>
+          </div>
+          <div class="fcard">
+            <div class="fcard-title">Storage (parallel)</div>
+            <ul><li>L4 Graph: nodes+edges</li><li>L3 Vector: embeddings</li><li>L2 Relational: provenance</li><li>L1 Cache: session state</li><li>temporal stamps</li></ul>
+          </div>
+        </div>
+
+        <div class="fdesc">↓ memify() post-process — prune stale · reweight edges · derive facts</div>
+
+        <div class="frow">
+          <span class="fb">Query</span><span class="fa">→</span>
+          <span class="fb">search() / recall()</span><span class="fa">→</span>
+          <span class="fb">auto-route</span>
+        </div>
+
+        <div class="fgrid" style="grid-template-columns:repeat(3,1fr);gap:4px">
+          <span class="fbadge" style="text-align:center">Hybrid<br/>(vec+graph+summary)</span>
+          <span class="fbadge" style="text-align:center">CoT Loop<br/>(4 iter max)</span>
+          <span class="fbadge" style="text-align:center">Agentic<br/>(ReAct loop)</span>
+        </div>
+
+        <div class="fdesc">↓ truth-subspace reranking → synthesis → session distillation → L4 lessons</div>
+
+        <div class="frow">
+          <span class="fb">Answer + Provenance</span><span class="fa">→</span>
+          <span class="fb">improve()</span><span class="fa">→</span>
+          <span class="fb">self-improving graph</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ MATRIX -->
+<section class="sec">
+  <div class="sec-label">Architecture Comparison Matrix</div>
+  <div style="background:var(--surf);border-radius:10px;border:1px solid var(--border);overflow:hidden">
+    <table class="ctable">
+      <thead><tr><th style="width:26%">Dimension</th><th style="width:37%">⬡ Coco M0</th><th style="width:37%">◉ Cognee 1.2.2</th></tr></thead>
+      <tbody>
+        <tr><td class="dim">Category</td><td class="cv">IDE workflow orchestration</td><td class="gv">Agent memory infrastructure</td></tr>
+        <tr><td class="dim">Graph engine</td><td><span class="no">✗</span> SQLite relational only</td><td><span class="ok">✓</span> Neo4j / Ladybug / Neptune</td></tr>
+        <tr><td class="dim">Semantic search</td><td><span class="half">◌</span> Optional (ChromaDB add-on)</td><td><span class="ok">✓</span> Native pgvector / LanceDB</td></tr>
+        <tr><td class="dim">Auto entity extraction</td><td><span class="no">✗</span> Manual via Brain skills</td><td><span class="ok">✓</span> LLM triplet extraction</td></tr>
+        <tr><td class="dim">Multi-hop traversal</td><td><span class="no">✗</span> No graph traversal</td><td><span class="ok">✓</span> k-hop subgraph extraction</td></tr>
+        <tr><td class="dim">Self-improving memory</td><td><span class="no">✗</span> No feedback loop</td><td><span class="ok">✓</span> Memify + truth subspace + distillation</td></tr>
+        <tr><td class="dim">Temporal edges</td><td><span class="no">✗</span> No temporal model</td><td><span class="ok">✓</span> Validity intervals (Graphiti adapter)</td></tr>
+        <tr><td class="dim">Expert panel routing</td><td><span class="ok">✓</span> 389 personas, 2-stage greedy</td><td><span class="no">✗</span> No persona system</td></tr>
+        <tr><td class="dim">Phase workflow engine</td><td><span class="ok">✓</span> GSD · 68 skills · 7-gate verify</td><td><span class="no">✗</span> No workflow engine</td></tr>
+        <tr><td class="dim">Zero infrastructure</td><td><span class="ok">✓</span> Local symlinks · 90s install</td><td><span class="no">✗</span> Requires DB server / Docker</td></tr>
+        <tr><td class="dim">REST API</td><td><span class="no">✗</span> IDE-only</td><td><span class="ok">✓</span> FastAPI · full CRUD</td></tr>
+        <tr><td class="dim">MCP server</td><td><span class="half">◌</span> Plugin (no standalone)</td><td><span class="ok">✓</span> Dedicated cognee-mcp · shared mode</td></tr>
+        <tr><td class="dim">Memory scale (tested)</td><td class="dim">Project-scoped (no benchmark)</td><td class="gv">10M tokens · BEAM 0.79 @ 100K</td></tr>
+        <tr><td class="dim">IDE integration</td><td class="cv">Native · Claude / Cursor / Codex / AGENTS.md</td><td class="dim">Via MCP only</td></tr>
+        <tr><td class="dim">Multi-language SDK</td><td class="dim">N/A</td><td class="gv">Python · TypeScript · Rust</td></tr>
+        <tr><td class="dim">Observability</td><td><span class="no">✗</span> None</td><td><span class="ok">✓</span> OpenTelemetry · provenance graphs</td></tr>
+        <tr><td class="dim">License</td><td>MIT</td><td>Apache-2.0</td></tr>
+        <tr><td class="dim">Integration potential</td><td colspan="2" style="color:var(--t2);font-style:italic">Cognee as memory backend for Coco M1 — Cognee-MCP shared mode + Coco GSD/SI orchestration = complementary stack</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ FOOTER -->
+<footer style="text-align:center;color:var(--t3);font-size:.65rem;margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+  Generated by team:arch · Coco M0 branch · <span style="font-family:monospace">cognee-coco-m0-comparison</span> · 2026-08-04
+</footer>
+
+</body>
+</html>

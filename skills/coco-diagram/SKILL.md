@@ -2,11 +2,12 @@
 name: coco-diagram
 description: Create branded architecture, IT current-state, flowchart, sequence, state machine, ER/data model, timeline, swimlane, quadrant, radar/spider, loop/flywheel, nested, tree, org chart, layer stack, Venn, pyramid/funnel, bar, line, Gantt and scatter charts, high-level, process, medallion, data flow, DP integration, or DP security matrix diagrams as standalone HTML/SVG/PNG. Redraw .drawio/.drawio.png/.drawio.svg or Mermaid .mmd sources at a chosen size/detail; onboard brand tokens from a website; add semantic patterns, callouts, accessible motion, or sketchy/hand-drawn styling.
 license: MIT
+domain: design
 metadata:
-  version: "2.3"
+  version: "2.3.2"
 ---
 
-# Diagram Design
+# CoCo Diagram
 
 Create visual diagrams as self-contained HTML files with inline SVG and CSS, following an opinionated editorial design system.
 
@@ -20,9 +21,9 @@ Twenty-seven visual types. Semantic patterns describe behavior independently; ty
 
 Don't silently ship default-skinned diagrams into a branded project.
 
-Open [`references/style-guide.md`](references/style-guide.md) and check the default tokens. If they're still the shipped defaults (paper `#f5f5f5`, ink `#2d3142`, accent `#8B5CF6` coco-violet), **pause and ask the user**:
+Open [`references/style-guide.md`](references/style-guide.md) and check the default tokens. If they're still the shipped defaults (paper `#f5f5f5`, ink `#2d3142`, accent `#BE185D` coco-magenta), **pause and ask the user**:
 
-> *"This is your first Schematic in this project. The style guide is still at the default (neutral white-smoke + coco-violet). Do you want to customize it to match your brand first? Options: (a) pull from your website URL, (b) extract from an installed skill, (c) extract from a local folder / design-system directory, (d) paste tokens manually, (e) proceed with the default for now."*
+> *"This is your first Schematic in this project. The style guide is still at the default (neutral white-smoke + coco-magenta). Do you want to customize it to match your brand first? Options: (a) pull from your website URL, (b) extract from an installed skill, (c) extract from a local folder / design-system directory, (d) paste tokens manually, (e) proceed with the default for now."*
 
 Then branch:
 
@@ -32,7 +33,7 @@ Then branch:
 - **(d)** → accept the user's tokens and write them into `style-guide.md` under a new "Custom tokens" section.
 - **(e)** → proceed; optionally remind the user they can run onboarding later.
 
-**Once the style guide has been customized** (or the user explicitly opted for default), skip this gate on subsequent runs. A simple way to detect customization: if the `accent` value in `style-guide.md` differs from `#8B5CF6`, assume custom.
+**Once the style guide has been customized** (or the user explicitly opted for default), skip this gate on subsequent runs. A simple way to detect customization: if the `accent` value in `style-guide.md` differs from `#BE185D`, assume custom.
 
 ---
 
@@ -158,7 +159,7 @@ Type-specific anti-patterns live in each `references/type-*.md`.
 
 ## 5. Design System
 
-**The design system is skinnable.** All colors, typography, and tokens live in a single source of truth — [`references/style-guide.md`](references/style-guide.md). This file describes semantic roles (`paper`, `ink`, `muted`, `accent`, `link`, …). The default skin is a cool editorial palette (white-smoke paper, jet-black ink, coco-violet accent, blue-slate muted, silver hairlines); to apply your own brand, either edit `style-guide.md` directly or run the URL-based flow described in [`references/onboarding.md`](references/onboarding.md).
+**The design system is skinnable.** All colors, typography, and tokens live in a single source of truth — [`references/style-guide.md`](references/style-guide.md). This file describes semantic roles (`paper`, `ink`, `muted`, `accent`, `link`, …). The default skin is a cool editorial palette (white-smoke paper, jet-black ink, coco-magenta accent, blue-slate muted, silver hairlines); to apply your own brand, either edit `style-guide.md` directly or run the URL-based flow described in [`references/onboarding.md`](references/onboarding.md).
 
 > When specs below or in type references mention "ink", "accent", "muted", etc., look up the current hex value in `style-guide.md`.
 
@@ -243,7 +244,7 @@ Don't use the dot pattern when the diagram sits inside a product page, slide, or
   <polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/>
 </marker>
 <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-  <polygon points="0 0, 8 3, 0 6" fill="#8B5CF6"/>
+  <polygon points="0 0, 8 3, 0 6" fill="#BE185D"/>
 </marker>
 <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
   <polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/>
@@ -253,7 +254,7 @@ Don't use the dot pattern when the diagram sits inside a product page, slide, or
 | Arrow | Stroke | When |
 |---|---|---|
 | Default | muted `#4f5d75` | Internal, generic |
-| Accent | accent `#8B5CF6` | Primary / highlighted / headline |
+| Accent | accent `#BE185D` | Primary / highlighted / headline |
 | Link-blue | `#2e5aa8` | HTTP/API calls, external systems |
 | Dashed | `stroke-dasharray="5,4"` + any color | Optional, passive, return, async |
 
@@ -283,7 +284,7 @@ These six rules are **non-negotiable**. Run the pre-output checklist (§9) to ve
 
    When in doubt, reroute. The exception exists for the narrow case where rerouting is geometrically impossible, not as a shortcut to avoid layout work.
 
-6. **A label mask must not overlap a node drawn after it.** Rule 2 keeps the label off its own connector; this one keeps it off the boxes. Because nodes are painted after labels, a mask that lands partly inside a node is covered by the node fill and the text renders as a fragment sitting on the node border. Place the label on a segment of the connector that runs through open canvas — for a connector leaving a node's right edge, that means clearing the node's `x + width` before the mask starts. A mask fully *inside* a node is a badge chip and is fine; a mask overlapping a zone container is fine too, since zones are painted first. Verify with `python3 scripts/verify-geometry.py <file>`.
+6. **A label mask must not overlap a node drawn after it.** Rule 2 keeps the label off its own connector; this one keeps it off the boxes. Because nodes are painted after labels, a mask that lands partly inside a node is covered by the node fill and the text renders as a fragment sitting on the node border. Place the label on a segment of the connector that runs through open canvas — for a connector leaving a node's right edge, that means clearing the node's `x + width` before the mask starts. A mask fully *inside* a node is a badge chip and is fine; a mask overlapping a zone container is fine too, since zones are painted first. Verify label-mask geometry by eye against this rule; the upstream `diagram-design` repository additionally ships a `verify-geometry.py` gate that is not vendored here.
 
 ### Node box — full pattern
 
@@ -462,14 +463,14 @@ Run before producing any diagram.
 - [ ] **No two connectors overlap, share a stroke path, or run on top of each other? Crossings use the bridge/hop primitive?**
 - [ ] **When several connectors enter or exit the same edge of a box, each has its own attach point (≥12px apart)? No connector hides another?**
 - [ ] **No connector passes behind a non-endpoint box, except the unavoidable-intervening-box case (§6 rule 5) — and in that case, the stroke is dashed and the label sits at the visible end?**
-- [ ] **No label mask overlaps a node drawn after it? (Node fill would clip the text — §6 rule 6. In this repository, `python3 scripts/verify-geometry.py <file>`.)**
+- [ ] **No label mask overlaps a node drawn after it? (Node fill would clip the text — §6 rule 6. In the upstream `diagram-design` repository, `python3 scripts/verify-geometry.py <file>`; not vendored here.)**
 - [ ] Every arrow label has an opaque `fill="#f5f5f5"` rect behind it?
 - [ ] Legend is a horizontal bottom strip, not floating?
 - [ ] No vertical `writing-mode` text?
 - [ ] `viewBox` expanded for the legend strip (~60px)?
 - [ ] Every font size, coord, width, height, gap divisible by 4?
 - [ ] Ran the packaged self-check — `python3 <skill-dir>/scripts/self_check.py <file>` — clean? (Accessible-SVG contract, single-file safety, motion basics; ships with the skill.)
-- [ ] If animated, does the complete static/no-JS frame work, does reduced motion hide/disable playback, and is the controller copied verbatim from `template-motion.html`? In this repository, also run `python3 scripts/verify-motion.py path/to/generated.html` plus the skin linter; from an installed skill, manually check print and static-query states on top of the self-check.
+- [ ] If animated, does the complete static/no-JS frame work, does reduced motion hide/disable playback, and is the controller copied verbatim from `template-motion.html`? In the upstream `diagram-design` repository, also run `python3 scripts/verify-motion.py` plus the skin linter (neither is vendored here); from this installed skill, run `scripts/self_check.py` and manually check print and static-query states on top of the self-check.
 
 **Typography:**
 

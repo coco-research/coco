@@ -49,7 +49,7 @@ Everything else — paper, dot pattern, typography, legend strip, 4px grid, comp
 
 - **Paper / bg / pattern**: defaults from `style-guide.md` (`paper`, 22×22 dot pattern at 10% ink).
 - **Axis lines**: `ink` (`#2d3142`), `stroke-width: 1.2`, `marker-start` + `marker-end` both pointing outward.
-- **Focal quadrant tint**: `rgba(139, 92, 246,0.04)` full rect behind the focal cell.
+- **Focal quadrant tint**: `rgba(190, 24, 93,0.04)` full rect behind the focal cell.
 - **Focal cell**: `accent-tint` fill, `accent` stroke at 1.2px. Corner tag in `accent`, weight 600.
 - **Non-focal cells**: `store` treatment (`ink @ 0.04` fill, `muted @ 0.28` stroke).
 - **Cell title**: Geist sans, 16px, weight 600, `ink`.

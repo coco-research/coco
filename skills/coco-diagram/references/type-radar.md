@@ -44,7 +44,7 @@ Series `[9, 8, 9, 9, 9]` on a 0–10 scale becomes:
 
 ```svg
 <polygon points="500,96 622,201 585,356 415,356 363,196"
-         fill="rgba(139, 92, 246,0.18)" stroke="#8B5CF6" stroke-width="1.8"/>
+         fill="rgba(190, 24, 93,0.18)" stroke="#BE185D" stroke-width="1.8"/>
 ```
 
 Each vertex: `center + (v/10) · (outer_i − center)`, rounded to the nearest pixel.
@@ -55,7 +55,7 @@ The skill's "1-focal" rule still holds: `accent` is reserved for the focal serie
 
 | Slot | Token | Light | Dark |
 |---|---|---|---|
-| Focal | `accent` | `#8B5CF6` | `#A78BFA` |
+| Focal | `accent` | `#BE185D` | `#F472B6` |
 | 1 | `series-1` (sage) | `#7c8f6f` | `#9caf8f` |
 | 2 | `series-2` (dusty-blue) | `#5e7a9b` | `#82a0c0` |
 | 3 | `series-3` (mustard) | `#b8915a` | `#d3ad7a` |

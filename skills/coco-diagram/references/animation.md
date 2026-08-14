@@ -115,9 +115,7 @@ PNG and SVG exports are static final-state artifacts unless the user explicitly 
 Run:
 
 ```bash
-python3 scripts/verify-motion.py path/to/animated-diagram.html
-python3 scripts/test-verify-motion.py
-python3 scripts/lint-skin.py path/to/animated-diagram.html
+python3 <skill-dir>/scripts/self_check.py path/to/animated-diagram.html
 ```
 
 The verifier checks mode/state declarations, contiguous steps, motion budgets, complete SVG naming, no-JS source visibility, decorative accessibility, the full control set, live status, reduced-motion/print CSS, keyboard handling, page-hide pause, bounded static/test overrides, immediate final-step stop, and exact canonical-controller identity. Its adversarial tests mutate the canonical template to prove each failure is rejected.

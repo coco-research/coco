@@ -2,7 +2,7 @@
 
 **The single source of truth for colors, typography, and tokens.** Every diagram draws from this — not from hex values inlined in other reference files. If you want to change the visual skin of Schematic, change this file.
 
-Default skin is a cool editorial palette — white-smoke paper, jet-black ink, coco-violet accent, blue-slate muted. It's designed to look good out of the box; swap these values (or run [`onboarding.md`](onboarding.md)) and every new diagram inherits the new skin without touching any type-specific logic.
+Default skin is a cool editorial palette — white-smoke paper, jet-black ink, coco-magenta accent, blue-slate muted. It's designed to look good out of the box; swap these values (or run [`onboarding.md`](onboarding.md)) and every new diagram inherits the new skin without touching any type-specific logic.
 
 To generate your own from a website URL, see [`onboarding.md`](onboarding.md).
 
@@ -12,7 +12,7 @@ To generate your own from a website URL, see [`onboarding.md`](onboarding.md).
 
 ### Semantic roles
 
-Every token is referred to by **semantic role**, not by its hex value. Type references (`type-*.md`) and SKILL.md say `accent`, not `#8B5CF6`.
+Every token is referred to by **semantic role**, not by its hex value. Type references (`type-*.md`) and SKILL.md say `accent`, not `#BE185D`.
 
 | Role | Purpose | Default (light) | Default (dark) |
 |---|---|---|---|
@@ -23,11 +23,11 @@ Every token is referred to by **semantic role**, not by its hex value. Type refe
 | `soft` | Sublabels, boundary labels | `#7a8399` | `#8e98ac` |
 | `rule` | Hairline borders | `rgba(45,49,66,0.12)` | `rgba(245,245,245,0.12)` |
 | `rule-solid` | Stronger borders, baselines | `#bfc0c0` (silver) | `rgba(191,192,192,0.25)` |
-| `accent` | Focal / 1–2 max per diagram | `#8B5CF6` (coco-violet) | `#A78BFA` |
-| `accent-tint` | Fill for accent-bordered boxes | `rgba(139, 92, 246,0.08)` | `rgba(167, 139, 250,0.10)` |
+| `accent` | Focal / 1–2 max per diagram | `#BE185D` (coco-magenta) | `#F472B6` |
+| `accent-tint` | Fill for accent-bordered boxes | `rgba(190, 24, 93,0.08)` | `rgba(244, 114, 182,0.10)` |
 | `link` | HTTP/API calls, external arrows | `#2e5aa8` | `#6a95d8` |
 
-> **Brand palette source:** this skin maps to a five-color brand palette — `jet-black #2d3142`, `silver #bfc0c0`, `white-smoke #f5f5f5`, `coco-violet #8B5CF6`, `blue-slate #4f5d75`. The `soft`, `rule`, and `link` tokens are derived (lighter slate, ink-at-opacity, and a saturated variant in the blue-slate hue family) to cover roles the brand palette doesn't name directly.
+> **Brand palette source:** this skin maps to a five-color brand palette — `jet-black #2d3142`, `silver #bfc0c0`, `white-smoke #f5f5f5`, `coco-magenta #BE185D`, `blue-slate #4f5d75`. The `soft`, `rule`, and `link` tokens are derived (lighter slate, ink-at-opacity, and a saturated variant in the blue-slate hue family) to cover roles the brand palette doesn't name directly.
 
 > **Note:** The pre-baked example HTML files in `assets/` were built under an earlier skin. Regenerating them against the current `style-guide.md` is a v5.1 task. New diagrams the skill produces will use the tokens above.
 
@@ -130,7 +130,20 @@ Three options:
 
 ### Constraints (don't break these)
 
-- **Contrast**: `ink` must hit WCAG AA on `paper`. `muted` must hit AA on `paper` for 11px+ text.
+- **Contrast**: `ink` must hit WCAG AA on `paper`. `muted` must hit AA on `paper` for 11px+ text. **`accent` must hit AA (4.5:1) on `paper` too**, because accent is used on `<text>` — focal node names, arrow labels, axis labels — not only on fills and strokes. Do not assume the large-text 3:1 exemption applies: diagrams are commonly rendered at a `viewBox` wider than their display width, so a nominal 12px label lands well under the 18.66px bold / 24px regular threshold. Check any new accent before adopting it:
+
+  ```python
+  def _lin(c): return c/12.92 if c <= 0.03928 else ((c+0.055)/1.055)**2.4
+  def luminance(hex_):
+      h = hex_.lstrip('#'); r, g, b = (int(h[i:i+2], 16)/255 for i in (0, 2, 4))
+      return 0.2126*_lin(r) + 0.7152*_lin(g) + 0.0722*_lin(b)
+  def ratio(fg, bg):
+      a, b = luminance(fg), luminance(bg)
+      hi, lo = max(a, b), min(a, b)
+      return (hi + 0.05) / (lo + 0.05)      # want >= 4.5 for accent on paper
+  ```
+
+  A vivid mid-tone violet, coral, or amber will typically land near 3.5:1 on a light paper and fail. Darken it until it clears 4.5:1 and keep the vivid tone for fills, strokes, and markers, where the 3:1 non-text threshold governs.
 - **One accent**: pick one color for `accent`. Two accents erases the focal signal.
 - **No rainbow palette**: if your brand ships 8 colors, pick 3 (paper, ink, accent). The rest become `muted` variants.
 - **Serif + sans + mono**: three families, not more. If brand typography is all sans, keep Instrument Serif for `title` and `callout` anyway — the contrast is load-bearing.

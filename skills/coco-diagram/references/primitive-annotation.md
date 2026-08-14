@@ -26,7 +26,7 @@ Use for editorial asides — the "italic pointer" that marks a detail without co
 | Intent | Text | Leader |
 |---|---|---|
 | Neutral aside | ink `#2d3142` | `rgba(45,49,66,0.40)` |
-| Focal / accent | accent `#8B5CF6` | `rgba(139, 92, 246,0.50)` |
+| Focal / accent | accent `#BE185D` | `rgba(190, 24, 93,0.50)` |
 | Tertiary (muted) | muted `#4f5d75` | `rgba(45,49,66,0.30)` |
 
 ## Anti-patterns

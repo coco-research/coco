@@ -4,7 +4,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
 **Total: 184 skills** — 69 core, 115 across 7 bundles.
 
-## Design (14)
+## Design (15)
 
 | Skill | Description |
 |-------|-------------|
@@ -12,6 +12,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [axiom-liquid-glass](axiom-liquid-glass/SKILL.md) | Apple Liquid Glass design system — comprehensive design philosophy, implementation guide, and technical API reference from WWDC 2025. Covers design principles ( |
 | [clone-website](clone-website/SKILL.md) | Clone any website into a pixel-perfect single-file HTML prototype. Extracts design tokens, assets, CSS computed styles, interaction patterns, and content via Pl |
 | [coco-ads](coco-ads/SKILL.md) | Turn the project you just shipped into a short, polished, shareable launch video (an "ad") using HyperFrames. Use when someone says "/coco-ads", "make a launch  |
+| [coco-diagram](coco-diagram/SKILL.md) | Create branded architecture, IT current-state, flowchart, sequence, state machine, ER/data model, timeline, swimlane, quadrant, radar/spider, loop/flywheel, nes |
 | [design-taste-frontend](design-taste-frontend/SKILL.md) | Anti-slop frontend skill for landing pages, portfolios, and redesigns. The agent reads the brief, infers the right design direction, and ships interfaces that d |
 | [frontend-design](frontend-design/SKILL.md) | Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts,  |
 | [journey-map](journey-map/SKILL.md) | Loads full context for a React Flow (@xyflow/react) user journey mapping project. Use when working on, extending, debugging, or building features for the journe |
@@ -101,12 +102,6 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [pmstudio-init](project-docs/SKILL.md) | Use when starting a new project, onboarding to an existing product, or setting up a documentation ecosystem for any initiative. Scaffolds the standard document  |
 | [pmstudio-comms](stakeholder-comms/SKILL.md) | Generate templated stakeholder communications from project context. Use when someone asks to "write a go-live email", "create a status update", "onboard someone |
 | [task-prd-creator](task-prd-creator/SKILL.md) | Use this skill when users request new features, enhancements, bug fixes, or any work that needs planning. Creates structured task files and PRDs (Product Requir |
-
-## Unspecified (1)
-
-| Skill | Description |
-|-------|-------------|
-| [coco-diagram](coco-diagram/SKILL.md) | Create branded architecture, IT current-state, flowchart, sequence, state machine, ER/data model, timeline, swimlane, quadrant, radar/spider, loop/flywheel, nes |
 
 ## Bundle: brain (6 skills)
 

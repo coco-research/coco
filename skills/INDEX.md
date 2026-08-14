@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 183 skills** — 68 core, 115 across 7 bundles.
+**Total: 184 skills** — 69 core, 115 across 7 bundles.
 
 ## Design (14)
 
@@ -101,6 +101,12 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [pmstudio-init](project-docs/SKILL.md) | Use when starting a new project, onboarding to an existing product, or setting up a documentation ecosystem for any initiative. Scaffolds the standard document  |
 | [pmstudio-comms](stakeholder-comms/SKILL.md) | Generate templated stakeholder communications from project context. Use when someone asks to "write a go-live email", "create a status update", "onboard someone |
 | [task-prd-creator](task-prd-creator/SKILL.md) | Use this skill when users request new features, enhancements, bug fixes, or any work that needs planning. Creates structured task files and PRDs (Product Requir |
+
+## Unspecified (1)
+
+| Skill | Description |
+|-------|-------------|
+| [coco-diagram](coco-diagram/SKILL.md) | Create branded architecture, IT current-state, flowchart, sequence, state machine, ER/data model, timeline, swimlane, quadrant, radar/spider, loop/flywheel, nes |
 
 ## Bundle: brain (6 skills)
 

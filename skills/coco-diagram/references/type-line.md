@@ -19,9 +19,9 @@
 ```svg
 <!-- Focal series -->
 <polyline points="x0,y0 x1,y1 x2,y2 ..."
-          fill="none" stroke="#8B5CF6" stroke-width="1.8" stroke-linejoin="round"/>
+          fill="none" stroke="#BE185D" stroke-width="1.8" stroke-linejoin="round"/>
 <!-- Dots at each point (focal only) -->
-<circle cx="x0" cy="y0" r="4" fill="#8B5CF6"/>
+<circle cx="x0" cy="y0" r="4" fill="#BE185D"/>
 
 <!-- Non-focal series -->
 <polyline points="x0,y0 x1,y1 ..."

@@ -21,7 +21,7 @@
 
 <!-- Focal point -->
 <circle cx="X" cy="Y" r="6" fill="#f5f5f5"/>
-<circle cx="X" cy="Y" r="6" fill="rgba(139, 92, 246,0.15)" stroke="#8B5CF6" stroke-width="1.2"/>
+<circle cx="X" cy="Y" r="6" fill="rgba(190, 24, 93,0.15)" stroke="#BE185D" stroke-width="1.2"/>
 ```
 
 ## Anti-patterns

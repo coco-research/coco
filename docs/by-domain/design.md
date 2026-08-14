@@ -2,7 +2,7 @@
 
 Auto-generated view. Filtered to `domain: design` skills.
 
-**14 skills.**
+**15 skills.**
 
 | Skill | Description |
 |-------|-------------|
@@ -12,6 +12,7 @@ Types: product demos, testimonials, explainers, soc |
 | [axiom-liquid-glass](../../skills/axiom-liquid-glass/SKILL.md) | Apple Liquid Glass design system — comprehensive design philosophy, implementation guide, and technical API reference from WWDC 2025. Covers design principles (iOS-native glass hierarchy, restraint ov |
 | [clone-website](../../skills/clone-website/SKILL.md) | Clone any website into a pixel-perfect single-file HTML prototype. Extracts design tokens, assets, CSS computed styles, interaction patterns, and content via Playwright. Outputs a self-contained HTML  |
 | [coco-ads](../../skills/coco-ads/SKILL.md) | Turn the project you just shipped into a short, polished, shareable launch video (an "ad") using HyperFrames. Use when someone says "/coco-ads", "make a launch video", "brag about this", "turn this in |
+| [coco-diagram](../../skills/coco-diagram/SKILL.md) | Create branded architecture, IT current-state, flowchart, sequence, state machine, ER/data model, timeline, swimlane, quadrant, radar/spider, loop/flywheel, nested, tree, org chart, layer stack, Venn, |
 | [design-taste-frontend](../../skills/design-taste-frontend/SKILL.md) | Anti-slop frontend skill for landing pages, portfolios, and redesigns. The agent reads the brief, infers the right design direction, and ships interfaces that do not look templated. Real design system |
 | [frontend-design](../../skills/frontend-design/SKILL.md) | Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples inclu |
 | [journey-map](../../skills/journey-map/SKILL.md) | Loads full context for a React Flow (@xyflow/react) user journey mapping project. Use when working on, extending, debugging, or building features for the journey map tool. Triggers on: "journey map pr |

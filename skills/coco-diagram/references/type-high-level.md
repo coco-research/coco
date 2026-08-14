@@ -191,7 +191,7 @@ gap                = 16
 row_top(k)         = first_top_y + k * (node_h + gap)   # k = 0..K-1
 ```
 
-**Focal node:** `fill="rgba(139, 92, 246,0.08)"`, `stroke="#8B5CF6"`, `stroke-width=1.2`. Title text in accent color. All other nodes: white fill, `stroke=rgba(45,49,66,0.25)`, `stroke-width=1`.
+**Focal node:** `fill="rgba(190, 24, 93,0.08)"`, `stroke="#BE185D"`, `stroke-width=1.2`. Title text in accent color. All other nodes: white fill, `stroke=rgba(45,49,66,0.25)`, `stroke-width=1`.
 
 Role badge top-left at `(node_x+8, node_y+6)`, size 12 high. Icon top-right at `(node_x+node_w-32, node_y+6)`, 24×24, monochrome via `currentColor`. Name centered at `(node_cx, node_y+44)` size 11 sans semibold. Subtitle at `(node_cx, node_y+56)` size 8 mono muted.
 
@@ -244,7 +244,7 @@ These are non-negotiable. Pick the style **automatically** from the topology —
 
 | `style` | Stroke | Width | Dash | Marker | When required |
 |---|---|---|---|---|---|
-| `primary` | `#8B5CF6` | 1.2 | — | `arrow-accent` | Every edge whose endpoint is the `focal` node. |
+| `primary` | `#BE185D` | 1.2 | — | `arrow-accent` | Every edge whose endpoint is the `focal` node. |
 | `secondary` | `#4f5d75` | 1.0 | — | `arrow` | Default for source→component and component→component when neither endpoint is focal. |
 | `trigger` | `#4f5d75` | 1.0 | `4,3` | `arrow-sm` | Every edge originating from a `kind: bar` component. |
 | `query` | `rgba(45,49,66,0.30)` | 1.0 | `4,3` | `arrow` | Read-back edges (e.g., focal ↔ Trino). |
@@ -254,7 +254,7 @@ These are non-negotiable. Pick the style **automatically** from the topology —
 ```svg
 <defs>
   <marker id="arrow"        markerWidth="8" markerHeight="6" refX="7" refY="3"   orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
-  <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3"   orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#8B5CF6"/></marker>
+  <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3"   orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#BE185D"/></marker>
   <marker id="arrow-sm"     markerWidth="6" markerHeight="5" refX="5" refY="2.5" orient="auto"><polygon points="0 0, 6 2.5, 0 5" fill="#4f5d75"/></marker>
   <marker id="arrow-dim"    markerWidth="8" markerHeight="6" refX="7" refY="3"   orient="auto"><polygon points="0 0, 8 3, 0 6" fill="rgba(45,49,66,0.45)"/></marker>
 </defs>
@@ -407,9 +407,9 @@ When `dark: true`, swap these tokens:
 | Cluster border | `rgba(45,49,66,0.18)` | `rgba(245,245,245,0.18)` |
 | Node fill | white | `rgba(245,245,245,0.06)` |
 | Node stroke | `rgba(45,49,66,0.25)` | `rgba(245,245,245,0.20)` |
-| Focal fill | `rgba(139, 92, 246,0.08)` | `rgba(167, 139, 250,0.12)` |
-| Focal stroke | `#8B5CF6` | `#A78BFA` |
-| Accent connector | `#8B5CF6` | `#A78BFA` |
+| Focal fill | `rgba(190, 24, 93,0.08)` | `rgba(244, 114, 182,0.12)` |
+| Focal stroke | `#BE185D` | `#F472B6` |
+| Accent connector | `#BE185D` | `#F472B6` |
 | Dot pattern | `rgba(45,49,66,0.10)` | `rgba(245,245,245,0.10)` |
 
 ---

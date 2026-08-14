@@ -26,7 +26,7 @@
 <text x="X+W/2" y="Y-8" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">VALUE</text>
 ```
 
-Focal bar: replace fill with `rgba(139, 92, 246,0.12)`, stroke with `#8B5CF6`, label fill with `#8B5CF6`.
+Focal bar: replace fill with `rgba(190, 24, 93,0.12)`, stroke with `#BE185D`, label fill with `#BE185D`.
 
 ## Anti-patterns
 

@@ -9,8 +9,8 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --paper: #2d3142; --paper-2: #393e53; --ink: #f5f5f5; --muted: #bfc0c0;
-      --soft: #8e98ac; --rule: rgba(245,245,245,0.12); --accent: #A78BFA;
-      --accent-tint: rgba(167, 139, 250,0.10); --link: #6a95d8;
+      --soft: #8e98ac; --rule: rgba(245,245,245,0.12); --accent: #F472B6;
+      --accent-tint: rgba(244, 114, 182,0.10); --link: #6a95d8;
       --sans: 'Geist', system-ui, sans-serif; --serif: 'Instrument Serif', serif;
       --mono: 'Geist Mono', ui-monospace, monospace;
     }
@@ -42,7 +42,7 @@
       <desc id="medallion-dark-desc">Clickstream events and order records move from raw storage through anonymized, staging, and aggregated tiers before lifecycle archiving.</desc>
       <defs>
         <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#bfc0c0"/></marker>
-        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#A78BFA"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#F472B6"/></marker>
         <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#6a95d8"/></marker>
         <clipPath id="clip-raw"><rect x="16" y="80" width="172" height="380" rx="6"/></clipPath>
         <clipPath id="clip-anon"><rect x="204" y="80" width="172" height="380" rx="6"/></clipPath>
@@ -55,11 +55,11 @@
       <!-- Promotion arcs are the medallion type's required connector grammar. -->
       <path d="M102 80 C102 0 290 0 290 80" fill="none" stroke="#bfc0c0" stroke-width="1.4" marker-end="url(#arrow)"/>
       <path d="M290 80 C290 0 478 0 478 80" fill="none" stroke="#bfc0c0" stroke-width="1.4" marker-end="url(#arrow)"/>
-      <path d="M478 80 C478 0 666 0 666 80" fill="none" stroke="#A78BFA" stroke-width="1.6" marker-end="url(#arrow-accent)"/>
+      <path d="M478 80 C478 0 666 0 666 80" fill="none" stroke="#F472B6" stroke-width="1.6" marker-end="url(#arrow-accent)"/>
       <path d="M666 80 C666 0 854 0 854 80" fill="none" stroke="#bfc0c0" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
       <text x="196" y="50" class="arc-label" fill="#bfc0c0">MASK IDS</text>
       <text x="384" y="50" class="arc-label" fill="#bfc0c0">CLEAN + JOIN</text>
-      <text x="572" y="50" class="arc-label" fill="#A78BFA">AGGREGATE</text>
+      <text x="572" y="50" class="arc-label" fill="#F472B6">AGGREGATE</text>
       <text x="760" y="50" class="arc-label" fill="#bfc0c0">LIFECYCLE</text>
 
       <!-- Raw -->
@@ -111,9 +111,9 @@
       <text x="408" y="388" class="example-value">validated event rows</text>
 
       <!-- Aggregated focal tier -->
-      <rect x="580" y="80" width="172" height="380" rx="6" fill="rgba(167, 139, 250,0.12)"/>
-      <rect x="580" y="80" width="172" height="50" fill="rgba(167, 139, 250,0.20)" clip-path="url(#clip-aggregate)"/>
-      <rect x="580" y="80" width="172" height="380" rx="6" fill="none" stroke="#A78BFA" stroke-width="1.6"/>
+      <rect x="580" y="80" width="172" height="380" rx="6" fill="rgba(244, 114, 182,0.12)"/>
+      <rect x="580" y="80" width="172" height="50" fill="rgba(244, 114, 182,0.20)" clip-path="url(#clip-aggregate)"/>
+      <rect x="580" y="80" width="172" height="380" rx="6" fill="none" stroke="#F472B6" stroke-width="1.6"/>
       <text x="666" y="106" class="tier-title">Aggregated</text>
       <text x="666" y="144" class="bucket focal-text">analytics-marts</text>
       <text x="596" y="180" class="field-label">Tool</text>

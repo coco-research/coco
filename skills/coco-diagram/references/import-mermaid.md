@@ -6,7 +6,7 @@ Turn Mermaid source into an editorial-quality diagram at the format, size, and d
 
 ## Trigger
 
-Load this file for `.mmd`, `.mermaid`, or Markdown containing fenced `mermaid` blocks when the user asks to convert, redraw, simplify, or present the diagram, or uses `/coco-diagram:import-mermaid`.
+Load this file for `.mmd`, `.mermaid`, or Markdown containing fenced `mermaid` blocks when the user asks to convert, redraw, simplify, or present the diagram, or uses `/diagram:import-mermaid`.
 
 ---
 

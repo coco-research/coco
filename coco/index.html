@@ -13,10 +13,10 @@
    Font stack resolves to real SF Pro on Apple devices, the system default elsewhere.
    ========================================================================== */
 :root{
-  --ink:#1d1d1f;            /* primary text, never pure black */
+  --ink:#14171c;            /* primary text, never pure black */
   --ink-2:#333336;          /* secondary */
-  --muted:#6e6e73;          /* tertiary */
-  --surface:#f5f5f7;        /* the one off-white */
+  --muted:#5b6169;          /* tertiary */
+  --surface:#f6f5f2;        /* the one off-white, warm rather than Apple's cool grey */
   --white:#fff;
   --blue:#0a3a66;           /* button fill — deep navy, our own, not Apple's blue */
   --link:#0a3a66;           /* link — same navy, one accent throughout */
@@ -24,7 +24,7 @@
   --shadow:0 5px 30px rgba(0,0,0,.22);   /* the single shadow */
   --ease:cubic-bezier(.4,0,.6,1);        /* the single curve */
   --dur:.32s;
-  --stadium:980px;
+  --stadium:100px;
   --wide:1024px;
   --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
 }
@@ -37,10 +37,10 @@ a{color:var(--link);text-decoration:none}
 a:hover{text-decoration:underline}
 .wrap{max-width:var(--wide);margin:0 auto;padding:0 22px}
 
-/* ---- nav: 12px, translucent, hairline. Apple's exact proportions ---- */
+/* ---- nav: 12px, translucent, hairline. Own blur recipe, not Apple's documented one. ---- */
 .nav{position:sticky;top:0;z-index:100;height:44px;
-  background:rgba(255,255,255,.72);backdrop-filter:saturate(180%) blur(20px);
-  -webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--hair)}
+  background:rgba(255,255,255,.78);backdrop-filter:saturate(150%) blur(16px);
+  -webkit-backdrop-filter:saturate(150%) blur(16px);border-bottom:1px solid var(--hair)}
 .nav-in{max-width:var(--wide);margin:0 auto;padding:0 22px;height:44px;
   display:flex;align-items:center;gap:34px}
 .nav a{font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;transition:opacity var(--dur) var(--ease)}
@@ -233,8 +233,8 @@ video{display:block;width:100%;height:auto}
 <section id="top" class="center" style="padding-top:76px">
   <div class="wrap">
     <p class="eyebrow reveal">CoCo 1.2.0 &middot; the CoCo Research flagship</p>
-    <h1 class="reveal">An entire engineering<br>department. In your editor.</h1>
-    <p class="sub reveal">389 experts deliberate. Then 184 skills ship the decision.</p>
+    <h1 class="reveal">Your editor, arguing with itself before anything ships.</h1>
+    <p class="sub reveal">Each of the 389 requires a live, checkable source. Then 184 skills ship what they decided.</p>
     <p class="body reveal" style="margin:16px auto 0;text-align:center">
       Runs on the model and editor you already have — Claude Code, Cursor, or Codex.
       Your keys never leave your machine.
@@ -254,10 +254,10 @@ video{display:block;width:100%;height:auto}
           </radialGradient>
         </defs>
         <rect width="820" height="380" fill="url(#glow)"/>
-        <g id="spokes" stroke="#1d1d1f" stroke-opacity=".14" stroke-width="1"></g>
+        <g id="spokes" stroke="#14171c" stroke-opacity=".14" stroke-width="1"></g>
         <g id="seats"></g>
         <g id="depts"></g>
-        <circle cx="410" cy="196" r="46" fill="#1d1d1f"/>
+        <circle cx="410" cy="196" r="46" fill="#14171c"/>
         <text x="410" y="192" text-anchor="middle" fill="#fff" font-size="15" font-weight="600"
               letter-spacing="-.3" font-family="-apple-system,sans-serif">Your</text>
         <text x="410" y="210" text-anchor="middle" fill="#fff" font-size="15" font-weight="600"
@@ -429,13 +429,13 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
       var col=s%per, row=Math.floor(s/per);
       seats.appendChild(el('circle',{
         cx:x+(col-(Math.min(n,per)-1)/2)*4.6, cy:y+(row-(rows-1)/2)*4.6, r:1.5,
-        fill:'#1d1d1f', 'fill-opacity':0.32
+        fill:'#14171c', 'fill-opacity':0.32
       }));
     }
     var anchor = (x<cx-20)?'end':(x>cx+20)?'start':'middle';
     var ly = y + (y<cy? -26 : 30);
     labels.appendChild((function(){
-      var t=el('text',{x:x,y:ly,'text-anchor':anchor,fill:'#6e6e73','font-size':11,
+      var t=el('text',{x:x,y:ly,'text-anchor':anchor,fill:'#5b6169','font-size':11,
         'font-weight':600,'letter-spacing':'.02em','font-family':'-apple-system,sans-serif'});
       t.textContent=d[0]+' · '+d[1]; return t;})());
   });

@@ -6,9 +6,11 @@
 <title>CoCo Research — governed AI, built in the open</title>
 <style>
 /* ============================================================================
-   Tokens measured live from apple.com (computed styles, ranked by usage).
+   Type scale, spacing, and layout proportions follow the Apple methodology
+   (computed styles, ranked by usage). The accent is deliberately our own —
+   a deep navy, not Apple's blue — to keep the visual identity distinct.
    Colours: 5 total. Shadows: 1. Weights: 400/600 only. Easing: 1 curve.
-   Font stack is apple.com's own, which resolves to real SF Pro on Apple devices.
+   Font stack resolves to real SF Pro on Apple devices, the system default elsewhere.
    ========================================================================== */
 :root{
   --ink:#1d1d1f;
@@ -16,8 +18,8 @@
   --muted:#6e6e73;
   --surface:#f5f5f7;
   --white:#fff;
-  --blue:#0071e3;
-  --link:#0066cc;
+  --blue:#0a3a66;           /* deep navy, our own, not Apple's blue */
+  --link:#0a3a66;           /* same navy, one accent throughout */
   --hair:rgba(0,0,0,.10);
   --shadow:0 5px 30px rgba(0,0,0,.22);
   --ease:cubic-bezier(.4,0,.6,1);
@@ -42,8 +44,41 @@ a:hover{text-decoration:underline}
   display:flex;align-items:center;gap:34px}
 .nav a{font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;transition:opacity var(--dur) var(--ease)}
 .nav a:hover{opacity:1;text-decoration:none}
-.nav .mark{font-size:15px;font-weight:600;letter-spacing:-.02em;margin-right:4px}
+.nav .mark{font-size:15px;font-weight:600;letter-spacing:-.02em;margin-right:4px;
+  display:inline-flex;align-items:center;gap:8px}
+.nav .mark svg{display:block;flex:none}
 .nav .spacer{flex:1}
+
+/* ---- nav-trigger: a nav link that opens the products overlay instead of navigating ---- */
+.nav-trigger{appearance:none;background:none;border:0;cursor:pointer;font-family:inherit;
+  font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;padding:0;
+  transition:opacity var(--dur) var(--ease)}
+.nav-trigger:hover{opacity:1}
+.nav-trigger[aria-expanded="true"]{opacity:1;font-weight:600}
+
+/* ---- products overlay: Apple's mega-menu pattern — a full-width panel under the sticky nav ---- */
+.overlay-backdrop{position:fixed;inset:44px 0 0 0;background:rgba(0,0,0,.28);z-index:98;
+  opacity:0;visibility:hidden;transition:opacity var(--dur) var(--ease)}
+.overlay-backdrop.open{opacity:1;visibility:visible}
+.overlay{position:fixed;top:44px;left:0;right:0;z-index:99;max-height:calc(100vh - 44px);
+  overflow-y:auto;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(24px);
+  -webkit-backdrop-filter:saturate(180%) blur(24px);border-bottom:1px solid var(--hair);
+  box-shadow:var(--shadow);transform:translateY(-8px);opacity:0;visibility:hidden;
+  transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease),visibility var(--dur)}
+.overlay.open{transform:none;opacity:1;visibility:visible}
+.overlay-in{max-width:var(--wide);margin:0 auto;padding:36px 22px 40px;text-align:left}
+.overlay-groups{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:32px}
+.overlay-group .k{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 14px}
+.overlay-group ul{list-style:none;margin:0;padding:0}
+.overlay-group li{margin-bottom:16px}
+.overlay-group a{display:block;color:var(--ink);opacity:1}
+.overlay-group a .name{display:block;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.overlay-group a .stage{display:block;font-size:11px;color:var(--muted);margin-top:2px;font-weight:400}
+.overlay-group a:hover .name{color:var(--blue)}
+.overlay-close{position:absolute;top:14px;right:22px;font-size:12px;color:var(--muted);
+  background:none;border:0;cursor:pointer;font-family:inherit}
+.overlay-close:hover{color:var(--ink)}
 
 .eyebrow{font-size:19px;font-weight:600;letter-spacing:.011em;color:var(--ink);margin:0 0 6px}
 h1{font-size:80px;line-height:1.05;font-weight:600;letter-spacing:-.015em;margin:0}
@@ -117,9 +152,9 @@ td{color:var(--muted)}
   text-transform:uppercase;padding:4px 9px;border-radius:var(--stadium);
   background:var(--surface);color:var(--ink-2);margin:0 0 10px}
 section.tint .chip{background:var(--white)}
-.chip.live{background:rgba(0,113,227,.10);color:#0058b0}
+.chip.live{background:rgba(10,58,102,.10);color:var(--blue)}
 .chip.soon{background:rgba(0,0,0,.05);color:var(--muted)}
-.chip.flag{background:rgba(0,113,227,.14);color:#0058b0}
+.chip.flag{background:rgba(10,58,102,.14);color:var(--blue)}
 
 .solo{padding-top:48px;text-align:left}
 .solo .prod{grid-template-columns:1fr;gap:30px;border-bottom:0;padding-bottom:0}
@@ -153,6 +188,9 @@ video{display:block;width:100%;height:auto}
   .grid,.steps{grid-template-columns:1fr}
   section{padding:64px 0}
   .nav a:not(.mark){display:none}
+  .overlay-groups{grid-template-columns:1fr 1fr;gap:24px}
+  .overlay-in{padding:28px 22px 32px}
+  .overlay{max-height:calc(100vh - 44px);overflow-y:auto}
   .tabs{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;
     -webkit-overflow-scrolling:touch;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
@@ -169,14 +207,69 @@ video{display:block;width:100%;height:auto}
 
 <nav class="nav">
   <div class="nav-in">
-    <a href="/" class="mark">CoCo Research</a>
+    <a href="/" class="mark">
+      <svg width="20" height="20" viewBox="0 0 100 100" role="img" aria-label="">
+        <defs>
+          <linearGradient id="markGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#0a3a66"/>
+            <stop offset="100%" stop-color="#5b9bd5"/>
+          </linearGradient>
+        </defs>
+        <path d="M 46 20 A 30 30 0 1 0 46 80" stroke="#14171c" stroke-width="10" stroke-linecap="round" fill="none"/>
+        <path d="M 54 20 A 30 30 0 1 1 54 80" stroke="url(#markGrad)" stroke-width="10" stroke-linecap="round" fill="none"/>
+      </svg>
+      CoCo Research
+    </a>
     <div class="spacer"></div>
     <a href="/coco/">CoCo</a>
-    <a href="#products">Products</a>
+    <button type="button" class="nav-trigger" id="products-trigger" aria-expanded="false" aria-controls="products-overlay">Products</button>
     <a href="#about">About</a>
     <a href="https://github.com/coco-research">GitHub</a>
   </div>
 </nav>
+
+<div class="overlay-backdrop" id="products-backdrop" hidden></div>
+<div class="overlay" id="products-overlay" role="region" aria-label="All CoCo Research products" hidden>
+  <button type="button" class="overlay-close" id="products-close">Close &times;</button>
+  <div class="overlay-in">
+    <div class="overlay-groups">
+      <div class="overlay-group">
+        <p class="k">The framework</p>
+        <ul>
+          <li><a href="/#product-coco"><span class="name">CoCo</span><span class="stage">Flagship &middot; available now</span></a></li>
+          <li><a href="/#product-m0"><span class="name">CoCo M0</span><span class="stage">In development</span></a></li>
+          <li><a href="/#product-platform"><span class="name">CoCo Platform</span><span class="stage">In development</span></a></li>
+          <li><a href="/#product-cococode"><span class="name">CoCoCode</span><span class="stage">In development</span></a></li>
+        </ul>
+      </div>
+      <div class="overlay-group">
+        <p class="k">The front door</p>
+        <ul>
+          <li><a href="/#product-connect"><span class="name">CoCo Connect</span><span class="stage">Available now &middot; v0.2.1</span></a></li>
+        </ul>
+      </div>
+      <div class="overlay-group">
+        <p class="k">Desktop apps</p>
+        <ul>
+          <li><a href="/#product-voice"><span class="name">CoCo Voice</span><span class="stage">Available now &middot; v0.9.4</span></a></li>
+          <li><a href="/#product-storydeck"><span class="name">StoryDeck</span><span class="stage">Available now &middot; v1.3.0</span></a></li>
+          <li><a href="/#product-pdf"><span class="name">CoCo PDF</span><span class="stage">In development</span></a></li>
+          <li><a href="/#product-teach"><span class="name">CoCo Teach</span><span class="stage">In development</span></a></li>
+        </ul>
+      </div>
+      <div class="overlay-group">
+        <p class="k">Governance and research</p>
+        <ul>
+          <li><a href="/#product-router"><span class="name">CoCo Router</span><span class="stage">In development</span></a></li>
+          <li><a href="/#product-loops"><span class="name">CoCo Loops</span><span class="stage">Source available</span></a></li>
+          <li><a href="/#product-mira"><span class="name">Mira</span><span class="stage">Source available &middot; AGPL-3.0</span></a></li>
+          <li><a href="/#product-hermes"><span class="name">CoCo Hermes</span><span class="stage">Early development</span></a></li>
+          <li><a href="/#product-fusion"><span class="name">CoCo Fusion</span><span class="stage">Source available &middot; parked</span></a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ================= HERO ================= -->
 <section id="top" class="center" style="padding-top:76px">
@@ -210,10 +303,7 @@ video{display:block;width:100%;height:auto}
         <span class="chip flag">Flagship &middot; version 1.2.0</span>
         <h2>CoCo turns your editor into an engineering department.</h2>
         <p class="body" style="max-width:56ch">389 experts deliberate. Then 184 skills ship
-          the decision. It installs into Claude Code, Cursor, or Codex in about ninety
-          seconds, shows you the exact commit before anything runs, and nothing leaves
-          your machine. Open-core: the framework is MIT, the Super Intelligence board is
-          licensed separately.</p>
+          the decision.</p>
         <div class="links" style="margin-top:20px;display:flex;gap:22px;flex-wrap:wrap">
           <a class="arrow" href="/coco/">Read the full story</a>
           <a class="arrow" href="https://github.com/coco-research/coco">Get it on GitHub</a>
@@ -268,7 +358,7 @@ video{display:block;width:100%;height:auto}
 
     <!-- ---------- panel: the framework ---------- -->
     <div class="panel" role="tabpanel" id="panel-framework" aria-labelledby="tab-framework" tabindex="0">
-      <div class="prod">
+      <div class="prod" id="product-coco">
         <div class="prod-media plain">
           <img src="assets/site/coco-advisory-board-389.png" alt="389 expert personas across nine departments" width="1200" height="800" loading="lazy">
         </div>
@@ -287,7 +377,7 @@ video{display:block;width:100%;height:auto}
       </div>
 
       <div class="grid cards">
-        <div class="tile">
+        <div class="tile" id="product-m0">
           <span class="chip soon">In development</span>
           <p class="lbl">CoCo M0</p>
           <span class="fine stage-note">The memory layer under everything else</span>
@@ -298,7 +388,7 @@ video{display:block;width:100%;height:auto}
             folder of tools. The write path works today; the daemon and its tools are still
             landing.</p>
         </div>
-        <div class="tile">
+        <div class="tile" id="product-platform">
           <span class="chip soon">In development</span>
           <p class="lbl">CoCo Platform</p>
           <span class="fine stage-note">Running locally, not yet packaged</span>
@@ -306,22 +396,23 @@ video{display:block;width:100%;height:auto}
             editor speaking the Model Context Protocol. It runs here every day as a local
             server. What it does not have yet is an installer anyone else could use.</p>
         </div>
-        <div class="tile">
+        <div class="tile" id="product-cococode">
           <span class="chip soon">In development</span>
           <p class="lbl">CoCoCode</p>
-          <span class="fine stage-note">Rust &middot; diverging into its own project</span>
+          <span class="fine stage-note">Rust &middot; a fork, headed toward its own project</span>
           <p>A terminal coding harness built to stay small in memory, which is what decides
-            whether you can run several agents at once or only one. It began from
+            whether you can run several agents at once or only one. It started as a fork of
             <a href="https://github.com/1jehuang/jcode">jcode</a> by Jeremy Huang, whose
-            MIT-licensed work is credited in the tree, and has since grown into its own
-            project with its own architecture rather than a patched copy of that one.</p>
+            MIT-licensed work is credited in the tree. It stays close to that upstream today;
+            the intent is to grow it into its own architecture over time, not to claim that
+            has already happened.</p>
         </div>
       </div>
     </div>
 
     <!-- ---------- panel: CoCo Connect, its own tab ---------- -->
     <div class="panel solo" role="tabpanel" id="panel-connect" aria-labelledby="tab-connect" tabindex="0" hidden>
-      <div class="prod">
+      <div class="prod" id="product-connect">
         <div>
           <span class="chip live">Available now</span>
           <h3 style="font-size:34px">CoCo Connect</h3>
@@ -357,7 +448,7 @@ video{display:block;width:100%;height:auto}
 
     <!-- ---------- panel: desktop apps ---------- -->
     <div class="panel" role="tabpanel" id="panel-apps" aria-labelledby="tab-apps" tabindex="0" hidden>
-      <div class="prod">
+      <div class="prod" id="product-voice">
         <div class="prod-media plain">
           <img src="assets/site/prod-voice.png" alt="CoCo Voice, an offline speech-to-text app" width="1600" height="480" loading="lazy">
         </div>
@@ -367,7 +458,9 @@ video{display:block;width:100%;height:auto}
           <span class="fine stage-note">Version 0.9.4 &middot; MIT &middot; Rust</span>
           <p>Offline speech to text for any text field on your machine. Nothing is uploaded and
             nothing is transcribed in someone else's data centre. The prebuilt app is Apple
-            silicon; other platforms build from source.</p>
+            silicon; other platforms build from source. A rebrand of
+            <a href="https://github.com/cjpais/Handy">Handy</a> by CJ Pais, MIT licensed —
+            the dictation engine underneath is his.</p>
           <div class="links">
             <a class="arrow" href="https://github.com/coco-research/Coco-Voice">See it on GitHub</a>
             <a class="arrow" href="https://github.com/coco-research/Coco-Voice/releases">Download</a>
@@ -375,7 +468,7 @@ video{display:block;width:100%;height:auto}
         </div>
       </div>
 
-      <div class="prod flip">
+      <div class="prod flip" id="product-storydeck">
         <div class="prod-media">
           <img src="assets/site/prod-storydeck.png" alt="The StoryDeck board, a terminal-styled sprint board with to do, in progress, blocked and done columns" width="1600" height="939" loading="lazy">
         </div>
@@ -394,16 +487,17 @@ video{display:block;width:100%;height:auto}
       </div>
 
       <div class="grid cards">
-        <div class="tile">
+        <div class="tile" id="product-pdf">
           <span class="chip soon">In development</span>
           <p class="lbl">CoCo PDF</p>
-          <span class="fine stage-note">Not yet released</span>
+          <span class="fine stage-note">Built, not yet public</span>
           <p>A desktop PDF editor for the everyday jobs: merge, sign, compress, OCR, redact.
             Files never leave the machine. It wraps the excellent
             <a href="https://github.com/Stirling-Tools/Stirling-PDF">Stirling&nbsp;PDF</a> in a
-            native shell rather than reinventing it, and credit for the engine belongs upstream.</p>
+            native shell rather than reinventing it, and credit for the engine belongs upstream.
+            A build exists; the repository is still private.</p>
         </div>
-        <div class="tile">
+        <div class="tile" id="product-teach">
           <span class="chip soon">In development</span>
           <p class="lbl">CoCo Teach</p>
           <span class="fine stage-note">Not yet released</span>
@@ -417,22 +511,19 @@ video{display:block;width:100%;height:auto}
 
     <!-- ---------- panel: research ---------- -->
     <div class="panel" role="tabpanel" id="panel-research" aria-labelledby="tab-research" tabindex="0" hidden>
-      <div class="prod">
-        <div class="prod-media">
-          <img src="assets/site/prod-router.png" alt="The CoCo Router provider dashboard, listing AI providers and which ones are connected" width="1279" height="857" loading="lazy">
-        </div>
-        <div>
+      <div class="prod" id="product-router" style="grid-template-columns:1fr">
+        <div style="max-width:64ch">
           <span class="chip soon">In development</span>
           <h3>CoCo Router</h3>
           <span class="fine stage-note">Not yet released</span>
           <p>One endpoint in front of many model providers, with automatic fallback when one of
-            them fails or runs out of quota. The dashboard above still carries its working name,
-            OmniRoute, because the rename has not reached the interface yet.</p>
+            them fails or runs out of quota. Its working name internally is still OmniRoute; the
+            rename hasn't reached a public build yet, which is also why there's no screenshot here.</p>
         </div>
       </div>
 
       <div class="grid cards">
-        <div class="tile">
+        <div class="tile" id="product-loops">
           <span class="chip">Source available</span>
           <p class="lbl">CoCo Loops</p>
           <span class="fine stage-note">Proprietary licence &middot; Python</span>
@@ -441,7 +532,7 @@ video{display:block;width:100%;height:auto}
             unattended execution is the part we are least willing to have quietly forked.</p>
           <p style="margin-top:14px"><a class="arrow" href="https://github.com/coco-research/coco-loops">Read the source</a></p>
         </div>
-        <div class="tile">
+        <div class="tile" id="product-mira">
           <span class="chip">Source available</span>
           <p class="lbl">Mira</p>
           <span class="fine stage-note">AGPL-3.0 &middot; TypeScript</span>
@@ -450,18 +541,17 @@ video{display:block;width:100%;height:auto}
             packaged download; this is a repository, not a product yet.</p>
           <p style="margin-top:14px"><a class="arrow" href="https://github.com/coco-research/Mira">Read the source</a></p>
         </div>
-        <div class="tile">
+        <div class="tile" id="product-hermes">
           <span class="chip soon">Early development</span>
           <p class="lbl">CoCo Hermes</p>
           <span class="fine stage-note">Rust &middot; nothing released yet</span>
           <p>Local source ingestion with quote-backed retrieval, so an answer can always be
             traced to the passage it came from. Planned as a signed macOS app with three
             destinations — ask, explore, and sources — and a store that stays on your own disk.
-            To be accurate about where it stands: the committed repository is currently little
-            more than its own architecture, and the implementation lives in a working tree
-            rather than in a release.</p>
+            To be accurate about where it stands: this is local work in progress, not yet
+            pushed to a repository, let alone a release.</p>
         </div>
-        <div class="tile">
+        <div class="tile" id="product-fusion">
           <span class="chip">Source available</span>
           <p class="lbl">CoCo Fusion</p>
           <span class="fine stage-note">Proprietary licence &middot; parked</span>
@@ -489,6 +579,12 @@ video{display:block;width:100%;height:auto}
   </div>
 </footer>
 
+<script>
+/* A refresh shouldn't drop you wherever the browser last remembered scrolling to —
+   land at the top by default, and let the hash-router (below) be the only thing
+   that decides otherwise. */
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+</script>
 <script>
 /* Entrance reveal. One curve, fires once, respects reduced motion. */
 (function(){
@@ -545,16 +641,76 @@ video{display:block;width:100%;height:auto}
     });
   });
 
+  /* A hash left in the URL bar re-applies itself on every future reload — clicking
+     one product link would otherwise pin every later refresh to that same section.
+     Handle the hash once, then drop it, so a plain reload always starts clean. */
+  function clearHash() {
+    if (history.replaceState) history.replaceState(null, '', location.pathname + location.search);
+  }
+
   function fromHash() {
     var id = (location.hash || '').replace('#', '');
     if (!id) return;
-    var match = tabs.filter(function (t) { return t.getAttribute('aria-controls') === id || t.id === id; })[0];
-    if (match) select(match, false);
+    var tabMatch = tabs.filter(function (t) { return t.getAttribute('aria-controls') === id || t.id === id; })[0];
+    if (tabMatch) { select(tabMatch, false); clearHash(); return; }
+    /* Not a tab id — check whether it names a specific product inside one of the
+       panels (the products overlay links here, e.g. #product-voice). Select that
+       product's tab first, since scrollIntoView does nothing on a hidden panel,
+       then scroll to the exact card once the panel is visible. */
+    var target = document.getElementById(id);
+    if (!target) return;
+    var owningPanel = target.closest('[role="tabpanel"]');
+    if (!owningPanel) return;
+    var owningTab = tabs.filter(function (t) { return t.getAttribute('aria-controls') === owningPanel.id; })[0];
+    if (owningTab) select(owningTab, false);
+    requestAnimationFrame(function () { target.scrollIntoView({ block: 'center' }); });
+    clearHash();
   }
   window.addEventListener('hashchange', fromHash);
   fromHash();
 
   select(tabs.filter(function (t) { return t.getAttribute('aria-selected') === 'true'; })[0] || tabs[0], false);
+})();
+</script>
+<script>
+/* Products overlay: Apple's mega-menu pattern. Trigger toggles it; backdrop click,
+   the close button, Escape, or picking a product all close it. */
+(function () {
+  var trigger = document.getElementById('products-trigger');
+  var overlay = document.getElementById('products-overlay');
+  var backdrop = document.getElementById('products-backdrop');
+  var closeBtn = document.getElementById('products-close');
+  if (!trigger || !overlay || !backdrop) return;
+
+  function open() {
+    overlay.hidden = false;
+    backdrop.hidden = false;
+    requestAnimationFrame(function () {
+      overlay.classList.add('open');
+      backdrop.classList.add('open');
+    });
+    trigger.setAttribute('aria-expanded', 'true');
+  }
+  function close() {
+    overlay.classList.remove('open');
+    backdrop.classList.remove('open');
+    trigger.setAttribute('aria-expanded', 'false');
+    window.setTimeout(function () {
+      overlay.hidden = true;
+      backdrop.hidden = true;
+    }, 340);
+  }
+  function isOpen() { return trigger.getAttribute('aria-expanded') === 'true'; }
+
+  trigger.addEventListener('click', function () { isOpen() ? close() : open(); });
+  backdrop.addEventListener('click', close);
+  if (closeBtn) closeBtn.addEventListener('click', close);
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && isOpen()) { close(); trigger.focus(); }
+  });
+  [].slice.call(overlay.querySelectorAll('a')).forEach(function (a) {
+    a.addEventListener('click', close);
+  });
 })();
 </script>
 <script>

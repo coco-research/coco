@@ -6,18 +6,20 @@
 <title>CoCo: An entire engineering department, inside your editor</title>
 <style>
 /* ============================================================================
-   Tokens measured live from apple.com (computed styles, ranked by usage).
+   Type scale, spacing, and layout proportions follow the Apple methodology
+   (computed styles, ranked by usage). The accent is deliberately our own —
+   a deep navy, not Apple's blue — to keep the visual identity distinct.
    Colours: 5 total. Shadows: 1. Weights: 400/600 only. Easing: 1 curve.
-   Font stack is apple.com's own, which resolves to real SF Pro on Apple devices.
+   Font stack resolves to real SF Pro on Apple devices, the system default elsewhere.
    ========================================================================== */
 :root{
-  --ink:#1d1d1f;            /* apple primary text, never pure black */
+  --ink:#1d1d1f;            /* primary text, never pure black */
   --ink-2:#333336;          /* secondary */
   --muted:#6e6e73;          /* tertiary */
   --surface:#f5f5f7;        /* the one off-white */
   --white:#fff;
-  --blue:#0071e3;           /* button fill */
-  --link:#0066cc;           /* link */
+  --blue:#0a3a66;           /* button fill — deep navy, our own, not Apple's blue */
+  --link:#0a3a66;           /* link — same navy, one accent throughout */
   --hair:rgba(0,0,0,.10);
   --shadow:0 5px 30px rgba(0,0,0,.22);   /* the single shadow */
   --ease:cubic-bezier(.4,0,.6,1);        /* the single curve */
@@ -43,10 +45,44 @@ a:hover{text-decoration:underline}
   display:flex;align-items:center;gap:34px}
 .nav a{font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;transition:opacity var(--dur) var(--ease)}
 .nav a:hover{opacity:1;text-decoration:none}
-.nav .mark{font-size:15px;font-weight:600;letter-spacing:-.02em;margin-right:4px}
+.nav .mark{font-size:15px;font-weight:600;letter-spacing:-.02em;margin-right:4px;
+  display:inline-flex;align-items:center;gap:8px}
+.nav .mark svg{display:block;flex:none}
 .nav .back{opacity:.6}
 .nav .back:hover{opacity:1}
 .nav .spacer{flex:1}
+
+/* ---- nav-trigger: a nav link that opens the products overlay instead of navigating ---- */
+.nav-trigger{appearance:none;background:none;border:0;cursor:pointer;font-family:inherit;
+  font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;padding:0;
+  transition:opacity var(--dur) var(--ease)}
+.nav-trigger:hover{opacity:1}
+.nav-trigger[aria-expanded="true"]{opacity:1;font-weight:600}
+
+/* ---- products overlay: same pattern as the homepage. Links here lead back to
+   the home page's product cards, since this page has none of its own. ---- */
+.overlay-backdrop{position:fixed;inset:44px 0 0 0;background:rgba(0,0,0,.28);z-index:98;
+  opacity:0;visibility:hidden;transition:opacity var(--dur) var(--ease)}
+.overlay-backdrop.open{opacity:1;visibility:visible}
+.overlay{position:fixed;top:44px;left:0;right:0;z-index:99;max-height:calc(100vh - 44px);
+  overflow-y:auto;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(24px);
+  -webkit-backdrop-filter:saturate(180%) blur(24px);border-bottom:1px solid var(--hair);
+  box-shadow:var(--shadow);transform:translateY(-8px);opacity:0;visibility:hidden;
+  transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease),visibility var(--dur)}
+.overlay.open{transform:none;opacity:1;visibility:visible}
+.overlay-in{max-width:var(--wide);margin:0 auto;padding:36px 22px 40px;text-align:left}
+.overlay-groups{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:32px}
+.overlay-group .k{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 14px}
+.overlay-group ul{list-style:none;margin:0;padding:0}
+.overlay-group li{margin-bottom:16px}
+.overlay-group a{display:block;color:var(--ink);opacity:1}
+.overlay-group a .name{display:block;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.overlay-group a .stage{display:block;font-size:11px;color:var(--muted);margin-top:2px;font-weight:400}
+.overlay-group a:hover .name{color:var(--blue)}
+.overlay-close{position:absolute;top:14px;right:22px;font-size:12px;color:var(--muted);
+  background:none;border:0;cursor:pointer;font-family:inherit}
+.overlay-close:hover{color:var(--ink)}
 
 /* ---- type scale. Tracking flips sign with size: the key Apple detail. ---- */
 .eyebrow{font-size:19px;font-weight:600;letter-spacing:.011em;color:var(--ink);margin:0 0 6px}
@@ -117,6 +153,8 @@ video{display:block;width:100%;height:auto}
   .grid,.steps{grid-template-columns:1fr}
   section{padding:64px 0}
   .nav a:not(.mark):not(.back){display:none}
+  .overlay-groups{grid-template-columns:1fr 1fr;gap:24px}
+  .overlay-in{padding:28px 22px 32px}
 }
 </style>
 </head>
@@ -125,15 +163,71 @@ video{display:block;width:100%;height:auto}
 <nav class="nav">
   <div class="nav-in">
     <a href="/" class="back">&lsaquo; CoCo Research</a>
-    <a href="#top" class="mark">CoCo</a>
+    <a href="#top" class="mark">
+      <svg width="20" height="20" viewBox="0 0 100 100" role="img" aria-label="">
+        <defs>
+          <linearGradient id="markGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#0a3a66"/>
+            <stop offset="100%" stop-color="#5b9bd5"/>
+          </linearGradient>
+        </defs>
+        <path d="M 46 20 A 30 30 0 1 0 46 80" stroke="#14171c" stroke-width="10" stroke-linecap="round" fill="none"/>
+        <path d="M 54 20 A 30 30 0 1 1 54 80" stroke="url(#markGrad)" stroke-width="10" stroke-linecap="round" fill="none"/>
+      </svg>
+      CoCo
+    </a>
     <div class="spacer"></div>
     <a href="#board">The Board</a>
     <a href="#capabilities">Capabilities</a>
+    <button type="button" class="nav-trigger" id="products-trigger" aria-expanded="false" aria-controls="products-overlay">Products</button>
     <a href="#install">Install</a>
-    <a href="#specs">Specs</a>
+    <a href="#specs">By the numbers</a>
     <a href="https://github.com/coco-research/coco">GitHub</a>
   </div>
 </nav>
+
+<div class="overlay-backdrop" id="products-backdrop" hidden></div>
+<div class="overlay" id="products-overlay" role="region" aria-label="All CoCo Research products" hidden>
+  <button type="button" class="overlay-close" id="products-close">Close &times;</button>
+  <div class="overlay-in">
+    <div class="overlay-groups">
+      <div class="overlay-group">
+        <p class="k">The framework</p>
+        <ul>
+          <li><a href="/#product-coco"><span class="name">CoCo</span><span class="stage">Flagship &middot; available now</span></a></li>
+          <li><a href="/#product-m0"><span class="name">CoCo M0</span><span class="stage">In development</span></a></li>
+          <li><a href="/#product-platform"><span class="name">CoCo Platform</span><span class="stage">In development</span></a></li>
+          <li><a href="/#product-cococode"><span class="name">CoCoCode</span><span class="stage">In development</span></a></li>
+        </ul>
+      </div>
+      <div class="overlay-group">
+        <p class="k">The front door</p>
+        <ul>
+          <li><a href="/#product-connect"><span class="name">CoCo Connect</span><span class="stage">Available now &middot; v0.2.1</span></a></li>
+        </ul>
+      </div>
+      <div class="overlay-group">
+        <p class="k">Desktop apps</p>
+        <ul>
+          <li><a href="/#product-voice"><span class="name">CoCo Voice</span><span class="stage">Available now &middot; v0.9.4</span></a></li>
+          <li><a href="/#product-storydeck"><span class="name">StoryDeck</span><span class="stage">Available now &middot; v1.3.0</span></a></li>
+          <li><a href="/#product-pdf"><span class="name">CoCo PDF</span><span class="stage">In development</span></a></li>
+          <li><a href="/#product-teach"><span class="name">CoCo Teach</span><span class="stage">In development</span></a></li>
+        </ul>
+      </div>
+      <div class="overlay-group">
+        <p class="k">Governance and research</p>
+        <ul>
+          <li><a href="/#product-router"><span class="name">CoCo Router</span><span class="stage">In development</span></a></li>
+          <li><a href="/#product-loops"><span class="name">CoCo Loops</span><span class="stage">Source available</span></a></li>
+          <li><a href="/#product-mira"><span class="name">Mira</span><span class="stage">Source available &middot; AGPL-3.0</span></a></li>
+          <li><a href="/#product-hermes"><span class="name">CoCo Hermes</span><span class="stage">Early development</span></a></li>
+          <li><a href="/#product-fusion"><span class="name">CoCo Fusion</span><span class="stage">Source available &middot; parked</span></a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ================= HERO ================= -->
 <section id="top" class="center" style="padding-top:76px">
@@ -142,8 +236,8 @@ video{display:block;width:100%;height:auto}
     <h1 class="reveal">An entire engineering<br>department. In your editor.</h1>
     <p class="sub reveal">389 experts deliberate. Then 184 skills ship the decision.</p>
     <p class="body reveal" style="margin:16px auto 0;text-align:center">
-      Installs into Claude Code, Cursor, or Codex. Not a new AI model. Not another
-      agent harness. Your model, your tool, your keys, your machine.
+      Runs on the model and editor you already have — Claude Code, Cursor, or Codex.
+      Your keys never leave your machine.
     </p>
     <div class="cta reveal">
       <a class="btn" href="https://github.com/coco-research/coco">Get CoCo on GitHub</a>
@@ -155,8 +249,8 @@ video{display:block;width:100%;height:auto}
       <svg viewBox="0 0 820 380" role="img" aria-label="Nine departments arranged around a decision">
         <defs>
           <radialGradient id="glow" cx="50%" cy="52%" r="52%">
-            <stop offset="0%" stop-color="#0071e3" stop-opacity=".10"/>
-            <stop offset="100%" stop-color="#0071e3" stop-opacity="0"/>
+            <stop offset="0%" stop-color="#0a3a66" stop-opacity=".10"/>
+            <stop offset="100%" stop-color="#0a3a66" stop-opacity="0"/>
           </radialGradient>
         </defs>
         <rect width="820" height="380" fill="url(#glow)"/>
@@ -177,7 +271,7 @@ video{display:block;width:100%;height:auto}
 <!-- ================= THE BOARD ================= -->
 <section id="board" class="tint">
   <div class="wrap center">
-    <h2 class="reveal">It doesn't answer. It deliberates.</h2>
+    <h2 class="reveal">The board argues before CoCo answers.</h2>
     <p class="body reveal" style="margin:0 auto;text-align:center">
       Ask a hard question and CoCo convenes the experts who actually disagree about it.
       They argue in rounds, positions move, and dissent is recorded by name rather than
@@ -196,7 +290,7 @@ video{display:block;width:100%;height:auto}
 
     <div class="grid" style="margin-top:56px">
       <div class="tile reveal"><p class="n">389</p><p class="lbl">Expert personas</p>
-        <p>Each grounded in cited public positions, with a validation gate that rejects fabricated quotes.</p></div>
+        <p>Each requires a live, checkable source link. Quotes are illustrative reconstructions, not verbatim — see the <a href="https://github.com/coco-research/coco/blob/main/systems/superintelligence/DISCLAIMER.md">disclaimer</a>.</p></div>
       <div class="tile reveal"><p class="n">9</p><p class="lbl">Departments</p>
         <p>Engineering, AI, product and design, finance, trading, risk and compliance, strategy, data, sales and go-to-market.</p></div>
       <div class="tile reveal"><p class="n">279</p><p class="lbl">Commands</p>
@@ -277,7 +371,7 @@ video{display:block;width:100%;height:auto}
 <!-- ================= SPECS ================= -->
 <section id="specs">
   <div class="wrap">
-    <h2 class="reveal center" style="margin-bottom:8px">Specifications</h2>
+    <h2 class="reveal center" style="margin-bottom:8px">By the numbers</h2>
     <table class="reveal">
       <tr><th>Version</th><td>1.2.0</td></tr>
       <tr><th>Skills</th><td>184 with all bundles installed. 69 core, plus 68 GSD, 20 HyperFrames, 9 Super Intelligence, 6 Brain, 5 Cursor, 4 M0 and 3 Cognee.</td></tr>
@@ -309,6 +403,10 @@ video{display:block;width:100%;height:auto}
   </div>
 </footer>
 
+<script>
+/* A refresh shouldn't drop you wherever the browser last remembered scrolling to. */
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+</script>
 <script>
 /* The board diagram: 9 departments, 389 seats, drawn to scale. */
 (function(){
@@ -349,6 +447,47 @@ video{display:block;width:100%;height:auto}
     es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
   },{rootMargin:'0px 0px -8% 0px',threshold:.08});
   els.forEach(function(e,i){ e.style.transitionDelay=(Math.min(i,6)*55)+'ms'; io.observe(e); });
+})();
+</script>
+<script>
+/* Products overlay: same pattern as the homepage. Every link here leads back to
+   the home page, since this page carries no product cards of its own. */
+(function () {
+  var trigger = document.getElementById('products-trigger');
+  var overlay = document.getElementById('products-overlay');
+  var backdrop = document.getElementById('products-backdrop');
+  var closeBtn = document.getElementById('products-close');
+  if (!trigger || !overlay || !backdrop) return;
+
+  function open() {
+    overlay.hidden = false;
+    backdrop.hidden = false;
+    requestAnimationFrame(function () {
+      overlay.classList.add('open');
+      backdrop.classList.add('open');
+    });
+    trigger.setAttribute('aria-expanded', 'true');
+  }
+  function close() {
+    overlay.classList.remove('open');
+    backdrop.classList.remove('open');
+    trigger.setAttribute('aria-expanded', 'false');
+    window.setTimeout(function () {
+      overlay.hidden = true;
+      backdrop.hidden = true;
+    }, 340);
+  }
+  function isOpen() { return trigger.getAttribute('aria-expanded') === 'true'; }
+
+  trigger.addEventListener('click', function () { isOpen() ? close() : open(); });
+  backdrop.addEventListener('click', close);
+  if (closeBtn) closeBtn.addEventListener('click', close);
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && isOpen()) { close(); trigger.focus(); }
+  });
+  [].slice.call(overlay.querySelectorAll('a')).forEach(function (a) {
+    a.addEventListener('click', close);
+  });
 })();
 </script>
 <script>

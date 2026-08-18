@@ -80,6 +80,19 @@ a:hover{text-decoration:underline}
   background:none;border:0;cursor:pointer;font-family:inherit}
 .overlay-close:hover{color:var(--ink)}
 
+/* ---- film lightbox: "Watch the film" pattern, a video in a centered modal ---- */
+.film-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:198;
+  opacity:0;visibility:hidden;transition:opacity var(--dur) var(--ease)}
+.film-backdrop.open{opacity:1;visibility:visible}
+.film-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-48%);width:min(920px,92vw);
+  z-index:199;opacity:0;visibility:hidden;transition:opacity var(--dur) var(--ease),
+  transform var(--dur) var(--ease),visibility var(--dur)}
+.film-modal.open{opacity:1;visibility:visible;transform:translate(-50%,-50%)}
+.film-modal video{width:100%;height:auto;display:block;border-radius:14px;box-shadow:var(--shadow)}
+.film-modal .film-close{position:absolute;top:-38px;right:0;background:none;border:0;
+  color:#fff;font-size:14px;cursor:pointer;font-family:inherit;opacity:.85}
+.film-modal .film-close:hover{opacity:1}
+
 .eyebrow{font-size:19px;font-weight:600;letter-spacing:.011em;color:var(--ink);margin:0 0 6px}
 h1{font-size:80px;line-height:1.05;font-weight:600;letter-spacing:-.015em;margin:0}
 h2{font-size:48px;line-height:1.08;font-weight:600;letter-spacing:-.012em;margin:0 0 18px}
@@ -271,6 +284,12 @@ video{display:block;width:100%;height:auto}
   </div>
 </div>
 
+<div class="film-backdrop" id="film-backdrop" hidden></div>
+<div class="film-modal" id="film-modal" role="dialog" aria-modal="true" aria-label="CoCo launch film" hidden>
+  <button type="button" class="film-close" id="film-close">Close &times;</button>
+  <video id="film-video" src="assets/site/coco-ads-launch.mp4" poster="assets/site/coco-ads-launch-poster.jpg" controls playsinline width="1920" height="1080"></video>
+</div>
+
 <!-- ================= HERO ================= -->
 <section id="top" class="center" style="padding-top:76px">
   <div class="wrap">
@@ -305,6 +324,7 @@ video{display:block;width:100%;height:auto}
         <p class="body" style="max-width:56ch">389 experts deliberate. Then 184 skills ship
           the decision.</p>
         <div class="links" style="margin-top:20px;display:flex;gap:22px;flex-wrap:wrap">
+          <button type="button" class="arrow" id="film-trigger" style="background:none;border:0;cursor:pointer;font-family:inherit;padding:0;color:var(--link)">Watch the film (20s)</button>
           <a class="arrow" href="/coco/">Read the full story</a>
           <a class="arrow" href="https://github.com/coco-research/coco">Get it on GitHub</a>
         </div>
@@ -710,6 +730,46 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   });
   [].slice.call(overlay.querySelectorAll('a')).forEach(function (a) {
     a.addEventListener('click', close);
+  });
+})();
+</script>
+<script>
+/* Film lightbox: "Watch the film" opens the launch video in a centered modal.
+   Same open/close pattern as the products overlay, plus pausing the video on close. */
+(function () {
+  var trigger = document.getElementById('film-trigger');
+  var modal = document.getElementById('film-modal');
+  var backdrop = document.getElementById('film-backdrop');
+  var closeBtn = document.getElementById('film-close');
+  var video = document.getElementById('film-video');
+  if (!trigger || !modal || !backdrop || !video) return;
+
+  function open() {
+    modal.hidden = false;
+    backdrop.hidden = false;
+    requestAnimationFrame(function () {
+      modal.classList.add('open');
+      backdrop.classList.add('open');
+    });
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduceMotion) { var p = video.play(); if (p && p.catch) p.catch(function () {}); }
+  }
+  function close() {
+    modal.classList.remove('open');
+    backdrop.classList.remove('open');
+    video.pause();
+    window.setTimeout(function () {
+      modal.hidden = true;
+      backdrop.hidden = true;
+    }, 340);
+  }
+  function isOpen() { return modal.classList.contains('open'); }
+
+  trigger.addEventListener('click', open);
+  backdrop.addEventListener('click', close);
+  closeBtn.addEventListener('click', close);
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && isOpen()) { close(); trigger.focus(); }
   });
 })();
 </script>

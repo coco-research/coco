@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CoCo: An entire engineering department, inside your editor</title>
+<title>CoCo Research — governed AI, built in the open</title>
 <style>
 /* ============================================================================
    Tokens measured live from apple.com (computed styles, ranked by usage).
@@ -11,16 +11,16 @@
    Font stack is apple.com's own, which resolves to real SF Pro on Apple devices.
    ========================================================================== */
 :root{
-  --ink:#1d1d1f;            /* apple primary text, never pure black */
-  --ink-2:#333336;          /* secondary */
-  --muted:#6e6e73;          /* tertiary */
-  --surface:#f5f5f7;        /* the one off-white */
+  --ink:#1d1d1f;
+  --ink-2:#333336;
+  --muted:#6e6e73;
+  --surface:#f5f5f7;
   --white:#fff;
-  --blue:#0071e3;           /* button fill */
-  --link:#0066cc;           /* link */
+  --blue:#0071e3;
+  --link:#0066cc;
   --hair:rgba(0,0,0,.10);
-  --shadow:0 5px 30px rgba(0,0,0,.22);   /* the single shadow */
-  --ease:cubic-bezier(.4,0,.6,1);        /* the single curve */
+  --shadow:0 5px 30px rgba(0,0,0,.22);
+  --ease:cubic-bezier(.4,0,.6,1);
   --dur:.32s;
   --stadium:980px;
   --wide:1024px;
@@ -35,7 +35,6 @@ a{color:var(--link);text-decoration:none}
 a:hover{text-decoration:underline}
 .wrap{max-width:var(--wide);margin:0 auto;padding:0 22px}
 
-/* ---- nav: 12px, translucent, hairline. Apple's exact proportions ---- */
 .nav{position:sticky;top:0;z-index:100;height:44px;
   background:rgba(255,255,255,.72);backdrop-filter:saturate(180%) blur(20px);
   -webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--hair)}
@@ -46,22 +45,19 @@ a:hover{text-decoration:underline}
 .nav .mark{font-size:15px;font-weight:600;letter-spacing:-.02em;margin-right:4px}
 .nav .spacer{flex:1}
 
-/* ---- type scale. Tracking flips sign with size: the key Apple detail. ---- */
 .eyebrow{font-size:19px;font-weight:600;letter-spacing:.011em;color:var(--ink);margin:0 0 6px}
 h1{font-size:80px;line-height:1.05;font-weight:600;letter-spacing:-.015em;margin:0}
 h2{font-size:48px;line-height:1.08;font-weight:600;letter-spacing:-.012em;margin:0 0 18px}
 h3{font-size:28px;line-height:1.14;font-weight:600;letter-spacing:.007em;margin:0 0 8px}
 .sub{font-size:28px;line-height:1.21;font-weight:400;letter-spacing:.007em;color:var(--ink-2);
-  margin:18px auto 0;max-width:34ch}
+  margin:18px auto 0;max-width:38ch}
 .body{font-size:17px;line-height:1.5;letter-spacing:-.022em;color:var(--muted);max-width:52ch}
 .fine{font-size:12px;line-height:1.34;letter-spacing:-.01em;color:var(--muted)}
 
-/* ---- sections: tight component padding, huge section padding ---- */
 section{padding:92px 0}
 section.tint{background:var(--surface)}
 .center{text-align:center}
 
-/* ---- the CTA pair: stadium fill + plain link, Apple's canonical pattern ---- */
 .cta{display:flex;gap:26px;justify-content:center;align-items:center;margin-top:34px;flex-wrap:wrap}
 .btn{display:inline-block;background:var(--blue);color:#fff;font-size:17px;letter-spacing:-.022em;
   padding:12px 24px;border-radius:var(--stadium);transition:opacity var(--dur) var(--ease)}
@@ -69,59 +65,103 @@ section.tint{background:var(--surface)}
 .arrow{font-size:17px;letter-spacing:-.022em}
 .arrow:after{content:" ›";font-weight:600}
 
-/* ---- hero visual: the 9 departments. Pure CSS/SVG, no imagery. ---- */
-.stage{margin:56px auto 0;max-width:820px;position:relative}
-.stage svg{width:100%;height:auto;display:block}
-
-/* ---- feature grid: 2-up tiles on the tint, 18px radius like Apple's cards ---- */
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:44px}
 .tile{background:var(--white);border-radius:18px;padding:40px 36px;min-width:0}
 .tile .n{font-size:56px;line-height:1;font-weight:600;letter-spacing:-.015em;margin:0 0 10px}
 .tile .lbl{font-size:17px;font-weight:600;letter-spacing:-.022em;margin:0 0 6px}
 .tile p{margin:0;font-size:17px;line-height:1.5;letter-spacing:-.022em;color:var(--muted)}
 
-/* ---- product imagery: real renders, the one shadow, the one existing radius ---- */
 figure{margin:0}
 .shot img{width:100%;height:auto;display:block;border-radius:18px;box-shadow:var(--shadow)}
 
-/* ---- three-step: numbered, restrained ---- */
-.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:34px;margin-top:48px;text-align:left}
-.step .k{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-.step code{display:block;background:var(--surface);border-radius:8px;padding:12px 14px;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;letter-spacing:0;
-  color:var(--ink);margin-top:12px;overflow-x:auto;white-space:nowrap}
-section.tint .step code{background:var(--white)}
-
-/* ---- spec table: 12px fine print, hairline rows. Apple's footer tables. ---- */
 table{width:100%;border-collapse:collapse;margin-top:34px}
 th,td{text-align:left;padding:14px 0;border-bottom:1px solid var(--hair);font-size:17px;letter-spacing:-.022em;vertical-align:top}
 th{width:34%;font-weight:600;color:var(--ink)}
 td{color:var(--muted)}
 
-/* ---- product bands: three groups inside one section ---- */
-.band{margin-top:52px}
-.band .k{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-  color:var(--muted);margin:0 0 14px}
-.band .grid{margin-top:0}
 .tile .stage-note{display:block;margin:0 0 8px}
 
-/* ---- footer ---- */
+/* ---- tabbed products: Apple's segmented-nav pattern, one hairline rail ---- */
+.tabs{position:relative;display:flex;gap:0;justify-content:center;flex-wrap:wrap;
+  margin:40px auto 0;border-bottom:1px solid var(--hair)}
+.tab{appearance:none;background:none;border:0;cursor:pointer;font-family:inherit;
+  font-size:17px;letter-spacing:-.022em;color:var(--muted);padding:12px 20px 14px;
+  position:relative;transition:color var(--dur) var(--ease)}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);font-weight:600}
+.tab:after{content:"";position:absolute;left:20px;right:20px;bottom:-1px;height:2px;
+  background:var(--ink);border-radius:2px;transform:scaleX(0);transform-origin:center;
+  transition:transform var(--dur) var(--ease)}
+.tab[aria-selected="true"]:after{transform:scaleX(1)}
+.tab:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:6px}
+.tab .count{font-size:12px;color:var(--muted);margin-left:7px;font-weight:400}
+
+.panel[hidden]{display:none}
+.panel{animation:panel-in .5s var(--ease) both}
+@keyframes panel-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.panel{animation:none}}
+
+.prod{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:44px;
+  align-items:center;text-align:left;padding:46px 0;border-bottom:1px solid var(--hair)}
+.prod:last-child{border-bottom:0}
+.prod.flip .prod-media{order:2}
+.prod-media img,.prod-media video{width:100%;height:auto;display:block;
+  border-radius:14px;box-shadow:var(--shadow)}
+.prod-media.plain img{box-shadow:none;border:1px solid var(--hair)}
+.prod h3{margin:0 0 4px;font-size:24px;letter-spacing:0}
+.prod .stage-note{display:block;margin:0 0 12px}
+.prod p{margin:0;font-size:17px;line-height:1.5;letter-spacing:-.022em;color:var(--muted)}
+.prod .links{margin-top:16px;display:flex;gap:22px;flex-wrap:wrap}
+
+.chip{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;padding:4px 9px;border-radius:var(--stadium);
+  background:var(--surface);color:var(--ink-2);margin:0 0 10px}
+section.tint .chip{background:var(--white)}
+.chip.live{background:rgba(0,113,227,.10);color:#0058b0}
+.chip.soon{background:rgba(0,0,0,.05);color:var(--muted)}
+.chip.flag{background:rgba(0,113,227,.14);color:#0058b0}
+
+.solo{padding-top:48px;text-align:left}
+.solo .prod{grid-template-columns:1fr;gap:30px;border-bottom:0;padding-bottom:0}
+.solo .feat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px;margin-top:38px}
+.solo .feat h4{margin:0 0 6px;font-size:17px;font-weight:600;letter-spacing:-.022em}
+.solo .feat p{font-size:15px}
+
+/* ---- flagship band: one big product, above the full catalogue ---- */
+.flagship{border-bottom:1px solid var(--hair)}
+.flagship .prod{padding:0;border-bottom:0;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)}
+.flagship h2{margin:0 0 6px;font-size:38px}
+
 footer{background:var(--surface);padding:44px 0 56px}
 footer .row{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:18px}
 footer a{font-size:12px;letter-spacing:-.01em;color:var(--link)}
 
-/* ---- motion: one curve, and only on entrance ---- */
 .reveal{opacity:0;transform:translateY(24px);
   transition:opacity .8s var(--ease),transform .8s var(--ease)}
 .reveal.in{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
 video{display:block;width:100%;height:auto}
-
+</style>
+<noscript><style>
+  .tabs{display:none}
+  .panel[hidden]{display:block!important}
+  .reveal{opacity:1!important;transform:none!important}
+</style></noscript>
+<style>
 @media (max-width:860px){
-  h1{font-size:48px} h2{font-size:34px} .sub{font-size:21px}
+  h1{font-size:44px} h2{font-size:32px} .sub{font-size:20px}
   .grid,.steps{grid-template-columns:1fr}
   section{padding:64px 0}
   .nav a:not(.mark){display:none}
+  .tabs{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:0 0 auto;font-size:15px;padding:11px 15px 13px}
+  .tab:after{left:15px;right:15px}
+  .prod,.flagship .prod{grid-template-columns:1fr;gap:26px;padding:34px 0}
+  .prod.flip .prod-media{order:0}
+  .prod h3{font-size:21px}
+  .solo .feat{grid-template-columns:1fr;gap:20px}
 }
 </style>
 </head>
@@ -129,298 +169,327 @@ video{display:block;width:100%;height:auto}
 
 <nav class="nav">
   <div class="nav-in">
-    <a href="#top" class="mark">CoCo</a>
+    <a href="/" class="mark">CoCo Research</a>
     <div class="spacer"></div>
-    <a href="#board">The Board</a>
-    <a href="#capabilities">Capabilities</a>
+    <a href="/coco/">CoCo</a>
     <a href="#products">Products</a>
-    <a href="#install">Install</a>
-    <a href="#specs">Specs</a>
-    <a href="https://github.com/coco-research/coco">GitHub</a>
+    <a href="#about">About</a>
+    <a href="https://github.com/coco-research">GitHub</a>
   </div>
 </nav>
 
 <!-- ================= HERO ================= -->
 <section id="top" class="center" style="padding-top:76px">
   <div class="wrap">
-    <p class="eyebrow reveal">CoCo 1.2.0</p>
-    <h1 class="reveal">An entire engineering<br>department. In your editor.</h1>
-    <p class="sub reveal">389 experts deliberate. Then 184 skills ship the decision.</p>
-    <p class="body reveal" style="margin:16px auto 0;text-align:center">
-      Installs into Claude Code, Cursor, or Codex. Not a new AI model. Not another
-      agent harness. Your model, your tool, your keys, your machine.
+    <p class="eyebrow reveal">CoCo Research</p>
+    <h1 class="reveal">Governed AI,<br>built in the open.</h1>
+    <p class="sub reveal">One flagship framework. Thirteen more things around it, each shown at its real stage.</p>
+    <p class="body reveal" style="margin:16px auto 0;text-align:center;max-width:56ch">
+      CoCo Research is where a regulated-risk product leader builds and open-sources the
+      agentic AI he designs by day. The concerns carry over either way: governed memory,
+      agents that follow rules and verify their own work, data that stays on your machine,
+      and shipping without hand-waving about what still doesn't.
     </p>
     <div class="cta reveal">
-      <a class="btn" href="https://github.com/coco-research/coco">Get CoCo on GitHub</a>
-      <a class="arrow" href="#board">See how it decides</a>
+      <a class="btn" href="/coco/">Explore CoCo, the flagship</a>
+      <a class="arrow" href="#products">See every product</a>
     </div>
-
-    <div class="stage reveal">
-      <!-- The board: 9 departments, 389 seats. Drawn, not rendered. -->
-      <svg viewBox="0 0 820 380" role="img" aria-label="Nine departments arranged around a decision">
-        <defs>
-          <radialGradient id="glow" cx="50%" cy="52%" r="52%">
-            <stop offset="0%" stop-color="#0071e3" stop-opacity=".10"/>
-            <stop offset="100%" stop-color="#0071e3" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-        <rect width="820" height="380" fill="url(#glow)"/>
-        <g id="spokes" stroke="#1d1d1f" stroke-opacity=".14" stroke-width="1"></g>
-        <g id="seats"></g>
-        <g id="depts"></g>
-        <circle cx="410" cy="196" r="46" fill="#1d1d1f"/>
-        <text x="410" y="192" text-anchor="middle" fill="#fff" font-size="15" font-weight="600"
-              letter-spacing="-.3" font-family="-apple-system,sans-serif">Your</text>
-        <text x="410" y="210" text-anchor="middle" fill="#fff" font-size="15" font-weight="600"
-              letter-spacing="-.3" font-family="-apple-system,sans-serif">call</text>
-      </svg>
-    </div>
-    <p class="fine reveal" style="margin-top:22px">100% local. No telemetry.</p>
   </div>
 </section>
 
-<!-- ================= THE BOARD ================= -->
-<section id="board" class="tint">
+<!-- ================= FLAGSHIP ================= -->
+<section class="tint flagship">
+  <div class="wrap">
+    <div class="prod reveal">
+      <div class="prod-media">
+        <video src="assets/site/coco-install-moment.mp4" poster="assets/site/coco-install-moment.png"
+               width="1200" height="750" muted playsinline loop autoplay preload="metadata"
+               aria-label="The CoCo installer showing the exact commit before it runs"></video>
+      </div>
+      <div>
+        <span class="chip flag">Flagship &middot; version 1.2.0</span>
+        <h2>CoCo turns your editor into an engineering department.</h2>
+        <p class="body" style="max-width:56ch">389 experts deliberate. Then 184 skills ship
+          the decision. It installs into Claude Code, Cursor, or Codex in about ninety
+          seconds, shows you the exact commit before anything runs, and nothing leaves
+          your machine. Open-core: the framework is MIT, the Super Intelligence board is
+          licensed separately.</p>
+        <div class="links" style="margin-top:20px;display:flex;gap:22px;flex-wrap:wrap">
+          <a class="arrow" href="/coco/">Read the full story</a>
+          <a class="arrow" href="https://github.com/coco-research/coco">Get it on GitHub</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section id="about">
   <div class="wrap center">
-    <h2 class="reveal">It doesn't answer. It deliberates.</h2>
+    <h2 class="reveal">What stays the same across every product.</h2>
     <p class="body reveal" style="margin:0 auto;text-align:center">
-      Ask a hard question and CoCo convenes the experts who actually disagree about it.
-      They argue in rounds, positions move, and dissent is recorded by name rather than
-      averaged away. You get the reasoning, the split, and who held which line.
+      Fourteen things, at fourteen different stages of finished. Four rules hold across
+      all of them regardless.
     </p>
-
-    <figure class="shot reveal" style="margin:48px auto 0;max-width:760px">
-      <img src="assets/site/coco-advisory-board-389.png" alt="389 expert personas across nine departments, bar length proportional to each department's real headcount" width="1200" height="800" loading="lazy">
-      <figcaption class="fine" style="margin-top:14px">389 experts, broken out by department. Engineering carries the largest seat count, at 70.</figcaption>
-    </figure>
-
-    <figure class="shot reveal" style="margin:36px auto 0;max-width:700px">
-      <video src="assets/site/coco-si-decide-terminal.mp4" poster="assets/site/coco-si-decide-terminal.png" width="1200" height="750" muted playsinline loop autoplay preload="metadata" aria-label="A real SI-Decide run: a routed panel, a verdict, and named dissent"></video>
-      <figcaption class="fine" style="margin-top:14px">A real /SI-Decide run. The panel is routed, not fixed, and dissent is kept, not averaged away.</figcaption>
-    </figure>
-
-    <div class="grid" style="margin-top:56px">
-      <div class="tile reveal"><p class="n">389</p><p class="lbl">Expert personas</p>
-        <p>Each grounded in cited public positions, with a validation gate that rejects fabricated quotes.</p></div>
-      <div class="tile reveal"><p class="n">9</p><p class="lbl">Departments</p>
-        <p>Engineering, AI, product and design, finance, trading, risk and compliance, strategy, data, sales and go-to-market.</p></div>
-      <div class="tile reveal"><p class="n">279</p><p class="lbl">Commands</p>
-        <p>37 core, plus 242 generated locally at install from the team registries.</p></div>
-      <div class="tile reveal"><p class="n">34</p><p class="lbl">Agents</p>
-        <p>Specialists that carry the decision into code, review it, and verify the result.</p></div>
+    <div class="grid" style="margin-top:44px">
+      <div class="tile reveal"><p class="lbl">Data stays local</p>
+        <p>No telemetry, no required cloud account, no command file transmitted anywhere
+          it doesn't have to be.</p></div>
+      <div class="tile reveal"><p class="lbl">Verify, don't average</p>
+        <p>Decisions carry dissent by name instead of blending it away, and claims get
+          checked rather than assumed.</p></div>
+      <div class="tile reveal"><p class="lbl">Stage is stated plainly</p>
+        <p>In development means in development. Nothing here is dressed up as shipped
+          when it isn't.</p></div>
+      <div class="tile reveal"><p class="lbl">Credit travels with the code</p>
+        <p>Where a product builds on someone else's open-source work, that work is
+          named and linked, not absorbed.</p></div>
     </div>
-  </div>
-</section>
-
-<!-- ================= CAPABILITIES ================= -->
-<section id="capabilities">
-  <div class="wrap center">
-    <h2 class="reveal">184 skills. One instruction set each.</h2>
-    <p class="body reveal" style="margin:0 auto 0;text-align:center">
-      Not prompt snippets. Every skill carries state management, verification logic and
-      error handling, so the work survives being handed between sessions and between tools.
-    </p>
-
-    <div class="steps" style="margin-top:56px">
-      <div class="step reveal"><p class="k">Orchestrate</p><h3>GSD</h3>
-        <p class="body">A 68-skill project lifecycle with a phase database on disk. Plans, executes, verifies, and audits its own failures.</p></div>
-      <div class="step reveal"><p class="k">Remember</p><h3>Brain</h3>
-        <p class="body">Six skills that keep durable project knowledge, so context outlives the session it was learned in.</p></div>
-      <div class="step reveal"><p class="k">Travel</p><h3>Any editor</h3>
-        <p class="body">Claude Code, Cursor, and Codex, from one install. The adapter changes; the skills do not.</p></div>
-    </div>
-
-    <figure class="shot reveal" style="margin:56px auto 0;max-width:900px">
-      <img src="assets/site/coco-cross-editor-portability.png" alt="Claude Code, Cursor, and Codex CLI shown as three identical cards, unified under one CoCo layer" width="1200" height="675" loading="lazy">
-      <figcaption class="fine" style="margin-top:14px">One layer. It installs into Claude Code, Cursor, or Codex CLI.</figcaption>
-    </figure>
-  </div>
-</section>
-
-<!-- ================= WHY ================= -->
-<section id="why" class="tint">
-  <div class="wrap center">
-    <h2 class="reveal">The same five situations, with a board behind them.</h2>
-    <p class="body reveal" style="margin:0 auto;text-align:center">
-      Nothing here is hypothetical. Every row is a real workflow, compared with and without
-      a routed panel and a build pipeline behind it.
-    </p>
-    <figure class="shot reveal" style="margin:44px auto 0;max-width:820px">
-      <img src="assets/site/coco-before-after.png" alt="A five-row comparison of a standard AI assistant versus a CoCo-orchestrated workspace, across hard decisions, feature development, code auditing, system debugging, and context resets" width="1200" height="775" loading="lazy">
-      <figcaption class="fine" style="margin-top:14px">Before CoCo and after, across five real workflows.</figcaption>
-    </figure>
   </div>
 </section>
 
 <!-- ================= PRODUCTS ================= -->
-<section id="products">
+<section id="products" class="tint">
   <div class="wrap center">
-    <h2 class="reveal">Eight things. Each at its real stage.</h2>
+    <h2 class="reveal">Fourteen things. Each at its real stage.</h2>
     <p class="body reveal" style="margin:0 auto;text-align:center">
-      CoCo, above, is the framework this page is about. Seven more things ship around it —
-      desktop apps you can download today, and research we have opened up rather than
-      announced. Every stage below is the actual one, not the one that reads better.
+      CoCo, above, is the flagship. Thirteen more things are built around it. Some you can
+      download right now. Some are still in development, and are marked that way rather
+      than dressed up. Where a product has no screenshot here, it is because it has not
+      been built far enough to have one.
     </p>
 
-    <div class="band reveal">
-      <p class="k">The framework</p>
-      <div class="grid">
-        <div class="tile reveal">
-          <p class="lbl">CoCo</p>
-          <span class="fine stage-note">Available now, version 1.2.0</span>
-          <p>The advisory board and skills library on this page. Public, MIT core, installs in about 90 seconds.
-          <a class="arrow" href="https://github.com/coco-research/coco">See it on GitHub</a></p>
+    <div class="tabs reveal" role="tablist" aria-label="CoCo Research products">
+      <button class="tab" role="tab" id="tab-framework" aria-controls="panel-framework" aria-selected="true">The framework<span class="count">4</span></button>
+      <button class="tab" role="tab" id="tab-connect" aria-controls="panel-connect" aria-selected="false" tabindex="-1">CoCo Connect</button>
+      <button class="tab" role="tab" id="tab-apps" aria-controls="panel-apps" aria-selected="false" tabindex="-1">Desktop apps<span class="count">4</span></button>
+      <button class="tab" role="tab" id="tab-research" aria-controls="panel-research" aria-selected="false" tabindex="-1">Research<span class="count">5</span></button>
+    </div>
+
+    <!-- ---------- panel: the framework ---------- -->
+    <div class="panel" role="tabpanel" id="panel-framework" aria-labelledby="tab-framework" tabindex="0">
+      <div class="prod">
+        <div class="prod-media plain">
+          <img src="assets/site/coco-advisory-board-389.png" alt="389 expert personas across nine departments" width="1200" height="800" loading="lazy">
         </div>
-        <div class="tile reveal">
-          <p class="lbl">CoCo Connect</p>
-          <span class="fine stage-note">Available now, version 0.2.1</span>
-          <p>A desktop app that installs, health-checks, and manages every module from one place. A Rust engine under a native UI. Signed Apple silicon build.
-          <a class="arrow" href="https://github.com/coco-research/coco-connect-releases/releases">Download it</a></p>
+        <div>
+          <span class="chip flag">Flagship &middot; available now</span>
+          <h3>CoCo</h3>
+          <span class="fine stage-note">Version 1.2.0 &middot; MIT core &middot; 184 skills</span>
+          <p>The advisory board and skills library described above. Installs into Claude
+            Code, Cursor, or Codex in about ninety seconds and keeps every decision on your
+            own machine.</p>
+          <div class="links">
+            <a class="arrow" href="/coco/">The full story</a>
+            <a class="arrow" href="https://github.com/coco-research/coco">See it on GitHub</a>
+          </div>
         </div>
-        <div class="tile reveal">
+      </div>
+
+      <div class="grid cards">
+        <div class="tile">
+          <span class="chip soon">In development</span>
           <p class="lbl">CoCo M0</p>
-          <span class="fine stage-note">In development, not yet released</span>
-          <p>A memory layer meant to carry your context between Claude Code and Cursor. The write path works today. The daemon and its tools are still landing.</p>
+          <span class="fine stage-note">The memory layer under everything else</span>
+          <p>Every other tool here forgets when you close it. M0 is the part that does not: an
+            operational thread carrying what you were doing, what you decided, and what is
+            still open, so moving between Claude Code and Cursor does not mean explaining
+            yourself twice. It is what makes the rest feel like one product rather than a
+            folder of tools. The write path works today; the daemon and its tools are still
+            landing.</p>
+        </div>
+        <div class="tile">
+          <span class="chip soon">In development</span>
+          <p class="lbl">CoCo Platform</p>
+          <span class="fine stage-note">Running locally, not yet packaged</span>
+          <p>A control plane that exposes CoCo's memory, decisions, and verification to any
+            editor speaking the Model Context Protocol. It runs here every day as a local
+            server. What it does not have yet is an installer anyone else could use.</p>
+        </div>
+        <div class="tile">
+          <span class="chip soon">In development</span>
+          <p class="lbl">CoCoCode</p>
+          <span class="fine stage-note">Rust &middot; diverging into its own project</span>
+          <p>A terminal coding harness built to stay small in memory, which is what decides
+            whether you can run several agents at once or only one. It began from
+            <a href="https://github.com/1jehuang/jcode">jcode</a> by Jeremy Huang, whose
+            MIT-licensed work is credited in the tree, and has since grown into its own
+            project with its own architecture rather than a patched copy of that one.</p>
         </div>
       </div>
     </div>
 
-    <div class="band reveal">
-      <p class="k">Apps you can download</p>
-      <div class="grid">
-        <div class="tile reveal">
-          <p class="lbl">CoCo Voice</p>
-          <span class="fine stage-note">Available now, version 0.9.4</span>
-          <p>Offline speech to text for any text field. Nothing leaves your machine. MIT licensed. The prebuilt app is Apple silicon; other platforms build from source.
-          <a class="arrow" href="https://github.com/coco-research/Coco-Voice">See it on GitHub</a></p>
+    <!-- ---------- panel: CoCo Connect, its own tab ---------- -->
+    <div class="panel solo" role="tabpanel" id="panel-connect" aria-labelledby="tab-connect" tabindex="0" hidden>
+      <div class="prod">
+        <div>
+          <span class="chip live">Available now</span>
+          <h3 style="font-size:34px">CoCo Connect</h3>
+          <span class="fine stage-note">Version 0.2.1 &middot; signed Apple silicon build</span>
+          <p style="max-width:60ch">One desktop app that installs, health-checks, and manages
+            every CoCo module from a single place, so none of this requires a terminal if you
+            do not want one. A Rust engine underneath a native interface. It is the front door
+            to everything else on this page, which is why it gets its own tab rather than a
+            tile in a grid.</p>
+          <div class="links">
+            <a class="arrow" href="https://github.com/coco-research/coco-connect-releases/releases">Download the latest release</a>
+            <a class="arrow" href="https://github.com/coco-research/coco-connect-releases">Release notes</a>
+          </div>
         </div>
-        <div class="tile reveal">
-          <p class="lbl">StoryDeck</p>
-          <span class="fine stage-note">Available now, version 1.3.0</span>
-          <p>A local-first sprint deck that stays on your device. MIT licensed, with an Apple silicon build and hot content updates.
-          <a class="arrow" href="https://github.com/coco-research/storydeck">See it on GitHub</a></p>
+      </div>
+      <div class="feat">
+        <div>
+          <h4>Installs the whole family</h4>
+          <p>Adds and removes CoCo modules without you editing a settings file by hand.</p>
         </div>
-        <div class="tile reveal">
-          <p class="lbl">Mira</p>
-          <span class="fine stage-note">Source available, AGPL-3.0</span>
-          <p>An AI video content engine for automated short-form video. The source is public and copyleft; there is no packaged download yet.
-          <a class="arrow" href="https://github.com/coco-research/Mira">Read the source</a></p>
+        <div>
+          <h4>Tells you what is broken</h4>
+          <p>Health checks every module and reports which ones are actually wired up.</p>
+        </div>
+        <div>
+          <h4>Updates itself</h4>
+          <p>Ships as a signed build with an auto-update feed, so upgrades are not a re-install.</p>
+        </div>
+      </div>
+      <p class="fine" style="margin-top:34px">The published build is Apple silicon. Other
+        platforms are not packaged yet.</p>
+    </div>
+
+    <!-- ---------- panel: desktop apps ---------- -->
+    <div class="panel" role="tabpanel" id="panel-apps" aria-labelledby="tab-apps" tabindex="0" hidden>
+      <div class="prod">
+        <div class="prod-media plain">
+          <img src="assets/site/prod-voice.png" alt="CoCo Voice, an offline speech-to-text app" width="1600" height="480" loading="lazy">
+        </div>
+        <div>
+          <span class="chip live">Available now</span>
+          <h3>CoCo Voice</h3>
+          <span class="fine stage-note">Version 0.9.4 &middot; MIT &middot; Rust</span>
+          <p>Offline speech to text for any text field on your machine. Nothing is uploaded and
+            nothing is transcribed in someone else's data centre. The prebuilt app is Apple
+            silicon; other platforms build from source.</p>
+          <div class="links">
+            <a class="arrow" href="https://github.com/coco-research/Coco-Voice">See it on GitHub</a>
+            <a class="arrow" href="https://github.com/coco-research/Coco-Voice/releases">Download</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="prod flip">
+        <div class="prod-media">
+          <img src="assets/site/prod-storydeck.png" alt="The StoryDeck board, a terminal-styled sprint board with to do, in progress, blocked and done columns" width="1600" height="939" loading="lazy">
+        </div>
+        <div>
+          <span class="chip live">Available now</span>
+          <h3>StoryDeck</h3>
+          <span class="fine stage-note">Version 1.3.0 &middot; MIT &middot; on-device only</span>
+          <p>A sprint board that lives on your device and nowhere else. You can talk to the
+            board in plain language to add a story or close one, and it still works with no
+            network at all.</p>
+          <div class="links">
+            <a class="arrow" href="https://github.com/coco-research/storydeck">See it on GitHub</a>
+            <a class="arrow" href="https://github.com/coco-research/storydeck/releases">Download</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid cards">
+        <div class="tile">
+          <span class="chip soon">In development</span>
+          <p class="lbl">CoCo PDF</p>
+          <span class="fine stage-note">Not yet released</span>
+          <p>A desktop PDF editor for the everyday jobs: merge, sign, compress, OCR, redact.
+            Files never leave the machine. It wraps the excellent
+            <a href="https://github.com/Stirling-Tools/Stirling-PDF">Stirling&nbsp;PDF</a> in a
+            native shell rather than reinventing it, and credit for the engine belongs upstream.</p>
+        </div>
+        <div class="tile">
+          <span class="chip soon">In development</span>
+          <p class="lbl">CoCo Teach</p>
+          <span class="fine stage-note">Not yet released</span>
+          <p>A tutor that keeps track of what you already know, so explanations start from your
+            level instead of from the beginning every time. It is built on
+            <a href="https://github.com/HKUDS/DeepTutor">DeepTutor</a> by HKUDS, adapted for
+            CoCo's own memory. The research and the hard parts are theirs.</p>
         </div>
       </div>
     </div>
 
-    <div class="band reveal">
-      <p class="k">Governance and research</p>
-      <div class="grid">
-        <div class="tile reveal">
+    <!-- ---------- panel: research ---------- -->
+    <div class="panel" role="tabpanel" id="panel-research" aria-labelledby="tab-research" tabindex="0" hidden>
+      <div class="prod">
+        <div class="prod-media">
+          <img src="assets/site/prod-router.png" alt="The CoCo Router provider dashboard, listing AI providers and which ones are connected" width="1279" height="857" loading="lazy">
+        </div>
+        <div>
+          <span class="chip soon">In development</span>
+          <h3>CoCo Router</h3>
+          <span class="fine stage-note">Not yet released</span>
+          <p>One endpoint in front of many model providers, with automatic fallback when one of
+            them fails or runs out of quota. The dashboard above still carries its working name,
+            OmniRoute, because the rename has not reached the interface yet.</p>
+        </div>
+      </div>
+
+      <div class="grid cards">
+        <div class="tile">
+          <span class="chip">Source available</span>
           <p class="lbl">CoCo Loops</p>
-          <span class="fine stage-note">Source available, proprietary licence</span>
-          <p>Autonomous engineering loops: the machinery that lets agents run unattended and still be reviewable. Readable in full, licensed rather than MIT.
-          <a class="arrow" href="https://github.com/coco-research/coco-loops">Read the source</a></p>
+          <span class="fine stage-note">Proprietary licence &middot; Python</span>
+          <p>The machinery that lets agents run unattended and still leave a reviewable trail
+            behind them. You can read all of it. It is licensed rather than MIT, because
+            unattended execution is the part we are least willing to have quietly forked.</p>
+          <p style="margin-top:14px"><a class="arrow" href="https://github.com/coco-research/coco-loops">Read the source</a></p>
         </div>
-        <div class="tile reveal">
+        <div class="tile">
+          <span class="chip">Source available</span>
+          <p class="lbl">Mira</p>
+          <span class="fine stage-note">AGPL-3.0 &middot; TypeScript</span>
+          <p>A video engine that assembles short-form video without a human in the timeline.
+            The source is public and copyleft, so anything built on it stays open. There is no
+            packaged download; this is a repository, not a product yet.</p>
+          <p style="margin-top:14px"><a class="arrow" href="https://github.com/coco-research/Mira">Read the source</a></p>
+        </div>
+        <div class="tile">
+          <span class="chip soon">Early development</span>
+          <p class="lbl">CoCo Hermes</p>
+          <span class="fine stage-note">Rust &middot; nothing released yet</span>
+          <p>Local source ingestion with quote-backed retrieval, so an answer can always be
+            traced to the passage it came from. Planned as a signed macOS app with three
+            destinations — ask, explore, and sources — and a store that stays on your own disk.
+            To be accurate about where it stands: the committed repository is currently little
+            more than its own architecture, and the implementation lives in a working tree
+            rather than in a release.</p>
+        </div>
+        <div class="tile">
+          <span class="chip">Source available</span>
           <p class="lbl">CoCo Fusion</p>
-          <span class="fine stage-note">Research, parked</span>
-          <p>An experiment in fusing model outputs across providers. Published because the work is worth reading, not because it is finished.
-          <a class="arrow" href="https://github.com/coco-research/coco-fusion">Read the source</a></p>
+          <span class="fine stage-note">Proprietary licence &middot; parked</span>
+          <p>An experiment in fusing outputs from several models into one answer. It is parked
+            rather than abandoned, and it is published because the work is worth reading rather
+            than because it is finished.</p>
+          <p style="margin-top:14px"><a class="arrow" href="https://github.com/coco-research/coco-fusion">Read the source</a></p>
         </div>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- ================= INSTALL ================= -->
-<section id="install" class="tint">
-  <div class="wrap center">
-    <h2 class="reveal">Ninety seconds. Then it's yours.</h2>
-    <p class="body reveal" style="margin:0 auto;text-align:center">
-      One command. It clones, shows you the exact commit you're about to run, and waits
-      for you to say yes.
-    </p>
-    <div class="steps">
-      <div class="step reveal"><p class="k">Step one</p><h3>Run it</h3>
-        <code>bash &lt;(curl -fsSL https://raw.githubusercontent.com/coco-research/coco/main/bin/coco-bootstrap.sh)</code></div>
-      <div class="step reveal"><p class="k">Step two</p><h3>Confirm the commit</h3>
-        <p class="body">CoCo prints the hash, date and message, then pauses. Nothing executes until you approve it.</p></div>
-      <div class="step reveal"><p class="k">Step three</p><h3>Convene the board</h3>
-        <code>/SI-Decide "should we migrate to Postgres?"</code></div>
-    </div>
-
-    <figure class="shot reveal" style="margin:48px auto 0;max-width:700px">
-      <video src="assets/site/coco-install-moment.mp4" poster="assets/site/coco-install-moment.png" width="1200" height="750" muted playsinline loop autoplay preload="metadata" aria-label="The install script pausing at an explicit yes or no confirmation before activating the Super Intelligence bundle"></video>
-      <figcaption class="fine" style="margin-top:14px">It asks before it does something big. The Super Intelligence bundle needs an explicit yes.</figcaption>
-    </figure>
-
-    <div class="cta reveal"><a class="btn" href="https://github.com/coco-research/coco">Get CoCo on GitHub</a>
-      <a class="arrow" href="#specs">Read the specs</a></div>
-  </div>
-</section>
-
-<!-- ================= SPECS ================= -->
-<section id="specs">
-  <div class="wrap">
-    <h2 class="reveal center" style="margin-bottom:8px">Specifications</h2>
-    <table class="reveal">
-      <tr><th>Version</th><td>1.2.0</td></tr>
-      <tr><th>Skills</th><td>184 with all bundles installed. 69 core, plus 68 GSD, 20 HyperFrames, 9 Super Intelligence, 6 Brain, 5 Cursor, 4 M0 and 3 Cognee.</td></tr>
-      <tr><th>Commands</th><td>279. 37 core, plus 242 generated locally at install.</td></tr>
-      <tr><th>Agents</th><td>34. 10 core, plus 24 in the GSD bundle.</td></tr>
-      <tr><th>Personas</th><td>389 across 9 departments, each behind an evidence-validation gate.</td></tr>
-      <tr><th>Editors</th><td>Claude Code, Cursor, Codex, and any AGENTS.md-compatible tool.</td></tr>
-      <tr><th>Execution</th><td>Entirely local. No telemetry, and no command files transmitted or stored remotely.</td></tr>
-      <tr><th>Install</th><td>Roughly 90 seconds, with a fail-closed commit confirmation before anything runs.</td></tr>
-      <tr><th>Bundles</th><td>6 opt-in system bundles: GSD (68 skills, 24 agents), HyperFrames (20 skills), Super Intelligence (9 skills), Brain (6 skills), M0 (4 skills), and Cognee (3 skills). Enabled with --systems.</td></tr>
-      <tr><th>Licence</th><td>Open core. MIT core, with the Super Intelligence system licensed separately and kept proprietary.</td></tr>
-    </table>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
     <div class="row">
-      <a href="https://github.com/coco-research/coco">Repository</a>
-      <a href="https://github.com/coco-research/coco/releases">Releases</a>
-      <a href="https://github.com/coco-research/coco/blob/main/CHANGELOG.md">Changelog</a>
+      <a href="/coco/">CoCo, the flagship</a>
+      <a href="https://github.com/coco-research">GitHub organisation</a>
+      <a href="https://github.com/coco-research/coco">CoCo repository</a>
       <a href="https://github.com/coco-research/coco/blob/main/LICENSE">Licence</a>
-      <a href="https://github.com/coco-research/coco/blob/main/CONTRIBUTING.md">Contributing</a>
     </div>
-    <p class="fine">CoCo is open-core. The core is MIT licensed. The Super Intelligence
-      system is licensed separately and kept proprietary. Figures on this page reflect release 1.2.0.</p>
+    <p class="fine">CoCo Research is Coco Inc, Rijul Kalra. CoCo is open-core: the framework
+      is MIT, the Super Intelligence board is licensed separately and kept proprietary.
+      Every stage marked on this page is the actual one, not the one that reads better.</p>
   </div>
 </footer>
 
 <script>
-/* The board diagram: 9 departments, 389 seats, drawn to scale. */
-(function(){
-  /* Real counts, measured from systems/superintelligence/<team>/personas/. Sum = 389. */
-  var depts=[["Engineering",70],["AI",59],["Product & design",56],["Finance",47],["Trading",46],
-             ["Risk & compliance",30],["Strategy",29],["Data & analytics",29],["Sales & GTM",23]];
-  var cx=410, cy=196, R=138, spokes=document.getElementById('spokes'),
-      seats=document.getElementById('seats'), labels=document.getElementById('depts');
-  var NS='http://www.w3.org/2000/svg';
-  function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
-  depts.forEach(function(d,i){
-    var a=(-90+i*(360/9))*Math.PI/180;
-    var x=cx+Math.cos(a)*R, y=cy+Math.sin(a)*R;
-    spokes.appendChild(el('line',{x1:cx,y1:cy,x2:x,y2:y}));
-    // one dot per seat, in a compact block sized so all nine clusters read evenly
-    var n=d[1], per=10, rows=Math.ceil(n/per);
-    for(var s=0;s<n;s++){
-      var col=s%per, row=Math.floor(s/per);
-      seats.appendChild(el('circle',{
-        cx:x+(col-(Math.min(n,per)-1)/2)*4.6, cy:y+(row-(rows-1)/2)*4.6, r:1.5,
-        fill:'#1d1d1f', 'fill-opacity':0.32
-      }));
-    }
-    var anchor = (x<cx-20)?'end':(x>cx+20)?'start':'middle';
-    var ly = y + (y<cy? -26 : 30);
-    labels.appendChild((function(){
-      var t=el('text',{x:x,y:ly,'text-anchor':anchor,fill:'#6e6e73','font-size':11,
-        'font-weight':600,'letter-spacing':'.02em','font-family':'-apple-system,sans-serif'});
-      t.textContent=d[0]+' · '+d[1]; return t;})());
-  });
-})();
-
 /* Entrance reveal. One curve, fires once, respects reduced motion. */
 (function(){
   var els=[].slice.call(document.querySelectorAll('.reveal'));
@@ -429,6 +498,63 @@ video{display:block;width:100%;height:auto}
     es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
   },{rootMargin:'0px 0px -8% 0px',threshold:.08});
   els.forEach(function(e,i){ e.style.transitionDelay=(Math.min(i,6)*55)+'ms'; io.observe(e); });
+})();
+</script>
+<script>
+/* Product tabs. Full ARIA tablist semantics: click, arrow keys, Home and End.
+   Panels start hidden in the markup so there is no flash of all four at once;
+   the <noscript> rule above unhides them when scripting is unavailable. */
+(function () {
+  var list = document.querySelector('.tabs[role="tablist"]');
+  if (!list) return;
+  var tabs = [].slice.call(list.querySelectorAll('[role="tab"]'));
+
+  function panelOf(tab) { return document.getElementById(tab.getAttribute('aria-controls')); }
+
+  function select(tab, focus) {
+    tabs.forEach(function (t) {
+      var on = t === tab, p = panelOf(t);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      if (!p) return;
+      if (on) {
+        p.hidden = false;
+        [].slice.call(p.querySelectorAll('.reveal')).forEach(function (e) { e.classList.add('in'); });
+        [].slice.call(p.querySelectorAll('video[autoplay]')).forEach(function (v) {
+          var r = v.play(); if (r && r.catch) r.catch(function () {});
+        });
+      } else {
+        p.hidden = true;
+        [].slice.call(p.querySelectorAll('video')).forEach(function (v) { v.pause(); });
+      }
+    });
+    if (focus) tab.focus();
+  }
+
+  tabs.forEach(function (tab, i) {
+    tab.addEventListener('click', function () { select(tab, false); });
+    tab.addEventListener('keydown', function (ev) {
+      var k = ev.key, next = null;
+      if (k === 'ArrowRight' || k === 'ArrowDown') next = tabs[(i + 1) % tabs.length];
+      else if (k === 'ArrowLeft' || k === 'ArrowUp') next = tabs[(i - 1 + tabs.length) % tabs.length];
+      else if (k === 'Home') next = tabs[0];
+      else if (k === 'End') next = tabs[tabs.length - 1];
+      if (!next) return;
+      ev.preventDefault();
+      select(next, true);
+    });
+  });
+
+  function fromHash() {
+    var id = (location.hash || '').replace('#', '');
+    if (!id) return;
+    var match = tabs.filter(function (t) { return t.getAttribute('aria-controls') === id || t.id === id; })[0];
+    if (match) select(match, false);
+  }
+  window.addEventListener('hashchange', fromHash);
+  fromHash();
+
+  select(tabs.filter(function (t) { return t.getAttribute('aria-selected') === 'true'; })[0] || tabs[0], false);
 })();
 </script>
 <script>

@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoCo: An entire engineering department, inside your editor</title>
+<style>
+/* ============================================================================
+   Tokens measured live from apple.com (computed styles, ranked by usage).
+   Colours: 5 total. Shadows: 1. Weights: 400/600 only. Easing: 1 curve.
+   Font stack is apple.com's own, which resolves to real SF Pro on Apple devices.
+   ========================================================================== */
+:root{
+  --ink:#1d1d1f;            /* apple primary text, never pure black */
+  --ink-2:#333336;          /* secondary */
+  --muted:#6e6e73;          /* tertiary */
+  --surface:#f5f5f7;        /* the one off-white */
+  --white:#fff;
+  --blue:#0071e3;           /* button fill */
+  --link:#0066cc;           /* link */
+  --hair:rgba(0,0,0,.10);
+  --shadow:0 5px 30px rgba(0,0,0,.22);   /* the single shadow */
+  --ease:cubic-bezier(.4,0,.6,1);        /* the single curve */
+  --dur:.32s;
+  --stadium:980px;
+  --wide:1024px;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:hidden;max-width:100%}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;scroll-behavior:smooth}
+body{margin:0;background:var(--white);color:var(--ink);font-family:var(--sans);
+  font-size:17px;line-height:1.47;letter-spacing:-.022em;font-weight:400}
+a{color:var(--link);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:var(--wide);margin:0 auto;padding:0 22px}
+
+/* ---- nav: 12px, translucent, hairline. Apple's exact proportions ---- */
+.nav{position:sticky;top:0;z-index:100;height:44px;
+  background:rgba(255,255,255,.72);backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--hair)}
+.nav-in{max-width:var(--wide);margin:0 auto;padding:0 22px;height:44px;
+  display:flex;align-items:center;gap:34px}
+.nav a{font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;transition:opacity var(--dur) var(--ease)}
+.nav a:hover{opacity:1;text-decoration:none}
+.nav .mark{font-size:15px;font-weight:600;letter-spacing:-.02em;margin-right:4px}
+.nav .back{opacity:.6}
+.nav .back:hover{opacity:1}
+.nav .spacer{flex:1}
+
+/* ---- type scale. Tracking flips sign with size: the key Apple detail. ---- */
+.eyebrow{font-size:19px;font-weight:600;letter-spacing:.011em;color:var(--ink);margin:0 0 6px}
+h1{font-size:80px;line-height:1.05;font-weight:600;letter-spacing:-.015em;margin:0}
+h2{font-size:48px;line-height:1.08;font-weight:600;letter-spacing:-.012em;margin:0 0 18px}
+h3{font-size:28px;line-height:1.14;font-weight:600;letter-spacing:.007em;margin:0 0 8px}
+.sub{font-size:28px;line-height:1.21;font-weight:400;letter-spacing:.007em;color:var(--ink-2);
+  margin:18px auto 0;max-width:34ch}
+.body{font-size:17px;line-height:1.5;letter-spacing:-.022em;color:var(--muted);max-width:52ch}
+.fine{font-size:12px;line-height:1.34;letter-spacing:-.01em;color:var(--muted)}
+
+/* ---- sections: tight component padding, huge section padding ---- */
+section{padding:92px 0}
+section.tint{background:var(--surface)}
+.center{text-align:center}
+
+/* ---- the CTA pair: stadium fill + plain link, Apple's canonical pattern ---- */
+.cta{display:flex;gap:26px;justify-content:center;align-items:center;margin-top:34px;flex-wrap:wrap}
+.btn{display:inline-block;background:var(--blue);color:#fff;font-size:17px;letter-spacing:-.022em;
+  padding:12px 24px;border-radius:var(--stadium);transition:opacity var(--dur) var(--ease)}
+.btn:hover{opacity:.85;text-decoration:none}
+.arrow{font-size:17px;letter-spacing:-.022em}
+.arrow:after{content:" ›";font-weight:600}
+
+/* ---- hero visual: the 9 departments. Pure CSS/SVG, no imagery. ---- */
+.stage{margin:56px auto 0;max-width:820px;position:relative}
+.stage svg{width:100%;height:auto;display:block}
+
+/* ---- feature grid: 2-up tiles on the tint, 18px radius like Apple's cards ---- */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:44px}
+.tile{background:var(--white);border-radius:18px;padding:40px 36px;min-width:0}
+.tile .n{font-size:56px;line-height:1;font-weight:600;letter-spacing:-.015em;margin:0 0 10px}
+.tile .lbl{font-size:17px;font-weight:600;letter-spacing:-.022em;margin:0 0 6px}
+.tile p{margin:0;font-size:17px;line-height:1.5;letter-spacing:-.022em;color:var(--muted)}
+
+/* ---- product imagery: real renders, the one shadow, the one existing radius ---- */
+figure{margin:0}
+.shot img{width:100%;height:auto;display:block;border-radius:18px;box-shadow:var(--shadow)}
+
+/* ---- three-step: numbered, restrained ---- */
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:34px;margin-top:48px;text-align:left}
+.step .k{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.step code{display:block;background:var(--surface);border-radius:8px;padding:12px 14px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;letter-spacing:0;
+  color:var(--ink);margin-top:12px;overflow-x:auto;white-space:nowrap}
+section.tint .step code{background:var(--white)}
+
+/* ---- spec table: 12px fine print, hairline rows. Apple's footer tables. ---- */
+table{width:100%;border-collapse:collapse;margin-top:34px}
+th,td{text-align:left;padding:14px 0;border-bottom:1px solid var(--hair);font-size:17px;letter-spacing:-.022em;vertical-align:top}
+th{width:34%;font-weight:600;color:var(--ink)}
+td{color:var(--muted)}
+
+/* ---- footer ---- */
+footer{background:var(--surface);padding:44px 0 56px}
+footer .row{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:18px}
+footer a{font-size:12px;letter-spacing:-.01em;color:var(--link)}
+
+/* ---- motion: one curve, and only on entrance ---- */
+.reveal{opacity:0;transform:translateY(24px);
+  transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+video{display:block;width:100%;height:auto}
+
+@media (max-width:860px){
+  h1{font-size:48px} h2{font-size:34px} .sub{font-size:21px}
+  .grid,.steps{grid-template-columns:1fr}
+  section{padding:64px 0}
+  .nav a:not(.mark):not(.back){display:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-in">
+    <a href="/" class="back">&lsaquo; CoCo Research</a>
+    <a href="#top" class="mark">CoCo</a>
+    <div class="spacer"></div>
+    <a href="#board">The Board</a>
+    <a href="#capabilities">Capabilities</a>
+    <a href="#install">Install</a>
+    <a href="#specs">Specs</a>
+    <a href="https://github.com/coco-research/coco">GitHub</a>
+  </div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<section id="top" class="center" style="padding-top:76px">
+  <div class="wrap">
+    <p class="eyebrow reveal">CoCo 1.2.0 &middot; the CoCo Research flagship</p>
+    <h1 class="reveal">An entire engineering<br>department. In your editor.</h1>
+    <p class="sub reveal">389 experts deliberate. Then 184 skills ship the decision.</p>
+    <p class="body reveal" style="margin:16px auto 0;text-align:center">
+      Installs into Claude Code, Cursor, or Codex. Not a new AI model. Not another
+      agent harness. Your model, your tool, your keys, your machine.
+    </p>
+    <div class="cta reveal">
+      <a class="btn" href="https://github.com/coco-research/coco">Get CoCo on GitHub</a>
+      <a class="arrow" href="#board">See how it decides</a>
+    </div>
+
+    <div class="stage reveal">
+      <!-- The board: 9 departments, 389 seats. Drawn, not rendered. -->
+      <svg viewBox="0 0 820 380" role="img" aria-label="Nine departments arranged around a decision">
+        <defs>
+          <radialGradient id="glow" cx="50%" cy="52%" r="52%">
+            <stop offset="0%" stop-color="#0071e3" stop-opacity=".10"/>
+            <stop offset="100%" stop-color="#0071e3" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="820" height="380" fill="url(#glow)"/>
+        <g id="spokes" stroke="#1d1d1f" stroke-opacity=".14" stroke-width="1"></g>
+        <g id="seats"></g>
+        <g id="depts"></g>
+        <circle cx="410" cy="196" r="46" fill="#1d1d1f"/>
+        <text x="410" y="192" text-anchor="middle" fill="#fff" font-size="15" font-weight="600"
+              letter-spacing="-.3" font-family="-apple-system,sans-serif">Your</text>
+        <text x="410" y="210" text-anchor="middle" fill="#fff" font-size="15" font-weight="600"
+              letter-spacing="-.3" font-family="-apple-system,sans-serif">call</text>
+      </svg>
+    </div>
+    <p class="fine reveal" style="margin-top:22px">100% local. No telemetry.</p>
+  </div>
+</section>
+
+<!-- ================= THE BOARD ================= -->
+<section id="board" class="tint">
+  <div class="wrap center">
+    <h2 class="reveal">It doesn't answer. It deliberates.</h2>
+    <p class="body reveal" style="margin:0 auto;text-align:center">
+      Ask a hard question and CoCo convenes the experts who actually disagree about it.
+      They argue in rounds, positions move, and dissent is recorded by name rather than
+      averaged away. You get the reasoning, the split, and who held which line.
+    </p>
+
+    <figure class="shot reveal" style="margin:48px auto 0;max-width:760px">
+      <img src="assets/coco-advisory-board-389.png" alt="389 expert personas across nine departments, bar length proportional to each department's real headcount" width="1200" height="800" loading="lazy">
+      <figcaption class="fine" style="margin-top:14px">389 experts, broken out by department. Engineering carries the largest seat count, at 70.</figcaption>
+    </figure>
+
+    <figure class="shot reveal" style="margin:36px auto 0;max-width:700px">
+      <video src="assets/coco-si-decide-terminal.mp4" poster="assets/coco-si-decide-terminal.png" width="1200" height="750" muted playsinline loop autoplay preload="metadata" aria-label="A real SI-Decide run: a routed panel, a verdict, and named dissent"></video>
+      <figcaption class="fine" style="margin-top:14px">A real /SI-Decide run. The panel is routed, not fixed, and dissent is kept, not averaged away.</figcaption>
+    </figure>
+
+    <div class="grid" style="margin-top:56px">
+      <div class="tile reveal"><p class="n">389</p><p class="lbl">Expert personas</p>
+        <p>Each grounded in cited public positions, with a validation gate that rejects fabricated quotes.</p></div>
+      <div class="tile reveal"><p class="n">9</p><p class="lbl">Departments</p>
+        <p>Engineering, AI, product and design, finance, trading, risk and compliance, strategy, data, sales and go-to-market.</p></div>
+      <div class="tile reveal"><p class="n">279</p><p class="lbl">Commands</p>
+        <p>37 core, plus 242 generated locally at install from the team registries.</p></div>
+      <div class="tile reveal"><p class="n">34</p><p class="lbl">Agents</p>
+        <p>Specialists that carry the decision into code, review it, and verify the result.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CAPABILITIES ================= -->
+<section id="capabilities">
+  <div class="wrap center">
+    <h2 class="reveal">184 skills. One instruction set each.</h2>
+    <p class="body reveal" style="margin:0 auto 0;text-align:center">
+      Not prompt snippets. Every skill carries state management, verification logic and
+      error handling, so the work survives being handed between sessions and between tools.
+    </p>
+
+    <div class="steps" style="margin-top:56px">
+      <div class="step reveal"><p class="k">Orchestrate</p><h3>Teams</h3>
+        <p class="body">A four-layer role pipeline behind <code style="background:none;padding:0;font-size:.94em">/team</code> — research, execute, review, synthesize. It ships with the core install; there is nothing to enable.</p></div>
+      <div class="step reveal"><p class="k">Remember</p><h3>Brain</h3>
+        <p class="body">Six skills that keep durable project knowledge, so context outlives the session it was learned in.</p></div>
+      <div class="step reveal"><p class="k">Travel</p><h3>Any editor</h3>
+        <p class="body">Claude Code, Cursor, and Codex, from one install. The adapter changes; the skills do not.</p></div>
+    </div>
+
+    <figure class="shot reveal" style="margin:56px auto 0;max-width:900px">
+      <img src="assets/coco-cross-editor-portability.png" alt="Claude Code, Cursor, and Codex CLI shown as three identical cards, unified under one CoCo layer" width="1200" height="675" loading="lazy">
+      <figcaption class="fine" style="margin-top:14px">One layer. It installs into Claude Code, Cursor, or Codex CLI.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ================= WHY ================= -->
+<section id="why" class="tint">
+  <div class="wrap center">
+    <h2 class="reveal">The same five situations, with a board behind them.</h2>
+    <p class="body reveal" style="margin:0 auto;text-align:center">
+      Nothing here is hypothetical. Every row is a real workflow, compared with and without
+      a routed panel and a build pipeline behind it.
+    </p>
+    <figure class="shot reveal" style="margin:44px auto 0;max-width:820px">
+      <img src="assets/coco-before-after.png" alt="A five-row comparison of a standard AI assistant versus a CoCo-orchestrated workspace, across hard decisions, feature development, code auditing, system debugging, and context resets" width="1200" height="775" loading="lazy">
+      <figcaption class="fine" style="margin-top:14px">Before CoCo and after, across five real workflows.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ================= INSTALL ================= -->
+<section id="install" class="tint">
+  <div class="wrap center">
+    <h2 class="reveal">Ninety seconds. Then it's yours.</h2>
+    <p class="body reveal" style="margin:0 auto;text-align:center">
+      One command. It clones, shows you the exact commit you're about to run, and waits
+      for you to say yes.
+    </p>
+    <div class="steps">
+      <div class="step reveal"><p class="k">Step one</p><h3>Run it</h3>
+        <code>bash &lt;(curl -fsSL https://raw.githubusercontent.com/coco-research/coco/main/bin/coco-bootstrap.sh)</code></div>
+      <div class="step reveal"><p class="k">Step two</p><h3>Confirm the commit</h3>
+        <p class="body">CoCo prints the hash, date and message, then pauses. Nothing executes until you approve it.</p></div>
+      <div class="step reveal"><p class="k">Step three</p><h3>Convene the board</h3>
+        <code>/SI-Decide "should we migrate to Postgres?"</code></div>
+    </div>
+
+    <figure class="shot reveal" style="margin:48px auto 0;max-width:700px">
+      <video src="assets/coco-install-moment.mp4" poster="assets/coco-install-moment.png" width="1200" height="750" muted playsinline loop autoplay preload="metadata" aria-label="The install script pausing at an explicit yes or no confirmation before activating the Super Intelligence bundle"></video>
+      <figcaption class="fine" style="margin-top:14px">It asks before it does something big. The Super Intelligence bundle needs an explicit yes.</figcaption>
+    </figure>
+
+    <div class="cta reveal"><a class="btn" href="https://github.com/coco-research/coco">Get CoCo on GitHub</a>
+      <a class="arrow" href="#specs">Read the specs</a></div>
+  </div>
+</section>
+
+<!-- ================= SPECS ================= -->
+<section id="specs">
+  <div class="wrap">
+    <h2 class="reveal center" style="margin-bottom:8px">Specifications</h2>
+    <table class="reveal">
+      <tr><th>Version</th><td>1.2.0</td></tr>
+      <tr><th>Skills</th><td>184 with all bundles installed. 69 core, plus 68 GSD, 20 HyperFrames, 9 Super Intelligence, 6 Brain, 5 Cursor, 4 M0 and 3 Cognee.</td></tr>
+      <tr><th>Commands</th><td>279. 37 core, plus 242 generated locally at install.</td></tr>
+      <tr><th>Agents</th><td>34. 10 core, plus 24 in the GSD bundle.</td></tr>
+      <tr><th>Personas</th><td>389 across 9 departments, each behind an evidence-validation gate.</td></tr>
+      <tr><th>Editors</th><td>Claude Code, Cursor, Codex, and any AGENTS.md-compatible tool.</td></tr>
+      <tr><th>Execution</th><td>Entirely local. No telemetry, and no command files transmitted or stored remotely.</td></tr>
+      <tr><th>Install</th><td>Roughly 90 seconds, with a fail-closed commit confirmation before anything runs.</td></tr>
+      <tr><th>Bundles</th><td>6 opt-in system bundles: GSD (68 skills, 24 agents), HyperFrames (20 skills), Super Intelligence (9 skills), Brain (6 skills), M0 (4 skills), and Cognee (3 skills). Enabled with --systems.</td></tr>
+      <tr><th>Licence</th><td>Open core. MIT core, with the Super Intelligence system licensed separately and kept proprietary.</td></tr>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <a href="/">CoCo Research</a>
+      <a href="https://github.com/coco-research/coco">Repository</a>
+      <a href="https://github.com/coco-research/coco/releases">Releases</a>
+      <a href="https://github.com/coco-research/coco/blob/main/CHANGELOG.md">Changelog</a>
+      <a href="https://github.com/coco-research/coco/blob/main/LICENSE">Licence</a>
+      <a href="https://github.com/coco-research/coco/blob/main/CONTRIBUTING.md">Contributing</a>
+    </div>
+    <p class="fine">CoCo is open-core. The core is MIT licensed. The Super Intelligence
+      system is licensed separately and kept proprietary. Figures on this page reflect release 1.2.0.
+      CoCo is the flagship product of <a href="/">CoCo Research</a>.</p>
+  </div>
+</footer>
+
+<script>
+/* The board diagram: 9 departments, 389 seats, drawn to scale. */
+(function(){
+  /* Real counts, measured from systems/superintelligence/<team>/personas/. Sum = 389. */
+  var depts=[["Engineering",70],["AI",59],["Product & design",56],["Finance",47],["Trading",46],
+             ["Risk & compliance",30],["Strategy",29],["Data & analytics",29],["Sales & GTM",23]];
+  var cx=410, cy=196, R=138, spokes=document.getElementById('spokes'),
+      seats=document.getElementById('seats'), labels=document.getElementById('depts');
+  var NS='http://www.w3.org/2000/svg';
+  function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
+  depts.forEach(function(d,i){
+    var a=(-90+i*(360/9))*Math.PI/180;
+    var x=cx+Math.cos(a)*R, y=cy+Math.sin(a)*R;
+    spokes.appendChild(el('line',{x1:cx,y1:cy,x2:x,y2:y}));
+    // one dot per seat, in a compact block sized so all nine clusters read evenly
+    var n=d[1], per=10, rows=Math.ceil(n/per);
+    for(var s=0;s<n;s++){
+      var col=s%per, row=Math.floor(s/per);
+      seats.appendChild(el('circle',{
+        cx:x+(col-(Math.min(n,per)-1)/2)*4.6, cy:y+(row-(rows-1)/2)*4.6, r:1.5,
+        fill:'#1d1d1f', 'fill-opacity':0.32
+      }));
+    }
+    var anchor = (x<cx-20)?'end':(x>cx+20)?'start':'middle';
+    var ly = y + (y<cy? -26 : 30);
+    labels.appendChild((function(){
+      var t=el('text',{x:x,y:ly,'text-anchor':anchor,fill:'#6e6e73','font-size':11,
+        'font-weight':600,'letter-spacing':'.02em','font-family':'-apple-system,sans-serif'});
+      t.textContent=d[0]+' · '+d[1]; return t;})());
+  });
+})();
+
+/* Entrance reveal. One curve, fires once, respects reduced motion. */
+(function(){
+  var els=[].slice.call(document.querySelectorAll('.reveal'));
+  if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});return;}
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{rootMargin:'0px 0px -8% 0px',threshold:.08});
+  els.forEach(function(e,i){ e.style.transitionDelay=(Math.min(i,6)*55)+'ms'; io.observe(e); });
+})();
+</script>
+<script>
+/* Respect prefers-reduced-motion: the poster PNG is the complete static frame,
+   so pause playback and expose controls instead of autoplaying. */
+(function () {
+  var q = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (!q || !q.matches) return;
+  document.querySelectorAll('video[autoplay]').forEach(function (v) {
+    v.removeAttribute('autoplay');
+    v.removeAttribute('loop');
+    v.setAttribute('controls', '');
+    v.pause();
+  });
+})();
+</script>
+</body>
+</html>

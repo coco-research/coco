@@ -13,10 +13,10 @@
    Font stack resolves to real SF Pro on Apple devices, the system default elsewhere.
    ========================================================================== */
 :root{
-  --ink:#1d1d1f;
+  --ink:#14171c;
   --ink-2:#333336;
-  --muted:#6e6e73;
-  --surface:#f5f5f7;
+  --muted:#5b6169;
+  --surface:#f6f5f2;        /* warm rather than Apple's cool grey */
   --white:#fff;
   --blue:#0a3a66;           /* deep navy, our own, not Apple's blue */
   --link:#0a3a66;           /* same navy, one accent throughout */
@@ -24,7 +24,7 @@
   --shadow:0 5px 30px rgba(0,0,0,.22);
   --ease:cubic-bezier(.4,0,.6,1);
   --dur:.32s;
-  --stadium:980px;
+  --stadium:100px;
   --wide:1024px;
   --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
 }
@@ -38,8 +38,8 @@ a:hover{text-decoration:underline}
 .wrap{max-width:var(--wide);margin:0 auto;padding:0 22px}
 
 .nav{position:sticky;top:0;z-index:100;height:44px;
-  background:rgba(255,255,255,.72);backdrop-filter:saturate(180%) blur(20px);
-  -webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--hair)}
+  background:rgba(255,255,255,.78);backdrop-filter:saturate(150%) blur(16px);
+  -webkit-backdrop-filter:saturate(150%) blur(16px);border-bottom:1px solid var(--hair)}
 .nav-in{max-width:var(--wide);margin:0 auto;padding:0 22px;height:44px;
   display:flex;align-items:center;gap:34px}
 .nav a{font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;transition:opacity var(--dur) var(--ease)}
@@ -295,7 +295,7 @@ video{display:block;width:100%;height:auto}
   <div class="wrap">
     <p class="eyebrow reveal">CoCo Research</p>
     <h1 class="reveal">Governed AI,<br>built in the open.</h1>
-    <p class="sub reveal">One flagship framework. Thirteen more things around it, each shown at its real stage.</p>
+    <p class="sub reveal">One flagship framework, and thirteen more things around it — each shown at its real stage.</p>
     <p class="body reveal" style="margin:16px auto 0;text-align:center;max-width:56ch">
       CoCo Research is where a regulated-risk product leader builds and open-sources the
       agentic AI he designs by day. The concerns carry over either way: governed memory,
@@ -448,21 +448,8 @@ video{display:block;width:100%;height:auto}
           </div>
         </div>
       </div>
-      <div class="feat">
-        <div>
-          <h4>Installs the whole family</h4>
-          <p>Adds and removes CoCo modules without you editing a settings file by hand.</p>
-        </div>
-        <div>
-          <h4>Tells you what is broken</h4>
-          <p>Health checks every module and reports which ones are actually wired up.</p>
-        </div>
-        <div>
-          <h4>Updates itself</h4>
-          <p>Ships as a signed build with an auto-update feed, so upgrades are not a re-install.</p>
-        </div>
-      </div>
-      <p class="fine" style="margin-top:34px">The published build is Apple silicon. Other
+      <p class="body" style="margin-top:28px;max-width:60ch"><strong style="color:var(--ink)">Tells you what is broken</strong> — health checks every module and reports which ones are actually wired up.</p>
+      <p class="fine" style="margin-top:20px">The published build is Apple silicon. Other
         platforms are not packaged yet.</p>
     </div>
 
@@ -595,7 +582,7 @@ video{display:block;width:100%;height:auto}
       <a href="mailto:product@cocoresearch.org">product@cocoresearch.org</a>
       <a href="mailto:sales@cocoresearch.org">sales@cocoresearch.org</a>
     </div>
-    <p class="fine">CoCo Research is Coco Inc, Rijul Kalra. CoCo is open-core: the framework
+    <p class="fine">CoCo Research is Coco Inc. CoCo is open-core: the framework
       is MIT, the Super Intelligence board is licensed separately and kept proprietary.
       Every stage marked on this page is the actual one, not the one that reads better.</p>
   </div>

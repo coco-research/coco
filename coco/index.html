@@ -104,7 +104,7 @@ section.tint{background:var(--surface)}
 .btn{display:inline-block;background:var(--blue);color:#fff;font-size:17px;letter-spacing:-.022em;
   padding:12px 24px;border-radius:var(--stadium);transition:opacity var(--dur) var(--ease)}
 .btn:hover{opacity:.85;text-decoration:none}
-.arrow{font-size:17px;letter-spacing:-.022em}
+.arrow{font-size:17px;letter-spacing:-.022em;display:inline-block;padding:10px 0;margin:-10px 0}
 .arrow:after{content:" ›";font-weight:600}
 
 /* ---- hero visual: the 9 departments. Pure CSS/SVG, no imagery. ---- */
@@ -142,17 +142,29 @@ footer .row{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:18px}
 footer a{font-size:12px;letter-spacing:-.01em;color:var(--link)}
 
 /* ---- motion: one curve, and only on entrance ---- */
-.reveal{opacity:0;transform:translateY(24px);
-  transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.reveal{opacity:0;transform:translateY(14px);
+  transition:opacity .45s var(--ease),transform .45s var(--ease)}
 .reveal.in{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
 video{display:block;width:100%;height:auto}
 
+/* Between the mobile breakpoint and the full-width desktop layout, the
+   content column is too narrow for an 80px h1 to hold its intended line
+   count — verified live: this specific headline wraps to 3 lines from
+   861px up to just under 1024px. 60px holds 2 lines across that whole gap. */
+@media (min-width:861px) and (max-width:1023px){
+  h1{font-size:60px}
+}
 @media (max-width:860px){
   h1{font-size:48px} h2{font-size:34px} .sub{font-size:21px}
   .grid,.steps{grid-template-columns:1fr}
   section{padding:64px 0}
-  .nav a:not(.mark):not(.back){display:none}
+  /* Every nav destination stays reachable on mobile — swipeable instead of
+     hidden, the same overflow-scroll pattern already used for .tabs. */
+  .nav-in{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .nav-in::-webkit-scrollbar{display:none}
+  .nav-in .mark,.nav-in .back,.nav-in .nav-trigger,.nav-in a{flex:0 0 auto}
+  .nav-in .spacer{flex:0 0 16px}
   .overlay-groups{grid-template-columns:1fr 1fr;gap:24px}
   .overlay-in{padding:28px 22px 32px}
 }
@@ -197,7 +209,7 @@ video{display:block;width:100%;height:auto}
           <li><a href="/#product-coco"><span class="name">CoCo</span><span class="stage">Flagship &middot; available now</span></a></li>
           <li><a href="/#product-m0"><span class="name">CoCo M0</span><span class="stage">In development</span></a></li>
           <li><a href="/#product-platform"><span class="name">CoCo Platform</span><span class="stage">In development</span></a></li>
-          <li><a href="/#product-cococode"><span class="name">CoCoCode</span><span class="stage">In development</span></a></li>
+          <li><a href="/#product-cococode"><span class="name">CoCo Code</span><span class="stage">In development</span></a></li>
         </ul>
       </div>
       <div class="overlay-group">
@@ -235,10 +247,6 @@ video{display:block;width:100%;height:auto}
     <p class="eyebrow reveal">CoCo 1.2.0 &middot; the CoCo Research flagship</p>
     <h1 class="reveal">Your editor, arguing with itself before anything ships.</h1>
     <p class="sub reveal">Each of the 389 requires a live, checkable source. Then 184 skills ship what they decided.</p>
-    <p class="body reveal" style="margin:16px auto 0;text-align:center">
-      Runs on the model and editor you already have — Claude Code, Cursor, or Codex.
-      Your keys never leave your machine.
-    </p>
     <div class="cta reveal">
       <a class="btn" href="https://github.com/coco-research/coco">Get CoCo on GitHub</a>
       <a class="arrow" href="#board">See how it decides</a>
@@ -290,7 +298,7 @@ video{display:block;width:100%;height:auto}
 
     <div class="grid" style="margin-top:56px">
       <div class="tile reveal"><p class="n">389</p><p class="lbl">Expert personas</p>
-        <p>Each requires a live, checkable source link. Quotes are illustrative reconstructions, not verbatim — see the <a href="https://github.com/coco-research/coco/blob/main/systems/superintelligence/DISCLAIMER.md">disclaimer</a>.</p></div>
+        <p>Each requires a live, checkable source link. Quotes are illustrative reconstructions, not verbatim; see the <a href="https://github.com/coco-research/coco/blob/main/systems/superintelligence/DISCLAIMER.md">disclaimer</a>.</p></div>
       <div class="tile reveal"><p class="n">9</p><p class="lbl">Departments</p>
         <p>Engineering, AI, product and design, finance, trading, risk and compliance, strategy, data, sales and go-to-market.</p></div>
       <div class="tile reveal"><p class="n">279</p><p class="lbl">Commands</p>
@@ -312,7 +320,7 @@ video{display:block;width:100%;height:auto}
 
     <div class="steps" style="margin-top:56px">
       <div class="step reveal"><p class="k">Orchestrate</p><h3>Teams</h3>
-        <p class="body">A four-layer role pipeline behind <code style="background:none;padding:0;font-size:.94em">/team</code> — research, execute, review, synthesize. It ships with the core install; there is nothing to enable.</p></div>
+        <p class="body">A four-layer role pipeline behind <code style="background:none;padding:0;font-size:.94em">/team</code>: research, execute, review, synthesize. It ships with the core install; there is nothing to enable.</p></div>
       <div class="step reveal"><p class="k">Remember</p><h3>Brain</h3>
         <p class="body">Six skills that keep durable project knowledge, so context outlives the session it was learned in.</p></div>
       <div class="step reveal"><p class="k">Travel</p><h3>Any editor</h3>
@@ -347,7 +355,8 @@ video{display:block;width:100%;height:auto}
     <h2 class="reveal">Ninety seconds. Then it's yours.</h2>
     <p class="body reveal" style="margin:0 auto;text-align:center">
       One command. It clones, shows you the exact commit you're about to run, and waits
-      for you to say yes.
+      for you to say yes. Runs on the model and editor you already have: Claude Code,
+      Cursor, or Codex. Your keys never leave your machine.
     </p>
     <div class="steps">
       <div class="step reveal"><p class="k">Step one</p><h3>Run it</h3>
@@ -448,7 +457,7 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   var io=new IntersectionObserver(function(es){
     es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
   },{rootMargin:'0px 0px -8% 0px',threshold:.08});
-  els.forEach(function(e,i){ e.style.transitionDelay=(Math.min(i,6)*55)+'ms'; io.observe(e); });
+  els.forEach(function(e,i){ e.style.transitionDelay=(Math.min(i,4)*35)+'ms'; io.observe(e); });
 })();
 </script>
 <script>

@@ -1,0 +1,20 @@
+{
+  "name": "vscode",
+  "version": "1.0.0",
+  "description": "VS Code — links skills, agents and rules into ~/.copilot and commands into the VS Code prompts folder",
+  "status": "stable",
+  "targets": {
+    "skills": "~/.copilot/skills/",
+    "agents": "~/.copilot/agents/",
+    "instructions": "~/.copilot/instructions/",
+    "prompts": "<VS Code User>/prompts/ (and <VS Code User>/profiles/*/prompts/)"
+  },
+  "transforms": [
+    "symlink skills/<name>/ to ~/.copilot/skills/<name>/",
+    "symlink agents/*.md to ~/.copilot/agents/*.md",
+    "symlink commands/<ns>/<name>.md to <prompts>/<ns>-<name>.prompt.md",
+    "compile rules/cursor-mdc/*.mdc to ~/.copilot/instructions/*.instructions.md with applyTo globs"
+  ],
+  "supports_systems": ["gsd", "brain", "cognee", "hyperframes", "superintelligence", "team"],
+  "domains": []
+}

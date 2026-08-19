@@ -662,10 +662,10 @@ npx cocosuperintelligence update
 <td>Generates a portable, root-level <code>AGENTS.md</code> definition.</td>
 </tr>
 <tr>
-<td><strong>VS Code (Continue)</strong></td>
-<td><code>vscode-continue</code></td>
-<td>Experimental (stub)</td>
-<td>Scaffold only — full wiring tracked in <a href="https://github.com/coco-research/coco/issues/4">#4</a>, targeted for v0.2.</td>
+<td><strong><a href="https://code.visualstudio.com/">VS Code</a> / Copilot CLI</strong></td>
+<td><code>vscode</code></td>
+<td>Stable</td>
+<td>Links skills, agents and rules into <code>~/.copilot/</code> and commands into the VS Code prompts folder. No extension needed.</td>
 </tr>
 <tr>
 <td><strong>Antigravity (Google)</strong></td>

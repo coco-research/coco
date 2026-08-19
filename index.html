@@ -289,6 +289,7 @@ video{display:block;width:100%;height:auto}
           <li><a href="/#product-mira"><span class="name">Mira</span><span class="stage">Source available &middot; AGPL-3.0</span></a></li>
           <li><a href="/#product-hermes"><span class="name">CoCo Hermes</span><span class="stage">Early development</span></a></li>
           <li><a href="/#product-fusion"><span class="name">CoCo Fusion</span><span class="stage">Source available &middot; parked</span></a></li>
+          <li><a href="/#product-ads"><span class="name">CoCo Ads</span><span class="stage">Available now</span></a></li>
         </ul>
       </div>
     </div>
@@ -306,7 +307,7 @@ video{display:block;width:100%;height:auto}
   <div class="wrap">
     <p class="eyebrow reveal">CoCo Research</p>
     <h1 class="reveal">Governed AI,<br>built in the open.</h1>
-    <p class="sub reveal">One flagship framework, and thirteen more things around it, each shown at its real stage.</p>
+    <p class="sub reveal">One flagship framework, and fourteen more things around it, each shown at its real stage.</p>
     <div class="cta reveal">
       <a class="btn" href="/coco/">Explore CoCo, the flagship</a>
       <a class="arrow" href="#products">See every product</a>
@@ -329,7 +330,7 @@ video{display:block;width:100%;height:auto}
         <p class="body" style="max-width:56ch">389 experts deliberate. Then 184 skills ship
           the decision.</p>
         <div class="links" style="margin-top:20px;display:flex;gap:22px;flex-wrap:wrap">
-          <button type="button" class="arrow" id="film-trigger" style="background:none;border:0;cursor:pointer;font-family:inherit;padding:0;color:var(--link)">Watch the film (20s)</button>
+          <button type="button" class="arrow" id="film-trigger" data-film-trigger data-video="assets/site/coco-ads-launch.mp4" data-poster="assets/site/coco-ads-launch-poster.jpg" style="background:none;border:0;cursor:pointer;font-family:inherit;padding:0;color:var(--link)">Watch the film (20s)</button>
           <a class="arrow" href="/coco/">Read the full story</a>
           <a class="arrow" href="https://github.com/coco-research/coco">Get CoCo on GitHub</a>
         </div>
@@ -343,7 +344,7 @@ video{display:block;width:100%;height:auto}
   <div class="wrap center">
     <h2 class="reveal">What stays the same across every product.</h2>
     <p class="body reveal" style="margin:0 auto;text-align:center">
-      Fourteen things, at fourteen different stages of finished, built by a regulated-risk
+      Fifteen things, at fifteen different stages of finished, built by a regulated-risk
       product leader open-sourcing the agentic AI he designs by day. Four rules hold across
       all of them regardless, and shipping without hand-waving about what still doesn't work
       is one of them.
@@ -368,9 +369,9 @@ video{display:block;width:100%;height:auto}
 <!-- ================= PRODUCTS ================= -->
 <section id="products" class="tint">
   <div class="wrap center">
-    <h2 class="reveal">Fourteen things. Each at its real stage.</h2>
+    <h2 class="reveal">Fifteen things. Each at its real stage.</h2>
     <p class="body reveal" style="margin:0 auto;text-align:center">
-      CoCo, above, is the flagship. Thirteen more things are built around it. Some you can
+      CoCo, above, is the flagship. Fourteen more things are built around it. Some you can
       download right now. Some are still in development, and are marked that way rather
       than dressed up. Where a product has no screenshot here, it is because it has not
       been built far enough to have one.
@@ -380,7 +381,7 @@ video{display:block;width:100%;height:auto}
       <button class="tab" role="tab" id="tab-framework" aria-controls="panel-framework" aria-selected="true">The framework<span class="count">4</span></button>
       <button class="tab" role="tab" id="tab-connect" aria-controls="panel-connect" aria-selected="false" tabindex="-1">CoCo Connect</button>
       <button class="tab" role="tab" id="tab-apps" aria-controls="panel-apps" aria-selected="false" tabindex="-1">Desktop apps<span class="count">4</span></button>
-      <button class="tab" role="tab" id="tab-research" aria-controls="panel-research" aria-selected="false" tabindex="-1">Research<span class="count">5</span></button>
+      <button class="tab" role="tab" id="tab-research" aria-controls="panel-research" aria-selected="false" tabindex="-1">Research<span class="count">6</span></button>
     </div>
 
     <!-- ---------- panel: the framework ---------- -->
@@ -576,6 +577,19 @@ video{display:block;width:100%;height:auto}
             than because it is finished.</p>
           <p style="margin-top:14px"><a class="arrow" href="https://github.com/coco-research/coco-fusion">Read the source</a></p>
         </div>
+        <div class="tile" id="product-ads">
+          <span class="chip live">Available now</span>
+          <p class="lbl">CoCo Ads</p>
+          <span class="fine stage-note">Skill, not an app &middot; invoked as <code>/coco-ads</code></span>
+          <p>Turns whatever you just shipped into a short, real launch video: reads the
+            project's own code, plans a concept, and renders it locally with HyperFrames, no
+            live URL or screenshots needed. It made this site's own launch film. Adapts the
+            flow from <a href="https://github.com/latent-spaces/brag">brag</a> by Shunit Haviv.</p>
+          <p style="margin-top:14px;display:flex;gap:22px;flex-wrap:wrap">
+            <a class="arrow" href="https://github.com/coco-research/coco/tree/main/skills/coco-ads">Read the skill</a>
+            <button type="button" class="arrow" data-film-trigger data-video="assets/site/coco-ads-selfdemo.mp4" data-poster="assets/site/coco-ads-selfdemo-poster.jpg" style="background:none;border:0;cursor:pointer;font-family:inherit;padding:0;color:var(--link)">Watch it explain itself (30s)</button>
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -732,17 +746,23 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 })();
 </script>
 <script>
-/* Film lightbox: "Watch the film" opens the launch video in a centered modal.
+/* Film lightbox: any [data-film-trigger] opens its own video in the shared centered modal.
    Same open/close pattern as the products overlay, plus pausing the video on close. */
 (function () {
-  var trigger = document.getElementById('film-trigger');
+  var triggers = document.querySelectorAll('[data-film-trigger]');
   var modal = document.getElementById('film-modal');
   var backdrop = document.getElementById('film-backdrop');
   var closeBtn = document.getElementById('film-close');
   var video = document.getElementById('film-video');
-  if (!trigger || !modal || !backdrop || !video) return;
+  if (!triggers.length || !modal || !backdrop || !video) return;
+  var activeTrigger = null;
 
-  function open() {
+  function open(trigger) {
+    var src = trigger.getAttribute('data-video');
+    var poster = trigger.getAttribute('data-poster');
+    if (src && video.getAttribute('src') !== src) video.setAttribute('src', src);
+    if (poster) video.setAttribute('poster', poster);
+    activeTrigger = trigger;
     modal.hidden = false;
     backdrop.hidden = false;
     requestAnimationFrame(function () {
@@ -763,11 +783,11 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   }
   function isOpen() { return modal.classList.contains('open'); }
 
-  trigger.addEventListener('click', open);
+  triggers.forEach(function (t) { t.addEventListener('click', function () { open(t); }); });
   backdrop.addEventListener('click', close);
   closeBtn.addEventListener('click', close);
   document.addEventListener('keydown', function (ev) {
-    if (ev.key === 'Escape' && isOpen()) { close(); trigger.focus(); }
+    if (ev.key === 'Escape' && isOpen()) { close(); if (activeTrigger) activeTrigger.focus(); }
   });
 })();
 </script>

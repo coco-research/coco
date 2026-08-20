@@ -9,7 +9,7 @@ schema_version: 1.0
 
 # AI Super Intelligence Team — SKILL entry
 
-Rijul's AI research + engineering brain trust **and decision-making partner**. 59 named personas drawn from the world's frontier model labs (US, UK, China, France), top AI universities, the open-source ecosystem, the independent-evaluation and AI-governance ecosystem, and product-history archetypes. Reusable across any CoCo-routed prompt — invoked by `/superintelligenceTeam-*` slash commands. The team's primary purpose is to **help take decisions**, not just review work after the fact — every cell carries a decision-relevant lens that convene synthesis explicitly draws on.
+Your AI research + engineering brain trust **and decision-making partner**. 59 named personas drawn from the world's frontier model labs (US, UK, China, France), top AI universities, the open-source ecosystem, the independent-evaluation and AI-governance ecosystem, and product-history archetypes. Reusable across any CoCo-routed prompt — invoked by `/superintelligenceTeam-*` slash commands. The team's primary purpose is to **help take decisions**, not just review work after the fact — every cell carries a decision-relevant lens that convene synthesis explicitly draws on.
 
 > **Status:** All three phases complete.
 > - **Phase 1:** 49 personas across 8 cells (baseline roster + founding v2 panelists).
@@ -65,17 +65,17 @@ Listed by cell. Each has a YAML-frontmatter profile under `personas/<slug>.md` p
 
 ```
 superintelligenceTeam/
-├── SKILL.md                   This file — user-facing entry.
-├── registry.json              Machine source of truth. Read by slash commands.
-├── EXPANSION.md               (Phase 2) Gap-analysis and roster-expansion candidates.
+├── SKILL.md This file — user-facing entry.
+├── registry.json Machine source of truth. Read by slash commands.
+├── EXPANSION.md (Phase 2) Gap-analysis and roster-expansion candidates.
 ├── templates/
-│   ├── persona.md             Schema source-of-truth for every persona file.
-│   └── convene.md             Multi-persona session template.
-├── personas/                  59 *.md files, one per persona. YAML frontmatter + 6 narrative sections.
-├── cells/                     8 *.md cell summaries.
-├── research/                  59 directories, one per persona. Raw research dumps so future re-syntheses don't recrawl.
+│ ├── persona.md Schema source-of-truth for every persona file.
+│ └── convene.md Multi-persona session template.
+├── personas/ 59 *.md files, one per persona. YAML frontmatter + 6 narrative sections.
+├── cells/ 8 *.md cell summaries.
+├── research/ 59 directories, one per persona. Raw research dumps so future re-syntheses don't recrawl.
 └── scripts/
-    └── build_registry.py      Regenerates registry.json from persona frontmatter. Run after any persona edit.
+    └── build_registry.py Regenerates registry.json from persona frontmatter. Run after any persona edit.
 ```
 
 <a id="slash-commands"></a>
@@ -173,7 +173,7 @@ All teams share the same schema (`teams: [...]` array on each persona, functiona
 
 ## Build provenance
 
-- Forged 2026-05-27 by Rijul Kalra during /coco session.
+- Forged 2026-05-27 during /coco session.
 - Quality bar set by Karpathy reference (12 cited URLs, 5 recent_signal_12mo entries, full 6-section narrative).
 - 46 remaining personas built by parallel research sub-agents in 6 waves (8 + 8 + 8 + 8 + 8 + 6).
 - Several agent runs corrected the user-supplied hints with verified facts (e.g., Lilian Weng's PhD = Indiana not NYU; Sergey Levine's PhD advisor = Vladlen Koltun not Pieter Abbeel; Barret Zoph fired from TML Jan 2026 and returned to OpenAI; Aditya Ramesh stayed at OpenAI Worldsim VP not TML).

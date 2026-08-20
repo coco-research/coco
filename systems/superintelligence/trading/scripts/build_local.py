@@ -13,6 +13,7 @@ Usage:
   (model defaults to qwen/qwen3.6-35b-a3b; must be loaded in LM Studio)
 """
 import argparse, json, re, sys, time, urllib.request, pathlib, yaml
+from concurrent.futures import ThreadPoolExecutor, as_completed
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import retriever
 from validate_persona import validate
@@ -21,7 +22,7 @@ FIN = pathlib.Path(__file__).resolve().parents[1]          # superintelligence/f
 ROSTER = json.loads((FIN / "roster.json").read_text())
 PERSONAS = FIN / "personas"; PERSONAS.mkdir(exist_ok=True)
 RESEARCH = FIN / "research"; RESEARCH.mkdir(exist_ok=True)
-ENDPOINT = "http://127.0.0.1:1234/v1/chat/completions"
+ENDPOINT = "http://127.0.0.1:1234/v1/completions"  # raw prompt endpoint (see llm() below)
 POOL = [p["slug"] for p in ROSTER["personas"]]
 
 FM = """slug, real_name, archetype (one line), teams (list), home_team, cell, cell_role, status (active|archetype), affiliations_2026 (list; single-quote values with a colon), domains (list), signature_moves (list), canonical_works (list), key_publications (list), recent_signal_12mo (list of {title,date,url}), public_stances (list of {stance,evidence_url}), mental_models (list), pairs_well_with (list of slugs), productive_conflict_with (list of slugs), blind_spots (list), voice_style (text), when_to_summon (list), confidence, last_verified, sources (list of URLs)"""
@@ -38,12 +39,42 @@ def sys_prompt(pool):
             "CRITICAL YAML FORMAT: use BLOCK style for every list. For lists of objects (recent_signal_12mo, public_stances) put each item on its own line as `  - title: ...` then indented `    date: ...` / `    url: ...` / `    stance: ...` / `    evidence_url: ...`. NEVER use inline flow style [{...}, {...}]. Single-quote any scalar value that contains a colon, comma, or quote. "
             f"pairs_well_with / productive_conflict_with: choose ONLY from this slug list (omit if none fit): {pool}")
 
+REASONING_TIMEOUT = 90  # safety-net: abort if literally nothing streams back for this long
+
+def _raw_prompt(messages):
+    # ChatML prompt with the assistant turn's <think> block pre-closed and EMPTY.
+    # This is the "prefill trick": since reasoning is already closed, the model has
+    # no room left to think and must go straight to the answer. Verified empirically
+    # that LM Studio does not honor reasoning_effort/enable_thinking for this model
+    # via /v1/chat/completions (tried top-level, camelCase, chat_template_kwargs, and
+    # baked into the server's persisted per-model load config — none suppressed
+    # reasoning). Using the raw /v1/completions endpoint with a forced-empty <think>
+    # block bypasses that gap entirely and gives the full max_tokens budget to the
+    # real answer instead of burning it on unbounded reasoning.
+    parts=[f"<|im_start|>{m['role']}\n{m['content']}<|im_end|>\n" for m in messages]
+    parts.append("<|im_start|>assistant\n<think>\n\n</think>\n\n")
+    return "".join(parts)
+
 def llm(model, messages, max_tokens=11000, temp=0.4):
-    payload={"model":model,"messages":messages,"temperature":temp,"max_tokens":max_tokens,"stream":False}
+    prompt=_raw_prompt(messages)
+    payload={"model":model,"prompt":prompt,"temperature":temp,"max_tokens":max_tokens,"stream":True,"stop":["<|im_end|>"]}
     req=urllib.request.Request(ENDPOINT,data=json.dumps(payload).encode(),headers={"Content-Type":"application/json"})
     t0=time.time()
-    with urllib.request.urlopen(req,timeout=900) as r: d=json.loads(r.read())
-    return d["choices"][0]["message"]["content"], time.time()-t0
+    text_parts=[]
+    with urllib.request.urlopen(req,timeout=900) as r:
+        for line in r:
+            if not line.startswith(b"data: "): continue
+            chunk=line[6:].strip()
+            if chunk==b"[DONE]": break
+            try: d=json.loads(chunk)
+            except Exception: continue
+            t=d["choices"][0].get("text","")
+            if t: text_parts.append(t)
+            if not text_parts and (time.time()-t0) > REASONING_TIMEOUT:
+                raise RuntimeError(f"no content after {REASONING_TIMEOUT}s — aborting (prefill trick may not have suppressed reasoning)")
+    if not text_parts:
+        raise RuntimeError("LLM returned no answer content (empty response)")
+    return "".join(text_parts), time.time()-t0
 
 def clean(t):
     t=re.sub(r"<think>.*?</think>","",t,flags=re.S).strip()
@@ -109,13 +140,18 @@ def main():
         todo=[p for p in todo if not (PERSONAS/f"{p['slug']}.md").exists()]  # resume: skip built
     print(f"building {len(todo)} persona(s) with {a.model}")
     npass=0
-    for i,p in enumerate(todo,1):
-        try:
-            v,reasons,ok,n,dt=build_one(p,a.model)
-        except Exception as e:
-            print(f"[{i}/{len(todo)}] {p['slug']:24} ERROR {type(e).__name__}: {str(e)[:80]}"); continue
-        npass += v=="PASS"
-        print(f"[{i}/{len(todo)}] {p['slug']:24} {v:11} urls {ok}/{n} {dt:.0f}s  {('; '.join(reasons))[:90]}")
+    # 4 concurrent workers, matching LM Studio's configured `parallel: 4` slots
+    # (measured ~1.71x aggregate throughput vs sequential on this server).
+    with ThreadPoolExecutor(max_workers=4) as ex:
+        futs={ex.submit(build_one,p,a.model):p for p in todo}
+        for i,fut in enumerate(as_completed(futs),1):
+            p=futs[fut]
+            try:
+                v,reasons,ok,n,dt=fut.result()
+            except Exception as e:
+                print(f"[{i}/{len(todo)}] {p['slug']:24} ERROR {type(e).__name__}: {str(e)[:80]}"); continue
+            npass += v=="PASS"
+            print(f"[{i}/{len(todo)}] {p['slug']:24} {v:11} urls {ok}/{n} {dt:.0f}s  {('; '.join(reasons))[:90]}")
     print(f"\nDONE: {npass}/{len(todo)} PASS")
 
 if __name__=="__main__":

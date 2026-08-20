@@ -137,10 +137,15 @@ Measured against that ceiling:
 - LM Studio: 25-27.5 tok/s (74-81% of ceiling -- well-optimized).
 - mlx-dspark baseline (non-speculative): 15.2-19 tok/s (45-56% -- less
   optimized kernels than LM Studio's llama.cpp-derived backend).
-- mlx-dspark `dflash` (speculative decoding): 20-35.9 tok/s (59-106% --
-  *can exceed* the naive per-token ceiling, because speculative decoding
-  amortizes one expensive full-weight read over `accept_len` ~2.7 accepted
-  tokens per verification round instead of one token per read).
+- mlx-dspark `dflash` (speculative decoding): highly variable, because the
+  gain depends entirely on how predictable the output is. Measured on this
+  machine at 111 tok/s on trivially predictable output and 10.1 tok/s on
+  open-ended prose, against a server-reported mean of about 14 tok/s across
+  mixed real requests. Speculative decoding amortizes one expensive
+  full-weight read over several accepted draft tokens, so it can exceed the
+  naive per-token ceiling when the drafter is usually right and falls back
+  toward the base rate when it is not. See "Timing expectations" below for
+  the measurements and the method.
 
 **Untapped levers, if more speed is ever needed** (ranked by expected impact):
 1. **`kv_bits` (KV-cache quantization)** -- currently `0`/unused. Helps most at
@@ -189,7 +194,31 @@ The preceding sections of this document describe the prefill technique conceptua
 
 ### Timing expectations
 
-The decode speed for this model is 20 to 35 tokens per second. Prompt processing is separate from decode and dominates the total latency on long inputs. One measured call with a 13,809 token prompt returning 500 tokens took about 2 minutes end to end. A second measured call with a 1,134 token prompt returning 750 tokens took about 133 seconds. These numbers imply that the caller should set generous client timeouts of several minutes. The caller should not assume a short prompt is fast because decode dominates once the prompt is small. Finally, the caller should batch bulky work rather than issuing many small chatty calls.
+The primary finding from this setup is that decode throughput is not a single fixed value; it varies by more than a factor of ten depending on how predictable the output text is. Consequently, citing a single "tokens per second" figure is misleading for this specific configuration.
+
+The server operates in speculative decoding mode, where a smaller drafter model proposes several tokens and the large model verifies them in a single pass. When the output is highly predictable, the drafter is usually correct, allowing many tokens to be committed per expensive weight read. This raises throughput far above the naive memory-bandwidth ceiling. Conversely, when the output is open-ended prose, the drafter is often incorrect, few tokens survive each verification round, and throughput falls back toward or below the base rate.
+
+The following table presents measured decode figures for single-stream requests on this machine. The request counter was verified to advance by exactly one per call to ensure no other traffic interfered with the measurements.
+
+| Output kind | Tokens produced | Wall clock | Decode rate |
+| :--- | :--- | :--- | :--- |
+| Highly predictable output (counting from 1 to 400) | 401 | 3.6 s | 111 tokens per second |
+| Open ended technical prose | 481 | 47.6 s | 10.1 tokens per second |
+
+The mechanism behind that spread is measurable rather than theoretical. The throughput of a server using speculative decoding is determined by the ratio of tokens accepted per verification round to the duration of that round, where each round incurs a fixed cost for a single pass through the large model regardless of the draft length. In a controlled test on a single stream, the server drafts up to eight tokens per round, and the measured performance varied significantly based on output predictability. For trivially predictable output such as counting, the system accepted the full eight tokens per round with a round time of 78 milliseconds, yielding a rate of 103 tokens per second. In contrast, open ended prose accepted only 2.55 tokens per round with a round time of 133 milliseconds, resulting in a rate of 19.3 tokens per second. These two effects compound, as the reduction in accepted tokens is roughly three times greater and the round time is about 1.7 times slower, which together account for the observed five fold difference in throughput. Consequently, the planning figure for performance is set by the nature of the output rather than by the hardware, and analytical prose work should be planned at the low end.
+
+| Output kind | Tokens accepted per round | Time per round | Resulting rate |
+| :--- | :--- | :--- | :--- |
+| Trivially predictable (counting) | 8.00 | 78 ms | 103 tokens/s |
+| Open ended prose | 2.55 | 133 ms | 19.3 tokens/s |
+
+The server's own /metrics endpoint reported a mean of about 14 tokens per second across 30 mixed real requests. This average is the appropriate figure to use when planning for ordinary work.
+
+Prompt processing, or prefill, is a distinct cost from decode and dominates latency on long inputs. This cost was measured by issuing two requests that requested the same output length but differed by 5,995 prompt tokens. The request with the longer prompt took 32.7 seconds more to complete, yielding a prefill rate of roughly 183 tokens per second. The practical consequence is that a prompt of 13,000 tokens costs approximately 70 seconds before generation even begins.
+
+The server is configured with a maximum batch size of four. Therefore, several callers sharing the server simultaneously will each observe lower throughput than the single-stream figures listed above. Anyone performing benchmarks should check the "requests" counter in the /metrics endpoint before and after a call. They must confirm that the counter advanced by exactly one; otherwise, the measurement includes traffic from other users.
+
+Callers should set client timeouts in minutes rather than seconds. They should expect roughly 14 tokens per second when planning ordinary analytical work and treat any faster performance as a bonus that depends on the predictability of the output. Finally, callers should prefer fewer large requests over many small ones because each request incurs its own prefill cost.
 
 ### A working client
 
@@ -200,6 +229,7 @@ import json, os, pathlib, urllib.error, urllib.request
 
 BASE = "http://127.0.0.1:8090"
 MODEL = "mlx-community/Qwen3.8-27B-4bit"
+STOP = "<|im_end|>"
 
 
 def _key():
@@ -207,7 +237,9 @@ def _key():
     if k:
         return k
     p = pathlib.Path.home() / ".config/mlx-dspark/api_key"
-    return p.read_text().strip() if p.exists() else ""
+    if not p.exists():
+        raise RuntimeError(f"no API key: set MLX_DSPARK_API_KEY or create {p}")
+    return p.read_text().strip()
 
 
 def _post(path, payload, timeout=900):
@@ -221,30 +253,72 @@ def _post(path, payload, timeout=900):
         return json.loads(r.read())
 
 
-def ask(question, max_tokens=1600, temperature=0.3):
-    """Return (text, usage). Raises RuntimeError if the answer was truncated."""
+def ask(question, max_tokens=1600, temperature=0.3, stop=(STOP,)):
+    """Return (text, usage) from the local model.
+
+    Raises RuntimeError if the reply was cut short, so a partial answer can
+    never be mistaken for a complete one. Pass stop=() when the desired output
+    may legitimately contain the stop string.
+    """
     payload = {
         "model": MODEL,
-        "prompt": ("<|im_start|>user\n" + question + "<|im_end|>\n"
+        "prompt": ("<|im_start|>user\n" + question + STOP + "\n"
                    "<|im_start|>assistant\n<think>\n\n</think>\n\n"),
         "max_tokens": max_tokens,
         "temperature": temperature,
-        "stop": ["<|im_end|>"],
     }
+    if stop:
+        payload["stop"] = list(stop)
     try:
         out = _post("/v1/completions", payload)
     except urllib.error.HTTPError as e:
         if e.code != 503:
             raise
+        # Idle-unloaded. Reload once, then retry exactly once.
         _post("/admin/load", {"model": MODEL, "mode": "auto"})
         out = _post("/v1/completions", payload)
-    usage = out.get("usage", {})
-    if usage.get("completion_tokens") == max_tokens:
-        raise RuntimeError(f"truncated at max_tokens={max_tokens}; raise and retry")
-    return out["choices"][0]["text"].strip(), usage
+
+    text = out["choices"][0]["text"].strip()
+    usage = out.get("usage") or {}
+    produced = usage.get("completion_tokens")
+
+    # Truncation is detected two ways, because the token count alone is not
+    # enough: the server may omit usage entirely, and a stop-string collision
+    # halts generation well below max_tokens.
+    if produced is None:
+        raise RuntimeError("no usage in response; cannot confirm completeness")
+    if produced >= max_tokens:
+        raise RuntimeError(
+            f"truncated at max_tokens={max_tokens}; raise it and retry")
+    finish = (out["choices"][0].get("finish_reason") or "").lower()
+    if finish and finish not in ("stop", "eos", "length_stop", ""):
+        raise RuntimeError(f"unexpected finish_reason {finish!r}; treat as partial")
+    return text, usage
 ```
 
 The 503 branch handles the idle unload described elsewhere in this document. The truncation check is deliberately an exception rather than a warning so that a partial answer cannot be used by accident. The imports required are `json`, `os`, `pathlib`, `urllib.request` and `urllib.error`.
+
+## Concurrency does not help on this setup
+
+The `--max-batch 4` flag sets a ceiling on how many requests may be in flight at once, it does not force a batch size, so a single request is not penalised by it. This distinction is important because the flag is easy to misread as a fixed batch size that would artificially constrain single-user performance.
+
+On this server, running requests concurrently reduces total throughput rather than increasing it. Normally batching raises aggregate tokens per second while lowering per-request speed. Here both fall. The measurements below were taken with open-ended prose of the same length, issued together.
+
+| Concurrent requests | Aggregate tokens per second | Mean per request | Slowest request |
+| :--- | :--- | :--- | :--- |
+| 1 | 12.7 | 12.7 | 12.7 |
+| 2 | 12.4 | 9.6 | 6.1 |
+| 4 | 11.3 | 6.1 | 2.2 |
+
+There is a significant fairness problem at four concurrent requests. The individual rates were 12.4, 6.1, 2.2, and 3.6 tokens per second, so the first caller ran roughly five and a half times faster than the slowest one. Work queued behind other work starves rather than degrading evenly.
+
+The likely mechanism is that speculative decoding already converts spare compute into speed by having a drafter propose tokens that the large model verifies in one pass, so the memory bandwidth is already well used at a single stream. Adding concurrent streams therefore competes for bandwidth that was not idle, while also multiplying the key-value cache footprint. This is the most probable explanation given the numbers rather than a proven cause.
+
+Callers should serialise work through this server and queue requests rather than fanning them out. Parallelism buys no aggregate throughput here and costs latency and predictability.
+
+### A memory consequence worth acting on
+
+The key-value cache is reserved per batch slot, so at a 65,536 token context each slot costs about 4 GB and four slots reserve about 16 GB, on top of roughly 20 GB for the target and drafter weights. Since concurrency is not earning anything, lowering `--max-batch` in `~/.config/mlx-dspark/start.sh` would free roughly 12 GB, which could instead fund a larger context window or leave room for LM Studio to be loaded at the same time. This is a recommendation about a file outside the repository and it has not been applied.
 
 ## Troubleshooting playbook
 

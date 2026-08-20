@@ -3,7 +3,7 @@
   "generated_at": "2026-05-31",
   "team_id": "engineering-super-intelligence",
   "team_name": "Engineering Super Intelligence Team",
-  "description": "Rijul's software-engineering brain trust. Named personas across 11 cells covering cloud architecture, reliability/SRE/observability, data and storage, security, FinOps, languages and runtimes, systems programming, web and frontend, architecture/testing/craft, DevOps/platform, and AI-assisted coding. Reusable as a decision-making partner — invoked by /SI-Eng slash commands.",
+  "description": "Your software-engineering brain trust. Named personas across 11 cells covering cloud architecture, reliability/SRE/observability, data and storage, security, FinOps, languages and runtimes, systems programming, web and frontend, architecture/testing/craft, DevOps/platform, and AI-assisted coding. Reusable as a decision-making partner — invoked by /SI-Eng slash commands.",
   "personas_count": 70,
   "cells_count": 11,
   "cells": {

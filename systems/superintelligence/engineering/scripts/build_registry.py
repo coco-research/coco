@@ -25,7 +25,7 @@ except ImportError:
     sys.exit("PyYAML not available. Install with: pip install pyyaml")
 
 # Script lives at superintelligence/engineering/scripts/build_registry.py
-ENG_DIR = Path(__file__).resolve().parents[1]          # -> superintelligence/engineering
+ENG_DIR = Path(__file__).resolve().parents[1] # -> superintelligence/engineering
 PERSONAS_DIR = ENG_DIR / "personas"
 REGISTRY_PATH = ENG_DIR / "registry.json"
 
@@ -147,7 +147,7 @@ def main() -> None:
         ("team_name", "Engineering Super Intelligence Team"),
         (
             "description",
-            "Rijul's software-engineering brain trust. Named personas across 11 cells covering "
+            "Your software-engineering brain trust. Named personas across 11 cells covering "
             "cloud architecture, reliability/SRE/observability, data and storage, security, "
             "FinOps, languages and runtimes, systems programming, web and frontend, "
             "architecture/testing/craft, DevOps/platform, and AI-assisted coding. Reusable as a "

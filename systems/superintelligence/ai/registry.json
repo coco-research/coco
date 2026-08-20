@@ -3,7 +3,7 @@
   "generated_at": "2026-05-30",
   "team_id": "ai-super-intelligence",
   "team_name": "AI Super Intelligence Team",
-  "description": "Rijul's AI research and engineering brain trust. 47 named personas across 8 cells covering frontier labs, applied product, model architecture, reasoning/RL/agents, alignment and interpretability, theory and science of DL, multimodal and embodied, and systems/kernels/serving. Reusable across all CoCo-routed work — invoked by /superintelligenceTeam slash commands.",
+  "description": "Your AI research and engineering brain trust. 47 named personas across 8 cells covering frontier labs, applied product, model architecture, reasoning/RL/agents, alignment and interpretability, theory and science of DL, multimodal and embodied, and systems/kernels/serving. Reusable across all CoCo-routed work — invoked by /superintelligenceTeam slash commands.",
   "personas_count": 59,
   "cells_count": 8,
   "cells": {

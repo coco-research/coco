@@ -27,8 +27,8 @@ except ImportError:
     sys.exit("PyYAML not available. Install with: pip install pyyaml")
 
 # Script lives at superintelligence/ai/scripts/build_registry.py
-AI_DIR = Path(__file__).resolve().parents[1]          # -> superintelligence/ai
-REPO_ROOT = AI_DIR.parents[1]                          # -> coco-platform
+AI_DIR = Path(__file__).resolve().parents[1] # -> superintelligence/ai
+REPO_ROOT = AI_DIR.parents[1] # -> coco-platform
 PERSONAS_DIR = AI_DIR / "personas"
 REGISTRY_PATH = AI_DIR / "registry.json"
 
@@ -143,7 +143,7 @@ def main() -> None:
         ("team_name", "AI Super Intelligence Team"),
         (
             "description",
-            "Rijul's AI research and engineering brain trust. 47 named personas across 8 cells "
+            "Your AI research and engineering brain trust. 47 named personas across 8 cells "
             "covering frontier labs, applied product, model architecture, reasoning/RL/agents, "
             "alignment and interpretability, theory and science of DL, multimodal and embodied, "
             "and systems/kernels/serving. Reusable across all CoCo-routed work — invoked by "
@@ -187,7 +187,7 @@ def main() -> None:
         if not slugs:
             print(f"WARN: cell {cell_id} is empty", file=sys.stderr)
     panel_count = sum(1 for p in personas.values() if p["v2_panel_attribution_count"] > 0)
-    print(f"  founding v2 panel-attributed personas: {panel_count}")
+    print(f" founding v2 panel-attributed personas: {panel_count}")
 
 
 if __name__ == "__main__":

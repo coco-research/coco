@@ -19,7 +19,7 @@ try:
 except ImportError:
     sys.exit("PyYAML not available. Install with: pip install pyyaml")
 
-PD_DIR = Path(__file__).resolve().parents[1]            # -> superintelligence/product-design
+PD_DIR = Path(__file__).resolve().parents[1] # -> superintelligence/product-design
 PERSONAS_DIR = PD_DIR / "personas"
 REGISTRY_PATH = PD_DIR / "registry.json"
 
@@ -138,7 +138,7 @@ def main() -> None:
         ("team_name", "Product & Design Super Intelligence Team"),
         (
             "description",
-            "Rijul's product + design brain trust and decision partner. Named personas across 8 "
+            "Your product + design brain trust and decision partner. Named personas across 8 "
             "cells spanning product strategy, discovery/research, growth/metrics, design "
             "foundations/usability, design leadership/craft, UX/content, design systems, and a "
             "product×design bridge. One merged team that convenes both lenses; pure-discipline "

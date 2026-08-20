@@ -10,7 +10,7 @@ schema_version: 1.0
 
 # Product & Design Super Intelligence Team — SKILL entry
 
-Rijul's product + design brain trust **and decision-making partner**. 56 named native personas across 8 cells — the people who defined product strategy, discovery, growth, usability, design craft, content, design systems, and the behavior/ethics frontier — plus Adam Wathan cross-listed from Engineering. One **merged** team (product and design held in deliberate tension) invoked by the `/SI-PD-*` slash commands. Primary purpose: **help take product and design decisions**, not just review afterward.
+Your product + design brain trust **and decision-making partner**. 56 named native personas across 8 cells — the people who defined product strategy, discovery, growth, usability, design craft, content, design systems, and the behavior/ethics frontier — plus Adam Wathan cross-listed from Engineering. One **merged** team (product and design held in deliberate tension) invoked by the `/SI-PD-*` slash commands. Primary purpose: **help take product and design decisions**, not just review afterward.
 
 > **Status:** Roster build complete (2026-06-01).
 > - **Merge decision:** Product and Design were combined into ONE team (mirrors the Cloud+Code → Engineering merge). Discipline-pure cells preserve depth; the team convenes both lenses by default. Pure-discipline input stays available via `/SI-PD-Huddle <cell>` or `--cells`.
@@ -82,12 +82,12 @@ Orchestrator-first, identical surface to the AI and Engineering teams. Generated
 
 ```
 superintelligence/product-design/
-├── SKILL.md                   This file.
-├── ROSTER.md                  Locked roster + build-wave manifest.
-├── registry.json              Machine source of truth.
-├── personas/                  56 *.md native personas.
-├── cells/                     8 *.md cell summaries (build_cells.py).
-├── research/                  56 research dumps.
+├── SKILL.md This file.
+├── ROSTER.md Locked roster + build-wave manifest.
+├── registry.json Machine source of truth.
+├── personas/ 56 *.md native personas.
+├── cells/ 8 *.md cell summaries (build_cells.py).
+├── research/ 56 research dumps.
 └── scripts/
     ├── build_registry.py
     └── build_cells.py
@@ -105,7 +105,7 @@ Templates (`persona.md`, `convene.md`) shared at `superintelligence/templates/`.
 
 ## Build provenance
 
-- Built 2026-06-01 by Rijul Kalra during a /coco session, after AI and Engineering.
+- Built 2026-06-01 during a /coco session, after AI and Engineering.
 - Merge (Product + Design → one team) and the roster patch decided via `/ultra-think`.
 - 56 native personas built by parallel research sub-agents across 4 waves; agents corrected many stale affiliations against verified 2026 facts (e.g., Elena Verna now Head of Growth at Lovable; Casey Winters now CEO of SuperMe; Karen McGrane at Contentful; John Maeda CVP Design & AI at Microsoft; Nathan Curtis at Directed Edges; Jony Ive's OpenAI device delayed to 2027 and renamed off "io"; Susan Kare built active, not archetype, on found recent signals).
 - Quality bar matched the Karpathy reference: ≥8 cited URLs, ≥3 recent signals (or persistent_signals for archetypes), every public_stance cited, full narrative.

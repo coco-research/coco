@@ -98,7 +98,7 @@ def main() -> None:
     registry = OrderedDict([
         ("schema_version", "1.0"), ("generated_at", date.today().isoformat()),
         ("team_id", "finance-super-intelligence"), ("team_name", "Finance Super Intelligence Team"),
-        ("description", "Rijul's finance brain trust and decision partner. Named personas across 7 cells: "
+        ("description", "Your finance brain trust and decision partner. Named personas across 7 cells: "
                         "valuation/corporate finance, investing, accounting/FP&A, macro, fintech, behavioral, "
                         "and capital markets/M&A/private. Markets/quant/derivatives are reserved for the Trading "
                         "team. Built local-first (LM Studio) and validator-gated. Invoked by /SI-Fin commands."),

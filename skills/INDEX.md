@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 184 skills** — 69 core, 115 across 7 bundles.
+**Total: 185 skills** — 70 core, 115 across 7 bundles.
 
 ## Design (15)
 
@@ -78,13 +78,14 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [skill-creator](skill-creator/SKILL.md) | Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabil |
 | [writing-skills](writing-skills/SKILL.md) | Use when creating new skills, editing existing skills, or verifying skills work before deployment |
 
-## Ops (5)
+## Ops (6)
 
 | Skill | Description |
 |-------|-------------|
 | [pmstudio-arb](arb-review/SKILL.md) | Generate an Architecture Review Board (ARB) presentation in Coco Inc's standard 11-slide format. Use when someone asks to "create an ARB deck", "architecture re |
 | [pmstudio-dr](dr-plan/SKILL.md) | Generate a Disaster Recovery plan with RTO/RPO targets. Use when someone asks to "create a DR plan", "disaster recovery", "business continuity", or "RTO RPO". D |
 | [pmstudio-irp](irp/SKILL.md) | Generate an Incident Response Plan (IRP) with severity classification, escalation procedures, and communication templates. Use when someone asks to "create an i |
+| [local-llm](local-llm/SKILL.md) | Use when working with this machine's local LLM setup (LM Studio + mlx-dspark) -- checking status, changing context window, diagnosing a reasoning hang or dead r |
 | [pmstudio-nfr](nfr-tracker/SKILL.md) | Detailed completeness audit of all project documents. Use when someone asks "are we ready for production", "audit our docs", "readiness check", "nfr tracker", o |
 | [pmstudio-recovery](recovery-plan/SKILL.md) | Generate detailed service restoration runbooks with step-by-step procedures. Use when someone asks to "create recovery procedures", "restoration runbook", "reco |
 

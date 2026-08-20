@@ -111,8 +111,8 @@ the model's trained range, not extrapolation.
 | Context window | KV cache / request | x4 concurrent (`--max-batch 4`) |
 |---|---|---|
 | 32,768 | 2.0 GB | 8 GB |
-| **65,536 (current default)** | **4.0 GB** | **16 GB** |
-| 131,072 (128k, considered, not adopted) | 8.0 GB | 32 GB |
+| 65,536 | 4.0 GB | 16 GB |
+| **131,072 (current default)** | **8.0 GB** | **32 GB** |
 
 Base model weights: ~16GB (target) + ~4GB (drafter, `dflash` mode) = ~20GB,
 before any KV cache. Add LM Studio's own separate ~16GB if it's also loaded
@@ -137,10 +137,15 @@ Measured against that ceiling:
 - LM Studio: 25-27.5 tok/s (74-81% of ceiling -- well-optimized).
 - mlx-dspark baseline (non-speculative): 15.2-19 tok/s (45-56% -- less
   optimized kernels than LM Studio's llama.cpp-derived backend).
-- mlx-dspark `dflash` (speculative decoding): 20-35.9 tok/s (59-106% --
-  *can exceed* the naive per-token ceiling, because speculative decoding
-  amortizes one expensive full-weight read over `accept_len` ~2.7 accepted
-  tokens per verification round instead of one token per read).
+- mlx-dspark `dflash` (speculative decoding): highly variable, because the
+  gain depends entirely on how predictable the output is. Measured on this
+  machine at 111 tok/s on trivially predictable output and 10.1 tok/s on
+  open-ended prose, against a server-reported mean of about 14 tok/s across
+  mixed real requests. Speculative decoding amortizes one expensive
+  full-weight read over several accepted draft tokens, so it can exceed the
+  naive per-token ceiling when the drafter is usually right and falls back
+  toward the base rate when it is not. See "Timing expectations" below for
+  the measurements and the method.
 
 **Untapped levers, if more speed is ever needed** (ranked by expected impact):
 1. **`kv_bits` (KV-cache quantization)** -- currently `0`/unused. Helps most at
@@ -158,7 +163,7 @@ Measured against that ceiling:
 
 ## What this model is good at, and what it is not
 
-The local model runs entirely on the local machine, which ensures that no data leaves the device and that there is no per-token cost associated with usage. The measured decode speed ranges from 20 to 35 tokens per second, and the context window supports 65,536 tokens. The model performs well at summarizing many small-to-medium diffs, at bulk classification of files into categories, and at mechanical text transformation, which represent its strongest use cases. It has no network access at all, so it cannot perform web research, cannot resolve a URL, and cannot look up a current fact beyond its training data. The model is weak in scenarios where a silently wrong answer is expensive, such as merge conflict resolution, security judgements, and attribution or licensing decisions. In those cases, the model should gather and summarize evidence, then a human or a stronger model should make the actual decision. Because the model is slow relative to a hosted model, it is preferable for work that is bulky and mechanical rather than short and latency sensitive.
+The local model runs entirely on the local machine, which ensures that no data leaves the device and that there is no per-token cost associated with usage. Measured decode speed is not a single figure: it ranged from 19 tokens per second on open ended prose to 103 on trivially predictable output, against a server reported mean of about 14 across mixed real requests. The context window is 131,072 tokens. The model performs well at summarizing many small-to-medium diffs, at bulk classification of files into categories, and at mechanical text transformation, which represent its strongest use cases. It has no network access at all, so it cannot perform web research, cannot resolve a URL, and cannot look up a current fact beyond its training data. The model is weak in scenarios where a silently wrong answer is expensive, such as merge conflict resolution, security judgements, and attribution or licensing decisions. In those cases, the model should gather and summarize evidence, then a human or a stronger model should make the actual decision. Because the model is slow relative to a hosted model, it is preferable for work that is bulky and mechanical rather than short and latency sensitive.
 
 ## Known failure modes
 
@@ -174,7 +179,7 @@ During a test where the caller requested the local LLM to reproduce a code block
 
 The mlx-dspark server is only an inference endpoint. It has no browser, no tool calling loop, and no network egress of its own, so the model genuinely cannot fetch anything. The practical pattern is therefore to keep the network on the caller's side. The orchestrating agent performs the fetch or the search itself, then passes the retrieved text into the prompt as context. The local model still does all of the reasoning, and the caller acts only as its input and output layer. This approach needs no additional infrastructure.
 
-A second option is to build a genuine tool calling loop, since the server exposes an OpenAI compatible API and could therefore emit a structured request that the caller executes and feeds back. Tool calling reliability on a 27B four-bit model is mediocre, so this is worth building only when the extra autonomy is actually needed. Whichever pattern is used, remember the context window is 65,536 tokens, so fetched pages should be trimmed or summarized before they are pasted in.
+A second option is to build a genuine tool calling loop, since the server exposes an OpenAI compatible API and could therefore emit a structured request that the caller executes and feeds back. Tool calling reliability on a 27B four-bit model is mediocre, so this is worth building only when the extra autonomy is actually needed. Whichever pattern is used, remember the context window is 131,072 tokens, so fetched pages should be trimmed or summarized before they are pasted in.
 
 ## Calling it from your own script
 
@@ -189,7 +194,31 @@ The preceding sections of this document describe the prefill technique conceptua
 
 ### Timing expectations
 
-The decode speed for this model is 20 to 35 tokens per second. Prompt processing is separate from decode and dominates the total latency on long inputs. One measured call with a 13,809 token prompt returning 500 tokens took about 2 minutes end to end. A second measured call with a 1,134 token prompt returning 750 tokens took about 133 seconds. These numbers imply that the caller should set generous client timeouts of several minutes. The caller should not assume a short prompt is fast because decode dominates once the prompt is small. Finally, the caller should batch bulky work rather than issuing many small chatty calls.
+The primary finding from this setup is that decode throughput is not a single fixed value; it varies by more than a factor of ten depending on how predictable the output text is. Consequently, citing a single "tokens per second" figure is misleading for this specific configuration.
+
+The server operates in speculative decoding mode, where a smaller drafter model proposes several tokens and the large model verifies them in a single pass. When the output is highly predictable, the drafter is usually correct, allowing many tokens to be committed per expensive weight read. This raises throughput far above the naive memory-bandwidth ceiling. Conversely, when the output is open-ended prose, the drafter is often incorrect, few tokens survive each verification round, and throughput falls back toward or below the base rate.
+
+The following table presents measured decode figures for single-stream requests on this machine. The request counter was verified to advance by exactly one per call to ensure no other traffic interfered with the measurements.
+
+| Output kind | Tokens produced | Wall clock | Decode rate |
+| :--- | :--- | :--- | :--- |
+| Highly predictable output (counting from 1 to 400) | 401 | 3.6 s | 111 tokens per second |
+| Open ended technical prose | 481 | 47.6 s | 10.1 tokens per second |
+
+The mechanism behind that spread is measurable rather than theoretical. The throughput of a server using speculative decoding is determined by the ratio of tokens accepted per verification round to the duration of that round, where each round incurs a fixed cost for a single pass through the large model regardless of the draft length. In a controlled test on a single stream, the server drafts up to eight tokens per round, and the measured performance varied significantly based on output predictability. For trivially predictable output such as counting, the system accepted the full eight tokens per round with a round time of 78 milliseconds, yielding a rate of 103 tokens per second. In contrast, open ended prose accepted only 2.55 tokens per round with a round time of 133 milliseconds, resulting in a rate of 19.3 tokens per second. These two effects compound, as the reduction in accepted tokens is roughly three times greater and the round time is about 1.7 times slower, which together account for the observed five fold difference in throughput. Consequently, the planning figure for performance is set by the nature of the output rather than by the hardware, and analytical prose work should be planned at the low end.
+
+| Output kind | Tokens accepted per round | Time per round | Resulting rate |
+| :--- | :--- | :--- | :--- |
+| Trivially predictable (counting) | 8.00 | 78 ms | 103 tokens/s |
+| Open ended prose | 2.55 | 133 ms | 19.3 tokens/s |
+
+The server's own /metrics endpoint reported a mean of about 14 tokens per second across 30 mixed real requests. This average is the appropriate figure to use when planning for ordinary work.
+
+Prompt processing, or prefill, is a distinct cost from decode and dominates latency on long inputs. This cost was measured by issuing two requests that requested the same output length but differed by 5,995 prompt tokens. The request with the longer prompt took 32.7 seconds more to complete, yielding a prefill rate of roughly 183 tokens per second. The practical consequence is that a prompt of 13,000 tokens costs approximately 70 seconds before generation even begins.
+
+The server is configured with a maximum batch size of four. Therefore, several callers sharing the server simultaneously will each observe lower throughput than the single-stream figures listed above. Anyone performing benchmarks should check the "requests" counter in the /metrics endpoint before and after a call. They must confirm that the counter advanced by exactly one; otherwise, the measurement includes traffic from other users.
+
+Callers should set client timeouts in minutes rather than seconds. They should expect roughly 14 tokens per second when planning ordinary analytical work and treat any faster performance as a bonus that depends on the predictability of the output. Finally, callers should prefer fewer large requests over many small ones because each request incurs its own prefill cost.
 
 ### A working client
 
@@ -200,6 +229,7 @@ import json, os, pathlib, urllib.error, urllib.request
 
 BASE = "http://127.0.0.1:8090"
 MODEL = "mlx-community/Qwen3.8-27B-4bit"
+STOP = "<|im_end|>"
 
 
 def _key():
@@ -207,7 +237,9 @@ def _key():
     if k:
         return k
     p = pathlib.Path.home() / ".config/mlx-dspark/api_key"
-    return p.read_text().strip() if p.exists() else ""
+    if not p.exists():
+        raise RuntimeError(f"no API key: set MLX_DSPARK_API_KEY or create {p}")
+    return p.read_text().strip()
 
 
 def _post(path, payload, timeout=900):
@@ -221,30 +253,96 @@ def _post(path, payload, timeout=900):
         return json.loads(r.read())
 
 
-def ask(question, max_tokens=1600, temperature=0.3):
-    """Return (text, usage). Raises RuntimeError if the answer was truncated."""
+def ask(question, max_tokens=1600, temperature=0.3, stop=(STOP,)):
+    """Return (text, usage) from the local model.
+
+    Raises RuntimeError if the reply was cut short, so a partial answer can
+    never be mistaken for a complete one. Pass stop=() when the desired output
+    may legitimately contain the stop string.
+    """
     payload = {
         "model": MODEL,
-        "prompt": ("<|im_start|>user\n" + question + "<|im_end|>\n"
+        "prompt": ("<|im_start|>user\n" + question + STOP + "\n"
                    "<|im_start|>assistant\n<think>\n\n</think>\n\n"),
         "max_tokens": max_tokens,
         "temperature": temperature,
-        "stop": ["<|im_end|>"],
     }
+    if stop:
+        payload["stop"] = list(stop)
     try:
         out = _post("/v1/completions", payload)
     except urllib.error.HTTPError as e:
-        if e.code != 503:
+        # The idle watcher unloads the model after a quiet period. That has been
+        # observed surfacing as 500 as well as the documented 503, so both are
+        # treated as recoverable: load explicitly, then retry exactly once.
+        if e.code not in (500, 503):
             raise
-        _post("/admin/load", {"model": MODEL, "mode": "auto"})
+        _post("/admin/load", {"model": MODEL, "mode": "auto"}, timeout=600)
         out = _post("/v1/completions", payload)
-    usage = out.get("usage", {})
-    if usage.get("completion_tokens") == max_tokens:
-        raise RuntimeError(f"truncated at max_tokens={max_tokens}; raise and retry")
-    return out["choices"][0]["text"].strip(), usage
+
+    text = out["choices"][0]["text"].strip()
+    usage = out.get("usage") or {}
+    produced = usage.get("completion_tokens")
+
+    # Truncation is detected two ways, because the token count alone is not
+    # enough: the server may omit usage entirely, and a stop-string collision
+    # halts generation well below max_tokens.
+    if produced is None:
+        raise RuntimeError("no usage in response; cannot confirm completeness")
+    if produced >= max_tokens:
+        raise RuntimeError(
+            f"truncated at max_tokens={max_tokens}; raise it and retry")
+    finish = (out["choices"][0].get("finish_reason") or "").lower()
+    if finish and finish not in ("stop", "eos", "length_stop", ""):
+        raise RuntimeError(f"unexpected finish_reason {finish!r}; treat as partial")
+    return text, usage
 ```
 
 The 503 branch handles the idle unload described elsewhere in this document. The truncation check is deliberately an exception rather than a warning so that a partial answer cannot be used by accident. The imports required are `json`, `os`, `pathlib`, `urllib.request` and `urllib.error`.
+
+## Concurrency does not help on this setup
+
+The `--max-batch 4` flag sets a ceiling on how many requests may be in flight at once, it does not force a batch size, so a single request is not penalised by it. This distinction is important because the flag is easy to misread as a fixed batch size that would artificially constrain single-user performance.
+
+On this server, running requests concurrently reduces total throughput rather than increasing it. Normally batching raises aggregate tokens per second while lowering per-request speed. Here both fall. The measurements below were taken with open-ended prose of the same length, issued together.
+
+| Concurrent requests | Aggregate tokens per second | Mean per request | Slowest request |
+| :--- | :--- | :--- | :--- |
+| 1 | 12.7 | 12.7 | 12.7 |
+| 2 | 12.4 | 9.6 | 6.1 |
+| 4 | 11.3 | 6.1 | 2.2 |
+
+There is a significant fairness problem at four concurrent requests. The individual rates were 12.4, 6.1, 2.2, and 3.6 tokens per second, so the first caller ran roughly five and a half times faster than the slowest one. Work queued behind other work starves rather than degrading evenly.
+
+The likely mechanism is that speculative decoding already converts spare compute into speed by having a drafter propose tokens that the large model verifies in one pass, so the memory bandwidth is already well used at a single stream. Adding concurrent streams therefore competes for bandwidth that was not idle, while also multiplying the key-value cache footprint. This is the most probable explanation given the numbers rather than a proven cause.
+
+Callers should serialise work through this server and queue requests rather than fanning them out. Parallelism buys no aggregate throughput here and costs latency and predictability.
+
+### A memory consequence worth acting on
+
+The key-value cache is charged per batch slot. At the current 131,072 token context each slot is worth about 8 GB, so four slots represent about 32 GB of worst case reservation on top of roughly 20 GB for the target and drafter weights. Those are ceilings rather than what is actually paid: the cache is allocated as it is needed, and a single stream at this context measured 15.5 GB active and 18.6 GB peak.
+
+Lowering the maximum batch to one was tried, on the reasoning that concurrency was not earning its memory. It was reverted. A batch of one removes the only fairness mechanism the server has, so a short request submitted behind a very long prefill is blocked for the entire duration of that prefill rather than progressing slowly alongside it. This was observed directly: a small request queued behind a 70,000 token prefill made no progress at all until the large request was abandoned. A maximum batch of four is therefore kept, and callers are expected to avoid fanning work out themselves rather than relying on the server to arbitrate.
+
+## Using the model efficiently
+
+### Reuse the prompt prefix, it is the largest single win
+Prefill is the dominant cost on long inputs, and the server caches the key-value state of a prompt prefix so an identical prefix does not have to be recomputed. Measured with a 16,415 token prompt repeated three times, changing only a short question at the very end, the first call took 134.4 seconds, the second took 130.1 seconds and registered a cache hit of 16,384 tokens, and the third took 0.68 seconds while reusing 16,405 tokens. The hit is recorded on the second call but the saving only materialises on the third, which is consistent with the cache operating in checkpoint mode. Callers should therefore not conclude the cache is broken after one repeat. The practical rule is to put everything stable at the start of the prompt and everything that varies at the very end, and to keep the stable part byte-identical between calls. Answering ten questions about one document should send the document once as a shared prefix rather than ten times.
+
+### Make the output more predictable when you can
+Throughput is governed by how many drafted tokens survive verification, so predictable output runs far faster. Counting output reached 103 tokens per second while open ended prose reached about 19. Constrained output formats, fixed templates, enumerations and short structured replies are therefore materially cheaper than free prose, and asking for a rigid shape is an efficiency decision and not only a parsing convenience.
+
+### Batch questions instead of chatting
+Every request pays its own prefill, so several small related calls cost more in total than one call that asks for several answers at once. Combined with prefix reuse, the cheapest pattern is one stable context followed by a request for all the answers together.
+
+### Do not fan out work
+Concurrency was measured to reduce aggregate throughput on this server rather than raise it, so submitting work in parallel is slower overall as well as less predictable per request. The opposite hazard is that setting the maximum batch to one removes any fairness, so a small request queued behind a very long prefill waits for the whole thing. A maximum batch of four is kept for that reason.
+
+### Check what else is loaded before heavy work
+LM Studio and this server hold separate copies of their weights, so both being loaded wastes roughly 16 GB. An idle LM Studio model was observed holding 16.08 GB while doing nothing. Running `lms ps` before a long job, and unloading anything idle, is worth the few seconds it takes.
+
+### Handle the idle unload defensively
+The watcher unloads the model after a period without requests. A request that arrives afterwards can fail, and it was observed failing with HTTP 500 rather than the documented HTTP 503, with the server log reporting that no model is loaded. Any caller should therefore treat both status codes as recoverable, load the model explicitly through the admin endpoint, and retry once.
 
 ## Troubleshooting playbook
 
@@ -275,7 +373,7 @@ The 503 branch handles the idle unload described elsewhere in this document. The
 
 **Symptom: context length errors / truncated output on long prompts.**
 - Check `/health`'s `context_window` field matches what you expect (currently
-  65536). If you need to raise it, see "Changing the context window" below --
+  131072). If you need to raise it, see "Changing the context window" below --
   don't just increase `max_tokens` in the request, that's the output budget,
   not the context window.
 

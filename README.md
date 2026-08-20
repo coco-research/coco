@@ -11,7 +11,7 @@
 
 ### Summon an advisory board of 389 world-class minds — right inside your AI coding session.
 
-CoCo Super Intelligence is the orchestration layer that turns Claude Code, Cursor, or Codex into an entire engineering department: routed expert panels that deliberate and decide, then **179 skills**, **279 commands**, and disk-persistent state that ship what they decided.
+CoCo Super Intelligence is the orchestration layer that turns Claude Code, Cursor, or Codex into an entire engineering department: routed expert panels that deliberate and decide, then **185 skills**, **280 commands**, and disk-persistent state that ship what they decided.
 
 Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds · 100% local · no telemetry
 
@@ -20,7 +20,7 @@ Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds
 [![License: Open-core](https://img.shields.io/badge/License-Open--core-yellow.svg?style=for-the-badge)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.2.0-blue?style=for-the-badge)](CHANGELOG.md)
 [![Skills](https://img.shields.io/badge/skills-149-emerald?style=for-the-badge)](skills/)
-[![Commands](https://img.shields.io/badge/commands-277-indigo?style=for-the-badge)](commands/)
+[![Commands](https://img.shields.io/badge/commands-280-indigo?style=for-the-badge)](commands/)
 [![Personas](https://img.shields.io/badge/personas-389-violet?style=for-the-badge)](systems/superintelligence/)
 [![CI](https://img.shields.io/github/actions/workflow/status/coco-research/coco/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/coco-research/coco/actions)
 
@@ -212,12 +212,12 @@ Requires only Python 3 and `git`. No new dependencies. Design adapted from [lak7
 
 ## The CoCo Asset Library
 
-A standard install equips your workspace with a lightweight core; full activation unlocks up to **896 total assets** to orchestrate any software-engineering workflow.
+A standard install equips your workspace with a lightweight core; full activation unlocks up to **903 total assets** to orchestrate any software-engineering workflow.
 
 <table align="center">
 <tr>
-<td align="center" width="20%"><h3>179</h3><sub>Skills</sub><br><small>68 Core + 111 Bundle</small></td>
-<td align="center" width="20%"><h3>279</h3><sub>Slash Commands</sub><br><small>37 Core + 242 Generated</small></td>
+<td align="center" width="20%"><h3>185</h3><sub>Skills</sub><br><small>70 Core + 115 Bundle</small></td>
+<td align="center" width="20%"><h3>280</h3><sub>Slash Commands</sub><br><small>38 Core + 242 Generated</small></td>
 <td align="center" width="20%"><h3>34</h3><sub>Specialized Agents</sub><br><small>10 Core + 24 Bundle</small></td>
 <td align="center" width="20%"><h3>389</h3><sub>Expert Personas</sub><br><small>Super Intelligence Board</small></td>
 <td align="center" width="20%"><h3>15</h3><sub>Cross-IDE Rules</sub><br><small>Cursor MDC Rules</small></td>
@@ -235,7 +235,7 @@ A standard install equips your workspace with a lightweight core; full activatio
 
 ## Skills Catalog
 
-CoCo ships **179 skills** (68 core + 111 across bundles). These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
+CoCo ships **185 skills** (70 core + 115 across bundles). These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
 
 ### Visual design & styling
 `ui-ux-pro-max` (50 styles, 21 palettes, 50 font pairings, 9 stacks) · `frontend-design` · `design-taste-frontend` · `redesign-existing-projects` · `axiom-liquid-glass` (Apple Liquid Glass, WWDC 2025) · `swiftui-liquid-glass` · `web-design-guidelines` · `tailwind-patterns` (Tailwind v4) · `vercel-react-best-practices` · `clone-website` · `c4-architecture` · `arb-review` · `expo-api-routes` · `ai-product` · `scroll-world` (scroll-scrubbed, cut-free camera flythrough landing pages, generated end to end via Higgsfield).
@@ -259,7 +259,7 @@ CoCo ships **179 skills** (68 core + 111 across bundles). These are not prompt s
 `coco` (conversational router) · `coco-cli` · `coco-loop` (compiles a plain-language goal into a confirmed charter, then runs a bounded, propose-only autonomous loop) · `skill-creator` · `writing-skills` · `find-skills`.
 
 <details>
-<summary><strong>▸ Full catalog — every one of the 179 skills</strong></summary>
+<summary><strong>▸ Full catalog — every one of the 185 skills</strong></summary>
 
 <br>
 
@@ -683,13 +683,13 @@ npx cocosuperintelligence update
 <tr><td><strong>Spec Version</strong></td><td>1.2.0</td></tr>
 <tr><td><strong>License</strong></td><td>Open-core — <a href="LICENSE">MIT</a> core; Super Intelligence is <a href="systems/superintelligence/LICENSE">proprietary</a></td></tr>
 <tr><td><strong>Total Skills</strong></td><td>149 with all bundles installed (66 Core + 68 GSD + 6 Brain + 9 Super Intelligence)</td></tr>
-<tr><td><strong>Slash Commands</strong></td><td>277 with all bundles — 35 Core (shipped) + 242 Super Intelligence (225 per-team + 17 cross-team, generated at install)</td></tr>
+<tr><td><strong>Slash Commands</strong></td><td>280 with all bundles — 38 Core (shipped) + 242 Super Intelligence (225 per-team + 17 cross-team, generated at install)</td></tr>
 <tr><td><strong>Specialized Agents</strong></td><td>34 (10 Core + 24 GSD Bundle)</td></tr>
 <tr><td><strong>Expert Personas</strong></td><td>389 across 9 departments and 70 cells</td></tr>
 <tr><td><strong>System Bundles</strong></td><td>5 (GSD, Brain, Cognee, HyperFrames, Super Intelligence) — opt in with <code>--systems &lt;name&gt;</code>. <code>/team</code> is core and needs no flag.</td></tr>
 <tr><td><strong>Cross-IDE Rules</strong></td><td>15 (.mdc files)</td></tr>
 <tr><td><strong>Workflows Defined</strong></td><td>3 (.md pipelines)</td></tr>
-<tr><td><strong>Total Addressable Assets</strong></td><td>896 with all bundles enabled</td></tr>
+<tr><td><strong>Total Addressable Assets</strong></td><td>903 with all bundles enabled</td></tr>
 <tr><td><strong>Install Time</strong></td><td>&le; 90 seconds</td></tr>
 <tr><td><strong>Telemetry / SaaS</strong></td><td>None — 100% local files</td></tr>
 </table>

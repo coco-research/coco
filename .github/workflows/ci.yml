@@ -63,7 +63,7 @@ jobs:
 
       - name: Adapter smoke test (dry-run)
         run: |
-          for adapter in claude-code cursor codex generic; do
+          for adapter in claude-code cursor vscode codex generic; do
             echo "--- testing $adapter (dry-run) ---"
             bash adapters/$adapter/install.sh --dry-run > /tmp/$adapter.out 2>&1 || {
               echo "FAIL: $adapter"

@@ -9,7 +9,7 @@ last_updated: 2026-06-01
 
 # Finance Super Intelligence Team
 
-Rijul's finance brain trust and decision partner. Named personas across 7 cells: valuation/corporate finance, investing, accounting/FP&A, macro, fintech, behavioral, and capital markets/M&A/private. Markets/quant/derivatives are reserved for the Trading team. Built local-first (LM Studio) and validator-gated. Invoked by /SI-Fin commands.
+Your finance brain trust and decision partner. Named personas across 7 cells: valuation/corporate finance, investing, accounting/FP&A, macro, fintech, behavioral, and capital markets/M&A/private. Markets/quant/derivatives are reserved for the Trading team. Built local-first (LM Studio) and validator-gated. Invoked by /SI-Fin commands.
 
 **39 native personas** (0 cross-listed) across **7 cells**. Real public figures
 rendered as illustrative composites — see `superintelligence/DISCLAIMER.md`. Built local-first +

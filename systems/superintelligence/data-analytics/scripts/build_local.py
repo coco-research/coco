@@ -4,15 +4,22 @@ Production local-first persona builder for the Finance SIT (and reusable for any
 Pipeline per persona:  retrieve (deep, free) -> draft (local) -> repair/cite pass (local)
   -> write personas/<slug>.md + research/<slug>/notes.md -> validate -> verdict.
 
-All generation is local (LM Studio) => ~$0. Validator enforces the verify-gate.
+All generation runs against a local OpenAI-compatible server => ~$0. Validator enforces
+the verify-gate. The defaults target LM Studio, which this pipeline was built against;
+set COCO_LOCAL_ENDPOINT to use any other OpenAI-compatible server (exo, llama.cpp, vLLM).
 
 Usage:
   python3 build_local.py --all
   python3 build_local.py --only aswath-damodaran
   python3 build_local.py --cell macro-economics
-  (model defaults to qwen/qwen3.6-35b-a3b; must be loaded in LM Studio)
+  (model defaults to $COCO_LOCAL_MODEL, else qwen/qwen3.6-35b-a3b; whichever it is
+   must already be loaded by the server at $COCO_LOCAL_ENDPOINT)
+
+  # run against an exo cluster instead of LM Studio:
+  COCO_LOCAL_ENDPOINT=http://localhost:52415/v1/chat/completions \\
+  COCO_LOCAL_MODEL=mlx-community/Qwen3.6-35B-A3B-8bit python3 build_local.py --all
 """
-import argparse, json, re, sys, time, urllib.request, pathlib, yaml
+import argparse, json, os, re, sys, time, urllib.request, pathlib, yaml
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import retriever
 from validate_persona import validate
@@ -21,7 +28,11 @@ FIN = pathlib.Path(__file__).resolve().parents[1]          # superintelligence/f
 ROSTER = json.loads((FIN / "roster.json").read_text())
 PERSONAS = FIN / "personas"; PERSONAS.mkdir(exist_ok=True)
 RESEARCH = FIN / "research"; RESEARCH.mkdir(exist_ok=True)
-ENDPOINT = "http://127.0.0.1:1234/v1/chat/completions"
+# Any OpenAI-compatible chat-completions endpoint works. Kept as the default because the
+# roster was built against LM Studio; exo serves the identical shape on port 52415.
+DEFAULT_ENDPOINT = "http://127.0.0.1:1234/v1/chat/completions"
+DEFAULT_MODEL = "qwen/qwen3.6-35b-a3b"
+ENDPOINT = os.environ.get("COCO_LOCAL_ENDPOINT") or DEFAULT_ENDPOINT
 POOL = [p["slug"] for p in ROSTER["personas"]]
 
 FM = """slug, real_name, archetype (one line), teams (list), home_team, cell, cell_role, status (active|archetype), affiliations_2026 (list; single-quote values with a colon), domains (list), signature_moves (list), canonical_works (list), key_publications (list), recent_signal_12mo (list of {title,date,url}), public_stances (list of {stance,evidence_url}), mental_models (list), pairs_well_with (list of slugs), productive_conflict_with (list of slugs), blind_spots (list), voice_style (text), when_to_summon (list), confidence, last_verified, sources (list of URLs)"""
@@ -97,7 +108,7 @@ def build_one(p, model):
 
 def main():
     ap=argparse.ArgumentParser()
-    ap.add_argument("--model",default="qwen/qwen3.6-35b-a3b")
+    ap.add_argument("--model",default=os.environ.get("COCO_LOCAL_MODEL") or DEFAULT_MODEL)
     ap.add_argument("--all",action="store_true"); ap.add_argument("--only",default=""); ap.add_argument("--cell",default="")
     ap.add_argument("--force",action="store_true",help="rebuild even if persona file already exists")
     a=ap.parse_args()
@@ -107,7 +118,7 @@ def main():
     elif not a.all: sys.exit("pass --all | --only <slug> | --cell <cell>")
     if not a.force:
         todo=[p for p in todo if not (PERSONAS/f"{p['slug']}.md").exists()]  # resume: skip built
-    print(f"building {len(todo)} persona(s) with {a.model}")
+    print(f"building {len(todo)} persona(s) with {a.model} via {ENDPOINT}")
     npass=0
     for i,p in enumerate(todo,1):
         try:

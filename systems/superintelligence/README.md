@@ -71,6 +71,20 @@ Persona generation was an explicit cost/quality experiment, settled by evidence:
 3. **gemini-3.5-flash** (`build_cursor.py`, Cursor headless agent) — top quality, but agent-latency-flaky at batch scale.
 4. **Claude research agents (WebSearch)** — the quality winner; built the pending tail via a fan-out workflow.
 
+`build_local.py` talks plain OpenAI chat-completions, so it is not tied to LM Studio. Point
+it at any server speaking that shape — including an [exo](https://github.com/exo-explore/exo)
+cluster, which lets a model span several machines rather than being capped by one:
+
+```bash
+COCO_LOCAL_ENDPOINT=http://localhost:52415/v1/chat/completions \
+COCO_LOCAL_MODEL=mlx-community/Qwen3.6-35B-A3B-8bit \
+  python3 finance/scripts/build_local.py --all
+```
+
+Both variables are optional; unset, the defaults remain LM Studio and `qwen/qwen3.6-35b-a3b`,
+which is what the roster above was actually built with. An explicit `--model` still wins over
+`COCO_LOCAL_MODEL`. Whichever model you name must already be loaded by that server.
+
 Plus cheap repair/recalibration: `yaml_repair.py` + `topup_cheap.py` (fix malformed YAML, prune dead URLs), and a **recalibrated validator** ([`*/scripts/validate_persona.py`](finance/scripts/validate_persona.py)) that keeps the anti-fabrication core (≥4 **live** real URLs, every stance cited, no invented quotes) while relaxing arbitrary quotas and tolerating link-rot. `activate_teams.py` flips `built=true` + regenerates commands for teams clearing threshold. Full write-up in [`QUALITY-FINDINGS.md`](QUALITY-FINDINGS.md).
 
 ## Persona schema

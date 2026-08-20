@@ -111,8 +111,8 @@ the model's trained range, not extrapolation.
 | Context window | KV cache / request | x4 concurrent (`--max-batch 4`) |
 |---|---|---|
 | 32,768 | 2.0 GB | 8 GB |
-| **65,536 (current default)** | **4.0 GB** | **16 GB** |
-| 131,072 (128k, considered, not adopted) | 8.0 GB | 32 GB |
+| 65,536 | 4.0 GB | 16 GB |
+| **131,072 (current default)** | **8.0 GB** | **32 GB** |
 
 Base model weights: ~16GB (target) + ~4GB (drafter, `dflash` mode) = ~20GB,
 before any KV cache. Add LM Studio's own separate ~16GB if it's also loaded
@@ -163,7 +163,7 @@ Measured against that ceiling:
 
 ## What this model is good at, and what it is not
 
-The local model runs entirely on the local machine, which ensures that no data leaves the device and that there is no per-token cost associated with usage. The measured decode speed ranges from 20 to 35 tokens per second, and the context window supports 65,536 tokens. The model performs well at summarizing many small-to-medium diffs, at bulk classification of files into categories, and at mechanical text transformation, which represent its strongest use cases. It has no network access at all, so it cannot perform web research, cannot resolve a URL, and cannot look up a current fact beyond its training data. The model is weak in scenarios where a silently wrong answer is expensive, such as merge conflict resolution, security judgements, and attribution or licensing decisions. In those cases, the model should gather and summarize evidence, then a human or a stronger model should make the actual decision. Because the model is slow relative to a hosted model, it is preferable for work that is bulky and mechanical rather than short and latency sensitive.
+The local model runs entirely on the local machine, which ensures that no data leaves the device and that there is no per-token cost associated with usage. Measured decode speed is not a single figure: it ranged from 19 tokens per second on open ended prose to 103 on trivially predictable output, against a server reported mean of about 14 across mixed real requests. The context window is 131,072 tokens. The model performs well at summarizing many small-to-medium diffs, at bulk classification of files into categories, and at mechanical text transformation, which represent its strongest use cases. It has no network access at all, so it cannot perform web research, cannot resolve a URL, and cannot look up a current fact beyond its training data. The model is weak in scenarios where a silently wrong answer is expensive, such as merge conflict resolution, security judgements, and attribution or licensing decisions. In those cases, the model should gather and summarize evidence, then a human or a stronger model should make the actual decision. Because the model is slow relative to a hosted model, it is preferable for work that is bulky and mechanical rather than short and latency sensitive.
 
 ## Known failure modes
 
@@ -179,7 +179,7 @@ During a test where the caller requested the local LLM to reproduce a code block
 
 The mlx-dspark server is only an inference endpoint. It has no browser, no tool calling loop, and no network egress of its own, so the model genuinely cannot fetch anything. The practical pattern is therefore to keep the network on the caller's side. The orchestrating agent performs the fetch or the search itself, then passes the retrieved text into the prompt as context. The local model still does all of the reasoning, and the caller acts only as its input and output layer. This approach needs no additional infrastructure.
 
-A second option is to build a genuine tool calling loop, since the server exposes an OpenAI compatible API and could therefore emit a structured request that the caller executes and feeds back. Tool calling reliability on a 27B four-bit model is mediocre, so this is worth building only when the extra autonomy is actually needed. Whichever pattern is used, remember the context window is 65,536 tokens, so fetched pages should be trimmed or summarized before they are pasted in.
+A second option is to build a genuine tool calling loop, since the server exposes an OpenAI compatible API and could therefore emit a structured request that the caller executes and feeds back. Tool calling reliability on a 27B four-bit model is mediocre, so this is worth building only when the extra autonomy is actually needed. Whichever pattern is used, remember the context window is 131,072 tokens, so fetched pages should be trimmed or summarized before they are pasted in.
 
 ## Calling it from your own script
 
@@ -272,10 +272,12 @@ def ask(question, max_tokens=1600, temperature=0.3, stop=(STOP,)):
     try:
         out = _post("/v1/completions", payload)
     except urllib.error.HTTPError as e:
-        if e.code != 503:
+        # The idle watcher unloads the model after a quiet period. That has been
+        # observed surfacing as 500 as well as the documented 503, so both are
+        # treated as recoverable: load explicitly, then retry exactly once.
+        if e.code not in (500, 503):
             raise
-        # Idle-unloaded. Reload once, then retry exactly once.
-        _post("/admin/load", {"model": MODEL, "mode": "auto"})
+        _post("/admin/load", {"model": MODEL, "mode": "auto"}, timeout=600)
         out = _post("/v1/completions", payload)
 
     text = out["choices"][0]["text"].strip()
@@ -318,7 +320,29 @@ Callers should serialise work through this server and queue requests rather than
 
 ### A memory consequence worth acting on
 
-The key-value cache is reserved per batch slot, so at a 65,536 token context each slot costs about 4 GB and four slots reserve about 16 GB, on top of roughly 20 GB for the target and drafter weights. Since concurrency is not earning anything, lowering `--max-batch` in `~/.config/mlx-dspark/start.sh` would free roughly 12 GB, which could instead fund a larger context window or leave room for LM Studio to be loaded at the same time. This is a recommendation about a file outside the repository and it has not been applied.
+The key-value cache is charged per batch slot. At the current 131,072 token context each slot is worth about 8 GB, so four slots represent about 32 GB of worst case reservation on top of roughly 20 GB for the target and drafter weights. Those are ceilings rather than what is actually paid: the cache is allocated as it is needed, and a single stream at this context measured 15.5 GB active and 18.6 GB peak.
+
+Lowering the maximum batch to one was tried, on the reasoning that concurrency was not earning its memory. It was reverted. A batch of one removes the only fairness mechanism the server has, so a short request submitted behind a very long prefill is blocked for the entire duration of that prefill rather than progressing slowly alongside it. This was observed directly: a small request queued behind a 70,000 token prefill made no progress at all until the large request was abandoned. A maximum batch of four is therefore kept, and callers are expected to avoid fanning work out themselves rather than relying on the server to arbitrate.
+
+## Using the model efficiently
+
+### Reuse the prompt prefix, it is the largest single win
+Prefill is the dominant cost on long inputs, and the server caches the key-value state of a prompt prefix so an identical prefix does not have to be recomputed. Measured with a 16,415 token prompt repeated three times, changing only a short question at the very end, the first call took 134.4 seconds, the second took 130.1 seconds and registered a cache hit of 16,384 tokens, and the third took 0.68 seconds while reusing 16,405 tokens. The hit is recorded on the second call but the saving only materialises on the third, which is consistent with the cache operating in checkpoint mode. Callers should therefore not conclude the cache is broken after one repeat. The practical rule is to put everything stable at the start of the prompt and everything that varies at the very end, and to keep the stable part byte-identical between calls. Answering ten questions about one document should send the document once as a shared prefix rather than ten times.
+
+### Make the output more predictable when you can
+Throughput is governed by how many drafted tokens survive verification, so predictable output runs far faster. Counting output reached 103 tokens per second while open ended prose reached about 19. Constrained output formats, fixed templates, enumerations and short structured replies are therefore materially cheaper than free prose, and asking for a rigid shape is an efficiency decision and not only a parsing convenience.
+
+### Batch questions instead of chatting
+Every request pays its own prefill, so several small related calls cost more in total than one call that asks for several answers at once. Combined with prefix reuse, the cheapest pattern is one stable context followed by a request for all the answers together.
+
+### Do not fan out work
+Concurrency was measured to reduce aggregate throughput on this server rather than raise it, so submitting work in parallel is slower overall as well as less predictable per request. The opposite hazard is that setting the maximum batch to one removes any fairness, so a small request queued behind a very long prefill waits for the whole thing. A maximum batch of four is kept for that reason.
+
+### Check what else is loaded before heavy work
+LM Studio and this server hold separate copies of their weights, so both being loaded wastes roughly 16 GB. An idle LM Studio model was observed holding 16.08 GB while doing nothing. Running `lms ps` before a long job, and unloading anything idle, is worth the few seconds it takes.
+
+### Handle the idle unload defensively
+The watcher unloads the model after a period without requests. A request that arrives afterwards can fail, and it was observed failing with HTTP 500 rather than the documented HTTP 503, with the server log reporting that no model is loaded. Any caller should therefore treat both status codes as recoverable, load the model explicitly through the admin endpoint, and retry once.
 
 ## Troubleshooting playbook
 
@@ -349,7 +373,7 @@ The key-value cache is reserved per batch slot, so at a 65,536 token context eac
 
 **Symptom: context length errors / truncated output on long prompts.**
 - Check `/health`'s `context_window` field matches what you expect (currently
-  65536). If you need to raise it, see "Changing the context window" below --
+  131072). If you need to raise it, see "Changing the context window" below --
   don't just increase `max_tokens` in the request, that's the output budget,
   not the context window.
 

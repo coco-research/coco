@@ -13,7 +13,7 @@ Usage:
   (model defaults to qwen/qwen3.6-35b-a3b; must be served by the mlx-dspark launchd service --
    see ~/.config/mlx-dspark/start.sh, or export MLX_DSPARK_API_KEY to override the key source)
 """
-import argparse, json, os, re, sys, time, urllib.request, pathlib, yaml
+import argparse, json, os, re, sys, time, urllib.request, urllib.error, pathlib, yaml
 from concurrent.futures import ThreadPoolExecutor, as_completed
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import retriever
@@ -24,6 +24,7 @@ ROSTER = json.loads((FIN / "roster.json").read_text())
 PERSONAS = FIN / "personas"; PERSONAS.mkdir(exist_ok=True)
 RESEARCH = FIN / "research"; RESEARCH.mkdir(exist_ok=True)
 ENDPOINT = "http://127.0.0.1:8090/v1/completions"  # mlx-dspark server, raw prompt endpoint (see llm() below)
+ADMIN_LOAD_ENDPOINT = "http://127.0.0.1:8090/admin/load"  # used to reload the model after an idle-unload (see llm() 503 handling)
 POOL = [p["slug"] for p in ROSTER["personas"]]
 
 FM = """slug, real_name, archetype (one line), teams (list), home_team, cell, cell_role, status (active|archetype), affiliations_2026 (list; single-quote values with a colon), domains (list), signature_moves (list), canonical_works (list), key_publications (list), recent_signal_12mo (list of {title,date,url}), public_stances (list of {stance,evidence_url}), mental_models (list), pairs_well_with (list of slugs), productive_conflict_with (list of slugs), blind_spots (list), voice_style (text), when_to_summon (list), confidence, last_verified, sources (list of URLs)"""
@@ -72,14 +73,40 @@ def _dspark_api_key():
         f"{key_file} exists (see ~/.config/mlx-dspark/start.sh)"
     )
 
+def _dspark_headers():
+    # Build the auth header at call time from the key helper above -- never
+    # store or format the header value as a literal anywhere in this file.
+    auth_value = f"Bearer {_dspark_api_key()}"
+    return {"Content-Type": "application/json", "Authorization": auth_value}
+
+def _dspark_load(model):
+    # Reload the model after an idle-unload (mlx-dspark's idle_watcher.py may
+    # have called /admin/unload after 15min of no traffic). context_window is
+    # sticky across loads server-side, so it does not need to be resent here.
+    # /admin/load blocks until the swap finishes -- no polling loop needed.
+    payload = json.dumps({"model": model, "mode": "auto"}).encode()
+    req = urllib.request.Request(ADMIN_LOAD_ENDPOINT, data=payload, headers=_dspark_headers(), method="POST")
+    with urllib.request.urlopen(req, timeout=120) as r:
+        return json.loads(r.read().decode())
+
+def _dspark_request(payload):
+    req = urllib.request.Request(ENDPOINT, data=json.dumps(payload).encode(), headers=_dspark_headers())
+    return urllib.request.urlopen(req, timeout=900)
+
 def llm(model, messages, max_tokens=11000, temp=0.4):
     prompt=_raw_prompt(messages)
     payload={"model":model,"prompt":prompt,"temperature":temp,"max_tokens":max_tokens,"stream":True,"stop":["<|im_end|>"]}
-    headers={"Content-Type":"application/json","Authorization":f"Bearer {_dspark_api_key()}"}
-    req=urllib.request.Request(ENDPOINT,data=json.dumps(payload).encode(),headers=headers)
     t0=time.time()
     text_parts=[]
-    with urllib.request.urlopen(req,timeout=900) as r:
+    try:
+        response = _dspark_request(payload)
+    except urllib.error.HTTPError as e:
+        if e.code != 503:
+            raise
+        # Model was idle-unloaded -- reload once and retry the request once.
+        _dspark_load(model)
+        response = _dspark_request(payload)
+    with response as r:
         for line in r:
             if not line.startswith(b"data: "): continue
             chunk=line[6:].strip()

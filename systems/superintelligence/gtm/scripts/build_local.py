@@ -4,15 +4,16 @@ Production local-first persona builder for the Finance SIT (and reusable for any
 Pipeline per persona:  retrieve (deep, free) -> draft (local) -> repair/cite pass (local)
   -> write personas/<slug>.md + research/<slug>/notes.md -> validate -> verdict.
 
-All generation is local (LM Studio) => ~$0. Validator enforces the verify-gate.
+All generation is local (mlx-dspark speculative-decoding server) => ~$0. Validator enforces the verify-gate.
 
 Usage:
   python3 build_local.py --all
   python3 build_local.py --only aswath-damodaran
   python3 build_local.py --cell macro-economics
-  (model defaults to qwen/qwen3.6-35b-a3b; must be loaded in LM Studio)
+  (model defaults to qwen/qwen3.6-35b-a3b; must be served by the mlx-dspark launchd service --
+   see ~/.config/mlx-dspark/start.sh, or export MLX_DSPARK_API_KEY to override the key source)
 """
-import argparse, json, re, sys, time, urllib.request, pathlib, yaml
+import argparse, json, os, re, sys, time, urllib.request, pathlib, yaml
 from concurrent.futures import ThreadPoolExecutor, as_completed
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import retriever
@@ -22,7 +23,7 @@ FIN = pathlib.Path(__file__).resolve().parents[1]          # superintelligence/f
 ROSTER = json.loads((FIN / "roster.json").read_text())
 PERSONAS = FIN / "personas"; PERSONAS.mkdir(exist_ok=True)
 RESEARCH = FIN / "research"; RESEARCH.mkdir(exist_ok=True)
-ENDPOINT = "http://127.0.0.1:1234/v1/completions"  # raw prompt endpoint (see llm() below)
+ENDPOINT = "http://127.0.0.1:8090/v1/completions"  # mlx-dspark server, raw prompt endpoint (see llm() below)
 POOL = [p["slug"] for p in ROSTER["personas"]]
 
 FM = """slug, real_name, archetype (one line), teams (list), home_team, cell, cell_role, status (active|archetype), affiliations_2026 (list; single-quote values with a colon), domains (list), signature_moves (list), canonical_works (list), key_publications (list), recent_signal_12mo (list of {title,date,url}), public_stances (list of {stance,evidence_url}), mental_models (list), pairs_well_with (list of slugs), productive_conflict_with (list of slugs), blind_spots (list), voice_style (text), when_to_summon (list), confidence, last_verified, sources (list of URLs)"""
@@ -45,20 +46,37 @@ def _raw_prompt(messages):
     # ChatML prompt with the assistant turn's <think> block pre-closed and EMPTY.
     # This is the "prefill trick": since reasoning is already closed, the model has
     # no room left to think and must go straight to the answer. Verified empirically
-    # that LM Studio does not honor reasoning_effort/enable_thinking for this model
-    # via /v1/chat/completions (tried top-level, camelCase, chat_template_kwargs, and
-    # baked into the server's persisted per-model load config — none suppressed
-    # reasoning). Using the raw /v1/completions endpoint with a forced-empty <think>
-    # block bypasses that gap entirely and gives the full max_tokens budget to the
-    # real answer instead of burning it on unbounded reasoning.
+    # that LM Studio and mlx-dspark both do not honor reasoning_effort/enable_thinking
+    # for this model via /v1/chat/completions (tried top-level, camelCase,
+    # chat_template_kwargs, and baked into persisted per-model load config -- none
+    # suppressed reasoning). Using the raw /v1/completions endpoint with a
+    # forced-empty <think> block bypasses that gap entirely and gives the full
+    # max_tokens budget to the real answer instead of burning it on unbounded
+    # reasoning. Same trick works against mlx-dspark since it uses the identical
+    # jinja chat-template mechanics.
     parts=[f"<|im_start|>{m['role']}\n{m['content']}<|im_end|>\n" for m in messages]
     parts.append("<|im_start|>assistant\n<think>\n\n</think>\n\n")
     return "".join(parts)
 
+def _dspark_api_key():
+    # Never hardcode the key. Prefer the env var; fall back to the local,
+    # non-repo key file the launchd service also reads (0600 perms, outside git).
+    key = os.environ.get("MLX_DSPARK_API_KEY")
+    if key:
+        return key.strip()
+    key_file = pathlib.Path.home() / ".config" / "mlx-dspark" / "api_key"
+    if key_file.exists():
+        return key_file.read_text().strip()
+    raise RuntimeError(
+        "mlx-dspark API key not found -- set MLX_DSPARK_API_KEY or ensure "
+        f"{key_file} exists (see ~/.config/mlx-dspark/start.sh)"
+    )
+
 def llm(model, messages, max_tokens=11000, temp=0.4):
     prompt=_raw_prompt(messages)
     payload={"model":model,"prompt":prompt,"temperature":temp,"max_tokens":max_tokens,"stream":True,"stop":["<|im_end|>"]}
-    req=urllib.request.Request(ENDPOINT,data=json.dumps(payload).encode(),headers={"Content-Type":"application/json"})
+    headers={"Content-Type":"application/json","Authorization":f"Bearer {_dspark_api_key()}"}
+    req=urllib.request.Request(ENDPOINT,data=json.dumps(payload).encode(),headers=headers)
     t0=time.time()
     text_parts=[]
     with urllib.request.urlopen(req,timeout=900) as r:
@@ -118,7 +136,7 @@ def build_one(p, model):
     fixed = pick_parseable(fixed, draft)
     (PERSONAS/f"{slug}.md").write_text(fixed+"\n",encoding="utf-8")
     rd=RESEARCH/slug; rd.mkdir(exist_ok=True)
-    dump=["# Research dump (auto, local pipeline)\n", f"name: {name}", f"generated_local: qwen via LM Studio\n", "## Fetched pages"]
+    dump=["# Research dump (auto, local pipeline)\n", f"name: {name}", f"generated_local: qwen via mlx-dspark\n", "## Fetched pages"]
     for u,txt in pages: dump.append(f"\n### {u}\n{txt}")
     dump.append("\n## Dated news")
     for n in news: dump.append(f"- {n['date']} :: {n['title']} :: {n['url']}")
@@ -140,7 +158,7 @@ def main():
         todo=[p for p in todo if not (PERSONAS/f"{p['slug']}.md").exists()]  # resume: skip built
     print(f"building {len(todo)} persona(s) with {a.model}")
     npass=0
-    # 4 concurrent workers, matching LM Studio's configured `parallel: 4` slots
+    # 4 concurrent workers, matching the mlx-dspark server's `--max-batch 4` config
     # (measured ~1.71x aggregate throughput vs sequential on this server).
     with ThreadPoolExecutor(max_workers=4) as ex:
         futs={ex.submit(build_one,p,a.model):p for p in todo}

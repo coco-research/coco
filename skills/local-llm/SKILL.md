@@ -156,6 +156,96 @@ Measured against that ceiling:
 5. Hardware upgrade (M4 Ultra ~= 2x memory bandwidth) -- out of scope, just
    noted for completeness.
 
+## What this model is good at, and what it is not
+
+The local model runs entirely on the local machine, which ensures that no data leaves the device and that there is no per-token cost associated with usage. The measured decode speed ranges from 20 to 35 tokens per second, and the context window supports 65,536 tokens. The model performs well at summarizing many small-to-medium diffs, at bulk classification of files into categories, and at mechanical text transformation, which represent its strongest use cases. It has no network access at all, so it cannot perform web research, cannot resolve a URL, and cannot look up a current fact beyond its training data. The model is weak in scenarios where a silently wrong answer is expensive, such as merge conflict resolution, security judgements, and attribution or licensing decisions. In those cases, the model should gather and summarize evidence, then a human or a stronger model should make the actual decision. Because the model is slow relative to a hosted model, it is preferable for work that is bulky and mechanical rather than short and latency sensitive.
+
+## Known failure modes
+
+Diff polarity inversion occurs when the model is asked to summarize a unified diff and reports a text change in the wrong direction. Specifically, the model may state that a value changed from A to B when the diff actually shows it changing from B to A. This was observed on a real diff and matters because the two directions can have opposite consequences. The mitigation is to state the polarity explicitly and twice in the prompt, specifying which side the minus lines come from and which side the plus lines come from. The prompt must also require the model to quote the raw diff line verbatim, including its leading plus or minus character, as evidence for every claim. The quoted line makes each claim cheap to verify with a single search, and any claim without evidence should be discarded.
+
+Silent truncation happens if the returned `completion_tokens` value is equal to the `max_tokens` that was requested. In this case, the answer was cut off mid-thought rather than completed, even though the output can still look superficially finished. The mitigation is to compare those two numbers on every call and treat equality as a failure. The system should then raise `max_tokens` and run the request again rather than using the partial answer.
+
+Reasoning suppression being ignored is a failure mode where every documented flag for suppressing reasoning is ignored by the model on the chat completions endpoint. This causes the model to exhaust its whole output budget before answering. The mitigation is the prefill technique described elsewhere in this document, and it is not optional.
+
+During a test where the caller requested the local LLM to reproduce a code block verbatim, the model emitted the end-of-turn token string as part of the requested content because that specific string was present in the source code. Since the server had configured this same string as the stop sequence, it interpreted the emitted token as a termination signal and halted generation prematurely, resulting in a response that ended mid-sentence after only 112 tokens. This behavior is indistinguishable from unrelated truncation errors, which creates a significant risk of misdiagnosis during troubleshooting. To mitigate this issue, callers must either unset the stop sequence for requests where the output may legitimately contain the stop string and trim any trailing content afterwards, or substitute a placeholder token in the prompt and swap the real value back in after generation. A general rule to prevent this failure mode is to never ask the model to echo its own control tokens.
+
+## Giving the model web access
+
+The mlx-dspark server is only an inference endpoint. It has no browser, no tool calling loop, and no network egress of its own, so the model genuinely cannot fetch anything. The practical pattern is therefore to keep the network on the caller's side. The orchestrating agent performs the fetch or the search itself, then passes the retrieved text into the prompt as context. The local model still does all of the reasoning, and the caller acts only as its input and output layer. This approach needs no additional infrastructure.
+
+A second option is to build a genuine tool calling loop, since the server exposes an OpenAI compatible API and could therefore emit a structured request that the caller executes and feeds back. Tool calling reliability on a 27B four-bit model is mediocre, so this is worth building only when the extra autonomy is actually needed. Whichever pattern is used, remember the context window is 65,536 tokens, so fetched pages should be trimmed or summarized before they are pasted in.
+
+## Calling it from your own script
+
+The preceding sections of this document describe the prefill technique conceptually, but they do not provide a ready-made implementation. This section supplies a working client so that a new caller does not have to reconstruct the specific request structure from scratch. The existing `build_local.py` script is designed as a persona pipeline rather than a general purpose client, which is why a standalone version is useful for other use cases.
+
+### The four things that are easy to get wrong
+
+- The endpoint must be `/v1/completions` and not `/v1/chat/completions`.
+- The assistant turn's `<think>` block must be present and already closed and empty, otherwise the model spends its entire budget reasoning.
+- The stop sequence must be set to `["<|im_end|>"]`, because without it the model can continue past the end of its turn and emit further dialogue.
+- A returned `completion_tokens` equal to the requested `max_tokens` means the answer was truncated and must not be used as though it were complete.
+
+### Timing expectations
+
+The decode speed for this model is 20 to 35 tokens per second. Prompt processing is separate from decode and dominates the total latency on long inputs. One measured call with a 13,809 token prompt returning 500 tokens took about 2 minutes end to end. A second measured call with a 1,134 token prompt returning 750 tokens took about 133 seconds. These numbers imply that the caller should set generous client timeouts of several minutes. The caller should not assume a short prompt is fast because decode dominates once the prompt is small. Finally, the caller should batch bulky work rather than issuing many small chatty calls.
+
+### A working client
+
+The client below is a standalone Python function.
+
+```python
+import json, os, pathlib, urllib.error, urllib.request
+
+BASE = "http://127.0.0.1:8090"
+MODEL = "mlx-community/Qwen3.8-27B-4bit"
+
+
+def _key():
+    k = os.environ.get("MLX_DSPARK_API_KEY")
+    if k:
+        return k
+    p = pathlib.Path.home() / ".config/mlx-dspark/api_key"
+    return p.read_text().strip() if p.exists() else ""
+
+
+def _post(path, payload, timeout=900):
+    req = urllib.request.Request(
+        BASE + path,
+        data=json.dumps(payload).encode(),
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + _key()},
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read())
+
+
+def ask(question, max_tokens=1600, temperature=0.3):
+    """Return (text, usage). Raises RuntimeError if the answer was truncated."""
+    payload = {
+        "model": MODEL,
+        "prompt": ("<|im_start|>user\n" + question + "<|im_end|>\n"
+                   "<|im_start|>assistant\n<think>\n\n</think>\n\n"),
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+        "stop": ["<|im_end|>"],
+    }
+    try:
+        out = _post("/v1/completions", payload)
+    except urllib.error.HTTPError as e:
+        if e.code != 503:
+            raise
+        _post("/admin/load", {"model": MODEL, "mode": "auto"})
+        out = _post("/v1/completions", payload)
+    usage = out.get("usage", {})
+    if usage.get("completion_tokens") == max_tokens:
+        raise RuntimeError(f"truncated at max_tokens={max_tokens}; raise and retry")
+    return out["choices"][0]["text"].strip(), usage
+```
+
+The 503 branch handles the idle unload described elsewhere in this document. The truncation check is deliberately an exception rather than a warning so that a partial answer cannot be used by accident. The imports required are `json`, `os`, `pathlib`, `urllib.request` and `urllib.error`.
+
 ## Troubleshooting playbook
 
 **Symptom: request hangs / "thinks" forever, dies after a client timeout.**

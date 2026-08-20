@@ -24,9 +24,15 @@ defaults (`chat.agentSkillsLocations`, `chat.agentFilesLocations`,
 One install covers chat in the editor and the CLI.
 
 Prompt files are the exception: outside a workspace's `.github/prompts`, VS Code only
-reads them from the active profile, so commands are linked into every profile folder
-found — `<User>/prompts` plus each `<User>/profiles/*/prompts`. Editions covered:
-VS Code, VS Code Insiders and VSCodium.
+reads them from the active profile, so commands are linked into `<User>/prompts` plus the
+prompts folder of every profile declared in `globalStorage/storage.json` that does not
+already share the default one. Profile folder names are read from that file rather than
+guessed, because a profile's `location` can be a nested path such as `builtin/agents`.
+Editions covered: VS Code, VS Code Insiders and VSCodium.
+
+Commands surface as slash commands in **VS Code chat** (`/team`, `/eng-anti-pattern`).
+They are not visible to the Copilot CLI agent, which reads skills, agents and instructions
+from `~/.copilot` but has no prompt-file location of its own.
 
 Two artifacts change shape on the way in:
 

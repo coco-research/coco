@@ -87,9 +87,36 @@ detect_user_dirs() {
   return 0
 }
 
+# A profile's directory name comes from `location` in globalStorage/storage.json, and that
+# value is not always a single path segment -- VS Code writes nested locations such as
+# "builtin/agents". Globbing profiles/*/ therefore does the wrong thing twice: it invents a
+# prompts folder under a container segment that is not a profile, and it never descends to
+# the real one. Read the declared list instead, and skip profiles whose useDefaultFlags.prompts
+# is true, since those deliberately share the default profile's prompts folder.
+profile_prompt_dirs() {
+  local user_dir=$1 storage="$1/globalStorage/storage.json"
+  [[ -f "$storage" ]] || return 0
+  command -v python3 >/dev/null 2>&1 || return 0
+  python3 - "$storage" <<'PY' 2>/dev/null || true
+import json, sys
+try:
+    with open(sys.argv[1]) as fh:
+        profiles = json.load(fh).get("userDataProfiles") or []
+except Exception:
+    sys.exit(0)
+for p in profiles:
+    loc = p.get("location")
+    if not isinstance(loc, str) or not loc:
+        continue
+    if (p.get("useDefaultFlags") or {}).get("prompts"):
+        continue
+    print(loc)
+PY
+}
+
 collect_prompt_dirs() {
   local -a user_dirs=()
-  local d extra u p
+  local d extra u loc found
   while IFS= read -r d; do [[ -n "$d" ]] && user_dirs+=("$d"); done < <(detect_user_dirs)
   for extra in "${EXTRA_USER_DIRS[@]:-}"; do
     [[ -n "$extra" ]] && user_dirs+=("$extra")
@@ -97,9 +124,20 @@ collect_prompt_dirs() {
   for u in "${user_dirs[@]:-}"; do
     [[ -n "$u" ]] || continue
     echo "$u/prompts"
-    for p in "$u"/profiles/*/; do
-      [[ -d "$p" ]] && echo "${p%/}/prompts"
-    done
+    found=0
+    while IFS= read -r loc; do
+      [[ -n "$loc" ]] || continue
+      found=1
+      echo "$u/profiles/$loc/prompts"
+    done < <(profile_prompt_dirs "$u")
+    # Only fall back to guessing when the profile list could not be read at all (no
+    # python3, or no storage.json yet). A readable list that yields nothing is an answer,
+    # not a failure: it means every profile shares the default prompts folder.
+    if [[ "$found" -eq 0 && ! -f "$u/globalStorage/storage.json" ]]; then
+      for d in "$u"/profiles/*/; do
+        [[ -d "$d" ]] && echo "${d%/}/prompts"
+      done
+    fi
   done
   return 0
 }

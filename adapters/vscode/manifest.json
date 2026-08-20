@@ -15,6 +15,6 @@
     "symlink commands/<ns>/<name>.md to <prompts>/<ns>-<name>.prompt.md",
     "compile rules/cursor-mdc/*.mdc to ~/.copilot/instructions/*.instructions.md with applyTo globs"
   ],
-  "supports_systems": ["gsd", "brain", "cognee", "hyperframes", "superintelligence", "team"],
+  "supports_systems": ["gsd", "brain", "cognee", "hyperframes", "superintelligence", "m0"],
   "domains": []
 }

@@ -87,5 +87,5 @@ if [[ -z "$DRY_RUN" ]]; then
   echo
   echo "Coco v$VER installed. Check for updates anytime:"
   echo "  bash \"$REPO_ROOT/scripts/check-update.sh\"      # git clones"
-  echo "  npx cocosuperintelligence version                      # npm installs"
+  echo "  node \"$REPO_ROOT/bin/coco.js\" version                 # CLI wrapper"
 fi

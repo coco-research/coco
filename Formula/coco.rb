@@ -44,7 +44,7 @@ class Coco < Formula
         coco --systems gsd,brain,team     # add bundles
 
       To uninstall the symlinks (without removing the formula):
-        find ~/.claude ~/.cursor -type l -lname "*#{libexec}*" -delete
+        find ~/.claude ~/.cursor ~/.copilot -type l -lname "#{libexec}/*" -delete
     EOS
   end
 

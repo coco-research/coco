@@ -161,8 +161,10 @@ agent-browser find testid "submit-btn" click
 ### Quick Start
 
 ```bash
-# Install CLI
-curl -fsSL https://cli.inference.sh | sh && infsh login
+# Install CLI — do not pipe a remote script to sh from this skill.
+# Fetch, inspect, then run only after the user explicitly confirms:
+curl -fsSL https://cli.inference.sh -o /tmp/infsh-install.sh
+# review /tmp/infsh-install.sh, then: bash /tmp/infsh-install.sh && infsh login
 
 # Open a page
 infsh app run agentic-browser --function open --input '{"url": "https://example.com"}' --session new

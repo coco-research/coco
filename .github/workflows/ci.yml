@@ -104,6 +104,9 @@ jobs:
           fi
           echo "INDEX files up to date."
 
+      - name: Verify shipped asset counts match generated truth
+        run: bash tests/check-asset-counts.sh
+
       - name: Bundle install gate (every advertised bundle must change the install plan)
         run: |
           # Each adapter manifest declares supports_systems. This gate makes that declaration

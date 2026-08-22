@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "skills": {
+    "total": 185,
+    "core": 70,
+    "bundle": 115
+  },
+  "commands": {
+    "total": 38,
+    "namespaces": 6
+  },
+  "agents": {
+    "total": 34,
+    "core": 10
+  },
+  "rules": 15
+}

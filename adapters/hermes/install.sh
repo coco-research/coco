@@ -97,6 +97,24 @@ install_profile() {
     link_dir "$skill" "$base/skills/$(basename "$skill")"
   done
 
+  # Root-level agents and commands (not part of any system bundle).
+  for agent in "$REPO_ROOT"/agents/*.md; do
+    [[ -f "$agent" ]] || continue
+    link_dir "$agent" "$claude_home/agents/$(basename "$agent")"
+  done
+  for ns in "$REPO_ROOT"/commands/*/; do
+    nsname=$(basename "$ns")
+    for cmd in "$ns"*.md; do
+      [[ -f "$cmd" ]] || continue
+      cname=$(basename "$cmd" .md)
+      if [[ "$cname" == "_index" ]]; then
+        link_dir "$cmd" "$claude_home/commands/$nsname.md"
+      else
+        link_dir "$cmd" "$claude_home/commands/$nsname:$cname.md"
+      fi
+    done
+  done
+
   # Agents, commands, and rules go into the profile's Claude-compatible home,
   # matching the layout Claude Code itself uses.
   link_rules() { :; }  # placeholder; rules handled below per-profile scope

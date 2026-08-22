@@ -718,8 +718,13 @@ Every skill lives at <code>skills/&lt;name&gt;/SKILL.md</code>. Edit it directly
 <details>
 <summary><strong>How do I cleanly uninstall CoCo?</strong></summary>
 Because CoCo uses symbolic links, removal is non-destructive:
-<pre>find ~/.claude ~/.cursor -type l -lname "*$(pwd)*" -delete</pre>
+<pre>find ~/.claude ~/.cursor ~/.copilot -type l -lname "*$(pwd)*" -delete</pre>
 This removes only the links pointing back to your CoCo repository folder.
+
+For the Hermes adapter, profiles live under <code>~/.hermes/profiles</code>:
+<pre>find ~/.hermes/profiles -type l -lname "*$(pwd)*" -delete</pre>
+The appended rules block between <code>&lt;!-- coco:rules-start --&gt;</code> and
+<code>&lt;!-- coco:rules-end --&gt;</code> in each profile's CLAUDE.md is stripped automatically on the next install run without the repo.
 </details>
 
 <details>

@@ -25,6 +25,7 @@ If you add a fifth shape, add it to SKILL_SOURCES below, and check the printed t
 against `find . -name 'SKILL.md' -not -path './.git/*' | wc -l`.
 """
 
+import json
 import os
 import sys
 import pathlib
@@ -353,6 +354,33 @@ def write_by_domain_views(skills):
         print(f'Wrote {out.relative_to(ROOT)}')
 
 
+def write_asset_counts(skills, commands, agents):
+    """Emit docs/asset-counts.json — the single source of truth for asset counts.
+
+    The README badge, package.json description, and prose have drifted apart three
+    times (149 vs 179 vs the real number). This file is generated from the same walk
+    that builds the indexes, so it is correct by construction. A CI gate asserts the
+    badge and package.json agree with it.
+    """
+    core_skills = [s for s in skills if 'bundle' not in s]
+    bundle_skills = [s for s in skills if 'bundle' in s]
+    core_agents = [a for a in agents if 'bundle' not in a]
+    counts = {
+        'schema': 1,
+        'skills': {
+            'total': len(skills),
+            'core': len(core_skills),
+            'bundle': len(bundle_skills),
+        },
+        'commands': {'total': len(commands), 'namespaces': len({c['namespace'] for c in commands})},
+        'agents': {'total': len(agents), 'core': len(core_agents)},
+        'rules': len(list((ROOT / 'rules' / 'cursor-mdc').glob('*.mdc'))),
+    }
+    out = ROOT / 'docs' / 'asset-counts.json'
+    out.write_text(json.dumps(counts, indent=2) + '\n')
+    print(f'Wrote {out.relative_to(ROOT)}')
+
+
 def main():
     skills = collect_skills()
     commands = collect_commands()
@@ -363,6 +391,7 @@ def main():
     write_agents_index(agents)
     write_systems_index(skills, agents)
     write_by_domain_views(skills)
+    write_asset_counts(skills, commands, agents)
     print(f'\nDone. Skills: {len(skills)} · Commands: {len(commands)} · '
           f'Agents: {len(agents)}')
 

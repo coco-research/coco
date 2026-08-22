@@ -103,11 +103,13 @@ Current first-class adapters (v1.0.0):
 | Slug | Target | Status |
 |------|--------|--------|
 | `claude-code` | Anthropic Claude Code CLI | stable |
+| `hermes` | Hermes Agent profiles (all bots) | stable |
 | `cursor` | Cursor IDE | stable |
 | `codex` | OpenAI Codex CLI | stable |
 | `generic` | Any tool reading `AGENTS.md` | stable |
+| `vscode` | VS Code / Copilot CLI (`~/.copilot`) | stable |
 
-`supports: [claude-code, cursor, codex, generic]` declares an artifact works everywhere. Omit an adapter to mark unsupported.
+`supports: [claude-code, cursor, codex, generic, hermes, vscode]` declares an artifact works everywhere. Omit an adapter to mark unsupported.
 
 ## Skill folder structure
 

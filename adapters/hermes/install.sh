@@ -45,7 +45,13 @@ if [[ $ALL_PROFILES -eq 1 ]]; then
     exit 1
   fi
 else
-  [[ -d "$PROFILES_ROOT/$PROFILE" ]] || { echo "Unknown profile: $PROFILE (looked in $PROFILES_ROOT)" >&2; exit 1; }
+  # A missing profile dir is fatal for a real install, but --dry-run must still be able
+  # to preview the plan (CI gates run with no real profiles on the machine). In that case
+  # proceed with the named profile as a purely notional target.
+  if [[ ! -d "$PROFILES_ROOT/$PROFILE" && $DRY_RUN -eq 0 ]]; then
+    echo "Unknown profile: $PROFILE (looked in $PROFILES_ROOT)" >&2
+    exit 1
+  fi
   PROFILES=("$PROFILE")
 fi
 

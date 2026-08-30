@@ -565,6 +565,8 @@ bash install.sh --systems superintelligence
 ```bash
 bash install.sh --adapter claude-code
 bash install.sh --adapter cursor
+bash install.sh --adapter grok
+bash install.sh --adapter vscode
 bash install.sh --adapter codex
 bash install.sh --adapter generic
 ```
@@ -648,6 +650,12 @@ npx cocosuperintelligence update
 <td><code>cursor</code></td>
 <td>Stable</td>
 <td>Links MDC rules and custom workspace skills.</td>
+</tr>
+<tr>
+<td><strong>Grok Build / Grok CLI</strong></td>
+<td><code>grok</code></td>
+<td>Stable</td>
+<td>Links skills, commands, agents and rules into <code>~/.grok/</code>. Registers <code>coco-platform</code> MCP and m0 hooks when those binaries are present.</td>
 </tr>
 <tr>
 <td><strong><a href="https://github.com/openai/codex">Codex CLI</a></strong></td>

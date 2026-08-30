@@ -1,0 +1,34 @@
+{
+  "name": "grok",
+  "version": "0.1.0",
+  "description": "Wires Coco artifacts into ~/.grok/ for Grok Build / Grok CLI",
+  "targets": {
+    "skills": "~/.grok/skills",
+    "commands": "~/.grok/commands",
+    "agents": "~/.grok/agents",
+    "rules": "~/.grok/rules",
+    "hooks": "~/.grok/hooks",
+    "mcp": "~/.grok/config.toml [mcp_servers.coco-platform]"
+  },
+  "transforms": [
+    "flatten commands/<ns>/<name>.md to <ns>:<name>.md because Grok does not recurse into subdirectories of ~/.grok/commands",
+    "symlink rules/cursor-mdc/*.mdc as ~/.grok/rules/*.md (Grok scans *.md, not *.mdc)",
+    "skip INDEX.md and README.md when linking agents"
+  ],
+  "supports_systems": [
+    "gsd",
+    "brain",
+    "cognee",
+    "hyperframes",
+    "superintelligence",
+    "m0"
+  ],
+  "domains": [
+    "foundational",
+    "pm",
+    "engineering",
+    "design",
+    "ops",
+    "meta"
+  ]
+}

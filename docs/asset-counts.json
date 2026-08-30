@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "skills": {
+    "total": 185,
+    "core": 70,
+    "bundle": 115
+  },
+  "commands": {
+    "shipped": 38,
+    "generated_si": 242,
+    "customer_facing": 280,
+    "namespaces": 6
+  },
+  "agents": {
+    "total": 34,
+    "core": 10
+  },
+  "rules": 15
+}

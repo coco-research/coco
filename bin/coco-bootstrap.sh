@@ -8,7 +8,7 @@
 #   COCO_DIR=~/tools/coco bash <(curl -fsSL ...)
 #
 # Flags (passed through to install.sh after --, or set via env):
-#   --adapter <name>    claude-code | cursor | codex | generic
+#   --adapter <name>    claude-code | cursor | grok | vscode | codex | generic
 #   --systems <list>    e.g. gsd,brain,team
 #   --dry-run           preview only, no writes
 #   --yes               skip the commit-verification prompt (for CI/scripted installs)
@@ -45,6 +45,8 @@ detect_adapter() {
     echo "claude-code"
   elif [[ -d "$HOME/.cursor" ]]; then
     echo "cursor"
+  elif [[ -d "$HOME/.grok" ]]; then
+    echo "grok"
   elif command -v codex >/dev/null 2>&1; then
     echo "codex"
   else

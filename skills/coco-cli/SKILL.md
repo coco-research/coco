@@ -23,13 +23,14 @@ Thin agent wrapper over `cocosuperintelligence` (run via `npx`). Drives the real
 
 ## Install flags (passed through to install.sh)
 
-- `--adapter <name>` — one of `claude-code` | `cursor` | `codex` | `generic`
+- `--adapter <name>` — one of `claude-code` | `cursor` | `grok` | `codex` | `generic`
 - `--systems <list>` — comma-separated, e.g. `gsd,brain,team`
 - `--dry-run` — preview only, no writes
 
 ## Examples
 
 - Install for Cursor: `npx cocosuperintelligence install --adapter cursor`
+- Install for Grok: `npx cocosuperintelligence install --adapter grok`
 - Selective systems: `npx cocosuperintelligence install --systems gsd,brain --adapter claude-code`
 - Preview without writing: `npx cocosuperintelligence install --dry-run`
 - Update an existing clone: `npx cocosuperintelligence update`

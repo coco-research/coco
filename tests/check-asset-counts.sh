@@ -107,6 +107,27 @@ else
 fi
 
 
+
+echo ""
+echo "=== README Technical Specifications Total Skills ==="
+SPEC_SKILLS=$(python3 -c "import re; t=open('README.md').read(); m=re.search(r'<tr><td><strong>Total Skills</strong></td><td>(\\d+)', t); print(m.group(1) if m else '')")
+if [ -n "$SPEC_SKILLS" ]; then
+  if [ "$SPEC_SKILLS" = "$SKILLS" ]; then
+    pass "spec Total Skills ($SPEC_SKILLS) matches"
+  else
+    fail_ "README spec Total Skills says $SPEC_SKILLS, customer-facing is $SKILLS (do not leave a third skills number)"
+  fi
+else
+  pass "no spec Total Skills row (nothing to check)"
+fi
+# Catch the exact drift class Pike found: a leftover 149 that is not skills.total.
+LEFTOVER_149=$(grep -nE '\b149\b' README.md || true)
+if [ -n "$LEFTOVER_149" ] && [ "$SKILLS" != "149" ]; then
+  fail_ "README still contains 149 (third skills number); customer-facing is $SKILLS: $LEFTOVER_149"
+else
+  pass "no leftover 149 in README"
+fi
+
 echo ""
 echo "=== .claude-plugin.json description ==="
 if [ -f .claude-plugin.json ]; then

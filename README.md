@@ -682,7 +682,7 @@ npx cocosuperintelligence update
 <table>
 <tr><td><strong>Spec Version</strong></td><td>1.2.0</td></tr>
 <tr><td><strong>License</strong></td><td>Open-core — <a href="LICENSE">MIT</a> core; Super Intelligence is <a href="systems/superintelligence/LICENSE">proprietary</a></td></tr>
-<tr><td><strong>Total Skills</strong></td><td>149 with all bundles installed (66 Core + 68 GSD + 6 Brain + 9 Super Intelligence)</td></tr>
+<tr><td><strong>Total Skills</strong></td><td>185 with all bundles installed (70 Core + 115 Bundle)</td></tr>
 <tr><td><strong>Slash Commands</strong></td><td>280 with all bundles — 38 Core (shipped) + 242 Super Intelligence (225 per-team + 17 cross-team, generated at install)</td></tr>
 <tr><td><strong>Specialized Agents</strong></td><td>34 (10 Core + 24 GSD Bundle)</td></tr>
 <tr><td><strong>Expert Personas</strong></td><td>389 across 9 departments and 70 cells</td></tr>

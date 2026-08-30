@@ -33,6 +33,17 @@ for adapter in claude-code cursor vscode codex generic; do
     || fail "adapters/$adapter/install.sh --dry-run"
 done
 
+bash adapters/cursor/install.sh --dry-run --systems superintelligence > /tmp/cursor-systems.out 2>&1 \
+  && pass "cursor install.sh --dry-run --systems superintelligence" \
+  || fail "cursor install.sh --dry-run --systems superintelligence"
+
+echo ""
+echo "=== Smoke test: cursor --systems superintelligence ==="
+# Repro: cursor install.sh used to reject --systems (Unknown flag / exit 1), so the
+# README flagship command died whenever ~/.cursor existed. Must write SI-Decide.md
+# into CURSOR_HOME/commands, not ~/.claude/commands.
+bash tests/cursor-si-commands.sh && pass "cursor --systems superintelligence writes SI-Decide.md" || fail "cursor --systems superintelligence did not write SI-Decide.md"
+
 echo ""
 echo "=== Smoke test: root install.sh ==="
 bash install.sh --list > /tmp/list.out 2>&1 && pass "install.sh --list runs" || fail "install.sh --list failed"

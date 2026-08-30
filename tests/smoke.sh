@@ -27,7 +27,7 @@ test -f docs/by-domain/pm.md && pass "docs/by-domain/pm.md generated" || fail "d
 
 echo ""
 echo "=== Smoke test: adapters dry-run ==="
-for adapter in claude-code cursor vscode codex generic; do
+for adapter in claude-code cursor grok vscode codex generic; do
   bash adapters/$adapter/install.sh --dry-run > /tmp/$adapter.out 2>&1 \
     && pass "adapters/$adapter/install.sh --dry-run" \
     || fail "adapters/$adapter/install.sh --dry-run"

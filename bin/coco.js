@@ -102,7 +102,7 @@ Usage:
 Update checks contact only github.com (no telemetry); disable with COCO_NO_UPDATE_CHECK=1.
 
 Install flags (passed to install.sh):
-  --adapter <name>                      claude-code | cursor | codex | generic
+  --adapter <name>                      claude-code | cursor | grok | vscode | codex | generic
   --systems <list>                      gsd | brain | cognee | hyperframes | m0 |
                                         superintelligence   (comma-separated)
   --dry-run                             preview, no writes
@@ -183,7 +183,7 @@ function cmdUpdate(argv) {
 function cmdUninstall(argv) {
   const dir = argv[0] && !argv[0].startsWith('--') ? argv[0] : DEFAULT_DIR;
   console.log(`Removing symlinks pointing into ${dir}...`);
-  const homes = [path.join(os.homedir(), '.claude'), path.join(os.homedir(), '.cursor')];
+  const homes = [path.join(os.homedir(), '.claude'), path.join(os.homedir(), '.cursor'), path.join(os.homedir(), '.grok')];
   for (const home of homes) {
     if (!fs.existsSync(home)) continue;
     run('find', [home, '-type', 'l', '-lname', `*${dir}*`, '-delete']);

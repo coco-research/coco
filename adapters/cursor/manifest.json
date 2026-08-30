@@ -10,9 +10,17 @@
   "transforms": [
     "symlink mdc rule files (earlier versions copied them, which made re-runs non-idempotent)",
     "flatten commands/<ns>/<name>.md to <ns>:<name>.md because Cursor does not recurse into subdirectories of ~/.cursor/commands",
-    "prune command symlinks pointing outside the current repo, which dangle after the repo is moved"
+    "prune command symlinks pointing outside the current repo, which dangle after the repo is moved",
+    "accept --systems and generate SI-* commands into ~/.cursor/commands (COCO_SI_COMMANDS_DIR), matching claude-code"
   ],
-  "supports_systems": [],
+  "supports_systems": [
+    "gsd",
+    "brain",
+    "cognee",
+    "hyperframes",
+    "superintelligence",
+    "m0"
+  ],
   "domains": [
     "foundational",
     "pm",

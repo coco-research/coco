@@ -354,17 +354,71 @@ def write_by_domain_views(skills):
         print(f'Wrote {out.relative_to(ROOT)}')
 
 
+
+def count_generated_si_commands():
+    """/SI-* commands generated at install from team registries. Not in-repo files.
+
+    Public command total = shipped files + this number.
+    Mira (2026-08-29): customer-facing commands = 280 (38 shipped + 242 generated).
+    38 is a labeled SSoT field (shipped files), not the public total. Do not invent
+    a third number.
+
+    Counted from live inputs, not a hardcoded 242:
+      built teams in systems/superintelligence/registry.json
+      x per-team surface in ai/scripts/build_commands.py
+      + meta family in scripts/build_meta_commands.py (SI.md + SI-Orchestrate + verbs)
+
+    Ponytail: if those generators add a new verb class, this import still tracks
+    because it reads ACTION/IDENTITY/ROSTER/MAINTENANCE and VERBS live.
+    """
+    import importlib.util
+
+    meta_path = ROOT / 'systems' / 'superintelligence' / 'registry.json'
+    n_built = 0
+    if meta_path.exists():
+        teams = json.loads(meta_path.read_text()).get('teams', {})
+        entries = teams.values() if isinstance(teams, dict) else teams
+        n_built = sum(1 for t in entries if isinstance(t, dict) and t.get('built'))
+
+    per_team = 0
+    gen_path = ROOT / 'systems' / 'superintelligence' / 'ai' / 'scripts' / 'build_commands.py'
+    if gen_path.exists():
+        spec = importlib.util.spec_from_file_location('si_build_commands', gen_path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        per_team = (
+            2  # dispatcher + Orchestrate
+            + len(mod.ACTION_VERBS)
+            + len(mod.IDENTITY_VERBS)
+            + len(mod.ROSTER_VERBS)
+            + len(mod.MAINTENANCE_VERBS)
+        )
+
+    meta_family = 0
+    meta_gen = ROOT / 'systems' / 'superintelligence' / 'scripts' / 'build_meta_commands.py'
+    if meta_gen.exists():
+        spec = importlib.util.spec_from_file_location('si_build_meta_commands', meta_gen)
+        mmod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mmod)
+        meta_family = 2 + len(mmod.VERBS)  # SI.md + SI-Orchestrate.md + verbs
+
+    return n_built * per_team + meta_family
+
+
 def write_asset_counts(skills, commands, agents):
     """Emit docs/asset-counts.json — the single source of truth for asset counts.
 
-    The README badge, package.json description, and prose have drifted apart three
-    times (149 vs 179 vs the real number). This file is generated from the same walk
-    that builds the indexes, so it is correct by construction. A CI gate asserts the
-    badge and package.json agree with it.
+    Two command layers (do not collapse them):
+      commands.shipped   — in-repo command files (collect_commands)
+      commands.generated_si — /SI-* generated at install
+      commands.customer_facing — public total = shipped + generated
+    README / package.json public claims must use commands.customer_facing, never shipped.
     """
     core_skills = [s for s in skills if 'bundle' not in s]
     bundle_skills = [s for s in skills if 'bundle' in s]
     core_agents = [a for a in agents if 'bundle' not in a]
+    shipped = len(commands)
+    generated = count_generated_si_commands()
     counts = {
         'schema': 1,
         'skills': {
@@ -372,13 +426,19 @@ def write_asset_counts(skills, commands, agents):
             'core': len(core_skills),
             'bundle': len(bundle_skills),
         },
-        'commands': {'total': len(commands), 'namespaces': len({c['namespace'] for c in commands})},
+        'commands': {
+            'shipped': shipped,
+            'generated_si': generated,
+            'customer_facing': shipped + generated,
+            'namespaces': len({c['namespace'] for c in commands}),
+        },
         'agents': {'total': len(agents), 'core': len(core_agents)},
         'rules': len(list((ROOT / 'rules' / 'cursor-mdc').glob('*.mdc'))),
     }
     out = ROOT / 'docs' / 'asset-counts.json'
     out.write_text(json.dumps(counts, indent=2) + '\n')
     print(f'Wrote {out.relative_to(ROOT)}')
+
 
 
 def main():

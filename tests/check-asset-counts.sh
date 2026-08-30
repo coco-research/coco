@@ -2,9 +2,16 @@
 # Guard: shipped asset counts must agree with the generated truth.
 #
 # docs/asset-counts.json is produced by scripts/build-index.py from a full walk of
-# the tree, so it is correct by construction. This gate fails when any *shipped*
+# the tree, so it is correct by construction. This gate fails when any *public*
 # count — README badge, package.json description, README prose tables — drifts
-# from it. Run from repo root: bash tests/check-asset-counts.sh
+# from it.
+#
+# Command layers (Mira, 2026-08-29):
+#   commands.shipped   = in-repo command files (labeled field, not the public total)
+#   commands.generated_si = /SI-* commands generated at install from team registries
+#   commands.customer_facing = public total = shipped + generated_si (280 = 38 + 242)
+# Do not stamp the public command count to commands.shipped.
+# Run from repo root: bash tests/check-asset-counts.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -18,11 +25,19 @@ if [ ! -f docs/asset-counts.json ]; then
 fi
 
 SKILLS=$(python3 -c "import json;print(json.load(open('docs/asset-counts.json'))['skills']['total'])")
-COMMANDS=$(python3 -c "import json;print(json.load(open('docs/asset-counts.json'))['commands']['total'])")
+COMMANDS=$(python3 -c "import json;print(json.load(open('docs/asset-counts.json'))['commands']['customer_facing'])")
+SHIPPED=$(python3 -c "import json;print(json.load(open('docs/asset-counts.json'))['commands']['shipped'])")
+GENERATED=$(python3 -c "import json;print(json.load(open('docs/asset-counts.json'))['commands']['generated_si'])")
 AGENTS=$(python3 -c "import json;print(json.load(open('docs/asset-counts.json'))['agents']['total'])")
 
 echo "=== truth: docs/asset-counts.json ==="
-echo "  skills=$SKILLS commands=$COMMANDS agents=$AGENTS"
+echo "  skills=$SKILLS commands.customer_facing=$COMMANDS (public) shipped=$SHIPPED generated=$GENERATED agents=$AGENTS"
+
+if [ "$COMMANDS" != "$((SHIPPED + GENERATED))" ]; then
+  fail_ "commands.customer_facing ($COMMANDS) != shipped ($SHIPPED) + generated ($GENERATED)"
+else
+  pass "commands.customer_facing == shipped + generated"
+fi
 
 echo ""
 echo "=== README badge ==="
@@ -37,36 +52,45 @@ else
   pass "no numeric skills badge found (nothing to check)"
 fi
 
+BADGE_COMMANDS=$(grep -oE 'shields\.io/badge/commands-[0-9]+' README.md | grep -oE '[0-9]+$' | head -1 || true)
+if [ -n "$BADGE_COMMANDS" ]; then
+  if [ "$BADGE_COMMANDS" = "$COMMANDS" ]; then
+    pass "commands badge ($BADGE_COMMANDS) matches public total"
+  else
+    fail_ "README commands badge says $BADGE_COMMANDS, public total is $COMMANDS (do not stamp shipped=$SHIPPED as public)"
+  fi
+else
+  pass "no numeric commands badge found (nothing to check)"
+fi
+
 echo ""
 echo "=== package.json description ==="
 PKG_DESC=$(python3 -c "import json;print(json.load(open('package.json'))['description'])")
-for n in $(printf '%s' "$PKG_DESC" | grep -oE '[0-9]+ (skills|commands|agents)' | grep -oE '^[0-9]+'); do :; done
-# Check each "<N> <word>" claim in the description against the JSON.
 while read -r n word; do
   [ -n "$n" ] || continue
   case "$word" in
     skills)   [ "$n" = "$SKILLS" ]   || fail_ "package.json claims $n skills, truth is $SKILLS" ;;
-    commands) [ "$n" = "$COMMANDS" ] || fail_ "package.json claims $n commands, truth is $COMMANDS" ;;
+    commands)
+      if [ "$n" = "$COMMANDS" ]; then
+        :
+      elif [ "$n" = "$SHIPPED" ] && [ "$SHIPPED" != "$COMMANDS" ]; then
+        fail_ "package.json stamps public commands to shipped files ($n); public total is $COMMANDS"
+      else
+        fail_ "package.json claims $n commands, public total is $COMMANDS"
+      fi
+      ;;
     agents)   [ "$n" = "$AGENTS" ]   || fail_ "package.json claims $n agents, truth is $AGENTS" ;;
   esac
-done <<EOF
+done <<CLAIMS
 $(printf '%s' "$PKG_DESC" | grep -oE '[0-9]+ (skills|commands|agents)' || true)
-EOF
+CLAIMS
 grep -qE '[0-9]+ (skills|commands|agents)' <<<"$PKG_DESC" \
-  && pass "package.json count claims all match" \
+  && pass "package.json count claims all match public totals" \
   || pass "package.json makes no count claims (fine)"
 
 echo ""
 echo "=== README prose asset table ==="
-# The <td><h3>N</h3>...<sub>Skills</sub></td> block. Extract pairs and compare.
-PROSE_SKILLS=$(python3 - "$SKILLS" <<'PY'
-import re, sys
-text = open('README.md').read()
-truth = sys.argv[1]
-m = re.search(r'<h3>(\d+)</h3><sub>Skills</sub>', text)
-print(m.group(1) if m else '')
-PY
-)
+PROSE_SKILLS=$(python3 -c "import re; t=open('README.md').read(); m=re.search(r'<h3>(\\d+)</h3><sub>Skills</sub>', t); print(m.group(1) if m else '')")
 if [ -n "$PROSE_SKILLS" ]; then
   [ "$PROSE_SKILLS" = "$SKILLS" ] && pass "prose Skills cell matches" \
     || fail_ "README prose Skills cell says $PROSE_SKILLS, truth is $SKILLS"
@@ -74,11 +98,33 @@ else
   pass "no prose Skills cell found (nothing to check)"
 fi
 
+PROSE_COMMANDS=$(python3 -c "import re; t=open('README.md').read(); m=re.search(r'<h3>(\\d+)</h3><sub>Slash Commands</sub>', t); print(m.group(1) if m else '')")
+if [ -n "$PROSE_COMMANDS" ]; then
+  [ "$PROSE_COMMANDS" = "$COMMANDS" ] && pass "prose Slash Commands cell matches public total" \
+    || fail_ "README prose Slash Commands cell says $PROSE_COMMANDS, public total is $COMMANDS"
+else
+  pass "no prose Slash Commands cell found (nothing to check)"
+fi
+
+
+echo ""
+echo "=== .claude-plugin.json description ==="
+if [ -f .claude-plugin.json ]; then
+  if python3 tests/check-plugin-counts.py; then
+    pass "plugin json customer-facing counts match"
+  else
+    fail_ "plugin json customer-facing counts mismatch"
+  fi
+else
+  pass "no .claude-plugin.json (nothing to check)"
+fi
+
 echo ""
 echo "=== Summary ==="
 if [ "$fail" -eq 0 ]; then
-  echo "  all shipped counts agree with docs/asset-counts.json"
+  echo "  all shipped public counts agree with docs/asset-counts.json"
   exit 0
 fi
-echo "  fix by regenerating indexes AND updating README/package.json to match"
+echo "  fix by regenerating indexes AND updating README/package.json to match public totals"
+echo "  (commands.shipped is a labeled field; do not use it as the public command count)"
 exit 1

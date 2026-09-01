@@ -422,8 +422,8 @@ video{display:block;width:100%;height:auto}
             operational thread carrying what you were doing, what you decided, and what is
             still open, so moving between Claude Code and Cursor does not mean explaining
             yourself twice. It is what makes the rest feel like one product rather than a
-            folder of tools. The write path works today; the daemon and its tools are still
-            landing.</p>
+            folder of tools. The write path and the memory daemon (bundled with Connect) run
+            today; extraction and the higher memory levels are still landing.</p>
         </div>
         <div class="tile" id="product-platform">
           <span class="chip soon">In development</span>
@@ -456,19 +456,19 @@ video{display:block;width:100%;height:auto}
         <div>
           <span class="chip live">Available now</span>
           <h3 style="font-size:34px">CoCo Connect</h3>
-          <span class="fine stage-note">Version 0.2.1 &middot; signed Apple silicon build</span>
+          <span class="fine stage-note">Version 0.2.1 &middot; Apple silicon build</span>
           <p style="max-width:60ch">One desktop app that installs, health-checks, and manages
-            every CoCo module from a single place, so none of this requires a terminal if you
-            do not want one. A Rust engine underneath a native interface. It is the front door
-            to everything else on this page, which is why it gets its own tab rather than a
-            tile in a grid.</p>
+            the CoCo modules it detects, all from a single place, so none of this requires a
+            terminal if you do not want one. A Rust engine underneath a native interface. It is
+            the front door to everything else on this page, which is why it gets its own tab
+            rather than a tile in a grid.</p>
           <div class="links">
             <a class="arrow" href="https://github.com/coco-research/coco-connect-releases/releases">Download the latest release</a>
             <a class="arrow" href="https://github.com/coco-research/coco-connect-releases">Release notes</a>
           </div>
         </div>
       </div>
-      <p class="body" style="margin-top:28px;max-width:60ch"><strong style="color:var(--ink)">Tells you what is broken:</strong> health checks every module and reports which ones are actually wired up.</p>
+      <p class="body" style="margin-top:28px;max-width:60ch"><strong style="color:var(--ink)">Tells you what is broken:</strong> health checks each installed module and reports which ones are actually wired up.</p>
       <p class="fine" style="margin-top:20px">The published build is Apple silicon. Other
         platforms are not packaged yet.</p>
     </div>
@@ -573,10 +573,10 @@ video{display:block;width:100%;height:auto}
           <p class="lbl">CoCo Hermes</p>
           <span class="fine stage-note">Rust &middot; nothing released yet</span>
           <p>Local source ingestion with quote-backed retrieval, so an answer can always be
-            traced to the passage it came from. Planned as a signed macOS app with three
+            traced to the passage it came from. Planned as a native macOS app with three
             destinations (ask, explore, and sources) and a store that stays on your own disk.
             To be accurate about where it stands: this is local work in progress, not yet
-            pushed to a repository, let alone a release.</p>
+            published; no public repository and no release yet.</p>
         </div>
         <div class="tile" id="product-fusion">
           <span class="chip">Source available</span>

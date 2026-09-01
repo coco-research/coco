@@ -40,7 +40,8 @@
 }
 *{box-sizing:border-box}
 html,body{overflow-x:hidden;max-width:100%}
-html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;scroll-behavior:smooth}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+@media (prefers-reduced-motion: no-preference){html{scroll-behavior:smooth}}
 body{margin:0;background:var(--white);color:var(--ink);font-family:var(--sans);
   font-size:17px;line-height:1.47;letter-spacing:-.022em;font-weight:400}
 a{color:var(--link);text-decoration:none}
@@ -53,7 +54,8 @@ a:hover{text-decoration:underline}
   -webkit-backdrop-filter:saturate(150%) blur(16px);border-bottom:1px solid var(--hair)}
 .nav-in{max-width:var(--wide);margin:0 auto;padding:0 22px;height:44px;
   display:flex;align-items:center;gap:34px}
-.nav a{font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;transition:opacity var(--dur) var(--ease)}
+.nav a{font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;transition:opacity var(--dur) var(--ease);
+  display:inline-flex;align-items:center;min-height:44px;padding:0 10px}
 .nav a:hover{opacity:1;text-decoration:none}
 .nav .mark{font-size:15px;font-weight:600;letter-spacing:-.02em;margin-right:4px;
   display:inline-flex;align-items:center;gap:8px}
@@ -64,7 +66,8 @@ a:hover{text-decoration:underline}
 
 /* ---- nav-trigger: a nav link that opens the products overlay instead of navigating ---- */
 .nav-trigger{appearance:none;background:none;border:0;cursor:pointer;font-family:inherit;
-  font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;padding:0;
+  font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;padding:0 10px;
+  display:inline-flex;align-items:center;min-height:44px;
   transition:opacity var(--dur) var(--ease)}
 .nav-trigger:hover{opacity:1}
 .nav-trigger[aria-expanded="true"]{opacity:1;font-weight:600}
@@ -90,8 +93,9 @@ a:hover{text-decoration:underline}
 .overlay-group a .name{display:block;font-size:14px;font-weight:600;letter-spacing:-.01em}
 .overlay-group a .stage{display:block;font-size:11px;color:var(--muted);margin-top:2px;font-weight:400}
 .overlay-group a:hover .name{color:var(--blue)}
-.overlay-close{position:absolute;top:14px;right:22px;font-size:12px;color:var(--muted);
-  background:none;border:0;cursor:pointer;font-family:inherit}
+.overlay-close{position:absolute;top:0;right:8px;font-size:12px;color:var(--muted);
+  background:none;border:0;cursor:pointer;font-family:inherit;
+  width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center}
 .overlay-close:hover{color:var(--ink)}
 
 /* ---- type scale. Tracking flips sign with size: the key Apple detail. ---- */
@@ -155,7 +159,14 @@ footer a{font-size:12px;letter-spacing:-.01em;color:var(--link)}
 .reveal{opacity:0;transform:translateY(14px);
   transition:opacity .45s var(--ease),transform .45s var(--ease)}
 .reveal.in{opacity:1;transform:none}
-@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .reveal{opacity:1;transform:none;transition:none}
+  .overlay{transform:none;transition:opacity 160ms ease,visibility 160ms}
+  .nav a,.nav-trigger,.btn{transition:none}
+}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible,video:focus-visible{
+  outline:2px solid var(--blue);outline-offset:3px}
 video{display:block;width:100%;height:auto}
 
 /* Between the mobile breakpoint and the full-width desktop layout, the
@@ -303,7 +314,8 @@ video{display:block;width:100%;height:auto}
     </figure>
 
     <figure class="shot reveal" style="margin:36px auto 0;max-width:700px">
-      <video src="assets/coco-si-decide-terminal.mp4" poster="assets/coco-si-decide-terminal.png" width="1200" height="750" muted playsinline loop autoplay preload="metadata" aria-label="A real SI-Decide run: a routed panel, a verdict, and named dissent"></video>
+      <video src="assets/coco-si-decide-terminal.mp4" poster="assets/coco-si-decide-terminal.png" width="1200" height="750" muted playsinline preload="metadata" controls aria-label="A real SI-Decide run: a routed panel, a verdict, and named dissent"></video>
+      <p class="fine" style="margin-top:8px">A real SI-Decide run: routed panel, verdict, named dissent.</p>
       <figcaption class="fine" style="margin-top:14px">A real /SI-Decide run. The panel is routed, not fixed, and dissent is kept, not averaged away.</figcaption>
     </figure>
 
@@ -379,7 +391,8 @@ video{display:block;width:100%;height:auto}
     </div>
 
     <figure class="shot reveal" style="margin:48px auto 0;max-width:700px">
-      <video src="assets/coco-install-moment.mp4" poster="assets/coco-install-moment.png" width="1200" height="750" muted playsinline loop autoplay preload="metadata" aria-label="The install script pausing at an explicit yes or no confirmation before activating the Super Intelligence bundle"></video>
+      <video src="assets/coco-install-moment.mp4" poster="assets/coco-install-moment.png" width="1200" height="750" muted playsinline preload="metadata" controls aria-label="The install script pausing at an explicit yes or no confirmation before activating the Super Intelligence bundle"></video>
+      <p class="fine" style="margin-top:8px">The install script pauses on an explicit yes or no before activating anything.</p>
       <figcaption class="fine" style="margin-top:14px">It asks before it does something big. The Super Intelligence bundle needs an explicit yes.</figcaption>
     </figure>
 
@@ -489,11 +502,15 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
       backdrop.classList.add('open');
     });
     trigger.setAttribute('aria-expanded', 'true');
+    overlay._lastFocus = document.activeElement;
+    var firstLink = overlay.querySelector('a, button');
+    if (firstLink) firstLink.focus();
   }
   function close() {
     overlay.classList.remove('open');
     backdrop.classList.remove('open');
     trigger.setAttribute('aria-expanded', 'false');
+    if (overlay._lastFocus && overlay._lastFocus.focus) overlay._lastFocus.focus();
     window.setTimeout(function () {
       overlay.hidden = true;
       backdrop.hidden = true;
@@ -506,6 +523,17 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   if (closeBtn) closeBtn.addEventListener('click', close);
   document.addEventListener('keydown', function (ev) {
     if (ev.key === 'Escape' && isOpen()) { close(); trigger.focus(); }
+    /* Keep Tab inside the open overlay while it is open. */
+    if (ev.key === 'Tab' && isOpen()) {
+      var focusables = [].slice.call(
+        overlay.querySelectorAll('a[href], button:not([disabled])')
+      ).filter(function (el) { return el.offsetParent !== null; });
+      if (!focusables.length) return;
+      var first = focusables[0], last = focusables[focusables.length - 1];
+      if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+      else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+      else if (!overlay.contains(document.activeElement)) { ev.preventDefault(); first.focus(); }
+    }
   });
   [].slice.call(overlay.querySelectorAll('a')).forEach(function (a) {
     a.addEventListener('click', close);

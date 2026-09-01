@@ -40,7 +40,8 @@
 }
 *{box-sizing:border-box}
 html,body{overflow-x:hidden;max-width:100%}
-html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;scroll-behavior:smooth}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+@media (prefers-reduced-motion: no-preference){html{scroll-behavior:smooth}}
 body{margin:0;background:var(--white);color:var(--ink);font-family:var(--sans);
   font-size:17px;line-height:1.47;letter-spacing:-.022em;font-weight:400}
 a{color:var(--link);text-decoration:none}
@@ -52,7 +53,8 @@ a:hover{text-decoration:underline}
   -webkit-backdrop-filter:saturate(150%) blur(16px);border-bottom:1px solid var(--hair)}
 .nav-in{max-width:var(--wide);margin:0 auto;padding:0 22px;height:44px;
   display:flex;align-items:center;gap:34px}
-.nav a{font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;transition:opacity var(--dur) var(--ease)}
+.nav a{font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;transition:opacity var(--dur) var(--ease);
+  display:inline-flex;align-items:center;min-height:44px;padding:0 10px}
 .nav a:hover{opacity:1;text-decoration:none}
 .nav .mark{font-size:15px;font-weight:600;letter-spacing:-.02em;margin-right:4px;
   display:inline-flex;align-items:center;gap:8px}
@@ -61,7 +63,8 @@ a:hover{text-decoration:underline}
 
 /* ---- nav-trigger: a nav link that opens the products overlay instead of navigating ---- */
 .nav-trigger{appearance:none;background:none;border:0;cursor:pointer;font-family:inherit;
-  font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;padding:0;
+  font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;padding:0 10px;
+  display:inline-flex;align-items:center;min-height:44px;
   transition:opacity var(--dur) var(--ease)}
 .nav-trigger:hover{opacity:1}
 .nav-trigger[aria-expanded="true"]{opacity:1;font-weight:600}
@@ -86,8 +89,9 @@ a:hover{text-decoration:underline}
 .overlay-group a .name{display:block;font-size:14px;font-weight:600;letter-spacing:-.01em}
 .overlay-group a .stage{display:block;font-size:11px;color:var(--muted);margin-top:2px;font-weight:400}
 .overlay-group a:hover .name{color:var(--blue)}
-.overlay-close{position:absolute;top:14px;right:22px;font-size:12px;color:var(--muted);
-  background:none;border:0;cursor:pointer;font-family:inherit}
+.overlay-close{position:absolute;top:0;right:8px;font-size:12px;color:var(--muted);
+  background:none;border:0;cursor:pointer;font-family:inherit;
+  width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center}
 .overlay-close:hover{color:var(--ink)}
 
 /* ---- film lightbox: "Watch the film" pattern, a video in a centered modal ---- */
@@ -96,11 +100,14 @@ a:hover{text-decoration:underline}
 .film-backdrop.open{opacity:1;visibility:visible}
 .film-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-48%);width:min(920px,92vw);
   z-index:199;opacity:0;visibility:hidden;transition:opacity var(--dur) var(--ease),
-  transform var(--dur) var(--ease),visibility var(--dur)}
+  transform var(--dur) var(--ease),visibility var(--dur);background:#111;border-radius:14px}
 .film-modal.open{opacity:1;visibility:visible;transform:translate(-50%,-50%)}
 .film-modal video{width:100%;height:auto;display:block;border-radius:14px;box-shadow:var(--shadow)}
-.film-modal .film-close{position:absolute;top:-38px;right:0;background:none;border:0;
-  color:#fff;font-size:14px;cursor:pointer;font-family:inherit;opacity:.85}
+.film-modal .film-title{margin:0;padding:10px 52px 10px 14px;font-size:14px;font-weight:600;
+  color:#fff;letter-spacing:-.01em}
+.film-modal .film-close{position:absolute;top:0;right:0;background:none;border:0;
+  color:#fff;font-size:14px;cursor:pointer;font-family:inherit;opacity:.85;
+  width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center}
 .film-modal .film-close:hover{opacity:1}
 
 .eyebrow{font-size:19px;font-weight:600;letter-spacing:.011em;color:var(--ink);margin:0 0 6px}
@@ -197,7 +204,14 @@ footer a{font-size:12px;letter-spacing:-.01em;color:var(--link)}
 .reveal{opacity:0;transform:translateY(14px);
   transition:opacity .45s var(--ease),transform .45s var(--ease)}
 .reveal.in{opacity:1;transform:none}
-@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .reveal{opacity:1;transform:none;transition:none}
+  .overlay,.film-modal{transform:none;transition:opacity 160ms ease,visibility 160ms}
+  .nav a,.nav-trigger,.btn,.tab{transition:none}
+}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible,video:focus-visible{
+  outline:2px solid var(--blue);outline-offset:3px}
 video{display:block;width:100%;height:auto}
 </style>
 <noscript><style>
@@ -307,7 +321,8 @@ video{display:block;width:100%;height:auto}
 </div>
 
 <div class="film-backdrop" id="film-backdrop" hidden></div>
-<div class="film-modal" id="film-modal" role="dialog" aria-modal="true" aria-label="CoCo launch film" hidden>
+<div class="film-modal" id="film-modal" role="dialog" aria-modal="true" aria-labelledby="film-title" hidden>
+  <h2 class="film-title" id="film-title">CoCo launch film</h2>
   <button type="button" class="film-close" id="film-close">Close &times;</button>
   <video id="film-video" src="assets/site/coco-ads-launch.mp4" poster="assets/site/coco-ads-launch-poster.jpg" controls playsinline width="1920" height="1080"></video>
 </div>
@@ -331,8 +346,9 @@ video{display:block;width:100%;height:auto}
     <div class="prod reveal">
       <div class="prod-media">
         <video src="assets/site/coco-install-moment.mp4" poster="assets/site/coco-install-moment.png"
-               width="1200" height="750" muted playsinline loop autoplay preload="metadata"
+               width="1200" height="750" muted playsinline preload="metadata" controls
                aria-label="The CoCo installer showing the exact commit before it runs"></video>
+        <p class="fine" style="margin-top:8px">The installer pauses on the exact commit before it runs.</p>
       </div>
       <div>
         <span class="chip flag">Flagship &middot; version 1.2.0</span>
@@ -658,9 +674,6 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
       if (on) {
         p.hidden = false;
         [].slice.call(p.querySelectorAll('.reveal')).forEach(function (e) { e.classList.add('in'); });
-        [].slice.call(p.querySelectorAll('video[autoplay]')).forEach(function (v) {
-          var r = v.play(); if (r && r.catch) r.catch(function () {});
-        });
       } else {
         p.hidden = true;
         [].slice.call(p.querySelectorAll('video')).forEach(function (v) { v.pause(); });
@@ -705,7 +718,7 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     if (!owningPanel) return;
     var owningTab = tabs.filter(function (t) { return t.getAttribute('aria-controls') === owningPanel.id; })[0];
     if (owningTab) select(owningTab, false);
-    requestAnimationFrame(function () { target.scrollIntoView({ block: 'center' }); });
+    requestAnimationFrame(function () { target.scrollIntoView({ block: 'center', behavior: 'auto' }); });
     clearHash();
   }
   window.addEventListener('hashchange', fromHash);
@@ -732,11 +745,15 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
       backdrop.classList.add('open');
     });
     trigger.setAttribute('aria-expanded', 'true');
+    overlay._lastFocus = document.activeElement;
+    var firstLink = overlay.querySelector('a, button');
+    if (firstLink) firstLink.focus();
   }
   function close() {
     overlay.classList.remove('open');
     backdrop.classList.remove('open');
     trigger.setAttribute('aria-expanded', 'false');
+    if (overlay._lastFocus && overlay._lastFocus.focus) overlay._lastFocus.focus();
     window.setTimeout(function () {
       overlay.hidden = true;
       backdrop.hidden = true;
@@ -749,6 +766,17 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   if (closeBtn) closeBtn.addEventListener('click', close);
   document.addEventListener('keydown', function (ev) {
     if (ev.key === 'Escape' && isOpen()) { close(); trigger.focus(); }
+    /* Keep Tab inside the open overlay while it is open. */
+    if (ev.key === 'Tab' && isOpen()) {
+      var focusables = [].slice.call(
+        overlay.querySelectorAll('a[href], button:not([disabled])')
+      ).filter(function (el) { return el.offsetParent !== null; });
+      if (!focusables.length) return;
+      var first = focusables[0], last = focusables[focusables.length - 1];
+      if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+      else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+      else if (!overlay.contains(document.activeElement)) { ev.preventDefault(); first.focus(); }
+    }
   });
   [].slice.call(overlay.querySelectorAll('a')).forEach(function (a) {
     a.addEventListener('click', close);
@@ -775,10 +803,19 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     activeTrigger = trigger;
     modal.hidden = false;
     backdrop.hidden = false;
+    /* Inert the page behind the modal dialog. */
+    [].slice.call(document.body.children).forEach(function (el) {
+      if (el !== modal && el !== backdrop && el.hasAttribute && !el.hasAttribute('data-film-inert')) {
+        el.setAttribute('data-film-inert', 'true');
+        el.setAttribute('inert', '');
+        el.setAttribute('aria-hidden', 'true');
+      }
+    });
     requestAnimationFrame(function () {
       modal.classList.add('open');
       backdrop.classList.add('open');
     });
+    closeBtn.focus();
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!reduceMotion) { var p = video.play(); if (p && p.catch) p.catch(function () {}); }
   }
@@ -786,6 +823,12 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     modal.classList.remove('open');
     backdrop.classList.remove('open');
     video.pause();
+    [].slice.call(document.querySelectorAll('[data-film-inert]')).forEach(function (el) {
+      el.removeAttribute('inert');
+      el.removeAttribute('aria-hidden');
+      el.removeAttribute('data-film-inert');
+    });
+    if (activeTrigger && activeTrigger.focus) activeTrigger.focus();
     window.setTimeout(function () {
       modal.hidden = true;
       backdrop.hidden = true;
@@ -797,7 +840,18 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   backdrop.addEventListener('click', close);
   closeBtn.addEventListener('click', close);
   document.addEventListener('keydown', function (ev) {
-    if (ev.key === 'Escape' && isOpen()) { close(); if (activeTrigger) activeTrigger.focus(); }
+    if (ev.key === 'Escape' && isOpen()) { close(); return; }
+    /* Focus trap while the film modal is open. */
+    if (ev.key === 'Tab' && isOpen()) {
+      var focusables = [].slice.call(
+        modal.querySelectorAll('a[href], button:not([disabled]), video[controls]')
+      ).filter(function (el) { return el.offsetParent !== null; });
+      if (!focusables.length) return;
+      var first = focusables[0], last = focusables[focusables.length - 1];
+      if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+      else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+      else if (!modal.contains(document.activeElement)) { ev.preventDefault(); first.focus(); }
+    }
   });
 })();
 </script>

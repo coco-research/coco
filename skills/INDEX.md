@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 185 skills** — 70 core, 115 across 7 bundles.
+**Total: 186 skills** — 71 core, 115 across 7 bundles.
 
 ## Design (15)
 
@@ -67,7 +67,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [workflow-routing](workflow-routing/SKILL.md) | Use at the start of any task to route between Superpowers skills and GSD commands based on project state, task scope, and context signals. Fires before other sk |
 | [writing-plans](writing-plans/SKILL.md) | Use when you have a spec or requirements for a multi-step task, before touching code |
 
-## Meta (6)
+## Meta (7)
 
 | Skill | Description |
 |-------|-------------|
@@ -75,6 +75,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [coco-cli](coco-cli/SKILL.md) | Install, update, version-check, or uninstall the Coco open-source AI workflow framework via its CLI (cocosuperintelligence, run with npx). Use when setting up C |
 | [coco-loop](coco-loop/SKILL.md) | Start a safe, governed autonomous loop from a plain-language goal. Use when the user says /coco-loop, "run an autonomous loop", "keep my build green for N hours |
 | [find-skills](find-skills/SKILL.md) | Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express int |
+| [goal](goal/SKILL.md) | Persistent project goal that survives across sessions and tools, with continuous-execution loop semantics. Use when someone asks to "set a goal", "what is my go |
 | [skill-creator](skill-creator/SKILL.md) | Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabil |
 | [writing-skills](writing-skills/SKILL.md) | Use when creating new skills, editing existing skills, or verifying skills work before deployment |
 

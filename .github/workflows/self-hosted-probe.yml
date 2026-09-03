@@ -14,8 +14,7 @@ name: Self-hosted probe
 on:
   workflow_dispatch:
   push:
-    branches: [chore/self-hosted-ci]
-    branches: [main]
+    branches: [main, chore/self-hosted-ci]
     paths:
       - '.github/workflows/self-hosted-probe.yml'
 

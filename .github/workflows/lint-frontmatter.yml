@@ -10,7 +10,8 @@ on:
       - 'agents/**/*.md'
       - 'commands/**/*.md'
       - 'systems/**/SKILL.md'
-      - 'workflows/**/*.md'
+      - 'workflows/**'
+  workflow_dispatch:
 
 permissions:
   contents: read

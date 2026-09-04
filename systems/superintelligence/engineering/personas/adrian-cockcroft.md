@@ -1,6 +1,6 @@
 ---
 slug: adrian-cockcroft
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: cloud-architecture
 cell_letter: C                       # back-compat with founding v2 panel artifacts (C = cloud)

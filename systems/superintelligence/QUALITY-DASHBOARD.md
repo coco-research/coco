@@ -1,6 +1,6 @@
 # Quality Dashboard
 
-Generated: 2026-09-04T14:20:40.713678+00:00
+Generated: 2026-09-04T14:53:56.872480+00:00
 
 | Team | Personas | Avg Score | Pass | Fail |
 |------|----------|-----------|------|------|
@@ -13,4 +13,7 @@ Generated: 2026-09-04T14:20:40.713678+00:00
 | strategy | 29 | 94.4 | 29 | 0 |
 | data-analytics | 29 | 96.4 | 29 | 0 |
 | gtm | 23 | 93.4 | 23 | 0 |
+| legal-ip | 31 | 95.3 | 31 | 0 |
+| healthcare-life-sciences | 25 | 98.2 | 25 | 0 |
+| education-edtech | 25 | 96.8 | 25 | 0 |
 | climate-energy | 25 | 98.0 | 25 | 0 |

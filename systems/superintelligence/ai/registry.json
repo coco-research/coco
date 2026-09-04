@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-30",
+  "generated_at": "2026-09-03",
   "team_id": "ai-super-intelligence",
   "team_name": "AI Super Intelligence Team",
   "description": "Your AI research and engineering brain trust. 47 named personas across 8 cells covering frontier labs, applied product, model architecture, reasoning/RL/agents, alignment and interpretability, theory and science of DL, multimodal and embodied, and systems/kernels/serving. Reusable across all CoCo-routed work — invoked by /superintelligenceTeam slash commands.",
@@ -228,7 +228,8 @@
       "real_name": "Albert Gu",
       "archetype": "State-space-model architect bridging theory, kernels, and production voice AI",
       "teams": [
-        "ai-super-intelligence"
+        "ai-super-intelligence",
+        "engineering-super-intelligence"
       ],
       "cell": "systems-kernels-serving",
       "cell_letter": "A",
@@ -321,7 +322,8 @@
       "real_name": "Andrej Karpathy",
       "archetype": "First-principles deep-learning teacher",
       "teams": [
-        "ai-super-intelligence"
+        "ai-super-intelligence",
+        "engineering-super-intelligence"
       ],
       "cell": "model-architects",
       "cell_letter": "A",
@@ -367,7 +369,8 @@
       "real_name": "Andrew Feldman",
       "archetype": "Wafer-scale insurgent CEO arguing the GPU was the wrong architecture for AI",
       "teams": [
-        "ai-super-intelligence"
+        "ai-super-intelligence",
+        "engineering-super-intelligence"
       ],
       "cell": "systems-kernels-serving",
       "cell_letter": "A",
@@ -595,7 +598,8 @@
       "real_name": "Bryan Catanzaro",
       "archetype": "GPU + software co-design at frontier model scale",
       "teams": [
-        "ai-super-intelligence"
+        "ai-super-intelligence",
+        "engineering-super-intelligence"
       ],
       "cell": "systems-kernels-serving",
       "cell_letter": "A",
@@ -1174,7 +1178,8 @@
       "real_name": "Horace He",
       "archetype": "First-principles ML systems engineer",
       "teams": [
-        "ai-super-intelligence"
+        "ai-super-intelligence",
+        "engineering-super-intelligence"
       ],
       "cell": "systems-kernels-serving",
       "cell_letter": "A",
@@ -2312,7 +2317,8 @@
       "real_name": "Alexander \"Sasha\" Rush",
       "archetype": "Literate-code pedagogue and post-training realist",
       "teams": [
-        "ai-super-intelligence"
+        "ai-super-intelligence",
+        "engineering-super-intelligence"
       ],
       "cell": "reasoning-rl-agents",
       "cell_letter": "A",
@@ -2596,7 +2602,8 @@
       "real_name": "Tim Dettmers",
       "archetype": "Quantization-and-accessibility engineer-scientist",
       "teams": [
-        "ai-super-intelligence"
+        "ai-super-intelligence",
+        "engineering-super-intelligence"
       ],
       "cell": "systems-kernels-serving",
       "cell_letter": "A",
@@ -2644,7 +2651,8 @@
       "real_name": "Tri Dao",
       "archetype": "Hardware-aware sequence-modeling kernel author",
       "teams": [
-        "ai-super-intelligence"
+        "ai-super-intelligence",
+        "engineering-super-intelligence"
       ],
       "cell": "systems-kernels-serving",
       "cell_letter": "A",
@@ -2692,7 +2700,8 @@
       "real_name": "Woosuk Kwon",
       "archetype": "OS-minded LLM serving systems architect",
       "teams": [
-        "ai-super-intelligence"
+        "ai-super-intelligence",
+        "engineering-super-intelligence"
       ],
       "cell": "systems-kernels-serving",
       "cell_letter": "A",

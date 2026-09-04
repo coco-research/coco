@@ -1,0 +1,286 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-04",
+  "team_id": "legal-ip-super-intelligence",
+  "team_name": "Legal & IP Super Intelligence Team",
+  "description": "Your legal, IP, and regulatory brain trust. 31 named personas across 7 cells covering patent strategy, tech licensing, regulatory litigation, AI governance, open-source compliance, privacy law, and antitrust.",
+  "personas_count": 31,
+  "cells_count": 7,
+  "cells": {
+    "ai-ip-governance": {
+      "id": "ai-ip-governance",
+      "description": "Legal & IP Super Intelligence Team cell: Ai Ip Governance",
+      "personas_count": 3,
+      "personas": [
+        "frank-pasquale",
+        "kate-crawford",
+        "ryan-calo"
+      ],
+      "file_path": "superintelligence/legal-ip/cells/ai-ip-governance.md"
+    },
+    "antitrust-competition": {
+      "id": "antitrust-competition",
+      "description": "Legal & IP Super Intelligence Team cell: Antitrust Competition",
+      "personas_count": 4,
+      "personas": [
+        "fiona-scott-morton",
+        "herbert-hovenkamp",
+        "lina-khan",
+        "tim-wu"
+      ],
+      "file_path": "superintelligence/legal-ip/cells/antitrust-competition.md"
+    },
+    "ip-patent-strategy": {
+      "id": "ip-patent-strategy",
+      "description": "Legal & IP Super Intelligence Team cell: Ip Patent Strategy",
+      "personas_count": 9,
+      "personas": [
+        "dan-burk",
+        "david-kappos",
+        "james-boyle",
+        "jessica-litman",
+        "mark-lemley",
+        "mark-mckenna",
+        "paul-goldstein",
+        "rebecca-tushnet",
+        "rochelle-dreyfuss"
+      ],
+      "file_path": "superintelligence/legal-ip/cells/ip-patent-strategy.md"
+    },
+    "open-source-compliance": {
+      "id": "open-source-compliance",
+      "description": "Legal & IP Super Intelligence Team cell: Open Source Compliance",
+      "personas_count": 3,
+      "personas": [
+        "eben-moglen",
+        "karen-sandler",
+        "richard-stallman"
+      ],
+      "file_path": "superintelligence/legal-ip/cells/open-source-compliance.md"
+    },
+    "privacy-international-law": {
+      "id": "privacy-international-law",
+      "description": "Legal & IP Super Intelligence Team cell: Privacy International Law",
+      "personas_count": 5,
+      "personas": [
+        "ann-cavoukian",
+        "daniel-solove",
+        "helen-nissenbaum",
+        "julie-cohen",
+        "margot-kaminski"
+      ],
+      "file_path": "superintelligence/legal-ip/cells/privacy-international-law.md"
+    },
+    "regulatory-litigation": {
+      "id": "regulatory-litigation",
+      "description": "Legal & IP Super Intelligence Team cell: Regulatory Litigation",
+      "personas_count": 3,
+      "personas": [
+        "danielle-citron",
+        "jack-balkin",
+        "lawrence-lessig"
+      ],
+      "file_path": "superintelligence/legal-ip/cells/regulatory-litigation.md"
+    },
+    "tech-licensing-contracts": {
+      "id": "tech-licensing-contracts",
+      "description": "Legal & IP Super Intelligence Team cell: Tech Licensing Contracts",
+      "personas_count": 4,
+      "personas": [
+        "corynne-cohen",
+        "heather-meeker",
+        "michael-carroll",
+        "pamela-samuelson"
+      ],
+      "file_path": "superintelligence/legal-ip/cells/tech-licensing-contracts.md"
+    }
+  },
+  "personas": {
+    "ann-cavoukian": {
+      "slug": "ann-cavoukian",
+      "real_name": "Ann Cavoukian",
+      "cell": "privacy-international-law",
+      "file_path": "superintelligence/legal-ip/personas/ann-cavoukian.md"
+    },
+    "corynne-cohen": {
+      "slug": "corynne-cohen",
+      "real_name": "Corynne Cohen",
+      "cell": "tech-licensing-contracts",
+      "file_path": "superintelligence/legal-ip/personas/corynne-cohen.md"
+    },
+    "dan-burk": {
+      "slug": "dan-burk",
+      "real_name": "Dan Burk",
+      "cell": "ip-patent-strategy",
+      "file_path": "superintelligence/legal-ip/personas/dan-burk.md"
+    },
+    "daniel-solove": {
+      "slug": "daniel-solove",
+      "real_name": "Daniel J. Solove",
+      "cell": "privacy-international-law",
+      "file_path": "superintelligence/legal-ip/personas/daniel-solove.md"
+    },
+    "danielle-citron": {
+      "slug": "danielle-citron",
+      "real_name": "Danielle Citron",
+      "cell": "regulatory-litigation",
+      "file_path": "superintelligence/legal-ip/personas/danielle-citron.md"
+    },
+    "david-kappos": {
+      "slug": "david-kappos",
+      "real_name": "David Kappos",
+      "cell": "ip-patent-strategy",
+      "file_path": "superintelligence/legal-ip/personas/david-kappos.md"
+    },
+    "eben-moglen": {
+      "slug": "eben-moglen",
+      "real_name": "Eben Moglen",
+      "cell": "open-source-compliance",
+      "file_path": "superintelligence/legal-ip/personas/eben-moglen.md"
+    },
+    "fiona-scott-morton": {
+      "slug": "fiona-scott-morton",
+      "real_name": "Fiona Scott Morton",
+      "cell": "antitrust-competition",
+      "file_path": "superintelligence/legal-ip/personas/fiona-scott-morton.md"
+    },
+    "frank-pasquale": {
+      "slug": "frank-pasquale",
+      "real_name": "Frank Pasquale",
+      "cell": "ai-ip-governance",
+      "file_path": "superintelligence/legal-ip/personas/frank-pasquale.md"
+    },
+    "heather-meeker": {
+      "slug": "heather-meeker",
+      "real_name": "Heather Meeker",
+      "cell": "tech-licensing-contracts",
+      "file_path": "superintelligence/legal-ip/personas/heather-meeker.md"
+    },
+    "helen-nissenbaum": {
+      "slug": "helen-nissenbaum",
+      "real_name": "Helen Nissenbaum",
+      "cell": "privacy-international-law",
+      "file_path": "superintelligence/legal-ip/personas/helen-nissenbaum.md"
+    },
+    "herbert-hovenkamp": {
+      "slug": "herbert-hovenkamp",
+      "real_name": "Herbert Hovenkamp",
+      "cell": "antitrust-competition",
+      "file_path": "superintelligence/legal-ip/personas/herbert-hovenkamp.md"
+    },
+    "jack-balkin": {
+      "slug": "jack-balkin",
+      "real_name": "Jack Balkin",
+      "cell": "regulatory-litigation",
+      "file_path": "superintelligence/legal-ip/personas/jack-balkin.md"
+    },
+    "james-boyle": {
+      "slug": "james-boyle",
+      "real_name": "James Boyle",
+      "cell": "ip-patent-strategy",
+      "file_path": "superintelligence/legal-ip/personas/james-boyle.md"
+    },
+    "jessica-litman": {
+      "slug": "jessica-litman",
+      "real_name": "Jessica Litman",
+      "cell": "ip-patent-strategy",
+      "file_path": "superintelligence/legal-ip/personas/jessica-litman.md"
+    },
+    "julie-cohen": {
+      "slug": "julie-cohen",
+      "real_name": "Julie Cohen",
+      "cell": "privacy-international-law",
+      "file_path": "superintelligence/legal-ip/personas/julie-cohen.md"
+    },
+    "karen-sandler": {
+      "slug": "karen-sandler",
+      "real_name": "Karen Sandler",
+      "cell": "open-source-compliance",
+      "file_path": "superintelligence/legal-ip/personas/karen-sandler.md"
+    },
+    "kate-crawford": {
+      "slug": "kate-crawford",
+      "real_name": "Kate Crawford",
+      "cell": "ai-ip-governance",
+      "file_path": "superintelligence/legal-ip/personas/kate-crawford.md"
+    },
+    "lawrence-lessig": {
+      "slug": "lawrence-lessig",
+      "real_name": "Lawrence Lessig",
+      "cell": "regulatory-litigation",
+      "file_path": "superintelligence/legal-ip/personas/lawrence-lessig.md"
+    },
+    "lina-khan": {
+      "slug": "lina-khan",
+      "real_name": "Lina Khan",
+      "cell": "antitrust-competition",
+      "file_path": "superintelligence/legal-ip/personas/lina-khan.md"
+    },
+    "margot-kaminski": {
+      "slug": "margot-kaminski",
+      "real_name": "Margot Kaminski",
+      "cell": "privacy-international-law",
+      "file_path": "superintelligence/legal-ip/personas/margot-kaminski.md"
+    },
+    "mark-lemley": {
+      "slug": "mark-lemley",
+      "real_name": "Mark Lemley",
+      "cell": "ip-patent-strategy",
+      "file_path": "superintelligence/legal-ip/personas/mark-lemley.md"
+    },
+    "mark-mckenna": {
+      "slug": "mark-mckenna",
+      "real_name": "Mark McKenna",
+      "cell": "ip-patent-strategy",
+      "file_path": "superintelligence/legal-ip/personas/mark-mckenna.md"
+    },
+    "michael-carroll": {
+      "slug": "michael-carroll",
+      "real_name": "Michael Carroll",
+      "cell": "tech-licensing-contracts",
+      "file_path": "superintelligence/legal-ip/personas/michael-carroll.md"
+    },
+    "pamela-samuelson": {
+      "slug": "pamela-samuelson",
+      "real_name": "Pamela Samuelson",
+      "cell": "tech-licensing-contracts",
+      "file_path": "superintelligence/legal-ip/personas/pamela-samuelson.md"
+    },
+    "paul-goldstein": {
+      "slug": "paul-goldstein",
+      "real_name": "Paul Goldstein",
+      "cell": "ip-patent-strategy",
+      "file_path": "superintelligence/legal-ip/personas/paul-goldstein.md"
+    },
+    "rebecca-tushnet": {
+      "slug": "rebecca-tushnet",
+      "real_name": "Rebecca Tushnet",
+      "cell": "ip-patent-strategy",
+      "file_path": "superintelligence/legal-ip/personas/rebecca-tushnet.md"
+    },
+    "richard-stallman": {
+      "slug": "richard-stallman",
+      "real_name": "Richard Stallman",
+      "cell": "open-source-compliance",
+      "file_path": "superintelligence/legal-ip/personas/richard-stallman.md"
+    },
+    "rochelle-dreyfuss": {
+      "slug": "rochelle-dreyfuss",
+      "real_name": "Rochelle Dreyfuss",
+      "cell": "ip-patent-strategy",
+      "file_path": "superintelligence/legal-ip/personas/rochelle-dreyfuss.md"
+    },
+    "ryan-calo": {
+      "slug": "ryan-calo",
+      "real_name": "Ryan Calo",
+      "cell": "ai-ip-governance",
+      "file_path": "superintelligence/legal-ip/personas/ryan-calo.md"
+    },
+    "tim-wu": {
+      "slug": "tim-wu",
+      "real_name": "Tim Wu",
+      "cell": "antitrust-competition",
+      "file_path": "superintelligence/legal-ip/personas/tim-wu.md"
+    }
+  }
+}

@@ -19,7 +19,7 @@ domains:
   - synthetic biology and longevity
   - clean energy and climate tech
   - artificial intelligence in healthcare
-  - "black swan" innovation theory
+  - 'black swan innovation theory'
   - technology-driven disruption
 signature_moves:
   - "I'd rather invest in 10 companies where 9 fail and 1 changes the world than 10 safe bets that return 2x."

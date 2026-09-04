@@ -1,6 +1,6 @@
 ---
 slug: michael-truell
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: ai-assisted-coding
 cell_role: lead-driver

@@ -1,6 +1,6 @@
 ---
 slug: bruce-schneier
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: security
 cell_role: lead-driver

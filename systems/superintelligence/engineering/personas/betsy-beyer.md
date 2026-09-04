@@ -15,7 +15,7 @@
 # recent_signal_12mo, but dates may be historical). `recent_signal_12mo` is
 # therefore an empty list. This is the conservative, non-fabricating call.
 slug: betsy-beyer
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: reliability-sre-obs
 cell_role: validator

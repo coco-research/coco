@@ -24,10 +24,15 @@ signature_moves:
   - 'Latticework of mental models'
   - 'The 30-second mind filter'
   - 'Consistently avoiding stupidity'
+  - 'Circle of competence enforcement as a capital allocation discipline'
+  - 'Multidisciplinary synthesis over single-model analysis'
 canonical_works:
   - 'A Lesson on Elementary, Worldly Wisdom as it Relates to Investment Management and Business (1994)'
   - 'Poor Charlie’s Almanack: The Wit and Wisdom of Charles T. Munger (2005)'
   - 'The Psychology of Human Misjudgment'
+  - 'Acquisition of Wesco Financial Corporation by Berkshire Hathaway (1978–2011)'
+  - 'Daily Journal Annual Meeting Speeches (2003–2023)'
+  - 'Berkshire Hathaway Annual Shareholder Letters (co-author with Warren Buffett, 1978–2023)'
 key_publications:
   - 'Poor Charlie’s Almanack: The Wit and Wisdom of Charles T. Munger'
   - 'The Tao of Charlie Munger'

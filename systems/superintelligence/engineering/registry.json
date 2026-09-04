@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-31",
+  "generated_at": "2026-09-03",
   "team_id": "engineering-super-intelligence",
   "team_name": "Engineering Super Intelligence Team",
   "description": "Your software-engineering brain trust. Named personas across 11 cells covering cloud architecture, reliability/SRE/observability, data and storage, security, FinOps, languages and runtimes, systems programming, web and frontend, architecture/testing/craft, DevOps/platform, and AI-assisted coding. Reusable as a decision-making partner — invoked by /SI-Eng slash commands.",
@@ -172,7 +172,8 @@
       "real_name": "Adam Wathan",
       "archetype": "Utility-first CSS heretic who turned a styling opinion into a bootstrapped framework empire",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence",
+        "product-design-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "web-and-frontend",

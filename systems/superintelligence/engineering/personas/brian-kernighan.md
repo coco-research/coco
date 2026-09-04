@@ -11,7 +11,7 @@
 # talk or interview dated strictly after 2025-05-30 found none; nothing was
 # fabricated to fill recency.
 slug: brian-kernighan
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: systems-programming
 cell_role: validator

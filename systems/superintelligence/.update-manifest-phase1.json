@@ -1,0 +1,87 @@
+{
+  "finance": [
+    {
+      "slug": "cathie-wood",
+      "stance_idx": 1,
+      "claim": "AI is not a bubble; it is the most powerful capital-spending cycle in history with most of the returns still to come."
+    },
+    {
+      "slug": "steve-kaplan",
+      "stance_idx": 1,
+      "claim": "VC/PE evidence should connect mechanisms (selection, contracts/actions, valuation practices) to measurable outcomes rather than stopping at qualitative process stories."
+    },
+    {
+      "slug": "tim-koller",
+      "stance_idx": 1,
+      "claim": "Value is governed by ROIC, revenue growth, and the ability to sustain both; growing earnings without earning attractive returns on capital can destroy value rather than create it."
+    },
+    {
+      "slug": "tim-koller",
+      "stance_idx": 5,
+      "claim": "The economic principles of valuation barely change across decades, but they matter more \u2014 not less \u2014 as leaders face digital disruption, geopolitical shifts, and climate challenges."
+    }
+  ],
+  "trading": [
+    {
+      "slug": "brett-steenbarger",
+      "stance_idx": 0,
+      "claim": "Emotions in trading are valuable signals revealing the trader's beliefs and expectations, to be observed and used for process improvement, not merely suppressed through discipline."
+    },
+    {
+      "slug": "ernest-chan",
+      "stance_idx": 0,
+      "claim": "Pure ML approaches to finding alpha have not been fruitful; ML's productive role in trading is risk management and strategy filtering, not direction prediction."
+    },
+    {
+      "slug": "robert-litterman",
+      "stance_idx": 3,
+      "claim": "Climate change is a systemic risk to the U.S. financial system and must be managed as a risk-management problem under deep uncertainty, akin to robust optimal control."
+    },
+    {
+      "slug": "robert-litterman",
+      "stance_idx": 4,
+      "claim": "Carbon-linked bonds can align government and investor incentives by tying coupons and principal to a carbon-price index, providing credible governments with immediate funds and de-risking the transition."
+    },
+    {
+      "slug": "stanley-druckenmiller",
+      "stance_idx": 2,
+      "claim": "US fiscal path is dangerous \u2014 government spends 'like drunken sailors'; entitlements must be cut or future obligations balloon toward ~$200T as the demographic storm hits"
+    }
+  ],
+  "strategy": [
+    {
+      "slug": "hamilton-helmer",
+      "stance_idx": 3,
+      "claim": "When deciding on a second business line, prefer extending an existing 'power umbrella' (lower risk) over pure invention; companies that try to invent durable advantage from scratch usually fail."
+    },
+    {
+      "slug": "phil-rosenzweig",
+      "stance_idx": 1,
+      "claim": "The most pervasive delusion is the halo effect: once we know a company succeeded, we infer it had a brilliant strategy, visionary leader, and great culture \u2014 and reverse all those judgments the moment performance dips, even when little has actually changed."
+    }
+  ],
+  "data-analytics": [
+    {
+      "slug": "dj-patil",
+      "stance_idx": 1,
+      "claim": "Even with modern AI, the overwhelming majority of a data scientist's work is data cleaning and preparation; teams that pretend otherwise ship unreliable products."
+    },
+    {
+      "slug": "dj-patil",
+      "stance_idx": 2,
+      "claim": "AI in defense and government should be sequenced by impact and consequence, automating high-impact low-consequence work (logistics, paperwork) before touching sensitive, high-consequence domains."
+    }
+  ],
+  "risk-compliance": [
+    {
+      "slug": "cathy-oneil",
+      "stance_idx": 0,
+      "claim": "Algorithms that are opaque, deployed at scale, and damaging are 'Weapons of Math Destruction' that encode and amplify historical bias."
+    },
+    {
+      "slug": "cathy-oneil",
+      "stance_idx": 1,
+      "claim": "AI should face mandatory, high-quality audits before deployment \u2014 an 'FDA for algorithms' style regime that puts the burden of explainability on developers."
+    }
+  ]
+}

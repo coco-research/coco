@@ -1,6 +1,6 @@
 ---
 slug: gregor-hohpe
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: architecture-testing-craft
 cell_role: specialist

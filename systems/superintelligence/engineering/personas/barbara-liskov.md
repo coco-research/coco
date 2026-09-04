@@ -18,7 +18,7 @@
 # Wing in 1994 — the community, not Liskov, coined the name; (2) PBFT was joint
 # with her PhD student Miguel Castro (OSDI '99).
 slug: barbara-liskov
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: architecture-testing-craft
 cell_role: validator

@@ -1,6 +1,6 @@
 ---
 slug: joe-hellerstein
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: data-and-storage
 cell_role: specialist

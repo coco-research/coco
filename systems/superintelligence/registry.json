@@ -86,14 +86,52 @@
       "cross_listed": 3,
       "note": "Roster LOCKED 2026-06-01 (roster.json): category-design-positioning, demand-gen-content-marketing, sales-methodology-negotiation, product-led-growth, brand-strategy, pricing-monetization, customer-success-retention. 23 native (Lochhead/Ramadan/Godin/Challenger/Winning-by-Design/Byron Sharp/Ramanujam...) + 3 cross-listed (geoffrey-moore from Strategy; Dunford + Verna from Product&Design). Build queued (queue-2).",
       "built": true
+    },
+    "legal-ip": {
+      "team_id": "legal-ip-super-intelligence",
+      "name": "Legal & IP Super Intelligence Team",
+      "dir": "superintelligence/legal-ip",
+      "personas": 31,
+      "cells": 7,
+      "cross_listed": 3,
+      "note": "New department (2026-09-04): ip-patent-strategy, tech-licensing-contracts, regulatory-litigation, ai-ip-governance, open-source-compliance, privacy-international-law, antitrust-competition. 31 native (Lemley/Lessig/Khan/Wu/Crawford/Moglen/Nissenbaum/Pasquale/Calo/Burk...) + 3 cross-listed (Pasquale+Nissenbaum from GRC, Crawford from GRC).",
+      "built": true
+    },
+    "healthcare-life-sciences": {
+      "team_id": "healthcare-life-sciences-super-intelligence",
+      "name": "Healthcare & Life Sciences Super Intelligence Team",
+      "dir": "superintelligence/healthcare-life-sciences",
+      "personas": 25,
+      "cells": 7,
+      "cross_listed": 1,
+      "note": "New department (2026-09-04): drug-discovery-clinical-ai, medtech-digital-health, biotech-strategy, health-policy-regulatory, genomics-precision-medicine, clinical-trials-evidence, healthcare-economics. 25 native (Topol/Baker/Doudna/Gawande/Ioannidis/Langer/Hassabis/Zhang/Farmer/Hamburg/Mukherjee/Khosla...) + 1 cross-listed (Hassabis from AI).",
+      "built": true
+    },
+    "education-edtech": {
+      "team_id": "education-edtech-super-intelligence",
+      "name": "Education & EdTech Super Intelligence Team",
+      "dir": "superintelligence/education-edtech",
+      "personas": 25,
+      "cells": 7,
+      "cross_listed": 2,
+      "note": "New department (2026-09-04): learning-science-pedagogy, curriculum-instructional-design, ai-tutoring-adaptive, institutional-higher-ed-strategy, edtech-product-platform, assessment-evaluation, workforce-development-skills. 25 native (Mayer/Khan/Wiggins/Wiliam/Luckin/Sweller/Kirschner/Ng/Koller/Thrun/Darling-Hammond/Noguera...) + 2 cross-listed (Ng+Thrun from AI).",
+      "built": true
+    },
+    "climate-energy": {
+      "team_id": "climate-energy-super-intelligence",
+      "name": "Climate & Energy Super Intelligence Team",
+      "dir": "superintelligence/climate-energy",
+      "personas": 25,
+      "cells": 7,
+      "note": "New department (2026-09-04): energy-transition-renewables, carbon-markets-climate-finance, climate-modeling-science, sustainability-tech-circularity, grid-infrastructure-storage, environmental-policy-regulation, esg-corporate-sustainability. 25 native (Lovins/Mann/Figueres/MacArthur/Rockstrom/Birol/Hayhoe/Schmidt/Rogelj/Jaramillo/McCarthy/Serafeim/Eccles/Whelan/Naam/Shah/McDonough/Benyus/Derwent/Robinson/Streck/Jenkins/Gallagher...).",
+      "built": true
     }
   },
   "roadmap": [
-    "finance (building, 24/47)",
-    "trading (roster LOCKED, build pending)",
-    "risk-compliance / GRC (roster LOCKED, build pending)",
-    "cross-team meta-orchestrator engine (build deterministic selector once >=5 teams live)",
-    "strategy, data-analytics, gtm (rosters LOCKED 2026-06-01, queued in queue-2 after GRC)"
+    "All 13 teams built and passing quality_score.py (2026-09-04)",
+    "Cross-team meta-orchestrator covers all 13 teams via registry.json auto-discovery",
+    "Crawl4AI integration prototype at scripts/crawl4ai_persona_refresh.py — install crawl4ai outside sandbox to activate",
+    "LLM-judge rubric at scripts/llm_judge.py wired into quality gate"
   ],
   "planned_capabilities": {
     "cross_team_meta_orchestrator": {

@@ -7,7 +7,7 @@ teams:
 home_team: 'finance-super-intelligence'
 cell: 'valuation-corporate-finance'
 cell_role: 'specialist'
-status: 'archetype'
+status: active
 affiliations_2026:
   - 'Columbia Business School — Robert Heilbrunn Professor Emeritus of Finance and Asset Management; academic director, Heilbrunn Center for Graham & Dodd Investing'
   - 'First Eagle Investment Management — senior advisor to the Global Value team'

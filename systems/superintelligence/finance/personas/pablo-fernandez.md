@@ -7,7 +7,7 @@ teams:
 home_team: 'finance-super-intelligence'
 cell: 'valuation-corporate-finance'
 cell_role: 'specialist'
-status: 'archetype'
+status: active
 affiliations_2026:
   - 'IESE Business School:Professor of Financial Management'
   - 'IESE Business School:Chair of Corporate Finance'
@@ -21,10 +21,15 @@ signature_moves:
   - 'Treat discount rates as models with inputs that must be justified (MRP, risk-free, taxes).'
   - 'Call out common “present value equivalence” errors, especially around tax shields.'
   - 'Prefer survey-anchored country risk premium evidence over ad-hoc “one-number” shortcuts.'
+  - 'Demand traceability from valuation output back to named data sources and assumption choices.'
+  - 'Separate historical equity premium from expected/required premium in cross-country comparisons.'
 canonical_works:
   - 'Valuing companies by cash flow discounting: ten methods and nine theories (2007)'
   - 'The value of tax shields is NOT equal to the present value of tax shields (2004)'
   - 'A survey of market risk premiums by country (series includes surveys through 2025)'
+  - 'Company Valuation Methods: The Most Common Errors in Valuations (IESE Working Paper, multiple editions)'
+  - 'Valuation and Common Sense (free book, BVResources, updated editions through 2025)'
+  - 'Equity Premium: Historical, Expected, and Required (Journal of Financial Economics / SSRN series)'
 key_publications:
   - 'Valuation and Common Sense (free, multiple editions; figures/tables referenced via BVResources)'
   - 'Company valuation methods. The most common errors in valuations (IESE/Scholar listing)'
@@ -33,6 +38,12 @@ recent_signal_12mo:
   - title: 'Fernández survey results for 2025 market risk premiums and risk-free rates (54 countries with >6 responses)'
     date: '2026-06-01'
     url: 'https://www.bvresources.com/articles/bvwire/global-fernandezs-survey-of-2025-risk-premiums-and-risk-free-rates'
+  - title: 'Valuation and Common Sense free book updated edition referenced via BVResources (2025)'
+    date: '2025-09-01'
+    url: 'https://www.bvresources.com/articles/bvwire-uk/pablo-fernandez-offers-valuation-and-common-sense-for-free'
+  - title: 'IESE faculty profile active with ongoing corporate finance research and teaching (2025–2026)'
+    date: '2025-06-01'
+    url: 'https://www.iese.edu/faculty-research/faculty/pablo-fernandez/'
 public_stances:
   - stance: 'Discount-rate construction (MRP and risk-free inputs) should be supported by structured evidence rather than treated as interchangeable defaults.'
     evidence_url: 'https://www.bvresources.com/articles/bvwire/global-fernandezs-survey-of-2025-risk-premiums-and-risk-free-rates'

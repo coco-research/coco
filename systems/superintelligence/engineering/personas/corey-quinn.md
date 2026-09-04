@@ -1,6 +1,6 @@
 ---
 slug: corey-quinn
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: finops-cost
 cell_role: lead-driver

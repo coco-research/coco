@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 38 commands across 6 namespaces.**
+**Total: 39 commands across 6 namespaces.**
 
 ## design
 
@@ -70,4 +70,5 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [`/util:architecture-review`](util/architecture-review.md) | Comprehensive architecture review with design patterns analysis and improvement recommendations |
 | [`/util:create-architecture-documentation`](util/create-architecture-documentation.md) | Generate comprehensive architecture documentation with diagrams, ADRs, and interactive visualization |
 | [`/util:refactor-code`](util/refactor-code.md) |  |
+| [`/util:self-eval`](util/self-eval.md) | Run post-output self-evaluation scoring on correctness, clarity, actionability, and conciseness |
 | [`/util:ss`](util/ss.md) | View the latest N screenshots from Desktop (default 1) |

@@ -2,10 +2,11 @@
 
 Auto-generated view. Filtered to `domain: meta` skills.
 
-**6 skills.**
+**7 skills.**
 
 | Skill | Description |
 |-------|-------------|
+| [agent-self-eval](../../skills/agent-self-eval/SKILL.md) | Post-run self-evaluation system that scores agent output on correctness, clarity, actionability, and conciseness. Use after /team runs, skill executions, or when explicitly asked to evaluate output qu |
 | [cli-anything](../../skills/cli-anything/SKILL.md) | Wrap any command-line tool into a JSON-emitting agent skill. Use when you want to make a CLI reliably callable and parseable by an AI agent — introspect its --help, define a structured-output (--json) |
 | [coco-cli](../../skills/coco-cli/SKILL.md) | Install, update, version-check, or uninstall the Coco open-source AI workflow framework via its CLI (cocosuperintelligence, run with npx). Use when setting up Coco on a machine, pulling the latest int |
 | [coco-loop](../../skills/coco-loop/SKILL.md) | Start a safe, governed autonomous loop from a plain-language goal. Use when the user says /coco-loop, "run an autonomous loop", "keep my build green for N hours", "work on X autonomously for a while", |

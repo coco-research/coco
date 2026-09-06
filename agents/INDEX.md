@@ -2,19 +2,20 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 34 agents** — 10 core, 24 across 1 bundles.
+**Total: 35 agents** — 11 core, 24 across 1 bundles.
 
-## Core agents (10)
+## Core agents (11)
 
 | Agent | Description |
 |-------|-------------|
+| [PROMPT-DEFENSE](PROMPT-DEFENSE.md) | This preamble MUST be included in every agent system prompt. It provides baseline protection against prompt injection attacks. |
 | [ai-engineer](ai-engineer.md) | name: ai-engineer |
 | [code-reviewer](code-reviewer.md) | name: code-reviewer |
 | [data-specialist](data-specialist.md) | name: data-specialist |
 | [database-architect](database-architect.md) | name: database-architect |
 | [mcp-specialist](mcp-specialist.md) | name: mcp-specialist |
 | [pm-advisor](pm-advisor.md) | name: pm-advisor |
-| [refactoring-specialist](refactoring-specialist.md) | Senior refactoring specialist for transforming complex, poorly structured code into clean, maintainable systems. Use proactively when code quality metrics show  |
+| [refactoring-specialist](refactoring-specialist.md) | @agents/PROMPT-DEFENSE.md |
 | [test-guardian](test-guardian.md) | name: test-guardian |
 | [typescript-pro](typescript-pro.md) | name: typescript-pro |
 | [ui-ux-designer](ui-ux-designer.md) | name: ui-ux-designer |

@@ -1,0 +1,12 @@
+{
+  "name": "zed",
+  "version": "0.1.0",
+  "description": "Wires Coco artifacts into ~/.config/zed/ for Zed editor with rules and agent context",
+  "targets": {
+    "rules": "~/.config/zed/rules",
+    "agents": "~/.config/zed/agents"
+  },
+  "transforms": ["copy markdown rules for Zed compatibility"],
+  "supports_systems": ["gsd", "brain", "team"],
+  "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
+}

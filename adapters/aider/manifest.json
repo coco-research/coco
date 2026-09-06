@@ -1,0 +1,12 @@
+{
+  "name": "aider",
+  "version": "0.1.0",
+  "description": "Generates .aider.conf.yml and AGENTS.md for Aider CLI agent with Coco skills, agents, and rules",
+  "targets": {
+    "agents_md": "./AGENTS.md",
+    "config": "./.aider.conf.yml"
+  },
+  "transforms": ["generate AGENTS.md from agents/", "generate .aider.conf.yml with conventions"],
+  "supports_systems": ["gsd", "brain", "team"],
+  "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
+}

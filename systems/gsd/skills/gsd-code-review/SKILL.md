@@ -28,7 +28,7 @@ Output: {padded_phase}-REVIEW.md in phase directory + inline summary of findings
 </objective>
 
 <execution_context>
-@$HOME/.claude/get-shit-done/workflows/code-review.md
+@systems/gsd/workflows/code-review.md
 </execution_context>
 
 <context>
@@ -44,7 +44,7 @@ Context files (CLAUDE.md, SUMMARY.md, phase state) are resolved inside the workf
 <process>
 This command is a thin dispatch layer. It parses arguments and delegates to the workflow.
 
-Execute the code-review workflow from @$HOME/.claude/get-shit-done/workflows/code-review.md end-to-end.
+Execute the code-review workflow from @systems/gsd/workflows/code-review.md end-to-end.
 
 The workflow (not this command) enforces these gates:
 - Phase validation (before config gate)

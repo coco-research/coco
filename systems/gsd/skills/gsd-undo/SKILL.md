@@ -21,9 +21,9 @@ Three modes:
 </objective>
 
 <execution_context>
-@$HOME/.claude/get-shit-done/workflows/undo.md
-@$HOME/.claude/get-shit-done/references/ui-brand.md
-@$HOME/.claude/get-shit-done/references/gate-prompts.md
+@systems/gsd/workflows/undo.md
+@systems/gsd/references/ui-brand.md
+@systems/gsd/references/gate-prompts.md
 </execution_context>
 
 <context>
@@ -31,5 +31,5 @@ $ARGUMENTS
 </context>
 
 <process>
-Execute the undo workflow from @$HOME/.claude/get-shit-done/workflows/undo.md end-to-end.
+Execute the undo workflow from @systems/gsd/workflows/undo.md end-to-end.
 </process>

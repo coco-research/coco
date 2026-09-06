@@ -18,7 +18,7 @@ Closes the plan → execute → verify → ship loop.
 </objective>
 
 <execution_context>
-@$HOME/.claude/get-shit-done/workflows/ship.md
+@systems/gsd/workflows/ship.md
 </execution_context>
 
-Execute the ship workflow from @$HOME/.claude/get-shit-done/workflows/ship.md end-to-end.
+Execute the ship workflow from @systems/gsd/workflows/ship.md end-to-end.

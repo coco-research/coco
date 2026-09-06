@@ -1,0 +1,12 @@
+{
+  "name": "github-copilot-cli",
+  "version": "0.1.0",
+  "description": "Generates AGENTS.md and .github/copilot-instructions.md for GitHub Copilot CLI with Coco agent context",
+  "targets": {
+    "agents_md": "./AGENTS.md",
+    "copilot_instructions": "./.github/copilot-instructions.md"
+  },
+  "transforms": ["generate AGENTS.md from agents/", "generate copilot-instructions.md"],
+  "supports_systems": ["gsd", "brain", "team"],
+  "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
+}

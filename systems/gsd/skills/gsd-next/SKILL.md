@@ -19,9 +19,9 @@ Supports `--force` flag to bypass safety gates (checkpoint, error state, verific
 </objective>
 
 <execution_context>
-@$HOME/.claude/get-shit-done/workflows/next.md
+@systems/gsd/workflows/next.md
 </execution_context>
 
 <process>
-Execute the next workflow from @$HOME/.claude/get-shit-done/workflows/next.md end-to-end.
+Execute the next workflow from @systems/gsd/workflows/next.md end-to-end.
 </process>

@@ -23,9 +23,9 @@ Future: `--prd` mode for PRD extraction is planned for a follow-up PR.
 </objective>
 
 <execution_context>
-@$HOME/.claude/get-shit-done/workflows/import.md
-@$HOME/.claude/get-shit-done/references/ui-brand.md
-@$HOME/.claude/get-shit-done/references/gate-prompts.md
+@systems/gsd/workflows/import.md
+@systems/gsd/references/ui-brand.md
+@systems/gsd/references/gate-prompts.md
 </execution_context>
 
 <context>

@@ -23,7 +23,7 @@ Output: updated SECURITY.md.
 </objective>
 
 <execution_context>
-@$HOME/.claude/get-shit-done/workflows/secure-phase.md
+@systems/gsd/workflows/secure-phase.md
 </execution_context>
 
 <context>
@@ -31,6 +31,6 @@ Phase: $ARGUMENTS — optional, defaults to last completed phase.
 </context>
 
 <process>
-Execute @$HOME/.claude/get-shit-done/workflows/secure-phase.md.
+Execute @systems/gsd/workflows/secure-phase.md.
 Preserve all workflow gates.
 </process>

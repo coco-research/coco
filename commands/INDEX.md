@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 38 commands across 6 namespaces.**
+**Total: 41 commands across 6 namespaces.**
 
 ## design
 
@@ -69,5 +69,8 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 |-------|-------------|
 | [`/util:architecture-review`](util/architecture-review.md) | Comprehensive architecture review with design patterns analysis and improvement recommendations |
 | [`/util:create-architecture-documentation`](util/create-architecture-documentation.md) | Generate comprehensive architecture documentation with diagrams, ADRs, and interactive visualization |
+| [`/util:learning-evolve`](util/learning-evolve.md) | Run pattern detection on session observations to extract and reinforce instincts |
+| [`/util:learning-promote`](util/learning-promote.md) | Promote a project-scoped instinct to global scope for cross-project reuse |
+| [`/util:learning-status`](util/learning-status.md) | Show Coco learning system status — instinct counts, observation stats, and detection summary |
 | [`/util:refactor-code`](util/refactor-code.md) |  |
 | [`/util:ss`](util/ss.md) | View the latest N screenshots from Desktop (default 1) |

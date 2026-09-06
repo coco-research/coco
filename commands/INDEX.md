@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 38 commands across 6 namespaces.**
+**Total: 43 commands across 7 namespaces.**
 
 ## design
 
@@ -36,6 +36,16 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | Slash | Description |
 |-------|-------------|
 | [`/pm:sync-init`](pm/sync-init.md) | Set up automated sync for a new project folder: email monitoring (Outlook), file change detection, and auto-update of all documents (PRD, presentations, etc.) e |
+
+## qa
+
+| Slash | Description |
+|-------|-------------|
+| [`/qa:diagnose`](qa/diagnose.md) | Diagnose incident by comparing system state vs UI claim (Phase 4) |
+| [`/qa:map-journeys`](qa/map-journeys.md) | Auto-generate user stories from UI code (Phase 0) |
+| [`/qa:recheck`](qa/recheck.md) | Run Phase 2 recurring QA check against stored baseline |
+| [`/qa:verify`](qa/verify.md) | Verify a fix claim against git commit and browser reproduction |
+| [`/qa:visual-qa`](qa/visual-qa.md) | Run Visualagent QA against a target app and generate fault report |
 
 ## team
 

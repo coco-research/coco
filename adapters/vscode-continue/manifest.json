@@ -1,0 +1,13 @@
+{
+  "name": "vscode-continue",
+  "version": "0.1.0",
+  "description": "Wires Coco artifacts into ~/.continue/ for VS Code with the Continue extension",
+  "targets": {
+    "skills": "~/.continue/skills",
+    "agents": "~/.continue/agents",
+    "rules": "~/.continue/rules"
+  },
+  "transforms": ["copy markdown rules for Continue compatibility"],
+  "supports_systems": ["gsd", "brain", "team"],
+  "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
+}

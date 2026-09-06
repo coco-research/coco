@@ -1,0 +1,12 @@
+{
+  "name": "amazon-q",
+  "version": "0.1.0",
+  "description": "Wires Coco artifacts into ~/.aws/amazon-q/ for Amazon Q Developer with rules and agent context",
+  "targets": {
+    "rules": "~/.aws/amazon-q/rules",
+    "agents": "~/.aws/amazon-q/agents"
+  },
+  "transforms": ["copy markdown rules for Amazon Q compatibility"],
+  "supports_systems": ["gsd", "brain", "team"],
+  "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
+}

@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 185 skills** — 70 core, 115 across 7 bundles.
+**Total: 186 skills** — 71 core, 115 across 7 bundles.
 
 ## Design (15)
 
@@ -67,10 +67,11 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [workflow-routing](workflow-routing/SKILL.md) | Use at the start of any task to route between Superpowers skills and GSD commands based on project state, task scope, and context signals. Fires before other sk |
 | [writing-plans](writing-plans/SKILL.md) | Use when you have a spec or requirements for a multi-step task, before touching code |
 
-## Meta (6)
+## Meta (7)
 
 | Skill | Description |
 |-------|-------------|
+| [agent-self-eval](agent-self-eval/SKILL.md) | Post-run self-evaluation system that scores agent output on correctness, clarity, actionability, and conciseness. Use after /team runs, skill executions, or whe |
 | [cli-anything](cli-anything/SKILL.md) | Wrap any command-line tool into a JSON-emitting agent skill. Use when you want to make a CLI reliably callable and parseable by an AI agent — introspect its --h |
 | [coco-cli](coco-cli/SKILL.md) | Install, update, version-check, or uninstall the Coco open-source AI workflow framework via its CLI (cocosuperintelligence, run with npx). Use when setting up C |
 | [coco-loop](coco-loop/SKILL.md) | Start a safe, governed autonomous loop from a plain-language goal. Use when the user says /coco-loop, "run an autonomous loop", "keep my build green for N hours |

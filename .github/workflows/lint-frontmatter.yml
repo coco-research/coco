@@ -36,7 +36,12 @@ jobs:
 
           REQUIRED_FIELDS = ['name', 'description']
           OPTIONAL_DOMAINS = ['foundational', 'pm', 'engineering', 'design', 'ops', 'meta']
-          KNOWN_ADAPTERS = ['claude-code', 'cursor', 'codex', 'generic']
+          # Keep in sync with adapters/*/manifest.json. The editor adapters that are
+          # landing in their own pull requests are listed so a skill may declare
+          # support for them in the same release; a name that is not an adapter at
+          # all is still rejected.
+          KNOWN_ADAPTERS = ['claude-code', 'cursor', 'codex', 'generic',
+                            'windsurf', 'zed', 'cline', 'roo-code', 'amazon-q']
 
           errors = []
           checked = 0

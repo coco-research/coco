@@ -2,9 +2,14 @@
 # Claude Code adapter — wires Coco artifacts into ~/.claude/
 #
 # Usage:
-#   bash adapters/claude-code/install.sh                    # install everything
-#   bash adapters/claude-code/install.sh --systems gsd      # add GSD bundle
+#   bash adapters/claude-code/install.sh                    # core + every bundle
+#   bash adapters/claude-code/install.sh --core-only        # core only, no bundles
+#   bash adapters/claude-code/install.sh --systems gsd      # only the GSD bundle
 #   bash adapters/claude-code/install.sh --dry-run          # preview only
+#
+# Bundles default to every bundle that ships skills or agents, derived by
+# scripts/installable-bundles.sh so a new bundle needs no edit here. --core-only opts out
+# of all of them and wins over --systems; --systems <list> replaces the default set.
 
 set -euo pipefail
 
@@ -12,10 +17,12 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TARGET_HOME="${CLAUDE_HOME:-$HOME/.claude}"
 DRY_RUN=0
 SYSTEMS=()
+CORE_ONLY=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run) DRY_RUN=1 ;;
+    --core-only) CORE_ONLY=1 ;;
     --systems) shift; IFS=',' read -ra SYSTEMS <<< "$1" ;;
     --help|-h)
       grep '^#' "$0" | sed 's/^# \?//'
@@ -25,11 +32,34 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
+# No flag means every bundle that ships skills or agents. The advertised totals (280
+# commands, 171 skills) are what a plain install is expected to deliver, and leaving them
+# behind an opt-in flag is how 70 of 171 skills went missing without a word.
+if [[ $CORE_ONLY -eq 1 ]]; then
+  SYSTEMS=()
+elif [[ ${#SYSTEMS[@]} -eq 0 ]]; then
+  while IFS= read -r bundle; do
+    [[ -n "$bundle" ]] && SYSTEMS+=("$bundle")
+  done < <(bash "$REPO_ROOT/scripts/installable-bundles.sh" --one-per-line 2>/dev/null || true)
+  if [[ ${#SYSTEMS[@]} -eq 0 ]]; then
+    echo "WARNING: scripts/installable-bundles.sh listed no bundles; installing core only." >&2
+  fi
+fi
+
 run() {
   if [[ $DRY_RUN -eq 1 ]]; then echo "DRY: $*"; else "$@"; fi
 }
 
 STALE_COUNT=0
+
+# Receipt counters. Every number printed at the end is counted while linking, so the
+# summary cannot drift from what was actually installed.
+SKILL_COUNT=0
+AGENT_COUNT=0
+COMMAND_COUNT=0
+SI_COUNT=""
+SI_SKIP=""
+BUNDLES_INSTALLED=()
 
 link_dir() {
   local src=$1 dst=$2
@@ -61,6 +91,7 @@ link_skills() {
   for skill in "$REPO_ROOT/skills"/*/; do
     name=$(basename "$skill")
     link_dir "$skill" "$TARGET_HOME/skills/$name"
+    SKILL_COUNT=$((SKILL_COUNT + 1))
   done
 }
 
@@ -76,6 +107,7 @@ link_commands() {
       else
         link_dir "$cmd" "$TARGET_HOME/commands/$nsname:$cname.md"
       fi
+      COMMAND_COUNT=$((COMMAND_COUNT + 1))
     done
   done
 }
@@ -84,7 +116,42 @@ link_agents() {
   for agent in "$REPO_ROOT/agents"/*.md; do
     name=$(basename "$agent")
     link_dir "$agent" "$TARGET_HOME/agents/$name"
+    # INDEX.md and README.md are navigation rather than subagents: still linked, not
+    # counted, so the receipt reports subagents instead of files.
+    case "$name" in
+      INDEX.md|README.md) ;;
+      *) AGENT_COUNT=$((AGENT_COUNT + 1)) ;;
+    esac
   done
+}
+
+# The Super Intelligence family (242 commands) is stamped out of the per-team registries
+# rather than shipped as files. scripts/generate-si-commands.sh runs both generators, so
+# this adapter cannot drift from the other adapters or half-implement the step.
+run_si_generator() {
+  local target=$1
+  local args=(--target "$target")
+  [[ $DRY_RUN -eq 1 ]] && args+=(--dry-run)
+
+  local out
+  if ! out=$(bash "$REPO_ROOT/scripts/generate-si-commands.sh" "${args[@]}" 2>&1); then
+    echo "WARNING: scripts/generate-si-commands.sh failed; the SI-* command family is" >&2
+    echo "missing from this install. Re-run it by hand to see the generator error." >&2
+    SI_COUNT=""
+    SI_SKIP="generator failed"
+    return 0
+  fi
+
+  echo "$out"
+  [[ $DRY_RUN -eq 1 ]] && return 0
+
+  SI_COUNT=$(printf '%s\n' "$out" | sed -n 's/^Generated \([0-9][0-9]*\) SI commands.*/\1/p' | tail -n 1)
+  if [[ -z "$SI_COUNT" ]]; then
+    # Deliberately not assuming 242 here: when the generators did not run the count is
+    # unknown, and the receipt says so rather than printing a number nobody verified.
+    SI_SKIP=$(printf '%s\n' "$out" | sed -n 's/^Skip SI generation: //p' | head -n 1)
+    [[ -n "$SI_SKIP" ]] || SI_SKIP="unknown reason"
+  fi
 }
 
 link_system() {
@@ -95,6 +162,7 @@ link_system() {
     for s in "$sys_dir/skills"/*/; do
       name=$(basename "$s")
       link_dir "$s" "$TARGET_HOME/skills/$name"
+      SKILL_COUNT=$((SKILL_COUNT + 1))
     done
   fi
   if [[ -d "$sys_dir/agents" ]]; then
@@ -102,6 +170,10 @@ link_system() {
       [[ -f "$a" ]] || continue
       name=$(basename "$a")
       link_dir "$a" "$TARGET_HOME/agents/$name"
+      case "$name" in
+        INDEX.md|README.md) ;;
+        *) AGENT_COUNT=$((AGENT_COUNT + 1)) ;;
+      esac
     done
   fi
   if [[ -d "$sys_dir/commands" ]]; then
@@ -109,22 +181,11 @@ link_system() {
       [[ -f "$c" ]] || continue
       name=$(basename "$c")
       link_dir "$c" "$TARGET_HOME/commands/$name"
+      COMMAND_COUNT=$((COMMAND_COUNT + 1))
     done
   fi
-  # Superintelligence: SI-* commands are generated from per-team registries, not shipped as files.
-  #   build_commands.py      → per-team scoped commands  (/SI-<Team>-<Verb>, 225)
-  #   build_meta_commands.py → cross-team orchestrator    (/SI, /SI-Orchestrate, /SI-<Verb>, 17)
-  # Both are run so the full 242 SI command family is delivered, not just the per-team half.
   if [[ -f "$sys_dir/ai/scripts/build_commands.py" ]]; then
-    if command -v python3 >/dev/null 2>&1; then
-      run env COCO_SI_COMMANDS_DIR="$TARGET_HOME/commands" python3 "$sys_dir/ai/scripts/build_commands.py"
-      if [[ -f "$sys_dir/scripts/build_meta_commands.py" ]]; then
-        run env COCO_SI_COMMANDS_DIR="$TARGET_HOME/commands" python3 "$sys_dir/scripts/build_meta_commands.py"
-      fi
-      echo "Generated SI-* commands (per-team + meta-orchestrator) into $TARGET_HOME/commands"
-    else
-      echo "Skip SI generation: python3 not found. Run $sys_dir/ai/scripts/build_commands.py and $sys_dir/scripts/build_meta_commands.py manually."
-    fi
+    run_si_generator "$TARGET_HOME/commands"
   fi
 }
 
@@ -177,6 +238,27 @@ EOF
   echo "Wrote rules block to $target"
 }
 
+print_receipt() {
+  [[ $DRY_RUN -eq 1 ]] && return 0
+  local bundles="core only"
+  [[ ${#BUNDLES_INSTALLED[@]} -gt 0 ]] && bundles="$(IFS=,; echo "${BUNDLES_INSTALLED[*]}")"
+  local commands
+  if [[ -n "$SI_COUNT" ]]; then
+    commands="$((COMMAND_COUNT + SI_COUNT))   ($COMMAND_COUNT core + $SI_COUNT Super Intelligence)"
+  elif [[ -n "$SI_SKIP" ]]; then
+    commands="$COMMAND_COUNT   (core commands only; SI generation skipped: $SI_SKIP)"
+  else
+    commands="$COMMAND_COUNT   (core commands only)"
+  fi
+  echo
+  echo "Installed for Claude Code:"
+  echo "  Slash commands : $commands"
+  echo "  Skills         : $SKILL_COUNT"
+  echo "  Subagents      : $AGENT_COUNT"
+  echo "  Bundles        : $bundles"
+  echo "Core-only install: bash install.sh --adapter claude-code --core-only"
+}
+
 echo "Coco · Claude Code adapter"
 echo "Source: $REPO_ROOT"
 echo "Target: $TARGET_HOME"
@@ -188,9 +270,13 @@ link_agents
 link_rules
 
 for sys in "${SYSTEMS[@]:-}"; do
-  [[ -n "$sys" ]] && link_system "$sys"
+  [[ -n "$sys" ]] || continue
+  BUNDLES_INSTALLED+=("$sys")
+  link_system "$sys"
 done
 
 report_stale
+
+print_receipt
 
 echo "Done."

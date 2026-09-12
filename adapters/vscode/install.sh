@@ -16,11 +16,16 @@
 # commands are linked into every profile's prompts folder.
 #
 # Usage:
-#   bash adapters/vscode/install.sh                        # install everything
-#   bash adapters/vscode/install.sh --systems gsd,brain    # add bundles
+#   bash adapters/vscode/install.sh                        # core + every bundle
+#   bash adapters/vscode/install.sh --core-only            # core only, no bundles
+#   bash adapters/vscode/install.sh --systems gsd,brain    # only these bundles
 #   bash adapters/vscode/install.sh --dry-run              # preview only
 #   bash adapters/vscode/install.sh --source /path/to/coco # link a different checkout
 #   bash adapters/vscode/install.sh --user-dir "<dir>"     # extra VS Code User folder
+#
+# Bundles default to every bundle that ships skills or agents, derived by
+# scripts/installable-bundles.sh so a new bundle needs no edit here. --core-only opts out
+# of all of them and wins over --systems; --systems <list> replaces the default set.
 
 set -euo pipefail
 
@@ -29,11 +34,13 @@ SOURCE_ROOT="$REPO_ROOT"
 COPILOT_HOME="${COPILOT_HOME:-$HOME/.copilot}"
 DRY_RUN=0
 SYSTEMS=()
+CORE_ONLY=0
 EXTRA_USER_DIRS=()
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run) DRY_RUN=1 ;;
+    --core-only) CORE_ONLY=1 ;;
     --systems) shift; IFS=',' read -ra SYSTEMS <<< "$1" ;;
     --source) shift; SOURCE_ROOT="$(cd "$1" && pwd)" ;;
     --user-dir) shift; EXTRA_USER_DIRS+=("$1") ;;
@@ -45,11 +52,34 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
+# No flag means every bundle that ships skills or agents. The advertised totals (280
+# commands, 171 skills) are what a plain install is expected to deliver, and leaving them
+# behind an opt-in flag is how 70 of 171 skills went missing without a word.
+if [[ $CORE_ONLY -eq 1 ]]; then
+  SYSTEMS=()
+elif [[ ${#SYSTEMS[@]} -eq 0 ]]; then
+  while IFS= read -r bundle; do
+    [[ -n "$bundle" ]] && SYSTEMS+=("$bundle")
+  done < <(bash "$REPO_ROOT/scripts/installable-bundles.sh" --one-per-line 2>/dev/null || true)
+  if [[ ${#SYSTEMS[@]} -eq 0 ]]; then
+    echo "WARNING: scripts/installable-bundles.sh listed no bundles; installing core only." >&2
+  fi
+fi
+
 run() {
   if [[ $DRY_RUN -eq 1 ]]; then echo "DRY: $*"; else "$@"; fi
 }
 
 STALE_COUNT=0
+
+# Receipt counters. Every number printed at the end is counted while linking, so the
+# summary cannot drift from what was actually installed.
+SKILL_COUNT=0
+AGENT_COUNT=0
+COMMAND_COUNT=0
+SI_COUNT=""
+SI_SKIP=""
+BUNDLES_INSTALLED=()
 
 link_dir() {
   local src=$1 dst=$2
@@ -155,6 +185,7 @@ link_skills_from() {
     link_dir "$skill" "$COPILOT_HOME/skills/$(basename "$skill")"
     LINKED=$((LINKED + 1))
   done
+  SKILL_COUNT=$((SKILL_COUNT + LINKED))
 }
 
 link_agents_from() {
@@ -168,6 +199,7 @@ link_agents_from() {
     link_dir "$agent" "$COPILOT_HOME/agents/$name"
     LINKED=$((LINKED + 1))
   done
+  AGENT_COUNT=$((AGENT_COUNT + LINKED))
 }
 
 # Commands become prompt files. The Claude and Cursor adapters name them
@@ -196,6 +228,7 @@ link_commands() {
       count=$((count + 1))
     done
   done
+  COMMAND_COUNT=$((COMMAND_COUNT + count))
   echo "Commands: $count linked as prompt files into ${#PROMPT_DIRS[@]} profile folder(s)"
 }
 
@@ -293,20 +326,32 @@ link_system() {
 
   # Superintelligence: SI-* commands are generated from per-team registries rather than
   # shipped as files, so they are built into a Coco-owned folder first and the prompt
-  # files then point at that folder.
-  #   build_commands.py      → per-team scoped commands  (/SI-<Team>-<Verb>)
-  #   build_meta_commands.py → cross-team orchestrator    (/SI, /SI-Orchestrate, ...)
+  # files then point at that folder. scripts/generate-si-commands.sh runs both generators
+  # (per-team + meta-orchestrator), which is the whole family rather than half of it.
   if [[ -f "$sys_dir/ai/scripts/build_commands.py" ]]; then
-    if ! command -v python3 >/dev/null 2>&1; then
-      echo "Skip SI generation: python3 not found. Run $sys_dir/ai/scripts/build_commands.py manually."
-      return
-    fi
     local si_dir="$COPILOT_HOME/coco-generated/si-commands"
-    run mkdir -p "$si_dir"
-    run env COCO_SI_COMMANDS_DIR="$si_dir" python3 "$sys_dir/ai/scripts/build_commands.py"
-    if [[ -f "$sys_dir/scripts/build_meta_commands.py" ]]; then
-      run env COCO_SI_COMMANDS_DIR="$si_dir" python3 "$sys_dir/scripts/build_meta_commands.py"
+    local si_args=(--target "$si_dir")
+    [[ $DRY_RUN -eq 1 ]] && si_args+=(--dry-run)
+
+    local out
+    if ! out=$(bash "$REPO_ROOT/scripts/generate-si-commands.sh" "${si_args[@]}" 2>&1); then
+      echo "WARNING: scripts/generate-si-commands.sh failed; the SI-* command family is" >&2
+      echo "missing from this install. Re-run it by hand to see the generator error." >&2
+      SI_COUNT=""
+      SI_SKIP="generator failed"
+      return 0
     fi
+    echo "$out"
+    [[ $DRY_RUN -eq 1 ]] && return 0
+
+    SI_COUNT=$(printf '%s\n' "$out" | sed -n 's/^Generated \([0-9][0-9]*\) SI commands.*/\1/p' | tail -n 1)
+    if [[ -z "$SI_COUNT" ]]; then
+      # Deliberately not assuming 242: when the generators did not run the count is
+      # unknown, and the receipt says so rather than printing a number nobody verified.
+      SI_SKIP=$(printf '%s\n' "$out" | sed -n 's/^Skip SI generation: //p' | head -n 1)
+      [[ -n "$SI_SKIP" ]] || SI_SKIP="unknown reason"
+    fi
+
     local si_count=0 f
     if [[ $DRY_RUN -eq 0 && ${#PROMPT_DIRS[@]} -gt 0 ]]; then
       for f in "$si_dir"/*.md; do
@@ -321,6 +366,29 @@ link_system() {
 
 PROMPT_DIRS=()
 while IFS= read -r d; do [[ -n "$d" ]] && PROMPT_DIRS+=("$d"); done < <(collect_prompt_dirs)
+
+print_receipt() {
+  [[ $DRY_RUN -eq 1 ]] && return 0
+  local bundles="core only"
+  [[ ${#BUNDLES_INSTALLED[@]} -gt 0 ]] && bundles="$(IFS=,; echo "${BUNDLES_INSTALLED[*]}")"
+  local commands
+  if [[ ${#PROMPT_DIRS[@]} -eq 0 ]]; then
+    commands="0   (no VS Code User folder found, so prompt files were skipped)"
+  elif [[ -n "$SI_COUNT" ]]; then
+    commands="$((COMMAND_COUNT + SI_COUNT))   ($COMMAND_COUNT core + $SI_COUNT Super Intelligence)"
+  elif [[ -n "$SI_SKIP" ]]; then
+    commands="$COMMAND_COUNT   (core commands only; SI generation skipped: $SI_SKIP)"
+  else
+    commands="$COMMAND_COUNT   (core commands only)"
+  fi
+  echo
+  echo "Installed for VS Code / Copilot CLI:"
+  echo "  Slash commands : $commands"
+  echo "  Skills         : $SKILL_COUNT"
+  echo "  Subagents      : $AGENT_COUNT"
+  echo "  Bundles        : $bundles"
+  echo "Core-only install: bash install.sh --adapter vscode --core-only"
+}
 
 echo "Coco · VS Code adapter"
 echo "Source: $SOURCE_ROOT"
@@ -345,7 +413,9 @@ echo "Agents: $LINKED linked into $COPILOT_HOME/agents"
 generate_instructions
 
 for sys in "${SYSTEMS[@]:-}"; do
-  [[ -n "$sys" ]] && link_system "$sys"
+  [[ -n "$sys" ]] || continue
+  BUNDLES_INSTALLED+=("$sys")
+  link_system "$sys"
 done
 
 if [[ $STALE_COUNT -gt 0 ]]; then
@@ -354,5 +424,6 @@ if [[ $STALE_COUNT -gt 0 ]]; then
   echo "untouched. They will keep serving stale content until you remove them. Re-run this"
   echo "installer afterwards to link them."
 fi
+print_receipt
 
 echo "Done. Reload VS Code (Developer: Reload Window) to pick up the new files."

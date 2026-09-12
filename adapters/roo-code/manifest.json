@@ -7,6 +7,6 @@
     "agents": "~/.roo-code/agents"
   },
   "transforms": ["copy markdown rules for Roo Code compatibility"],
-  "supports_systems": ["gsd", "brain", "team"],
+  "supports_systems": ["gsd"],
   "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
 }

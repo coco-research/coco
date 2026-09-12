@@ -1,6 +1,6 @@
 ---
 name: brain:export
-description: "Auto-generate a slim CLAUDE.local.md from brain DB. Preserves manual behavior rules. Produces ~1,200 token auto-generated context section with key people, systems, decisions, and project status."
+description: "Use when the user asks to refresh CLAUDE.local.md, regenerate project context, or after a brain-update session flush. Rewrites only the sentinel-delimited auto-generated section from the brain DB, preserving manual behavior rules."
 ---
 
 # /brain-export — CLAUDE.local.md Auto-Generator

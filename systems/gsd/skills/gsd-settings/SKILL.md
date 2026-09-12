@@ -1,6 +1,6 @@
 ---
 name: gsd-settings
-description: "Configure GSD workflow toggles and model profile"
+description: "Use when the user wants to turn GSD workflow steps on or off or to change the model profile. Prompts for model, research, plan_check, verifier, and branching, then writes the merged config with current values pre-selected."
 allowed-tools:
   - Read
   - Write

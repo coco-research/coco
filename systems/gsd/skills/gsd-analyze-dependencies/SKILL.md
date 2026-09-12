@@ -1,6 +1,6 @@
 ---
 name: gsd-analyze-dependencies
-description: "Analyze phase dependencies and suggest Depends on entries for ROADMAP.md"
+description: "Use before /gsd-manager to fill in missing Depends on fields in ROADMAP.md. Analyzes file overlap, semantic dependencies and data flow between phases, then suggests dependency updates to confirm."
 allowed-tools:
   - Read
   - Write

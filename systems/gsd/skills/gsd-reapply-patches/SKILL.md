@@ -1,6 +1,6 @@
 ---
 name: gsd-reapply-patches
-description: "Reapply local modifications after a GSD update"
+description: "Use after a GSD update, when local modifications were backed up to gsd-local-patches/ and must be merged back. Three-way compares the pristine baseline, the backup, and the new install, flagging conflicts instead of skipping files."
 ---
 
 

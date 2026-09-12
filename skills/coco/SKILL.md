@@ -1,6 +1,6 @@
 ---
 name: coco
-description: "CoCo — your AI PM brain. Unified interface wrapping skills, commands, and knowledge tools. Invoke /coco to activate."
+description: "Use when the user invokes /coco or /coco!, says catch me up, or asks what needs attention, a project status, their todos, decisions or people. Renders the PM dashboard and routes each subcommand to its platform tool or a PM skill."
 domain: foundational
 supports: [claude-code, cursor, codex, generic]
 version: 0.1.0
@@ -131,9 +131,7 @@ Check **every** user message against these rules. First match wins. Announce: `>
 | `/coco good-morning` | — | Morning briefing: overnight changes, pending items, today's priorities |
 | `/coco cron-status` | — | Knowledge engine cron status: last run, errors, schedule |
 | `/coco wiki [entity]` | `brain-wiki` skill | Show knowledge article for entity (or list all) |
-| `/coco wiki-search <query>` | `brain-wiki` skill | Unified FTS5 + semantic search across all knowledge articles |
-| `/coco about <entity>` | `knowledge_article` | Fetch and display knowledge article |
-| `/coco wiki-search <query>` | `knowledge_search` | Search knowledge articles |
+| `/coco wiki-search <query>` | `knowledge_search` | Unified FTS5 + semantic search across all knowledge articles |
 | `/coco flag <article> <reason>` | — | Flag article for review/regen |
 | `/coco flag list` | — | Show all flagged articles pending regen |
 | `/coco flag process` | — | Regenerate all flagged articles |
@@ -233,10 +231,6 @@ When the user invokes `/coco flag process`:
 | "are we ready" / "readiness check" / "audit docs" | `/coco nfr` |
 | "set up project docs" / "scaffold docs" | `/coco docs` |
 | "recovery runbook" / "restore service" | `/coco recovery` |
-| "assess risks for..." / "risk register" | `/coco assess` |
-| "run a retro" / "retrospective" / "what went well" | `/coco retro` |
-| "research then document then present..." | `/coco chain` |
-| "show team history" / "how did the last run score" | `/coco runs` |
 | "this article is wrong" / "flag {article}" / "article needs update" | `/coco flag` |
 
 ### Orchestration Commands (delegated to Platform agents)
@@ -259,33 +253,20 @@ Document generation and project ops. Each routes to a registered PM skill.
 | Command | Skill | Description |
 |---------|-------|-------------|
 | `/coco prd <project>` | `prd-generator` | Generate/update PRD |
-| `/coco comms <type>` | `stakeholder-comms` | Draft stakeholder communication (go-live, status, onboard, change, incident, steerco) |
-| `/coco deck <project>` | `arb-review` | Architecture review board deck |
-| `/coco changelog [mode]` | `change-log` | Generate/update change log (init, update, release) |
-| `/coco meeting-notes [path]` | `meeting-notes` | Process meeting transcript into structured notes |
-| `/coco dr-plan` | `dr-plan` | Disaster recovery plan with RTO/RPO targets |
-| `/coco irp` | `irp` | Incident response plan |
-| `/coco nfr` | `nfr-tracker` | Operational readiness audit |
-| `/coco docs [type]` | `project-docs` | Scaffold/audit project documentation ecosystem |
-| `/coco recovery` | `recovery-plan` | Service restoration runbooks |
+| `/coco comms <type>` | `pmstudio-comms` (dir stakeholder-comms) | Draft stakeholder communication (go-live, status, onboard, change, incident, steerco) |
+| `/coco deck <project>` | `pmstudio-arb` (dir arb-review) | Architecture review board deck |
+| `/coco changelog [mode]` | `pmstudio-changelog` (dir change-log) | Generate/update change log (init, update, release) |
+| `/coco meeting-notes [path]` | `pmstudio-meeting-notes` (dir meeting-notes) | Process meeting transcript into structured notes |
+| `/coco dr-plan` | `pmstudio-dr` (dir dr-plan) | Disaster recovery plan with RTO/RPO targets |
+| `/coco irp` | `pmstudio-irp` (dir irp) | Incident response plan |
+| `/coco nfr` | `pmstudio-nfr` (dir nfr-tracker) | Operational readiness audit |
+| `/coco docs [type]` | `pmstudio-init` (dir project-docs) | Scaffold/audit project documentation ecosystem |
+| `/coco recovery` | `pmstudio-recovery` (dir recovery-plan) | Service restoration runbooks |
 | `/coco status-report <project>` | `coco_context` + formatting | Generate status report from project context |
 
 **Routing mechanism:** Invoke the target skill using the Skill tool. Example: `/coco prd MyApp` -> `Skill(skill: "prd-generator", args: "MyApp")`.
 
 For `/coco status-report`, call `mcp__coco-platform__coco_context` first, then format the result as a status report with sections: Summary, Key Metrics, Risks/Blockers, Next Steps.
-
-### Team v2 Commands (delegated to Team skills via Skill tool)
-
-Cross-functional team actions. Each routes to a registered team skill.
-
-| Command | Skill | Description |
-|---------|-------|-------------|
-| `/coco assess <project>` | `team:assess` | Risk assessment for project |
-| `/coco retro` | `team:retro` | Retrospective from recent work |
-| `/coco chain <actions> <scope>` | `team:chain` | Chain team actions together |
-| `/coco runs` | `team:history` | Show recent team run history |
-
-**Routing mechanism:** Invoke the target skill using the Skill tool. Example: `/coco assess MyApp` -> `Skill(skill: "team:assess", args: "MyApp")`.
 
 ### Fallthrough
 
@@ -347,12 +328,6 @@ PM Studio:
   docs [type]            — Scaffold/audit project docs
   recovery               — Service restoration runbooks
   status-report <project>— Status report from project context
-
-Team v2:
-  assess <project>       — Risk assessment for project
-  retro                  — Retrospective from recent work
-  chain <actions> <scope>— Chain team actions together
-  runs                   — Show recent team run history
 
 Orchestration:
   build <desc>   — Spawn dev agent team

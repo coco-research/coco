@@ -1,6 +1,6 @@
 ---
 name: cognee:recall
-description: "Semantic and graph search across Cognee knowledge graph. Queries project memory, finds related entities and decisions, injects results as agent context. Triggers on: 'cognee recall', 'search memory', 'what do we know about', 'find related', 'graph search', 'memory search', 'recall context'."
+description: "Use when the user says 'cognee recall', 'search memory', 'what do we know about', 'find related', or 'graph search'. Runs semantic, graph, and lexical search across the Cognee knowledge graph and injects results as agent context."
 ---
 
 # /cognee-recall — Search & Recall from Knowledge Graph

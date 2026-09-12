@@ -1,6 +1,6 @@
 ---
 name: gsd-audit-uat
-description: "Cross-phase audit of all outstanding UAT and verification items"
+description: "Use when the user asks what UAT or verification items are still outstanding across phases, or wants a prioritized manual test plan. Scans every phase for pending, skipped, blocked and human_needed items and flags stale docs."
 allowed-tools:
   - Read
   - Glob
@@ -23,3 +23,7 @@ Core planning files are loaded in-workflow via CLI.
 Glob: .planning/phases/*/*-UAT.md
 Glob: .planning/phases/*/*-VERIFICATION.md
 </context>
+
+<process>
+Execute the audit-uat workflow from @$HOME/.claude/get-shit-done/workflows/audit-uat.md end-to-end.
+</process>

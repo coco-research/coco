@@ -1,6 +1,6 @@
 ---
 name: gsd-note
-description: "Zero-friction idea capture. Append, list, or promote notes to todos."
+description: "Use when the user says note this, jot this down, asks to list my notes, or wants a note promoted to a todo. Appends a timestamped note file in one Write with one confirmation line, no questions."
 argument-hint: "<text> | list | promote <N> [--global]"
 allowed-tools:
   - Read

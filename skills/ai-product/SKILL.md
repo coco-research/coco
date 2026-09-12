@@ -1,6 +1,6 @@
 ---
 name: ai-product
-description: "Expert in shipping production-grade AI-powered features — LLM integration patterns, RAG architecture, prompt engineering that scales, AI UX that users trust, safety and guardrails, streaming, and cost optimization."
+description: "Use when building AI features into a product: LLM integration, RAG pipelines, guardrails, streaming, AI UX, prompt engineering, or AI cost control. Treats prompts as code and validates every model output."
 domain: pm
 supports: [claude-code, cursor, codex, generic]
 version: 0.1.0

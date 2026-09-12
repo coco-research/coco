@@ -1,6 +1,6 @@
 ---
 name: finishing-a-development-branch
-description: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
+description: "Use when implementation is done and tests pass and the user must choose to merge locally, open a PR, keep the branch, or discard it. Presents those four options, executes the choice, and cleans up the worktree for merge and discard."
 domain: engineering
 ---
 
@@ -45,7 +45,7 @@ Stop. Don't proceed to Step 2.
 git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null
 ```
 
-Or ask: "This branch split from main - is that correct?"
+If that prints nothing (neither branch exists), ask the user which base branch to use and wait for the answer. Do not continue with `<base-branch>` unset.
 
 ### Step 3: Present Options
 
@@ -104,7 +104,7 @@ EOF
 )"
 ```
 
-Then: Cleanup worktree (Step 5)
+Then: keep the worktree (no cleanup for Option 2)
 
 #### Option 3: Keep As-Is
 
@@ -136,7 +136,7 @@ Then: Cleanup worktree (Step 5)
 
 ### Step 5: Cleanup Worktree
 
-**For Options 1, 2, 4:**
+**For Options 1 and 4:**
 
 Check if in worktree:
 ```bash
@@ -194,8 +194,8 @@ git worktree remove <worktree-path>
 ## Integration
 
 **Called by:**
-- **subagent-driven-development** (Step 7) - After all tasks complete
-- **executing-plans** (Step 5) - After all batches complete
+- **subagent-driven-development** - after all tasks complete (see its Integration section)
+- **executing-plans** (Step 3: Complete Development) - after all batches complete
 
 **Pairs with:**
 - **using-git-worktrees** - Cleans up worktree created by that skill

@@ -1,3 +1,6 @@
+---
+description: "Use when asked which files implement a component, to build or refresh .arch/index.json, or to check whether the architecture map drifted. Pins the index to a commit, validates every path, and writes ARCH-EVIDENCE.md."
+---
 # /team arch — Architecture Index Pipeline
 
 > Called by team.md router when action is `arch`.

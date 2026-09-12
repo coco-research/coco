@@ -1,3 +1,7 @@
+---
+description: "Use when selecting roles for a /team run, validating --roles IDs, or adding a new role. Roster of role definitions with layer, category, domain tags, and the system prompt injected into each agent."
+---
+
 # Team Roles — Cross-Functional Product Team Roster
 
 > **Purpose:** This file defines all available roles for the /team system.

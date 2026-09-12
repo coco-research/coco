@@ -1,22 +1,15 @@
 ---
-name: meta:media
-description: Multimodal memory — ingest, embed, and search media (images, video, audio, files) with Gemini Embedding 2 + ChromaDB
-trigger: |
-  ACTIVATE when:
-  - User sends an image, screenshot, file, video, or audio
-  - User says "remember this", "save this image", "store this", "log this media"
-  - User asks "find that diagram", "search for", "what images do we have", "recall", "media search"
-  - User asks to generate an image/diagram and wants it saved
-  - Code references a past asset (screenshot, diagram, mockup, recording)
-  ALSO proactively query when:
-  - User discusses a topic and a past media asset might be relevant
-  - User references "that screenshot", "the diagram from last week", etc.
+name: media-memory
+description: "Use when the user sends or generates an image, screenshot, video, audio or file and wants it saved, or asks to find past media (that diagram, the mockup from last week). Ingests and searches with local ChromaDB embeddings."
 domain: engineering
 ---
 
 # /media-memory — Multimodal Memory System
 
-You have access to a persistent multimodal memory system at `~/.claude/media-memory/`. It stores every piece of media (images, video, audio, files) with rich metadata and Gemini Embedding 2 vectors in ChromaDB.
+You have access to a persistent multimodal memory system at `~/.claude/media-memory/`. It stores every piece of media (images, video, audio, files) with rich metadata and local ChromaDB embeddings.
+
+**Prerequisites:** if `~/.claude/media-memory/scripts/ingest.py` is missing, the system is not
+installed. Say so and stop instead of running the commands below.
 
 ## Directory Layout
 ```

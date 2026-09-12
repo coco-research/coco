@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 185 skills** — 70 core, 115 across 7 bundles.
+**Total: 189 skills** — 70 core, 119 across 7 bundles.
 
 ## Design (15)
 
@@ -240,15 +240,19 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [m0-recall](../systems/m0/skills/m0-recall/SKILL.md) | Read the recent M0 operational thread for a project, newest first, to pick up work started in this or another tool. Answers 'where were we' and 'what is next' b |
 | [m0-remember](../systems/m0/skills/m0-remember/SKILL.md) | Write one entry to the M0 operational thread so the next session, in this tool or any other, can continue the work. Records a completed step, a decision, a veri |
 
-## Bundle: superintelligence (9 skills)
+## Bundle: superintelligence (13 skills)
 
 | Skill | Description |
 |-------|-------------|
 | [ai](../systems/superintelligence/ai/SKILL.md) |  |
+| [climate-energy](../systems/superintelligence/climate-energy/SKILL.md) |  |
 | [data-analytics-super-intelligence](../systems/superintelligence/data-analytics/SKILL.md) |  |
+| [education-edtech](../systems/superintelligence/education-edtech/SKILL.md) |  |
 | [engineering](../systems/superintelligence/engineering/SKILL.md) |  |
 | [finance-super-intelligence](../systems/superintelligence/finance/SKILL.md) |  |
 | [gtm-super-intelligence](../systems/superintelligence/gtm/SKILL.md) |  |
+| [healthcare-life-sciences](../systems/superintelligence/healthcare-life-sciences/SKILL.md) |  |
+| [legal-ip](../systems/superintelligence/legal-ip/SKILL.md) |  |
 | [product-design](../systems/superintelligence/product-design/SKILL.md) |  |
 | [risk-compliance-super-intelligence](../systems/superintelligence/risk-compliance/SKILL.md) |  |
 | [strategy-super-intelligence](../systems/superintelligence/strategy/SKILL.md) |  |

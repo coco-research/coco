@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0",
-  "pinnedCommit": "e5c673f3fbe35d86cceb6d2f3811302388b488d1",
-  "generatedAt": "2026-07-31T19:40:00Z",
-  "source": "gitnexus",
+  "pinnedCommit": "992abf3489adf5bb229b17a4a3036cd1690795f5",
+  "generatedAt": "2026-09-12T04:49:19Z",
+  "source": "crawl",
   "ecosystem": {
     "manifest": "package.json",
     "languages": [
@@ -13,8 +13,7 @@
     ],
     "framework": null,
     "treeDepthUsed": 4,
-    "treeTruncated": false,
-    "sourceCommitsBehind": 22
+    "treeTruncated": false
   },
   "components": [
     {
@@ -45,7 +44,7 @@
     {
       "id": "command-surface",
       "title": "Slash Command Surface",
-      "purpose": "Delivers namespaced slash commands as flat markdown files under commands/<namespace>/, where the team namespace additionally carries the four-layer orchestration router that selects roles and sequences agent handoffs.",
+      "purpose": "Delivers namespaced slash commands as flat markdown files under commands/<namespace>/, where the team namespace carries the four-layer orchestration router that selects roles and sequences agent handoffs. The core tree ships 38; a further 242 Super Intelligence commands are generated at install time from the team registries rather than committed, so the installed surface is roughly eight times the size of this directory.",
       "connections": [
         "skill-library",
         "system-bundles",
@@ -65,7 +64,7 @@
     {
       "id": "system-bundles",
       "title": "Bundled Orchestration Systems",
-      "purpose": "Delivers multi-phase project orchestration, knowledge tracking, and persona-council capabilities as optional bundles, each shipping its own nested skills and agents that install independently of the core asset set.",
+      "purpose": "Delivers multi-phase project orchestration, knowledge tracking, media production, and persona-council capabilities as optional bundles, each shipping its own nested skills and agents that install independently of the core asset set. The Super Intelligence bundle carries the registries and generators that produce the 242-command family.",
       "connections": [
         "command-surface",
         "install-adapters"
@@ -102,7 +101,7 @@
     {
       "id": "install-adapters",
       "title": "Multi-Editor Install Adapters",
-      "purpose": "Delivers installation across Claude Code, Cursor, and Codex by symlinking skills, commands, and agents into each tool's configuration directory under a per-editor namespace mapping, with a Homebrew formula for bootstrap.",
+      "purpose": "Delivers installation into five editor and CLI targets \u2014 Claude Code, Cursor, VS Code and the Copilot CLI, Codex, and any AGENTS.md consumer \u2014 by linking skills, commands and agents into each tool's configuration directory under a per-target namespace mapping, with an npm wrapper and a Homebrew formula for bootstrap.",
       "connections": [
         "skill-library",
         "command-surface",
@@ -119,7 +118,7 @@
           "files": [
             "install.sh"
           ],
-          "rationale": "The namespace mapping, symlink logic, bootstrap script, and package formula that make the asset set installable."
+          "rationale": "One directory per target, each holding an install.sh, a manifest.json declaring the surfaces and bundles it supports, and a README. The manifests are the machine-readable contract; scripts/build-delivery-index.py installs every adapter into a throwaway HOME and records what it actually delivered in adapters/INDEX.md."
         }
       }
     }
@@ -133,5 +132,5 @@
     "system-bundles-to-install-adapters": "Bundle registration",
     "agent-roster-to-install-adapters": "Agent registration"
   },
-  "notes": "Structural index only. Component altitude is C4-Container; these paths are not work-assignment boundaries. Build tooling (scripts/), generated catalogs (docs/), CI workflows, tests, examples, and static assets are deliberately excluded under the runtime-only rule in references/component-rules.md, so they appear in no component."
+  "notes": "Structural index only. Component altitude is C4-Container; these paths are not work-assignment boundaries. Build tooling (scripts/), generated catalogs (docs/), CI workflows, tests, examples, and static assets are deliberately excluded under the runtime-only rule in references/component-rules.md, so they appear in no component. What each component actually installs is recorded separately, and empirically, in adapters/INDEX.md."
 }

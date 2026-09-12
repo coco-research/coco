@@ -1,7 +1,7 @@
 # Architecture Index — coco
 
-**Pinned at:** e5c673f (2026-07-31) · **Validator:** exit 0, 10 paths verified
-**Source:** gitnexus code graph, 22 commits behind at read time · **Altitude:** C4-Container
+**Pinned at:** 992abf3 (2026-09-12) · **Validator:** exit 0, 10 paths verified
+**Source:** repository crawl (`scripts/repo_tree.py`, depth 4, 706 files, not truncated) · **Altitude:** C4-Container
 
 Structural index only. Component paths describe where code lives; they are not
 work-assignment boundaries, and a single component may legitimately own more than a
@@ -11,11 +11,11 @@ produces no drift. See `team:architecture.md` for the protocol and its stated li
 
 | Component | Purpose | Primary paths |
 |---|---|---|
-| Agent Skill Library | Reusable agent capabilities as self-contained skill directories, each with a SKILL.md manifest | `skills/` |
-| Slash Command Surface | Namespaced slash commands, including the `/team` four-layer orchestration router | `commands/` |
-| Bundled Orchestration Systems | Optional bundles shipping their own nested skills and agents, installable independently | `systems/` |
-| Subagent Role Definitions | Named subagent roles that commands dispatch to, plus the behavioural rules they load | `agents/`, `rules/` |
-| Multi-Editor Install Adapters | Per-editor symlink installation across Claude Code, Cursor, and Codex, plus a Homebrew formula | `adapters/`, `bin/`, `Formula/`, `install.sh` |
+| Agent Skill Library | Delivers reusable agent capabilities as self-contained skill directories, each carrying a SKILL. | `skills` |
+| Slash Command Surface | Delivers namespaced slash commands as flat markdown files under commands/<namespace>/, where the team namespace carries the four-layer orchestration router that selects roles and sequences agent handoffs. | `commands` |
+| Bundled Orchestration Systems | Delivers multi-phase project orchestration, knowledge tracking, media production, and persona-council capabilities as optional bundles, each shipping its own nested skills and agents that install independently of the core asset set. | `systems` |
+| Subagent Role Definitions | Delivers the named subagent roles that commands dispatch work to, together with the behavioural rules those agents load, so that a role's system prompt is defined once and reused across every pipeline that spawns it. | `agents`, `rules` |
+| Multi-Editor Install Adapters | Delivers installation into five editor and CLI targets — Claude Code, Cursor, VS Code and the Copilot CLI, Codex, and any AGENTS. | `adapters`, `bin`, `Formula`, `install.sh` |
 
 `skills/` additionally shares `templates/` with the command surface.
 
@@ -24,8 +24,16 @@ produces no drift. See `team:architecture.md` for the protocol and its stated li
 Under the runtime-only rule in `skills/arch-index/references/component-rules.md`, these
 are not components and belong to none: `scripts/` and `docs/` (build tooling and the
 catalogs it generates), `.github/` and `workflows/` (continuous integration), `tests/`,
-`examples/`, and `assets/`. They are real and they matter; they are not part of the
-runtime an agent consumes.
+`examples/`, `assets/` and `coco/` (site media), and `.arch/` (this artifact). They are
+real and they matter; they are not part of the runtime an agent consumes.
+
+## What this index does not say
+
+It records where code lives, not what an install delivers, and here those diverge
+sharply: the largest single piece of the command surface is generated at install time
+rather than committed, so an adapter that skips the generators ships 38 commands where
+the advertised total is 280. That question is answered empirically — by installing every
+adapter and counting — in [`adapters/INDEX.md`](../adapters/INDEX.md).
 
 ## Diagram
 
@@ -33,8 +41,8 @@ runtime an agent consumes.
 C4Container
   title Architecture Index — coco
   Container(skill_library, "Agent Skill Library", "markdown + scripts")
-  Container(command_surface, "Slash Command Surface", "markdown")
-  Container(system_bundles, "Bundled Orchestration Systems", "markdown + nested skills")
+  Container(command_surface, "Slash Command Surface", "markdown + generated")
+  Container(system_bundles, "Bundled Orchestration Systems", "markdown + registries")
   Container(agent_roster, "Subagent Role Definitions", "markdown")
   Container(install_adapters, "Multi-Editor Install Adapters", "shell + ruby")
   Rel(skill_library, command_surface, "Capability invocation")

@@ -301,7 +301,15 @@ def install_skills():
             continue
         os.makedirs(SKILL_DIR, exist_ok=True)
         if directory and os.path.isdir(directory):
-            if os.path.isdir(dest):
+            if os.path.islink(dest):
+                # A symlink here is somebody else's skill (a linked-in pack, say).
+                # rmtree would refuse it outright, so unlink explicitly, and only
+                # when the user asked for --force.
+                if not FORCE:
+                    skipped.append(dest)
+                    continue
+                os.unlink(dest)
+            elif os.path.isdir(dest):
                 shutil.rmtree(dest)
             shutil.copytree(directory, dest, ignore=shutil.ignore_patterns(*SKIP_DIRS))
         else:
@@ -381,7 +389,12 @@ def uninstall():
             if DRY:
                 say(f"DRY: remove {path}")
                 continue
-            shutil.rmtree(path) if os.path.isdir(path) else os.remove(path)
+            if os.path.islink(path):
+                os.unlink(path)
+            elif os.path.isdir(path):
+                shutil.rmtree(path)
+            else:
+                os.remove(path)
             removed.append(path)
 
 

@@ -3,13 +3,13 @@
   "generated_at": "2026-05-30",
   "team_id": "ai-super-intelligence",
   "team_name": "AI Super Intelligence Team",
-  "description": "Your AI research and engineering brain trust. 47 named personas across 8 cells covering frontier labs, applied product, model architecture, reasoning/RL/agents, alignment and interpretability, theory and science of DL, multimodal and embodied, and systems/kernels/serving. Reusable across all CoCo-routed work — invoked by /superintelligenceTeam slash commands.",
+  "description": "Your AI research and engineering brain trust. 47 named personas across 8 cells covering frontier labs, applied product, model architecture, reasoning/RL/agents, alignment and interpretability, theory and science of DL, multimodal and embodied, and systems/kernels/serving. Reusable across all CoCo-routed work \u2014 invoked by /superintelligenceTeam slash commands.",
   "personas_count": 59,
   "cells_count": 8,
   "cells": {
     "frontier-labs-research": {
       "id": "frontier-labs-research",
-      "description": "Frontier Labs Research — CEO/CSO tier at frontier model labs.",
+      "description": "Frontier Labs Research \u2014 CEO/CSO tier at frontier model labs.",
       "personas_count": 6,
       "personas": [
         "arthur-mensch",
@@ -23,7 +23,7 @@
     },
     "applied-ai-leadership": {
       "id": "applied-ai-leadership",
-      "description": "Applied AI Leadership — product/strategy founders building real AI products.",
+      "description": "Applied AI Leadership \u2014 product/strategy founders building real AI products.",
       "personas_count": 7,
       "personas": [
         "aidan-gomez",
@@ -38,7 +38,7 @@
     },
     "model-architects": {
       "id": "model-architects",
-      "description": "Model Architects — pretraining, scaling laws, and model design.",
+      "description": "Model Architects \u2014 pretraining, scaling laws, and model design.",
       "personas_count": 7,
       "personas": [
         "andrej-karpathy",
@@ -53,7 +53,7 @@
     },
     "reasoning-rl-agents": {
       "id": "reasoning-rl-agents",
-      "description": "Reasoning, RL, and Agents — post-training and agentic systems.",
+      "description": "Reasoning, RL, and Agents \u2014 post-training and agentic systems.",
       "personas_count": 7,
       "personas": [
         "barret-zoph",
@@ -85,7 +85,7 @@
     },
     "theory-science": {
       "id": "theory-science",
-      "description": "Theory and Science of Deep Learning — foundational researchers.",
+      "description": "Theory and Science of Deep Learning \u2014 foundational researchers.",
       "personas_count": 9,
       "personas": [
         "aleksander-madry",
@@ -102,7 +102,7 @@
     },
     "multimodal-embodied": {
       "id": "multimodal-embodied",
-      "description": "Multimodal, Vision, and Embodied AI — robotics + diffusion + spatial.",
+      "description": "Multimodal, Vision, and Embodied AI \u2014 robotics + diffusion + spatial.",
       "personas_count": 7,
       "personas": [
         "aditya-ramesh",
@@ -117,7 +117,7 @@
     },
     "systems-kernels-serving": {
       "id": "systems-kernels-serving",
-      "description": "Systems, Kernels, and Serving — training infrastructure + inference.",
+      "description": "Systems, Kernels, and Serving \u2014 training infrastructure + inference.",
       "personas_count": 7,
       "personas": [
         "albert-gu",
@@ -135,7 +135,7 @@
     "aditya-ramesh": {
       "slug": "aditya-ramesh",
       "real_name": "Aditya Ramesh",
-      "archetype": "Quiet multimodal generation builder — DALL-E to Sora to robots",
+      "archetype": "Quiet multimodal generation builder \u2014 DALL-E to Sora to robots",
       "teams": [
         "ai-super-intelligence"
       ],
@@ -144,7 +144,7 @@
       "cell_role": "specialist",
       "status": "active",
       "affiliations_2026": [
-        "OpenAI (VP of Research, leads Worldsim — the World Simulation team and the robotics-from-video-models effort, since late 2025)"
+        "OpenAI (VP of Research, leads Worldsim \u2014 the World Simulation team and the robotics-from-video-models effort, since late 2025)"
       ],
       "domains": [
         "text-to-image generation",
@@ -173,7 +173,7 @@
       "confidence": 0.88,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Plain, precise, low-volume. Capability claims are grounded in artifacts (\"Sora 2 advances physical realism and prompt fidelity\"), not slogans. Uses creator-side",
-      "file_path": "superintelligenceTeam/personas/aditya-ramesh.md",
+      "file_path": "superintelligence/ai/personas/aditya-ramesh.md",
       "research_dir": "superintelligenceTeam/research/aditya-ramesh/"
     },
     "aidan-gomez": {
@@ -219,8 +219,8 @@
       "public_stances_count": 8,
       "confidence": 0.92,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Calm, plain-English, founder-confident. Avoids hype-words and AGI theology. Frames arguments through pragmatism vs hype — \"the actual revolution is much more pr",
-      "file_path": "superintelligenceTeam/personas/aidan-gomez.md",
+      "voice_style_excerpt": "Calm, plain-English, founder-confident. Avoids hype-words and AGI theology. Frames arguments through pragmatism vs hype \u2014 \"the actual revolution is much more pr",
+      "file_path": "superintelligence/ai/personas/aidan-gomez.md",
       "research_dir": "superintelligenceTeam/research/aidan-gomez/"
     },
     "albert-gu": {
@@ -265,13 +265,13 @@
       "public_stances_count": 8,
       "confidence": 0.94,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Precise, mathematical, minimal. Prefers concrete numbers (90ms latency, 3:1 ratio, 16k context, 2–8× speedup) over qualitative claims. Comfortable saying \"this ",
-      "file_path": "superintelligenceTeam/personas/albert-gu.md",
+      "voice_style_excerpt": "Precise, mathematical, minimal. Prefers concrete numbers (90ms latency, 3:1 ratio, 16k context, 2\u20138\u00d7 speedup) over qualitative claims. Comfortable saying \"this ",
+      "file_path": "superintelligence/ai/personas/albert-gu.md",
       "research_dir": "superintelligenceTeam/research/albert-gu/"
     },
     "aleksander-madry": {
       "slug": "aleksander-madry",
-      "real_name": "Aleksander Mądry",
+      "real_name": "Aleksander M\u0105dry",
       "archetype": "Robustness-first preparedness architect",
       "teams": [
         "ai-super-intelligence"
@@ -313,7 +313,7 @@
       "confidence": 0.94,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Mathematical precision before rhetoric. Defines the problem before proposing the solution; loads \"saddle-point,\" \"threat model,\" \"attribution,\" \"threshold,\" and",
-      "file_path": "superintelligenceTeam/personas/aleksander-madry.md",
+      "file_path": "superintelligence/ai/personas/aleksander-madry.md",
       "research_dir": "superintelligenceTeam/research/aleksander-madry/"
     },
     "andrej-karpathy": {
@@ -359,7 +359,7 @@
       "confidence": 0.95,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Plain English, no jargon when avoidable. Analogies from physics and optics when explaining gradients. Drops one-liner heuristics (\"read the loss curve like a bo",
-      "file_path": "superintelligenceTeam/personas/andrej-karpathy.md",
+      "file_path": "superintelligence/ai/personas/andrej-karpathy.md",
       "research_dir": "superintelligenceTeam/research/andrej-karpathy/"
     },
     "andrew-feldman": {
@@ -405,8 +405,8 @@
       "public_stances_count": 9,
       "confidence": 0.94,
       "last_verified": "2026-05-28",
-      "voice_style_excerpt": "Stanford GSB-cadence: structured, three-points-then-the-conclusion, \"let me give you the three things going on here.\" Concrete-number-heavy — bandwidth ratios (",
-      "file_path": "superintelligenceTeam/personas/andrew-feldman.md",
+      "voice_style_excerpt": "Stanford GSB-cadence: structured, three-points-then-the-conclusion, \"let me give you the three things going on here.\" Concrete-number-heavy \u2014 bandwidth ratios (",
+      "file_path": "superintelligence/ai/personas/andrew-feldman.md",
       "research_dir": "superintelligenceTeam/research/andrew-feldman/"
     },
     "aravind-srinivas": {
@@ -452,7 +452,7 @@
       "confidence": 0.91,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Direct, founder-confident, fast. Speaks in product framings (\"answer engine, not search engine\"; \"memo not deck\"; \"wrap, don't build\"). Uses combative one-liner",
-      "file_path": "superintelligenceTeam/personas/aravind-srinivas.md",
+      "file_path": "superintelligence/ai/personas/aravind-srinivas.md",
       "research_dir": "superintelligenceTeam/research/aravind-srinivas/"
     },
     "arthur-mensch": {
@@ -496,8 +496,8 @@
       "public_stances_count": 9,
       "confidence": 0.92,
       "last_verified": "2026-05-28",
-      "voice_style_excerpt": "Structured, deductive, French-public-intellectual register. Builds the argument from premises (AI is infrastructure → Europe lacks sovereign production capacity",
-      "file_path": "superintelligenceTeam/personas/arthur-mensch.md",
+      "voice_style_excerpt": "Structured, deductive, French-public-intellectual register. Builds the argument from premises (AI is infrastructure \u2192 Europe lacks sovereign production capacity",
+      "file_path": "superintelligence/ai/personas/arthur-mensch.md",
       "research_dir": "superintelligenceTeam/research/arthur-mensch/"
     },
     "barret-zoph": {
@@ -541,8 +541,8 @@
       "public_stances_count": 7,
       "confidence": 0.9,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Plain, professional, understated. No grand pronouncements; no futurist sweep. Engineering-first — when he explains a problem, he names the system, the bug, and ",
-      "file_path": "superintelligenceTeam/personas/barret-zoph.md",
+      "voice_style_excerpt": "Plain, professional, understated. No grand pronouncements; no futurist sweep. Engineering-first \u2014 when he explains a problem, he names the system, the bug, and ",
+      "file_path": "superintelligence/ai/personas/barret-zoph.md",
       "research_dir": "superintelligenceTeam/research/barret-zoph/"
     },
     "beth-barnes": {
@@ -557,7 +557,7 @@
       "cell_role": "specialist",
       "status": "active",
       "affiliations_2026": [
-        "METR — Model Evaluation and Threat Research (Founder and CEO, since December 2023)"
+        "METR \u2014 Model Evaluation and Threat Research (Founder and CEO, since December 2023)"
       ],
       "domains": [
         "independent third-party AI evaluations",
@@ -586,8 +586,8 @@
       "public_stances_count": 10,
       "confidence": 0.95,
       "last_verified": "2026-05-28",
-      "voice_style_excerpt": "Calm, technical, deliberately non-rhetorical for a topic where rhetoric is the obvious frame. Speaks in operational specifics — task durations, confidence inter",
-      "file_path": "superintelligenceTeam/personas/beth-barnes.md",
+      "voice_style_excerpt": "Calm, technical, deliberately non-rhetorical for a topic where rhetoric is the obvious frame. Speaks in operational specifics \u2014 task durations, confidence inter",
+      "file_path": "superintelligence/ai/personas/beth-barnes.md",
       "research_dir": "superintelligenceTeam/research/beth-barnes/"
     },
     "bryan-catanzaro": {
@@ -633,7 +633,7 @@
       "confidence": 0.95,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Plain technical English. Engineering-first vocabulary. Refers to systems as systems, kernels as kernels, parallelism as parallelism. No marketing veneer even in",
-      "file_path": "superintelligenceTeam/personas/bryan-catanzaro.md",
+      "file_path": "superintelligence/ai/personas/bryan-catanzaro.md",
       "research_dir": "superintelligenceTeam/research/bryan-catanzaro/"
     },
     "chelsea-finn": {
@@ -679,7 +679,7 @@
       "confidence": 0.95,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Direct, calm, technically precise without being jargon-heavy. Prefers concrete examples (\"a teleoperator lights a match and then lights a candle with that match",
-      "file_path": "superintelligenceTeam/personas/chelsea-finn.md",
+      "file_path": "superintelligence/ai/personas/chelsea-finn.md",
       "research_dir": "superintelligenceTeam/research/chelsea-finn/"
     },
     "chris-olah": {
@@ -726,7 +726,7 @@
       "confidence": 0.96,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Patient, geometric, aesthetic-first. Reaches for biological and visual metaphors before adversarial or compliance metaphors. Treats neural networks with a kind ",
-      "file_path": "superintelligenceTeam/personas/chris-olah.md",
+      "file_path": "superintelligence/ai/personas/chris-olah.md",
       "research_dir": "superintelligenceTeam/research/chris-olah/"
     },
     "christopher-manning": {
@@ -774,7 +774,7 @@
       "confidence": 0.96,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Measured, generous, Stanford-Australian-academic. Almost never overclaims; hype-words (\"AGI\", \"revolution\", \"superintelligence\") used carefully and with qualifi",
-      "file_path": "superintelligenceTeam/personas/christopher-manning.md",
+      "file_path": "superintelligence/ai/personas/christopher-manning.md",
       "research_dir": "superintelligenceTeam/research/christopher-manning/"
     },
     "dan-hendrycks": {
@@ -823,7 +823,7 @@
       "confidence": 0.95,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Plain, measured, deliberately non-alarmist prose for a topic where alarm is the obvious frame. Speaks the languages of three audiences fluently and code-switche",
-      "file_path": "superintelligenceTeam/personas/dan-hendrycks.md",
+      "file_path": "superintelligence/ai/personas/dan-hendrycks.md",
       "research_dir": "superintelligenceTeam/research/dan-hendrycks/"
     },
     "dario-amodei": {
@@ -869,8 +869,8 @@
       "public_stances_count": 9,
       "confidence": 0.93,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Long, structured paragraphs. Builds arguments deductively from premises before stating conclusions. Comfortable with uncertainty — says \"I think,\" \"my best gues",
-      "file_path": "superintelligenceTeam/personas/dario-amodei.md",
+      "voice_style_excerpt": "Long, structured paragraphs. Builds arguments deductively from premises before stating conclusions. Comfortable with uncertainty \u2014 says \"I think,\" \"my best gues",
+      "file_path": "superintelligence/ai/personas/dario-amodei.md",
       "research_dir": "superintelligenceTeam/research/dario-amodei/"
     },
     "demis-hassabis": {
@@ -917,7 +917,7 @@
       "confidence": 0.96,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Measured, English-accented, scientist-CEO register. Speaks in fully-formed paragraphs, not soundbites. Reaches for biological and physical analogies (hippocampa",
-      "file_path": "superintelligenceTeam/personas/demis-hassabis.md",
+      "file_path": "superintelligence/ai/personas/demis-hassabis.md",
       "research_dir": "superintelligenceTeam/research/demis-hassabis/"
     },
     "elon-musk": {
@@ -971,7 +971,7 @@
       "confidence": 0.96,
       "last_verified": "2026-05-28",
       "voice_style_excerpt": "Bluntly direct, occasionally profane in long-form interviews; on X he writes telegraphically and often mid-task. Uses physics analogies (entropy, conservation l",
-      "file_path": "superintelligenceTeam/personas/elon-musk.md",
+      "file_path": "superintelligence/ai/personas/elon-musk.md",
       "research_dir": "superintelligenceTeam/research/elon-musk/"
     },
     "fei-fei-li": {
@@ -1020,8 +1020,8 @@
       "public_stances_count": 8,
       "confidence": 0.97,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Warm, deliberate, accessible. Anchors abstract claims in specific human stories — her father's dry-cleaning business, a child seeing a cat, a radiologist with a",
-      "file_path": "superintelligenceTeam/personas/fei-fei-li.md",
+      "voice_style_excerpt": "Warm, deliberate, accessible. Anchors abstract claims in specific human stories \u2014 her father's dry-cleaning business, a child seeing a cat, a radiologist with a",
+      "file_path": "superintelligence/ai/personas/fei-fei-li.md",
       "research_dir": "superintelligenceTeam/research/fei-fei-li/"
     },
     "geoffrey-hinton": {
@@ -1070,8 +1070,8 @@
       "public_stances_count": 8,
       "confidence": 0.97,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Quiet, mid-Atlantic British academic English. Plain language, no equations in public talks. Light irony — he is comfortable saying 'we may all be doomed' with a",
-      "file_path": "superintelligenceTeam/personas/geoffrey-hinton.md",
+      "voice_style_excerpt": "Quiet, mid-Atlantic British academic English. Plain language, no equations in public talks. Light irony \u2014 he is comfortable saying 'we may all be doomed' with a",
+      "file_path": "superintelligence/ai/personas/geoffrey-hinton.md",
       "research_dir": "superintelligenceTeam/research/geoffrey-hinton/"
     },
     "greg-brockman": {
@@ -1118,7 +1118,7 @@
       "confidence": 0.91,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Direct, operational, declarative. Frames problems in terms of dependency graphs, supply chains, and shipping dates. Uses systems-engineering vocabulary (\"the bi",
-      "file_path": "superintelligenceTeam/personas/greg-brockman.md",
+      "file_path": "superintelligence/ai/personas/greg-brockman.md",
       "research_dir": "superintelligenceTeam/research/greg-brockman/"
     },
     "helen-toner": {
@@ -1165,8 +1165,8 @@
       "public_stances_count": 10,
       "confidence": 0.94,
       "last_verified": "2026-05-28",
-      "voice_style_excerpt": "Plain English, precise, deliberately calm. Refuses Silicon Valley civilizational rhetoric — does not talk about Intelligence Ages or singularities or summoning ",
-      "file_path": "superintelligenceTeam/personas/helen-toner.md",
+      "voice_style_excerpt": "Plain English, precise, deliberately calm. Refuses Silicon Valley civilizational rhetoric \u2014 does not talk about Intelligence Ages or singularities or summoning ",
+      "file_path": "superintelligence/ai/personas/helen-toner.md",
       "research_dir": "superintelligenceTeam/research/helen-toner/"
     },
     "horace-he": {
@@ -1210,7 +1210,7 @@
       "confidence": 0.92,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Plain, technical, slightly dry. Heavy use of concrete numbers (\"9.75 million FLOPS in the time Python does one\") and roofline-style framings. Drops one-liner he",
-      "file_path": "superintelligenceTeam/personas/horace-he.md",
+      "file_path": "superintelligence/ai/personas/horace-he.md",
       "research_dir": "superintelligenceTeam/research/horace-he/"
     },
     "hyung-won-chung": {
@@ -1252,7 +1252,7 @@
       "confidence": 0.9,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Paradigm-shift framing rather than benchmark deltas. Short declarative slogans repeated across talks: \"Don't teach. Incentivize.\" \"Add structure, remove structu",
-      "file_path": "superintelligenceTeam/personas/hyung-won-chung.md",
+      "file_path": "superintelligence/ai/personas/hyung-won-chung.md",
       "research_dir": "superintelligenceTeam/research/hyung-won-chung/"
     },
     "ilya-sutskever": {
@@ -1297,7 +1297,7 @@
       "confidence": 0.92,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Soft-spoken, deliberately spare, often pauses before answering. Prefers framings over methods. Speaks in eras and regimes (\"the age of scaling,\" \"the missing co",
-      "file_path": "superintelligenceTeam/personas/ilya-sutskever.md",
+      "file_path": "superintelligence/ai/personas/ilya-sutskever.md",
       "research_dir": "superintelligenceTeam/research/ilya-sutskever/"
     },
     "jakub-pachocki": {
@@ -1341,7 +1341,7 @@
       "confidence": 0.88,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Reserved, technically precise, allergic to hype. Speaks in carefully hedged claims (\"I would say it is a form of reasoning, but that doesn't mean it's the same ",
-      "file_path": "superintelligenceTeam/personas/jakub-pachocki.md",
+      "file_path": "superintelligence/ai/personas/jakub-pachocki.md",
       "research_dir": "superintelligenceTeam/research/jakub-pachocki/"
     },
     "jan-leike": {
@@ -1384,7 +1384,7 @@
       "confidence": 0.94,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Plain, calm, slightly Germanic English. Short declarative sentences. Numbered claims rather than rhetorical flourishes. Even the May 17 2024 resignation thread ",
-      "file_path": "superintelligenceTeam/personas/jan-leike.md",
+      "file_path": "superintelligence/ai/personas/jan-leike.md",
       "research_dir": "superintelligenceTeam/research/jan-leike/"
     },
     "jared-kaplan": {
@@ -1427,7 +1427,7 @@
       "confidence": 0.92,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Measured, physicist-academic register. Reaches first for empirical regularities (\"the loss is a power law over seven orders of magnitude\") rather than benchmark",
-      "file_path": "superintelligenceTeam/personas/jared-kaplan.md",
+      "file_path": "superintelligence/ai/personas/jared-kaplan.md",
       "research_dir": "superintelligenceTeam/research/jared-kaplan/"
     },
     "jason-wei": {
@@ -1471,7 +1471,7 @@
       "confidence": 0.91,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Plain English, short paragraphs, lists of 3 / 5 / 7. Cites benchmark numbers (GSM8K, MATH, MMLU, LongMemEval-S) rather than analogies. Uses \"I think\" rather tha",
-      "file_path": "superintelligenceTeam/personas/jason-wei.md",
+      "file_path": "superintelligence/ai/personas/jason-wei.md",
       "research_dir": "superintelligenceTeam/research/jason-wei/"
     },
     "john-jumper": {
@@ -1517,7 +1517,7 @@
       "confidence": 0.96,
       "last_verified": "2026-05-28",
       "voice_style_excerpt": "Measured, modest, scientifically careful. American-accented, midwestern-academic register. Speaks in qualified statements (\"I think,\" \"I'll be shocked if,\" \"it ",
-      "file_path": "superintelligenceTeam/personas/john-jumper.md",
+      "file_path": "superintelligence/ai/personas/john-jumper.md",
       "research_dir": "superintelligenceTeam/research/john-jumper/"
     },
     "john-schulman": {
@@ -1562,13 +1562,13 @@
       "confidence": 0.95,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Measured, technical, and unusually willing to say \"I don't know\" in public. Prefers to derive a claim from a gradient or an estimator before he asserts it. Will",
-      "file_path": "superintelligenceTeam/personas/john-schulman.md",
+      "file_path": "superintelligence/ai/personas/john-schulman.md",
       "research_dir": "superintelligenceTeam/research/john-schulman/"
     },
     "karina-nguyen": {
       "slug": "karina-nguyen",
       "real_name": "Karina Nguyen",
-      "archetype": "Post-training as tailoring — RLHF practitioner who treats data mixtures as craft",
+      "archetype": "Post-training as tailoring \u2014 RLHF practitioner who treats data mixtures as craft",
       "teams": [
         "ai-super-intelligence"
       ],
@@ -1608,8 +1608,8 @@
       "public_stances_count": 9,
       "confidence": 0.9,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Plain English, almost no ML jargon even when discussing RLHF or synthetic data. Reaches for everyday metaphors — tailoring, art, cooking, brain damage, taste — ",
-      "file_path": "superintelligenceTeam/personas/karina-nguyen.md",
+      "voice_style_excerpt": "Plain English, almost no ML jargon even when discussing RLHF or synthetic data. Reaches for everyday metaphors \u2014 tailoring, art, cooking, brain damage, taste \u2014 ",
+      "file_path": "superintelligence/ai/personas/karina-nguyen.md",
       "research_dir": "superintelligenceTeam/research/karina-nguyen/"
     },
     "liang-wenfeng": {
@@ -1654,8 +1654,8 @@
       "public_stances_count": 9,
       "confidence": 0.88,
       "last_verified": "2026-05-28",
-      "voice_style_excerpt": "Spare, deliberate, philosophical rather than technical when speaking publicly. Reaches for structural framings — \"the real gap is between originality and imitat",
-      "file_path": "superintelligenceTeam/personas/liang-wenfeng.md",
+      "voice_style_excerpt": "Spare, deliberate, philosophical rather than technical when speaking publicly. Reaches for structural framings \u2014 \"the real gap is between originality and imitat",
+      "file_path": "superintelligence/ai/personas/liang-wenfeng.md",
       "research_dir": "superintelligenceTeam/research/liang-wenfeng/"
     },
     "lilian-weng": {
@@ -1702,7 +1702,7 @@
       "confidence": 0.94,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Senior research scientist register. Precise, slightly formal, deeply cited. Where Karpathy will say \"you're sucking supervision through a straw,\" Weng will say ",
-      "file_path": "superintelligenceTeam/personas/lilian-weng.md",
+      "file_path": "superintelligence/ai/personas/lilian-weng.md",
       "research_dir": "superintelligenceTeam/research/lilian-weng/"
     },
     "mira-murati": {
@@ -1745,8 +1745,8 @@
       "public_stances_count": 7,
       "confidence": 0.91,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Calm and deliberate. Engineer-first vocabulary; rarely reaches for AGI or superintelligence rhetoric. Frames decisions in terms of users, access, and benefits —",
-      "file_path": "superintelligenceTeam/personas/mira-murati.md",
+      "voice_style_excerpt": "Calm and deliberate. Engineer-first vocabulary; rarely reaches for AGI or superintelligence rhetoric. Frames decisions in terms of users, access, and benefits \u2014",
+      "file_path": "superintelligence/ai/personas/mira-murati.md",
       "research_dir": "superintelligenceTeam/research/mira-murati/"
     },
     "nathan-lambert": {
@@ -1761,7 +1761,7 @@
       "cell_role": "specialist",
       "status": "active",
       "affiliations_2026": [
-        "Allen Institute for AI / Ai2 (Senior Research Scientist; post-training lead for Olmo and Tülu, since 2024)",
+        "Allen Institute for AI / Ai2 (Senior Research Scientist; post-training lead for Olmo and T\u00fclu, since 2024)",
         "Interconnects (founder; newsletter + podcast at interconnects.ai)",
         "The ATOM Project (founder; American Truly Open Models initiative, since July 2025)"
       ],
@@ -1795,8 +1795,8 @@
       "public_stances_count": 9,
       "confidence": 0.94,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Prolific, conversational, accessible — writes how he talks. Newsletter cadence is closer to a research diary than a peer-reviewed paper, and he is self-aware ab",
-      "file_path": "superintelligenceTeam/personas/nathan-lambert.md",
+      "voice_style_excerpt": "Prolific, conversational, accessible \u2014 writes how he talks. Newsletter cadence is closer to a research diary than a peer-reviewed paper, and he is self-aware ab",
+      "file_path": "superintelligence/ai/personas/nathan-lambert.md",
       "research_dir": "superintelligenceTeam/research/nathan-lambert/"
     },
     "neel-nanda": {
@@ -1840,8 +1840,8 @@
       "public_stances_count": 10,
       "confidence": 0.94,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Plain English. Precise but unguarded — comfortable saying \"I don't know,\" \"this is just my intuition,\" \"I've become more pessimistic than I used to be.\" Cambrid",
-      "file_path": "superintelligenceTeam/personas/neel-nanda.md",
+      "voice_style_excerpt": "Plain English. Precise but unguarded \u2014 comfortable saying \"I don't know,\" \"this is just my intuition,\" \"I've become more pessimistic than I used to be.\" Cambrid",
+      "file_path": "superintelligence/ai/personas/neel-nanda.md",
       "research_dir": "superintelligenceTeam/research/neel-nanda/"
     },
     "noam-brown": {
@@ -1885,8 +1885,8 @@
       "public_stances_count": 10,
       "confidence": 0.94,
       "last_verified": "2026-05-28",
-      "voice_style_excerpt": "Numerically anchored and forward-leaning. Concrete multipliers (\"100,000× more data,\" \"1000-10,000× in size,\" \"5 of 6 problems\"). Specific wall-clock times (\"o1",
-      "file_path": "superintelligenceTeam/personas/noam-brown.md",
+      "voice_style_excerpt": "Numerically anchored and forward-leaning. Concrete multipliers (\"100,000\u00d7 more data,\" \"1000-10,000\u00d7 in size,\" \"5 of 6 problems\"). Specific wall-clock times (\"o1",
+      "file_path": "superintelligence/ai/personas/noam-brown.md",
       "research_dir": "superintelligenceTeam/research/noam-brown/"
     },
     "noam-shazeer": {
@@ -1929,7 +1929,7 @@
       "confidence": 0.93,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Terse, direct, engineer-to-engineer. Strong preference for concrete numerical claims (\"million tokens to the dollar\", \"50 percent of the time\", \"32 GPUs in 2015",
-      "file_path": "superintelligenceTeam/personas/noam-shazeer.md",
+      "file_path": "superintelligence/ai/personas/noam-shazeer.md",
       "research_dir": "superintelligenceTeam/research/noam-shazeer/"
     },
     "patrick-lewis": {
@@ -1974,7 +1974,7 @@
       "confidence": 0.91,
       "last_verified": "2026-05-28",
       "voice_style_excerpt": "Plain English, soft-spoken, lightly British-dry. Self-deprecating, particularly about the RAG acronym (\"we should have picked a better name\"). Reaches for archi",
-      "file_path": "superintelligenceTeam/personas/patrick-lewis.md",
+      "file_path": "superintelligence/ai/personas/patrick-lewis.md",
       "research_dir": "superintelligenceTeam/research/patrick-lewis/"
     },
     "paul-christiano": {
@@ -1989,8 +1989,8 @@
       "cell_role": "lead-driver",
       "status": "active",
       "affiliations_2026": [
-        "U.S. AI Safety Institute / Center for AI Standards and Innovation (CAISI) at NIST — Head of AI Safety, since April 2024",
-        "Alignment Research Center (ARC) — founder, on leave during CAISI tenure"
+        "U.S. AI Safety Institute / Center for AI Standards and Innovation (CAISI) at NIST \u2014 Head of AI Safety, since April 2024",
+        "Alignment Research Center (ARC) \u2014 founder, on leave during CAISI tenure"
       ],
       "domains": [
         "AI alignment theory",
@@ -2019,8 +2019,8 @@
       "public_stances_count": 8,
       "confidence": 0.95,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Plain, careful, hedged English. Not aphoristic, not preacherly. Heavy use of conditional and probabilistic framing — \"I think there's a really plausible world…\"",
-      "file_path": "superintelligenceTeam/personas/paul-christiano.md",
+      "voice_style_excerpt": "Plain, careful, hedged English. Not aphoristic, not preacherly. Heavy use of conditional and probabilistic framing \u2014 \"I think there's a really plausible world\u2026\"",
+      "file_path": "superintelligence/ai/personas/paul-christiano.md",
       "research_dir": "superintelligenceTeam/research/paul-christiano/"
     },
     "percy-liang": {
@@ -2065,7 +2065,7 @@
       "confidence": 0.94,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Measured academic English. Concrete numbers preferred over rhetoric ('only 9 of 30 labs disclose train-test overlap', 'FMTI fell from 58 to 40', 'beats Llama 3.",
-      "file_path": "superintelligenceTeam/personas/percy-liang.md",
+      "file_path": "superintelligence/ai/personas/percy-liang.md",
       "research_dir": "superintelligenceTeam/research/percy-liang/"
     },
     "pieter-abbeel": {
@@ -2114,8 +2114,8 @@
       "public_stances_count": 7,
       "confidence": 0.95,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Calm, Belgian-accented, never sensational. Concrete examples over abstract argument — the autonomous helicopter, the bin-pick, the dexterous hand, the 100-demo-",
-      "file_path": "superintelligenceTeam/personas/pieter-abbeel.md",
+      "voice_style_excerpt": "Calm, Belgian-accented, never sensational. Concrete examples over abstract argument \u2014 the autonomous helicopter, the bin-pick, the dexterous hand, the 100-demo-",
+      "file_path": "superintelligence/ai/personas/pieter-abbeel.md",
       "research_dir": "superintelligenceTeam/research/pieter-abbeel/"
     },
     "prafulla-dhariwal": {
@@ -2159,7 +2159,7 @@
       "confidence": 0.88,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Restrained, technical, declarative. Short sentences, no hedging, no analogies, no metaphors when avoidable. Reads like the introduction of a well-written deep-l",
-      "file_path": "superintelligenceTeam/personas/prafulla-dhariwal.md",
+      "file_path": "superintelligence/ai/personas/prafulla-dhariwal.md",
       "research_dir": "superintelligenceTeam/research/prafulla-dhariwal/"
     },
     "robin-rombach": {
@@ -2205,7 +2205,7 @@
       "confidence": 0.93,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Plain, technical, uncluttered. German-English. Avoids hype vocabulary. Tends toward architectural framings (\"unifying X and Y in a single flow matching architec",
-      "file_path": "superintelligenceTeam/personas/robin-rombach.md",
+      "file_path": "superintelligence/ai/personas/robin-rombach.md",
       "research_dir": "superintelligenceTeam/research/robin-rombach/"
     },
     "sam-altman": {
@@ -2257,8 +2257,8 @@
       "public_stances_count": 9,
       "confidence": 0.97,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Short declarative sentences, typically 8-15 words. Plain English over jargon — he says \"intelligence\" before \"frontier model.\" Civilizational analogies (Stone A",
-      "file_path": "superintelligenceTeam/personas/sam-altman.md",
+      "voice_style_excerpt": "Short declarative sentences, typically 8-15 words. Plain English over jargon \u2014 he says \"intelligence\" before \"frontier model.\" Civilizational analogies (Stone A",
+      "file_path": "superintelligence/ai/personas/sam-altman.md",
       "research_dir": "superintelligenceTeam/research/sam-altman/"
     },
     "sara-hooker": {
@@ -2304,7 +2304,7 @@
       "confidence": 0.95,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Warm-then-pointed. Opens with an acknowledgement of the strongest version of the other side's claim, then makes a sharp structural critique, then closes with an",
-      "file_path": "superintelligenceTeam/personas/sara-hooker.md",
+      "file_path": "superintelligence/ai/personas/sara-hooker.md",
       "research_dir": "superintelligenceTeam/research/sara-hooker/"
     },
     "sasha-rush": {
@@ -2320,7 +2320,7 @@
       "status": "active",
       "affiliations_2026": [
         "Cursor (ML Researcher, since March 2025, post-training of coding-agent models)",
-        "Cornell Tech (Associate Professor, on leave / reduced load through 2025–2026 academic year)",
+        "Cornell Tech (Associate Professor, on leave / reduced load through 2025\u20132026 academic year)",
         "COLM (Conference on Language Modeling, co-founder and President)"
       ],
       "domains": [
@@ -2351,7 +2351,7 @@
       "confidence": 0.95,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Dry, plain English, often a single sentence per claim. Comfortable with mathematical formality when it pays for itself, allergic to formality-as-aesthetics. Dro",
-      "file_path": "superintelligenceTeam/personas/sasha-rush.md",
+      "file_path": "superintelligence/ai/personas/sasha-rush.md",
       "research_dir": "superintelligenceTeam/research/sasha-rush/"
     },
     "sebastian-raschka": {
@@ -2395,8 +2395,8 @@
       "public_stances_count": 8,
       "confidence": 0.95,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Warm, careful, German-accented English. Writes long-form (30–90 minute reads) but in plain prose, with diagrams every few hundred words. Drops one-liner heurist",
-      "file_path": "superintelligenceTeam/personas/sebastian-raschka.md",
+      "voice_style_excerpt": "Warm, careful, German-accented English. Writes long-form (30\u201390 minute reads) but in plain prose, with diagrams every few hundred words. Drops one-liner heurist",
+      "file_path": "superintelligence/ai/personas/sebastian-raschka.md",
       "research_dir": "superintelligenceTeam/research/sebastian-raschka/"
     },
     "sergey-levine": {
@@ -2445,14 +2445,14 @@
       "public_stances_count": 8,
       "confidence": 0.95,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Measured, academic, calm. Reframes questions before answering them (\"a much more useful way to think about it is…\"). Strong preference for analogies — sporks, P",
-      "file_path": "superintelligenceTeam/personas/sergey-levine.md",
+      "voice_style_excerpt": "Measured, academic, calm. Reframes questions before answering them (\"a much more useful way to think about it is\u2026\"). Strong preference for analogies \u2014 sporks, P",
+      "file_path": "superintelligence/ai/personas/sergey-levine.md",
       "research_dir": "superintelligenceTeam/research/sergey-levine/"
     },
     "steve-jobs": {
       "slug": "steve-jobs",
       "real_name": "Steven Paul Jobs",
-      "archetype": "Product-decision lens — focus, shipping discipline, and hardware-software-service integration as ideology",
+      "archetype": "Product-decision lens \u2014 focus, shipping discipline, and hardware-software-service integration as ideology",
       "teams": [
         "ai-super-intelligence"
       ],
@@ -2491,7 +2491,7 @@
       "confidence": 0.97,
       "last_verified": "2026-05-28",
       "voice_style_excerpt": "Calm and missionary in public, ferocious in private. Black mock-turtleneck, jeans,",
-      "file_path": "superintelligenceTeam/personas/steve-jobs.md",
+      "file_path": "superintelligence/ai/personas/steve-jobs.md",
       "research_dir": "superintelligenceTeam/research/steve-jobs/"
     },
     "stuart-russell": {
@@ -2507,12 +2507,12 @@
       "status": "active",
       "affiliations_2026": [
         "UC Berkeley (Professor of Computer Science, EECS; Smith-Zadeh Professor in Engineering)",
-        "Center for Human-Compatible AI (CHAI) — Founder and Director, since 2016",
-        "International Association for Safe and Ethical AI (IASEAI) — Founder and President, since 2025",
-        "Kavli Center for Ethics, Science, and the Public at UC Berkeley — inaugural Director, since 2022"
+        "Center for Human-Compatible AI (CHAI) \u2014 Founder and Director, since 2016",
+        "International Association for Safe and Ethical AI (IASEAI) \u2014 Founder and President, since 2025",
+        "Kavli Center for Ethics, Science, and the Public at UC Berkeley \u2014 inaugural Director, since 2022"
       ],
       "domains": [
-        "AI foundations (textbook author — AIMA)",
+        "AI foundations (textbook author \u2014 AIMA)",
         "value alignment and the control problem",
         "inverse reinforcement learning and cooperative IRL",
         "probabilistic reasoning and Bayesian networks",
@@ -2539,7 +2539,7 @@
       "confidence": 0.97,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Formal British academic English. Full sentences with subordinate clauses; precise Latinate vocabulary. Analogies from physics, nuclear policy, and aviation safe",
-      "file_path": "superintelligenceTeam/personas/stuart-russell.md",
+      "file_path": "superintelligence/ai/personas/stuart-russell.md",
       "research_dir": "superintelligenceTeam/research/stuart-russell/"
     },
     "thomas-wolf": {
@@ -2587,8 +2587,8 @@
       "public_stances_count": 8,
       "confidence": 0.95,
       "last_verified": "2026-05-28",
-      "voice_style_excerpt": "Warm, French-accented English, with a researcher's careful pacing rather than a sales register. Long-form when writing — the Einstein essay and his blog posts r",
-      "file_path": "superintelligenceTeam/personas/thomas-wolf.md",
+      "voice_style_excerpt": "Warm, French-accented English, with a researcher's careful pacing rather than a sales register. Long-form when writing \u2014 the Einstein essay and his blog posts r",
+      "file_path": "superintelligence/ai/personas/thomas-wolf.md",
       "research_dir": "superintelligenceTeam/research/thomas-wolf/"
     },
     "tim-dettmers": {
@@ -2635,8 +2635,8 @@
       "public_stances_count": 8,
       "confidence": 0.94,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Plain technical English. Concrete numbers — dollar amounts, GPU days, bit widths, bandwidth in GB/s — appear in nearly every paragraph. Comfortable saying a met",
-      "file_path": "superintelligenceTeam/personas/tim-dettmers.md",
+      "voice_style_excerpt": "Plain technical English. Concrete numbers \u2014 dollar amounts, GPU days, bit widths, bandwidth in GB/s \u2014 appear in nearly every paragraph. Comfortable saying a met",
+      "file_path": "superintelligence/ai/personas/tim-dettmers.md",
       "research_dir": "superintelligenceTeam/research/tim-dettmers/"
     },
     "tri-dao": {
@@ -2684,7 +2684,7 @@
       "confidence": 0.97,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Precise, measured, calibrated. Hedges claims explicitly (\"more of a proof of concept\", \"some of the newer architectures\"). Concrete numbers over abstract argume",
-      "file_path": "superintelligenceTeam/personas/tri-dao.md",
+      "file_path": "superintelligence/ai/personas/tri-dao.md",
       "research_dir": "superintelligenceTeam/research/tri-dao/"
     },
     "woosuk-kwon": {
@@ -2730,13 +2730,13 @@
       "public_stances_count": 8,
       "confidence": 0.93,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Direct, declarative, structurally clean English (English is his second language and the phrasing shows in the best way — minimal hedging, minimal jargon). Reach",
-      "file_path": "superintelligenceTeam/personas/woosuk-kwon.md",
+      "voice_style_excerpt": "Direct, declarative, structurally clean English (English is his second language and the phrasing shows in the best way \u2014 minimal hedging, minimal jargon). Reach",
+      "file_path": "superintelligence/ai/personas/woosuk-kwon.md",
       "research_dir": "superintelligenceTeam/research/woosuk-kwon/"
     },
     "yann-lecun": {
       "slug": "yann-lecun",
-      "real_name": "Yann André LeCun",
+      "real_name": "Yann Andr\u00e9 LeCun",
       "archetype": "World-models contrarian; CNN inventor turned anti-LLM founder",
       "teams": [
         "ai-super-intelligence"
@@ -2746,9 +2746,9 @@
       "cell_role": "lead-driver",
       "status": "active",
       "affiliations_2026": [
-        "Advanced Machine Intelligence Labs (AMI Labs) — Executive Chairman, founded Nov 2025, $1.03B raise Mar 2026",
+        "Advanced Machine Intelligence Labs (AMI Labs) \u2014 Executive Chairman, founded Nov 2025, $1.03B raise Mar 2026",
         "New York University (Silver Professor, Courant Institute, since 2003)",
-        "Logical Intelligence — Founding Chair, Technical Research Board (since Jan 2026)"
+        "Logical Intelligence \u2014 Founding Chair, Technical Research Board (since Jan 2026)"
       ],
       "domains": [
         "convolutional neural networks (he invented them)",
@@ -2779,7 +2779,7 @@
       "confidence": 0.97,
       "last_verified": "2026-05-27",
       "voice_style_excerpt": "Direct, contrarian, quantitative. Anchors arguments in information-theoretic bandwidth (bytes per second, internet text vs. visual input) and biological cogniti",
-      "file_path": "superintelligenceTeam/personas/yann-lecun.md",
+      "file_path": "superintelligence/ai/personas/yann-lecun.md",
       "research_dir": "superintelligenceTeam/research/yann-lecun/"
     },
     "yejin-choi": {
@@ -2794,7 +2794,7 @@
       "cell_role": "specialist",
       "status": "active",
       "affiliations_2026": [
-        "Stanford University (Dieter Schwarz Foundation Professor and Senior Fellow at HAI; Professor of Computer Science; joined 2024–2025)",
+        "Stanford University (Dieter Schwarz Foundation Professor and Senior Fellow at HAI; Professor of Computer Science; joined 2024\u20132025)",
         "NVIDIA Research (Distinguished Research Scientist, Language and Cognition Research; concurrent industrial appointment)"
       ],
       "domains": [
@@ -2827,7 +2827,7 @@
       "confidence": 0.96,
       "last_verified": "2026-05-28",
       "voice_style_excerpt": "Korean-American academic. Measured, generous, structurally polite. Critique style is \"I am skeptical that,\" \"I am not so sure that is the right framing,\" \"there",
-      "file_path": "superintelligenceTeam/personas/yejin-choi.md",
+      "file_path": "superintelligence/ai/personas/yejin-choi.md",
       "research_dir": "superintelligenceTeam/research/yejin-choi/"
     },
     "yoshua-bengio": {
@@ -2842,12 +2842,12 @@
       "cell_role": "lead-driver",
       "status": "active",
       "affiliations_2026": [
-        "Université de Montréal (Full Professor, Computer Science and Operations Research)",
+        "Universit\u00e9 de Montr\u00e9al (Full Professor, Computer Science and Operations Research)",
         "LawZero (Founder, Co-President, and Scientific Director, since June 2025)",
-        "Mila — Quebec AI Institute (Founder and Scientific Advisor; was Scientific Director until 2025)",
+        "Mila \u2014 Quebec AI Institute (Founder and Scientific Advisor; was Scientific Director until 2025)",
         "CIFAR (Canada CIFAR AI Chair; co-director of the Learning in Machines & Brains program)",
         "UN Scientific Advisory Board (member since 2023)",
-        "International AI Safety Report (Chair, 2024–2026 editions)"
+        "International AI Safety Report (Chair, 2024\u20132026 editions)"
       ],
       "domains": [
         "Deep learning foundations",
@@ -2879,23 +2879,23 @@
       "public_stances_count": 8,
       "confidence": 0.97,
       "last_verified": "2026-05-27",
-      "voice_style_excerpt": "Measured, French-Canadian-inflected English. Structured argument with explicit numbering and clean topic sentences — closer to a scientific paper than a tweet. ",
-      "file_path": "superintelligenceTeam/personas/yoshua-bengio.md",
+      "voice_style_excerpt": "Measured, French-Canadian-inflected English. Structured argument with explicit numbering and clean topic sentences \u2014 closer to a scientific paper than a tweet. ",
+      "file_path": "superintelligence/ai/personas/yoshua-bengio.md",
       "research_dir": "superintelligenceTeam/research/yoshua-bengio/"
     }
   },
   "known_teams": {
-    "ai-super-intelligence": "AI Super Intelligence Team — frontier AI research, models, alignment, and systems.",
-    "cloud-super-intelligence": "Cloud Super Intelligence Team — AWS, GCP, Azure, infrastructure (future).",
-    "finance-super-intelligence": "Finance Super Intelligence Team — FP&A, accounting, finance ops (future).",
-    "coding-super-intelligence": "Coding Super Intelligence Team — software engineering practice (future).",
-    "design-super-intelligence": "Design Super Intelligence Team — UX, design systems, visual design (future).",
-    "product-super-intelligence": "Product Super Intelligence Team — PM craft, product strategy (future)."
+    "ai-super-intelligence": "AI Super Intelligence Team \u2014 frontier AI research, models, alignment, and systems.",
+    "cloud-super-intelligence": "Cloud Super Intelligence Team \u2014 AWS, GCP, Azure, infrastructure (future).",
+    "finance-super-intelligence": "Finance Super Intelligence Team \u2014 FP&A, accounting, finance ops (future).",
+    "coding-super-intelligence": "Coding Super Intelligence Team \u2014 software engineering practice (future).",
+    "design-super-intelligence": "Design Super Intelligence Team \u2014 UX, design systems, visual design (future).",
+    "product-super-intelligence": "Product Super Intelligence Team \u2014 PM craft, product strategy (future)."
   },
   "lineage": {
     "founding_v2_panel": {
       "date": "2026-05-26",
-      "note": "Earlier 5-cell × 4-persona panel synthesized the founding Memory v2 architecture. Personas with `v2_panel_attribution` entries draw on that material; cell_letter A-E preserves cross-team back-compat.",
+      "note": "Earlier 5-cell \u00d7 4-persona panel synthesized the founding Memory v2 architecture. Personas with `v2_panel_attribution` entries draw on that material; cell_letter A-E preserves cross-team back-compat.",
       "source_artifacts": [
         "internal synthesis (not publicly citable)",
         "internal synthesis (not publicly citable)",

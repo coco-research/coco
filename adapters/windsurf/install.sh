@@ -72,7 +72,8 @@ for agent in "$REPO_ROOT/agents"/*.md; do
 done
 
 # Systems bundles
-for sys in "${SYSTEMS[@]}"; do
+for sys in "${SYSTEMS[@]:-}"; do
+  [[ -n "$sys" ]] || continue
   sys_dir="$REPO_ROOT/systems/$sys"
   [[ -d "$sys_dir" ]] || { echo "Unknown system: $sys" >&2; continue; }
   if [[ -d "$sys_dir/skills" ]]; then

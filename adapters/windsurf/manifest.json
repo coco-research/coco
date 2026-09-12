@@ -7,6 +7,6 @@
     "rules": "~/.codeium/windsurf/rules"
   },
   "transforms": ["copy mdc files for Windsurf compatibility"],
-  "supports_systems": ["gsd", "brain", "team"],
+  "supports_systems": ["gsd", "brain"],
   "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
 }

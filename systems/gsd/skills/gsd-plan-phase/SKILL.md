@@ -1,6 +1,6 @@
 ---
 name: gsd-plan-phase
-description: "Create detailed phase plan (PLAN.md) with verification loop"
+description: "Use after a phase has been discussed, or when the user asks for a PLAN.md for a roadmap phase. Researches, spawns gsd-planner, verifies with gsd-plan-checker, and iterates; supports --gaps, --prd, --skip-research."
 argument-hint: "[phase] [--auto] [--research] [--skip-research] [--gaps] [--skip-verify] [--prd <file>] [--reviews] [--text]"
 agent: gsd-planner
 allowed-tools:

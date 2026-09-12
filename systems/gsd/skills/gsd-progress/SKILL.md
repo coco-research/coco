@@ -1,6 +1,6 @@
 ---
 name: gsd-progress
-description: "Check project progress, show context, and route to next action (execute or plan)"
+description: "Use when the user asks where the project stands, what to do next, or to resume after a break. Summarizes recent work and what is ahead, then routes to executing an existing plan or planning the next one."
 allowed-tools:
   - Read
   - Bash

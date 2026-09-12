@@ -1,6 +1,6 @@
 ---
 name: design-taste-frontend
-description: Anti-slop frontend skill for landing pages, portfolios, and redesigns. The agent reads the brief, infers the right design direction, and ships interfaces that do not look templated. Real design systems when applicable, audit-first on redesigns, strict pre-flight check.
+description: "Use when the user asks for a landing page, marketing site, portfolio, or redesign, not dashboards or data tables. Infers a design read, sets the three dials, picks a real design system, and blocks generic AI patterns at pre-flight."
 domain: design
 ---
 

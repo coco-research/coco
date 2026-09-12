@@ -1,3 +1,7 @@
+---
+description: "Use when the user asks to add missing tests, close coverage gaps, or prove a suite runs. Runs the /team test pipeline: coverage analysis, test writing, then a regression gate that treats any skip as unverified. Tests only, no source."
+---
+
 # /team test — Test Pipeline
 
 > Called by team.md router when action is `test`.

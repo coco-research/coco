@@ -1,6 +1,6 @@
 ---
 name: coco-diagram
-description: Create branded architecture, IT current-state, flowchart, sequence, state machine, ER/data model, timeline, swimlane, quadrant, radar/spider, loop/flywheel, nested, tree, org chart, layer stack, Venn, pyramid/funnel, bar, line, Gantt and scatter charts, high-level, process, medallion, data flow, DP integration, or DP security matrix diagrams as standalone HTML/SVG/PNG. Redraw .drawio/.drawio.png/.drawio.svg or Mermaid .mmd sources at a chosen size/detail; onboard brand tokens from a website; add semantic patterns, callouts, accessible motion, or sketchy/hand-drawn styling.
+description: "Use for architecture, current-state, process, data-flow, medallion, or DP diagrams, including redrawing .drawio and Mermaid sources. Creates branded flowchart, sequence, ER, org, timeline, and chart visuals as standalone HTML/SVG/PNG."
 license: MIT
 domain: design
 metadata:

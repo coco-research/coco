@@ -1,6 +1,6 @@
 ---
 name: workflow-routing
-description: Use at the start of any task to route between Superpowers skills and GSD commands based on project state, task scope, and context signals. Fires before other skills when both systems are installed.
+description: "Use when starting any task, before invoking any other skill or GSD command, to route between Superpowers skills and GSD commands from project state and task scope. Fires first when both systems are installed."
 domain: foundational
 ---
 

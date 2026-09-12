@@ -1,6 +1,6 @@
 ---
 name: m0-handoff
-description: "Session handoff and resume for M0. Write a compact_checkpoint before a session ends or context is compacted, and resume from the latest one at the start of a session in any tool. Turns a cold start into a continuation. Triggers on: 'm0 handoff', 'hand off', 'session handoff', 'save session state', 'resume where we left off', 'pick up where we left off', 'before I compact', 'end of session', 'continue in Cursor', 'continue in Claude Code'."
+description: "Use when the user says m0 handoff, before I compact, end of session, save session state, resume where we left off, or continue in Cursor or Claude Code. Writes or reads a compact_checkpoint so a cold start becomes a continuation."
 ---
 
 # /m0-handoff — Hand Off and Resume

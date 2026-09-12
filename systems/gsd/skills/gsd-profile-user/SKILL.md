@@ -1,6 +1,6 @@
 ---
 name: gsd-profile-user
-description: "Generate developer behavioral profile and create Claude-discoverable artifacts"
+description: "Use when the user asks to profile how they work, adapt assistant responses to them, or refresh an existing developer profile. Generates USER-PROFILE.md from session analysis or a questionnaire."
 argument-hint: "[--questionnaire] [--refresh]"
 allowed-tools:
   - Read
@@ -14,7 +14,7 @@ allowed-tools:
 
 
 <objective>
-Generate a developer behavioral profile from session analysis (or questionnaire) and produce artifacts (USER-PROFILE.md, /gsd-dev-preferences, CLAUDE.md section) that personalize Claude's responses.
+Generate a developer behavioral profile from session analysis (or questionnaire) and produce artifacts (USER-PROFILE.md, a CLAUDE.md section) that adapt the assistant's responses.
 
 Routes to the profile-user workflow which orchestrates the full flow: consent gate, session analysis or questionnaire fallback, profile generation, result display, and artifact selection.
 </objective>

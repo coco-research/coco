@@ -1,3 +1,6 @@
+---
+description: "Use when any /team pipeline claims a component owns a path, that module boundaries hold, or that a deliverable follows the architecture. Defines the .arch/index.json baseline, the currency check, and the ARCH-EVIDENCE.md a claim needs."
+---
 # Architecture Conformance Protocol
 
 > **Purpose:** One canonical definition of what "follows the architecture",

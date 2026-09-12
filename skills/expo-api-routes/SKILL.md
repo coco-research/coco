@@ -1,6 +1,6 @@
 ---
 name: expo-api-routes
-description: Guidelines for creating API routes in Expo Router with EAS Hosting
+description: "Use when adding server-side API routes to an Expo Router app (+api.ts files) for secrets, database access, third-party proxies, webhooks, CORS, or EAS Hosting deploys. Covers file routing, env vars, and Cloudflare Workers limits."
 version: 1.0.0
 license: MIT
 domain: engineering

@@ -1,6 +1,6 @@
 ---
 name: axiom-liquid-glass
-description: Apple Liquid Glass design system — comprehensive design philosophy, implementation guide, and technical API reference from WWDC 2025. Covers design principles (iOS-native glass hierarchy, restraint over spectacle), implementation patterns (Regular vs Clear variants, SwiftUI glassEffect API, scroll edge effects, tinting), platform adaptation (iOS 26+, iPadOS 26+, macOS Tahoe+, visionOS 3+), accessibility, performance, testing, design review frameworks, and iOS-native UI redesign guidance.
+description: "Use when implementing, reviewing, or debugging Apple Liquid Glass: iOS 26+ adoption, Regular vs Clear variants, tinting, scroll edge effects, or an iOS-native redesign review."
 user-invocable: true
 skill_type: discipline
 version: 1.2.0

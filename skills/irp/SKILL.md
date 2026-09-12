@@ -1,6 +1,6 @@
 ---
 name: pmstudio-irp
-description: Generate an Incident Response Plan (IRP) with severity classification, escalation procedures, and communication templates. Use when someone asks to "create an incident response plan", "IRP", "incident procedures", "escalation matrix", "incident playbook", or needs to document how to handle incidents for a product/platform. Reads PRD, stakeholder directory, and project memory to build product-specific response procedures. Complementary to DR plan (DR = restore service; IRP = manage the incident while it's happening).
+description: "Use when the user asks for an incident response plan, IRP, escalation matrix or incident playbook. Writes an offline HTML plan with severities, escalation contacts and comms; DR restores service, IRP runs the incident."
 domain: ops
 ---
 
@@ -75,7 +75,7 @@ Key rule: **Data classification drives minimum severity.**
 
 **6. Communication Protocol**
 - Internal (team Slack/Teams channel)
-- Stakeholder (email using `/stakeholder-comms incident` template)
+- Stakeholder (email using `/pmstudio-comms incident` template)
 - Vendor (support ticket + phone for SEV1-2)
 - Leadership (when to escalate to SteerCo)
 - Per-severity: who communicates what, when, through which channel

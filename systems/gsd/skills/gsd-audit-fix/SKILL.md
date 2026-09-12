@@ -1,6 +1,6 @@
 ---
 name: gsd-audit-fix
-description: "Autonomous audit-to-fix pipeline — find issues, classify, fix, test, commit"
+description: "Use after /gsd-audit-uat when the user wants the findings fixed, not just listed. Classifies each issue as auto-fixable or manual and fixes the auto-fixable ones with test verification and atomic commits; --severity sets the floor."
 argument-hint: "--source <audit-uat> [--severity <medium|high|all>] [--max N] [--dry-run]"
 allowed-tools:
   - Read

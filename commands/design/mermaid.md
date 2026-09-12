@@ -1,5 +1,5 @@
 ---
-description: "Build beautiful Mermaid diagrams using beautiful-mermaid. Covers all 6 diagram types, theming, SVG/ASCII output, and CoCo Platform integration."
+description: "Use when the user asks for a diagram or chart: flowchart, sequence, state, class, ER, or XY chart, as SVG, HTML, or terminal ASCII. Builds beautiful-mermaid diagrams with themes, output templates, and parser-pitfall checks."
 allowed-tools:
   - Read
   - Write
@@ -10,11 +10,11 @@ allowed-tools:
   - Agent
 ---
 
-# /mermaid — Beautiful Mermaid Diagram Builder
+# /design-mermaid — Beautiful Mermaid Diagram Builder
 
 You are a Mermaid diagram specialist. You use the `beautiful-mermaid` library (not standard Mermaid v10) for ALL diagram rendering.
 
-**Reference repo:** `~/Downloads/beautiful-mermaid/` — read source files here when you need API details, parser capabilities, or edge-case syntax.
+**Package:** `beautiful-mermaid@1.1.3`, imported from `https://esm.sh/beautiful-mermaid@1.1.3` (the version pinned in every template below). Run `npm i beautiful-mermaid@1.1.3` to read the source locally when you need API details, parser capabilities, or edge-case syntax.
 
 ## Quick Reference
 
@@ -152,7 +152,7 @@ const svg = renderMermaidSVG('graph TD; A --> B', { bg: '#fff', fg: '#000' })
 ### Step 4: Validate
 
 If the diagram fails to render:
-1. **Check syntax** — read `~/Downloads/beautiful-mermaid/src/parser.ts` for exact parser rules
+1. **Check syntax** — read the parser source in `beautiful-mermaid@1.1.3` (`node_modules/beautiful-mermaid/src/parser.ts`) for exact parser rules
 2. **Check diagram type** — only 6 types supported (flowchart, state, sequence, class, ER, xychart)
 3. **Simplify** — strip to minimal reproducing case
 4. **Fallback** — show raw mermaid source in a styled code block
@@ -170,8 +170,8 @@ If the diagram fails to render:
 
 If `beautiful-mermaid` cannot parse the diagram:
 
-1. **Read the parser source**: `~/Downloads/beautiful-mermaid/src/parser.ts`
-2. **Check tests for examples**: `~/Downloads/beautiful-mermaid/src/__tests__/`
+1. **Read the parser source**: install the pinned package (`npm i beautiful-mermaid@1.1.3`) and read `node_modules/beautiful-mermaid/src/parser.ts`
+2. **Check tests for examples**: `node_modules/beautiful-mermaid/src/__tests__/`
 3. **Try the async renderer**: `renderMermaidSVGAsync()` — same output, different execution path
 4. **Degrade to code block**: Wrap in ``` ```mermaid ``` ``` with a note that it needs a standard Mermaid renderer
 5. **Convert to supported type**: e.g., `journey` → flowchart, `pie` → xychart bar, `gantt` → flowchart with timeline
@@ -202,4 +202,4 @@ for (const el of els) {
 </script>
 ```
 
-ARGUMENTS: {{ARGUMENTS}}
+ARGUMENTS: $ARGUMENTS

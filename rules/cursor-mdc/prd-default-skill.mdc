@@ -1,5 +1,5 @@
 ---
-description: "MANDATORY: On ANY PRD task, you MUST read the prd-generator skill file FIRST. Do NOT write PRD content until you have read it."
+description: "Use when the user asks to create, write, or revise a PRD, or any time a PRD task starts. Requires reading the prd-generator skill file before you write anything, then following its 5-step workflow and validation script."
 globs:
 alwaysApply: true
 ---
@@ -11,7 +11,7 @@ When creating, writing, or revising a Product Requirements Document (PRD), alway
 **CRITICAL — WHY CURSOR "FORGETS"**: The skill lives in a file; it is NOT in the model's context until you read it. Each new chat has no memory of the skill content. So:
 
 - **Your first action on any PRD task MUST be**: Read the skill file (see path below). Do not skip this. Do not assume you know the workflow.
-- This skill does NOT appear in `available_skills` (installed via `npx skills add`). You must read it by path every time.
+- The skill body is not loaded into context automatically, so read it by path every time.
 
 ## Skill Location
 

@@ -1,6 +1,6 @@
 ---
 name: gsd-map-codebase
-description: "Analyze codebase with parallel mapper agents to produce .planning/codebase/ documents"
+description: "Use when onboarding to an unfamiliar codebase, before a major refactor, on a brownfield project before /gsd-new-project, or to refresh .planning/codebase/. Spawns up to 4 parallel mapper agents that write 7 documents."
 argument-hint: "[optional: specific area to map, e.g., 'api' or 'auth']"
 allowed-tools:
   - Read

@@ -1,6 +1,6 @@
 ---
 name: gsd-update
-description: "Update GSD to latest version with changelog display"
+description: "Use when the user asks whether GSD is up to date or wants to upgrade it. Checks the local and global install against npm, shows the changelog, warns before a clean install, then clears the cache."
 allowed-tools:
   - Bash
   - AskUserQuestion

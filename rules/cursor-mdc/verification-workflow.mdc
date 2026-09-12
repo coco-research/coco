@@ -1,5 +1,5 @@
 ---
-description: Mandatory verification after every code change. Merges quality gate + pre-implementation checklist into one enforced workflow.
+description: "Use after every code change and before starting the next file, or when a subagent changed code. Runs the 30-second pre-check, six ordered quality gates, batch-size limits, and the recurring anti-pattern list."
 alwaysApply: true
 ---
 
@@ -23,11 +23,11 @@ Run these 6 gates IN ORDER. If any gate fails, fix it before touching another fi
 
 | # | Gate | Command / Action | Time |
 |---|------|-----------------|------|
-| 1 | **Build** | `npm run build` (or equivalent) | 10s |
+| 1 | **Build** | the project's build command (e.g. `npm run build`) | 10s |
 | 2 | **Lint** | `ReadLints` on edited files | 5s |
 | 3 | **Imports** | Verify named/default match; no circular deps | 30s |
 | 4 | **References** | Search for all usages of renamed/removed identifiers | 30s |
-| 5 | **Tests** | `npx vitest run path/to/file.test.jsx` | 10s |
+| 5 | **Tests** | the project's test command for the changed file (e.g. `npx vitest run path/to/file.test.jsx`) | 10s |
 | 6 | **Behavior** | Does it render? Console errors? Happy path works? | 30s |
 
 **Total: ~2 minutes per verification cycle. This saves 30+ minutes of debugging.**
@@ -44,7 +44,13 @@ Run all 7 categories on every changed file:
 6. CSS Class Integrity
 7. React Anti-Patterns
 
-Report findings using the PASS/FAIL/WARNING template from the skill.
+Report each check with this verdict template:
+
+```text
+PASS:    <check> - <evidence>
+FAIL:    <check> - <what broke, and the fix>
+WARNING: <check> - <risk, not blocking>
+```
 
 ## Batch Size Rule
 
@@ -72,8 +78,8 @@ These are the TOP recurring bugs. Flag them the instant you see them:
 If a subagent in another window made code changes, run the same verification on their output:
 
 ```
-Launch verification-agent on [files changed by subagent].
-Report findings. Fix FAIL items before proceeding.
+Run the same gate sequence on [files changed by subagent] yourself, or hand it to one agent
+such as code-reviewer. Fix FAIL items before proceeding.
 ```
 
 ## Escape Hatches (When to Skip)

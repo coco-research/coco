@@ -1,6 +1,6 @@
 ---
 name: browser-automation
-description: Browser automation for AI agents. Two providers — agent-browser (local CLI with Playwright) and agentic-browser (cloud via inference.sh). Both use the same @e ref-based workflow for navigating pages, filling forms, clicking buttons, taking screenshots, extracting data, and automating browser tasks.
+description: "Use when the agent must open a URL, fill a form, click through a flow, screenshot a page, or extract data from a live page. Covers two providers (agent-browser local CLI, agentic-browser cloud) and the shared @e ref workflow."
 allowed-tools: Bash(agent-browser:*), Bash(infsh *)
 domain: engineering
 ---
@@ -13,6 +13,8 @@ Browser automation for AI agents with two provider options. Both share the same 
 |----------|---------|----------|
 | agent-browser | Local (Playwright CLI) | Local testing, iOS Simulator, file:// URLs |
 | agentic-browser | Cloud (inference.sh) | Video recording, cloud execution, parallel sessions |
+
+**Default to agent-browser; use agentic-browser only when the task needs recording, cloud IPs, or more than 2 parallel sessions.** They share the same `@e` ref workflow.
 
 ---
 
@@ -297,23 +299,3 @@ infsh app run agentic-browser --function execute --session $SESSION --input '{
 4. Save session state for reuse
 5. Load saved state in future sessions
 
----
-
-## Deep-Dive Documentation
-
-| Reference | Description |
-|-----------|-------------|
-| `references/commands.md` | Full command reference with all options |
-| `references/snapshot-refs.md` | Ref lifecycle, invalidation rules, troubleshooting |
-| `references/session-management.md` | Parallel sessions, state persistence |
-| `references/authentication.md` | Login flows, OAuth, 2FA handling |
-| `references/video-recording.md` | Recording workflows for debugging |
-| `references/proxy-support.md` | Proxy configuration, geo-testing |
-
-## Ready-to-Use Templates
-
-| Template | Description |
-|----------|-------------|
-| `templates/form-automation.sh` | Form filling with validation |
-| `templates/authenticated-session.sh` | Login once, reuse state |
-| `templates/capture-workflow.sh` | Content extraction with screenshots |

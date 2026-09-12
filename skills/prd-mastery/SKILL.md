@@ -1,6 +1,6 @@
 ---
-name: "PRD Mastery: Context-Aware, Expert-Driven, and Token-Efficient Refinement"
-description: "A skill that blends the wisdom of top industry experts, ensures token-efficient PRDs, and organizes outputs in a clear folder structure."
+name: prd-mastery
+description: "Use when the user asks for a PRD, requirements doc, or product spec grounded in the existing repo, or wants a token-efficient PRD folder. Runs repo reconnaissance, expert questioning, then writes the PRD."
 version: "1.0"
 author: "Callum Bir"
 keywords: ["PRD", "product requirements", "business analysis", "product management", "documentation", "Cagan", "Torres", "Biddle"]
@@ -69,7 +69,7 @@ pnpm --version
 
 1. **Run Repository Reconnaissance**
    ```bash
-   node .claude/skills/ba-prd-skills/repo_scan.js
+  node skills/prd-mastery/repo_scan.js
    ```
 
 2. **Review Preliminary Findings**
@@ -472,11 +472,11 @@ const architecture = {
 
 ```bash
 # Use the helper script
-node .claude/skills/ba-prd-skills/create_prd.js "User Authentication"
+node skills/prd-mastery/create_prd.js "User Authentication"
 
 # Or manually
 mkdir prds/prd-001-user-authentication
-cp prds/templates/prd-template.md prds/prd-001-user-authentication/prd.md
+cp skills/prd-mastery/templates/prd-template.md prds/prd-001-user-authentication/prd.md
 ```
 
 ---

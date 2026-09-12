@@ -7,6 +7,6 @@
     "copilot_instructions": "./.github/copilot-instructions.md"
   },
   "transforms": ["generate AGENTS.md from agents/", "generate copilot-instructions.md"],
-  "supports_systems": ["gsd", "brain", "team"],
+  "supports_systems": ["gsd"],
   "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
 }

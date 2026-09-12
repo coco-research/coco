@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 37 commands across 6 namespaces.**
+**Total: 38 commands across 6 namespaces.**
 
 ## design
 
@@ -29,6 +29,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | Slash | Description |
 |-------|-------------|
 | [`/eng:anti-pattern`](eng/anti-pattern.md) |  |
+| [`/eng:local-llm`](eng/local-llm.md) | Check status, change context window, restart, or troubleshoot this machine's local LLM setup (LM Studio + mlx-dspark). Usage: /eng-local-llm [status\|set-contex |
 
 ## pm
 

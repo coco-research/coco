@@ -5,6 +5,7 @@
 #   bash install.sh                            # auto-detect IDE, install everything
 #   bash install.sh --adapter claude-code      # install for Claude Code
 #   bash install.sh --adapter cursor           # install for Cursor
+#   bash install.sh --adapter vscode           # install for VS Code / Copilot CLI
 #   bash install.sh --adapter codex            # generate AGENTS.md (Codex)
 #   bash install.sh --adapter generic          # generate AGENTS.md (any tool)
 #   bash install.sh --adapter claude-code --systems gsd,brain  # add bundles
@@ -36,6 +37,8 @@ detect_adapter() {
     echo "claude-code"
   elif [[ -d "$HOME/.cursor" ]]; then
     echo "cursor"
+  elif [[ -d "$HOME/.copilot" || -d "$HOME/Library/Application Support/Code/User" || -d "${XDG_CONFIG_HOME:-$HOME/.config}/Code/User" ]]; then
+    echo "vscode"
   elif command -v codex &>/dev/null; then
     echo "codex"
   else

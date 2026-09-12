@@ -10,26 +10,26 @@ A convene session has three phases: **inputs**, **per-cell stances**, and **synt
 
 ```yaml
 ---
-convene_id: 2026-05-27-memory-v3-synthesis   # ISO date + topic-slug
+convene_id: 2026-05-27-memory-v3-synthesis # ISO date + topic-slug
 topic: "founding Memory v2 → v3 — substrate, hot path, erasure"
-caller: rijul-kalra
+caller: operator
 date: 2026-05-27
-mode: full-panel                                    # full-panel (20) | cell (4) | duo (2) | solo (1)
-cells_active: [A, B, C, D, E]                       # which cells participated
-personas_active:                                    # explicit roster for the session
+mode: full-panel # full-panel (20) | cell (4) | duo (2) | solo (1)
+cells_active: [A, B, C, D, E] # which cells participated
+personas_active: # explicit roster for the session
   - andrej-karpathy
   - yann-lecun
   - jason-wei
   - tri-dao
   # ...
-artifacts_reviewed:                                 # what the panel was asked to review
+artifacts_reviewed: # what the panel was asked to review
   - path: internal synthesis (not publicly citable)
     role: source
   - path: internal synthesis (not publicly citable)
     role: counterproposal
-verdict_format: reversals-fixes-pending             # reversals-fixes-pending | take-leave | go-no-go | decision-matrix
-status: ratified                                    # draft | ratified | superseded
-supersedes: []                                      # IDs of earlier convene sessions this overrides
+verdict_format: reversals-fixes-pending # reversals-fixes-pending | take-leave | go-no-go | decision-matrix
+status: ratified # draft | ratified | superseded
+supersedes: [] # IDs of earlier convene sessions this overrides
 ---
 ```
 

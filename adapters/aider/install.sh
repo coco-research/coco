@@ -3,7 +3,7 @@
 #
 # Usage:
 #   bash adapters/aider/install.sh
-#   bash adapters/aider/install.sh --systems gsd,brain
+#   bash adapters/aider/install.sh --systems gsd
 #   bash adapters/aider/install.sh --dry-run
 
 set -euo pipefail
@@ -37,7 +37,7 @@ for agent in "$REPO_ROOT/agents"/*.md; do
   [[ -f "$agent" ]] || continue
   name=$(basename "$agent" .md)
   [[ "$name" == "INDEX" || "$name" == "README" || "$name" == "PROMPT-DEFENSE" ]] && continue
-  desc=$(grep -m1 "^description:" "$agent" 2>/dev/null | sed 's/^description: *"*//;s/"*$//' | head -c 120)
+  desc=$(grep -m1 "^description:" "$agent" 2>/dev/null | sed 's/^description: *"*//;s/"*$//' | head -c 120 || true)
   AGENTS_CONTENT+="
 ### $name
 $desc
@@ -45,7 +45,8 @@ $desc
 done
 
 # Add system agents if requested
-for sys in "${SYSTEMS[@]}"; do
+for sys in "${SYSTEMS[@]:-}"; do
+  [[ -n "$sys" ]] || continue
   sys_dir="$REPO_ROOT/systems/$sys"
   [[ -d "$sys_dir/agents" ]] || continue
   AGENTS_CONTENT+="
@@ -54,7 +55,7 @@ for sys in "${SYSTEMS[@]}"; do
   for a in "$sys_dir/agents"/*.md; do
     [[ -f "$a" ]] || continue
     aname=$(basename "$a" .md)
-    adesc=$(grep -m1 "^description:" "$a" 2>/dev/null | sed 's/^description: *"*//;s/"*$//' | head -c 120)
+    adesc=$(grep -m1 "^description:" "$a" 2>/dev/null | sed 's/^description: *"*//;s/"*$//' | head -c 120 || true)
     AGENTS_CONTENT+="
 ### $aname
 $adesc

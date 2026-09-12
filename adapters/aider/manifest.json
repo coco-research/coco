@@ -7,6 +7,6 @@
     "config": "./.aider.conf.yml"
   },
   "transforms": ["generate AGENTS.md from agents/", "generate .aider.conf.yml with conventions"],
-  "supports_systems": ["gsd", "brain", "team"],
+  "supports_systems": ["gsd"],
   "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
 }

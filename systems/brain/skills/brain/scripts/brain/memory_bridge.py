@@ -77,30 +77,38 @@ def _run_chromadb_op(script: str) -> dict | None:
 
 
 def _upsert_drawer_via_subprocess(text: str, wing: str, room: str) -> str | None:
-    """Write one drawer to ChromaDB via subprocess. Returns drawer_id on success."""
+    """Write one drawer to ChromaDB via chroma_worker (stdin JSON). Returns drawer_id on success."""
     drawer_id = _drawer_id(wing, room, text)
     timestamp = _now_iso()
-    # Escape text for safe embedding in Python string
-    escaped_text = json.dumps(text)
-    escaped_meta = json.dumps({
-        "wing": wing, "room": room,
-        "source_file": "brain-sync", "filed_at": timestamp,
+    payload = json.dumps({
+        "op": "upsert",
+        "palace_path": MEMPALACE_PATH,
+        "collection_name": COLLECTION_NAME,
+        "items": [{
+            "id": drawer_id,
+            "text": text,
+            "metadata": {
+                "wing": wing, "room": room,
+                "source_file": "brain-sync", "filed_at": timestamp,
+            },
+        }],
     })
-    script = f"""
-import json, chromadb
-client = chromadb.PersistentClient(path={json.dumps(MEMPALACE_PATH)})
-col = client.get_collection({json.dumps(COLLECTION_NAME)})
-col.upsert(
-    ids=[{json.dumps(drawer_id)}],
-    documents=[{escaped_text}],
-    metadatas=[json.loads({json.dumps(escaped_meta)})],
-)
-print(json.dumps({{"id": {json.dumps(drawer_id)}, "status": "ok"}}))
-"""
-    result = _run_chromadb_op(script)
-    if result and result.get("status") == "ok":
-        return result.get("id")
-    return None
+    try:
+        worker_path = os.path.join(os.path.dirname(__file__), "chroma_worker.py")
+        result = subprocess.run(
+            [MEMPALACE_PYTHON, worker_path],
+            input=payload, capture_output=True, text=True, timeout=30,
+        )
+        if result.returncode != 0:
+            log.warning("memory_bridge: chroma_worker failed — %s", result.stderr[:200])
+            return None
+        data = json.loads(result.stdout)
+        if data.get("status") == "ok":
+            return drawer_id
+        return None
+    except Exception as exc:
+        log.warning("memory_bridge: chroma_worker subprocess error — %s", exc)
+        return None
 
 
 def _batch_upsert_drawers(items: list[dict]) -> int:
@@ -133,30 +141,25 @@ def _batch_upsert_drawers(items: list[dict]) -> int:
         })
 
     # Serialize as JSON so the subprocess script never has raw strings embedded
-    ids_json = json.dumps(ids)
-    documents_json = json.dumps(documents)
-    metadatas_json = json.dumps(metadatas)
     count = len(ids)
 
-    script = f"""
-import json, chromadb
-client = chromadb.PersistentClient(path={json.dumps(MEMPALACE_PATH)})
-col = client.get_collection({json.dumps(COLLECTION_NAME)})
-ids = json.loads({json.dumps(ids_json)})
-documents = json.loads({json.dumps(documents_json)})
-metadatas = json.loads({json.dumps(metadatas_json)})
-col.upsert(ids=ids, documents=documents, metadatas=metadatas)
-print(json.dumps({{"upserted": len(ids), "status": "ok"}}))
-"""
+    payload = json.dumps({
+        "op": "upsert",
+        "palace_path": MEMPALACE_PATH,
+        "collection_name": COLLECTION_NAME,
+        "items": [
+            {"id": ids[i], "text": documents[i], "metadata": metadatas[i]}
+            for i in range(count)
+        ],
+    })
     try:
+        worker_path = os.path.join(os.path.dirname(__file__), "chroma_worker.py")
         result = subprocess.run(
-            [MEMPALACE_PYTHON, "-c", script],
-            capture_output=True, text=True, timeout=60,
+            [MEMPALACE_PYTHON, worker_path],
+            input=payload, capture_output=True, text=True, timeout=60,
         )
         if result.returncode != 0:
-            log.warning(
-                "memory_bridge: batch upsert failed — %s", result.stderr[:200]
-            )
+            log.warning("memory_bridge: batch upsert failed — %s", result.stderr[:200])
             return 0
         data = json.loads(result.stdout)
         if data.get("status") == "ok":
@@ -714,14 +717,27 @@ def verify_sync(db_path: Path, project_slug: str) -> dict:
     result["expected"] = len(expected_ids)
 
     # --- Step 3: fetch all MemPalace drawer IDs for this project wing (ONE subprocess) ---
-    script = f"""
-import json, chromadb
-client = chromadb.PersistentClient(path={json.dumps(MEMPALACE_PATH)})
-col = client.get_collection({json.dumps(COLLECTION_NAME)})
-results = col.get(where={{"wing": {json.dumps(project_slug)}}}, limit=10000)
-print(json.dumps(results["ids"]))
-"""
-    actual_ids_raw = _run_chromadb_op(script)
+    payload = json.dumps({
+        "op": "get_ids",
+        "palace_path": MEMPALACE_PATH,
+        "collection_name": COLLECTION_NAME,
+        "where": {"wing": project_slug},
+        "limit": 10000,
+    })
+    try:
+        worker_path = os.path.join(os.path.dirname(__file__), "chroma_worker.py")
+        result_proc = subprocess.run(
+            [MEMPALACE_PYTHON, worker_path],
+            input=payload, capture_output=True, text=True, timeout=30,
+        )
+        if result_proc.returncode != 0:
+            log.warning("memory_bridge: get_ids failed — %s", result_proc.stderr[:200])
+            actual_ids_raw = None
+        else:
+            actual_ids_raw = json.loads(result_proc.stdout).get("ids")
+    except Exception as exc:
+        log.warning("memory_bridge: get_ids subprocess error — %s", exc)
+        actual_ids_raw = None
     if actual_ids_raw is None:
         log.warning("verify_sync: could not query MemPalace for project '%s'", project_slug)
         # Return partial result with expected count but zeros for actual
@@ -803,15 +819,26 @@ def health_check(db_path: Path, project_slug: str) -> dict:
         )
 
     # --- mempalace section (ONE subprocess for total + project counts) ---
-    mempalace_script = f"""
-import json, chromadb
-client = chromadb.PersistentClient(path={json.dumps(MEMPALACE_PATH)})
-col = client.get_collection({json.dumps(COLLECTION_NAME)})
-total = col.count()
-project = len(col.get(where={{"wing": {json.dumps(project_slug)}}}, limit=10000)["ids"])
-print(json.dumps({{"total": total, "project": project}}))
-"""
-    mempalace_stats = _run_chromadb_op(mempalace_script)
+    health_payload = json.dumps({
+        "op": "stats",
+        "palace_path": MEMPALACE_PATH,
+        "collection_name": COLLECTION_NAME,
+        "project_wing": project_slug,
+    })
+    try:
+        worker_path = os.path.join(os.path.dirname(__file__), "chroma_worker.py")
+        health_proc = subprocess.run(
+            [MEMPALACE_PYTHON, worker_path],
+            input=health_payload, capture_output=True, text=True, timeout=30,
+        )
+        if health_proc.returncode != 0:
+            log.warning("memory_bridge: stats failed — %s", health_proc.stderr[:200])
+            mempalace_stats = None
+        else:
+            mempalace_stats = json.loads(health_proc.stdout)
+    except Exception as exc:
+        log.warning("memory_bridge: stats subprocess error — %s", exc)
+        mempalace_stats = None
     if mempalace_stats is not None:
         report["mempalace"]["available"] = True
         report["mempalace"]["total_drawers"] = mempalace_stats.get("total", 0)

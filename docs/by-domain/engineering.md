@@ -2,7 +2,7 @@
 
 Auto-generated view. Filtered to `domain: engineering` skills.
 
-**20 skills.**
+**21 skills.**
 
 | Skill | Description |
 |-------|-------------|
@@ -11,6 +11,7 @@ Auto-generated view. Filtered to `domain: engineering` skills.
 | [arch-index](../../skills/arch-index/SKILL.md) | Build and validate .arch/index.json — a committed map from each architectural component of this repository to the real directories and files that implement it, pinned to a git commit, with every path  |
 | [browser-automation](../../skills/browser-automation/SKILL.md) | Browser automation for AI agents. Two providers — agent-browser (local CLI with Playwright) and agentic-browser (cloud via inference.sh). Both use the same @e ref-based workflow for navigating pages,  |
 | [c4-architecture](../../skills/c4-architecture/SKILL.md) | Generate architecture documentation using C4 model Mermaid diagrams. Use when asked to create architecture diagrams, document system architecture, visualize software structure, or generate context/con |
+| [coco-ship](../../skills/coco-ship/SKILL.md) | Use when finished work needs to reach a coco-managed repository (coco-research/coco or similar) — verifies branch state, commits, pushes through the corporate DLP guard only when actually needed, open |
 | [code-verification](../../skills/code-verification/SKILL.md) | Post-implementation verification system that catches AI-introduced bugs. Covers 7 categories — TDZ errors, import mismatches, reference integrity, dead code, React state/effects, mock isolation, and C |
 | [expo-api-routes](../../skills/expo-api-routes/SKILL.md) | Guidelines for creating API routes in Expo Router with EAS Hosting |
 | [finishing-a-development-branch](../../skills/finishing-a-development-branch/SKILL.md) | Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup |

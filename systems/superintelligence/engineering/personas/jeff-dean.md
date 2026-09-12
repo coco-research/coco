@@ -1,6 +1,6 @@
 ---
 slug: jeff-dean
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: data-and-storage
 cell_role: lead-driver

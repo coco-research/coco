@@ -16,7 +16,7 @@
 # interview — not from fabricated recent activity. See
 # research/sanjay-ghemawat/notes.md for the full archetype-decision write-up.
 slug: sanjay-ghemawat
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: data-and-storage
 cell_role: specialist

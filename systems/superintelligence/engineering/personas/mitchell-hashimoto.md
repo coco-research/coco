@@ -1,6 +1,6 @@
 ---
 slug: mitchell-hashimoto
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: systems-programming
 cell_role: specialist

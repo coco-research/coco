@@ -1,6 +1,6 @@
 ---
 slug: mike-fuller
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: finops-cost
 cell_role: specialist

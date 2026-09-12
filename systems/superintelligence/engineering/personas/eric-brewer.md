@@ -1,6 +1,6 @@
 ---
 slug: eric-brewer
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: cloud-architecture
 cell_role: validator

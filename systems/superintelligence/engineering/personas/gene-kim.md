@@ -1,6 +1,6 @@
 ---
 slug: gene-kim
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: devops-platform
 cell_role: lead-driver

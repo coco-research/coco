@@ -124,6 +124,34 @@ TEAMS = {
         "persona_count": 23, "cell_count": 7, "gap_doc": "ROSTER.md",
         "built": False, "legacy_prefix": None,
     },
+    "Legal": {
+        "team_id": "legal-ip-super-intelligence",
+        "team_name": "Legal & IP Super Intelligence Team",
+        "data_dir": "superintelligence/legal-ip",
+        "persona_count": 31, "cell_count": 7, "gap_doc": "ROSTER.md",
+        "built": True, "legacy_prefix": None,
+    },
+    "Health": {
+        "team_id": "healthcare-life-sciences-super-intelligence",
+        "team_name": "Healthcare & Life Sciences Super Intelligence Team",
+        "data_dir": "superintelligence/healthcare-life-sciences",
+        "persona_count": 25, "cell_count": 7, "gap_doc": "ROSTER.md",
+        "built": True, "legacy_prefix": None,
+    },
+    "Edu": {
+        "team_id": "education-edtech-super-intelligence",
+        "team_name": "Education & EdTech Super Intelligence Team",
+        "data_dir": "superintelligence/education-edtech",
+        "persona_count": 25, "cell_count": 7, "gap_doc": "ROSTER.md",
+        "built": True, "legacy_prefix": None,
+    },
+    "Climate": {
+        "team_id": "climate-energy-super-intelligence",
+        "team_name": "Climate & Energy Super Intelligence Team",
+        "data_dir": "superintelligence/climate-energy",
+        "persona_count": 25, "cell_count": 7, "gap_doc": "ROSTER.md",
+        "built": True, "legacy_prefix": None,
+    },
 }
 
 

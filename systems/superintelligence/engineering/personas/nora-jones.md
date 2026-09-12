@@ -1,6 +1,6 @@
 ---
 slug: nora-jones
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: reliability-sre-obs
 cell_letter: E                       # back-compat with founding v2 panel artifacts (E = obs/ops)

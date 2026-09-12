@@ -1,6 +1,6 @@
 ---
 slug: ryan-carniato
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: web-and-frontend
 cell_role: specialist

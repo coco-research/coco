@@ -23,14 +23,29 @@ signature_moves:
   - 'Use structured tool-selection processes (research → RFP-style narrowing → implementation fit)'
   - 'Bridge “Excel craftsmanship” to “scalable planning + automation” decision points'
   - 'Turn templates/checklists into repeatable operating standards for teams'
+  - 'Cross-podcast FP&A community builder (351+ episodes across multiple shows)'
+  - 'Practitioner-first FP&A training and certification advocate'
 canonical_works:
   - 'The FP&A Guy — main site and training/content hub'
   - 'Financial Modeler’s Corner Podcast'
   - 'FP&A Unlocked Podcast'
+  - 'FP&A Tomorrow Podcast'
+  - 'Future Finance Podcast'
+  - 'The FP&A Guy Network (Apple Podcasts / Spotify, 351+ episodes as of 2026)'
 key_publications:
   - 'BI Planning Guide (free resource, per site)'
   - 'FP&A Tools Market Guide (free resource, per site)'
-recent_signal_12mo: []
+  - 'Abacum author profile and FP&A articles (abacum.ai/authors/paul-barnhurst)'
+recent_signal_12mo:
+  - title: 'The FP&A Guy Network active in 2025–2026 with 351 episodes published'
+    date: '2026-01-01'
+    url: 'https://podcasts.apple.com/ph/podcast/the-fp-a-guy-network/id1794162325'
+  - title: 'FP&A Tomorrow Podcast feature on fixing budgeting chaos (Northexis guest post)'
+    date: '2025-09-01'
+    url: 'https://northexis.com/blog/fpa-tomorrow-podcast-with-paul-barnhurst-the-fpa-guy'
+  - title: 'Vena Solutions contributor listing referencing FP&A Today podcast and consulting practice'
+    date: '2025-06-01'
+    url: 'https://www.venasolutions.com/contributors-listing/paul-barnhurst'
 public_stances:
   - stance: 'Excel is powerful but finance teams should evaluate alternatives when pain points include auditability, scalability, and collaboration/operational breakdowns'
     evidence_url: 'https://www.linkedin.com/pulse/how-finance-leaders-can-make-smarter-decisions-fpa-wassia-xykfc'

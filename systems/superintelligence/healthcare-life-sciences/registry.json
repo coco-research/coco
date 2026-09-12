@@ -1,0 +1,244 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-04",
+  "team_id": "healthcare-life-sciences-super-intelligence",
+  "team_name": "Healthcare & Life Sciences Super Intelligence Team",
+  "description": "Your healthcare and life sciences brain trust. 25 named personas across 7 cells covering drug discovery, medtech, biotech strategy, health policy, genomics, clinical trials, and healthcare economics.",
+  "personas_count": 25,
+  "cells_count": 7,
+  "cells": {
+    "biotech-strategy": {
+      "id": "biotech-strategy",
+      "description": "Healthcare & Life Sciences Super Intelligence Team cell: Biotech Strategy",
+      "personas_count": 4,
+      "personas": [
+        "jennifer-doudna",
+        "nina-tandon",
+        "robert-langer",
+        "vinod-khosla"
+      ],
+      "file_path": "superintelligence/healthcare-life-sciences/cells/biotech-strategy.md"
+    },
+    "clinical-trials-evidence": {
+      "id": "clinical-trials-evidence",
+      "description": "Healthcare & Life Sciences Super Intelligence Team cell: Clinical Trials Evidence",
+      "personas_count": 3,
+      "personas": [
+        "ben-goldacre",
+        "iain-chalmers",
+        "john-ioannidis"
+      ],
+      "file_path": "superintelligence/healthcare-life-sciences/cells/clinical-trials-evidence.md"
+    },
+    "drug-discovery-clinical-ai": {
+      "id": "drug-discovery-clinical-ai",
+      "description": "Healthcare & Life Sciences Super Intelligence Team cell: Drug Discovery Clinical Ai",
+      "personas_count": 4,
+      "personas": [
+        "david-baker",
+        "demis-hassabis",
+        "feng-zhang",
+        "siddhartha-mukherjee"
+      ],
+      "file_path": "superintelligence/healthcare-life-sciences/cells/drug-discovery-clinical-ai.md"
+    },
+    "genomics-precision-medicine": {
+      "id": "genomics-precision-medicine",
+      "description": "Healthcare & Life Sciences Super Intelligence Team cell: Genomics Precision Medicine",
+      "personas_count": 5,
+      "personas": [
+        "carlos-bustamante",
+        "craig-venter",
+        "ewan-birney",
+        "george-church",
+        "sarah-tishkoff"
+      ],
+      "file_path": "superintelligence/healthcare-life-sciences/cells/genomics-precision-medicine.md"
+    },
+    "health-policy-regulatory": {
+      "id": "health-policy-regulatory",
+      "description": "Healthcare & Life Sciences Super Intelligence Team cell: Health Policy Regulatory",
+      "personas_count": 3,
+      "personas": [
+        "atul-gawande",
+        "margaret-hamburg",
+        "paul-farmer"
+      ],
+      "file_path": "superintelligence/healthcare-life-sciences/cells/health-policy-regulatory.md"
+    },
+    "healthcare-economics": {
+      "id": "healthcare-economics",
+      "description": "Healthcare & Life Sciences Super Intelligence Team cell: Healthcare Economics",
+      "personas_count": 3,
+      "personas": [
+        "amitabh-chandra",
+        "austin-frakt",
+        "uwe-reinhardt"
+      ],
+      "file_path": "superintelligence/healthcare-life-sciences/cells/healthcare-economics.md"
+    },
+    "medtech-digital-health": {
+      "id": "medtech-digital-health",
+      "description": "Healthcare & Life Sciences Super Intelligence Team cell: Medtech Digital Health",
+      "personas_count": 3,
+      "personas": [
+        "bertalan-mesko",
+        "eric-topol",
+        "uzeyn-damania"
+      ],
+      "file_path": "superintelligence/healthcare-life-sciences/cells/medtech-digital-health.md"
+    }
+  },
+  "personas": {
+    "amitabh-chandra": {
+      "slug": "amitabh-chandra",
+      "real_name": "Amitabh Chandra",
+      "cell": "healthcare-economics",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/amitabh-chandra.md"
+    },
+    "atul-gawande": {
+      "slug": "atul-gawande",
+      "real_name": "Atul Gawande",
+      "cell": "health-policy-regulatory",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/atul-gawande.md"
+    },
+    "austin-frakt": {
+      "slug": "austin-frakt",
+      "real_name": "Austin B. Frakt",
+      "cell": "healthcare-economics",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/austin-frakt.md"
+    },
+    "ben-goldacre": {
+      "slug": "ben-goldacre",
+      "real_name": "Ben Goldacre",
+      "cell": "clinical-trials-evidence",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/ben-goldacre.md"
+    },
+    "bertalan-mesko": {
+      "slug": "bertalan-mesko",
+      "real_name": "Bertalan Mesk\u00f3",
+      "cell": "medtech-digital-health",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/bertalan-mesko.md"
+    },
+    "carlos-bustamante": {
+      "slug": "carlos-bustamante",
+      "real_name": "Carlos D. Bustamante",
+      "cell": "genomics-precision-medicine",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/carlos-bustamante.md"
+    },
+    "craig-venter": {
+      "slug": "craig-venter",
+      "real_name": "J. Craig Venter",
+      "cell": "genomics-precision-medicine",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/craig-venter.md"
+    },
+    "david-baker": {
+      "slug": "david-baker",
+      "real_name": "David Baker",
+      "cell": "drug-discovery-clinical-ai",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/david-baker.md"
+    },
+    "demis-hassabis": {
+      "slug": "demis-hassabis",
+      "real_name": "Demis Hassabis",
+      "cell": "drug-discovery-clinical-ai",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/demis-hassabis.md"
+    },
+    "eric-topol": {
+      "slug": "eric-topol",
+      "real_name": "Eric Topol",
+      "cell": "medtech-digital-health",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/eric-topol.md"
+    },
+    "ewan-birney": {
+      "slug": "ewan-birney",
+      "real_name": "Ewan Birney",
+      "cell": "genomics-precision-medicine",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/ewan-birney.md"
+    },
+    "feng-zhang": {
+      "slug": "feng-zhang",
+      "real_name": "Feng Zhang",
+      "cell": "drug-discovery-clinical-ai",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/feng-zhang.md"
+    },
+    "george-church": {
+      "slug": "george-church",
+      "real_name": "George M. Church",
+      "cell": "genomics-precision-medicine",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/george-church.md"
+    },
+    "iain-chalmers": {
+      "slug": "iain-chalmers",
+      "real_name": "Iain Chalmers",
+      "cell": "clinical-trials-evidence",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/iain-chalmers.md"
+    },
+    "jennifer-doudna": {
+      "slug": "jennifer-doudna",
+      "real_name": "Jennifer Doudna",
+      "cell": "biotech-strategy",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/jennifer-doudna.md"
+    },
+    "john-ioannidis": {
+      "slug": "john-ioannidis",
+      "real_name": "John Ioannidis",
+      "cell": "clinical-trials-evidence",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/john-ioannidis.md"
+    },
+    "margaret-hamburg": {
+      "slug": "margaret-hamburg",
+      "real_name": "Margaret A. Hamburg",
+      "cell": "health-policy-regulatory",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/margaret-hamburg.md"
+    },
+    "nina-tandon": {
+      "slug": "nina-tandon",
+      "real_name": "Nina Tandon",
+      "cell": "biotech-strategy",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/nina-tandon.md"
+    },
+    "paul-farmer": {
+      "slug": "paul-farmer",
+      "real_name": "Paul Farmer",
+      "cell": "health-policy-regulatory",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/paul-farmer.md"
+    },
+    "robert-langer": {
+      "slug": "robert-langer",
+      "real_name": "Robert Langer",
+      "cell": "biotech-strategy",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/robert-langer.md"
+    },
+    "sarah-tishkoff": {
+      "slug": "sarah-tishkoff",
+      "real_name": "Sarah A. Tishkoff",
+      "cell": "genomics-precision-medicine",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/sarah-tishkoff.md"
+    },
+    "siddhartha-mukherjee": {
+      "slug": "siddhartha-mukherjee",
+      "real_name": "Siddhartha Mukherjee",
+      "cell": "drug-discovery-clinical-ai",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/siddhartha-mukherjee.md"
+    },
+    "uwe-reinhardt": {
+      "slug": "uwe-reinhardt",
+      "real_name": "Uwe E. Reinhardt",
+      "cell": "healthcare-economics",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/uwe-reinhardt.md"
+    },
+    "uzeyn-damania": {
+      "slug": "uzeyn-damania",
+      "real_name": "Zubin Damania",
+      "cell": "medtech-digital-health",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/uzeyn-damania.md"
+    },
+    "vinod-khosla": {
+      "slug": "vinod-khosla",
+      "real_name": "Vinod Khosla",
+      "cell": "biotech-strategy",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/vinod-khosla.md"
+    }
+  }
+}

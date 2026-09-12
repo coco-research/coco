@@ -1,6 +1,6 @@
 ---
 slug: window-snyder
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: security
 cell_role: specialist

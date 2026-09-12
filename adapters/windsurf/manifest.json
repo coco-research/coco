@@ -1,0 +1,12 @@
+{
+  "name": "windsurf",
+  "version": "0.1.0",
+  "description": "Wires Coco artifacts into ~/.codeium/windsurf/ for Windsurf (Codeium) IDE",
+  "targets": {
+    "skills": "~/.codeium/windsurf/skills",
+    "rules": "~/.codeium/windsurf/rules"
+  },
+  "transforms": ["copy mdc files for Windsurf compatibility"],
+  "supports_systems": ["gsd", "brain"],
+  "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
+}

@@ -356,6 +356,7 @@ def install_skills():
                 fields[key] = fm[key]
         if DRY:
             say(f"DRY: skill  {sid:<44} {len(body.splitlines()):>5} lines")
+            written.append(dest)
             continue
         os.makedirs(SKILL_DIR, exist_ok=True)
         if directory and os.path.isdir(directory):
@@ -399,6 +400,7 @@ def install_agents():
         }
         if DRY:
             say(f"DRY: agent  {name:<44} tools={len(fields['tools'])}")
+            written.append(dest)
             continue
         os.makedirs(SUBAGENT_DIR, exist_ok=True)
         with open(dest, "w", encoding="utf-8") as fh:
@@ -422,6 +424,7 @@ def install_commands():
             fields["argument-hint"] = fm["argument-hint"]
         if DRY:
             say(f"DRY: slash  /{slash:<43} {len(body.splitlines()):>5} lines")
+            written.append(dest)
             continue
         os.makedirs(PROMPT_DIR, exist_ok=True)
         with open(dest, "w", encoding="utf-8") as fh:
@@ -537,7 +540,10 @@ fi
 if [[ "$UNINSTALL" -eq 0 && "$DRY_RUN" -eq 0 ]]; then
   n_cmd=$(find "$PROMPTS_DIR" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
   n_si=$(find "$PROMPTS_DIR" -maxdepth 1 -name 'SI*.md' 2>/dev/null | wc -l | tr -d ' ')
-  n_skill=$(find "$SKILLS_DIR" -name SKILL.md 2>/dev/null | wc -l | tr -d ' ')
+  # A skill is one directory with a SKILL.md directly inside it. Recursing also
+  # counts SKILL.md files vendored inside someone else's skill, which overstates it.
+  # -L so a skill the user linked in from another checkout still counts as installed.
+  n_skill=$(find -L "$SKILLS_DIR" -mindepth 2 -maxdepth 2 -name SKILL.md 2>/dev/null | wc -l | tr -d ' ')
   n_agent=$(find "$SUBAGENTS_DIR" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
   echo
   echo "Installed for PI-Desktop:"

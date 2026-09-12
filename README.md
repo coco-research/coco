@@ -145,7 +145,7 @@ AI chat context is fragile and wipes on `/clear`. CoCo persists phase state, dec
 <td width="33%" valign="top">
 
 ### 3. Vendor-neutral portability
-CoCo compiles its rules, templates, and agent definitions into pure Markdown and YAML frontmatter. Native IDE adapters inject the same library into Claude Code, Cursor, Codex CLI, or any `AGENTS.md` tool — so your workflows follow you even if you switch AI editors.
+CoCo compiles its rules, templates, and agent definitions into pure Markdown and YAML frontmatter. Native IDE adapters inject the same library into Claude Code, Cursor, Codex CLI, PI-Desktop, VS Code, or any `AGENTS.md` tool — so your workflows follow you even if you switch AI editors.
 
 </td>
 </tr>
@@ -566,6 +566,7 @@ bash install.sh --systems superintelligence
 bash install.sh --adapter claude-code
 bash install.sh --adapter cursor
 bash install.sh --adapter codex
+bash install.sh --adapter pi-desktop
 bash install.sh --adapter generic
 ```
 

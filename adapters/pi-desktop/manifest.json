@@ -1,0 +1,23 @@
+{
+  "name": "pi-desktop",
+  "version": "1.0.0",
+  "description": "PI-Desktop — writes slash commands into ~/.pi/agent/prompts, and skills and subagents into ~/.agents",
+  "status": "stable",
+  "targets": {
+    "commands": "~/.pi/agent/prompts/<ns>-<name>.md",
+    "skills": "~/.agents/skills/<name>/",
+    "subagents": "~/.agents/subagents/coco-<name>.md"
+  },
+  "transforms": [
+    "commands/<ns>/<name>.md -> ~/.pi/agent/prompts/<ns>-<name>.md (copy, front matter normalised)",
+    "commands/<ns>/_index.md -> ~/.pi/agent/prompts/<ns>.md",
+    "skills/<name>/ -> ~/.agents/skills/<name>/ (copy, assets included)",
+    "systems/<bundle>/skills/<name>/ -> ~/.agents/skills/<name>/ (only with --systems)",
+    "workflows/*.md -> ~/.agents/skills/coco-workflow-<name>/ (procedural instructions)",
+    "agents/*.md -> ~/.agents/subagents/coco-<name>.md with tools and maxTurns",
+    "systems/<bundle>/agents/*.md -> ~/.agents/subagents/coco-<name>.md (only with --systems)",
+    "descriptions clipped to the 240-character cap PI-Desktop applies to its skill catalog"
+  ],
+  "supports_systems": ["gsd", "brain", "cognee", "hyperframes", "superintelligence", "m0"],
+  "domains": []
+}

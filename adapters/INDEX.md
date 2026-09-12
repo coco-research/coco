@@ -10,7 +10,7 @@ because most adapters link into the checkout rather than copying.
 |---|---:|---:|---:|---:|:--:|---:|
 | `claude-code` | 280 | 242 | 171 | 34 | — | 0 |
 | `codex` | 0 | 0 | 0 | 0 | yes | 0 |
-| `cursor` | 38 | 0 | 75 | 0 | — | 0 |
+| `cursor` | 280 | 242 | 176 | 0 | — | 0 |
 | `generic` | 0 | 0 | 0 | 0 | yes | 0 |
 | `vscode` | 280 | 242 | 171 | 34 | — | 0 |
 
@@ -19,7 +19,7 @@ because most adapters link into the checkout rather than copying.
 | Surface | Best adapter | Advertised |
 |---|---:|---:|
 | Slash commands | 280 | 280 |
-| Skills | 171 | 185 |
+| Skills | 176 | 185 |
 
 ## Adapters below the command ceiling
 
@@ -27,9 +27,7 @@ The Super Intelligence family is generated at install time, not committed, so an
 adapter that does not invoke the generators delivers 38 commands instead of 280.
 This section is the standing list of who is short and by how much.
 
-| Adapter | Commands | Short by | Cause |
-|---|---:|---:|---|
-| `cursor` | 38 | 242 | declares `supports_systems: []` |
+None — every adapter delivers the full command surface.
 
 Not comparable (AGENTS.md producers rather than tree installers): `codex`, `generic`.
 

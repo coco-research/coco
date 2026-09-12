@@ -2,15 +2,21 @@
 # Coco — single-entry installer
 #
 # Usage:
-#   bash install.sh                            # auto-detect IDE, install everything
+#   bash install.sh                            # auto-detect IDE, install core + all bundles
 #   bash install.sh --adapter claude-code      # install for Claude Code
 #   bash install.sh --adapter cursor           # install for Cursor
 #   bash install.sh --adapter vscode           # install for VS Code / Copilot CLI
 #   bash install.sh --adapter codex            # generate AGENTS.md (Codex)
 #   bash install.sh --adapter generic          # generate AGENTS.md (any tool)
-#   bash install.sh --adapter claude-code --systems gsd,brain  # add bundles
+#   bash install.sh --core-only                # core only, no bundles
+#   bash install.sh --adapter claude-code --systems gsd,brain  # only these bundles
 #   bash install.sh --list                     # list available adapters
 #   bash install.sh --dry-run                  # preview only
+#
+# Every bundle under systems/ that ships skills or agents is installed by default. That
+# set is derived by scripts/installable-bundles.sh, so a new bundle needs no edit here.
+# --core-only opts out of all bundles and wins over --systems; --systems <list>
+# replaces the default set.
 
 set -euo pipefail
 
@@ -18,6 +24,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ADAPTER=""
 DRY_RUN=""
 SYSTEMS=""
+CORE_ONLY=""
 
 show_help() {
   grep '^#' "$0" | sed 's/^# \?//'
@@ -50,6 +57,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --adapter) shift; ADAPTER=$1 ;;
     --systems) shift; SYSTEMS=$1 ;;
+    --core-only) CORE_ONLY=1 ;;
     --dry-run) DRY_RUN="--dry-run" ;;
     --list) list_adapters; exit 0 ;;
     --help|-h) show_help; exit 0 ;;
@@ -71,9 +79,38 @@ if [[ ! -d "$ADAPTER_DIR" ]]; then
   exit 1
 fi
 
+# The default bundle set is offered only to adapters that advertise support for the flag.
+# An adapter that declares no bundles installs the core only, which is what --core-only
+# would ask for anyway; handing it a flag it does not accept would turn a plain install
+# into an error.
+adapter_supports_systems() {
+  local manifest="$ADAPTER_DIR/manifest.json"
+  [[ -f "$manifest" ]] || return 1
+  local list=""
+  if command -v python3 >/dev/null 2>&1; then
+    list=$(python3 -c 'import json,sys; print(",".join(json.load(open(sys.argv[1])).get("supports_systems") or []))' "$manifest" 2>/dev/null) || list=""
+  elif command -v jq >/dev/null 2>&1; then
+    list=$(jq -r '(.supports_systems // []) | join(",")' "$manifest" 2>/dev/null) || list=""
+  fi
+  [[ -n "$list" ]]
+}
+
 ARGS=()
 [[ -n "$DRY_RUN" ]] && ARGS+=("$DRY_RUN")
-[[ -n "$SYSTEMS" ]] && ARGS+=("--systems" "$SYSTEMS")
+
+if [[ -n "$CORE_ONLY" ]]; then
+  # Explicit opt-out: no bundles, and never an error, even alongside --systems.
+  adapter_supports_systems && ARGS+=("--core-only")
+elif [[ -n "$SYSTEMS" ]]; then
+  ARGS+=("--systems" "$SYSTEMS")
+else
+  # No --systems: install every bundle that ships skills or agents, so a plain run
+  # delivers the advertised totals instead of a silent subset.
+  DEFAULT_SYSTEMS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" 2>/dev/null || true)"
+  if [[ -n "$DEFAULT_SYSTEMS" ]] && adapter_supports_systems; then
+    ARGS+=("--systems" "$DEFAULT_SYSTEMS")
+  fi
+fi
 
 if [[ ${#ARGS[@]} -gt 0 ]]; then
   bash "$ADAPTER_DIR/install.sh" "${ARGS[@]}"

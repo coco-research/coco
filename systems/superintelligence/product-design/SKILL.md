@@ -1,11 +1,12 @@
 ---
-team_id: product-design-super-intelligence
-team_name: Product & Design Super Intelligence Team
-personas_count: 56
-cells_count: 8
-cross_listed: 1
-last_updated: 2026-06-01
-schema_version: 1.0
+name: "product-design-super-intelligence"
+description: "Your product + design brain trust and decision partner. Named personas across 8 cells spanning product strategy, discovery/research, growth/metrics, design foundations/usability, design leadership/craft, UX/content, design systems, and a…"
+team_id: "product-design-super-intelligence"
+team_name: "Product & Design Super Intelligence Team"
+personas_count: "56"
+cells_count: "8"
+last_updated: "2026-06-01"
+schema_version: "1.0"
 ---
 
 # Product & Design Super Intelligence Team — SKILL entry

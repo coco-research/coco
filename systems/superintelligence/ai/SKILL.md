@@ -1,10 +1,12 @@
 ---
-team_id: ai-super-intelligence
-team_name: AI Super Intelligence Team
-personas_count: 59
-cells_count: 8
-last_updated: 2026-05-28
-schema_version: 1.0
+name: "ai-super-intelligence"
+description: "Your AI research and engineering brain trust. 59 named personas across 8 cells covering frontier labs, applied product, model architecture, reasoning/RL/agents, alignment and interpretability, theory and science of DL, multimodal and…"
+team_id: "ai-super-intelligence"
+team_name: "AI Super Intelligence Team"
+personas_count: "59"
+cells_count: "8"
+last_updated: "2026-05-28"
+schema_version: "1.0"
 ---
 
 # AI Super Intelligence Team — SKILL entry

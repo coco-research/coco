@@ -150,6 +150,18 @@ jobs:
           done
           [ "$fail" -eq 0 ] || exit 1
 
+      - name: Validate the SI team role roster
+        run: |
+          # The roster is the catalogue a scheduler reads to pick roles and compose their
+          # prompts without a human in the loop. Three gates: the definitions satisfy the
+          # schema and the layer rules, every validation rule is proven to fire on a
+          # known-bad fixture, and commands/team/roles.md matches the roster it is
+          # rendered from. The validator exits 0 with capability gaps listed, because a
+          # declared gap is a result and an undeclared one is the defect.
+          python3 systems/team/validate_roles.py
+          python3 systems/team/validate_roles.py --self-test
+          python3 systems/team/build_roster.py --check
+
       - name: Run the standalone test suites
         run: |
           # These three suites pass locally but were invoked nowhere in CI, so nothing stopped

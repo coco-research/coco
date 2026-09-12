@@ -1,0 +1,91 @@
+{
+  "$comment": "The layer model. Membership is decided by these rules and enforced by scripts/validate_roles.py, not by a label someone typed. Order is the pipeline order: a role may hand off within its own layer or forward, never backward.",
+  "order": ["research", "execution", "review", "synthesis"],
+  "layers": {
+    "research": {
+      "display": "Layer 1 — Research",
+      "rule": "Belongs here when its output is context that other roles consume, rather than an artifact the user keeps.",
+      "entry_criteria": "The role gathers or interprets existing material. It does not create the deliverable and does not judge it.",
+      "exit_criteria": "Produces a context artifact that at least one other role lists as an input.",
+      "may_decide": [
+        "What to investigate and how deep to go",
+        "Which findings are relevant enough to carry forward",
+        "Where the evidence is too thin to conclude"
+      ],
+      "must_not": [
+        "Produce the user-facing deliverable",
+        "Approve or reject another role's work"
+      ]
+    },
+    "execution": {
+      "display": "Layer 2 — Execution",
+      "rule": "Belongs here when it produces an artifact that a different role must then judge.",
+      "entry_criteria": "The role builds, writes, designs or implements something concrete.",
+      "exit_criteria": "Produces an artifact with stated acceptance criteria, submitted for review rather than self-approved.",
+      "may_decide": [
+        "How to implement within the constraints it was given",
+        "Which tool or skill to use for the job"
+      ],
+      "must_not": [
+        "Declare its own output approved — a verdict is a review-layer right",
+        "Change the scope or acceptance criteria it was given"
+      ]
+    },
+    "review": {
+      "display": "Layer 3 — Review",
+      "rule": "Belongs here when its output is a judgement about someone else's artifact rather than an artifact of its own.",
+      "entry_criteria": "The role critiques, validates or measures an artifact produced by an execution role.",
+      "exit_criteria": "Produces a verdict with findings, each carrying a location and a suggested fix.",
+      "may_decide": [
+        "PASS, PASS WITH FIXES, or NEEDS REWORK for the artifact it reviewed",
+        "Which findings are blocking and which are advisory"
+      ],
+      "must_not": [
+        "Author the artifact it reviews",
+        "Ship the deliverable past a failed verdict"
+      ]
+    },
+    "synthesis": {
+      "display": "Layer 4 — Synthesis",
+      "rule": "Belongs here when it resolves conflicts between other roles and owns the final output.",
+      "entry_criteria": "The role receives findings from more than one layer and must reconcile them.",
+      "exit_criteria": "Produces the final artifact plus the decisions it made to reconcile conflicts.",
+      "may_decide": [
+        "Which conflicting recommendation wins, and why",
+        "Whether the run is complete enough to hand to the user"
+      ],
+      "must_not": [
+        "Be the only author of the artifact it signs off",
+        "Leave a conflict unresolved without naming it"
+      ]
+    }
+  },
+  "enforced_rules": [
+    {
+      "id": "forward-handoffs-only",
+      "statement": "A role may hand off to a role in its own layer or a later one, never an earlier one.",
+      "why": "A backward handoff means the layer model is wrong for one of the two roles."
+    },
+    {
+      "id": "research-produces-context",
+      "statement": "A research role must hand off to at least one role.",
+      "why": "Research whose output nobody consumes is not research, it is an unused document."
+    },
+    {
+      "id": "execution-cannot-approve",
+      "statement": "An execution role must not declare an approval or verdict decision right.",
+      "why": "Self-approval is the failure the review layer exists to prevent."
+    },
+    {
+      "id": "review-must-judge",
+      "statement": "A review role must declare a verdict decision right.",
+      "why": "A reviewer that cannot gate is an advisor, and should be layer 2."
+    },
+    {
+      "id": "synthesis-is-terminal",
+      "statement": "A synthesis role must hand off to no role, and must escalate to the user.",
+      "why": "The pipeline ends at synthesis; only a human can be asked to go further."
+    }
+  ],
+  "verdict_tokens": ["pass", "verdict", "approve", "reject", "gate", "sign off", "sign-off"]
+}

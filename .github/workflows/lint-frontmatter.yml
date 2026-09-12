@@ -53,8 +53,15 @@ jobs:
               except yaml.YAMLError as e:
                   return {'__yaml_error': str(e)}
 
-          for pattern in ['skills/*/SKILL.md', 'systems/*/skills/*/SKILL.md']:
+          # Every SKILL.md in the repo, plus the agent definitions. The previous
+          # globs stopped at skills/*/SKILL.md and systems/*/skills/*/SKILL.md, so
+          # systems/<bundle>/<domain>/SKILL.md was never validated — nine roster
+          # front doors shipped without a name or a description while CI stayed green.
+          SKIP_FILES = {'agents/INDEX.md', 'agents/README.md'}
+          for pattern in ['skills/*/SKILL.md', 'systems/**/SKILL.md', 'agents/*.md']:
               for p in pathlib.Path('.').glob(pattern):
+                  if p.as_posix() in SKIP_FILES:
+                      continue
                   checked += 1
                   fm = parse_frontmatter(p)
                   if fm is None:

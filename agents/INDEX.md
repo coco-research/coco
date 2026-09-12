@@ -14,7 +14,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [database-architect](database-architect.md) | name: database-architect |
 | [mcp-specialist](mcp-specialist.md) | name: mcp-specialist |
 | [pm-advisor](pm-advisor.md) | name: pm-advisor |
-| [refactoring-specialist](refactoring-specialist.md) | Senior refactoring specialist for transforming complex, poorly structured code into clean, maintainable systems. Use proactively when code quality metrics show  |
+| [refactoring-specialist](refactoring-specialist.md) | name: refactoring-specialist |
 | [test-guardian](test-guardian.md) | name: test-guardian |
 | [typescript-pro](typescript-pro.md) | name: typescript-pro |
 | [ui-ux-designer](ui-ux-designer.md) | name: ui-ux-designer |

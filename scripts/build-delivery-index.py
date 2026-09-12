@@ -126,7 +126,13 @@ def install(adapter, bundles, timeout=900):
         (pathlib.Path(home) / profile).mkdir(parents=True, exist_ok=True)
     env = dict(os.environ)
     env['HOME'] = home
-    for var in ('CLAUDE_HOME', 'CURSOR_HOME', 'COPILOT_HOME', 'PI_AGENT_HOME', 'AGENTS_HOME'):
+    # Both the per-tool overrides and the platform config roots have to go, or the
+    # throwaway HOME is not authoritative: a CI runner that exports XDG_CONFIG_HOME
+    # makes the VS Code adapter look for its profile in the runner's real config
+    # directory, find nothing, and report 242 commands where macOS reports 280. The
+    # generated index is committed, so it has to measure the same on every platform.
+    for var in ('CLAUDE_HOME', 'CURSOR_HOME', 'COPILOT_HOME', 'PI_AGENT_HOME', 'AGENTS_HOME',
+                'XDG_CONFIG_HOME', 'XDG_DATA_HOME', 'APPDATA', 'LOCALAPPDATA'):
         env.pop(var, None)
     cmd = ['bash', str(ROOT / 'adapters' / adapter / 'install.sh')]
     if bundles:

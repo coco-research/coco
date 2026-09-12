@@ -18,7 +18,8 @@
 #
 # Usage:
 #   bash adapters/pi-desktop/install.sh                        # install everything
-#   bash adapters/pi-desktop/install.sh --systems gsd,brain    # add system bundles
+#   bash adapters/pi-desktop/install.sh --core-only            # skip the system bundles
+#   bash adapters/pi-desktop/install.sh --systems gsd,brain    # pick specific bundles
 #   bash adapters/pi-desktop/install.sh --dry-run              # preview only
 #   bash adapters/pi-desktop/install.sh --uninstall            # remove what it wrote
 #   bash adapters/pi-desktop/install.sh --source /path/to/coco # install a different checkout
@@ -35,6 +36,7 @@ SOURCE_ROOT="$REPO_ROOT"
 DRY_RUN=0
 UNINSTALL=0
 FORCE=0
+CORE_ONLY=0
 SYSTEMS_CSV=""
 
 while [[ $# -gt 0 ]]; do
@@ -42,6 +44,7 @@ while [[ $# -gt 0 ]]; do
     --dry-run) DRY_RUN=1 ;;
     --uninstall) UNINSTALL=1 ;;
     --force) FORCE=1 ;;
+    --core-only) CORE_ONLY=1 ;;
     --systems) shift; SYSTEMS_CSV="${1:-}" ;;
     --source) shift; SOURCE_ROOT="$(cd "${1:-.}" && pwd)" ;;
     --help|-h) grep '^#' "$0" | sed 's/^# \?//'; exit 0 ;;
@@ -49,6 +52,28 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
+
+# Bundles are the default. The framework advertises 185 skills and 280 commands and a
+# plain install used to deliver 70 and 38, because every bundle sat behind a flag nobody
+# knew to pass. --core-only is the opt-out; --systems still names an explicit subset.
+if [[ "$CORE_ONLY" -eq 1 ]]; then
+  SYSTEMS_CSV=""
+elif [[ -z "$SYSTEMS_CSV" ]]; then
+  if [[ -f "$REPO_ROOT/scripts/installable-bundles.sh" ]]; then
+    SYSTEMS_CSV="$(bash "$REPO_ROOT/scripts/installable-bundles.sh")"
+  else
+    # A checkout that predates the shared helper: derive the same list here. A bundle
+    # counts only when it ships something, which is how `team` and `learning` are
+    # excluded rather than named and silently installing nothing.
+    for _dir in "$REPO_ROOT"/systems/*/; do
+      [[ -d "$_dir" ]] || continue
+      if [[ -n "$(find "$_dir" -name SKILL.md -print -quit 2>/dev/null)" ]] ||
+         [[ -n "$(find "$_dir" -path '*/agents/*.md' -print -quit 2>/dev/null)" ]]; then
+        SYSTEMS_CSV="${SYSTEMS_CSV:+$SYSTEMS_CSV,}$(basename "$_dir")"
+      fi
+    done
+  fi
+fi
 
 if ! command -v python3 >/dev/null 2>&1; then
   echo "python3 is required by the PI-Desktop adapter (front matter rewriting)." >&2
@@ -278,6 +303,14 @@ def agent_sources():
                 adir = os.path.join(base, bundle, "agents")
                 if os.path.isdir(adir):
                     cands += [os.path.join(adir, f) for f in sorted(os.listdir(adir))]
+                # Some bundles nest their agents inside a skill instead of beside it —
+                # hyperframes ships motion-graphics/agents/{builder,director,finalize}.md.
+                # No adapter's glob reached those, so three roles existed and installed
+                # nowhere.
+                for root, dirs, files in os.walk(os.path.join(base, bundle, "skills")):
+                    if os.path.basename(root) != "agents":
+                        continue
+                    cands += [os.path.join(root, f) for f in sorted(files)]
         for path in cands:
             if not path.endswith(".md") or not os.path.isfile(path):
                 continue
@@ -464,3 +497,55 @@ if DRY:
     say("Dry run — nothing written.")
 say("Restart PI-Desktop (or open a new session) to pick the new commands and skills up.")
 PY
+
+# Super Intelligence command family. The 242 SI-* commands are not committed; they are
+# generated from the nine team registries. Skipping this step is what left a PI-Desktop
+# install with 38 commands where the published total is 280, with no warning, so it runs
+# by default and says so when it cannot.
+PROMPTS_DIR="${PI_AGENT_HOME:-$HOME/.pi/agent}/prompts"
+SKILLS_DIR="${AGENTS_HOME:-$HOME/.agents}/skills"
+SUBAGENTS_DIR="${AGENTS_HOME:-$HOME/.agents}/subagents"
+SI_SCRIPT="$REPO_ROOT/scripts/generate-si-commands.sh"
+
+# The family belongs to the superintelligence bundle, so it follows that bundle rather
+# than installing unconditionally: `--core-only` means the core set, and `--systems gsd`
+# means gsd. With bundles now the default, the ordinary install still gets all 242.
+case ",$SYSTEMS_CSV," in
+  *,superintelligence,*) WANT_SI=1 ;;
+  *) WANT_SI=0 ;;
+esac
+
+if [[ "$UNINSTALL" -eq 0 && "$WANT_SI" -eq 1 ]]; then
+  if [[ -f "$SI_SCRIPT" ]]; then
+    SI_ARGS=(--target "$PROMPTS_DIR")
+    [[ "$DRY_RUN" -eq 1 ]] && SI_ARGS+=(--dry-run)
+    bash "$SI_SCRIPT" "${SI_ARGS[@]}" || {
+      echo "WARNING: SI command generation failed. The core commands are installed;" >&2
+      echo "         re-run: bash scripts/generate-si-commands.sh --target \"$PROMPTS_DIR\"" >&2
+    }
+  else
+    echo "WARNING: scripts/generate-si-commands.sh not found, so the 242 Super"
+    echo "         Intelligence commands were not generated. This checkout predates"
+    echo "         the shared generator; pull the latest main and re-run."
+  fi
+
+fi
+
+# The receipt prints for every successful install, including the ones that deliberately
+# skipped the SI family — a summary that disappears exactly when you opted out of
+# something is the silent under-delivery this whole change exists to end.
+if [[ "$UNINSTALL" -eq 0 && "$DRY_RUN" -eq 0 ]]; then
+  n_cmd=$(find "$PROMPTS_DIR" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+  n_si=$(find "$PROMPTS_DIR" -maxdepth 1 -name 'SI*.md' 2>/dev/null | wc -l | tr -d ' ')
+  n_skill=$(find "$SKILLS_DIR" -name SKILL.md 2>/dev/null | wc -l | tr -d ' ')
+  n_agent=$(find "$SUBAGENTS_DIR" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+  echo
+  echo "Installed for PI-Desktop:"
+  printf '  Slash commands : %s' "$n_cmd"
+  [[ "$n_si" -gt 0 ]] && printf '   (%s of them Super Intelligence)' "$n_si"
+  echo
+  printf '  Skills         : %s\n' "$n_skill"
+  printf '  Subagents      : %s\n' "$n_agent"
+  printf '  Bundles        : %s\n' "${SYSTEMS_CSV:-core only}"
+  echo "Core-only install: bash adapters/pi-desktop/install.sh --core-only"
+fi

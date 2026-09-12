@@ -131,9 +131,28 @@ def collect_commands():
 
 
 def _first_prose_line(path):
-    for line in path.read_text().split('\n'):
+    """One-line description for an index row.
+
+    Prefer the documented `description:`, then fall back to the first real prose
+    line. The fallback must skip the frontmatter block, not just the `---` fences:
+    the previous version skipped only `---` and `#`, so any file with frontmatter
+    returned its first key line and nine of the ten agent rows rendered as
+    `name: code-reviewer` instead of a description.
+    """
+    fm = parse_frontmatter(path, strict=False)
+    if isinstance(fm, dict):
+        desc = fm.get('description')
+        if isinstance(desc, str) and desc.strip():
+            return ' '.join(desc.split())[:200]
+
+    text = path.read_text()
+    if text.startswith('---'):
+        parts = text.split('---', 2)
+        if len(parts) >= 3:
+            text = parts[2]
+    for line in text.split('\n'):
         line = line.strip()
-        if line and not line.startswith('---') and not line.startswith('#'):
+        if line and not line.startswith(('#', '>', '|', '---')):
             return line[:200]
     return ''
 

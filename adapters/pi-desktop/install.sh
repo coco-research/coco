@@ -22,6 +22,7 @@
 #   bash adapters/pi-desktop/install.sh --dry-run              # preview only
 #   bash adapters/pi-desktop/install.sh --uninstall            # remove what it wrote
 #   bash adapters/pi-desktop/install.sh --source /path/to/coco # install a different checkout
+#   bash adapters/pi-desktop/install.sh --force                # replace files this adapter did not write
 #
 # Environment overrides (mainly for tests):
 #   PI_AGENT_HOME   default ~/.pi/agent    (commands land in $PI_AGENT_HOME/prompts)
@@ -98,7 +99,6 @@ MARKER = "Coco PI-Desktop adapter"
 DESC_CAP = 240          # PI-Desktop caps skill descriptions at 240 characters
 MAX_TURNS = 80          # the host's own ceiling for a subagent
 SKIP_DIRS = {".git", "__pycache__", "node_modules", "dist", ".DS_Store", ".pytest_cache"}
-DESC_KEYS = ("name", "description", "domain", "license", "version")
 READ_TOOLS = ["Read", "Glob", "Grep", "Bash"]
 WRITE_TOOLS = ["Read", "Glob", "Grep", "Bash", "Edit", "Write"]
 WRITER_NAMES = {
@@ -114,12 +114,6 @@ def say(msg):
     print(msg)
 
 
-def act(msg):
-    """Print the command that would run, and run it unless this is a dry run."""
-    if DRY:
-        say("DRY: " + msg)
-        return False
-    return True
 
 
 def parse_frontmatter(text):
@@ -162,12 +156,15 @@ def front_matter(fields):
     return "\n".join(lines)
 
 
-def body_of(path):
-    with open(path, encoding="utf-8", errors="replace") as fh:
-        return parse_frontmatter(fh.read())[1]
+    for para in body.split("\n\n"):
+        para = para.strip()
+        if para and not para.startswith(("#", ">", "|", "---", "<!--")):
+            return one_line(re.sub(r"[*`\[\]]", "", para))
+    return ""
 
 
 def prose_fallback(body):
+    """First real prose paragraph, used when a file documents no description."""
     for para in body.split("\n\n"):
         para = para.strip()
         if para and not para.startswith(("#", ">", "|", "---", "<!--")):

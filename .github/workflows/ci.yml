@@ -152,12 +152,15 @@ jobs:
 
       - name: Run the standalone test suites
         run: |
-          # These three suites pass locally but were invoked nowhere in CI, so nothing stopped
+          # These suites pass locally but were invoked nowhere in CI, so nothing stopped
           # them rotting. m0-smoke.sh and run_fixtures.sh had no CI coverage at all.
           bash tests/smoke.sh
           bash skills/arch-index/scripts/run_fixtures.sh
           bash systems/m0/tests/m0-smoke.sh
-          # tests/smoke.sh writes into the tree; fail loudly rather than leaving it dirty.
+          # The generated indexes must not depend on untracked files: a stale
+          # systems/<name>/ directory used to produce a phantom bundle row and show
+          # up as unexplained INDEX drift on twenty unrelated branches.
+          bash tests/check-index-tracks-git.sh
           if ! git diff --quiet; then
             echo "A test suite left the tree dirty:"
             git diff --stat

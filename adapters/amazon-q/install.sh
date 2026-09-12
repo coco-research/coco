@@ -3,7 +3,7 @@
 #
 # Usage:
 #   bash adapters/amazon-q/install.sh
-#   bash adapters/amazon-q/install.sh --systems gsd,brain
+#   bash adapters/amazon-q/install.sh --systems gsd
 #   bash adapters/amazon-q/install.sh --dry-run
 
 set -euo pipefail
@@ -65,7 +65,10 @@ for agent in "$REPO_ROOT/agents"/*.md; do
 done
 
 # Systems bundles
-for sys in "${SYSTEMS[@]}"; do
+# Only bundles that ship agents/ can be wired by this adapter; it has no skills
+# support, so brain (skills only) and team (no installable artifacts) are not advertised.
+for sys in "${SYSTEMS[@]:-}"; do
+  [[ -n "$sys" ]] || continue
   sys_dir="$REPO_ROOT/systems/$sys"
   [[ -d "$sys_dir" ]] || { echo "Unknown system: $sys" >&2; continue; }
   if [[ -d "$sys_dir/agents" ]]; then

@@ -7,6 +7,6 @@
     "agents": "~/.aws/amazon-q/agents"
   },
   "transforms": ["copy markdown rules for Amazon Q compatibility"],
-  "supports_systems": ["gsd", "brain", "team"],
+  "supports_systems": ["gsd"],
   "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
 }

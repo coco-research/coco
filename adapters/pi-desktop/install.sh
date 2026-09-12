@@ -163,12 +163,37 @@ def front_matter(fields):
     return ""
 
 
+def first_heading(body):
+    for line in body.splitlines():
+        line = line.strip()
+        if line.startswith("#"):
+            text = one_line(line.lstrip("#"))
+            if text:
+                return text
+    return ""
+
+
 def prose_fallback(body):
-    """First real prose paragraph, used when a file documents no description."""
+    """Best available description when a file documents none.
+
+    The document title wins, then the first real paragraph. Paragraphs that are
+    tables, block quotes or code fences are skipped — the 21 team/<command>.md
+    files open with a table and a bullet list, and reading those as the
+    description put "- backend only -> senior-backend-eng ..." in the slash menu.
+    """
+    title = first_heading(body)
+    if title:
+        return title
     for para in body.split("\n\n"):
         para = para.strip()
-        if para and not para.startswith(("#", ">", "|", "---", "<!--")):
-            return one_line(re.sub(r"[*`\[\]]", "", para))
+        if not para:
+            continue
+        first = para.splitlines()[0].strip()
+        if first.startswith(("#", ">", "|", "---", "<!--", "-", "*", "+", "```")):
+            continue
+        if re.match(r"^\d+[.)]\s", first):
+            continue
+        return one_line(re.sub(r"[*`\[\]]", "", para))
     return ""
 
 

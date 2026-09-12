@@ -218,14 +218,14 @@ A standard install equips your workspace with a lightweight core; full activatio
 <tr>
 <td align="center" width="20%"><h3>185</h3><sub>Skills</sub><br><small>70 Core + 115 Bundle</small></td>
 <td align="center" width="20%"><h3>280</h3><sub>Slash Commands</sub><br><small>38 Core + 242 Generated</small></td>
-<td align="center" width="20%"><h3>34</h3><sub>Specialized Agents</sub><br><small>10 Core + 24 Bundle</small></td>
+<td align="center" width="20%"><h3>37</h3><sub>Specialized Agents</sub><br><small>10 Core + 27 Bundle</small></td>
 <td align="center" width="20%"><h3>389</h3><sub>Expert Personas</sub><br><small>Super Intelligence Board</small></td>
 <td align="center" width="20%"><h3>15</h3><sub>Cross-IDE Rules</sub><br><small>Cursor MDC Rules</small></td>
 </tr>
 </table>
 
 <div align="center">
-  <sub><strong>Core install:</strong> 130 active assets (68 Skills, 37 Commands, 10 Agents, 15 Rules)</sub><br>
+  <sub><strong>A plain install ships all of it</strong> — every bundle is included by default.</sub><br>
   <sub><strong>Orchestration bundles:</strong> <strong>+68 GSD skills</strong> · <strong>+24 GSD agents</strong> · <strong>+6 Brain skills</strong> · <strong>+9 Super Intelligence skills</strong> · <strong>+242 SI commands</strong> · <strong>3 Workflows</strong></sub>
 </div>
 
@@ -547,14 +547,14 @@ coco
 <tr>
 <td valign="top">
 
-**Activate orchestration bundles**
+**Narrow the install (optional)**
 
 ```bash
-# Enable GSD, Brain, and Team systems
+# Every bundle installs by default. To take a subset instead:
 bash install.sh --systems gsd,brain
 
-# Enable the Super Intelligence board
-bash install.sh --systems superintelligence
+# Or the core set alone, with no bundles:
+bash install.sh --core-only
 ```
 
 </td>
@@ -694,7 +694,7 @@ npx cocosuperintelligence update
 <tr><td><strong>Telemetry / SaaS</strong></td><td>None — 100% local files</td></tr>
 </table>
 
-<sub>Core install ships 68 skills + 37 commands + 10 agents + 15 rules (130 active assets). The totals above reflect a full install with every bundle (<code>bash install.sh --systems gsd,brain,cognee,hyperframes,superintelligence</code>). Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely.</sub>
+<sub>These are the totals a plain <code>bash install.sh</code> delivers: system bundles are installed by default. <code>--core-only</code> installs the core set alone (70 skills, 38 commands, 10 agents, 15 rules), and <code>--systems gsd,brain</code> installs an explicit subset. Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely. <code>adapters/INDEX.md</code> records what each adapter actually delivers, measured by running it.</sub>
 
 ---
 

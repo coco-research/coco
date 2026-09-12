@@ -10,7 +10,6 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | cognee | `systems/cognee/` | 3 | 0 | 0 | 4 |
 | gsd | `systems/gsd/` | 68 | 24 | 0 | 93 |
 | hyperframes | `systems/hyperframes/` | 20 | 0 | 0 | 928 |
-| learning | `systems/learning/` | 0 | 0 | 0 | 0 |
 | m0 | `systems/m0/` | 4 | 0 | 0 | 9 |
 | superintelligence | `systems/superintelligence/` | 9 | 0 | 0 | 1159 |
 | team | `systems/team/` | 0 | 0 | 0 | 2 |
@@ -21,4 +20,4 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | roo-code | `adapters/roo-code/` | 0 | 0 | 0 | 2 |
 | vscode | `adapters/vscode/` | 0 | 0 | 0 | 3 |
 
-> **Advertised as a bundle but installs no artifacts:** `learning`, `team`. These directories hold documentation only, so passing them to `--systems` has no effect.
+> **Advertised as a bundle but installs no artifacts:** `team`. These directories hold documentation only, so passing them to `--systems` has no effect.

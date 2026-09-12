@@ -1,10 +1,12 @@
 ---
-name: data-analytics-super-intelligence
-team: data-analytics
-personas: 25
-cells: 7
-command_prefix: /SI-Data
-last_updated: 2026-06-01
+name: "data-analytics-super-intelligence"
+description: "Data & Analytics Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md."
+team_id: "data-analytics-super-intelligence"
+team_name: "Data & Analytics Super Intelligence Team"
+personas_count: "29"
+cells_count: "7"
+last_updated: "2026-06-01"
+schema_version: "1.0"
 ---
 
 # Data & Analytics Super Intelligence Team

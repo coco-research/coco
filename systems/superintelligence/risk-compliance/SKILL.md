@@ -1,10 +1,12 @@
 ---
-name: risk-compliance-super-intelligence
-team: risk-compliance
-personas: 40
-cells: 7
-command_prefix: /SI-GRC
-last_updated: 2026-06-01
+name: "risk-compliance-super-intelligence"
+description: "Risk & Compliance (GRC) Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md."
+team_id: "risk-compliance-super-intelligence"
+team_name: "Risk & Compliance (GRC) Super Intelligence Team"
+personas_count: "42"
+cells_count: "7"
+last_updated: "2026-06-01"
+schema_version: "1.0"
 ---
 
 # Risk & Compliance (GRC) Super Intelligence Team

@@ -8,6 +8,6 @@
     "rules": "~/.continue/rules"
   },
   "transforms": ["copy markdown rules for Continue compatibility"],
-  "supports_systems": ["gsd", "brain", "team"],
+  "supports_systems": ["gsd", "brain"],
   "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
 }

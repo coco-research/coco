@@ -3,7 +3,7 @@
 #
 # Usage:
 #   bash adapters/zed/install.sh
-#   bash adapters/zed/install.sh --systems gsd,brain
+#   bash adapters/zed/install.sh --systems gsd
 #   bash adapters/zed/install.sh --dry-run
 
 set -euo pipefail
@@ -65,7 +65,11 @@ for agent in "$REPO_ROOT/agents"/*.md; do
 done
 
 # Systems bundles
-for sys in "${SYSTEMS[@]}"; do
+# Systems bundles. Only bundles that ship agents can be wired in: this adapter
+# links agents and rules, so bundles that ship skills alone (for example brain)
+# are deliberately absent from supports_systems in the manifest.
+for sys in "${SYSTEMS[@]:-}"; do
+  [[ -n "$sys" ]] || continue
   sys_dir="$REPO_ROOT/systems/$sys"
   [[ -d "$sys_dir" ]] || { echo "Unknown system: $sys" >&2; continue; }
   if [[ -d "$sys_dir/agents" ]]; then

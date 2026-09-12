@@ -7,6 +7,6 @@
     "agents": "~/.config/zed/agents"
   },
   "transforms": ["copy markdown rules for Zed compatibility"],
-  "supports_systems": ["gsd", "brain", "team"],
+  "supports_systems": ["gsd"],
   "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
 }

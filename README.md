@@ -530,17 +530,17 @@ bash install.sh
 </td>
 <td width="50%" valign="top">
 
-**Via global npm package**
+**Via the npm CLI wrapper**
 
 ```bash
-# Authenticate the GitHub Packages registry
-echo "@coco-research:registry=https://npm.pkg.github.com" >> ~/.npmrc
-echo "//npm.pkg.github.com/:_authToken=YOUR_TOKEN" >> ~/.npmrc
-
-# Install and launch
-npm install -g cocosuperintelligence
-coco
+# The package name is reserved as `cocosuperintelligence` but is not published
+# on npmjs.com yet (registry 404). Until it is, run the wrapper from a clone:
+git clone --branch v1.2.0 --depth 1 https://github.com/coco-research/coco.git
+node coco/bin/coco.js --help
 ```
+*Do not `npx cocosuperintelligence` until the name is published — npx would
+resolve whatever first claims that name. The wrapper clones the pinned
+release tag, not floating `main`.*
 
 </td>
 </tr>
@@ -579,7 +579,7 @@ bash install.sh --adapter generic
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/coco-research/coco/main/bin/coco-bootstrap.sh)
 ```
-*Clones Coco to `~/.coco`, then pauses and prints the commit hash, date, and message so you can verify it against [the latest commit on `main`](https://github.com/coco-research/coco/commits/main) before it runs `install.sh`. Type `y` to proceed. Pass `--yes` or set `COCO_BOOTSTRAP_YES=1` to skip the prompt for CI or scripted installs, and pass adapter/systems flags after `--`, e.g. `-- --adapter cursor --systems gsd`.*
+*Clones the pinned release tag (currently `v1.2.0`, not floating `main`) to `~/.coco`, then pauses and prints the commit hash, date, and message so you can verify it against [that release](https://github.com/coco-research/coco/releases/tag/v1.2.0) before it runs `install.sh`. Type `y` to proceed. Pass `--yes` or set `COCO_BOOTSTRAP_YES=1` to skip the prompt for CI or scripted installs, and pass adapter/systems flags after `--`, e.g. `-- --adapter cursor --systems gsd`.*
 
 </td>
 </tr>
@@ -610,15 +610,16 @@ git pull --ff-only && bash install.sh
 </td>
 <td width="50%" valign="top">
 
-**npm installs**
+**CLI wrapper (from a clone)**
 
 ```bash
 # print version + check for updates
-npx cocosuperintelligence version
+node bin/coco.js version
 
-# apply an update
-npx cocosuperintelligence update
+# apply an update (checks out the pinned release tag)
+node bin/coco.js update
 ```
+Until `cocosuperintelligence` is published on npmjs.com, do not use `npx` for this.
 
 </td>
 </tr>
@@ -718,8 +719,11 @@ Every skill lives at <code>skills/&lt;name&gt;/SKILL.md</code>. Edit it directly
 <details>
 <summary><strong>How do I cleanly uninstall CoCo?</strong></summary>
 Because CoCo uses symbolic links, removal is non-destructive:
-<pre>find ~/.claude ~/.cursor -type l -lname "*$(pwd)*" -delete</pre>
-This removes only the links pointing back to your CoCo repository folder.
+<pre>CLONE="$(pwd)"
+find ~/.claude ~/.cursor ~/.copilot -type l -lname "${CLONE}/*" -delete</pre>
+This removes only links whose target is inside this clone. A contains-match such as
+<code>*$(pwd)*</code> would also delete links into any path that merely contains the
+folder name (for example <code>coco-research</code> when the clone is <code>coco</code>).
 </details>
 
 <details>

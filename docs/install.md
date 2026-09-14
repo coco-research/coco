@@ -22,7 +22,7 @@ Per-adapter detail. For the 30-second version, see [`README.md`](../README.md).
 |------|--------|
 | `--dry-run` | Print what would happen, don't write |
 | `--help` | Show usage |
-| `--systems gsd,brain` | Install one or more system bundles. Accepted by the claude-code, vscode, codex and generic adapters; the cursor adapter does not accept this flag |
+| `--systems gsd,brain` | Install one or more system bundles. Accepted by every adapter, including cursor (`~/.cursor/commands` for generated SI-* files) |
 
 ---
 
@@ -53,14 +53,19 @@ You should see symlinks pointing back into the cloned repo.
 
 ```bash
 bash adapters/cursor/install.sh
+bash adapters/cursor/install.sh --systems superintelligence
+# equivalent flagship path:
+# bash install.sh --adapter cursor --systems superintelligence
 ```
 
 Wires:
 - `skills/<name>/` → `~/.cursor/skills/<name>/`
 - `rules/cursor-mdc/*.mdc` → `~/.cursor/rules/*.mdc`
 - `adapters/cursor/skills/*` → `~/.cursor/skills/*` (Cursor-specific helpers)
+- `commands/<ns>/<name>.md` → `~/.cursor/commands/<ns>:<name>.md`
+- `--systems superintelligence` generates SI-* command files (including `SI-Decide.md`) into `~/.cursor/commands` via `COCO_SI_COMMANDS_DIR`. Same generators as claude-code; Cursor is not a claude-code install in disguise.
 
-Verify in Cursor: open command palette, search for skill names.
+Verify: `ls ~/.cursor/commands/SI-Decide.md`
 
 ---
 

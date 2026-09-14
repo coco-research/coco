@@ -26,12 +26,62 @@ against `find . -name 'SKILL.md' -not -path './.git/*' | wc -l`.
 """
 
 import os
+import subprocess
 import sys
 import pathlib
 import yaml
 from collections import defaultdict
 
 ROOT = pathlib.Path(__file__).parent.parent.resolve()
+
+
+def _tracked_paths():
+    """POSIX paths of every git-tracked file, or None when this is not a checkout.
+
+    Discovery walks the filesystem, which makes the generated indexes a function of
+    whatever happens to be in the working tree. An untracked leftover directory — a
+    stale `systems/<name>/` from an experiment, say — was then indexed as if it
+    shipped, and the next person to run the "Verify INDEX is up to date" gate saw
+    drift they had not caused and could not explain. Reading git's index instead
+    makes the output a function of the commit.
+
+    Returns None outside a git checkout (a tarball or npm install), where the
+    filesystem walk is the only thing available.
+    """
+    try:
+        proc = subprocess.run(['git', '-C', str(ROOT), 'ls-files', '-z'],
+                              capture_output=True, check=True)
+    except (OSError, subprocess.CalledProcessError):
+        print('WARNING: not a git checkout — falling back to a filesystem walk, so '
+              'untracked directories will be indexed.', file=sys.stderr)
+        return None
+    return {p for p in proc.stdout.decode('utf-8', 'replace').split('\0') if p}
+
+
+TRACKED = _tracked_paths()
+TRACKED_DIRS = set()
+if TRACKED is not None:
+    for _p in TRACKED:
+        _parts = _p.split('/')
+        for _i in range(1, len(_parts)):
+            TRACKED_DIRS.add('/'.join(_parts[:_i]))
+
+
+def _rel(path):
+    return path.relative_to(ROOT).as_posix()
+
+
+def _shipped(path):
+    """True when a file should count towards an index.
+
+    Outside git this is every file, which is the old behaviour.
+    """
+    return TRACKED is None or _rel(path) in TRACKED
+
+
+def _shipped_dir(path):
+    """True when a directory holds at least one tracked file."""
+    return TRACKED is None or _rel(path) in TRACKED_DIRS
 
 # (glob, index of the parent directory that names the bundle, or None for core skills)
 # Depths differ per shape, so the bundle index is declared alongside its glob rather
@@ -96,6 +146,8 @@ def collect_skills():
     seen = set()
     for glob, bundle_at in SKILL_SOURCES:
         for p in sorted(ROOT.glob(glob)):
+            if not _shipped(p):
+                continue
             if p in seen:
                 continue
             seen.add(p)
@@ -120,6 +172,8 @@ def collect_skills():
 def collect_commands():
     commands = []
     for p in sorted(ROOT.glob('commands/*/*.md')):
+        if not _shipped(p):
+            continue
         fm = parse_frontmatter(p) or {}
         ns = p.parent.name
         cname = p.stem
@@ -141,6 +195,8 @@ def _first_prose_line(path):
 def collect_agents():
     agents = []
     for p in sorted(ROOT.glob('agents/*.md')):
+        if not _shipped(p):
+            continue
         if p.name in ('README.md', 'INDEX.md'):
             continue
         agents.append({'name': p.stem, 'desc': _first_prose_line(p),
@@ -150,6 +206,8 @@ def collect_agents():
     # parents[1]. parents[2] here yields the literal string "systems", which produced
     # 24 links to a nonexistent systems/systems/agents/ directory.
     for p in sorted(ROOT.glob('systems/*/agents/*.md')):
+        if not _shipped(p):
+            continue
         if p.name in ('README.md', 'INDEX.md'):
             continue
         agents.append({'name': p.stem, 'desc': _first_prose_line(p),
@@ -289,16 +347,18 @@ def write_systems_index(skills, agents):
         base_dir = ROOT / base
         if not base_dir.is_dir():
             continue
-        for d in sorted(p for p in base_dir.iterdir() if p.is_dir()):
-            n_cmds = (len(list(d.glob('commands/*.md')))
-                      + len(list(d.glob('commands/*/*.md'))))
+        for d in sorted(p for p in base_dir.iterdir()
+                          if p.is_dir() and _shipped_dir(p)):
+            n_cmds = len([c for c in list(d.glob('commands/*.md'))
+                          + list(d.glob('commands/*/*.md')) if _shipped(c)])
             containers.append({
                 'base': base,
                 'name': d.name,
                 'skills': skills_by_bundle.get(d.name, 0),
                 'agents': agents_by_bundle.get(d.name, 0),
                 'commands': n_cmds,
-                'files': sum(1 for f in d.rglob('*') if f.is_file() and _ships(f)),
+                'files': sum(1 for f in d.rglob('*')
+                          if f.is_file() and _ships(f) and _shipped(f)),
             })
 
     lines = ['# System Bundles Index', '',

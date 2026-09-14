@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 40 commands across 7 namespaces.**
+**Total: 41 commands across 7 namespaces.**
 
 ## coco
 
@@ -77,4 +77,5 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [`/util:context-budget`](util/context-budget.md) | Audit context window token consumption across all loaded components and recommend optimizations |
 | [`/util:create-architecture-documentation`](util/create-architecture-documentation.md) | Generate comprehensive architecture documentation with diagrams, ADRs, and interactive visualization |
 | [`/util:refactor-code`](util/refactor-code.md) |  |
+| [`/util:self-eval`](util/self-eval.md) | Run post-output self-evaluation scoring on correctness, clarity, actionability, and conciseness |
 | [`/util:ss`](util/ss.md) | View the latest N screenshots from Desktop (default 1) |

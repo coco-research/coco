@@ -27,7 +27,9 @@ test -f docs/by-domain/pm.md && pass "docs/by-domain/pm.md generated" || fail "d
 
 echo ""
 echo "=== Smoke test: adapters dry-run ==="
-for adapter in claude-code cursor vscode codex generic; do
+for adapter in claude-code cursor vscode codex generic hermes; do
+  # hermes ships via PR #118; skip until it lands on main.
+  [ -d "adapters/$adapter" ] || { echo "SKIP: $adapter (not present)"; continue; }
   bash adapters/$adapter/install.sh --dry-run > /tmp/$adapter.out 2>&1 \
     && pass "adapters/$adapter/install.sh --dry-run" \
     || fail "adapters/$adapter/install.sh --dry-run"
@@ -77,6 +79,10 @@ bash tests/check-command-refs.sh && pass "command cross-references resolve" || f
 echo ""
 echo "=== Smoke test: /team evidence-gate integrity ==="
 bash tests/check-evidence-gate.sh && pass "/team evidence-gate present" || fail "/team evidence-gate incomplete"
+
+echo ""
+echo "=== Smoke test: security surface ==="
+bash tests/check-security-surface.sh && pass "security-surface checks" || fail "security-surface checks"
 
 echo ""
 echo "=== Summary ==="

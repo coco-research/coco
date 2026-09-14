@@ -1,6 +1,6 @@
 ---
 name: gsd-import
-description: "Ingest external plans with conflict detection against project decisions before writing anything."
+description: "Use when the user wants to bring an external plan file into GSD planning, or passes --from <filepath>. Detects conflicts against PROJECT.md decisions, writes it as a GSD PLAN.md, and validates it with gsd-plan-checker."
 argument-hint: "--from <filepath>"
 allowed-tools:
   - Read

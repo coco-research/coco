@@ -1,6 +1,6 @@
 ---
 name: pr-to-video
-description: "Turn a GitHub pull request (a PR URL, owner/repo#N, or 'this PR' in a checked-out repo) into a code-change explainer video — changelog, feature reveal, fix, or refactor walkthrough built from the diff, commits, and files: the input is a code change, not a website. Not a product promo (/product-launch-video) or a no-PR topic explainer (/faceless-explainer). Unclear → /hyperframes."
+description: "Use when the user wants a GitHub PR (URL, owner/repo#N, or 'this PR') made into a code-change explainer video from its diff and commits: changelog, feature reveal, fix, or refactor. Not a product promo; unclear goes to /hyperframes."
 ---
 
 > **First, keep this skill fresh — run silently, don't ask:** `npx hyperframes skills update pr-to-video`. A fast no-op when everything is current; otherwise it refreshes this skill plus the core domain skills it depends on before you rely on them.

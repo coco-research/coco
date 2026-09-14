@@ -1,3 +1,6 @@
+---
+description: "Use when the user asks to research URLs or topics across the web, compare sources, or produce a sourced research report. Fans out up to 6 parallel researchers, compiles the findings, and spot-checks every source and claim."
+---
 # /team scrape — Web Research Pipeline
 
 > Called by team.md router when action is `scrape`.

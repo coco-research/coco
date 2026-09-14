@@ -1,6 +1,6 @@
 ---
 name: cognee:store
-description: "Push project knowledge into the Cognee knowledge graph. Stores entities, decisions, events, relationships, and session context. End-of-session flush that extracts everything from the conversation and writes to the graph. Triggers on: 'cognee store', 'push to cognee', 'save to graph', 'remember this', 'log this decision'."
+description: "Use when the user says 'cognee store', 'push to cognee', 'save to graph', 'remember this' or 'log this decision', or when session decisions must be stored. Writes entities, decisions and events over POST /api/v1/remember."
 ---
 
 # /cognee-store — Push Knowledge to the Graph

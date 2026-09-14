@@ -10,14 +10,20 @@ on:
       - 'agents/**/*.md'
       - 'commands/**/*.md'
       - 'systems/**/SKILL.md'
-      - 'workflows/**/*.md'
+      - 'workflows/**'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    # This workflow is reachable from pull_request, and this repository is
+    # public with forks, so a fork's pull request would otherwise execute its
+    # own code on the self-hosted machine. Branches and pull requests from
+    # this repository use the local runner; anything from a fork falls back to
+    # a GitHub-hosted runner, which is disposable.
+    runs-on: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","macOS","ARM64","local"]') || fromJSON('["ubuntu-latest"]') }}
     steps:
       - uses: actions/checkout@v7
 

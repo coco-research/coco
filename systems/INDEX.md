@@ -22,6 +22,7 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | generic | `adapters/generic/` | 0 | 0 | 0 | 3 |
 | hermes | `adapters/hermes/` | 0 | 0 | 0 | 3 |
 | vscode | `adapters/vscode/` | 0 | 0 | 0 | 3 |
+| vscode-continue | `adapters/vscode-continue/` | 0 | 0 | 0 | 2 |
 | windsurf | `adapters/windsurf/` | 0 | 0 | 0 | 2 |
 | zed | `adapters/zed/` | 0 | 0 | 0 | 2 |
 

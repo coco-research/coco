@@ -1,6 +1,6 @@
 ---
 name: gsd-quick
-description: "Execute a quick task with GSD guarantees (atomic commits, state tracking) but skip optional agents"
+description: "Use when the user wants a small, ad-hoc change handled with GSD guarantees (atomic commits, STATE.md) but without the full pipeline. Tasks land in .planning/quick/; --full, --discuss, --research, --validate add the skipped agents back."
 argument-hint: "[--full] [--validate] [--discuss] [--research]"
 allowed-tools:
   - Read

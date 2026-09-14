@@ -1,3 +1,7 @@
+---
+description: "Use when the user asks for a stakeholder email, launch announcement, status update, incident notice, or onboarding note. Runs the /team communicate pipeline: audience and tone analysis, drafting, then grammar and standards review."
+---
+
 # /team communicate — Communications Pipeline
 
 > Called by team.md router when action is `communicate`.

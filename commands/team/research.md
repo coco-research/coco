@@ -1,3 +1,6 @@
+---
+description: "Use when the user wants a multi-angle investigation on a topic with sources, or the team router action is research. Runs a research-heavy pipeline across domain, technical, business, security, and UX angles, then compiles cited findings."
+---
 # /team research — Research Pipeline
 
 > Called by team.md router when action is `research`.

@@ -1,6 +1,6 @@
 ---
 name: m0-remember
-description: "Write one entry to the M0 operational thread so the next session, in this tool or any other, can continue the work. Records a completed step, a decision, a verification result, or a dispatched lane. Idempotent and local-only. Triggers on: 'remember this', 'm0 remember', 'save to memory', 'log this decision', 'record what we did', 'note for next session', 'write a checkpoint'."
+description: "Use when the user says 'm0 remember', 'record what we did', 'note for next session' or 'write a checkpoint', or after finishing a step worth handing to the next session. Appends one idempotent entry to the M0 thread."
 ---
 
 # /m0-remember — Write to the Operational Thread

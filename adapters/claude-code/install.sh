@@ -44,6 +44,11 @@ link_dir() {
   fi
   # A dangling symlink is removed and relinked. These accumulate whenever the repo moves.
   [[ -L "$dst" ]] && run rm "$dst"
+  # Security: refuse to create symlinks outside TARGET_HOME
+  case "$dst" in
+    "$TARGET_HOME"/*) ;;
+    *) echo "REFUSE: target $dst is outside $TARGET_HOME" >&2; return 1 ;;
+  esac
   run mkdir -p "$(dirname "$dst")"
   run ln -sf "$src" "$dst"
   echo "Linked: $dst -> $src"

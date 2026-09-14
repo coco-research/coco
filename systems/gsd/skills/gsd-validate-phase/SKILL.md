@@ -1,6 +1,6 @@
 ---
 name: gsd-validate-phase
-description: "Retroactively audit and fill Nyquist validation gaps for a completed phase"
+description: "Use when validation or test coverage is missing on a phase that already shipped. Audits or reconstructs VALIDATION.md, fills the gaps and generates the missing test files."
 argument-hint: "[phase number]"
 allowed-tools:
   - Read

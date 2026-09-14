@@ -1,0 +1,12 @@
+{
+  "name": "roo-code",
+  "version": "0.1.0",
+  "description": "Wires Coco artifacts into ~/.roo-code/ for Roo Code VS Code extension with rules and agent context",
+  "targets": {
+    "rules": "~/.roo-code/rules",
+    "agents": "~/.roo-code/agents"
+  },
+  "transforms": ["copy markdown rules for Roo Code compatibility"],
+  "supports_systems": ["gsd"],
+  "domains": ["foundational", "pm", "engineering", "design", "ops", "meta"]
+}

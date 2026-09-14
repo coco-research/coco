@@ -1,6 +1,6 @@
 ---
 name: gsd-check-todos
-description: "List pending todos and select one to work on"
+description: "Use when the user asks what is pending, what to do next, or to list todos (optionally filtered by area). Lists pending todos, loads full context for the selected one, and routes to work now, add to a phase, brainstorm, or create a phase."
 argument-hint: "[area filter]"
 allowed-tools:
   - Read

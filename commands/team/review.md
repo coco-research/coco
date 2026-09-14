@@ -1,3 +1,7 @@
+---
+description: "Use when the /team router routes action=review, or the user asks for existing code, docs, or a diff reviewed. Scope mapping, 3-5 specialist lenses, cross-review, then a principal synthesis of severity-ranked findings."
+---
+
 # /team review — Review Pipeline
 
 > Called by team.md router when action is `review`.

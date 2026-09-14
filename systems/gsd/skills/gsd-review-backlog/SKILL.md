@@ -1,6 +1,6 @@
 ---
 name: gsd-review-backlog
-description: "Review and promote backlog items to active milestone"
+description: "Use when 999.x backlog items need triage, or the user asks to review, promote, or prune the backlog. Shows each item with its accumulated context, promotes chosen ones into the active milestone, and removes stale ones."
 allowed-tools:
   - Read
   - Write
@@ -32,18 +32,27 @@ milestone sequence or remove stale entries.
    - Options per item: **Promote** (move to active), **Keep** (leave in backlog), **Remove** (delete)
 
 4. **For items to PROMOTE:**
-   - Find the next sequential phase number in the active milestone
-   - Rename the directory from `999.x-slug` to `{new_num}-slug`:
+   - Create the phase in the active milestone and capture its number (this creates the
+     `.planning/phases/{NEW_NUM}-slug` directory):
      ```bash
      NEW_NUM=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" phase add "${DESCRIPTION}" --raw)
      ```
-   - Move accumulated artifacts to the new phase directory
+   - Move the accumulated artifacts from `999.x-slug` into the new directory, then drop the
+     now-empty backlog directory:
+     ```bash
+     mv ".planning/phases/999.x-slug/"* ".planning/phases/${NEW_NUM}-slug/" 2>/dev/null
+     rmdir ".planning/phases/999.x-slug" 2>/dev/null
+     ```
    - Update ROADMAP.md: move the entry from `## Backlog` section to the active phase list
    - Remove `(BACKLOG)` marker
    - Add appropriate `**Depends on:**` field
 
 5. **For items to REMOVE:**
-   - Delete the phase directory
+   - Confirm a second time before deleting, stating that this removes the phase directory
+     and its accumulated artifacts recursively:
+     ```bash
+     rm -rf ".planning/phases/999.x-slug"
+     ```
    - Remove the entry from ROADMAP.md `## Backlog` section
 
 6. **Commit changes:**

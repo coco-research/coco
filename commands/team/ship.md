@@ -1,3 +1,6 @@
+---
+description: "Use when the user wants an idea taken from concept to a shipped, reviewed product, or when the /team router picks ship. Runs six build stages, seven hard verification gates, then PR open, with one approval gate after the plan."
+---
 # /team ship — Idea to Shipped Product Pipeline
 
 > Called by team.md router when action is `ship`.
@@ -38,7 +41,7 @@ appropriate /team action's role selection.
 ### Stage 2: Think
 - Runs: `/team think <idea with research context>`
 - Purpose: Architecture options, evaluate trade-offs
-- Writes: `.team-ship/ARCHITECTURE-OPTIONS.md`, and records the chosen option in the brain decisions store via `/brain-update`
+- Writes: `.team-ship/ARCHITECTURE-OPTIONS.md`, and records the chosen option in the brain decisions store via `/brain:update`
 - Autonomy: Full — no approval needed
 
 ### Stage 3: Plan
@@ -262,7 +265,7 @@ cannot be recovered by `--resume`.
 - Research → `.team-ship/RESEARCH-BRIEF.md` (key findings, 200 lines max)
 - Think → `.team-ship/ARCHITECTURE-OPTIONS.md` (options considered, the chosen one, and
   the rationale for choosing it). The chosen option is additionally recorded in the
-  brain decisions store via `/brain-update`, which is the canonical home for decisions
+  brain decisions store via `/brain:update`, which is the canonical home for decisions
   per the global instructions.
 - Research → `.arch/index.json` + `.arch/ARCH-EVIDENCE.md` (validated structural index,
   produced by `/team arch`; absent by design on repositories that do not want one)
@@ -328,7 +331,7 @@ Ship complete. 14 files created. Evidence: .team-ship/EVIDENCE.md
 
 When `.planning/` exists, the ship pipeline creates GSD-compatible artifacts:
 - Plan stage produces `.planning/phases/` structure
-- Build stage uses `/gsd:execute-phase` conventions
+- Build stage uses `/gsd-execute-phase` conventions
 - Verify stage cross-references REQUIREMENTS.md
 
 ARGUMENTS: {{ARGUMENTS}}

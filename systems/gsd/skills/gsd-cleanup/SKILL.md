@@ -1,6 +1,6 @@
 ---
 name: gsd-cleanup
-description: "Archive accumulated phase directories from completed milestones"
+description: "Use when .planning/phases/ has accumulated directories from completed milestones. Shows a dry-run of what moves to .planning/milestones/v{X.Y}-phases/ and archives only after confirmation."
 allowed-tools:
   - Read
   - Write

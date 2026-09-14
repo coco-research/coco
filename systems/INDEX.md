@@ -10,7 +10,7 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | cognee | `systems/cognee/` | 3 | 0 | 0 | 4 |
 | gsd | `systems/gsd/` | 68 | 24 | 0 | 94 |
 | hyperframes | `systems/hyperframes/` | 20 | 0 | 0 | 928 |
-| learning | `systems/learning/` | 0 | 0 | 0 | 1 |
+| learning | `systems/learning/` | 0 | 0 | 0 | 3 |
 | m0 | `systems/m0/` | 4 | 0 | 0 | 9 |
 | superintelligence | `systems/superintelligence/` | 9 | 0 | 0 | 1192 |
 | team | `systems/team/` | 0 | 0 | 0 | 2 |

@@ -27,11 +27,24 @@ test -f docs/by-domain/pm.md && pass "docs/by-domain/pm.md generated" || fail "d
 
 echo ""
 echo "=== Smoke test: adapters dry-run ==="
-for adapter in claude-code cursor vscode codex generic; do
+for adapter in claude-code cursor vscode codex generic hermes; do
+  # hermes ships via PR #118; skip until it lands on main.
+  [ -d "adapters/$adapter" ] || { echo "SKIP: $adapter (not present)"; continue; }
   bash adapters/$adapter/install.sh --dry-run > /tmp/$adapter.out 2>&1 \
     && pass "adapters/$adapter/install.sh --dry-run" \
     || fail "adapters/$adapter/install.sh --dry-run"
 done
+
+bash adapters/cursor/install.sh --dry-run --systems superintelligence > /tmp/cursor-systems.out 2>&1 \
+  && pass "cursor install.sh --dry-run --systems superintelligence" \
+  || fail "cursor install.sh --dry-run --systems superintelligence"
+
+echo ""
+echo "=== Smoke test: cursor --systems superintelligence ==="
+# Repro: cursor install.sh used to reject --systems (Unknown flag / exit 1), so the
+# README flagship command died whenever ~/.cursor existed. Must write SI-Decide.md
+# into CURSOR_HOME/commands, not ~/.claude/commands.
+bash tests/cursor-si-commands.sh && pass "cursor --systems superintelligence writes SI-Decide.md" || fail "cursor --systems superintelligence did not write SI-Decide.md"
 
 echo ""
 echo "=== Smoke test: root install.sh ==="

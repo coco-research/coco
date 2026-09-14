@@ -50,7 +50,7 @@ jobs:
 
       - name: Adapter install.sh syntax check
         run: |
-          for f in adapters/*/install.sh install.sh; do
+          for f in adapters/*/install.sh install.sh bin/coco-bootstrap.sh skills/prd-generator/scripts/generate_prd.sh skills/brainstorming/scripts/stop-server.sh tests/check-security-surface.sh; do
             bash -n "$f" || { echo "Syntax error in $f"; exit 1; }
           done
           echo "All install scripts pass syntax check."

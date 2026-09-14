@@ -12,7 +12,7 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | hyperframes | `systems/hyperframes/` | 20 | 0 | 0 | 928 |
 | learning | `systems/learning/` | 0 | 0 | 0 | 3 |
 | m0 | `systems/m0/` | 4 | 0 | 0 | 9 |
-| superintelligence | `systems/superintelligence/` | 9 | 0 | 0 | 1192 |
+| superintelligence | `systems/superintelligence/` | 9 | 0 | 0 | 1219 |
 | team | `systems/team/` | 0 | 0 | 0 | 2 |
 | aider | `adapters/aider/` | 0 | 0 | 0 | 2 |
 | claude-code | `adapters/claude-code/` | 0 | 0 | 0 | 3 |

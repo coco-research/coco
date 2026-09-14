@@ -2,7 +2,13 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 380 commands across 7 namespaces.**
+**Total: 381 commands across 8 namespaces.**
+
+## coco
+
+| Slash | Description |
+|-------|-------------|
+| [`/coco:goal`](coco/goal.md) | Set, check, or complete the persistent project goal stored in .goal.md. Trigger as /coco-goal or /coco:goal. |
 
 ## design
 

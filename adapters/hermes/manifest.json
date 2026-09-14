@@ -1,0 +1,28 @@
+{
+  "name": "hermes",
+  "version": "0.1.0",
+  "description": "Wires Coco artifacts into a Hermes Agent profile's skills directory",
+  "targets": {
+    "skills": "<profile>/skills",
+    "commands": "<profile>/home/.claude/commands (slash-command reference for Claude-compatible flows)",
+    "agents": "<profile>/home/.claude/agents",
+    "rules": "<profile>/home/.claude/CLAUDE.md (appended)"
+  },
+  "transforms": [],
+  "supports_systems": [
+    "gsd",
+    "brain",
+    "cognee",
+    "hyperframes",
+    "superintelligence",
+    "m0"
+  ],
+  "domains": [
+    "foundational",
+    "pm",
+    "engineering",
+    "design",
+    "ops",
+    "meta"
+  ]
+}

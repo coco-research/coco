@@ -6,17 +6,22 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 
 | Bundle | Location | Skills | Agents | Commands | Files |
 |--------|----------|-------:|-------:|---------:|------:|
-| brain | `systems/brain/` | 6 | 0 | 0 | 18 |
+| brain | `systems/brain/` | 6 | 0 | 0 | 19 |
 | cognee | `systems/cognee/` | 3 | 0 | 0 | 4 |
-| gsd | `systems/gsd/` | 68 | 24 | 0 | 93 |
+| gsd | `systems/gsd/` | 68 | 24 | 0 | 94 |
 | hyperframes | `systems/hyperframes/` | 20 | 0 | 0 | 928 |
+| learning | `systems/learning/` | 0 | 0 | 0 | 1 |
 | m0 | `systems/m0/` | 4 | 0 | 0 | 9 |
-| superintelligence | `systems/superintelligence/` | 9 | 0 | 0 | 1186 |
+| superintelligence | `systems/superintelligence/` | 9 | 0 | 0 | 1219 |
 | team | `systems/team/` | 0 | 0 | 0 | 2 |
+| aider | `adapters/aider/` | 0 | 0 | 0 | 2 |
 | claude-code | `adapters/claude-code/` | 0 | 0 | 0 | 3 |
+| cline | `adapters/cline/` | 0 | 0 | 0 | 2 |
 | codex | `adapters/codex/` | 0 | 0 | 0 | 3 |
 | cursor | `adapters/cursor/` | 5 | 0 | 0 | 8 |
 | generic | `adapters/generic/` | 0 | 0 | 0 | 3 |
+| hermes | `adapters/hermes/` | 0 | 0 | 0 | 3 |
 | vscode | `adapters/vscode/` | 0 | 0 | 0 | 3 |
+| windsurf | `adapters/windsurf/` | 0 | 0 | 0 | 2 |
 
-> **Advertised as a bundle but installs no artifacts:** `team`. These directories hold documentation only, so passing them to `--systems` has no effect.
+> **Advertised as a bundle but installs no artifacts:** `learning`, `team`. These directories hold documentation only, so passing them to `--systems` has no effect.

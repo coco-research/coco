@@ -34,15 +34,24 @@ prompt_input() {
     local var_name="$2"
     local required="$3"
 
+    # Only assign into the hardcoded names this script reads. Never eval user text.
+    case "$var_name" in
+        PRODUCT_NAME|DESCRIPTION|OUTPUT_FILE|PROBLEM|PRIMARY_USERS|BUSINESS_GOALS|SUCCESS_METRICS|TIMELINE|OUT_OF_SCOPE) ;;
+        *)
+            echo -e "${RED}Internal error: unknown field $var_name${NC}" >&2
+            exit 1
+            ;;
+    esac
+
     while true; do
         echo -e "${YELLOW}${prompt}${NC}"
         read -r input
 
         if [ -n "$input" ]; then
-            eval "$var_name='$input'"
+            printf -v "$var_name" '%s' "$input"
             break
         elif [ "$required" != "true" ]; then
-            eval "$var_name=''"
+            printf -v "$var_name" '%s' ""
             break
         else
             echo -e "${RED}This field is required. Please provide a value.${NC}"

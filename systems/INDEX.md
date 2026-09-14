@@ -10,9 +10,9 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | cognee | `systems/cognee/` | 3 | 0 | 0 | 4 |
 | gsd | `systems/gsd/` | 68 | 24 | 0 | 94 |
 | hyperframes | `systems/hyperframes/` | 20 | 0 | 0 | 928 |
-| learning | `systems/learning/` | 0 | 0 | 0 | 1 |
+| learning | `systems/learning/` | 0 | 0 | 0 | 3 |
 | m0 | `systems/m0/` | 4 | 0 | 0 | 9 |
-| superintelligence | `systems/superintelligence/` | 9 | 0 | 0 | 1192 |
+| superintelligence | `systems/superintelligence/` | 9 | 0 | 0 | 1246 |
 | team | `systems/team/` | 0 | 0 | 0 | 2 |
 | aider | `adapters/aider/` | 0 | 0 | 0 | 2 |
 | claude-code | `adapters/claude-code/` | 0 | 0 | 0 | 3 |
@@ -24,5 +24,6 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | vscode | `adapters/vscode/` | 0 | 0 | 0 | 3 |
 | vscode-continue | `adapters/vscode-continue/` | 0 | 0 | 0 | 2 |
 | windsurf | `adapters/windsurf/` | 0 | 0 | 0 | 2 |
+| zed | `adapters/zed/` | 0 | 0 | 0 | 2 |
 
 > **Advertised as a bundle but installs no artifacts:** `learning`, `team`. These directories hold documentation only, so passing them to `--systems` has no effect.

@@ -68,6 +68,10 @@ echo "=== Smoke test: /team evidence-gate integrity ==="
 bash tests/check-evidence-gate.sh && pass "/team evidence-gate present" || fail "/team evidence-gate incomplete"
 
 echo ""
+echo "=== Smoke test: security surface ==="
+bash tests/check-security-surface.sh && pass "security-surface checks" || fail "security-surface checks"
+
+echo ""
 echo "=== Summary ==="
 echo "  passed: $PASS"
 echo "  failed: $FAIL"

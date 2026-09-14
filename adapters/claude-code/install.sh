@@ -122,9 +122,13 @@ link_system() {
   # Both are run so the full 242 SI command family is delivered, not just the per-team half.
   if [[ -f "$sys_dir/ai/scripts/build_commands.py" ]]; then
     if command -v python3 >/dev/null 2>&1; then
-      run env COCO_SI_COMMANDS_DIR="$TARGET_HOME/commands" python3 "$sys_dir/ai/scripts/build_commands.py"
+      # COCO_SI_REPO = directory that CONTAINS superintelligence/ (i.e. systems/).
+      # Override to a durable checkout when installing from an ephemeral clone (Decide B).
+      local si_repo_parent
+      si_repo_parent="$(cd "$sys_dir/.." && pwd)"
+      run env COCO_SI_REPO="${COCO_SI_REPO:-$si_repo_parent}" COCO_SI_COMMANDS_DIR="$TARGET_HOME/commands" python3 "$sys_dir/ai/scripts/build_commands.py"
       if [[ -f "$sys_dir/scripts/build_meta_commands.py" ]]; then
-        run env COCO_SI_COMMANDS_DIR="$TARGET_HOME/commands" python3 "$sys_dir/scripts/build_meta_commands.py"
+        run env COCO_SI_REPO="${COCO_SI_REPO:-$si_repo_parent}" COCO_SI_COMMANDS_DIR="$TARGET_HOME/commands" python3 "$sys_dir/scripts/build_meta_commands.py"
       fi
       echo "Generated SI-* commands (per-team + meta-orchestrator) into $TARGET_HOME/commands"
     else

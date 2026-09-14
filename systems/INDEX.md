@@ -6,9 +6,9 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 
 | Bundle | Location | Skills | Agents | Commands | Files |
 |--------|----------|-------:|-------:|---------:|------:|
-| brain | `systems/brain/` | 6 | 0 | 0 | 18 |
+| brain | `systems/brain/` | 6 | 0 | 0 | 19 |
 | cognee | `systems/cognee/` | 3 | 0 | 0 | 4 |
-| gsd | `systems/gsd/` | 68 | 24 | 0 | 93 |
+| gsd | `systems/gsd/` | 68 | 24 | 0 | 94 |
 | hyperframes | `systems/hyperframes/` | 20 | 0 | 0 | 928 |
 | m0 | `systems/m0/` | 4 | 0 | 0 | 9 |
 | superintelligence | `systems/superintelligence/` | 9 | 0 | 0 | 1159 |

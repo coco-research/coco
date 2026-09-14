@@ -6,7 +6,7 @@
 //   npx cocosuperintelligence install       # same as above
 //   npx cocosuperintelligence install --adapter cursor
 //   npx cocosuperintelligence install --systems gsd,brain,m0
-//   npx cocosuperintelligence update        # pull latest in existing clone
+//   npx cocosuperintelligence update        # checkout the pinned release tag
 //   npx cocosuperintelligence uninstall     # remove symlinks + clone
 //   npx cocosuperintelligence --help
 
@@ -28,6 +28,7 @@ const DEFAULT_DIR = path.join(process.cwd(), 'coco');
 const PKG_VERSION = (() => {
   try { return require('../package.json').version || '0.0.0'; } catch (_) { return '0.0.0'; }
 })();
+const PINNED_TAG = 'v' + PKG_VERSION;
 const UPDATE_CACHE = path.join(os.homedir(), '.coco', '.update-check.json');
 const LATEST_URL = 'https://raw.githubusercontent.com/coco-research/coco/main/package.json';
 
@@ -66,7 +67,7 @@ function fetchLatestVersion(cb) {
 function banner(latest) {
   if (latest && semverGt(latest, PKG_VERSION)) {
     console.log(`\n  ⬆  Coco ${latest} is available (you have ${PKG_VERSION}).`);
-    console.log(`     Update:  npx cocosuperintelligence update     (or: git -C <clone> pull --ff-only && bash install.sh)\n`);
+    console.log(`     Update:  node bin/coco.js update     (or: git -C <clone> pull --ff-only && bash install.sh)\n`);
   }
 }
 
@@ -94,7 +95,7 @@ function help() {
 Usage:
   npx cocosuperintelligence                   clone + install (auto-detect)
   npx cocosuperintelligence install [flags]   clone + install with flags
-  npx cocosuperintelligence update [dir]      pull latest in existing clone
+  npx cocosuperintelligence update [dir]      checkout the pinned release tag
   npx cocosuperintelligence uninstall [dir]   remove symlinks + clone
   npx cocosuperintelligence version           show version + check for updates
   npx cocosuperintelligence --help            this message
@@ -115,6 +116,9 @@ Examples:
   npx cocosuperintelligence uninstall
 
 Repo: https://github.com/coco-research/coco
+Install clones the ${PINNED_TAG} release tag, not floating main.
+The npm name cocosuperintelligence is reserved; until it is published, prefer
+git clone or bin/coco-bootstrap.sh over npx.
 `);
 }
 
@@ -132,15 +136,24 @@ function run(cmd, args, opts = {}) {
 
 function cloneOrUpdate(dir) {
   if (fs.existsSync(dir) && fs.existsSync(path.join(dir, '.git'))) {
-    console.log(`Coco already at ${dir}. Pulling latest...`);
-    run('git', ['pull', '--ff-only'], { cwd: dir });
+    // Detached HEAD is the tagged install. A branch checkout (typical `git clone` of
+    // main) must not be force-moved onto an older pin.
+    const head = spawnSync('git', ['symbolic-ref', '-q', 'HEAD'], { cwd: dir });
+    if (head.status !== 0) {
+      console.log(`Coco already at ${dir} (detached). Updating to ${PINNED_TAG}...`);
+      run('git', ['fetch', '--tags', '--force', '--depth', '1', 'origin', `refs/tags/${PINNED_TAG}:refs/tags/${PINNED_TAG}`], { cwd: dir });
+      run('git', ['checkout', '--force', PINNED_TAG], { cwd: dir });
+    } else {
+      console.log(`Coco already at ${dir}. Pulling latest...`);
+      run('git', ['pull', '--ff-only'], { cwd: dir });
+    }
   } else {
     if (fs.existsSync(dir)) {
       console.error(`Error: ${dir} exists but is not a git repo. Move it or pick a different location.`);
       process.exit(1);
     }
-    console.log(`Cloning Coco to ${dir}...`);
-    run('git', ['clone', REPO, dir]);
+    console.log(`Cloning Coco ${PINNED_TAG} to ${dir}...`);
+    run('git', ['clone', '--branch', PINNED_TAG, '--depth', '1', REPO, dir]);
   }
 }
 
@@ -181,12 +194,19 @@ function cmdUpdate(argv) {
 }
 
 function cmdUninstall(argv) {
-  const dir = argv[0] && !argv[0].startsWith('--') ? argv[0] : DEFAULT_DIR;
+  const dir = path.resolve(argv[0] && !argv[0].startsWith('--') ? argv[0] : DEFAULT_DIR);
+  // Prefix match on the resolved clone path plus a trailing slash, so a clone
+  // named `coco` cannot also delete links into `coco-research` / `coco-connect`.
+  const prefix = dir.endsWith(path.sep) ? dir : dir + path.sep;
   console.log(`Removing symlinks pointing into ${dir}...`);
-  const homes = [path.join(os.homedir(), '.claude'), path.join(os.homedir(), '.cursor')];
+  const homes = [
+    path.join(os.homedir(), '.claude'),
+    path.join(os.homedir(), '.cursor'),
+    path.join(os.homedir(), '.copilot'),
+  ];
   for (const home of homes) {
     if (!fs.existsSync(home)) continue;
-    run('find', [home, '-type', 'l', '-lname', `*${dir}*`, '-delete']);
+    run('find', [home, '-type', 'l', '-lname', `${prefix}*`, '-delete']);
   }
   console.log(`Removing clone at ${dir}...`);
   if (fs.existsSync(dir)) {

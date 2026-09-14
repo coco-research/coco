@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 186 skills** — 71 core, 115 across 7 bundles.
+**Total: 222 skills** — 74 core, 148 across 8 bundles.
 
 ## Design (15)
 
@@ -24,7 +24,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [visual-explainer](visual-explainer/SKILL.md) | Generate self-contained HTML visual explanations for systems, code changes, plans, data, and technical concepts. Use for diagrams, architecture overviews, diff  |
 | [web-design-guidelines](web-design-guidelines/SKILL.md) | Review UI code for Web Interface Guidelines compliance. Use when asked to "review my UI", "check accessibility", "audit design", "review UX", or "check my site  |
 
-## Engineering (20)
+## Engineering (21)
 
 | Skill | Description |
 |-------|-------------|
@@ -33,6 +33,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [arch-index](arch-index/SKILL.md) | Build and validate .arch/index.json — a committed map from each architectural component of this repository to the real directories and files that implement it,  |
 | [browser-automation](browser-automation/SKILL.md) | Use when the agent must open a URL, fill a form, click through a flow, screenshot a page, or extract data from a live page. Covers two providers (agent-browser  |
 | [c4-architecture](c4-architecture/SKILL.md) | Generate architecture documentation using C4 model Mermaid diagrams. Use when asked to create architecture diagrams, document system architecture, visualize sof |
+| [coco-ship](coco-ship/SKILL.md) | Use when finished work needs to reach a coco-managed repository (coco-research/coco or similar) — verifies branch state, commits, pushes through the corporate D |
 | [code-verification](code-verification/SKILL.md) | Use after every code change, after writing tests, or before marking a task complete, and when the user says verify, quality gate, or audit code. Runs a 7-catego |
 | [expo-api-routes](expo-api-routes/SKILL.md) | Use when adding server-side API routes to an Expo Router app (+api.ts files) for secrets, database access, third-party proxies, webhooks, CORS, or EAS Hosting d |
 | [finishing-a-development-branch](finishing-a-development-branch/SKILL.md) | Use when implementation is done and tests pass and the user must choose to merge locally, open a PR, keep the branch, or discard it. Presents those four options |
@@ -67,13 +68,15 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [workflow-routing](workflow-routing/SKILL.md) | Use when starting any task, before invoking any other skill or GSD command, to route between Superpowers skills and GSD commands from project state and task sco |
 | [writing-plans](writing-plans/SKILL.md) | Use when you have a spec or requirements for a multi-step task, before touching code |
 
-## Meta (7)
+## Meta (9)
 
 | Skill | Description |
 |-------|-------------|
+| [agent-self-eval](agent-self-eval/SKILL.md) | Post-run self-evaluation system that scores agent output on correctness, clarity, actionability, and conciseness. Use after /team runs, skill executions, or whe |
 | [cli-anything](cli-anything/SKILL.md) | Wrap any command-line tool into a JSON-emitting agent skill. Use when you want to make a CLI reliably callable and parseable by an AI agent — introspect its --h |
 | [coco-cli](coco-cli/SKILL.md) | Install, update, version-check, or uninstall the Coco open-source AI workflow framework via bin/coco.js. Use when setting up Coco on a machine, checking out the |
 | [coco-loop](coco-loop/SKILL.md) | Start a safe, governed autonomous loop from a plain-language goal. Use when the user says /coco-loop, "run an autonomous loop", "keep my build green for N hours |
+| [context-budget](context-budget/SKILL.md) | Audit token consumption across agents, skills, MCP servers, and rules. Identifies bloat, redundant components, and produces prioritized token-savings recommenda |
 | [find-skills](find-skills/SKILL.md) | Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express int |
 | [goal](goal/SKILL.md) | Persistent project goal that survives across sessions and tools, with continuous-execution loop semantics. Use when someone asks to "set a goal", "what is my go |
 | [skill-creator](skill-creator/SKILL.md) | Use when the user asks to create, scaffold, update or package a skill, or asks how skill frontmatter, progressive disclosure or bundled resources should be stru |
@@ -240,6 +243,44 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [m0-handoff](../systems/m0/skills/m0-handoff/SKILL.md) | Use when the user says m0 handoff, before I compact, end of session, save session state, resume where we left off, or continue in Cursor or Claude Code. Writes  |
 | [m0-recall](../systems/m0/skills/m0-recall/SKILL.md) | Use when the user asks m0 recall, where were we, what did we do last time, catch me up, what is next, or to resume context from another tool. Reads the recent M |
 | [m0-remember](../systems/m0/skills/m0-remember/SKILL.md) | Use when the user says 'm0 remember', 'record what we did', 'note for next session' or 'write a checkpoint', or after finishing a step worth handing to the next |
+
+## Bundle: reverse-skill (33 skills)
+
+| Skill | Description |
+|-------|-------------|
+| [api-security](../systems/reverse-skill/skills/api-security/SKILL.md) | Use for authorized security assessment of REST, GraphQL, WebSocket, or SOAP APIs, including discovery, authentication, authorization, rate-limit, and CI/CD test |
+| [apk-reverse](../systems/reverse-skill/skills/apk-reverse/SKILL.md) | 在 CLI 环境下做 Android APK 逆向时使用。适用于 APK 解包、Java 反编译、smali 修改、重打包、Frida 动态 Hook，以及按需切换到 so/native 分析。优先使用本机已安装的 jadx、apktool、frida、adb、ida-reverse、radare2。 |
+| [binary-diff](../systems/reverse-skill/skills/binary-diff/SKILL.md) | 跨版本符号迁移与二进制差分。当你有旧版本的符号/逆向结果，需要快速迁移到新版本时使用。 适用场景：内核缺 PDB 用旧版符号推导、程序更新后批量迁移函数名、应用更新后快速定位新偏移。 核心方法：用 LLM 做结构化差异比对，程序化输入输出，成本极低（200 函数 ~1 元）。 触发关键词：符号迁移、bindiff、跨版 |
+| [browser-automation](../systems/reverse-skill/skills/browser-automation/SKILL.md) | 统一自动化入口。覆盖浏览器自动化（Playwright）和 Windows 桌面应用自动化（OpenReverse）。 浏览器场景：打开网页、点击、填表、爬取、截图、自动化登录、渗透页面交互。 桌面场景：操作 IDA/x64dbg 等 GUI 工具、Windows UI Automation、视觉驱动交互、桌面应用网络 |
+| [browser-extension-reverse](../systems/reverse-skill/skills/browser-extension-reverse/SKILL.md) | Use for authorized reverse engineering of browser extensions (Chrome/Firefox) including manifest analysis, background workers, and extension-based credential or |
+| [cloud-k8s](../systems/reverse-skill/skills/cloud-k8s/SKILL.md) | Use for authorized cloud, container, and Kubernetes security assessment including metadata SSRF, IAM misconfig, container escape paths, and cluster RBAC review. |
+| [code-audit](../systems/reverse-skill/skills/code-audit/SKILL.md) | Use for authorized source-code security review and SAST workflows including Semgrep, CodeQL patterns, dangerous API hunting, and fix verification. |
+| [database-security](../systems/reverse-skill/skills/database-security/SKILL.md) | Use for authorized database security assessment covering PostgreSQL/MySQL/MSSQL/Mongo/Redis exposure, authz, UDF/command paths, and misconfiguration review. |
+| [digital-forensics](../systems/reverse-skill/skills/digital-forensics/SKILL.md) | Use for authorized digital forensics including memory dumps, disk timelines, PCAP investigation, artifact triage, and IR evidence preservation. |
+| [docs-generator](../systems/reverse-skill/skills/docs-generator/SKILL.md) | Creates task-oriented technical documentation with progressive disclosure. Use when writing READMEs, API docs, architecture docs, or markdown documentation. Als |
+| [dotnet-reverse](../systems/reverse-skill/skills/dotnet-reverse/SKILL.md) | .NET / C# 二进制逆向。当目标是 .NET assembly（PE 头含 CLR、.exe/.dll 托管程序）、C# 编译产物（含 NativeAOT）、红队 Sharp* 工具（Rubeus / SharpHound / SharpHound 等）、.NET 混淆程序（ConfuserEx / SmartA |
+| [email-security](../systems/reverse-skill/skills/email-security/SKILL.md) | Use for authorized email security review including phishing analysis, header authentication (SPF/DKIM/DMARC), BEC patterns, and mailbox token abuse research. |
+| [firmware-pentest](../systems/reverse-skill/skills/firmware-pentest/SKILL.md) | 固件 / IoT 渗透链。从拿到一坨 .bin / .img 开始，闭环走完逆向 → 提取 → 模拟 → 利用。 方法论遵循 OWASP FSTM 九阶段；工具链以 binwalk v3、unblob、EMBA、Firmadyne、AFL++ 为主。 适用场景：路由器/摄像头/智能家居固件审计、固件升级包逆向、IoT  |
+| [ghidra-reverse](../systems/reverse-skill/skills/ghidra-reverse/SKILL.md) | Use for free/open reverse engineering with Ghidra (headless or GUI), including decompile, cross-refs, and optional Ghidra MCP workflows when IDA is unavailable. |
+| [go-rust-reverse](../systems/reverse-skill/skills/go-rust-reverse/SKILL.md) | Use for reverse engineering stripped Go and Rust binaries including runtime recognition, pclntab/moduel data recovery, panic strings, and idiomatic decompilatio |
+| [hardware-security](../systems/reverse-skill/skills/hardware-security/SKILL.md) | Use for authorized hardware and embedded interface security research including UART/JTAG discovery, debug pad triage, secure boot overview, and offline firmware |
+| [identity-federation](../systems/reverse-skill/skills/identity-federation/SKILL.md) | Use for authorized assessment of federated identity systems including SAML, OIDC, OAuth2 flows, SSO misconfiguration, and token confusion issues. |
+| [js-reverse](../systems/reverse-skill/skills/js-reverse/SKILL.md) | 在使用 js-reverse-mcp 做前端 JavaScript 逆向时使用，适用于签名链路定位、页面观察取证、运行时采样、本地补环境复现与证据化输出。优先适配当前环境里的 js-reverse_* 工具，需要更强的浏览器/CDP/Hook 面时联动 jshookmcp。 |
+| [llm-security](../systems/reverse-skill/skills/llm-security/SKILL.md) | Use for authorized security assessment of LLM applications and AI agents, including prompt injection, tool abuse, RAG exposure, memory poisoning, and model supp |
+| [macos-reverse](../systems/reverse-skill/skills/macos-reverse/SKILL.md) | Use for authorized macOS and Mach-O reverse engineering including codesign, Objective-C/Swift recovery, endpoint security surfaces, and Apple platform malware a |
+| [malware-analysis](../systems/reverse-skill/skills/malware-analysis/SKILL.md) | Use when analyzing suspected malware through static, dynamic, and behavioral techniques, including IOC extraction, YARA or Sigma rules, sandboxing, and anti-ana |
+| [mobile-reverse](../systems/reverse-skill/skills/mobile-reverse/SKILL.md) | Use for authorized Android or iOS application reverse engineering and security testing, including APK or IPA analysis, runtime instrumentation, SSL pinning, and |
+| [ot-ics](../systems/reverse-skill/skills/ot-ics/SKILL.md) | Use for authorized OT/ICS security assessment covering Purdue model zoning, PLC/SCADA exposure, industrial protocol discovery, and safe passive-first evaluation |
+| [pentest-tools](../systems/reverse-skill/skills/pentest-tools/SKILL.md) | 主动渗透测试工具链。覆盖信息收集、端口扫描、漏洞扫描、Web 渗透、SQL 注入、目录爆破、密码破解等场景。 通过 MCP server（pentestMCP / mcp-security-hub）将 20+ 安全工具暴露给 AI agent。 触发关键词：渗透测试、端口扫描、Nmap、漏洞扫描、Nuclei、SQL  |
+| [protocol-reverse](../systems/reverse-skill/skills/protocol-reverse/SKILL.md) | Use for authorized reverse engineering of custom binary protocols, Protobuf/gRPC, WebSocket frames, and PCAP-driven protocol recovery. |
+| [radare2](../systems/reverse-skill/skills/radare2/SKILL.md) | Use this skill whenever the user wants to analyze binaries with radare2/r2 from the command line, including reverse engineering, disassembly, function analysis, |
+| [radio-sdr](../systems/reverse-skill/skills/radio-sdr/SKILL.md) | Use for authorized RF/SDR security research including signal identification, replay feasibility study in shielded labs, and wireless protocol analysis outside c |
+| [reverse-engineering](../systems/reverse-skill/skills/reverse-engineering/SKILL.md) | Provides reverse engineering techniques. Use when the main job is to understand how a compiled, obfuscated, packed, or virtualized target works before exploitin |
+| [supply-chain-security](../systems/reverse-skill/skills/supply-chain-security/SKILL.md) | Use for software supply-chain security assessment covering SBOM, SCA, CI/CD pipelines, container images, build integrity, dependency provenance, and vulnerabili |
+| [thick-client](../systems/reverse-skill/skills/thick-client/SKILL.md) | Use for authorized security testing of desktop thick clients including local storage, update channels, IPC, traffic, and client-side trust boundaries. |
+| [threat-hunting](../systems/reverse-skill/skills/threat-hunting/SKILL.md) | Use for blue-team threat hunting, detection engineering with Sigma/YARA, SIEM query design, and incident detection validation. |
+| [wifi-wireless](../systems/reverse-skill/skills/wifi-wireless/SKILL.md) | Use for authorized wireless security assessment including Wi-Fi capture, WPA handshake analysis, rogue AP detection research, and lab-only deauth testing. |
+| [windows-ad](../systems/reverse-skill/skills/windows-ad/SKILL.md) | Use for authorized Active Directory and Windows identity attacks including Kerberos, AD CS, BloodHound paths, NTLM relay, and domain privilege escalation resear |
 
 ## Bundle: superintelligence (9 skills)
 

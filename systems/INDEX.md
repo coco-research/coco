@@ -12,6 +12,7 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | hyperframes | `systems/hyperframes/` | 20 | 0 | 0 | 928 |
 | learning | `systems/learning/` | 0 | 0 | 0 | 3 |
 | m0 | `systems/m0/` | 4 | 0 | 0 | 9 |
+| reverse-skill | `systems/reverse-skill/` | 33 | 0 | 0 | 129 |
 | superintelligence | `systems/superintelligence/` | 9 | 0 | 0 | 1246 |
 | team | `systems/team/` | 0 | 0 | 0 | 2 |
 | aider | `adapters/aider/` | 0 | 0 | 0 | 2 |

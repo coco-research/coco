@@ -1,0 +1,35 @@
+name: Self-hosted probe
+
+# Smoke test for the coco-mac-local self-hosted runner. Verifies end-to-end
+# job pickup + execution without burning any GitHub Actions minutes.
+#
+# This is the canary for the self-hosted migration. It deliberately avoids
+# actions/setup-python (which has a known macOS-self-hosted bug: see
+# https://github.com/actions/setup-python/issues/1301 — sets AGENT_TOOLSDIRECTORY
+# to /Users/runner/hostedtoolcache and fails with mkdir /Users/runner: Permission denied
+# regardless of RUNNER_TOOL_CACHE in the runner's own env, since the actions/runner
+# worker does not propagate arbitrary process env to step processes). When that is
+# resolved upstream, lint-frontmatter.yml's setup-python call will Just Work.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, chore/self-hosted-ci]
+    paths:
+      - '.github/workflows/self-hosted-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: [self-hosted, macOS, ARM64, local]
+    timeout-minutes: 5
+    steps:
+      - name: Prove runner identity
+        run: |
+          echo "host=$(hostname)"
+          echo "arch=$(uname -m)"
+          echo "kernel=$(uname -sr)"
+          echo "user=$(whoami)"
+          echo "gh_user=${GH_USER:-unset}"

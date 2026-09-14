@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 223 skills** — 72 core, 151 across 8 bundles.
+**Total: 220 skills** — 72 core, 148 across 8 bundles.
 
 ## Design (15)
 
@@ -242,13 +242,12 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [m0-recall](../systems/m0/skills/m0-recall/SKILL.md) | Read the recent M0 operational thread for a project, newest first, to pick up work started in this or another tool. Answers 'where were we' and 'what is next' b |
 | [m0-remember](../systems/m0/skills/m0-remember/SKILL.md) | Write one entry to the M0 operational thread so the next session, in this tool or any other, can continue the work. Records a completed step, a decision, a veri |
 
-## Bundle: reverse-skill (36 skills)
+## Bundle: reverse-skill (33 skills)
 
 | Skill | Description |
 |-------|-------------|
 | [api-security](../systems/reverse-skill/skills/api-security/SKILL.md) | Use for authorized security assessment of REST, GraphQL, WebSocket, or SOAP APIs, including discovery, authentication, authorization, rate-limit, and CI/CD test |
 | [apk-reverse](../systems/reverse-skill/skills/apk-reverse/SKILL.md) | 在 CLI 环境下做 Android APK 逆向时使用。适用于 APK 解包、Java 反编译、smali 修改、重打包、Frida 动态 Hook，以及按需切换到 so/native 分析。优先使用本机已安装的 jadx、apktool、frida、adb、ida-reverse、radare2。 |
-| [attack-chain](../systems/reverse-skill/skills/attack-chain/SKILL.md) | Use for authorized multi-stage attack-path planning and orchestration when a task spans reconnaissance, initial access, privilege escalation, lateral movement,  |
 | [binary-diff](../systems/reverse-skill/skills/binary-diff/SKILL.md) | 跨版本符号迁移与二进制差分。当你有旧版本的符号/逆向结果，需要快速迁移到新版本时使用。 适用场景：内核缺 PDB 用旧版符号推导、程序更新后批量迁移函数名、应用更新后快速定位新偏移。 核心方法：用 LLM 做结构化差异比对，程序化输入输出，成本极低（200 函数 ~1 元）。 触发关键词：符号迁移、bindiff、跨版 |
 | [browser-automation](../systems/reverse-skill/skills/browser-automation/SKILL.md) | 统一自动化入口。覆盖浏览器自动化（Playwright）和 Windows 桌面应用自动化（OpenReverse）。 浏览器场景：打开网页、点击、填表、爬取、截图、自动化登录、渗透页面交互。 桌面场景：操作 IDA/x64dbg 等 GUI 工具、Windows UI Automation、视觉驱动交互、桌面应用网络 |
 | [browser-extension-reverse](../systems/reverse-skill/skills/browser-extension-reverse/SKILL.md) | Use for authorized reverse engineering of browser extensions (Chrome/Firefox) including manifest analysis, background workers, and extension-based credential or |
@@ -270,10 +269,8 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [malware-analysis](../systems/reverse-skill/skills/malware-analysis/SKILL.md) | Use when analyzing suspected malware through static, dynamic, and behavioral techniques, including IOC extraction, YARA or Sigma rules, sandboxing, and anti-ana |
 | [mobile-reverse](../systems/reverse-skill/skills/mobile-reverse/SKILL.md) | Use for authorized Android or iOS application reverse engineering and security testing, including APK or IPA analysis, runtime instrumentation, SSL pinning, and |
 | [ot-ics](../systems/reverse-skill/skills/ot-ics/SKILL.md) | Use for authorized OT/ICS security assessment covering Purdue model zoning, PLC/SCADA exposure, industrial protocol discovery, and safe passive-first evaluation |
-| [patch-diff-exploit](../systems/reverse-skill/skills/patch-diff-exploit/SKILL.md) | N-day 补丁差分到利用。从厂商发布的补丁里反推漏洞点、写 PoC、做成可用的攻击模块。 适用场景：已知 CVE 编号但只有补丁没有 PoC、SRC/红队需要打击未及时更新的资产、N-day 武器化、Patch Tuesday 跟进。 核心方法：拿 before/after 二进制 → 对齐符号 → 二进制 diff |
 | [pentest-tools](../systems/reverse-skill/skills/pentest-tools/SKILL.md) | 主动渗透测试工具链。覆盖信息收集、端口扫描、漏洞扫描、Web 渗透、SQL 注入、目录爆破、密码破解等场景。 通过 MCP server（pentestMCP / mcp-security-hub）将 20+ 安全工具暴露给 AI agent。 触发关键词：渗透测试、端口扫描、Nmap、漏洞扫描、Nuclei、SQL  |
 | [protocol-reverse](../systems/reverse-skill/skills/protocol-reverse/SKILL.md) | Use for authorized reverse engineering of custom binary protocols, Protobuf/gRPC, WebSocket frames, and PCAP-driven protocol recovery. |
-| [pwn-chain](../systems/reverse-skill/skills/pwn-chain/SKILL.md) | 从逆向走到可用利用 (Working Exploit) 的全链路工程化方法。 适用场景：拿到了二进制 + 漏洞点 + 目标环境，需要写出一个能稳定打通的 exploit（不是只能本地复现一下、远程一打就崩的脚本）。 覆盖三大方向：栈溢出 / 堆利用 / 内核 pwn。强调"CTF 本地通 → 真实远程稳定打通"的工程差 |
 | [radare2](../systems/reverse-skill/skills/radare2/SKILL.md) | Use this skill whenever the user wants to analyze binaries with radare2/r2 from the command line, including reverse engineering, disassembly, function analysis, |
 | [radio-sdr](../systems/reverse-skill/skills/radio-sdr/SKILL.md) | Use for authorized RF/SDR security research including signal identification, replay feasibility study in shielded labs, and wireless protocol analysis outside c |
 | [reverse-engineering](../systems/reverse-skill/skills/reverse-engineering/SKILL.md) | Provides reverse engineering techniques. Use when the main job is to understand how a compiled, obfuscated, packed, or virtualized target works before exploitin |

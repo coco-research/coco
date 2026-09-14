@@ -23,7 +23,6 @@
 3. 找目标命令的实现类/方法
 4. 看 P/Invoke 段（Interop.* 命名空间）—— native API 调用在这里
 5. 提取内嵌资源（有些工具嵌配置/模板）
-6. 如需改特征（EDR 规避）：改命令字符串、API 调用、字符串常量
 ```
 
 ### Rubeus 结构示例
@@ -150,7 +149,6 @@ brew install --cask dotnet-sdk
 
 - Medium《De-obfuscating and reversing a .NET/C# spyware》— dnSpy + de4dot 实战 info-stealer 脱混淆
 - YouTube《dnSpy Patch .NET EXEs & DLLs》— 手把手 patch + keygen
-- 看雪论坛 .NET 逆向版块 — 搜 ".net 逆向" / "dnSpy" / "ConfuserEx" 有大量实战帖、Nuitka 逆向、免杀讨论
 - Guided Hacking《Top 5 .NET Reverse Engineering Tools》— dnSpy 仍排第一
 - StackExchange / Reverse Engineering — `DynamicMethod` 调试等进阶问题
 

@@ -1,6 +1,6 @@
 ---
 name: code-verification
-description: Post-implementation verification system that catches AI-introduced bugs. Covers 7 categories — TDZ errors, import mismatches, reference integrity, dead code, React state/effects, mock isolation, and CSS integrity. Run after every code change, after writing tests, or before marking a task complete. Triggers on "verify", "check code quality", "run verification", "audit code", "quality gate", "pre-commit check".
+description: "Use after every code change, after writing tests, or before marking a task complete, and when the user says verify, quality gate, or audit code. Runs a 7-category mechanical check for TDZ, import, dead code, and mock leakage bugs."
 domain: engineering
 ---
 
@@ -279,7 +279,7 @@ This skill is the workflow. The agents are the executors:
 
 | Agent | Role | When |
 |-------|------|------|
-| `verification-agent` | Runs Categories 1-5, 7 on product code | After implementation |
+| Inline (main agent) | Runs Categories 1-5, 7 on product code | After implementation |
 | `test-guardian` | Runs Category 6 on test code | After writing tests |
 | `code-reviewer` | Broader quality review (SOLID, perf, security) | Before merge/deploy |
 
@@ -287,8 +287,8 @@ This skill is the workflow. The agents are the executors:
 
 | Rule | Role | When |
 |------|------|------|
-| `quality-gate.mdc` | Enforces 6 mandatory checks after every edit | Always (auto-applied) |
-| `pre-implementation-checklist.mdc` | Prevents bugs before they're written | Always (auto-applied) |
+| `verification-workflow.mdc` | Merged quality gate + pre-implementation checklist, enforced after every change | Always (auto-applied) |
+| `code-quality.mdc` | Documentation, error handling, and logging standards | When editing JS/TS/JSX/PY |
 
 ## Quick Commands
 

@@ -1,6 +1,6 @@
 ---
 name: gsd-autonomous
-description: "Run all remaining phases autonomously — discuss→plan→execute per phase"
+description: "Use when the user says run the rest autonomously, overnight, or hands-off through the remaining phases. Runs discuss, plan, execute per phase, pausing only for user decisions, then milestone audit, complete, and cleanup."
 argument-hint: "[--from N] [--to N] [--only N] [--interactive]"
 allowed-tools:
   - Read

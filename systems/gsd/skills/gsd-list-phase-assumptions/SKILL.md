@@ -1,6 +1,6 @@
 ---
 name: gsd-list-phase-assumptions
-description: "Surface Claude's assumptions about a phase approach before planning"
+description: "Use when the user wants to see what the agent assumes about a phase's approach, order, scope, risks and dependencies before planning starts, instead of running a full discuss session. Read-only; ends with a prompt for feedback."
 argument-hint: "[phase]"
 allowed-tools:
   - Read

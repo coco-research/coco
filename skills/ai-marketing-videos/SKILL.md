@@ -19,7 +19,10 @@ Create professional marketing videos via [inference.sh](https://inference.sh) CL
 ## Quick Start
 
 ```bash
-curl -fsSL https://cli.inference.sh | sh && infsh login
+# Do not pipe a remote script to sh. Fetch, inspect, then run only after
+# the user explicitly confirms:
+curl -fsSL https://cli.inference.sh -o /tmp/infsh-install.sh
+# review /tmp/infsh-install.sh, then: bash /tmp/infsh-install.sh && infsh login
 
 # Generate a product promo video
 infsh app run google/veo-3-1-fast --input '{
@@ -275,6 +278,9 @@ done
 - [ ] Mobile-optimized
 
 ## Related Skills
+
+These are third-party packages. Show the exact identifier to the user and
+wait for an explicit yes that names that package. Do not pass `-y`.
 
 ```bash
 # Video generation

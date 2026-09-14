@@ -7,11 +7,12 @@ budget). Replaces the keyword-scoring shell. Free/local. The LIGHT layer — nev
 persona records; /SI-Orchestrate drills into only the selected teams afterward.
 
 When the local embedding endpoint is unavailable, FALL BACK to keyword overlap
-(same shape JSON, method=keyword) so Stage A stays usable without LM Studio.
+(same shape JSON, method=keyword). Product (Mira): this is a *supported degraded
+production path* — not dogfood-only / unsupported.
 
-Keyword path is a *degraded* route (dogfood SI-Decide 2026-09-14): exit 0 + method tag,
-but NEVER auto-delegate, warn loudly, and do not reuse embed FLOOR/DELEGATE_MARGIN as
-if Jaccard were commensurate with cosine.
+Honesty bar: surface method=keyword + degraded; never claim keyword ≡ embed cosine;
+NEVER auto-delegate on keyword; warn loudly; if keyword also cannot run, fail closed.
+Do not reuse embed FLOOR/DELEGATE_MARGIN as if Jaccard were commensurate with cosine.
 
     python3 superintelligence/scripts/meta_select.py "should we ship an AI compliance product?"
     -> JSON {prompt, method, teams:[{team_id,short,score,weight,cells:[{cell,score}]}], delegate}
@@ -104,7 +105,7 @@ def select_embed(prompt, profs):
 
 
 def select_keyword(prompt, profs):
-    """Degraded path: return top-N by keyword overlap; never auto-delegate; warn loudly."""
+    """Supported degraded production path: top-N keyword overlap; never auto-delegate; warn loudly."""
     scored = []
     for key, tid, short, profile, cells in profs:
         score = keyword_overlap(prompt, profile)

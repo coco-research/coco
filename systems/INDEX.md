@@ -19,5 +19,6 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | generic | `adapters/generic/` | 0 | 0 | 0 | 3 |
 | hermes | `adapters/hermes/` | 0 | 0 | 0 | 3 |
 | vscode | `adapters/vscode/` | 0 | 0 | 0 | 3 |
+| windsurf | `adapters/windsurf/` | 0 | 0 | 0 | 2 |
 
 > **Advertised as a bundle but installs no artifacts:** `team`. These directories hold documentation only, so passing them to `--systems` has no effect.

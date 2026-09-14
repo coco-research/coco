@@ -63,7 +63,9 @@ jobs:
 
       - name: Adapter smoke test (dry-run)
         run: |
-          for adapter in claude-code cursor vscode codex generic; do
+          for adapter in claude-code cursor vscode codex generic hermes; do
+            # hermes ships via PR #118; skip until it lands on main.
+            [ -d "adapters/$adapter" ] || { echo "SKIP: $adapter (not present)"; continue; }
             echo "--- testing $adapter (dry-run) ---"
             bash adapters/$adapter/install.sh --dry-run > /tmp/$adapter.out 2>&1 || {
               echo "FAIL: $adapter"

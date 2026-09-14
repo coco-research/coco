@@ -22,6 +22,8 @@
 set -euo pipefail
 
 REPO_URL="https://github.com/coco-research/coco.git"
+# Keep in sync with package.json version. Clone the last tagged release, not floating main.
+PINNED_TAG="v1.2.0"
 INSTALL_DIR="${COCO_DIR:-$HOME/.coco}"
 YES="${COCO_BOOTSTRAP_YES:-}"
 PASS_THROUGH=()
@@ -68,16 +70,24 @@ fi
 
 # ── Clone or update ──────────────────────────────────────────────────────────
 if [ -d "$INSTALL_DIR/.git" ]; then
-  echo "Coco already exists at $INSTALL_DIR. Pulling latest..."
-  git -C "$INSTALL_DIR" pull --ff-only
+  # Detached HEAD is the tagged install. A branch checkout (typical prior bootstrap
+  # of main) must not be force-moved onto an older pin.
+  if git -C "$INSTALL_DIR" symbolic-ref -q HEAD >/dev/null; then
+    echo "Coco already exists at $INSTALL_DIR. Pulling latest..."
+    git -C "$INSTALL_DIR" pull --ff-only
+  else
+    echo "Coco already exists at $INSTALL_DIR (detached). Updating to $PINNED_TAG..."
+    git -C "$INSTALL_DIR" fetch --tags --force --depth 1 origin "refs/tags/${PINNED_TAG}:refs/tags/${PINNED_TAG}"
+    git -C "$INSTALL_DIR" checkout --force "$PINNED_TAG"
+  fi
 else
   if [ -e "$INSTALL_DIR" ]; then
     echo "Error: $INSTALL_DIR exists but is not a Coco clone." >&2
     echo "Remove it manually or set COCO_DIR to a different path." >&2
     exit 1
   fi
-  echo "Cloning Coco..."
-  git clone --quiet "$REPO_URL" "$INSTALL_DIR"
+  echo "Cloning Coco $PINNED_TAG..."
+  git clone --quiet --branch "$PINNED_TAG" --depth 1 "$REPO_URL" "$INSTALL_DIR"
 fi
 
 # ── Commit verification gate ─────────────────────────────────────────────────
@@ -91,8 +101,8 @@ echo "│  Commit : $COMMIT_HASH"
 echo "│  Date   : $COMMIT_DATE"
 echo "│  Message: $COMMIT_MSG"
 echo "│"
-echo "│  Confirm this matches the latest release on GitHub:"
-echo "│  https://github.com/coco-research/coco/commits/main"
+echo "│  Confirm this matches the $PINNED_TAG release on GitHub:"
+echo "│  https://github.com/coco-research/coco/releases/tag/$PINNED_TAG"
 echo "└──────────────────────────────────────────────────────────────────────┘"
 echo ""
 

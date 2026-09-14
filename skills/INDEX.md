@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 185 skills** — 70 core, 115 across 7 bundles.
+**Total: 186 skills** — 71 core, 115 across 7 bundles.
 
 ## Design (15)
 
@@ -67,14 +67,15 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [workflow-routing](workflow-routing/SKILL.md) | Use when starting any task, before invoking any other skill or GSD command, to route between Superpowers skills and GSD commands from project state and task sco |
 | [writing-plans](writing-plans/SKILL.md) | Use when you have a spec or requirements for a multi-step task, before touching code |
 
-## Meta (6)
+## Meta (7)
 
 | Skill | Description |
 |-------|-------------|
 | [cli-anything](cli-anything/SKILL.md) | Wrap any command-line tool into a JSON-emitting agent skill. Use when you want to make a CLI reliably callable and parseable by an AI agent — introspect its --h |
-| [coco-cli](coco-cli/SKILL.md) | Install, update, version-check, or uninstall the Coco open-source AI workflow framework via its CLI (cocosuperintelligence, run with npx). Use when setting up C |
+| [coco-cli](coco-cli/SKILL.md) | Install, update, version-check, or uninstall the Coco open-source AI workflow framework via bin/coco.js. Use when setting up Coco on a machine, checking out the |
 | [coco-loop](coco-loop/SKILL.md) | Start a safe, governed autonomous loop from a plain-language goal. Use when the user says /coco-loop, "run an autonomous loop", "keep my build green for N hours |
 | [find-skills](find-skills/SKILL.md) | Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express int |
+| [goal](goal/SKILL.md) | Persistent project goal that survives across sessions and tools, with continuous-execution loop semantics. Use when someone asks to "set a goal", "what is my go |
 | [skill-creator](skill-creator/SKILL.md) | Use when the user asks to create, scaffold, update or package a skill, or asks how skill frontmatter, progressive disclosure or bundled resources should be stru |
 | [writing-skills](writing-skills/SKILL.md) | Use when creating new skills, editing existing skills, or verifying skills work before deployment |
 

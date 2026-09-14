@@ -31,6 +31,7 @@ bash adapters/claude-code/install.sh --dry-run
 ## Uninstall
 
 ```bash
-# remove symlinks coming from this repo
-find ~/.claude -type l -lname "*$(pwd)*" -delete
+# remove symlinks coming from this repo (run from the clone root)
+CLONE="$(pwd)"
+find ~/.claude -type l -lname "${CLONE}/*" -delete
 ```

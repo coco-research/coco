@@ -16,6 +16,7 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | superintelligence | `systems/superintelligence/` | 9 | 0 | 0 | 1246 |
 | team | `systems/team/` | 0 | 0 | 0 | 2 |
 | aider | `adapters/aider/` | 0 | 0 | 0 | 2 |
+| amazon-q | `adapters/amazon-q/` | 0 | 0 | 0 | 2 |
 | claude-code | `adapters/claude-code/` | 0 | 0 | 0 | 3 |
 | cline | `adapters/cline/` | 0 | 0 | 0 | 2 |
 | codex | `adapters/codex/` | 0 | 0 | 0 | 3 |

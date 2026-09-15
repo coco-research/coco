@@ -24,7 +24,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [visual-explainer](visual-explainer/SKILL.md) | Generate self-contained HTML visual explanations for systems, code changes, plans, data, and technical concepts. Use for diagrams, architecture overviews, diff  |
 | [web-design-guidelines](web-design-guidelines/SKILL.md) | Review UI code for Web Interface Guidelines compliance. Use when asked to "review my UI", "check accessibility", "audit design", "review UX", or "check my site  |
 
-## Engineering (21)
+## Engineering (22)
 
 | Skill | Description |
 |-------|-------------|
@@ -38,6 +38,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [expo-api-routes](expo-api-routes/SKILL.md) | Use when adding server-side API routes to an Expo Router app (+api.ts files) for secrets, database access, third-party proxies, webhooks, CORS, or EAS Hosting d |
 | [finishing-a-development-branch](finishing-a-development-branch/SKILL.md) | Use when implementation is done and tests pass and the user must choose to merge locally, open a PR, keep the branch, or discard it. Presents those four options |
 | [generate-tests](generate-tests/SKILL.md) | Use when asked to generate tests for a file, module or component, to raise coverage, or to bootstrap a suite for untested code. Detects the project's test frame |
+| [maker-mdap](maker-mdap/SKILL.md) | Knowledge base from "Solving a Million-Step LLM Task with Zero Errors" (Meyerson, Paolo, Dailey, Shahrzad, Francon, Hayes, Qiu, Hodjat, Miikkulainen — arXiv:251 |
 | [media-memory](media-memory/SKILL.md) | Use when the user sends or generates an image, screenshot, video, audio or file and wants it saved, or asks to find past media (that diagram, the mockup from la |
 | [openai-agents](openai-agents/SKILL.md) | Build AI applications with OpenAI Agents SDK - text agents, voice agents, multi-agent handoffs, tools with Zod schemas, guardrails, and streaming. Prevents 11 d |
 | [openai-api](openai-api/SKILL.md) | Use when implementing GPT chat, streaming, function calling, embeddings for RAG, images, audio or batch jobs, or troubleshooting 429 rate limits and API or Type |
@@ -50,7 +51,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) | Use when writing, reviewing, or refactoring React or Next.js code, or optimizing data fetching, bundle size, and re-renders. Applies Vercel impact-prioritized p |
 | [voice-ai](voice-ai/SKILL.md) | Voice AI architecture and implementation guide. Covers two architectures: speech-to-speech (OpenAI Realtime API, lowest latency) and pipeline (STT->LLM->TTS, mo |
 
-## Foundational (14)
+## Foundational (13)
 
 | Skill | Description |
 |-------|-------------|
@@ -60,7 +61,6 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [executing-plans](executing-plans/SKILL.md) | Use when you have a written implementation plan to execute in a separate session with review checkpoints |
 | [humanizer](humanizer/SKILL.md) | Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written. Based on Wikipedia's compreh |
 | [karpathy-guidelines](karpathy-guidelines/SKILL.md) | Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, reviewing, or refactoring code to avoid overcomplication, make surgical changes, s |
-| [maker-mdap](maker-mdap/SKILL.md) | REQUIRED baseline — Maker MDAP (massively decomposed agentic processes). Use for long multi-step work that must stay reliable: decompose into tiny subtasks, vot |
 | [subagent-driven-development](subagent-driven-development/SKILL.md) | Use when executing implementation plans with independent tasks in the current session |
 | [systematic-debugging](systematic-debugging/SKILL.md) | Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes |
 | [ultra-think](ultra-think/SKILL.md) | Use when facing architectural decisions, complex trade-offs, strategic technology choices, or scaling and migration questions that deserve more than a quick ans |

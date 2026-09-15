@@ -29,6 +29,8 @@ AGENTS.md.bak
 node_modules/
 __pycache__/
 *.pyc
+.repowise/
+coco-ads-output*/
 
 # Untracked legacy worktrees / backups
 *.bak

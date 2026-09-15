@@ -15,7 +15,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [database-architect](database-architect.md) | Database architecture and design specialist. Use PROACTIVELY for database design decisions, data modeling, scalability planning, microservices data patterns, da |
 | [mcp-specialist](mcp-specialist.md) | MCP (Model Context Protocol) specialist covering server/client development, configuration, troubleshooting, tool setup, architecture, transport layers, and prot |
 | [pm-advisor](pm-advisor.md) | Product management advisor for feature planning, issue creation, prioritization, and data-driven product decisions. Use proactively when planning features, writ |
-| [refactoring-specialist](refactoring-specialist.md) | Senior refactoring specialist for transforming complex, poorly structured code into clean, maintainable systems. Use proactively when complexity metrics spike,  |
+| [refactoring-specialist](refactoring-specialist.md) | Senior refactoring specialist for transforming complex, poorly structured code into clean, maintainable systems. Use proactively when code quality metrics show  |
 | [test-guardian](test-guardian.md) | Ensures tests actually test what they claim. Catches tautological assertions, mock leakage, tests that pass for wrong reasons, missing edge cases. Run after wri |
 | [typescript-pro](typescript-pro.md) | Advanced TypeScript specialist for type-level programming, complex generics, end-to-end type safety, monorepo architecture, and large-scale migrations. Use when |
 | [ui-ux-designer](ui-ux-designer.md) | Research-backed UI/UX design critic providing opinionated, evidence-based feedback on interfaces. Use proactively when reviewing UI code, designing layouts, cho |

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://esm.sh; connect-src 'self' https://esm.sh; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+<title>Architecture Index — coco</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1f2328;
+    --accent: #0969da;
+    --surface: #f6f8fa;
+    --border: #d0d7de;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1b26;
+      --fg: #a9b1d6;
+      --accent: #7aa2f7;
+      --surface: #24283b;
+      --border: #414868;
+    }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+  }
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--fg);
+  }
+  .meta {
+    font-size: 0.875rem;
+    opacity: 0.7;
+    margin-bottom: 32px;
+  }
+  .diagram-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    max-width: 960px;
+    width: 100%;
+    overflow-x: auto;
+  }
+  .diagram-container svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+  .error {
+    color: #ff453a;
+    font-family: monospace;
+    font-size: 0.875rem;
+    white-space: pre-wrap;
+  }
+  .theme-toggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--fg);
+  }
+</style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">◐ Toggle theme</button>
+<h1>Architecture Index — coco</h1>
+<p class="meta">Pinned at 992abf3 · 2026-09-04 · C4-Container altitude</p>
+<div class="diagram-container" id="diagram" data-code="C4Container
+  title Architecture Index — coco
+  Container(skill_library, &quot;Agent Skill Library&quot;, &quot;Markdown + Python + Shell&quot;)
+  Container(command_surface, &quot;Slash Command Surface&quot;, &quot;Markdown&quot;)
+  Container(system_bundles, &quot;Bundled Orchestration Systems&quot;, &quot;Python + Markdown + JSON&quot;)
+  Container(agent_roster, &quot;Subagent Role Definitions&quot;, &quot;Markdown&quot;)
+  Container(install_adapters, &quot;Multi-Editor Install Adapters&quot;, &quot;Shell + Ruby + JSON&quot;)
+  Rel(skill_library, command_surface, &quot;Capability invocation&quot;)
+  Rel(skill_library, install_adapters, &quot;Skill registration&quot;)
+  Rel(skill_library, system_bundles, &quot;Nested skill hosting&quot;)
+  Rel(command_surface, system_bundles, &quot;Bundled command registration&quot;)
+  Rel(command_surface, agent_roster, &quot;Role dispatch&quot;)
+  Rel(command_surface, install_adapters, &quot;Command registration&quot;)
+  Rel(system_bundles, install_adapters, &quot;Bundle registration&quot;)
+  Rel(agent_roster, install_adapters, &quot;Agent registration&quot;)"></div>
+
+<script type="module">
+import { renderMermaidSVGAsync } from 'https://esm.sh/beautiful-mermaid@1.1.3'
+
+const themes = {
+  light: { bg: '#ffffff', fg: '#1f2328', accent: '#0969da', transparent: true },
+  dark: { bg: '#1a1b26', fg: '#a9b1d6', accent: '#7aa2f7', transparent: true }
+}
+
+let currentTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+
+async function render() {
+  const el = document.getElementById('diagram')
+  const code = el.dataset.code
+  try {
+    el.innerHTML = await renderMermaidSVGAsync(code, themes[currentTheme])
+  } catch (e) {
+    el.innerHTML = '<pre class="error">' + e.message + '</pre>'
+  }
+}
+
+window.toggleTheme = function() {
+  currentTheme = currentTheme === 'dark' ? 'light' : 'dark'
+  document.documentElement.style.setProperty('--bg', themes[currentTheme].bg)
+  document.documentElement.style.setProperty('--fg', themes[currentTheme].fg)
+  document.documentElement.style.setProperty('--accent', themes[currentTheme].accent)
+  render()
+}
+
+render()
+</script>
+</body>
+</html>

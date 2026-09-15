@@ -1,6 +1,6 @@
 # Risk & Compliance (GRC) Super Intelligence Team — Roster
 
-**Status:** generated from `registry.json` on 2026-06-11 by `build_roster_md.py` — regenerate, do not hand-edit.
+**Status:** generated from `registry.json` on 2026-09-03 by `build_roster_md.py` — regenerate, do not hand-edit.
 **Team ID:** `risk-compliance-super-intelligence`
 **Native personas:** 30 across 7 cells. **Cross-listed:** 12 (no new research).
 **Quality bar:** ≥8 source URLs, ≥3 recent signals, every `public_stance` carries an `evidence_url`. Full English prose.

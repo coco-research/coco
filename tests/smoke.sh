@@ -27,7 +27,7 @@ test -f docs/by-domain/pm.md && pass "docs/by-domain/pm.md generated" || fail "d
 
 echo ""
 echo "=== Smoke test: adapters dry-run ==="
-for adapter in claude-code cursor grok vscode codex generic hermes; do
+for adapter in claude-code cursor grok vscode pi-desktop codex generic hermes; do
   # hermes ships via PR #118; skip until it lands on main.
   [ -d "adapters/$adapter" ] || { echo "SKIP: $adapter (not present)"; continue; }
   bash adapters/$adapter/install.sh --dry-run > /tmp/$adapter.out 2>&1 \
@@ -75,6 +75,10 @@ PY
 echo ""
 echo "=== Smoke test: command cross-references ==="
 bash tests/check-command-refs.sh && pass "command cross-references resolve" || fail "command cross-references broken"
+
+echo ""
+echo "=== Smoke test: systems/gsd/ context-loading references ==="
+bash tests/check-gsd-refs.sh && pass "systems/gsd/ references resolve" || fail "systems/gsd/ references broken"
 
 echo ""
 echo "=== Smoke test: /team evidence-gate integrity ==="

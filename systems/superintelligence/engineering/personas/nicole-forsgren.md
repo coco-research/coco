@@ -1,6 +1,6 @@
 ---
 slug: nicole-forsgren
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: devops-platform
 cell_role: lead-driver

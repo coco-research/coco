@@ -61,7 +61,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [`/team:reanalyse`](team/reanalyse.md) | Use when the user runs /team reanalyse, or already-approved work must be re-checked against current code for regressions. Diffs since the last review, re-verifi |
 | [`/team:research`](team/research.md) | Use when the user wants a multi-angle investigation on a topic with sources, or the team router action is research. Runs a research-heavy pipeline across domain |
 | [`/team:review`](team/review.md) | Use when the /team router routes action=review, or the user asks for existing code, docs, or a diff reviewed. Scope mapping, 3-5 specialist lenses, cross-review |
-| [`/team:roles`](team/roles.md) |  |
+| [`/team:roles`](team/roles.md) | Use when selecting roles for a /team run, validating --roles IDs, or adding a new role. Roster of role definitions with layer, category, domain tags, and the sy |
 | [`/team:scrape`](team/scrape.md) | Use when the user asks to research URLs or topics across the web, compare sources, or produce a sourced research report. Fans out up to 6 parallel researchers,  |
 | [`/team:ship`](team/ship.md) | Use when the user wants an idea taken from concept to a shipped, reviewed product, or when the /team router picks ship. Runs six build stages, seven hard verifi |
 | [`/team:test`](team/test.md) | Use when the user asks to add missing tests, close coverage gaps, or prove a suite runs. Runs the /team test pipeline: coverage analysis, test writing, then a r |

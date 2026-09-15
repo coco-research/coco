@@ -1,10 +1,10 @@
 ---
-name: strategy-super-intelligence
-team: strategy
-personas: 25
-cells: 7
-command_prefix: /SI-Strat
-last_updated: 2026-06-01
+name: "strategy-super-intelligence"
+description: "Strategy Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md."
+team_id: "strategy-super-intelligence"
+team_name: "Strategy Super Intelligence Team"
+last_updated: "2026-06-01"
+schema_version: "1.0"
 ---
 
 # Strategy Super Intelligence Team

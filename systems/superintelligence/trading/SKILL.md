@@ -1,10 +1,10 @@
 ---
-name: trading-super-intelligence
-team: trading
-personas: 43
-cells: 8
-command_prefix: /SI-Trade
-last_updated: 2026-06-01
+name: "trading-super-intelligence"
+description: "Trading Super Intelligence Team. Named real-world personas across 8 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md."
+team_id: "trading-super-intelligence"
+team_name: "Trading Super Intelligence Team"
+last_updated: "2026-06-01"
+schema_version: "1.0"
 ---
 
 # Trading Super Intelligence Team

@@ -1,8 +1,8 @@
 ---
+name: legal-ip-super-intelligence
+description: "Your legal, IP, and regulatory brain trust. 31 named personas across 7 cells covering patent strategy, tech licensing, regulatory litigation, AI governance, open-source compliance, privacy law, and antitrust."
 team_id: legal-ip-super-intelligence
 team_name: Legal & IP Super Intelligence Team
-personas_count: 31
-cells_count: 7
 last_updated: 2026-09-04
 schema_version: 1.0
 ---

@@ -1,10 +1,10 @@
 ---
-name: gtm-super-intelligence
-team: gtm
-personas: 23
-cells: 7
-command_prefix: /SI-GTM
-last_updated: 2026-06-01
+name: "gtm-super-intelligence"
+description: "Sales, GTM & Marketing Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md."
+team_id: "gtm-super-intelligence"
+team_name: "Sales, GTM & Marketing Super Intelligence Team"
+last_updated: "2026-06-01"
+schema_version: "1.0"
 ---
 
 # Sales, GTM & Marketing Super Intelligence Team

@@ -19,8 +19,8 @@ Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds
 
 [![License: Open-core](https://img.shields.io/badge/License-Open--core-yellow.svg?style=for-the-badge)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.2.0-blue?style=for-the-badge)](CHANGELOG.md)
-[![Skills](https://img.shields.io/badge/skills-222-emerald?style=for-the-badge)](skills/)
-[![Commands](https://img.shields.io/badge/commands-286-indigo?style=for-the-badge)](commands/)
+[![Skills](https://img.shields.io/badge/skills-226-emerald?style=for-the-badge)](skills/)
+[![Commands](https://img.shields.io/badge/commands-386-indigo?style=for-the-badge)](commands/)
 [![Personas](https://img.shields.io/badge/personas-389-violet?style=for-the-badge)](systems/superintelligence/)
 [![CI](https://img.shields.io/github/actions/workflow/status/coco-research/coco/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/coco-research/coco/actions)
 
@@ -145,7 +145,7 @@ AI chat context is fragile and wipes on `/clear`. CoCo persists phase state, dec
 <td width="33%" valign="top">
 
 ### 3. Vendor-neutral portability
-CoCo compiles its rules, templates, and agent definitions into pure Markdown and YAML frontmatter. Native IDE adapters inject the same library into Claude Code, Cursor, Codex CLI, or any `AGENTS.md` tool — so your workflows follow you even if you switch AI editors.
+CoCo compiles its rules, templates, and agent definitions into pure Markdown and YAML frontmatter. Native IDE adapters inject the same library into Claude Code, Cursor, Codex CLI, PI-Desktop, VS Code, or any `AGENTS.md` tool — so your workflows follow you even if you switch AI editors.
 
 </td>
 </tr>
@@ -216,8 +216,8 @@ A standard install equips your workspace with a lightweight core; full activatio
 
 <table align="center">
 <tr>
-<td align="center" width="20%"><h3>222</h3><sub>Skills</sub><br><small>74 Core + 148 Bundle</small></td>
-<td align="center" width="20%"><h3>286</h3><sub>Slash Commands</sub><br><small>44 Core + 242 Generated</small></td>
+<td align="center" width="20%"><h3>226</h3><sub>Skills</sub><br><small>74 Core + 152 Bundle</small></td>
+<td align="center" width="20%"><h3>386</h3><sub>Slash Commands</sub><br><small>44 Core + 342 Generated</small></td>
 <td align="center" width="20%"><h3>34</h3><sub>Specialized Agents</sub><br><small>10 Core + 24 Bundle</small></td>
 <td align="center" width="20%"><h3>389</h3><sub>Expert Personas</sub><br><small>Super Intelligence Board</small></td>
 <td align="center" width="20%"><h3>15</h3><sub>Cross-IDE Rules</sub><br><small>Cursor MDC Rules</small></td>
@@ -282,6 +282,8 @@ CoCo ships **222 skills** (70 core + 115 across bundles). These are not prompt s
 ## System Bundles
 
 Bundles are opt-in packages that extend the workspace with specialized databases, pipelines, and rosters. Enable them with `--systems <name>`.
+
+One further bundle, `reverse-skill`, is deliberately not part of any default install and is not counted among the four below: it vendors reverse-engineering and penetration-testing methodology under [`systems/reverse-skill/`](systems/reverse-skill/), and it is security tooling that stays installed only when it is asked for by name, with `--systems reverse-skill`. See [`systems/reverse-skill/README.md`](systems/reverse-skill/README.md) for what it contains and how it was curated.
 
 ### 1. GSD (Get Shit Done)
 An orchestration engine of **68 skills and 24 agents** that manages the lifecycle of complex codebases. A disk-backed phase database records goals, decisions, milestones, and blockers; **workstreams** spin up isolated git checkouts to test refactors without polluting main; **forensics** performs post-mortem root-cause audits when a phase fails; and **autonomous mode** runs parallel waves of subagents through plan milestones end-to-end.
@@ -565,7 +567,10 @@ bash install.sh --systems superintelligence
 ```bash
 bash install.sh --adapter claude-code
 bash install.sh --adapter cursor
+bash install.sh --adapter grok
+bash install.sh --adapter vscode
 bash install.sh --adapter codex
+bash install.sh --adapter pi-desktop
 bash install.sh --adapter generic
 ```
 
@@ -651,6 +656,12 @@ Until `cocosuperintelligence` is published on npmjs.com, do not use `npx` for th
 <td>Links MDC rules and custom workspace skills.</td>
 </tr>
 <tr>
+<td><strong>Grok Build / Grok CLI</strong></td>
+<td><code>grok</code></td>
+<td>Stable</td>
+<td>Links skills, commands, agents and rules into <code>~/.grok/</code>. Registers <code>coco-platform</code> MCP and m0 hooks when those binaries are present.</td>
+</tr>
+<tr>
 <td><strong><a href="https://github.com/openai/codex">Codex CLI</a></strong></td>
 <td><code>codex</code></td>
 <td>Stable</td>
@@ -683,8 +694,8 @@ Until `cocosuperintelligence` is published on npmjs.com, do not use `npx` for th
 <table>
 <tr><td><strong>Spec Version</strong></td><td>1.2.0</td></tr>
 <tr><td><strong>License</strong></td><td>Open-core — <a href="LICENSE">MIT</a> core; Super Intelligence is <a href="systems/superintelligence/LICENSE">proprietary</a></td></tr>
-<tr><td><strong>Total Skills</strong></td><td>222 with all bundles installed (74 Core + 148 Bundle)</td></tr>
-<tr><td><strong>Slash Commands</strong></td><td>286 with all bundles — 44 Core (shipped) + 242 Super Intelligence (225 per-team + 17 cross-team, generated at install)</td></tr>
+<tr><td><strong>Total Skills</strong></td><td>226 with all bundles installed (74 Core + 152 Bundle)</td></tr>
+<tr><td><strong>Slash Commands</strong></td><td>386 with all bundles — 44 Core (shipped) + 342 Super Intelligence (325 per-team + 17 cross-team, generated at install)</td></tr>
 <tr><td><strong>Specialized Agents</strong></td><td>34 (10 Core + 24 GSD Bundle)</td></tr>
 <tr><td><strong>Expert Personas</strong></td><td>389 across 9 departments and 70 cells</td></tr>
 <tr><td><strong>System Bundles</strong></td><td>5 (GSD, Brain, Cognee, HyperFrames, Super Intelligence) — opt in with <code>--systems &lt;name&gt;</code>. <code>/team</code> is core and needs no flag.</td></tr>
@@ -720,7 +731,7 @@ Every skill lives at <code>skills/&lt;name&gt;/SKILL.md</code>. Edit it directly
 <summary><strong>How do I cleanly uninstall CoCo?</strong></summary>
 Because CoCo uses symbolic links, removal is non-destructive:
 <pre>CLONE="$(pwd)"
-find ~/.claude ~/.cursor ~/.copilot -type l -lname "${CLONE}/*" -delete</pre>
+find ~/.claude ~/.cursor ~/.grok ~/.copilot -type l -lname "${CLONE}/*" -delete</pre>
 This removes only links whose target is inside this clone. A contains-match such as
 <code>*$(pwd)*</code> would also delete links into any path that merely contains the
 folder name (for example <code>coco-research</code> when the clone is <code>coco</code>).

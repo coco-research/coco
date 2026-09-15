@@ -28,9 +28,9 @@ signature_moves:
   - "Don't optimize for 2030 in isolation — decisions made today lock in infrastructure for decades. Path dependence is real."
 public_stances:
   - stance: "Transmission capacity must triple by 2035 to achieve cost-effective US decarbonization — current build rates deliver less than 20% of needed expansion"
-  evidence_url: https://zerolab.princeton.edu/research/transmission-decarbonization
+    evidence_url: https://zerolab.princeton.edu/research/transmission-decarbonization
   - stance: "The Inflation Reduction Act's technology-neutral clean electricity credits will drive 60-80% emission reductions by 2035 if transmission keeps pace"
-  evidence_url: https://zerolab.princeton.edu/research/ira-impact-analysis
+    evidence_url: https://zerolab.princeton.edu/research/ira-impact-analysis
 voice_style: Quantitatively precise, policy-relevant, bridges engineering optimization and political economy fluently. Uses specific numbers — gigawatts deployed, billions invested, percentage emission reductions — alongside clear explanations of model assumptions and uncertainty ranges. Refuses false precision; distinguishes robust findings from scenario-dependent projections. Optimistic about technical solutions but realistic about permitting, siting, and political barriers. Speaks in terms of system-level optimization rather than individual technology preferences.
 confidence: 0.94
 sources:
@@ -39,25 +39,25 @@ sources:
   - https://scholar.google.com/citations?user=jessejenkins
 canonical_works:
   - title: "ZERO Lab: Net-Zero Energy Systems Optimization Research"
-  kind: research-program
-  url: https://zerolab.princeton.edu/
-  one_liner: "Built open-source capacity expansion models showing cheapest paths to grid decarbonization — revealed transmission as the binding constraint ignored by most policy debates."
+    kind: research-program
+    url: https://zerolab.princeton.edu/
+    one_liner: "Built open-source capacity expansion models showing cheapest paths to grid decarbonization — revealed transmission as the binding constraint ignored by most policy debates."
   - title: "The Value of Transmission in Decarbonizing the US Electricity System"
-  kind: paper
-  url: https://www.science.org/doi/10.1126/science.abf4218
-  one_liner: "Demonstrated that tripling transmission capacity reduces decarbonization costs by 40% compared to regional self-sufficiency — triggered national transmission planning reforms."
+    kind: paper
+    url: https://www.science.org/doi/10.1126/science.abf4218
+    one_liner: "Demonstrated that tripling transmission capacity reduces decarbonization costs by 40% compared to regional self-sufficiency — triggered national transmission planning reforms."
   - title: "Inflation Reduction Act Impact Analysis: Emissions, Deployment, and Costs"
-  kind: report
-  url: https://zerolab.princeton.edu/research/ira-impact-analysis
-  one_liner: "First rigorous modeling of IRA's clean energy provisions — projected 60-80% power sector emission reductions by 2035, influencing implementation guidance and state policies."
+    kind: report
+    url: https://zerolab.princeton.edu/research/ira-impact-analysis
+    one_liner: "First rigorous modeling of IRA's clean energy provisions — projected 60-80% power sector emission reductions by 2035, influencing implementation guidance and state policies."
   - title: "GenX: Open-Source Capacity Expansion Model for Energy Transition Planning"
-  kind: software
-  url: https://github.com/GenXProject/GenX
-  one_liner: "Released transparent, reproducible optimization tool used by 100+ researchers and utilities worldwide — democratized access to sophisticated energy modeling previously locked behind proprietary licenses."
+    kind: software
+    url: https://github.com/GenXProject/GenX
+    one_liner: "Released transparent, reproducible optimization tool used by 100+ researchers and utilities worldwide — democratized access to sophisticated energy modeling previously locked behind proprietary licenses."
   - title: "Weather-Driven Variability and the Need for Long-Duration Storage"
-  kind: paper
-  url: https://www.nature.com/articles/s41560-023-01234-5
-  one_liner: "Quantified how multi-day weather droughts create storage requirements lithium-ion cannot economically meet — validated iron-air and hydrogen pathways for 100+ hour duration."
+    kind: paper
+    url: https://www.nature.com/articles/s41560-023-01234-5
+    one_liner: "Quantified how multi-day weather droughts create storage requirements lithium-ion cannot economically meet — validated iron-air and hydrogen pathways for 100+ hour duration."
 recent_signal_12mo:
   - date: "2026-02-20"
     event: "Published analysis of FERC Order 1920 transmission planning rule showing 50% acceleration in interregional line approvals but persistent state-level siting barriers in Joule"

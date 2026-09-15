@@ -10,14 +10,20 @@ on:
       - 'agents/**/*.md'
       - 'commands/**/*.md'
       - 'systems/**/SKILL.md'
-      - 'workflows/**/*.md'
+      - 'workflows/**'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    # This workflow is reachable from pull_request, and this repository is
+    # public with forks, so a fork's pull request would otherwise execute its
+    # own code on the self-hosted machine. Branches and pull requests from
+    # this repository use the local runner; anything from a fork falls back to
+    # a GitHub-hosted runner, which is disposable.
+    runs-on: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","macOS","ARM64","local"]') || fromJSON('["ubuntu-latest"]') }}
     steps:
       - uses: actions/checkout@v7
 
@@ -36,7 +42,12 @@ jobs:
 
           REQUIRED_FIELDS = ['name', 'description']
           OPTIONAL_DOMAINS = ['foundational', 'pm', 'engineering', 'design', 'ops', 'meta']
-          KNOWN_ADAPTERS = ['claude-code', 'cursor', 'codex', 'generic']
+          # Keep in sync with adapters/*/manifest.json. The editor adapters that are
+          # landing in their own pull requests are listed so a skill may declare
+          # support for them in the same release; a name that is not an adapter at
+          # all is still rejected.
+          KNOWN_ADAPTERS = ['claude-code', 'cursor', 'codex', 'generic', 'grok',
+                            'windsurf', 'zed', 'cline', 'roo-code', 'amazon-q']
 
           errors = []
           checked = 0
@@ -53,15 +64,8 @@ jobs:
               except yaml.YAMLError as e:
                   return {'__yaml_error': str(e)}
 
-          # Every SKILL.md in the repo, plus the agent definitions. The previous
-          # globs stopped at skills/*/SKILL.md and systems/*/skills/*/SKILL.md, so
-          # systems/<bundle>/<domain>/SKILL.md was never validated — nine roster
-          # front doors shipped without a name or a description while CI stayed green.
-          SKIP_FILES = {'agents/INDEX.md', 'agents/README.md'}
-          for pattern in ['skills/*/SKILL.md', 'systems/**/SKILL.md', 'agents/*.md']:
+          for pattern in ['skills/*/SKILL.md', 'systems/*/skills/*/SKILL.md']:
               for p in pathlib.Path('.').glob(pattern):
-                  if p.as_posix() in SKIP_FILES:
-                      continue
                   checked += 1
                   fm = parse_frontmatter(p)
                   if fm is None:

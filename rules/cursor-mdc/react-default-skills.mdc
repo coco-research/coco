@@ -1,5 +1,5 @@
 ---
-description:
+description: "Use when editing .jsx or .tsx files or starting React UI work: read the design-system, frontend-design, Vercel React performance, and web interface guideline skills before writing code."
 globs: "**/*.jsx, **/*.tsx"
 alwaysApply: false
 ---

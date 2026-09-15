@@ -11,7 +11,7 @@
 
 ### Summon an advisory board of 389 world-class minds — right inside your AI coding session.
 
-CoCo Super Intelligence is the orchestration layer that turns Claude Code, Cursor, or Codex into an entire engineering department: routed expert panels that deliberate and decide, then **185 skills**, **280 commands**, and disk-persistent state that ship what they decided.
+CoCo Super Intelligence is the orchestration layer that turns Claude Code, Cursor, or Codex into an entire engineering department: routed expert panels that deliberate and decide, then **222 skills**, **286 commands**, and disk-persistent state that ship what they decided.
 
 Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds · 100% local · no telemetry
 
@@ -19,8 +19,8 @@ Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds
 
 [![License: Open-core](https://img.shields.io/badge/License-Open--core-yellow.svg?style=for-the-badge)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.2.0-blue?style=for-the-badge)](CHANGELOG.md)
-[![Skills](https://img.shields.io/badge/skills-149-emerald?style=for-the-badge)](skills/)
-[![Commands](https://img.shields.io/badge/commands-280-indigo?style=for-the-badge)](commands/)
+[![Skills](https://img.shields.io/badge/skills-226-emerald?style=for-the-badge)](skills/)
+[![Commands](https://img.shields.io/badge/commands-386-indigo?style=for-the-badge)](commands/)
 [![Personas](https://img.shields.io/badge/personas-389-violet?style=for-the-badge)](systems/superintelligence/)
 [![CI](https://img.shields.io/github/actions/workflow/status/coco-research/coco/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/coco-research/coco/actions)
 
@@ -145,7 +145,7 @@ AI chat context is fragile and wipes on `/clear`. CoCo persists phase state, dec
 <td width="33%" valign="top">
 
 ### 3. Vendor-neutral portability
-CoCo compiles its rules, templates, and agent definitions into pure Markdown and YAML frontmatter. Native IDE adapters inject the same library into Claude Code, Cursor, Codex CLI, or any `AGENTS.md` tool — so your workflows follow you even if you switch AI editors.
+CoCo compiles its rules, templates, and agent definitions into pure Markdown and YAML frontmatter. Native IDE adapters inject the same library into Claude Code, Cursor, Codex CLI, PI-Desktop, VS Code, or any `AGENTS.md` tool — so your workflows follow you even if you switch AI editors.
 
 </td>
 </tr>
@@ -212,12 +212,12 @@ Requires only Python 3 and `git`. No new dependencies. Design adapted from [lak7
 
 ## The CoCo Asset Library
 
-A standard install equips your workspace with a lightweight core; full activation unlocks up to **903 total assets** to orchestrate any software-engineering workflow.
+A standard install equips your workspace with a lightweight core; full activation unlocks up to **947 total assets** to orchestrate any software-engineering workflow.
 
 <table align="center">
 <tr>
-<td align="center" width="20%"><h3>185</h3><sub>Skills</sub><br><small>70 Core + 115 Bundle</small></td>
-<td align="center" width="20%"><h3>280</h3><sub>Slash Commands</sub><br><small>38 Core + 242 Generated</small></td>
+<td align="center" width="20%"><h3>226</h3><sub>Skills</sub><br><small>74 Core + 152 Bundle</small></td>
+<td align="center" width="20%"><h3>386</h3><sub>Slash Commands</sub><br><small>44 Core + 342 Generated</small></td>
 <td align="center" width="20%"><h3>34</h3><sub>Specialized Agents</sub><br><small>10 Core + 24 Bundle</small></td>
 <td align="center" width="20%"><h3>389</h3><sub>Expert Personas</sub><br><small>Super Intelligence Board</small></td>
 <td align="center" width="20%"><h3>15</h3><sub>Cross-IDE Rules</sub><br><small>Cursor MDC Rules</small></td>
@@ -225,7 +225,7 @@ A standard install equips your workspace with a lightweight core; full activatio
 </table>
 
 <div align="center">
-  <sub><strong>Core install:</strong> 130 active assets (68 Skills, 37 Commands, 10 Agents, 15 Rules)</sub><br>
+  <sub><strong>Core install:</strong> 133 active assets (70 Skills, 38 Commands, 10 Agents, 15 Rules)</sub><br>
   <sub><strong>Orchestration bundles:</strong> <strong>+68 GSD skills</strong> · <strong>+24 GSD agents</strong> · <strong>+6 Brain skills</strong> · <strong>+9 Super Intelligence skills</strong> · <strong>+242 SI commands</strong> · <strong>3 Workflows</strong></sub>
 </div>
 
@@ -235,7 +235,7 @@ A standard install equips your workspace with a lightweight core; full activatio
 
 ## Skills Catalog
 
-CoCo ships **185 skills** (70 core + 115 across bundles). These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
+CoCo ships **222 skills** (70 core + 115 across bundles). These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
 
 ### Visual design & styling
 `ui-ux-pro-max` (50 styles, 21 palettes, 50 font pairings, 9 stacks) · `frontend-design` · `design-taste-frontend` · `redesign-existing-projects` · `axiom-liquid-glass` (Apple Liquid Glass, WWDC 2025) · `swiftui-liquid-glass` · `web-design-guidelines` · `tailwind-patterns` (Tailwind v4) · `vercel-react-best-practices` · `clone-website` · `c4-architecture` · `arb-review` · `expo-api-routes` · `ai-product` · `scroll-world` (scroll-scrubbed, cut-free camera flythrough landing pages, generated end to end via Higgsfield).
@@ -259,7 +259,7 @@ CoCo ships **185 skills** (70 core + 115 across bundles). These are not prompt s
 `coco` (conversational router) · `coco-cli` · `coco-loop` (compiles a plain-language goal into a confirmed charter, then runs a bounded, propose-only autonomous loop) · `skill-creator` · `writing-skills` · `find-skills`.
 
 <details>
-<summary><strong>▸ Full catalog — every one of the 185 skills</strong></summary>
+<summary><strong>▸ Full catalog — every one of the 222 skills</strong></summary>
 
 <br>
 
@@ -282,6 +282,8 @@ CoCo ships **185 skills** (70 core + 115 across bundles). These are not prompt s
 ## System Bundles
 
 Bundles are opt-in packages that extend the workspace with specialized databases, pipelines, and rosters. Enable them with `--systems <name>`.
+
+One further bundle, `reverse-skill`, is deliberately not part of any default install and is not counted among the four below: it vendors reverse-engineering and penetration-testing methodology under [`systems/reverse-skill/`](systems/reverse-skill/), and it is security tooling that stays installed only when it is asked for by name, with `--systems reverse-skill`. See [`systems/reverse-skill/README.md`](systems/reverse-skill/README.md) for what it contains and how it was curated.
 
 ### 1. GSD (Get Shit Done)
 An orchestration engine of **68 skills and 24 agents** that manages the lifecycle of complex codebases. A disk-backed phase database records goals, decisions, milestones, and blockers; **workstreams** spin up isolated git checkouts to test refactors without polluting main; **forensics** performs post-mortem root-cause audits when a phase fails; and **autonomous mode** runs parallel waves of subagents through plan milestones end-to-end.
@@ -530,17 +532,17 @@ bash install.sh
 </td>
 <td width="50%" valign="top">
 
-**Via global npm package**
+**Via the npm CLI wrapper**
 
 ```bash
-# Authenticate the GitHub Packages registry
-echo "@coco-research:registry=https://npm.pkg.github.com" >> ~/.npmrc
-echo "//npm.pkg.github.com/:_authToken=YOUR_TOKEN" >> ~/.npmrc
-
-# Install and launch
-npm install -g cocosuperintelligence
-coco
+# The package name is reserved as `cocosuperintelligence` but is not published
+# on npmjs.com yet (registry 404). Until it is, run the wrapper from a clone:
+git clone --branch v1.2.0 --depth 1 https://github.com/coco-research/coco.git
+node coco/bin/coco.js --help
 ```
+*Do not `npx cocosuperintelligence` until the name is published — npx would
+resolve whatever first claims that name. The wrapper clones the pinned
+release tag, not floating `main`.*
 
 </td>
 </tr>
@@ -565,7 +567,10 @@ bash install.sh --systems superintelligence
 ```bash
 bash install.sh --adapter claude-code
 bash install.sh --adapter cursor
+bash install.sh --adapter grok
+bash install.sh --adapter vscode
 bash install.sh --adapter codex
+bash install.sh --adapter pi-desktop
 bash install.sh --adapter generic
 ```
 
@@ -579,7 +584,7 @@ bash install.sh --adapter generic
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/coco-research/coco/main/bin/coco-bootstrap.sh)
 ```
-*Clones Coco to `~/.coco`, then pauses and prints the commit hash, date, and message so you can verify it against [the latest commit on `main`](https://github.com/coco-research/coco/commits/main) before it runs `install.sh`. Type `y` to proceed. Pass `--yes` or set `COCO_BOOTSTRAP_YES=1` to skip the prompt for CI or scripted installs, and pass adapter/systems flags after `--`, e.g. `-- --adapter cursor --systems gsd`.*
+*Clones the pinned release tag (currently `v1.2.0`, not floating `main`) to `~/.coco`, then pauses and prints the commit hash, date, and message so you can verify it against [that release](https://github.com/coco-research/coco/releases/tag/v1.2.0) before it runs `install.sh`. Type `y` to proceed. Pass `--yes` or set `COCO_BOOTSTRAP_YES=1` to skip the prompt for CI or scripted installs, and pass adapter/systems flags after `--`, e.g. `-- --adapter cursor --systems gsd`.*
 
 </td>
 </tr>
@@ -610,15 +615,16 @@ git pull --ff-only && bash install.sh
 </td>
 <td width="50%" valign="top">
 
-**npm installs**
+**CLI wrapper (from a clone)**
 
 ```bash
 # print version + check for updates
-npx cocosuperintelligence version
+node bin/coco.js version
 
-# apply an update
-npx cocosuperintelligence update
+# apply an update (checks out the pinned release tag)
+node bin/coco.js update
 ```
+Until `cocosuperintelligence` is published on npmjs.com, do not use `npx` for this.
 
 </td>
 </tr>
@@ -648,6 +654,12 @@ npx cocosuperintelligence update
 <td><code>cursor</code></td>
 <td>Stable</td>
 <td>Links MDC rules and custom workspace skills.</td>
+</tr>
+<tr>
+<td><strong>Grok Build / Grok CLI</strong></td>
+<td><code>grok</code></td>
+<td>Stable</td>
+<td>Links skills, commands, agents and rules into <code>~/.grok/</code>. Registers <code>coco-platform</code> MCP and m0 hooks when those binaries are present.</td>
 </tr>
 <tr>
 <td><strong><a href="https://github.com/openai/codex">Codex CLI</a></strong></td>
@@ -682,19 +694,19 @@ npx cocosuperintelligence update
 <table>
 <tr><td><strong>Spec Version</strong></td><td>1.2.0</td></tr>
 <tr><td><strong>License</strong></td><td>Open-core — <a href="LICENSE">MIT</a> core; Super Intelligence is <a href="systems/superintelligence/LICENSE">proprietary</a></td></tr>
-<tr><td><strong>Total Skills</strong></td><td>149 with all bundles installed (66 Core + 68 GSD + 6 Brain + 9 Super Intelligence)</td></tr>
-<tr><td><strong>Slash Commands</strong></td><td>280 with all bundles — 38 Core (shipped) + 242 Super Intelligence (225 per-team + 17 cross-team, generated at install)</td></tr>
+<tr><td><strong>Total Skills</strong></td><td>226 with all bundles installed (74 Core + 152 Bundle)</td></tr>
+<tr><td><strong>Slash Commands</strong></td><td>386 with all bundles — 44 Core (shipped) + 342 Super Intelligence (325 per-team + 17 cross-team, generated at install)</td></tr>
 <tr><td><strong>Specialized Agents</strong></td><td>34 (10 Core + 24 GSD Bundle)</td></tr>
 <tr><td><strong>Expert Personas</strong></td><td>389 across 9 departments and 70 cells</td></tr>
 <tr><td><strong>System Bundles</strong></td><td>5 (GSD, Brain, Cognee, HyperFrames, Super Intelligence) — opt in with <code>--systems &lt;name&gt;</code>. <code>/team</code> is core and needs no flag.</td></tr>
 <tr><td><strong>Cross-IDE Rules</strong></td><td>15 (.mdc files)</td></tr>
 <tr><td><strong>Workflows Defined</strong></td><td>3 (.md pipelines)</td></tr>
-<tr><td><strong>Total Addressable Assets</strong></td><td>903 with all bundles enabled</td></tr>
+<tr><td><strong>Total Addressable Assets</strong></td><td>947 with all bundles enabled</td></tr>
 <tr><td><strong>Install Time</strong></td><td>&le; 90 seconds</td></tr>
 <tr><td><strong>Telemetry / SaaS</strong></td><td>None — 100% local files</td></tr>
 </table>
 
-<sub>Core install ships 68 skills + 37 commands + 10 agents + 15 rules (130 active assets). The totals above reflect a full install with every bundle (<code>bash install.sh --systems gsd,brain,cognee,hyperframes,superintelligence</code>). Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely.</sub>
+<sub>Core install ships 70 skills + 38 commands + 10 agents + 15 rules (133 active assets). The totals above reflect a full install with every bundle (<code>bash install.sh --systems gsd,brain,cognee,hyperframes,superintelligence</code>). Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely.</sub>
 
 ---
 
@@ -718,8 +730,17 @@ Every skill lives at <code>skills/&lt;name&gt;/SKILL.md</code>. Edit it directly
 <details>
 <summary><strong>How do I cleanly uninstall CoCo?</strong></summary>
 Because CoCo uses symbolic links, removal is non-destructive:
-<pre>find ~/.claude ~/.cursor -type l -lname "*$(pwd)*" -delete</pre>
-This removes only the links pointing back to your CoCo repository folder.
+<pre>CLONE="$(pwd)"
+find ~/.claude ~/.cursor ~/.grok ~/.copilot -type l -lname "${CLONE}/*" -delete</pre>
+This removes only links whose target is inside this clone. A contains-match such as
+<code>*$(pwd)*</code> would also delete links into any path that merely contains the
+folder name (for example <code>coco-research</code> when the clone is <code>coco</code>).
+
+For the Hermes adapter, profiles live under <code>~/.hermes/profiles</code>:
+<pre>CLONE="$(pwd)"
+find ~/.hermes/profiles -type l -lname "${CLONE}/*" -delete</pre>
+The appended rules block between <code>&lt;!-- coco:rules-start --&gt;</code> and
+<code>&lt;!-- coco:rules-end --&gt;</code> in each profile's CLAUDE.md is stripped automatically on the next install run without the repo.
 </details>
 
 <details>

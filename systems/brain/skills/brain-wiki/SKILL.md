@@ -1,6 +1,6 @@
 ---
 name: brain:wiki
-description: "Browse, search, and generate Wikipedia-style knowledge articles from the brain. Auto-generated from brain DB entities, emails, docs, and decisions."
+description: "Use when the user asks for a knowledge article, wiki page, or entity summary from the brain, or wants to search, list, or review merges across brain DB articles. Generates Wikipedia-style articles from entities, decisions, and emails."
 ---
 
 # /brain-wiki — CoCo Knowledge Articles
@@ -12,6 +12,13 @@ Articles are auto-generated from the brain DB by the daily knowledge engine cron
 (`~/.coco/knowledge/cron.py`). Each article synthesizes all evidence available about
 an entity — decisions, events, relationships, tasks — into a structured, versioned
 knowledge artifact.
+
+## Prerequisites
+
+Articles live in the external knowledge engine at `~/.coco/knowledge/` (`cron.py` and
+`knowledge.db`), which does not ship in this repo. Wire this skill with
+`bash adapters/<your-ide>/install.sh --systems brain` and install the engine itself
+before using anything below.
 
 ---
 
@@ -179,7 +186,7 @@ Show all person-type articles and cross-project relationship statistics.
 
 **Procedure:**
 
-1. Query knowledge.db directly (do NOT invoke cron --dry-run, per review finding m4):
+1. Query knowledge.db directly (do NOT invoke cron --dry-run):
    ```python
    import sys, sqlite3, json
    sys.path.insert(0, str(Path("~/.coco/knowledge").expanduser()))
@@ -235,9 +242,10 @@ Interactively review merge proposals (entities that may be duplicates).
 
 **Procedure:**
 
-1. List pending merges:
+1. List pending merges directly from `~/.coco/knowledge/knowledge.db` (there is no
+   `wiki --list-merges` subcommand):
    ```bash
-   python3 ~/.claude/skills/brain/scripts/brain/brain_cli.py wiki --list-merges
+   sqlite3 ~/.coco/knowledge/knowledge.db ".tables"
    ```
 
 2. For each pending merge, show both entities' summaries side by side:
@@ -255,15 +263,12 @@ Interactively review merge proposals (entities that may be duplicates).
    Action: [A=keep A | B=keep B | s=skip | q=quit]
    ```
 
-3. On approval:
-   ```bash
-   python3 ~/.claude/skills/brain/scripts/brain/brain_cli.py wiki --approve-merge {gid_keep} {gid_remove}
-   ```
-   This:
+3. On approval, apply the merge directly in `~/.coco/knowledge/knowledge.db` (there is no
+   CLI subcommand for it), which:
    - Reassigns all articles from gid_remove → gid_keep
    - Adds the removed entity's name to gid_keep's aliases
    - Deletes gid_remove from global_entities
-   - FIX M6: uses delete-then-reinsert for articles_fts (not UPDATE, which fails on virtual tables):
+   - Uses delete-then-reinsert for articles_fts (not UPDATE, which fails on virtual tables):
      `DELETE FROM articles_fts WHERE gid=gid_remove` then re-INSERT with gid_keep
 
 4. On skip: record the skip decision (do not re-propose the same pair for 30 days).
@@ -377,22 +382,20 @@ Run /brain-wiki generate to bootstrap, or /brain-wiki install-cron for daily aut
 
 - **FTS5 scoring:** BM25 rank in SQLite FTS5 is negative (more negative = better match).
   Score normalization: `score = 1.0 / (1.0 + abs(rank))` — higher score = more relevant.
-  (FIX M5 from review findings.)
 
 - **body_json → FTS5 text:** FTS5 indexes plain text, not raw JSON. The engine extracts
   `section["content"]` from each section in `body_json` before inserting into `articles_fts`.
-  (FIX C3 from review findings.)
 
 - **articles_fts updates:** Virtual tables cannot be bulk-UPDATEd. Always use
   DELETE WHERE gid=? then re-INSERT for any gid change (e.g., merge approvals).
-  (FIX M6 from review findings.)
 
 - **Project registration:** Before the cron can harvest a project, it must be registered:
-  ```bash
-  python3 ~/.claude/skills/brain/scripts/brain/brain_cli.py wiki-register \
-    --slug {slug} --db {path/to/project_brain.db}
+  ```python
+  from engine import KnowledgeEngine
+  engine = KnowledgeEngine()
+  engine.register_project(...)   # pass the project slug and path to project_brain.db
   ```
-  brain-init Step 8 calls this automatically. (FIX M1 from review findings.)
+  brain-init Step 8 calls this automatically.
 
 - **Kill switch:** If `~/.coco/disabled` exists, all brain-wiki commands should exit silently
   (consistent with CoCo kill switch convention).

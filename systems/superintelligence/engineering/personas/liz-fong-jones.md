@@ -1,6 +1,6 @@
 ---
 slug: liz-fong-jones
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: reliability-sre-obs
 cell_role: specialist

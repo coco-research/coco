@@ -3,8 +3,6 @@ name: "finance-super-intelligence"
 description: "Your finance brain trust and decision partner. Named personas across 7 cells: valuation/corporate finance, investing, accounting/FP&A, macro, fintech, behavioral, and capital markets/M&A/private. Markets/quant/derivatives are reserved for…"
 team_id: "finance-super-intelligence"
 team_name: "Finance Super Intelligence Team"
-personas_count: "47"
-cells_count: "7"
 last_updated: "2026-06-01"
 schema_version: "1.0"
 ---

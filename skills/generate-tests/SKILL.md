@@ -1,6 +1,6 @@
 ---
 name: generate-tests
-description: "Generate complete test coverage for any file, component, or module. Covers unit tests, integration tests, edge cases, error handling, and mocking — adapted to whatever testing framework the project uses."
+description: "Use when asked to generate tests for a file, module or component, to raise coverage, or to bootstrap a suite for untested code. Detects the project's test framework and conventions first, then writes unit, integration and edge-case tests."
 domain: engineering
 supports: [claude-code, cursor, codex, generic]
 version: 0.1.0

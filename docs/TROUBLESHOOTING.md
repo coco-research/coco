@@ -143,7 +143,8 @@ If you have multiple `AGENTS.md` files on disk, make sure the one nearest your w
 Symlink adapters:
 
 ```bash
-find ~/.claude ~/.cursor -type l -lname "*$(pwd)*" -delete
+CLONE="$(pwd)"
+find ~/.claude ~/.cursor ~/.copilot -type l -lname "${CLONE}/*" -delete
 ```
 
 File-generation adapters:

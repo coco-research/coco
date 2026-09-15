@@ -2,7 +2,7 @@
 
 Auto-generated view. Filtered to `domain: meta` skills.
 
-**9 skills.**
+**10 skills.**
 
 | Skill | Description |
 |-------|-------------|
@@ -14,4 +14,5 @@ Auto-generated view. Filtered to `domain: meta` skills.
 | [find-skills](../../skills/find-skills/SKILL.md) | Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express interest in extending capabilities. This sk |
 | [goal](../../skills/goal/SKILL.md) | Persistent project goal that survives across sessions and tools, with continuous-execution loop semantics. Use when someone asks to "set a goal", "what is my goal", "goal status", "keep working on X u |
 | [skill-creator](../../skills/skill-creator/SKILL.md) | Use when the user asks to create, scaffold, update or package a skill, or asks how skill frontmatter, progressive disclosure or bundled resources should be structured. Walks through init_skill.py, wri |
+| [skill-map](../../skills/skill-map/SKILL.md) | Discover in-repo CoCo skills and slash commands from the skill-map. Use when the user asks which skill/command to use, how to find capabilities, marketplace/map lookup, or plain-language goals that sh |
 | [writing-skills](../../skills/writing-skills/SKILL.md) | Use when creating new skills, editing existing skills, or verifying skills work before deployment |

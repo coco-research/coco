@@ -9,9 +9,9 @@
 
 # CoCo Super Intelligence
 
-### Summon an advisory board of 389 world-class minds — right inside your AI coding session.
+### Summon an advisory board of 495 world-class minds — right inside your AI coding session.
 
-CoCo Super Intelligence is the orchestration layer that turns Claude Code, Cursor, or Codex into an entire engineering department: routed expert panels that deliberate and decide, then **222 skills**, **286 commands**, and disk-persistent state that ship what they decided.
+CoCo Super Intelligence is the orchestration layer that turns Claude Code, Cursor, or Codex into an entire engineering department: routed expert panels that deliberate and decide, then **226 skills**, **386 commands**, and disk-persistent state that ship what they decided.
 
 Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds · 100% local · no telemetry
 
@@ -21,7 +21,7 @@ Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds
 [![Version](https://img.shields.io/badge/version-1.2.0-blue?style=for-the-badge)](CHANGELOG.md)
 [![Skills](https://img.shields.io/badge/skills-226-emerald?style=for-the-badge)](skills/)
 [![Commands](https://img.shields.io/badge/commands-386-indigo?style=for-the-badge)](commands/)
-[![Personas](https://img.shields.io/badge/personas-389-violet?style=for-the-badge)](systems/superintelligence/)
+[![Personas](https://img.shields.io/badge/personas-495-violet?style=for-the-badge)](systems/superintelligence/)
 [![CI](https://img.shields.io/github/actions/workflow/status/coco-research/coco/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/coco-research/coco/actions)
 
 <br>
@@ -51,7 +51,7 @@ Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds
 
 > **One developer writing single prompts? That was last year.**
 >
-> CoCo Super Intelligence convenes a cross-team board of 389 named experts to pressure-test your hardest calls — then puts an orchestrated team of agents to work executing the verdict: parallel build waves, deterministic verification gates, and phase state that survives every `/clear`.
+> CoCo Super Intelligence convenes a cross-team board of 495 named experts to pressure-test your hardest calls — then puts an orchestrated team of agents to work executing the verdict: parallel build waves, deterministic verification gates, and phase state that survives every `/clear`.
 
 </div>
 
@@ -77,7 +77,7 @@ Your model, your tool, your keys, your machine. When you see "parallel subagent 
 
 ## ⭐ The Board — CoCo Super Intelligence
 
-### A cross-team advisory board of 389 world-class minds
+### A cross-team advisory board of 495 world-class minds
 
 Super Intelligence is CoCo's signature capability. It lets you summon custom, real-world expert panels directly inside your coding session to guide architectural, engineering, risk, finance, and business decisions — each contribution attributed to a named expert, grounded in cited public sources.
 
@@ -88,7 +88,7 @@ Super Intelligence is CoCo's signature capability. It lets you summon custom, re
 /SI-GRC-Review "Check this customer onboarding flow for GDPR compliance"
 ```
 
-**389 expert personas**, organized across 9 specialized departments:
+**495 expert personas**, organized across 13 specialized departments:
 
 | Department | Experts | Focus |
 |---|---:|---|
@@ -97,12 +97,16 @@ Super Intelligence is CoCo's signature capability. It lets you summon custom, re
 | **Product & Design** | 56 | Design systems, UX, product strategy, growth loops |
 | **Finance** | 47 | Valuation, corporate finance, macro modeling, fintech infrastructure |
 | **Trading** | 46 | Quant analysis, market microstructure, derivatives pricing, crypto liquidity |
+| **Legal & IP** | 31 | Privacy law, antitrust, patent and copyright policy, digital rights |
 | **Risk & Compliance (GRC)** | 30 | GDPR, HIPAA, SOC 2, security auditing, international regulation |
 | **Strategy** | 29 | Platform economics, business models, competitive analysis |
 | **Data & Analytics** | 29 | Data engineering, pipeline optimization, predictive modeling |
+| **Climate & Energy** | 25 | Decarbonization policy, clean-energy economics, carbon markets, circular economy |
+| **Education & EdTech** | 25 | Learning science, curriculum design, education policy, assessment |
+| **Healthcare & Life Sciences** | 25 | Health economics, genomics, clinical medicine, public health policy |
 | **Sales / GTM / Marketing** | 23 | Product-market fit, sales ops, growth marketing, enterprise GTM |
 
-- **242 generated slash commands.** 17 cross-team meta commands (like `/SI-Decide` or `/SI-Tradeoff`, routing across domains) plus 225 per-team commands (25 verbs × 9 teams, such as `/SI-AI-Decide` or `/SI-Eng-Pre-Mortem`). These are generated locally at install time from the team registries — no command files are transmitted or stored remotely.
+- **342 generated slash commands.** 17 cross-team meta commands (like `/SI-Decide` or `/SI-Tradeoff`, routing across domains) plus 325 per-team commands (25 verbs × 13 teams, such as `/SI-AI-Decide` or `/SI-Eng-Pre-Mortem`). These are generated locally at install time from the team registries — no command files are transmitted or stored remotely.
 - **70 expertise cells.** Each department is subdivided into focused cells (e.g. Engineering has 11, AI has 8) so the router can assemble a precise panel rather than a generic crowd.
 - **Cross-team meta-orchestration.** For complex queries spanning domains ("build and sell an AI audit tool"), a local router scores your prompt against team registries and cells, then greedily assembles a proportional 16–32-person panel.
 - **Citable and grounded.** Every stance is verified from public sources and carries a direct evidence URL. Personas are validated against a strict anti-fabrication gate.
@@ -118,7 +122,7 @@ The meta-orchestrator uses a staged algorithm so it never has to load the entire
 
 ### Persona build & validation pipeline
 
-The 389-persona roster was compiled with a systematic multi-tier workflow. Candidate generation was evaluated across local Qwen (via LM Studio), a hosted small model, and Gemini Flash, but **Claude research agents proved the quality winner** for resolving historical data and citing verifiable signal. Personas are checked by an advisory validation gate (`validate_persona.py`) that enforces five things: every required frontmatter field is present; at least 4 cited URLs resolve live (non-404); every `public_stance` carries an `evidence_url`, so no stance is uncited; at least 2 recent signals within 12 months (or 2 persistent signals for historical archetypes); and any `pairs_well_with` / `productive_conflict_with` slug refers to a real roster member. Two limits are worth stating plainly: the gate confirms that a stance is *cited*, not that a quotation is authentic, and `home_team` is only checked for presence, not validated against the list of real teams. A `NEEDS-TOPUP` verdict is advisory — it does not currently affect which personas a council selects at runtime.
+The 495-persona roster was compiled with a systematic multi-tier workflow. Candidate generation was evaluated across local Qwen (via LM Studio), a hosted small model, and Gemini Flash, but **Claude research agents proved the quality winner** for resolving historical data and citing verifiable signal. Personas are checked by an advisory validation gate (`validate_persona.py`) that enforces five things: every required frontmatter field is present; at least 4 cited URLs resolve live (non-404); every `public_stance` carries an `evidence_url`, so no stance is uncited; at least 2 recent signals within 12 months (or 2 persistent signals for historical archetypes); and any `pairs_well_with` / `productive_conflict_with` slug refers to a real roster member. Two limits are worth stating plainly: the gate confirms that a stance is *cited*, not that a quotation is authentic, and `home_team` is only checked for presence, not validated against the list of real teams. A `NEEDS-TOPUP` verdict is advisory — it does not currently affect which personas a council selects at runtime.
 
 ---
 
@@ -219,14 +223,14 @@ A standard install equips your workspace with a lightweight core; full activatio
 <td align="center" width="20%"><h3>226</h3><sub>Skills</sub><br><small>74 Core + 152 Bundle</small></td>
 <td align="center" width="20%"><h3>386</h3><sub>Slash Commands</sub><br><small>44 Core + 342 Generated</small></td>
 <td align="center" width="20%"><h3>34</h3><sub>Specialized Agents</sub><br><small>10 Core + 24 Bundle</small></td>
-<td align="center" width="20%"><h3>389</h3><sub>Expert Personas</sub><br><small>Super Intelligence Board</small></td>
+<td align="center" width="20%"><h3>495</h3><sub>Expert Personas</sub><br><small>Super Intelligence Board</small></td>
 <td align="center" width="20%"><h3>15</h3><sub>Cross-IDE Rules</sub><br><small>Cursor MDC Rules</small></td>
 </tr>
 </table>
 
 <div align="center">
-  <sub><strong>Core install:</strong> 133 active assets (70 Skills, 38 Commands, 10 Agents, 15 Rules)</sub><br>
-  <sub><strong>Orchestration bundles:</strong> <strong>+68 GSD skills</strong> · <strong>+24 GSD agents</strong> · <strong>+6 Brain skills</strong> · <strong>+9 Super Intelligence skills</strong> · <strong>+242 SI commands</strong> · <strong>3 Workflows</strong></sub>
+  <sub><strong>Core install:</strong> 144 active assets (74 Skills, 44 Commands, 11 Agents, 15 Rules)</sub><br>
+  <sub><strong>Orchestration bundles:</strong> <strong>+68 GSD skills</strong> · <strong>+24 GSD agents</strong> · <strong>+6 Brain skills</strong> · <strong>+13 Super Intelligence skills</strong> · <strong>+342 SI commands</strong> · <strong>3 Workflows</strong></sub>
 </div>
 
 ---
@@ -235,7 +239,7 @@ A standard install equips your workspace with a lightweight core; full activatio
 
 ## Skills Catalog
 
-CoCo ships **222 skills** (70 core + 115 across bundles). These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
+CoCo ships **226 skills** (74 core + 152 across bundles). These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
 
 ### Visual design & styling
 `ui-ux-pro-max` (50 styles, 21 palettes, 50 font pairings, 9 stacks) · `frontend-design` · `design-taste-frontend` · `redesign-existing-projects` · `axiom-liquid-glass` (Apple Liquid Glass, WWDC 2025) · `swiftui-liquid-glass` · `web-design-guidelines` · `tailwind-patterns` (Tailwind v4) · `vercel-react-best-practices` · `clone-website` · `c4-architecture` · `arb-review` · `expo-api-routes` · `ai-product` · `scroll-world` (scroll-scrubbed, cut-free camera flythrough landing pages, generated end to end via Higgsfield).
@@ -259,7 +263,7 @@ CoCo ships **222 skills** (70 core + 115 across bundles). These are not prompt s
 `coco` (conversational router) · `coco-cli` · `coco-loop` (compiles a plain-language goal into a confirmed charter, then runs a bounded, propose-only autonomous loop) · `skill-creator` · `writing-skills` · `find-skills`.
 
 <details>
-<summary><strong>▸ Full catalog — every one of the 222 skills</strong></summary>
+<summary><strong>▸ Full catalog — every one of the 226 skills</strong></summary>
 
 <br>
 
@@ -271,7 +275,7 @@ CoCo ships **222 skills** (70 core + 115 across bundles). These are not prompt s
 
 **Brain bundle skills (6)** — `brain` · `brain-init` · `brain-rescan` · `brain-update` · `brain-export` · `brain-wiki`.
 
-**Super Intelligence bundle (9)** — one orchestration skill per built team (ai, engineering, product-design, finance, trading, risk-compliance, strategy, data-analytics, gtm), which generate the 242 `/SI-*` commands at install.
+**Super Intelligence bundle (13)** — one orchestration skill per built team (ai, engineering, product-design, finance, trading, risk-compliance, strategy, data-analytics, gtm, climate-energy, education-edtech, healthcare-life-sciences, legal-ip), which generate the 342 `/SI-*` commands at install.
 
 </details>
 
@@ -295,7 +299,7 @@ A local knowledge-graph engine of **6 skills** connecting email, chat, code, and
 A multi-agent product-team pipeline (`/team:ship`, `/team:plan`, `/team:review`, `/team:verify`, and more). It spawns specialized subagents — Research, Architect, QA — to execute changes, review diffs, and write tests, with deterministic gates that intercept merges to run lints, import audits, reference checks, and verification suites.
 
 ### 4. Super Intelligence
-The **389-persona advisory board** and its **242 generated `/SI-*` commands** across 9 departments — the hero capability described [above](#the-board).
+The **495-persona advisory board** and its **342 generated `/SI-*` commands** across 13 teams — the hero capability described [above](#the-board).
 
 ---
 
@@ -697,7 +701,7 @@ Until `cocosuperintelligence` is published on npmjs.com, do not use `npx` for th
 <tr><td><strong>Total Skills</strong></td><td>226 with all bundles installed (74 Core + 152 Bundle)</td></tr>
 <tr><td><strong>Slash Commands</strong></td><td>386 with all bundles — 44 Core (shipped) + 342 Super Intelligence (325 per-team + 17 cross-team, generated at install)</td></tr>
 <tr><td><strong>Specialized Agents</strong></td><td>34 (10 Core + 24 GSD Bundle)</td></tr>
-<tr><td><strong>Expert Personas</strong></td><td>389 across 9 departments and 70 cells</td></tr>
+<tr><td><strong>Expert Personas</strong></td><td>495 across 13 departments and 70 cells</td></tr>
 <tr><td><strong>System Bundles</strong></td><td>5 (GSD, Brain, Cognee, HyperFrames, Super Intelligence) — opt in with <code>--systems &lt;name&gt;</code>. <code>/team</code> is core and needs no flag.</td></tr>
 <tr><td><strong>Cross-IDE Rules</strong></td><td>15 (.mdc files)</td></tr>
 <tr><td><strong>Workflows Defined</strong></td><td>3 (.md pipelines)</td></tr>
@@ -706,7 +710,7 @@ Until `cocosuperintelligence` is published on npmjs.com, do not use `npx` for th
 <tr><td><strong>Telemetry / SaaS</strong></td><td>None — 100% local files</td></tr>
 </table>
 
-<sub>Core install ships 70 skills + 38 commands + 10 agents + 15 rules (133 active assets). The totals above reflect a full install with every bundle (<code>bash install.sh --systems gsd,brain,cognee,hyperframes,superintelligence</code>). Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely.</sub>
+<sub>Core install ships 74 skills + 44 commands + 11 agents + 15 rules (144 active assets). The totals above reflect a full install with every bundle (<code>bash install.sh --systems gsd,brain,cognee,hyperframes,superintelligence</code>). Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely.</sub>
 
 ---
 

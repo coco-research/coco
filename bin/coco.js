@@ -103,7 +103,7 @@ Usage:
 Update checks contact only github.com (no telemetry); disable with COCO_NO_UPDATE_CHECK=1.
 
 Install flags (passed to install.sh):
-  --adapter <name>                      claude-code | cursor | codex | generic
+  --adapter <name>                      claude-code | cursor | grok | vscode | codex | generic
   --systems <list>                      gsd | brain | cognee | hyperframes | m0 |
                                         superintelligence   (comma-separated)
   --dry-run                             preview, no writes
@@ -202,6 +202,7 @@ function cmdUninstall(argv) {
   const homes = [
     path.join(os.homedir(), '.claude'),
     path.join(os.homedir(), '.cursor'),
+    path.join(os.homedir(), '.grok'),
     path.join(os.homedir(), '.copilot'),
   ];
   for (const home of homes) {

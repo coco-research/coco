@@ -23,6 +23,7 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | cursor | `adapters/cursor/` | 5 | 0 | 0 | 8 |
 | generic | `adapters/generic/` | 0 | 0 | 0 | 3 |
 | github-copilot-cli | `adapters/github-copilot-cli/` | 0 | 0 | 0 | 2 |
+| grok | `adapters/grok/` | 0 | 0 | 0 | 3 |
 | hermes | `adapters/hermes/` | 0 | 0 | 0 | 3 |
 | pi-desktop | `adapters/pi-desktop/` | 0 | 0 | 0 | 3 |
 | roo-code | `adapters/roo-code/` | 0 | 0 | 0 | 2 |

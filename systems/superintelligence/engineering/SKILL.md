@@ -3,8 +3,6 @@ name: "engineering-super-intelligence"
 description: "Your software-engineering brain trust. Named personas across 11 cells covering cloud architecture, reliability/SRE/observability, data and storage, security, FinOps, languages and runtimes, systems programming, web and frontend…"
 team_id: "engineering-super-intelligence"
 team_name: "Engineering Super Intelligence Team"
-personas_count: "70"
-cells_count: "11"
 last_updated: "2026-05-30"
 schema_version: "1.0"
 ---

@@ -1,6 +1,6 @@
 ---
 name: m0-recall
-description: "Read the recent M0 operational thread for a project, newest first, to pick up work started in this or another tool. Answers 'where were we' and 'what is next' before asking the user to repeat context. Local SQLite, no embeddings, no network. Triggers on: 'm0 recall', 'where were we', 'what did we do last time', 'catch me up', 'resume context', 'read the thread', 'what is next'."
+description: "Use when the user asks m0 recall, where were we, what did we do last time, catch me up, what is next, or to resume context from another tool. Reads the recent M0 operational thread per project, newest first, from local SQLite."
 ---
 
 # /m0-recall — Read the Operational Thread

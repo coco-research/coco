@@ -1,6 +1,6 @@
 ---
 slug: linus-torvalds
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: systems-programming
 cell_role: lead-driver

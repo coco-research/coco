@@ -1,6 +1,6 @@
 ---
 name: brain
-description: "SQLite-based project knowledge tracker. Manages entities, relationships, tasks, threads, decisions, and events per project folder. Use /brain to query or update project_brain.db. Triggers on: 'brain', 'project knowledge', 'what do we know about', 'open tasks', 'recent decisions'."
+description: "Use when the user says brain, project knowledge, what do we know about, open tasks, or recent decisions, or runs /brain or /brain-update. SQLite project_brain.db tracker for entities, relationships, tasks, threads, decisions, events."
 ---
 
 # /brain --- Project Knowledge Tracker

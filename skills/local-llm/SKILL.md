@@ -112,7 +112,13 @@ the model's trained range, not extrapolation.
 |---|---|---|
 | 32,768 | 2.0 GB | 8 GB |
 | 65,536 | 4.0 GB | 16 GB |
-| **131,072 (current default)** | **8.0 GB** | **32 GB** |
+
+The context window itself is a mutable runtime setting (changed via
+`~/.config/mlx-dspark/start.sh`, see "Changing the context window" below), so
+it is not restated here as a fixed row. Read the live value from the
+`context_window` field at `curl -s http://127.0.0.1:8090/health`, then divide
+it by 16,384 to get the KV cache in gigabytes per request, and multiply that
+by four for the `--max-batch 4` concurrent ceiling.
 
 Base model weights: ~16GB (target) + ~4GB (drafter, `dflash` mode) = ~20GB,
 before any KV cache. Add LM Studio's own separate ~16GB if it's also loaded
@@ -163,7 +169,7 @@ Measured against that ceiling:
 
 ## What this model is good at, and what it is not
 
-The local model runs entirely on the local machine, which ensures that no data leaves the device and that there is no per-token cost associated with usage. Measured decode speed is not a single figure: it ranged from 19 tokens per second on open ended prose to 103 on trivially predictable output, against a server reported mean of about 14 across mixed real requests. The context window is 131,072 tokens. The model performs well at summarizing many small-to-medium diffs, at bulk classification of files into categories, and at mechanical text transformation, which represent its strongest use cases. It has no network access at all, so it cannot perform web research, cannot resolve a URL, and cannot look up a current fact beyond its training data. The model is weak in scenarios where a silently wrong answer is expensive, such as merge conflict resolution, security judgements, and attribution or licensing decisions. In those cases, the model should gather and summarize evidence, then a human or a stronger model should make the actual decision. Because the model is slow relative to a hosted model, it is preferable for work that is bulky and mechanical rather than short and latency sensitive.
+The local model runs entirely on the local machine, which ensures that no data leaves the device and that there is no per-token cost associated with usage. Measured decode speed is not a single figure: it ranged from 19 tokens per second on open ended prose to 103 on trivially predictable output, against a server reported mean of about 14 across mixed real requests. The context window is a mutable runtime setting rather than a fixed figure; read the live value from the `context_window` field at `curl -s http://127.0.0.1:8090/health` before relying on a specific number. The model performs well at summarizing many small-to-medium diffs, at bulk classification of files into categories, and at mechanical text transformation, which represent its strongest use cases. It has no network access at all, so it cannot perform web research, cannot resolve a URL, and cannot look up a current fact beyond its training data. The model is weak in scenarios where a silently wrong answer is expensive, such as merge conflict resolution, security judgements, and attribution or licensing decisions. In those cases, the model should gather and summarize evidence, then a human or a stronger model should make the actual decision. Because the model is slow relative to a hosted model, it is preferable for work that is bulky and mechanical rather than short and latency sensitive.
 
 ## Known failure modes
 
@@ -179,7 +185,7 @@ During a test where the caller requested the local LLM to reproduce a code block
 
 The mlx-dspark server is only an inference endpoint. It has no browser, no tool calling loop, and no network egress of its own, so the model genuinely cannot fetch anything. The practical pattern is therefore to keep the network on the caller's side. The orchestrating agent performs the fetch or the search itself, then passes the retrieved text into the prompt as context. The local model still does all of the reasoning, and the caller acts only as its input and output layer. This approach needs no additional infrastructure.
 
-A second option is to build a genuine tool calling loop, since the server exposes an OpenAI compatible API and could therefore emit a structured request that the caller executes and feeds back. Tool calling reliability on a 27B four-bit model is mediocre, so this is worth building only when the extra autonomy is actually needed. Whichever pattern is used, remember the context window is 131,072 tokens, so fetched pages should be trimmed or summarized before they are pasted in.
+A second option is to build a genuine tool calling loop, since the server exposes an OpenAI compatible API and could therefore emit a structured request that the caller executes and feeds back. Tool calling reliability on a 27B four-bit model is mediocre, so this is worth building only when the extra autonomy is actually needed. Whichever pattern is used, remember that the context window is a mutable runtime setting, so check the live value from the `context_window` field at `curl -s http://127.0.0.1:8090/health` and trim or summarize fetched pages to fit comfortably within it before they are pasted in.
 
 ## Calling it from your own script
 
@@ -320,7 +326,7 @@ Callers should serialise work through this server and queue requests rather than
 
 ### A memory consequence worth acting on
 
-The key-value cache is charged per batch slot. At the current 131,072 token context each slot is worth about 8 GB, so four slots represent about 32 GB of worst case reservation on top of roughly 20 GB for the target and drafter weights. Those are ceilings rather than what is actually paid: the cache is allocated as it is needed, and a single stream at this context measured 15.5 GB active and 18.6 GB peak.
+The key-value cache is charged per batch slot. Divide the live context window (the `context_window` field at `curl -s http://127.0.0.1:8090/health`) by 16,384 to estimate how many gigabytes each slot is worth, then multiply by four for the worst case reservation across all slots, on top of roughly 20 GB for the target and drafter weights. At the 131,072 token context in effect when this was measured, that worked out to about 8 GB per slot and about 32 GB across four slots. Those are ceilings rather than what is actually paid: the cache is allocated as it is needed, and a single stream at that context measured 15.5 GB active and 18.6 GB peak.
 
 Lowering the maximum batch to one was tried, on the reasoning that concurrency was not earning its memory. It was reverted. A batch of one removes the only fairness mechanism the server has, so a short request submitted behind a very long prefill is blocked for the entire duration of that prefill rather than progressing slowly alongside it. This was observed directly: a small request queued behind a 70,000 token prefill made no progress at all until the large request was abandoned. A maximum batch of four is therefore kept, and callers are expected to avoid fanning work out themselves rather than relying on the server to arbitrate.
 
@@ -372,10 +378,12 @@ The watcher unloads the model after a period without requests. A request that ar
   Qwen3.8-27B-4bit", "mode": "auto"}` first.
 
 **Symptom: context length errors / truncated output on long prompts.**
-- Check `/health`'s `context_window` field matches what you expect (currently
-  131072). If you need to raise it, see "Changing the context window" below --
-  don't just increase `max_tokens` in the request, that's the output budget,
-  not the context window.
+- Check `/health`'s `context_window` field against what you expect; this
+  value is a mutable runtime setting, so read it live with `curl -s
+  http://127.0.0.1:8090/health` rather than assuming a fixed number. If you
+  need to raise it, see "Changing the context window" below -- don't just
+  increase `max_tokens` in the request, that's the output budget, not the
+  context window.
 
 **Symptom: server not responding at all.**
 - `launchctl list | grep dspark` -- confirm both

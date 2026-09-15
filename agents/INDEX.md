@@ -2,12 +2,13 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 34 agents** — 10 core, 24 across 1 bundles.
+**Total: 35 agents** — 11 core, 24 across 1 bundles.
 
-## Core agents (10)
+## Core agents (11)
 
 | Agent | Description |
 |-------|-------------|
+| [PROMPT-DEFENSE](PROMPT-DEFENSE.md) | This preamble MUST be included in every agent system prompt. It provides baseline protection against prompt injection attacks. |
 | [ai-engineer](ai-engineer.md) | Senior AI engineer for architecting, implementing, and optimizing end-to-end AI systems — from model selection and training pipelines to production deployment,  |
 | [code-reviewer](code-reviewer.md) | Senior code and architecture reviewer for comprehensive quality, security, performance, and architectural integrity analysis. Use proactively after writing or m |
 | [data-specialist](data-specialist.md) | Senior data specialist covering exploratory analysis, statistical modeling, machine learning, experimentation, SQL optimization, query design, and performance t |

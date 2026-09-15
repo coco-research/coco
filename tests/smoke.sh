@@ -27,11 +27,24 @@ test -f docs/by-domain/pm.md && pass "docs/by-domain/pm.md generated" || fail "d
 
 echo ""
 echo "=== Smoke test: adapters dry-run ==="
-for adapter in claude-code cursor vscode codex generic; do
+for adapter in claude-code cursor grok vscode pi-desktop codex generic hermes; do
+  # hermes ships via PR #118; skip until it lands on main.
+  [ -d "adapters/$adapter" ] || { echo "SKIP: $adapter (not present)"; continue; }
   bash adapters/$adapter/install.sh --dry-run > /tmp/$adapter.out 2>&1 \
     && pass "adapters/$adapter/install.sh --dry-run" \
     || fail "adapters/$adapter/install.sh --dry-run"
 done
+
+bash adapters/cursor/install.sh --dry-run --systems superintelligence > /tmp/cursor-systems.out 2>&1 \
+  && pass "cursor install.sh --dry-run --systems superintelligence" \
+  || fail "cursor install.sh --dry-run --systems superintelligence"
+
+echo ""
+echo "=== Smoke test: cursor --systems superintelligence ==="
+# Repro: cursor install.sh used to reject --systems (Unknown flag / exit 1), so the
+# README flagship command died whenever ~/.cursor existed. Must write SI-Decide.md
+# into CURSOR_HOME/commands, not ~/.claude/commands.
+bash tests/cursor-si-commands.sh && pass "cursor --systems superintelligence writes SI-Decide.md" || fail "cursor --systems superintelligence did not write SI-Decide.md"
 
 echo ""
 echo "=== Smoke test: root install.sh ==="
@@ -64,8 +77,16 @@ echo "=== Smoke test: command cross-references ==="
 bash tests/check-command-refs.sh && pass "command cross-references resolve" || fail "command cross-references broken"
 
 echo ""
+echo "=== Smoke test: systems/gsd/ context-loading references ==="
+bash tests/check-gsd-refs.sh && pass "systems/gsd/ references resolve" || fail "systems/gsd/ references broken"
+
+echo ""
 echo "=== Smoke test: /team evidence-gate integrity ==="
 bash tests/check-evidence-gate.sh && pass "/team evidence-gate present" || fail "/team evidence-gate incomplete"
+
+echo ""
+echo "=== Smoke test: security surface ==="
+bash tests/check-security-surface.sh && pass "security-surface checks" || fail "security-surface checks"
 
 echo ""
 echo "=== Summary ==="

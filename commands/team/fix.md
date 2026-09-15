@@ -1,3 +1,6 @@
+---
+description: "Use when the user reports a bug, pastes a failing test or an error log, or asks to debug and fix an issue. Diagnoses root cause, writes a failing regression test first, fixes it, and captures the gate command, exit code and evidence."
+---
 # /team fix — Fix Pipeline
 
 > Called by team.md router when action is `fix`.

@@ -143,8 +143,19 @@ def env_override_vars():
     return sorted(found)
 
 
-def install(adapter, bundles, timeout=900):
-    """Install one adapter into a temp HOME and count what arrived."""
+def install(adapter, bundles, mode='widest', timeout=900):
+    """Install one adapter into a temp HOME and count what arrived.
+
+    `mode` is what the caller passes on the command line:
+      widest  — `--systems <every bundle the manifest claims>`
+      default — no flags at all, which is what a user actually runs
+
+    Both are measured, because they are not the same question. An adapter whose plain
+    run installs less than its widest is one an ordinary user cannot get the full
+    framework out of, and measuring only the widest hid exactly that: the Hermes
+    adapter had no default-bundle logic at all and delivered 74 of 188 skills, while
+    this index reported 175 because it always passed the flag.
+    """
     home = tempfile.mkdtemp(prefix=f'deliv-{adapter}-')
     cwd = tempfile.mkdtemp(prefix=f'deliv-cwd-{adapter}-')
     # The VS Code adapter links core commands into the editor's user profile, which
@@ -162,7 +173,7 @@ def install(adapter, bundles, timeout=900):
     for var in env_override_vars():
         env.pop(var, None)
     cmd = ['bash', str(ROOT / 'adapters' / adapter / 'install.sh')]
-    if bundles:
+    if mode == 'widest' and bundles:
         cmd += ['--systems', ','.join(bundles)]
     try:
         proc = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True,
@@ -181,8 +192,8 @@ def install(adapter, bundles, timeout=900):
         'agents': count_md(home, {'agents', 'subagents'}),
         'generated_commands': count_generated(home),
         'bundles': bundles,
+        'mode': mode,
         'agents_md': (pathlib.Path(cwd) / 'AGENTS.md').exists(),
-        'bundles': bundles,
         'tail': ' | '.join([ln for ln in output.strip().splitlines() if ln.strip()][-1:]),
     }
     shutil.rmtree(home, ignore_errors=True)
@@ -195,6 +206,13 @@ def main():
     advertised = advertised_totals()
     adapters = sorted(p.name for p in (ROOT / 'adapters').iterdir() if p.is_dir())
     rows = [install(a, manifest_bundles(a)) for a in adapters]
+    defaults = {r['adapter']: install(r['adapter'], r['bundles'], mode='default')
+                for r in rows}
+    for r in rows:
+        d = defaults[r['adapter']]
+        r['default_skills'] = d['skills']
+        r['default_commands'] = d['commands']
+        r['default_exit'] = d['exit']
 
     lines = [
         '# Install Adapters — Delivery Index',
@@ -257,6 +275,54 @@ def main():
     if exempt:
         lines += ['', 'Not comparable (AGENTS.md producers rather than tree installers): '
                   + ', '.join(f"`{r['adapter']}`" for r in exempt) + '.']
+
+    # A plain run is what a user actually gets. Any adapter that installs less without
+    # flags than with them is one an ordinary install cannot fully benefit from.
+    shortfall = []
+    for r in rows:
+        if r['agents_md'] and r['commands'] == 0:
+            continue  # AGENTS.md producer: one file by design
+        gap = r['skills'] - r['default_skills']
+        if gap > 0:
+            shortfall.append((r['adapter'], r['default_skills'], r['skills'], gap,
+                              r['default_exit']))
+
+    lines += [
+        '',
+        '## Default install against the widest install',
+        '',
+        'The columns above measure the widest install. This measures what `bash',
+        'adapters/<name>/install.sh` delivers with **no flags**, which is what a user runs.',
+        'Every adapter installs its bundles by default, so a plain run should match the',
+        'widest one. A shortfall here means an ordinary install silently misses part of',
+        'the framework.',
+        '',
+        '| Adapter | Skills, plain run | Skills, widest | Short by |',
+        '|---|---:|---:|---:|',
+    ]
+    for r in rows:
+        lines.append(f"| `{r['adapter']}` | {r['default_skills']} | {r['skills']} | "
+                     f"{r['skills'] - r['default_skills']} |")
+    lines += ['']
+    if shortfall:
+        lines += [
+            '**Adapters whose plain run falls short:**',
+            '',
+            '| Adapter | Plain run | Widest | Missing | Exit |',
+            '|---|---:|---:|---:|---:|',
+        ]
+        for name, dflt, widest, gap, rc in sorted(shortfall, key=lambda x: -x[3]):
+            lines.append(f'| `{name}` | {dflt} | {widest} | {gap} | {rc} |')
+        lines += [
+            '',
+            'Either the adapter does not default to its bundles, or it walks fewer skill',
+            'layouts than its siblings. Both are bugs in the adapter, not in the',
+            'measurement; `scripts/installable-bundles.sh` is the shared source of the',
+            'default set and `adapters/pi-desktop/install.sh` is a worked example of the',
+            'three skill layouts that exist.',
+        ]
+    else:
+        lines += ['Every adapter delivers its full skill set on a plain run.']
 
     note = []
     for r in rows:

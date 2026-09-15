@@ -1,6 +1,6 @@
 ---
 name: gsd-review
-description: "Request cross-AI peer review of phase plans from external AI CLIs"
+description: "Use when a phase plan should be peer-reviewed by other AI CLIs before execution, or the user asks for a cross-AI review. Invokes Gemini, Claude, Codex, or OpenCode and writes REVIEWS.md for /gsd-plan-phase --reviews."
 argument-hint: "--phase N [--gemini] [--claude] [--codex] [--opencode] [--all]"
 allowed-tools:
   - Read

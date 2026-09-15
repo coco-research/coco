@@ -1,6 +1,6 @@
 ---
 name: gsd-remove-workspace
-description: "Remove a GSD workspace and clean up worktrees"
+description: "Use when a finished GSD workspace and its worktrees should be deleted. Confirms first, runs git worktree remove for each member repo, and refuses if any repo has uncommitted changes."
 argument-hint: "<workspace-name>"
 allowed-tools:
   - Bash

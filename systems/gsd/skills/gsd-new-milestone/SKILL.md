@@ -1,6 +1,6 @@
 ---
 name: gsd-new-milestone
-description: "Start a new milestone cycle — update PROJECT.md and route to requirements"
+description: "Use when the current milestone has shipped and it is time to scope the next one, or when the user asks to start a new milestone. Updates PROJECT.md, then runs questioning, research, requirements, and roadmap."
 argument-hint: "[milestone name, e.g., 'v1.1 Notifications']"
 allowed-tools:
   - Read

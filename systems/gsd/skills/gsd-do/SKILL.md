@@ -1,6 +1,6 @@
 ---
 name: gsd-do
-description: "Route freeform text to the right GSD command automatically"
+description: "Use when you know what you want but not which /gsd-* command to run. Routes freeform text to the best matching GSD command, confirms the match, then hands off without doing the work itself."
 argument-hint: "<description of what you want to do>"
 allowed-tools:
   - Read

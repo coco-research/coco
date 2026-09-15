@@ -1,3 +1,6 @@
+---
+description: "Use when built work must be checked against its spec, plan, or PRD before shipping, or the team router action is verify. Re-runs the gate from a clean checkout per requirement and grades it MET, PARTIAL, NOT MET, or UNVERIFIED."
+---
 # /team verify — Verification Pipeline
 
 > Called by team.md router when action is `verify`.

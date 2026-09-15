@@ -1,6 +1,6 @@
 ---
 name: gsd-verify-work
-description: "Validate built features through conversational UAT"
+description: "Use after a phase executes, when the user wants to test the built features themselves. Runs one conversational UAT test at a time into {phase}-UAT.md and, when something fails, diagnoses it and queues fix plans for /gsd-execute-phase."
 argument-hint: "[phase number, e.g., '4']"
 allowed-tools:
   - Read

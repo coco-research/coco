@@ -1,6 +1,6 @@
 ---
 name: gsd-new-workspace
-description: "Create an isolated workspace with repo copies and independent .planning/"
+description: "Use when you need an isolated copy of one or more repos with its own .planning/, or want to work on several repos in parallel. Creates worktrees or clones plus WORKSPACE.md; then run /gsd-new-project inside."
 argument-hint: "--name <name> [--repos repo1,repo2] [--path /target] [--strategy worktree|clone] [--branch name] [--auto]"
 allowed-tools:
   - Read

@@ -1,6 +1,6 @@
 ---
 name: gsd-milestone-summary
-description: "Generate a comprehensive project summary from milestone artifacts for team onboarding and review"
+description: "Use when onboarding someone to a finished milestone or preparing a team review. Reads ROADMAP, REQUIREMENTS, CONTEXT, SUMMARY, and VERIFICATION artifacts into one MILESTONE_SUMMARY in .planning/reports/, then offers Q&A."
 argument-hint: "[version]"
 allowed-tools:
   - Read

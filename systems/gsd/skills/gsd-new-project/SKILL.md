@@ -1,6 +1,6 @@
 ---
 name: gsd-new-project
-description: "Initialize a new project with deep context gathering and PROJECT.md"
+description: "Use when starting GSD in a repo that has no .planning/ yet, or the user wants a new project set up. Questioning, optional research, requirements, and roadmap produce .planning/PROJECT.md, REQUIREMENTS.md, ROADMAP.md, and STATE.md."
 argument-hint: "[--auto]"
 allowed-tools:
   - Read

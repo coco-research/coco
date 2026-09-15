@@ -1,3 +1,7 @@
+---
+description: "Use when the user asks for a deck, architecture review board slides, keynote, or demo. Runs the /team present pipeline in the Consulting or Apple format with narrative design and slide-quality review; outputs a self-contained HTML deck."
+---
+
 # /team present — Presentation Pipeline
 
 > Called by team.md router when action is `present`.

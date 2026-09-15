@@ -1,6 +1,6 @@
 ---
 name: gsd-add-backlog
-description: "Add an idea to the backlog parking lot (999.x numbering)"
+description: "Use when the user wants to park an idea or feature request that is not ready for active planning, or says add it to the backlog. Writes a 999.x entry to ROADMAP.md and creates its phase directory for later promotion."
 argument-hint: "<description>"
 allowed-tools:
   - Read

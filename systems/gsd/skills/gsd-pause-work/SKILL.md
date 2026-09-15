@@ -1,6 +1,6 @@
 ---
 name: gsd-pause-work
-description: "Create context handoff when pausing work mid-phase"
+description: "Use when the user wants to pause work mid-phase or hand it off to a new session. Writes .continue-here.md with position, completed and remaining work, decisions and blockers, commits it as WIP, and prints resume instructions."
 allowed-tools:
   - Read
   - Write

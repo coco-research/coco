@@ -94,9 +94,11 @@ bug in the measurement.
   the editor user profile, so the measurement creates the two standard profile
   directories inside the throwaway HOME first. Without them it reports only the
   generated family.
-- **Skills stop at 191, not 226.** Five skills live under `adapters/cursor/skills`
-  and are Cursor-only; the rest of the 226 figure is the repository inventory
-  rather than what any single adapter installs.
+- **Skills stop at 191, not 226.** The advertised figure is the
+  repository inventory. The difference is two sets no default install claims: the
+  `reverse-skill` bundle, which is security tooling held back on purpose and reachable
+  with `--systems reverse-skill`, and the five skills under `adapters/cursor/skills`,
+  which are Cursor-only by construction. Neither is a shortfall.
 - **Counts include symlinks.** Most adapters link into the checkout instead of
   copying, and are deduplicated by resolved path.
 

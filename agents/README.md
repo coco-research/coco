@@ -35,7 +35,7 @@ Worth knowing, because they are easy to confuse and none is a subset of another:
   with the files here. No count is quoted because three different counting methods over that
   file disagree, depending on whether the `## Role Template` placeholder and each role's
   `### System Prompt` subheading are counted; read the file rather than trusting a figure.
-- the **389 Super Intelligence personas** under `systems/superintelligence/*/personas/`
+- the **495 Super Intelligence personas** under `systems/superintelligence/*/personas/`
 
 ## Agents
 

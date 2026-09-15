@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-11",
+  "generated_at": "2026-09-03",
   "team_id": "finance-super-intelligence",
   "team_name": "Finance Super Intelligence Team",
   "description": "Your finance brain trust and decision partner. Named personas across 7 cells: valuation/corporate finance, investing, accounting/FP&A, macro, fintech, behavioral, and capital markets/M&A/private. Markets/quant/derivatives are reserved for the Trading team. Built local-first (LM Studio) and validator-gated. Invoked by /SI-Fin commands.",
@@ -449,7 +449,7 @@
       "home_team": "finance-super-intelligence",
       "cell": "valuation-corporate-finance",
       "cell_role": "specialist",
-      "status": "archetype",
+      "status": "active",
       "affiliations_2026": [
         "Columbia Business School — Robert Heilbrunn Professor Emeritus of Finance and Asset Management; academic director, Heilbrunn Center for Graham & Dodd Investing",
         "First Eagle Investment Management — senior advisor to the Global Value team"
@@ -1765,7 +1765,7 @@
       "home_team": "finance-super-intelligence",
       "cell": "valuation-corporate-finance",
       "cell_role": "specialist",
-      "status": "archetype",
+      "status": "active",
       "affiliations_2026": [
         "IESE Business School:Professor of Financial Management",
         "IESE Business School:Chair of Corporate Finance"

@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 222 skills** — 74 core, 148 across 8 bundles.
+**Total: 226 skills** — 74 core, 152 across 8 bundles.
 
 ## Design (15)
 
@@ -282,15 +282,19 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [wifi-wireless](../systems/reverse-skill/skills/wifi-wireless/SKILL.md) | Use for authorized wireless security assessment including Wi-Fi capture, WPA handshake analysis, rogue AP detection research, and lab-only deauth testing. |
 | [windows-ad](../systems/reverse-skill/skills/windows-ad/SKILL.md) | Use for authorized Active Directory and Windows identity attacks including Kerberos, AD CS, BloodHound paths, NTLM relay, and domain privilege escalation resear |
 
-## Bundle: superintelligence (9 skills)
+## Bundle: superintelligence (13 skills)
 
 | Skill | Description |
 |-------|-------------|
 | [ai](../systems/superintelligence/ai/SKILL.md) |  |
+| [climate-energy](../systems/superintelligence/climate-energy/SKILL.md) |  |
 | [data-analytics-super-intelligence](../systems/superintelligence/data-analytics/SKILL.md) |  |
+| [education-edtech](../systems/superintelligence/education-edtech/SKILL.md) |  |
 | [engineering](../systems/superintelligence/engineering/SKILL.md) |  |
 | [finance-super-intelligence](../systems/superintelligence/finance/SKILL.md) |  |
 | [gtm-super-intelligence](../systems/superintelligence/gtm/SKILL.md) |  |
+| [healthcare-life-sciences](../systems/superintelligence/healthcare-life-sciences/SKILL.md) |  |
+| [legal-ip](../systems/superintelligence/legal-ip/SKILL.md) |  |
 | [product-design](../systems/superintelligence/product-design/SKILL.md) |  |
 | [risk-compliance-super-intelligence](../systems/superintelligence/risk-compliance/SKILL.md) |  |
 | [strategy-super-intelligence](../systems/superintelligence/strategy/SKILL.md) |  |

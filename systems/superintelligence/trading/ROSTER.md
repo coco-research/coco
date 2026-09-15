@@ -1,6 +1,6 @@
 # Trading Super Intelligence Team — Roster
 
-**Status:** generated from `registry.json` on 2026-06-11 by `build_roster_md.py` — regenerate, do not hand-edit.
+**Status:** generated from `registry.json` on 2026-09-03 by `build_roster_md.py` — regenerate, do not hand-edit.
 **Team ID:** `trading-super-intelligence`
 **Native personas:** 46 across 8 cells.
 **Quality bar:** ≥8 source URLs, ≥3 recent signals, every `public_stance` carries an `evidence_url`. Full English prose.

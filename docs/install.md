@@ -161,7 +161,7 @@ The `generic` adapter is the same script under a different name — for users of
 | `brain` | 6-skill local knowledge tracker | `--systems brain` |
 | `cognee` | 3-skill knowledge-graph memory | `--systems cognee` |
 | `hyperframes` | 20-skill video and motion suite | `--systems hyperframes` |
-| `superintelligence` | 495-persona expert board, generates 242 commands at install | `--systems superintelligence` |
+| `superintelligence` | 495-persona expert board, generates 342 commands at install | `--systems superintelligence` |
 
 Combine freely:
 

@@ -13,7 +13,7 @@ assets where each editor or CLI looks for them. The architecture is therefore sh
 two questions: how capabilities are authored, and how they reach a tool.
 
 The distinguishing structural fact is that one large surface does not exist as files at
-all. The 242-command Super Intelligence family is generated at install time from the
+all. The 342-command Super Intelligence family is generated at install time from the
 JSON registries under `systems/superintelligence/`, so the installed command surface is
 roughly eight times the size of the `commands/` directory.
 
@@ -53,11 +53,11 @@ surface and the adapters.
 
 **Slash Command Surface** (`commands/`) — namespaced commands as flat markdown, six
 namespaces including `team`, the four-layer orchestration router. 38 committed here;
-242 more are generated at install.
+342 more are generated at install.
 
 **Bundled Orchestration Systems** (`systems/`) — opt-in bundles shipping nested skills,
 agents and registries: GSD (68 skills, 24 agents), HyperFrames (20), Super Intelligence
-(9 skills over 389 personas), brain, cognee, m0. The SI registries are the source the
+(13 skills over 495 personas), brain, cognee, m0. The SI registries are the source the
 generators read.
 
 **Subagent Role Definitions** (`agents/`, `rules/`) — the named roles commands dispatch
@@ -91,7 +91,7 @@ than install time.
 
 ## 7. Key architectural decisions
 
-**The command surface is generated, not committed.** 242 commands derive from nine
+**The command surface is generated, not committed.** 342 commands derive from thirteen
 registries so a roster change propagates without hand-editing. The cost is that the
 delivered surface is invisible to a file listing, and an adapter that omits the
 generator step under-delivers silently — which is why `adapters/INDEX.md` is generated

@@ -60,7 +60,7 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-# Bundles are the default. The framework advertises 185 skills and 280 commands and a
+# Bundles are the default. The framework advertises 226 skills and 386 commands and a
 # plain install used to deliver 70 and 38, because every bundle sat behind a flag nobody
 # knew to pass. --core-only is the opt-out; --systems still names an explicit subset.
 if [[ "$CORE_ONLY" -eq 1 ]]; then
@@ -499,9 +499,9 @@ if DRY:
 say("Restart PI-Desktop (or open a new session) to pick the new commands and skills up.")
 PY
 
-# Super Intelligence command family. The 242 SI-* commands are not committed; they are
-# generated from the nine team registries. Skipping this step is what left a PI-Desktop
-# install with 38 commands where the published total is 280, with no warning, so it runs
+# Super Intelligence command family. The 342 SI-* commands are not committed; they are
+# generated from the thirteen team registries. Skipping this step is what left a PI-Desktop
+# install with 38 commands where the published total is 386, with no warning, so it runs
 # by default and says so when it cannot.
 PROMPTS_DIR="${PI_AGENT_HOME:-$HOME/.pi/agent}/prompts"
 SKILLS_DIR="${AGENTS_HOME:-$HOME/.agents}/skills"
@@ -510,7 +510,7 @@ SI_SCRIPT="$REPO_ROOT/scripts/generate-si-commands.sh"
 
 # The family belongs to the superintelligence bundle, so it follows that bundle rather
 # than installing unconditionally: `--core-only` means the core set, and `--systems gsd`
-# means gsd. With bundles now the default, the ordinary install still gets all 242.
+# means gsd. With bundles now the default, the ordinary install still gets all 342.
 case ",$SYSTEMS_CSV," in
   *,superintelligence,*) WANT_SI=1 ;;
   *) WANT_SI=0 ;;
@@ -525,7 +525,7 @@ if [[ "$UNINSTALL" -eq 0 && "$WANT_SI" -eq 1 ]]; then
       echo "         re-run: bash scripts/generate-si-commands.sh --target \"$PROMPTS_DIR\"" >&2
     }
   else
-    echo "WARNING: scripts/generate-si-commands.sh not found, so the 242 Super"
+    echo "WARNING: scripts/generate-si-commands.sh not found, so the 342 Super"
     echo "         Intelligence commands were not generated. This checkout predates"
     echo "         the shared generator; pull the latest main and re-run."
   fi

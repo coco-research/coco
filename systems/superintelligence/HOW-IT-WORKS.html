@@ -83,12 +83,12 @@
 
 <header>
   <h1>Super Intelligence — the expert council, explained</h1>
-  <p class="sub">SI convenes a panel of 16&ndash;32 modeled experts to argue about your question and hand you an attributed verdict. There are 242 slash commands under the hood, but the system routes for you &mdash; <strong>you only need to remember one</strong>.</p>
+  <p class="sub">SI convenes a panel of 16&ndash;32 modeled experts to argue about your question and hand you an attributed verdict. There are 342 slash commands under the hood, but the system routes for you &mdash; <strong>you only need to remember one</strong>.</p>
   <div class="stats">
-    <div class="stat"><b>9</b><span>expert teams</span></div>
+    <div class="stat"><b>13</b><span>expert teams</span></div>
     <div class="stat"><b>495</b><span>modeled experts</span></div>
-    <div class="stat"><b>72</b><span>specialist cells</span></div>
-    <div class="stat"><b>242</b><span>slash commands</span></div>
+    <div class="stat"><b>98</b><span>specialist cells</span></div>
+    <div class="stat"><b>342</b><span>slash commands</span></div>
     <div class="stat"><b>1</b><span>command you need: <code>/SI</code></span></div>
   </div>
 </header>
@@ -125,7 +125,7 @@
   <p>Every command follows the same pipeline: <strong>infer the verb &rarr; route to teams &rarr; select the panel &rarr; approve &rarr; run</strong>. The front door first maps your wording to a verb (an intent table: &ldquo;A or B&rdquo; &rarr; Decide, &ldquo;tear this apart&rdquo; &rarr; Stress-Test, and so on &mdash; if two genuinely fit, it asks one quick question). Team routing is done by a local embedding model that scores your prompt against each team's profile and specialist cells (no cloud call). Single-domain questions auto-delegate to that team; multi-domain questions get a cross-team panel with seats split proportionally to relevance.</p>
   <div class="diagram" id="d1" data-code="flowchart TD
   U[&quot;You type a prompt&quot;] --> SI[&quot;/SI front door&quot;]
-  SI --> MS[&quot;meta_select.py scores your prompt<br/>against all 9 teams + 72 cells<br/>(local embeddings)&quot;]
+  SI --> MS[&quot;meta_select.py scores your prompt<br/>against all 13 teams + 98 cells<br/>(local embeddings)&quot;]
   MS --> Q{&quot;How many domains?&quot;}
   Q -->|&quot;one team dominates&quot;| TO[&quot;/SI-Team-Orchestrate<br/>picks 16-32 from that team&quot;]
   Q -->|&quot;spans several&quot;| XO[&quot;/SI-Orchestrate<br/>picks 16-32 ACROSS teams,<br/>seats split by relevance&quot;]
@@ -187,7 +187,7 @@
 
 <section id="grammar">
   <h2>The command grammar</h2>
-  <p>Every command follows one pattern. Once you know it, you know all 242:</p>
+  <p>Every command follows one pattern. Once you know it, you know all 342:</p>
   <pre class="cmd"><span class="c">/SI</span><span class="dim">[-Team][-Verb]</span> <span class="dim">"your prompt"</span> <span class="dim">[flags]</span>
 
 <span class="dim"># no team, no verb  →</span>  /SI "..."              <span class="dim">routes everything for you</span>
@@ -195,7 +195,7 @@
 <span class="dim"># team + verb       →</span>  /SI-PD-Decide "..."    <span class="dim">one team's roster, that verb</span>
 <span class="dim"># team only         →</span>  /SI-PD                 <span class="dim">prints that team's roster</span></pre>
 
-  <h3>The 9 teams</h3>
+  <h3>The 13 teams</h3>
   <table>
     <tr><th>Code</th><th>Team</th><th>Experts</th><th>Reach for it when the question is about&hellip;</th></tr>
     <tr><td><code>PD</code></td><td>Product &amp; Design</td><td>56</td><td>product strategy, UX, design systems, user research, what to build<br><code>/SI-PD "infinite scroll or pagination for the activity feed?"</code></td></tr>
@@ -207,6 +207,10 @@
     <tr><td><code>GRC</code></td><td>Risk &amp; Compliance</td><td>30</td><td>governance, privacy, regulatory exposure, audit, controls<br><code>/SI-GRC "review our data-retention policy before the audit, be brutal"</code></td></tr>
     <tr><td><code>Strat</code></td><td>Strategy</td><td>29</td><td>competitive positioning, market entry, long-range bets<br><code>/SI-Strat "enter the SMB segment or double down on enterprise?"</code></td></tr>
     <tr><td><code>GTM</code></td><td>Sales, GTM &amp; Marketing</td><td>23</td><td>pricing, positioning, launch, pipeline, growth<br><code>/SI-GTM "usage-based pricing or seats for the new tier?"</code></td></tr>
+    <tr><td><code>Legal</code></td><td>Legal &amp; IP</td><td>31</td><td>patent strategy, tech licensing, regulatory litigation, AI governance, open-source compliance, antitrust<br><code>/SI-Legal "does our open-source contribution policy expose us to a licensing claim?"</code></td></tr>
+    <tr><td><code>Health</code></td><td>Healthcare &amp; Life Sciences</td><td>25</td><td>drug discovery, medtech, biotech strategy, health policy, genomics, clinical trials<br><code>/SI-Health "run the trial with a synthetic control arm or a traditional RCT?"</code></td></tr>
+    <tr><td><code>Edu</code></td><td>Education &amp; EdTech</td><td>25</td><td>learning science, curriculum design, AI tutoring, higher-ed strategy, edtech platforms, assessment<br><code>/SI-Edu "adaptive AI tutor or a fixed curriculum for the new course?"</code></td></tr>
+    <tr><td><code>Climate</code></td><td>Climate &amp; Energy</td><td>25</td><td>energy transition, carbon markets, climate modeling, sustainability, grid infrastructure, ESG<br><code>/SI-Climate "carbon offset purchase or on-site renewable investment to hit our net-zero target?"</code></td></tr>
   </table>
 
   <h3>The verbs, grouped by what you want</h3>

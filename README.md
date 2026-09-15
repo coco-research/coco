@@ -229,7 +229,7 @@ A standard install equips your workspace with a lightweight core; full activatio
 </table>
 
 <div align="center">
-  <sub><strong>Core install:</strong> 133 active assets (70 Skills, 38 Commands, 10 Agents, 15 Rules)</sub><br>
+  <sub><strong>Core install:</strong> 144 active assets (74 Skills, 44 Commands, 11 Agents, 15 Rules)</sub><br>
   <sub><strong>Orchestration bundles:</strong> <strong>+68 GSD skills</strong> · <strong>+24 GSD agents</strong> · <strong>+6 Brain skills</strong> · <strong>+13 Super Intelligence skills</strong> · <strong>+342 SI commands</strong> · <strong>3 Workflows</strong></sub>
 </div>
 
@@ -239,7 +239,7 @@ A standard install equips your workspace with a lightweight core; full activatio
 
 ## Skills Catalog
 
-CoCo ships **222 skills** (70 core + 115 across bundles). These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
+CoCo ships **226 skills** (74 core + 152 across bundles). These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
 
 ### Visual design & styling
 `ui-ux-pro-max` (50 styles, 21 palettes, 50 font pairings, 9 stacks) · `frontend-design` · `design-taste-frontend` · `redesign-existing-projects` · `axiom-liquid-glass` (Apple Liquid Glass, WWDC 2025) · `swiftui-liquid-glass` · `web-design-guidelines` · `tailwind-patterns` (Tailwind v4) · `vercel-react-best-practices` · `clone-website` · `c4-architecture` · `arb-review` · `expo-api-routes` · `ai-product` · `scroll-world` (scroll-scrubbed, cut-free camera flythrough landing pages, generated end to end via Higgsfield).
@@ -263,7 +263,7 @@ CoCo ships **222 skills** (70 core + 115 across bundles). These are not prompt s
 `coco` (conversational router) · `coco-cli` · `coco-loop` (compiles a plain-language goal into a confirmed charter, then runs a bounded, propose-only autonomous loop) · `skill-creator` · `writing-skills` · `find-skills`.
 
 <details>
-<summary><strong>▸ Full catalog — every one of the 222 skills</strong></summary>
+<summary><strong>▸ Full catalog — every one of the 226 skills</strong></summary>
 
 <br>
 
@@ -710,7 +710,7 @@ Until `cocosuperintelligence` is published on npmjs.com, do not use `npx` for th
 <tr><td><strong>Telemetry / SaaS</strong></td><td>None — 100% local files</td></tr>
 </table>
 
-<sub>Core install ships 70 skills + 38 commands + 10 agents + 15 rules (133 active assets). The totals above reflect a full install with every bundle (<code>bash install.sh --systems gsd,brain,cognee,hyperframes,superintelligence</code>). Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely.</sub>
+<sub>Core install ships 74 skills + 44 commands + 11 agents + 15 rules (144 active assets). The totals above reflect a full install with every bundle (<code>bash install.sh --systems gsd,brain,cognee,hyperframes,superintelligence</code>). Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely.</sub>
 
 ---
 

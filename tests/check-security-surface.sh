@@ -130,9 +130,15 @@ fi
 # because it is a historical record of the exact bug this suite guards
 # against, and this test file is excluded because its own grep patterns quote
 # the forbidden strings as literals in order to detect them elsewhere.
-glob_hits="$(grep -RInE '\-lname[[:space:]]+["'"'"']\*' \
-  --exclude-dir=.git --exclude-dir=node_modules \
-  --exclude=CHANGELOG.md --exclude=check-security-surface.sh . || true)"
+#
+# Candidates come from `git ls-files`, not a filesystem walk: this repo's own
+# tooling checks out nested `git worktree`s under .claude/worktrees/, each a
+# complete second copy of every tracked file, and a filesystem walk would
+# grep that copy too and report a false failure that has nothing to do with
+# this repository's actual content. -z keeps a path with a space or an
+# unusual character from being split wrong.
+glob_hits="$(git ls-files -z -- . ':!CHANGELOG.md' ':!tests/check-security-surface.sh' \
+  | xargs -0 grep -InE '\-lname[[:space:]]+["'"'"']\*' -- || true)"
 if [[ -n "$glob_hits" ]]; then
   fail_ "unanchored contains-match link glob found:"
   echo "$glob_hits" | sed 's/^/    /'

@@ -106,7 +106,7 @@ Super Intelligence is CoCo's signature capability. It lets you summon custom, re
 | **Healthcare & Life Sciences** | 25 | Health economics, genomics, clinical medicine, public health policy |
 | **Sales / GTM / Marketing** | 23 | Product-market fit, sales ops, growth marketing, enterprise GTM |
 
-- **242 generated slash commands.** 17 cross-team meta commands (like `/SI-Decide` or `/SI-Tradeoff`, routing across domains) plus 225 per-team commands (25 verbs × 9 teams, such as `/SI-AI-Decide` or `/SI-Eng-Pre-Mortem`). These are generated locally at install time from the team registries — no command files are transmitted or stored remotely.
+- **342 generated slash commands.** 17 cross-team meta commands (like `/SI-Decide` or `/SI-Tradeoff`, routing across domains) plus 325 per-team commands (25 verbs × 13 teams, such as `/SI-AI-Decide` or `/SI-Eng-Pre-Mortem`). These are generated locally at install time from the team registries — no command files are transmitted or stored remotely.
 - **70 expertise cells.** Each department is subdivided into focused cells (e.g. Engineering has 11, AI has 8) so the router can assemble a precise panel rather than a generic crowd.
 - **Cross-team meta-orchestration.** For complex queries spanning domains ("build and sell an AI audit tool"), a local router scores your prompt against team registries and cells, then greedily assembles a proportional 16–32-person panel.
 - **Citable and grounded.** Every stance is verified from public sources and carries a direct evidence URL. Personas are validated against a strict anti-fabrication gate.
@@ -230,7 +230,7 @@ A standard install equips your workspace with a lightweight core; full activatio
 
 <div align="center">
   <sub><strong>Core install:</strong> 133 active assets (70 Skills, 38 Commands, 10 Agents, 15 Rules)</sub><br>
-  <sub><strong>Orchestration bundles:</strong> <strong>+68 GSD skills</strong> · <strong>+24 GSD agents</strong> · <strong>+6 Brain skills</strong> · <strong>+9 Super Intelligence skills</strong> · <strong>+242 SI commands</strong> · <strong>3 Workflows</strong></sub>
+  <sub><strong>Orchestration bundles:</strong> <strong>+68 GSD skills</strong> · <strong>+24 GSD agents</strong> · <strong>+6 Brain skills</strong> · <strong>+13 Super Intelligence skills</strong> · <strong>+342 SI commands</strong> · <strong>3 Workflows</strong></sub>
 </div>
 
 ---
@@ -275,7 +275,7 @@ CoCo ships **222 skills** (70 core + 115 across bundles). These are not prompt s
 
 **Brain bundle skills (6)** — `brain` · `brain-init` · `brain-rescan` · `brain-update` · `brain-export` · `brain-wiki`.
 
-**Super Intelligence bundle (9)** — one orchestration skill per built team (ai, engineering, product-design, finance, trading, risk-compliance, strategy, data-analytics, gtm), which generate the 242 `/SI-*` commands at install.
+**Super Intelligence bundle (13)** — one orchestration skill per built team (ai, engineering, product-design, finance, trading, risk-compliance, strategy, data-analytics, gtm, climate-energy, education-edtech, healthcare-life-sciences, legal-ip), which generate the 342 `/SI-*` commands at install.
 
 </details>
 
@@ -299,7 +299,7 @@ A local knowledge-graph engine of **6 skills** connecting email, chat, code, and
 A multi-agent product-team pipeline (`/team:ship`, `/team:plan`, `/team:review`, `/team:verify`, and more). It spawns specialized subagents — Research, Architect, QA — to execute changes, review diffs, and write tests, with deterministic gates that intercept merges to run lints, import audits, reference checks, and verification suites.
 
 ### 4. Super Intelligence
-The **495-persona advisory board** and its **242 generated `/SI-*` commands** across 9 teams — the hero capability described [above](#the-board).
+The **495-persona advisory board** and its **342 generated `/SI-*` commands** across 13 teams — the hero capability described [above](#the-board).
 
 ---
 

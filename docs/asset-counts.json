@@ -49,12 +49,13 @@
       "github-copilot-cli",
       "grok",
       "hermes",
+      "pi-desktop",
       "roo-code",
       "vscode",
       "vscode-continue",
       "windsurf",
       "zed"
     ],
-    "total": 15
+    "total": 16
   }
 }

@@ -49,7 +49,7 @@ jobs:
           KNOWN_ADAPTERS = ['claude-code', 'cursor', 'codex', 'generic', 'grok',
                             'windsurf', 'zed', 'cline', 'roo-code', 'amazon-q',
                             'aider', 'github-copilot-cli', 'hermes', 'vscode',
-                            'vscode-continue']
+                            'vscode-continue', 'pi-desktop']
 
           errors = []
           checked = 0

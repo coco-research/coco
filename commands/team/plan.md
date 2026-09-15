@@ -1,3 +1,6 @@
+---
+description: "Use when the user asks for a plan, roadmap, phase breakdown, or task sequencing, or the /team router picks plan. Runs the L1-L4 research/plan/validate/approve pipeline and writes GSD-compatible PLAN.md files when .planning/ exists."
+---
 # /team plan — Planning Pipeline
 
 > Called by team.md router when action is `plan`.
@@ -41,7 +44,7 @@ When `.planning/` exists:
 - Read ROADMAP.md and REQUIREMENTS.md for context
 - Plans follow GSD conventions
 - Output: `.planning/phases/{phase_dir}/PLAN.md` files with proper frontmatter
-- Compatible with `/gsd:execute-phase`
+- Compatible with `/gsd-execute-phase`
 
 ### Layer 3: Plan Validation
 L3 agents check:

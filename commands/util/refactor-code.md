@@ -1,3 +1,8 @@
+---
+name: refactor-code
+description: "Use when the user asks to refactor a file, module, or scope while preserving behaviour, for example /util refactor-code src/auth. Fills test gaps first, refactors incrementally with commits, then verifies tests, lint, and performance."
+---
+
 # Intelligently Refactor and Improve Code Quality
 
 Intelligently refactor and improve code quality
@@ -30,7 +35,7 @@ Follow this systematic approach to refactor code: **$ARGUMENTS**
    - Plan the refactoring in small, incremental steps
 
 4. **Environment Setup**
-   - Create a new branch: `git checkout -b refactor/$ARGUMENTS`
+   - Create a new branch from a slug you derive from the scope: `git checkout -b refactor/<slug>` (derive the slug; never paste the raw argument into a branch name)
    - Ensure all tests pass before starting
    - Set up any additional tooling needed (profilers, analyzers)
 

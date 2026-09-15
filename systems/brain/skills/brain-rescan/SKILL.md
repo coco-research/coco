@@ -1,6 +1,6 @@
 ---
 name: brain:rescan
-description: "Incremental rescan of project folder. Detects new/changed files since last scan, extracts knowledge from CLAUDE.local.md, memory files, and doc inventory, and updates the brain DB. Requires an existing project_brain.db — run /brain-init first if none exists."
+description: "Use when project files changed since the last brain scan, CLAUDE.local.md was updated, or a periodic refresh is due. Rescans incrementally, writes new entities, decisions, and documents; needs project_brain.db (run /brain-init first)."
 ---
 
 # /brain:rescan --- Incremental Knowledge Rescan

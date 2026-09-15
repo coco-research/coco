@@ -283,6 +283,8 @@ CoCo ships **222 skills** (70 core + 115 across bundles). These are not prompt s
 
 Bundles are opt-in packages that extend the workspace with specialized databases, pipelines, and rosters. Enable them with `--systems <name>`.
 
+One further bundle, `reverse-skill`, is deliberately not part of any default install and is not counted among the four below: it vendors reverse-engineering and penetration-testing methodology under [`systems/reverse-skill/`](systems/reverse-skill/), and it is security tooling that stays installed only when it is asked for by name, with `--systems reverse-skill`. See [`systems/reverse-skill/README.md`](systems/reverse-skill/README.md) for what it contains and how it was curated.
+
 ### 1. GSD (Get Shit Done)
 An orchestration engine of **68 skills and 24 agents** that manages the lifecycle of complex codebases. A disk-backed phase database records goals, decisions, milestones, and blockers; **workstreams** spin up isolated git checkouts to test refactors without polluting main; **forensics** performs post-mortem root-cause audits when a phase fails; and **autonomous mode** runs parallel waves of subagents through plan milestones end-to-end.
 

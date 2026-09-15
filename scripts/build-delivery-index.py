@@ -10,7 +10,7 @@ directory listing, because the largest single piece of it does not exist as file
 at all: the Super Intelligence command family (342 commands) is generated at
 install time by `systems/superintelligence/*/scripts/build_commands.py`, and an
 adapter that does not call those generators ships 38 commands where the README
-advertises 386. Nothing in the tree said so; running the adapters says so.
+advertises 387. Nothing in the tree said so; running the adapters says so.
 
 Run from repo root:
     python3 scripts/build-delivery-index.py
@@ -157,7 +157,7 @@ def install(adapter, bundles, timeout=900):
     # Both the per-tool overrides and the platform config roots have to go, or the
     # throwaway HOME is not authoritative: a CI runner that exports XDG_CONFIG_HOME
     # makes the VS Code adapter look for its profile in the runner's real config
-    # directory, find nothing, and report 342 commands where macOS reports 386. The
+    # directory, find nothing, and report 342 commands where macOS reports 387. The
     # generated index is committed, so it has to measure the same on every platform.
     for var in env_override_vars():
         env.pop(var, None)

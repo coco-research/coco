@@ -60,7 +60,7 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-# Bundles are the default. The framework advertises 228 skills and 386 commands and a
+# Bundles are the default. The framework advertises 228 skills and 387 commands and a
 # plain install used to deliver 70 and 38, because every bundle sat behind a flag nobody
 # knew to pass. --core-only is the opt-out; --systems still names an explicit subset.
 if [[ "$CORE_ONLY" -eq 1 ]]; then
@@ -501,7 +501,7 @@ PY
 
 # Super Intelligence command family. The 342 SI-* commands are not committed; they are
 # generated from the thirteen team registries. Skipping this step is what left a PI-Desktop
-# install with 38 commands where the published total is 386, with no warning, so it runs
+# install with 38 commands where the published total is 387, with no warning, so it runs
 # by default and says so when it cannot.
 PROMPTS_DIR="${PI_AGENT_HOME:-$HOME/.pi/agent}/prompts"
 SKILLS_DIR="${AGENTS_HOME:-$HOME/.agents}/skills"

@@ -1,6 +1,6 @@
 ---
 name: brain:init
-description: "Initialize a project_brain.db in the current project folder. Creates the database, project record, then scans existing files (CLAUDE.local.md, memory files, docs, emails) to bootstrap the brain with knowledge. Smart enough to handle re-runs — skips what already exists and only processes new/changed files."
+description: "Use when setting up project memory in a new folder or on the first brain:init in a project. Creates project_brain.db, registers the project, and bootstraps it from CLAUDE.local.md, memory files, docs, and emails; safe to re-run."
 ---
 
 # /brain:init --- Initialize Project Brain

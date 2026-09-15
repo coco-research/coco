@@ -25,13 +25,64 @@ If you add a fifth shape, add it to SKILL_SOURCES below, and check the printed t
 against `find . -name 'SKILL.md' -not -path './.git/*' | wc -l`.
 """
 
+import json
 import os
+import subprocess
 import sys
 import pathlib
 import yaml
 from collections import defaultdict
 
 ROOT = pathlib.Path(__file__).parent.parent.resolve()
+
+
+def _tracked_paths():
+    """POSIX paths of every git-tracked file, or None when this is not a checkout.
+
+    Discovery walks the filesystem, which makes the generated indexes a function of
+    whatever happens to be in the working tree. An untracked leftover directory — a
+    stale `systems/<name>/` from an experiment, say — was then indexed as if it
+    shipped, and the next person to run the "Verify INDEX is up to date" gate saw
+    drift they had not caused and could not explain. Reading git's index instead
+    makes the output a function of the commit.
+
+    Returns None outside a git checkout (a tarball or npm install), where the
+    filesystem walk is the only thing available.
+    """
+    try:
+        proc = subprocess.run(['git', '-C', str(ROOT), 'ls-files', '-z'],
+                              capture_output=True, check=True)
+    except (OSError, subprocess.CalledProcessError):
+        print('WARNING: not a git checkout — falling back to a filesystem walk, so '
+              'untracked directories will be indexed.', file=sys.stderr)
+        return None
+    return {p for p in proc.stdout.decode('utf-8', 'replace').split('\0') if p}
+
+
+TRACKED = _tracked_paths()
+TRACKED_DIRS = set()
+if TRACKED is not None:
+    for _p in TRACKED:
+        _parts = _p.split('/')
+        for _i in range(1, len(_parts)):
+            TRACKED_DIRS.add('/'.join(_parts[:_i]))
+
+
+def _rel(path):
+    return path.relative_to(ROOT).as_posix()
+
+
+def _shipped(path):
+    """True when a file should count towards an index.
+
+    Outside git this is every file, which is the old behaviour.
+    """
+    return TRACKED is None or _rel(path) in TRACKED
+
+
+def _shipped_dir(path):
+    """True when a directory holds at least one tracked file."""
+    return TRACKED is None or _rel(path) in TRACKED_DIRS
 
 # (glob, index of the parent directory that names the bundle, or None for core skills)
 # Depths differ per shape, so the bundle index is declared alongside its glob rather
@@ -96,6 +147,8 @@ def collect_skills():
     seen = set()
     for glob, bundle_at in SKILL_SOURCES:
         for p in sorted(ROOT.glob(glob)):
+            if not _shipped(p):
+                continue
             if p in seen:
                 continue
             seen.add(p)
@@ -120,6 +173,8 @@ def collect_skills():
 def collect_commands():
     commands = []
     for p in sorted(ROOT.glob('commands/*/*.md')):
+        if not _shipped(p):
+            continue
         fm = parse_frontmatter(p) or {}
         ns = p.parent.name
         cname = p.stem
@@ -141,6 +196,8 @@ def _first_prose_line(path):
 def collect_agents():
     agents = []
     for p in sorted(ROOT.glob('agents/*.md')):
+        if not _shipped(p):
+            continue
         if p.name in ('README.md', 'INDEX.md'):
             continue
         agents.append({'name': p.stem, 'desc': _first_prose_line(p),
@@ -150,6 +207,8 @@ def collect_agents():
     # parents[1]. parents[2] here yields the literal string "systems", which produced
     # 24 links to a nonexistent systems/systems/agents/ directory.
     for p in sorted(ROOT.glob('systems/*/agents/*.md')):
+        if not _shipped(p):
+            continue
         if p.name in ('README.md', 'INDEX.md'):
             continue
         agents.append({'name': p.stem, 'desc': _first_prose_line(p),
@@ -289,16 +348,18 @@ def write_systems_index(skills, agents):
         base_dir = ROOT / base
         if not base_dir.is_dir():
             continue
-        for d in sorted(p for p in base_dir.iterdir() if p.is_dir()):
-            n_cmds = (len(list(d.glob('commands/*.md')))
-                      + len(list(d.glob('commands/*/*.md'))))
+        for d in sorted(p for p in base_dir.iterdir()
+                          if p.is_dir() and _shipped_dir(p)):
+            n_cmds = len([c for c in list(d.glob('commands/*.md'))
+                          + list(d.glob('commands/*/*.md')) if _shipped(c)])
             containers.append({
                 'base': base,
                 'name': d.name,
                 'skills': skills_by_bundle.get(d.name, 0),
                 'agents': agents_by_bundle.get(d.name, 0),
                 'commands': n_cmds,
-                'files': sum(1 for f in d.rglob('*') if f.is_file() and _ships(f)),
+                'files': sum(1 for f in d.rglob('*')
+                          if f.is_file() and _ships(f) and _shipped(f)),
             })
 
     lines = ['# System Bundles Index', '',
@@ -353,6 +414,93 @@ def write_by_domain_views(skills):
         print(f'Wrote {out.relative_to(ROOT)}')
 
 
+
+def count_generated_si_commands():
+    """/SI-* commands generated at install from team registries. Not in-repo files.
+
+    Public command total = shipped files + this number.
+    Mira (2026-08-29): customer-facing commands = 280 (38 shipped + 242 generated).
+    38 is a labeled SSoT field (shipped files), not the public total. Do not invent
+    a third number.
+
+    Counted from live inputs, not a hardcoded 242:
+      built teams in systems/superintelligence/registry.json
+      x per-team surface in ai/scripts/build_commands.py
+      + meta family in scripts/build_meta_commands.py (SI.md + SI-Orchestrate + verbs)
+
+    Ponytail: if those generators add a new verb class, this import still tracks
+    because it reads ACTION/IDENTITY/ROSTER/MAINTENANCE and VERBS live.
+    """
+    import importlib.util
+
+    meta_path = ROOT / 'systems' / 'superintelligence' / 'registry.json'
+    n_built = 0
+    if meta_path.exists():
+        teams = json.loads(meta_path.read_text()).get('teams', {})
+        entries = teams.values() if isinstance(teams, dict) else teams
+        n_built = sum(1 for t in entries if isinstance(t, dict) and t.get('built'))
+
+    per_team = 0
+    gen_path = ROOT / 'systems' / 'superintelligence' / 'ai' / 'scripts' / 'build_commands.py'
+    if gen_path.exists():
+        spec = importlib.util.spec_from_file_location('si_build_commands', gen_path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        per_team = (
+            2  # dispatcher + Orchestrate
+            + len(mod.ACTION_VERBS)
+            + len(mod.IDENTITY_VERBS)
+            + len(mod.ROSTER_VERBS)
+            + len(mod.MAINTENANCE_VERBS)
+        )
+
+    meta_family = 0
+    meta_gen = ROOT / 'systems' / 'superintelligence' / 'scripts' / 'build_meta_commands.py'
+    if meta_gen.exists():
+        spec = importlib.util.spec_from_file_location('si_build_meta_commands', meta_gen)
+        mmod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mmod)
+        meta_family = 2 + len(mmod.VERBS)  # SI.md + SI-Orchestrate.md + verbs
+
+    return n_built * per_team + meta_family
+
+
+def write_asset_counts(skills, commands, agents):
+    """Emit docs/asset-counts.json — the single source of truth for asset counts.
+
+    Two command layers (do not collapse them):
+      commands.shipped   — in-repo command files (collect_commands)
+      commands.generated_si — /SI-* generated at install
+      commands.customer_facing — public total = shipped + generated
+    README / package.json public claims must use commands.customer_facing, never shipped.
+    """
+    core_skills = [s for s in skills if 'bundle' not in s]
+    bundle_skills = [s for s in skills if 'bundle' in s]
+    core_agents = [a for a in agents if 'bundle' not in a]
+    shipped = len(commands)
+    generated = count_generated_si_commands()
+    counts = {
+        'schema': 1,
+        'skills': {
+            'total': len(skills),
+            'core': len(core_skills),
+            'bundle': len(bundle_skills),
+        },
+        'commands': {
+            'shipped': shipped,
+            'generated_si': generated,
+            'customer_facing': shipped + generated,
+            'namespaces': len({c['namespace'] for c in commands}),
+        },
+        'agents': {'total': len(agents), 'core': len(core_agents)},
+        'rules': len(list((ROOT / 'rules' / 'cursor-mdc').glob('*.mdc'))),
+    }
+    out = ROOT / 'docs' / 'asset-counts.json'
+    out.write_text(json.dumps(counts, indent=2) + '\n')
+    print(f'Wrote {out.relative_to(ROOT)}')
+
+
+
 def main():
     skills = collect_skills()
     commands = collect_commands()
@@ -363,6 +511,7 @@ def main():
     write_agents_index(agents)
     write_systems_index(skills, agents)
     write_by_domain_views(skills)
+    write_asset_counts(skills, commands, agents)
     print(f'\nDone. Skills: {len(skills)} · Commands: {len(commands)} · '
           f'Agents: {len(agents)}')
 

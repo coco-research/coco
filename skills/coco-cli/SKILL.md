@@ -30,13 +30,14 @@ first claims that name. From a clone, invoke `node bin/coco.js` instead.
 
 ## Install flags (passed through to install.sh)
 
-- `--adapter <name>` — one of `claude-code` | `cursor` | `codex` | `generic`
+- `--adapter <name>` — one of `claude-code` | `cursor` | `grok` | `codex` | `generic`
 - `--systems <list>` — comma-separated, e.g. `gsd,brain,team`
 - `--dry-run` — preview only, no writes
 
 ## Examples
 
 - Install for Cursor: `node bin/coco.js install --adapter cursor`
+- Install for Grok: `node bin/coco.js install --adapter grok`
 - Selective systems: `node bin/coco.js install --systems gsd,brain --adapter claude-code`
 - Preview without writing: `node bin/coco.js install --dry-run`
 - Update an existing clone: `node bin/coco.js update`

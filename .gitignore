@@ -8,6 +8,7 @@
 # IDE-local config (users wire via adapters/*/install.sh)
 .claude/
 .cursor/
+.grok/
 
 # Local secrets / env
 .env

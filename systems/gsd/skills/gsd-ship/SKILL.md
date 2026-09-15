@@ -17,8 +17,4 @@ Bridge local completion → merged PR. After /gsd-verify-work passes, ship the w
 Closes the plan → execute → verify → ship loop.
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/ship.md
-</execution_context>
-
-Execute the ship workflow from @systems/gsd/workflows/ship.md end-to-end.
+Execute the ship workflow end-to-end.

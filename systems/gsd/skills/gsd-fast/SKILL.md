@@ -22,10 +22,6 @@ needs research, multi-step planning, or verification. /gsd-fast is for tasks
 you could describe in one sentence and execute in under 2 minutes.
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/fast.md
-</execution_context>
-
 <process>
-Execute the fast workflow from @systems/gsd/workflows/fast.md end-to-end.
+Execute the fast workflow end-to-end.
 </process>

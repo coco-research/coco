@@ -24,11 +24,6 @@ Designed for power users who want to parallelize work across phases from one ter
 **After:** User exits when done managing, or all phases complete and milestone lifecycle is suggested.
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/manager.md
-@systems/gsd/references/ui-brand.md
-</execution_context>
-
 <context>
 No arguments required. Requires an active milestone with ROADMAP.md and STATE.md.
 
@@ -36,6 +31,6 @@ Project context, phase list, dependencies, and recommendations are resolved insi
 </context>
 
 <process>
-Execute the manager workflow from @systems/gsd/workflows/manager.md end-to-end.
+Execute the manager workflow end-to-end.
 Maintain the dashboard refresh loop until the user exits or all phases complete.
 </process>

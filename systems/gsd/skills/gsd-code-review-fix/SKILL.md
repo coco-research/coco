@@ -23,10 +23,6 @@ Arguments:
 Output: {padded_phase}-REVIEW-FIX.md in phase directory + inline summary of fixes applied
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/code-review-fix.md
-</execution_context>
-
 <context>
 Phase: $ARGUMENTS (first positional argument is phase number)
 
@@ -40,7 +36,7 @@ Context files (CLAUDE.md, REVIEW.md, phase state) are resolved inside the workfl
 <process>
 This command is a thin dispatch layer. It parses arguments and delegates to the workflow.
 
-Execute the code-review-fix workflow from @systems/gsd/workflows/code-review-fix.md end-to-end.
+Execute the code-review-fix workflow end-to-end.
 
 The workflow (not this command) enforces these gates:
 - Phase validation (before config gate)

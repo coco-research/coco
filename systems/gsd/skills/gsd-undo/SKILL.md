@@ -20,16 +20,10 @@ Three modes:
 - **--plan NN-MM**: Revert all commits for a specific plan
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/undo.md
-@systems/gsd/references/ui-brand.md
-@systems/gsd/references/gate-prompts.md
-</execution_context>
-
 <context>
 $ARGUMENTS
 </context>
 
 <process>
-Execute the undo workflow from @systems/gsd/workflows/undo.md end-to-end.
+Execute the undo workflow end-to-end.
 </process>

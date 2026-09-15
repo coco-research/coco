@@ -20,16 +20,11 @@ Orchestrates gsd-ui-researcher and gsd-ui-checker.
 Flow: Validate → Research UI → Verify UI-SPEC → Done
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/ui-phase.md
-@systems/gsd/references/ui-brand.md
-</execution_context>
-
 <context>
 Phase number: $ARGUMENTS — optional, auto-detects next unplanned phase if omitted.
 </context>
 
 <process>
-Execute @systems/gsd/workflows/ui-phase.md end-to-end.
+Execute the ui-phase workflow end-to-end.
 Preserve all workflow gates.
 </process>

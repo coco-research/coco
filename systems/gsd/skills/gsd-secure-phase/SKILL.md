@@ -22,15 +22,11 @@ Verify threat mitigations for a completed phase. Three states:
 Output: updated SECURITY.md.
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/secure-phase.md
-</execution_context>
-
 <context>
 Phase: $ARGUMENTS — optional, defaults to last completed phase.
 </context>
 
 <process>
-Execute @systems/gsd/workflows/secure-phase.md.
+Execute the secure-phase workflow.
 Preserve all workflow gates.
 </process>

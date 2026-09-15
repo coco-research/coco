@@ -20,10 +20,6 @@ Creates: .planning/seeds/SEED-NNN-slug.md
 Consumed by: /gsd-new-milestone (scans seeds and presents matches)
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/plant-seed.md
-</execution_context>
-
 <process>
-Execute the plant-seed workflow from @systems/gsd/workflows/plant-seed.md end-to-end.
+Execute the plant-seed workflow end-to-end.
 </process>

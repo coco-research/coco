@@ -16,10 +16,6 @@ Purpose: Clean removal of work you've decided not to do, without polluting conte
 Output: Phase deleted, all subsequent phases renumbered, git commit as historical record.
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/remove-phase.md
-</execution_context>
-
 <context>
 Phase: $ARGUMENTS
 
@@ -27,6 +23,6 @@ Roadmap and state are resolved in-workflow via `init phase-op` and targeted read
 </context>
 
 <process>
-Execute the remove-phase workflow from @systems/gsd/workflows/remove-phase.md end-to-end.
+Execute the remove-phase workflow end-to-end.
 Preserve all validation gates (future phase check, work check), renumbering logic, and commit.
 </process>

@@ -19,10 +19,6 @@ artifacts (notes, todos, seeds, research questions, requirements, or new phases)
 Accepts an optional topic argument: `/gsd-explore authentication strategy`
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/explore.md
-</execution_context>
-
 <process>
-Execute the explore workflow from @systems/gsd/workflows/explore.md end-to-end.
+Execute the explore workflow end-to-end.
 </process>

@@ -18,10 +18,6 @@ Purpose: Enable new team members to understand a completed project by reading on
 Output: MILESTONE_SUMMARY written to `.planning/reports/`, presented inline, optional interactive Q&A.
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/milestone-summary.md
-</execution_context>
-
 <context>
 **Project files:**
 - `.planning/ROADMAP.md`
@@ -37,7 +33,7 @@ Output: MILESTONE_SUMMARY written to `.planning/reports/`, presented inline, opt
 </context>
 
 <process>
-Read and execute the milestone-summary workflow from @systems/gsd/workflows/milestone-summary.md end-to-end.
+Read and execute the milestone-summary workflow end-to-end.
 </process>
 
 <success_criteria>

@@ -22,15 +22,11 @@ Audit Nyquist validation coverage for a completed phase. Three states:
 Output: updated VALIDATION.md + generated test files.
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/validate-phase.md
-</execution_context>
-
 <context>
 Phase: $ARGUMENTS — optional, defaults to last completed phase.
 </context>
 
 <process>
-Execute @systems/gsd/workflows/validate-phase.md.
+Execute the validate-phase workflow.
 Preserve all workflow gates.
 </process>

@@ -77,6 +77,10 @@ echo "=== Smoke test: command cross-references ==="
 bash tests/check-command-refs.sh && pass "command cross-references resolve" || fail "command cross-references broken"
 
 echo ""
+echo "=== Smoke test: systems/gsd/ context-loading references ==="
+bash tests/check-gsd-refs.sh && pass "systems/gsd/ references resolve" || fail "systems/gsd/ references broken"
+
+echo ""
 echo "=== Smoke test: /team evidence-gate integrity ==="
 bash tests/check-evidence-gate.sh && pass "/team evidence-gate present" || fail "/team evidence-gate incomplete"
 

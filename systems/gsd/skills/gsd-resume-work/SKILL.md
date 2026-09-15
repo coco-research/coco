@@ -22,12 +22,8 @@ Routes to the resume-project workflow which handles:
 - Context-aware next action routing
   </objective>
 
-<execution_context>
-@systems/gsd/workflows/resume-project.md
-</execution_context>
-
 <process>
-**Follow the resume-project workflow** from `@systems/gsd/workflows/resume-project.md`.
+**Follow the resume-project workflow.**
 
 The workflow handles all resumption logic including:
 

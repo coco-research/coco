@@ -15,5 +15,45 @@
     "total": 35,
     "core": 11
   },
-  "rules": 15
+  "rules": 15,
+  "personas": {
+    "total": 495,
+    "by_department": {
+      "ai": 59,
+      "climate-energy": 25,
+      "data-analytics": 29,
+      "education-edtech": 25,
+      "engineering": 70,
+      "finance": 47,
+      "gtm": 23,
+      "healthcare-life-sciences": 25,
+      "legal-ip": 31,
+      "product-design": 56,
+      "risk-compliance": 30,
+      "strategy": 29,
+      "trading": 46
+    }
+  },
+  "departments": {
+    "total": 13
+  },
+  "adapters": {
+    "list": [
+      "aider",
+      "amazon-q",
+      "claude-code",
+      "cline",
+      "codex",
+      "cursor",
+      "generic",
+      "github-copilot-cli",
+      "hermes",
+      "roo-code",
+      "vscode",
+      "vscode-continue",
+      "windsurf",
+      "zed"
+    ],
+    "total": 14
+  }
 }

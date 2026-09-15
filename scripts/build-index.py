@@ -185,6 +185,36 @@ def collect_commands():
     return commands
 
 
+def collect_personas():
+    """Persona counts by department, keyed by department directory name.
+
+    A department is any `systems/superintelligence/<dept>/personas/` directory; a
+    persona is a `*.md` file directly inside it. No README, index or template file
+    lives in a personas/ directory today — every file there is a real persona with
+    frontmatter (slug, real_name, archetype, ...); if a non-persona file is ever
+    added, filter it here rather than letting it silently inflate the count.
+    """
+    by_department = {}
+    base = ROOT / 'systems' / 'superintelligence'
+    if base.is_dir():
+        for personas_dir in sorted(base.glob('*/personas')):
+            dept = personas_dir.parent.name
+            by_department[dept] = sum(1 for p in personas_dir.glob('*.md') if _shipped(p))
+    return by_department
+
+
+def collect_adapters():
+    """Sorted adapter directory names under adapters/ — the SSoT for `ls adapters/`.
+
+    Mirrors _shipped_dir: an adapter must hold at least one tracked file to count,
+    so a leftover empty directory from a removed adapter is not counted.
+    """
+    base = ROOT / 'adapters'
+    if not base.is_dir():
+        return []
+    return sorted(p.name for p in base.iterdir() if p.is_dir() and _shipped_dir(p))
+
+
 def _first_prose_line(path):
     for line in path.read_text().split('\n'):
         line = line.strip()
@@ -465,7 +495,7 @@ def count_generated_si_commands():
     return n_built * per_team + meta_family
 
 
-def write_asset_counts(skills, commands, agents):
+def write_asset_counts(skills, commands, agents, personas, adapters):
     """Emit docs/asset-counts.json — the single source of truth for asset counts.
 
     Two command layers (do not collapse them):
@@ -494,6 +524,12 @@ def write_asset_counts(skills, commands, agents):
         },
         'agents': {'total': len(agents), 'core': len(core_agents)},
         'rules': len(list((ROOT / 'rules' / 'cursor-mdc').glob('*.mdc'))),
+        'personas': {
+            'total': sum(personas.values()),
+            'by_department': personas,
+        },
+        'departments': {'total': len(personas)},
+        'adapters': {'list': adapters, 'total': len(adapters)},
     }
     out = ROOT / 'docs' / 'asset-counts.json'
     out.write_text(json.dumps(counts, indent=2) + '\n')
@@ -505,15 +541,18 @@ def main():
     skills = collect_skills()
     commands = collect_commands()
     agents = collect_agents()
+    personas = collect_personas()
+    adapters = collect_adapters()
 
     write_skills_index(skills)
     write_commands_index(commands)
     write_agents_index(agents)
     write_systems_index(skills, agents)
     write_by_domain_views(skills)
-    write_asset_counts(skills, commands, agents)
+    write_asset_counts(skills, commands, agents, personas, adapters)
     print(f'\nDone. Skills: {len(skills)} · Commands: {len(commands)} · '
-          f'Agents: {len(agents)}')
+          f'Agents: {len(agents)} · Personas: {sum(personas.values())} · '
+          f'Adapters: {len(adapters)}')
 
 
 if __name__ == '__main__':

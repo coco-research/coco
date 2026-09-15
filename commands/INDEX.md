@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 44 commands across 7 namespaces.**
+**Total: 45 commands across 7 namespaces.**
 
 ## coco
 
@@ -36,6 +36,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 |-------|-------------|
 | [`/eng:anti-pattern`](eng/anti-pattern.md) | Use when the user asks to audit or fix swallowed errors, empty catch blocks, or catch-and-continue. Triages findings by severity and fixes one at a time with lo |
 | [`/eng:local-llm`](eng/local-llm.md) | Check status, change context window, restart, or troubleshoot this machine's local LLM setup (LM Studio + mlx-dspark). Usage: /eng-local-llm [status\|set-contex |
+| [`/eng:maker-mdap`](eng/maker-mdap.md) | Load the MAKER/MDAP knowledge base (arXiv:2511.09030) — Maximal Agentic Decomposition, first-to-ahead-by-k voting, red-flagging, cost scaling. Usage: /maker-mda |
 
 ## pm
 

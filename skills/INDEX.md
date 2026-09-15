@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 226 skills** — 74 core, 152 across 8 bundles.
+**Total: 228 skills** — 76 core, 152 across 8 bundles.
 
 ## Design (15)
 
@@ -24,7 +24,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [visual-explainer](visual-explainer/SKILL.md) | Generate self-contained HTML visual explanations for systems, code changes, plans, data, and technical concepts. Use for diagrams, architecture overviews, diff  |
 | [web-design-guidelines](web-design-guidelines/SKILL.md) | Review UI code for Web Interface Guidelines compliance. Use when asked to "review my UI", "check accessibility", "audit design", "review UX", or "check my site  |
 
-## Engineering (21)
+## Engineering (22)
 
 | Skill | Description |
 |-------|-------------|
@@ -38,6 +38,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [expo-api-routes](expo-api-routes/SKILL.md) | Use when adding server-side API routes to an Expo Router app (+api.ts files) for secrets, database access, third-party proxies, webhooks, CORS, or EAS Hosting d |
 | [finishing-a-development-branch](finishing-a-development-branch/SKILL.md) | Use when implementation is done and tests pass and the user must choose to merge locally, open a PR, keep the branch, or discard it. Presents those four options |
 | [generate-tests](generate-tests/SKILL.md) | Use when asked to generate tests for a file, module or component, to raise coverage, or to bootstrap a suite for untested code. Detects the project's test frame |
+| [maker-mdap](maker-mdap/SKILL.md) | Knowledge base from "Solving a Million-Step LLM Task with Zero Errors" (Meyerson, Paolo, Dailey, Shahrzad, Francon, Hayes, Qiu, Hodjat, Miikkulainen — arXiv:251 |
 | [media-memory](media-memory/SKILL.md) | Use when the user sends or generates an image, screenshot, video, audio or file and wants it saved, or asks to find past media (that diagram, the mockup from la |
 | [openai-agents](openai-agents/SKILL.md) | Build AI applications with OpenAI Agents SDK - text agents, voice agents, multi-agent handoffs, tools with Zod schemas, guardrails, and streaming. Prevents 11 d |
 | [openai-api](openai-api/SKILL.md) | Use when implementing GPT chat, streaming, function calling, embeddings for RAG, images, audio or batch jobs, or troubleshooting 429 rate limits and API or Type |
@@ -68,7 +69,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [workflow-routing](workflow-routing/SKILL.md) | Use when starting any task, before invoking any other skill or GSD command, to route between Superpowers skills and GSD commands from project state and task sco |
 | [writing-plans](writing-plans/SKILL.md) | Use when you have a spec or requirements for a multi-step task, before touching code |
 
-## Meta (9)
+## Meta (10)
 
 | Skill | Description |
 |-------|-------------|
@@ -80,6 +81,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [find-skills](find-skills/SKILL.md) | Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express int |
 | [goal](goal/SKILL.md) | Persistent project goal that survives across sessions and tools, with continuous-execution loop semantics. Use when someone asks to "set a goal", "what is my go |
 | [skill-creator](skill-creator/SKILL.md) | Use when the user asks to create, scaffold, update or package a skill, or asks how skill frontmatter, progressive disclosure or bundled resources should be stru |
+| [skill-map](skill-map/SKILL.md) | Discover in-repo CoCo skills and slash commands from the skill-map. Use when the user asks which skill/command to use, how to find capabilities, marketplace/map |
 | [writing-skills](writing-skills/SKILL.md) | Use when creating new skills, editing existing skills, or verifying skills work before deployment |
 
 ## Ops (6)

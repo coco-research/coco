@@ -1,0 +1,244 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-04",
+  "team_id": "education-edtech-super-intelligence",
+  "team_name": "Education & EdTech Super Intelligence Team",
+  "description": "Your education and edtech brain trust. 25 named personas across 7 cells covering learning science, curriculum design, AI tutoring, higher-ed strategy, edtech platforms, assessment, and workforce development.",
+  "personas_count": 25,
+  "cells_count": 7,
+  "cells": {
+    "ai-tutoring-adaptive": {
+      "id": "ai-tutoring-adaptive",
+      "description": "Education & EdTech Super Intelligence Team cell: Ai Tutoring Adaptive",
+      "personas_count": 2,
+      "personas": [
+        "rose-luckin",
+        "sal-khan"
+      ],
+      "file_path": "superintelligence/education-edtech/cells/ai-tutoring-adaptive.md"
+    },
+    "assessment-evaluation": {
+      "id": "assessment-evaluation",
+      "description": "Education & EdTech Super Intelligence Team cell: Assessment Evaluation",
+      "personas_count": 3,
+      "personas": [
+        "dylan-wiliam",
+        "james-popham",
+        "rick-stiggins"
+      ],
+      "file_path": "superintelligence/education-edtech/cells/assessment-evaluation.md"
+    },
+    "curriculum-instructional-design": {
+      "id": "curriculum-instructional-design",
+      "description": "Education & EdTech Super Intelligence Team cell: Curriculum Instructional Design",
+      "personas_count": 3,
+      "personas": [
+        "grant-wiggins",
+        "jay-mctighe",
+        "ken-robinson"
+      ],
+      "file_path": "superintelligence/education-edtech/cells/curriculum-instructional-design.md"
+    },
+    "edtech-product-platform": {
+      "id": "edtech-product-platform",
+      "description": "Education & EdTech Super Intelligence Team cell: Edtech Product Platform",
+      "personas_count": 4,
+      "personas": [
+        "andrew-ng",
+        "audrey-watters",
+        "daphne-koller",
+        "sebastian-thrun"
+      ],
+      "file_path": "superintelligence/education-edtech/cells/edtech-product-platform.md"
+    },
+    "institutional-higher-ed-strategy": {
+      "id": "institutional-higher-ed-strategy",
+      "description": "Education & EdTech Super Intelligence Team cell: Institutional Higher Ed Strategy",
+      "personas_count": 5,
+      "personas": [
+        "bryan-alexander",
+        "cathy-davidson",
+        "linda-darling-hammond",
+        "michael-crow",
+        "pedro-noguera"
+      ],
+      "file_path": "superintelligence/education-edtech/cells/institutional-higher-ed-strategy.md"
+    },
+    "learning-science-pedagogy": {
+      "id": "learning-science-pedagogy",
+      "description": "Education & EdTech Super Intelligence Team cell: Learning Science Pedagogy",
+      "personas_count": 5,
+      "personas": [
+        "david-perkins",
+        "john-sweller",
+        "paul-kirschner",
+        "richard-mayer",
+        "sugata-mitra"
+      ],
+      "file_path": "superintelligence/education-edtech/cells/learning-science-pedagogy.md"
+    },
+    "workforce-development-skills": {
+      "id": "workforce-development-skills",
+      "description": "Education & EdTech Super Intelligence Team cell: Workforce Development Skills",
+      "personas_count": 3,
+      "personas": [
+        "anthony-carnevale",
+        "brandon-busteed",
+        "michelle-weise"
+      ],
+      "file_path": "superintelligence/education-edtech/cells/workforce-development-skills.md"
+    }
+  },
+  "personas": {
+    "andrew-ng": {
+      "slug": "andrew-ng",
+      "real_name": "Andrew Ng",
+      "cell": "edtech-product-platform",
+      "file_path": "superintelligence/education-edtech/personas/andrew-ng.md"
+    },
+    "anthony-carnevale": {
+      "slug": "anthony-carnevale",
+      "real_name": "Anthony P. Carnevale",
+      "cell": "workforce-development-skills",
+      "file_path": "superintelligence/education-edtech/personas/anthony-carnevale.md"
+    },
+    "audrey-watters": {
+      "slug": "audrey-watters",
+      "real_name": "Audrey Watters",
+      "cell": "edtech-product-platform",
+      "file_path": "superintelligence/education-edtech/personas/audrey-watters.md"
+    },
+    "brandon-busteed": {
+      "slug": "brandon-busteed",
+      "real_name": "Brandon Busteed",
+      "cell": "workforce-development-skills",
+      "file_path": "superintelligence/education-edtech/personas/brandon-busteed.md"
+    },
+    "bryan-alexander": {
+      "slug": "bryan-alexander",
+      "real_name": "Bryan Alexander",
+      "cell": "institutional-higher-ed-strategy",
+      "file_path": "superintelligence/education-edtech/personas/bryan-alexander.md"
+    },
+    "cathy-davidson": {
+      "slug": "cathy-davidson",
+      "real_name": "Cathy N. Davidson",
+      "cell": "institutional-higher-ed-strategy",
+      "file_path": "superintelligence/education-edtech/personas/cathy-davidson.md"
+    },
+    "daphne-koller": {
+      "slug": "daphne-koller",
+      "real_name": "Daphne Koller",
+      "cell": "edtech-product-platform",
+      "file_path": "superintelligence/education-edtech/personas/daphne-koller.md"
+    },
+    "david-perkins": {
+      "slug": "david-perkins",
+      "real_name": "David Perkins",
+      "cell": "learning-science-pedagogy",
+      "file_path": "superintelligence/education-edtech/personas/david-perkins.md"
+    },
+    "dylan-wiliam": {
+      "slug": "dylan-wiliam",
+      "real_name": "Dylan Wiliam",
+      "cell": "assessment-evaluation",
+      "file_path": "superintelligence/education-edtech/personas/dylan-wiliam.md"
+    },
+    "grant-wiggins": {
+      "slug": "grant-wiggins",
+      "real_name": "Grant Wiggins",
+      "cell": "curriculum-instructional-design",
+      "file_path": "superintelligence/education-edtech/personas/grant-wiggins.md"
+    },
+    "james-popham": {
+      "slug": "james-popham",
+      "real_name": "W. James Popham",
+      "cell": "assessment-evaluation",
+      "file_path": "superintelligence/education-edtech/personas/james-popham.md"
+    },
+    "jay-mctighe": {
+      "slug": "jay-mctighe",
+      "real_name": "Jay McTighe",
+      "cell": "curriculum-instructional-design",
+      "file_path": "superintelligence/education-edtech/personas/jay-mctighe.md"
+    },
+    "john-sweller": {
+      "slug": "john-sweller",
+      "real_name": "John Sweller",
+      "cell": "learning-science-pedagogy",
+      "file_path": "superintelligence/education-edtech/personas/john-sweller.md"
+    },
+    "ken-robinson": {
+      "slug": "ken-robinson",
+      "real_name": "Sir Ken Robinson",
+      "cell": "curriculum-instructional-design",
+      "file_path": "superintelligence/education-edtech/personas/ken-robinson.md"
+    },
+    "linda-darling-hammond": {
+      "slug": "linda-darling-hammond",
+      "real_name": "Linda Darling-Hammond",
+      "cell": "institutional-higher-ed-strategy",
+      "file_path": "superintelligence/education-edtech/personas/linda-darling-hammond.md"
+    },
+    "michael-crow": {
+      "slug": "michael-crow",
+      "real_name": "Michael M. Crow",
+      "cell": "institutional-higher-ed-strategy",
+      "file_path": "superintelligence/education-edtech/personas/michael-crow.md"
+    },
+    "michelle-weise": {
+      "slug": "michelle-weise",
+      "real_name": "Michelle R. Weise",
+      "cell": "workforce-development-skills",
+      "file_path": "superintelligence/education-edtech/personas/michelle-weise.md"
+    },
+    "paul-kirschner": {
+      "slug": "paul-kirschner",
+      "real_name": "Paul A. Kirschner",
+      "cell": "learning-science-pedagogy",
+      "file_path": "superintelligence/education-edtech/personas/paul-kirschner.md"
+    },
+    "pedro-noguera": {
+      "slug": "pedro-noguera",
+      "real_name": "Pedro A. Noguera",
+      "cell": "institutional-higher-ed-strategy",
+      "file_path": "superintelligence/education-edtech/personas/pedro-noguera.md"
+    },
+    "richard-mayer": {
+      "slug": "richard-mayer",
+      "real_name": "Richard E. Mayer",
+      "cell": "learning-science-pedagogy",
+      "file_path": "superintelligence/education-edtech/personas/richard-mayer.md"
+    },
+    "rick-stiggins": {
+      "slug": "rick-stiggins",
+      "real_name": "Richard J. Stiggins",
+      "cell": "assessment-evaluation",
+      "file_path": "superintelligence/education-edtech/personas/rick-stiggins.md"
+    },
+    "rose-luckin": {
+      "slug": "rose-luckin",
+      "real_name": "Rose Luckin",
+      "cell": "ai-tutoring-adaptive",
+      "file_path": "superintelligence/education-edtech/personas/rose-luckin.md"
+    },
+    "sal-khan": {
+      "slug": "sal-khan",
+      "real_name": "Salman Khan",
+      "cell": "ai-tutoring-adaptive",
+      "file_path": "superintelligence/education-edtech/personas/sal-khan.md"
+    },
+    "sebastian-thrun": {
+      "slug": "sebastian-thrun",
+      "real_name": "Sebastian Thrun",
+      "cell": "edtech-product-platform",
+      "file_path": "superintelligence/education-edtech/personas/sebastian-thrun.md"
+    },
+    "sugata-mitra": {
+      "slug": "sugata-mitra",
+      "real_name": "Sugata Mitra",
+      "cell": "learning-science-pedagogy",
+      "file_path": "superintelligence/education-edtech/personas/sugata-mitra.md"
+    }
+  }
+}

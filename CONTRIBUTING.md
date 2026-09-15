@@ -26,7 +26,16 @@ git commit -m "feat: short description"
 gh pr create
 ```
 
+**A bug you find is a bug you fix.** If installing Coco, or anything around it, turns up
+something broken, do not file it and move on — reproduce it, fix it at the source, add the
+gate that would have caught it, and open the pull request. Generated output, built
+bundles and deployed copies do not count as a fix; the next rebuild erases them.
+
+The same instruction is in [`AGENTS.md`](AGENTS.md), which is loaded into every agent
+session opened in this repo, so an agent working here follows it without being told.
+
 ---
+
 
 ## Add a skill
 

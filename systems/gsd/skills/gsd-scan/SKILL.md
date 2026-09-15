@@ -18,10 +18,6 @@ Accepts an optional `--focus` flag: `tech`, `arch`, `quality`, `concerns`, or `t
 Lightweight alternative to `/gsd-map-codebase` — spawns one mapper agent instead of four parallel ones.
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/scan.md
-</execution_context>
-
 <process>
-Execute the scan workflow from @systems/gsd/workflows/scan.md end-to-end.
+Execute the scan workflow end-to-end.
 </process>

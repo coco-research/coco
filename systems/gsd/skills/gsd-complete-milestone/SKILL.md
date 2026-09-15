@@ -16,13 +16,6 @@ Purpose: Create historical record of shipped version, archive milestone artifact
 Output: Milestone archived (roadmap + requirements), PROJECT.md evolved, git tagged.
 </objective>
 
-<execution_context>
-**Load these files NOW (before proceeding):**
-
-- @systems/gsd/workflows/complete-milestone.md (main workflow)
-- @systems/gsd/templates/milestone-archive.md (archive template)
-  </execution_context>
-
 <context>
 **Project files:**
 - `.planning/ROADMAP.md`

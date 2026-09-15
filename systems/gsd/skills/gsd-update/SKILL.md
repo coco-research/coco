@@ -19,12 +19,8 @@ Routes to the update workflow which handles:
 - Restart reminder
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/update.md
-</execution_context>
-
 <process>
-**Follow the update workflow** from `@systems/gsd/workflows/update.md`.
+**Follow the update workflow.**
 
 The workflow handles all logic including:
 1. Installed version detection (local/global)

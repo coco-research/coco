@@ -23,10 +23,6 @@ Routes to the add-todo workflow which handles:
 - Git commits
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/add-todo.md
-</execution_context>
-
 <context>
 Arguments: $ARGUMENTS (optional todo description)
 
@@ -34,7 +30,7 @@ State is resolved in-workflow via `init todos` and targeted reads.
 </context>
 
 <process>
-**Follow the add-todo workflow** from `@systems/gsd/workflows/add-todo.md`.
+**Follow the add-todo workflow.**
 
 The workflow handles all logic including:
 1. Directory ensuring

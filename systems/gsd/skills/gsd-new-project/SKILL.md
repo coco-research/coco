@@ -33,15 +33,7 @@ Initialize a new project through unified flow: questioning → research (optiona
 **After this command:** Run `/gsd-plan-phase 1` to start execution.
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/new-project.md
-@systems/gsd/references/questioning.md
-@systems/gsd/references/ui-brand.md
-@systems/gsd/templates/project.md
-@systems/gsd/templates/requirements.md
-</execution_context>
-
 <process>
-Execute the new-project workflow from @systems/gsd/workflows/new-project.md end-to-end.
+Execute the new-project workflow end-to-end.
 Preserve all workflow gates (validation, approvals, commits, routing).
 </process>

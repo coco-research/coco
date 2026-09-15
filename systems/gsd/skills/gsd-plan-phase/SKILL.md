@@ -23,11 +23,6 @@ Create executable phase prompts (PLAN.md files) for a roadmap phase with integra
 **Orchestrator role:** Parse arguments, validate phase, research domain (unless skipped), spawn gsd-planner, verify with gsd-plan-checker, iterate until pass or max iterations, present results.
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/plan-phase.md
-@systems/gsd/references/ui-brand.md
-</execution_context>
-
 <runtime_note>
 **Copilot (VS Code):** Use `vscode_askquestions` wherever this workflow calls `AskUserQuestion`. They are equivalent — `vscode_askquestions` is the VS Code Copilot implementation of the same interactive question API. Do not skip questioning steps because `AskUserQuestion` appears unavailable; use `vscode_askquestions` instead.
 </runtime_note>
@@ -48,6 +43,6 @@ Normalize phase input in step 2 before any directory lookups.
 </context>
 
 <process>
-Execute the plan-phase workflow from @systems/gsd/workflows/plan-phase.md end-to-end.
+Execute the plan-phase workflow end-to-end.
 Preserve all workflow gates (validation, research, planning, verification loop, routing).
 </process>

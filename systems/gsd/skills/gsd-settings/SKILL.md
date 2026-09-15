@@ -20,12 +20,8 @@ Routes to the settings workflow which handles:
 - Confirmation display with quick command references
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/settings.md
-</execution_context>
-
 <process>
-**Follow the settings workflow** from `@systems/gsd/workflows/settings.md`.
+**Follow the settings workflow.**
 
 The workflow handles all logic including:
 1. Config file creation with defaults if missing

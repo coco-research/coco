@@ -18,16 +18,11 @@ graded assessment (1-4 per pillar). Works on any project.
 Output: {phase_num}-UI-REVIEW.md
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/ui-review.md
-@systems/gsd/references/ui-brand.md
-</execution_context>
-
 <context>
 Phase: $ARGUMENTS — optional, defaults to last completed phase.
 </context>
 
 <process>
-Execute @systems/gsd/workflows/ui-review.md end-to-end.
+Execute the ui-review workflow end-to-end.
 Preserve all workflow gates.
 </process>

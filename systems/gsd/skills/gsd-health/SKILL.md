@@ -13,11 +13,7 @@ allowed-tools:
 Validate `.planning/` directory integrity and report actionable issues. Checks for missing files, invalid configurations, inconsistent state, and orphaned plans.
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/health.md
-</execution_context>
-
 <process>
-Execute the health workflow from @systems/gsd/workflows/health.md end-to-end.
+Execute the health workflow end-to-end.
 Parse --repair flag from arguments and pass to workflow.
 </process>

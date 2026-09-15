@@ -22,12 +22,6 @@ Import external plan files into the GSD planning system with conflict detection 
 Future: `--prd` mode for PRD extraction is planned for a follow-up PR.
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/import.md
-@systems/gsd/references/ui-brand.md
-@systems/gsd/references/gate-prompts.md
-</execution_context>
-
 <context>
 $ARGUMENTS
 </context>

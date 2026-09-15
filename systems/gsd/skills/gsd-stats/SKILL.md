@@ -10,10 +10,6 @@ allowed-tools:
 Display comprehensive project statistics including phase progress, plan execution metrics, requirements completion, git history stats, and project timeline.
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/stats.md
-</execution_context>
-
 <process>
-Execute the stats workflow from @systems/gsd/workflows/stats.md end-to-end.
+Execute the stats workflow end-to-end.
 </process>

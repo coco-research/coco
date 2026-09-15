@@ -27,10 +27,6 @@ Arguments:
 Output: {padded_phase}-REVIEW.md in phase directory + inline summary of findings
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/code-review.md
-</execution_context>
-
 <context>
 Phase: $ARGUMENTS (first positional argument is phase number)
 
@@ -44,7 +40,7 @@ Context files (CLAUDE.md, SUMMARY.md, phase state) are resolved inside the workf
 <process>
 This command is a thin dispatch layer. It parses arguments and delegates to the workflow.
 
-Execute the code-review workflow from @systems/gsd/workflows/code-review.md end-to-end.
+Execute the code-review workflow end-to-end.
 
 The workflow (not this command) enforces these gates:
 - Phase validation (before config gate)

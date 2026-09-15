@@ -20,10 +20,6 @@ Each mapper agent explores a focus area and **writes documents directly** to `.p
 Output: .planning/codebase/ folder with 7 structured documents about the codebase state.
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/map-codebase.md
-</execution_context>
-
 <context>
 Focus area: $ARGUMENTS (optional - if provided, tells agents to focus on specific subsystem)
 

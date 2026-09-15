@@ -24,10 +24,6 @@ Flags:
 - `--source <audit>` — which audit to run (default: audit-uat)
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/audit-fix.md
-</execution_context>
-
 <process>
-Execute the audit-fix workflow from @systems/gsd/workflows/audit-fix.md end-to-end.
+Execute the audit-fix workflow end-to-end.
 </process>

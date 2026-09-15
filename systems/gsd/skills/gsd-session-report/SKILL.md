@@ -11,10 +11,6 @@ allowed-tools:
 Generate a structured SESSION_REPORT.md document capturing session outcomes, work performed, and estimated resource usage. Provides a shareable artifact for post-session review.
 </objective>
 
-<execution_context>
-@systems/gsd/workflows/session-report.md
-</execution_context>
-
 <process>
-Execute the session-report workflow from @systems/gsd/workflows/session-report.md end-to-end.
+Execute the session-report workflow end-to-end.
 </process>

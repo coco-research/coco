@@ -52,9 +52,9 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-# No flag means every bundle that ships skills or agents. The advertised totals (280
-# commands, 171 skills) are what a plain install is expected to deliver, and leaving them
-# behind an opt-in flag is how 70 of 171 skills went missing without a word.
+# No flag means every bundle in the default allow-list. The advertised totals (386
+# commands, 226 skills) are what a plain install is expected to deliver, and leaving them
+# behind an opt-in flag is how 74 of 226 skills went missing without a word.
 if [[ $CORE_ONLY -eq 1 ]]; then
   SYSTEMS=()
 elif [[ ${#SYSTEMS[@]} -eq 0 ]]; then
@@ -346,7 +346,7 @@ link_system() {
 
     SI_COUNT=$(printf '%s\n' "$out" | sed -n 's/^Generated \([0-9][0-9]*\) SI commands.*/\1/p' | tail -n 1)
     if [[ -z "$SI_COUNT" ]]; then
-      # Deliberately not assuming 242: when the generators did not run the count is
+      # Deliberately not assuming 342: when the generators did not run the count is
       # unknown, and the receipt says so rather than printing a number nobody verified.
       SI_SKIP=$(printf '%s\n' "$out" | sed -n 's/^Skip SI generation: //p' | head -n 1)
       [[ -n "$SI_SKIP" ]] || SI_SKIP="unknown reason"

@@ -152,7 +152,7 @@ run_si_generator() {
 
   SI_COUNT=$(printf '%s\n' "$out" | sed -n 's/^Generated \([0-9][0-9]*\) SI commands.*/\1/p' | tail -n 1)
   if [[ -z "$SI_COUNT" ]]; then
-    # Deliberately not assuming 242 here: when the generators did not run the count is
+    # Deliberately not assuming 342 here: when the generators did not run the count is
     # unknown, and the receipt says so rather than printing a number nobody verified.
     SI_SKIP=$(printf '%s\n' "$out" | sed -n 's/^Skip SI generation: //p' | head -n 1)
     [[ -n "$SI_SKIP" ]] || SI_SKIP="unknown reason"

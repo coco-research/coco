@@ -1,6 +1,6 @@
 ---
 name: gsd-autonomous
-description: "Run all remaining phases autonomously — discuss→plan→execute per phase"
+description: "Use when the user says run the rest autonomously, overnight, or hands-off through the remaining phases. Runs discuss, plan, execute per phase, pausing only for user decisions, then milestone audit, complete, and cleanup."
 argument-hint: "[--from N] [--to N] [--only N] [--interactive]"
 allowed-tools:
   - Read
@@ -26,8 +26,8 @@ Uses ROADMAP.md phase discovery and Skill() flat invocations for each phase comm
 </objective>
 
 <execution_context>
-@$HOME/.claude/get-shit-done/workflows/autonomous.md
-@$HOME/.claude/get-shit-done/references/ui-brand.md
+@systems/gsd/workflows/autonomous.md
+
 </execution_context>
 
 <context>
@@ -41,6 +41,6 @@ Project context, phase list, and state are resolved inside the workflow using in
 </context>
 
 <process>
-Execute the autonomous workflow from @$HOME/.claude/get-shit-done/workflows/autonomous.md end-to-end.
+Execute the autonomous workflow from @systems/gsd/workflows/autonomous.md end-to-end.
 Preserve all workflow gates (phase discovery, per-phase execution, blocker handling, progress display).
 </process>

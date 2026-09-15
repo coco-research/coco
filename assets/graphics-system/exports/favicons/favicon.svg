@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Coco favicon — derived from assets/logo.svg (vertical lockup), mark only.
+
+  DERIVATION ONLY, no new brand decisions (card t_0e14a6c0):
+    • The two interlocked C-arcs are carried over VERBATIM from logo.svg —
+      same paths, same stroke-width 24, same round caps: C #1 anchor is
+      #FFFFFF, C #2 is the sampled Apple-Intelligence gradient.
+    • The gradient is the logo's own def, stop order verbatim
+      (#C2A8FF → #7FB8FF → #A6F0CD), as recorded in
+      assets/graphics-system/tokens.toml [brand_gradient].
+    • Square-safe: the mark is centered on a full square #0A0F1F canvas
+      (the logo's own canvas color) — PADDED, never cropped. The non-square
+      logo-si.png (560×530) is NOT used as a source.
+    • No wordmark: <text> does not survive favicon sizes; the mark is the
+      brand element that does.
+
+  Regenerate the rasters with scripts/export_favicons.sh (librsvg 2.62.x
+  pinned, same renderer as the rest of the graphics system).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Coco">
+  <defs>
+    <!-- Apple Intelligence gradient — logo.svg verbatim -->
+    <linearGradient id="intelligence" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#C2A8FF"/>
+      <stop offset="50%" stop-color="#7FB8FF"/>
+      <stop offset="100%" stop-color="#A6F0CD"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Square canvas: the logo's own background color -->
+  <rect x="0" y="0" width="512" height="512" fill="#0A0F1F"/>
+
+  <!-- Mark, centered (logo.svg draws it at translate(0,30) inside a 512×720
+       lockup; mark bbox there is x 120–392, y 158–358 in group coords.
+       scale(1.2) for favicon presence, re-centered on the 512 square. -->
+  <g transform="translate(-51.2, -53.6) scale(1.2)">
+    <!-- C #1: anchor, pure white — path verbatim from logo.svg -->
+    <path d="M 232 158
+             A 100 100 0 1 0 232 358"
+          stroke="#FFFFFF"
+          stroke-width="24"
+          stroke-linecap="round"
+          fill="none"/>
+    <!-- C #2: accent, sampled gradient — path verbatim from logo.svg -->
+    <path d="M 280 158
+             A 100 100 0 1 1 280 358"
+          stroke="url(#intelligence)"
+          stroke-width="24"
+          stroke-linecap="round"
+          fill="none"/>
+  </g>
+</svg>

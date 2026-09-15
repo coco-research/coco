@@ -1,6 +1,6 @@
 ---
 name: gsd-join-discord
-description: "Join the GSD Discord community"
+description: "Use when the user asks where to get help, how to join the GSD community, or where to report a problem. Displays the Discord invite link and what the server is for."
 ---
 
 

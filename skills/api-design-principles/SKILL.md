@@ -1,6 +1,6 @@
 ---
 name: api-design-principles
-description: Master REST and GraphQL API design principles to build intuitive, scalable, and maintainable APIs that delight developers. Use when designing new APIs, reviewing API specifications, or establishing API design standards.
+description: "Use when designing a new REST or GraphQL API, reviewing an API spec before implementation, setting team API standards, or migrating REST to GraphQL. Covers resources, HTTP semantics, pagination, error handling, and pitfalls."
 domain: engineering
 ---
 
@@ -248,6 +248,7 @@ class UserResponse(BaseModel):
             }
         )
 ```
+**Not for:** HATEOAS-first designs — most teams should stop at Pattern 3.
 
 ## GraphQL Design Patterns
 
@@ -522,8 +523,5 @@ def create_context():
 
 - **references/rest-best-practices.md**: Comprehensive REST API design guide
 - **references/graphql-schema-design.md**: GraphQL schema patterns and anti-patterns
-- **references/api-versioning-strategies.md**: Versioning approaches and migration paths
 - **assets/rest-api-template.py**: FastAPI REST API template
-- **assets/graphql-schema-template.graphql**: Complete GraphQL schema example
 - **assets/api-design-checklist.md**: Pre-implementation review checklist
-- **scripts/openapi-generator.py**: Generate OpenAPI specs from code

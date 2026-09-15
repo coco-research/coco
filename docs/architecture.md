@@ -105,6 +105,7 @@ Current first-class adapters (v1.0.0):
 | `claude-code` | Anthropic Claude Code CLI | stable |
 | `hermes` | Hermes Agent profiles (all bots) | stable |
 | `cursor` | Cursor IDE | stable |
+| `grok` | Grok Build / Grok CLI | stable |
 | `codex` | OpenAI Codex CLI | stable |
 | `generic` | Any tool reading `AGENTS.md` | stable |
 

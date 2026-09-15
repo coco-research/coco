@@ -6,12 +6,19 @@
 #   bash install.sh --adapter claude-code      # install for Claude Code
 #   bash install.sh --adapter cursor           # install for Cursor
 #   bash install.sh --adapter grok             # install for Grok Build / Grok CLI
+#   bash install.sh --adapter pi-desktop       # install for PI-Desktop
 #   bash install.sh --adapter vscode           # install for VS Code / Copilot CLI
 #   bash install.sh --adapter codex            # generate AGENTS.md (Codex)
 #   bash install.sh --adapter generic          # generate AGENTS.md (any tool)
 #   bash install.sh --adapter claude-code --systems gsd,brain  # add bundles
 #   bash install.sh --list                     # list available adapters
 #   bash install.sh --dry-run                  # preview only
+#
+# One bundle, reverse-skill, is security and reverse-engineering tooling vendored
+# under systems/reverse-skill/. It is never part of "install everything" for any
+# adapter and is only installed when named explicitly, the same way any other
+# bundle is opted into:
+#   bash install.sh --adapter claude-code --systems reverse-skill  # opt in to security tooling
 
 set -euo pipefail
 
@@ -36,6 +43,8 @@ list_adapters() {
 detect_adapter() {
   if [[ -n "${CLAUDECODE:-}" || -d "$HOME/.claude/skills" ]]; then
     echo "claude-code"
+  elif [[ -d "$HOME/.pi/agent" || -d "$HOME/.agents" ]]; then
+    echo "pi-desktop"
   elif [[ -d "$HOME/.cursor" ]]; then
     echo "cursor"
   elif [[ -d "$HOME/.copilot" || -d "$HOME/Library/Application Support/Code/User" || -d "${XDG_CONFIG_HOME:-$HOME/.config}/Code/User" ]]; then

@@ -1,6 +1,6 @@
 ---
 name: gsd-insert-phase
-description: "Insert urgent work as decimal phase (e.g., 72.1) between existing phases"
+description: "Use when urgent work surfaces mid-milestone and must land between two planned phases without renumbering the roadmap. Inserts it as a decimal phase such as 72.1 after the phase the user names."
 argument-hint: "<after> <description>"
 allowed-tools:
   - Read

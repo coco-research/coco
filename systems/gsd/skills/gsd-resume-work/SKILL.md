@@ -1,6 +1,6 @@
 ---
 name: gsd-resume-work
-description: "Resume work from previous session with full context restoration"
+description: "Use when you resume work and the last session ended mid-phase, a .continue-here checkpoint exists, or a PLAN has no SUMMARY. Restores STATE.md context, shows status, and routes to the next command."
 allowed-tools:
   - Read
   - Bash

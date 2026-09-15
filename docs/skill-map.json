@@ -6,8 +6,8 @@
   },
   "totals": {
     "skills": 228,
-    "commands_customer_facing": 386,
-    "commands_shipped": 44,
+    "commands_customer_facing": 387,
+    "commands_shipped": 45,
     "commands_generated_si": 342
   },
   "required_baseline": [
@@ -2464,6 +2464,17 @@
       "slash": "/eng:local-llm",
       "path": "commands/eng/local-llm.md",
       "description": "description: \"Check status, change context window, restart, or troubleshoot this machine's local LLM setup (LM Studio + mlx-dspark). Usage: /eng-local-llm [status|set-context <n>|restart|troubleshoot]",
+      "required": false,
+      "tags": [
+        "eng"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "eng:maker-mdap",
+      "slash": "/eng:maker-mdap",
+      "path": "commands/eng/maker-mdap.md",
+      "description": "description: \"Load the MAKER/MDAP knowledge base (arXiv:2511.09030) — Maximal Agentic Decomposition, first-to-ahead-by-k voting, red-flagging, cost scaling. Usage: /maker-mdap [topic | ch01–ch07]\"",
       "required": false,
       "tags": [
         "eng"

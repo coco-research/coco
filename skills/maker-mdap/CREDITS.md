@@ -1,11 +1,7 @@
 # Credits
 
-Maker MDAP skill content is derived from:
+Landed from Rijul checkout (untracked pack), not rewritten:
 
-- Elliot Meyerson, Giuseppe Paolo, Roberto Dailey, Hormoz Shahrzad, Olivier Francon, Conor F. Hayes, Xin Qiu, Babak Hodjat, Risto Miikkulainen.
-  **Solving a Million-Step LLM Task with Zero Errors** (MAKER).
-  arXiv:2511.09030 — https://arxiv.org/abs/2511.09030
+`/Users/rijulkalra/Rijul Kalra/Coco Research/products/coco-research/skills/maker-mdap`
 
-MAKER = Maximal Agentic decomposition, first-to-ahead-by-K Error correction, and Red-flagging — an instance of massively decomposed agentic processes (MDAPs).
-
-This skill is define-in-house guidance for CoCo workers (portable Markdown). It does not vendor an external runtime or an unverified third-party skill pack.
+Paper already cited in SKILL.md frontmatter: Meyerson et al. arXiv:2511.09030.

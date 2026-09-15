@@ -13,7 +13,7 @@
 # takeaway) with historical dates. The recent ceremonial signals are logged in
 # research/rich-hickey/notes.md so future re-syntheses do not re-crawl.
 slug: rich-hickey
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: languages-runtimes
 cell_role: lead-driver

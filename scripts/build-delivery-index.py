@@ -31,11 +31,21 @@ import tempfile
 ROOT = pathlib.Path(__file__).parent.parent.resolve()
 OUT = ROOT / 'adapters' / 'INDEX.md'
 
-# Readme says 38 core commands + 242 generated. Kept here so the generated table
-# can show the gap rather than requiring the reader to hold both numbers.
-ADVERTISED = {'commands': 280, 'skills': 185}
-
 BUNDLE_UNIVERSE = ('gsd', 'brain', 'cognee', 'hyperframes', 'superintelligence', 'm0')
+
+
+def advertised_totals():
+    """The public command/skill totals, read from the generated source of truth.
+
+    docs/asset-counts.json is produced by scripts/build-index.py from a full walk
+    of the tree and gated by tests/check-asset-counts.sh, so it is correct by
+    construction. A literal snapshot here would go stale exactly the way this
+    file's old `ADVERTISED = {'commands': 280, 'skills': 185}` did.
+    """
+    counts = json.loads((ROOT / 'docs' / 'asset-counts.json').read_text())
+    return {'commands': counts['commands']['customer_facing'],
+            'skills': counts['skills']['total'],
+            'shipped': counts['commands']['shipped']}
 
 
 def manifest_bundles(adapter):
@@ -115,6 +125,24 @@ def count_generated(root):
     return len(seen)
 
 
+_ENV_OVERRIDE_RE = re.compile(r'\$\{([A-Za-z_][A-Za-z0-9_]*):-\$\{?HOME\}?/')
+
+
+def env_override_vars():
+    """Every environment variable an adapter's own install.sh reads to redirect
+    where it writes, discovered by scanning the installers instead of kept as a
+    hand list. Every such override in this repo follows the same
+    `${SOME_VAR:-$HOME/...}` convention: `CLAUDE_HOME`, `CURSOR_HOME`,
+    `HERMES_PROFILES`, the VS Code adapter's own `APPDATA`/`XDG_CONFIG_HOME`
+    platform fallback, and so on. A new adapter's override is picked up the
+    moment it lands, instead of waiting for someone to add it here by hand.
+    """
+    found = set()
+    for install_sh in (ROOT / 'adapters').glob('*/install.sh'):
+        found.update(_ENV_OVERRIDE_RE.findall(install_sh.read_text()))
+    return sorted(found)
+
+
 def install(adapter, bundles, timeout=900):
     """Install one adapter into a temp HOME and count what arrived."""
     home = tempfile.mkdtemp(prefix=f'deliv-{adapter}-')
@@ -131,8 +159,7 @@ def install(adapter, bundles, timeout=900):
     # makes the VS Code adapter look for its profile in the runner's real config
     # directory, find nothing, and report 242 commands where macOS reports 280. The
     # generated index is committed, so it has to measure the same on every platform.
-    for var in ('CLAUDE_HOME', 'CURSOR_HOME', 'COPILOT_HOME', 'PI_AGENT_HOME', 'AGENTS_HOME',
-                'XDG_CONFIG_HOME', 'XDG_DATA_HOME', 'APPDATA', 'LOCALAPPDATA'):
+    for var in env_override_vars():
         env.pop(var, None)
     cmd = ['bash', str(ROOT / 'adapters' / adapter / 'install.sh')]
     if bundles:
@@ -165,6 +192,7 @@ def install(adapter, bundles, timeout=900):
 
 def main():
     bundles = advertised_bundles()
+    advertised = advertised_totals()
     adapters = sorted(p.name for p in (ROOT / 'adapters').iterdir() if p.is_dir())
     rows = [install(a, manifest_bundles(a)) for a in adapters]
 
@@ -196,8 +224,8 @@ def main():
     ]
     best_cmd = max(r['commands'] for r in rows)
     best_skill = max(r['skills'] for r in rows)
-    lines.append(f"| Slash commands | {best_cmd} | {ADVERTISED['commands']} |")
-    lines.append(f"| Skills | {best_skill} | {ADVERTISED['skills']} |")
+    lines.append(f"| Slash commands | {best_cmd} | {advertised['commands']} |")
+    lines.append(f"| Skills | {best_skill} | {advertised['skills']} |")
 
     # Only adapters that install into a config directory and were given bundles are
     # comparable. An AGENTS.md producer emits one file by design, and an adapter
@@ -212,7 +240,8 @@ def main():
         '## Adapters below the command ceiling',
         '',
         'The Super Intelligence family is generated at install time, not committed, so an',
-        'adapter that does not invoke the generators delivers 38 commands instead of 280.',
+        f"adapter that does not invoke the generators delivers {advertised['shipped']} "
+        f"commands instead of {advertised['commands']}.",
         'This section is the standing list of who is short and by how much.',
         '',
     ]
@@ -252,8 +281,8 @@ def main():
         '  the editor user profile, so the measurement creates the two standard profile',
         '  directories inside the throwaway HOME first. Without them it reports only the',
         '  generated family.',
-        '- **Skills stop at 171, not 185.** Five skills live under `adapters/cursor/skills`',
-        '  and are Cursor-only; the rest of the 185 figure is the repository inventory',
+        f"- **Skills stop at {best_skill}, not {advertised['skills']}.** Five skills live under `adapters/cursor/skills`",
+        f"  and are Cursor-only; the rest of the {advertised['skills']} figure is the repository inventory",
         '  rather than what any single adapter installs.',
         '- **Counts include symlinks.** Most adapters link into the checkout instead of',
         '  copying, and are deduplicated by resolved path.',

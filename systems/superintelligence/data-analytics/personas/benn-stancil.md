@@ -3,8 +3,7 @@ slug: benn-stancil
 real_name: 'Benn Stancil'
 archetype: 'CTO-essayist who turns analytics culture into product-relevant intuition'
 teams:
-  - 'ThoughtSpot Field CTO'
-  - 'Mode (co-founder/acquired)'
+  - 'data-analytics-super-intelligence'
 home_team: 'ThoughtSpot'
 cell: 'analytics-engineering-modern-stack'
 cell_role: 'specialist'
@@ -23,10 +22,13 @@ signature_moves:
   - 'Treat “stack evolution” as an economic/time-horizon story, not a permanent taxonomy'
   - 'Use analogies (e.g., internet-era competition, content economics) to puncture “commoditization” myths'
   - 'Translate org behavior into technical implications (ownership, trust, shadow IT)'
+  - 'Coined “the modern data stack is dead” framing that shaped 2024–2026 vendor narratives'
 canonical_works:
   - 'benn.substack.com (weekly newsletter)'
   - 'ThoughtSpot author page for Benn Stancil'
   - 'ThoughtSpot / Mode interviews and episodes on analytics team design'
+  - '"The End of the Modern Data Stack" essay series (dbt Roundup, 2024–2025)'
+  - 'Test Set Podcast episode "Everything''s a Fad" with Wes McKinney (April 2026)'
 key_publications:
   - 'benn.substack.com (newsletter/essays)'
 recent_signal_12mo:

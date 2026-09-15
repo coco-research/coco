@@ -1,3 +1,7 @@
+---
+description: "Use when a /team pipeline or PR body makes a quality claim such as tests pass, lint clean, or N% coverage. Defines the evidence protocol (CI-pinned commands, provisioned deps, skipped is not passed) and the EVIDENCE.md artifact."
+---
+
 # Test Evidence Protocol
 
 > **Purpose:** One canonical definition of what "tests pass," "lint clean," and

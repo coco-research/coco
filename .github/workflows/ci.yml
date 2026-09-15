@@ -50,7 +50,7 @@ jobs:
 
       - name: Adapter install.sh syntax check
         run: |
-          for f in adapters/*/install.sh install.sh; do
+          for f in adapters/*/install.sh install.sh bin/coco-bootstrap.sh skills/prd-generator/scripts/generate_prd.sh skills/brainstorming/scripts/stop-server.sh tests/check-security-surface.sh; do
             bash -n "$f" || { echo "Syntax error in $f"; exit 1; }
           done
           echo "All install scripts pass syntax check."
@@ -61,9 +61,13 @@ jobs:
       - name: Validate /team evidence-gate integrity
         run: bash tests/check-evidence-gate.sh
 
+      - name: Validate no hardcoded adapter list drifts from adapters/
+        run: bash tests/check-adapter-drift.sh
+
       - name: Adapter smoke test (dry-run)
         run: |
-          for adapter in claude-code cursor vscode codex generic; do
+          for d in adapters/*/; do
+            adapter=$(basename "$d")
             echo "--- testing $adapter (dry-run) ---"
             bash adapters/$adapter/install.sh --dry-run > /tmp/$adapter.out 2>&1 || {
               echo "FAIL: $adapter"
@@ -103,6 +107,9 @@ jobs:
             exit 1
           fi
           echo "INDEX files up to date."
+
+      - name: Verify shipped asset counts match generated truth
+        run: bash tests/check-asset-counts.sh
 
       - name: Verify the delivery index matches what the adapters install
         run: |
@@ -166,14 +173,29 @@ jobs:
           done
           [ "$fail" -eq 0 ] || exit 1
 
+      - name: Validate the SI team role roster
+        run: |
+          # The roster is the catalogue a scheduler reads to pick roles and compose their
+          # prompts without a human in the loop. Three gates: the definitions satisfy the
+          # schema and the layer rules, every validation rule is proven to fire on a
+          # known-bad fixture, and commands/team/roles.md matches the roster it is
+          # rendered from. The validator exits 0 with capability gaps listed, because a
+          # declared gap is a result and an undeclared one is the defect.
+          python3 systems/team/validate_roles.py
+          python3 systems/team/validate_roles.py --self-test
+          python3 systems/team/build_roster.py --check
+
       - name: Run the standalone test suites
         run: |
-          # These three suites pass locally but were invoked nowhere in CI, so nothing stopped
+          # These suites pass locally but were invoked nowhere in CI, so nothing stopped
           # them rotting. m0-smoke.sh and run_fixtures.sh had no CI coverage at all.
           bash tests/smoke.sh
           bash skills/arch-index/scripts/run_fixtures.sh
           bash systems/m0/tests/m0-smoke.sh
-          # tests/smoke.sh writes into the tree; fail loudly rather than leaving it dirty.
+          # The generated indexes must not depend on untracked files: a stale
+          # systems/<name>/ directory used to produce a phantom bundle row and show
+          # up as unexplained INDEX drift on twenty unrelated branches.
+          bash tests/check-index-tracks-git.sh
           if ! git diff --quiet; then
             echo "A test suite left the tree dirty:"
             git diff --stat

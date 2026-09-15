@@ -2,7 +2,7 @@
 # Cursor adapter — wires Coco artifacts into ~/.cursor/
 #
 # Usage:
-#   bash adapters/cursor/install.sh                       # all bundles (the default)
+#   bash adapters/cursor/install.sh                       # every bundle in the default allow-list
 #   bash adapters/cursor/install.sh --systems gsd,brain   # only these bundles
 #   bash adapters/cursor/install.sh --core-only           # no bundles
 #   bash adapters/cursor/install.sh --dry-run             # preview only
@@ -15,15 +15,15 @@
 #   commands/<ns>/<name>.md          -> ~/.cursor/commands/<ns>:<name>.md            (symlink)
 #   the SI-* command family          -> ~/.cursor/commands/SI-*.md                   (generated)
 #
-# Bundles default to every bundle that actually ships something
-# (scripts/installable-bundles.sh) rather than to the core alone: defaulting to core
-# delivered about a third of the framework and said nothing about it. --systems
-# overrides the default, --core-only installs no bundles, and --systems wins if both
-# are given.
+# Bundles default to scripts/installable-bundles.sh, the reviewed allow-list, rather than
+# to the core alone: defaulting to core delivered about a third of the framework and said
+# nothing about it. --systems overrides the default, --core-only installs no bundles, and
+# --systems wins if both are given. reverse-skill, the security-testing bundle, is
+# deliberately absent from the allow-list and stays reachable only via --systems reverse-skill.
 #
-# The Super Intelligence command family (242 commands) is generated at install time
-# from the team registries, not committed. An install that skips that step delivers 38
-# commands where the published total is 280.
+# The Super Intelligence command family (342 commands) is generated at install time
+# from the team registries, not committed. An install that skips that step delivers 44
+# commands where the published total is 386.
 #
 # Cursor has no subagent concept in this adapter — no agent target, no discovery path —
 # so systems/<bundle>/agents/*.md is deliberately not installed, and this script says so
@@ -252,14 +252,14 @@ done
 echo "Commands: $cmd_count linked into $TARGET_HOME/commands"
 
 # Bundles. The SI generator lives inside the superintelligence bundle and is only run when
-# that bundle is selected, which is what makes --core-only a real 38-command install.
+# that bundle is selected, which is what makes --core-only a real 44-command install.
 for sys in "${SYSTEMS[@]:-}"; do
   [[ -n "$sys" ]] && link_system "$sys"
 done
 
 # A previous full install left generated SI-* files behind, and no bundle in this run owns
 # them. They are reported, not deleted: this adapter removes what it created, never files a
-# user may only have here, and a receipt that says 38 beside a directory holding 280 needs
+# user may only have here, and a receipt that says 44 beside a directory holding 386 needs
 # the difference named.
 if [[ $DRY_RUN -eq 0 && $si_count -eq 0 ]]; then
   leftovers=0

@@ -1,3 +1,6 @@
+---
+description: "Use when the user runs /team reanalyse, or already-approved work must be re-checked against current code for regressions. Diffs since the last review, re-verifies requirements, and confirms test regressions with captured evidence."
+---
 # /team reanalyse — Re-Analysis Pipeline
 
 > Called by team.md router when action is `reanalyse`.

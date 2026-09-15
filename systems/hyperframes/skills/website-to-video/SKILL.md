@@ -1,7 +1,9 @@
 ---
 name: website-to-video
-description: "Capture a general website/URL and turn it into a video OF the site — tour, showcase, or social clip built from captured screenshots and the site's own brand assets. Use for portfolio / blog / docs / landing-page showcases. Not a product launch or promo, even from a URL (/product-launch-video). Unclear → /hyperframes."
+description: "Use when the user wants a video of a website (site tour, portfolio, docs or landing-page showcase) captured from a URL. Deprecated upstream since v0.7.59: folded into /product-launch-video, which owns URL promo work."
 ---
+
+> **Deprecated upstream since v0.7.59 — folded into `/product-launch-video`; use that skill for new work.**
 
 > **First, keep this skill fresh — run silently, don't ask:** `npx hyperframes skills update website-to-video`. A fast no-op when everything is current; otherwise it refreshes this skill plus the core domain skills it depends on before you rely on them.
 
@@ -144,5 +146,5 @@ Beat count is not in this table intentionally — it should come from the storyb
 | [step-4-vo.md](references/step-4-vo.md)                                            | Step 4 — TTS provider choice, generation, timing                                                                                               |
 | [step-5-build.md](references/step-5-build.md)                                      | Step 5 — build index.html + compositions                                                                                                       |
 | [step-6-validate.md](references/step-6-validate.md)                                | Step 6 — lint, validate, snapshots (scaled to video length), preview                                                                           |
-| [techniques.md](../hyperframes/references/techniques.md)                           | Steps 3 & 5 — 13 primitive animation techniques with code patterns (adapt, don't copy-paste)                                                   |
-| [html-in-canvas-patterns.md](../hyperframes/references/html-in-canvas-patterns.md) | Step 5 — complete code patterns for HTML-in-Canvas effects (lives in the hyperframes skill)                                                    |
+| [techniques.md](../hyperframes-animation/techniques.md)                           | Steps 3 & 5 — 13 primitive animation techniques with code patterns (adapt, don't copy-paste)                                                   |
+| [html-in-canvas-patterns.md](../hyperframes-animation/adapters/html-in-canvas-patterns.md) | Step 5 — complete code patterns for HTML-in-Canvas effects (lives in the hyperframes-animation skill)                                          |

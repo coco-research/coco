@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Generate the Super Intelligence command family into a target directory.
 #
-# The 242 SI commands are not committed. They are stamped out of the nine team
+# The 342 SI commands are not committed. They are stamped out of the thirteen team
 # registries by two generators, which is why an adapter that does not call them
-# ships 38 commands where the published total is 280 — and says nothing about it.
+# ships 44 commands where the published total is 386 — and says nothing about it.
 # This is the one place that knows how to run them, so a new adapter cannot
 # half-implement the step, and a change to the generators cannot be applied to only
 # some of the adapters.
 #
-#   systems/superintelligence/ai/scripts/build_commands.py        225 per-team
+#   systems/superintelligence/ai/scripts/build_commands.py        325 per-team
 #   systems/superintelligence/scripts/build_meta_commands.py       17 cross-team
 #
 # Usage:
@@ -54,7 +54,7 @@ if ! command -v python3 >/dev/null 2>&1; then
 fi
 
 if [[ "$DRY_RUN" -eq 1 ]]; then
-  say "DRY: generate 242 SI commands into $TARGET"
+  say "DRY: generate 342 SI commands into $TARGET"
   exit 0
 fi
 

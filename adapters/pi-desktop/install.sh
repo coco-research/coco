@@ -186,13 +186,6 @@ def front_matter(fields):
     return "\n".join(lines)
 
 
-    for para in body.split("\n\n"):
-        para = para.strip()
-        if para and not para.startswith(("#", ">", "|", "---", "<!--")):
-            return one_line(re.sub(r"[*`\[\]]", "", para))
-    return ""
-
-
 def first_heading(body):
     for line in body.splitlines():
         line = line.strip()

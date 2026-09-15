@@ -10,19 +10,19 @@ because most adapters link into the checkout rather than copying.
 |---|---:|---:|---:|---:|:--:|---:|
 | `aider` | 0 | 0 | 0 | 0 | yes | 0 |
 | `amazon-q` | 0 | 0 | 0 | 35 | — | 0 |
-| `claude-code` | 386 | 342 | 175 | 35 | — | 0 |
+| `claude-code` | 386 | 342 | 177 | 35 | — | 0 |
 | `cline` | 0 | 0 | 0 | 35 | — | 0 |
 | `codex` | 0 | 0 | 0 | 0 | yes | 0 |
-| `cursor` | 386 | 342 | 180 | 0 | — | 0 |
+| `cursor` | 386 | 342 | 182 | 0 | — | 0 |
 | `generic` | 0 | 0 | 0 | 0 | yes | 0 |
 | `github-copilot-cli` | 0 | 0 | 0 | 0 | yes | 0 |
-| `grok` | 389 | 342 | 188 | 35 | — | 0 |
-| `hermes` | 386 | 342 | 175 | 35 | — | 0 |
-| `pi-desktop` | 386 | 342 | 178 | 37 | — | 0 |
+| `grok` | 389 | 342 | 190 | 35 | — | 0 |
+| `hermes` | 386 | 342 | 177 | 35 | — | 0 |
+| `pi-desktop` | 386 | 342 | 180 | 37 | — | 0 |
 | `roo-code` | 0 | 0 | 0 | 35 | — | 0 |
-| `vscode` | 386 | 342 | 175 | 35 | — | 0 |
-| `vscode-continue` | 0 | 0 | 148 | 35 | — | 0 |
-| `windsurf` | 0 | 0 | 148 | 35 | — | 0 |
+| `vscode` | 386 | 342 | 177 | 35 | — | 0 |
+| `vscode-continue` | 0 | 0 | 150 | 35 | — | 0 |
+| `windsurf` | 0 | 0 | 150 | 35 | — | 0 |
 | `zed` | 0 | 0 | 0 | 35 | — | 0 |
 
 ## Widest install, against the published totals
@@ -30,7 +30,7 @@ because most adapters link into the checkout rather than copying.
 | Surface | Best adapter | Advertised |
 |---|---:|---:|
 | Slash commands | 389 | 386 |
-| Skills | 188 | 226 |
+| Skills | 190 | 228 |
 
 ## Adapters below the command ceiling
 
@@ -65,8 +65,8 @@ bug in the measurement.
   the editor user profile, so the measurement creates the two standard profile
   directories inside the throwaway HOME first. Without them it reports only the
   generated family.
-- **Skills stop at 188, not 226.** Five skills live under `adapters/cursor/skills`
-  and are Cursor-only; the rest of the 226 figure is the repository inventory
+- **Skills stop at 190, not 228.** Five skills live under `adapters/cursor/skills`
+  and are Cursor-only; the rest of the 228 figure is the repository inventory
   rather than what any single adapter installs.
 - **Counts include symlinks.** Most adapters link into the checkout instead of
   copying, and are deduplicated by resolved path.

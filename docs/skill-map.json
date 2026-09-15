@@ -437,11 +437,11 @@
       "kind": "skill",
       "id": "maker-mdap",
       "path": "skills/maker-mdap/SKILL.md",
-      "description": "REQUIRED baseline — Maker MDAP (massively decomposed agentic processes). Use for long multi-step work that must stay reliable: decompose into tiny subtasks, vote across parallel micro-attempts, and red-flag risky outputs. Source: Meyerson et al. arXiv:2511.09030.",
-      "domain": "foundational",
+      "description": "Knowledge base from \\\"Solving a Million-Step LLM Task with Zero Errors\\\" (Meyerson, Paolo, Dailey, Shahrzad, Francon, Hayes, Qiu, Hodjat, Miikkulainen — arXiv:2511.09030). Use when designing long-horizon, multi-step agentic LLM pipelines that need very high reliability, applying Maximal Agentic Decomposition (MAD), first-to-ahead-by-k voting, or red-flagging error correction, estimating cost/reliability scaling laws for multi-agent systems, or studying Massively Decomposed Agentic Processes (MDAPs).",
+      "domain": "engineering",
       "required": true,
       "tags": [
-        "foundational",
+        "engineering",
         "maker-mdap"
       ]
     },

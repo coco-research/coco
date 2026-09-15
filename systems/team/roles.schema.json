@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coco-research.org/schemas/si-team-role.schema.json",
+  "title": "SI Team Role",
+  "description": "One role in the CoCo cross-functional team roster. The completion test this schema encodes: an orchestrator can decide whether the role belongs on a task, compose its prompt, and verify its output, from this record alone.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "family",
+    "layer",
+    "mission",
+    "selection",
+    "does_not_do",
+    "inputs",
+    "outputs",
+    "decision_rights",
+    "handoffs",
+    "competence",
+    "capabilities",
+    "escalation",
+    "system_prompt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "maxLength": 40,
+      "description": "Stable identifier. Consumers reference it; it never changes when a display name does."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 2,
+      "description": "Display name. Not an identifier and not derived from one."
+    },
+    "family": {
+      "type": "string",
+      "enum": [
+        "leadership",
+        "research",
+        "engineering",
+        "content",
+        "presentation",
+        "review"
+      ],
+      "description": "The cluster a role belongs to. Same-family roles must carry an overlap decision."
+    },
+    "layer": {
+      "type": "string",
+      "enum": [
+        "research",
+        "execution",
+        "review",
+        "synthesis"
+      ],
+      "description": "Pipeline layer. Membership is decided by the rule in layer_rules.json, not by label."
+    },
+    "mission": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 220,
+      "description": "One sentence stating what the role is FOR. If this cannot be written distinctly, the role should be merged or retired."
+    },
+    "selection": {
+      "type": "string",
+      "minLength": 20,
+      "description": "The condition under which the router selects this role. Must be decidable by reading the task, not by human judgement."
+    },
+    "does_not_do": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 10
+      },
+      "description": "Scope boundaries. What the role must not do, stated so a reviewer can catch a violation."
+    },
+    "inputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "artifact",
+          "from"
+        ],
+        "properties": {
+          "artifact": {
+            "type": "string",
+            "minLength": 2,
+            "description": "Named artifact, e.g. CONTEXT-BRIEF.md"
+          },
+          "from": {
+            "type": "string",
+            "minLength": 2,
+            "description": "A role id, or one of: user, orchestrator, all-layer-1"
+          }
+        }
+      },
+      "description": "What the role receives. Named artifacts and named producers, not prose."
+    },
+    "outputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "artifact",
+          "acceptance_criteria"
+        ],
+        "properties": {
+          "artifact": {
+            "type": "string",
+            "minLength": 2
+          },
+          "acceptance_criteria": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 10
+            },
+            "description": "How a verifier decides this output is done. Each criterion must be checkable without asking the author."
+          }
+        }
+      },
+      "description": "What the role produces, with the criteria its output is judged against."
+    },
+    "decision_rights": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 10
+      },
+      "description": "What the role may decide alone. Anything not listed here it must escalate."
+    },
+    "handoffs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Role ids that consume this role's output. Must resolve to a known role. Empty only for a role whose output terminates the pipeline."
+    },
+    "competence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "meaning"
+      ],
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": [
+            "8+ years",
+            "10+ years",
+            "12+ years",
+            "15+ years",
+            "20+ years"
+          ]
+        },
+        "meaning": {
+          "type": "string",
+          "minLength": 30,
+          "description": "What the level licenses: the scope it can hold and the decisions it may take. A bare year count is decoration."
+        }
+      },
+      "description": "Competence, with the meaning of the level stated."
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Skill ids the role executes with. Each must resolve to a SKILL.md in this repository. Empty is allowed only when capability_gaps is non-empty."
+    },
+    "capability_gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "why"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "why": {
+            "type": "string",
+            "minLength": 20
+          }
+        }
+      },
+      "description": "Capabilities the role needs that this repository does not implement. Named, never invented."
+    },
+    "escalation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "to",
+        "when"
+      ],
+      "properties": {
+        "to": {
+          "type": "string",
+          "description": "Role id, or 'user' when only a human can decide"
+        },
+        "when": {
+          "type": "string",
+          "minLength": 15
+        }
+      },
+      "description": "The failure path: who is asked, and at what point."
+    },
+    "overlap": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "with",
+          "decision",
+          "rule"
+        ],
+        "properties": {
+          "with": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            },
+            "description": "Every same-family peer this role is adjacent to. One entry per role covers the whole cluster."
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "merge",
+              "differentiate",
+              "retire"
+            ]
+          },
+          "rule": {
+            "type": "string",
+            "minLength": 20,
+            "description": "For differentiate: the one testable line that picks between the two."
+          }
+        }
+      },
+      "description": "Required on any role that shares a family with another role."
+    },
+    "category": {
+      "type": "string",
+      "description": "Legacy grouping retained for the seed. Superseded by family, kept so consumers keep working."
+    },
+    "domain_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Task domains this role applies to, from the domain tag vocabulary."
+    },
+    "system_prompt": {
+      "type": "string",
+      "minLength": 200,
+      "description": "The prompt injected into the agent's spawn. Content, not schema: it may repeat what the structured fields state, but must not contradict them."
+    }
+  }
+}

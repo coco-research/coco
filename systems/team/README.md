@@ -4,8 +4,12 @@ Opinionated orchestration system for multi-agent workflows: research, plan, buil
 
 ## `/team` is core — there is nothing to install
 
-**This directory holds documentation only.** It ships no skills, agents or commands, so
-`--systems team` installs nothing and is not a valid bundle flag. Passing it has no effect.
+**This directory ships no skills, agents or commands**, so `--systems team` installs
+nothing and is not a valid bundle flag. Passing it has no effect.
+
+It does hold tooling: the role roster's schema, its source of truth, and the validator
+that gates it. None of that is installable, which is why the bundle list still excludes
+this directory.
 
 The `/team` commands are part of the core install. Every one of them is present after a plain:
 
@@ -28,7 +32,29 @@ A four-layer role pipeline. Each command selects the appropriate role mix for it
 - **L3 — Review** — audit L2's output for accuracy, standards and evidence
 - **L4 — Synthesis** — principal-level verdict and recommended next action
 
-The roster of roles is defined inline in [`commands/team/roles.md`](../../commands/team/roles.md).
+## The role roster
+
+The roster lives here, not in the command file:
+
+| Path | What it is |
+|---|---|
+| `roles.yaml` | **Source of truth.** 37 roles, one record each. Edit this. |
+| `roles.schema.json` | The contract: every field, its type, and the completion test. |
+| `layer_rules.json` | The four-layer model, and the rules that decide membership. |
+| `validate_roles.py` | One command that fails on a malformed roster or a broken layer rule, and prints declared capability gaps as results rather than failures. |
+| `build_roster.py` | Renders [`commands/team/roles.md`](../../commands/team/roles.md) from `roles.yaml`. |
+| `MIGRATION.md` | What changes for consumers of the deployed catalogue. |
+
+`commands/team/roles.md` is generated. The router reads it and agents are handed prompt
+text out of it, so it stays committed — but CI fails if it disagrees with `roles.yaml`.
+
+```bash
+python3 systems/team/validate_roles.py            # validate the roster
+python3 systems/team/validate_roles.py --baseline # what today's data is missing
+python3 systems/team/validate_roles.py --self-test# prove every rule fires
+python3 systems/team/build_roster.py              # re-render the command file
+```
+
 Those roles are specific to `/team` and are distinct from both the core agents in
 [`agents/`](../../agents/) and the GSD agents in [`systems/gsd/agents/`](../gsd/agents/).
 

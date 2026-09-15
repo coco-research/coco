@@ -20,7 +20,7 @@ The teams are a **decision-making partner**, not just a review surface. They are
 | Data & Analytics Super Intelligence | `/SI-Data-*` | 25 | 7 | 24/29 PASS |
 | Sales, GTM & Marketing | `/SI-GTM-*` | 20 (+3 cross-listed) | 7 | 17/23 PASS |
 
-**All 9 teams built and activated.** The first three (AI, Engineering, Product & Design) were authored by Claude research agents and are built by construction. The six newer teams were built local-first then completed by Claude research agents (see *Build pipeline* below) and gated by the validator; the **Validated** column is the share that clears the strict bar (real cited live URLs, ≥2 signals or archetype `persistent_signals`, every stance cited). Personas below the bar are still real, grounded panel members flagged for incremental top-up — not omitted.
+**All 13 teams built and activated.** The first three (AI, Engineering, Product & Design) were authored by Claude research agents and are built by construction. The six newer teams were built local-first then completed by Claude research agents (see *Build pipeline* below) and gated by the validator; the **Validated** column is the share that clears the strict bar (real cited live URLs, ≥2 signals or archetype `persistent_signals`, every stance cited). Personas below the bar are still real, grounded panel members flagged for incremental top-up — not omitted.
 
 The machine-readable meta-registry is [`registry.json`](registry.json) (`kind: superintelligence-meta`). Each team has its own `<team>/registry.json`, `<team>/SKILL.md` (human entry point), `<team>/ROSTER.md` (locked roster), `personas/`, `cells/`, `research/`, and `scripts/`.
 
@@ -115,7 +115,7 @@ THRESHOLD=0.70 python3 superintelligence/scripts/activate_teams.py
 ```
 superintelligence/
 ├── README.md                  This file.
-├── registry.json              Meta-registry (9 teams, default_team, build status).
+├── registry.json              Meta-registry (13 teams, default_team, build status).
 ├── DISCLAIMER.md              Real-figure / illustrative-composite disclaimer.
 ├── QUALITY-FINDINGS.md        Build-pipeline experiment + validator recalibration write-up.
 ├── ACTIVATION-REPORT.md       Per-team PASS rates + activation decisions.

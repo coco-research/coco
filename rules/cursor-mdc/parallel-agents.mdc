@@ -1,5 +1,5 @@
 ---
-description: Automatic parallel agent orchestration based on task complexity
+description: "Use when a task has 2 or more independent subtasks, when work needs waves of parallel agents, or when changes need an independent verification pass. Auto-selects wave, shared-file or resume-chain orchestration and never skips verification."
 alwaysApply: true
 ---
 
@@ -42,7 +42,7 @@ Collect results. Done.
 ```
 Wave 1: [A, B, C, D] → collect + synthesize
 Wave 2: [E, F, G, H] → prompts include Wave 1 synthesis
-Wave 3: [verification-agent] → checks all changes
+Wave 3: [verification pass] → orchestrator re-checks all changes
 ```
 
 ## Pattern 3: Shared Files
@@ -71,9 +71,9 @@ Round 3: Continue with full history
 
 | Pattern | Verification |
 |---------|-------------|
-| Single Wave | Run verification-agent in a follow-up call |
-| Multi-Wave | Final wave is always verification-agent |
-| Shared Files | Wave 2+ includes verification-agent |
+| Single Wave | Orchestrator runs a verification pass in a follow-up call |
+| Multi-Wave | Final wave is always the verification pass |
+| Shared Files | Wave 2+ includes the verification pass |
 | Resume Chains | Final round is "verify everything you changed" |
 
 ## Rules

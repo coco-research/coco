@@ -4,16 +4,20 @@
 # Usage:
 #   bash adapters/cursor/install.sh
 #   bash adapters/cursor/install.sh --dry-run
+#   bash adapters/cursor/install.sh --systems superintelligence
+#   bash adapters/cursor/install.sh --systems gsd,brain,superintelligence
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TARGET_HOME="${CURSOR_HOME:-$HOME/.cursor}"
 DRY_RUN=0
+SYSTEMS=()
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run) DRY_RUN=1 ;;
+    --systems) shift; IFS=',' read -ra SYSTEMS <<< "${1:-}" ;;
     --help|-h) grep '^#' "$0" | sed 's/^# \?//'; exit 0 ;;
     *) echo "Unknown flag: $1" >&2; exit 1 ;;
   esac
@@ -72,9 +76,52 @@ prune_unusable_command_links() {
   done
 }
 
+link_system() {
+  local sys=$1
+  local sys_dir="$REPO_ROOT/systems/$sys"
+  [[ -d "$sys_dir" ]] || { echo "Unknown system: $sys" >&2; exit 1; }
+  if [[ -d "$sys_dir/skills" ]]; then
+    for s in "$sys_dir/skills"/*/; do
+      name=$(basename "$s")
+      link_dir "$s" "$TARGET_HOME/skills/$name"
+    done
+  fi
+  if [[ -d "$sys_dir/commands" ]]; then
+    for c in "$sys_dir/commands"/*.md; do
+      [[ -f "$c" ]] || continue
+      name=$(basename "$c")
+      link_dir "$c" "$TARGET_HOME/commands/$name"
+    done
+  fi
+  # Superintelligence: SI-* commands are generated from per-team registries, not shipped as files.
+  # Written into $TARGET_HOME/commands (CURSOR_HOME, default ~/.cursor/commands) — the same
+  # family claude-code writes to ~/.claude/commands. Do not route Cursor users through the
+  # claude-code adapter to get these files.
+  if [[ -f "$sys_dir/ai/scripts/build_commands.py" ]]; then
+    run mkdir -p "$TARGET_HOME/commands"
+    if [[ $DRY_RUN -eq 1 ]]; then
+      echo "DRY: env COCO_SI_COMMANDS_DIR=$TARGET_HOME/commands python3 $sys_dir/ai/scripts/build_commands.py"
+      if [[ -f "$sys_dir/scripts/build_meta_commands.py" ]]; then
+        echo "DRY: env COCO_SI_COMMANDS_DIR=$TARGET_HOME/commands python3 $sys_dir/scripts/build_meta_commands.py"
+      fi
+      echo "DRY: would generate SI-* commands into $TARGET_HOME/commands"
+    elif command -v python3 >/dev/null 2>&1; then
+      env COCO_SI_COMMANDS_DIR="$TARGET_HOME/commands" python3 "$sys_dir/ai/scripts/build_commands.py"
+      if [[ -f "$sys_dir/scripts/build_meta_commands.py" ]]; then
+        env COCO_SI_COMMANDS_DIR="$TARGET_HOME/commands" python3 "$sys_dir/scripts/build_meta_commands.py"
+      fi
+      echo "Generated SI-* commands (per-team + meta-orchestrator) into $TARGET_HOME/commands"
+    else
+      echo "python3 not found; cannot generate SI-* commands into $TARGET_HOME/commands" >&2
+      exit 1
+    fi
+  fi
+}
+
 echo "Coco · Cursor adapter"
 echo "Source: $REPO_ROOT"
 echo "Target: $TARGET_HOME"
+[[ $DRY_RUN -eq 1 ]] && echo "(dry-run mode)"
 
 # Skills
 for skill in "$REPO_ROOT/skills"/*/; do
@@ -119,6 +166,10 @@ for ns in "$REPO_ROOT/commands"/*/; do
   done
 done
 echo "Commands: $cmd_count linked into $TARGET_HOME/commands"
+
+for sys in "${SYSTEMS[@]:-}"; do
+  [[ -n "$sys" ]] && link_system "$sys"
+done
 
 if [[ $STALE_COUNT -gt 0 ]]; then
   echo

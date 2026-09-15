@@ -1,5 +1,5 @@
 ---
-description: Routes tasks to the correct skill file automatically
+description: "Use before starting any task in Cursor to check whether a skill file must be read first. Routes PRD, test-writing and code-verification tasks to the skill path to read before writing code."
 alwaysApply: true
 ---
 
@@ -13,8 +13,7 @@ alwaysApply: true
 |---------|-------|------|
 | Create a PRD, write requirements, document a feature | **prd-generator** | `~/.cursor/skills/prd-generator/SKILL.md` |
 | Write tests, generate tests, test coverage | **generate-tests** | `~/.cursor/skills/generate-tests/SKILL.md` |
-| Verify code, check quality, audit code, pre-commit | **verification** | `~/.cursor/skills/verification/SKILL.md` |
-| Remember this, persist context, session memory | **persistent-memory** | `~/.cursor/skills/persistent-memory/SKILL.md` |
+| Verify code, check quality, audit code, pre-commit | **verification-before-completion** | `~/.cursor/skills/verification-before-completion/SKILL.md` |
 
 ## How to Use
 

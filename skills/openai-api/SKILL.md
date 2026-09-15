@@ -1,9 +1,6 @@
 ---
 name: openai-api
-description: |
-  Build with OpenAI stateless APIs - Chat Completions (GPT-5.2, o3), Realtime voice, Batch API (50% savings), Embeddings, DALL-E 3, Whisper, and TTS. Prevents 16 documented errors.
-
-  Use when: implementing GPT-5 chat, streaming, function calling, embeddings for RAG, or troubleshooting rate limits (429), API errors, TypeScript issues, model name errors.
+description: "Use when implementing GPT chat, streaming, function calling, embeddings for RAG, images, audio or batch jobs, or troubleshooting 429 rate limits and API or TypeScript errors. Stateless OpenAI patterns that prevent 16 documented errors."
 user-invocable: true
 domain: engineering
 ---
@@ -1128,7 +1125,7 @@ All API sections documented:
 3. Test skill installation and auto-discovery
 4. Update roadmap and commit
 
-See `/planning/research-logs/openai-api.md` for complete research notes.
+See `references/top-errors.md` for the full list of documented errors and fixes.
 
 ---
 

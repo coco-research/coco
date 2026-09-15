@@ -1,6 +1,6 @@
 ---
 name: m0
-description: "Cross-tool agent memory control plane. Start, stop, and check the M0 operational-thread server; find the store; drain deferred writes; wire the MCP tools and session hooks. Local SQLite, no dependencies, no network. Triggers on: 'm0', 'm0 status', 'start m0', 'cross-tool memory', 'operational thread', 'agent memory server', 'where is my memory stored'."
+description: "Use when the user says 'm0', 'm0 status', 'start m0', 'cross-tool memory', 'operational thread', or 'where is my memory stored', or when the M0 server, store, spool, or MCP wiring needs attention."
 ---
 
 # /m0 — Cross-Tool Agent Memory

@@ -141,6 +141,38 @@ else
 fi
 
 echo ""
+echo "=== README skills/commands prose claims ==="
+if python3 tests/check-skills-commands-prose.py; then
+  pass "README skills/commands prose claims match docs/asset-counts.json"
+else
+  fail_ "README skills/commands prose claims mismatch (see above)"
+fi
+
+echo ""
+echo "=== persona / department claims ==="
+if python3 tests/check-persona-counts.py; then
+  pass "persona/department claims match docs/asset-counts.json"
+else
+  fail_ "persona/department claims mismatch (see above)"
+fi
+
+echo ""
+echo "=== website pages (index.html, coco/index.html) ==="
+if python3 tests/check-site-counts.py; then
+  pass "site-page counts match docs/asset-counts.json"
+else
+  fail_ "site-page counts mismatch (see above)"
+fi
+
+echo ""
+echo "=== adapter list ==="
+if python3 tests/check-adapter-list.py; then
+  pass "adapters/ agrees with lint-frontmatter.yml KNOWN_ADAPTERS"
+else
+  fail_ "adapters/ disagrees with lint-frontmatter.yml KNOWN_ADAPTERS"
+fi
+
+echo ""
 echo "=== Summary ==="
 if [ "$fail" -eq 0 ]; then
   echo "  all shipped public counts agree with docs/asset-counts.json"

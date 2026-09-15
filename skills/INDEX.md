@@ -286,16 +286,16 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
 | Skill | Description |
 |-------|-------------|
-| [ai](../systems/superintelligence/ai/SKILL.md) |  |
-| [climate-energy](../systems/superintelligence/climate-energy/SKILL.md) |  |
-| [data-analytics-super-intelligence](../systems/superintelligence/data-analytics/SKILL.md) |  |
-| [education-edtech](../systems/superintelligence/education-edtech/SKILL.md) |  |
-| [engineering](../systems/superintelligence/engineering/SKILL.md) |  |
-| [finance-super-intelligence](../systems/superintelligence/finance/SKILL.md) |  |
-| [gtm-super-intelligence](../systems/superintelligence/gtm/SKILL.md) |  |
-| [healthcare-life-sciences](../systems/superintelligence/healthcare-life-sciences/SKILL.md) |  |
-| [legal-ip](../systems/superintelligence/legal-ip/SKILL.md) |  |
-| [product-design](../systems/superintelligence/product-design/SKILL.md) |  |
-| [risk-compliance-super-intelligence](../systems/superintelligence/risk-compliance/SKILL.md) |  |
-| [strategy-super-intelligence](../systems/superintelligence/strategy/SKILL.md) |  |
-| [trading-super-intelligence](../systems/superintelligence/trading/SKILL.md) |  |
+| [ai-super-intelligence](../systems/superintelligence/ai/SKILL.md) | Your AI research and engineering brain trust. 59 named personas across 8 cells covering frontier labs, applied product, model architecture, reasoning/RL/agents, |
+| [climate-energy-super-intelligence](../systems/superintelligence/climate-energy/SKILL.md) | Your climate and energy brain trust. 25 named personas across 7 cells covering energy transition, carbon markets, climate modeling, sustainability, grid infrast |
+| [data-analytics-super-intelligence](../systems/superintelligence/data-analytics/SKILL.md) | Data & Analytics Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites;  |
+| [education-edtech-super-intelligence](../systems/superintelligence/education-edtech/SKILL.md) | Your education and edtech brain trust. 25 named personas across 7 cells covering learning science, curriculum design, AI tutoring, higher-ed strategy, edtech pl |
+| [engineering-super-intelligence](../systems/superintelligence/engineering/SKILL.md) | Your software-engineering brain trust. Named personas across 11 cells covering cloud architecture, reliability/SRE/observability, data and storage, security, Fi |
+| [finance-super-intelligence](../systems/superintelligence/finance/SKILL.md) | Your finance brain trust and decision partner. Named personas across 7 cells: valuation/corporate finance, investing, accounting/FP&A, macro, fintech, behaviora |
+| [gtm-super-intelligence](../systems/superintelligence/gtm/SKILL.md) | Sales, GTM & Marketing Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative compos |
+| [healthcare-life-sciences-super-intelligence](../systems/superintelligence/healthcare-life-sciences/SKILL.md) | Your healthcare and life sciences brain trust. 25 named personas across 7 cells covering drug discovery, medtech, biotech strategy, health policy, genomics, cli |
+| [legal-ip-super-intelligence](../systems/superintelligence/legal-ip/SKILL.md) | Your legal, IP, and regulatory brain trust. 31 named personas across 7 cells covering patent strategy, tech licensing, regulatory litigation, AI governance, ope |
+| [product-design-super-intelligence](../systems/superintelligence/product-design/SKILL.md) | Your product + design brain trust and decision partner. Named personas across 8 cells spanning product strategy, discovery/research, growth/metrics, design foun |
+| [risk-compliance-super-intelligence](../systems/superintelligence/risk-compliance/SKILL.md) | Risk & Compliance (GRC) Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative compo |
+| [strategy-super-intelligence](../systems/superintelligence/strategy/SKILL.md) | Strategy Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISC |
+| [trading-super-intelligence](../systems/superintelligence/trading/SKILL.md) | Trading Super Intelligence Team. Named real-world personas across 8 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCL |

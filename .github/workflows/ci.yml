@@ -63,7 +63,7 @@ jobs:
 
       - name: Adapter smoke test (dry-run)
         run: |
-          for adapter in claude-code cursor vscode codex generic hermes; do
+          for adapter in claude-code cursor grok vscode codex generic hermes; do
             # hermes ships via PR #118; skip until it lands on main.
             [ -d "adapters/$adapter" ] || { echo "SKIP: $adapter (not present)"; continue; }
             echo "--- testing $adapter (dry-run) ---"
@@ -105,6 +105,9 @@ jobs:
             exit 1
           fi
           echo "INDEX files up to date."
+
+      - name: Verify shipped asset counts match generated truth
+        run: bash tests/check-asset-counts.sh
 
       - name: Verify the delivery index matches what the adapters install
         run: |

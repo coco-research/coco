@@ -43,7 +43,10 @@ Hermes profiles live at `~/.hermes/profiles/<profile>/`. The adapter wires:
 ## Uninstall
 
 ```bash
-find ~/.hermes/profiles -type l -lname "*<path-to-coco-repo>*" -delete
+# Run from the clone root. Match the clone path plus a trailing slash so a
+# directory named `coco` cannot also delete links into `coco-research`.
+CLONE="$(pwd)"
+find ~/.hermes/profiles -type l -lname "${CLONE}/*" -delete
 ```
 
 The rules block is removed automatically on the next install run without the repo; otherwise strip everything between `<!-- coco:rules-start -->` and `<!-- coco:rules-end -->`.

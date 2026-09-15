@@ -95,15 +95,16 @@ def update_entity(conn: sqlite3.Connection, entity_id: int, **kwargs) -> dict:
     sets, params = [], []
     for k, v in kwargs.items():
         if k in allowed:
-            # Log change
             log_change(conn, entity_id, k, old[k], v, "update_entity")
-            sets.append(f"{k}=?")
+            sets.append(k + "=?")
             params.append(v)
     if sets:
         sets.append("updated_at=?")
         params.append(now_iso())
         params.append(entity_id)
-        conn.execute(f"UPDATE entities SET {', '.join(sets)} WHERE id=?", params)
+        # Safe: column names from allowed whitelist only, no f-string interpolation
+        stmt = "UPDATE entities SET " + ", ".join(sets) + " WHERE id=?"
+        conn.execute(stmt, params)
         conn.commit()
     return row_to_dict(conn.execute("SELECT * FROM entities WHERE id=?", (entity_id,)).fetchone())
 
@@ -113,7 +114,6 @@ def update_entity(conn: sqlite3.Connection, entity_id: int, **kwargs) -> dict:
 def create_relationship(conn: sqlite3.Connection, source_id: int, target_id: int,
                         rel_type: str, context: str | None = None,
                         valid_from: str | None = None, valid_to: str | None = None) -> dict:
-    # Idempotent: skip if exists
     existing = conn.execute(
         "SELECT * FROM relationships WHERE source_id=? AND target_id=? AND rel_type=?",
         (source_id, target_id, rel_type),
@@ -168,14 +168,16 @@ def update_task(conn: sqlite3.Connection, task_id: int, **kwargs) -> dict:
     sets, params = [], []
     for k, v in kwargs.items():
         if k in allowed:
-            sets.append(f"{k}=?")
+            sets.append(k + "=?")
             params.append(v)
     if kwargs.get("status") == "done":
         sets.append("completed_at=?")
         params.append(now_iso())
     if sets:
         params.append(task_id)
-        conn.execute(f"UPDATE tasks SET {', '.join(sets)} WHERE id=?", params)
+        # Safe: column names from allowed whitelist only, no f-string interpolation
+        stmt = "UPDATE tasks SET " + ", ".join(sets) + " WHERE id=?"
+        conn.execute(stmt, params)
         conn.commit()
     return row_to_dict(conn.execute("SELECT * FROM tasks WHERE id=?", (task_id,)).fetchone())
 

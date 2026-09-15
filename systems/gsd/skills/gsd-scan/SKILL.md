@@ -1,6 +1,6 @@
 ---
 name: gsd-scan
-description: "Rapid codebase assessment — lightweight alternative to /gsd-map-codebase"
+description: "Use when you need a quick read on one subsystem instead of a full /gsd-map-codebase run, or the user asks to scan tech, arch, quality, or concerns. Spawns one mapper agent and writes targeted docs into .planning/codebase/."
 allowed-tools:
   - Read
   - Write

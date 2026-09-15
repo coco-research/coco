@@ -1,6 +1,6 @@
 ---
 name: gsd-next
-description: "Automatically advance to the next logical step in the GSD workflow"
+description: "Use to keep moving without inspecting progress, or when the user asks what is next in the GSD workflow. Reads STATE.md, ROADMAP.md and phase dirs to invoke the next step; --force skips safety and verification gates."
 allowed-tools:
   - Read
   - Bash

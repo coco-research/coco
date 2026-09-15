@@ -1,6 +1,6 @@
 ---
 name: gsd-pr-branch
-description: "Create a clean PR branch by filtering out .planning/ commits — ready for code review"
+description: "Use when opening a pull request and the diff is cluttered with .planning/ commits. Creates a clean branch filtered of GSD planning artifacts so reviewers see only code changes."
 argument-hint: "[target branch, default: main]"
 allowed-tools:
   - Bash

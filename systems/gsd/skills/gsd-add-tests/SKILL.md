@@ -1,6 +1,6 @@
 ---
 name: gsd-add-tests
-description: "Generate tests for a completed phase based on UAT criteria and implementation"
+description: "Use when a completed phase needs unit or E2E tests, or the user asks to add tests for phase N. Classifies implementation files into TDD, E2E, or skip, gets plan approval, then generates RED-GREEN tests from SUMMARY.md and UAT criteria."
 argument-hint: "<phase> [additional instructions]"
 allowed-tools:
   - Read

@@ -1,6 +1,6 @@
 ---
 name: gsd-list-workspaces
-description: "List active GSD workspaces and their status"
+description: "Use when the user asks which GSD workspaces exist, or where their isolated work lives. Scans the workspaces root for WORKSPACE.md manifests and prints name, path, repo count, strategy and project status."
 allowed-tools:
   - Bash
   - Read

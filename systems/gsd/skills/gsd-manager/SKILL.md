@@ -1,6 +1,6 @@
 ---
 name: gsd-manager
-description: "Interactive command center for managing multiple phases from one terminal"
+description: "Use when the user wants a dashboard of all phases or to run more than one phase in parallel. Shows phase status with recommended next actions, runs discuss inline, and dispatches plan and execute as background agents."
 allowed-tools:
   - Read
   - Write

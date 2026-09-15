@@ -1,6 +1,6 @@
 ---
 name: gsd-ui-phase
-description: "Generate UI design contract (UI-SPEC.md) for frontend phases"
+description: "Use before planning a frontend phase, or when a UI contract must be locked before implementation. Orchestrates gsd-ui-researcher and gsd-ui-checker to validate, research, and verify UI-SPEC.md for the phase."
 argument-hint: "[phase]"
 allowed-tools:
   - Read

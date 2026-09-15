@@ -1,6 +1,6 @@
 ---
-name: pmstudio-init
-description: Use when starting a new project, onboarding to an existing product, or setting up a documentation ecosystem for any initiative. Scaffolds the standard document set, folder structure, project memory, and doc-sync config. Works for software products, consulting engagements, platform implementations, and governance programs.
+name: project-docs
+description: "Use when starting a new project, onboarding to an existing product, or auditing an existing folder structure against the standard. Scaffolds the 16-document set, folder structure, project memory and doc-sync config."
 domain: pm
 ---
 
@@ -151,7 +151,7 @@ Ask the user these questions (skip any they've already answered):
 
 ### Step 2: Scaffold Folder Structure
 
-Create the folder structure based on project type. Use the template from `templates/folder-structures.md`.
+Create the folder structure for the chosen project type, per the layouts below.
 
 **All types get:**
 ```

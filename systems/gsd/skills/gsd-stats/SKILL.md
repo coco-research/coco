@@ -1,6 +1,6 @@
 ---
 name: gsd-stats
-description: "Display project statistics — phases, plans, requirements, git metrics, and timeline"
+description: "Use when the user asks how big the project is, what has shipped, or for project statistics. Reports phase progress, plan execution, requirements completion, git history metrics, and timeline through the GSD workflow."
 allowed-tools:
   - Read
   - Bash

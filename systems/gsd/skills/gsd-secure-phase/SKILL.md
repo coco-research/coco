@@ -1,6 +1,6 @@
 ---
 name: gsd-secure-phase
-description: "Retroactively verify threat mitigations for a completed phase"
+description: "Use to re-verify the threat mitigations of a phase that already shipped, or when the user asks to audit SECURITY.md. Audits an existing SECURITY.md, runs from a PLAN.md threat model, or exits if the phase never ran."
 argument-hint: "[phase number]"
 allowed-tools:
   - Read

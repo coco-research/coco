@@ -1,6 +1,6 @@
 ---
 name: gsd-thread
-description: "Manage persistent context threads for cross-session work"
+description: "Use when work spans sessions and does not belong to any specific phase, or when the user wants to create, list or resume a context thread. Keeps lightweight threads under .planning/threads/."
 argument-hint: "[name | description]"
 allowed-tools:
   - Read

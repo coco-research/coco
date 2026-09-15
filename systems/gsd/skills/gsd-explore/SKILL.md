@@ -1,6 +1,6 @@
 ---
 name: gsd-explore
-description: "Socratic ideation and idea routing — think through ideas before committing to plans"
+description: "Use when the user wants to think through an idea before committing to a plan, e.g. /gsd-explore auth strategy. Runs a Socratic session, optionally spawns research, then routes output to notes, seeds, requirements, or new phases."
 allowed-tools:
   - Read
   - Write

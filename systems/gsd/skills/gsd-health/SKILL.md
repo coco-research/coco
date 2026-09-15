@@ -1,6 +1,6 @@
 ---
 name: gsd-health
-description: "Diagnose planning directory health and optionally repair issues"
+description: "Use when .planning/ looks inconsistent, files are missing, or state seems wrong. Validates .planning/ integrity, reports missing files, bad config, and orphaned plans, and --repair fixes what it finds."
 argument-hint: "[--repair]"
 allowed-tools:
   - Read

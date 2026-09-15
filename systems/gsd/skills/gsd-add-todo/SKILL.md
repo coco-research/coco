@@ -1,6 +1,6 @@
 ---
 name: gsd-add-todo
-description: "Capture idea or task as todo from current conversation context"
+description: "Use when an idea, task, or issue surfaces mid-session and the user wants it captured as a todo instead of doing it now. Infers the area, checks duplicates, and writes the todo file plus a STATE.md update."
 argument-hint: "[optional description]"
 allowed-tools:
   - Read

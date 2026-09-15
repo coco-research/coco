@@ -1,3 +1,7 @@
+---
+description: "Use when a /team run must pick the best tool or skill for a capability, or when adding a discovered tool to the registry. Maps each capability to its best tool, quality notes, fallback, and when-to-skip rule."
+---
+
 # Team Toolkit Registry
 
 > **Purpose:** Maps capabilities to the best available tool/skill.
@@ -112,21 +116,21 @@
 
 ## Test-Driven Development
 
-- **Best tool:** superpowers:test-driven-development
+- **Best tool:** test-driven-development
 - **Quality notes:** No findings yet
 - **Alternative:** Direct test writing by qa-test-architect role
 - **When to skip tool:** When adding tests to existing test suite (just follow patterns)
 
 ## Systematic Debugging
 
-- **Best tool:** superpowers:systematic-debugging
+- **Best tool:** systematic-debugging
 - **Quality notes:** No findings yet
 - **Alternative:** Direct debugging by relevant engineering role
 - **When to skip tool:** Obvious bugs (typos, wrong variable names)
 
 ## Code Review
 
-- **Best tool:** superpowers:requesting-code-review
+- **Best tool:** requesting-code-review
 - **Quality notes:** No findings yet
 - **Alternative:** /team review action (uses full 4-layer pipeline)
 - **When to skip tool:** Quick sanity checks on < 50 lines
@@ -189,7 +193,7 @@
 - **Best tool:** c4-architecture
 - **Quality notes:**
   - Tabulates the five C4 levels with the audience and the when-to-create rule for each, so it prevents the common error of drawing a component diagram for a stakeholder who needed a context diagram.
-  - Render the resulting Mermaid through `design:mermaid` (beautiful-mermaid), never through the standard Mermaid CDN.
+  - Render the resulting Mermaid through `/design-mermaid` (beautiful-mermaid), never through the standard Mermaid CDN.
 - **Alternative:** Direct Mermaid authoring by an engineering role
 - **When to skip tool:** A current diagram already exists for the level being asked about
 

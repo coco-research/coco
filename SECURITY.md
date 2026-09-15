@@ -27,20 +27,23 @@ Coco is a library of markdown artifacts and shell installers. The most likely se
 | Concern | Severity | Notes |
 |---------|----------|-------|
 | Malicious skill content (prompt injection) | medium | Skills are markdown; review before installing third-party additions |
-| Adapter `install.sh` symlink behavior | low | Symlinks point only into the cloned repo; no privilege escalation |
+| Adapter `install.sh` symlink behavior | low | Symlinks point only into the cloned repo; non-symlink files are left in place |
 | Hardcoded credentials | high | Coco ships zero secrets; report any you find immediately |
-| Supply-chain via plugin recommendations | low | We link external plugins but don't bundle them |
+| Supply-chain via plugin recommendations | medium | Skills must not `curl | sh` or `npx skills add -y`; third-party installs need an explicit yes |
+| Unpublished npm name | medium | `cocosuperintelligence` 404s on npmjs.com; do not `npx` it until it is published |
 
 ## Bootstrap installer behavior
 
-`bin/coco-bootstrap.sh` (the `bash <(curl -fsSL ...)` one-liner) now pauses for interactive
-confirmation before installing — it displays the cloned commit's hash, date, and message, and
-asks `[y/N]` before running `install.sh`. This is a deliberate behavior change from the prior
-zero-friction flow, added so users piping a remote script directly to their shell get a chance
-to verify what they're about to run.
+`bin/coco-bootstrap.sh` (the `bash <(curl -fsSL ...)` one-liner) clones the **pinned
+release tag** (see `PINNED_TAG` in that script, kept in sync with `package.json`),
+not floating `main`. It then pauses for interactive confirmation before installing —
+it displays the cloned commit's hash, date, and message, and asks `[y/N]` before
+running `install.sh`. This is a deliberate behavior change from the prior
+zero-friction flow, added so users piping a remote script directly to their shell
+get a chance to verify what they're about to run.
 
 Pass `--yes` or set `COCO_BOOTSTRAP_YES=1` to preserve the old unattended behavior for CI or
-scripted installs.
+scripted installs. The npm CLI wrapper (`bin/coco.js`) uses the same tag pin.
 
 ## Out of scope
 

@@ -1,6 +1,6 @@
 ---
 name: gsd-ship
-description: "Create PR, run review, and prepare for merge after verification passes"
+description: "Use after /gsd-verify-work passes, when the work should become a PR. Pushes the branch, creates the PR with an auto-generated body, optionally triggers review, and tracks the merge, closing the plan-execute-verify-ship loop."
 argument-hint: "[phase number or milestone, e.g., '4' or 'v1.0']"
 allowed-tools:
   - Read

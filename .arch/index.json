@@ -1,29 +1,31 @@
 {
   "schemaVersion": "1.0",
-  "pinnedCommit": "e5c673f3fbe35d86cceb6d2f3811302388b488d1",
-  "generatedAt": "2026-07-31T19:40:00Z",
-  "source": "gitnexus",
+  "pinnedCommit": "992abf3489adf5bb229b17a4a3036cd1690795f5",
+  "generatedAt": "2026-09-04T00:00:00Z",
+  "source": "crawl",
   "ecosystem": {
     "manifest": "package.json",
     "languages": [
       "markdown",
       "python",
       "shell",
-      "ruby"
+      "ruby",
+      "javascript",
+      "html"
     ],
     "framework": null,
     "treeDepthUsed": 4,
-    "treeTruncated": false,
-    "sourceCommitsBehind": 22
+    "treeTruncated": false
   },
   "components": [
     {
       "id": "skill-library",
       "title": "Agent Skill Library",
-      "purpose": "Delivers reusable agent capabilities as self-contained skill directories, each carrying a SKILL.md manifest with YAML frontmatter plus optional reference documents, executable scripts, and templates that the agent loads on demand.",
+      "purpose": "Delivers reusable agent capabilities as self-contained skill directories with SKILL.md manifests, reference documents, scripts, and templates that agents load on demand to perform specialized tasks.",
       "connections": [
         "command-surface",
-        "install-adapters"
+        "install-adapters",
+        "system-bundles"
       ],
       "codeOwnership": {
         "primary": {
@@ -31,21 +33,21 @@
             "skills"
           ],
           "files": [],
-          "rationale": "Every top-level skill definition and its bundled references live here; this directory is the component."
+          "rationale": "Every top-level skill definition and its bundled references, scripts, and templates live here; this directory is the component."
         },
         "shared": {
           "directories": [
             "templates"
           ],
           "files": [],
-          "rationale": "Authoring scaffolds for new skills, also used when a command needs to emit a skill-shaped artifact."
+          "rationale": "Authoring scaffolds for new skills and memory templates, also used when a command needs to emit a skill-shaped artifact."
         }
       }
     },
     {
       "id": "command-surface",
       "title": "Slash Command Surface",
-      "purpose": "Delivers namespaced slash commands as flat markdown files under commands/<namespace>/, where the team namespace additionally carries the four-layer orchestration router that selects roles and sequences agent handoffs.",
+      "purpose": "Delivers namespaced slash commands as markdown files under commands/<namespace>/, including the team orchestration router that selects roles and sequences agent handoffs across the four-layer protocol.",
       "connections": [
         "skill-library",
         "system-bundles",
@@ -65,10 +67,11 @@
     {
       "id": "system-bundles",
       "title": "Bundled Orchestration Systems",
-      "purpose": "Delivers multi-phase project orchestration, knowledge tracking, and persona-council capabilities as optional bundles, each shipping its own nested skills and agents that install independently of the core asset set.",
+      "purpose": "Delivers multi-phase project orchestration, knowledge tracking, persona councils, and video generation as optional bundles under systems/, each shipping its own nested skills, agents, personas, and validation scripts that install independently of the core asset set.",
       "connections": [
         "command-surface",
-        "install-adapters"
+        "install-adapters",
+        "skill-library"
       ],
       "codeOwnership": {
         "primary": {
@@ -76,14 +79,14 @@
             "systems"
           ],
           "files": [],
-          "rationale": "The GSD, brain, superintelligence, and team bundles, each self-contained with its own nested skills directory."
+          "rationale": "The GSD, brain, cognee, hyperframes, m0, superintelligence, and team bundles, each self-contained with nested skills, agents, personas, and domain-specific registries."
         }
       }
     },
     {
       "id": "agent-roster",
       "title": "Subagent Role Definitions",
-      "purpose": "Delivers the named subagent roles that commands dispatch work to, together with the behavioural rules those agents load, so that a role's system prompt is defined once and reused across every pipeline that spawns it.",
+      "purpose": "Delivers named subagent roles and behavioural rules that commands dispatch work to, so each role's system prompt is defined once in agents/ and rules/ and reused across every pipeline that spawns it.",
       "connections": [
         "command-surface",
         "install-adapters"
@@ -95,14 +98,14 @@
             "rules"
           ],
           "files": [],
-          "rationale": "Agent role definitions and the behavioural rule set they carry; both are dispatched by the command surface rather than invoked directly."
+          "rationale": "Agent role definitions and the behavioural rule sets they carry; both are dispatched by the command surface rather than invoked directly."
         }
       }
     },
     {
       "id": "install-adapters",
       "title": "Multi-Editor Install Adapters",
-      "purpose": "Delivers installation across Claude Code, Cursor, and Codex by symlinking skills, commands, and agents into each tool's configuration directory under a per-editor namespace mapping, with a Homebrew formula for bootstrap.",
+      "purpose": "Delivers installation across Claude Code, Cursor, VS Code, Codex, and generic editors by mapping skills, commands, and agents into each tool's configuration directory under per-editor namespace conventions, with a Homebrew formula and bootstrap script for first-time setup.",
       "connections": [
         "skill-library",
         "command-surface",
@@ -119,7 +122,7 @@
           "files": [
             "install.sh"
           ],
-          "rationale": "The namespace mapping, symlink logic, bootstrap script, and package formula that make the asset set installable."
+          "rationale": "The namespace mapping, symlink logic, bootstrap script, and package formula that make the entire asset set installable across editors."
         }
       }
     }
@@ -127,11 +130,12 @@
   "connectionLabels": {
     "skill-library-to-command-surface": "Capability invocation",
     "skill-library-to-install-adapters": "Skill registration",
+    "skill-library-to-system-bundles": "Nested skill hosting",
     "command-surface-to-system-bundles": "Bundled command registration",
     "command-surface-to-agent-roster": "Role dispatch",
     "command-surface-to-install-adapters": "Command registration",
     "system-bundles-to-install-adapters": "Bundle registration",
     "agent-roster-to-install-adapters": "Agent registration"
   },
-  "notes": "Structural index only. Component altitude is C4-Container; these paths are not work-assignment boundaries. Build tooling (scripts/), generated catalogs (docs/), CI workflows, tests, examples, and static assets are deliberately excluded under the runtime-only rule in references/component-rules.md, so they appear in no component."
+  "notes": "Structural index only. Component altitude is C4-Container; these paths are not work-assignment boundaries. Build tooling (scripts/), generated catalogs (docs/), CI workflows (.github/), tests (tests/), examples (examples/), static assets (assets/, coco/), and website content (index.html, CNAME) are deliberately excluded under the runtime-only rule in references/component-rules.md, so they appear in no component."
 }

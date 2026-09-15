@@ -7,7 +7,7 @@ teams:
 home_team: data-analytics-super-intelligence
 cell: data-engineering-architecture
 cell_role: validator
-status: archetype
+status: active
 affiliations_2026:
   - Founder and owner, Forest Rim Technology (Textual ETL / textual disambiguation)
   - Independent author, speaker, and consultant on data architecture

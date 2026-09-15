@@ -17,6 +17,10 @@ Uses decimal numbering (72.1, 72.2, etc.) to preserve the logical sequence of pl
 Purpose: Handle urgent work discovered during execution without renumbering entire roadmap.
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/insert-phase.md
+</execution_context>
+
 <context>
 Arguments: $ARGUMENTS (format: <after-phase-number> <description>)
 
@@ -24,6 +28,6 @@ Roadmap and state are resolved in-workflow via `init phase-op` and targeted tool
 </context>
 
 <process>
-Execute the insert-phase workflow end-to-end.
+Execute the insert-phase workflow from @$HOME/.claude/get-shit-done/workflows/insert-phase.md end-to-end.
 Preserve all validation gates (argument parsing, phase verification, decimal calculation, roadmap updates).
 </process>

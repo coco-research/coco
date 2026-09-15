@@ -19,6 +19,10 @@ planning via /gsd-plan-phase --reviews.
 **Flow:** Detect CLIs → Build review prompt → Invoke each CLI → Collect responses → Write REVIEWS.md
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/review.md
+</execution_context>
+
 <context>
 Phase number: extracted from $ARGUMENTS (required)
 
@@ -31,5 +35,5 @@ Phase number: extracted from $ARGUMENTS (required)
 </context>
 
 <process>
-Execute the review workflow end-to-end.
+Execute the review workflow from @$HOME/.claude/get-shit-done/workflows/review.md end-to-end.
 </process>

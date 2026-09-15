@@ -33,7 +33,15 @@ Initialize a new project through unified flow: questioning → research (optiona
 **After this command:** Run `/gsd-plan-phase 1` to start execution.
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/new-project.md
+@$HOME/.claude/get-shit-done/references/questioning.md
+@$HOME/.claude/get-shit-done/references/ui-brand.md
+@$HOME/.claude/get-shit-done/templates/project.md
+@$HOME/.claude/get-shit-done/templates/requirements.md
+</execution_context>
+
 <process>
-Execute the new-project workflow end-to-end.
+Execute the new-project workflow from @$HOME/.claude/get-shit-done/workflows/new-project.md end-to-end.
 Preserve all workflow gates (validation, approvals, commits, routing).
 </process>

@@ -19,6 +19,10 @@ artifacts (notes, todos, seeds, research questions, requirements, or new phases)
 Accepts an optional topic argument: `/gsd-explore authentication strategy`
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/explore.md
+</execution_context>
+
 <process>
-Execute the explore workflow end-to-end.
+Execute the explore workflow from @$HOME/.claude/get-shit-done/workflows/explore.md end-to-end.
 </process>

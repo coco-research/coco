@@ -16,10 +16,10 @@ Output ONLY the reference content below. Do NOT add:
 </objective>
 
 <execution_context>
-@systems/gsd/README.md
+@$HOME/.claude/get-shit-done/workflows/help.md
 </execution_context>
 
 <process>
-Output the command reference from `systems/gsd/README.md`: the top-level commands table and the pointer to `skills/` for the complete inventory of all 68 skills.
+Output the complete GSD command reference from @$HOME/.claude/get-shit-done/workflows/help.md.
 Display the reference content directly — no additions or modifications.
 </process>

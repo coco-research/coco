@@ -16,11 +16,16 @@ Acts as a smart dispatcher — never does the work itself. Matches intent to the
 Use when you know what you want but don't know which `/gsd-*` command to run.
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/do.md
+@$HOME/.claude/get-shit-done/references/ui-brand.md
+</execution_context>
+
 <context>
 $ARGUMENTS
 </context>
 
 <process>
-Execute the do workflow end-to-end.
+Execute the do workflow from @$HOME/.claude/get-shit-done/workflows/do.md end-to-end.
 Route user intent to the best GSD command and invoke it.
 </process>

@@ -18,6 +18,10 @@ Purpose: Diagnose failed or stuck workflows so the user can understand root caus
 Output: Forensic report saved to `.planning/forensics/`, presented inline, with optional issue creation.
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/forensics.md
+</execution_context>
+
 <context>
 **Data sources:**
 - `git log` (recent commits, patterns, time gaps)
@@ -32,7 +36,7 @@ Output: Forensic report saved to `.planning/forensics/`, presented inline, with 
 </context>
 
 <process>
-Read and execute the forensics workflow end-to-end.
+Read and execute the forensics workflow from @$HOME/.claude/get-shit-done/workflows/forensics.md end-to-end.
 </process>
 
 <success_criteria>

@@ -29,6 +29,13 @@ Extract implementation decisions that downstream agents need — researcher and 
 **Output:** `{phase_num}-CONTEXT.md` — decisions clear enough that downstream agents can act without asking the user again
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/discuss-phase.md
+@$HOME/.claude/get-shit-done/workflows/discuss-phase-assumptions.md
+@$HOME/.claude/get-shit-done/workflows/discuss-phase-power.md
+@$HOME/.claude/get-shit-done/templates/context.md
+</execution_context>
+
 <runtime_note>
 **Copilot (VS Code):** Use `vscode_askquestions` wherever this workflow calls `AskUserQuestion`. They are equivalent — `vscode_askquestions` is the VS Code Copilot implementation of the same interactive question API.
 </runtime_note>
@@ -45,11 +52,11 @@ Context files are resolved in-workflow using `init phase-op` and roadmap/state t
 DISCUSS_MODE=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-get workflow.discuss_mode 2>/dev/null || echo "discuss")
 ```
 
-If `DISCUSS_MODE` is `"assumptions"`: run the assumptions-driven variant of the process above end-to-end.
+If `DISCUSS_MODE` is `"assumptions"`: Read and execute @$HOME/.claude/get-shit-done/workflows/discuss-phase-assumptions.md end-to-end.
 
-If `DISCUSS_MODE` is `"discuss"` (or unset, or any other value): run the standard discuss-mode variant of the process above end-to-end.
+If `DISCUSS_MODE` is `"discuss"` (or unset, or any other value): Read and execute @$HOME/.claude/get-shit-done/workflows/discuss-phase.md end-to-end.
 
-**MANDATORY:** Follow the numbered steps in the objective above as the complete process. Do not skip steps or improvise beyond what is listed.
+**MANDATORY:** The execution_context files listed above ARE the instructions. Read the workflow file BEFORE taking any action. The objective and success_criteria sections in this command file are summaries — the workflow file contains the complete step-by-step process with all required behaviors, config checks, and interaction patterns. Do not improvise from the summary.
 </process>
 
 <success_criteria>

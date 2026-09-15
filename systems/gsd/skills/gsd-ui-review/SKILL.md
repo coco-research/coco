@@ -18,11 +18,16 @@ graded assessment (1-4 per pillar). Works on any project.
 Output: {phase_num}-UI-REVIEW.md
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/ui-review.md
+@$HOME/.claude/get-shit-done/references/ui-brand.md
+</execution_context>
+
 <context>
 Phase: $ARGUMENTS — optional, defaults to last completed phase.
 </context>
 
 <process>
-Execute the ui-review workflow end-to-end.
+Execute @$HOME/.claude/get-shit-done/workflows/ui-review.md end-to-end.
 Preserve all workflow gates.
 </process>

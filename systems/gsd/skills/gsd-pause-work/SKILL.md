@@ -19,12 +19,16 @@ Routes to the pause-work workflow which handles:
 - Resume instructions
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/pause-work.md
+</execution_context>
+
 <context>
 State and phase progress are gathered in-workflow with targeted reads.
 </context>
 
 <process>
-**Follow the pause-work workflow.**
+**Follow the pause-work workflow** from `@$HOME/.claude/get-shit-done/workflows/pause-work.md`.
 
 The workflow handles all logic including:
 1. Phase directory detection

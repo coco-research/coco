@@ -19,6 +19,11 @@ Generate a developer behavioral profile from session analysis (or questionnaire)
 Routes to the profile-user workflow which orchestrates the full flow: consent gate, session analysis or questionnaire fallback, profile generation, result display, and artifact selection.
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/profile-user.md
+@$HOME/.claude/get-shit-done/references/ui-brand.md
+</execution_context>
+
 <context>
 Flags from $ARGUMENTS:
 - `--questionnaire` -- Skip session analysis entirely, use questionnaire-only path

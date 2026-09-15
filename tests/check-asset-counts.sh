@@ -141,6 +141,14 @@ else
 fi
 
 echo ""
+echo "=== README skills/commands prose claims ==="
+if python3 tests/check-skills-commands-prose.py; then
+  pass "README skills/commands prose claims match docs/asset-counts.json"
+else
+  fail_ "README skills/commands prose claims mismatch (see above)"
+fi
+
+echo ""
 echo "=== persona / department claims ==="
 if python3 tests/check-persona-counts.py; then
   pass "persona/department claims match docs/asset-counts.json"

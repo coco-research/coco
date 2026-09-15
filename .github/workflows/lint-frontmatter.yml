@@ -46,7 +46,7 @@ jobs:
           # landing in their own pull requests are listed so a skill may declare
           # support for them in the same release; a name that is not an adapter at
           # all is still rejected.
-          KNOWN_ADAPTERS = ['claude-code', 'cursor', 'codex', 'generic',
+          KNOWN_ADAPTERS = ['claude-code', 'cursor', 'codex', 'generic', 'grok',
                             'windsurf', 'zed', 'cline', 'roo-code', 'amazon-q']
 
           errors = []

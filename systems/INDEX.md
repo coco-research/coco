@@ -13,7 +13,7 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | learning | `systems/learning/` | 0 | 0 | 0 | 11 |
 | m0 | `systems/m0/` | 4 | 0 | 0 | 9 |
 | reverse-skill | `systems/reverse-skill/` | 33 | 0 | 0 | 129 |
-| superintelligence | `systems/superintelligence/` | 9 | 0 | 0 | 1273 |
+| superintelligence | `systems/superintelligence/` | 13 | 0 | 0 | 1334 |
 | team | `systems/team/` | 0 | 0 | 0 | 2 |
 | aider | `adapters/aider/` | 0 | 0 | 0 | 2 |
 | amazon-q | `adapters/amazon-q/` | 0 | 0 | 0 | 2 |
@@ -23,7 +23,9 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | cursor | `adapters/cursor/` | 5 | 0 | 0 | 8 |
 | generic | `adapters/generic/` | 0 | 0 | 0 | 3 |
 | github-copilot-cli | `adapters/github-copilot-cli/` | 0 | 0 | 0 | 2 |
+| grok | `adapters/grok/` | 0 | 0 | 0 | 3 |
 | hermes | `adapters/hermes/` | 0 | 0 | 0 | 3 |
+| pi-desktop | `adapters/pi-desktop/` | 0 | 0 | 0 | 3 |
 | roo-code | `adapters/roo-code/` | 0 | 0 | 0 | 2 |
 | vscode | `adapters/vscode/` | 0 | 0 | 0 | 3 |
 | vscode-continue | `adapters/vscode-continue/` | 0 | 0 | 0 | 2 |

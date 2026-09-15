@@ -34,5 +34,8 @@ Reload the Grok session (or start a new one) to pick up the new files.
 ## Uninstall
 
 ```bash
-find ~/.grok -type l -lname "*$(pwd)*" -delete
+# Run from the clone root. Match the clone path plus a trailing slash so a
+# directory named `coco` cannot also delete links into `coco-research`.
+CLONE="$(pwd)"
+find ~/.grok -type l -lname "${CLONE}/*" -delete
 ```

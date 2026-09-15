@@ -1,6 +1,6 @@
 ---
 name: task-prd-creator
-description: Use this skill when users request new features, enhancements, bug fixes, or any work that needs planning. Creates structured task files and PRDs (Product Requirements Documents) before implementation. Activates for "I want to add X", "implement Y", "create a task for Z", "plan this feature", or any feature request.
+description: "Use when the user says I want to add X, implement Y, create a task for Z, or plan this feature. Writes a task file plus a PRD under .agent/, links them, and waits for approval before any implementation starts."
 version: 1.0.0
 tags:
   - planning
@@ -91,9 +91,8 @@ Present files, explain approach, **WAIT for user approval**.
 
 ## Integration
 
-- `mvp-architect` - MVP scoping
-- `planning-assistant` - Content planning
-- `agent-folder-init` - Initialize .agent/ structure
+- `writing-plans` - Implementation plan authoring
+- `prd-generator` - Heavier PRD generation and validation
 
 ---
 

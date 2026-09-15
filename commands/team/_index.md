@@ -1,3 +1,7 @@
+---
+description: "Use when the user types /team or wants work handed to the cross-functional 4-layer team (research, develop, review, verify, document, ship). Parses the action and routes it to commands/team/*.md."
+---
+
 # /team — Cross-Functional Product Team
 
 > **You ARE the team lead.** You orchestrate, monitor, and synthesize.
@@ -171,8 +175,8 @@ If `--domain` flag provided, use it to override the `domain` and `tags` fields.
 ## Step 3: Read Toolkit + Feedback
 
 Read these files (if missing, log warning and continue):
-- `~/.claude/commands/team:toolkit.md` — available tools and quality notes
-- `~/.claude/commands/team:feedback.md` — past findings and recommendations
+- `commands/team/toolkit.md` — available tools and quality notes
+- `commands/team/feedback.md` — past findings and recommendations
 
 If `team:toolkit.md` missing or empty → log: "No toolkit entries available. Agents will use default approaches."
 If `team:feedback.md` missing or empty → log: "No feedback history. Expected for first /team run."
@@ -185,7 +189,7 @@ Before extracting entries, check file health:
    - Archive `applied` + `low` impact entries first (regardless of age)
    - Then `applied` + `medium` entries
    - Only archive `high` impact entries if critically over budget
-   - Write archived entries to `~/.claude/commands/team:feedback-archive.md`
+   - Write archived entries to `commands/team/feedback-archive.md`
 3. Then proceed with extraction
 
 ### Extraction
@@ -202,7 +206,7 @@ These extracts will be inlined into Layer 2 agent prompts (I8: agents don't read
 
 ## Step 4: Select Roles
 
-Read `~/.claude/commands/team:roles.md`.
+Read `commands/team/roles.md`.
 
 ### Selection Algorithm
 
@@ -415,8 +419,8 @@ If L4 agent fails:
 
 ## Step 6: Post-Pipeline
 
-1. **Apply feedback:** Append L4's feedback entries to `~/.claude/commands/team:feedback.md`
-2. **Update toolkit:** If L4 recommended toolkit updates, apply them to `~/.claude/commands/team:toolkit.md`
+1. **Apply feedback:** Append L4's feedback entries to `commands/team/feedback.md`
+2. **Update toolkit:** If L4 recommended toolkit updates, apply them to `commands/team/toolkit.md`
 3. **Report:** Present final output to user with summary table
 4. **Cleanup:** TeamDelete
 
@@ -466,7 +470,7 @@ When `$ARGUMENTS` doesn't start with a known action:
 When `gsd_active: true` (`.planning/` exists):
 
 - `/team develop` reads `.planning/ROADMAP.md` for phase context
-- `/team plan` aligns with GSD phases — creates PLAN.md files compatible with `/gsd:execute-phase`
+- `/team plan` aligns with GSD phases — creates PLAN.md files compatible with `/gsd-execute-phase`
 - `/team review` maps findings back to GSD requirements from REQUIREMENTS.md
 - L2 agents working on GSD projects include `.planning/STATE.md` and `CLAUDE.local.md` in their context
 

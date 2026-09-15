@@ -6,6 +6,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Security
+
+- **`generate_prd.sh` no longer `eval`s user input.** Interactive answers were assigned with `eval "$var_name='$input'"`, so a value containing a quote could run as shell. Assignment is now `printf -v` into an allow-listed variable name.
+- **`stop-server.sh` no longer treats `/tmp/../…` as under `/tmp`.** The old `[[ $path == /tmp/* ]]` glob matched a traversal prefix and then `rm -rf` the directory. The path is canonicalized with `pwd -P` and compared against the real `/tmp` root; only a session directory under that root is deleted. PIDs must be numeric before `kill`.
+- **Uninstall no longer glob-matches any path containing the clone name.** `find -lname '*${dir}*'` deleted links into `coco-research` / `coco-connect` when the clone was `coco`. The CLI and the docs now match the resolved clone path plus a trailing slash.
+- **Skills no longer instruct `curl | sh` or `npx skills add -y`.** `browser-automation` and `ai-marketing-videos` fetch the inference.sh installer to a file for review; `find-skills` installs without `-y` and still requires an explicit yes that names the package.
+- **CLI clone is pinned to the release tag, not floating `main`.** `bin/coco.js` and `bin/coco-bootstrap.sh` clone `v1.2.0` (kept in sync with `package.json`). Existing branch checkouts still `git pull --ff-only` so a tagged pin cannot downgrade a `main` tree.
+- **Documented that `cocosuperintelligence` is unpublished.** The name 404s on npmjs.com; README, `coco-cli`, and `SECURITY.md` tell users not to `npx` it until it is published.
+
 ### Added
 
 - **A Grok Build / Grok CLI adapter.** Wires Coco into `~/.grok/{skills,commands,agents,rules,hooks}` the same way the Claude Code adapter wires `~/.claude/`. Commands are flattened to `<ns>:<name>.md` because Grok, like Cursor, discovers user commands as flat `*.md` files and does not recurse. Rules are symlinked from Cursor `.mdc` sources as `*.md`, which is what Grok scans. `--systems` is supported, including Super Intelligence: per-team `SKILL.md` folders land as `si-<team>` skills and the 242 `/SI-*` commands are generated into `~/.grok/commands`. When `~/.coco/bin/coco-platform-mcp` is present, the adapter registers it in `~/.grok/config.toml` so native Grok config wins over Cursor's `~/.cursor/mcp.json` (which uses a relative `./backend` path and fails from a Grok session). When `~/.coco/bin/coco-m0-hook` is present, it writes `~/.grok/hooks/coco-m0.json`. The root installer auto-detects `~/.grok` after VS Code, and the smoke suite and CI dry-run loop cover the new adapter.

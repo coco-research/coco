@@ -1,6 +1,6 @@
 ---
 name: ultra-think
-description: "Deep, multi-dimensional analysis and problem solving. Activates systematic reasoning across technical, business, user, and system perspectives. Generates multiple solutions with trade-offs, then synthesizes into a clear recommendation."
+description: "Use when facing architectural decisions, complex trade-offs, strategic technology choices, or scaling and migration questions that deserve more than a quick answer. Lays out options with trade-offs, then a recommendation."
 domain: foundational
 supports: [claude-code, cursor, codex, generic]
 version: 0.1.0

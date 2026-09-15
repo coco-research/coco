@@ -1,6 +1,6 @@
 ---
 name: gsd-audit-milestone
-description: "Audit milestone completion against original intent before archiving"
+description: "Use before archiving a milestone, or when the user asks whether a milestone met its definition of done. Aggregates phase VERIFICATION.md files, tech debt and deferred gaps, then runs a cross-phase integration check."
 argument-hint: "[version]"
 allowed-tools:
   - Read

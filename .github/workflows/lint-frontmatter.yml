@@ -10,13 +10,25 @@ on:
       - 'agents/**/*.md'
       - 'commands/**/*.md'
       - 'systems/**/SKILL.md'
-      - 'workflows/**/*.md'
+      - 'workflows/**'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   lint:
+    # This job runs on a GitHub-hosted runner because it needs no local
+    # hardware: every step only reads files already checked out by
+    # actions/checkout and runs a pip-installed Python interpreter. The
+    # runner used to be chosen conditionally, falling back to a self-hosted
+    # macOS machine for pushes and pull requests from this repository itself,
+    # because this repository is public with forks and a fork's pull request
+    # could otherwise execute its own code on that machine. Running
+    # unconditionally on a hosted runner removes that local-execution
+    # exposure entirely, for forks and for this repository alike, so it is
+    # strictly safer than the conditional it replaces rather than a
+    # weakening of it.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -32,14 +44,41 @@ jobs:
       - name: Validate frontmatter
         run: |
           python3 <<'PY'
-          import sys, pathlib, yaml
+          import sys, pathlib, re, yaml
 
           REQUIRED_FIELDS = ['name', 'description']
           OPTIONAL_DOMAINS = ['foundational', 'pm', 'engineering', 'design', 'ops', 'meta']
-          KNOWN_ADAPTERS = ['claude-code', 'cursor', 'codex', 'generic']
+          # Keep in sync with adapters/*/manifest.json. The editor adapters that are
+          # landing in their own pull requests are listed so a skill may declare
+          # support for them in the same release; a name that is not an adapter at
+          # all is still rejected.
+          KNOWN_ADAPTERS = ['claude-code', 'cursor', 'codex', 'generic', 'grok',
+                            'windsurf', 'zed', 'cline', 'roo-code', 'amazon-q',
+                            'aider', 'github-copilot-cli', 'hermes', 'vscode',
+                            'vscode-continue', 'pi-desktop']
+
+          # Fields every systems/superintelligence/<team>/SKILL.md file carries.
+          # These files catalog a Superintelligence team rather than describe a
+          # skill, and are written to two different, mutually inconsistent
+          # schemas (team_id/team_name/personas_count/... vs
+          # name/team/personas/...). last_updated is the only field common to
+          # every one of them.
+          TEAM_SKILL_REQUIRED_FIELDS = ['last_updated']
+
+          # Fields every persona file (systems/<bundle>/<team>/personas/*.md)
+          # carries today: slug and real_name identify the persona, archetype is
+          # its one-line description, and status records whether it is active.
+          PERSONA_REQUIRED_FIELDS = ['slug', 'real_name', 'archetype', 'status']
+
+          # A command's slash name comes from its file path, not its
+          # frontmatter (see scripts/build-index.py collect_commands), and only
+          # 5 of 44 command files carry a "name" field, so only "description"
+          # is genuinely required.
+          COMMAND_REQUIRED_FIELDS = ['description']
 
           errors = []
           checked = 0
+          seen = set()
 
           def parse_frontmatter(path):
               text = path.read_text()
@@ -53,19 +92,46 @@ jobs:
               except yaml.YAMLError as e:
                   return {'__yaml_error': str(e)}
 
-          for pattern in ['skills/*/SKILL.md', 'systems/*/skills/*/SKILL.md']:
-              for p in pathlib.Path('.').glob(pattern):
-                  checked += 1
-                  fm = parse_frontmatter(p)
-                  if fm is None:
-                      errors.append(f'{p}: missing or malformed frontmatter')
+          def is_doc_file(path):
+              # README.md, INDEX.md, and the shared PROMPT-DEFENSE.md preamble
+              # are documentation, not content items, and none of them carry
+              # frontmatter. The convention holding across agents/ and
+              # commands/ is an all-caps basename, so that is what is excluded
+              # rather than a fixed name list.
+              return bool(re.fullmatch(r'[A-Z0-9_-]+', path.stem))
+
+          def check(path, required_fields, kind):
+              global checked
+              if path in seen:
+                  return None
+              seen.add(path)
+              checked += 1
+              fm = parse_frontmatter(path)
+              if fm is None:
+                  errors.append(f'{path}: missing or malformed frontmatter')
+                  return None
+              if '__yaml_error' in fm:
+                  errors.append(f'{path}: YAML parse error: {fm["__yaml_error"]}')
+                  return None
+              if not isinstance(fm, dict):
+                  errors.append(f'{path}: frontmatter is not a YAML mapping ({kind})')
+                  return None
+              for f in required_fields:
+                  if f not in fm:
+                      errors.append(f'{path}: missing required field "{f}" ({kind})')
+              return fm
+
+          # Regular skill files. They live in four structurally different
+          # places (see scripts/build-index.py SKILL_SOURCES); each glob is
+          # recursive so a further-nested skill file, such as the one under
+          # systems/reverse-skill/skills/, is not silently skipped by a
+          # single-star pattern.
+          for pattern in ['skills/**/SKILL.md', 'systems/*/skills/**/SKILL.md',
+                          'adapters/*/skills/**/SKILL.md']:
+              for p in sorted(pathlib.Path('.').glob(pattern)):
+                  fm = check(p, REQUIRED_FIELDS, 'skill')
+                  if not isinstance(fm, dict):
                       continue
-                  if '__yaml_error' in fm:
-                      errors.append(f'{p}: YAML parse error — {fm["__yaml_error"]}')
-                      continue
-                  for f in REQUIRED_FIELDS:
-                      if f not in fm:
-                          errors.append(f'{p}: missing required field "{f}"')
                   if 'domain' in fm and fm['domain'] not in OPTIONAL_DOMAINS:
                       errors.append(f'{p}: unknown domain "{fm["domain"]}" (allowed: {OPTIONAL_DOMAINS})')
                   if 'supports' in fm and isinstance(fm['supports'], list):
@@ -73,7 +139,28 @@ jobs:
                           if adapter not in KNOWN_ADAPTERS:
                               errors.append(f'{p}: unknown adapter "{adapter}" in supports (allowed: {KNOWN_ADAPTERS})')
 
-          print(f'Checked {checked} skill files')
+          # Superintelligence team catalog files:
+          # systems/superintelligence/<team>/SKILL.md.
+          for p in sorted(pathlib.Path('.').glob('systems/superintelligence/*/SKILL.md')):
+              check(p, TEAM_SKILL_REQUIRED_FIELDS, 'team skill')
+
+          # Persona files: systems/<bundle>/<team>/personas/*.md.
+          for p in sorted(pathlib.Path('.').glob('systems/*/*/personas/*.md')):
+              check(p, PERSONA_REQUIRED_FIELDS, 'persona')
+
+          # Agent definitions: agents/**/*.md, excluding doc/preamble files.
+          for p in sorted(pathlib.Path('agents').glob('**/*.md')):
+              if is_doc_file(p):
+                  continue
+              check(p, REQUIRED_FIELDS, 'agent')
+
+          # Slash commands: commands/**/*.md, excluding the generated INDEX.md.
+          for p in sorted(pathlib.Path('commands').glob('**/*.md')):
+              if is_doc_file(p):
+                  continue
+              check(p, COMMAND_REQUIRED_FIELDS, 'command')
+
+          print(f'Checked {checked} files')
           if errors:
               print('\n--- Errors ---')
               for e in errors:

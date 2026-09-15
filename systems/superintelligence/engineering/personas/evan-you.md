@@ -1,6 +1,6 @@
 ---
 slug: evan-you
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: web-and-frontend
 cell_role: lead-driver

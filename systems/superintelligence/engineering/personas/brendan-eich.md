@@ -1,6 +1,6 @@
 ---
 slug: brendan-eich
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: languages-runtimes
 cell_role: specialist

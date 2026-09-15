@@ -1,6 +1,6 @@
 ---
 name: gsd-docs-update
-description: "Generate or update project documentation verified against the codebase"
+description: "Use when the user asks to generate, update, refresh or verify project documentation, or to check that docs still match the codebase. Writes up to 9 doc files, each verified against real paths; supports --force and --verify-only."
 argument-hint: "[--force] [--verify-only]"
 allowed-tools:
   - Read

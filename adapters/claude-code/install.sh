@@ -32,9 +32,9 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-# No flag means every bundle that ships skills or agents. The advertised totals (280
-# commands, 171 skills) are what a plain install is expected to deliver, and leaving them
-# behind an opt-in flag is how 70 of 171 skills went missing without a word.
+# No flag means every bundle in the default allow-list. The advertised totals (386
+# commands, 226 skills) are what a plain install is expected to deliver, and leaving them
+# behind an opt-in flag is how 74 of 226 skills went missing without a word.
 if [[ $CORE_ONLY -eq 1 ]]; then
   SYSTEMS=()
 elif [[ ${#SYSTEMS[@]} -eq 0 ]]; then
@@ -74,6 +74,11 @@ link_dir() {
   fi
   # A dangling symlink is removed and relinked. These accumulate whenever the repo moves.
   [[ -L "$dst" ]] && run rm "$dst"
+  # Security: refuse to create symlinks outside TARGET_HOME
+  case "$dst" in
+    "$TARGET_HOME"/*) ;;
+    *) echo "REFUSE: target $dst is outside $TARGET_HOME" >&2; return 1 ;;
+  esac
   run mkdir -p "$(dirname "$dst")"
   run ln -sf "$src" "$dst"
   echo "Linked: $dst -> $src"
@@ -125,7 +130,7 @@ link_agents() {
   done
 }
 
-# The Super Intelligence family (242 commands) is stamped out of the per-team registries
+# The Super Intelligence family (342 commands) is stamped out of the per-team registries
 # rather than shipped as files. scripts/generate-si-commands.sh runs both generators, so
 # this adapter cannot drift from the other adapters or half-implement the step.
 run_si_generator() {

@@ -1,3 +1,6 @@
+---
+description: "Use when the user runs /team think, asks for options analysis, or wants a brainstorm before deciding. Generates structured options, stress-tests them across review layers, and returns a decision matrix with a recommendation."
+---
 # /team think — Analysis & Brainstorm Pipeline
 
 > Called by team.md router when action is `think`.

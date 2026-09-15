@@ -1,5 +1,5 @@
 ---
-description: Load and continuously update persistent memory across sessions
+description: "Use when starting a session or after a code change, bug fix, refactor, or decision: read ~/.claude/CLAUDE.md and ./CLAUDE.local.md first, then log the change and its rationale to ./CLAUDE.local.md in the same batch."
 globs:
 alwaysApply: true
 ---
@@ -15,7 +15,7 @@ alwaysApply: true
 
 **Multi-project workspaces:** If the workspace contains multiple project folders, each project should have its own `CLAUDE.local.md` inside its folder. The workspace root `CLAUDE.local.md` tracks standalone tasks only. When working on a specific project, read that project's local memory file (e.g., `./ProjectName/CLAUDE.local.md`).
 
-If `./CLAUDE.local.md` doesn't exist, create it immediately using the template in the `persistent-memory` skill (`~/.cursor/skills/persistent-memory/SKILL.md`).
+If `./CLAUDE.local.md` doesn't exist, create it immediately using the **Local Memory Template** below.
 
 ## Continuous Local Memory Updates
 
@@ -103,11 +103,11 @@ Why? Separate turns risk forgetting the update entirely.
 Ask yourself:
 > "Did I create, edit, or delete any file? Did I make a decision or learn something?"
 
-If YES and you haven't updated `./CLAUDE.local.md`, **DO NOT complete the turn** until you add the update.
+If you created, edited, or deleted a file and haven't updated `./CLAUDE.local.md`, **DO NOT complete the turn** until you add the update. Decision-only turns have no memory obligation.
 
 ## Quality Protocol Reminder
 
-When creating a NEW `./CLAUDE.local.md`, always include these sections from the template:
+When creating a NEW `./CLAUDE.local.md`, always include these sections alongside the template above:
 - **Quality Protocol** — with workflow steps and batch size rule
 - **Verification Log** — for tracking verification runs
 

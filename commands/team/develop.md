@@ -1,3 +1,6 @@
+---
+description: "Use when the user runs /team develop, or the team router picks action develop, to build or fix code through a multi-agent pipeline. Shards files across L2 agents, then reviews with captured regression evidence."
+---
 # /team develop — Build Pipeline
 
 > Called by team.md router when action is `develop`.
@@ -76,4 +79,4 @@ Run after Layer 2, before Layer 3, per the Test Evidence Protocol (`team:evidenc
 When `.planning/` exists:
 - Read ROADMAP.md for phase context
 - L2 agents follow GSD conventions: atomic commits, SUMMARY.md, STATE.md updates
-- Output is compatible with `/gsd:verify-work`
+Output is compatible with `/gsd-verify-work`.

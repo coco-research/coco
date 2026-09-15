@@ -5,6 +5,8 @@
 #   bash install.sh                            # auto-detect IDE, install core + all bundles
 #   bash install.sh --adapter claude-code      # install for Claude Code
 #   bash install.sh --adapter cursor           # install for Cursor
+#   bash install.sh --adapter grok             # install for Grok Build / Grok CLI
+#   bash install.sh --adapter pi-desktop       # install for PI-Desktop
 #   bash install.sh --adapter vscode           # install for VS Code / Copilot CLI
 #   bash install.sh --adapter codex            # generate AGENTS.md (Codex)
 #   bash install.sh --adapter generic          # generate AGENTS.md (any tool)
@@ -13,10 +15,17 @@
 #   bash install.sh --list                     # list available adapters
 #   bash install.sh --dry-run                  # preview only
 #
-# Every bundle under systems/ that ships skills or agents is installed by default. That
-# set is derived by scripts/installable-bundles.sh, so a new bundle needs no edit here.
+# Every bundle named in scripts/installable-bundles.sh is installed by default. That
+# file is a reviewed allow-list, not a scan of systems/, so a new bundle needs a
+# one-line, reviewed addition there before it joins the default set.
 # --core-only opts out of all bundles and wins over --systems; --systems <list>
 # replaces the default set.
+#
+# One bundle, reverse-skill, is security and reverse-engineering tooling vendored
+# under systems/reverse-skill/. It is deliberately absent from the allow-list, so
+# it is never part of a default install for any adapter, and is only installed
+# when named explicitly, the same way any other non-default bundle would be:
+#   bash install.sh --adapter claude-code --systems reverse-skill  # opt in to security tooling
 
 set -euo pipefail
 
@@ -42,10 +51,14 @@ list_adapters() {
 detect_adapter() {
   if [[ -n "${CLAUDECODE:-}" || -d "$HOME/.claude/skills" ]]; then
     echo "claude-code"
+  elif [[ -d "$HOME/.pi/agent" || -d "$HOME/.agents" ]]; then
+    echo "pi-desktop"
   elif [[ -d "$HOME/.cursor" ]]; then
     echo "cursor"
   elif [[ -d "$HOME/.copilot" || -d "$HOME/Library/Application Support/Code/User" || -d "${XDG_CONFIG_HOME:-$HOME/.config}/Code/User" ]]; then
     echo "vscode"
+  elif [[ -d "$HOME/.grok" ]]; then
+    echo "grok"
   elif command -v codex &>/dev/null; then
     echo "codex"
   else
@@ -124,5 +137,5 @@ if [[ -z "$DRY_RUN" ]]; then
   echo
   echo "Coco v$VER installed. Check for updates anytime:"
   echo "  bash \"$REPO_ROOT/scripts/check-update.sh\"      # git clones"
-  echo "  npx cocosuperintelligence version                      # npm installs"
+  echo "  node \"$REPO_ROOT/bin/coco.js\" version                 # CLI wrapper"
 fi

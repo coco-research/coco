@@ -567,6 +567,8 @@ bash install.sh --systems superintelligence
 ```bash
 bash install.sh --adapter claude-code
 bash install.sh --adapter cursor
+bash install.sh --adapter grok
+bash install.sh --adapter vscode
 bash install.sh --adapter codex
 bash install.sh --adapter pi-desktop
 bash install.sh --adapter generic
@@ -654,6 +656,12 @@ Until `cocosuperintelligence` is published on npmjs.com, do not use `npx` for th
 <td>Links MDC rules and custom workspace skills.</td>
 </tr>
 <tr>
+<td><strong>Grok Build / Grok CLI</strong></td>
+<td><code>grok</code></td>
+<td>Stable</td>
+<td>Links skills, commands, agents and rules into <code>~/.grok/</code>. Registers <code>coco-platform</code> MCP and m0 hooks when those binaries are present.</td>
+</tr>
+<tr>
 <td><strong><a href="https://github.com/openai/codex">Codex CLI</a></strong></td>
 <td><code>codex</code></td>
 <td>Stable</td>
@@ -723,7 +731,7 @@ Every skill lives at <code>skills/&lt;name&gt;/SKILL.md</code>. Edit it directly
 <summary><strong>How do I cleanly uninstall CoCo?</strong></summary>
 Because CoCo uses symbolic links, removal is non-destructive:
 <pre>CLONE="$(pwd)"
-find ~/.claude ~/.cursor ~/.copilot -type l -lname "${CLONE}/*" -delete</pre>
+find ~/.claude ~/.cursor ~/.grok ~/.copilot -type l -lname "${CLONE}/*" -delete</pre>
 This removes only links whose target is inside this clone. A contains-match such as
 <code>*$(pwd)*</code> would also delete links into any path that merely contains the
 folder name (for example <code>coco-research</code> when the clone is <code>coco</code>).

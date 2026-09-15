@@ -122,6 +122,24 @@ else
   fail_ "find prefix matched the wrong clone (foo=$(test -L "$home/skills/foo" && echo yes || echo no) bar=$(test -L "$home/skills/bar" && echo yes || echo no))"
 fi
 
+# Class-wide: any *unanchored* contains-match, not just the three literals above.
+# The safe shape always resolves the clone to a variable and anchors it as a
+# prefix followed by "/*" (e.g. -lname "${CLONE}/*"); an unsafe shape opens the
+# -lname argument with a bare "*" before the path, which matches any string
+# that merely contains the clone path as a substring. CHANGELOG.md is excluded
+# because it is a historical record of the exact bug this suite guards
+# against, and this test file is excluded because its own grep patterns quote
+# the forbidden strings as literals in order to detect them elsewhere.
+glob_hits="$(grep -RInE '\-lname[[:space:]]+["'"'"']\*' \
+  --exclude-dir=.git --exclude-dir=node_modules \
+  --exclude=CHANGELOG.md --exclude=check-security-surface.sh . || true)"
+if [[ -n "$glob_hits" ]]; then
+  fail_ "unanchored contains-match link glob found:"
+  echo "$glob_hits" | sed 's/^/    /'
+else
+  pass "no unanchored contains-match link glob anywhere in the tree"
+fi
+
 echo ""
 echo "=== skills: no curl|sh, no npx skills add -y ==="
 if grep -RInE 'curl[[:space:]].+\|[[:space:]]*sh' \

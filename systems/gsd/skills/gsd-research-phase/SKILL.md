@@ -1,6 +1,6 @@
 ---
 name: gsd-research-phase
-description: "Research how to implement a phase (standalone - usually use /gsd-plan-phase instead)"
+description: "Use when you want phase research without planning: to investigate before deciding a phase is feasible, or to re-research after a plan already exists. Standalone command; most workflows should use /gsd-plan-phase instead."
 argument-hint: "[phase]"
 allowed-tools:
   - Read

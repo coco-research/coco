@@ -1,3 +1,6 @@
+---
+description: "Use when the user asks for a PRD, guide, runbook, API docs, or incident report, or when the team router action is document. Runs the 4-layer documentation pipeline with type-specific roles and GSD context."
+---
 # /team document — Documentation Pipeline
 
 > Called by team.md router when action is `document`.

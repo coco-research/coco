@@ -24,7 +24,7 @@
 # (undisclosed role). She remains a chaos-engineering / SRE specialist for cell
 # purposes regardless of current employer.
 slug: tammy-butow
-teams: [engineering]
+teams: [engineering-super-intelligence]
 home_team: engineering
 cell: reliability-sre-obs
 cell_role: specialist

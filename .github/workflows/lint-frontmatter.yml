@@ -53,7 +53,9 @@ jobs:
           # support for them in the same release; a name that is not an adapter at
           # all is still rejected.
           KNOWN_ADAPTERS = ['claude-code', 'cursor', 'codex', 'generic', 'grok',
-                            'windsurf', 'zed', 'cline', 'roo-code', 'amazon-q']
+                            'windsurf', 'zed', 'cline', 'roo-code', 'amazon-q',
+                            'aider', 'github-copilot-cli', 'hermes', 'vscode',
+                            'vscode-continue', 'pi-desktop']
 
           # Fields every systems/superintelligence/<team>/SKILL.md file carries.
           # These files catalog a Superintelligence team rather than describe a

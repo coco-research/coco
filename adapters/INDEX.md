@@ -8,30 +8,49 @@ because most adapters link into the checkout rather than copying.
 
 | Adapter | Commands | of which generated | Skills | Agents | AGENTS.md | Exit |
 |---|---:|---:|---:|---:|:--:|---:|
-| `claude-code` | 280 | 242 | 171 | 34 | — | 0 |
+| `aider` | 0 | 0 | 0 | 0 | yes | 0 |
+| `amazon-q` | 0 | 0 | 0 | 35 | — | 0 |
+| `claude-code` | 286 | 242 | 175 | 35 | — | 0 |
+| `cline` | 0 | 0 | 0 | 35 | — | 0 |
 | `codex` | 0 | 0 | 0 | 0 | yes | 0 |
-| `cursor` | 38 | 0 | 75 | 0 | — | 0 |
+| `cursor` | 286 | 242 | 180 | 0 | — | 0 |
 | `generic` | 0 | 0 | 0 | 0 | yes | 0 |
-| `vscode` | 280 | 242 | 171 | 34 | — | 0 |
+| `github-copilot-cli` | 0 | 0 | 0 | 0 | yes | 0 |
+| `grok` | 289 | 242 | 184 | 35 | — | 0 |
+| `hermes` | 286 | 242 | 175 | 35 | — | 0 |
+| `roo-code` | 0 | 0 | 0 | 35 | — | 0 |
+| `vscode` | 286 | 242 | 175 | 35 | — | 0 |
+| `vscode-continue` | 0 | 0 | 148 | 35 | — | 0 |
+| `windsurf` | 0 | 0 | 148 | 35 | — | 0 |
+| `zed` | 0 | 0 | 0 | 35 | — | 0 |
 
 ## Widest install, against the published totals
 
 | Surface | Best adapter | Advertised |
 |---|---:|---:|
-| Slash commands | 280 | 280 |
-| Skills | 171 | 185 |
+| Slash commands | 289 | 286 |
+| Skills | 184 | 222 |
 
 ## Adapters below the command ceiling
 
 The Super Intelligence family is generated at install time, not committed, so an
-adapter that does not invoke the generators delivers 38 commands instead of 280.
+adapter that does not invoke the generators delivers 44 commands instead of 286.
 This section is the standing list of who is short and by how much.
 
 | Adapter | Commands | Short by | Cause |
 |---|---:|---:|---|
-| `cursor` | 38 | 242 | declares `supports_systems: []` |
+| `amazon-q` | 0 | 289 | does not invoke the SI generators |
+| `cline` | 0 | 289 | does not invoke the SI generators |
+| `roo-code` | 0 | 289 | does not invoke the SI generators |
+| `vscode-continue` | 0 | 289 | does not invoke the SI generators |
+| `windsurf` | 0 | 289 | does not invoke the SI generators |
+| `zed` | 0 | 289 | does not invoke the SI generators |
+| `claude-code` | 286 | 3 | does not invoke the SI generators |
+| `cursor` | 286 | 3 | does not invoke the SI generators |
+| `hermes` | 286 | 3 | does not invoke the SI generators |
+| `vscode` | 286 | 3 | does not invoke the SI generators |
 
-Not comparable (AGENTS.md producers rather than tree installers): `codex`, `generic`.
+Not comparable (AGENTS.md producers rather than tree installers): `aider`, `codex`, `generic`, `github-copilot-cli`.
 
 ## Measurement notes
 
@@ -47,8 +66,8 @@ bug in the measurement.
   the editor user profile, so the measurement creates the two standard profile
   directories inside the throwaway HOME first. Without them it reports only the
   generated family.
-- **Skills stop at 171, not 185.** Five skills live under `adapters/cursor/skills`
-  and are Cursor-only; the rest of the 185 figure is the repository inventory
+- **Skills stop at 184, not 222.** Five skills live under `adapters/cursor/skills`
+  and are Cursor-only; the rest of the 222 figure is the repository inventory
   rather than what any single adapter installs.
 - **Counts include symlinks.** Most adapters link into the checkout instead of
   copying, and are deduplicated by resolved path.

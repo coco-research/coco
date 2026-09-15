@@ -47,6 +47,7 @@
       "cursor",
       "generic",
       "github-copilot-cli",
+      "grok",
       "hermes",
       "roo-code",
       "vscode",
@@ -54,6 +55,6 @@
       "windsurf",
       "zed"
     ],
-    "total": 14
+    "total": 15
   }
 }

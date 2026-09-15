@@ -88,7 +88,7 @@ else:
 check_one('package.json', r'advisory board of (\d+) world-class minds', 'description persona claim')
 check_one('agents/README.md', r'the \*\*(\d+) Super Intelligence personas\*\*', 'personas bullet')
 check_one('docs/install.md', r'`superintelligence` \| (\d+)-persona expert board', 'system bundles row')
-check_one('docs/INDEX.md', r'(\d+)-persona expert board \(9 team skills', 'by-system-bundle line')
+check_one('docs/INDEX.md', r'(\d+)-persona expert board \(', 'by-system-bundle line')
 check_one('systems/superintelligence/HOW-IT-WORKS.html',
           r'<div class="stat"><b>(\d+)</b><span>modeled experts</span></div>', 'stat block')
 check_one('assets/og-image.svg', r'An advisory board of (\d+) world-class', 'social card text')

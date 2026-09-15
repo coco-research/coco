@@ -1,7 +1,7 @@
 {
   "name": "coco",
   "displayName": "Coco",
-  "description": "An entire team. Wherever your AI lives. This install delivers 226 skills, 386 commands and 35 agents. System bundles are opt-in via `install.sh --systems <name>`, and enabling every bundle reaches 226 skills, 386 commands and 35 agents for project orchestration, knowledge tracking, and multi-agent pipelines. Open-core, vendor-neutral.",
+  "description": "An entire team. Wherever your AI lives. This install delivers 228 skills, 386 commands and 35 agents. System bundles are opt-in via `install.sh --systems <name>`, and enabling every bundle reaches 228 skills, 386 commands and 35 agents for project orchestration, knowledge tracking, and multi-agent pipelines. Open-core, vendor-neutral.",
   "version": "1.2.0",
   "author": "Coco Inc",
   "license": "SEE LICENSE IN LICENSE",

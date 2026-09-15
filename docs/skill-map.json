@@ -1,0 +1,2922 @@
+{
+  "schema": 1,
+  "source": {
+    "asset_counts": "docs/asset-counts.json",
+    "builder": "scripts/build-skill-map.py"
+  },
+  "totals": {
+    "skills": 228,
+    "commands_customer_facing": 386,
+    "commands_shipped": 44,
+    "commands_generated_si": 342
+  },
+  "required_baseline": [
+    "karpathy-guidelines",
+    "maker-mdap"
+  ],
+  "entries": [
+    {
+      "kind": "skill",
+      "id": "agent-lightning",
+      "path": "skills/agent-lightning/SKILL.md",
+      "description": "Train and optimize AI agents using Microsoft's Agent Lightning framework with reinforcement learning. Use when setting up agent training, instrumenting agents with tracing, configuring LightningStore, implementing reward functions, or optimizing prompts with RL/APO algorithms.",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "agent-self-eval",
+      "path": "skills/agent-self-eval/SKILL.md",
+      "description": "Post-run self-evaluation system that scores agent output on correctness, clarity, actionability, and conciseness. Use after /team runs, skill executions, or when explicitly asked to evaluate output quality.",
+      "domain": "meta",
+      "required": false,
+      "tags": [
+        "meta"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "ai-marketing-videos",
+      "path": "skills/ai-marketing-videos/SKILL.md",
+      "description": "|",
+      "domain": "design",
+      "required": false,
+      "tags": [
+        "design"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "ai-product",
+      "path": "skills/ai-product/SKILL.md",
+      "description": "Use when building AI features into a product: LLM integration, RAG pipelines, guardrails, streaming, AI UX, prompt engineering, or AI cost control. Treats prompts as code and validates every model output.",
+      "domain": "pm",
+      "required": false,
+      "tags": [
+        "pm"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "api-design-principles",
+      "path": "skills/api-design-principles/SKILL.md",
+      "description": "Use when designing a new REST or GraphQL API, reviewing an API spec before implementation, setting team API standards, or migrating REST to GraphQL. Covers resources, HTTP semantics, pagination, error handling, and pitfalls.",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "pmstudio-arb",
+      "path": "skills/arb-review/SKILL.md",
+      "description": "Generate an Architecture Review Board (ARB) presentation in Coco Inc's standard 11-slide format. Use when someone asks to \"create an ARB deck\", \"architecture review presentation\", \"prepare for architecture review board\", \"ARB slides\", or needs to present a product/platform architecture for sign-off. Reads PRD, architecture maps, and project memory to pre-fill technical content. Produces a self-contained HTML slide deck.",
+      "domain": "ops",
+      "required": false,
+      "tags": [
+        "ops"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "arch-index",
+      "path": "skills/arch-index/SKILL.md",
+      "description": "Build and validate .arch/index.json — a committed map from each architectural component of this repository to the real directories and files that implement it, pinned to a git commit, with every path verified to exist. Also detects structural drift between that index and the current code. Use when asked to map a codebase, produce a component or code-ownership index, find which files implement a component, check whether architecture docs are stale, or detect architecture drift after a refactor. Triggers include 'map the codebase', 'component index', 'which files implement X', 'is the architecture still accurate', 'architecture drift', 'refresh the architecture index'.",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "axiom-liquid-glass",
+      "path": "skills/axiom-liquid-glass/SKILL.md",
+      "description": "Use when implementing, reviewing, or debugging Apple Liquid Glass: iOS 26+ adoption, Regular vs Clear variants, tinting, scroll edge effects, or an iOS-native redesign review.",
+      "domain": "design",
+      "required": false,
+      "tags": [
+        "design"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "brainstorming",
+      "path": "skills/brainstorming/SKILL.md",
+      "description": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
+      "domain": "foundational",
+      "required": false,
+      "tags": [
+        "foundational"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "browser-automation",
+      "path": "skills/browser-automation/SKILL.md",
+      "description": "Use when the agent must open a URL, fill a form, click through a flow, screenshot a page, or extract data from a live page. Covers two providers (agent-browser local CLI, agentic-browser cloud) and the shared @e ref workflow.",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "c4-architecture",
+      "path": "skills/c4-architecture/SKILL.md",
+      "description": "Generate architecture documentation using C4 model Mermaid diagrams. Use when asked to create architecture diagrams, document system architecture, visualize software structure, or generate context/container/component/deployment diagrams.",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "pmstudio-changelog",
+      "path": "skills/change-log/SKILL.md",
+      "description": "Create or update a structured change log for a product or platform. Use when someone asks to \"create a change log\", \"log this change\", \"what changed\", \"update the change log\", \"release notes\", or \"changelog\". Reads project memory (CLAUDE.local.md Recent Changes) and meeting notes to build chronological change records. Supports init (backfill from memory), update (append new entries), and release (summarize for a version).",
+      "domain": "pm",
+      "required": false,
+      "tags": [
+        "pm"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "cli-anything",
+      "path": "skills/cli-anything/SKILL.md",
+      "description": "Wrap any command-line tool into a JSON-emitting agent skill. Use when you want to make a CLI reliably callable and parseable by an AI agent — introspect its --help, define a structured-output (--json) contract and a stable error contract, then generate a SKILL.md wrapper with verified examples. Triggers on \"wrap this CLI\", \"make X agent-usable\", \"generate a skill for this command\", \"turn a tool into an agent skill\".",
+      "domain": "meta",
+      "required": false,
+      "tags": [
+        "meta"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "clone-website",
+      "path": "skills/clone-website/SKILL.md",
+      "description": "Clone any website into a pixel-perfect single-file HTML prototype. Extracts design tokens, assets, CSS computed styles, interaction patterns, and content via Playwright. Outputs a self-contained HTML file with real data injection. Use when the user wants to clone, replicate, reverse-engineer, or create a pixel-perfect copy of any website or web app. Provide one or more target URLs as arguments.",
+      "domain": "design",
+      "required": false,
+      "tags": [
+        "design"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "coco",
+      "path": "skills/coco/SKILL.md",
+      "description": "Use when the user invokes /coco or /coco!, says catch me up, or asks what needs attention, a project status, their todos, decisions or people. Renders the PM dashboard and routes each subcommand to its platform tool or a PM skill.",
+      "domain": "foundational",
+      "required": false,
+      "tags": [
+        "foundational"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "coco-ads",
+      "path": "skills/coco-ads/SKILL.md",
+      "description": "Turn the project you just shipped into a short, polished, shareable launch video (an \"ad\") using HyperFrames. Use when someone says \"/coco-ads\", \"make a launch video\", \"brag about this\", \"turn this into a promo\", \"make an ad for this\", or wants to share what they built. Reads the project code directly — no live URL or screenshots needed. Renders locally.",
+      "domain": "design",
+      "required": false,
+      "tags": [
+        "design"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "coco-cli",
+      "path": "skills/coco-cli/SKILL.md",
+      "description": "Install, update, version-check, or uninstall the Coco open-source AI workflow framework via bin/coco.js. Use when setting up Coco on a machine, checking out the pinned release tag into an existing clone, checking the installed version, or removing it. Do not npx cocosuperintelligence until that name is published. Triggers on \"install coco\", \"update coco\", \"set up coco\", \"coco cli\", \"uninstall coco\".",
+      "domain": "meta",
+      "required": false,
+      "tags": [
+        "meta"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "coco-diagram",
+      "path": "skills/coco-diagram/SKILL.md",
+      "description": "Use for architecture, current-state, process, data-flow, medallion, or DP diagrams, including redrawing .drawio and Mermaid sources. Creates branded flowchart, sequence, ER, org, timeline, and chart visuals as standalone HTML/SVG/PNG.",
+      "domain": "design",
+      "required": false,
+      "tags": [
+        "design"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "coco-loop",
+      "path": "skills/coco-loop/SKILL.md",
+      "description": ">",
+      "domain": "meta",
+      "required": false,
+      "tags": [
+        "meta"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "coco-ship",
+      "path": "skills/coco-ship/SKILL.md",
+      "description": "Use when finished work needs to reach a coco-managed repository (coco-research/coco or similar) — verifies branch state, commits, pushes through the corporate DLP guard only when actually needed, opens a PR against main, waits for CI, and reports the result. Never merges, never pushes to main directly.",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "code-verification",
+      "path": "skills/code-verification/SKILL.md",
+      "description": "Use after every code change, after writing tests, or before marking a task complete, and when the user says verify, quality gate, or audit code. Runs a 7-category mechanical check for TDZ, import, dead code, and mock leakage bugs.",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "context-budget",
+      "path": "skills/context-budget/SKILL.md",
+      "description": "Audit token consumption across agents, skills, MCP servers, and rules. Identifies bloat, redundant components, and produces prioritized token-savings recommendations. Use when the context window is filling up too fast or before adding new components.",
+      "domain": "meta",
+      "required": false,
+      "tags": [
+        "meta"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "design-taste-frontend",
+      "path": "skills/design-taste-frontend/SKILL.md",
+      "description": "Use when the user asks for a landing page, marketing site, portfolio, or redesign, not dashboards or data tables. Infers a design read, sets the three dials, picks a real design system, and blocks generic AI patterns at pre-flight.",
+      "domain": "design",
+      "required": false,
+      "tags": [
+        "design"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "dispatching-parallel-agents",
+      "path": "skills/dispatching-parallel-agents/SKILL.md",
+      "description": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies",
+      "domain": "foundational",
+      "required": false,
+      "tags": [
+        "foundational"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "pmstudio-sync",
+      "path": "skills/doc-sync/SKILL.md",
+      "description": "Use when linked docs drift, when a source file changes and downstream PRDs, decks, or notes must follow, or when a .sync-report.md exists. Diffs the proposed edits, applies them only after approval, and never overwrites a target file.",
+      "domain": "pm",
+      "required": false,
+      "tags": [
+        "pm"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "pmstudio-dr",
+      "path": "skills/dr-plan/SKILL.md",
+      "description": "Generate a Disaster Recovery plan with RTO/RPO targets. Use when someone asks to \"create a DR plan\", \"disaster recovery\", \"business continuity\", or \"RTO RPO\". Do NOT use for step-by-step restoration runbooks — use /pmstudio-recovery instead. Designed for SaaS platform products where Coco Inc is the customer — focuses on service continuity, data recovery, and vendor dependency management rather than infrastructure rebuild.",
+      "domain": "ops",
+      "required": false,
+      "tags": [
+        "ops"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "executing-plans",
+      "path": "skills/executing-plans/SKILL.md",
+      "description": "Use when you have a written implementation plan to execute in a separate session with review checkpoints",
+      "domain": "foundational",
+      "required": false,
+      "tags": [
+        "foundational"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "expo-api-routes",
+      "path": "skills/expo-api-routes/SKILL.md",
+      "description": "Use when adding server-side API routes to an Expo Router app (+api.ts files) for secrets, database access, third-party proxies, webhooks, CORS, or EAS Hosting deploys. Covers file routing, env vars, and Cloudflare Workers limits.",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "find-skills",
+      "path": "skills/find-skills/SKILL.md",
+      "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
+      "domain": "meta",
+      "required": false,
+      "tags": [
+        "meta"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "finishing-a-development-branch",
+      "path": "skills/finishing-a-development-branch/SKILL.md",
+      "description": "Use when implementation is done and tests pass and the user must choose to merge locally, open a PR, keep the branch, or discard it. Presents those four options, executes the choice, and cleans up the worktree for merge and discard.",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "frontend-design",
+      "path": "skills/frontend-design/SKILL.md",
+      "description": "Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics.",
+      "domain": "design",
+      "required": false,
+      "tags": [
+        "design"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "generate-tests",
+      "path": "skills/generate-tests/SKILL.md",
+      "description": "Use when asked to generate tests for a file, module or component, to raise coverage, or to bootstrap a suite for untested code. Detects the project's test framework and conventions first, then writes unit, integration and edge-case tests.",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "goal",
+      "path": "skills/goal/SKILL.md",
+      "description": "Persistent project goal that survives across sessions and tools, with continuous-execution loop semantics. Use when someone asks to \"set a goal\", \"what is my goal\", \"goal status\", \"keep working on X until done\", \"resume the goal\", or wants work to continue across sessions until an objective is achieved. File-backed (.goal.md at project root); shared by every Coco-installed tool working in that repository.",
+      "domain": "meta",
+      "required": false,
+      "tags": [
+        "meta"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "humanizer",
+      "path": "skills/humanizer/SKILL.md",
+      "description": "|",
+      "domain": "foundational",
+      "required": false,
+      "tags": [
+        "foundational"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "pmstudio-irp",
+      "path": "skills/irp/SKILL.md",
+      "description": "Use when the user asks for an incident response plan, IRP, escalation matrix or incident playbook. Writes an offline HTML plan with severities, escalation contacts and comms; DR restores service, IRP runs the incident.",
+      "domain": "ops",
+      "required": false,
+      "tags": [
+        "ops"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "journey-map",
+      "path": "skills/journey-map/SKILL.md",
+      "description": ">",
+      "domain": "design",
+      "required": false,
+      "tags": [
+        "design"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "karpathy-guidelines",
+      "path": "skills/karpathy-guidelines/SKILL.md",
+      "description": "Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, reviewing, or refactoring code to avoid overcomplication, make surgical changes, surface assumptions, and define verifiable success criteria.",
+      "domain": "foundational",
+      "required": true,
+      "tags": [
+        "foundational"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "local-llm",
+      "path": "skills/local-llm/SKILL.md",
+      "description": "Use when working with this machine's local LLM setup (LM Studio + mlx-dspark) -- checking status, changing context window, diagnosing a reasoning hang or dead request, understanding RAM/speed tradeoffs, or wiring a new script to the local inference endpoint.",
+      "domain": "ops",
+      "required": false,
+      "tags": [
+        "ops"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "maker-mdap",
+      "path": "skills/maker-mdap/SKILL.md",
+      "description": "REQUIRED baseline — Maker MDAP (massively decomposed agentic processes). Use for long multi-step work that must stay reliable: decompose into tiny subtasks, vote across parallel micro-attempts, and red-flag risky outputs. Source: Meyerson et al. arXiv:2511.09030.",
+      "domain": "foundational",
+      "required": true,
+      "tags": [
+        "foundational",
+        "maker-mdap"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "media-memory",
+      "path": "skills/media-memory/SKILL.md",
+      "description": "Use when the user sends or generates an image, screenshot, video, audio or file and wants it saved, or asks to find past media (that diagram, the mockup from last week). Ingests and searches with local ChromaDB embeddings.",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "pmstudio-meeting-notes",
+      "path": "skills/meeting-notes/SKILL.md",
+      "description": "Generate structured meeting notes from transcripts or pasted text. Use when someone says \"meeting notes\", \"process this transcript\", \"summarize this call\", \"notes from today's meeting\", or pastes/references a meeting transcript. Auto-enriches attendees from stakeholder directory, routes output to correct project subfolder, flags downstream artifact impacts (PRD, deck, architecture), and proposes CLAUDE.local.md updates. Produces date-first Markdown files.",
+      "domain": "pm",
+      "required": false,
+      "tags": [
+        "pm"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "pmstudio-nfr",
+      "path": "skills/nfr-tracker/SKILL.md",
+      "description": "Detailed completeness audit of all project documents. Use when someone asks \"are we ready for production\", \"audit our docs\", \"readiness check\", \"nfr tracker\", or \"what's missing\". Do NOT use for a quick command listing — use /pmstudio instead. Scans every document for section-level completeness, reports staleness, and gives prioritized gap-closure recommendations.",
+      "domain": "ops",
+      "required": false,
+      "tags": [
+        "ops"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "openai-agents",
+      "path": "skills/openai-agents/SKILL.md",
+      "description": "|",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "openai-api",
+      "path": "skills/openai-api/SKILL.md",
+      "description": "Use when implementing GPT chat, streaming, function calling, embeddings for RAG, images, audio or batch jobs, or troubleshooting 429 rate limits and API or TypeScript errors. Stateless OpenAI patterns that prevent 16 documented errors.",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "OpenAI Apps MCP",
+      "path": "skills/openai-apps-mcp/SKILL.md",
+      "description": "|",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "openai-whisper",
+      "path": "skills/openai-whisper/SKILL.md",
+      "description": "Speech-to-text transcription via OpenAI Whisper. Supports two modes — Local CLI (no API key, runs on-device) and Cloud API (fast, scalable, requires OPENAI_API_KEY). Use when the user needs to transcribe audio files, translate speech, or convert audio to text.",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "pmstudio",
+      "path": "skills/pmstudio/SKILL.md",
+      "description": "PM Studio command center. Use for a quick overview of available commands and document inventory. Use when someone says \"pmstudio\", \"show commands\", \"what can I generate\", or \"project status\". Do NOT use for detailed completeness audits — use /pmstudio-nfr instead. Shows document coverage dashboard and recommends which /pmstudio-* command to run next.",
+      "domain": "pm",
+      "required": false,
+      "tags": [
+        "pm"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "prd-generator",
+      "path": "skills/prd-generator/SKILL.md",
+      "description": "Generate comprehensive Product Requirements Documents (PRDs) for product managers. Use this skill when users ask to \"create a PRD\", \"write product requirements\", \"document a feature\", or need help structuring product specifications.",
+      "domain": "pm",
+      "required": false,
+      "tags": [
+        "pm"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "prd-mastery",
+      "path": "skills/prd-mastery/SKILL.md",
+      "description": "Use when the user asks for a PRD, requirements doc, or product spec grounded in the existing repo, or wants a token-efficient PRD folder. Runs repo reconnaissance, expert questioning, then writes the PRD.",
+      "domain": "pm",
+      "required": false,
+      "tags": [
+        "pm"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "project-docs",
+      "path": "skills/project-docs/SKILL.md",
+      "description": "Use when starting a new project, onboarding to an existing product, or auditing an existing folder structure against the standard. Scaffolds the 16-document set, folder structure, project memory and doc-sync config.",
+      "domain": "pm",
+      "required": false,
+      "tags": [
+        "pm"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "receiving-code-review",
+      "path": "skills/receiving-code-review/SKILL.md",
+      "description": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "pmstudio-recovery",
+      "path": "skills/recovery-plan/SKILL.md",
+      "description": "Generate detailed service restoration runbooks with step-by-step procedures. Use when someone asks to \"create recovery procedures\", \"restoration runbook\", \"recovery steps\", \"how to restore service\", or needs tactical step-by-step procedures for recovering from disaster scenarios. This is the execution companion to the DR plan — DR defines what and when, recovery-plan defines exactly how. Requires a DR plan to exist (will prompt to run /pmstudio-dr first if missing).",
+      "domain": "ops",
+      "required": false,
+      "tags": [
+        "ops"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "redesign-existing-projects",
+      "path": "skills/redesign-existing-projects/SKILL.md",
+      "description": "Use when the user asks to make an existing website or app look premium, remove generic AI-looking design, or polish a UI without changing functionality. Audits the stack, lists the generic AI patterns, and upgrades in place.",
+      "domain": "design",
+      "required": false,
+      "tags": [
+        "design"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "requesting-code-review",
+      "path": "skills/requesting-code-review/SKILL.md",
+      "description": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "scroll-world",
+      "path": "skills/scroll-world/SKILL.md",
+      "description": ">",
+      "domain": "design",
+      "required": false,
+      "tags": [
+        "design"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "skill-creator",
+      "path": "skills/skill-creator/SKILL.md",
+      "description": "Use when the user asks to create, scaffold, update or package a skill, or asks how skill frontmatter, progressive disclosure or bundled resources should be structured. Walks through init_skill.py, writing SKILL.md and package_skill.py.",
+      "domain": "meta",
+      "required": false,
+      "tags": [
+        "meta"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "skill-map",
+      "path": "skills/skill-map/SKILL.md",
+      "description": "Discover in-repo CoCo skills and slash commands from the skill-map. Use when the user asks which skill/command to use, how to find capabilities, marketplace/map lookup, or plain-language goals that should map to ranked skill/command ids.",
+      "domain": "meta",
+      "required": false,
+      "tags": [
+        "meta"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "pmstudio-comms",
+      "path": "skills/stakeholder-comms/SKILL.md",
+      "description": "Generate templated stakeholder communications from project context. Use when someone asks to \"write a go-live email\", \"create a status update\", \"onboard someone\", \"write an announcement\", \"steerco update\", \"incident summary\", \"change notification\", or any stakeholder communication task. Reads project memory, stakeholder directory, PRD, and meeting notes to pre-fill real names, dates, and context. Produces ready-to-send Markdown.",
+      "domain": "pm",
+      "required": false,
+      "tags": [
+        "pm"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "subagent-driven-development",
+      "path": "skills/subagent-driven-development/SKILL.md",
+      "description": "Use when executing implementation plans with independent tasks in the current session",
+      "domain": "foundational",
+      "required": false,
+      "tags": [
+        "foundational"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "swiftui-liquid-glass",
+      "path": "skills/swiftui-liquid-glass/SKILL.md",
+      "description": "Implement, review, or improve SwiftUI features using the iOS 26+ Liquid Glass API. Use when asked to adopt Liquid Glass in new SwiftUI UI, refactor an existing feature to Liquid Glass, or review Liquid Glass usage for correctness, performance, and design alignment.",
+      "domain": "design",
+      "required": false,
+      "tags": [
+        "design"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "systematic-debugging",
+      "path": "skills/systematic-debugging/SKILL.md",
+      "description": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
+      "domain": "foundational",
+      "required": false,
+      "tags": [
+        "foundational"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "tailwind-patterns",
+      "path": "skills/tailwind-patterns/SKILL.md",
+      "description": "Tailwind CSS v4 principles. CSS-first configuration, container queries, modern patterns, design token architecture. Use when building with Tailwind v4 or migrating from v3.",
+      "domain": "design",
+      "required": false,
+      "tags": [
+        "design"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "task-prd-creator",
+      "path": "skills/task-prd-creator/SKILL.md",
+      "description": "Use when the user says I want to add X, implement Y, create a task for Z, or plan this feature. Writes a task file plus a PRD under .agent/, links them, and waits for approval before any implementation starts.",
+      "domain": "pm",
+      "required": false,
+      "tags": [
+        "pm"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "test-driven-development",
+      "path": "skills/test-driven-development/SKILL.md",
+      "description": "Use when implementing any feature or bugfix, before writing implementation code",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "ui-ux-pro-max",
+      "path": "skills/ui-ux-pro-max/SKILL.md",
+      "description": "Use when designing, building or reviewing UI/UX for a web or mobile app: picking styles, color palettes, typography, layout, animation or charts, or checking accessibility and touch targets. Priority-ranked rules ordered by impact.",
+      "domain": "design",
+      "required": false,
+      "tags": [
+        "design"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "ultra-think",
+      "path": "skills/ultra-think/SKILL.md",
+      "description": "Use when facing architectural decisions, complex trade-offs, strategic technology choices, or scaling and migration questions that deserve more than a quick answer. Lays out options with trade-offs, then a recommendation.",
+      "domain": "foundational",
+      "required": false,
+      "tags": [
+        "foundational"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "using-git-worktrees",
+      "path": "skills/using-git-worktrees/SKILL.md",
+      "description": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "using-superpowers",
+      "path": "skills/using-superpowers/SKILL.md",
+      "description": "Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions",
+      "domain": "foundational",
+      "required": false,
+      "tags": [
+        "foundational"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "vercel-react-best-practices",
+      "path": "skills/vercel-react-best-practices/SKILL.md",
+      "description": "Use when writing, reviewing, or refactoring React or Next.js code, or optimizing data fetching, bundle size, and re-renders. Applies Vercel impact-prioritized performance rules organized into 8 categories.",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "verification-before-completion",
+      "path": "skills/verification-before-completion/SKILL.md",
+      "description": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always",
+      "domain": "foundational",
+      "required": false,
+      "tags": [
+        "foundational"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "visual-explainer",
+      "path": "skills/visual-explainer/SKILL.md",
+      "description": "Generate self-contained HTML visual explanations for systems, code changes, plans, data, and technical concepts. Use for diagrams, architecture overviews, diff or plan reviews, project recaps, comparison tables, slide decks, and other visual explanations.",
+      "domain": "design",
+      "required": false,
+      "tags": [
+        "design"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "voice-ai",
+      "path": "skills/voice-ai/SKILL.md",
+      "description": "Voice AI architecture and implementation guide. Covers two architectures: speech-to-speech (OpenAI Realtime API, lowest latency) and pipeline (STT->LLM->TTS, more control). Includes provider-specific patterns for OpenAI Realtime, Vapi, Deepgram, ElevenLabs, and LiveKit. Use when building voice agents, voice-enabled apps, or real-time conversational AI.",
+      "domain": "engineering",
+      "required": false,
+      "tags": [
+        "engineering"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "web-design-guidelines",
+      "path": "skills/web-design-guidelines/SKILL.md",
+      "description": "Review UI code for Web Interface Guidelines compliance. Use when asked to \"review my UI\", \"check accessibility\", \"audit design\", \"review UX\", or \"check my site against best practices\".",
+      "domain": "design",
+      "required": false,
+      "tags": [
+        "design"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "workflow-routing",
+      "path": "skills/workflow-routing/SKILL.md",
+      "description": "Use when starting any task, before invoking any other skill or GSD command, to route between Superpowers skills and GSD commands from project state and task scope. Fires first when both systems are installed.",
+      "domain": "foundational",
+      "required": false,
+      "tags": [
+        "foundational"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "writing-plans",
+      "path": "skills/writing-plans/SKILL.md",
+      "description": "Use when you have a spec or requirements for a multi-step task, before touching code",
+      "domain": "foundational",
+      "required": false,
+      "tags": [
+        "foundational"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "writing-skills",
+      "path": "skills/writing-skills/SKILL.md",
+      "description": "Use when creating new skills, editing existing skills, or verifying skills work before deployment",
+      "domain": "meta",
+      "required": false,
+      "tags": [
+        "meta"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "brain",
+      "path": "systems/brain/skills/brain/SKILL.md",
+      "description": "Use when the user says brain, project knowledge, what do we know about, open tasks, or recent decisions, or runs /brain or /brain-update. SQLite project_brain.db tracker for entities, relationships, tasks, threads, decisions, events.",
+      "domain": "bundle:brain",
+      "required": false,
+      "tags": [
+        "bundle:brain"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "brain:export",
+      "path": "systems/brain/skills/brain-export/SKILL.md",
+      "description": "Use when the user asks to refresh CLAUDE.local.md, regenerate project context, or after a brain-update session flush. Rewrites only the sentinel-delimited auto-generated section from the brain DB, preserving manual behavior rules.",
+      "domain": "bundle:brain",
+      "required": false,
+      "tags": [
+        "bundle:brain"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "brain:init",
+      "path": "systems/brain/skills/brain-init/SKILL.md",
+      "description": "Use when setting up project memory in a new folder or on the first brain:init in a project. Creates project_brain.db, registers the project, and bootstraps it from CLAUDE.local.md, memory files, docs, and emails; safe to re-run.",
+      "domain": "bundle:brain",
+      "required": false,
+      "tags": [
+        "bundle:brain"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "brain:rescan",
+      "path": "systems/brain/skills/brain-rescan/SKILL.md",
+      "description": "Use when project files changed since the last brain scan, CLAUDE.local.md was updated, or a periodic refresh is due. Rescans incrementally, writes new entities, decisions, and documents; needs project_brain.db (run /brain-init first).",
+      "domain": "bundle:brain",
+      "required": false,
+      "tags": [
+        "bundle:brain"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "brain:update",
+      "path": "systems/brain/skills/brain-update/SKILL.md",
+      "description": "End-of-session brain flush. Scans the full conversation, extracts all new entities, decisions, tasks, events, relationships, and updates, presents a summary, and writes to project_brain.db after confirmation. Use at end of every session or when you want to capture everything discussed.",
+      "domain": "bundle:brain",
+      "required": false,
+      "tags": [
+        "bundle:brain"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "brain:wiki",
+      "path": "systems/brain/skills/brain-wiki/SKILL.md",
+      "description": "Use when the user asks for a knowledge article, wiki page, or entity summary from the brain, or wants to search, list, or review merges across brain DB articles. Generates Wikipedia-style articles from entities, decisions, and emails.",
+      "domain": "bundle:brain",
+      "required": false,
+      "tags": [
+        "bundle:brain"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "cognee",
+      "path": "systems/cognee/skills/cognee/SKILL.md",
+      "description": "Use when the user says 'cognee', asks about knowledge graph or graph memory, wants to switch memory backends, or needs a status check, dataset init, or graph view. Covers Cognee endpoints plus the Brain fallback.",
+      "domain": "bundle:cognee",
+      "required": false,
+      "tags": [
+        "bundle:cognee"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "cognee:recall",
+      "path": "systems/cognee/skills/cognee-recall/SKILL.md",
+      "description": "Use when the user says 'cognee recall', 'search memory', 'what do we know about', 'find related', or 'graph search'. Runs semantic, graph, and lexical search across the Cognee knowledge graph and injects results as agent context.",
+      "domain": "bundle:cognee",
+      "required": false,
+      "tags": [
+        "bundle:cognee"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "cognee:store",
+      "path": "systems/cognee/skills/cognee-store/SKILL.md",
+      "description": "Use when the user says 'cognee store', 'push to cognee', 'save to graph', 'remember this' or 'log this decision', or when session decisions must be stored. Writes entities, decisions and events over POST /api/v1/remember.",
+      "domain": "bundle:cognee",
+      "required": false,
+      "tags": [
+        "bundle:cognee"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-add-backlog",
+      "path": "systems/gsd/skills/gsd-add-backlog/SKILL.md",
+      "description": "Use when the user wants to park an idea or feature request that is not ready for active planning, or says add it to the backlog. Writes a 999.x entry to ROADMAP.md and creates its phase directory for later promotion.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-add-phase",
+      "path": "systems/gsd/skills/gsd-add-phase/SKILL.md",
+      "description": "Use when the user asks to add a phase, feature, or scope to the end of the current milestone roadmap. Adds the next sequential phase directory, updates ROADMAP.md, and tracks the change in STATE.md.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-add-tests",
+      "path": "systems/gsd/skills/gsd-add-tests/SKILL.md",
+      "description": "Use when a completed phase needs unit or E2E tests, or the user asks to add tests for phase N. Classifies implementation files into TDD, E2E, or skip, gets plan approval, then generates RED-GREEN tests from SUMMARY.md and UAT criteria.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-add-todo",
+      "path": "systems/gsd/skills/gsd-add-todo/SKILL.md",
+      "description": "Use when an idea, task, or issue surfaces mid-session and the user wants it captured as a todo instead of doing it now. Infers the area, checks duplicates, and writes the todo file plus a STATE.md update.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-analyze-dependencies",
+      "path": "systems/gsd/skills/gsd-analyze-dependencies/SKILL.md",
+      "description": "Use before /gsd-manager to fill in missing Depends on fields in ROADMAP.md. Analyzes file overlap, semantic dependencies and data flow between phases, then suggests dependency updates to confirm.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-audit-fix",
+      "path": "systems/gsd/skills/gsd-audit-fix/SKILL.md",
+      "description": "Use after /gsd-audit-uat when the user wants the findings fixed, not just listed. Classifies each issue as auto-fixable or manual and fixes the auto-fixable ones with test verification and atomic commits; --severity sets the floor.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-audit-milestone",
+      "path": "systems/gsd/skills/gsd-audit-milestone/SKILL.md",
+      "description": "Use before archiving a milestone, or when the user asks whether a milestone met its definition of done. Aggregates phase VERIFICATION.md files, tech debt and deferred gaps, then runs a cross-phase integration check.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-audit-uat",
+      "path": "systems/gsd/skills/gsd-audit-uat/SKILL.md",
+      "description": "Use when the user asks what UAT or verification items are still outstanding across phases, or wants a prioritized manual test plan. Scans every phase for pending, skipped, blocked and human_needed items and flags stale docs.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-autonomous",
+      "path": "systems/gsd/skills/gsd-autonomous/SKILL.md",
+      "description": "Use when the user says run the rest autonomously, overnight, or hands-off through the remaining phases. Runs discuss, plan, execute per phase, pausing only for user decisions, then milestone audit, complete, and cleanup.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-check-todos",
+      "path": "systems/gsd/skills/gsd-check-todos/SKILL.md",
+      "description": "Use when the user asks what is pending, what to do next, or to list todos (optionally filtered by area). Lists pending todos, loads full context for the selected one, and routes to work now, add to a phase, brainstorm, or create a phase.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-cleanup",
+      "path": "systems/gsd/skills/gsd-cleanup/SKILL.md",
+      "description": "Use when .planning/phases/ has accumulated directories from completed milestones. Shows a dry-run of what moves to .planning/milestones/v{X.Y}-phases/ and archives only after confirmation.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-code-review",
+      "path": "systems/gsd/skills/gsd-code-review/SKILL.md",
+      "description": "Use after a phase's code is written, or when the user asks to review changed files for bugs, security issues, or quality. Spawns the gsd-code-reviewer agent at quick, standard, or deep depth and writes the phase REVIEW.md.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-code-review-fix",
+      "path": "systems/gsd/skills/gsd-code-review-fix/SKILL.md",
+      "description": "Use after gsd-code-review has written REVIEW.md, when you want its Critical and Warning findings fixed. Spawns the fixer agent, commits each fix atomically and writes REVIEW-FIX.md (--all, --auto to iterate).",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-complete-milestone",
+      "path": "systems/gsd/skills/gsd-complete-milestone/SKILL.md",
+      "description": "Use when every phase in a milestone is complete and the user wants to archive it, tag the release, and start the next version. Archives roadmap and requirements to .planning/milestones/, updates PROJECT.md, then tags the version.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-debug",
+      "path": "systems/gsd/skills/gsd-debug/SKILL.md",
+      "description": "Use when a bug, failing test, or unexpected behaviour needs investigation, especially across sessions or context resets. Isolates it in a debugger subagent with persistent .planning/debug state, unlike skills/systematic-debugging.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-discuss-phase",
+      "path": "systems/gsd/skills/gsd-discuss-phase/SKILL.md",
+      "description": "Use when a phase has unresolved decisions before planning and no CONTEXT.md exists. Asks adaptive questions on the phase's gray areas and writes {phase_num}-CONTEXT.md with locked decisions; --auto, --chain, --power change the questioning.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-do",
+      "path": "systems/gsd/skills/gsd-do/SKILL.md",
+      "description": "Use when you know what you want but not which /gsd-* command to run. Routes freeform text to the best matching GSD command, confirms the match, then hands off without doing the work itself.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-docs-update",
+      "path": "systems/gsd/skills/gsd-docs-update/SKILL.md",
+      "description": "Use when the user asks to generate, update, refresh or verify project documentation, or to check that docs still match the codebase. Writes up to 9 doc files, each verified against real paths; supports --force and --verify-only.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-execute-phase",
+      "path": "systems/gsd/skills/gsd-execute-phase/SKILL.md",
+      "description": "Use when the user wants to execute a phase's plans, resume the remaining plans, or run only one wave. Discovers plans, groups them into dependency waves, spawns a fresh subagent per plan, then verifies the phase.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-explore",
+      "path": "systems/gsd/skills/gsd-explore/SKILL.md",
+      "description": "Use when the user wants to think through an idea before committing to a plan, e.g. /gsd-explore auth strategy. Runs a Socratic session, optionally spawns research, then routes output to notes, seeds, requirements, or new phases.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-fast",
+      "path": "systems/gsd/skills/gsd-fast/SKILL.md",
+      "description": "Use for a trivial task the user can describe in one sentence: a typo, config change, small refactor or forgotten commit. Executes inline with no subagents and no PLAN.md; anything needing research or planning belongs to /gsd-quick.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-forensics",
+      "path": "systems/gsd/skills/gsd-forensics/SKILL.md",
+      "description": "Use when a GSD run failed, stalled, or produced the wrong result and the cause is unclear. Reads git history and .planning/ state and phase artifacts to diagnose root cause, then writes a report to .planning/forensics/.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-health",
+      "path": "systems/gsd/skills/gsd-health/SKILL.md",
+      "description": "Use when .planning/ looks inconsistent, files are missing, or state seems wrong. Validates .planning/ integrity, reports missing files, bad config, and orphaned plans, and --repair fixes what it finds.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-help",
+      "path": "systems/gsd/skills/gsd-help/SKILL.md",
+      "description": "Use when the user asks what GSD commands exist or how to use GSD. Outputs the complete GSD command reference verbatim, with no project analysis, status, or next-step suggestions.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-import",
+      "path": "systems/gsd/skills/gsd-import/SKILL.md",
+      "description": "Use when the user wants to bring an external plan file into GSD planning, or passes --from <filepath>. Detects conflicts against PROJECT.md decisions, writes it as a GSD PLAN.md, and validates it with gsd-plan-checker.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-insert-phase",
+      "path": "systems/gsd/skills/gsd-insert-phase/SKILL.md",
+      "description": "Use when urgent work surfaces mid-milestone and must land between two planned phases without renumbering the roadmap. Inserts it as a decimal phase such as 72.1 after the phase the user names.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-intel",
+      "path": "systems/gsd/skills/gsd-intel/SKILL.md",
+      "description": "Use when the user asks what the codebase intel knows, or runs /gsd-intel query, status, diff, or refresh. Queries or rebuilds the .planning/intel/ files, and stops with a disabled message when intel is off in .planning/config.json.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-join-discord",
+      "path": "systems/gsd/skills/gsd-join-discord/SKILL.md",
+      "description": "Use when the user asks where to get help, how to join the GSD community, or where to report a problem. Displays the Discord invite link and what the server is for.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-list-phase-assumptions",
+      "path": "systems/gsd/skills/gsd-list-phase-assumptions/SKILL.md",
+      "description": "Use when the user wants to see what the agent assumes about a phase's approach, order, scope, risks and dependencies before planning starts, instead of running a full discuss session. Read-only; ends with a prompt for feedback.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-list-workspaces",
+      "path": "systems/gsd/skills/gsd-list-workspaces/SKILL.md",
+      "description": "Use when the user asks which GSD workspaces exist, or where their isolated work lives. Scans the workspaces root for WORKSPACE.md manifests and prints name, path, repo count, strategy and project status.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-manager",
+      "path": "systems/gsd/skills/gsd-manager/SKILL.md",
+      "description": "Use when the user wants a dashboard of all phases or to run more than one phase in parallel. Shows phase status with recommended next actions, runs discuss inline, and dispatches plan and execute as background agents.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-map-codebase",
+      "path": "systems/gsd/skills/gsd-map-codebase/SKILL.md",
+      "description": "Use when onboarding to an unfamiliar codebase, before a major refactor, on a brownfield project before /gsd-new-project, or to refresh .planning/codebase/. Spawns up to 4 parallel mapper agents that write 7 documents.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-milestone-summary",
+      "path": "systems/gsd/skills/gsd-milestone-summary/SKILL.md",
+      "description": "Use when onboarding someone to a finished milestone or preparing a team review. Reads ROADMAP, REQUIREMENTS, CONTEXT, SUMMARY, and VERIFICATION artifacts into one MILESTONE_SUMMARY in .planning/reports/, then offers Q&A.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-new-milestone",
+      "path": "systems/gsd/skills/gsd-new-milestone/SKILL.md",
+      "description": "Use when the current milestone has shipped and it is time to scope the next one, or when the user asks to start a new milestone. Updates PROJECT.md, then runs questioning, research, requirements, and roadmap.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-new-project",
+      "path": "systems/gsd/skills/gsd-new-project/SKILL.md",
+      "description": "Use when starting GSD in a repo that has no .planning/ yet, or the user wants a new project set up. Questioning, optional research, requirements, and roadmap produce .planning/PROJECT.md, REQUIREMENTS.md, ROADMAP.md, and STATE.md.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-new-workspace",
+      "path": "systems/gsd/skills/gsd-new-workspace/SKILL.md",
+      "description": "Use when you need an isolated copy of one or more repos with its own .planning/, or want to work on several repos in parallel. Creates worktrees or clones plus WORKSPACE.md; then run /gsd-new-project inside.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-next",
+      "path": "systems/gsd/skills/gsd-next/SKILL.md",
+      "description": "Use to keep moving without inspecting progress, or when the user asks what is next in the GSD workflow. Reads STATE.md, ROADMAP.md and phase dirs to invoke the next step; --force skips safety and verification gates.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-note",
+      "path": "systems/gsd/skills/gsd-note/SKILL.md",
+      "description": "Use when the user says note this, jot this down, asks to list my notes, or wants a note promoted to a todo. Appends a timestamped note file in one Write with one confirmation line, no questions.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-pause-work",
+      "path": "systems/gsd/skills/gsd-pause-work/SKILL.md",
+      "description": "Use when the user wants to pause work mid-phase or hand it off to a new session. Writes .continue-here.md with position, completed and remaining work, decisions and blockers, commits it as WIP, and prints resume instructions.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-plan-milestone-gaps",
+      "path": "systems/gsd/skills/gsd-plan-milestone-gaps/SKILL.md",
+      "description": "Use when a milestone audit reported gaps and you want the fix phases created in one pass. Reads MILESTONE-AUDIT.md, groups gaps into phases, adds them to ROADMAP.md and offers to plan each one.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-plan-phase",
+      "path": "systems/gsd/skills/gsd-plan-phase/SKILL.md",
+      "description": "Use after a phase has been discussed, or when the user asks for a PLAN.md for a roadmap phase. Researches, spawns gsd-planner, verifies with gsd-plan-checker, and iterates; supports --gaps, --prd, --skip-research.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-plant-seed",
+      "path": "systems/gsd/skills/gsd-plant-seed/SKILL.md",
+      "description": "Capture a forward-looking idea with trigger conditions — surfaces automatically at the right milestone",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-pr-branch",
+      "path": "systems/gsd/skills/gsd-pr-branch/SKILL.md",
+      "description": "Use when opening a pull request and the diff is cluttered with .planning/ commits. Creates a clean branch filtered of GSD planning artifacts so reviewers see only code changes.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-profile-user",
+      "path": "systems/gsd/skills/gsd-profile-user/SKILL.md",
+      "description": "Use when the user asks to profile how they work, adapt assistant responses to them, or refresh an existing developer profile. Generates USER-PROFILE.md from session analysis or a questionnaire.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-progress",
+      "path": "systems/gsd/skills/gsd-progress/SKILL.md",
+      "description": "Use when the user asks where the project stands, what to do next, or to resume after a break. Summarizes recent work and what is ahead, then routes to executing an existing plan or planning the next one.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-quick",
+      "path": "systems/gsd/skills/gsd-quick/SKILL.md",
+      "description": "Use when the user wants a small, ad-hoc change handled with GSD guarantees (atomic commits, STATE.md) but without the full pipeline. Tasks land in .planning/quick/; --full, --discuss, --research, --validate add the skipped agents back.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-reapply-patches",
+      "path": "systems/gsd/skills/gsd-reapply-patches/SKILL.md",
+      "description": "Use after a GSD update, when local modifications were backed up to gsd-local-patches/ and must be merged back. Three-way compares the pristine baseline, the backup, and the new install, flagging conflicts instead of skipping files.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-remove-phase",
+      "path": "systems/gsd/skills/gsd-remove-phase/SKILL.md",
+      "description": "Use when a planned but unstarted phase should come off the roadmap. Removes the phase, renumbers the phases after it into a clean sequence, and commits the change as the historical record.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-remove-workspace",
+      "path": "systems/gsd/skills/gsd-remove-workspace/SKILL.md",
+      "description": "Use when a finished GSD workspace and its worktrees should be deleted. Confirms first, runs git worktree remove for each member repo, and refuses if any repo has uncommitted changes.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-research-phase",
+      "path": "systems/gsd/skills/gsd-research-phase/SKILL.md",
+      "description": "Use when you want phase research without planning: to investigate before deciding a phase is feasible, or to re-research after a plan already exists. Standalone command; most workflows should use /gsd-plan-phase instead.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-resume-work",
+      "path": "systems/gsd/skills/gsd-resume-work/SKILL.md",
+      "description": "Use when you resume work and the last session ended mid-phase, a .continue-here checkpoint exists, or a PLAN has no SUMMARY. Restores STATE.md context, shows status, and routes to the next command.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-review",
+      "path": "systems/gsd/skills/gsd-review/SKILL.md",
+      "description": "Use when a phase plan should be peer-reviewed by other AI CLIs before execution, or the user asks for a cross-AI review. Invokes Gemini, Claude, Codex, or OpenCode and writes REVIEWS.md for /gsd-plan-phase --reviews.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-review-backlog",
+      "path": "systems/gsd/skills/gsd-review-backlog/SKILL.md",
+      "description": "Use when 999.x backlog items need triage, or the user asks to review, promote, or prune the backlog. Shows each item with its accumulated context, promotes chosen ones into the active milestone, and removes stale ones.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-scan",
+      "path": "systems/gsd/skills/gsd-scan/SKILL.md",
+      "description": "Use when you need a quick read on one subsystem instead of a full /gsd-map-codebase run, or the user asks to scan tech, arch, quality, or concerns. Spawns one mapper agent and writes targeted docs into .planning/codebase/.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-secure-phase",
+      "path": "systems/gsd/skills/gsd-secure-phase/SKILL.md",
+      "description": "Use to re-verify the threat mitigations of a phase that already shipped, or when the user asks to audit SECURITY.md. Audits an existing SECURITY.md, runs from a PLAN.md threat model, or exits if the phase never ran.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-session-report",
+      "path": "systems/gsd/skills/gsd-session-report/SKILL.md",
+      "description": "Use when a session ends and the user wants a summary of what was done and what it cost. Writes a shareable SESSION_REPORT.md with outcomes, work performed and estimated resource usage.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-set-profile",
+      "path": "systems/gsd/skills/gsd-set-profile/SKILL.md",
+      "description": "Use when the user wants to switch the GSD model profile for agents: quality, balanced, budget, or inherit. Runs the gsd-tools config-set-model-profile command and shows its output verbatim.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-settings",
+      "path": "systems/gsd/skills/gsd-settings/SKILL.md",
+      "description": "Use when the user wants to turn GSD workflow steps on or off or to change the model profile. Prompts for model, research, plan_check, verifier, and branching, then writes the merged config with current values pre-selected.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-ship",
+      "path": "systems/gsd/skills/gsd-ship/SKILL.md",
+      "description": "Use after /gsd-verify-work passes, when the work should become a PR. Pushes the branch, creates the PR with an auto-generated body, optionally triggers review, and tracks the merge, closing the plan-execute-verify-ship loop.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-stats",
+      "path": "systems/gsd/skills/gsd-stats/SKILL.md",
+      "description": "Use when the user asks how big the project is, what has shipped, or for project statistics. Reports phase progress, plan execution, requirements completion, git history metrics, and timeline through the GSD workflow.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-thread",
+      "path": "systems/gsd/skills/gsd-thread/SKILL.md",
+      "description": "Use when work spans sessions and does not belong to any specific phase, or when the user wants to create, list or resume a context thread. Keeps lightweight threads under .planning/threads/.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-ui-phase",
+      "path": "systems/gsd/skills/gsd-ui-phase/SKILL.md",
+      "description": "Use before planning a frontend phase, or when a UI contract must be locked before implementation. Orchestrates gsd-ui-researcher and gsd-ui-checker to validate, research, and verify UI-SPEC.md for the phase.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-ui-review",
+      "path": "systems/gsd/skills/gsd-ui-review/SKILL.md",
+      "description": "Use when the user asks for a visual or UI quality review of frontend code that already shipped, or passes a phase number. Produces {phase_num}-UI-REVIEW.md with a graded 1-4 assessment across six pillars.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-undo",
+      "path": "systems/gsd/skills/gsd-undo/SKILL.md",
+      "description": "Use when the user wants to roll back GSD commits: the last N, a whole phase, or one plan. Reverts through the phase manifest with dependency checks and a confirmation gate before anything is undone.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-update",
+      "path": "systems/gsd/skills/gsd-update/SKILL.md",
+      "description": "Use when the user asks whether GSD is up to date or wants to upgrade it. Checks the local and global install against npm, shows the changelog, warns before a clean install, then clears the cache.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-validate-phase",
+      "path": "systems/gsd/skills/gsd-validate-phase/SKILL.md",
+      "description": "Use when validation or test coverage is missing on a phase that already shipped. Audits or reconstructs VALIDATION.md, fills the gaps and generates the missing test files.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-verify-work",
+      "path": "systems/gsd/skills/gsd-verify-work/SKILL.md",
+      "description": "Use after a phase executes, when the user wants to test the built features themselves. Runs one conversational UAT test at a time into {phase}-UAT.md and, when something fails, diagnoses it and queues fix plans for /gsd-execute-phase.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "gsd-workstreams",
+      "path": "systems/gsd/skills/gsd-workstreams/SKILL.md",
+      "description": "Use when the user runs /gsd-workstreams or asks to list, create, switch, status, progress, complete, or resume parallel workstreams for concurrent milestone work. The active one is tracked in the GSD_WS variable.",
+      "domain": "bundle:gsd",
+      "required": false,
+      "tags": [
+        "bundle:gsd"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "embedded-captions",
+      "path": "systems/hyperframes/skills/embedded-captions/SKILL.md",
+      "description": ">",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "faceless-explainer",
+      "path": "systems/hyperframes/skills/faceless-explainer/SKILL.md",
+      "description": "Turn arbitrary text — an article, notes, a topic, a brief — into a faceless explainer video: there is no site or footage to capture, so the visuals are invented per scene (typography, abstract graphics, diagrams, data-viz). Use for topic explainers, concept breakdowns, how-tos, listicles. Not a video built from a website (/product-launch-video — promo or tour). Unclear → /hyperframes.",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "figma",
+      "path": "systems/hyperframes/skills/figma/SKILL.md",
+      "description": "Import Figma content into a HyperFrames composition — rendered assets, brand tokens, components, storyboard sections → reconstructed motion (frames read as states, not slides) (REST/CLI), connector-assisted motion when available, and shaders from a connector or native export. Use when the user pastes a figma.com link or asks to bring a Figma design, frame, logo, brand, or animation into a video/composition.",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "general-video",
+      "path": "systems/hyperframes/skills/general-video/SKILL.md",
+      "description": ">",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "hyperframes",
+      "path": "systems/hyperframes/skills/hyperframes/SKILL.md",
+      "description": ">",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "hyperframes-animation",
+      "path": "systems/hyperframes/skills/hyperframes-animation/SKILL.md",
+      "description": "All animation knowledge for HyperFrames — atomic motion rules, multi-phase scene blueprints, scene transitions, broader motion-design techniques, AND the seven runtime adapters (GSAP default, plus Lottie, Three.js, Anime.js, CSS keyframes, Web Animations API, TypeGPU). Use for any motion or animation task: pick 2-4 rules and compose, or load a blueprint, or look up runtime-specific API (e.g. GSAP eases / Lottie player / Three.js mixer). Also covers auditing an existing composition's choreography (animation map) and 24 named text-animation effects. HyperFrames-native: single paused timeline, seek-safe, deterministic.",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "hyperframes-cli",
+      "path": "systems/hyperframes/skills/hyperframes-cli/SKILL.md",
+      "description": ">",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "hyperframes-core",
+      "path": "systems/hyperframes/skills/hyperframes-core/SKILL.md",
+      "description": "The HyperFrames composition contract — build one renderable project. Use for composition structure, the `data-*` timing attributes, `class=\"clip\"`, tracks, sub-compositions, variables, framework-owned media playback, deterministic-render rules, and validation. Also covers Tailwind projects and the STORYBOARD.md / SCRIPT.md plan formats. Read before writing composition HTML.",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "hyperframes-creative",
+      "path": "systems/hyperframes/skills/hyperframes-creative/SKILL.md",
+      "description": "Non-animation creative direction for HyperFrames videos. Use for design spec (frame.md / design.md) handling, palettes, typography, narration, beat planning, audio-reactive visuals, composition patterns, and brand / style decisions. For atomic motion patterns and scene blueprints, use `hyperframes-animation`.",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "hyperframes-keyframes",
+      "path": "systems/hyperframes/skills/hyperframes-keyframes/SKILL.md",
+      "description": ">",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "hyperframes-registry",
+      "path": "systems/hyperframes/skills/hyperframes-registry/SKILL.md",
+      "description": "Install, discover, and wire registry blocks and components into HyperFrames compositions. Use when running hyperframes add or hyperframes catalog, installing one item or every block matching a tag, wiring an installed item into index.html, or working with hyperframes.json. Covers discovery, install locations, block sub-composition wiring, component snippet merging, and authoring a new block or component to contribute upstream (idea → scaffold → validate → PR).",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "media-use",
+      "path": "systems/hyperframes/skills/media-use/SKILL.md",
+      "description": "Agent Media OS, the single skill for every media need in a HyperFrames project. Resolve BGM, SFX, image, icon, brand logo, voice, color grade, or LUT into a frozen local file or paste-ready block + ledger record (one verb, `resolve`); generate via TTS / music / image models when the catalog misses; produce voiceover, transcription, captions, and background removal through one shared audio engine; operate on media (cut / reframe / transform); and reuse assets across projects. Also use for vague feedback that real footage looks dark, flat, boring, should feel retro/camcorder/print/ASCII, needs privacy, or needs a media reveal.",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "motion-graphics",
+      "path": "systems/hyperframes/skills/motion-graphics/SKILL.md",
+      "description": "Use when the user wants a short, design-led, unnarrated motion graphic: kinetic type, stat count-up, chart hit, logo sting, lower-third, animated map, or UI animation. Longer or narrated: /general-video. Unclear: /hyperframes.",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "music-to-video",
+      "path": "systems/hyperframes/skills/music-to-video/SKILL.md",
+      "description": "Use when the user supplies a music track, a video to pull audio from, or a mood brief, and wants a beat-synced video: lyric video, slideshow, or kinetic promo. The music drives pacing; zero assets are required.",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "pr-to-video",
+      "path": "systems/hyperframes/skills/pr-to-video/SKILL.md",
+      "description": "Use when the user wants a GitHub PR (URL, owner/repo#N, or 'this PR') made into a code-change explainer video from its diff and commits: changelog, feature reveal, fix, or refactor. Not a product promo; unclear goes to /hyperframes.",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "product-launch-video",
+      "path": "systems/hyperframes/skills/product-launch-video/SKILL.md",
+      "description": "Turn a product or marketing URL, pasted script, or brief into a product launch / promo video — SaaS promos, feature reveals, product demos, app and company launches. Use when the user wants to market, launch, promote, or reveal a product; the default for any commercial URL. Site tours / showcases of a website route here too — the brief carries the show-it-as-is intent. Unclear → /hyperframes.",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "remotion-to-hyperframes",
+      "path": "systems/hyperframes/skills/remotion-to-hyperframes/SKILL.md",
+      "description": "Use when the user explicitly asks to port, convert or migrate a Remotion source to HyperFrames HTML: one-way, Remotion-only. A passing mention or a lookalike request is a fresh build (/general-video); unclear intent goes to /hyperframes.",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "slideshow",
+      "path": "systems/hyperframes/skills/slideshow/SKILL.md",
+      "description": "Use when the user asks for a slideshow, presentation, pitch deck, or interactive deck, or to convert an existing page into a deck. Authors a HyperFrames deck with fragments, branching and presenter mode; unclear -> /hyperframes.",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "talking-head-recut",
+      "path": "systems/hyperframes/skills/talking-head-recut/SKILL.md",
+      "description": "Package an existing talking-head / interview / podcast video with timed, designed GRAPHIC OVERLAY cards — kinetic titles, lower-thirds, data callouts, quotes, side panels, picture-in-picture — synced to the transcript, on a 16:9 / 9:16 / 4:5 canvas of your choice; the clip plays untouched underneath. Trigger on \"graphic overlays\", \"on-screen graphics\", \"package / dress up my video\". Not plain subtitles (/embedded-captions). Unclear → /hyperframes.",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "website-to-video",
+      "path": "systems/hyperframes/skills/website-to-video/SKILL.md",
+      "description": "Use when the user wants a video of a website (site tour, portfolio, docs or landing-page showcase) captured from a URL. Deprecated upstream since v0.7.59: folded into /product-launch-video, which owns URL promo work.",
+      "domain": "bundle:hyperframes",
+      "required": false,
+      "tags": [
+        "bundle:hyperframes"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "m0",
+      "path": "systems/m0/skills/m0/SKILL.md",
+      "description": "Use when the user says 'm0', 'm0 status', 'start m0', 'cross-tool memory', 'operational thread', or 'where is my memory stored', or when the M0 server, store, spool, or MCP wiring needs attention.",
+      "domain": "bundle:m0",
+      "required": false,
+      "tags": [
+        "bundle:m0"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "m0-handoff",
+      "path": "systems/m0/skills/m0-handoff/SKILL.md",
+      "description": "Use when the user says m0 handoff, before I compact, end of session, save session state, resume where we left off, or continue in Cursor or Claude Code. Writes or reads a compact_checkpoint so a cold start becomes a continuation.",
+      "domain": "bundle:m0",
+      "required": false,
+      "tags": [
+        "bundle:m0"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "m0-recall",
+      "path": "systems/m0/skills/m0-recall/SKILL.md",
+      "description": "Use when the user asks m0 recall, where were we, what did we do last time, catch me up, what is next, or to resume context from another tool. Reads the recent M0 operational thread per project, newest first, from local SQLite.",
+      "domain": "bundle:m0",
+      "required": false,
+      "tags": [
+        "bundle:m0"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "m0-remember",
+      "path": "systems/m0/skills/m0-remember/SKILL.md",
+      "description": "Use when the user says 'm0 remember', 'record what we did', 'note for next session' or 'write a checkpoint', or after finishing a step worth handing to the next session. Appends one idempotent entry to the M0 thread.",
+      "domain": "bundle:m0",
+      "required": false,
+      "tags": [
+        "bundle:m0"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "api-security",
+      "path": "systems/reverse-skill/skills/api-security/SKILL.md",
+      "description": "Use for authorized security assessment of REST, GraphQL, WebSocket, or SOAP APIs, including discovery, authentication, authorization, rate-limit, and CI/CD testing.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "apk-reverse",
+      "path": "systems/reverse-skill/skills/apk-reverse/SKILL.md",
+      "description": "在 CLI 环境下做 Android APK 逆向时使用。适用于 APK 解包、Java 反编译、smali 修改、重打包、Frida 动态 Hook，以及按需切换到 so/native 分析。优先使用本机已安装的 jadx、apktool、frida、adb、ida-reverse、radare2。",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "binary-diff",
+      "path": "systems/reverse-skill/skills/binary-diff/SKILL.md",
+      "description": "|",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "browser-automation",
+      "path": "systems/reverse-skill/skills/browser-automation/SKILL.md",
+      "description": "|",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "browser-extension-reverse",
+      "path": "systems/reverse-skill/skills/browser-extension-reverse/SKILL.md",
+      "description": "Use for authorized reverse engineering of browser extensions (Chrome/Firefox) including manifest analysis, background workers, and extension-based credential or traffic logic recovery.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "cloud-k8s",
+      "path": "systems/reverse-skill/skills/cloud-k8s/SKILL.md",
+      "description": "Use for authorized cloud, container, and Kubernetes security assessment including metadata SSRF, IAM misconfig, container escape paths, and cluster RBAC review.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "code-audit",
+      "path": "systems/reverse-skill/skills/code-audit/SKILL.md",
+      "description": "Use for authorized source-code security review and SAST workflows including Semgrep, CodeQL patterns, dangerous API hunting, and fix verification.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "database-security",
+      "path": "systems/reverse-skill/skills/database-security/SKILL.md",
+      "description": "Use for authorized database security assessment covering PostgreSQL/MySQL/MSSQL/Mongo/Redis exposure, authz, UDF/command paths, and misconfiguration review.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "digital-forensics",
+      "path": "systems/reverse-skill/skills/digital-forensics/SKILL.md",
+      "description": "Use for authorized digital forensics including memory dumps, disk timelines, PCAP investigation, artifact triage, and IR evidence preservation.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "docs-generator",
+      "path": "systems/reverse-skill/skills/docs-generator/SKILL.md",
+      "description": "|",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "dotnet-reverse",
+      "path": "systems/reverse-skill/skills/dotnet-reverse/SKILL.md",
+      "description": ".NET / C# 二进制逆向。当目标是 .NET assembly（PE 头含 CLR、.exe/.dll 托管程序）、C# 编译产物（含 NativeAOT）、红队 Sharp* 工具（Rubeus / SharpHound / SharpHound 等）、.NET 混淆程序（ConfuserEx / SmartAssembly / Babel / Eazfuscator）、.NET loader / info-stealer / 套壳 malware 时使用。优先用 dnSpyEx + de4dot，需要 AI 直接操作时联动 dnSpy MCP。不用于纯 native 二进制（走 reverse-engineering / ida-reverse）。",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "email-security",
+      "path": "systems/reverse-skill/skills/email-security/SKILL.md",
+      "description": "Use for authorized email security review including phishing analysis, header authentication (SPF/DKIM/DMARC), BEC patterns, and mailbox token abuse research.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "firmware-pentest",
+      "path": "systems/reverse-skill/skills/firmware-pentest/SKILL.md",
+      "description": "|",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "ghidra-reverse",
+      "path": "systems/reverse-skill/skills/ghidra-reverse/SKILL.md",
+      "description": "Use for free/open reverse engineering with Ghidra (headless or GUI), including decompile, cross-refs, and optional Ghidra MCP workflows when IDA is unavailable.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "go-rust-reverse",
+      "path": "systems/reverse-skill/skills/go-rust-reverse/SKILL.md",
+      "description": "Use for reverse engineering stripped Go and Rust binaries including runtime recognition, pclntab/moduel data recovery, panic strings, and idiomatic decompilation recovery.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "hardware-security",
+      "path": "systems/reverse-skill/skills/hardware-security/SKILL.md",
+      "description": "Use for authorized hardware and embedded interface security research including UART/JTAG discovery, debug pad triage, secure boot overview, and offline firmware extraction support.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "identity-federation",
+      "path": "systems/reverse-skill/skills/identity-federation/SKILL.md",
+      "description": "Use for authorized assessment of federated identity systems including SAML, OIDC, OAuth2 flows, SSO misconfiguration, and token confusion issues.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "js-reverse",
+      "path": "systems/reverse-skill/skills/js-reverse/SKILL.md",
+      "description": "在使用 js-reverse-mcp 做前端 JavaScript 逆向时使用，适用于签名链路定位、页面观察取证、运行时采样、本地补环境复现与证据化输出。优先适配当前环境里的 js-reverse_* 工具，需要更强的浏览器/CDP/Hook 面时联动 jshookmcp。",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "llm-security",
+      "path": "systems/reverse-skill/skills/llm-security/SKILL.md",
+      "description": "Use for authorized security assessment of LLM applications and AI agents, including prompt injection, tool abuse, RAG exposure, memory poisoning, and model supply-chain risks.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "macos-reverse",
+      "path": "systems/reverse-skill/skills/macos-reverse/SKILL.md",
+      "description": "Use for authorized macOS and Mach-O reverse engineering including codesign, Objective-C/Swift recovery, endpoint security surfaces, and Apple platform malware analysis.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "malware-analysis",
+      "path": "systems/reverse-skill/skills/malware-analysis/SKILL.md",
+      "description": "Use when analyzing suspected malware through static, dynamic, and behavioral techniques, including IOC extraction, YARA or Sigma rules, sandboxing, and anti-analysis behavior.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "mobile-reverse",
+      "path": "systems/reverse-skill/skills/mobile-reverse/SKILL.md",
+      "description": "Use for authorized Android or iOS application reverse engineering and security testing, including APK or IPA analysis, runtime instrumentation, SSL pinning, and platform protection checks.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "ot-ics",
+      "path": "systems/reverse-skill/skills/ot-ics/SKILL.md",
+      "description": "Use for authorized OT/ICS security assessment covering Purdue model zoning, PLC/SCADA exposure, industrial protocol discovery, and safe passive-first evaluation.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "pentest-tools",
+      "path": "systems/reverse-skill/skills/pentest-tools/SKILL.md",
+      "description": "|",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "protocol-reverse",
+      "path": "systems/reverse-skill/skills/protocol-reverse/SKILL.md",
+      "description": "Use for authorized reverse engineering of custom binary protocols, Protobuf/gRPC, WebSocket frames, and PCAP-driven protocol recovery.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "radare2",
+      "path": "systems/reverse-skill/skills/radare2/SKILL.md",
+      "description": "|",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "radio-sdr",
+      "path": "systems/reverse-skill/skills/radio-sdr/SKILL.md",
+      "description": "Use for authorized RF/SDR security research including signal identification, replay feasibility study in shielded labs, and wireless protocol analysis outside classic Wi-Fi.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "reverse-engineering",
+      "path": "systems/reverse-skill/skills/reverse-engineering/SKILL.md",
+      "description": "Provides reverse engineering techniques. Use when the main job is to understand how a compiled, obfuscated, packed, or virtualized target works before exploiting or solving it, including binaries, APKs, WASM, firmware, custom VMs, bytecode, malware-like loaders, and anti-debug or anti-analysis logic. Do not use it when the vulnerability is already understood and the remaining task is exploitation; use pwn instead. Do not use it for pure web workflows, log or disk forensics, or standalone crypto problems unless reversing the implementation is the real blocker.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "supply-chain-security",
+      "path": "systems/reverse-skill/skills/supply-chain-security/SKILL.md",
+      "description": "Use for software supply-chain security assessment covering SBOM, SCA, CI/CD pipelines, container images, build integrity, dependency provenance, and vulnerability reachability.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "thick-client",
+      "path": "systems/reverse-skill/skills/thick-client/SKILL.md",
+      "description": "Use for authorized security testing of desktop thick clients including local storage, update channels, IPC, traffic, and client-side trust boundaries.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "threat-hunting",
+      "path": "systems/reverse-skill/skills/threat-hunting/SKILL.md",
+      "description": "Use for blue-team threat hunting, detection engineering with Sigma/YARA, SIEM query design, and incident detection validation.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "wifi-wireless",
+      "path": "systems/reverse-skill/skills/wifi-wireless/SKILL.md",
+      "description": "Use for authorized wireless security assessment including Wi-Fi capture, WPA handshake analysis, rogue AP detection research, and lab-only deauth testing.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "skill",
+      "id": "windows-ad",
+      "path": "systems/reverse-skill/skills/windows-ad/SKILL.md",
+      "description": "Use for authorized Active Directory and Windows identity attacks including Kerberos, AD CS, BloodHound paths, NTLM relay, and domain privilege escalation research.",
+      "domain": "bundle:reverse-skill",
+      "required": false,
+      "tags": [
+        "bundle:reverse-skill"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "coco:goal",
+      "slash": "/coco:goal",
+      "path": "commands/coco/goal.md",
+      "description": "allowed-tools: Read, Write, Edit, Glob",
+      "required": false,
+      "tags": [
+        "coco"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "design:mermaid",
+      "slash": "/design:mermaid",
+      "path": "commands/design/mermaid.md",
+      "description": "description: \"Use when the user asks for a diagram or chart: flowchart, sequence, state, class, ER, or XY chart, as SVG, HTML, or terminal ASCII. Builds beautiful-mermaid diagrams with themes, output ",
+      "required": false,
+      "tags": [
+        "design"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "email",
+      "slash": "/email",
+      "path": "commands/email/_index.md",
+      "description": "description: \"Read, search, and manage Outlook emails. Auto-detects Legacy Outlook (AppleScript) vs New Outlook (MIME/HxStore extraction). Subcommands: read, unread, search, today, thread, save, summa",
+      "required": false,
+      "tags": [
+        "email"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "email:read",
+      "slash": "/email:read",
+      "path": "commands/email/read.md",
+      "description": "description: \"Show latest emails from a specific person. Usage: /email-read alice\"",
+      "required": false,
+      "tags": [
+        "email"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "email:reply",
+      "slash": "/email:reply",
+      "path": "commands/email/reply.md",
+      "description": "description: \"Draft a reply to a specific email. Usage: /email-reply Project Phase 2 Contract Data\"",
+      "required": false,
+      "tags": [
+        "email"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "email:save",
+      "slash": "/email:save",
+      "path": "commands/email/save.md",
+      "description": "description: \"Save matching emails to a project folder for sync processing. Usage: /email-save alice to emails/\"",
+      "required": false,
+      "tags": [
+        "email"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "email:search",
+      "slash": "/email:search",
+      "path": "commands/email/search.md",
+      "description": "description: \"Search emails by subject keywords. Usage: /email-search github webhook\"",
+      "required": false,
+      "tags": [
+        "email"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "email:summary",
+      "slash": "/email:summary",
+      "path": "commands/email/summary.md",
+      "description": "description: \"AI summary of today's emails — key decisions, action items, meetings. No arguments needed.\"",
+      "required": false,
+      "tags": [
+        "email"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "email:thread",
+      "slash": "/email:thread",
+      "path": "commands/email/thread.md",
+      "description": "description: \"Show full email thread by subject. Usage: /email-thread Project Phase 2\"",
+      "required": false,
+      "tags": [
+        "email"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "email:today",
+      "slash": "/email:today",
+      "path": "commands/email/today.md",
+      "description": "description: \"Show all emails received today grouped by hour.\"",
+      "required": false,
+      "tags": [
+        "email"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "email:unread",
+      "slash": "/email:unread",
+      "path": "commands/email/unread.md",
+      "description": "description: \"Show all unread emails with count and top 20 list. No arguments needed.\"",
+      "required": false,
+      "tags": [
+        "email"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "eng:anti-pattern",
+      "slash": "/eng:anti-pattern",
+      "path": "commands/eng/anti-pattern.md",
+      "description": "description: \"Use when the user asks to audit or fix swallowed errors, empty catch blocks, or catch-and-continue. Triages findings by severity and fixes one at a time with logging, a documented overri",
+      "required": false,
+      "tags": [
+        "eng"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "eng:local-llm",
+      "slash": "/eng:local-llm",
+      "path": "commands/eng/local-llm.md",
+      "description": "description: \"Check status, change context window, restart, or troubleshoot this machine's local LLM setup (LM Studio + mlx-dspark). Usage: /eng-local-llm [status|set-context <n>|restart|troubleshoot]",
+      "required": false,
+      "tags": [
+        "eng"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "pm:sync-init",
+      "slash": "/pm:sync-init",
+      "path": "commands/pm/sync-init.md",
+      "description": "description: \"Set up automated sync for a new project folder: email monitoring (Outlook), file change detection, and auto-update of all documents (PRD, presentations, etc.) every 2 hours via cron. Run",
+      "required": false,
+      "tags": [
+        "pm"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team",
+      "slash": "/team",
+      "path": "commands/team/_index.md",
+      "description": "description: \"Use when the user types /team or wants work handed to the cross-functional 4-layer team (research, develop, review, verify, document, ship). Parses the action and routes it to commands/t",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:arch",
+      "slash": "/team:arch",
+      "path": "commands/team/arch.md",
+      "description": "description: \"Use when asked which files implement a component, to build or refresh .arch/index.json, or to check whether the architecture map drifted. Pins the index to a commit, validates every path",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:architecture",
+      "slash": "/team:architecture",
+      "path": "commands/team/architecture.md",
+      "description": "description: \"Use when any /team pipeline claims a component owns a path, that module boundaries hold, or that a deliverable follows the architecture. Defines the .arch/index.json baseline, the curren",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:communicate",
+      "slash": "/team:communicate",
+      "path": "commands/team/communicate.md",
+      "description": "description: \"Use when the user asks for a stakeholder email, launch announcement, status update, incident notice, or onboarding note. Runs the /team communicate pipeline: audience and tone analysis, ",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:develop",
+      "slash": "/team:develop",
+      "path": "commands/team/develop.md",
+      "description": "description: \"Use when the user runs /team develop, or the team router picks action develop, to build or fix code through a multi-agent pipeline. Shards files across L2 agents, then reviews with captu",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:document",
+      "slash": "/team:document",
+      "path": "commands/team/document.md",
+      "description": "description: \"Use when the user asks for a PRD, guide, runbook, API docs, or incident report, or when the team router action is document. Runs the 4-layer documentation pipeline with type-specific rol",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:evidence",
+      "slash": "/team:evidence",
+      "path": "commands/team/evidence.md",
+      "description": "description: \"Use when a /team pipeline or PR body makes a quality claim such as tests pass, lint clean, or N% coverage. Defines the evidence protocol (CI-pinned commands, provisioned deps, skipped is",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:feedback",
+      "slash": "/team:feedback",
+      "path": "commands/team/feedback.md",
+      "description": "description: \"Use when running /team and Layer 2 needs past findings inlined, or when appending Layer 4 learnings after a run. Registry of feedback entries with status lifecycle and a maximum of 50 ac",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:fix",
+      "slash": "/team:fix",
+      "path": "commands/team/fix.md",
+      "description": "description: \"Use when the user reports a bug, pastes a failing test or an error log, or asks to debug and fix an issue. Diagnoses root cause, writes a failing regression test first, fixes it, and cap",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:plan",
+      "slash": "/team:plan",
+      "path": "commands/team/plan.md",
+      "description": "description: \"Use when the user asks for a plan, roadmap, phase breakdown, or task sequencing, or the /team router picks plan. Runs the L1-L4 research/plan/validate/approve pipeline and writes GSD-com",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:present",
+      "slash": "/team:present",
+      "path": "commands/team/present.md",
+      "description": "description: \"Use when the user asks for a deck, architecture review board slides, keynote, or demo. Runs the /team present pipeline in the Consulting or Apple format with narrative design and slide-q",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:reanalyse",
+      "slash": "/team:reanalyse",
+      "path": "commands/team/reanalyse.md",
+      "description": "description: \"Use when the user runs /team reanalyse, or already-approved work must be re-checked against current code for regressions. Diffs since the last review, re-verifies requirements, and confi",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:research",
+      "slash": "/team:research",
+      "path": "commands/team/research.md",
+      "description": "description: \"Use when the user wants a multi-angle investigation on a topic with sources, or the team router action is research. Runs a research-heavy pipeline across domain, technical, business, sec",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:review",
+      "slash": "/team:review",
+      "path": "commands/team/review.md",
+      "description": "description: \"Use when the /team router routes action=review, or the user asks for existing code, docs, or a diff reviewed. Scope mapping, 3-5 specialist lenses, cross-review, then a principal synthes",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:roles",
+      "slash": "/team:roles",
+      "path": "commands/team/roles.md",
+      "description": "description: \"Use when selecting roles for a /team run, validating --roles IDs, or adding a new role. Roster of role definitions with layer, category, domain tags, and the system prompt injected into ",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:scrape",
+      "slash": "/team:scrape",
+      "path": "commands/team/scrape.md",
+      "description": "description: \"Use when the user asks to research URLs or topics across the web, compare sources, or produce a sourced research report. Fans out up to 6 parallel researchers, compiles the findings, and",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:ship",
+      "slash": "/team:ship",
+      "path": "commands/team/ship.md",
+      "description": "description: \"Use when the user wants an idea taken from concept to a shipped, reviewed product, or when the /team router picks ship. Runs six build stages, seven hard verification gates, then PR open",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:test",
+      "slash": "/team:test",
+      "path": "commands/team/test.md",
+      "description": "description: \"Use when the user asks to add missing tests, close coverage gaps, or prove a suite runs. Runs the /team test pipeline: coverage analysis, test writing, then a regression gate that treats",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:think",
+      "slash": "/team:think",
+      "path": "commands/team/think.md",
+      "description": "description: \"Use when the user runs /team think, asks for options analysis, or wants a brainstorm before deciding. Generates structured options, stress-tests them across review layers, and returns a ",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:toolkit",
+      "slash": "/team:toolkit",
+      "path": "commands/team/toolkit.md",
+      "description": "description: \"Use when a /team run must pick the best tool or skill for a capability, or when adding a discovered tool to the registry. Maps each capability to its best tool, quality notes, fallback, ",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "team:verify",
+      "slash": "/team:verify",
+      "path": "commands/team/verify.md",
+      "description": "description: \"Use when built work must be checked against its spec, plan, or PRD before shipping, or the team router action is verify. Re-runs the gate from a clean checkout per requirement and grades",
+      "required": false,
+      "tags": [
+        "team"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "util:architecture-review",
+      "slash": "/util:architecture-review",
+      "path": "commands/util/architecture-review.md",
+      "description": "allowed-tools: Read, Glob, Grep, Bash",
+      "required": false,
+      "tags": [
+        "util"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "util:context-budget",
+      "slash": "/util:context-budget",
+      "path": "commands/util/context-budget.md",
+      "description": "description: \"Audit context window token consumption across all loaded components and recommend optimizations\"",
+      "required": false,
+      "tags": [
+        "util"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "util:create-architecture-documentation",
+      "slash": "/util:create-architecture-documentation",
+      "path": "commands/util/create-architecture-documentation.md",
+      "description": "allowed-tools: Read, Write, Edit, Bash",
+      "required": false,
+      "tags": [
+        "util"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "util:learning-evolve",
+      "slash": "/util:learning-evolve",
+      "path": "commands/util/learning-evolve.md",
+      "description": "name: learning:evolve",
+      "required": false,
+      "tags": [
+        "util"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "util:learning-promote",
+      "slash": "/util:learning-promote",
+      "path": "commands/util/learning-promote.md",
+      "description": "name: learning:promote",
+      "required": false,
+      "tags": [
+        "util"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "util:learning-status",
+      "slash": "/util:learning-status",
+      "path": "commands/util/learning-status.md",
+      "description": "name: learning:status",
+      "required": false,
+      "tags": [
+        "util"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "util:refactor-code",
+      "slash": "/util:refactor-code",
+      "path": "commands/util/refactor-code.md",
+      "description": "name: refactor-code",
+      "required": false,
+      "tags": [
+        "util"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "util:self-eval",
+      "slash": "/util:self-eval",
+      "path": "commands/util/self-eval.md",
+      "description": "description: \"Run post-output self-evaluation scoring on correctness, clarity, actionability, and conciseness\"",
+      "required": false,
+      "tags": [
+        "util"
+      ]
+    },
+    {
+      "kind": "command",
+      "id": "util:ss",
+      "slash": "/util:ss",
+      "path": "commands/util/ss.md",
+      "description": "description: View the latest N screenshots from Desktop (default 1)",
+      "required": false,
+      "tags": [
+        "util"
+      ]
+    },
+    {
+      "kind": "si_verb",
+      "id": "SI-Orchestrate",
+      "slash": "/SI-Orchestrate",
+      "path": null,
+      "description": "cross-team selection + approval gate (verbs call this)",
+      "required": false,
+      "tags": [
+        "si",
+        "generated"
+      ]
+    },
+    {
+      "kind": "si_verb",
+      "id": "SI-Analyse",
+      "slash": "/SI-Analyse",
+      "path": null,
+      "description": "multi-team analysis",
+      "required": false,
+      "tags": [
+        "si",
+        "generated"
+      ]
+    },
+    {
+      "kind": "si_verb",
+      "id": "SI-Debug",
+      "slash": "/SI-Debug",
+      "path": null,
+      "description": "multi-lens diagnosis",
+      "required": false,
+      "tags": [
+        "si",
+        "generated"
+      ]
+    },
+    {
+      "kind": "si_verb",
+      "id": "SI-Decide",
+      "slash": "/SI-Decide",
+      "path": null,
+      "description": "cross-team decision matrix",
+      "required": false,
+      "tags": [
+        "si",
+        "generated"
+      ]
+    },
+    {
+      "kind": "si_verb",
+      "id": "SI-Design",
+      "slash": "/SI-Design",
+      "path": null,
+      "description": "architecture/feature design",
+      "required": false,
+      "tags": [
+        "si",
+        "generated"
+      ]
+    },
+    {
+      "kind": "si_verb",
+      "id": "SI-Plan",
+      "slash": "/SI-Plan",
+      "path": null,
+      "description": "phased plan synthesis",
+      "required": false,
+      "tags": [
+        "si",
+        "generated"
+      ]
+    },
+    {
+      "kind": "si_verb",
+      "id": "SI-Review",
+      "slash": "/SI-Review",
+      "path": null,
+      "description": "multi-team critique",
+      "required": false,
+      "tags": [
+        "si",
+        "generated"
+      ]
+    },
+    {
+      "kind": "si_verb",
+      "id": "SI-Tradeoff",
+      "slash": "/SI-Tradeoff",
+      "path": null,
+      "description": "side-by-side A-vs-B",
+      "required": false,
+      "tags": [
+        "si",
+        "generated"
+      ]
+    },
+    {
+      "kind": "si_verb",
+      "id": "SI-Vote",
+      "slash": "/SI-Vote",
+      "path": null,
+      "description": "yes/no per persona",
+      "required": false,
+      "tags": [
+        "si",
+        "generated"
+      ]
+    }
+  ]
+}

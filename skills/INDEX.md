@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 226 skills** — 74 core, 152 across 8 bundles.
+**Total: 228 skills** — 76 core, 152 across 8 bundles.
 
 ## Design (15)
 
@@ -50,7 +50,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) | Use when writing, reviewing, or refactoring React or Next.js code, or optimizing data fetching, bundle size, and re-renders. Applies Vercel impact-prioritized p |
 | [voice-ai](voice-ai/SKILL.md) | Voice AI architecture and implementation guide. Covers two architectures: speech-to-speech (OpenAI Realtime API, lowest latency) and pipeline (STT->LLM->TTS, mo |
 
-## Foundational (13)
+## Foundational (14)
 
 | Skill | Description |
 |-------|-------------|
@@ -60,6 +60,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [executing-plans](executing-plans/SKILL.md) | Use when you have a written implementation plan to execute in a separate session with review checkpoints |
 | [humanizer](humanizer/SKILL.md) | Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written. Based on Wikipedia's compreh |
 | [karpathy-guidelines](karpathy-guidelines/SKILL.md) | Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, reviewing, or refactoring code to avoid overcomplication, make surgical changes, s |
+| [maker-mdap](maker-mdap/SKILL.md) | REQUIRED baseline — Maker MDAP (massively decomposed agentic processes). Use for long multi-step work that must stay reliable: decompose into tiny subtasks, vot |
 | [subagent-driven-development](subagent-driven-development/SKILL.md) | Use when executing implementation plans with independent tasks in the current session |
 | [systematic-debugging](systematic-debugging/SKILL.md) | Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes |
 | [ultra-think](ultra-think/SKILL.md) | Use when facing architectural decisions, complex trade-offs, strategic technology choices, or scaling and migration questions that deserve more than a quick ans |
@@ -68,7 +69,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [workflow-routing](workflow-routing/SKILL.md) | Use when starting any task, before invoking any other skill or GSD command, to route between Superpowers skills and GSD commands from project state and task sco |
 | [writing-plans](writing-plans/SKILL.md) | Use when you have a spec or requirements for a multi-step task, before touching code |
 
-## Meta (9)
+## Meta (10)
 
 | Skill | Description |
 |-------|-------------|
@@ -80,6 +81,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [find-skills](find-skills/SKILL.md) | Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express int |
 | [goal](goal/SKILL.md) | Persistent project goal that survives across sessions and tools, with continuous-execution loop semantics. Use when someone asks to "set a goal", "what is my go |
 | [skill-creator](skill-creator/SKILL.md) | Use when the user asks to create, scaffold, update or package a skill, or asks how skill frontmatter, progressive disclosure or bundled resources should be stru |
+| [skill-map](skill-map/SKILL.md) | Discover in-repo CoCo skills and slash commands from the skill-map. Use when the user asks which skill/command to use, how to find capabilities, marketplace/map |
 | [writing-skills](writing-skills/SKILL.md) | Use when creating new skills, editing existing skills, or verifying skills work before deployment |
 
 ## Ops (6)

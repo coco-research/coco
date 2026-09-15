@@ -60,7 +60,7 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-# Bundles are the default. The framework advertises 226 skills and 386 commands and a
+# Bundles are the default. The framework advertises 228 skills and 386 commands and a
 # plain install used to deliver 70 and 38, because every bundle sat behind a flag nobody
 # knew to pass. --core-only is the opt-out; --systems still names an explicit subset.
 if [[ "$CORE_ONLY" -eq 1 ]]; then

@@ -13,7 +13,7 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | learning | `systems/learning/` | 0 | 0 | 0 | 11 |
 | m0 | `systems/m0/` | 4 | 0 | 0 | 9 |
 | reverse-skill | `systems/reverse-skill/` | 33 | 0 | 0 | 129 |
-| superintelligence | `systems/superintelligence/` | 9 | 0 | 0 | 1273 |
+| superintelligence | `systems/superintelligence/` | 13 | 0 | 0 | 1334 |
 | team | `systems/team/` | 0 | 0 | 0 | 2 |
 | aider | `adapters/aider/` | 0 | 0 | 0 | 2 |
 | amazon-q | `adapters/amazon-q/` | 0 | 0 | 0 | 2 |

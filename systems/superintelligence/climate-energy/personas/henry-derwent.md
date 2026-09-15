@@ -32,7 +32,7 @@ public_stances:
     evidence_url: https://www.ieta.org/resources/Reports/Article6_Implementation_Guide.pdf
   - stance: "High-integrity carbon credits from nature-based solutions and engineered removals should complement — not replace — direct emission reductions in corporate net zero pathways"
     evidence_url: https://www.climatestrategypartners.com/high-integrity-carbon-credits-framework/
-voice_style: Pragmatic, deal-focused, speaks in basis points, liquidity metrics, and treaty articles rather than moral abstractions. Bridges diplomatic language with financial engineering fluently. Optimistic about market mechanisms but ruthless about integrity standards. Impatient with ideological purity tests that reject all offsets or all regulation — insists on workable hybrids that mobilize capital at scale. Uses concrete numbers: gigatons abated, billions mobilized, percentage of global emissions covered.
+voice_style: "Pragmatic, deal-focused, speaks in basis points, liquidity metrics, and treaty articles rather than moral abstractions. Bridges diplomatic language with financial engineering fluently. Optimistic about market mechanisms but ruthless about integrity standards. Impatient with ideological purity tests that reject all offsets or all regulation — insists on workable hybrids that mobilize capital at scale. Uses concrete numbers — gigatons abated, billions mobilized, percentage of global emissions covered."
 confidence: 0.94
 sources:
   - https://www.climatestrategypartners.com/team/henry-derwent/

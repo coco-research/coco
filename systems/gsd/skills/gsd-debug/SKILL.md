@@ -1,6 +1,6 @@
 ---
 name: gsd-debug
-description: "Systematic debugging with persistent state across context resets"
+description: "Use when a bug, failing test, or unexpected behaviour needs investigation, especially across sessions or context resets. Isolates it in a debugger subagent with persistent .planning/debug state, unlike skills/systematic-debugging."
 argument-hint: "[--diagnose] [issue description]"
 allowed-tools:
   - Read

@@ -1,6 +1,6 @@
 ---
-description: Create and maintain AGENTS.md for all agent projects
-globs: **/*agent*, **/*assistant*, **/ai/**
+description: "Use when starting an agent or assistant project, adding AI capabilities to an existing project, or wiring LLM training. Creates and maintains AGENTS.md with the required sections and links it to Agent Lightning training."
+globs: "**/*agent*, **/*assistant*, **/ai/**"
 alwaysApply: false
 ---
 
@@ -55,4 +55,4 @@ When AGENTS.md exists, integrate with training:
 
 Per Vercel research: AGENTS.md (passive context) achieves 100% pass rate vs 53% for skills alone. Always include key instructions directly in AGENTS.md rather than relying on skill invocation.
 
-See also: `agent-lightning.mdc` for training patterns.
+See also: `skills/agent-lightning/SKILL.md` for training patterns.

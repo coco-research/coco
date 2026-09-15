@@ -17,6 +17,10 @@ Purpose: Help users see what Claude thinks BEFORE planning begins - enabling cou
 Output: Conversational output only (no file creation) - ends with "What do you think?" prompt
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/list-phase-assumptions.md
+</execution_context>
+
 <context>
 Phase number: $ARGUMENTS (required)
 

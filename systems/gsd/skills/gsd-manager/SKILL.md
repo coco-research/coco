@@ -24,6 +24,11 @@ Designed for power users who want to parallelize work across phases from one ter
 **After:** User exits when done managing, or all phases complete and milestone lifecycle is suggested.
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/manager.md
+@$HOME/.claude/get-shit-done/references/ui-brand.md
+</execution_context>
+
 <context>
 No arguments required. Requires an active milestone with ROADMAP.md and STATE.md.
 
@@ -31,6 +36,6 @@ Project context, phase list, dependencies, and recommendations are resolved insi
 </context>
 
 <process>
-Execute the manager workflow end-to-end.
+Execute the manager workflow from @$HOME/.claude/get-shit-done/workflows/manager.md end-to-end.
 Maintain the dashboard refresh loop until the user exits or all phases complete.
 </process>

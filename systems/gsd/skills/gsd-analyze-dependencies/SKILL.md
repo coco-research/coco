@@ -19,6 +19,10 @@ Analyze the phase dependency graph for the current milestone. For each phase pai
 Then suggest `Depends on` updates to ROADMAP.md.
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/analyze-dependencies.md
+</execution_context>
+
 <context>
 No arguments required. Requires an active milestone with ROADMAP.md.
 
@@ -26,6 +30,6 @@ Run this command BEFORE `/gsd-manager` to fill in missing `Depends on` fields an
 </context>
 
 <process>
-Execute the analyze-dependencies workflow end-to-end.
+Execute the analyze-dependencies workflow from @$HOME/.claude/get-shit-done/workflows/analyze-dependencies.md end-to-end.
 Present dependency suggestions clearly and apply confirmed updates to ROADMAP.md.
 </process>

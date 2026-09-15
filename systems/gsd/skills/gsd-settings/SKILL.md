@@ -20,8 +20,12 @@ Routes to the settings workflow which handles:
 - Confirmation display with quick command references
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/settings.md
+</execution_context>
+
 <process>
-**Follow the settings workflow.**
+**Follow the settings workflow** from `@$HOME/.claude/get-shit-done/workflows/settings.md`.
 
 The workflow handles all logic including:
 1. Config file creation with defaults if missing

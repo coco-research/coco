@@ -18,6 +18,10 @@ Designed for rapid multi-project workflows where remembering which phase/step yo
 Supports `--force` flag to bypass safety gates (checkpoint, error state, verification failures).
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/next.md
+</execution_context>
+
 <process>
-Execute the next workflow end-to-end.
+Execute the next workflow from @$HOME/.claude/get-shit-done/workflows/next.md end-to-end.
 </process>

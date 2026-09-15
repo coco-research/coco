@@ -24,6 +24,10 @@ Flags:
 - `--source <audit>` — which audit to run (default: audit-uat)
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/audit-fix.md
+</execution_context>
+
 <process>
-Execute the audit-fix workflow end-to-end.
+Execute the audit-fix workflow from @$HOME/.claude/get-shit-done/workflows/audit-fix.md end-to-end.
 </process>

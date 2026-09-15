@@ -34,7 +34,12 @@ Create a physical workspace directory containing copies of specified git repos (
 **After this command:** `cd` into the workspace and run `/gsd-new-project` to initialize GSD.
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/new-workspace.md
+@$HOME/.claude/get-shit-done/references/ui-brand.md
+</execution_context>
+
 <process>
-Execute the new-workspace workflow end-to-end.
+Execute the new-workspace workflow from @$HOME/.claude/get-shit-done/workflows/new-workspace.md end-to-end.
 Preserve all workflow gates (validation, approvals, commits, routing).
 </process>

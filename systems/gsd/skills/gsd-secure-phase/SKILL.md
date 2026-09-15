@@ -22,11 +22,15 @@ Verify threat mitigations for a completed phase. Three states:
 Output: updated SECURITY.md.
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/secure-phase.md
+</execution_context>
+
 <context>
 Phase: $ARGUMENTS — optional, defaults to last completed phase.
 </context>
 
 <process>
-Execute the secure-phase workflow.
+Execute @$HOME/.claude/get-shit-done/workflows/secure-phase.md.
 Preserve all workflow gates.
 </process>

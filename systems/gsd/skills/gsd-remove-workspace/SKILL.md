@@ -17,6 +17,11 @@ allowed-tools:
 Remove a workspace directory after confirmation. For worktree strategy, runs `git worktree remove` for each member repo first. Refuses if any repo has uncommitted changes.
 </objective>
 
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/remove-workspace.md
+@$HOME/.claude/get-shit-done/references/ui-brand.md
+</execution_context>
+
 <process>
-Execute the remove-workspace workflow end-to-end.
+Execute the remove-workspace workflow from @$HOME/.claude/get-shit-done/workflows/remove-workspace.md end-to-end.
 </process>

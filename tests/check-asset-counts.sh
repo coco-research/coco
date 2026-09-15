@@ -173,6 +173,14 @@ else
 fi
 
 echo ""
+echo "=== Super Intelligence team/cell/command claims ==="
+if python3 tests/check-si-counts.py; then
+  pass "SI team/cell/command claims match the live registries"
+else
+  fail_ "SI team/cell/command claims mismatch (see above)"
+fi
+
+echo ""
 echo "=== Summary ==="
 if [ "$fail" -eq 0 ]; then
   echo "  all shipped public counts agree with docs/asset-counts.json"

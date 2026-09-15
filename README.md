@@ -145,7 +145,7 @@ AI chat context is fragile and wipes on `/clear`. CoCo persists phase state, dec
 <td width="33%" valign="top">
 
 ### 3. Vendor-neutral portability
-CoCo compiles its rules, templates, and agent definitions into pure Markdown and YAML frontmatter. Native IDE adapters inject the same library into Claude Code, Cursor, Codex CLI, or any `AGENTS.md` tool — so your workflows follow you even if you switch AI editors.
+CoCo compiles its rules, templates, and agent definitions into pure Markdown and YAML frontmatter. Native IDE adapters inject the same library into Claude Code, Cursor, Codex CLI, PI-Desktop, VS Code, or any `AGENTS.md` tool — so your workflows follow you even if you switch AI editors.
 
 </td>
 </tr>
@@ -282,6 +282,8 @@ CoCo ships **222 skills** (70 core + 115 across bundles). These are not prompt s
 ## System Bundles
 
 Bundles are opt-in packages that extend the workspace with specialized databases, pipelines, and rosters. Enable them with `--systems <name>`.
+
+One further bundle, `reverse-skill`, is deliberately not part of any default install and is not counted among the four below: it vendors reverse-engineering and penetration-testing methodology under [`systems/reverse-skill/`](systems/reverse-skill/), and it is security tooling that stays installed only when it is asked for by name, with `--systems reverse-skill`. See [`systems/reverse-skill/README.md`](systems/reverse-skill/README.md) for what it contains and how it was curated.
 
 ### 1. GSD (Get Shit Done)
 An orchestration engine of **68 skills and 24 agents** that manages the lifecycle of complex codebases. A disk-backed phase database records goals, decisions, milestones, and blockers; **workstreams** spin up isolated git checkouts to test refactors without polluting main; **forensics** performs post-mortem root-cause audits when a phase fails; and **autonomous mode** runs parallel waves of subagents through plan milestones end-to-end.
@@ -568,6 +570,7 @@ bash install.sh --adapter cursor
 bash install.sh --adapter grok
 bash install.sh --adapter vscode
 bash install.sh --adapter codex
+bash install.sh --adapter pi-desktop
 bash install.sh --adapter generic
 ```
 

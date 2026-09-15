@@ -61,11 +61,13 @@ jobs:
       - name: Validate /team evidence-gate integrity
         run: bash tests/check-evidence-gate.sh
 
+      - name: Validate no hardcoded adapter list drifts from adapters/
+        run: bash tests/check-adapter-drift.sh
+
       - name: Adapter smoke test (dry-run)
         run: |
-          for adapter in claude-code cursor grok vscode pi-desktop codex generic hermes; do
-            # hermes ships via PR #118; skip until it lands on main.
-            [ -d "adapters/$adapter" ] || { echo "SKIP: $adapter (not present)"; continue; }
+          for d in adapters/*/; do
+            adapter=$(basename "$d")
             echo "--- testing $adapter (dry-run) ---"
             bash adapters/$adapter/install.sh --dry-run > /tmp/$adapter.out 2>&1 || {
               echo "FAIL: $adapter"

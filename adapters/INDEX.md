@@ -59,9 +59,6 @@ Not comparable (AGENTS.md producers rather than tree installers): `aider`, `code
 Read the table with these in mind; each is a property of the adapter, not a
 bug in the measurement.
 
-- **Cursor declares `supports_systems: []`.** It can install the core only, so
-  it can never reach the Super Intelligence family. That is a declared claim,
-  checked by the bundle gate, not an oversight.
 - **Codex and generic emit one `AGENTS.md`** and nothing else. They are
   AGENTS.md producers; the tree-side surfaces are not their job.
 - **The VS Code adapter needs a profile to exist.** It links core commands into

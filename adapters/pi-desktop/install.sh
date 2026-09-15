@@ -25,6 +25,13 @@
 #   bash adapters/pi-desktop/install.sh --source /path/to/coco # install a different checkout
 #   bash adapters/pi-desktop/install.sh --force                # replace files this adapter did not write
 #
+# "Install everything" means every bundle named in scripts/installable-bundles.sh, and
+# that list deliberately excludes systems/reverse-skill. That bundle vendors reverse
+# engineering and penetration-testing methodology, and it is security tooling that
+# nobody should end up with just because they ran the installer with no flags. It is
+# still available on request, on the same terms as any other bundle:
+#   bash adapters/pi-desktop/install.sh --systems reverse-skill # opt in to security tooling
+#
 # Environment overrides (mainly for tests):
 #   PI_AGENT_HOME   default ~/.pi/agent    (commands land in $PI_AGENT_HOME/prompts)
 #   AGENTS_HOME     default ~/.agents      (skills and subagents land under it)
@@ -62,16 +69,14 @@ elif [[ -z "$SYSTEMS_CSV" ]]; then
   if [[ -f "$REPO_ROOT/scripts/installable-bundles.sh" ]]; then
     SYSTEMS_CSV="$(bash "$REPO_ROOT/scripts/installable-bundles.sh")"
   else
-    # A checkout that predates the shared helper: derive the same list here. A bundle
-    # counts only when it ships something, which is how `team` and `learning` are
-    # excluded rather than named and silently installing nothing.
-    for _dir in "$REPO_ROOT"/systems/*/; do
-      [[ -d "$_dir" ]] || continue
-      if [[ -n "$(find "$_dir" -name SKILL.md -print -quit 2>/dev/null)" ]] ||
-         [[ -n "$(find "$_dir" -path '*/agents/*.md' -print -quit 2>/dev/null)" ]]; then
-        SYSTEMS_CSV="${SYSTEMS_CSV:+$SYSTEMS_CSV,}$(basename "$_dir")"
-      fi
-    done
+    # scripts/installable-bundles.sh declares the default allow-list and is the
+    # single place that list is allowed to live — re-deriving it here by scanning
+    # systems/ is exactly the bug that let systems/reverse-skill join the default
+    # install silently. A checkout missing the helper gets the safe fallback,
+    # --core-only, rather than a second copy of that scan.
+    echo "WARNING: scripts/installable-bundles.sh not found; installing core only." >&2
+    echo "         Pull the latest main and re-run for the default bundle set." >&2
+    SYSTEMS_CSV=""
   fi
 fi
 

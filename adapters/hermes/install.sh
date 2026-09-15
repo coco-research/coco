@@ -48,9 +48,15 @@ else
   # A missing profile dir is fatal for a real install, but --dry-run must still be able
   # to preview the plan (CI gates run with no real profiles on the machine). In that case
   # proceed with the named profile as a purely notional target.
+  # Create the profile on demand. Hermes keeps a profile's skills and its
+  # Claude-compatible home underneath the profile directory, and this script
+  # already creates those subdirectories, so refusing to create the profile
+  # root only meant that a first install failed on any machine where no
+  # profile had been made by hand. --all-profiles still refuses an empty root,
+  # because there is genuinely nothing to enumerate there.
   if [[ ! -d "$PROFILES_ROOT/$PROFILE" && $DRY_RUN -eq 0 ]]; then
-    echo "Unknown profile: $PROFILE (looked in $PROFILES_ROOT)" >&2
-    exit 1
+    echo "Profile $PROFILE does not exist under $PROFILES_ROOT; creating it."
+    mkdir -p "$PROFILES_ROOT/$PROFILE"
   fi
   PROFILES=("$PROFILE")
 fi

@@ -1,0 +1,10 @@
+{
+  "name": "Coco Research",
+  "short_name": "Coco",
+  "icons": [
+    { "src": "/assets/site/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/assets/site/favicon-32.png", "sizes": "32x32", "type": "image/png" }
+  ],
+  "theme_color": "#0A0F1F",
+  "background_color": "#0A0F1F"
+}

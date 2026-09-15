@@ -1,6 +1,6 @@
 ---
 name: cognee
-description: "Knowledge graph memory backend powered by Cognee. Query, status check, dataset management, and backend switching between Brain and Cognee. Triggers on: 'cognee', 'knowledge graph', 'graph memory', 'switch memory', 'memory backend'."
+description: "Use when the user says 'cognee', asks about knowledge graph or graph memory, wants to switch memory backends, or needs a status check, dataset init, or graph view. Covers Cognee endpoints plus the Brain fallback."
 ---
 
 # /cognee — Knowledge Graph Memory Backend

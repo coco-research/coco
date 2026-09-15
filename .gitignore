@@ -23,6 +23,7 @@ secrets.yaml
 project_brain.db*
 _brain_manifest.json
 **/CLAUDE.local.md
+.goal.md
 
 # Generated artifacts
 AGENTS.md.bak

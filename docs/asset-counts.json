@@ -1,14 +1,14 @@
 {
   "schema": 1,
   "skills": {
-    "total": 222,
+    "total": 226,
     "core": 74,
-    "bundle": 148
+    "bundle": 152
   },
   "commands": {
     "shipped": 44,
-    "generated_si": 242,
-    "customer_facing": 286,
+    "generated_si": 342,
+    "customer_facing": 386,
     "namespaces": 7
   },
   "agents": {

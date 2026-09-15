@@ -122,6 +122,14 @@ recent_signal_12mo:
     date: 2025-09-01
     url: https://dblp.org/pid/67/2454.html
     takeaway: "Madry signs onto a 40-author cross-lab community statement (with Bengio, Hendrycks, Hubinger, Krakovna, Pachocki, Nanda, Shlegeris and others) arguing CoT monitorability is real but fragile and must be preserved deliberately. Places him in the cross-lab safety community in addition to inside OpenAI."
+  - title: "World Models and AI's Inflection Point — discussion with MIT CSAIL Director Daniela Rus"
+    date: 2026-07-15
+    url: https://www.linkedin.com/posts/daniela-rus-220b3_open-ai-mit-csail-discuss-frontier-research-activity-7482753333489987585-g2pw
+    takeaway: "July 2026 public discussion at MIT CSAIL on world models and frontier research. Demonstrates continued active engagement with MIT AI policy and research community while maintaining OpenAI role; reinforces dual-affiliation visibility in 2026."
+  - title: "MIT AI Policy Forum co-chair appointment continues into 2026"
+    date: 2026-01-15
+    url: https://www.eecs.mit.edu/people/aleksander-madry/
+    takeaway: "Continues as Faculty Co-Lead of the MIT AI Policy Forum alongside Asu Ozdaglar and Luis Videgaray. The forum shapes MIT's institutional AI governance stance; Madry's ongoing leadership confirms his academic-policy footprint remains active despite OpenAI industry role."
 
 public_stances:
   - claim: "Adversarial robustness must be framed as a saddle-point optimization. Defenses that cannot be written in inner-max / outer-min form are heuristics, not defenses."

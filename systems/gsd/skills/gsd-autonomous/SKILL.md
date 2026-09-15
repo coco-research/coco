@@ -27,7 +27,6 @@ Uses ROADMAP.md phase discovery and Skill() flat invocations for each phase comm
 
 <execution_context>
 @systems/gsd/workflows/autonomous.md
-
 </execution_context>
 
 <context>

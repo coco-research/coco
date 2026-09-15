@@ -1,6 +1,6 @@
 # GSD — Get Stuff Done
 
-Self-contained project orchestration system. State-tracked phases, atomic commits, multi-agent execution, verification gates.
+Project orchestration system. State-tracked phases, atomic commits, multi-agent execution, verification gates.
 
 ## Install
 
@@ -56,3 +56,11 @@ The repo's own `.planning/` is included as a dogfood example.
 ## Why a separate system
 
 GSD has its own conventions, state spec, and agent pipelines that don't apply to plain skill use. Bundling under `systems/` keeps the core framework lightweight while letting GSD users opt in.
+
+## External dependency: this bundle is not self-contained
+
+This directory vendors the skill and agent definitions only: `README.md`, `agents/*.md` (24 files), `skills/*/SKILL.md` (68 files), and one workflow file, `workflows/autonomous.md`, per the scope named in the repository's `CREDITS.md` ("68 skills + 24 agents"). It does not vendor the upstream GSD framework's workflow documents, reference documents, templates, or its `gsd-tools.cjs` command-line tool.
+
+Most skill files load the rest of their instructions, and some agent files load their reference material, from a separate GSD installation expected at `~/.claude/get-shit-done/`. That path is referenced directly in this bundle's `SKILL.md` and agent files, for example `@$HOME/.claude/get-shit-done/workflows/add-phase.md` or `node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" ...`. For those skills and agents to function, a user needs a working GSD installation at that path, providing at least its `bin/`, `references/`, `templates/`, and `workflows/` directories.
+
+Installing that separate GSD toolkit is outside the scope of this bundle and this repository; consult the upstream project named in `CREDITS.md` for its own installation instructions. Only `workflows/autonomous.md` is vendored here directly, so `/gsd-autonomous` is the one command in this bundle that works without any external installation.

@@ -1,0 +1,244 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-04",
+  "team_id": "climate-energy-super-intelligence",
+  "team_name": "Climate & Energy Super Intelligence Team",
+  "description": "Your climate and energy brain trust. 25 named personas across 7 cells covering energy transition, carbon markets, climate modeling, sustainability, grid infrastructure, environmental policy, and ESG.",
+  "personas_count": 25,
+  "cells_count": 7,
+  "cells": {
+    "carbon-markets-climate-finance": {
+      "id": "carbon-markets-climate-finance",
+      "description": "Climate & Energy Super Intelligence Team cell: Carbon Markets Climate Finance",
+      "personas_count": 3,
+      "personas": [
+        "charlotte-streck",
+        "christiana-figueres",
+        "henry-derwent"
+      ],
+      "file_path": "superintelligence/climate-energy/cells/carbon-markets-climate-finance.md"
+    },
+    "climate-modeling-science": {
+      "id": "climate-modeling-science",
+      "description": "Climate & Energy Super Intelligence Team cell: Climate Modeling Science",
+      "personas_count": 4,
+      "personas": [
+        "gavin-schmidt",
+        "joeri-rogelj",
+        "katharine-hayhoe",
+        "michael-mann"
+      ],
+      "file_path": "superintelligence/climate-energy/cells/climate-modeling-science.md"
+    },
+    "energy-transition-renewables": {
+      "id": "energy-transition-renewables",
+      "description": "Climate & Energy Super Intelligence Team cell: Energy Transition Renewables",
+      "personas_count": 5,
+      "personas": [
+        "amory-lovins",
+        "fatih-birol",
+        "kelly-gallagher",
+        "michael-liebreigh",
+        "tony-seba"
+      ],
+      "file_path": "superintelligence/climate-energy/cells/energy-transition-renewables.md"
+    },
+    "environmental-policy-regulation": {
+      "id": "environmental-policy-regulation",
+      "description": "Climate & Energy Super Intelligence Team cell: Environmental Policy Regulation",
+      "personas_count": 3,
+      "personas": [
+        "gina-mccarthy",
+        "johan-rockstrom",
+        "mary-robinson"
+      ],
+      "file_path": "superintelligence/climate-energy/cells/environmental-policy-regulation.md"
+    },
+    "esg-corporate-sustainability": {
+      "id": "esg-corporate-sustainability",
+      "description": "Climate & Energy Super Intelligence Team cell: Esg Corporate Sustainability",
+      "personas_count": 3,
+      "personas": [
+        "george-serafeim",
+        "robert-eccles",
+        "tensie-whelan"
+      ],
+      "file_path": "superintelligence/climate-energy/cells/esg-corporate-sustainability.md"
+    },
+    "grid-infrastructure-storage": {
+      "id": "grid-infrastructure-storage",
+      "description": "Climate & Energy Super Intelligence Team cell: Grid Infrastructure Storage",
+      "personas_count": 4,
+      "personas": [
+        "jesse-jenkins",
+        "jigar-shah",
+        "mateo-jaramillo",
+        "ramez-naam"
+      ],
+      "file_path": "superintelligence/climate-energy/cells/grid-infrastructure-storage.md"
+    },
+    "sustainability-tech-circularity": {
+      "id": "sustainability-tech-circularity",
+      "description": "Climate & Energy Super Intelligence Team cell: Sustainability Tech Circularity",
+      "personas_count": 3,
+      "personas": [
+        "ellen-macarthur",
+        "janine-benyus",
+        "william-mcdonough"
+      ],
+      "file_path": "superintelligence/climate-energy/cells/sustainability-tech-circularity.md"
+    }
+  },
+  "personas": {
+    "amory-lovins": {
+      "slug": "amory-lovins",
+      "real_name": "Amory B. Lovins",
+      "cell": "energy-transition-renewables",
+      "file_path": "superintelligence/climate-energy/personas/amory-lovins.md"
+    },
+    "charlotte-streck": {
+      "slug": "charlotte-streck",
+      "real_name": "Charlotte Streck",
+      "cell": "carbon-markets-climate-finance",
+      "file_path": "superintelligence/climate-energy/personas/charlotte-streck.md"
+    },
+    "christiana-figueres": {
+      "slug": "christiana-figueres",
+      "real_name": "Christiana Figueres",
+      "cell": "carbon-markets-climate-finance",
+      "file_path": "superintelligence/climate-energy/personas/christiana-figueres.md"
+    },
+    "ellen-macarthur": {
+      "slug": "ellen-macarthur",
+      "real_name": "Dame Ellen MacArthur",
+      "cell": "sustainability-tech-circularity",
+      "file_path": "superintelligence/climate-energy/personas/ellen-macarthur.md"
+    },
+    "fatih-birol": {
+      "slug": "fatih-birol",
+      "real_name": "Fatih Birol",
+      "cell": "energy-transition-renewables",
+      "file_path": "superintelligence/climate-energy/personas/fatih-birol.md"
+    },
+    "gavin-schmidt": {
+      "slug": "gavin-schmidt",
+      "real_name": "Gavin Schmidt",
+      "cell": "climate-modeling-science",
+      "file_path": "superintelligence/climate-energy/personas/gavin-schmidt.md"
+    },
+    "george-serafeim": {
+      "slug": "george-serafeim",
+      "real_name": "George Serafeim",
+      "cell": "esg-corporate-sustainability",
+      "file_path": "superintelligence/climate-energy/personas/george-serafeim.md"
+    },
+    "gina-mccarthy": {
+      "slug": "gina-mccarthy",
+      "real_name": "Gina McCarthy",
+      "cell": "environmental-policy-regulation",
+      "file_path": "superintelligence/climate-energy/personas/gina-mccarthy.md"
+    },
+    "henry-derwent": {
+      "slug": "henry-derwent",
+      "real_name": "Henry Derwent",
+      "cell": "carbon-markets-climate-finance",
+      "file_path": "superintelligence/climate-energy/personas/henry-derwent.md"
+    },
+    "janine-benyus": {
+      "slug": "janine-benyus",
+      "real_name": "Janine Benyus",
+      "cell": "sustainability-tech-circularity",
+      "file_path": "superintelligence/climate-energy/personas/janine-benyus.md"
+    },
+    "jesse-jenkins": {
+      "slug": "jesse-jenkins",
+      "real_name": "Jesse D. Jenkins",
+      "cell": "grid-infrastructure-storage",
+      "file_path": "superintelligence/climate-energy/personas/jesse-jenkins.md"
+    },
+    "jigar-shah": {
+      "slug": "jigar-shah",
+      "real_name": "Jigar Shah",
+      "cell": "grid-infrastructure-storage",
+      "file_path": "superintelligence/climate-energy/personas/jigar-shah.md"
+    },
+    "joeri-rogelj": {
+      "slug": "joeri-rogelj",
+      "real_name": "Joeri Rogelj",
+      "cell": "climate-modeling-science",
+      "file_path": "superintelligence/climate-energy/personas/joeri-rogelj.md"
+    },
+    "johan-rockstrom": {
+      "slug": "johan-rockstrom",
+      "real_name": "Johan Rockstr\u00f6m",
+      "cell": "environmental-policy-regulation",
+      "file_path": "superintelligence/climate-energy/personas/johan-rockstrom.md"
+    },
+    "katharine-hayhoe": {
+      "slug": "katharine-hayhoe",
+      "real_name": "Katharine Hayhoe",
+      "cell": "climate-modeling-science",
+      "file_path": "superintelligence/climate-energy/personas/katharine-hayhoe.md"
+    },
+    "kelly-gallagher": {
+      "slug": "kelly-gallagher",
+      "real_name": "Kelly Sims Gallagher",
+      "cell": "energy-transition-renewables",
+      "file_path": "superintelligence/climate-energy/personas/kelly-gallagher.md"
+    },
+    "mary-robinson": {
+      "slug": "mary-robinson",
+      "real_name": "Mary Robinson",
+      "cell": "environmental-policy-regulation",
+      "file_path": "superintelligence/climate-energy/personas/mary-robinson.md"
+    },
+    "mateo-jaramillo": {
+      "slug": "mateo-jaramillo",
+      "real_name": "Mateo Jaramillo",
+      "cell": "grid-infrastructure-storage",
+      "file_path": "superintelligence/climate-energy/personas/mateo-jaramillo.md"
+    },
+    "michael-liebreigh": {
+      "slug": "michael-liebreigh",
+      "real_name": "Michael Liebreich",
+      "cell": "energy-transition-renewables",
+      "file_path": "superintelligence/climate-energy/personas/michael-liebreigh.md"
+    },
+    "michael-mann": {
+      "slug": "michael-mann",
+      "real_name": "Michael E. Mann",
+      "cell": "climate-modeling-science",
+      "file_path": "superintelligence/climate-energy/personas/michael-mann.md"
+    },
+    "ramez-naam": {
+      "slug": "ramez-naam",
+      "real_name": "Ramez Naam",
+      "cell": "grid-infrastructure-storage",
+      "file_path": "superintelligence/climate-energy/personas/ramez-naam.md"
+    },
+    "robert-eccles": {
+      "slug": "robert-eccles",
+      "real_name": "Robert G. Eccles",
+      "cell": "esg-corporate-sustainability",
+      "file_path": "superintelligence/climate-energy/personas/robert-eccles.md"
+    },
+    "tensie-whelan": {
+      "slug": "tensie-whelan",
+      "real_name": "Tensie Whelan",
+      "cell": "esg-corporate-sustainability",
+      "file_path": "superintelligence/climate-energy/personas/tensie-whelan.md"
+    },
+    "tony-seba": {
+      "slug": "tony-seba",
+      "real_name": "Tony Seba",
+      "cell": "energy-transition-renewables",
+      "file_path": "superintelligence/climate-energy/personas/tony-seba.md"
+    },
+    "william-mcdonough": {
+      "slug": "william-mcdonough",
+      "real_name": "William McDonough",
+      "cell": "sustainability-tech-circularity",
+      "file_path": "superintelligence/climate-energy/personas/william-mcdonough.md"
+    }
+  }
+}

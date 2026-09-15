@@ -735,6 +735,12 @@ find ~/.claude ~/.cursor ~/.grok ~/.copilot -type l -lname "${CLONE}/*" -delete<
 This removes only links whose target is inside this clone. A contains-match such as
 <code>*$(pwd)*</code> would also delete links into any path that merely contains the
 folder name (for example <code>coco-research</code> when the clone is <code>coco</code>).
+
+For the Hermes adapter, profiles live under <code>~/.hermes/profiles</code>:
+<pre>CLONE="$(pwd)"
+find ~/.hermes/profiles -type l -lname "${CLONE}/*" -delete</pre>
+The appended rules block between <code>&lt;!-- coco:rules-start --&gt;</code> and
+<code>&lt;!-- coco:rules-end --&gt;</code> in each profile's CLAUDE.md is stripped automatically on the next install run without the repo.
 </details>
 
 <details>

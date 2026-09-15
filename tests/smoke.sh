@@ -27,10 +27,9 @@ test -f docs/by-domain/pm.md && pass "docs/by-domain/pm.md generated" || fail "d
 
 echo ""
 echo "=== Smoke test: adapters dry-run ==="
-for adapter in claude-code cursor grok vscode pi-desktop codex generic hermes; do
-  # hermes ships via PR #118; skip until it lands on main.
-  [ -d "adapters/$adapter" ] || { echo "SKIP: $adapter (not present)"; continue; }
-  bash adapters/$adapter/install.sh --dry-run > /tmp/$adapter.out 2>&1 \
+for d in adapters/*/; do
+  adapter=$(basename "$d")
+  bash "adapters/$adapter/install.sh" --dry-run > "/tmp/$adapter.out" 2>&1 \
     && pass "adapters/$adapter/install.sh --dry-run" \
     || fail "adapters/$adapter/install.sh --dry-run"
 done

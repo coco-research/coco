@@ -1,6 +1,6 @@
 ---
 name: gsd-set-profile
-description: "Switch model profile for GSD agents (quality/balanced/budget/inherit)"
+description: "Use when the user wants to switch the GSD model profile for agents: quality, balanced, budget, or inherit. Runs the gsd-tools config-set-model-profile command and shows its output verbatim."
 argument-hint: "<profile (quality|balanced|budget|inherit)>"
 allowed-tools:
   - Bash

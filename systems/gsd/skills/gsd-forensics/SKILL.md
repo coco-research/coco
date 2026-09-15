@@ -1,6 +1,6 @@
 ---
 name: gsd-forensics
-description: "Post-mortem investigation for failed GSD workflows — analyzes git history, artifacts, and state to diagnose what went wrong"
+description: "Use when a GSD run failed, stalled, or produced the wrong result and the cause is unclear. Reads git history and .planning/ state and phase artifacts to diagnose root cause, then writes a report to .planning/forensics/."
 argument-hint: "[problem description]"
 allowed-tools:
   - Read

@@ -1,6 +1,6 @@
 ---
 name: gsd-help
-description: "Show available GSD commands and usage guide"
+description: "Use when the user asks what GSD commands exist or how to use GSD. Outputs the complete GSD command reference verbatim, with no project analysis, status, or next-step suggestions."
 allowed-tools:
   - Read
 ---

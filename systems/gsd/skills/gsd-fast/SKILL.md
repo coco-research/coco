@@ -1,6 +1,6 @@
 ---
 name: gsd-fast
-description: "Execute a trivial task inline — no subagents, no planning overhead"
+description: "Use for a trivial task the user can describe in one sentence: a typo, config change, small refactor or forgotten commit. Executes inline with no subagents and no PLAN.md; anything needing research or planning belongs to /gsd-quick."
 argument-hint: "[task description]"
 allowed-tools:
   - Read

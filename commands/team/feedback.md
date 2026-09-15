@@ -1,3 +1,7 @@
+---
+description: "Use when running /team and Layer 2 needs past findings inlined, or when appending Layer 4 learnings after a run. Registry of feedback entries with status lifecycle and a maximum of 50 active entries."
+---
+
 # Team Feedback Registry
 
 > **Purpose:** Accumulated learnings from /team runs. Layer 2 agents read

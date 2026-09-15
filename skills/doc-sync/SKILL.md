@@ -1,6 +1,6 @@
 ---
 name: pmstudio-sync
-description: Use when a project has linked documentation artifacts (PRDs, presentations, meeting notes, architecture maps) that must stay synchronized. Detects which source files changed, identifies downstream documents needing updates, reads new content, and proposes specific edits with diffs before applying. Also use when a .sync-report.md exists in the project or user says "process sync report".
+description: "Use when linked docs drift, when a source file changes and downstream PRDs, decks, or notes must follow, or when a .sync-report.md exists. Diffs the proposed edits, applies them only after approval, and never overwrites a target file."
 domain: pm
 ---
 
@@ -20,7 +20,7 @@ Maintains consistency across a documentation ecosystem where one source change (
 
 ### Infrastructure (one-time setup)
 
-The persistent detection layer runs outside Claude Code via `/project-sync init`:
+The persistent detection layer runs outside Claude Code via `/pm:sync-init`:
 
 | Component | Path | Purpose |
 |-----------|------|---------|
@@ -206,7 +206,7 @@ Manual follow-up needed:
 ## Adding This to a New Project
 
 1. Create `.sync-watch.json` in the project root (use template above)
-2. Run `/project-sync init` to set up the launchd cron job
+2. Run `/pm:sync-init` to set up the launchd cron job
 3. Done — the background orchestrator runs every 2 hours and generates `.sync-report.md` when changes are detected
 
 ## Dependency Graph Pattern

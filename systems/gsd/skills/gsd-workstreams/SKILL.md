@@ -1,6 +1,6 @@
 ---
 name: gsd-workstreams
-description: "Manage parallel workstreams — list, create, switch, status, progress, complete, and resume"
+description: "Use when the user runs /gsd-workstreams or asks to list, create, switch, status, progress, complete, or resume parallel workstreams for concurrent milestone work. The active one is tracked in the GSD_WS variable."
 allowed-tools:
   - Read
   - Bash
@@ -49,7 +49,7 @@ Display detailed phase breakdown and state information.
 
 ### switch
 Run: `node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" workstream set <name> --raw --cwd "$CWD"`
-Also set `GSD_WORKSTREAM` for the current session when the runtime supports it.
+Also set `GSD_WS` for the current session when the runtime supports it.
 If the runtime exposes a session identifier, GSD also stores the active workstream
 session-locally so concurrent sessions do not overwrite each other.
 

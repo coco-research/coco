@@ -1,6 +1,6 @@
 ---
 name: coco-cli
-description: Install, update, version-check, or uninstall the Coco open-source AI workflow framework via its CLI (cocosuperintelligence, run with npx). Use when setting up Coco on a machine, pulling the latest into an existing clone, checking the installed version, or removing it. Triggers on "install coco", "update coco", "set up coco", "coco cli", "uninstall coco".
+description: Install, update, version-check, or uninstall the Coco open-source AI workflow framework via bin/coco.js. Use when setting up Coco on a machine, checking out the pinned release tag into an existing clone, checking the installed version, or removing it. Do not npx cocosuperintelligence until that name is published. Triggers on "install coco", "update coco", "set up coco", "coco cli", "uninstall coco".
 domain: meta
 ---
 
@@ -8,18 +8,25 @@ domain: meta
 
 # coco-cli — manage the Coco framework
 
-Thin agent wrapper over `cocosuperintelligence` (run via `npx`). Drives the real CLI; does not reimplement it.
+Thin agent wrapper over `bin/coco.js` (package name `cocosuperintelligence`).
+Drives the real CLI; does not reimplement it.
+
+The npm name is reserved but **not published** on npmjs.com (registry 404). Do
+not run `npx cocosuperintelligence` until it is — npx would execute whatever
+first claims that name. From a clone, invoke `node bin/coco.js` instead.
+`install` / `update` check out the release tag matching `package.json`
+(`v1.2.0` today), not floating `main`.
 
 ## Commands
 
 | Command | Purpose | Invocation |
 |---|---|---|
-| (default) | clone + install, auto-detecting the adapter | `npx cocosuperintelligence` |
-| `install` | clone + install with explicit flags | `npx cocosuperintelligence install [flags]` |
-| `update` | pull latest in an existing clone | `npx cocosuperintelligence update [dir]` |
-| `uninstall` | remove symlinks + the clone | `npx cocosuperintelligence uninstall [dir]` |
-| `version` | print version + check for updates | `npx cocosuperintelligence version` |
-| `--help` | print usage | `npx cocosuperintelligence --help` |
+| (default) | clone + install, auto-detecting the adapter | `node bin/coco.js` |
+| `install` | clone + install with explicit flags | `node bin/coco.js install [flags]` |
+| `update` | check out the pinned release tag | `node bin/coco.js update [dir]` |
+| `uninstall` | remove symlinks + the clone | `node bin/coco.js uninstall [dir]` |
+| `version` | print version + check for updates | `node bin/coco.js version` |
+| `--help` | print usage | `node bin/coco.js --help` |
 
 ## Install flags (passed through to install.sh)
 
@@ -29,10 +36,10 @@ Thin agent wrapper over `cocosuperintelligence` (run via `npx`). Drives the real
 
 ## Examples
 
-- Install for Cursor: `npx cocosuperintelligence install --adapter cursor`
-- Selective systems: `npx cocosuperintelligence install --systems gsd,brain --adapter claude-code`
-- Preview without writing: `npx cocosuperintelligence install --dry-run`
-- Update an existing clone: `npx cocosuperintelligence update`
+- Install for Cursor: `node bin/coco.js install --adapter cursor`
+- Selective systems: `node bin/coco.js install --systems gsd,brain --adapter claude-code`
+- Preview without writing: `node bin/coco.js install --dry-run`
+- Update an existing clone: `node bin/coco.js update`
 
 ## Output contract
 
@@ -49,6 +56,6 @@ This CLI is human-output-oriented; it has **no native `--json` mode**. For agent
 
 ## Notes
 
-- Side effects: `install` clones the repo and creates symlinks; `uninstall` removes them. `install`/`update` re-pull, so they are not no-ops.
+- Side effects: `install` clones the pinned release tag and creates symlinks; `uninstall` removes them. `install`/`update` re-fetch, so they are not no-ops. Branch checkouts still `git pull --ff-only` and are not force-moved onto an older pin.
 - Network egress: `github.com` only. No telemetry. Disable update checks with `COCO_NO_UPDATE_CHECK=1`.
-- Prerequisites: `node`/`npx`, `git`, and `bash`.
+- Prerequisites: `node`, `git`, and `bash`. Do not use `npx cocosuperintelligence` until the name is published on npmjs.com.

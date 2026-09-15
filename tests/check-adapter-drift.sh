@@ -10,11 +10,18 @@
 # github-copilot-cli or vscode-continue.
 #
 # This is a general drift detector, not a re-check of those two files: it
-# scans every tracked .sh/.py/.js/.yml/.yaml file for the same two idioms (a
-# bash for-loop, or a bracket/brace list literal) whose tokens are mostly
-# adapter names, and fails if the tokens it finds disagree with `ls adapters/`.
-# It will catch a *new* hardcoded list added later, in a file this script has
-# never heard of, the same way it would have caught the two above.
+# asks `git ls-files` for every tracked .sh/.py/.js/.yml/.yaml file (NUL-
+# delimited, so a path with a space or an unusual character can't be split
+# wrong), scans each for the same two idioms (a bash for-loop, or a
+# bracket/brace list literal) whose tokens are mostly adapter names, and
+# fails if the tokens it finds disagree with `ls adapters/`. It will catch a
+# *new* hardcoded list added later, in a file this script has never heard of,
+# the same way it would have caught the two above. Reading from `git
+# ls-files` rather than walking the filesystem also means it only ever sees
+# this repository's own tracked content: a nested `git worktree` checked out
+# somewhere under this tree (this repo's own tooling creates them under
+# .claude/worktrees/) holds a complete second copy of every tracked file, and
+# a filesystem walk would score that copy as if it were part of this repo.
 #
 # Known gaps, stated plainly rather than overstated:
 #   - .github/workflows/lint-frontmatter.yml's KNOWN_ADAPTERS is excluded on
@@ -46,16 +53,26 @@ echo "  $(echo "$REAL_ADAPTERS" | tr '\n' ' ')"
 echo ""
 echo "=== scanning tree for hardcoded adapter enumerations ==="
 if python3 - "$REAL_ADAPTERS" <<'PY'
-import pathlib, re, sys
+import pathlib, re, subprocess, sys
 
 real = set(sys.argv[1].split())
-exts = {'.sh', '.py', '.js', '.yml', '.yaml'}
-skip_dirs = {'.git', 'node_modules'}
-# Owned by PR #179; see the file header comment for why.
-skip_files = {
-    pathlib.Path('.github/workflows/lint-frontmatter.yml'),
-    pathlib.Path('tests/check-adapter-drift.sh'),
-}
+
+# git ls-files is the source of truth for "files in this repository": tracked
+# content only, NUL-delimited so a path with a space or a newline can't be
+# split wrong, and scoped to this worktree's own index so a nested worktree
+# checked out on disk (adapters/*/install.sh legitimately mentions only its
+# own name, so that whole directory is excluded too) never contributes a
+# second, stale copy of a file this repo already tracks. Owned by PR #179;
+# see the file header comment for why lint-frontmatter.yml is excluded.
+out = subprocess.run(
+    ['git', 'ls-files', '-z', '--',
+     '*.sh', '*.py', '*.js', '*.yml', '*.yaml',
+     ':!adapters/*',
+     ':!.github/workflows/lint-frontmatter.yml',
+     ':!tests/check-adapter-drift.sh'],
+    capture_output=True, text=True, check=True,
+).stdout
+files = [f for f in out.split('\0') if f]
 
 def report(where, items, real):
     items = sorted(items)
@@ -69,17 +86,9 @@ def report(where, items, real):
 
 drift = False
 
-for path in sorted(pathlib.Path('.').rglob('*')):
-    if not path.is_file() or path.suffix not in exts:
-        continue
-    if any(part in skip_dirs for part in path.parts):
-        continue
-    if path.parts[:1] == ('adapters',):
-        continue  # adapters/<name>/install.sh legitimately mentions only its own name
-    if path in skip_files:
-        continue
+for f in files:
     try:
-        text = path.read_text(errors='ignore')
+        text = pathlib.Path(f).read_text(errors='ignore')
     except OSError:
         continue
 
@@ -87,12 +96,12 @@ for path in sorted(pathlib.Path('.').rglob('*')):
 
     for m in re.finditer(r'for\s+\w+\s+in\s+([^;\n]+?)\s*;\s*do', text):
         line = text.count('\n', 0, m.start()) + 1
-        candidates.append((f'{path}:{line}', m.group(1).split()))
+        candidates.append((f'{f}:{line}', m.group(1).split()))
 
     for m in re.finditer(r'[A-Za-z_][A-Za-z0-9_]*\s*=\s*[\[{]([^\]\}]{0,400})[\]\}]', text, re.DOTALL):
         line = text.count('\n', 0, m.start()) + 1
         items = re.findall(r'''['"]([A-Za-z0-9_.-]+)['"]''', m.group(1))
-        candidates.append((f'{path}:{line}', items))
+        candidates.append((f'{f}:{line}', items))
 
     for where, tokens in candidates:
         if len(tokens) < 3:

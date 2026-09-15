@@ -1,8 +1,8 @@
 ---
+name: healthcare-life-sciences-super-intelligence
+description: "Your healthcare and life sciences brain trust. 25 named personas across 7 cells covering drug discovery, medtech, biotech strategy, health policy, genomics, clinical trials, and healthcare economics."
 team_id: healthcare-life-sciences-super-intelligence
 team_name: Healthcare & Life Sciences Super Intelligence Team
-personas_count: 25
-cells_count: 7
 last_updated: 2026-09-04
 schema_version: 1.0
 ---

@@ -1,8 +1,8 @@
 ---
+name: climate-energy-super-intelligence
+description: "Your climate and energy brain trust. 25 named personas across 7 cells covering energy transition, carbon markets, climate modeling, sustainability, grid infrastructure, environmental policy, and ESG."
 team_id: climate-energy-super-intelligence
 team_name: Climate & Energy Super Intelligence Team
-personas_count: 25
-cells_count: 7
 last_updated: 2026-09-04
 schema_version: 1.0
 ---

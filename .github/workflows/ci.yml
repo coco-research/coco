@@ -61,6 +61,9 @@ jobs:
       - name: Validate /team evidence-gate integrity
         run: bash tests/check-evidence-gate.sh
 
+      - name: Validate roster front-door frontmatter
+        run: bash tests/check-roster-frontmatter.sh
+
       - name: Validate no hardcoded adapter list drifts from adapters/
         run: bash tests/check-adapter-drift.sh
 

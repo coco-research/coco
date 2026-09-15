@@ -1,8 +1,8 @@
 ---
+name: education-edtech-super-intelligence
+description: "Your education and edtech brain trust. 25 named personas across 7 cells covering learning science, curriculum design, AI tutoring, higher-ed strategy, edtech platforms, assessment, and workforce development."
 team_id: education-edtech-super-intelligence
 team_name: Education & EdTech Super Intelligence Team
-personas_count: 25
-cells_count: 7
 last_updated: 2026-09-04
 schema_version: 1.0
 ---

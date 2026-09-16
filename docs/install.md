@@ -1,6 +1,16 @@
 # Install
 
-Per-adapter detail. For the 30-second version, see [`README.md`](../README.md).
+Canonical path from a clone:
+
+```bash
+bash install.sh
+bash install.sh --adapter cursor
+bash install.sh --adapter claude-code
+bash install.sh --systems gsd,brain
+bash install.sh --systems superintelligence
+```
+
+`install.sh` auto-detects the active tool. `--adapter` forces one; `--systems` replaces the default bundle set. Per-adapter wiring is below. For the 30-second version, see [`README.md`](../README.md).
 
 ---
 
@@ -21,6 +31,7 @@ Per-adapter detail. For the 30-second version, see [`README.md`](../README.md).
 
 | Flag | Effect |
 |------|--------|
+| `--adapter <name>` | Force an adapter (`cursor`, `claude-code`, …) instead of auto-detect. Root `install.sh` only; equivalent to `bash adapters/<name>/install.sh`. |
 | `--dry-run` | Print what would happen, don't write |
 | `--help` | Show usage |
 | `--systems gsd,brain` | Install one or more system bundles. Accepted by every adapter, including cursor (`~/.cursor/commands` for generated SI-* files) |

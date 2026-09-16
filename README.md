@@ -59,6 +59,7 @@ Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds
 
 ```bash
 git clone https://github.com/coco-research/coco.git && cd coco && bash install.sh
+bash install.sh --systems superintelligence
 ```
 
 <div align="center"><sub>90 seconds. Override with <code>--adapter cursor</code> or <code>--adapter claude-code</code>; narrow bundles with <code>--systems</code>. Per-adapter detail: <a href="docs/install.md">docs/install.md</a>.</sub></div>
@@ -559,6 +560,7 @@ release tag, not floating `main`.*
 ```bash
 # Every bundle installs by default. To take a subset instead:
 bash install.sh --systems gsd,brain
+bash install.sh --systems superintelligence
 
 # Or the core set alone, with no bundles:
 bash install.sh --core-only

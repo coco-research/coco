@@ -7,6 +7,7 @@ bash install.sh
 bash install.sh --adapter cursor
 bash install.sh --adapter claude-code
 bash install.sh --systems gsd,brain
+bash install.sh --systems superintelligence
 ```
 
 `install.sh` auto-detects the active tool. `--adapter` forces one; `--systems` replaces the default bundle set. Per-adapter wiring is below. For the 30-second version, see [`README.md`](../README.md).

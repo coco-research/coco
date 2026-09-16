@@ -506,4 +506,4 @@ If approaching limits:
 - Summarize toolkit to one-line per entry
 - Compress context brief further
 
-ARGUMENTS: {{ARGUMENTS}}
+ARGUMENTS: $ARGUMENTS

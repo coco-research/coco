@@ -61,7 +61,7 @@ Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds
 git clone https://github.com/coco-research/coco.git && cd coco && bash install.sh
 ```
 
-<div align="center"><sub>90 seconds. That's all it takes to wire CoCo into your AI coding tool.</sub></div>
+<div align="center"><sub>90 seconds. Override with <code>--adapter cursor</code> or <code>--adapter claude-code</code>; narrow bundles with <code>--systems</code>. Per-adapter detail: <a href="docs/install.md">docs/install.md</a>.</sub></div>
 
 ---
 
@@ -594,6 +594,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/coco-research/coco/main/bin/
 </td>
 </tr>
 </table>
+
+Adapter flags, bundle selection, and per-adapter targets: [`docs/install.md`](docs/install.md).
 
 The install paths above are deliberately conservative: the remote bootstrap never runs code before you have confirmed the commit it cloned, `install.sh` only ever reads and symlinks files already inside the repository, the CI workflows that build and publish Coco pin their `setup-node` and `setup-python` Actions to commit SHAs rather than mutable tags, and nothing Coco does locally or in CI sends data anywhere. See [`SECURITY.md`](SECURITY.md) for the full policy.
 

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0",
+  "pinnedCommit": "935e1e1da979c88a585cd68e086ea8d9c36e8e51",
+  "ecosystem": {
+    "treeTruncated": false
+  },
+  "components": [
+    {
+      "id": "component-x",
+      "title": "Component X",
+      "codeOwnership": {
+        "primary": {
+          "directories": ["src/comp-x"],
+          "rationale": "Component X"
+        }
+      }
+    }
+  ]
+}

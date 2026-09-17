@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0",
+  "pinnedCommit": "STALE_MARKER",
+  "ecosystem": {"treeTruncated": false},
+  "components": [
+    {"id": "x", "title": "X", "codeOwnership": {"primary": {"directories": ["src/x"], "rationale": "x"}}, "connections": ["y"]},
+    {"id": "y", "title": "Y", "codeOwnership": {"primary": {"directories": ["src/y"], "rationale": "y"}}, "connections": ["x", "z"]},
+    {"id": "z", "title": "Z", "codeOwnership": {"primary": {"directories": ["src/z"], "rationale": "z"}}, "connections": ["y"]}
+  ]
+}

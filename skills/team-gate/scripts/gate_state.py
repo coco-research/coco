@@ -32,6 +32,7 @@ re-reads HEAD, recomputes the tree digest, and re-parses the stored raw output.
 
 import argparse
 import dataclasses
+import fcntl
 import hashlib
 import json
 import os
@@ -127,7 +128,7 @@ def start_run(repo_root: str, command: str, flags: list) -> str:
 
 def append_receipt(run_dir: Path, kind: str, detail: Dict[str, Any],
                    hook_payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    """Append a hashed receipt to receipts.jsonl and update head.json.
+    """Append a hashed receipt to receipts.jsonl and update head.json under exclusive file lock.
 
     Fields: seq, timestamp, kind, detail, session_id, tool_use_id, agent_id,
     agent_type, permission_mode, cwd (last six from hook_payload if present),
@@ -135,50 +136,63 @@ def append_receipt(run_dir: Path, kind: str, detail: Dict[str, Any],
 
     Raises InvalidReceiptKind if kind not in RECEIPT_KINDS.
     Returns the written record.
+
+    Thread-safe: acquires an exclusive lock on run_dir/.receipts.lock for the duration
+    of reading the last seq, appending to receipts.jsonl, and updating head.json.
     """
     if kind not in RECEIPT_KINDS:
         raise InvalidReceiptKind(f"invalid receipt kind: {kind!r}")
 
     run_dir = Path(run_dir)
     receipts_file = run_dir / "receipts.jsonl"
+    lock_file = run_dir / ".receipts.lock"
 
-    prev_hash = None
-    seq = 1
-    if receipts_file.is_file():
-        lines = receipts_file.read_text(encoding="utf-8").strip().split("\n")
-        if lines:
-            try:
-                last = json.loads(lines[-1])
-                seq = last.get("seq", 0) + 1
-                prev_hash = last.get("hash")
-            except json.JSONDecodeError:
-                pass
+    lock_fd = None
+    try:
+        lock_fd = os.open(str(lock_file), os.O_CREAT | os.O_WRONLY, 0o644)
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
 
-    record = {
-        "seq": seq,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "kind": kind,
-        "detail": detail,
-        "prev_hash": prev_hash
-    }
+        prev_hash = None
+        seq = 1
+        if receipts_file.is_file():
+            lines = receipts_file.read_text(encoding="utf-8").strip().split("\n")
+            if lines:
+                try:
+                    last = json.loads(lines[-1])
+                    seq = last.get("seq", 0) + 1
+                    prev_hash = last.get("hash")
+                except json.JSONDecodeError:
+                    pass
 
-    if hook_payload:
-        for key in ["session_id", "tool_use_id", "agent_id", "agent_type", "permission_mode", "cwd"]:
-            if key in hook_payload:
-                record[key] = hook_payload[key]
+        record = {
+            "seq": seq,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "kind": kind,
+            "detail": detail,
+            "prev_hash": prev_hash
+        }
 
-    record_without_hash = {k: v for k, v in record.items() if k != "hash"}
-    record["hash"] = _sha256_json(record_without_hash)
+        if hook_payload:
+            for key in ["session_id", "tool_use_id", "agent_id", "agent_type", "permission_mode", "cwd"]:
+                if key in hook_payload:
+                    record[key] = hook_payload[key]
 
-    with receipts_file.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(record) + "\n")
+        record_without_hash = {k: v for k, v in record.items() if k != "hash"}
+        record["hash"] = _sha256_json(record_without_hash)
 
-    head_obj = {"seq": seq, "hash": record["hash"]}
-    head_tmp = run_dir / "head.json.tmp"
-    head_tmp.write_text(json.dumps(head_obj), encoding="utf-8")
-    os.replace(str(head_tmp), str(run_dir / "head.json"))
+        with receipts_file.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(record) + "\n")
 
-    return record
+        head_obj = {"seq": seq, "hash": record["hash"]}
+        head_tmp = run_dir / "head.json.tmp"
+        head_tmp.write_text(json.dumps(head_obj), encoding="utf-8")
+        os.replace(str(head_tmp), str(run_dir / "head.json"))
+
+        return record
+    finally:
+        if lock_fd is not None:
+            fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            os.close(lock_fd)
 
 
 def verify_chain(run_dir: Path) -> ChainResult:
@@ -499,6 +513,89 @@ def self_test():
     intact_status = "OK" if proc.returncode == 0 else "FAIL"
     results.append(("status-chain-intact", 0, proc.returncode, intact_status))
 
+    # Concurrent-appends live test: 8 subprocesses x 5 receipts each = 40 total
+    try:
+        import tempfile as tmpmod
+        temp_root = Path(tmpmod.mkdtemp(prefix="gate_state_concurrent_"))
+        concurrent_env = os.environ.copy()
+        concurrent_env["TEAM_STATE_ROOT"] = str(temp_root)
+
+        # Start a fresh run
+        proc_start = subprocess.run(
+            [sys.executable, __file__, "start", str(temp_root.parent), "concurrent-test"],
+            env=concurrent_env,
+            capture_output=True,
+            text=True
+        )
+        if proc_start.returncode != 0:
+            results.append(("concurrent-appends", "start", "FAIL"))
+        else:
+            run_id = proc_start.stdout.strip()
+            run_dir = temp_root / run_id
+
+            # Launch 8 subprocesses, each appending 5 receipts
+            procs = []
+            for i in range(8):
+                for j in range(5):
+                    payload = json.dumps({"session_id": f"test-{i}", "tool_use_id": f"tool-{i}-{j}"})
+                    proc = subprocess.Popen(
+                        [sys.executable, __file__, "receipt", "stage-opened", '{"stage": 1}', "--hook-payload", "-"],
+                        cwd=str(run_dir),
+                        env=concurrent_env,
+                        stdin=subprocess.PIPE,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True
+                    )
+                    proc.stdin.write(payload)
+                    proc.stdin.close()
+                    procs.append(proc)
+
+            # Wait for all subprocesses to complete
+            for proc in procs:
+                proc.wait()
+
+            # Verify: read receipts.jsonl and check seq contiguity
+            receipts_file = run_dir / "receipts.jsonl"
+            if receipts_file.is_file():
+                lines = receipts_file.read_text(encoding="utf-8").strip().split("\n")
+                records = [json.loads(line) for line in lines if line.strip()]
+                record_count = len(records)
+                seq_values = [r.get("seq") for r in records]
+
+                # Check: 40 records, seq 1-40 contiguous, no duplicates
+                seq_ok = (
+                    record_count == 40 and
+                    seq_values == list(range(1, 41))
+                )
+
+                # Verify chain via subprocess
+                proc_verify = subprocess.run(
+                    [sys.executable, __file__, "verify-chain"],
+                    cwd=str(run_dir),
+                    env=concurrent_env,
+                    capture_output=True,
+                    text=True
+                )
+                verify_ok = proc_verify.returncode == 0
+
+                # Check head.json seq
+                head_file = run_dir / "head.json"
+                head_seq_ok = False
+                if head_file.is_file():
+                    head_obj = json.loads(head_file.read_text(encoding="utf-8"))
+                    head_seq_ok = head_obj.get("seq") == 40
+
+                concurrent_ok = seq_ok and verify_ok and head_seq_ok
+                concurrent_status = "OK" if concurrent_ok else "FAIL"
+                results.append(("concurrent-appends", 40, record_count, seq_ok, verify_ok, head_seq_ok, concurrent_status))
+            else:
+                results.append(("concurrent-appends", "no-receipts", "FAIL"))
+
+        shutil.rmtree(temp_root, ignore_errors=True)
+    except Exception as e:
+        results.append(("concurrent-appends", f"exception: {e}", "FAIL"))
+
     all_ok = all(s == "OK" for r in results for s in [r[-1]] if len(r) >= 3)
     for result in results:
         if len(result) == 3:
@@ -507,6 +604,9 @@ def self_test():
         elif len(result) == 4:
             name, expected, actual, status = result
             print(f"{name}: expected {expected} got {actual} {status}")
+        elif len(result) == 7:
+            name, expect_count, actual_count, seq_ok, verify_ok, head_ok, status = result
+            print(f"{name}: {actual_count} records (expect {expect_count}), seq_contiguous={seq_ok}, verify-chain={verify_ok}, head.seq={head_ok} {status}")
         else:
             name, expected, actual, exp_stderr, act_stderr, status = result
             print(f"{name}: expected {expected} got {actual} stderr contains {exp_stderr!r} {status}")

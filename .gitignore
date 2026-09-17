@@ -44,3 +44,4 @@ coco-ads-output*/
 # diffable across runs and present in the clean checkout that /team ship verifies from.
 .arch/DRIFT.json
 .arch/tree.json
+.team-ship/

@@ -32,7 +32,7 @@ L1 agents determine:
   and requires the deterministic scan, not a reading:
 
   ```bash
-  python3 skills/arch-index/scripts/arch_drift.py --repo-root .
+  python3 ~/.claude/skills/arch-index/scripts/arch_drift.py --repo-root .
   ```
 
   Report it when a component's primary paths have died (`REMOVE` or `PRUNE`), or when new

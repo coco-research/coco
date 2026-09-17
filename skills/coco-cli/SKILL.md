@@ -15,7 +15,7 @@ The npm name is reserved but **not published** on npmjs.com (registry 404). Do
 not run `npx cocosuperintelligence` until it is — npx would execute whatever
 first claims that name. From a clone, invoke `node bin/coco.js` instead.
 `install` / `update` check out the release tag matching `package.json`
-(`v1.2.0` today), not floating `main`.
+(`v1.5.0` today), not floating `main`.
 
 ## Commands
 

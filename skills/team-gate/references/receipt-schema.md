@@ -26,6 +26,8 @@ When `kind` is `gate-result`, the `detail` object contains:
 - `gate`: string. Gate identifier (e.g., "preconditions", "tdd-redgreen").
 - `gate_file`: string (optional). Relative path to the gate report (e.g., `gates/8.json`). Used for orphan detection. Orphan detection compares on basename; a receipt naming `gates/8.json` is matched against file `gates/8.json` by comparing only the filename `8.json`.
 
+**Note**: The `gates/` directory is flat (no subdirectories). `detail.gate_file` is always of the form `gates/<n>.json` where `<n>` is a filename. Verifiers inspect only one level deep; nested gates are out of contract and will not be detected.
+
 ## Optional Context Fields (Populated from Hook)
 
 When `append_receipt` is called with `hook_payload`, these fields are copied if present:

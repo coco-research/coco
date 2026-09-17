@@ -45,3 +45,5 @@ coco-ads-output*/
 .arch/DRIFT.json
 .arch/tree.json
 .team-ship/
+skills/team-gate/scripts/fixtures/arch_gate/_build/
+skills/team-gate/scripts/fixtures/**/_build/

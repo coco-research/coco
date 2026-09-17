@@ -58,7 +58,7 @@ L3 agents verify Layer 2's claims, and explicitly check for these failure modes 
   Applies only when `.arch/index.json` exists. Run the deterministic scan — no model call:
 
   ```bash
-  python3 skills/arch-index/scripts/arch_drift.py --repo-root .
+  python3 ~/.claude/skills/arch-index/scripts/arch_drift.py --repo-root .
   ```
 
   Then interpret it per `team:architecture.md`:

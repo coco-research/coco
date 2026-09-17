@@ -63,7 +63,7 @@ appropriate /team action's role selection.
   Then run the declaration check, which validates shape only:
 
   ```bash
-  python3 skills/arch-index/scripts/verify_arch_plan.py \
+  python3 ~/.claude/skills/arch-index/scripts/verify_arch_plan.py \
     .team-ship/ARCH-PLAN.json --declare
   ```
 
@@ -174,7 +174,7 @@ Skip when `--no-arch` was passed, and report `DISABLED (--no-arch)`. If
 `.team-ship/ARCH-PLAN.json` is absent, report `NOT APPLICABLE`. Neither is a pass.
 
 ```bash
-python3 skills/arch-index/scripts/verify_arch_plan.py \
+python3 ~/.claude/skills/arch-index/scripts/verify_arch_plan.py \
   .team-ship/ARCH-PLAN.json --verify --repo-root .
 ```
 
@@ -214,8 +214,8 @@ words given.
 None of the first three is a pass, and none may be reported as one.
 
 ```bash
-python3 skills/arch-index/scripts/validate_index.py .arch/index.json --repo-root .
-python3 skills/arch-index/scripts/arch_drift.py --repo-root .
+python3 ~/.claude/skills/arch-index/scripts/validate_index.py .arch/index.json --repo-root .
+python3 ~/.claude/skills/arch-index/scripts/arch_drift.py --repo-root .
 ```
 
 - Any component with zero surviving primary paths is a **BLOCK**. The build deleted or

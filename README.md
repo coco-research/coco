@@ -18,7 +18,7 @@ Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds
 <br>
 
 [![License: Open-core](https://img.shields.io/badge/License-Open--core-yellow.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.5.0-blue?style=for-the-badge)](CHANGELOG.md)
 [![Skills](https://img.shields.io/badge/skills-226-emerald?style=for-the-badge)](skills/)
 [![Commands](https://img.shields.io/badge/commands-386-indigo?style=for-the-badge)](commands/)
 [![Personas](https://img.shields.io/badge/personas-495-violet?style=for-the-badge)](systems/superintelligence/)
@@ -543,7 +543,7 @@ bash install.sh
 ```bash
 # The package name is reserved as `cocosuperintelligence` but is not published
 # on npmjs.com yet (registry 404). Until it is, run the wrapper from a clone:
-git clone --branch v1.2.0 --depth 1 https://github.com/coco-research/coco.git
+git clone --branch v1.5.0 --depth 1 https://github.com/coco-research/coco.git
 node coco/bin/coco.js --help
 ```
 *Do not `npx cocosuperintelligence` until the name is published — npx would
@@ -591,7 +591,7 @@ bash install.sh --adapter generic
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/coco-research/coco/main/bin/coco-bootstrap.sh)
 ```
-*Clones the pinned release tag (currently `v1.2.0`, not floating `main`) to `~/.coco`, then pauses and prints the commit hash, date, and message so you can verify it against [that release](https://github.com/coco-research/coco/releases/tag/v1.2.0) before it runs `install.sh`. Type `y` to proceed. Pass `--yes` or set `COCO_BOOTSTRAP_YES=1` to skip the prompt for CI or scripted installs, and pass adapter/systems flags after `--`, e.g. `-- --adapter cursor --systems gsd`.*
+*Clones the pinned release tag (currently `v1.5.0`, not floating `main`) to `~/.coco`, then pauses and prints the commit hash, date, and message so you can verify it against [that release](https://github.com/coco-research/coco/releases/tag/v1.5.0) before it runs `install.sh`. Type `y` to proceed. Pass `--yes` or set `COCO_BOOTSTRAP_YES=1` to skip the prompt for CI or scripted installs, and pass adapter/systems flags after `--`, e.g. `-- --adapter cursor --systems gsd`.*
 
 </td>
 </tr>
@@ -701,7 +701,7 @@ Until `cocosuperintelligence` is published on npmjs.com, do not use `npx` for th
 ## Technical Specifications
 
 <table>
-<tr><td><strong>Spec Version</strong></td><td>1.2.0</td></tr>
+<tr><td><strong>Spec Version</strong></td><td>1.5.0</td></tr>
 <tr><td><strong>License</strong></td><td>Open-core — <a href="LICENSE">MIT</a> core; Super Intelligence is <a href="systems/superintelligence/LICENSE">proprietary</a></td></tr>
 <tr><td><strong>Total Skills</strong></td><td>226 with all bundles installed (74 Core + 152 Bundle)</td></tr>
 <tr><td><strong>Slash Commands</strong></td><td>386 with all bundles — 44 Core (shipped) + 342 Super Intelligence (325 per-team + 17 cross-team, generated at install)</td></tr>

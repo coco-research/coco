@@ -33,16 +33,19 @@ from pathlib import Path
 
 
 def run_command(cmd, cwd):
-    """Run a command and return (exit_code, stdout, stderr)."""
+    """Run a command and return (exit_code, stdout, stderr).
+
+    Returns (None, "", error_msg) if the subprocess cannot launch (distinct from exit code).
+    """
     try:
         result = subprocess.run(
             cmd, cwd=cwd, capture_output=True, text=True, check=False
         )
         return result.returncode, result.stdout, result.stderr
     except FileNotFoundError as exc:
-        return 2, "", f"command not found: {exc}"
+        return None, "", f"command not found: {exc}"
     except Exception as exc:
-        return 2, "", f"subprocess error: {exc}"
+        return None, "", f"subprocess error: {exc}"
 
 
 def git_rev_parse(root, ref):
@@ -126,7 +129,7 @@ def main():
     validate_script = os.path.join(
         os.path.dirname(__file__), "..", "..", "arch-index", "scripts", "validate_index.py"
     )
-    validate_exit, _, _ = run_command(
+    validate_exit, _, validate_err = run_command(
         ["python3", validate_script, index_path, "--repo-root", root, "--quiet"],
         cwd=root,
     )
@@ -139,7 +142,7 @@ def main():
         tmp_path = tmp.name
 
     try:
-        drift_exit, _, _ = run_command(
+        drift_exit, _, drift_err = run_command(
             ["python3", drift_script, "--repo-root", root, "--out", tmp_path],
             cwd=root,
         )
@@ -165,22 +168,43 @@ def main():
             if c.get("verdict") == "PRUNE"
         ]
 
-        # Apply pass rules
+        # Apply pass rules in order: launch failures first, then other blocks
         exit_code = 0
-        reason = ""
+        reason_parts = []
 
-        if validate_exit != 0:
-            exit_code = 1
-            reason = f"validate_index.py failed (exit {validate_exit})"
-        elif drift_exit != 0:
+        # Check if subprocesses failed to launch
+        if validate_exit is None:
             exit_code = 2
-            reason = f"arch_drift.py failed to run (exit {drift_exit})"
-        elif removes:
-            exit_code = 1
-            reason = f"BLOCK: {len(removes)} component(s) with REMOVE verdict"
-        elif prunes:
-            # PRUNE only: pass but print MAJOR line
-            print(f"MAJOR: PRUNE {' '.join(prunes)}")
+            reason_parts.append(f"validate_index.py failed to launch: {validate_err}")
+        if drift_exit is None:
+            exit_code = 2
+            reason_parts.append(f"arch_drift.py failed to launch: {drift_err}")
+
+        if exit_code == 2:
+            reason = "; ".join(reason_parts)
+        else:
+            # Compute all block conditions
+            reason_parts = []
+
+            if removes:
+                reason_parts.append(f"REMOVE: {len(removes)} component(s) ({', '.join(removes)})")
+                exit_code = 1
+
+            if prunes:
+                reason_parts.append(f"PRUNE: {len(prunes)} component(s) ({', '.join(prunes)})")
+                if exit_code == 0:
+                    print(f"MAJOR: PRUNE {' '.join(prunes)}")
+
+            if validate_exit != 0:
+                reason_parts.append(f"validate_index.py failed (exit {validate_exit})")
+                exit_code = 1
+
+            if drift_exit != 0:
+                reason_parts.append(f"arch_drift.py failed (exit {drift_exit})")
+                if exit_code != 1:
+                    exit_code = 2
+
+            reason = "; ".join(reason_parts) if reason_parts else ""
 
         # Write result JSON
         result = {
@@ -217,46 +241,61 @@ def main():
 
 
 def self_test(root):
-    """Run all fixtures and assert exact exit codes."""
+    """Run all fixtures as subprocesses and assert exact exit codes."""
     test_dir = os.path.join(os.path.dirname(__file__), "fixtures", "arch_gate")
+    build_dir = os.path.join(test_dir, "_build")
+
     if not os.path.isdir(test_dir):
         print("FAIL: fixtures directory does not exist", file=sys.stderr)
         return 1
 
+    # Auto-build fixtures if needed
+    if not os.path.isdir(build_dir):
+        print("Building fixtures...", file=sys.stderr)
+        script = os.path.join(test_dir, "make_fixtures.sh")
+        try:
+            subprocess.run(["bash", script], check=True, capture_output=True)
+        except subprocess.CalledProcessError as exc:
+            print(f"FAIL: fixture build failed: {exc}", file=sys.stderr)
+            return 1
+
     fixtures = ["remove-verdict", "prune-verdict", "clean", "stale-pin"]
     all_pass = True
 
+    # Expected exit codes per fixture
+    expected = {
+        "remove-verdict": 1,
+        "prune-verdict": 0,
+        "clean": 0,
+        "stale-pin": 2,
+    }
+
     for fixture_name in fixtures:
-        fixture_root = os.path.join(test_dir, fixture_name)
+        fixture_root = os.path.join(build_dir, fixture_name)
         if not os.path.isdir(fixture_root):
             print(f"FAIL  {fixture_name:20s} -> fixture directory missing")
             all_pass = False
             continue
 
-        # Expected exit codes per fixture
-        expected = {
-            "remove-verdict": 1,
-            "prune-verdict": 0,
-            "clean": 0,
-            "stale-pin": 2,
-        }
-
-        # Run the gate
-        exit_code = main.__code__.co_consts  # dummy, we need to call main with args
-
-        # Simulate argparse for this test
-        old_argv = sys.argv
-        try:
-            sys.argv = ["arch_gate.py", "--repo-root", fixture_root]
-            exit_code = main()
-        except SystemExit as exc:
-            exit_code = exc.code or 0
-        finally:
-            sys.argv = old_argv
+        # Run as subprocess
+        proc = subprocess.run(
+            [sys.executable, __file__, "--repo-root", fixture_root],
+            capture_output=True,
+            text=True
+        )
+        exit_code = proc.returncode
+        stderr = proc.stderr
 
         expected_code = expected.get(fixture_name, 0)
         passed = exit_code == expected_code
         print(f"  {'PASS' if passed else 'FAIL'}  {fixture_name:20s} exit={exit_code} (expect {expected_code})")
+
+        # For remove-verdict, assert REMOVE is mentioned in stderr
+        if fixture_name == "remove-verdict" and passed:
+            if "REMOVE" not in stderr:
+                print(f"    WARNING: REMOVE not in stderr output", file=sys.stderr)
+                all_pass = False
+
         if not passed:
             all_pass = False
 

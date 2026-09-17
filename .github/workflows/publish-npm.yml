@@ -25,8 +25,8 @@ jobs:
         run: |
           node -e "
           const pkg = require('./package.json');
-          if (!pkg.name.startsWith('@coco-research/')) {
-            console.error('package.json name must be scoped @coco-research/*');
+          if (pkg.name !== 'cocosuperintelligence') {
+            console.error('package.json name must be cocosuperintelligence');
             process.exit(1);
           }
           console.log('package.json valid:', pkg.name, pkg.version);

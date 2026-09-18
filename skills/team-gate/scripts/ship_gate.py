@@ -36,8 +36,16 @@ cannot write <path>: <reason>" line and exit 2, never a traceback.
 Required gates, by stage. Stages 1 to 6 each require their own
 gates/handoff-<n>.json (from check_artifacts.py) at exit 0; stage 6 also
 requires an "approval" receipt (raw human approval text) somewhere in the
-chain. Stage 7 requires gates/7-discover.json and gates/7.json. Stage 8
-requires gates/8.json. Stage 9 requires gates/9.json. Stage 10 requires
+chain. Stage 1 also requires gates/1-arch-baseline.json (arch_gate.py's
+baseline subcommand), but as a present-but-not-blocking gate: a missing
+file blocks stage 1 like any other missing gate, while a present file
+whose own exit is 2 (STALE, NOT_APPLICABLE or DISABLED) is informational
+only here, printed but never added to the blocking list, because R2/R3
+defer real enforcement of that status to stage 13's gates/13-arch.json,
+which reproduces it. Stage 3 also requires gates/3-arch-plan.json
+(arch_gate.py's plan-declare subcommand), an ordinary required gate like
+any other. Stage 7 requires gates/7-discover.json and gates/7.json. Stage
+8 requires gates/8.json. Stage 9 requires gates/9.json. Stage 10 requires
 gates/10.json; a NOT_APPLICABLE result there is an ordinary exit-2 gate
 like any other and blocks unless overridden. Stage 11 requires
 gates/8-verifier.json, gates/11.json, gates/11-matrix.json and
@@ -50,10 +58,22 @@ Stage 12 requires gates/12.json. Stage 13, the CI mirror, has no file of
 its own: it is satisfied when gates/7.json exits 0 and the ordered argv
 values under gates/8.json's "commands" equal the ordered argv values
 under gates/7-discover.json's "commands", proving the commands run
-locally were exactly the CI commands. Stage 14 is this check's own two
-remaining conditions: .team-ship/EVIDENCE.json records head equal to
-HEAD, and running render_evidence.py --check (as a subprocess with
-sys.executable) exits 0.
+locally were exactly the CI commands. Beside that comparison, stage 13
+also requires gates/13-arch-plan.json (arch_gate.py's plan-verify
+subcommand) and gates/13-arch.json (its conformance subcommand, which is
+where a STALE, NOT_APPLICABLE or DISABLED baseline status from stage 1 is
+actually enforced). Both arch files are evaluated by the ordinary
+per-item rule every other required gate uses, and both share one override
+name, "arch", covering either file's failure whether its own exit is 1 or
+2, the same way gates/10.json's coverage row is covered by the single
+name "10" regardless of whether its failure is UNVERIFIED at exit 2 or
+BLOCK at exit 1 (R3). Neither arch file is listed in REQUIRED_GATES: like
+the CI-mirror comparison itself, they are evaluated inline by
+_evaluate_stage13 rather than through the generic required-gates table,
+because stage 13 as a whole has never been a table-driven stage. Stage 14
+is this check's own two remaining conditions: .team-ship/EVIDENCE.json
+records head equal to HEAD, and running render_evidence.py --check (as a
+subprocess with sys.executable) exits 0.
 
 Every row that depends on receipts.jsonl (the stage 6 approval row, the
 stage 11 ordering check, block receipts, overrides) is meaningful only
@@ -136,8 +156,10 @@ MANIFEST_PATH = Path(__file__).resolve().parent.parent / "references" / "ship-ma
 # string is always accepted too.
 REQUIRED_GATES: List[Tuple[int, str, str]] = [
     (1, "handoff-1", "gates/handoff-1.json"),
+    (1, "1-arch-baseline", "gates/1-arch-baseline.json"),
     (2, "handoff-2", "gates/handoff-2.json"),
     (3, "handoff-3", "gates/handoff-3.json"),
+    (3, "3-arch-plan", "gates/3-arch-plan.json"),
     (4, "handoff-4", "gates/handoff-4.json"),
     (5, "handoff-5", "gates/handoff-5.json"),
     (6, "handoff-6", "gates/handoff-6.json"),
@@ -367,6 +389,17 @@ def _evaluate_gate_item(run_dir: Path, relpath: str, head: str) -> Dict[str, Any
     return {"state": "failed", "exit": file_exit, "head": file_head}
 
 
+def _is_informational_at_stage1(key: str, state: str) -> bool:
+    """R2/R3: gates/1-arch-baseline.json's exit-2 statuses (STALE,
+    NOT_APPLICABLE, DISABLED) are informational only at stage 1; real
+    enforcement happens at stage 13 through gates/13-arch.json, which
+    reproduces the same status. A missing baseline file still blocks
+    stage 1 like any other missing gate, and a head-drifted one is still
+    unconditional like any other; only the "unverified" (exit 2) state of
+    this one key is exempted from blocking here."""
+    return key == "1-arch-baseline" and state == "unverified"
+
+
 def _commands_argv(data: Optional[Dict[str, Any]]) -> Optional[List[Any]]:
     if data is None:
         return None
@@ -375,54 +408,112 @@ def _commands_argv(data: Optional[Dict[str, Any]]) -> Optional[List[Any]]:
 
 def _evaluate_stage13(
     run_dir: Path, head: str, overrides: List[Dict[str, Any]], used: set
-) -> Tuple[Dict[str, Any], Optional[Tuple[int, str, str]], Optional[Tuple[int, str, str]], Optional[Dict[str, Any]]]:
-    """Evaluate the CI-mirror stage. Returns (row, unconditional, blocking, override).
+) -> Tuple[
+    Dict[str, Any],
+    List[Tuple[int, str, str]],
+    List[Tuple[int, str, str]],
+    List[Tuple[int, str, Dict[str, Any]]],
+]:
+    """Evaluate stage 13: the CI-mirror comparison, plus, beside it, the
+    two architecture gate files gates/13-arch-plan.json and
+    gates/13-arch.json (arch_gate.py's plan-verify and conformance
+    subcommands). Returns (row, unconditional, blocking, overridden), each
+    now a list of zero or more (stage, name, reason-or-detail) entries,
+    since up to three independent checks live at this one stage.
 
-    Stage 13 has no gate file of its own; it compares two files already
-    required by stages 7 and 8. Neither unconditional nor blocking is
-    "never overridable" here, so both are returned through the ordinary
-    (stage, file, reason) shape used by the blocking list.
+    Stage 13 has no REQUIRED_GATES entries of its own; like the CI-mirror
+    comparison itself, the two arch files are evaluated inline here by the
+    ordinary per-item rule (missing, UNVERIFIED at exit 2, or BLOCK at any
+    other exit, all overridable, head-drift never overridable), and share
+    one override name, "arch", covering either or both. R3, the coverage
+    precedent: gates/10.json's NOT_APPLICABLE (exit 2) and UNVERIFIED
+    (exit 1) states are both overridden by the single name "10"; the arch
+    files here are both overridden by the single name "arch" the same way,
+    whichever of exit 1 or exit 2 either file carries.
     """
-    required = ["gates/7.json", "gates/8.json", "gates/7-discover.json"]
+    required = [
+        "gates/7.json", "gates/8.json", "gates/7-discover.json",
+        "gates/13-arch-plan.json", "gates/13-arch.json",
+    ]
+    unconditional: List[Tuple[int, str, str]] = []
+    blocking: List[Tuple[int, str, str]] = []
+    overridden_detail: List[Tuple[int, str, Dict[str, Any]]] = []
+    reasons: List[str] = []
+    present = True
+    row_exit = 0
+    head_ok = True
+    row_overridden = False
+
     seven = _evaluate_gate_item(run_dir, "gates/7.json", head)
     eight_data = _read_json_file(run_dir / "gates" / "8.json")
     discover_data = _read_json_file(run_dir / "gates" / "7-discover.json")
 
     if seven["state"] != "ok":
-        reason = f"gates/7.json is not exit 0 ({seven['state']})"
+        ci_reason = f"gates/7.json is not exit 0 ({seven['state']})"
     elif eight_data is None:
-        reason = "gates/8.json is missing"
+        ci_reason = "gates/8.json is missing"
     elif discover_data is None:
-        reason = "gates/7-discover.json is missing"
+        ci_reason = "gates/7-discover.json is missing"
     else:
         argv8 = _commands_argv(eight_data)
         argv_discover = _commands_argv(discover_data)
         if argv8 == argv_discover:
-            reason = None
+            ci_reason = None
         else:
-            reason = "commands differ between gates/8.json and gates/7-discover.json"
+            ci_reason = "commands differ between gates/8.json and gates/7-discover.json"
 
-    if reason is None:
-        row = {
-            "stage": CI_MIRROR_STAGE, "required": required, "present": True,
-            "exit": 0, "head_ok": True, "overridden": False, "reason": "PASS",
-        }
-        return row, None, None, None
+    if ci_reason is not None:
+        override = _override_for(overrides, used, str(CI_MIRROR_STAGE), "ci-mirror")
+        if override:
+            row_overridden = True
+            row_exit = 1
+            overridden_detail.append((CI_MIRROR_STAGE, "ci-mirror", override))
+            reasons.append(f"OVERRIDDEN: {override.get('instruction', '')}")
+        else:
+            present = False
+            row_exit = 1
+            blocking.append((CI_MIRROR_STAGE, "ci-mirror", ci_reason))
+            reasons.append(ci_reason)
 
-    override = _override_for(overrides, used, str(CI_MIRROR_STAGE), "ci-mirror")
-    if override:
-        row = {
-            "stage": CI_MIRROR_STAGE, "required": required, "present": True,
-            "exit": 1, "head_ok": True, "overridden": True,
-            "reason": f"OVERRIDDEN: {override.get('instruction', '')}",
-        }
-        return row, None, None, override
+    for key, relpath in (("arch", "gates/13-arch-plan.json"), ("arch", "gates/13-arch.json")):
+        info = _evaluate_gate_item(run_dir, relpath, head)
+        state = info["state"]
+        if state == "ok":
+            continue
+        if state == "head-drift":
+            present = False
+            head_ok = False
+            item_reason = f"head drift: {relpath} recorded {info['head']}, HEAD is {head}"
+            unconditional.append((CI_MIRROR_STAGE, relpath, item_reason))
+            reasons.append(item_reason)
+            continue
+
+        override = _override_for(overrides, used, key, str(CI_MIRROR_STAGE))
+        if override:
+            row_overridden = True
+            overridden_detail.append((CI_MIRROR_STAGE, key, override))
+            reasons.append(f"{relpath}: OVERRIDDEN")
+            continue
+
+        present = False
+        if state == "missing":
+            blocking.append((CI_MIRROR_STAGE, relpath, "missing"))
+            reasons.append(f"{relpath}: missing")
+        elif state == "unverified":
+            blocking.append((CI_MIRROR_STAGE, relpath, "UNVERIFIED (exit 2)"))
+            row_exit = row_exit or 2
+            reasons.append(f"{relpath}: UNVERIFIED (exit 2)")
+        else:
+            blocking.append((CI_MIRROR_STAGE, relpath, f"BLOCK (exit {info['exit']})"))
+            row_exit = info["exit"] if row_exit in (0, None) else row_exit
+            reasons.append(f"{relpath}: BLOCK (exit {info['exit']})")
 
     row = {
-        "stage": CI_MIRROR_STAGE, "required": required, "present": False,
-        "exit": 1, "head_ok": True, "overridden": False, "reason": reason,
+        "stage": CI_MIRROR_STAGE, "required": required, "present": present,
+        "exit": row_exit, "head_ok": head_ok, "overridden": row_overridden,
+        "reason": "; ".join(reasons) if reasons else "PASS",
     }
-    return row, None, (CI_MIRROR_STAGE, "ci-mirror", reason), None
+    return row, unconditional, blocking, overridden_detail
 
 
 def _evaluate_stage14(repo_root: Path, run_dir: Path, head: str) -> Tuple[Dict[str, Any], Optional[Tuple[int, str, str]]]:
@@ -581,6 +672,13 @@ def _compute_stages(
                 reasons.append(reason)
                 continue
 
+            if _is_informational_at_stage1(key, state):
+                data = _read_json_file(run_dir / relpath)
+                status = (data or {}).get("status") or "UNVERIFIED"
+                reason = f"{relpath}: {status} (informational at stage 1; enforced at stage 13)"
+                reasons.append(reason)
+                continue
+
             override = _override_for(overrides, used, key, str(stage))
             if override:
                 row_overridden = True
@@ -655,14 +753,11 @@ def _compute_stages(
             "head_ok": head_ok, "overridden": row_overridden, "reason": reason_text,
         }
 
-    row13, unconditional13, blocking13, override13 = _evaluate_stage13(run_dir, head, overrides, used)
+    row13, unconditional13, blocking13, overridden13 = _evaluate_stage13(run_dir, head, overrides, used)
     stage_rows[CI_MIRROR_STAGE] = row13
-    if unconditional13:
-        unconditional.append(unconditional13)
-    if blocking13:
-        blocking.append(blocking13)
-    if override13:
-        overridden_detail.append((CI_MIRROR_STAGE, "ci-mirror", override13))
+    unconditional.extend(unconditional13)
+    blocking.extend(blocking13)
+    overridden_detail.extend(overridden13)
 
     row14, unconditional14 = _evaluate_stage14(repo_root, run_dir, head)
     stage_rows[FINAL_STAGE] = row14
@@ -846,6 +941,8 @@ def cmd_stage(repo_root_arg: str, n: int) -> int:
                 failing.append(relpath)
                 extra_reasons.append(f"{relpath}: head drift")
                 continue
+            if _is_informational_at_stage1(key, state):
+                continue
             override = _override_for(overrides, used_overrides, key, str(stage))
             if override:
                 overridden.append(relpath)
@@ -874,11 +971,16 @@ def cmd_stage(repo_root_arg: str, n: int) -> int:
             failing.append("gates/9-recheck.json")
 
     if n > CI_MIRROR_STAGE:
-        row13, _, blocking13, _ = _evaluate_stage13(run_dir, head, overrides, used_overrides)
-        if not row13["present"] and not row13["overridden"]:
-            failing.append("ci-mirror")
-        elif row13["overridden"]:
-            overridden.append("ci-mirror")
+        row13, unconditional13, blocking13, overridden13 = _evaluate_stage13(
+            run_dir, head, overrides, used_overrides
+        )
+        overridden_names13 = {name for _, name, _ in overridden13}
+        for _, name, _ in unconditional13:
+            failing.append(name)
+        for _, name, _ in blocking13:
+            if name not in overridden_names13:
+                failing.append(name)
+        overridden.extend(sorted(overridden_names13))
 
     allowed = (
         not missing and not failing and chain_result.status == "ok"
@@ -924,6 +1026,9 @@ _SELF_TEST_CASES: List[Tuple[str, int, Optional[str]]] = [
     ("rounds-exceeded", 1, "exceeds 3"),
     ("rounds-overridden", 0, None),
     ("rounds-three", 0, None),
+    ("arch-not-applicable-blocks", 1, "13: gates/13-arch.json"),
+    ("arch-not-applicable-overridden", 0, None),
+    ("arch-plan-missing-path", 1, "gates/13-arch-plan.json"),
 ]
 
 
@@ -999,7 +1104,8 @@ def _self_test_fixed_cases(build_dir: Path) -> List[str]:
                     all_ok = False
                 lines.append(f"{name}-no-fabricated-approval: 'missing approval receipt' absent {n2_status}")
 
-            if name in ("all-green", "override-covers-9", "override-covers-approval"):
+            if name in ("all-green", "override-covers-9", "override-covers-approval",
+                        "arch-not-applicable-overridden"):
                 expected_verdict = "PASS" if name == "all-green" else "PASS_WITH_OVERRIDE"
                 gate14 = _run_gates14(state_root)
                 verdict_ok = gate14 is not None and gate14.get("verdict") == expected_verdict
@@ -1009,7 +1115,8 @@ def _self_test_fixed_cases(build_dir: Path) -> List[str]:
                 actual = gate14.get("verdict") if gate14 else None
                 lines.append(f"{name}-verdict: expected {expected_verdict} got {actual} {v_status}")
 
-                if name in ("override-covers-9", "override-covers-approval"):
+                if name in ("override-covers-9", "override-covers-approval",
+                            "arch-not-applicable-overridden"):
                     expected_instruction = f"{name} instruction text"
                     instruction_ok = gate14 is not None and expected_instruction in json.dumps(gate14)
                     i_status = "OK" if instruction_ok else "FAIL"
@@ -1026,15 +1133,16 @@ def _self_test_fixed_cases(build_dir: Path) -> List[str]:
                         all_ok = False
                     lines.append(f"all-green-status: gates/14.json carries derive_status fields {s_status}")
 
-        # stage-query-allowed / stage-query-blocked
-        for name, expected_exit, expects_missing in (
-            ("stage-query-allowed", 0, None),
-            ("stage-query-blocked", 1, "gates/7.json"),
+        # stage-query-allowed / stage-query-blocked / baseline-missing
+        for name, stage_n, expected_exit, expects_missing in (
+            ("stage-query-allowed", "8", 0, None),
+            ("stage-query-blocked", "8", 1, "gates/7.json"),
+            ("baseline-missing", "2", 1, "gates/1-arch-baseline.json"),
         ):
             repo, state_root = _copy_fixture(build_dir, name, tmp_root)
             env = dict(os.environ, TEAM_STATE_ROOT=str(state_root))
             proc = subprocess.run(
-                [sys.executable, __file__, "stage", "8", "--repo-root", str(repo)],
+                [sys.executable, __file__, "stage", stage_n, "--repo-root", str(repo)],
                 capture_output=True, text=True, timeout=60, env=env,
             )
             exit_ok = proc.returncode == expected_exit
@@ -1281,6 +1389,7 @@ def _self_test_real_pipeline() -> Tuple[List[str], bool]:
         team_ship = repo / ".team-ship"
         team_ship.mkdir(parents=True, exist_ok=True)
         (team_ship / "RESEARCH-BRIEF.md").write_text(_RESEARCH_BRIEF_TEXT)
+        (team_ship / "BROWNFIELD-MAP.md").write_text(_BROWNFIELD_MAP_TEXT)
         (team_ship / "ARCHITECTURE-OPTIONS.md").write_text(_ARCHITECTURE_OPTIONS_TEXT)
         (team_ship / "PLAN.md").write_text(_PLAN_TEXT)
         (team_ship / "ARCH-PLAN.json").write_text('{\n  "declaredAtCommit": null\n}\n')
@@ -1360,6 +1469,41 @@ def _self_test_real_pipeline() -> Tuple[List[str], bool]:
         )
         return lines, ok
 
+
+_BROWNFIELD_MAP_TEXT = """# Brownfield Map
+
+## Summary
+
+This map exists only to satisfy the ship-manifest's stage 1 output and
+stage 2 input requirement for this real end to end measurement run.
+The repository it describes is the all-pass run_gate fixture, copied
+fresh for this exercise, so the map is honest about a small, single
+commit codebase rather than a large brownfield estate.
+
+## Entry points
+
+The fixture repository ships one stub pytest binary and one CI workflow
+file naming a single test command; there is no application entry point
+beyond that stub, and this map says so plainly.
+
+## Impact
+
+No call graph of meaningful size exists in a fixture this small, so
+nothing here is ranked by importance or churn; the map records that the
+scan found a minimal, near empty codebase rather than inventing weight
+where none exists.
+
+## Tests
+
+The one discovered test command is the stub pytest invocation the fixture
+ships; no other test suite is present in this repository.
+
+## Limits
+
+This map is generated for measurement, not for a real change, so it
+carries none of the caveats a genuine brownfield scan would need about
+partial coverage or stale symbols.
+"""
 
 _RESEARCH_BRIEF_TEXT = """# Research Brief
 

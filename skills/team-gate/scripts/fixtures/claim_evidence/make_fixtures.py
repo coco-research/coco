@@ -416,6 +416,70 @@ def make_shipped_with_pr_receipt(output_root: Path) -> None:
                      "running check, so the 'shipped' claim holds and is not a finding.")
 
 
+CALC_INIT_PY = (
+    "def add(a, b):\n"
+    "    return a + b\n"
+    "\n\n"
+    "def mean(xs):\n"
+    "    return sum(xs) / len(xs)\n"
+)
+
+TEST_CALC_PY = (
+    "import unittest\n\n"
+    "from calc import add\n\n\n"
+    "class TestAdd(unittest.TestCase):\n"
+    "    def test_add(self):\n"
+    "        self.assertEqual(add(2, 3), 5)\n\n\n"
+    "if __name__ == \"__main__\":\n"
+    "    unittest.main()\n"
+)
+
+TEST_MEAN_PY = (
+    "import unittest\n\n"
+    "from calc import mean\n\n\n"
+    "class TestMean(unittest.TestCase):\n"
+    "    def test_mean(self):\n"
+    "        self.assertEqual(mean([2, 4]), 3)\n\n\n"
+    "if __name__ == \"__main__\":\n"
+    "    unittest.main()\n"
+)
+
+TEST_SH = "#!/usr/bin/env bash\npython3 -m unittest discover -s tests -v\n"
+
+CI_YML = (
+    "name: CI\n"
+    "on: [push]\n"
+    "jobs:\n"
+    "  test:\n"
+    "    runs-on: ubuntu-latest\n"
+    "    steps:\n"
+    "      - uses: actions/checkout@v4\n"
+    "      - run: bash scripts/test.sh\n"
+)
+
+
+def make_real_run_gate_repo(output_root: Path) -> None:
+    """A small git repository shaped like the team-gate pilot's: two passing
+    unittest tests, a bash test.sh runner, and a ci.yml discover source. No
+    .team-ship/ is committed; run_gate.py's discover/run/evidence are run for
+    real against a copy of this repository, so its EVIDENCE.json and
+    gates/8.json are run_gate.py's own output, not a hand-built schema.
+    Reused by every claim_evidence self-test case that needs real evidence
+    (the real-evidence-* and matrix-tests-* cases): each writes its own
+    .team-ship/PLAN.md and/or PR-BODY.md into a fresh copy at self-test time.
+    """
+    build_dir = _new_fixture(output_root, "real-run-gate-repo")
+    _write(build_dir, "calc/__init__.py", CALC_INIT_PY)
+    _write(build_dir, "tests/test_calc.py", TEST_CALC_PY)
+    _write(build_dir, "tests/test_mean.py", TEST_MEAN_PY)
+    _write(build_dir, "scripts/test.sh", TEST_SH)
+    _write(build_dir, ".github/workflows/ci.yml", CI_YML)
+    _finish_fixture(output_root, "real-run-gate-repo", build_dir,
+                     "Two passing unittest tests discovered via ci.yml + scripts/test.sh, "
+                     "for self-test cases that run run_gate.py for real rather than "
+                     "hand-building its output.")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate claim_evidence fixtures")
     parser.add_argument("--out", type=Path, default=None, help="Output root directory")
@@ -444,6 +508,7 @@ def main() -> None:
     make_ci_green_without_stage_13(output_root)
     make_shipped_without_pr(output_root)
     make_shipped_with_pr_receipt(output_root)
+    make_real_run_gate_repo(output_root)
     print("Fixtures generated successfully")
 
 

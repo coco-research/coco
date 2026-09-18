@@ -5,7 +5,7 @@ description: "Use when the user wants an idea taken from concept to a shipped, r
 
 > Called by team.md router when action is `ship`.
 > The ultimate automation: takes a natural language idea and delivers a built, reviewed, verified product.
-> Uses Option B: one approval gate after plan, then full autonomy for build+verify.
+> Approval model: one human approval gate after the plan, then the build and verification stages run without further prompts.
 
 ## Role Selection Bias
 

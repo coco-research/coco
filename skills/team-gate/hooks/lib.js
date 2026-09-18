@@ -95,6 +95,31 @@ function hooksMode(runDir) {
   return 'observe';
 }
 
+// Per-guard mode. run.json's flags is the raw positional list
+// gate_state.py start received. "hooks=observe|enforce" is the run-wide
+// default; a "hooks.<guard>=observe|enforce" token overrides it for one
+// guard, so a deny run can arm exactly the guard under test. That is what
+// the brief's tasks 16 to 18 ask for: one hook, one deliberate violation.
+// Guard keys: stage, artifact, stop. An unrecognised key is ignored, so a
+// typo cannot silently arm or disarm anything.
+// Throws under the same fail-closed rule as hooksMode when run.json cannot
+// be read or parsed.
+function guardMode(runDir, guard) {
+  const raw = fs.readFileSync(path.join(runDir, 'run.json'), 'utf8');
+  const runObj = JSON.parse(raw);
+  const flags = runObj.flags;
+  let override = null;
+  if (Array.isArray(flags)) {
+    const wanted = String(guard);
+    for (const f of flags) {
+      const m = /^hooks\.([a-z-]+)=(observe|enforce)$/.exec(String(f));
+      if (m && m[1] === wanted) override = m[2];
+    }
+  }
+  if (override !== null) return override;
+  return hooksMode(runDir);
+}
+
 function readRunId(runDir) {
   try {
     const raw = fs.readFileSync(path.join(runDir, 'run.json'), 'utf8');
@@ -243,6 +268,7 @@ module.exports = {
   stateRoot,
   findRun,
   hooksMode,
+  guardMode,
   readRunId,
   appendReceipt,
   readReceipts,

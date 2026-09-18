@@ -157,7 +157,7 @@ function main() {
 
   let mode;
   try {
-    mode = lib.hooksMode(runDir);
+    mode = lib.guardMode(runDir, 'artifact');
   } catch (err) {
     // Cannot read the state directory. We cannot confirm enforce mode
     // either (that is exactly what failed to read), so we stay silent

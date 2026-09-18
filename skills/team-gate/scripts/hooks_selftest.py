@@ -88,13 +88,13 @@ def git_head(repo: Path) -> str:
     return proc.stdout.strip()
 
 
-def start_run(repo: Path, state_root: Path, hooks_mode: str = "observe", command: str = "ship"):
+def start_run(repo: Path, state_root: Path, hooks_mode: str = "observe", command: str = "ship",
+              extra_flags=None):
     env = os.environ.copy()
     env["TEAM_STATE_ROOT"] = str(state_root)
-    proc = subprocess.run(
-        [sys.executable, str(GATE_STATE_PY), "start", str(repo), command, f"hooks={hooks_mode}"],
-        capture_output=True, text=True, env=env,
-    )
+    argv = [sys.executable, str(GATE_STATE_PY), "start", str(repo), command, f"hooks={hooks_mode}"]
+    argv.extend(extra_flags or [])
+    proc = subprocess.run(argv, capture_output=True, text=True, env=env)
     if proc.returncode != 0:
         raise RuntimeError(f"gate_state start failed: {proc.stderr}")
     run_id = proc.stdout.strip()
@@ -1040,6 +1040,131 @@ def command_names_a_team_gate_file(command: str) -> bool:
     return any(f in (command or "") for f in team_gate_files)
 
 
+def test_guard_modes() -> bool:
+    """Per-guard arming, for the deny runs of tasks 16 to 18.
+
+    hooks=<mode> stays the run-wide default; hooks.<guard>=<mode> overrides it
+    for one guard, so a run can arm exactly the hook under test and leave the
+    others observing. Each case starts one run and drives the hook under test,
+    asserting the overridden guard denies while a sibling guard does not.
+    """
+    all_ok = True
+
+    # run-wide observe, the artifact guard armed: it denies, the stage guard does not
+    tmp = Path(tempfile.mkdtemp(prefix="tgm_artifact_"))
+    repo = make_repo(tmp)
+    state_root = tmp / "state"
+    _, run_dir = start_run(repo, state_root, "observe", extra_flags=["hooks.artifact=enforce"])
+    payload = load_fixture("team-artifact-guard", "write-evidence-md")
+    payload["cwd"] = str(repo)
+    proc = run_hook("team-artifact-guard.js", payload, repo, state_root)
+    stdout_json = None
+    try:
+        stdout_json = json.loads(proc.stdout)
+    except Exception:
+        pass
+    ok = (proc.returncode == 0 and stdout_json is not None
+          and stdout_json.get("hookSpecificOutput", {}).get("permissionDecision") == "deny")
+    all_ok &= report("guard-modes", "artifact-armed-in-observe-run",
+                     "exit 0, artifact guard denies",
+                     f"exit {proc.returncode}, stdout {proc.stdout!r}", ok)
+
+    seed_all_green(repo, run_dir, state_root, skip={"gates/8.json"})
+    payload = load_fixture("team-stage-guard", "pr-create-blocked")
+    payload["cwd"] = str(repo)
+    proc = run_hook("team-stage-guard.js", payload, repo, state_root)
+    cert = latest(run_dir, "certified", lambda r: r["detail"]["tool_use_id"] == payload["tool_use_id"])
+    ok = (proc.returncode == 0 and proc.stdout == "" and cert is not None
+          and cert["detail"]["decision"] == "would-deny")
+    all_ok &= report("guard-modes", "artifact-armed-stage-still-observe",
+                     "exit 0, no stdout, certified would-deny",
+                     f"exit {proc.returncode}, cert {cert}", ok)
+    shutil.rmtree(tmp, ignore_errors=True)
+
+    # run-wide observe, the stage guard armed: the PR gate denies, the Stop guard does not
+    tmp = Path(tempfile.mkdtemp(prefix="tgm_stage_"))
+    repo = make_repo(tmp)
+    state_root = tmp / "state"
+    _, run_dir = start_run(repo, state_root, "observe", extra_flags=["hooks.stage=enforce"])
+    seed_all_green(repo, run_dir, state_root, skip={"gates/8.json"})
+    payload = load_fixture("team-stage-guard", "pr-create-blocked")
+    payload["cwd"] = str(repo)
+    proc = run_hook("team-stage-guard.js", payload, repo, state_root)
+    stdout_json = None
+    try:
+        stdout_json = json.loads(proc.stdout)
+    except Exception:
+        pass
+    reason = ""
+    if stdout_json:
+        reason = stdout_json.get("hookSpecificOutput", {}).get("permissionDecisionReason", "")
+    ok = (proc.returncode == 0 and stdout_json is not None
+          and stdout_json.get("hookSpecificOutput", {}).get("permissionDecision") == "deny"
+          and "gates/8.json" in reason)
+    all_ok &= report("guard-modes", "stage-armed-in-observe-run",
+                     "exit 0, deny naming gates/8.json",
+                     f"exit {proc.returncode}, reason {reason!r}", ok)
+
+    stop_payload = load_fixture("team-stop-guard", "in-flight-first-stop")
+    stop_payload["cwd"] = str(repo)
+    proc = run_hook("team-stop-guard.js", stop_payload, repo, state_root)
+    checked = latest(run_dir, "stop-checked")
+    ok = (proc.returncode == 0 and proc.stdout == "" and checked is not None
+          and checked["detail"]["decision"] == "would-block")
+    all_ok &= report("guard-modes", "stage-armed-stop-still-observe",
+                     "exit 0, no stdout, stop-checked would-block",
+                     f"exit {proc.returncode}, checked {checked}", ok)
+    shutil.rmtree(tmp, ignore_errors=True)
+
+    # run-wide enforce, the Stop guard disarmed: it records would-block, artifact still denies
+    tmp = Path(tempfile.mkdtemp(prefix="tgm_stop_"))
+    repo = make_repo(tmp)
+    state_root = tmp / "state"
+    _, run_dir = start_run(repo, state_root, "enforce", extra_flags=["hooks.stop=observe"])
+    seed_all_green(repo, run_dir, state_root, skip={"gates/8.json"})
+    stop_payload = load_fixture("team-stop-guard", "in-flight-first-stop")
+    stop_payload["cwd"] = str(repo)
+    proc = run_hook("team-stop-guard.js", stop_payload, repo, state_root)
+    checked = latest(run_dir, "stop-checked")
+    ok = (proc.returncode == 0 and proc.stdout == "" and checked is not None
+          and checked["detail"]["decision"] == "would-block")
+    all_ok &= report("guard-modes", "stop-disarmed-in-enforce-run",
+                     "exit 0, no stdout, stop-checked would-block",
+                     f"exit {proc.returncode}, checked {checked}", ok)
+
+    payload = load_fixture("team-artifact-guard", "write-evidence-md")
+    payload["cwd"] = str(repo)
+    proc = run_hook("team-artifact-guard.js", payload, repo, state_root)
+    stdout_json = None
+    try:
+        stdout_json = json.loads(proc.stdout)
+    except Exception:
+        pass
+    ok = (proc.returncode == 0 and stdout_json is not None
+          and stdout_json.get("hookSpecificOutput", {}).get("permissionDecision") == "deny")
+    all_ok &= report("guard-modes", "stop-disarmed-artifact-still-enforced",
+                     "exit 0, artifact guard denies",
+                     f"exit {proc.returncode}, stdout {proc.stdout!r}", ok)
+    shutil.rmtree(tmp, ignore_errors=True)
+
+    # an unrecognised guard key changes nothing
+    tmp = Path(tempfile.mkdtemp(prefix="tgm_typo_"))
+    repo = make_repo(tmp)
+    state_root = tmp / "state"
+    _, run_dir = start_run(repo, state_root, "observe", extra_flags=["hooks.stagee=enforce"])
+    payload = load_fixture("team-artifact-guard", "write-evidence-md")
+    payload["cwd"] = str(repo)
+    proc = run_hook("team-artifact-guard.js", payload, repo, state_root)
+    cert = latest(run_dir, "certified", lambda r: r["detail"]["tool_use_id"] == payload["tool_use_id"])
+    ok = (proc.returncode == 0 and proc.stdout == "" and cert is not None
+          and cert["detail"]["decision"] == "would-deny")
+    all_ok &= report("guard-modes", "unknown-guard-key-ignored",
+                     "exit 0, no stdout, certified would-deny",
+                     f"exit {proc.returncode}, cert {cert}", ok)
+    shutil.rmtree(tmp, ignore_errors=True)
+
+    return all_ok
+
 def main() -> int:
     if not FIXTURES_DIR.is_dir():
         print("ERROR: fixtures directory not found:", FIXTURES_DIR, file=sys.stderr)
@@ -1053,6 +1178,7 @@ def main() -> int:
         test_no_active_run,
         test_malformed_json,
         test_install,
+        test_guard_modes,
     ]
 
     all_ok = True

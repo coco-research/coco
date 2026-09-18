@@ -44,7 +44,7 @@ function main() {
 
   let mode;
   try {
-    mode = lib.hooksMode(runDir);
+    mode = lib.guardMode(runDir, 'stop');
   } catch (err) {
     try {
       lib.blockReceipt(repoRoot, `${HOOK_NAME}: ${err && err.message ? err.message : err}`, { hook: HOOK_NAME }, raw);

@@ -50,10 +50,14 @@ file, and the red proof is invalid-red with `attribution_frame` naming that
 implementation path.
 
 **never-red.** The base commit already has a correct implementation and a
-passing test. HEAD only adds a second test; the implementation never changes.
-Reverting the implementation to base leaves it identical to HEAD, so the new
-test passes even with the implementation reverted, which prove_red reports as
-never-red.
+passing test. HEAD only adds a second test; add(), the function under test,
+never changes. HEAD also touches an unrelated, unimported module
+(`src/util.py`) purely so the diff carries an implementation path and this
+fixture stays on the ordinary red-green proof rather than stub mode, which
+tests-only-exercises below now covers for the genuinely tests-only shape.
+Reverting the implementation to base leaves add() identical to HEAD, so the
+new test passes even with the implementation reverted, which prove_red
+reports as never-red.
 
 **wrong-reason-syntax-error.** The base commit's implementation has a syntax
 error, a missing colon. HEAD fixes the colon and adds the test. Reverting
@@ -88,3 +92,33 @@ an uncommitted line to `src/calc.py` without committing it. Without
 function takes a required parameter, `value`. This machine has no
 fixture-aware runner, so `_run-one` cannot call the function and reports it
 UNRUNNABLE instead of pass, fail, or error.
+
+**tests-only-exercises.** The base commit's `src/calc.py` is already correct
+and unchanged at HEAD; HEAD only adds a `unittest.TestCase` test that calls
+it. Because the diff carries no implementation path, prove switches to stub
+mode: `src/calc.py` is resolved from the test's absolute import, its `add`
+function is overwritten with a stub that raises, and the test fails against
+that stub. Exit 0, one test, class valid-red-stub, mode stub.
+
+**tests-only-no-import.** HEAD adds a test that asserts on a literal and
+imports nothing from the worktree. Stub mode resolves zero implementation
+modules for that file, so the test is never-red, reason "exercises no
+implementation module", decided before any run.
+
+**tests-only-still-passes.** HEAD adds a test that imports `src/calc.py` but
+asserts only on a constant the test defines itself. The import resolves, so
+the test does run against the stubbed module, but never calls the stubbed
+function, so it passes anyway. Reported never-red with the same reason as
+tests-only-no-import, this time from an actual run rather than a static
+skip.
+
+**tests-only-relative-import.** HEAD adds `pkg/test_calc.py`, importing its
+sibling `pkg/calc.py` (unchanged since base) with `from .calc import add`.
+The relative import resolves against the test file's own directory (level 1
+climbs zero extra parents), stubs `pkg/calc.py`, and the test fails against
+the stub. Exit 0, class valid-red-stub, mode stub.
+
+**mixed-diff-uses-red-green.** Same shape as proper-red-green (a bug fixed
+in `src/calc.py` plus a new test in the same HEAD commit). The diff carries
+an implementation path, so prove stays on the ordinary red-green proof
+regardless of the new test, mode red-green.

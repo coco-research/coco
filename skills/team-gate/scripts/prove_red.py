@@ -26,6 +26,21 @@ Never mutates the caller's worktree. All git writes (checkout, apply, worktree
 add/remove/prune) happen either as read-only queries against the repository root
 through gr(), or as writes scoped to a throwaway detached worktree through gw(),
 which refuses to run against the repository root.
+
+Stub mode. A tests-only change (the enumerated diff between --base and HEAD
+carries no implementation path, only test and support paths) has nothing for
+the ordinary red-green proof to revert, so prove instead resolves, per test
+file, which implementation modules the file imports (an AST scan of its
+import and from-import statements), overwrites each resolved module's source
+in the throwaway worktree with a stub whose top-level names raise
+NotImplementedError, and runs the test against that. A failure is
+valid-red-stub; a pass is never-red with the reason "exercises no
+implementation module", the same reason given, before any run, to a test
+file that imports no implementation module at all. Every test record in
+gates/9.json carries a mode field, "red-green" or "stub", and the run picks
+one mode for the whole invocation from the diff, never a mix: any
+implementation path in the diff keeps the ordinary red-green proof, even
+alongside new tests.
 """
 
 import argparse
@@ -315,6 +330,7 @@ def _zero_counts() -> Dict[str, int]:
     return {
         "tests": 0, "pass": 0, "block": 0, "unverified": 0, "unrunnable": 0,
         "never_red": 0, "invalid_red": 0, "green_fails": 0, "inseparable": 0,
+        "red_green": 0, "stub": 0,
     }
 
 
@@ -463,6 +479,191 @@ def classify_red(result: Dict[str, Any], wt: Path, added_impl: Set[str], modifie
     return red
 
 
+def _scan_test_imports(source: str) -> List[Tuple[int, Optional[str], List[str]]]:
+    """Return (level, module, names) for every import statement anywhere in source.
+
+    A plain `import a.b.c` yields (0, "a.b.c", []). A `from a.b import c, d`
+    yields (0, "a.b", ["c", "d"]). A relative `from .calc import add` yields
+    (1, "calc", ["add"]); a relative `from . import calc` yields (1, None,
+    ["calc"]), since there is no dotted module and each imported name is
+    itself a candidate submodule. ast.walk covers imports nested inside
+    functions, not only module-level ones. A SyntaxError propagates.
+    """
+    tree = ast.parse(source)
+    out: List[Tuple[int, Optional[str], List[str]]] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                out.append((0, alias.name, []))
+        elif isinstance(node, ast.ImportFrom):
+            out.append((node.level, node.module, [a.name for a in node.names]))
+    return out
+
+
+def _resolve_import_to_impl_path(level: int, module: Optional[str], names: List[str],
+                                  test_file_rel: str, wt: Path) -> List[str]:
+    """Resolve one import statement to worktree-relative implementation paths.
+
+    An absolute import (level 0) resolves the dotted module name from the
+    worktree root. A relative import resolves against the test file's own
+    directory: level 1 is that directory, each additional level climbs one
+    more parent, matching the dotted module name _run_one_subprocess derives
+    from the same path. When the import has no dotted module (`from . import
+    x`), each imported name is itself the candidate module segment. A dotted
+    name that resolves to neither `<name>.py` nor `<name>/__init__.py` under
+    the worktree, or whose classify_path is not implementation, is dropped.
+    """
+    if level == 0:
+        if not module:
+            return []
+        base_dir = wt
+        candidates_dotted = [module]
+    else:
+        base_dir = wt / Path(test_file_rel).parent
+        for _ in range(level - 1):
+            base_dir = base_dir.parent
+        candidates_dotted = [module] if module else list(names)
+
+    resolved: List[str] = []
+    for dotted in candidates_dotted:
+        as_path = dotted.replace(".", "/")
+        for suffix in (as_path + ".py", as_path + "/__init__.py"):
+            candidate = base_dir / suffix
+            if not candidate.is_file():
+                continue
+            try:
+                rel_to_wt = str(candidate.resolve().relative_to(wt.resolve()))
+            except ValueError:
+                continue
+            if classify_path(rel_to_wt) == "implementation":
+                resolved.append(rel_to_wt)
+                break
+    return resolved
+
+
+_STUB_SENTINEL_CLASS = (
+    "class _ProveRedStubSentinel:\n"
+    "    def __call__(self, *args, **kwargs):\n"
+    "        raise NotImplementedError(\"stubbed by prove_red\")\n"
+    "\n"
+    "    def __getattr__(self, name):\n"
+    "        raise NotImplementedError(\"stubbed by prove_red\")\n"
+    "\n"
+    "\n"
+)
+
+
+def stub_module_source(source: str) -> str:
+    """Build stub source for one implementation module, by AST, for stub-mode red proof.
+
+    Every top-level function or async function becomes a same-named function
+    that raises NotImplementedError("stubbed by prove_red") on any call, with
+    its parameters widened to *args, **kwargs since only the raise matters.
+    Every top-level class becomes a same-named class whose methods (the
+    FunctionDef and AsyncFunctionDef nodes directly in its body) each raise
+    the same error; a class with no methods becomes an empty class. Every
+    top-level simple assignment (Assign or AnnAssign to a single Name)
+    becomes an assignment to a shared sentinel object that raises the same
+    error on call and on attribute access, chosen over a bespoke descriptor
+    per name because one sentinel class covers both uses. A SyntaxError from
+    ast.parse propagates to the caller.
+    """
+    tree = ast.parse(source)
+    body_parts: List[str] = []
+    needs_sentinel = False
+
+    for node in tree.body:
+        if isinstance(node, ast.AsyncFunctionDef):
+            body_parts.append(
+                f"async def {node.name}(*args, **kwargs):\n"
+                f"    raise NotImplementedError(\"stubbed by prove_red\")\n\n\n"
+            )
+        elif isinstance(node, ast.FunctionDef):
+            body_parts.append(
+                f"def {node.name}(*args, **kwargs):\n"
+                f"    raise NotImplementedError(\"stubbed by prove_red\")\n\n\n"
+            )
+        elif isinstance(node, ast.ClassDef):
+            methods = [
+                item.name for item in node.body
+                if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
+            ]
+            if methods:
+                method_bodies = "".join(
+                    f"    def {m}(self, *args, **kwargs):\n"
+                    f"        raise NotImplementedError(\"stubbed by prove_red\")\n\n"
+                    for m in methods
+                )
+            else:
+                method_bodies = "    pass\n\n"
+            body_parts.append(f"class {node.name}:\n{method_bodies}\n")
+        elif isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            needs_sentinel = True
+            body_parts.append(f"{node.targets[0].id} = _ProveRedStubSentinel()\n")
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            needs_sentinel = True
+            body_parts.append(f"{node.target.id} = _ProveRedStubSentinel()\n")
+
+    prefix = _STUB_SENTINEL_CLASS if needs_sentinel else ""
+    return prefix + "".join(body_parts)
+
+
+def classify_stub_red(result: Dict[str, Any], wt: Path) -> Dict[str, Any]:
+    """Classify one stub-phase _run-one result into never-red, valid-red-stub, or unrunnable.
+
+    Stub mode has no implementation-path revert, so unlike classify_red, an
+    attribution frame landing inside the stub module itself is not
+    invalid-red: the stub module is deliberately rewritten to raise, and
+    landing there is exactly the proof this mode looks for. Any frame inside
+    the worktree, test or stub alike, therefore counts as valid-red-stub; no
+    frame under the worktree at all is invalid-red naming the last frame's
+    file, and a pass is never-red with the fixed reason below.
+    """
+    outcome = result.get("outcome")
+    exc_type = result.get("exc_type")
+    message = (result.get("message") or "")[:2000]
+    frames = result.get("frames") or []
+    last_frame = frames[-1] if frames else None
+
+    red: Dict[str, Any] = {
+        "class": None, "exc_type": exc_type, "message": message,
+        "last_frame": last_frame, "attribution_frame": None, "resolvedTo": None,
+    }
+
+    if outcome == "pass":
+        red["class"] = "never-red"
+        red["message"] = "exercises no implementation module"
+        return red
+
+    if outcome == "unrunnable":
+        red["class"] = "unrunnable"
+        return red
+
+    attribution_frame = None
+    for frame in reversed(frames):
+        if _relative_to_worktree(frame["file"], wt) is not None:
+            attribution_frame = frame
+            break
+    red["attribution_frame"] = attribution_frame
+    if attribution_frame is not None:
+        red["class"] = "valid-red-stub"
+    else:
+        red["class"] = "invalid-red"
+        outside_file = last_frame["file"] if last_frame else "<no frames recorded>"
+        red["message"] = f"no frame under the worktree; last frame {outside_file}"
+    return red
+
+
+def _never_red_no_import() -> Dict[str, Any]:
+    """A never-red classification for a test file that imports no implementation module,
+    determined statically from the AST scan alone, before any run."""
+    return {
+        "class": "never-red", "exc_type": None,
+        "message": "exercises no implementation module",
+        "last_frame": None, "attribution_frame": None, "resolvedTo": None,
+    }
+
+
 def cmd_enumerate(args: argparse.Namespace) -> int:
     """List every new or modified test function between base and HEAD."""
     repo_root = Path(args.repo_root).resolve()
@@ -553,6 +754,12 @@ def cmd_prove(args: argparse.Namespace) -> int:
         runnable = [t for t in enum_result["tests"] if t["kind"] != "implementation"]
         inseparable = [t for t in enum_result["tests"] if t["kind"] == "implementation"]
 
+        # R13: a tests-only change (no implementation path in the diff) has nothing
+        # to revert, so the red proof switches to stubbing every implementation
+        # module the new test files import instead of reverting the diff.
+        stub_mode = not enum_result["implementation_paths"]
+        mode_word = "stub" if stub_mode else "red-green"
+
         gate_obj: Dict[str, Any] = {
             "gate": "tdd-redgreen",
             "argv": sys.argv,
@@ -586,7 +793,8 @@ def cmd_prove(args: argparse.Namespace) -> int:
             gate_obj.update({
                 "worktree": None, "revert": None,
                 "tests": [
-                    {**_base_test_fields(t), "green": None, "red": None, "verdict": "UNVERIFIED"}
+                    {**_base_test_fields(t), "green": None, "red": None,
+                     "verdict": "UNVERIFIED", "mode": mode_word}
                     for t in inseparable
                 ],
                 "counts": counts, "exit": 2,
@@ -639,8 +847,34 @@ def cmd_prove(args: argparse.Namespace) -> int:
                 if apply_proc.returncode != 0:
                     raise GateExit(2, f"cannot apply dirty patch: {apply_proc.stderr.strip()}")
 
+            # Stub mode resolves, per test file, which implementation modules it
+            # imports; a file that imports none is never-red before any run.
+            stub_targets: Dict[str, List[str]] = {}
+            never_red_no_import: Set[str] = set()
+            if stub_mode:
+                file_import_cache: Dict[str, List[str]] = {}
+                for t in runnable:
+                    f = t["file"]
+                    if f not in file_import_cache:
+                        try:
+                            test_src = (wt / f).read_text(encoding="utf-8")
+                            imports = _scan_test_imports(test_src)
+                        except (OSError, SyntaxError):
+                            imports = []
+                        found: List[str] = []
+                        for level, module, names in imports:
+                            for p in _resolve_import_to_impl_path(level, module, names, f, wt):
+                                if p not in found:
+                                    found.append(p)
+                        file_import_cache[f] = found
+                    stub_targets[t["nodeid"]] = file_import_cache[f]
+                    if not file_import_cache[f]:
+                        never_red_no_import.add(t["nodeid"])
+
             green_info: Dict[str, Dict[str, Any]] = {}
             for t in runnable:
+                if t["nodeid"] in never_red_no_import:
+                    continue
                 r = _run_one_subprocess(python, wt, t["file"], t["qualname"])
                 green_info[t["nodeid"]] = {
                     "outcome": r.get("outcome"),
@@ -648,27 +882,34 @@ def cmd_prove(args: argparse.Namespace) -> int:
                     "message": r.get("message"),
                 }
 
-            for status, path, old_path in changed:
-                if classify_path(path) != "implementation":
-                    continue
-                if status == "A":
-                    target = wt / path
-                    if target.exists():
-                        target.unlink()
-                        _remove_empty_parents(wt, target.parent)
-                elif status == "M":
-                    gw(wt, repo_root, "checkout", base, "--", path)
-                elif status == "R":
-                    target = wt / path
-                    if target.exists():
-                        target.unlink()
-                        _remove_empty_parents(wt, target.parent)
-                    gw(wt, repo_root, "checkout", base, "--", old_path)
-                elif status == "D":
-                    gw(wt, repo_root, "checkout", base, "--", path)
+            if stub_mode:
+                stub_paths = sorted({p for paths in stub_targets.values() for p in paths})
+                for rel_path in stub_paths:
+                    target = wt / rel_path
+                    target.write_text(stub_module_source(target.read_text(encoding="utf-8")), encoding="utf-8")
+                revert_info = {"stubbed": stub_paths}
+            else:
+                for status, path, old_path in changed:
+                    if classify_path(path) != "implementation":
+                        continue
+                    if status == "A":
+                        target = wt / path
+                        if target.exists():
+                            target.unlink()
+                            _remove_empty_parents(wt, target.parent)
+                    elif status == "M":
+                        gw(wt, repo_root, "checkout", base, "--", path)
+                    elif status == "R":
+                        target = wt / path
+                        if target.exists():
+                            target.unlink()
+                            _remove_empty_parents(wt, target.parent)
+                        gw(wt, repo_root, "checkout", base, "--", old_path)
+                    elif status == "D":
+                        gw(wt, repo_root, "checkout", base, "--", path)
 
-            revert_status = gw(wt, repo_root, "status", "--porcelain")
-            revert_info = {"diffstat": revert_status.stdout}
+                revert_status = gw(wt, repo_root, "status", "--porcelain")
+                revert_info = {"diffstat": revert_status.stdout}
 
             counts = _zero_counts()
             counts["tests"] = len(enum_result["tests"])
@@ -676,23 +917,33 @@ def cmd_prove(args: argparse.Namespace) -> int:
             counts["unverified"] = len(inseparable)
 
             tests_output: List[Dict[str, Any]] = [
-                {**_base_test_fields(t), "green": None, "red": None, "verdict": "UNVERIFIED"}
+                {**_base_test_fields(t), "green": None, "red": None,
+                 "verdict": "UNVERIFIED", "mode": mode_word}
                 for t in inseparable
             ]
 
             for t in runnable:
                 nodeid = t["nodeid"]
-                r = _run_one_subprocess(python, wt, t["file"], t["qualname"])
-                red = classify_red(r, wt, added_impl, modified_impl, repo_root, base)
-                g = green_info[nodeid]
 
-                if g.get("outcome") == "unrunnable" or red["class"] == "unrunnable":
+                if nodeid in never_red_no_import:
+                    g = None
+                    red = _never_red_no_import()
+                elif stub_mode:
+                    r = _run_one_subprocess(python, wt, t["file"], t["qualname"])
+                    red = classify_stub_red(r, wt)
+                    g = green_info[nodeid]
+                else:
+                    r = _run_one_subprocess(python, wt, t["file"], t["qualname"])
+                    red = classify_red(r, wt, added_impl, modified_impl, repo_root, base)
+                    g = green_info[nodeid]
+
+                if g is not None and (g.get("outcome") == "unrunnable" or red["class"] == "unrunnable"):
                     verdict = "UNRUNNABLE"
                     counts["unrunnable"] += 1
                 else:
                     is_never_red = red["class"] == "never-red"
                     is_invalid_red = red["class"] == "invalid-red"
-                    is_green_fail = g.get("outcome") != "pass"
+                    is_green_fail = g is not None and g.get("outcome") != "pass"
                     if is_never_red:
                         counts["never_red"] += 1
                     if is_invalid_red:
@@ -706,19 +957,24 @@ def cmd_prove(args: argparse.Namespace) -> int:
                         verdict = "PASS"
                         counts["pass"] += 1
 
-                tests_output.append({**_base_test_fields(t), "green": g, "red": red, "verdict": verdict})
+                counts["stub" if stub_mode else "red_green"] += 1
+                tests_output.append({
+                    **_base_test_fields(t), "green": g, "red": red,
+                    "verdict": verdict, "mode": mode_word,
+                })
 
+            mode_tally = f"{counts['red_green']} red-green, {counts['stub']} stub"
             if counts["unrunnable"] > 0:
                 exit_code = 2
-                summary = f"UNRUNNABLE: {counts['unrunnable']} test(s) could not be run"
+                summary = f"UNRUNNABLE: {counts['unrunnable']} test(s) could not be run ({mode_tally})"
                 verdict_word = "UNRUNNABLE"
             elif counts["block"] > 0:
                 exit_code = 1
-                summary = f"BLOCK: {counts['block']} test(s) failed red-green proof"
+                summary = f"BLOCK: {counts['block']} test(s) failed red-green proof ({mode_tally})"
                 verdict_word = "BLOCK"
             else:
                 exit_code = 0
-                summary = f"PASS: {counts['pass']} test(s) proved red then green"
+                summary = f"PASS: {counts['pass']} test(s) proved red then green ({mode_tally})"
                 verdict_word = "PASS"
 
             gate_obj.update({
@@ -928,6 +1184,11 @@ _FIXTURE_EXPECTATIONS: List[Tuple[str, int, List[str]]] = [
     ("not-applicable-no-new-tests", 2, ["NOT_APPLICABLE"]),
     ("dirty-tree", 2, ["dirty"]),
     ("unrunnable-parametrised", 2, ["unrunnable=1"]),
+    ("tests-only-exercises", 0, ["red_ok=1"]),
+    ("tests-only-no-import", 1, ["never_red=1"]),
+    ("tests-only-still-passes", 1, ["never_red=1"]),
+    ("tests-only-relative-import", 0, ["red_ok=1"]),
+    ("mixed-diff-uses-red-green", 0, ["red_ok=1"]),
 ]
 
 _NO_GATE_FIXTURES = {"dirty-tree"}

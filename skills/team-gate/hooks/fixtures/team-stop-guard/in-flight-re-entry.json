@@ -1,0 +1,8 @@
+{
+  "hook_event_name": "Stop",
+  "session_id": "fixture-session",
+  "permission_mode": "auto",
+  "stop_hook_active": true,
+  "background_tasks": [],
+  "last_assistant_message": "Working on stage 2."
+}

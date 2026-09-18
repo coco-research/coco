@@ -262,6 +262,8 @@ def verify_chain(run_dir: Path) -> ChainResult:
     4. Every record's prev_hash links correctly
     5. Seq is contiguous from 1
     6. Every gates/*.json file is named by some gate-result receipt
+    7. For each distinct gate_file, only the receipt with highest seq is verified against disk
+    8. For each distinct artifact path, only the receipt with highest seq is verified against disk
 
     Returns ChainResult with status in {ok, broken, unrunnable}.
     """
@@ -344,9 +346,36 @@ def verify_chain(run_dir: Path) -> ChainResult:
                 if gate_file.name not in gate_names:
                     return ChainResult("broken", f"orphan gate file: {gate_file.name} (receipt dropped)")
 
-        # Two-way verification: for every gate-result and artifact-written, validate files exist and sha256 matches
+        # Build latest gate and artifact maps: for each distinct file, keep only the receipt with highest seq
+        latest_gate: Dict[str, Dict[str, Any]] = {}
+        latest_artifact: Dict[str, Dict[str, Any]] = {}
+
+        for record in records:
+            detail = record.get("detail")
+            if not isinstance(detail, dict):
+                continue
+
+            if record.get("kind") == "gate-result":
+                gate_file = detail.get("gate_file")
+                if gate_file:
+                    # Keep receipt with highest seq for this gate_file
+                    if gate_file not in latest_gate or record.get("seq", 0) > latest_gate[gate_file].get("seq", 0):
+                        latest_gate[gate_file] = record
+
+            elif record.get("kind") == "artifact-written":
+                path = detail.get("path")
+                sha256 = detail.get("sha256")
+                # Validate artifact-written detail has both path and sha256, or neither
+                if (path and not sha256) or (sha256 and not path):
+                    seq = record.get("seq")
+                    return ChainResult("broken", f"receipt {seq} artifact-written detail incomplete")
+                if path and sha256:
+                    # Keep receipt with highest seq for this path
+                    if path not in latest_artifact or record.get("seq", 0) > latest_artifact[path].get("seq", 0):
+                        latest_artifact[path] = record
+
         # Count artifact-written receipts that need repo_root
-        artifact_count = sum(1 for r in records if r.get("kind") == "artifact-written" and isinstance(r.get("detail"), dict) and r.get("detail").get("path") and r.get("detail").get("sha256"))
+        artifact_count = len(latest_artifact)
 
         run_obj = None
         if artifact_count > 0:
@@ -359,69 +388,91 @@ def verify_chain(run_dir: Path) -> ChainResult:
             except (json.JSONDecodeError, OSError) as e:
                 return ChainResult("broken", f"run.json unreadable: {e}; {artifact_count} artifact path(s) cannot be checked")
 
+        # Validate all receipts for path containment (every receipt, even superseded ones)
         for record in records:
             detail = record.get("detail")
+            seq = record.get("seq")
 
             if record.get("kind") == "gate-result":
-                seq = record.get("seq")
                 gate_file = detail.get("gate_file")
-                gate_sha256 = detail.get("gate_sha256")
-
-                # If no gate_file, skip validation
-                if not gate_file:
-                    continue
-
-                # If gate_file is present but gate_sha256 is missing, it's broken
-                if not gate_sha256:
-                    return ChainResult("broken", f"receipt {seq} gate-result has no gate_sha256")
-
-                # Validate path containment
-                gate_path, reason = _contained_path(run_dir, gate_file, seq, "gate_file")
-                if reason:
-                    return ChainResult("broken", reason)
-
-                # Check file exists
-                if not gate_path.is_file():
-                    return ChainResult("broken", f"receipt {seq} names {gate_file!r} which does not exist")
-
-                # Compare sha256 (raw bytes, same as artifact check)
-                actual_sha = hashlib.sha256(gate_path.read_bytes()).hexdigest()
-                if actual_sha != gate_sha256:
-                    return ChainResult("broken", f"receipt {seq} {gate_file!r} sha256 mismatch: recorded {gate_sha256[:12]} actual {actual_sha[:12]}")
+                if gate_file:
+                    # Validate path containment for every receipt
+                    gate_path, reason = _contained_path(run_dir, gate_file, seq, "gate_file")
+                    if reason:
+                        return ChainResult("broken", reason)
 
             elif record.get("kind") == "artifact-written":
-                seq = record.get("seq")
                 path = detail.get("path")
-                sha256_val = detail.get("sha256")
+                if path:
+                    # Validate path containment for every receipt
+                    if "repo_root" not in run_obj:
+                        return ChainResult("broken", f"run.json has no repo_root; {artifact_count} artifact path(s) cannot be checked")
 
-                if not path or not sha256_val:
-                    continue
+                    repo_root_str = run_obj["repo_root"]
+                    if not os.path.isabs(repo_root_str) and ("/" in repo_root_str or repo_root_str in ("", ".", "..")):
+                        return ChainResult("broken", f"run.json repo_root malformed: {repo_root_str!r}")
 
-                if "repo_root" not in run_obj:
-                    return ChainResult("broken", f"run.json has no repo_root; {artifact_count} artifact path(s) cannot be checked")
+                    if os.path.isabs(repo_root_str):
+                        repo_root = Path(repo_root_str)
+                    else:
+                        repo_root = (run_dir / repo_root_str).resolve()
 
-                repo_root_str = run_obj["repo_root"]
-                if not os.path.isabs(repo_root_str) and ("/" in repo_root_str or repo_root_str in ("", ".", "..")):
-                    return ChainResult("broken", f"run.json repo_root malformed: {repo_root_str!r}")
+                    artifact_path, reason = _contained_path(repo_root, path, seq, "artifact path")
+                    if reason:
+                        return ChainResult("broken", reason)
 
-                if os.path.isabs(repo_root_str):
-                    repo_root = Path(repo_root_str)
-                else:
-                    repo_root = (run_dir / repo_root_str).resolve()
+        # Two-way verification: only check latest receipts against disk
+        for gate_file, record in latest_gate.items():
+            seq = record.get("seq")
+            gate_sha256 = record["detail"].get("gate_sha256")
 
-                # Validate path containment
-                artifact_path, reason = _contained_path(repo_root, path, seq, "artifact path")
-                if reason:
-                    return ChainResult("broken", reason)
+            # If gate_sha256 is missing, it's broken
+            if not gate_sha256:
+                return ChainResult("broken", f"receipt {seq} gate-result has no gate_sha256")
 
-                # Check file exists
-                if not artifact_path.is_file():
-                    return ChainResult("broken", f"receipt {seq} names {path!r} which does not exist")
+            # Path containment already validated above
+            gate_path, reason = _contained_path(run_dir, gate_file, seq, "gate_file")
+            if reason:
+                return ChainResult("broken", reason)
 
-                # Compare sha256
-                actual_sha = hashlib.sha256(artifact_path.read_bytes()).hexdigest()
-                if actual_sha != sha256_val:
-                    return ChainResult("broken", f"receipt {seq} {path!r} sha256 mismatch: recorded {sha256_val[:12]} actual {actual_sha[:12]}")
+            # Check file exists
+            if not gate_path.is_file():
+                return ChainResult("broken", f"receipt {seq} names {gate_file!r} which does not exist")
+
+            # Compare sha256 (raw bytes)
+            actual_sha = hashlib.sha256(gate_path.read_bytes()).hexdigest()
+            if actual_sha != gate_sha256:
+                return ChainResult("broken", f"receipt {seq} {gate_file!r} sha256 mismatch: recorded {gate_sha256[:12]} actual {actual_sha[:12]}")
+
+        for path, record in latest_artifact.items():
+            seq = record.get("seq")
+            sha256_val = record["detail"].get("sha256")
+
+            if "repo_root" not in run_obj:
+                return ChainResult("broken", f"run.json has no repo_root; {artifact_count} artifact path(s) cannot be checked")
+
+            repo_root_str = run_obj["repo_root"]
+            if not os.path.isabs(repo_root_str) and ("/" in repo_root_str or repo_root_str in ("", ".", "..")):
+                return ChainResult("broken", f"run.json repo_root malformed: {repo_root_str!r}")
+
+            if os.path.isabs(repo_root_str):
+                repo_root = Path(repo_root_str)
+            else:
+                repo_root = (run_dir / repo_root_str).resolve()
+
+            # Path containment already validated above
+            artifact_path, reason = _contained_path(repo_root, path, seq, "artifact path")
+            if reason:
+                return ChainResult("broken", reason)
+
+            # Check file exists
+            if not artifact_path.is_file():
+                return ChainResult("broken", f"receipt {seq} names {path!r} which does not exist")
+
+            # Compare sha256
+            actual_sha = hashlib.sha256(artifact_path.read_bytes()).hexdigest()
+            if actual_sha != sha256_val:
+                return ChainResult("broken", f"receipt {seq} {path!r} sha256 mismatch: recorded {sha256_val[:12]} actual {actual_sha[:12]}")
 
         return ChainResult("ok", "chain intact")
 
@@ -432,11 +483,14 @@ def verify_chain(run_dir: Path) -> ChainResult:
 def derive_status(run_dir: Path) -> Dict[str, Any]:
     """Derive status from receipts.
 
-    Returns dict with stage_cursor, build_rounds, status, last_gate.
+    Returns dict with stage_cursor, build_rounds, status, last_gate, superseded_receipts.
     Nothing stores these. Derived only.
 
     build_rounds is the count of stage-opened receipts whose detail.stage == 6.
     Each loop-back to Build re-opens stage 6.
+
+    superseded_receipts is the count of gate-result and artifact-written receipts
+    that are not the latest for their respective gate_file or path.
     """
     run_dir = Path(run_dir)
     receipts_file = run_dir / "receipts.jsonl"
@@ -445,7 +499,8 @@ def derive_status(run_dir: Path) -> Dict[str, Any]:
         "stage_cursor": None,
         "build_rounds": 0,
         "status": "no-runs",
-        "last_gate": None
+        "last_gate": None,
+        "superseded_receipts": 0
     }
 
     if not receipts_file.is_file():
@@ -458,6 +513,10 @@ def derive_status(run_dir: Path) -> Dict[str, Any]:
         if not records:
             return result
 
+        # Build latest gate and artifact maps
+        latest_gate: Dict[str, int] = {}
+        latest_artifact: Dict[str, int] = {}
+
         for record in records:
             detail = record.get("detail")
             if not isinstance(detail, dict):
@@ -466,6 +525,7 @@ def derive_status(run_dir: Path) -> Dict[str, Any]:
                 result["stage_cursor"] = None
                 result["build_rounds"] = 0
                 result["last_gate"] = None
+                result["superseded_receipts"] = 0
                 return result
 
             kind = record.get("kind")
@@ -476,9 +536,41 @@ def derive_status(run_dir: Path) -> Dict[str, Any]:
                 result["stage_cursor"] = stage
             elif kind == "gate-result":
                 result["last_gate"] = detail.get("gate")
+                gate_file = detail.get("gate_file")
+                if gate_file:
+                    seq = record.get("seq", 0)
+                    if gate_file not in latest_gate or seq > latest_gate[gate_file]:
+                        latest_gate[gate_file] = seq
+            elif kind == "artifact-written":
+                path = detail.get("path")
+                if path:
+                    seq = record.get("seq", 0)
+                    if path not in latest_artifact or seq > latest_artifact[path]:
+                        latest_artifact[path] = seq
             elif kind == "gate-timeout":
                 result["status"] = "blocked"
                 return result
+
+        # Count superseded receipts
+        superseded_count = 0
+        for record in records:
+            detail = record.get("detail")
+            if not isinstance(detail, dict):
+                continue
+
+            kind = record.get("kind")
+            seq = record.get("seq", 0)
+
+            if kind == "gate-result":
+                gate_file = detail.get("gate_file")
+                if gate_file and latest_gate.get(gate_file) != seq:
+                    superseded_count += 1
+            elif kind == "artifact-written":
+                path = detail.get("path")
+                if path and latest_artifact.get(path) != seq:
+                    superseded_count += 1
+
+        result["superseded_receipts"] = superseded_count
 
         if result["status"] == "blocked":
             return result
@@ -619,6 +711,10 @@ def self_test():
         ("run-json-unreadable", 1, "run.json unreadable"),
         ("artifact-without-repo-root", 1, "has no repo_root"),
         ("detail-not-object", 1, "detail malformed"),
+        ("gate-rereceipted-current", 0, None),
+        ("gate-rereceipted-stale", 1, "sha256 mismatch"),
+        ("artifact-rereceipted-current", 0, None),
+        ("artifact-detail-incomplete", 1, "artifact-written detail incomplete"),
     ]
 
     results = []

@@ -210,7 +210,12 @@ def run_handoff_gate(repo_root: Path, stage_key: str, gate_name: str, gate_rel: 
         print(f"ERROR: unknown stage: {stage_key}", file=sys.stderr)
         return 2
 
-    run_dir = gate_state.find_run(repo_root)
+    try:
+        run_dir = gate_state.find_run(repo_root)
+    except gate_state.RunMarkerUnreadable as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
+
     if run_dir is None:
         print(f"ERROR: no active run (.team-ship/RUN not found under {repo_root})", file=sys.stderr)
         return 2
@@ -289,7 +294,11 @@ def cmd_stage_output(repo_root: Path, stage: str, path_arg: str) -> int:
         print(f"ERROR: unknown stage: {stage}", file=sys.stderr)
         return 2
 
-    run_dir = gate_state.find_run(repo_root)
+    try:
+        run_dir = gate_state.find_run(repo_root)
+    except gate_state.RunMarkerUnreadable as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
     if run_dir is None:
         print(f"ERROR: no active run (.team-ship/RUN not found under {repo_root})", file=sys.stderr)
         return 2

@@ -121,6 +121,8 @@ stage 6) and exits 1 when more than three build rounds have opened,
 with the reason "build_rounds <n> exceeds 3". An override receipt naming
 gate "rounds" covers it like any other row and the verdict becomes
 PASS_WITH_OVERRIDE. The row's "stage" key carries the string "rounds".
+When the chain is not "ok", this row reads "not evaluated: chain broken"
+and is not added to the failing list.
 
 No em dash, no section sign, stdlib only, exit() called only in the main guard.
 """
@@ -181,10 +183,18 @@ def _git_head(path: Path) -> Optional[str]:
 
 
 def _resolve(repo_root_arg: str) -> Tuple[Path, Path, str]:
-    """Resolve (repo_root, run_dir, head) or raise ship_gate.Unmeasurable."""
+    """Resolve (repo_root, run_dir, head) or raise ship_gate.Unmeasurable.
+
+    A relative repo_root in run.json is resolved against the run
+    directory, matching gate_state.verify_chain, never against the
+    process cwd.
+    """
     repo_root = Path(repo_root_arg).resolve()
 
-    run_dir = gate_state.find_run(repo_root)
+    try:
+        run_dir = gate_state.find_run(repo_root)
+    except gate_state.RunMarkerUnreadable as exc:
+        raise ship_gate.Unmeasurable(str(exc))
     if run_dir is None:
         raise ship_gate.Unmeasurable(f"no active run found under {repo_root}")
 
@@ -200,7 +210,7 @@ def _resolve(repo_root_arg: str) -> Tuple[Path, Path, str]:
 
     recorded_root_str = run_obj.get("repo_root")
     if recorded_root_str:
-        recorded_root = Path(recorded_root_str)
+        recorded_root = ship_gate._recorded_repo_root(run_dir, recorded_root_str)
         head_recorded = _git_head(recorded_root)
         if head_recorded is None:
             raise ship_gate.Unmeasurable(f"cannot resolve HEAD for {recorded_root}")
@@ -287,13 +297,24 @@ def _first_block_test_descriptor(gate9_data: Optional[Dict[str, Any]]) -> Option
 
 
 def _evaluate_rounds(
-    run_dir: Path, overrides: List[Dict[str, Any]], used: set
+    run_dir: Path, overrides: List[Dict[str, Any]], used: set,
+    chain_ok: bool = True,
 ) -> Tuple[Dict[str, Any], Optional[Tuple[Union[int, str], str, str]], Optional[Tuple[Union[int, str], str, Dict[str, Any]]]]:
     """Evaluate the build rounds limit. Returns (row, blocking, override).
 
     The "rounds" row checks that build_rounds does not exceed 3.
-    It is overridable by an override naming "rounds".
+    It is overridable by an override naming "rounds". When the chain is
+    not "ok", the row is not evaluated, matching ship_gate's approval
+    wording, and is never added to the failing list.
     """
+    if not chain_ok:
+        row = {
+            "stage": "rounds", "required": True, "present": True,
+            "exit": 0, "head_ok": True, "overridden": False,
+            "reason": "not evaluated: chain broken",
+        }
+        return row, None, None
+
     derive = gate_state.derive_status(run_dir)
     build_rounds = derive.get("build_rounds", 0)
 
@@ -307,7 +328,7 @@ def _evaluate_rounds(
             "exit": 0, "head_ok": True, "overridden": True,
             "reason": f"OVERRIDDEN: {override.get('instruction', '')}",
         }
-        return row, None, ("rounds", "derive_status", override)
+        return row, None, ("rounds", "rounds", override)
 
     if row_exit == 0:
         row = {
@@ -381,7 +402,7 @@ def _compute_stages(
 
         override = ship_gate._override_for(overrides, used, key, str(stage))
         if override:
-            overridden_detail.append((stage, key, override))
+            overridden_detail.append((stage, relpath, override))
             stage_rows[stage] = {
                 "stage": stage, "required": [relpath], "present": True,
                 "exit": 0, "head_ok": True, "overridden": True,
@@ -447,7 +468,9 @@ def cmd_check(repo_root_arg: str, json_output: bool) -> int:
         run_dir, head, repo_root, overrides, used_overrides, records,
     )
 
-    rounds_row, rounds_blocking, rounds_override = _evaluate_rounds(run_dir, overrides, used_overrides)
+    rounds_row, rounds_blocking, rounds_override = _evaluate_rounds(
+        run_dir, overrides, used_overrides, chain_ok=(chain_result.status == "ok"),
+    )
     stage_rows["rounds"] = rounds_row
     if rounds_blocking:
         blocking.append(rounds_blocking)
@@ -481,10 +504,7 @@ def cmd_check(repo_root_arg: str, json_output: bool) -> int:
 
     summary = "; ".join(all_lines) if all_lines else verdict
 
-    overrides_out = [
-        {"stage": stage, "gate": key, "instruction": detail.get("instruction", ""), "by": detail.get("by")}
-        for stage, key, detail in overridden_detail
-    ]
+    overrides_out = ship_gate._overrides_out(overridden_detail)
 
     # An override receipt that never matched a missing or failing gate is
     # unused; listed so a stale or misspelled override is visible rather
@@ -685,6 +705,22 @@ def _self_test_fixed_cases(build_dir: Path) -> List[str]:
                 all_ok = False
             detail = f" substring {expected_substr!r} present={substr_ok}" if expected_substr else ""
             lines.append(f"{name}: expected {expected_exit} got {proc.returncode}{detail} {status}")
+
+            if name == "chain-broken" and status == "OK":
+                gate_fix = _run_gate_fix(state_root)
+                rounds_row = None
+                for row in (gate_fix.get("stages") if gate_fix else []) or []:
+                    if row.get("stage") == "rounds":
+                        rounds_row = row
+                        break
+                r12c_ok = (
+                    rounds_row is not None
+                    and rounds_row.get("reason") == "not evaluated: chain broken"
+                )
+                r12c_status = "OK" if r12c_ok else "FAIL"
+                if r12c_status == "FAIL":
+                    all_ok = False
+                lines.append(f"chain-broken-rounds-not-evaluated: reason matches approval wording {r12c_status}")
 
             if name in ("all-green", "map-overridden", "override-covers-matrix"):
                 expected_verdict = "PASS" if name == "all-green" else "PASS_WITH_OVERRIDE"

@@ -112,7 +112,11 @@ GATE_NAME_MAP = {
 def _resolve_context(repo_root_arg: str):
     """Resolve (repo_root, run_dir, head) or print one ERROR line and return None."""
     repo_root = Path(repo_root_arg).resolve()
-    run_dir = gate_state.find_run(repo_root)
+    try:
+        run_dir = gate_state.find_run(repo_root)
+    except gate_state.RunMarkerUnreadable as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return None
     if run_dir is None:
         print(f"ERROR: no active run found under {repo_root}", file=sys.stderr)
         return None

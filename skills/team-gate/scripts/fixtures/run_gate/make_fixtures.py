@@ -27,6 +27,13 @@ Fixtures (see README.md for why five of them ship a stub bin/pytest):
   shell-operator-line      discover: a step with `bash tests/check-x.sh || true` and a
                            plain `pytest -q`; the first is skipped, the second chosen
   shell-operator-only      discover: only the `|| true` line; zero commands, exit 2
+  unittest-all-pass        run: a `bash scripts/test.sh` runner prints unittest's
+                            `Ran 3 tests` + `OK`; summary shape unittest, passed 3
+  unittest-one-fail        run: `Ran 2 tests` + `FAILED (failures=1)`, exit 1
+  unittest-skip            run: `Ran 2 tests` + `OK (skipped=1)`, exit 1 (blocked)
+  unittest-zero            run: `Ran 0 tests` + `OK`; blocked as no tests collected
+  pytest-wins              run: the same script prints both shapes; pytest's own
+                            `2 passed` line must win, shape pytest, passed 2
 """
 
 import argparse
@@ -300,6 +307,63 @@ def _make_shell_operator_only(out_dir: Path, ts: str) -> None:
     _init_git_repo(repo, ts)
 
 
+def _write_test_script(repo: Path, body: str) -> None:
+    scripts_dir = repo / "scripts"
+    scripts_dir.mkdir(parents=True, exist_ok=True)
+    script = scripts_dir / "test.sh"
+    script.write_text(body)
+    os.chmod(script, 0o755)
+
+
+def _make_unittest_all_pass(out_dir: Path, ts: str) -> None:
+    repo = out_dir / "unittest-all-pass"
+    _reset_dir(repo)
+    _write_workflow(repo, "bash scripts/test.sh")
+    _write_test_script(repo, "#!/bin/bash\necho \"Ran 3 tests in 0.001s\"\necho\necho OK\nexit 0\n")
+    _init_git_repo(repo, ts)
+
+
+def _make_unittest_one_fail(out_dir: Path, ts: str) -> None:
+    repo = out_dir / "unittest-one-fail"
+    _reset_dir(repo)
+    _write_workflow(repo, "bash scripts/test.sh")
+    _write_test_script(
+        repo,
+        "#!/bin/bash\necho \"Ran 2 tests in 0.001s\"\necho\necho \"FAILED (failures=1)\"\nexit 1\n",
+    )
+    _init_git_repo(repo, ts)
+
+
+def _make_unittest_skip(out_dir: Path, ts: str) -> None:
+    repo = out_dir / "unittest-skip"
+    _reset_dir(repo)
+    _write_workflow(repo, "bash scripts/test.sh")
+    _write_test_script(
+        repo,
+        "#!/bin/bash\necho \"Ran 2 tests in 0.001s\"\necho\necho \"OK (skipped=1)\"\nexit 0\n",
+    )
+    _init_git_repo(repo, ts)
+
+
+def _make_unittest_zero(out_dir: Path, ts: str) -> None:
+    repo = out_dir / "unittest-zero"
+    _reset_dir(repo)
+    _write_workflow(repo, "bash scripts/test.sh")
+    _write_test_script(repo, "#!/bin/bash\necho \"Ran 0 tests in 0.000s\"\necho\necho OK\nexit 0\n")
+    _init_git_repo(repo, ts)
+
+
+def _make_pytest_wins(out_dir: Path, ts: str) -> None:
+    repo = out_dir / "pytest-wins"
+    _reset_dir(repo)
+    _write_workflow(repo, "bash scripts/test.sh")
+    _write_test_script(
+        repo,
+        "#!/bin/bash\necho \"Ran 3 tests in 0.001s\"\necho\necho OK\necho \"2 passed in 0.01s\"\nexit 0\n",
+    )
+    _init_git_repo(repo, ts)
+
+
 def generate_fixtures(out_dir: Path) -> None:
     ts = os.environ.get("TEAM_FIXED_TS", "2026-09-17T14:22:03+00:00")
     if out_dir.exists():
@@ -320,6 +384,11 @@ def generate_fixtures(out_dir: Path) -> None:
     _make_coverage_not_applicable(out_dir, ts)
     _make_shell_operator_line(out_dir, ts)
     _make_shell_operator_only(out_dir, ts)
+    _make_unittest_all_pass(out_dir, ts)
+    _make_unittest_one_fail(out_dir, ts)
+    _make_unittest_skip(out_dir, ts)
+    _make_unittest_zero(out_dir, ts)
+    _make_pytest_wins(out_dir, ts)
 
 
 def main() -> int:

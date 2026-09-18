@@ -1,0 +1,4 @@
+{
+  "name": "ci-green-without-stage-13",
+  "description": "gates/14.json has no stage 13 row, so the 'ci is green' claim is a merge-claim finding."
+}

@@ -12,13 +12,13 @@ Usage:
   install.py --user                   merge the four hooks into ~/.claude/settings.json
   install.py --project DIR --remove   remove exactly the team-gate entries, leave everything else
   install.py --user --remove          same, for ~/.claude/settings.json
-  install.py --project DIR --check    exit 0 if all four are registered, 1 otherwise
+  install.py --project DIR --check    exit 0 if all four are registered and files exist, 1 otherwise
   install.py --user --check           same, for ~/.claude/settings.json
 
 The registered command is `node "$CLAUDE_PROJECT_DIR/skills/team-gate/hooks/<name>.js"`
-for --project, since $CLAUDE_PROJECT_DIR resolves per session to whichever
-project is open. For --user there is no project context, so the command
-is `node "<absolute path to this directory>/<name>.js"` instead.
+for --project only when the target project contains the skills/team-gate/hooks
+directory; otherwise it is `node "<absolute path to this directory>/<name>.js"`.
+For --user there is no project context, so the command is always the absolute path.
 
 The merge is idempotent: an event/hook_file pair already present anywhere
 in that event's array (found by the hook's filename appearing in a
@@ -41,6 +41,7 @@ No em dash, no section sign, stdlib only, sys.exit only in the __main__ guard.
 import argparse
 import json
 import os
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -62,9 +63,13 @@ REGISTRATIONS = [
 HOOK_FILES = sorted({hook_file for _, _, hook_file in REGISTRATIONS})
 
 
-def build_command(hook_file: str, project_mode: bool) -> str:
+def build_command(hook_file: str, project_mode: bool, project_dir: Path = None) -> str:
     if project_mode:
-        return f'node "$CLAUDE_PROJECT_DIR/skills/team-gate/hooks/{hook_file}"'
+        # If the project contains the hooks directory, use project-relative form
+        if project_dir and (project_dir / "skills" / "team-gate" / "hooks").is_dir():
+            return f'node "$CLAUDE_PROJECT_DIR/skills/team-gate/hooks/{hook_file}"'
+        # Otherwise use absolute path (consumer repository case)
+        return f'node "{HOOKS_DIR / hook_file}"'
     return f'node "{HOOKS_DIR / hook_file}"'
 
 
@@ -99,7 +104,7 @@ def ensure_backup(path: Path) -> None:
         shutil.copyfile(str(path), str(backup))
 
 
-def do_install(settings_path: Path, project_mode: bool) -> bool:
+def do_install(settings_path: Path, project_mode: bool, project_dir: Path = None) -> bool:
     existed_before = settings_path.is_file()
     settings = load_settings(settings_path)
     hooks = settings.setdefault("hooks", {})
@@ -114,7 +119,7 @@ def do_install(settings_path: Path, project_mode: bool) -> bool:
         )
         if already:
             continue
-        command = build_command(hook_file, project_mode)
+        command = build_command(hook_file, project_mode, project_dir)
         hook_item = {"type": "command", "command": command, "timeout": 60}
         entry = {"matcher": matcher, "hooks": [hook_item]} if matcher is not None else {"hooks": [hook_item]}
         arr.append(entry)
@@ -174,7 +179,7 @@ def do_remove(settings_path: Path) -> bool:
     return True
 
 
-def do_check(settings_path: Path) -> bool:
+def do_check(settings_path: Path, project_dir: Path = None) -> bool:
     if not settings_path.is_file():
         print("not registered: settings file does not exist")
         return False
@@ -187,11 +192,28 @@ def do_check(settings_path: Path) -> bool:
     missing = []
     for event, _matcher, hook_file in REGISTRATIONS:
         arr = hooks.get(event, [])
-        found = isinstance(arr, list) and any(
-            command_references(h.get("command", ""), hook_file)
-            for entry in arr
-            for h in entry.get("hooks", [])
-        )
+        found = False
+        for entry in arr:
+            for h in entry.get("hooks", []):
+                command = h.get("command", "")
+                if command_references(command, hook_file):
+                    # Resolve the command to check if the file exists
+                    if "$CLAUDE_PROJECT_DIR" in command:
+                        if project_dir:
+                            resolved_path = project_dir / "skills" / "team-gate" / "hooks" / hook_file
+                            if resolved_path.is_file():
+                                found = True
+                                break
+                    else:
+                        # Absolute path - extract from command and check
+                        match = re.search(r'node\s+"([^"]+)"', command)
+                        if match:
+                            hook_path = Path(match.group(1))
+                            if hook_path.is_file():
+                                found = True
+                                break
+            if found:
+                break
         if not found:
             missing.append(f"{event}/{hook_file}")
 
@@ -221,15 +243,16 @@ def main() -> int:
             return 2
         settings_path = project_dir / ".claude" / "settings.json"
     else:
+        project_dir = None
         settings_path = Path.home() / ".claude" / "settings.json"
 
     try:
         if args.check:
-            return 0 if do_check(settings_path) else 1
+            return 0 if do_check(settings_path, project_dir) else 1
         if args.remove:
             do_remove(settings_path)
             return 0
-        do_install(settings_path, project_mode)
+        do_install(settings_path, project_mode, project_dir)
         return 0
     except json.JSONDecodeError as exc:
         print(f"ERROR: {settings_path} is not valid JSON: {exc}", file=sys.stderr)

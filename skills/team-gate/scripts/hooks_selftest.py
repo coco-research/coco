@@ -984,6 +984,47 @@ def test_install() -> bool:
     shutil.rmtree(tmp, ignore_errors=True)
     all_ok &= report(hook, "install-check-missing", "exit 1", f"exit {proc.returncode}", ok)
 
+    # install-consumer-absolute: project without skills/team-gate should use absolute paths
+    tmp = Path(tempfile.mkdtemp(prefix="install_consumer_"))
+    proc = run_install(["--project", str(tmp)])
+    settings_path = tmp / ".claude" / "settings.json"
+    settings = json.loads(settings_path.read_text(encoding="utf-8")) if settings_path.is_file() else None
+    # Verify absolute paths are used (no $CLAUDE_PROJECT_DIR)
+    has_absolute_paths = False
+    if settings:
+        for event_hooks in settings.get("hooks", {}).values():
+            for entry in event_hooks:
+                for h in entry.get("hooks", []):
+                    cmd = h.get("command", "")
+                    if "$CLAUDE_PROJECT_DIR" not in cmd and "node" in cmd and str(HOOKS_DIR) in cmd:
+                        has_absolute_paths = True
+                        break
+    check_proc = run_install(["--project", str(tmp), "--check"])
+    ok = proc.returncode == 0 and has_absolute_paths and check_proc.returncode == 0
+    shutil.rmtree(tmp, ignore_errors=True)
+    all_ok &= report(hook, "install-consumer-absolute", "exit 0, absolute paths used, --check exit 0",
+                      f"exit {proc.returncode}, absolute_paths {has_absolute_paths}, check exit {check_proc.returncode}", ok)
+
+    # install-check-dangling: $CLAUDE_PROJECT_DIR reference in project without hooks, --check exits 1
+    tmp = Path(tempfile.mkdtemp(prefix="install_dangling_"))
+    claude_dir = tmp / ".claude"
+    claude_dir.mkdir(parents=True)
+    settings_path = claude_dir / "settings.json"
+    # Hand-write settings with $CLAUDE_PROJECT_DIR relative paths (simulating coco project reference)
+    dangling = {
+        "hooks": {
+            "UserPromptSubmit": [{
+                "hooks": [{"type": "command", "command": 'node "$CLAUDE_PROJECT_DIR/skills/team-gate/hooks/team-turn-log.js"', "timeout": 60}]
+            }]
+        }
+    }
+    settings_path.write_text(json.dumps(dangling, indent=2) + "\n", encoding="utf-8")
+    proc = run_install(["--project", str(tmp), "--check"])
+    ok = proc.returncode == 1
+    shutil.rmtree(tmp, ignore_errors=True)
+    all_ok &= report(hook, "install-check-dangling", "exit 1 (dangling $CLAUDE_PROJECT_DIR path)",
+                      f"exit {proc.returncode}", ok)
+
     return all_ok
 
 

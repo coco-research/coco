@@ -129,7 +129,7 @@ exit 2: UNVERIFIED; the run cannot pass fix_gate until the gate passes or an ove
 
 L3 verifies the fix by assembling evidence and checking claims against it.
 
-1. Run `run_gate.py evidence`, which assembles EVIDENCE.json and renders EVIDENCE.md; its entry ids are what the PR body cites.
+1. Run `run_gate.py evidence`, per the Test Evidence Protocol (`team:evidence.md`); it assembles EVIDENCE.json and renders EVIDENCE.md, and its entry ids are what the PR body cites.
 
 ```
 python3 ~/.claude/skills/team-gate/scripts/run_gate.py --repo-root . evidence

@@ -187,11 +187,28 @@ def seed_manifest_artifacts(repo: Path) -> None:
 
 def seed_handoffs(repo: Path, state_root: Path, upto: int) -> None:
     """Run check_artifacts.py stage-inputs 1..upto for real, producing real
-    gates/handoff-<n>.json files and gate-result receipts."""
+    gates/handoff-<n>.json files and gate-result receipts, and hand-fabricate
+    the architecture gate files ship_gate requires beside them since 02281f0:
+    gates/1-arch-baseline.json at stage 1 (status CURRENT, exit 0) and
+    gates/3-arch-plan.json at stage 3 (exit 0). Both carry the current HEAD."""
+    head = subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"],
+                          capture_output=True, text=True, check=True).stdout.strip()
+    run_dir = state_root / (repo / ".team-ship" / "RUN").read_text(encoding="utf-8").strip()
     for n in range(1, upto + 1):
         proc = check_artifacts(repo, state_root, "stage-inputs", str(n))
         if proc.returncode != 0:
             raise RuntimeError(f"handoff-{n} setup failed: {proc.stderr}")
+        if n == 1:
+            write_gate(run_dir, repo, state_root, "gates/1-arch-baseline.json", "arch-baseline", {
+                "argv": ["baseline", "--repo-root", str(repo)], "cwd": str(repo), "head": head,
+                "exit": 0, "summary": f"arch baseline: CURRENT pin={head[:12]} head={head[:12]}",
+                "pin": head, "status": "CURRENT",
+            })
+        if n == 3:
+            write_gate(run_dir, repo, state_root, "gates/3-arch-plan.json", "arch-plan-declare", {
+                "argv": ["plan-declare", "--repo-root", str(repo)], "cwd": str(repo), "head": head,
+                "exit": 0, "summary": "declare: PASS", "child_exit": 0,
+            })
 
 
 def write_gate(run_dir: Path, repo: Path, state_root: Path, relpath: str, gate_name: str, data: dict) -> None:
@@ -265,6 +282,15 @@ def seed_deep_gates(run_dir: Path, repo: Path, state_root: Path, head: str, skip
     })
     maybe("gates/12.json", "claim-evidence", {
         "argv": ["claim_evidence.py", "check"], "cwd": cwd, "head": head, "exit": 0, "summary": "no findings",
+    })
+    maybe("gates/13-arch-plan.json", "arch-plan-verify", {
+        "argv": ["plan-verify", "--repo-root", cwd], "cwd": cwd, "head": head, "exit": 0,
+        "summary": "verify: PASS", "child_exit": 0,
+    })
+    maybe("gates/13-arch.json", "arch-conformance", {
+        "argv": ["conformance", "--repo-root", cwd], "cwd": cwd, "head": head, "exit": 0,
+        "summary": "conformance: PASS", "gate": "PASS", "status": "CURRENT", "pin": head,
+        "removes": [], "prunes": [], "validate_exit": 0, "drift_exit": 0,
     })
 
 

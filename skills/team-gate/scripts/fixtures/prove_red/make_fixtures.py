@@ -235,16 +235,24 @@ def fixture_unittest_invalid_red(root: Path, env: Dict[str, str]) -> None:
 
 
 def fixture_never_red(root: Path, env: Dict[str, str]) -> None:
-    """Base already has a passing implementation and test; HEAD only adds an unrelated test."""
+    """Base already has a passing implementation and test; HEAD only adds an unrelated test.
+
+    HEAD also touches an unrelated, unimported module (src/util.py) so the diff
+    carries an implementation path and stays on the ordinary red-green proof
+    rather than stub mode; add() itself, the function under test, never
+    changes, which is the case this fixture exists to cover.
+    """
     name = "never-red"
     repo = _init_repo(root, name, env)
     _write_files(repo, {
         "src/__init__.py": "",
         "src/calc.py": "def add(a, b):\n    return a + b\n",
+        "src/util.py": "def double(n):\n    return n * 2\n",
         "tests/test_calc.py": "from src.calc import add\n\n\ndef test_add():\n    assert add(2, 3) == 5\n",
     })
     base_sha = _commit(repo, env, "base")
     _write_files(repo, {
+        "src/util.py": "def double(n):\n    return n * 2\n\n\ndef triple(n):\n    return n * 3\n",
         "tests/test_calc.py": (
             "from src.calc import add\n\n\ndef test_add():\n    assert add(2, 3) == 5\n"
             "\n\ndef test_add_negatives():\n    assert add(-2, 3) == 1\n"
@@ -377,6 +385,97 @@ def fixture_unrunnable_parametrised(root: Path, env: Dict[str, str]) -> None:
     _write_base_sha(root, name, base_sha)
 
 
+def fixture_tests_only_exercises(root: Path, env: Dict[str, str]) -> None:
+    """Existing module unchanged at base and HEAD; HEAD adds a unittest test that calls it."""
+    name = "tests-only-exercises"
+    repo = _init_repo(root, name, env)
+    _write_files(repo, {
+        "src/__init__.py": "",
+        "src/calc.py": "def add(a, b):\n    return a + b\n",
+    })
+    base_sha = _commit(repo, env, "base")
+    _write_files(repo, {
+        "tests/test_calc.py": (
+            "import unittest\n\n"
+            "from src.calc import add\n\n\n"
+            "class TestAdd(unittest.TestCase):\n"
+            "    def test_add(self):\n"
+            "        self.assertEqual(add(2, 3), 5)\n"
+        ),
+    })
+    _commit(repo, env, "head")
+    _write_base_sha(root, name, base_sha)
+
+
+def fixture_tests_only_no_import(root: Path, env: Dict[str, str]) -> None:
+    """HEAD adds a test that asserts on a literal and imports nothing from the worktree."""
+    name = "tests-only-no-import"
+    repo = _init_repo(root, name, env)
+    _write_files(repo, {"README.md": "placeholder\n"})
+    base_sha = _commit(repo, env, "base")
+    _write_files(repo, {
+        "tests/test_trivial.py": "def test_trivial():\n    assert 1 == 1\n",
+    })
+    _commit(repo, env, "head")
+    _write_base_sha(root, name, base_sha)
+
+
+def fixture_tests_only_still_passes(root: Path, env: Dict[str, str]) -> None:
+    """HEAD adds a test that imports the module but asserts only on its own constant."""
+    name = "tests-only-still-passes"
+    repo = _init_repo(root, name, env)
+    _write_files(repo, {
+        "src/__init__.py": "",
+        "src/calc.py": "def add(a, b):\n    return a + b\n",
+    })
+    base_sha = _commit(repo, env, "base")
+    _write_files(repo, {
+        "tests/test_calc2.py": (
+            "from src.calc import add\n\n"
+            "EXPECTED = 5\n\n\n"
+            "def test_add():\n    assert EXPECTED == 5\n"
+        ),
+    })
+    _commit(repo, env, "head")
+    _write_base_sha(root, name, base_sha)
+
+
+def fixture_tests_only_relative_import(root: Path, env: Dict[str, str]) -> None:
+    """HEAD adds a test in a package that reaches its implementation via a relative import."""
+    name = "tests-only-relative-import"
+    repo = _init_repo(root, name, env)
+    _write_files(repo, {
+        "pkg/__init__.py": "",
+        "pkg/calc.py": "def add(a, b):\n    return a + b\n",
+    })
+    base_sha = _commit(repo, env, "base")
+    _write_files(repo, {
+        "pkg/test_calc.py": (
+            "from .calc import add\n\n\n"
+            "def test_add():\n    assert add(2, 3) == 5\n"
+        ),
+    })
+    _commit(repo, env, "head")
+    _write_base_sha(root, name, base_sha)
+
+
+def fixture_mixed_diff_uses_red_green(root: Path, env: Dict[str, str]) -> None:
+    """An implementation fix plus a new test in the same HEAD commit keeps red-green mode."""
+    name = "mixed-diff-uses-red-green"
+    repo = _init_repo(root, name, env)
+    _write_files(repo, {
+        "src/__init__.py": "",
+        "src/calc.py": "def add(a, b):\n    return a - b\n",
+    })
+    base_sha = _commit(repo, env, "base")
+    _write_files(repo, {
+        "src/calc.py": "def add(a, b):\n    return a + b\n",
+        "tests/test_calc.py": "from src.calc import add\n\n\ndef test_add():\n    assert add(2, 3) == 5\n",
+    })
+    _commit(repo, env, "head")
+    _write_base_sha(root, name, base_sha)
+
+
 _GENERATORS = [
     fixture_proper_red_green,
     fixture_new_module_import_red,
@@ -393,6 +492,11 @@ _GENERATORS = [
     fixture_not_applicable_no_new_tests,
     fixture_dirty_tree,
     fixture_unrunnable_parametrised,
+    fixture_tests_only_exercises,
+    fixture_tests_only_no_import,
+    fixture_tests_only_still_passes,
+    fixture_tests_only_relative_import,
+    fixture_mixed_diff_uses_red_green,
 ]
 
 

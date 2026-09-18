@@ -13,7 +13,7 @@ Pass rules (from commands/team/architecture.md lines 93-117):
   - Subprocess fails to run: exit 2
 
 Writes result JSON to --out (default .arch/ARCH-GATE.json):
-  {gate, exit, removes, prunes, validate_exit, drift_exit, pin, head, reason}
+  {gate, exit, removes, prunes, validate_exit, drift_exit, pin, head, reason, tools_dir}
 
 Usage:
     python3 arch_gate.py --repo-root .
@@ -26,10 +26,54 @@ Exit codes: 0 pass, 1 block, 2 unrunnable or unverified.
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+
+def resolve_tools_dir(repo_root):
+    """Resolve the arch-index scripts directory.
+
+    Returns a tuple (tools_dir, error_reason). On success, tools_dir is set and
+    error_reason is None. On failure, tools_dir is None and error_reason contains
+    the reason string.
+
+    Resolution order:
+    1. ARCH_INDEX_SCRIPTS environment variable (must exist and contain both scripts)
+    2. <repo_root>/skills/arch-index/scripts (if it contains both scripts)
+    3. ~/.claude/skills/arch-index/scripts
+
+    Args:
+        repo_root: The repository root path
+
+    Returns:
+        Tuple of (tools_dir, error_reason). Either tools_dir or error_reason is None.
+    """
+    required_scripts = ["validate_index.py", "arch_drift.py"]
+
+    # Try ARCH_INDEX_SCRIPTS env var first
+    env_tools_dir = os.environ.get("ARCH_INDEX_SCRIPTS")
+    if env_tools_dir:
+        env_tools_dir = os.path.abspath(env_tools_dir)
+        if all(os.path.isfile(os.path.join(env_tools_dir, script)) for script in required_scripts):
+            return env_tools_dir, None
+        # ARCH_INDEX_SCRIPTS is set but incomplete; error, don't fall through
+        return None, f"arch-index scripts not found in {env_tools_dir}"
+
+    # Try <repo_root>/skills/arch-index/scripts
+    repo_tools_dir = os.path.join(repo_root, "skills", "arch-index", "scripts")
+    if all(os.path.isfile(os.path.join(repo_tools_dir, script)) for script in required_scripts):
+        return repo_tools_dir, None
+
+    # Fall back to ~/.claude/skills/arch-index/scripts
+    home_tools_dir = os.path.expanduser("~/.claude/skills/arch-index/scripts")
+    if all(os.path.isfile(os.path.join(home_tools_dir, script)) for script in required_scripts):
+        return home_tools_dir, None
+
+    # None of the locations have both scripts
+    return None, f"arch-index scripts not found in {home_tools_dir}"
 
 
 def run_command(cmd, cwd):
@@ -70,6 +114,12 @@ def main():
 
     if args.self_test:
         return self_test(root)
+
+    # Resolve tools directory
+    tools_dir, tools_error = resolve_tools_dir(root)
+    if tools_error:
+        print(f"ERROR: {tools_error}", file=sys.stderr)
+        return 2
 
     # Check pin vs HEAD
     pin = None
@@ -119,6 +169,7 @@ def main():
             "pin": pin,
             "head": head,
             "reason": reason,
+            "tools_dir": tools_dir,
         }
         os.makedirs(os.path.dirname(out_path), exist_ok=True)
         with open(out_path, "w") as fh:
@@ -126,18 +177,14 @@ def main():
         return 2
 
     # Run validate_index.py
-    validate_script = os.path.join(
-        os.path.dirname(__file__), "..", "..", "arch-index", "scripts", "validate_index.py"
-    )
+    validate_script = os.path.join(tools_dir, "validate_index.py")
     validate_exit, _, validate_err = run_command(
         ["python3", validate_script, index_path, "--repo-root", root, "--quiet"],
         cwd=root,
     )
 
     # Run arch_drift.py with temp output file
-    drift_script = os.path.join(
-        os.path.dirname(__file__), "..", "..", "arch-index", "scripts", "arch_drift.py"
-    )
+    drift_script = os.path.join(tools_dir, "arch_drift.py")
     with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as tmp:
         tmp_path = tmp.name
 
@@ -217,6 +264,7 @@ def main():
             "pin": pin,
             "head": head,
             "reason": reason,
+            "tools_dir": tools_dir,
         }
 
         os.makedirs(os.path.dirname(out_path), exist_ok=True)
@@ -259,7 +307,7 @@ def self_test(root):
             print(f"FAIL: fixture build failed: {exc}", file=sys.stderr)
             return 1
 
-    fixtures = ["remove-verdict", "prune-verdict", "clean", "stale-pin"]
+    fixtures = ["remove-verdict", "prune-verdict", "clean", "stale-pin", "tools-dir-env", "tools-dir-repo", "tools-dir-env-missing"]
     all_pass = True
 
     # Expected exit codes per fixture
@@ -268,36 +316,228 @@ def self_test(root):
         "prune-verdict": 0,
         "clean": 0,
         "stale-pin": 2,
+        "tools-dir-env": 0,
+        "tools-dir-repo": 0,
+        "tools-dir-env-missing": 2,
     }
 
     for fixture_name in fixtures:
-        fixture_root = os.path.join(build_dir, fixture_name)
-        if not os.path.isdir(fixture_root):
-            print(f"FAIL  {fixture_name:20s} -> fixture directory missing")
+        env = os.environ.copy()
+
+        # All fixtures run on temporary copies to keep in-tree _build clean
+
+        # Determine the source fixture to copy
+        if fixture_name in ["tools-dir-env", "tools-dir-env-missing"]:
+            source_fixture = os.path.join(build_dir, "clean")
+        elif fixture_name == "tools-dir-repo":
+            source_fixture = os.path.join(build_dir, "clean")
+        else:
+            source_fixture = os.path.join(build_dir, fixture_name)
+
+        if not os.path.isdir(source_fixture):
+            print(f"FAIL  {fixture_name:20s} -> source fixture missing")
             all_pass = False
             continue
 
-        # Run as subprocess
-        proc = subprocess.run(
-            [sys.executable, __file__, "--repo-root", fixture_root],
-            capture_output=True,
-            text=True
-        )
-        exit_code = proc.returncode
-        stderr = proc.stderr
+        # Set up environment for tools-dir tests
+        if fixture_name == "tools-dir-env":
+            # Copy clean fixture to temp and run with ARCH_INDEX_SCRIPTS env var set
+            real_scripts = os.path.expanduser("~/.claude/skills/arch-index/scripts")
+            if not os.path.isdir(real_scripts):
+                print(f"SKIP  {fixture_name:20s} -> real scripts not found")
+                continue
 
-        expected_code = expected.get(fixture_name, 0)
-        passed = exit_code == expected_code
-        print(f"  {'PASS' if passed else 'FAIL'}  {fixture_name:20s} exit={exit_code} (expect {expected_code})")
-
-        # For remove-verdict, assert REMOVE is mentioned in stderr
-        if fixture_name == "remove-verdict" and passed:
-            if "REMOVE" not in stderr:
-                print(f"    WARNING: REMOVE not in stderr output", file=sys.stderr)
+            clean_fixture = os.path.join(build_dir, "clean")
+            if not os.path.isdir(clean_fixture):
+                print(f"FAIL  {fixture_name:20s} -> clean fixture missing")
                 all_pass = False
+                continue
 
-        if not passed:
-            all_pass = False
+            tmpfixture = tempfile.mkdtemp()
+            try:
+                # Copy the clean fixture into tmpfixture
+                shutil.copytree(clean_fixture, os.path.join(tmpfixture, "repo"))
+                fixture_root = os.path.join(tmpfixture, "repo")
+
+                tmpdir = tempfile.mkdtemp()
+                try:
+                    # Copy both scripts
+                    for script in ["validate_index.py", "arch_drift.py"]:
+                        src = os.path.join(real_scripts, script)
+                        dst = os.path.join(tmpdir, script)
+                        if os.path.isfile(src):
+                            shutil.copy2(src, dst)
+                    env["ARCH_INDEX_SCRIPTS"] = tmpdir
+                    proc = subprocess.run(
+                        [sys.executable, __file__, "--repo-root", fixture_root],
+                        capture_output=True,
+                        text=True,
+                        env=env
+                    )
+                    exit_code = proc.returncode
+                    stderr = proc.stderr
+
+                    expected_code = expected.get(fixture_name, 0)
+                    passed = exit_code == expected_code
+                    print(f"  {'PASS' if passed else 'FAIL'}  {fixture_name:20s} exit={exit_code} (expect {expected_code})")
+
+                    # Check that tools_dir is recorded in the JSON
+                    if passed:
+                        try:
+                            gate_file = os.path.join(fixture_root, ".arch", "ARCH-GATE.json")
+                            if os.path.isfile(gate_file):
+                                with open(gate_file) as fh:
+                                    gate_data = json.load(fh)
+                                if "tools_dir" not in gate_data or gate_data["tools_dir"] != tmpdir:
+                                    print(f"    WARNING: tools_dir not correctly recorded", file=sys.stderr)
+                                    all_pass = False
+                        except Exception:
+                            pass
+
+                    if not passed:
+                        all_pass = False
+                finally:
+                    shutil.rmtree(tmpdir)
+            finally:
+                shutil.rmtree(tmpfixture)
+            continue
+
+        elif fixture_name == "tools-dir-repo":
+            # Create a temporary copy of the clean fixture and add skills/arch-index/scripts to it
+            env.pop("ARCH_INDEX_SCRIPTS", None)
+            real_scripts = os.path.expanduser("~/.claude/skills/arch-index/scripts")
+            if not os.path.isdir(real_scripts):
+                print(f"SKIP  {fixture_name:20s} -> real scripts not found")
+                continue
+
+            clean_fixture = os.path.join(build_dir, "clean")
+            if not os.path.isdir(clean_fixture):
+                print(f"FAIL  {fixture_name:20s} -> clean fixture missing")
+                all_pass = False
+                continue
+
+            tmpfixture = tempfile.mkdtemp()
+            try:
+                # Copy the clean fixture into tmpfixture
+                shutil.copytree(clean_fixture, os.path.join(tmpfixture, "repo"))
+                fixture_with_scripts = os.path.join(tmpfixture, "repo")
+
+                # Create skills/arch-index/scripts in the fixture
+                scripts_dest = os.path.join(fixture_with_scripts, "skills", "arch-index", "scripts")
+                os.makedirs(scripts_dest, exist_ok=True)
+                for script in ["validate_index.py", "arch_drift.py"]:
+                    src = os.path.join(real_scripts, script)
+                    dst = os.path.join(scripts_dest, script)
+                    if os.path.isfile(src):
+                        shutil.copy2(src, dst)
+
+                # Run with the fixture that has repo scripts
+                proc = subprocess.run(
+                    [sys.executable, __file__, "--repo-root", fixture_with_scripts],
+                    capture_output=True,
+                    text=True,
+                    env=env
+                )
+                exit_code = proc.returncode
+                stderr = proc.stderr
+
+                expected_code = expected.get(fixture_name, 0)
+                passed = exit_code == expected_code
+                print(f"  {'PASS' if passed else 'FAIL'}  {fixture_name:20s} exit={exit_code} (expect {expected_code})")
+
+                # Check that tools_dir points to repo scripts
+                if passed:
+                    try:
+                        gate_file = os.path.join(fixture_with_scripts, ".arch", "ARCH-GATE.json")
+                        if os.path.isfile(gate_file):
+                            with open(gate_file) as fh:
+                                gate_data = json.load(fh)
+                            expected_tools_dir = os.path.join(fixture_with_scripts, "skills", "arch-index", "scripts")
+                            if "tools_dir" not in gate_data or gate_data["tools_dir"] != expected_tools_dir:
+                                print(f"    WARNING: tools_dir not correctly recorded", file=sys.stderr)
+                                all_pass = False
+                    except Exception:
+                        pass
+
+                if not passed:
+                    all_pass = False
+            finally:
+                shutil.rmtree(tmpfixture)
+            continue
+
+        elif fixture_name == "tools-dir-env-missing":
+            # Copy clean fixture to temp and run with empty ARCH_INDEX_SCRIPTS
+            clean_fixture = os.path.join(build_dir, "clean")
+            if not os.path.isdir(clean_fixture):
+                print(f"FAIL  {fixture_name:20s} -> clean fixture missing")
+                all_pass = False
+                continue
+
+            tmpfixture = tempfile.mkdtemp()
+            try:
+                # Copy the clean fixture into tmpfixture
+                shutil.copytree(clean_fixture, os.path.join(tmpfixture, "repo"))
+                fixture_root = os.path.join(tmpfixture, "repo")
+
+                tmpdir = tempfile.mkdtemp()
+                try:
+                    env["ARCH_INDEX_SCRIPTS"] = tmpdir
+                    proc = subprocess.run(
+                        [sys.executable, __file__, "--repo-root", fixture_root],
+                        capture_output=True,
+                        text=True,
+                        env=env
+                    )
+                    exit_code = proc.returncode
+                    stderr = proc.stderr
+
+                    expected_code = expected.get(fixture_name, 0)
+                    passed = exit_code == expected_code
+                    print(f"  {'PASS' if passed else 'FAIL'}  {fixture_name:20s} exit={exit_code} (expect {expected_code})")
+
+                    # Check stderr contains "arch-index scripts not found"
+                    if passed and "arch-index scripts not found" not in stderr:
+                        print(f"    WARNING: expected error message not in stderr", file=sys.stderr)
+                        all_pass = False
+
+                    if not passed:
+                        all_pass = False
+                finally:
+                    shutil.rmtree(tmpdir)
+            finally:
+                shutil.rmtree(tmpfixture)
+            continue
+
+        # Standard fixtures - run on temporary copy
+        tmpfixture = tempfile.mkdtemp()
+        try:
+            shutil.copytree(source_fixture, os.path.join(tmpfixture, "fixture"))
+            fixture_root = os.path.join(tmpfixture, "fixture")
+
+            # Run as subprocess
+            proc = subprocess.run(
+                [sys.executable, __file__, "--repo-root", fixture_root],
+                capture_output=True,
+                text=True,
+                env=env
+            )
+            exit_code = proc.returncode
+            stderr = proc.stderr
+
+            expected_code = expected.get(fixture_name, 0)
+            passed = exit_code == expected_code
+            print(f"  {'PASS' if passed else 'FAIL'}  {fixture_name:20s} exit={exit_code} (expect {expected_code})")
+
+            # For remove-verdict, assert REMOVE is mentioned in stderr
+            if fixture_name == "remove-verdict" and passed:
+                if "REMOVE" not in stderr:
+                    print(f"    WARNING: REMOVE not in stderr output", file=sys.stderr)
+                    all_pass = False
+
+            if not passed:
+                all_pass = False
+        finally:
+            shutil.rmtree(tmpfixture)
 
     print()
     print(f"{len(fixtures)} fixture(s): {'all pass' if all_pass else 'SOME FAILED'}")

@@ -44,12 +44,20 @@ passed=0
 total=${#scripts[@]}
 
 for script in "${scripts[@]}"; do
-  python3 "$HERE/$script" --self-test >/dev/null 2>&1
+  out="$(mktemp)"
+  python3 "$HERE/$script" --self-test >"$out" 2>&1
   rc=$?
+  printf '%s: exit %d\n' "$script" "$rc"
   if [ "$rc" -eq 0 ]; then
     ((passed++))
+  else
+    # A red suite that does not say why costs a debugging round: whoever reads
+    # the CI log otherwise has to reproduce the failure locally first, and a
+    # failure that reproduces only on one platform is the expensive case. Print
+    # a bounded tail of the failing script's own output.
+    tail -n 25 "$out" | sed 's/^/    /'
   fi
-  printf '%s: exit %d\n' "$script" "$rc"
+  rm -f "$out"
 done
 
 echo "team-gate fixtures: $passed/$total passed"

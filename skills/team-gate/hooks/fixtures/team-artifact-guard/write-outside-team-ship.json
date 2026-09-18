@@ -1,0 +1,11 @@
+{
+  "hook_event_name": "PreToolUse",
+  "session_id": "fixture-session",
+  "permission_mode": "auto",
+  "tool_name": "Write",
+  "tool_use_id": "toolu_outside",
+  "tool_input": {
+    "file_path": "src/index.js",
+    "content": "console.log('hi');"
+  }
+}

@@ -265,6 +265,70 @@ def _coverage_data(head: str, cwd: str, status: str = "MEASURED", exit_code: int
     }
 
 
+def _arch_baseline_data(head: str, cwd: str, status: str = "CURRENT") -> Dict[str, Any]:
+    """Shaped like arch_gate.py's cmd_baseline: CURRENT means the index's
+    pinnedCommit equals head, exit 0; any other status (STALE,
+    NOT_APPLICABLE, DISABLED) is exit 2 and pin is None here, since none of
+    these fixtures need a real .arch/index.json on disk to prove the point."""
+    exit_code = 0 if status == "CURRENT" else 2
+    pin = head if status == "CURRENT" else None
+    if pin:
+        summary = f"arch baseline: {status} pin={pin[:12]} head={head[:12]}"
+    else:
+        summary = f"arch baseline: {status} head={head[:12]}"
+    return {
+        "argv": ["baseline", "--repo-root", cwd], "cwd": cwd, "head": head, "exit": exit_code,
+        "summary": summary, "pin": pin, "status": status,
+    }
+
+
+def _arch_plan_data(head: str, cwd: str, mode: str, exit_code: int = 0,
+                     component: Optional[str] = None) -> Dict[str, Any]:
+    """Shaped like arch_gate.py's _plan_gate wrapper around
+    verify_arch_plan.py, for both plan-declare (stage 3) and plan-verify
+    (stage 13)."""
+    mode_flag = "--declare" if mode == "declare" else "--verify"
+    plan_path = str(Path(cwd) / ".team-ship" / "ARCH-PLAN.json")
+    argv = ["python3", "verify_arch_plan.py", plan_path, mode_flag, "--repo-root", cwd]
+    label = f"plan-{mode}"
+    if exit_code == 0:
+        stdout_tail = [f"{label}: OK"]
+    else:
+        descriptor = component or "src/missing/path.ts"
+        stdout_tail = [f"BLOCK: component path does not exist: {descriptor}"]
+    summary = f"{label}: child_exit={exit_code} -> exit={exit_code}"
+    return {
+        "argv": argv, "cwd": cwd, "head": head, "exit": exit_code,
+        "summary": summary, "child_exit": exit_code, "stdout_tail": stdout_tail,
+    }
+
+
+def _arch_conformance_data(head: str, cwd: str, status: str = "PASS") -> Dict[str, Any]:
+    """Shaped like arch_gate.py's cmd_conformance. status "PASS" is a clean
+    run; any other status reproduces a non-CURRENT baseline status at
+    exit 2, per R2/R3."""
+    if status == "PASS":
+        exit_code = 0
+        gate = "PASS"
+        summary = "conformance: PASS"
+        validate_exit: Optional[int] = 0
+        drift_exit: Optional[int] = 0
+        pin: Optional[str] = head
+    else:
+        exit_code = 2
+        gate = "UNVERIFIED"
+        summary = f"conformance: baseline status is {status}, cannot be checked honestly"
+        validate_exit = None
+        drift_exit = None
+        pin = None
+    return {
+        "argv": ["conformance", "--repo-root", cwd], "cwd": cwd, "head": head, "exit": exit_code,
+        "summary": summary, "gate": gate, "removes": [], "prunes": [],
+        "validate_exit": validate_exit, "drift_exit": drift_exit, "pin": pin,
+        "tools_dir": str(Path(cwd) / "skills" / "arch-index" / "scripts"),
+    }
+
+
 def _verify_compare_data(head: str, cwd: str) -> Dict[str, Any]:
     return {
         "argv": ["verify_independent.py", "compare", "gates/8.json", "gates/8-verifier.json"],
@@ -320,7 +384,10 @@ def _write_evidence(repo: Path, head: str, run_id: str) -> None:
 def _build_standard(run_dir: Path, repo: Path, head: str, *,
                      skip: Optional[set] = None, gate9_exit: int = 0,
                      gate10_status: str = "MEASURED", gate10_exit: int = 0,
-                     gate8_argv: Optional[List[str]] = None, approval: bool = True) -> None:
+                     gate8_argv: Optional[List[str]] = None, approval: bool = True,
+                     arch_baseline_status: str = "CURRENT",
+                     arch_plan13_exit: int = 0, arch_plan13_component: Optional[str] = None,
+                     arch_conformance_status: str = "PASS") -> None:
     skip = skip or set()
     cwd = str(repo)
 
@@ -333,6 +400,20 @@ def _build_standard(run_dir: Path, repo: Path, head: str, *,
     for n in range(1, 7):
         maybe(f"gates/handoff-{n}.json", f"handoff-{n}", _handoff_data(head, cwd), 0, "PASS: all inputs valid")
     maybe("gates/handoff-approval.json", "handoff-approval", _handoff_data(head, cwd), 0, "PASS: all inputs valid")
+
+    baseline_data = _arch_baseline_data(head, cwd, status=arch_baseline_status)
+    maybe("gates/1-arch-baseline.json", "arch-baseline", baseline_data, baseline_data["exit"], baseline_data["summary"])
+
+    plan3_data = _arch_plan_data(head, cwd, "declare")
+    maybe("gates/3-arch-plan.json", "arch-plan-declare", plan3_data, plan3_data["exit"], plan3_data["summary"])
+
+    plan13_data = _arch_plan_data(head, cwd, "verify", exit_code=arch_plan13_exit,
+                                   component=arch_plan13_component)
+    maybe("gates/13-arch-plan.json", "arch-plan-verify", plan13_data, plan13_data["exit"], plan13_data["summary"])
+
+    conformance_data = _arch_conformance_data(head, cwd, status=arch_conformance_status)
+    maybe("gates/13-arch.json", "arch-conformance", conformance_data,
+          conformance_data["exit"], conformance_data["summary"])
 
     maybe("gates/7-discover.json", "gate-discovery", _discover_data(head, cwd), 0,
           "discovered 1 command(s); first 'pytest -q' from .github/workflows/ci.yml:9")
@@ -657,6 +738,63 @@ def make_rounds_three(build_dir: Path) -> None:
         _append_receipt(run_dir, "stage-opened", {"stage": 6})
 
 
+def make_arch_not_applicable_blocks(build_dir: Path) -> None:
+    """R3: the baseline is NOT_APPLICABLE (models a repository with no
+    .arch/index.json), and gates/13-arch.json reproduces that status at
+    exit 2. Not overridden: the run BLOCKs, naming stage 13 and the arch
+    gate file."""
+    name = "arch-not-applicable-blocks"
+    repo = _make_repo(build_dir, name)
+    head = _init_repo(repo)
+    run_dir = _start_run(build_dir, name, repo)
+    _build_standard(run_dir, repo, head, arch_baseline_status="NOT_APPLICABLE",
+                     arch_conformance_status="NOT_APPLICABLE")
+    _write_evidence(repo, head, name)
+
+
+def make_arch_not_applicable_overridden(build_dir: Path) -> None:
+    """R3: identical to arch-not-applicable-blocks, but an override
+    receipt names gate "arch", covering gates/13-arch.json's NOT_APPLICABLE
+    state. The verdict becomes PASS_WITH_OVERRIDE."""
+    name = "arch-not-applicable-overridden"
+    repo = _make_repo(build_dir, name)
+    head = _init_repo(repo)
+    run_dir = _start_run(build_dir, name, repo)
+    _build_standard(run_dir, repo, head, arch_baseline_status="NOT_APPLICABLE",
+                     arch_conformance_status="NOT_APPLICABLE")
+    _write_evidence(repo, head, name)
+    _append_receipt(run_dir, "override", {
+        "gate": "arch", "instruction": "arch-not-applicable-overridden instruction text", "by": "rijul",
+    })
+
+
+def make_arch_plan_missing_path(build_dir: Path) -> None:
+    """A component declared new or modified whose path is missing is what
+    verify_arch_plan.py's --verify mode reports as its own violation;
+    arch_gate.py's plan-verify wrapper maps that child exit 1 straight
+    through to gates/13-arch-plan.json's own exit 1. Not overridden: BLOCK,
+    naming gates/13-arch-plan.json."""
+    name = "arch-plan-missing-path"
+    repo = _make_repo(build_dir, name)
+    head = _init_repo(repo)
+    run_dir = _start_run(build_dir, name, repo)
+    _build_standard(run_dir, repo, head, arch_plan13_exit=1,
+                     arch_plan13_component="src/webhook-ingest/handler.ts")
+    _write_evidence(repo, head, name)
+
+
+def make_baseline_missing(build_dir: Path) -> None:
+    """gates/1-arch-baseline.json is never written: missing blocks stage 1
+    like any other missing gate (it is not exempted the way a present but
+    UNVERIFIED baseline is), so a stage 2 query lists it under missing."""
+    name = "baseline-missing"
+    repo = _make_repo(build_dir, name)
+    head = _init_repo(repo)
+    run_dir = _start_run(build_dir, name, repo)
+    _build_standard(run_dir, repo, head, skip={"gates/1-arch-baseline.json"})
+    _write_evidence(repo, head, name)
+
+
 FIXTURE_MAKERS = [
     make_all_green,
     make_gate_missing_8,
@@ -681,6 +819,10 @@ FIXTURE_MAKERS = [
     make_rounds_exceeded,
     make_rounds_overridden,
     make_rounds_three,
+    make_arch_not_applicable_blocks,
+    make_arch_not_applicable_overridden,
+    make_arch_plan_missing_path,
+    make_baseline_missing,
 ]
 
 

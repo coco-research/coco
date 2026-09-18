@@ -27,6 +27,28 @@ assertion is raised inside a helper function defined in the test module rather
 than in the test body itself. The red proof is still a valid assertion,
 because the frame that raises it is in a test path.
 
+**unittest-valid-red.** Same bug and fix as proper-red-green, but the new test is a
+`unittest.TestCase` whose `assertEqual` fails at the red phase. The AssertionError is
+raised from inside the standard library's `unittest/case.py`, not the test file, so
+attribution walks the traceback backwards past that stdlib frame to the test method,
+the first frame that resolves under the worktree. The red proof is still
+valid-red-assertion, with `attribution_frame` naming the test file.
+
+**helper-outside-worktree.** Same bug and fix as proper-red-green, but the assertion
+lives in a helper module reachable only through a sys.path entry outside the
+worktree (the self-test supplies it via `PYTHONPATH`; it is never copied into the
+temporary repo). The AssertionError's last frame is in that external helper, outside
+the worktree, so attribution walks one frame further back to the test, the first
+frame that resolves under the worktree. The red proof is valid-red-assertion, with
+`attribution_frame` naming the test file.
+
+**unittest-invalid-red.** A `unittest.TestCase` test whose red-phase failure is an
+AssertionError raised by a plain `assert` statement inside the implementation module
+itself, before the test's own `assertEqual` is ever reached. Both frames resolve
+under the worktree, so attribution stops at the last one, in the implementation
+file, and the red proof is invalid-red with `attribution_frame` naming that
+implementation path.
+
 **never-red.** The base commit already has a correct implementation and a
 passing test. HEAD only adds a second test; the implementation never changes.
 Reverting the implementation to base leaves it identical to HEAD, so the new

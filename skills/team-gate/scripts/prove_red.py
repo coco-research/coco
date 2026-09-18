@@ -370,7 +370,16 @@ def _relative_to_worktree(file_path: str, wt: Path) -> Optional[str]:
 
 def classify_red(result: Dict[str, Any], wt: Path, added_impl: Set[str], modified_impl: Set[str],
                   repo_root: Path, base: str) -> Dict[str, Any]:
-    """Classify one red-phase _run-one result into never-red, valid-red, or invalid-red."""
+    """Classify one red-phase _run-one result into never-red, valid-red, or invalid-red.
+
+    For an AssertionError, attribution walks the recorded frames from the last one
+    backwards, skipping any frame whose file resolves outside the worktree (the
+    standard library, site-packages, a pytest plugin's assertion rewrite hook), and
+    stops at the first frame that resolves under it. That frame decides the class: a
+    test-path frame is valid-red-assertion, an implementation-path frame is
+    invalid-red. No frame under the worktree at all is invalid-red naming the last
+    frame's file, as before this attribution walk existed.
+    """
     outcome = result.get("outcome")
     exc_type = result.get("exc_type")
     message = (result.get("message") or "")[:2000]
@@ -379,7 +388,7 @@ def classify_red(result: Dict[str, Any], wt: Path, added_impl: Set[str], modifie
 
     red: Dict[str, Any] = {
         "class": None, "exc_type": exc_type, "message": message,
-        "last_frame": last_frame, "resolvedTo": None,
+        "last_frame": last_frame, "attribution_frame": None, "resolvedTo": None,
     }
 
     if outcome == "pass":
@@ -391,12 +400,24 @@ def classify_red(result: Dict[str, Any], wt: Path, added_impl: Set[str], modifie
         return red
 
     if outcome == "fail" and exc_type == "AssertionError":
-        rel = _relative_to_worktree(last_frame["file"], wt) if last_frame else None
+        attribution_frame = None
+        rel = None
+        for frame in reversed(frames):
+            candidate = _relative_to_worktree(frame["file"], wt)
+            if candidate is not None:
+                attribution_frame = frame
+                rel = candidate
+                break
+        red["attribution_frame"] = attribution_frame
         if rel is not None and classify_path(rel) in ("test", "support"):
             red["class"] = "valid-red-assertion"
-        else:
+        elif rel is not None:
             red["class"] = "invalid-red"
             red["message"] = f"assertion raised inside implementation path {rel}"
+        else:
+            red["class"] = "invalid-red"
+            outside_file = last_frame["file"] if last_frame else "<no frames recorded>"
+            red["message"] = f"no frame under the worktree; last frame {outside_file}"
         return red
 
     if exc_type == "ModuleNotFoundError":
@@ -896,6 +917,9 @@ _FIXTURE_EXPECTATIONS: List[Tuple[str, int, List[str]]] = [
     ("new-module-import-red", 0, []),
     ("new-symbol-in-existing-module", 0, []),
     ("assertion-in-helper", 0, []),
+    ("unittest-valid-red", 0, ["red_ok=1"]),
+    ("helper-outside-worktree", 0, ["red_ok=1"]),
+    ("unittest-invalid-red", 1, ["invalid_red=1"]),
     ("never-red", 1, ["never_red=1"]),
     ("wrong-reason-syntax-error", 1, ["invalid_red=1"]),
     ("weakened-after-red", 0, []),
@@ -953,6 +977,16 @@ def cmd_self_test() -> int:
             child_env = os.environ.copy()
             child_env["TEAM_STATE_ROOT"] = str(state_root_dir)
             os.environ["TEAM_STATE_ROOT"] = str(state_root_dir)
+
+            if name == "helper-outside-worktree":
+                # The fixture's test imports a helper that lives outside the worktree
+                # entirely, reachable only through this externally supplied sys.path
+                # entry; it is never copied into the temporary repo.
+                external_dir = str(build_dir / "external_helpers")
+                existing_pp = child_env.get("PYTHONPATH")
+                child_env["PYTHONPATH"] = (
+                    external_dir if not existing_pp else external_dir + os.pathsep + existing_pp
+                )
 
             try:
                 run_id = gate_state.start_run(str(repo), "fix", [])

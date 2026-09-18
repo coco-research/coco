@@ -57,6 +57,16 @@ writes the deny or block JSON in the forms below. Nothing else differs
 between the two modes: the receipts from an observed run are the proof
 that enforcement will behave the same way.
 
+The flag can also be set per guard, which is what a deny run needs when it
+must arm one hook and leave the others observing: `hooks.stage`,
+`hooks.artifact` and `hooks.stop` each take `observe` or `enforce` and
+override the run-wide value for that one guard, so
+`gate_state.py start <repo> <command> hooks=observe hooks.stage=enforce`
+enforces the stage guard alone. `team-turn-log` has no guard key because it
+never denies. When a key is repeated the last token wins, and an
+unrecognised key (`hooks.stagee`) changes nothing rather than arming or
+disarming anything by accident.
+
 - PreToolUse deny: `{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "<reason>"}}`
 - Stop block: `{"decision": "block", "reason": "<reason>"}`
 

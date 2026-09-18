@@ -87,7 +87,7 @@ exit 0: continue and quote the gate file's summary (gates/9.json).
 exit 1: BLOCK; a never-red or invalid-red classification, quote the reason from gates/9.json.
 exit 2: UNVERIFIED; the suite is not confirmed passing until the gate passes or an override receipt names the gate.
 
-On a tests-only change prove_red reports never-red until task 34's stubbed-implementation proof lands; record "override red-green: tests-only change, stub proof pending task 34" in your own words as the human, and remove this sentence when 34 is committed.
+On a tests-only change prove_red switches to its stub mode: it replaces the implementation modules the new test imports with stubs in the throwaway worktree and proves the test fails against them, recording the class valid-red-stub; a test that still passes, or imports no implementation module, is never-red with the reason "exercises no implementation module".
 
 7. Run `prove_red.py recheck` to confirm the proved tests still hold.
 

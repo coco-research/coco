@@ -28,7 +28,6 @@ jobs:
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
-          scope: '@coco-research'
 
       - name: Verify package.json
         run: |

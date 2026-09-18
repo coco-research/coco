@@ -36,6 +36,8 @@ scripts=(
   "render_pr_body.py"
   "ship_gate.py"
   "fix_gate.py"
+  "brownfield_map.py"
+  "hooks_selftest.py"
 )
 
 passed=0

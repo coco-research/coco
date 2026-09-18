@@ -49,7 +49,10 @@ L1 agents focus on the following areas.
   cross-component fix as a boundary violation.
 - Write `.team-ship/PLAN.md` with a `requirements` list, one item per reported issue phrased
   as the behaviour the fix must satisfy, since `claim_evidence.py matrix` reads that list and
-  fix_gate requires gates/11-matrix.json, so a fix run without it cannot pass.
+  fix_gate requires gates/11-matrix.json, so a fix run without it cannot pass. Give each item a
+  `[tests: ...]` list naming the regression test in the form prove_red records
+  (`tests/test_x.py::TestClass.test_method` for unittest, `tests/test_x.py::test_fn` for a
+  plain function), so the matrix grades it through the test.
 
 ```
 python3 ~/.claude/skills/team-gate/scripts/arch_gate.py --repo-root .

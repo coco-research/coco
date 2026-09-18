@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+"""Stand-in ripwire binary for brownfield_map.py's --self-test.
+
+Named "ripwire" once copied onto a temporary PATH entry (this file's own name,
+stub-ripwire, is never invoked directly). Prints a small, fixed JSON document
+shaped like a real "ripwire <dir> --json" or "ripwire <dir> --json --for=TASK"
+run, redacted to a tiny repository; the shape was copied from the installed
+0.6.1 binary run against a two-file, one-test fixture, not from any repository
+this stub is actually pointed at. Honours --version.
+
+Set RIPWIRE_STUB_FAIL to any non-empty value to force a stderr line and exit 3,
+for the ripwire-fails fixture.
+"""
+
+import json
+import os
+import sys
+
+VERSION_LINE = "ripwire 0.6.1 (Release, stub build for team-gate fixtures)"
+
+DEFAULT_MAP = {
+    "files": 3, "symbols": 5, "edges": 3, "shown": 5, "est_tokens": 213,
+    "ambiguous": 0, "unresolved": 0, "order": "important-first", "pr_iters": 27,
+    "r": [
+        {"p": "src/util.py", "s": [
+            {"t": "fn", "n": "add", "k": 0.3836, "c": []},
+            {"t": "fn", "n": "used_by_helper", "k": 0.1677, "c": [{"n": "add"}]},
+        ]},
+        {"p": "src/main.py", "s": [
+            {"t": "fn", "n": "helper", "k": 0.1824, "c": []},
+            {"t": "fn", "n": "main", "k": 0.0986, "c": [{"n": "helper"}]},
+        ]},
+        {"p": "tests/test_util.py", "layer": "test", "s": [
+            {"t": "fn", "n": "test_add", "k": 0.1677, "c": [{"n": "add"}]},
+        ]},
+    ],
+}
+
+TASK_MAP = {
+    "at": "c0bd55c18", "route": "subtoken+body",
+    "relevance_floor": " [relevance floor: kept 3 of 40]",
+    "confidence": "high", "margin_pct": 43, "coverage": 10,
+    "kept": 3, "scored": 3, "corpus": 5, "bundle": "sigs",
+    "lego_total": 0, "compose_total": 0, "routes_total": 0,
+    "lens": "compose,lego,routes,docs",
+    "tail": {"total": 0, "shown": 0, "files": []},
+    "capped": False, "est_tokens": 333,
+    "sigs": [
+        {"l": 1, "n": "add", "p": "src/util.py", "cx": 1, "ccx": 0, "in": 2,
+         "churn": 2, "amp": 3, "tested": True, "r": 1, "sig": "def add(a, b):"},
+        {"l": 4, "n": "used_by_helper", "p": "src/util.py", "cx": 1, "ccx": 0, "in": 0,
+         "churn": 2, "amp": 1, "r": 2, "sig": "def used_by_helper(x):"},
+        {"l": 3, "n": "test_add", "p": "tests/test_util.py", "layer": "test", "cx": 1,
+         "ccx": 0, "in": 0, "churn": 1, "r": 3, "sig": "def test_add():"},
+    ],
+}
+
+
+def main() -> int:
+    if os.environ.get("RIPWIRE_STUB_FAIL"):
+        print("ripwire: stub forced failure for fixture testing", file=sys.stderr)
+        return 3
+
+    argv = sys.argv[1:]
+    if "--version" in argv:
+        print(VERSION_LINE)
+        return 0
+
+    if not argv:
+        print("ripwire: stub requires a directory argument", file=sys.stderr)
+        return 2
+
+    root = argv[0]
+    task = None
+    for arg in argv[1:]:
+        if arg.startswith("--for="):
+            task = arg[len("--for="):]
+
+    if task is not None:
+        doc = dict(TASK_MAP)
+        doc["task"] = task
+        doc["root"] = root
+    else:
+        doc = dict(DEFAULT_MAP)
+        doc["root"] = root
+
+    print(json.dumps(doc))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

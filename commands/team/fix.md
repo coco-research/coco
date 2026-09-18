@@ -23,7 +23,7 @@ exit 0: continue; read `.team-ship/BROWNFIELD-MAP.md` before reading any code.
 exit 1: not used; a map is not a pass or fail judgement.
 exit 2: UNVERIFIED; quote the gate file's summary (gates/handoff-1-map.json).
 
-fix_gate will require this gate file once task 29 lands; until then the map is the first step by instruction.
+fix_gate requires this gate file as its stage 0 row, so the fix pipeline cannot pass without the map; an override receipt naming gate "map" waives it on a throwaway repository.
 
 ## Issue Detection
 

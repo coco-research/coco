@@ -1,0 +1,4 @@
+{
+  "name": "shipped-with-pr-receipt",
+  "description": "Self-test appends a pr-opened receipt with the gate_state API before running check, so the 'shipped' claim holds and is not a finding."
+}

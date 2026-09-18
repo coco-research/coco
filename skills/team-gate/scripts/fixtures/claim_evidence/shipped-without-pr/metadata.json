@@ -1,0 +1,4 @@
+{
+  "name": "shipped-without-pr",
+  "description": "receipts.jsonl carries no pr-opened receipt, so the 'shipped' claim is a merge-claim finding."
+}

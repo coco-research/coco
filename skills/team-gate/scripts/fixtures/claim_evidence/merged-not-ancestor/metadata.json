@@ -1,0 +1,4 @@
+{
+  "name": "merged-not-ancestor",
+  "description": "HEAD is on a branch not reachable from origin/main via a local bare remote, so the 'merged' claim is a merge-claim finding."
+}

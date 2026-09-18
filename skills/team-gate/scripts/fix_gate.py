@@ -14,7 +14,7 @@ Subcommands:
       measure). With --json, the stage rows are also printed as JSON.
   stage N --repo-root DIR
       A pure query: "may fix-pipeline stage N's artifact be written
-      now?" Writes nothing. Checks only that stages 1..N-1 already
+      now?" Writes nothing. Checks only that stages 0..N-1 (the map row included) already
       satisfy their own required gates. Prints one JSON object
       {"stage", "allowed", "missing", "failing", "overridden", "reason"}
       and exits 0 when allowed, 1 when not, 2 when unmeasurable.

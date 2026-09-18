@@ -19,6 +19,7 @@ Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds
 
 [![License: Open-core](https://img.shields.io/badge/License-Open--core-yellow.svg?style=for-the-badge)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.5.0-blue?style=for-the-badge)](CHANGELOG.md)
+[![npm](https://img.shields.io/npm/v/cocosuperintelligence?style=for-the-badge)](https://www.npmjs.com/package/cocosuperintelligence)
 [![Skills](https://img.shields.io/badge/skills-226-emerald?style=for-the-badge)](skills/)
 [![Commands](https://img.shields.io/badge/commands-386-indigo?style=for-the-badge)](commands/)
 [![Personas](https://img.shields.io/badge/personas-495-violet?style=for-the-badge)](systems/superintelligence/)
@@ -58,11 +59,13 @@ Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds
 <a id="install"></a>
 
 ```bash
-git clone https://github.com/coco-research/coco.git && cd coco && bash install.sh
-bash install.sh --systems superintelligence
+npx cocosuperintelligence
+# or: npm i -g cocosuperintelligence && coco
+# alternate: git clone https://github.com/coco-research/coco.git && cd coco && bash install.sh
 ```
 
-<div align="center"><sub>90 seconds. Override with <code>--adapter cursor</code> or <code>--adapter claude-code</code>; narrow bundles with <code>--systems</code>. Per-adapter detail: <a href="docs/install.md">docs/install.md</a>.</sub></div>
+<div align="center"><sub>A local governed department on Claude Code, Cursor, or Codex. Open-core. No telemetry.</sub></div>
+<div align="center"><sub>90 seconds. <code>npx</code> clones the pinned release (<code>v1.5.0</code>) into <code>./coco</code> and runs <code>install.sh</code>. Override with <code>--adapter cursor</code> or <code>--adapter claude-code</code>; narrow bundles with <code>--systems</code>. Per-adapter detail: <a href="docs/install.md">docs/install.md</a>.</sub></div>
 
 ---
 
@@ -541,14 +544,15 @@ bash install.sh
 **Via the npm CLI wrapper**
 
 ```bash
-# The package name is reserved as `cocosuperintelligence` but is not published
-# on npmjs.com yet (registry 404). Until it is, run the wrapper from a clone:
-git clone --branch v1.5.0 --depth 1 https://github.com/coco-research/coco.git
-node coco/bin/coco.js --help
+npx cocosuperintelligence
+# or globally (the binary is coco):
+npm i -g cocosuperintelligence && coco
+
+# flags pass through to install.sh
+npx cocosuperintelligence install --adapter cursor
+npx cocosuperintelligence install --systems superintelligence
 ```
-*Do not `npx cocosuperintelligence` until the name is published — npx would
-resolve whatever first claims that name. The wrapper clones the pinned
-release tag, not floating `main`.*
+*Same installer as a clone: the wrapper clones the pinned release tag (currently `v1.5.0`), not floating `main`, then runs `install.sh`.*
 
 </td>
 </tr>
@@ -624,16 +628,15 @@ git pull --ff-only && bash install.sh
 </td>
 <td width="50%" valign="top">
 
-**CLI wrapper (from a clone)**
+**npm CLI wrapper**
 
 ```bash
 # print version + check for updates
-node bin/coco.js version
+npx cocosuperintelligence version
 
 # apply an update (checks out the pinned release tag)
-node bin/coco.js update
+npx cocosuperintelligence update
 ```
-Until `cocosuperintelligence` is published on npmjs.com, do not use `npx` for this.
 
 </td>
 </tr>
@@ -763,6 +766,7 @@ Re-run the installer with the new adapter flag (e.g. <code>bash install.sh --ada
 
 CoCo is open-core: the core is MIT-licensed and contributions are welcome. The Super Intelligence System (`systems/superintelligence/`) is proprietary — see [`systems/superintelligence/LICENSE`](systems/superintelligence/LICENSE).
 
+- **Star the repo:** [coco-research/coco](https://github.com/coco-research/coco) is the measurable ask.
 - **Start here:** [`CONTRIBUTING.md`](CONTRIBUTING.md) — how to add a skill, command, agent, or adapter.
 - **Good first issues:** [help wanted / good first issue](https://github.com/coco-research/coco/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) — small, well-scoped tasks for newcomers.
 - **Report a bug / request a feature:** [open an issue](https://github.com/coco-research/coco/issues/new/choose).

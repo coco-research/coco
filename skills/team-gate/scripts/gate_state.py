@@ -4,7 +4,7 @@
 Exported library functions (for import by other scripts):
 
   state_root() -> Path: ~/.team/runs, overridable by env TEAM_STATE_ROOT
-  find_run(cwd) -> Path|None: walk up from cwd to find .team-ship/RUN
+  find_run(cwd) -> Path|None: walk up from cwd to find .team-ship/RUN; unreadable marker raises RunMarkerUnreadable
   start_run(repo_root, command, flags) -> run_id: creates run dir and writes run.json
   append_receipt(run_dir, kind, detail, hook_payload=None) -> dict: append to receipts.jsonl
   verify_chain(run_dir) -> ChainResult: status in {ok, broken, unrunnable}, reason string
@@ -16,8 +16,8 @@ stop-checked, certified, gate-timeout. Any other kind raises InvalidReceiptKind.
 
 CLI modes:
   python3 gate_state.py start <repo_root> <command> [flags...]
-  python3 gate_state.py status
-  python3 gate_state.py verify-chain
+  python3 gate_state.py status [--repo-root DIR]
+  python3 gate_state.py verify-chain [--repo-root DIR]
   python3 gate_state.py receipt <kind> <json-detail> [--hook-payload - | --hook-payload PATH]
   python3 gate_state.py --self-test
 
@@ -64,6 +64,15 @@ class ReceiptFileCorrupt(ValueError):
     pass
 
 
+class RunMarkerUnreadable(Exception):
+    """Raised when .team-ship/RUN exists but cannot be read."""
+
+    def __init__(self, path: Path, err: BaseException):
+        self.path = Path(path)
+        self.err = err
+        super().__init__(f"cannot read {self.path}: {type(err).__name__}: {err}")
+
+
 @dataclasses.dataclass
 class ChainResult:
     """Result of verifying receipt chain integrity."""
@@ -80,19 +89,25 @@ def state_root() -> Path:
 
 
 def find_run(cwd: Path) -> Optional[Path]:
-    """Walk up from cwd to find .team-ship/RUN, read run id, return run directory."""
+    """Walk up from cwd to find .team-ship/RUN, read run id, return run directory.
+
+    A missing marker is not an error: the walk continues, and None is returned
+    at the filesystem root. A marker that exists but cannot be read is not
+    absence: raises RunMarkerUnreadable so callers fail closed instead of
+    resolving a different run further up the tree.
+    """
     current = Path(cwd).resolve()
     while current != current.parent:
         marker = current / ".team-ship" / "RUN"
         if marker.is_file():
             try:
                 run_id = marker.read_text(encoding="utf-8").strip()
-                if run_id:
-                    run_dir = state_root() / run_id
-                    if run_dir.is_dir():
-                        return run_dir
-            except Exception:
-                pass
+            except (OSError, UnicodeDecodeError) as e:
+                raise RunMarkerUnreadable(marker, e) from e
+            if run_id:
+                run_dir = state_root() / run_id
+                if run_dir.is_dir():
+                    return run_dir
         current = current.parent
     return None
 
@@ -252,6 +267,29 @@ def append_receipt(run_dir: Path, kind: str, detail: Dict[str, Any],
             os.close(lock_fd)
 
 
+def recorded_repo_root_malformed(repo_root_str: str) -> bool:
+    """True when a recorded repo_root is not an absolute path and not a
+    single relative segment other than '.' or '..'."""
+    return not os.path.isabs(repo_root_str) and (
+        "/" in repo_root_str or repo_root_str in ("", ".", "..")
+    )
+
+
+def resolve_recorded_repo_root(run_dir: Path, repo_root_str: str) -> Path:
+    """Resolve run.json repo_root the same way verify_chain does.
+
+    An absolute path is used as a path and then resolved. A single
+    relative segment that is not '.' and not '..' is joined to run_dir.
+    Any other relative value raises ValueError with verify_chain's
+    wording.
+    """
+    if recorded_repo_root_malformed(repo_root_str):
+        raise ValueError(f"run.json repo_root malformed: {repo_root_str!r}")
+    if os.path.isabs(repo_root_str):
+        return Path(repo_root_str).resolve()
+    return (run_dir / repo_root_str).resolve()
+
+
 def verify_chain(run_dir: Path) -> ChainResult:
     """Verify receipt chain integrity.
 
@@ -409,7 +447,7 @@ def verify_chain(run_dir: Path) -> ChainResult:
                         return ChainResult("broken", f"run.json has no repo_root; {artifact_count} artifact path(s) cannot be checked")
 
                     repo_root_str = run_obj["repo_root"]
-                    if not os.path.isabs(repo_root_str) and ("/" in repo_root_str or repo_root_str in ("", ".", "..")):
+                    if recorded_repo_root_malformed(repo_root_str):
                         return ChainResult("broken", f"run.json repo_root malformed: {repo_root_str!r}")
 
                     if os.path.isabs(repo_root_str):
@@ -452,7 +490,7 @@ def verify_chain(run_dir: Path) -> ChainResult:
                 return ChainResult("broken", f"run.json has no repo_root; {artifact_count} artifact path(s) cannot be checked")
 
             repo_root_str = run_obj["repo_root"]
-            if not os.path.isabs(repo_root_str) and ("/" in repo_root_str or repo_root_str in ("", ".", "..")):
+            if recorded_repo_root_malformed(repo_root_str):
                 return ChainResult("broken", f"run.json repo_root malformed: {repo_root_str!r}")
 
             if os.path.isabs(repo_root_str):
@@ -596,8 +634,10 @@ def main():
     sp_start.add_argument("command", help="command being run")
     sp_start.add_argument("flags", nargs="*", help="command flags")
 
-    sp.add_parser("status", help="show run status")
-    sp.add_parser("verify-chain", help="verify receipt chain integrity")
+    sp_status = sp.add_parser("status", help="show run status")
+    sp_status.add_argument("--repo-root", default=".", help="repository root")
+    sp_verify = sp.add_parser("verify-chain", help="verify receipt chain integrity")
+    sp_verify.add_argument("--repo-root", default=".", help="repository root")
 
     sp_receipt = sp.add_parser("receipt", help="append a receipt")
     sp_receipt.add_argument("kind", help="receipt kind")
@@ -617,7 +657,15 @@ def main():
             print(run_id)
             return 0
 
-        current_run = find_run(Path.cwd())
+        if args.mode in ("status", "verify-chain"):
+            search_root = Path(args.repo_root)
+        else:
+            search_root = Path.cwd()
+        try:
+            current_run = find_run(search_root)
+        except RunMarkerUnreadable as e:
+            print(f"ERROR: {e}", file=sys.stderr)
+            return 2
         if not current_run:
             print("no active run (no .team-ship/RUN found)", file=sys.stderr)
             return 2
@@ -933,6 +981,121 @@ def self_test():
     except Exception as e:
         results.append(("concurrent-appends", f"exception: {e}", "FAIL"))
 
+    # 5c: unreadable .team-ship/RUN is not absence
+    try:
+        temp_root = Path(tempfile.mkdtemp(prefix="gate_state_unreadable_"))
+        fixture_copy = temp_root / "chain-intact"
+        shutil.copytree(test_root / "chain-intact", fixture_copy, symlinks=True)
+        team_ship_dir = fixture_copy / ".team-ship"
+        team_ship_dir.mkdir(parents=True, exist_ok=True)
+        (team_ship_dir / "RUN").write_text("chain-intact")
+        nested = fixture_copy / "nested"
+        nested_marker = nested / ".team-ship" / "RUN"
+        nested_marker.parent.mkdir(parents=True)
+        nested_marker.write_bytes(b"\xff\xfe")
+        env = os.environ.copy()
+        env["TEAM_STATE_ROOT"] = str(temp_root)
+        proc = subprocess.run(
+            [sys.executable, __file__, "verify-chain"],
+            cwd=str(nested),
+            env=env,
+            capture_output=True,
+            text=True
+        )
+        marker_path = str(nested_marker.resolve())
+        exit_ok = proc.returncode == 2
+        stderr_ok = (
+            "ERROR:" in proc.stderr
+            and marker_path in proc.stderr
+            and "UnicodeDecodeError" in proc.stderr
+        )
+        unreadable_status = "OK" if (exit_ok and stderr_ok) else "FAIL"
+        results.append(("find-run-unreadable", 2, proc.returncode, "ERROR:", proc.stderr[:50], unreadable_status))
+        shutil.rmtree(temp_root, ignore_errors=True)
+    except Exception as e:
+        results.append(("find-run-unreadable", f"exception: {e}", "FAIL"))
+
+    # 5c: a genuinely absent marker still walks up
+    try:
+        temp_root = Path(tempfile.mkdtemp(prefix="gate_state_walkup_"))
+        fixture_copy = temp_root / "chain-intact"
+        shutil.copytree(test_root / "chain-intact", fixture_copy, symlinks=True)
+        team_ship_dir = fixture_copy / ".team-ship"
+        team_ship_dir.mkdir(parents=True, exist_ok=True)
+        (team_ship_dir / "RUN").write_text("chain-intact")
+        nested = fixture_copy / "nested"
+        nested.mkdir()
+        env = os.environ.copy()
+        env["TEAM_STATE_ROOT"] = str(temp_root)
+        proc = subprocess.run(
+            [sys.executable, __file__, "verify-chain"],
+            cwd=str(nested),
+            env=env,
+            capture_output=True,
+            text=True
+        )
+        exit_ok = proc.returncode == 0
+        stderr_ok = "chain intact" in proc.stderr
+        walkup_status = "OK" if (exit_ok and stderr_ok) else "FAIL"
+        results.append(("find-run-walk-up", 0, proc.returncode, "chain intact", proc.stderr[:50], walkup_status))
+        shutil.rmtree(temp_root, ignore_errors=True)
+    except Exception as e:
+        results.append(("find-run-walk-up", f"exception: {e}", "FAIL"))
+
+    # 5f: verify-chain --repo-root resolves from the flag, not process cwd
+    try:
+        temp_root = Path(tempfile.mkdtemp(prefix="gate_state_vcroot_"))
+        fixture_copy = temp_root / "chain-intact"
+        shutil.copytree(test_root / "chain-intact", fixture_copy, symlinks=True)
+        team_ship_dir = fixture_copy / ".team-ship"
+        team_ship_dir.mkdir(parents=True, exist_ok=True)
+        (team_ship_dir / "RUN").write_text("chain-intact")
+        elsewhere = Path(tempfile.mkdtemp(prefix="gate_state_vcroot_cwd_"))
+        env = os.environ.copy()
+        env["TEAM_STATE_ROOT"] = str(temp_root)
+        proc = subprocess.run(
+            [sys.executable, __file__, "verify-chain", "--repo-root", str(fixture_copy)],
+            cwd=str(elsewhere),
+            env=env,
+            capture_output=True,
+            text=True
+        )
+        exit_ok = proc.returncode == 0
+        stderr_ok = "chain intact" in proc.stderr
+        vcroot_status = "OK" if (exit_ok and stderr_ok) else "FAIL"
+        results.append(("verify-chain-repo-root", 0, proc.returncode, "chain intact", proc.stderr[:50], vcroot_status))
+        shutil.rmtree(temp_root, ignore_errors=True)
+        shutil.rmtree(elsewhere, ignore_errors=True)
+    except Exception as e:
+        results.append(("verify-chain-repo-root", f"exception: {e}", "FAIL"))
+
+    # 5f: status --repo-root resolves from the flag, not process cwd
+    try:
+        temp_root = Path(tempfile.mkdtemp(prefix="gate_state_stroot_"))
+        fixture_copy = temp_root / "chain-intact"
+        shutil.copytree(test_root / "chain-intact", fixture_copy, symlinks=True)
+        team_ship_dir = fixture_copy / ".team-ship"
+        team_ship_dir.mkdir(parents=True, exist_ok=True)
+        (team_ship_dir / "RUN").write_text("chain-intact")
+        empty = Path(tempfile.mkdtemp(prefix="gate_state_stroot_empty_"))
+        env = os.environ.copy()
+        env["TEAM_STATE_ROOT"] = str(temp_root)
+        proc = subprocess.run(
+            [sys.executable, __file__, "status", "--repo-root", str(empty)],
+            cwd=str(fixture_copy),
+            env=env,
+            capture_output=True,
+            text=True
+        )
+        exit_ok = proc.returncode == 2
+        stderr_ok = "no active run" in proc.stderr
+        stroot_status = "OK" if (exit_ok and stderr_ok) else "FAIL"
+        results.append(("status-repo-root", 2, proc.returncode, "no active run", proc.stderr[:50], stroot_status))
+        shutil.rmtree(temp_root, ignore_errors=True)
+        shutil.rmtree(empty, ignore_errors=True)
+    except Exception as e:
+        results.append(("status-repo-root", f"exception: {e}", "FAIL"))
+
     all_ok = all(s == "OK" for r in results for s in [r[-1]] if len(r) >= 3)
     for result in results:
         if len(result) == 3:
@@ -948,6 +1111,8 @@ def self_test():
             name, expected, actual, exp_stderr, act_stderr, status = result
             print(f"{name}: expected {expected} got {actual} stderr contains {exp_stderr!r} {status}")
 
+    ok_count = sum(1 for r in results if len(r) >= 3 and r[-1] == "OK")
+    print(f"{ok_count}/{len(results)} OK")
     return 0 if all_ok else 1
 
 

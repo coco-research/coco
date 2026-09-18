@@ -98,12 +98,12 @@ merely which rule the stage is scoped to accept; every other row's
 "head_rule" is always "equal" for the same reason.
 
 Every row that depends on receipts.jsonl (the stage 6 approval row, the
-stage 11 ordering check, block receipts, overrides) is meaningful only
-once gate_state.verify_chain reports the chain "ok". When it does not,
-those rows read "not evaluated: chain broken" and are never added to the
-failing list; the only failing item in that case is the chain row itself,
-so a corrupted receipts.jsonl is reported once, not as a cascade of
-fabricated missing-approval or missing-override failures.
+rounds row, the stage 11 ordering check, block receipts, overrides) is
+meaningful only once gate_state.verify_chain reports the chain "ok".
+When it does not, those rows read "not evaluated: chain broken" and are
+never added to the failing list; the only failing item in that case is
+the chain row itself, so a corrupted receipts.jsonl is reported once, not
+as a cascade of fabricated missing-approval or missing-override failures.
 
 Overrides. An "override" receipt carries detail {gate, instruction, by}.
 Its "gate" value is matched against either the stage number as a string
@@ -121,7 +121,9 @@ names no failing or missing gate is recorded under gates/14.json's
 stdout; it never changes the verdict. An override receipt missing its
 own "gate" field is itself always unused (it cannot name anything) and
 is reported with the literal gate "(malformed: no gate)", never Python's
-None.
+None. Each override receipt appears once in gates/14.json's "overrides"
+array, with the files it covered as a list on that entry, even when one
+receipt covers two stage 13 files or two stage 11 files.
 
 Four conditions can never be overridden, whatever receipts exist: a
 broken receipt chain (gate_state.verify_chain reports "broken"; a
@@ -138,8 +140,10 @@ are never offered to the override mechanism at all.
 Every repository-relative path this script resolves, EVIDENCE.json,
 EVIDENCE.md, the render_evidence.py --check --repo-root argument, and
 HEAD, uses the repository root recorded in run.json, never the raw
---repo-root argument. --repo-root may therefore be any subdirectory of
-the repository; gate_state.find_run() walks up from it to the same
+--repo-root argument. A relative repo_root in run.json is resolved
+against the run directory, matching gate_state.verify_chain, never
+against the process cwd. --repo-root may therefore be any subdirectory
+of the repository; gate_state.find_run() walks up from it to the same
 .team-ship/RUN pointer regardless.
 
 Every gate file this script reads is read only from run_dir/gates,
@@ -152,8 +156,8 @@ stage 6) and exits 1 when more than three build rounds have opened,
 with the reason "build_rounds <n> exceeds 3". An override receipt naming
 gate "rounds" covers it like any other row and the verdict becomes
 PASS_WITH_OVERRIDE. The row's "stage" key carries the string "rounds".
-
-No em dash, no section sign, stdlib only, exit() called only in the main guard.
+When the chain is not "ok", this row reads "not evaluated: chain broken"
+like the approval row, and is not added to the failing list.
 """
 
 import argparse
@@ -246,6 +250,20 @@ def _git_head(path: Path) -> Optional[str]:
     return head or None
 
 
+def _recorded_repo_root(run_dir: Path, recorded_root_str: str) -> Path:
+    """Resolve run.json repo_root against the run directory.
+
+    Matches gate_state.verify_chain: an absolute path is used as a path
+    and then resolved for HEAD checks; a single relative segment that is
+    not '.' and not '..' is joined to run_dir, never to the process cwd.
+    Any other relative value is refused as malformed.
+    """
+    try:
+        return gate_state.resolve_recorded_repo_root(run_dir, recorded_root_str)
+    except ValueError as exc:
+        raise Unmeasurable(str(exc))
+
+
 def _resolve(repo_root_arg: str) -> Tuple[Path, Path, str, Dict[str, Any]]:
     """Resolve (repo_root, run_dir, head, manifest) or raise Unmeasurable.
 
@@ -254,11 +272,15 @@ def _resolve(repo_root_arg: str) -> Tuple[Path, Path, str, Dict[str, Any]]:
     pointer. Once the run is found, its HEAD is checked against the git
     top level of repo_root_arg, and every path this script resolves from
     here on, including the returned repo_root, uses run.json's own
-    repo_root, never the raw argument.
+    repo_root, never the raw argument. A relative repo_root is resolved
+    against the run directory, matching gate_state.verify_chain.
     """
     repo_root_input = Path(repo_root_arg).resolve()
 
-    run_dir = gate_state.find_run(repo_root_input)
+    try:
+        run_dir = gate_state.find_run(repo_root_input)
+    except gate_state.RunMarkerUnreadable as exc:
+        raise Unmeasurable(str(exc))
     if run_dir is None:
         raise Unmeasurable(f"no active run found under {repo_root_input}")
 
@@ -274,7 +296,7 @@ def _resolve(repo_root_arg: str) -> Tuple[Path, Path, str, Dict[str, Any]]:
 
     recorded_root_str = run_obj.get("repo_root")
     if recorded_root_str:
-        repo_root = Path(recorded_root_str).resolve()
+        repo_root = _recorded_repo_root(run_dir, recorded_root_str)
         head_recorded = _git_head(repo_root)
         if head_recorded is None:
             raise Unmeasurable(f"cannot resolve HEAD for {repo_root}")
@@ -358,6 +380,35 @@ def _override_gate_label(detail: Dict[str, Any]) -> str:
     by a literal placeholder, never Python's None."""
     gate = detail.get("gate")
     return gate if gate else "(malformed: no gate)"
+
+
+def _overrides_out(
+    overridden_detail: List[Tuple[Union[int, str], str, Dict[str, Any]]],
+) -> List[Dict[str, Any]]:
+    """One entry per override receipt, with the files it covered as a list.
+
+    overridden_detail is (stage, covered_file, override_detail) in
+    evaluation order. The same detail object covering two files is
+    listed once; gate, instruction, and by come from the receipt.
+    """
+    out: List[Dict[str, Any]] = []
+    index_by_id: Dict[int, int] = {}
+    for stage, covered, detail in overridden_detail:
+        token = id(detail)
+        if token in index_by_id:
+            entry = out[index_by_id[token]]
+            if covered not in entry["files"]:
+                entry["files"].append(covered)
+            continue
+        index_by_id[token] = len(out)
+        out.append({
+            "stage": stage,
+            "gate": _override_gate_label(detail),
+            "instruction": detail.get("instruction", ""),
+            "by": detail.get("by"),
+            "files": [covered],
+        })
+    return out
 
 
 def _latest_seq_for_gate_file(records: List[Dict[str, Any]], gate_file: str) -> Optional[int]:
@@ -558,7 +609,7 @@ def _evaluate_stage13(
         override = _override_for(overrides, used, key, str(CI_MIRROR_STAGE))
         if override:
             row_overridden = True
-            overridden_detail.append((CI_MIRROR_STAGE, key, override))
+            overridden_detail.append((CI_MIRROR_STAGE, relpath, override))
             reasons.append(f"{relpath}: OVERRIDDEN")
             continue
 
@@ -625,13 +676,24 @@ def _evaluate_stage14(repo_root: Path, run_dir: Path, head: str) -> Tuple[Dict[s
 
 
 def _evaluate_rounds(
-    run_dir: Path, overrides: List[Dict[str, Any]], used: set
+    run_dir: Path, overrides: List[Dict[str, Any]], used: set,
+    chain_ok: bool = True,
 ) -> Tuple[Dict[str, Any], Optional[Tuple[Union[int, str], str, str]], Optional[Tuple[Union[int, str], str, Dict[str, Any]]]]:
     """Evaluate the build rounds limit. Returns (row, blocking, override).
 
     The "rounds" row checks that build_rounds does not exceed 3.
-    It is overridable by an override naming "rounds".
+    It is overridable by an override naming "rounds". When the chain is
+    not "ok", the row is not evaluated, matching the approval row's
+    wording, and is never added to the failing list.
     """
+    if not chain_ok:
+        row = {
+            "stage": "rounds", "required": True, "present": True,
+            "exit": 0, "head_ok": True, "overridden": False,
+            "reason": "not evaluated: chain broken",
+        }
+        return row, None, None
+
     derive = gate_state.derive_status(run_dir)
     build_rounds = derive.get("build_rounds", 0)
 
@@ -645,7 +707,7 @@ def _evaluate_rounds(
             "exit": 0, "head_ok": True, "overridden": True,
             "reason": f"OVERRIDDEN: {override.get('instruction', '')}",
         }
-        return row, None, ("rounds", "derive_status", override)
+        return row, None, ("rounds", "rounds", override)
 
     if row_exit == 0:
         row = {
@@ -756,7 +818,7 @@ def _compute_stages(
             override = _override_for(overrides, used, key, str(stage))
             if override:
                 row_overridden = True
-                overridden_detail.append((stage, key, override))
+                overridden_detail.append((stage, relpath, override))
                 reasons.append(f"{relpath}: OVERRIDDEN")
                 continue
 
@@ -790,7 +852,7 @@ def _compute_stages(
                 override = _override_for(overrides, used, "approval", str(stage))
                 if override:
                     row_overridden = True
-                    overridden_detail.append((stage, "approval", override))
+                    overridden_detail.append((stage, "approval-receipt", override))
                     reasons.append("approval-receipt: OVERRIDDEN")
                 else:
                     present = False
@@ -839,7 +901,7 @@ def _compute_stages(
     if unconditional14:
         unconditional.append(unconditional14)
 
-    rounds_row, rounds_blocking, rounds_override = _evaluate_rounds(run_dir, overrides, used)
+    rounds_row, rounds_blocking, rounds_override = _evaluate_rounds(run_dir, overrides, used, chain_ok)
     stage_rows["rounds"] = rounds_row
     if rounds_blocking:
         blocking.append(rounds_blocking)
@@ -907,10 +969,7 @@ def cmd_check(repo_root_arg: str, json_output: bool) -> int:
 
     summary = "; ".join(all_lines) if all_lines else verdict
 
-    overrides_out = [
-        {"stage": stage, "gate": key, "instruction": detail.get("instruction", ""), "by": detail.get("by")}
-        for stage, key, detail in overridden_detail
-    ]
+    overrides_out = _overrides_out(overridden_detail)
 
     # M5: an override receipt that matched nothing above is unused.
     # N4: one missing its own "gate" field is labelled explicitly rather
@@ -1110,6 +1169,7 @@ _SELF_TEST_CASES: List[Tuple[str, int, Optional[str]]] = [
     ("all-green-after-build", 0, None),
     ("pre-build-foreign-head", 1, "gates/handoff-3.json"),
     ("post-build-ancestor-head", 1, "gates/8.json"),
+    ("override-covers-arch-both", 0, None),
 ]
 
 
@@ -1185,6 +1245,26 @@ def _self_test_fixed_cases(build_dir: Path) -> List[str]:
                     all_ok = False
                 lines.append(f"{name}-no-fabricated-approval: 'missing approval receipt' absent {n2_status}")
 
+            if name in ("chain-broken", "receipts-malformed-line",
+                        "gate-timeout-receipt", "override-cannot-cover-chain") and status == "OK":
+                # 12c: receipt-derived rows agree. The rounds row must
+                # refuse with the approval row's wording, not compute a
+                # build_rounds value off a broken chain.
+                gate14_12c = _run_gates14(state_root)
+                rounds_row = None
+                for row in (gate14_12c.get("stages") if gate14_12c else []) or []:
+                    if row.get("stage") == "rounds":
+                        rounds_row = row
+                        break
+                r12c_ok = (
+                    rounds_row is not None
+                    and rounds_row.get("reason") == "not evaluated: chain broken"
+                )
+                r12c_status = "OK" if r12c_ok else "FAIL"
+                if r12c_status == "FAIL":
+                    all_ok = False
+                lines.append(f"{name}-rounds-not-evaluated: reason matches approval wording {r12c_status}")
+
             if name == "all-green-after-build" and status == "OK":
                 # R15: stage 1 to 6 gate files were recorded at the
                 # repository's first commit, then a second commit moved
@@ -1238,7 +1318,8 @@ def _self_test_fixed_cases(build_dir: Path) -> List[str]:
                 lines.append(f"post-build-ancestor-head-drift: 'head drift' names gates/8.json {pba_status}")
 
             if name in ("all-green", "override-covers-9", "override-covers-approval",
-                        "arch-not-applicable-overridden", "map-overridden"):
+                        "arch-not-applicable-overridden", "map-overridden",
+                        "override-covers-arch-both"):
                 expected_verdict = "PASS" if name == "all-green" else "PASS_WITH_OVERRIDE"
                 gate14 = _run_gates14(state_root)
                 verdict_ok = gate14 is not None and gate14.get("verdict") == expected_verdict
@@ -1249,13 +1330,32 @@ def _self_test_fixed_cases(build_dir: Path) -> List[str]:
                 lines.append(f"{name}-verdict: expected {expected_verdict} got {actual} {v_status}")
 
                 if name in ("override-covers-9", "override-covers-approval",
-                            "arch-not-applicable-overridden", "map-overridden"):
+                            "arch-not-applicable-overridden", "map-overridden",
+                            "override-covers-arch-both"):
                     expected_instruction = f"{name} instruction text"
                     instruction_ok = gate14 is not None and expected_instruction in json.dumps(gate14)
                     i_status = "OK" if instruction_ok else "FAIL"
                     if i_status == "FAIL":
                         all_ok = False
                     lines.append(f"{name}-instruction: present in gates/14.json {i_status}")
+
+                if name == "override-covers-arch-both":
+                    # 12d: one override receipt covering two stage 13 files
+                    # is listed once, with those files as a list.
+                    overrides_list = (gate14 or {}).get("overrides") or []
+                    arch_entries = [o for o in overrides_list if o.get("gate") == "arch"]
+                    files = arch_entries[0].get("files") if len(arch_entries) == 1 else []
+                    d12_ok = (
+                        len(arch_entries) == 1
+                        and len(overrides_list) == 1
+                        and "gates/13-arch-plan.json" in files
+                        and "gates/13-arch.json" in files
+                        and len(files) == 2
+                    )
+                    d12_status = "OK" if d12_ok else "FAIL"
+                    if d12_status == "FAIL":
+                        all_ok = False
+                    lines.append(f"override-covers-arch-both-once: one receipt, two files {d12_status}")
 
                 if name == "all-green":
                     status_ok = gate14 is not None and isinstance(gate14.get("status"), dict) and (
@@ -1352,6 +1452,79 @@ def _self_test_fixed_cases(build_dir: Path) -> List[str]:
         else:
             lines.append("unused-override: FAIL fixture not found")
             all_ok = False
+
+        # 5e: a relative run.json repo_root is resolved against the run
+        # directory, matching gate_state.verify_chain, never against the
+        # process cwd. The copy writes repo_root as a single path segment
+        # that is a symlink inside the run dir; resolving it against an
+        # empty cwd cannot find HEAD.
+        if (build_dir / "all-green").is_dir():
+            repo, state_root = _copy_fixture(
+                build_dir, "all-green", tmp_root, dest_name="all-green-relative-repo-root",
+            )
+            run_dir = next(state_root.glob("*"))
+            link = run_dir / "linked-repo"
+            link.symlink_to(repo)
+            run_json_path = run_dir / "run.json"
+            run_obj = json.loads(run_json_path.read_text(encoding="utf-8"))
+            run_obj["repo_root"] = "linked-repo"
+            run_json_path.write_text(json.dumps(run_obj, indent=2) + "\n", encoding="utf-8")
+            empty_cwd = tmp_root / "empty-cwd-5e"
+            empty_cwd.mkdir()
+            env = dict(os.environ, TEAM_STATE_ROOT=str(state_root))
+            proc = subprocess.run(
+                [sys.executable, __file__, "check", "--repo-root", str(repo)],
+                capture_output=True, text=True, timeout=60, env=env, cwd=str(empty_cwd),
+            )
+            r5e_ok = proc.returncode == 0 and "cannot resolve HEAD" not in proc.stderr
+            r5e_status = "OK" if r5e_ok else "FAIL"
+            if r5e_status == "FAIL":
+                all_ok = False
+            lines.append(f"relative-repo-root: expected 0 got {proc.returncode} {r5e_status}")
+        else:
+            lines.append("relative-repo-root: FAIL fixture not found")
+            all_ok = False
+
+        # 12c: a broken receipt chain must leave BOTH the approval row
+        # and the rounds row unevaluated with the same wording, so a
+        # future edit cannot silently reintroduce a computing rounds
+        # row beside a refusing approval row.
+        if (build_dir / "all-green").is_dir():
+            repo, state_root = _copy_fixture(
+                build_dir, "all-green", tmp_root, dest_name="all-green-12c-chain-broken",
+            )
+            run_dir = next(state_root.glob("*"))
+            receipts_file = run_dir / "receipts.jsonl"
+            receipt_lines = receipts_file.read_text(encoding="utf-8").strip().split("\n")
+            record = json.loads(receipt_lines[1])
+            record["detail"] = dict(record["detail"], summary="corrupted after the fact")
+            receipt_lines[1] = json.dumps(record)
+            receipts_file.write_text("\n".join(receipt_lines) + "\n", encoding="utf-8")
+            proc = _run_check(repo, state_root)
+            gate14 = _run_gates14(state_root)
+            rows = {r.get("stage"): r for r in (gate14.get("stages") if gate14 else []) or []}
+            approval_reason = (rows.get(6) or {}).get("reason") or ""
+            rounds_reason = (rows.get("rounds") or {}).get("reason") or ""
+            needle = "not evaluated: chain broken"
+            r12c_ok = (
+                proc.returncode == 1
+                and "chain broken" in proc.stderr
+                and needle in approval_reason
+                and needle in rounds_reason
+            )
+            r12c_status = "OK" if r12c_ok else "FAIL"
+            if r12c_status == "FAIL":
+                all_ok = False
+            lines.append(
+                f"12c-chain-broken-rows: expected 1 got {proc.returncode} "
+                f"stderr_chain_broken={'chain broken' in proc.stderr} "
+                f"approval={needle in approval_reason} rounds={needle in rounds_reason} "
+                f"{r12c_status}"
+            )
+        else:
+            lines.append("12c-chain-broken-rows: FAIL fixture not found")
+            all_ok = False
+
 
         # N1: gates/14.json already exists as a directory; the atomic
         # write must fail closed with exit 2, one "cannot write" stderr

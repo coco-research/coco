@@ -75,6 +75,28 @@ is this check's own two remaining conditions: .team-ship/EVIDENCE.json
 records head equal to HEAD, and running render_evidence.py --check (as a
 subprocess with sys.executable) exits 0.
 
+Head comparison is scoped by when a gate runs (R15). Stage 6 commits the
+build, and stages 1 to 6 all run before that commit, so their gate files
+gates/handoff-1.json through gates/handoff-6.json, gates/1-arch-baseline.json
+and gates/3-arch-plan.json are written against a HEAD that Stage 6 is then
+expected to move past. For these eight files the head check passes when
+the recorded head equals HEAD or is an ancestor of HEAD, computed by
+_is_ancestor with `git -C <repo_root> merge-base --is-ancestor <recorded>
+HEAD` (a 10 second timeout, False on any error). gates/handoff-approval.json
+is not in this list: check_artifacts.py writes it, but this script has
+never read it, checking the "approval" kind receipt for that stage
+instead, so R15's naming of it does not change what this script measures.
+Every other required gate file, gates/7-discover.json through
+gates/12.json, the two arch files at stage 13, and .team-ship/EVIDENCE.json
+at stage 14, measures the tree the build actually produced, so its
+recorded head must equal HEAD exactly; an ancestor is not enough for any
+of those, and a recorded head that is neither equal nor an ancestor, for
+either group, is still head drift and still never overridable. Each stage
+1 to 6 row in gates/14.json carries a "head_rule" field recording which
+comparison its gate files actually matched by, "equal" or "ancestor", not
+merely which rule the stage is scoped to accept; every other row's
+"head_rule" is always "equal" for the same reason.
+
 Every row that depends on receipts.jsonl (the stage 6 approval row, the
 stage 11 ordering check, block receipts, overrides) is meaningful only
 once gate_state.verify_chain reports the chain "ok". When it does not,
@@ -178,6 +200,16 @@ APPROVAL_STAGE = 6
 CI_MIRROR_STAGE = 13
 FINAL_STAGE = 14
 STAGE_COUNT = 14
+
+# R15: required gate files whose stage runs before Stage 6's own commits
+# move HEAD. _evaluate_gate_item accepts a recorded head that is HEAD or an
+# ancestor of HEAD for these; every other required gate file measures the
+# built tree and keeps strict equality.
+PRE_BUILD_HEAD_FILES = frozenset({
+    "gates/handoff-1.json", "gates/handoff-2.json", "gates/handoff-3.json",
+    "gates/handoff-4.json", "gates/handoff-5.json", "gates/handoff-6.json",
+    "gates/1-arch-baseline.json", "gates/3-arch-plan.json",
+})
 
 
 class Unmeasurable(Exception):
@@ -363,30 +395,64 @@ def _read_json_file(path: Path) -> Optional[Dict[str, Any]]:
 # Per-gate-file evaluation
 # ---------------------------------------------------------------------------
 
-def _evaluate_gate_item(run_dir: Path, relpath: str, head: str) -> Dict[str, Any]:
+def _is_ancestor(recorded_head: str, current_head: str, repo_root: Path) -> bool:
+    """Check if recorded_head is an ancestor of current_head using
+    git merge-base --is-ancestor. Returns False on error. Same shape as
+    fix_gate.py's own copy of this helper (kept separate there; see R15)."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo_root), "merge-base", "--is-ancestor",
+             recorded_head, current_head],
+            capture_output=True, timeout=10,
+        )
+        return result.returncode == 0
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+
+
+def _evaluate_gate_item(
+    run_dir: Path, relpath: str, head: str,
+    repo_root: Optional[Path] = None, head_rule: str = "equal",
+) -> Dict[str, Any]:
     """Classify one required gate file's state against the current HEAD.
 
     state in {"ok", "failed", "unverified", "head-drift", "missing"}.
     "unverified" is reserved for a present file whose own exit is 2.
+
+    head_rule is "equal" (the default) for a gate file that measures the
+    built tree: its recorded head must equal HEAD exactly. It is
+    "ancestor" for a pre-build gate file (R15): a recorded head that is an
+    ancestor of HEAD, computed by _is_ancestor, also passes, since
+    repo_root is then required to run that check. A recorded head that is
+    neither equal nor an ancestor is head-drift regardless of head_rule.
+    The returned dict's own "head_rule" key records which comparison
+    actually matched, "equal" or "ancestor", or None when there was no
+    match to record (missing or head-drift).
     """
     path = run_dir / relpath
     if not path.is_file():
-        return {"state": "missing", "exit": None, "head": None}
+        return {"state": "missing", "exit": None, "head": None, "head_rule": None}
 
     data = _read_json_file(path)
     if data is None:
-        return {"state": "missing", "exit": None, "head": None}
+        return {"state": "missing", "exit": None, "head": None, "head_rule": None}
 
     file_head = data.get("head")
     file_exit = data.get("exit")
 
-    if file_head != head:
-        return {"state": "head-drift", "exit": file_exit, "head": file_head}
+    if file_head == head:
+        matched_rule = "equal"
+    elif (head_rule == "ancestor" and file_head and repo_root is not None
+          and _is_ancestor(file_head, head, repo_root)):
+        matched_rule = "ancestor"
+    else:
+        return {"state": "head-drift", "exit": file_exit, "head": file_head, "head_rule": None}
+
     if file_exit == 0:
-        return {"state": "ok", "exit": 0, "head": file_head}
+        return {"state": "ok", "exit": 0, "head": file_head, "head_rule": matched_rule}
     if file_exit == 2:
-        return {"state": "unverified", "exit": 2, "head": file_head}
-    return {"state": "failed", "exit": file_exit, "head": file_head}
+        return {"state": "unverified", "exit": 2, "head": file_head, "head_rule": matched_rule}
+    return {"state": "failed", "exit": file_exit, "head": file_head, "head_rule": matched_rule}
 
 
 def _is_informational_at_stage1(key: str, state: str) -> bool:
@@ -510,7 +576,8 @@ def _evaluate_stage13(
 
     row = {
         "stage": CI_MIRROR_STAGE, "required": required, "present": present,
-        "exit": row_exit, "head_ok": head_ok, "overridden": row_overridden,
+        "exit": row_exit, "head_ok": head_ok, "head_rule": "equal",
+        "overridden": row_overridden,
         "reason": "; ".join(reasons) if reasons else "PASS",
     }
     return row, unconditional, blocking, overridden_detail
@@ -540,7 +607,8 @@ def _evaluate_stage14(repo_root: Path, run_dir: Path, head: str) -> Tuple[Dict[s
     if not reasons:
         row = {
             "stage": FINAL_STAGE, "required": required, "present": True,
-            "exit": 0, "head_ok": True, "overridden": False, "reason": "PASS",
+            "exit": 0, "head_ok": True, "head_rule": "equal",
+            "overridden": False, "reason": "PASS",
         }
         return row, None
 
@@ -549,6 +617,7 @@ def _evaluate_stage14(repo_root: Path, run_dir: Path, head: str) -> Tuple[Dict[s
         "stage": FINAL_STAGE, "required": required,
         "present": evidence is not None, "exit": 1,
         "head_ok": evidence is not None and evidence.get("head") == head,
+        "head_rule": "equal",
         "overridden": False, "reason": reason_text,
     }
     return row, (FINAL_STAGE, ".team-ship/EVIDENCE.json", reason_text)
@@ -656,12 +725,16 @@ def _compute_stages(
         present = True
         row_exit = 0
         head_ok = True
+        head_rule = "equal"
         row_overridden = False
         reasons: List[str] = []
 
         for key, relpath in items:
-            info = _evaluate_gate_item(run_dir, relpath, head)
+            item_head_rule = "ancestor" if relpath in PRE_BUILD_HEAD_FILES else "equal"
+            info = _evaluate_gate_item(run_dir, relpath, head, repo_root, item_head_rule)
             state = info["state"]
+            if info.get("head_rule") == "ancestor":
+                head_rule = "ancestor"
             if state == "ok":
                 continue
             if state == "head-drift":
@@ -750,7 +823,8 @@ def _compute_stages(
         stage_rows[stage] = {
             "stage": stage, "required": required, "present": present,
             "exit": row_exit if (present or reasons) else None,
-            "head_ok": head_ok, "overridden": row_overridden, "reason": reason_text,
+            "head_ok": head_ok, "head_rule": head_rule,
+            "overridden": row_overridden, "reason": reason_text,
         }
 
     row13, unconditional13, blocking13, overridden13 = _evaluate_stage13(run_dir, head, overrides, used)
@@ -933,7 +1007,8 @@ def cmd_stage(repo_root_arg: str, n: int) -> int:
     groups = _group_required()
     for stage in range(1, n):
         for key, relpath in groups.get(stage, []):
-            info = _evaluate_gate_item(run_dir, relpath, head)
+            item_head_rule = "ancestor" if relpath in PRE_BUILD_HEAD_FILES else "equal"
+            info = _evaluate_gate_item(run_dir, relpath, head, repo_root, item_head_rule)
             state = info["state"]
             if state == "ok":
                 continue
@@ -1029,6 +1104,9 @@ _SELF_TEST_CASES: List[Tuple[str, int, Optional[str]]] = [
     ("arch-not-applicable-blocks", 1, "13: gates/13-arch.json"),
     ("arch-not-applicable-overridden", 0, None),
     ("arch-plan-missing-path", 1, "gates/13-arch-plan.json"),
+    ("all-green-after-build", 0, None),
+    ("pre-build-foreign-head", 1, "gates/handoff-3.json"),
+    ("post-build-ancestor-head", 1, "gates/8.json"),
 ]
 
 
@@ -1103,6 +1181,58 @@ def _self_test_fixed_cases(build_dir: Path) -> List[str]:
                 if n2_status == "FAIL":
                     all_ok = False
                 lines.append(f"{name}-no-fabricated-approval: 'missing approval receipt' absent {n2_status}")
+
+            if name == "all-green-after-build" and status == "OK":
+                # R15: stage 1 to 6 gate files were recorded at the
+                # repository's first commit, then a second commit moved
+                # HEAD before the stage 7 to 14 gate files were written.
+                # The scoped head rule must still pass the whole run, with
+                # stages 1 and 3 recorded as matching by ancestry and the
+                # built-tree stage 8 still matching by strict equality.
+                gate14 = _run_gates14(state_root)
+                rows = {r.get("stage"): r for r in (gate14.get("stages") if gate14 else [])}
+                r15_ok = (
+                    gate14 is not None
+                    and gate14.get("verdict") == "PASS"
+                    and rows.get(1, {}).get("head_ok") is True
+                    and rows.get(1, {}).get("head_rule") == "ancestor"
+                    and rows.get(3, {}).get("head_ok") is True
+                    and rows.get(3, {}).get("head_rule") == "ancestor"
+                    and rows.get(8, {}).get("head_ok") is True
+                    and rows.get(8, {}).get("head_rule") == "equal"
+                )
+                r15_status = "OK" if r15_ok else "FAIL"
+                if r15_status == "FAIL":
+                    all_ok = False
+                lines.append(f"all-green-after-build-head-rule: stage 1/3 ancestor, stage 8 equal {r15_status}")
+
+            if name == "pre-build-foreign-head" and status == "OK":
+                # R15: gates/handoff-3.json is head drift (recorded at a
+                # sha that is not an ancestor of HEAD), which is
+                # unconditional and never overridable; an override receipt
+                # naming "3" is present but must be reported unused.
+                head_drift_ok = "head drift" in combined and "gates/handoff-3.json" in combined
+                gate14 = _run_gates14(state_root)
+                override_unused_ok = (
+                    gate14 is not None
+                    and gate14.get("verdict") == "BLOCK"
+                    and any(u.get("gate") == "3" for u in gate14.get("unused_overrides", []))
+                )
+                pbf_ok = head_drift_ok and override_unused_ok
+                pbf_status = "OK" if pbf_ok else "FAIL"
+                if pbf_status == "FAIL":
+                    all_ok = False
+                lines.append(f"pre-build-foreign-head-override-unused: BLOCK, override 3 unused {pbf_status}")
+
+            if name == "post-build-ancestor-head" and status == "OK":
+                # R15: gates/8.json is recorded at an ancestor of HEAD, not
+                # HEAD itself; stage 8 measures the built tree and keeps
+                # strict equality, so this must still be head drift.
+                pba_ok = "head drift" in combined and "gates/8.json" in combined
+                pba_status = "OK" if pba_ok else "FAIL"
+                if pba_status == "FAIL":
+                    all_ok = False
+                lines.append(f"post-build-ancestor-head-drift: 'head drift' names gates/8.json {pba_status}")
 
             if name in ("all-green", "override-covers-9", "override-covers-approval",
                         "arch-not-applicable-overridden"):

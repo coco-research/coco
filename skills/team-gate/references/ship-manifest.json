@@ -10,6 +10,12 @@
           "maxLines": 200,
           "requiredHeadings": [],
           "forbidTokens": ["TODO", "TBD", "placeholder", "lorem", "FIXME", "to be written"]
+        },
+        {
+          "path": ".team-ship/BROWNFIELD-MAP.md",
+          "minLines": 12,
+          "requiredHeadings": ["Summary", "Impact", "Tests", "Limits"],
+          "forbidTokens": ["TODO", "TBD", "placeholder", "lorem", "FIXME", "to be written"]
         }
       ]
     },
@@ -21,6 +27,12 @@
           "minLines": 20,
           "maxLines": 200,
           "requiredHeadings": [],
+          "forbidTokens": ["TODO", "TBD", "placeholder", "lorem", "FIXME", "to be written"]
+        },
+        {
+          "path": ".team-ship/BROWNFIELD-MAP.md",
+          "minLines": 12,
+          "requiredHeadings": ["Summary", "Impact", "Tests", "Limits"],
           "forbidTokens": ["TODO", "TBD", "placeholder", "lorem", "FIXME", "to be written"]
         }
       ],

@@ -176,6 +176,13 @@ def seed_manifest_artifacts(repo: Path) -> None:
     (team_ship / "ARCHITECTURE-OPTIONS.md").write_text("## Chosen option\n\n" + _fixture_lines(12))
     (team_ship / "PLAN.md").write_text(_fixture_lines(14))
     (team_ship / "REVIEW-FINDINGS.md").write_text(_fixture_lines(4))
+    (team_ship / "BROWNFIELD-MAP.md").write_text(
+        "## Summary\n\n" + _fixture_lines(3)
+        + "\n## Entry points\n\n" + _fixture_lines(3)
+        + "\n## Impact\n\n" + _fixture_lines(3)
+        + "\n## Tests\n\n" + _fixture_lines(2)
+        + "\n## Limits\n\n" + _fixture_lines(2)
+    )
 
 
 def seed_handoffs(repo: Path, state_root: Path, upto: int) -> None:

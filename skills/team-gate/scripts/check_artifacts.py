@@ -365,6 +365,7 @@ def run_self_test() -> int:
         ("stage-output-symlink-escape", ["stage-output", "3", ".team-ship/PLAN.md"], 1, "escapes .team-ship"),
         ("approval-ready-ok", ["approval-ready"], 0, None),
         ("approval-missing", ["approval-ready"], 1, "does not exist"),
+        ("map-missing", ["stage-inputs", "2"], 1, "BROWNFIELD-MAP.md"),
     ]
 
     all_pass = True

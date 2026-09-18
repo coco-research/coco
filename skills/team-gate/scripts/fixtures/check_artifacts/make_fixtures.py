@@ -89,6 +89,45 @@ def review_findings() -> str:
     return "\n".join(lines) + "\n"
 
 
+def brownfield_map_md() -> str:
+    """Hand-rendered stand-in for brownfield_map.py's real output: the same five
+    headings (Summary, Entry points, Impact, Tests, Limits), no wall-clock, no
+    forbidden tokens, and enough non-heading lines to clear the manifest's minLines.
+    """
+    lines = [
+        "# Brownfield map",
+        "",
+        "## Summary",
+        "",
+        "- Task: none given; showing the default ranked map.",
+        "- Repository: not greenfield.",
+        "- Languages: Python (3).",
+        "- Files: 3.",
+        "- Symbols: 5.",
+        "",
+        "## Entry points",
+        "",
+        "- **add** - src/util.py",
+        "- **helper** - src/main.py",
+        "",
+        "## Impact",
+        "",
+        "- src/util.py: ranked first by call-graph importance.",
+        "- src/main.py: ranked second by call-graph importance.",
+        "",
+        "## Tests",
+        "",
+        "- tests/test_util.py",
+        "",
+        "## Limits",
+        "",
+        "- Multi-file localization is the weakest measured result.",
+        "- The call graph is name-based and unsound by construction.",
+        "- Churn, ownership and co-change need real git history.",
+    ]
+    return "\n".join(lines) + "\n"
+
+
 def build_repo(repo_dir: Path, files: dict, run_id: str = "run-001") -> None:
     """Create .team-ship/ contents plus the RUN pointer, then commit a git repo."""
     repo_dir.mkdir(parents=True, exist_ok=True)
@@ -123,12 +162,14 @@ VALID_RESEARCH_BRIEF = research_brief(valid=True)
 VALID_PLAN = plan_md()
 VALID_ARCH_PLAN_JSON = arch_plan_json()
 VALID_REVIEW_FINDINGS = review_findings()
+VALID_BROWNFIELD_MAP = brownfield_map_md()
 
 
 def create_complete_stage(out: Path) -> None:
     fixture_dir = out / "complete-stage"
     build_repo(fixture_dir / "repo", {
         ".team-ship/RESEARCH-BRIEF.md": VALID_RESEARCH_BRIEF,
+        ".team-ship/BROWNFIELD-MAP.md": VALID_BROWNFIELD_MAP,
     })
     make_run_dir(fixture_dir)
 
@@ -187,6 +228,17 @@ def create_forbidden_token_substring_ok(out: Path) -> None:
         ".team-ship/RESEARCH-BRIEF.md": research_brief(
             valid=True, extra="We closed all TODOs on mastodon."
         ),
+        ".team-ship/BROWNFIELD-MAP.md": VALID_BROWNFIELD_MAP,
+    })
+    make_run_dir(fixture_dir)
+
+
+def create_map_missing(out: Path) -> None:
+    fixture_dir = out / "map-missing"
+    # A complete stage 2 input set except the map: RESEARCH-BRIEF.md present and
+    # valid, .team-ship/BROWNFIELD-MAP.md deliberately absent.
+    build_repo(fixture_dir / "repo", {
+        ".team-ship/RESEARCH-BRIEF.md": VALID_RESEARCH_BRIEF,
     })
     make_run_dir(fixture_dir)
 
@@ -294,6 +346,7 @@ FIXTURE_BUILDERS = [
     create_stage_output_symlink_escape,
     create_approval_ready_ok,
     create_approval_missing,
+    create_map_missing,
 ]
 
 

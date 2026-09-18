@@ -106,7 +106,7 @@ L3 agents verify the following properties.
 - Edge cases covered (null, empty, boundary, error paths)
 - Test names describe the scenario being tested
 
-Run `run_gate.py evidence`, which assembles EVIDENCE.json and renders EVIDENCE.md, so execution is confirmed rather than narrated.
+Run `run_gate.py evidence`, per the Test Evidence Protocol (`team:evidence.md`). It assembles EVIDENCE.json and renders EVIDENCE.md, so execution is confirmed rather than narrated.
 
 ```
 python3 ~/.claude/skills/team-gate/scripts/run_gate.py evidence --repo-root .

@@ -1,0 +1,4 @@
+{
+  "name": "override-with-markup",
+  "description": "Base repository for render_pr_body; self-test appends an override receipt whose text contains markdown and HTML markup."
+}

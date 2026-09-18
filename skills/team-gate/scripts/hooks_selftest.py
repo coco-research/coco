@@ -188,9 +188,10 @@ def seed_manifest_artifacts(repo: Path) -> None:
 def seed_handoffs(repo: Path, state_root: Path, upto: int) -> None:
     """Run check_artifacts.py stage-inputs 1..upto for real, producing real
     gates/handoff-<n>.json files and gate-result receipts, and hand-fabricate
-    the architecture gate files ship_gate requires beside them since 02281f0:
-    gates/1-arch-baseline.json at stage 1 (status CURRENT, exit 0) and
-    gates/3-arch-plan.json at stage 3 (exit 0). Both carry the current HEAD."""
+    the architecture and brownfield-map gate files ship_gate requires beside
+    them: gates/handoff-1-map.json at stage 1, gates/1-arch-baseline.json at
+    stage 1 (status CURRENT, exit 0) and gates/3-arch-plan.json at stage 3
+    (exit 0). All three carry the current HEAD."""
     head = subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"],
                           capture_output=True, text=True, check=True).stdout.strip()
     run_dir = state_root / (repo / ".team-ship" / "RUN").read_text(encoding="utf-8").strip()
@@ -199,6 +200,12 @@ def seed_handoffs(repo: Path, state_root: Path, upto: int) -> None:
         if proc.returncode != 0:
             raise RuntimeError(f"handoff-{n} setup failed: {proc.stderr}")
         if n == 1:
+            write_gate(run_dir, repo, state_root, "gates/handoff-1-map.json", "brownfield-map", {
+                "argv": ["brownfield_map.py", "--repo-root", str(repo)], "cwd": str(repo), "head": head,
+                "exit": 0, "summary": "map written: 0 file(s), 0 symbol(s)",
+                "ripwire_version": "0.6.1", "binary": "ripwire",
+                "elapsed_seconds": 0.0, "languages": {}, "symbols": 0,
+            })
             write_gate(run_dir, repo, state_root, "gates/1-arch-baseline.json", "arch-baseline", {
                 "argv": ["baseline", "--repo-root", str(repo)], "cwd": str(repo), "head": head,
                 "exit": 0, "summary": f"arch baseline: CURRENT pin={head[:12]} head={head[:12]}",

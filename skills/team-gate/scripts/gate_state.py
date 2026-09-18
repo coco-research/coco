@@ -21,13 +21,17 @@ CLI modes:
   python3 gate_state.py receipt <kind> <json-detail> [--hook-payload - | --hook-payload PATH]
   python3 gate_state.py --self-test
 
-Exit contract: 0 = ok, 1 = broken, 2 = unrunnable (invalid kind, state unreadable, run not found, bad arguments). Reason on stderr in one line.
+Exit contract: 0 = ok, 1 = broken, 2 = unrunnable (invalid kind, state unreadable, run not found, bad arguments, corrupt receipts tail). Reason on stderr in one line.
 
 Receipt chain detects accidental corruption and truncation via head.json (seq + hash of
 last record), and cross-reference of gates/*.json against gate-result receipts. It is
 not claimed as integrity against the model, because the model runs at the same uid and
 can rewrite the whole file. Integrity against the model rests on re-derivation: a hook
 re-reads HEAD, recomputes the tree digest, and re-parses the stored raw output.
+
+ReceiptFileCorrupt is raised by append_receipt if receipts.jsonl exists, is non-empty,
+and does not end with a newline or does not have a valid JSON object (with integer seq)
+as its last non-empty line. The write is aborted (file unchanged) and exit code 2 returned.
 """
 
 import argparse
@@ -52,6 +56,11 @@ RECEIPT_KINDS = {
 
 class InvalidReceiptKind(ValueError):
     """Raised when an invalid receipt kind is encountered."""
+    pass
+
+
+class ReceiptFileCorrupt(ValueError):
+    """Raised when receipts.jsonl has a corrupt tail (incomplete JSON or no trailing newline)."""
     pass
 
 
@@ -92,6 +101,48 @@ def _sha256_json(obj: Dict[str, Any]) -> str:
     """Compute SHA-256 over canonical JSON (sorted keys, no spaces)."""
     canonical = json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _contained_path(base: Path, rel: str, seq: int, label: str) -> tuple:
+    """Validate and resolve a relative path within a base directory.
+
+    Returns (path, None) if valid, (None, reason) if not.
+    Checks: non-empty string, not absolute, no empty/. /.. segments, resolves within base,
+    no symlinks, no control characters (< 0x20 or >= 0x7f), and for gate_file specifically
+    must be exactly [gates, <name>].
+    """
+    if not rel or not isinstance(rel, str):
+        return None, f"receipt {seq} {label} malformed: {rel!r}"
+
+    if os.path.isabs(rel):
+        return None, f"receipt {seq} {label} malformed: {rel!r}"
+
+    if any(ord(c) < 0x20 or ord(c) >= 0x7f for c in rel):
+        return None, f"receipt {seq} {label} malformed: {rel!r}"
+
+    segments = rel.split("/")
+    if any(seg in ("", ".", "..") for seg in segments):
+        return None, f"receipt {seq} {label} malformed: {rel!r}"
+
+    if label == "gate_file":
+        if len(segments) != 2 or segments[0] != "gates" or not segments[1]:
+            return None, f"receipt {seq} {label} malformed: {rel!r}"
+
+    candidate = base / rel
+    if candidate.is_symlink():
+        return None, f"receipt {seq} {rel!r} is a symlink"
+
+    if candidate.exists() and not candidate.is_file():
+        return None, f"receipt {seq} {rel!r} is not a regular file"
+
+    try:
+        resolved = candidate.resolve(strict=False)
+        if not resolved.is_relative_to(base.resolve()):
+            return None, f"receipt {seq} {rel!r} resolves outside {base}"
+    except (ValueError, RuntimeError):
+        return None, f"receipt {seq} {rel!r} resolves outside {base}"
+
+    return candidate, None
 
 
 def start_run(repo_root: str, command: str, flags: list) -> str:
@@ -155,14 +206,20 @@ def append_receipt(run_dir: Path, kind: str, detail: Dict[str, Any],
         prev_hash = None
         seq = 1
         if receipts_file.is_file():
-            lines = receipts_file.read_text(encoding="utf-8").strip().split("\n")
-            if lines:
-                try:
-                    last = json.loads(lines[-1])
-                    seq = last.get("seq", 0) + 1
-                    prev_hash = last.get("hash")
-                except json.JSONDecodeError:
-                    pass
+            raw_content = receipts_file.read_text(encoding="utf-8")
+            if raw_content:
+                if not raw_content.endswith("\n"):
+                    raise ReceiptFileCorrupt("receipts.jsonl corrupt tail: does not end with newline")
+                lines = raw_content.strip().split("\n")
+                if lines:
+                    try:
+                        last = json.loads(lines[-1])
+                        if not isinstance(last.get("seq"), int):
+                            raise ReceiptFileCorrupt("receipts.jsonl corrupt tail: last record has no valid seq")
+                        seq = last.get("seq", 0) + 1
+                        prev_hash = last.get("hash")
+                    except json.JSONDecodeError as e:
+                        raise ReceiptFileCorrupt(f"receipts.jsonl corrupt tail: {e}")
 
         record = {
             "seq": seq,
@@ -263,15 +320,21 @@ def verify_chain(run_dir: Path) -> ChainResult:
                 if record.get("prev_hash") != expected_prev:
                     return ChainResult("broken", f"seq {expected_seq}: prev_hash mismatch (insertion)")
 
-        for record in records:
+            # T1: Validate detail is an object before using it
+            detail = record.get("detail")
+            if not isinstance(detail, dict):
+                seq = record.get("seq")
+                return ChainResult("broken", f"receipt {seq} detail malformed")
+
             if record.get("kind") == "gate-timeout":
-                tool_use_id = record.get("detail", {}).get("tool_use_id", "unknown")
-                return ChainResult("broken", f"gate-timeout: {tool_use_id}")
+                tool_use_id = detail.get("tool_use_id", "unknown")
+                return ChainResult("broken", f"gate-timeout: {tool_use_id!r}")
 
         gate_names = set()
         for record in records:
             if record.get("kind") == "gate-result":
-                gate_file = record.get("detail", {}).get("gate_file")
+                detail = record.get("detail")
+                gate_file = detail.get("gate_file")
                 if gate_file:
                     gate_names.add(Path(gate_file).name)
 
@@ -280,6 +343,85 @@ def verify_chain(run_dir: Path) -> ChainResult:
             for gate_file in gates_dir.glob("*.json"):
                 if gate_file.name not in gate_names:
                     return ChainResult("broken", f"orphan gate file: {gate_file.name} (receipt dropped)")
+
+        # Two-way verification: for every gate-result and artifact-written, validate files exist and sha256 matches
+        # Count artifact-written receipts that need repo_root
+        artifact_count = sum(1 for r in records if r.get("kind") == "artifact-written" and isinstance(r.get("detail"), dict) and r.get("detail").get("path") and r.get("detail").get("sha256"))
+
+        run_obj = None
+        if artifact_count > 0:
+            try:
+                run_file = run_dir / "run.json"
+                if run_file.is_file():
+                    run_obj = json.loads(run_file.read_text(encoding="utf-8"))
+                else:
+                    return ChainResult("broken", f"run.json missing; {artifact_count} artifact path(s) cannot be checked")
+            except (json.JSONDecodeError, OSError) as e:
+                return ChainResult("broken", f"run.json unreadable: {e}; {artifact_count} artifact path(s) cannot be checked")
+
+        for record in records:
+            detail = record.get("detail")
+
+            if record.get("kind") == "gate-result":
+                seq = record.get("seq")
+                gate_file = detail.get("gate_file")
+                gate_sha256 = detail.get("gate_sha256")
+
+                # If no gate_file, skip validation
+                if not gate_file:
+                    continue
+
+                # If gate_file is present but gate_sha256 is missing, it's broken
+                if not gate_sha256:
+                    return ChainResult("broken", f"receipt {seq} gate-result has no gate_sha256")
+
+                # Validate path containment
+                gate_path, reason = _contained_path(run_dir, gate_file, seq, "gate_file")
+                if reason:
+                    return ChainResult("broken", reason)
+
+                # Check file exists
+                if not gate_path.is_file():
+                    return ChainResult("broken", f"receipt {seq} names {gate_file!r} which does not exist")
+
+                # Compare sha256 (raw bytes, same as artifact check)
+                actual_sha = hashlib.sha256(gate_path.read_bytes()).hexdigest()
+                if actual_sha != gate_sha256:
+                    return ChainResult("broken", f"receipt {seq} {gate_file!r} sha256 mismatch: recorded {gate_sha256[:12]} actual {actual_sha[:12]}")
+
+            elif record.get("kind") == "artifact-written":
+                seq = record.get("seq")
+                path = detail.get("path")
+                sha256_val = detail.get("sha256")
+
+                if not path or not sha256_val:
+                    continue
+
+                if "repo_root" not in run_obj:
+                    return ChainResult("broken", f"run.json has no repo_root; {artifact_count} artifact path(s) cannot be checked")
+
+                repo_root_str = run_obj["repo_root"]
+                if not os.path.isabs(repo_root_str) and ("/" in repo_root_str or repo_root_str in ("", ".", "..")):
+                    return ChainResult("broken", f"run.json repo_root malformed: {repo_root_str!r}")
+
+                if os.path.isabs(repo_root_str):
+                    repo_root = Path(repo_root_str)
+                else:
+                    repo_root = (run_dir / repo_root_str).resolve()
+
+                # Validate path containment
+                artifact_path, reason = _contained_path(repo_root, path, seq, "artifact path")
+                if reason:
+                    return ChainResult("broken", reason)
+
+                # Check file exists
+                if not artifact_path.is_file():
+                    return ChainResult("broken", f"receipt {seq} names {path!r} which does not exist")
+
+                # Compare sha256
+                actual_sha = hashlib.sha256(artifact_path.read_bytes()).hexdigest()
+                if actual_sha != sha256_val:
+                    return ChainResult("broken", f"receipt {seq} {path!r} sha256 mismatch: recorded {sha256_val[:12]} actual {actual_sha[:12]}")
 
         return ChainResult("ok", "chain intact")
 
@@ -317,14 +459,23 @@ def derive_status(run_dir: Path) -> Dict[str, Any]:
             return result
 
         for record in records:
+            detail = record.get("detail")
+            if not isinstance(detail, dict):
+                seq = record.get("seq")
+                result["status"] = "unreadable"
+                result["stage_cursor"] = None
+                result["build_rounds"] = 0
+                result["last_gate"] = None
+                return result
+
             kind = record.get("kind")
             if kind == "stage-opened":
-                stage = record.get("detail", {}).get("stage")
+                stage = detail.get("stage")
                 if stage == 6:
                     result["build_rounds"] += 1
                 result["stage_cursor"] = stage
             elif kind == "gate-result":
-                result["last_gate"] = record.get("detail", {}).get("gate")
+                result["last_gate"] = detail.get("gate")
             elif kind == "gate-timeout":
                 result["status"] = "blocked"
                 return result
@@ -421,7 +572,7 @@ def main():
                 record = append_receipt(current_run, args.kind, detail, hook_payload)
                 print(json.dumps(record))
                 return 0
-            except InvalidReceiptKind as e:
+            except (InvalidReceiptKind, ReceiptFileCorrupt) as e:
                 print(str(e), file=sys.stderr)
                 return 2
 
@@ -452,6 +603,22 @@ def self_test():
         ("orphan-with-prefixed-names", 1, "9.json"),
         ("gate-timeout-present", 1, None),
         ("run-not-started", 2, None),
+        ("gate-file-missing", 1, "does not exist"),
+        ("gate-file-altered", 1, "sha256 mismatch"),
+        ("gate-file-reformatted", 1, "sha256 mismatch"),
+        ("gate-file-traversal", 1, "malformed"),
+        ("gate-file-empty-name", 1, "malformed"),
+        ("gate-file-symlink", 1, "is a symlink"),
+        ("gate-file-one-segment", 1, "malformed"),
+        ("gate-file-nested", 1, "malformed"),
+        ("artifact-path-traversal", 1, "malformed"),
+        ("artifact-path-absolute", 1, "malformed"),
+        ("artifact-path-symlink", 1, "is a symlink"),
+        ("repo-root-traversal", 1, "repo_root malformed"),
+        ("artifact-path-directory", 1, "is not a regular file"),
+        ("run-json-unreadable", 1, "run.json unreadable"),
+        ("artifact-without-repo-root", 1, "has no repo_root"),
+        ("detail-not-object", 1, "detail malformed"),
     ]
 
     results = []
@@ -481,17 +648,30 @@ def self_test():
         else:
             results.append((name, expected_exit, proc.returncode, status))
 
-    invalid_kind_env = os.environ.copy()
-    invalid_kind_env["TEAM_STATE_ROOT"] = str(test_root.parent)
-    proc = subprocess.run(
-        [sys.executable, __file__, "receipt", "bogus-kind", '{}'],
-        cwd=str(test_root / "chain-intact"),
-        env=invalid_kind_env,
-        capture_output=True,
-        text=True
-    )
-    invalid_status = "OK" if proc.returncode == 2 else "FAIL"
-    results.append(("bogus-kind", 2, proc.returncode, invalid_status))
+    # bogus-kind test: copy fixture to temp and run receipt on it
+    try:
+        import tempfile as tmpmod
+        import shutil
+        fixture_to_copy = test_root / "chain-intact"
+        if fixture_to_copy.is_dir():
+            temp_bogus = Path(tmpmod.mkdtemp(prefix="gate_state_bogus_"))
+            shutil.copytree(fixture_to_copy, temp_bogus / "chain-intact")
+            invalid_kind_env = os.environ.copy()
+            invalid_kind_env["TEAM_STATE_ROOT"] = str(temp_bogus)
+            proc = subprocess.run(
+                [sys.executable, __file__, "receipt", "bogus-kind", '{}'],
+                cwd=str(temp_bogus / "chain-intact"),
+                env=invalid_kind_env,
+                capture_output=True,
+                text=True
+            )
+            invalid_status = "OK" if proc.returncode == 2 else "FAIL"
+            results.append(("bogus-kind", 2, proc.returncode, invalid_status))
+            shutil.rmtree(temp_bogus, ignore_errors=True)
+        else:
+            results.append(("bogus-kind", "fixture not found", "SKIP"))
+    except Exception as e:
+        results.append(("bogus-kind", f"exception: {e}", "FAIL"))
 
     proc = subprocess.run(
         [sys.executable, __file__, "status"],
@@ -512,6 +692,39 @@ def self_test():
     )
     intact_status = "OK" if proc.returncode == 0 else "FAIL"
     results.append(("status-chain-intact", 0, proc.returncode, intact_status))
+
+    # Receipt-corrupt-tail test: copy fixture to temp and try to append to a fixture with corrupt tail
+    try:
+        import tempfile as tmpmod
+        import shutil
+        corrupt_fixture = test_root / "receipt-corrupt-tail"
+        if corrupt_fixture.is_dir():
+            temp_corrupt = Path(tmpmod.mkdtemp(prefix="gate_state_corrupt_"))
+            (temp_corrupt / "gate_state").mkdir(parents=True, exist_ok=True)
+            shutil.copytree(corrupt_fixture, temp_corrupt / "gate_state" / "receipt-corrupt-tail")
+            corrupt_fixture_temp = temp_corrupt / "gate_state" / "receipt-corrupt-tail"
+            receipts_file = corrupt_fixture_temp / "receipts.jsonl"
+            sha_before = __import__("hashlib").sha256(receipts_file.read_bytes()).hexdigest() if receipts_file.is_file() else None
+            corrupt_env = os.environ.copy()
+            corrupt_env["TEAM_STATE_ROOT"] = str(temp_corrupt)
+            proc = subprocess.run(
+                [sys.executable, __file__, "receipt", "run-started", '{}'],
+                cwd=str(corrupt_fixture_temp),
+                env=corrupt_env,
+                capture_output=True,
+                text=True
+            )
+            sha_after = __import__("hashlib").sha256(receipts_file.read_bytes()).hexdigest() if receipts_file.is_file() else None
+            corrupt_exit_ok = proc.returncode == 2
+            corrupt_stderr_ok = "corrupt tail" in proc.stderr
+            corrupt_unchanged = sha_before == sha_after
+            corrupt_status = "OK" if (corrupt_exit_ok and corrupt_stderr_ok and corrupt_unchanged) else "FAIL"
+            results.append(("receipt-corrupt-tail", 2, proc.returncode, corrupt_status))
+            shutil.rmtree(temp_corrupt, ignore_errors=True)
+        else:
+            results.append(("receipt-corrupt-tail", "fixture not found", "SKIP"))
+    except Exception as e:
+        results.append(("receipt-corrupt-tail", f"exception: {e}", "FAIL"))
 
     # Concurrent-appends live test: 8 subprocesses x 5 receipts each = 40 total
     try:

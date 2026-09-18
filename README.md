@@ -67,6 +67,11 @@ npx cocosuperintelligence
 <div align="center"><sub>A local governed department on Claude Code, Cursor, or Codex. Open-core. No telemetry.</sub></div>
 <div align="center"><sub>90 seconds. <code>npx</code> clones the pinned release (<code>v1.5.0</code>) into <code>./coco</code> and runs <code>install.sh</code>. Override with <code>--adapter cursor</code> or <code>--adapter claude-code</code>; narrow bundles with <code>--systems</code>. Per-adapter detail: <a href="docs/install.md">docs/install.md</a>.</sub></div>
 
+<p align="center">
+  <img src="docs/assets/dogfood-si.gif" alt="Real local meta_select.py Stage-A run on this Mac — degraded: keyword fallback (embedding endpoint unavailable)" width="720" />
+</p>
+<div align="center"><sub><em>Honest local dogfood, 2026-09-15: <code>python3 systems/superintelligence/scripts/meta_select.py</code> on this Mac. Embedding endpoint was down (<code>Connection refused</code>), so this is the <strong>degraded: keyword fallback</strong> path — <code>method: keyword</code>, <code>degraded: true</code> — labeled on-screen, not dressed up as embed cosine.</em></sub></div>
+
 ---
 
 ## What CoCo Is (and Isn't)

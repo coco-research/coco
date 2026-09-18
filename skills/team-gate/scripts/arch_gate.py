@@ -65,9 +65,9 @@ a receipt failure is exit 2.
                                   the child's own distinct exit 2 (plan
                                   unreadable) maps to this gate's exit 2.
 
-  conformance --repo-root <r>    Stage 13. Reads gates/1-arch-baseline.json
-                                  (absent is exit 2, "no baseline"). A
-                                  recorded status of DISABLED,
+  conformance --repo-root <r>    Stage 13. Reads gates/1-arch-baseline.json.
+                                  Absent baseline is exit 2, status
+                                  NO_BASELINE. A recorded status of DISABLED,
                                   NOT_APPLICABLE or STALE reproduces that
                                   status with exit 2. CURRENT runs
                                   validate_index.py and arch_drift.py with
@@ -75,9 +75,13 @@ a receipt failure is exit 2.
                                   check: inside a run the pin is expected to
                                   be behind HEAD after the build (Stage 6 has
                                   committed), so that comparison is only ever
-                                  made once, at Stage 1 by baseline. Writes
-                                  gates/13-arch.json plus the existing
-                                  .arch/ARCH-GATE.json.
+                                  made once, at Stage 1 by baseline. Every
+                                  resolved path (NO_BASELINE, DISABLED,
+                                  NOT_APPLICABLE, STALE or CURRENT) writes
+                                  gates/13-arch.json with a gate-result
+                                  receipt; .arch/ARCH-GATE.json, the
+                                  committed human-facing record, is written
+                                  only on the CURRENT path.
 
 Exit codes: 0 pass, 1 block, 2 unrunnable or unverified.
 """
@@ -641,11 +645,25 @@ def cmd_conformance(repo_root_arg):
     argv = ["conformance", "--repo-root", repo_root_arg]
     cwd = str(repo_root)
 
+    tools_dir, tools_error = resolve_tools_dir(str(repo_root))
+    if tools_error:
+        print(f"ERROR: {tools_error}", file=sys.stderr)
+        return 2
+
     baseline_path = run_dir / "gates" / "1-arch-baseline.json"
     if not baseline_path.is_file():
+        exit_code = 2
         summary = "conformance: no baseline recorded; run the baseline subcommand first"
+        data = {
+            "argv": argv, "cwd": cwd, "head": head, "exit": exit_code, "summary": summary,
+            "tools_dir": tools_dir, "status": "NO_BASELINE", "pin": None,
+        }
+        rc = _write_gate_and_receipt(run_dir, "13-arch.json", data, "arch-conformance",
+                                      exit_code, summary)
+        if rc is not None:
+            return rc
         print(summary, file=sys.stderr)
-        return 2
+        return exit_code
 
     try:
         baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
@@ -654,18 +672,22 @@ def cmd_conformance(repo_root_arg):
         return 2
 
     baseline_status = baseline.get("status")
-    if baseline_status != "CURRENT":
-        summary = (f"conformance: baseline status is {baseline_status}, "
-                    f"cannot be checked honestly")
-        print(summary, file=sys.stderr)
-        return 2
-
     pin = baseline.get("pin")
 
-    tools_dir, tools_error = resolve_tools_dir(str(repo_root))
-    if tools_error:
-        print(f"ERROR: {tools_error}", file=sys.stderr)
-        return 2
+    if baseline_status != "CURRENT":
+        exit_code = 2
+        summary = (f"conformance: baseline status is {baseline_status}, "
+                    f"cannot be checked honestly")
+        data = {
+            "argv": argv, "cwd": cwd, "head": head, "exit": exit_code, "summary": summary,
+            "tools_dir": tools_dir, "status": baseline_status, "pin": pin,
+        }
+        rc = _write_gate_and_receipt(run_dir, "13-arch.json", data, "arch-conformance",
+                                      exit_code, summary)
+        if rc is not None:
+            return rc
+        print(summary, file=sys.stderr)
+        return exit_code
 
     index_path = repo_root / ".arch" / "index.json"
     validate_script = os.path.join(tools_dir, "validate_index.py")
@@ -741,7 +763,7 @@ def cmd_conformance(repo_root_arg):
             "argv": argv, "cwd": cwd, "head": head, "exit": exit_code, "summary": summary,
             "gate": gate, "removes": removes, "prunes": prunes,
             "validate_exit": validate_exit, "drift_exit": drift_exit,
-            "pin": pin, "tools_dir": tools_dir,
+            "pin": pin, "tools_dir": tools_dir, "status": baseline_status,
         }
 
         rc = _write_gate_and_receipt(run_dir, "13-arch.json", data, "arch-conformance",
@@ -752,6 +774,8 @@ def cmd_conformance(repo_root_arg):
         # The committed, human-facing record. Kept at the same path the
         # standalone mode has always used, so downstream tooling and the
         # Stage 11 clean checkout keep reading one file regardless of mode.
+        # Written only on the CURRENT path; the non-CURRENT branches above
+        # return before reaching here.
         legacy_out = repo_root / ".arch" / "ARCH-GATE.json"
         legacy_data = dict(data)
         legacy_data["reason"] = reason
@@ -830,6 +854,66 @@ def _ra_extra_commit(repo_path):
                     check=True, capture_output=True)
 
 
+def _ra_gate_data(copy_path, gate_filename):
+    """Read a gate file's parsed JSON for the run started against copy_path.
+    Returns None when the run, the file or its JSON cannot be found."""
+    run_dir = gate_state.find_run(copy_path)
+    if run_dir is None:
+        return None
+    gate_file = run_dir / "gates" / gate_filename
+    if not gate_file.is_file():
+        return None
+    try:
+        return json.loads(gate_file.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def _check_gate_status(label, copy_path, gate_filename, expected_status):
+    data = _ra_gate_data(copy_path, gate_filename)
+    status = data.get("status") if data else None
+    ok = data is not None and status == expected_status
+    print(f"  {'PASS' if ok else 'FAIL'}  {label:36s} status={status!r} "
+          f"(expect {expected_status!r})")
+    return ok
+
+
+def _ra_gate_receipt_present(copy_path, gate_filename):
+    run_dir = gate_state.find_run(copy_path)
+    if run_dir is None:
+        return False
+    receipts_file = run_dir / "receipts.jsonl"
+    if not receipts_file.is_file():
+        return False
+    target = f"gates/{gate_filename}"
+    for line in receipts_file.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            rec = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if rec.get("kind") == "gate-result" and rec.get("detail", {}).get("gate_file") == target:
+            return True
+    return False
+
+
+def _check_receipt_present(label, copy_path, gate_filename):
+    ok = _ra_gate_receipt_present(copy_path, gate_filename)
+    print(f"  {'PASS' if ok else 'FAIL'}  {label:36s} receipt-present={ok}")
+    return ok
+
+
+def _check_verify_chain(label, copy_path, env):
+    gate_state_script = Path(__file__).resolve().parent / "gate_state.py"
+    proc = subprocess.run([sys.executable, str(gate_state_script), "verify-chain"],
+                           cwd=str(copy_path), env=env, capture_output=True, text=True,
+                           timeout=30)
+    ok = proc.returncode == 0
+    print(f"  {'PASS' if ok else 'FAIL'}  {label:36s} exit={proc.returncode} (expect 0)")
+    return ok
+
+
 def _self_test_run_aware():
     """Exercise baseline, plan-declare, plan-verify and conformance, each on
     a temporary copy of a generated fixture with a run started through the
@@ -902,6 +986,9 @@ def _self_test_run_aware():
     _ra_extra_commit(copy_path)
     check("conformance-current-after-commit",
           _ra_invoke("conformance", copy_path, env, needs_tools=True), 0)
+    ok = _check_gate_status("conformance-current-after-commit/gate-file",
+                             copy_path, "13-arch.json", "CURRENT")
+    all_ok = all_ok and ok
 
     # conformance-stale-baseline: baseline itself already recorded STALE.
     copy_path, env = _ra_isolated_copy(build_dir, "stale-pin")
@@ -909,11 +996,49 @@ def _self_test_run_aware():
           2, "STALE")
     check("conformance-stale-baseline",
           _ra_invoke("conformance", copy_path, env, needs_tools=True), 2, "STALE")
+    ok = _check_gate_status("conformance-stale-baseline/gate-file",
+                             copy_path, "13-arch.json", "STALE")
+    all_ok = all_ok and ok
 
     # conformance-no-baseline: conformance run without ever running baseline.
     copy_path, env = _ra_isolated_copy(build_dir, "clean")
     check("conformance-no-baseline", _ra_invoke("conformance", copy_path, env, needs_tools=True),
           2, "no baseline")
+    ok = _check_gate_status("conformance-no-baseline/gate-file",
+                             copy_path, "13-arch.json", "NO_BASELINE")
+    all_ok = all_ok and ok
+
+    # conformance-not-applicable: baseline over a repository with no
+    # .arch/index.json records NOT_APPLICABLE; conformance reproduces the
+    # same status, now with the gate file present and a receipt appended.
+    copy_path, env = _ra_isolated_copy(build_dir, "no-index")
+    check("conformance-not-applicable/baseline", _ra_invoke("baseline", copy_path, env),
+          2, "NOT_APPLICABLE")
+    check("conformance-not-applicable",
+          _ra_invoke("conformance", copy_path, env, needs_tools=True), 2, "NOT_APPLICABLE")
+    ok = _check_gate_status("conformance-not-applicable/gate-file",
+                             copy_path, "13-arch.json", "NOT_APPLICABLE")
+    all_ok = all_ok and ok
+    ok = _check_receipt_present("conformance-not-applicable/receipt",
+                                 copy_path, "13-arch.json")
+    all_ok = all_ok and ok
+    ok = _check_verify_chain("conformance-not-applicable/verify-chain", copy_path, env)
+    all_ok = all_ok and ok
+
+    # conformance-disabled: baseline over a run started with a no-arch flag
+    # records DISABLED; conformance reproduces the same status the same way.
+    copy_path, env = _ra_isolated_copy(build_dir, "clean", flags=["--no-arch"])
+    check("conformance-disabled/baseline", _ra_invoke("baseline", copy_path, env),
+          2, "DISABLED")
+    check("conformance-disabled",
+          _ra_invoke("conformance", copy_path, env, needs_tools=True), 2, "DISABLED")
+    ok = _check_gate_status("conformance-disabled/gate-file",
+                             copy_path, "13-arch.json", "DISABLED")
+    all_ok = all_ok and ok
+    ok = _check_receipt_present("conformance-disabled/receipt", copy_path, "13-arch.json")
+    all_ok = all_ok and ok
+    ok = _check_verify_chain("conformance-disabled/verify-chain", copy_path, env)
+    all_ok = all_ok and ok
 
     # repo-root-mismatch: --repo-root points at the nested, unrelated
     # repository. find_run() walks up and finds the outer run, but the

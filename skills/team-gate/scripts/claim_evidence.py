@@ -57,8 +57,8 @@ Subcommands:
     "text:" and "tests: [nodeid, ...]" lines) or a scalar item ("R1: <text>
     [tests: nodeid, nodeid]"). A requirement that names tests is graded
     through the tests route: MET when every named test appears in
-    gates/9.json with red.class valid-red-assertion or
-    valid-red-missing-name and the latest gates/8.json has exit 0 and no
+    gates/9.json with red.class valid-red-assertion,
+    valid-red-missing-name, or valid-red-stub and the latest gates/8.json has exit 0 and no
     failures; NOT MET when any named test is classified never-red or
     invalid-red, or gates/8.json records a failure; UNVERIFIED when a named
     test is absent from gates/9.json, or gates/8.json or gates/9.json is
@@ -739,7 +739,7 @@ def _grade_requirement(req_id: str, gate_files: List[Tuple[str, Dict[str, Any]]]
     return "MET", names
 
 
-_VALID_RED_CLASSES = ("valid-red-assertion", "valid-red-missing-name")
+_VALID_RED_CLASSES = ("valid-red-assertion", "valid-red-missing-name", "valid-red-stub")
 _BROKEN_RED_CLASSES = ("never-red", "invalid-red")
 
 
@@ -1192,6 +1192,10 @@ def cmd_self_test() -> int:
          [_prove_red_test_entry(other_nodeid, "valid-red-assertion", "PASS")], 2, "tests", "UNVERIFIED"),
         ("matrix-yaml-mapping", plan_yaml_mapping,
          [_prove_red_test_entry(good_nodeid, "valid-red-assertion", "PASS")], 0, "tests", "MET"),
+        ("matrix-tests-met-stub", plan_scalar_tests,
+         [(lambda t: {**t, "mode": "stub"})(
+            _prove_red_test_entry(good_nodeid, "valid-red-stub", "PASS")
+         )], 0, "tests", "MET"),
     ]
 
     if not real_repo_build.is_dir():

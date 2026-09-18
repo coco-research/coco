@@ -18,9 +18,14 @@ Subcommands:
 Exit contract: 0 = PASS, 1 = BLOCK, 2 = UNRUNNABLE.
 
 Runner. There is no pytest and no coverage on this machine. Every test function is
-run directly, in its own subprocess, through _run-one. A test function that takes
+run directly, in its own subprocess, through _run-one. unittest.TestCase methods
+run setUpClass, setUp, the test, tearDown, and tearDownClass, with tearDown and
+tearDownClass wrapped so they run even when the test raises; an exception in a
+background thread after the test returns is the test's result, and a thread
+still running after a short join is unrunnable. A test function that takes
 required parameters cannot be run without a fixture-aware runner and is reported
-UNRUNNABLE. Fixture-aware execution and coverage attribution are deferred.
+UNRUNNABLE. Pytest fixtures and coverage attribution remain deferred.
+
 
 Never mutates the caller's worktree. All git writes (checkout, apply, worktree
 add/remove/prune) happen either as read-only queries against the repository root
@@ -58,10 +63,13 @@ import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import traceback
+import unittest
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
+
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gate_state
@@ -395,7 +403,13 @@ def classify_red(result: Dict[str, Any], wt: Path, added_impl: Set[str], modifie
     test-path frame is valid-red-assertion, an implementation-path frame is
     invalid-red. No frame under the worktree at all is invalid-red naming the last
     frame's file, as before this attribution walk existed.
+
+    For ModuleNotFoundError, a missing module is valid-red-missing-name when its
+    path is added (status A) or is the new path of a rename or modification
+    (status M or R). Checking added paths only misclassified a renamed
+    implementation module as invalid-red.
     """
+
     outcome = result.get("outcome")
     exc_type = result.get("exc_type")
     message = (result.get("message") or "")[:2000]
@@ -441,9 +455,10 @@ def classify_red(result: Dict[str, Any], wt: Path, added_impl: Set[str], modifie
         resolved = None
         if mod:
             for candidate in (mod.replace(".", "/") + ".py", mod.replace(".", "/") + "/__init__.py"):
-                if candidate in added_impl:
+                if candidate in added_impl or candidate in modified_impl:
                     resolved = candidate
                     break
+
         if resolved:
             red["class"] = "valid-red-missing-name"
             red["resolvedTo"] = resolved
@@ -668,7 +683,11 @@ def cmd_enumerate(args: argparse.Namespace) -> int:
     """List every new or modified test function between base and HEAD."""
     repo_root = Path(args.repo_root).resolve()
     try:
-        run_dir = gate_state.find_run(repo_root)
+        try:
+            run_dir = gate_state.find_run(repo_root)
+        except gate_state.RunMarkerUnreadable as exc:
+            raise GateExit(2, str(exc))
+
         if not run_dir:
             raise GateExit(2, "run directory not found")
 
@@ -729,7 +748,11 @@ def cmd_prove(args: argparse.Namespace) -> int:
     python = args.python if args.python else sys.executable
 
     try:
-        run_dir = gate_state.find_run(repo_root)
+        try:
+            run_dir = gate_state.find_run(repo_root)
+        except gate_state.RunMarkerUnreadable as exc:
+            raise GateExit(2, str(exc))
+
         if not run_dir:
             raise GateExit(2, "run directory not found")
 
@@ -1010,7 +1033,10 @@ def cmd_recheck(args: argparse.Namespace) -> int:
     """Re-hash every PASS test recorded in gates/9.json at the current HEAD."""
     repo_root = Path(args.repo_root).resolve()
     try:
-        run_dir = gate_state.find_run(repo_root)
+        try:
+            run_dir = gate_state.find_run(repo_root)
+        except gate_state.RunMarkerUnreadable as exc:
+            raise GateExit(2, str(exc))
         if not run_dir:
             raise GateExit(2, "run directory not found")
 
@@ -1095,6 +1121,116 @@ def cmd_recheck(args: argparse.Namespace) -> int:
         return exc.code
 
 
+def _exception_payload(phase: str, exc: BaseException, tb: Any) -> Dict[str, Any]:
+    """Build the JSON-ready result dict for a test-phase exception."""
+    this_file = os.path.abspath(__file__)
+    frames = [
+        {"file": f.filename, "line": f.lineno, "func": f.name}
+        for f in traceback.extract_tb(tb)
+        if os.path.abspath(f.filename) != this_file
+    ]
+    return {
+        "outcome": "fail" if isinstance(exc, AssertionError) else "error",
+        "phase": phase,
+        "exc_type": type(exc).__name__,
+        "exc_module": type(exc).__module__,
+        "message": str(exc)[:2000],
+        "missing_name": getattr(exc, "name", None),
+        "frames": frames,
+    }
+
+
+
+_THREAD_JOIN_TIMEOUT = 1.0
+
+
+def _join_extra_threads(before: Set[threading.Thread]) -> List[str]:
+    """Join threads started during the test call. Return names still alive."""
+    leftover: List[str] = []
+    deadline = time.time() + _THREAD_JOIN_TIMEOUT
+    for t in threading.enumerate():
+        if t is threading.main_thread() or t in before:
+            continue
+        remaining = deadline - time.time()
+        if remaining > 0:
+            t.join(remaining)
+        if t.is_alive():
+            leftover.append(t.name)
+    return leftover
+
+
+def _invoke_test(func: Any, instance: Any, is_testcase: bool) -> None:
+    """Call one test function, running unittest setUp and tearDown when present.
+
+    For TestCase methods, setUpClass / setUp / test / tearDown / tearDownClass
+    are called explicitly. tearDown and tearDownClass run even when the test
+    raises, matching the non-TestCase branch. Python 3.10's TestCase.debug
+    does not wrap tearDown in try/finally, so it is not used here.
+    """
+    if is_testcase:
+        cls = type(instance)
+        cls.setUpClass()
+        try:
+            instance.setUp()
+            try:
+                if inspect.iscoroutinefunction(func):
+                    asyncio.run(func())
+                else:
+                    func()
+            finally:
+                instance.tearDown()
+        finally:
+            cls.tearDownClass()
+        return
+    setup = getattr(instance, "setUp", None) if instance is not None else None
+    teardown = getattr(instance, "tearDown", None) if instance is not None else None
+    if callable(setup):
+        setup()
+    try:
+        if inspect.iscoroutinefunction(func):
+            asyncio.run(func())
+        else:
+            func()
+    finally:
+        if callable(teardown):
+            teardown()
+
+
+def _run_call_phase(func: Any, instance: Any, is_testcase: bool) -> Dict[str, Any]:
+    """Run the test call and harvest background-thread failures before reporting pass."""
+    thread_errors: List[Any] = []
+
+    def _hook(args: Any) -> None:
+        thread_errors.append(args)
+
+    old_hook = threading.excepthook
+    threading.excepthook = _hook
+    before = set(threading.enumerate())
+    call_exc: Optional[BaseException] = None
+    try:
+        _invoke_test(func, instance, is_testcase)
+    except BaseException as exc:
+        call_exc = exc
+    leftover = _join_extra_threads(before)
+    threading.excepthook = old_hook
+    if call_exc is not None:
+        raise call_exc
+    if leftover:
+        return {
+            "outcome": "unrunnable",
+            "phase": "call",
+            "message": "background thread still running after test return",
+        }
+    if thread_errors:
+        args = thread_errors[0]
+        exc = args.exc_value
+        if exc is None:
+            exc_type = args.exc_type if args.exc_type is not None else RuntimeError
+            exc = exc_type()
+        return _exception_payload("call", exc, args.exc_traceback)
+    return {"outcome": "pass", "phase": "call"}
+
+
 def cmd_run_one(sys_path_root: str, test_file: str, qualname: str) -> int:
     """Internal: import test_file, resolve qualname, call it, print one JSON result line."""
     root = Path(sys_path_root)
@@ -1112,6 +1248,8 @@ def cmd_run_one(sys_path_root: str, test_file: str, qualname: str) -> int:
         modname = modname[:-3]
 
     phase = "import"
+    instance: Any = None
+    is_testcase = False
     try:
         spec = importlib.util.spec_from_file_location(modname, str(tf))
         mod = importlib.util.module_from_spec(spec)
@@ -1122,8 +1260,13 @@ def cmd_run_one(sys_path_root: str, test_file: str, qualname: str) -> int:
         if "." in qualname:
             class_name, method_name = qualname.split(".", 1)
             cls = getattr(mod, class_name)
-            instance = cls()
-            func = getattr(instance, method_name)
+            if isinstance(cls, type) and issubclass(cls, unittest.TestCase):
+                instance = cls(method_name)
+                func = getattr(instance, method_name)
+                is_testcase = True
+            else:
+                instance = cls()
+                func = getattr(instance, method_name)
         else:
             func = getattr(mod, qualname)
 
@@ -1142,30 +1285,14 @@ def cmd_run_one(sys_path_root: str, test_file: str, qualname: str) -> int:
             return 0
 
         phase = "call"
-        if inspect.iscoroutinefunction(func):
-            asyncio.run(func())
-        else:
-            func()
-        print(json.dumps({"outcome": "pass", "phase": "call"}))
+        print(json.dumps(_run_call_phase(func, instance, is_testcase)))
         return 0
 
     except BaseException as exc:
-        this_file = os.path.abspath(__file__)
-        frames = [
-            {"file": f.filename, "line": f.lineno, "func": f.name}
-            for f in traceback.extract_tb(exc.__traceback__)
-            if os.path.abspath(f.filename) != this_file
-        ]
-        print(json.dumps({
-            "outcome": "fail" if isinstance(exc, AssertionError) else "error",
-            "phase": phase,
-            "exc_type": type(exc).__name__,
-            "exc_module": type(exc).__module__,
-            "message": str(exc)[:2000],
-            "missing_name": getattr(exc, "name", None),
-            "frames": frames,
-        }))
+        print(json.dumps(_exception_payload(phase, exc, exc.__traceback__)))
         return 0
+
+
 
 
 _FIXTURE_EXPECTATIONS: List[Tuple[str, int, List[str]]] = [
@@ -1189,7 +1316,12 @@ _FIXTURE_EXPECTATIONS: List[Tuple[str, int, List[str]]] = [
     ("tests-only-still-passes", 1, ["never_red=1"]),
     ("tests-only-relative-import", 0, ["red_ok=1"]),
     ("mixed-diff-uses-red-green", 0, ["red_ok=1"]),
+    ("renamed-module-red", 0, ["red_ok=1"]),
+    ("unittest-setup", 0, ["red_ok=1"]),
+    ("unittest-teardown-on-fail", 0, ["red_ok=1"]),
+    ("background-thread-fail", 0, ["red_ok=1"]),
 ]
+
 
 _NO_GATE_FIXTURES = {"dirty-tree"}
 
@@ -1249,6 +1381,9 @@ def cmd_self_test() -> int:
                     external_dir if not existing_pp else external_dir + os.pathsep + existing_pp
                 )
 
+            if name == "unittest-teardown-on-fail":
+                child_env["PROVE_RED_TEARDOWN_LOG"] = str(tmp_root_path / "teardown.log")
+
             try:
                 run_id = gate_state.start_run(str(repo), "fix", [])
             except Exception as exc:
@@ -1278,14 +1413,23 @@ def cmd_self_test() -> int:
                 chain_proc = subprocess.run([sys.executable, str(gate_state_path), "verify-chain"], cwd=str(repo), env=child_env, capture_output=True, text=True, timeout=30)
                 chain_ok = chain_proc.returncode == 0
 
-            status = "OK" if (exit_ok and stderr_ok and worktrees_ok and gate_ok and chain_ok) else "FAIL"
+            log_ok = True
+            log_desc = ""
+            if name == "unittest-teardown-on-fail":
+                log_path = tmp_root_path / "teardown.log"
+                log_text = log_path.read_text(encoding="utf-8") if log_path.is_file() else ""
+                n_td = log_text.count("tearDown")
+                log_ok = n_td >= 2
+                log_desc = f" tearDown_log={n_td}"
+
+            status = "OK" if (exit_ok and stderr_ok and worktrees_ok and gate_ok and chain_ok and log_ok) else "FAIL"
             if status == "FAIL":
                 all_ok = False
 
             sub_desc = " ".join(f"stderr contains '{s}'" for s in expected_substrings)
             lines.append(
                 f"{name}: expected {expected_exit} got {proc.returncode} {sub_desc} "
-                f"worktrees={1 if worktrees_ok else 0} chain={0 if chain_ok else 1} {status}"
+                f"worktrees={1 if worktrees_ok else 0} chain={0 if chain_ok else 1}{log_desc} {status}"
             )
 
             if name == "weakened-after-red" and status == "OK":
@@ -1313,7 +1457,11 @@ def cmd_self_test() -> int:
     for line in lines:
         print(line)
 
+    ok_n = sum(1 for ln in lines if ln.endswith(" OK"))
+    print(f"{ok_n}/{len(lines)} OK")
+
     return 0 if all_ok else 1
+
 
 
 def main() -> int:

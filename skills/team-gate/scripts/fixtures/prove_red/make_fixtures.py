@@ -476,6 +476,120 @@ def fixture_mixed_diff_uses_red_green(root: Path, env: Dict[str, str]) -> None:
     _write_base_sha(root, name, base_sha)
 
 
+def fixture_renamed_module_red(root: Path, env: Dict[str, str]) -> None:
+    """HEAD renames src/calc.py to src/adder.py. Without the rename-aware
+    ModuleNotFoundError check, red classifies invalid-red; with it, valid-red."""
+    name = "renamed-module-red"
+    repo = _init_repo(root, name, env)
+    _write_files(repo, {
+        "src/__init__.py": "",
+        "src/calc.py": (
+            "# calculator helpers kept identical across the rename so git records status R\n"
+            "def add(a, b):\n"
+            "    return a - b\n"
+        ),
+    })
+    base_sha = _commit(repo, env, "base")
+    _git(repo, env, "mv", "src/calc.py", "src/adder.py")
+    _write_files(repo, {
+        "src/adder.py": (
+            "# calculator helpers kept identical across the rename so git records status R\n"
+            "def add(a, b):\n"
+            "    return a + b\n"
+        ),
+        "tests/test_adder.py": "from src.adder import add\n\n\ndef test_add():\n    assert add(2, 3) == 5\n",
+    })
+    _commit(repo, env, "head")
+    _write_base_sha(root, name, base_sha)
+
+
+def fixture_unittest_setup(root: Path, env: Dict[str, str]) -> None:
+    """The assertion reads values planted in setUp. Without invoking setUp the
+    green run raises AttributeError and the gate BLOCKs; with it, valid red then green."""
+    name = "unittest-setup"
+    repo = _init_repo(root, name, env)
+    _write_files(repo, {
+        "src/__init__.py": "",
+        "src/calc.py": "def add(a, b):\n    return a - b\n",
+    })
+    base_sha = _commit(repo, env, "base")
+    _write_files(repo, {
+        "src/calc.py": "def add(a, b):\n    return a + b\n",
+        "tests/test_calc.py": (
+            "import unittest\n\n"
+            "from src.calc import add\n\n\n"
+            "class TestAdd(unittest.TestCase):\n"
+            "    def setUp(self):\n"
+            "        self.expected = 5\n\n"
+            "    def tearDown(self):\n"
+            "        del self.expected\n\n"
+            "    def test_add(self):\n"
+            "        self.assertEqual(add(2, 3), self.expected)\n"
+        ),
+    })
+    _commit(repo, env, "head")
+    _write_base_sha(root, name, base_sha)
+
+
+def fixture_unittest_teardown_on_fail(root: Path, env: Dict[str, str]) -> None:
+    """The red phase fails the assertion. tearDown must still append to an
+    on-disk log; TestCase.debug on this Python skips tearDown on failure."""
+    name = "unittest-teardown-on-fail"
+    repo = _init_repo(root, name, env)
+    _write_files(repo, {
+        "src/__init__.py": "",
+        "src/calc.py": "def add(a, b):\n    return a - b\n",
+    })
+    base_sha = _commit(repo, env, "base")
+    _write_files(repo, {
+        "src/calc.py": "def add(a, b):\n    return a + b\n",
+        "tests/test_calc.py": (
+            "import os\n"
+            "import unittest\n\n"
+            "from src.calc import add\n\n\n"
+            "class TestAdd(unittest.TestCase):\n"
+            "    def setUp(self):\n"
+            "        self.expected = 5\n\n"
+            "    def tearDown(self):\n"
+            "        log = os.environ.get('PROVE_RED_TEARDOWN_LOG')\n"
+            "        if log:\n"
+            "            with open(log, 'a') as fh:\n"
+            "                fh.write('tearDown\\n')\n\n"
+            "    def test_add(self):\n"
+            "        self.assertEqual(add(2, 3), self.expected)\n"
+        ),
+    })
+    _commit(repo, env, "head")
+    _write_base_sha(root, name, base_sha)
+
+
+def fixture_background_thread_fail(root: Path, env: Dict[str, str]) -> None:
+    """The assertion runs in a worker thread the test does not join. Without
+    harvesting that thread the red phase reports pass (never-red); with it, valid red."""
+    name = "background-thread-fail"
+    repo = _init_repo(root, name, env)
+    _write_files(repo, {
+        "src/__init__.py": "",
+        "src/calc.py": "def add(a, b):\n    return a - b\n",
+    })
+    base_sha = _commit(repo, env, "base")
+    _write_files(repo, {
+        "src/calc.py": "def add(a, b):\n    return a + b\n",
+        "tests/test_calc.py": (
+            "import threading\n\n"
+            "from src.calc import add\n\n\n"
+            "def test_add():\n"
+            "    def worker():\n"
+            "        assert add(2, 3) == 5\n"
+            "    t = threading.Thread(target=worker)\n"
+            "    t.start()\n"
+        ),
+    })
+    _commit(repo, env, "head")
+    _write_base_sha(root, name, base_sha)
+
+
+
 _GENERATORS = [
     fixture_proper_red_green,
     fixture_new_module_import_red,
@@ -497,7 +611,12 @@ _GENERATORS = [
     fixture_tests_only_still_passes,
     fixture_tests_only_relative_import,
     fixture_mixed_diff_uses_red_green,
+    fixture_renamed_module_red,
+    fixture_unittest_setup,
+    fixture_unittest_teardown_on_fail,
+    fixture_background_thread_fail,
 ]
+
 
 
 def main() -> int:

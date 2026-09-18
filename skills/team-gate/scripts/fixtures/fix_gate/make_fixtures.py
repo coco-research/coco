@@ -284,6 +284,26 @@ def _corrupt_early_receipt(run_dir: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Map gate helper
+# ---------------------------------------------------------------------------
+
+def _map_data(head: str, cwd: str) -> Dict[str, Any]:
+    """Generate gates/handoff-1-map.json for the map stage."""
+    return {
+        "argv": ["brownfield_map.py", "--repo-root", cwd],
+        "binary": "ripwire",
+        "cwd": cwd,
+        "elapsed_seconds": 1.23,
+        "exit": 0,
+        "head": head,
+        "languages": 3,
+        "ripwire_version": "ripwire 0.6.1",
+        "summary": "brownfield map written",
+        "symbols": 456,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Per-fixture assembly
 # ---------------------------------------------------------------------------
 
@@ -292,6 +312,81 @@ def make_all_green(build_dir: Path) -> None:
     repo = _make_repo(build_dir, name)
     head = _init_repo(repo)
     run_dir = _start_run(build_dir, name, repo)
+    cwd = str(repo)
+
+    # Write map stage first
+    sha = _write_gate(run_dir, "gates/handoff-1-map.json", _map_data(head, cwd))
+    _append_gate_receipt(run_dir, "brownfield-map", "gates/handoff-1-map.json", sha, 0, "brownfield map written")
+
+    _build_standard(run_dir, repo, head)
+
+
+def make_map_missing(build_dir: Path) -> None:
+    name = "map-missing"
+    repo = _make_repo(build_dir, name)
+    head = _init_repo(repo)
+    run_dir = _start_run(build_dir, name, repo)
+    _build_standard(run_dir, repo, head, skip={"gates/handoff-1-map.json"})
+
+
+def make_map_overridden(build_dir: Path) -> None:
+    name = "map-overridden"
+    repo = _make_repo(build_dir, name)
+    head = _init_repo(repo)
+    run_dir = _start_run(build_dir, name, repo)
+
+    # Skip the map gate (missing), then override it
+    _build_standard(run_dir, repo, head, skip={"gates/handoff-1-map.json"})
+
+    # Add override receipt for the missing map
+    _append_receipt(run_dir, "override", {
+        "gate": "map", "instruction": "map-overridden instruction text", "by": "rijul",
+    })
+
+
+def make_map_earlier_head(build_dir: Path) -> None:
+    """Map gate recorded at first commit, then a second commit moves HEAD.
+    All other gates written at the new HEAD. The map's recorded head is an
+    ancestor of HEAD, so it should pass via the ancestor check."""
+    name = "map-earlier-head"
+    repo = _make_repo(build_dir, name)
+    first_head = _init_repo(repo)
+    cwd = str(repo)
+
+    # Start the run (creates run.json and state directory)
+    run_dir = _start_run(build_dir, name, repo)
+
+    # Write map gate with first commit's head
+    sha = _write_gate(run_dir, "gates/handoff-1-map.json", _map_data(first_head, cwd))
+    _append_gate_receipt(run_dir, "brownfield-map", "gates/handoff-1-map.json", sha, 0, "brownfield map written")
+
+    # Make a second commit to move HEAD
+    (repo / "file2.txt").write_text("second commit\n")
+    _run_git(["add", "-A"], repo)
+    _run_git(["commit", "-q", "-m", "second"], repo, env=_git_env())
+    second_head = _run_git(["rev-parse", "HEAD"], repo)
+
+    # Write all other gates at the new HEAD
+    _build_standard(run_dir, repo, second_head)
+
+
+def make_map_foreign_head(build_dir: Path) -> None:
+    """Map gate's head set to a non-existent commit SHA or from an unrelated
+    repository. HEAD doesn't have that commit as an ancestor, so the ancestor
+    check fails and head-drift is reported."""
+    name = "map-foreign-head"
+    repo = _make_repo(build_dir, name)
+    head = _init_repo(repo)
+    run_dir = _start_run(build_dir, name, repo)
+    cwd = str(repo)
+
+    # Create a map gate with a foreign head: 40 hex digits that don't exist
+    foreign_head = "a" * 40
+    map_data = _map_data(head, cwd)
+    map_data["head"] = foreign_head
+    sha = _write_gate(run_dir, "gates/handoff-1-map.json", map_data)
+    _append_gate_receipt(run_dir, "brownfield-map", "gates/handoff-1-map.json", sha, 0, "brownfield map written")
+
     _build_standard(run_dir, repo, head)
 
 
@@ -300,6 +395,12 @@ def make_red_green_never_red(build_dir: Path) -> None:
     repo = _make_repo(build_dir, name)
     head = _init_repo(repo)
     run_dir = _start_run(build_dir, name, repo)
+    cwd = str(repo)
+
+    # Write map stage first
+    sha = _write_gate(run_dir, "gates/handoff-1-map.json", _map_data(head, cwd))
+    _append_gate_receipt(run_dir, "brownfield-map", "gates/handoff-1-map.json", sha, 0, "brownfield map written")
+
     _build_standard(run_dir, repo, head, gate9_exit=1)
 
 
@@ -308,6 +409,12 @@ def make_recheck_hash_changed(build_dir: Path) -> None:
     repo = _make_repo(build_dir, name)
     head = _init_repo(repo)
     run_dir = _start_run(build_dir, name, repo)
+    cwd = str(repo)
+
+    # Write map stage first
+    sha = _write_gate(run_dir, "gates/handoff-1-map.json", _map_data(head, cwd))
+    _append_gate_receipt(run_dir, "brownfield-map", "gates/handoff-1-map.json", sha, 0, "brownfield map written")
+
     _build_standard(run_dir, repo, head, recheck_findings=[
         "hash changed: tests/test_fix.py::test_bug_is_fixed recorded 000000000000 now 111111111111",
     ])
@@ -318,6 +425,12 @@ def make_matrix_not_met(build_dir: Path) -> None:
     repo = _make_repo(build_dir, name)
     head = _init_repo(repo)
     run_dir = _start_run(build_dir, name, repo)
+    cwd = str(repo)
+
+    # Write map stage first
+    sha = _write_gate(run_dir, "gates/handoff-1-map.json", _map_data(head, cwd))
+    _append_gate_receipt(run_dir, "brownfield-map", "gates/handoff-1-map.json", sha, 0, "brownfield map written")
+
     _build_standard(run_dir, repo, head, matrix_grade="NOT MET")
 
 
@@ -326,6 +439,12 @@ def make_claim_uncited(build_dir: Path) -> None:
     repo = _make_repo(build_dir, name)
     head = _init_repo(repo)
     run_dir = _start_run(build_dir, name, repo)
+    cwd = str(repo)
+
+    # Write map stage first
+    sha = _write_gate(run_dir, "gates/handoff-1-map.json", _map_data(head, cwd))
+    _append_gate_receipt(run_dir, "brownfield-map", "gates/handoff-1-map.json", sha, 0, "brownfield map written")
+
     _build_standard(run_dir, repo, head, claim_findings=[{
         "line": 3, "text": "Fixed 12 failing tests.", "type": "uncited",
         "claim": "12", "reason": "quantitative claim has no [E<n>] citation",
@@ -337,6 +456,12 @@ def make_override_covers_matrix(build_dir: Path) -> None:
     repo = _make_repo(build_dir, name)
     head = _init_repo(repo)
     run_dir = _start_run(build_dir, name, repo)
+    cwd = str(repo)
+
+    # Write map stage first
+    sha = _write_gate(run_dir, "gates/handoff-1-map.json", _map_data(head, cwd))
+    _append_gate_receipt(run_dir, "brownfield-map", "gates/handoff-1-map.json", sha, 0, "brownfield map written")
+
     _build_standard(run_dir, repo, head, matrix_grade="NOT MET")
     _append_receipt(run_dir, "override", {
         "gate": "11-matrix", "instruction": "override-covers-matrix instruction text", "by": "rijul",
@@ -348,6 +473,12 @@ def make_chain_broken(build_dir: Path) -> None:
     repo = _make_repo(build_dir, name)
     head = _init_repo(repo)
     run_dir = _start_run(build_dir, name, repo)
+    cwd = str(repo)
+
+    # Write map stage first
+    sha = _write_gate(run_dir, "gates/handoff-1-map.json", _map_data(head, cwd))
+    _append_gate_receipt(run_dir, "brownfield-map", "gates/handoff-1-map.json", sha, 0, "brownfield map written")
+
     _build_standard(run_dir, repo, head)
     _corrupt_early_receipt(run_dir)
 
@@ -357,6 +488,12 @@ def make_unused_override(build_dir: Path) -> None:
     repo = _make_repo(build_dir, name)
     head = _init_repo(repo)
     run_dir = _start_run(build_dir, name, repo)
+    cwd = str(repo)
+
+    # Write map stage first
+    sha = _write_gate(run_dir, "gates/handoff-1-map.json", _map_data(head, cwd))
+    _append_gate_receipt(run_dir, "brownfield-map", "gates/handoff-1-map.json", sha, 0, "brownfield map written")
+
     _build_standard(run_dir, repo, head)
     _append_receipt(run_dir, "override", {
         "gate": "8", "instruction": "unused override instruction text", "by": "rijul",
@@ -380,6 +517,10 @@ def make_recheck_before_proof(build_dir: Path) -> None:
     def write_and_receipt(relpath: str, gate: str, data: Dict[str, Any]) -> None:
         sha = _write_gate(run_dir, relpath, data)
         _append_gate_receipt(run_dir, gate, relpath, sha, data["exit"], data["summary"])
+
+    # Write map stage first
+    sha = _write_gate(run_dir, "gates/handoff-1-map.json", _map_data(head, cwd))
+    _append_gate_receipt(run_dir, "brownfield-map", "gates/handoff-1-map.json", sha, 0, "brownfield map written")
 
     write_and_receipt("gates/7-discover.json", "gate-discovery", _discover_data(head, cwd))
     write_and_receipt("gates/8.json", "test-execution", _run_data(head, cwd))
@@ -409,6 +550,12 @@ def make_stage_query_allowed(build_dir: Path) -> None:
     repo = _make_repo(build_dir, name)
     head = _init_repo(repo)
     run_dir = _start_run(build_dir, name, repo)
+    cwd = str(repo)
+
+    # Write map stage first
+    sha = _write_gate(run_dir, "gates/handoff-1-map.json", _map_data(head, cwd))
+    _append_gate_receipt(run_dir, "brownfield-map", "gates/handoff-1-map.json", sha, 0, "brownfield map written")
+
     _build_standard(run_dir, repo, head, skip={"gates/12.json"})
 
 
@@ -417,7 +564,7 @@ def make_stage_query_blocked(build_dir: Path) -> None:
     repo = _make_repo(build_dir, name)
     head = _init_repo(repo)
     run_dir = _start_run(build_dir, name, repo)
-    _build_standard(run_dir, repo, head, skip={"gates/7-discover.json", "gates/12.json"})
+    _build_standard(run_dir, repo, head, skip={"gates/handoff-1-map.json", "gates/7-discover.json", "gates/12.json"})
 
 
 def make_rounds_exceeded(build_dir: Path) -> None:
@@ -427,6 +574,12 @@ def make_rounds_exceeded(build_dir: Path) -> None:
     repo = _make_repo(build_dir, name)
     head = _init_repo(repo)
     run_dir = _start_run(build_dir, name, repo)
+    cwd = str(repo)
+
+    # Write map stage first
+    sha = _write_gate(run_dir, "gates/handoff-1-map.json", _map_data(head, cwd))
+    _append_gate_receipt(run_dir, "brownfield-map", "gates/handoff-1-map.json", sha, 0, "brownfield map written")
+
     _build_standard(run_dir, repo, head)
     for i in range(4):
         _append_receipt(run_dir, "stage-opened", {"stage": 6})
@@ -439,6 +592,12 @@ def make_rounds_overridden(build_dir: Path) -> None:
     repo = _make_repo(build_dir, name)
     head = _init_repo(repo)
     run_dir = _start_run(build_dir, name, repo)
+    cwd = str(repo)
+
+    # Write map stage first
+    sha = _write_gate(run_dir, "gates/handoff-1-map.json", _map_data(head, cwd))
+    _append_gate_receipt(run_dir, "brownfield-map", "gates/handoff-1-map.json", sha, 0, "brownfield map written")
+
     _build_standard(run_dir, repo, head)
     for i in range(4):
         _append_receipt(run_dir, "stage-opened", {"stage": 6})
@@ -454,6 +613,12 @@ def make_rounds_three(build_dir: Path) -> None:
     repo = _make_repo(build_dir, name)
     head = _init_repo(repo)
     run_dir = _start_run(build_dir, name, repo)
+    cwd = str(repo)
+
+    # Write map stage first
+    sha = _write_gate(run_dir, "gates/handoff-1-map.json", _map_data(head, cwd))
+    _append_gate_receipt(run_dir, "brownfield-map", "gates/handoff-1-map.json", sha, 0, "brownfield map written")
+
     _build_standard(run_dir, repo, head)
     for i in range(3):
         _append_receipt(run_dir, "stage-opened", {"stage": 6})
@@ -461,6 +626,10 @@ def make_rounds_three(build_dir: Path) -> None:
 
 FIXTURE_MAKERS = [
     make_all_green,
+    make_map_missing,
+    make_map_overridden,
+    make_map_earlier_head,
+    make_map_foreign_head,
     make_red_green_never_red,
     make_recheck_hash_changed,
     make_matrix_not_met,

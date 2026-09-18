@@ -46,3 +46,19 @@ exits 3, proving run names the failing command rather than only reporting a sing
 overall exit code. `coverage-not-applicable` has only the `bash tests/smoke.sh` command,
 no pytest command anywhere, proving `coverage` reports `NOT_APPLICABLE` (exit 2) instead
 of attempting to measure coverage of a non-pytest command.
+
+`unittest-all-pass`, `unittest-one-fail`, `unittest-skip`, `unittest-zero`, and
+`pytest-wins` exercise the second summary shape `run_gate.py` recognizes: unittest's
+`Ran N tests` line followed by `OK`, `OK (skipped=S)`, or `FAILED (...)`. Each ships a
+`bash scripts/test.sh` runner (a real binary, no stub needed) whose ci.yml `run:` line
+is that runner shape, so discovery selects it without a name fallback; the script just
+prints the fixed summary lines the fixture's name promises and exits with that
+fixture's code. `unittest-all-pass` prints `Ran 3 tests` then `OK` and exits 0, proving
+the summary is shape "unittest" with passed 3. `unittest-one-fail` prints
+`FAILED (failures=1)`; `unittest-skip` prints `OK (skipped=1)`; both block (exit 1) with
+"failed" and "skipped" respectively in stderr, the same as the pytest-shaped fixtures
+above. `unittest-zero` prints `Ran 0 tests` then `OK` and exits 0 from the script itself,
+proving `run_gate.py` still blocks it as "no tests collected" rather than treating
+all-zero-and-OK as a pass. `pytest-wins` prints both shapes from the same script (a
+`Ran 3 tests` / `OK` pair and a `2 passed` line); the pytest shape must win, so the
+recorded summary is shape "pytest" with passed 2, not shape "unittest" with passed 3.

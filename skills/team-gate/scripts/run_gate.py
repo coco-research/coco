@@ -42,10 +42,15 @@ Subcommands:
   evidence: aggregates the run's gate files into .team-ship/EVIDENCE.json, then asks
             render_evidence.render() for the markdown and writes .team-ship/EVIDENCE.md.
 
-Every subcommand accepts --role builder|verifier (default builder). The verifier role
-writes gates/<n>-verifier.json instead of gates/<n>.json, so the builder's own gate
-files are never overwritten by an independent re-run. evidence in the verifier role is
-refused, because evidence is assembled from the builder's gates only.
+Usage: run_gate.py [--repo-root REPO] [--role ROLE] SUBCOMMAND [--repo-root REPO] [--role ROLE]
+
+Every subcommand accepts --repo-root and --role. Both flags can be given before the subcommand,
+after it, or both (if given in both positions with the same value, the second is ignored; if
+given in both positions with different values, exit 2 with one stderr line). Default --repo-root
+is "." and default --role is "builder". The verifier role writes gates/<n>-verifier.json instead
+of gates/<n>.json, so the builder's own gate files are never overwritten by an independent
+re-run. evidence in the verifier role is refused, because evidence is assembled from the
+builder's gates only.
 
 The run directory comes only from gate_state.find_run(); it is never invented locally.
 Every gate file records argv, cwd, head (git rev-parse HEAD of the measured repository),
@@ -1326,11 +1331,12 @@ def main() -> int:
                          help="builder writes gates/<n>.json, verifier writes gates/<n>-verifier.json")
     parser.add_argument("--self-test", action="store_true", help="run self-test on fixtures")
     subparsers = parser.add_subparsers(dest="subcommand")
-    subparsers.add_parser("discover")
-    subparsers.add_parser("parity")
-    subparsers.add_parser("run")
-    subparsers.add_parser("coverage")
-    subparsers.add_parser("evidence")
+    for subparser_name in ["discover", "parity", "run", "coverage", "evidence"]:
+        subparser = subparsers.add_parser(subparser_name)
+        subparser.add_argument("--repo-root", default=None, dest="sub_repo_root",
+                               help="repository root (overrides parent --repo-root)")
+        subparser.add_argument("--role", choices=["builder", "verifier"], default=None, dest="sub_role",
+                               help="builder|verifier (overrides parent --role)")
 
     args = parser.parse_args()
 
@@ -1348,7 +1354,23 @@ def main() -> int:
         parser.print_help()
         return 2
 
-    return dispatch[args.subcommand](args.repo_root, args.role)
+    # Resolve --repo-root: prefer subparser value, then parent value, then default
+    repo_root_from_parent = args.repo_root
+    repo_root_from_sub = getattr(args, "sub_repo_root", None)
+    if repo_root_from_parent != "." and repo_root_from_sub is not None and repo_root_from_parent != repo_root_from_sub:
+        sys.stderr.write(f"--repo-root given twice with different values\n")
+        return 2
+    final_repo_root = repo_root_from_sub if repo_root_from_sub is not None else repo_root_from_parent
+
+    # Resolve --role: prefer subparser value, then parent value, then default
+    role_from_parent = args.role
+    role_from_sub = getattr(args, "sub_role", None)
+    if role_from_parent != "builder" and role_from_sub is not None and role_from_parent != role_from_sub:
+        sys.stderr.write(f"--role given twice with different values\n")
+        return 2
+    final_role = role_from_sub if role_from_sub is not None else role_from_parent
+
+    return dispatch[args.subcommand](final_repo_root, final_role)
 
 
 if __name__ == "__main__":

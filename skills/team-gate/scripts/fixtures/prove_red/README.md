@@ -122,3 +122,24 @@ the stub. Exit 0, class valid-red-stub, mode stub.
 in `src/calc.py` plus a new test in the same HEAD commit). The diff carries
 an implementation path, so prove stays on the ordinary red-green proof
 regardless of the new test, mode red-green.
+
+**renamed-module-red.** The base commit has `src/calc.py` with the subtraction
+bug. HEAD renames that file to `src/adder.py`, fixes `add`, and adds a test
+that imports `src.adder`. Reverting restores `src/calc.py` and deletes
+`src/adder.py`, so the red proof is a `ModuleNotFoundError` for the new
+module name. Status R is not an add, so a classifier that only checks added
+paths would call this invalid-red. Checking renamed and modified paths as
+well makes it valid-red-missing-name. Exit 0, one test, one valid red.
+
+**unittest-setup.** Same bug and fix as proper-red-green, but the
+`unittest.TestCase` test reads `self.expected` planted in `setUp` and
+deleted in `tearDown`. The internal runner must invoke those hooks; without
+them the green run raises AttributeError and the gate BLOCKs. Exit 0, one
+test, one valid red.
+
+**background-thread-fail.** Same bug and fix as proper-red-green, but the
+assertion runs in a worker thread the test function does not join. The
+runner must join extra threads and treat an uncaught thread exception as
+the test result; without that the red phase prints pass and the gate
+reports never-red. Exit 0, one test, one valid red.
+

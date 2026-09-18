@@ -20,12 +20,20 @@ Subcommands:
   parity:   compares locally installed tool versions against the versions pinned by
             discover. Writes gates/7.json.
   run:      executes every command discover recorded, in order, each with
-            subprocess.run and no shell; parses the summary for the pytest-shaped
-            ones (summary is null for the rest). The gate blocks if any command's
-            real exit is non-zero, or any pytest-shaped summary has failed, skipped,
-            or errors above zero, or has no tests collected at all. A missing runner
-            binary is exit 2 for the whole gate. Writes gates/8.json with commands:
-            [{argv, real_exit, summary}] alongside the existing top-level fields.
+            subprocess.run and no shell; parses each command's combined stdout and
+            stderr for one of two summary shapes: pytest's `N passed`/`N failed`/
+            `N skipped`/`N error(s)` count lines, or unittest's `Ran N tests` line
+            followed by `OK`, `OK (skipped=S)`, or `FAILED (failures=F, errors=E,
+            skipped=S, expected failures=X, unexpected successes=U)`. When both
+            shapes appear in the same output (a pytest run may print
+            unittest-looking lines from a wrapped runner) the pytest shape wins.
+            Every command's summary carries shape: "pytest", "unittest", or "none"
+            when neither shape is recognized, in which case only that command's real
+            exit is judged. The gate blocks if any command's real exit is non-zero,
+            or any pytest- or unittest-shaped summary has failed, skipped, or errors
+            above zero, or has no tests collected at all. A missing runner binary is
+            exit 2 for the whole gate. Writes gates/8.json with commands: [{argv,
+            real_exit, summary}] alongside the existing top-level fields.
   coverage: re-runs the first pytest-shaped discovered command with --cov
             --cov-branch and records the total percentage. If discover found no
             pytest-shaped command at all, writes gates/10.json with status
@@ -600,17 +608,89 @@ def cmd_parity(repo_root_arg: str, role: str) -> int:
 # run
 # ---------------------------------------------------------------------------
 
+_PYTEST_PATTERNS = {
+    "passed": r'(\d+)\s+passed',
+    "failed": r'(\d+)\s+failed',
+    "skipped": r'(\d+)\s+skipped',
+    "errors": r'(\d+)\s+error',
+}
+
+
 def _parse_pytest_summary(output: str) -> Dict[str, int]:
     def _count(pattern: str) -> int:
         match = re.search(pattern, output)
         return int(match.group(1)) if match else 0
 
-    return {
-        "passed": _count(r'(\d+)\s+passed'),
-        "failed": _count(r'(\d+)\s+failed'),
-        "skipped": _count(r'(\d+)\s+skipped'),
-        "errors": _count(r'(\d+)\s+error'),
-    }
+    return {key: _count(pattern) for key, pattern in _PYTEST_PATTERNS.items()}
+
+
+def _pytest_summary_present(output: str) -> bool:
+    """True when output contains at least one pytest-shaped `N <word>` count line."""
+    return any(re.search(pattern, output) for pattern in _PYTEST_PATTERNS.values())
+
+
+def _parse_unittest_summary(output: str) -> Optional[Dict[str, int]]:
+    """Parse unittest's `Ran N tests` / `OK` / `FAILED (...)` summary shape.
+
+    Returns None when no `Ran N tests?` line is present (this output is not
+    unittest-shaped). Otherwise: a following `OK` line gives passed = total,
+    failed = 0, skipped = 0; a following `OK (skipped=S)` line gives
+    skipped = S and passed = total - S; a following `FAILED (...)` line carries
+    comma-separated `failures=F, errors=E, skipped=S, expected failures=X,
+    unexpected successes=U` (any subset, defaulting missing keys to 0), and then
+    failed = F + E + U, skipped = S, passed = total - failed - skipped - X.
+    """
+    ran_match = re.search(r'^Ran (\d+) tests?\b', output, re.MULTILINE)
+    if not ran_match:
+        return None
+    total = int(ran_match.group(1))
+    rest = output[ran_match.end():]
+
+    failed_match = re.search(r'^FAILED \((.*)\)\s*$', rest, re.MULTILINE)
+    if failed_match:
+        counts: Dict[str, int] = {}
+        for part in failed_match.group(1).split(","):
+            key, sep, value = part.strip().partition("=")
+            if sep and value.strip().isdigit():
+                counts[key.strip()] = int(value.strip())
+        failures = counts.get("failures", 0)
+        errors = counts.get("errors", 0)
+        skipped = counts.get("skipped", 0)
+        expected_failures = counts.get("expected failures", 0)
+        unexpected_successes = counts.get("unexpected successes", 0)
+        failed = failures + errors + unexpected_successes
+        passed = total - failed - skipped - expected_failures
+        return {"passed": passed, "failed": failed, "skipped": skipped, "errors": errors}
+
+    ok_match = re.search(r'^OK(?:\s+\(skipped=(\d+)\))?\s*$', rest, re.MULTILINE)
+    if ok_match:
+        skipped = int(ok_match.group(1)) if ok_match.group(1) else 0
+        return {"passed": total - skipped, "failed": 0, "skipped": skipped, "errors": 0}
+
+    return None
+
+
+def _parse_test_summary(output: str) -> Dict[str, Any]:
+    """Parse combined stdout+stderr into a shape-tagged test summary.
+
+    Recognizes pytest's `N passed`/`N failed`/`N skipped`/`N error(s)` count-line
+    shape and unittest's `Ran N tests` + `OK`/`FAILED (...)` shape. When both shapes
+    are present in the same output (a pytest run may print unittest-looking lines
+    from a wrapped runner) the pytest shape wins. Returns a dict with passed,
+    failed, skipped, errors, and shape: "pytest", "unittest", or "none" when
+    neither shape is recognized.
+    """
+    if _pytest_summary_present(output):
+        parsed = _parse_pytest_summary(output)
+        parsed["shape"] = "pytest"
+        return parsed
+
+    unittest_parsed = _parse_unittest_summary(output)
+    if unittest_parsed is not None:
+        unittest_parsed["shape"] = "unittest"
+        return unittest_parsed
+
+    return {"passed": 0, "failed": 0, "skipped": 0, "errors": 0, "shape": "none"}
 
 
 def _commands_from_discover(discover_data: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -663,14 +743,17 @@ def cmd_run(repo_root_arg: str, role: str) -> int:
 
         real_exit = result.returncode
         combined = (result.stdout or "") + "\n" + (result.stderr or "")
-        if _is_pytest_command(argv):
-            parsed = _parse_pytest_summary(combined)
-            no_tests_collected = (parsed["passed"] == 0 and parsed["failed"] == 0
-                                   and parsed["skipped"] == 0 and parsed["errors"] == 0)
-            command_summary = dict(parsed)
-            command_summary["no_tests_collected"] = no_tests_collected
-        else:
-            command_summary = None
+        parsed = _parse_test_summary(combined)
+        if parsed["shape"] == "none" and _is_pytest_command(argv):
+            # A pytest-invoked command whose output matched neither summary shape
+            # (e.g. "no tests ran") is still a pytest result: all-zero counts, which
+            # blocks below as "no tests collected" rather than being ignored.
+            parsed = {"passed": 0, "failed": 0, "skipped": 0, "errors": 0, "shape": "pytest"}
+        no_tests_collected = (parsed["shape"] != "none" and parsed["passed"] == 0
+                               and parsed["failed"] == 0 and parsed["skipped"] == 0
+                               and parsed["errors"] == 0)
+        command_summary = dict(parsed)
+        command_summary["no_tests_collected"] = no_tests_collected
         results.append({"argv": argv, "real_exit": real_exit, "summary": command_summary})
 
     reasons: List[str] = []
@@ -690,11 +773,11 @@ def cmd_run(repo_root_arg: str, role: str) -> int:
 
     final_exit = 1 if reasons else 0
     summary_text = "; ".join(reasons) if reasons else f"{len(results)} command(s) passed"
-    first_pytest_summary = next((r["summary"] for r in results if r["summary"] is not None), None)
+    first_summary = results[0]["summary"] if results else None
 
     data = {
         "argv": commands[0]["argv"], "cwd": str(repo_root), "head": head, "exit": final_exit,
-        "summary": summary_text, "parsed": first_pytest_summary,
+        "summary": summary_text, "parsed": first_summary,
         "real_exit": results[0]["real_exit"] if results else None,
         "commands": results,
     }
@@ -969,6 +1052,71 @@ def cmd_self_test() -> int:
     ok = proc.returncode == 1 and "skipped" in proc.stderr
     all_ok = all_ok and ok
     print(f"one-skip: expected 1 got {proc.returncode} stderr contains 'skipped' {'OK' if ok else 'FAIL'}")
+
+    # unittest-all-pass: discover then run -> 0, summary shape unittest, passed 3
+    copy_path, env = _isolated_fixture_copy(build_dir, "unittest-all-pass")
+    _invoke(copy_path, env, "discover")
+    proc = _invoke(copy_path, env, "run")
+    ok = proc.returncode == 0
+    shape = passed = None
+    if ok:
+        run_dir = next(Path(env["TEAM_STATE_ROOT"]).glob("*"))
+        gate_path = run_dir / "gates" / "8.json"
+        ok = gate_path.is_file()
+        if ok:
+            data = json.loads(gate_path.read_text())
+            summary = (data.get("commands") or [{}])[0].get("summary") or {}
+            shape = summary.get("shape")
+            passed = summary.get("passed")
+            ok = shape == "unittest" and passed == 3
+    all_ok = all_ok and ok
+    print(f"unittest-all-pass: expected 0 got {proc.returncode} shape={shape} passed={passed} "
+          f"{'OK' if ok else 'FAIL'}")
+
+    # unittest-one-fail: discover then run -> 1, stderr contains "failed"
+    copy_path, env = _isolated_fixture_copy(build_dir, "unittest-one-fail")
+    _invoke(copy_path, env, "discover")
+    proc = _invoke(copy_path, env, "run")
+    ok = proc.returncode == 1 and "failed" in proc.stderr
+    all_ok = all_ok and ok
+    print(f"unittest-one-fail: expected 1 got {proc.returncode} stderr contains 'failed' {'OK' if ok else 'FAIL'}")
+
+    # unittest-skip: discover then run -> 1, stderr contains "skipped"
+    copy_path, env = _isolated_fixture_copy(build_dir, "unittest-skip")
+    _invoke(copy_path, env, "discover")
+    proc = _invoke(copy_path, env, "run")
+    ok = proc.returncode == 1 and "skipped" in proc.stderr
+    all_ok = all_ok and ok
+    print(f"unittest-skip: expected 1 got {proc.returncode} stderr contains 'skipped' {'OK' if ok else 'FAIL'}")
+
+    # unittest-zero: discover then run -> 1, stderr contains "no tests collected"
+    copy_path, env = _isolated_fixture_copy(build_dir, "unittest-zero")
+    _invoke(copy_path, env, "discover")
+    proc = _invoke(copy_path, env, "run")
+    ok = proc.returncode == 1 and "no tests collected" in proc.stderr
+    all_ok = all_ok and ok
+    print(f"unittest-zero: expected 1 got {proc.returncode} stderr contains 'no tests collected' "
+          f"{'OK' if ok else 'FAIL'}")
+
+    # pytest-wins: discover then run -> 0, summary shape pytest, passed 2 (pytest shape
+    # wins over the unittest-looking lines the same script also prints)
+    copy_path, env = _isolated_fixture_copy(build_dir, "pytest-wins")
+    _invoke(copy_path, env, "discover")
+    proc = _invoke(copy_path, env, "run")
+    ok = proc.returncode == 0
+    shape = passed = None
+    if ok:
+        run_dir = next(Path(env["TEAM_STATE_ROOT"]).glob("*"))
+        gate_path = run_dir / "gates" / "8.json"
+        ok = gate_path.is_file()
+        if ok:
+            data = json.loads(gate_path.read_text())
+            summary = (data.get("commands") or [{}])[0].get("summary") or {}
+            shape = summary.get("shape")
+            passed = summary.get("passed")
+            ok = shape == "pytest" and passed == 2
+    all_ok = all_ok and ok
+    print(f"pytest-wins: expected 0 got {proc.returncode} shape={shape} passed={passed} {'OK' if ok else 'FAIL'}")
 
     # parity-mismatch: discover then parity -> 1, stderr contains "ruff"
     copy_path, env = _isolated_fixture_copy(build_dir, "parity-mismatch")

@@ -100,12 +100,18 @@ def _sentence_for(entry: Dict[str, Any]) -> str:
     return f"{label} exit {entry.get('exit', '?')}. [{entry_id}]"
 
 
-def _find_override(run_dir: Path) -> Optional[str]:
-    """Scan receipts.jsonl for the last override receipt, return its reason text."""
+def _find_overrides(run_dir: Path) -> List[tuple]:
+    """Scan receipts.jsonl for every override receipt and return them in receipt
+    order as (gate, instruction, by) tuples.
+
+    Reads detail.instruction, the shape every writer records (the turn-log hook
+    and the aggregators' documented override receipt), falling back to
+    detail.reason for older receipts. Returns an empty list when none exist.
+    """
     receipts_file = run_dir / "receipts.jsonl"
     if not receipts_file.is_file():
-        return None
-    override_text = None
+        return []
+    override_list: List[tuple] = []
     for line in receipts_file.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line:
@@ -117,8 +123,11 @@ def _find_override(run_dir: Path) -> Optional[str]:
         if record.get("kind") == "override":
             detail = record.get("detail", {})
             if isinstance(detail, dict):
-                override_text = detail.get("reason", "")
-    return override_text
+                instruction = detail.get("instruction") or detail.get("reason", "")
+                gate = detail.get("gate", "unknown")
+                by = detail.get("by", "unknown")
+                override_list.append((gate, instruction, by))
+    return override_list
 
 
 def _fence_for(text: str) -> str:
@@ -129,9 +138,10 @@ def _fence_for(text: str) -> str:
     return "`" * max(3, longest + 1)
 
 
-def render_pr_body(evidence: Dict[str, Any], narrative: str, override_text: Optional[str]) -> str:
-    """Pure function: narrative plus a generated results section plus an
-    optional verbatim override section."""
+def render_pr_body(evidence: Dict[str, Any], narrative: str, overrides: List[tuple]) -> str:
+    """Pure function: narrative plus a generated results section plus one
+    verbatim fenced block per override receipt, in receipt order, each fenced
+    with one more backtick than the longest run inside its text."""
     lines = []
     if narrative.strip():
         lines.append(narrative.rstrip("\n"))
@@ -148,14 +158,18 @@ def render_pr_body(evidence: Dict[str, Any], narrative: str, override_text: Opti
     for entry in sorted(entries, key=_entry_sort_key):
         lines.append(f"- {_sentence_for(entry)}")
 
-    if override_text is not None:
+    if overrides:
         lines.append("")
-        lines.append("## Override")
+        lines.append("## Overrides" if len(overrides) > 1 else "## Override")
         lines.append("")
-        fence = _fence_for(override_text)
-        lines.append(fence)
-        lines.append(override_text.rstrip("\n"))
-        lines.append(fence)
+        for gate, instruction, by in overrides:
+            lines.append(f"Override for gate {gate} by {by}:")
+            lines.append("")
+            fence = _fence_for(instruction)
+            lines.append(fence)
+            lines.append(instruction.rstrip("\n"))
+            lines.append(fence)
+            lines.append("")
 
     text = "\n".join(lines).rstrip("\n") + "\n"
     return text
@@ -189,9 +203,9 @@ def cmd_render(repo_root: str, narrative_path: Optional[str]) -> int:
     if narrative_file.is_file():
         narrative = narrative_file.read_text(encoding="utf-8")
 
-    override_text = _find_override(run_dir)
+    overrides = _find_overrides(run_dir)
 
-    text = render_pr_body(evidence, narrative, override_text)
+    text = render_pr_body(evidence, narrative, overrides)
     body_path = root / ".team-ship" / "PR-BODY.md"
     body_path.parent.mkdir(parents=True, exist_ok=True)
     data = text.encode("utf-8")
@@ -233,6 +247,8 @@ def _ensure_fixtures() -> int:
 
 OVERRIDE_MARKUP_TEXT = "Ship with **bold** markup and <script>alert(1)</script> intact, per Rijul, 2026-09-17."
 OVERRIDE_BACKTICKS_TEXT = "Override reason includes a fenced block:\n```\nsome code\n```\nper Rijul, 2026-09-17."
+OVERRIDE_GATE_10_TEXT = "Override for coverage gate per requirement R7."
+OVERRIDE_GATE_ARCH_TEXT = "Override for architecture gate, superseded by discussion."
 
 
 def cmd_self_test() -> int:
@@ -242,16 +258,27 @@ def cmd_self_test() -> int:
 
     fixture_dir = _self_test_fixture_dir()
 
-    # (name, build_from, override_text_or_None, expected_exit, fence_check)
+    # (name, build_from, override_receipts_or_None, expected_exit, required_substrings)
+    # override_receipts_or_None is a list of receipt detail dicts appended in order,
+    # in the real shape {gate, instruction, by}, or {reason} for the old shape.
     cases = [
-        ("all-claims-backed", "all-claims-backed", None, 0, "```"),
-        ("override-with-markup", "override-with-markup", OVERRIDE_MARKUP_TEXT, 0, "```"),
-        ("override-with-backticks", "override-with-backticks", OVERRIDE_BACKTICKS_TEXT, 0, "````"),
+        ("all-claims-backed", "all-claims-backed", None, 0, ["```"]),
+        ("override-with-markup", "override-with-markup",
+         [{"gate": "approval", "instruction": OVERRIDE_MARKUP_TEXT, "by": "user"}], 0, ["```", OVERRIDE_MARKUP_TEXT]),
+        ("override-with-backticks", "override-with-backticks",
+         [{"gate": "approval", "instruction": OVERRIDE_BACKTICKS_TEXT, "by": "user"}], 0, ["````", OVERRIDE_BACKTICKS_TEXT.rstrip("\n")]),
+        ("override-old-shape", "override-with-markup",
+         [{"reason": OVERRIDE_MARKUP_TEXT}], 0, ["```", OVERRIDE_MARKUP_TEXT]),
+        ("override-two-gates", "override-with-markup",
+         [{"gate": "10", "instruction": OVERRIDE_GATE_10_TEXT, "by": "user"},
+          {"gate": "arch", "instruction": OVERRIDE_GATE_ARCH_TEXT, "by": "user"}], 0,
+         ["## Overrides", "Override for gate 10 by user", OVERRIDE_GATE_10_TEXT,
+          "Override for gate arch by user", OVERRIDE_GATE_ARCH_TEXT]),
     ]
 
     all_pass = True
 
-    for name, build_from, override_text, expected_exit, fence_check in cases:
+    for name, build_from, override_receipts, expected_exit, required_substrings in cases:
         build_dir = fixture_dir / build_from / "_build"
         if not build_dir.is_dir():
             print(f"{name}: FIXTURE NOT FOUND", file=sys.stderr)
@@ -274,9 +301,10 @@ def cmd_self_test() -> int:
                 continue
 
             run_dir = state_root / run_id
-            if override_text is not None:
+            if override_receipts is not None:
                 try:
-                    gate_state.append_receipt(run_dir, "override", {"reason": override_text})
+                    for override_detail in override_receipts:
+                        gate_state.append_receipt(run_dir, "override", override_detail)
                 except Exception as e:
                     print(f"{name}: FAIL - could not append override receipt: {e}", file=sys.stderr)
                     all_pass = False
@@ -296,13 +324,24 @@ def cmd_self_test() -> int:
             body_path = repo_copy / ".team-ship" / "PR-BODY.md"
             body_text = body_path.read_text(encoding="utf-8") if body_path.is_file() else ""
 
-            if override_text is not None:
-                if fence_check not in body_text or override_text.rstrip("\n") not in body_text:
-                    print(f"{name}: FAIL - override fence not intact", file=sys.stderr)
-                    all_pass = False
-                    continue
+            case_ok = True
+            if override_receipts is not None:
+                for needle in required_substrings:
+                    if needle not in body_text:
+                        print(f"{name}: FAIL - {needle[:40]!r} not found in the rendered body", file=sys.stderr)
+                        all_pass = False
+                        case_ok = False
+                        break
+                if case_ok and len(override_receipts) > 1:
+                    first = body_text.index(override_receipts[0]["instruction"])
+                    second = body_text.index(override_receipts[1]["instruction"])
+                    if not first < second:
+                        print(f"{name}: FAIL - overrides not in receipt order", file=sys.stderr)
+                        all_pass = False
+                        case_ok = False
 
-            print(f"{name}: expected {expected_exit} got {expected_exit} OK")
+            if case_ok:
+                print(f"{name}: expected {expected_exit} got {expected_exit} OK")
 
     return 0 if all_pass else 1
 

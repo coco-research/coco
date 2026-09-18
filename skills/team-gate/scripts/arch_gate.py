@@ -4,7 +4,8 @@
 Exits 0 when conformance passes, 1 when a block exists, 2 when unrunnable or
 unverified.
 
-Pass rules (from commands/team/architecture.md lines 93-117):
+Standalone flag-only invocation (unchanged), pass rules from
+commands/team/architecture.md lines 93-117:
   - Any failed validate_index.py check: BLOCK (exit 1)
   - Component with zero surviving primary paths (REMOVE verdict): BLOCK (exit 1)
   - Index pinned to commit != HEAD: UNVERIFIED (exit 2)
@@ -20,10 +21,69 @@ Usage:
     python3 arch_gate.py --repo-root . --index .arch/index.json --out .arch/ARCH-GATE.json
     python3 arch_gate.py --self-test
 
+Run-aware subcommands (each requires an active run started via gate_state.py;
+absence of a run is exit 2). Run resolution matches brownfield_map.py's
+_resolve_context exactly: gate_state.find_run() walks up from --repo-root to
+the .team-ship/RUN pointer, then --repo-root's own git toplevel is checked
+against run.json's own repo_root; a mismatch is refused before anything is
+written. Each writes a gate file under run_dir/gates (argv, cwd, head, exit,
+summary, plus its own fields), atomically, followed by a gate-result receipt;
+a receipt failure is exit 2.
+
+  baseline --repo-root <r>       Stage 1. Records {pin, head, status} to
+                                  gates/1-arch-baseline.json. status is
+                                  DISABLED when the run was started with a
+                                  no-arch flag, NOT_APPLICABLE when
+                                  <root>/.arch/index.json is absent, STALE
+                                  when the pin is not HEAD, CURRENT
+                                  otherwise. Exit 0 for CURRENT, 2 for the
+                                  other three, never 1.
+
+  plan-declare --repo-root <r>   Stage 3. Runs verify_arch_plan.py
+                                  <root>/.team-ship/ARCH-PLAN.json --declare
+                                  --repo-root <root> with no shell, a
+                                  120-second timeout, cwd at <root>. Writes
+                                  gates/3-arch-plan.json. Exit 0 when the
+                                  child exits 0, 1 when it exits 1 (a shape
+                                  violation, a real BLOCK), 2 when the child
+                                  cannot run, times out, or reports the plan
+                                  itself unreadable (its own exit 2, which
+                                  covers ARCH-PLAN.json being absent).
+
+  plan-verify --repo-root <r>    Stage 13. Same wrapper with --verify,
+                                  writing gates/13-arch-plan.json. The same
+                                  three-way exit mapping applies. Note:
+                                  verify_arch_plan.py's --verify mode reports
+                                  an unresolvable declaredAtCommit as its own
+                                  violation but exits 1 for it exactly like a
+                                  real missing-path or out-of-scope BLOCK; it
+                                  does not distinguish the two by exit code.
+                                  This wrapper therefore does not invent a
+                                  distinction the child does not make: every
+                                  child exit of 1 maps to this gate's exit 1,
+                                  and only a launch failure, a timeout, or
+                                  the child's own distinct exit 2 (plan
+                                  unreadable) maps to this gate's exit 2.
+
+  conformance --repo-root <r>    Stage 13. Reads gates/1-arch-baseline.json
+                                  (absent is exit 2, "no baseline"). A
+                                  recorded status of DISABLED,
+                                  NOT_APPLICABLE or STALE reproduces that
+                                  status with exit 2. CURRENT runs
+                                  validate_index.py and arch_drift.py with
+                                  the present pass rules minus the pin-vs-HEAD
+                                  check: inside a run the pin is expected to
+                                  be behind HEAD after the build (Stage 6 has
+                                  committed), so that comparison is only ever
+                                  made once, at Stage 1 by baseline. Writes
+                                  gates/13-arch.json plus the existing
+                                  .arch/ARCH-GATE.json.
+
 Exit codes: 0 pass, 1 block, 2 unrunnable or unverified.
 """
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -31,6 +91,9 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gate_state
 
 
 def resolve_tools_dir(repo_root):
@@ -41,8 +104,8 @@ def resolve_tools_dir(repo_root):
     the reason string.
 
     Resolution order:
-    1. ARCH_INDEX_SCRIPTS environment variable (must exist and contain both scripts)
-    2. <repo_root>/skills/arch-index/scripts (if it contains both scripts)
+    1. ARCH_INDEX_SCRIPTS environment variable (must exist and contain all required scripts)
+    2. <repo_root>/skills/arch-index/scripts (if it contains all required scripts)
     3. ~/.claude/skills/arch-index/scripts
 
     Args:
@@ -51,7 +114,7 @@ def resolve_tools_dir(repo_root):
     Returns:
         Tuple of (tools_dir, error_reason). Either tools_dir or error_reason is None.
     """
-    required_scripts = ["validate_index.py", "arch_drift.py"]
+    required_scripts = ["validate_index.py", "arch_drift.py", "verify_arch_plan.py"]
 
     # Try ARCH_INDEX_SCRIPTS env var first
     env_tools_dir = os.environ.get("ARCH_INDEX_SCRIPTS")
@@ -98,7 +161,14 @@ def git_rev_parse(root, ref):
     return out.strip() if exit_code == 0 else None
 
 
+RUN_AWARE_SUBCOMMANDS = ("baseline", "plan-declare", "plan-verify", "conformance")
+
+
 def main():
+    argv = sys.argv[1:]
+    if argv and argv[0] in RUN_AWARE_SUBCOMMANDS:
+        return dispatch_run_aware(argv[0], argv[1:])
+
     ap = argparse.ArgumentParser(
         description="Gate architecture conformance against index and drift."
     )
@@ -288,6 +358,579 @@ def main():
             os.unlink(tmp_path)
 
 
+# ---------------------------------------------------------------------------
+# Run-aware subcommands: baseline, plan-declare, plan-verify, conformance
+# ---------------------------------------------------------------------------
+
+def _atomic_write(path, content_bytes):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.parent / f".{path.name}.tmp"
+    tmp.write_bytes(content_bytes)
+    os.replace(str(tmp), str(path))
+
+
+def _write_gate_and_receipt(run_dir, filename, data, gate_name, exit_code, summary):
+    """Write a gate file under run_dir/gates and append its gate-result receipt.
+
+    Returns None on success, or an exit code (2) on failure.
+    """
+    gate_file = run_dir / "gates" / filename
+    content = (json.dumps(data, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    try:
+        _atomic_write(gate_file, content)
+    except OSError as exc:
+        print(f"ERROR: cannot write {gate_file}: {exc}", file=sys.stderr)
+        return 2
+    try:
+        gate_sha256 = hashlib.sha256(gate_file.read_bytes()).hexdigest()
+        gate_state.append_receipt(run_dir, "gate-result", {
+            "gate": gate_name,
+            "gate_file": f"gates/{gate_file.name}",
+            "gate_sha256": gate_sha256,
+            "exit": exit_code,
+            "summary": summary,
+        })
+    except Exception as exc:
+        try:
+            gate_file.unlink()
+        except OSError:
+            pass
+        print(f"ERROR: cannot append receipt: {exc}", file=sys.stderr)
+        return 2
+    return None
+
+
+def _resolve_context(repo_root_arg):
+    """Resolve (repo_root, run_dir, head) for a run-aware subcommand, or print
+    one ERROR line and return None.
+
+    Mirrors brownfield_map.py's _resolve_context: gate_state.find_run() walks
+    up from repo_root_arg to the .team-ship/RUN pointer, then repo_root_arg's
+    own git toplevel is checked against run.json's own repo_root. A mismatch
+    is refused before anything is written. The recorded repo_root wins from
+    that point on; the raw argument is discarded.
+    """
+    repo_root_input = Path(repo_root_arg).resolve()
+    run_dir = gate_state.find_run(repo_root_input)
+    if run_dir is None:
+        print(f"ERROR: no active run found under {repo_root_input}", file=sys.stderr)
+        return None
+
+    run_json_path = run_dir / "run.json"
+    try:
+        run_obj = json.loads(run_json_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"ERROR: run.json unreadable: {exc}", file=sys.stderr)
+        return None
+
+    recorded_root_str = run_obj.get("repo_root")
+    if not recorded_root_str:
+        print(f"ERROR: run.json missing repo_root: {run_json_path}", file=sys.stderr)
+        return None
+    recorded_root = Path(recorded_root_str).resolve()
+
+    try:
+        toplevel_result = subprocess.run(
+            ["git", "-C", str(repo_root_input), "rev-parse", "--show-toplevel"],
+            capture_output=True, text=True, timeout=10,
+        )
+    except OSError as exc:
+        print(f"ERROR: repository unreadable: git rev-parse --show-toplevel failed: {exc}",
+              file=sys.stderr)
+        return None
+    if toplevel_result.returncode != 0:
+        print(f"ERROR: repository unreadable: git rev-parse --show-toplevel failed: "
+              f"{toplevel_result.stderr.strip()}", file=sys.stderr)
+        return None
+    toplevel = Path(toplevel_result.stdout.strip()).resolve()
+
+    if toplevel != recorded_root:
+        print(f"ERROR: repo-root mismatch: --repo-root {repo_root_input} is inside "
+              f"repository {toplevel}, run {run_dir.name} belongs to {recorded_root}",
+              file=sys.stderr)
+        return None
+
+    repo_root = recorded_root
+
+    try:
+        head_result = subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
+            capture_output=True, text=True, timeout=10,
+        )
+    except OSError as exc:
+        print(f"ERROR: repository unreadable: git rev-parse HEAD failed: {exc}", file=sys.stderr)
+        return None
+    if head_result.returncode != 0:
+        print(f"ERROR: repository unreadable: git rev-parse HEAD failed: "
+              f"{head_result.stderr.strip()}", file=sys.stderr)
+        return None
+    return repo_root, run_dir, head_result.stdout.strip()
+
+
+def _flag_is_no_arch(flag):
+    if not isinstance(flag, str):
+        return False
+    normalized = flag.strip().lower().lstrip("-").replace("_", "-")
+    return normalized == "no-arch"
+
+
+def _run_flags(run_dir):
+    try:
+        run_obj = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    flags = run_obj.get("flags")
+    return flags if isinstance(flags, list) else []
+
+
+def _pin_from_index_and_file(repo_root, index):
+    """Same precedence arch_drift.py and the standalone mode use: index.json's
+    pinnedCommit, overridden by .arch/pinned-commit when that file exists and
+    is non-empty."""
+    pin = index.get("pinnedCommit")
+    pin_path = repo_root / ".arch" / "pinned-commit"
+    if pin_path.is_file():
+        file_pin = pin_path.read_text().strip()
+        if file_pin:
+            pin = file_pin
+    return pin
+
+
+def cmd_baseline(repo_root_arg):
+    ctx = _resolve_context(repo_root_arg)
+    if ctx is None:
+        return 2
+    repo_root, run_dir, head = ctx
+    argv = ["baseline", "--repo-root", repo_root_arg]
+    cwd = str(repo_root)
+
+    flags = _run_flags(run_dir)
+    index_path = repo_root / ".arch" / "index.json"
+
+    pin = None
+    if _arch_disabled(flags):
+        status = "DISABLED"
+    elif not index_path.is_file():
+        status = "NOT_APPLICABLE"
+    else:
+        try:
+            index = json.loads(index_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            print(f"ERROR: cannot read index: {exc}", file=sys.stderr)
+            return 2
+        pin = _pin_from_index_and_file(repo_root, index)
+        status = "CURRENT" if pin == head else "STALE"
+
+    exit_code = 0 if status == "CURRENT" else 2
+    if pin:
+        summary = f"arch baseline: {status} pin={pin[:12]} head={head[:12]}"
+    else:
+        summary = f"arch baseline: {status} head={head[:12]}"
+
+    data = {
+        "argv": argv, "cwd": cwd, "head": head, "exit": exit_code, "summary": summary,
+        "pin": pin, "status": status,
+    }
+    rc = _write_gate_and_receipt(run_dir, "1-arch-baseline.json", data,
+                                  "arch-baseline", exit_code, summary)
+    if rc is not None:
+        return rc
+
+    print(summary, file=sys.stderr)
+    return exit_code
+
+
+def _arch_disabled(flags):
+    return any(_flag_is_no_arch(f) for f in flags)
+
+
+def _run_verify_arch_plan(tools_dir, plan_path, mode_flag, root, timeout=120):
+    """Invoke verify_arch_plan.py in --declare or --verify mode.
+
+    Returns (child_exit, stdout, stderr, launch_error, cmd). child_exit is
+    None and launch_error is set when the subprocess could not be started or
+    timed out; launch_error is None otherwise.
+    """
+    script = os.path.join(tools_dir, "verify_arch_plan.py")
+    cmd = ["python3", script, str(plan_path), mode_flag, "--repo-root", str(root)]
+    try:
+        result = subprocess.run(cmd, cwd=str(root), capture_output=True, text=True,
+                                 timeout=timeout, check=False)
+        return result.returncode, result.stdout, result.stderr, None, cmd
+    except subprocess.TimeoutExpired:
+        return None, "", "", f"verify_arch_plan.py timed out after {timeout}s", cmd
+    except OSError as exc:
+        return None, "", "", f"verify_arch_plan.py failed to launch: {exc}", cmd
+
+
+def _map_plan_exit(child_exit):
+    """Map verify_arch_plan.py's exit to this gate's exit: 0 stays 0. 2 (the
+    plan itself unreadable, absent or invalid JSON) stays 2, since that is
+    the child's own distinct code and is always distinguishable from a real
+    BLOCK. Any other non-zero exit, including 1 for a real shape or built
+    violation, is 1. --verify's own "cannot compare against declaredAtCommit"
+    violation also exits 1 from the child, indistinguishable by exit code
+    alone from a real missing-path or out-of-scope BLOCK, so it folds into
+    this same exit-1 bucket rather than inventing a distinction the child
+    does not make."""
+    if child_exit is None:
+        return 2
+    if child_exit == 0:
+        return 0
+    if child_exit == 2:
+        return 2
+    return 1
+
+
+def _plan_gate(repo_root_arg, mode_flag, gate_filename, gate_name, stage_label):
+    ctx = _resolve_context(repo_root_arg)
+    if ctx is None:
+        return 2
+    repo_root, run_dir, head = ctx
+
+    tools_dir, tools_error = resolve_tools_dir(str(repo_root))
+    if tools_error:
+        print(f"ERROR: {tools_error}", file=sys.stderr)
+        return 2
+
+    plan_path = repo_root / ".team-ship" / "ARCH-PLAN.json"
+    child_exit, stdout, stderr, launch_error, cmd = _run_verify_arch_plan(
+        tools_dir, plan_path, mode_flag, repo_root)
+
+    exit_code = _map_plan_exit(child_exit)
+    stdout_lines = [ln for ln in stdout.splitlines() if ln.strip()]
+    stdout_tail = stdout_lines[-40:]
+
+    if launch_error:
+        summary = f"{stage_label}: {launch_error}"
+    else:
+        summary = f"{stage_label}: child_exit={child_exit} -> exit={exit_code}"
+
+    data = {
+        "argv": cmd, "cwd": str(repo_root), "head": head, "exit": exit_code,
+        "summary": summary, "child_exit": child_exit, "stdout_tail": stdout_tail,
+    }
+    rc = _write_gate_and_receipt(run_dir, gate_filename, data, gate_name, exit_code, summary)
+    if rc is not None:
+        return rc
+
+    if exit_code != 0:
+        for line in stdout_lines:
+            print(line, file=sys.stderr)
+        if launch_error:
+            print(launch_error, file=sys.stderr)
+    print(summary, file=sys.stderr)
+    return exit_code
+
+
+def cmd_plan_declare(repo_root_arg):
+    return _plan_gate(repo_root_arg, "--declare", "3-arch-plan.json",
+                       "arch-plan-declare", "plan-declare")
+
+
+def cmd_plan_verify(repo_root_arg):
+    return _plan_gate(repo_root_arg, "--verify", "13-arch-plan.json",
+                       "arch-plan-verify", "plan-verify")
+
+
+def cmd_conformance(repo_root_arg):
+    ctx = _resolve_context(repo_root_arg)
+    if ctx is None:
+        return 2
+    repo_root, run_dir, head = ctx
+    argv = ["conformance", "--repo-root", repo_root_arg]
+    cwd = str(repo_root)
+
+    baseline_path = run_dir / "gates" / "1-arch-baseline.json"
+    if not baseline_path.is_file():
+        summary = "conformance: no baseline recorded; run the baseline subcommand first"
+        print(summary, file=sys.stderr)
+        return 2
+
+    try:
+        baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"conformance: baseline gate file unreadable: {exc}", file=sys.stderr)
+        return 2
+
+    baseline_status = baseline.get("status")
+    if baseline_status != "CURRENT":
+        summary = (f"conformance: baseline status is {baseline_status}, "
+                    f"cannot be checked honestly")
+        print(summary, file=sys.stderr)
+        return 2
+
+    pin = baseline.get("pin")
+
+    tools_dir, tools_error = resolve_tools_dir(str(repo_root))
+    if tools_error:
+        print(f"ERROR: {tools_error}", file=sys.stderr)
+        return 2
+
+    index_path = repo_root / ".arch" / "index.json"
+    validate_script = os.path.join(tools_dir, "validate_index.py")
+    validate_exit, _, validate_err = run_command(
+        ["python3", validate_script, str(index_path), "--repo-root", str(repo_root), "--quiet"],
+        cwd=str(repo_root),
+    )
+
+    drift_script = os.path.join(tools_dir, "arch_drift.py")
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as tmp:
+        tmp_path = tmp.name
+
+    try:
+        drift_exit, _, drift_err = run_command(
+            ["python3", drift_script, "--repo-root", str(repo_root), "--out", tmp_path],
+            cwd=str(repo_root),
+        )
+
+        drift_data = {}
+        if drift_exit == 0 and os.path.isfile(tmp_path):
+            try:
+                with open(tmp_path) as fh:
+                    drift_data = json.load(fh)
+            except json.JSONDecodeError:
+                pass
+
+        removes = [
+            c["id"] for c in drift_data.get("components", []) if c.get("verdict") == "REMOVE"
+        ]
+        prunes = [
+            c["id"] for c in drift_data.get("components", []) if c.get("verdict") == "PRUNE"
+        ]
+
+        exit_code = 0
+        reason_parts = []
+
+        if validate_exit is None:
+            exit_code = 2
+            reason_parts.append(f"validate_index.py failed to launch: {validate_err}")
+        if drift_exit is None:
+            exit_code = 2
+            reason_parts.append(f"arch_drift.py failed to launch: {drift_err}")
+
+        if exit_code == 2:
+            reason = "; ".join(reason_parts)
+        else:
+            reason_parts = []
+
+            if removes:
+                reason_parts.append(f"REMOVE: {len(removes)} component(s) ({', '.join(removes)})")
+                exit_code = 1
+
+            if prunes:
+                reason_parts.append(f"PRUNE: {len(prunes)} component(s) ({', '.join(prunes)})")
+                if exit_code == 0:
+                    print(f"MAJOR: PRUNE {' '.join(prunes)}")
+
+            if validate_exit != 0:
+                reason_parts.append(f"validate_index.py failed (exit {validate_exit})")
+                exit_code = 1
+
+            if drift_exit != 0:
+                reason_parts.append(f"arch_drift.py failed (exit {drift_exit})")
+                if exit_code != 1:
+                    exit_code = 2
+
+            reason = "; ".join(reason_parts) if reason_parts else ""
+
+        gate = "BLOCK" if exit_code == 1 else "UNVERIFIED" if exit_code == 2 else "PASS"
+        summary = reason if reason else f"conformance: {gate}"
+
+        data = {
+            "argv": argv, "cwd": cwd, "head": head, "exit": exit_code, "summary": summary,
+            "gate": gate, "removes": removes, "prunes": prunes,
+            "validate_exit": validate_exit, "drift_exit": drift_exit,
+            "pin": pin, "tools_dir": tools_dir,
+        }
+
+        rc = _write_gate_and_receipt(run_dir, "13-arch.json", data, "arch-conformance",
+                                      exit_code, summary)
+        if rc is not None:
+            return rc
+
+        # The committed, human-facing record. Kept at the same path the
+        # standalone mode has always used, so downstream tooling and the
+        # Stage 11 clean checkout keep reading one file regardless of mode.
+        legacy_out = repo_root / ".arch" / "ARCH-GATE.json"
+        legacy_data = dict(data)
+        legacy_data["reason"] = reason
+        os.makedirs(legacy_out.parent, exist_ok=True)
+        with open(legacy_out, "w") as fh:
+            json.dump(legacy_data, fh, indent=2)
+
+        print(
+            f"gate={gate} exit={exit_code} removes={len(removes)} prunes={len(prunes)} "
+            f"validate_exit={validate_exit} drift_exit={drift_exit}",
+            file=sys.stderr,
+        )
+        if exit_code != 0 and reason:
+            print(reason, file=sys.stderr)
+        return exit_code
+    finally:
+        if os.path.isfile(tmp_path):
+            os.unlink(tmp_path)
+
+
+def dispatch_run_aware(name, rest):
+    ap = argparse.ArgumentParser(prog=f"arch_gate.py {name}",
+                                  description=f"Run the {name} gate for the active run.")
+    ap.add_argument("--repo-root", required=True, help="repository root, or a subdirectory of it")
+    args = ap.parse_args(rest)
+
+    if name == "baseline":
+        return cmd_baseline(args.repo_root)
+    if name == "plan-declare":
+        return cmd_plan_declare(args.repo_root)
+    if name == "plan-verify":
+        return cmd_plan_verify(args.repo_root)
+    if name == "conformance":
+        return cmd_conformance(args.repo_root)
+    print(f"unknown subcommand: {name}", file=sys.stderr)
+    return 2
+
+
+_REAL_ARCH_INDEX_SCRIPTS = str(Path(__file__).resolve().parents[2] / "arch-index" / "scripts")
+
+
+def _ra_isolated_copy(build_dir, name, start_run=True, flags=None):
+    """Copy a generated fixture into a fresh temporary directory, point
+    TEAM_STATE_ROOT at a fresh state directory beside it, and optionally
+    start a run against the copy through the gate_state API (which is what
+    writes the .team-ship/RUN pointer)."""
+    tmp_root = Path(tempfile.mkdtemp(prefix=f"arch_gate_{name}_"))
+    copy_path = tmp_root / name
+    shutil.copytree(build_dir / name, copy_path)
+    state_root = tmp_root / "state"
+    state_root.mkdir()
+    env = os.environ.copy()
+    env["TEAM_STATE_ROOT"] = str(state_root)
+    os.environ["TEAM_STATE_ROOT"] = str(state_root)
+    if start_run:
+        gate_state.start_run(str(copy_path), "ship", flags or [])
+    return copy_path, env
+
+
+def _ra_invoke(subcommand, repo_root, env, needs_tools=False):
+    call_env = dict(env)
+    if needs_tools:
+        call_env["ARCH_INDEX_SCRIPTS"] = _REAL_ARCH_INDEX_SCRIPTS
+    return subprocess.run([sys.executable, __file__, subcommand, "--repo-root", str(repo_root)],
+                           capture_output=True, text=True, timeout=60, env=call_env)
+
+
+def _ra_extra_commit(repo_path):
+    """Advance HEAD past a recorded baseline pin by touching an already
+    claimed file, the way a build stage's commit would."""
+    target = repo_path / "src" / "a" / "main.rs"
+    with target.open("a") as fh:
+        fh.write("// build addition\n")
+    subprocess.run(["git", "add", "-A"], cwd=str(repo_path), check=True, capture_output=True)
+    subprocess.run(["git", "commit", "-q", "-m", "build addition"], cwd=str(repo_path),
+                    check=True, capture_output=True)
+
+
+def _self_test_run_aware():
+    """Exercise baseline, plan-declare, plan-verify and conformance, each on
+    a temporary copy of a generated fixture with a run started through the
+    gate_state API and the .team-ship/RUN pointer written."""
+    fixtures_dir = Path(__file__).resolve().parent / "fixtures" / "arch_gate"
+    build_dir = fixtures_dir / "_build"
+    make_fixtures = fixtures_dir / "make_fixtures.py"
+
+    result = subprocess.run([sys.executable, str(make_fixtures)], capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"FAIL  make_fixtures.py -> {result.stderr}", file=sys.stderr)
+        return False
+
+    all_ok = True
+
+    def check(name, proc, expected_exit, contains=None):
+        nonlocal all_ok
+        ok = proc.returncode == expected_exit
+        if ok and contains and contains not in proc.stderr:
+            ok = False
+        suffix = f" contains={contains!r}" if contains else ""
+        print(f"  {'PASS' if ok else 'FAIL'}  {name:36s} exit={proc.returncode} "
+              f"(expect {expected_exit}){suffix}")
+        if not ok:
+            all_ok = False
+        return ok
+
+    # baseline-current: clean fixture, pin==head at run start, CURRENT.
+    copy_path, env = _ra_isolated_copy(build_dir, "clean")
+    check("baseline-current", _ra_invoke("baseline", copy_path, env), 0)
+
+    # baseline-stale: stale-pin fixture, pin != head already at Stage 1.
+    copy_path, env = _ra_isolated_copy(build_dir, "stale-pin")
+    check("baseline-stale", _ra_invoke("baseline", copy_path, env), 2, "STALE")
+
+    # baseline-no-index: no .arch/index.json at all.
+    copy_path, env = _ra_isolated_copy(build_dir, "no-index")
+    check("baseline-no-index", _ra_invoke("baseline", copy_path, env), 2, "NOT_APPLICABLE")
+
+    # baseline-disabled: the run was started with a no-arch flag.
+    copy_path, env = _ra_isolated_copy(build_dir, "clean", flags=["--no-arch"])
+    check("baseline-disabled", _ra_invoke("baseline", copy_path, env), 2, "DISABLED")
+
+    # declare-pass / declare-fail / declare-no-plan.
+    copy_path, env = _ra_isolated_copy(build_dir, "arch-plan-declare-pass")
+    check("declare-pass", _ra_invoke("plan-declare", copy_path, env, needs_tools=True), 0)
+
+    copy_path, env = _ra_isolated_copy(build_dir, "arch-plan-declare-fail")
+    check("declare-fail", _ra_invoke("plan-declare", copy_path, env, needs_tools=True),
+          1, "kebab-case")
+
+    copy_path, env = _ra_isolated_copy(build_dir, "no-index")
+    check("declare-no-plan", _ra_invoke("plan-declare", copy_path, env, needs_tools=True),
+          2, "ARCH-PLAN.json")
+
+    # verify-pass / verify-missing-path.
+    copy_path, env = _ra_isolated_copy(build_dir, "arch-plan-verify-pass")
+    check("verify-pass", _ra_invoke("plan-verify", copy_path, env, needs_tools=True), 0)
+
+    copy_path, env = _ra_isolated_copy(build_dir, "arch-plan-verify-missing-path")
+    check("verify-missing-path", _ra_invoke("plan-verify", copy_path, env, needs_tools=True),
+          1, "webhook-ingest")
+
+    # conformance-current-after-commit: baseline records CURRENT, then one
+    # more commit moves HEAD past the recorded pin, then conformance still
+    # passes. This is the R2 proof: currency is judged once, at baseline
+    # time, never re-checked here.
+    copy_path, env = _ra_isolated_copy(build_dir, "clean")
+    check("conformance-current-after-commit/baseline", _ra_invoke("baseline", copy_path, env), 0)
+    _ra_extra_commit(copy_path)
+    check("conformance-current-after-commit",
+          _ra_invoke("conformance", copy_path, env, needs_tools=True), 0)
+
+    # conformance-stale-baseline: baseline itself already recorded STALE.
+    copy_path, env = _ra_isolated_copy(build_dir, "stale-pin")
+    check("conformance-stale-baseline/baseline", _ra_invoke("baseline", copy_path, env),
+          2, "STALE")
+    check("conformance-stale-baseline",
+          _ra_invoke("conformance", copy_path, env, needs_tools=True), 2, "STALE")
+
+    # conformance-no-baseline: conformance run without ever running baseline.
+    copy_path, env = _ra_isolated_copy(build_dir, "clean")
+    check("conformance-no-baseline", _ra_invoke("conformance", copy_path, env, needs_tools=True),
+          2, "no baseline")
+
+    # repo-root-mismatch: --repo-root points at the nested, unrelated
+    # repository. find_run() walks up and finds the outer run, but the
+    # toplevel cross-check refuses before anything is written.
+    copy_path, env = _ra_isolated_copy(build_dir, "repo-root-mismatch")
+    nested = copy_path / "nested-unrelated"
+    check("repo-root-mismatch", _ra_invoke("baseline", nested, env), 2, "repo-root mismatch")
+
+    # no-run: no run was ever started against this copy.
+    copy_path, env = _ra_isolated_copy(build_dir, "no-index", start_run=False)
+    check("no-run", _ra_invoke("baseline", copy_path, env), 2, "no active run")
+
+    print()
+    print(f"run-aware subcommands: {'all pass' if all_ok else 'SOME FAILED'}")
+    return all_ok
+
+
 def self_test(root):
     """Run all fixtures as subprocesses and assert exact exit codes."""
     test_dir = os.path.join(os.path.dirname(__file__), "fixtures", "arch_gate")
@@ -361,8 +1004,8 @@ def self_test(root):
 
                 tmpdir = tempfile.mkdtemp()
                 try:
-                    # Copy both scripts
-                    for script in ["validate_index.py", "arch_drift.py"]:
+                    # Copy the required scripts
+                    for script in ["validate_index.py", "arch_drift.py", "verify_arch_plan.py"]:
                         src = os.path.join(real_scripts, script)
                         dst = os.path.join(tmpdir, script)
                         if os.path.isfile(src):
@@ -425,7 +1068,7 @@ def self_test(root):
                 # Create skills/arch-index/scripts in the fixture
                 scripts_dest = os.path.join(fixture_with_scripts, "skills", "arch-index", "scripts")
                 os.makedirs(scripts_dest, exist_ok=True)
-                for script in ["validate_index.py", "arch_drift.py"]:
+                for script in ["validate_index.py", "arch_drift.py", "verify_arch_plan.py"]:
                     src = os.path.join(real_scripts, script)
                     dst = os.path.join(scripts_dest, script)
                     if os.path.isfile(src):
@@ -541,6 +1184,10 @@ def self_test(root):
 
     print()
     print(f"{len(fixtures)} fixture(s): {'all pass' if all_pass else 'SOME FAILED'}")
+
+    ra_all_pass = _self_test_run_aware()
+    all_pass = all_pass and ra_all_pass
+
     return 0 if all_pass else 1
 
 

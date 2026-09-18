@@ -1091,6 +1091,15 @@ def self_test(root):
 
     for fixture_name in fixtures:
         env = os.environ.copy()
+        # The four drift fixtures exercise verdicts, not tool discovery, so they
+        # are handed the repository's own arch-index scripts explicitly, exactly
+        # as _ra_invoke does for the run-aware cases. Without this they fall back
+        # to the installed copy under ~/.claude/skills/arch-index, which exists on
+        # a developer machine and not on a fresh checkout, and they exit 2 for
+        # "cannot find the tools" instead of the verdict they assert. The
+        # tools-dir-* cases below still set or clear the variable themselves.
+        if fixture_name in ("remove-verdict", "prune-verdict", "clean", "stale-pin"):
+            env["ARCH_INDEX_SCRIPTS"] = _REAL_ARCH_INDEX_SCRIPTS
 
         # All fixtures run on temporary copies to keep in-tree _build clean
 

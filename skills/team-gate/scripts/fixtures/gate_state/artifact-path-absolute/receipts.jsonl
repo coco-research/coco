@@ -1,0 +1,2 @@
+{"seq": 1, "timestamp": "2026-01-01T00:00:00Z", "kind": "run-started", "detail": {}, "prev_hash": null, "hash": "3f958bcdc96ac6cfbf133218c795365ddacc40048a2373243adeb71ef4e36681"}
+{"seq": 2, "timestamp": "2026-01-01T00:00:00Z", "kind": "artifact-written", "detail": {"path": "/nonexistent/abs/artifact.txt", "sha256": "747355bdc2a224032fd405b1b9e8985bfca47e45b34668f7d0a70ee4789bd855"}, "prev_hash": "3f958bcdc96ac6cfbf133218c795365ddacc40048a2373243adeb71ef4e36681", "hash": "4df5c7c42c46669f6b7f30c34342f71ac68a5495a32b8dfc10b45850ab8dae6b"}

@@ -56,11 +56,14 @@ def render(evidence: Dict[str, Any]) -> str:
 
     Pure function: same input always yields the same output. Every timestamp
     that appears comes from the evidence content itself, never from the clock.
+    The run line uses evidence["runId"] only; a caller that wants the run.json
+    fallback resolves it first and injects "runId" before calling this
+    function, which keeps this function a pure function of its one argument.
     """
     lines = [HEADER, ""]
     lines.append("# Ship Evidence")
     lines.append("")
-    lines.append(f"Run: {evidence.get('runId', 'unknown')}")
+    lines.append(f"Run: {evidence.get('runId') or '(not recorded)'}")
     lines.append(f"Head: {evidence.get('head', 'unknown')}")
     lines.append("")
 
@@ -70,9 +73,11 @@ def render(evidence: Dict[str, Any]) -> str:
 
     for entry in sorted(entries, key=_entry_sort_key):
         entry_id = entry.get("id", "?")
-        label = entry.get("label", "")
-        gate = entry.get("gate", "?")
-        lines.append(f"## {entry_id}: {label} (gate {gate})")
+        display = entry.get("label") or entry.get("gate")
+        if display is not None:
+            lines.append(f"## {entry_id}: {display}")
+        else:
+            lines.append(f"## {entry_id}")
         for key in sorted(entry.keys()):
             if key in ("id", "label", "gate"):
                 continue
@@ -81,6 +86,26 @@ def render(evidence: Dict[str, Any]) -> str:
 
     text = "\n".join(lines).rstrip("\n") + "\n"
     return text
+
+
+def _resolve_run_id(evidence: Dict[str, Any], run_dir: Path) -> Dict[str, Any]:
+    """Return evidence, with "runId" injected from run.json when the content
+    itself carries none. render() stays pure; this is the one place the
+    run.json fallback is applied, so both cmd_render and cmd_check use it."""
+    if evidence.get("runId"):
+        return evidence
+    run_json_path = run_dir / "run.json"
+    if run_json_path.is_file():
+        try:
+            run_obj = json.loads(run_json_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return evidence
+        run_id = run_obj.get("run_id")
+        if run_id:
+            resolved = dict(evidence)
+            resolved["runId"] = run_id
+            return resolved
+    return evidence
 
 
 def _git_head(repo_root: Path) -> str:
@@ -140,6 +165,7 @@ def cmd_render(repo_root: str) -> int:
         print(f"ERROR: {e}", file=sys.stderr)
         return 2
 
+    evidence = _resolve_run_id(evidence, run_dir)
     text = render(evidence)
     md_path = root / ".team-ship" / "EVIDENCE.md"
     md_path.parent.mkdir(parents=True, exist_ok=True)
@@ -195,6 +221,7 @@ def cmd_check(repo_root: str) -> int:
         print(f"ERROR: EVIDENCE.md unreadable: {e}", file=sys.stderr)
         return 2
 
+    evidence = _resolve_run_id(evidence, run_dir)
     current = render(evidence)
     if current == on_disk:
         return 0
@@ -300,7 +327,90 @@ def cmd_self_test() -> int:
 
             print(f"{name}: expected {expected_exit} got {expected_exit} OK")
 
+    if not _self_test_run_gate_shape():
+        all_pass = False
+
     return 0 if all_pass else 1
+
+
+def _self_test_run_gate_shape() -> bool:
+    """rendered-from-run-gate-shape: an EVIDENCE.json in the exact shape
+    run_gate.py writes (entries carry id, gate, verdict, exit, head, command,
+    summary, detail; no entry has "label" and the object has no top-level
+    "runId"), built inline rather than through the shared fixture generator.
+    The rendered EVIDENCE.md must carry the run.json run_id and a heading
+    naming the gate, and --check must exit 0 immediately after rendering.
+    """
+    name = "rendered-from-run-gate-shape"
+    with tempfile.TemporaryDirectory() as tmpdir:
+        repo = Path(tmpdir) / "repo"
+        repo.mkdir()
+        subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+        subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repo, check=True)
+        subprocess.run(["git", "config", "user.name", "Test User"], cwd=repo, check=True)
+        (repo / ".gitignore").write_text(".team-ship/\n")
+        (repo / "README.md").write_text("# fixture\n")
+        subprocess.run(["git", "add", "-A"], cwd=repo, check=True)
+        subprocess.run(["git", "commit", "-q", "-m", "init"], cwd=repo, check=True)
+
+        run_gate_shape_evidence = {
+            "schemaVersion": "1.0",
+            "head": "1" * 40,
+            "entries": [
+                {
+                    "id": "E1",
+                    "gate": "test-execution",
+                    "verdict": "PASS",
+                    "exit": 0,
+                    "head": "1" * 40,
+                    "command": {"argv": ["pytest", "-q"], "cwd": "/repo"},
+                    "summary": "312 passed, 0 skipped, 0 failed",
+                    "detail": {"passed": 312, "failed": 0, "skipped": 0},
+                },
+            ],
+        }
+        evidence_dir = repo / ".team-ship"
+        evidence_dir.mkdir()
+        (evidence_dir / "EVIDENCE.json").write_text(json.dumps(run_gate_shape_evidence, indent=2))
+
+        state_root = Path(tmpdir) / "state"
+        state_root.mkdir()
+        os.environ["TEAM_STATE_ROOT"] = str(state_root)
+
+        try:
+            run_id = gate_state.start_run(str(repo), "test", [])
+        except Exception as e:
+            print(f"{name}: FAIL - could not start run: {e}", file=sys.stderr)
+            return False
+
+        render_result = subprocess.run([sys.executable, __file__, "--repo-root", str(repo)],
+            capture_output=True, text=True, timeout=30
+        )
+        if render_result.returncode != 0:
+            print(f"{name}: expected 0 got {render_result.returncode} FAIL", file=sys.stderr)
+            if render_result.stderr:
+                print(f"  stderr: {render_result.stderr}", file=sys.stderr)
+            return False
+
+        md_text = (evidence_dir / "EVIDENCE.md").read_text(encoding="utf-8")
+        if run_id not in md_text:
+            print(f"{name}: FAIL - run_id {run_id!r} not found in EVIDENCE.md", file=sys.stderr)
+            return False
+        if "test-execution" not in md_text:
+            print(f"{name}: FAIL - gate name 'test-execution' not found in EVIDENCE.md", file=sys.stderr)
+            return False
+
+        check_result = subprocess.run([sys.executable, __file__, "--repo-root", str(repo), "--check"],
+            capture_output=True, text=True, timeout=30
+        )
+        if check_result.returncode != 0:
+            print(f"{name}: expected 0 got {check_result.returncode} FAIL (check)", file=sys.stderr)
+            if check_result.stderr:
+                print(f"  stderr: {check_result.stderr}", file=sys.stderr)
+            return False
+
+        print(f"{name}: expected 0 got 0 OK")
+        return True
 
 
 def main() -> int:

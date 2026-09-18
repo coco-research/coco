@@ -783,6 +783,94 @@ def make_arch_plan_missing_path(build_dir: Path) -> None:
     _write_evidence(repo, head, name)
 
 
+# R15: ship_gate.py's head rule is scoped to when a gate runs. These three
+# fixtures prove the scoped rule: a run that commits between the pre-build
+# gates and the build's own gates still passes (make_all_green_after_build),
+# a pre-build gate recorded at a genuinely foreign head is still head drift
+# and still not overridable (make_pre_build_foreign_head), and a post-build
+# gate recorded at an ancestor of HEAD (not HEAD itself) is still head
+# drift, since stage 8 measures the built tree (make_post_build_ancestor_head).
+PRE_BUILD_GATES = {
+    "gates/handoff-1.json", "gates/handoff-2.json", "gates/handoff-3.json",
+    "gates/handoff-4.json", "gates/handoff-5.json", "gates/handoff-6.json",
+    "gates/handoff-approval.json",
+    "gates/1-arch-baseline.json", "gates/3-arch-plan.json",
+}
+POST_BUILD_GATES = {
+    "gates/7-discover.json", "gates/7.json", "gates/8.json", "gates/9.json",
+    "gates/10.json", "gates/8-verifier.json", "gates/11.json",
+    "gates/11-matrix.json", "gates/9-recheck.json", "gates/12.json",
+    "gates/13-arch-plan.json", "gates/13-arch.json",
+}
+
+
+def make_all_green_after_build(build_dir: Path) -> None:
+    """R15: stage 1 to 6 gate files, the approval receipt, the arch
+    baseline and plan-declare are recorded at the repository's first
+    commit. One more fixed-date commit then moves HEAD, and every stage 7
+    to 14 gate file, EVIDENCE.json and the stage 13 arch files are written
+    at the new HEAD. The scoped head rule must still pass: stages 1 to 6
+    match by ancestry, the built-tree stages match by strict equality."""
+    name = "all-green-after-build"
+    repo = _make_repo(build_dir, name)
+    head1 = _init_repo(repo)
+    run_dir = _start_run(build_dir, name, repo)
+
+    _build_standard(run_dir, repo, head1, skip=POST_BUILD_GATES, approval=True)
+
+    head2 = _second_commit(repo)
+
+    _build_standard(run_dir, repo, head2, skip=PRE_BUILD_GATES, approval=False)
+
+    _write_evidence(repo, head2, name)
+
+
+def make_pre_build_foreign_head(build_dir: Path) -> None:
+    """R15: gates/handoff-3.json is recorded at a sha that is not an
+    ancestor of HEAD at all, standing in for a gate file carried over from
+    an unrelated run. The scoped head rule still classifies this as head
+    drift, and unconditional head drift is never overridable: an override
+    receipt naming "3" is present but does not cover it."""
+    name = "pre-build-foreign-head"
+    repo = _make_repo(build_dir, name)
+    head = _init_repo(repo)
+    run_dir = _start_run(build_dir, name, repo)
+    cwd = str(repo)
+    _build_standard(run_dir, repo, head, skip={"gates/handoff-3.json"})
+    _write_evidence(repo, head, name)
+
+    foreign_head = "f" * 40
+    data = _handoff_data(foreign_head, cwd)
+    sha = _write_gate(run_dir, "gates/handoff-3.json", data)
+    _append_gate_receipt(run_dir, "handoff-3", "gates/handoff-3.json", sha, 0, data["summary"])
+
+    _append_receipt(run_dir, "override", {
+        "gate": "3", "instruction": "pre-build-foreign-head instruction text", "by": "rijul",
+    })
+
+
+def make_post_build_ancestor_head(build_dir: Path) -> None:
+    """R15: gates/8.json is recorded at an earlier commit that is an
+    ancestor of the current HEAD, not HEAD itself. Stage 8 measures the
+    built tree, so R15 keeps strict equality for it: an ancestor is not
+    enough, and this must still be head drift, proving the scoped rule
+    narrows to stages 1 to 6 rather than loosening every gate file."""
+    name = "post-build-ancestor-head"
+    repo = _make_repo(build_dir, name)
+    head1 = _init_repo(repo)
+    run_dir = _start_run(build_dir, name, repo)
+    cwd = str(repo)
+    head2 = _second_commit(repo)
+
+    _build_standard(run_dir, repo, head2, skip={"gates/8.json"})
+
+    data = _run_data(head1, cwd)
+    sha = _write_gate(run_dir, "gates/8.json", data)
+    _append_gate_receipt(run_dir, "test-execution", "gates/8.json", sha, 0, "1 command(s) passed")
+
+    _write_evidence(repo, head2, name)
+
+
 def make_baseline_missing(build_dir: Path) -> None:
     """gates/1-arch-baseline.json is never written: missing blocks stage 1
     like any other missing gate (it is not exempted the way a present but
@@ -823,6 +911,9 @@ FIXTURE_MAKERS = [
     make_arch_not_applicable_overridden,
     make_arch_plan_missing_path,
     make_baseline_missing,
+    make_all_green_after_build,
+    make_pre_build_foreign_head,
+    make_post_build_ancestor_head,
 ]
 
 

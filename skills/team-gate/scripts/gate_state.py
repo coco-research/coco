@@ -676,6 +676,40 @@ def main():
         return 2
 
 
+def _run_fixture_test(fixture_dir: Path, fixture_name: str, test_root: Path, cmd_args: list = None) -> tuple:
+    """Run a single fixture test with proper .team-ship/RUN setup.
+
+    Copies fixture to tempfile, writes pointer, runs CLI, cleans up.
+    Returns (proc, temp_root) where proc is the subprocess result and temp_root is the copied fixture root.
+    """
+    import tempfile
+    import shutil
+
+    if cmd_args is None:
+        cmd_args = ["verify-chain"]
+
+    temp_root = Path(tempfile.mkdtemp(prefix="gate_state_test_"))
+    fixture_copy = temp_root / fixture_name
+    shutil.copytree(fixture_dir, fixture_copy, symlinks=True)
+
+    team_ship_dir = fixture_copy / ".team-ship"
+    team_ship_dir.mkdir(parents=True, exist_ok=True)
+    (team_ship_dir / "RUN").write_text(fixture_name)
+
+    env = os.environ.copy()
+    env["TEAM_STATE_ROOT"] = str(temp_root)
+
+    proc = subprocess.run(
+        [sys.executable, __file__] + cmd_args,
+        cwd=str(fixture_copy),
+        env=env,
+        capture_output=True,
+        text=True
+    )
+
+    return proc, temp_root, fixture_copy
+
+
 def self_test():
     """Run self-tests against generated fixtures via subprocess."""
     import tempfile
@@ -718,8 +752,6 @@ def self_test():
     ]
 
     results = []
-    env = os.environ.copy()
-    env["TEAM_STATE_ROOT"] = str(test_root.parent)
 
     for name, expected_exit, expected_stderr in fixtures:
         fixture_dir = test_root / name
@@ -728,21 +760,20 @@ def self_test():
             results.append((name, expected_exit, "SKIP"))
             continue
 
-        proc = subprocess.run(
-            [sys.executable, __file__, "verify-chain"],
-            cwd=str(fixture_dir),
-            env=env,
-            capture_output=True,
-            text=True
-        )
+        try:
+            proc, temp_root, _ = _run_fixture_test(fixture_dir, name, test_root)
 
-        exit_ok = proc.returncode == expected_exit
-        stderr_ok = expected_stderr is None or expected_stderr in proc.stderr
-        status = "OK" if (exit_ok and stderr_ok) else "FAIL"
-        if expected_stderr:
-            results.append((name, expected_exit, proc.returncode, expected_stderr, proc.stderr[:50], status))
-        else:
-            results.append((name, expected_exit, proc.returncode, status))
+            exit_ok = proc.returncode == expected_exit
+            stderr_ok = expected_stderr is None or expected_stderr in proc.stderr
+            status = "OK" if (exit_ok and stderr_ok) else "FAIL"
+            if expected_stderr:
+                results.append((name, expected_exit, proc.returncode, expected_stderr, proc.stderr[:50], status))
+            else:
+                results.append((name, expected_exit, proc.returncode, status))
+        finally:
+            import shutil
+            if 'temp_root' in locals():
+                shutil.rmtree(temp_root, ignore_errors=True)
 
     # bogus-kind test: copy fixture to temp and run receipt on it
     try:
@@ -751,7 +782,10 @@ def self_test():
         fixture_to_copy = test_root / "chain-intact"
         if fixture_to_copy.is_dir():
             temp_bogus = Path(tmpmod.mkdtemp(prefix="gate_state_bogus_"))
-            shutil.copytree(fixture_to_copy, temp_bogus / "chain-intact")
+            shutil.copytree(fixture_to_copy, temp_bogus / "chain-intact", symlinks=True)
+            team_ship_dir = (temp_bogus / "chain-intact" / ".team-ship")
+            team_ship_dir.mkdir(parents=True, exist_ok=True)
+            (team_ship_dir / "RUN").write_text("chain-intact")
             invalid_kind_env = os.environ.copy()
             invalid_kind_env["TEAM_STATE_ROOT"] = str(temp_bogus)
             proc = subprocess.run(
@@ -769,56 +803,50 @@ def self_test():
     except Exception as e:
         results.append(("bogus-kind", f"exception: {e}", "FAIL"))
 
-    proc = subprocess.run(
-        [sys.executable, __file__, "status"],
-        cwd=str(test_root / "gate-timeout-present"),
-        env=env,
-        capture_output=True,
-        text=True
-    )
-    timeout_status = "OK" if proc.returncode == 1 else "FAIL"
-    results.append(("status-gate-timeout", 1, proc.returncode, timeout_status))
-
-    proc = subprocess.run(
-        [sys.executable, __file__, "status"],
-        cwd=str(test_root / "chain-intact"),
-        env=env,
-        capture_output=True,
-        text=True
-    )
-    intact_status = "OK" if proc.returncode == 0 else "FAIL"
-    results.append(("status-chain-intact", 0, proc.returncode, intact_status))
-
-    # Receipt-corrupt-tail test: copy fixture to temp and try to append to a fixture with corrupt tail
+    # status tests: these need the pointer too
     try:
-        import tempfile as tmpmod
-        import shutil
-        corrupt_fixture = test_root / "receipt-corrupt-tail"
-        if corrupt_fixture.is_dir():
-            temp_corrupt = Path(tmpmod.mkdtemp(prefix="gate_state_corrupt_"))
-            (temp_corrupt / "gate_state").mkdir(parents=True, exist_ok=True)
-            shutil.copytree(corrupt_fixture, temp_corrupt / "gate_state" / "receipt-corrupt-tail")
-            corrupt_fixture_temp = temp_corrupt / "gate_state" / "receipt-corrupt-tail"
-            receipts_file = corrupt_fixture_temp / "receipts.jsonl"
-            sha_before = __import__("hashlib").sha256(receipts_file.read_bytes()).hexdigest() if receipts_file.is_file() else None
-            corrupt_env = os.environ.copy()
-            corrupt_env["TEAM_STATE_ROOT"] = str(temp_corrupt)
-            proc = subprocess.run(
-                [sys.executable, __file__, "receipt", "run-started", '{}'],
-                cwd=str(corrupt_fixture_temp),
-                env=corrupt_env,
-                capture_output=True,
-                text=True
-            )
-            sha_after = __import__("hashlib").sha256(receipts_file.read_bytes()).hexdigest() if receipts_file.is_file() else None
-            corrupt_exit_ok = proc.returncode == 2
-            corrupt_stderr_ok = "corrupt tail" in proc.stderr
-            corrupt_unchanged = sha_before == sha_after
-            corrupt_status = "OK" if (corrupt_exit_ok and corrupt_stderr_ok and corrupt_unchanged) else "FAIL"
-            results.append(("receipt-corrupt-tail", 2, proc.returncode, corrupt_status))
-            shutil.rmtree(temp_corrupt, ignore_errors=True)
+        proc, temp_root_status_timeout, _ = _run_fixture_test(test_root / "gate-timeout-present", "gate-timeout-present", test_root)
+        timeout_status = "OK" if proc.returncode == 1 else "FAIL"
+        results.append(("status-gate-timeout", 1, proc.returncode, timeout_status))
+        shutil.rmtree(temp_root_status_timeout, ignore_errors=True)
+    except Exception as e:
+        results.append(("status-gate-timeout", 1, "exception", "FAIL"))
+
+    try:
+        proc, temp_root_status_intact, _ = _run_fixture_test(test_root / "chain-intact", "chain-intact", test_root)
+        intact_status = "OK" if proc.returncode == 0 else "FAIL"
+        results.append(("status-chain-intact", 0, proc.returncode, intact_status))
+        shutil.rmtree(temp_root_status_intact, ignore_errors=True)
+    except Exception as e:
+        results.append(("status-chain-intact", 0, "exception", "FAIL"))
+
+    # Receipt-corrupt-tail test: use helper with receipt command
+    try:
+        proc, temp_root_corrupt, fixture_copy_corrupt = _run_fixture_test(
+            test_root / "receipt-corrupt-tail", "receipt-corrupt-tail", test_root,
+            cmd_args=["receipt", "run-started", "{}"]
+        )
+        receipts_file = fixture_copy_corrupt / "receipts.jsonl"
+        sha_after = __import__("hashlib").sha256(receipts_file.read_bytes()).hexdigest() if receipts_file.is_file() else None
+        # Compute sha_before by re-reading the original fixture
+        receipts_orig = (test_root / "receipt-corrupt-tail" / "receipts.jsonl")
+        sha_before = __import__("hashlib").sha256(receipts_orig.read_bytes()).hexdigest() if receipts_orig.is_file() else None
+        
+        corrupt_exit_ok = proc.returncode == 2
+        corrupt_stderr_ok = "corrupt tail" in proc.stderr
+        corrupt_unchanged = sha_before == sha_after
+        
+        if corrupt_exit_ok and corrupt_stderr_ok and corrupt_unchanged:
+            corrupt_status = "OK"
+        elif not corrupt_exit_ok:
+            corrupt_status = f"FAIL (exit {proc.returncode}, expected 2)"
+        elif not corrupt_stderr_ok:
+            corrupt_status = f"FAIL (stderr missing 'corrupt tail')"
         else:
-            results.append(("receipt-corrupt-tail", "fixture not found", "SKIP"))
+            corrupt_status = "FAIL (sha256 changed)"
+        
+        results.append(("receipt-corrupt-tail", 2, proc.returncode, corrupt_status))
+        shutil.rmtree(temp_root_corrupt, ignore_errors=True)
     except Exception as e:
         results.append(("receipt-corrupt-tail", f"exception: {e}", "FAIL"))
 

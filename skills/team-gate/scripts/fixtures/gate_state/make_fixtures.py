@@ -40,14 +40,11 @@ def _sha256_bytes(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _setup_fixture_pointer(fixture_dir: Path, fixture_name: str) -> None:
-    """Create .team-ship/RUN pointer so find_run can locate this fixture.
-
-    Uses relative path from parent (gate_state) so state_root() + run_id resolves correctly.
-    """
-    team_ship_dir = fixture_dir / ".team-ship"
-    team_ship_dir.mkdir(parents=True, exist_ok=True)
-    (team_ship_dir / "RUN").write_text(f"gate_state/{fixture_name}")
+def _ensure_dir_tracked(dir_path: Path) -> None:
+    """Ensure a directory is tracked by git by creating a .keep file if it's empty."""
+    dir_path.mkdir(parents=True, exist_ok=True)
+    if not any(dir_path.iterdir()):
+        (dir_path / ".keep").write_text("")
 
 
 def _get_fixtures_dir(out_dir: str = None) -> Path:
@@ -89,7 +86,6 @@ def make_chain_intact():
     (fixture_dir / "head.json").write_text(json.dumps(head_obj))
 
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-chain-intact"}))
-    _setup_fixture_pointer(fixture_dir, "chain-intact")
 
 
 def make_chain_corrupted_tail():
@@ -124,7 +120,6 @@ def make_chain_corrupted_tail():
     receipts_file.write_text("\n".join(lines[:-1] + [lines[-1][:20]]))
 
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-corrupted-tail"}))
-    _setup_fixture_pointer(fixture_dir, "chain-corrupted-tail")
 
 
 def make_chain_tail_dropped():
@@ -162,7 +157,6 @@ def make_chain_tail_dropped():
     receipts_file.write_text("\n".join(lines[:-1]))
 
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-tail-dropped"}))
-    _setup_fixture_pointer(fixture_dir, "chain-tail-dropped")
 
 
 def make_chain_inserted():
@@ -206,7 +200,6 @@ def make_chain_inserted():
     receipts_file.write_text("\n".join(new_lines))
 
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-inserted"}))
-    _setup_fixture_pointer(fixture_dir, "chain-inserted")
 
 
 def make_orphan_gate_file():
@@ -246,7 +239,6 @@ def make_orphan_gate_file():
     (gates_dir / "8.json").write_text(json.dumps({"verdict": "PASS"}))
 
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-orphan"}))
-    _setup_fixture_pointer(fixture_dir, "orphan-gate-file")
 
 
 def make_run_not_started():
@@ -255,7 +247,6 @@ def make_run_not_started():
     fixture_dir.mkdir(parents=True, exist_ok=True)
 
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-not-started"}))
-    _setup_fixture_pointer(fixture_dir, "run-not-started")
 
 
 def make_gate_timeout_present():
@@ -294,7 +285,6 @@ def make_gate_timeout_present():
     (fixture_dir / "head.json").write_text(json.dumps(head_obj))
 
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-timeout"}))
-    _setup_fixture_pointer(fixture_dir, "gate-timeout-present")
 
 
 def make_orphan_with_prefixed_names():
@@ -337,7 +327,6 @@ def make_orphan_with_prefixed_names():
     (gates_dir / "9.json").write_text(json.dumps({"verdict": "PASS"}))
 
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-orphan-prefixed"}))
-    _setup_fixture_pointer(fixture_dir, "orphan-with-prefixed-names")
 
 
 def make_gate_file_missing():
@@ -378,7 +367,6 @@ def make_gate_file_missing():
     (fixture_dir / "head.json").write_text(json.dumps(head_obj))
 
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-gate-missing"}))
-    _setup_fixture_pointer(fixture_dir, "gate-file-missing")
 
 
 def make_gate_file_altered():
@@ -427,7 +415,6 @@ def make_gate_file_altered():
     gate_file.write_text(json.dumps({"verdict": "FAIL"}))
 
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-gate-altered"}))
-    _setup_fixture_pointer(fixture_dir, "gate-file-altered")
 
 
 def make_gate_file_traversal():
@@ -465,7 +452,6 @@ def make_gate_file_traversal():
     (fixture_dir / "head.json").write_text(json.dumps(head_obj))
 
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-gate-traversal"}))
-    _setup_fixture_pointer(fixture_dir, "gate-file-traversal")
 
 
 def make_gate_file_empty_name():
@@ -492,7 +478,6 @@ def make_gate_file_empty_name():
 
     (fixture_dir / "head.json").write_text(json.dumps({"seq": 2, "hash": records[1]["hash"]}))
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-empty"}))
-    _setup_fixture_pointer(fixture_dir, "gate-file-empty-name")
 
 
 def make_gate_file_symlink():
@@ -532,7 +517,6 @@ def make_gate_file_symlink():
         link_target.unlink()
     os.symlink("../outside.json", str(link_target))
 
-    _setup_fixture_pointer(fixture_dir, "gate-file-symlink")
 
 
 def make_artifact_path_traversal():
@@ -548,7 +532,7 @@ def make_artifact_path_traversal():
     secret_sha = hashlib.sha256(secret_content.encode("utf-8")).hexdigest()
 
     repo_dir = fixture_dir / "repo"
-    repo_dir.mkdir(parents=True, exist_ok=True)
+    _ensure_dir_tracked(repo_dir)
 
     for i, (kind, detail) in enumerate([
         ("run-started", {}),
@@ -568,7 +552,6 @@ def make_artifact_path_traversal():
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-traversal", "repo_root": "repo"}))
 
     (fixture_dir / "secret.txt").write_text(secret_content)
-    _setup_fixture_pointer(fixture_dir, "artifact-path-traversal")
 
 
 def make_artifact_path_absolute():
@@ -584,7 +567,7 @@ def make_artifact_path_absolute():
     sha = hashlib.sha256("absolute".encode("utf-8")).hexdigest()
 
     repo_dir = fixture_dir / "repo"
-    repo_dir.mkdir(parents=True, exist_ok=True)
+    _ensure_dir_tracked(repo_dir)
 
     for i, (kind, detail) in enumerate([
         ("run-started", {}),
@@ -603,7 +586,6 @@ def make_artifact_path_absolute():
     (fixture_dir / "head.json").write_text(json.dumps({"seq": 2, "hash": records[1]["hash"]}))
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-absolute", "repo_root": "repo"}))
 
-    _setup_fixture_pointer(fixture_dir, "artifact-path-absolute")
 
 
 def make_artifact_path_symlink():
@@ -644,7 +626,6 @@ def make_artifact_path_symlink():
         link_target.unlink()
     os.symlink("../outside.md", str(link_target))
 
-    _setup_fixture_pointer(fixture_dir, "artifact-path-symlink")
 
 
 def make_gate_file_one_segment():
@@ -679,7 +660,6 @@ def make_gate_file_one_segment():
     (fixture_dir / "head.json").write_text(json.dumps({"seq": 2, "hash": records[1]["hash"]}))
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-one-seg"}))
 
-    _setup_fixture_pointer(fixture_dir, "gate-file-one-segment")
 
 
 def make_gate_file_nested():
@@ -715,7 +695,6 @@ def make_gate_file_nested():
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-nested"}))
 
 
-    _setup_fixture_pointer(fixture_dir, "gate-file-nested")
 
 
 def make_repo_root_traversal():
@@ -747,7 +726,6 @@ def make_repo_root_traversal():
     (fixture_dir / "head.json").write_text(json.dumps({"seq": 2, "hash": records[1]["hash"]}))
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-traversal", "repo_root": "../../other"}))
 
-    _setup_fixture_pointer(fixture_dir, "repo-root-traversal")
 
 
 def make_artifact_path_directory():
@@ -781,8 +759,7 @@ def make_artifact_path_directory():
     (fixture_dir / "head.json").write_text(json.dumps({"seq": 2, "hash": records[1]["hash"]}))
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-dir", "repo_root": "repo"}))
 
-    (repo_dir / "adir").mkdir(parents=True, exist_ok=True)
-    _setup_fixture_pointer(fixture_dir, "artifact-path-directory")
+    _ensure_dir_tracked(repo_dir / "adir")
 
 
 def make_run_json_unreadable():
@@ -814,7 +791,6 @@ def make_run_json_unreadable():
     (fixture_dir / "head.json").write_text(json.dumps({"seq": 2, "hash": records[1]["hash"]}))
     (fixture_dir / "run.json").write_text("{not json")
 
-    _setup_fixture_pointer(fixture_dir, "run-json-unreadable")
 
 
 def make_artifact_without_repo_root():
@@ -846,7 +822,6 @@ def make_artifact_without_repo_root():
     (fixture_dir / "head.json").write_text(json.dumps({"seq": 2, "hash": records[1]["hash"]}))
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-no-root"}))
 
-    _setup_fixture_pointer(fixture_dir, "artifact-without-repo-root")
 
 
 def make_receipt_corrupt_tail():
@@ -878,7 +853,6 @@ def make_receipt_corrupt_tail():
 
     (fixture_dir / "head.json").write_text(json.dumps({"seq": 2, "hash": records[1]["hash"]}))
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-corrupt-tail"}))
-    _setup_fixture_pointer(fixture_dir, "receipt-corrupt-tail")
 
 
 def make_detail_not_object():
@@ -914,7 +888,6 @@ def make_detail_not_object():
 
     (fixture_dir / "head.json").write_text(json.dumps({"seq": 2, "hash": records[1]["hash"]}))
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-detail-null"}))
-    _setup_fixture_pointer(fixture_dir, "detail-not-object")
 
 
 
@@ -957,7 +930,6 @@ def make_gate_file_reformatted():
     # Now reformat the file with pretty-printed JSON (different whitespace, same content)
     gate_file.write_text(json.dumps(gate_json, indent=2))
     
-    _setup_fixture_pointer(fixture_dir, "gate-file-reformatted")
 
 def make_gate_rereceipted_current():
     """Two gate-result receipts for same gate_file; file matches the later (higher seq) receipt. Exit 0."""
@@ -998,7 +970,6 @@ def make_gate_rereceipted_current():
 
     (fixture_dir / "head.json").write_text(json.dumps({"seq": 3, "hash": records[2]["hash"]}))
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-rereceipted-current"}))
-    _setup_fixture_pointer(fixture_dir, "gate-rereceipted-current")
 
 
 def make_gate_rereceipted_stale():
@@ -1044,7 +1015,6 @@ def make_gate_rereceipted_stale():
     # Revert the file to match the earlier receipt (simulating a re-run that reverted)
     gate_file.write_text(json.dumps(content1))
 
-    _setup_fixture_pointer(fixture_dir, "gate-rereceipted-stale")
 
 
 def make_artifact_rereceipted_current():
@@ -1088,7 +1058,6 @@ def make_artifact_rereceipted_current():
 
     (fixture_dir / "head.json").write_text(json.dumps({"seq": 3, "hash": records[2]["hash"]}))
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-rereceipted-artifact", "repo_root": "repo"}))
-    _setup_fixture_pointer(fixture_dir, "artifact-rereceipted-current")
 
 
 def make_artifact_detail_incomplete():
@@ -1121,7 +1090,6 @@ def make_artifact_detail_incomplete():
 
     (fixture_dir / "head.json").write_text(json.dumps({"seq": 2, "hash": records[1]["hash"]}))
     (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-incomplete", "repo_root": "repo"}))
-    _setup_fixture_pointer(fixture_dir, "artifact-detail-incomplete")
 
 def main():
     """Generate all fixtures."""

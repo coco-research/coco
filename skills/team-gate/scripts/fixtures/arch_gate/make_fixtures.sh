@@ -26,7 +26,12 @@ build_fixture() {
     git add . && git commit -q -m "Initial"
 
     PIN=$(git rev-parse HEAD)
-    sed -i '' "s/PLACEHOLDER/$PIN/" .arch/index.json
+    # In-place edit without sed's non-portable -i form: BSD sed wants
+    # `-i ''` and GNU sed reads that as an empty script plus a file named
+    # after the substitution, which aborts the build under set -e (this
+    # broke the fixture build on the Linux CI runner while passing on macOS).
+    sed "s/PLACEHOLDER/$PIN/" .arch/index.json > .arch/index.json.new
+    mv .arch/index.json.new .arch/index.json
 
     if [ "$stale" = "1" ]; then
         # Stale: diverge after setting pin

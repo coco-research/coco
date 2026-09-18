@@ -146,6 +146,94 @@ def fixture_assertion_in_helper(root: Path, env: Dict[str, str]) -> None:
     _write_base_sha(root, name, base_sha)
 
 
+def fixture_unittest_valid_red(root: Path, env: Dict[str, str]) -> None:
+    """Same bug and fix as proper-red-green, but the new test is a unittest.TestCase whose
+    red-phase failure is an AssertionError raised from inside the standard library's
+    unittest/case.py, never from the test file itself."""
+    name = "unittest-valid-red"
+    repo = _init_repo(root, name, env)
+    _write_files(repo, {
+        "src/__init__.py": "",
+        "src/calc.py": "def mean(values):\n    return sum(values) / (len(values) + 1)\n",
+    })
+    base_sha = _commit(repo, env, "base")
+    _write_files(repo, {
+        "src/calc.py": "def mean(values):\n    return sum(values) / len(values)\n",
+        "tests/test_calc.py": (
+            "import unittest\n\n"
+            "from src.calc import mean\n\n\n"
+            "class TestMean(unittest.TestCase):\n"
+            "    def test_mean(self):\n"
+            "        self.assertEqual(mean([2, 4]), 3)\n"
+        ),
+    })
+    _commit(repo, env, "head")
+    _write_base_sha(root, name, base_sha)
+
+
+def fixture_helper_outside_worktree(root: Path, env: Dict[str, str]) -> None:
+    """Same bug and fix as proper-red-green, but the assertion lives in a helper module
+    that sits outside the worktree entirely, reachable only through an external
+    sys.path entry the self-test supplies via PYTHONPATH."""
+    name = "helper-outside-worktree"
+    repo = _init_repo(root, name, env)
+    _write_files(repo, {
+        "src/__init__.py": "",
+        "src/calc.py": "def add(a, b):\n    return a - b\n",
+    })
+    base_sha = _commit(repo, env, "base")
+    _write_files(repo, {
+        "src/calc.py": "def add(a, b):\n    return a + b\n",
+        "tests/test_calc.py": (
+            "from assert_helper import check_equal\n\n"
+            "from src.calc import add\n\n\n"
+            "def test_add():\n    check_equal(add(2, 3), 5)\n"
+        ),
+    })
+    _commit(repo, env, "head")
+    _write_base_sha(root, name, base_sha)
+    external_dir = root / name / "_build" / "external_helpers"
+    external_dir.mkdir(parents=True, exist_ok=True)
+    (external_dir / "assert_helper.py").write_text(
+        "def check_equal(actual, expected):\n    assert actual == expected\n",
+        encoding="utf-8",
+    )
+
+
+def fixture_unittest_invalid_red(root: Path, env: Dict[str, str]) -> None:
+    """A unittest.TestCase test whose red-phase failure is an AssertionError raised by a
+    plain assert statement inside the implementation module itself, not by the test."""
+    name = "unittest-invalid-red"
+    repo = _init_repo(root, name, env)
+    _write_files(repo, {
+        "src/__init__.py": "",
+        "src/calc.py": (
+            "def double(n):\n"
+            "    result = n + n + 1\n"
+            "    assert result % 2 == 0, \"double must be even\"\n"
+            "    return result\n"
+        ),
+    })
+    base_sha = _commit(repo, env, "base")
+    _write_files(repo, {
+        "src/calc.py": (
+            "def double(n):\n"
+            "    result = n + n\n"
+            "    assert result % 2 == 0, \"double must be even\"\n"
+            "    return result\n"
+        ),
+        "tests/test_calc.py": (
+            "import unittest\n\n"
+            "from src.calc import double\n\n\n"
+            "class TestDouble(unittest.TestCase):\n"
+            "    def test_double(self):\n"
+            "        self.assertEqual(double(3), 6)\n"
+        ),
+    })
+    _commit(repo, env, "head")
+    _write_base_sha(root, name, base_sha)
+
+
 def fixture_never_red(root: Path, env: Dict[str, str]) -> None:
     """Base already has a passing implementation and test; HEAD only adds an unrelated test."""
     name = "never-red"
@@ -294,6 +382,9 @@ _GENERATORS = [
     fixture_new_module_import_red,
     fixture_new_symbol_in_existing_module,
     fixture_assertion_in_helper,
+    fixture_unittest_valid_red,
+    fixture_helper_outside_worktree,
+    fixture_unittest_invalid_red,
     fixture_never_red,
     fixture_wrong_reason_syntax_error,
     fixture_weakened_after_red,

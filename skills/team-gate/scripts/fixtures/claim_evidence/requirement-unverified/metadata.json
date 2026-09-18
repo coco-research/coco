@@ -1,0 +1,4 @@
+{
+  "name": "requirement-unverified",
+  "description": "R1 maps to no gate at all; self-test leaves it unmapped at run time."
+}

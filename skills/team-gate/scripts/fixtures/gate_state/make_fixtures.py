@@ -14,6 +14,7 @@ Fixtures generated:
 """
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -958,6 +959,170 @@ def make_gate_file_reformatted():
     
     _setup_fixture_pointer(fixture_dir, "gate-file-reformatted")
 
+def make_gate_rereceipted_current():
+    """Two gate-result receipts for same gate_file; file matches the later (higher seq) receipt. Exit 0."""
+    fixture_dir = FIXTURES_DIR / "gate-rereceipted-current"
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+
+    records = []
+    prev_hash = None
+
+    gates_dir = fixture_dir / "gates"
+    gates_dir.mkdir(parents=True, exist_ok=True)
+    gate_file = gates_dir / "8.json"
+
+    # First receipt (seq 2): gate_file with content1
+    content1 = {"verdict": "FAIL"}
+    gate_file.write_text(json.dumps(content1))
+    sha1 = _sha256_bytes(gate_file)
+
+    # Second receipt (seq 3): gate_file with content2 (new attempt, rewrote the file)
+    content2 = {"verdict": "PASS"}
+    gate_file.write_text(json.dumps(content2))
+    sha2 = _sha256_bytes(gate_file)
+
+    receipts_file = fixture_dir / "receipts.jsonl"
+    receipts_file.write_text("")
+
+    for i, (kind, detail) in enumerate([
+        ("run-started", {}),
+        ("gate-result", {"gate": "test-gate", "gate_file": "gates/8.json", "gate_sha256": sha1}),
+        ("gate-result", {"gate": "test-gate", "gate_file": "gates/8.json", "gate_sha256": sha2}),
+    ]):
+        record = {"seq": i + 1, "timestamp": FIXED_TS, "kind": kind, "detail": detail, "prev_hash": prev_hash}
+        record["hash"] = _sha256_json({k: v for k, v in record.items() if k != "hash"})
+        with (receipts_file).open("a") as f:
+            f.write(json.dumps(record) + "\n")
+        records.append(record)
+        prev_hash = record["hash"]
+
+    (fixture_dir / "head.json").write_text(json.dumps({"seq": 3, "hash": records[2]["hash"]}))
+    (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-rereceipted-current"}))
+    _setup_fixture_pointer(fixture_dir, "gate-rereceipted-current")
+
+
+def make_gate_rereceipted_stale():
+    """Two gate-result receipts for same gate_file; file matches the earlier (lower seq) receipt. Exit 1."""
+    fixture_dir = FIXTURES_DIR / "gate-rereceipted-stale"
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+
+    records = []
+    prev_hash = None
+
+    gates_dir = fixture_dir / "gates"
+    gates_dir.mkdir(parents=True, exist_ok=True)
+    gate_file = gates_dir / "8.json"
+
+    # First receipt (seq 2): gate_file with content1
+    content1 = {"verdict": "PASS"}
+    gate_file.write_text(json.dumps(content1))
+    sha1 = _sha256_bytes(gate_file)
+
+    # Second receipt (seq 3): gate_file SHOULD have content2, but we'll revert it to content1
+    content2 = {"verdict": "FAIL"}
+    gate_file.write_text(json.dumps(content2))
+    sha2 = _sha256_bytes(gate_file)
+
+    receipts_file = fixture_dir / "receipts.jsonl"
+    receipts_file.write_text("")
+
+    for i, (kind, detail) in enumerate([
+        ("run-started", {}),
+        ("gate-result", {"gate": "test-gate", "gate_file": "gates/8.json", "gate_sha256": sha1}),
+        ("gate-result", {"gate": "test-gate", "gate_file": "gates/8.json", "gate_sha256": sha2}),
+    ]):
+        record = {"seq": i + 1, "timestamp": FIXED_TS, "kind": kind, "detail": detail, "prev_hash": prev_hash}
+        record["hash"] = _sha256_json({k: v for k, v in record.items() if k != "hash"})
+        with (receipts_file).open("a") as f:
+            f.write(json.dumps(record) + "\n")
+        records.append(record)
+        prev_hash = record["hash"]
+
+    (fixture_dir / "head.json").write_text(json.dumps({"seq": 3, "hash": records[2]["hash"]}))
+    (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-rereceipted-stale"}))
+
+    # Revert the file to match the earlier receipt (simulating a re-run that reverted)
+    gate_file.write_text(json.dumps(content1))
+
+    _setup_fixture_pointer(fixture_dir, "gate-rereceipted-stale")
+
+
+def make_artifact_rereceipted_current():
+    """Two artifact-written receipts for same path; file matches the later (higher seq) receipt. Exit 0."""
+    fixture_dir = FIXTURES_DIR / "artifact-rereceipted-current"
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+
+    records = []
+    prev_hash = None
+
+    repo_dir = fixture_dir / "repo"
+    repo_dir.mkdir(parents=True, exist_ok=True)
+
+    # First receipt (seq 2): artifact with content1
+    artifact_file = repo_dir / "EVIDENCE.md"
+    content1 = "evidence version 1"
+    artifact_file.write_text(content1)
+    sha1_bytes = artifact_file.read_bytes()
+    sha1 = hashlib.sha256(sha1_bytes).hexdigest()
+
+    # Second receipt (seq 3): artifact rewritten with content2
+    content2 = "evidence version 2"
+    artifact_file.write_text(content2)
+    sha2_bytes = artifact_file.read_bytes()
+    sha2 = hashlib.sha256(sha2_bytes).hexdigest()
+
+    receipts_file = fixture_dir / "receipts.jsonl"
+    receipts_file.write_text("")
+
+    for i, (kind, detail) in enumerate([
+        ("run-started", {}),
+        ("artifact-written", {"path": "EVIDENCE.md", "sha256": sha1}),
+        ("artifact-written", {"path": "EVIDENCE.md", "sha256": sha2}),
+    ]):
+        record = {"seq": i + 1, "timestamp": FIXED_TS, "kind": kind, "detail": detail, "prev_hash": prev_hash}
+        record["hash"] = _sha256_json({k: v for k, v in record.items() if k != "hash"})
+        with (receipts_file).open("a") as f:
+            f.write(json.dumps(record) + "\n")
+        records.append(record)
+        prev_hash = record["hash"]
+
+    (fixture_dir / "head.json").write_text(json.dumps({"seq": 3, "hash": records[2]["hash"]}))
+    (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-rereceipted-artifact", "repo_root": "repo"}))
+    _setup_fixture_pointer(fixture_dir, "artifact-rereceipted-current")
+
+
+def make_artifact_detail_incomplete():
+    """Artifact-written receipt with path but no sha256. Exit 1."""
+    fixture_dir = FIXTURES_DIR / "artifact-detail-incomplete"
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+
+    records = []
+    prev_hash = None
+
+    repo_dir = fixture_dir / "repo"
+    repo_dir.mkdir(parents=True, exist_ok=True)
+
+    artifact_file = repo_dir / "EVIDENCE.md"
+    artifact_file.write_text("test content")
+
+    receipts_file = fixture_dir / "receipts.jsonl"
+    receipts_file.write_text("")
+
+    for i, (kind, detail) in enumerate([
+        ("run-started", {}),
+        ("artifact-written", {"path": "EVIDENCE.md"}),  # Missing sha256
+    ]):
+        record = {"seq": i + 1, "timestamp": FIXED_TS, "kind": kind, "detail": detail, "prev_hash": prev_hash}
+        record["hash"] = _sha256_json({k: v for k, v in record.items() if k != "hash"})
+        with (receipts_file).open("a") as f:
+            f.write(json.dumps(record) + "\n")
+        records.append(record)
+        prev_hash = record["hash"]
+
+    (fixture_dir / "head.json").write_text(json.dumps({"seq": 2, "hash": records[1]["hash"]}))
+    (fixture_dir / "run.json").write_text(json.dumps({"run_id": "test-incomplete", "repo_root": "repo"}))
+    _setup_fixture_pointer(fixture_dir, "artifact-detail-incomplete")
+
 def main():
     """Generate all fixtures."""
     global FIXTURES_DIR
@@ -994,6 +1159,10 @@ def main():
     make_receipt_corrupt_tail()
     make_detail_not_object()
     make_gate_file_reformatted()
+    make_gate_rereceipted_current()
+    make_gate_rereceipted_stale()
+    make_artifact_rereceipted_current()
+    make_artifact_detail_incomplete()
 
     print(f"Generated fixtures in {FIXTURES_DIR}")
     return 0

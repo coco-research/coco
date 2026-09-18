@@ -34,6 +34,13 @@ Stage list, derived from commands/team/fix.md and REVIEW-OPUS.md section
 list in WAVE3-BRIEFS.md's Task 12b, which is authoritative for what this
 script actually checks:
 
+  0 map           gates/handoff-1-map.json The brownfield repository map,
+                  the first step of the pipeline. Written by
+                  brownfield_map.py at the start of the run before any
+                  commit. Head comparison is special for this stage: the
+                  recorded head must be an ancestor of the current HEAD
+                  (computed with git merge-base --is-ancestor), since the
+                  map is written at run start before any fix work.
   1 discover      gates/7-discover.json   fix.md:46 "Run the authoritative
                   gate per the Test Evidence Protocol"; 1.16 F6 "The
                   authoritative gate ran per the evidence protocol".
@@ -138,6 +145,7 @@ import ship_gate
 # override receipt names to cover this one file; the stage number as a
 # string is always accepted too.
 FIX_REQUIRED_GATES: List[Tuple[int, str, str]] = [
+    (0, "map", "gates/handoff-1-map.json"),
     (1, "7-discover", "gates/7-discover.json"),
     (2, "8", "gates/8.json"),
     (3, "9", "gates/9.json"),
@@ -146,10 +154,10 @@ FIX_REQUIRED_GATES: List[Tuple[int, str, str]] = [
     (6, "12", "gates/12.json"),
 ]
 FIX_STAGE_NAMES: Dict[int, str] = {
-    1: "discover", 2: "run", 3: "red-green", 4: "recheck",
+    0: "map", 1: "discover", 2: "run", 3: "red-green", 4: "recheck",
     5: "matrix", 6: "evidence-check",
 }
-FIX_STAGE_COUNT = 6
+FIX_STAGE_COUNT = 7
 
 
 # ---------------------------------------------------------------------------
@@ -225,6 +233,20 @@ def _latest_gate_seqs(records: List[Dict[str, Any]]) -> Dict[str, int]:
         if gate_file not in latest or seq > latest[gate_file]:
             latest[gate_file] = seq
     return latest
+
+
+def _is_ancestor(recorded_head: str, current_head: str, repo_root: Path) -> bool:
+    """Check if recorded_head is an ancestor of current_head using
+    git merge-base --is-ancestor. Returns False on error."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo_root), "merge-base", "--is-ancestor",
+             recorded_head, current_head],
+            capture_output=True, timeout=10,
+        )
+        return result.returncode == 0
+    except (OSError, subprocess.TimeoutExpired):
+        return False
 
 
 def _recheck_order_reason(records: List[Dict[str, Any]]) -> Optional[str]:
@@ -304,7 +326,7 @@ def _evaluate_rounds(
 
 
 def _compute_stages(
-    run_dir: Path, head: str, overrides: List[Dict[str, Any]], used: set,
+    run_dir: Path, head: str, repo_root: Path, overrides: List[Dict[str, Any]], used: set,
     records: List[Dict[str, Any]],
 ) -> Tuple[
     Dict[Union[int, str], Dict[str, Any]],
@@ -312,7 +334,7 @@ def _compute_stages(
     List[Tuple[Union[int, str], str, str]],
     List[Tuple[Union[int, str], str, Dict[str, Any]]],
 ]:
-    """Evaluate every one of the six fix-pipeline stages.
+    """Evaluate every one of the seven fix-pipeline stages.
 
     Returns (stage_rows, unconditional, blocking, overridden_detail), where
     unconditional and blocking are lists of (stage, file, reason) and
@@ -328,6 +350,12 @@ def _compute_stages(
         label = f"{name}: " if name else ""
         info = ship_gate._evaluate_gate_item(run_dir, relpath, head)
         state = info["state"]
+
+        # For stage 0 (map), special head rule: recorded head must be ancestor of HEAD
+        if stage == 0 and state == "head-drift":
+            recorded = info.get("head")
+            if recorded and _is_ancestor(recorded, head, repo_root):
+                state = "ok"
 
         order_reason = None
         if relpath == "gates/9-recheck.json" and state not in ("missing", "head-drift"):
@@ -416,7 +444,7 @@ def cmd_check(repo_root_arg: str, json_output: bool) -> int:
     used_overrides: set = set()
 
     stage_rows, unconditional, blocking, overridden_detail = _compute_stages(
-        run_dir, head, overrides, used_overrides, records,
+        run_dir, head, repo_root, overrides, used_overrides, records,
     )
 
     rounds_row, rounds_blocking, rounds_override = _evaluate_rounds(run_dir, overrides, used_overrides)
@@ -467,7 +495,7 @@ def cmd_check(repo_root_arg: str, json_output: bool) -> int:
         for detail in unused
     ]
 
-    stages_list = [stage_rows[n] for n in range(1, FIX_STAGE_COUNT + 1)]
+    stages_list = [stage_rows[n] for n in range(0, FIX_STAGE_COUNT)]
     if "rounds" in stage_rows:
         stages_list.append(stage_rows["rounds"])
 
@@ -508,7 +536,7 @@ def cmd_check(repo_root_arg: str, json_output: bool) -> int:
 
 def cmd_stage(repo_root_arg: str, n: int) -> int:
     try:
-        if not (1 <= n <= FIX_STAGE_COUNT):
+        if not (1 <= n < FIX_STAGE_COUNT):
             raise ship_gate.Unmeasurable(f"invalid stage number: {n}")
 
         repo_root, run_dir, head = _resolve(repo_root_arg)
@@ -592,6 +620,10 @@ def cmd_stage(repo_root_arg: str, n: int) -> int:
 
 _SELF_TEST_CASES: List[Tuple[str, int, Optional[str]]] = [
     ("all-green", 0, None),
+    ("map-missing", 1, "gates/handoff-1-map.json"),
+    ("map-overridden", 0, None),
+    ("map-earlier-head", 0, None),
+    ("map-foreign-head", 1, "head drift"),
     ("red-green-never-red", 1, "gates/9.json"),
     ("recheck-hash-changed", 1, "gates/9-recheck.json"),
     ("matrix-not-met", 1, "gates/11-matrix.json"),
@@ -654,7 +686,7 @@ def _self_test_fixed_cases(build_dir: Path) -> List[str]:
             detail = f" substring {expected_substr!r} present={substr_ok}" if expected_substr else ""
             lines.append(f"{name}: expected {expected_exit} got {proc.returncode}{detail} {status}")
 
-            if name in ("all-green", "override-covers-matrix"):
+            if name in ("all-green", "map-overridden", "override-covers-matrix"):
                 expected_verdict = "PASS" if name == "all-green" else "PASS_WITH_OVERRIDE"
                 gate_fix = _run_gate_fix(state_root)
                 verdict_ok = gate_fix is not None and gate_fix.get("verdict") == expected_verdict
@@ -663,6 +695,15 @@ def _self_test_fixed_cases(build_dir: Path) -> List[str]:
                     all_ok = False
                 actual = gate_fix.get("verdict") if gate_fix else None
                 lines.append(f"{name}-verdict: expected {expected_verdict} got {actual} {v_status}")
+
+                if name == "map-overridden":
+                    instruction_ok = gate_fix is not None and (
+                        "map-overridden instruction text" in json.dumps(gate_fix)
+                    )
+                    i_status = "OK" if instruction_ok else "FAIL"
+                    if i_status == "FAIL":
+                        all_ok = False
+                    lines.append(f"map-overridden-instruction: present in gates/fix.json {i_status}")
 
                 if name == "override-covers-matrix":
                     instruction_ok = gate_fix is not None and (
@@ -705,7 +746,7 @@ def _self_test_fixed_cases(build_dir: Path) -> List[str]:
             repo, state_root = _copy_fixture(build_dir, name, tmp_root)
             env = dict(os.environ, TEAM_STATE_ROOT=str(state_root))
             proc = subprocess.run(
-                [sys.executable, __file__, "stage", str(FIX_STAGE_COUNT), "--repo-root", str(repo)],
+                [sys.executable, __file__, "stage", str(FIX_STAGE_COUNT - 1), "--repo-root", str(repo)],
                 capture_output=True, text=True, timeout=60, env=env,
             )
             exit_ok = proc.returncode == expected_exit

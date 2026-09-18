@@ -415,7 +415,11 @@ def _resolve_context(repo_root_arg):
     that point on; the raw argument is discarded.
     """
     repo_root_input = Path(repo_root_arg).resolve()
-    run_dir = gate_state.find_run(repo_root_input)
+    try:
+        run_dir = gate_state.find_run(repo_root_input)
+    except gate_state.RunMarkerUnreadable as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return None
     if run_dir is None:
         print(f"ERROR: no active run found under {repo_root_input}", file=sys.stderr)
         return None
@@ -431,7 +435,11 @@ def _resolve_context(repo_root_arg):
     if not recorded_root_str:
         print(f"ERROR: run.json missing repo_root: {run_json_path}", file=sys.stderr)
         return None
-    recorded_root = Path(recorded_root_str).resolve()
+    try:
+        recorded_root = gate_state.resolve_recorded_repo_root(run_dir, recorded_root_str)
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return None
 
     try:
         toplevel_result = subprocess.run(

@@ -97,7 +97,11 @@ def cmd_render(repo_root: str) -> int:
         print(f"ERROR: {e}", file=sys.stderr)
         return 2
 
-    run_dir = gate_state.find_run(root)
+    try:
+        run_dir = gate_state.find_run(root)
+    except gate_state.RunMarkerUnreadable as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
     if run_dir is None:
         print(f"ERROR: no active run found under {root}", file=sys.stderr)
         return 2

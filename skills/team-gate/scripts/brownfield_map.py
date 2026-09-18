@@ -435,10 +435,15 @@ def _resolve_context(repo_root_arg: str):
     nothing is written or appended. When they agree, repo_root_arg's own
     subdirectory is discarded: every path from here on, including the
     returned repo_root, is run.json's own repo_root, never the raw
-    argument.
+    argument. A relative repo_root is resolved against the run directory,
+    the same rule as gate_state.verify_chain, never against the process cwd.
     """
     repo_root_input = Path(repo_root_arg).resolve()
-    run_dir = gate_state.find_run(repo_root_input)
+    try:
+        run_dir = gate_state.find_run(repo_root_input)
+    except gate_state.RunMarkerUnreadable as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return None
     if run_dir is None:
         print(f"ERROR: no active run found under {repo_root_input}", file=sys.stderr)
         return None
@@ -454,7 +459,11 @@ def _resolve_context(repo_root_arg: str):
     if not recorded_root_str:
         print(f"ERROR: run.json missing repo_root: {run_json_path}", file=sys.stderr)
         return None
-    recorded_root = Path(recorded_root_str).resolve()
+    try:
+        recorded_root = gate_state.resolve_recorded_repo_root(run_dir, recorded_root_str)
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return None
 
     try:
         toplevel_result = subprocess.run(
@@ -757,6 +766,42 @@ def cmd_self_test() -> int:
     all_ok = all_ok and ok
     print(f"repo-root-subdir: expected 0 got {proc.returncode} artifacts_at_root={artifacts_at_root} "
           f"not_under_subdir={not_under_subdir} {'OK' if ok else 'FAIL'}")
+
+    # relative-repo-root: run.json records a single path segment relative
+    # to the run directory. Path.resolve() with no base uses the process
+    # cwd and misses the repository; joining with the run directory
+    # matches gate_state.verify_chain and writes the map. The follow-up
+    # invoke rewrites repo_root to "." which verify_chain refuses as
+    # malformed, so this script must refuse it the same way.
+    copy_path, env = _isolated_copy(build_dir, "map-written")
+    run_dir = gate_state.find_run(copy_path)
+    run_json_path = run_dir / "run.json"
+    run_obj = json.loads(run_json_path.read_text(encoding="utf-8"))
+    link = run_dir / "linked-repo"
+    link.symlink_to(copy_path.resolve())
+    run_obj["repo_root"] = "linked-repo"
+    run_json_path.write_text(json.dumps(run_obj, indent=2), encoding="utf-8")
+    foreign_cwd = Path(tempfile.mkdtemp(prefix="brownfield_map_cwd_"))
+    stub_env = _with_stub_on_path(env, stub_dir)
+    proc = subprocess.run(
+        [sys.executable, __file__, "--repo-root", str(copy_path)],
+        cwd=str(foreign_cwd), env=stub_env, capture_output=True, text=True, timeout=60)
+    artifacts_ok = ((copy_path / ".team-ship" / "brownfield-map.json").is_file()
+                    and (copy_path / ".team-ship" / "BROWNFIELD-MAP.md").is_file())
+    named = "map written" in proc.stdout
+    ok = proc.returncode == 0 and artifacts_ok and named
+    run_obj["repo_root"] = "."
+    run_json_path.write_text(json.dumps(run_obj, indent=2), encoding="utf-8")
+    refuse = subprocess.run(
+        [sys.executable, __file__, "--repo-root", str(copy_path)],
+        cwd=str(copy_path), env=stub_env, capture_output=True, text=True, timeout=60)
+    refuse_ok = refuse.returncode == 2 and "run.json repo_root malformed" in refuse.stderr
+    ok = ok and refuse_ok
+    all_ok = all_ok and ok
+    print(f"relative-repo-root: expected 0 got {proc.returncode} artifacts={artifacts_ok} "
+          f"stdout_map_written={named} refuse_exit={refuse.returncode} "
+          f"refuse_malformed={'run.json repo_root malformed' in refuse.stderr} "
+          f"{'OK' if ok else 'FAIL'}")
 
     # real-binary: the one permitted skip, when no real binary is on this machine.
     real_binary, _real_source, _tried = _resolve_binary(None)

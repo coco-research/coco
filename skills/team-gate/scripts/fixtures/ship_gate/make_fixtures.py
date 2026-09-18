@@ -776,8 +776,24 @@ def make_arch_not_applicable_overridden(build_dir: Path) -> None:
     _write_evidence(repo, head, name)
     _append_receipt(run_dir, "override", {
         "gate": "arch", "instruction": "arch-not-applicable-overridden instruction text", "by": "rijul",
+        "gate": "arch", "instruction": "arch-not-applicable-overridden instruction text", "by": "rijul",
     })
 
+
+def make_override_covers_arch_both(build_dir: Path) -> None:
+    """One override naming gate "arch" covers both stage 13 arch files.
+    gates/14.json must list that receipt once, with both files on it.
+    """
+    name = "override-covers-arch-both"
+    repo = _make_repo(build_dir, name)
+    head = _init_repo(repo)
+    run_dir = _start_run(build_dir, name, repo)
+    _build_standard(run_dir, repo, head, arch_baseline_status="NOT_APPLICABLE",
+                     arch_plan13_exit=1, arch_conformance_status="NOT_APPLICABLE")
+    _write_evidence(repo, head, name)
+    _append_receipt(run_dir, "override", {
+        "gate": "arch", "instruction": "override-covers-arch-both instruction text", "by": "rijul",
+    })
 
 def make_arch_plan_missing_path(build_dir: Path) -> None:
     """A component declared new or modified whose path is missing is what
@@ -950,6 +966,7 @@ FIXTURE_MAKERS = [
     make_rounds_three,
     make_arch_not_applicable_blocks,
     make_arch_not_applicable_overridden,
+    make_override_covers_arch_both,
     make_arch_plan_missing_path,
     make_baseline_missing,
     make_map_missing,

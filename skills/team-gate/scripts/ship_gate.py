@@ -178,6 +178,7 @@ MANIFEST_PATH = Path(__file__).resolve().parent.parent / "references" / "ship-ma
 # string is always accepted too.
 REQUIRED_GATES: List[Tuple[int, str, str]] = [
     (1, "handoff-1", "gates/handoff-1.json"),
+    (1, "map", "gates/handoff-1-map.json"),
     (1, "1-arch-baseline", "gates/1-arch-baseline.json"),
     (2, "handoff-2", "gates/handoff-2.json"),
     (3, "handoff-3", "gates/handoff-3.json"),
@@ -206,7 +207,7 @@ STAGE_COUNT = 14
 # ancestor of HEAD for these; every other required gate file measures the
 # built tree and keeps strict equality.
 PRE_BUILD_HEAD_FILES = frozenset({
-    "gates/handoff-1.json", "gates/handoff-2.json", "gates/handoff-3.json",
+    "gates/handoff-1.json", "gates/handoff-1-map.json", "gates/handoff-2.json", "gates/handoff-3.json",
     "gates/handoff-4.json", "gates/handoff-5.json", "gates/handoff-6.json",
     "gates/1-arch-baseline.json", "gates/3-arch-plan.json",
 })
@@ -1104,6 +1105,8 @@ _SELF_TEST_CASES: List[Tuple[str, int, Optional[str]]] = [
     ("arch-not-applicable-blocks", 1, "13: gates/13-arch.json"),
     ("arch-not-applicable-overridden", 0, None),
     ("arch-plan-missing-path", 1, "gates/13-arch-plan.json"),
+    ("map-missing", 1, "1: gates/handoff-1-map.json"),
+    ("map-overridden", 0, None),
     ("all-green-after-build", 0, None),
     ("pre-build-foreign-head", 1, "gates/handoff-3.json"),
     ("post-build-ancestor-head", 1, "gates/8.json"),
@@ -1235,7 +1238,7 @@ def _self_test_fixed_cases(build_dir: Path) -> List[str]:
                 lines.append(f"post-build-ancestor-head-drift: 'head drift' names gates/8.json {pba_status}")
 
             if name in ("all-green", "override-covers-9", "override-covers-approval",
-                        "arch-not-applicable-overridden"):
+                        "arch-not-applicable-overridden", "map-overridden"):
                 expected_verdict = "PASS" if name == "all-green" else "PASS_WITH_OVERRIDE"
                 gate14 = _run_gates14(state_root)
                 verdict_ok = gate14 is not None and gate14.get("verdict") == expected_verdict
@@ -1246,7 +1249,7 @@ def _self_test_fixed_cases(build_dir: Path) -> List[str]:
                 lines.append(f"{name}-verdict: expected {expected_verdict} got {actual} {v_status}")
 
                 if name in ("override-covers-9", "override-covers-approval",
-                            "arch-not-applicable-overridden"):
+                            "arch-not-applicable-overridden", "map-overridden"):
                     expected_instruction = f"{name} instruction text"
                     instruction_ok = gate14 is not None and expected_instruction in json.dumps(gate14)
                     i_status = "OK" if instruction_ok else "FAIL"
@@ -1268,8 +1271,9 @@ def _self_test_fixed_cases(build_dir: Path) -> List[str]:
             ("stage-query-allowed", "8", 0, None),
             ("stage-query-blocked", "8", 1, "gates/7.json"),
             ("baseline-missing", "2", 1, "gates/1-arch-baseline.json"),
+            ("map-missing", "2", 1, "gates/handoff-1-map.json"),
         ):
-            repo, state_root = _copy_fixture(build_dir, name, tmp_root)
+            repo, state_root = _copy_fixture(build_dir, name, tmp_root, dest_name=f"{name}-stage-query")
             env = dict(os.environ, TEAM_STATE_ROOT=str(state_root))
             proc = subprocess.run(
                 [sys.executable, __file__, "stage", stage_n, "--repo-root", str(repo)],

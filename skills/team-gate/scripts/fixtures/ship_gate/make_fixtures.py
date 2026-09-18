@@ -184,6 +184,15 @@ def _handoff_data(head: str, cwd: str, exit_code: int = 0) -> Dict[str, Any]:
     }
 
 
+def _map_data(head: str, cwd: str) -> Dict[str, Any]:
+    return {
+        "argv": ["brownfield_map.py", "--repo-root", cwd], "cwd": cwd, "head": head,
+        "exit": 0, "summary": "map written: 3 file(s), 5 symbol(s)",
+        "ripwire_version": "0.6.1", "binary": "/usr/local/bin/ripwire",
+        "elapsed_seconds": 0.123, "languages": {"Python": 2}, "symbols": 5,
+    }
+
+
 def _discover_data(head: str, cwd: str, argv: Optional[List[str]] = None) -> Dict[str, Any]:
     argv = argv or ["pytest", "-q"]
     commands = [{"argv": argv, "source": ".github/workflows/ci.yml", "sourceLine": 9}]
@@ -400,6 +409,8 @@ def _build_standard(run_dir: Path, repo: Path, head: str, *,
     for n in range(1, 7):
         maybe(f"gates/handoff-{n}.json", f"handoff-{n}", _handoff_data(head, cwd), 0, "PASS: all inputs valid")
     maybe("gates/handoff-approval.json", "handoff-approval", _handoff_data(head, cwd), 0, "PASS: all inputs valid")
+
+    maybe("gates/handoff-1-map.json", "map", _map_data(head, cwd), 0, "map written: 3 file(s), 5 symbol(s)")
 
     baseline_data = _arch_baseline_data(head, cwd, status=arch_baseline_status)
     maybe("gates/1-arch-baseline.json", "arch-baseline", baseline_data, baseline_data["exit"], baseline_data["summary"])
@@ -791,7 +802,7 @@ def make_arch_plan_missing_path(build_dir: Path) -> None:
 # gate recorded at an ancestor of HEAD (not HEAD itself) is still head
 # drift, since stage 8 measures the built tree (make_post_build_ancestor_head).
 PRE_BUILD_GATES = {
-    "gates/handoff-1.json", "gates/handoff-2.json", "gates/handoff-3.json",
+    "gates/handoff-1.json", "gates/handoff-1-map.json", "gates/handoff-2.json", "gates/handoff-3.json",
     "gates/handoff-4.json", "gates/handoff-5.json", "gates/handoff-6.json",
     "gates/handoff-approval.json",
     "gates/1-arch-baseline.json", "gates/3-arch-plan.json",
@@ -883,6 +894,36 @@ def make_baseline_missing(build_dir: Path) -> None:
     _write_evidence(repo, head, name)
 
 
+
+
+def make_map_missing(build_dir: Path) -> None:
+    """gates/handoff-1-map.json is never written: missing blocks stage 1
+    like any other missing gate, so a stage 2 query lists it under missing."""
+    name = "map-missing"
+    repo = _make_repo(build_dir, name)
+    head = _init_repo(repo)
+    run_dir = _start_run(build_dir, name, repo)
+    _build_standard(run_dir, repo, head, skip={"gates/handoff-1-map.json"})
+    _write_evidence(repo, head, name)
+
+
+def make_map_overridden(build_dir: Path) -> None:
+    """gates/handoff-1-map.json is written at an exit 2 status (simulated as
+    missing then added via override). Stage 2 allows this under the override
+    "map", producing PASS_WITH_OVERRIDE."""
+    name = "map-overridden"
+    repo = _make_repo(build_dir, name)
+    head = _init_repo(repo)
+    run_dir = _start_run(build_dir, name, repo)
+    _build_standard(run_dir, repo, head, skip={"gates/handoff-1-map.json"})
+
+    _append_receipt(run_dir, "override", {
+        "gate": "map", "instruction": "map-overridden instruction text", "by": "rijul",
+    })
+
+    _write_evidence(repo, head, name)
+
+
 FIXTURE_MAKERS = [
     make_all_green,
     make_gate_missing_8,
@@ -911,6 +952,8 @@ FIXTURE_MAKERS = [
     make_arch_not_applicable_overridden,
     make_arch_plan_missing_path,
     make_baseline_missing,
+    make_map_missing,
+    make_map_overridden,
     make_all_green_after_build,
     make_pre_build_foreign_head,
     make_post_build_ancestor_head,

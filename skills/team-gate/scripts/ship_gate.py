@@ -104,6 +104,13 @@ Every gate file this script reads is read only from run_dir/gates,
 resolved once through gate_state.find_run(). No second implementation of
 find_run exists here.
 
+A fifteenth row named "rounds" follows the stage rows: it reads
+build_rounds from gate_state.derive_status (stage-opened receipts for
+stage 6) and exits 1 when more than three build rounds have opened,
+with the reason "build_rounds <n> exceeds 3". An override receipt naming
+gate "rounds" covers it like any other row and the verdict becomes
+PASS_WITH_OVERRIDE. The row's "stage" key carries the string "rounds".
+
 No em dash, no section sign, stdlib only, exit() called only in the main guard.
 """
 
@@ -116,7 +123,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gate_state
@@ -456,6 +463,45 @@ def _evaluate_stage14(repo_root: Path, run_dir: Path, head: str) -> Tuple[Dict[s
     return row, (FINAL_STAGE, ".team-ship/EVIDENCE.json", reason_text)
 
 
+def _evaluate_rounds(
+    run_dir: Path, overrides: List[Dict[str, Any]], used: set
+) -> Tuple[Dict[str, Any], Optional[Tuple[Union[int, str], str, str]], Optional[Tuple[Union[int, str], str, Dict[str, Any]]]]:
+    """Evaluate the build rounds limit. Returns (row, blocking, override).
+
+    The "rounds" row checks that build_rounds does not exceed 3.
+    It is overridable by an override naming "rounds".
+    """
+    derive = gate_state.derive_status(run_dir)
+    build_rounds = derive.get("build_rounds", 0)
+
+    row_exit = 1 if build_rounds > 3 else 0
+    reason = f"build_rounds {build_rounds} exceeds 3" if build_rounds > 3 else f"build_rounds {build_rounds}"
+
+    override = _override_for(overrides, used, "rounds")
+    if override:
+        row = {
+            "stage": "rounds", "required": True, "present": True,
+            "exit": 0, "head_ok": True, "overridden": True,
+            "reason": f"OVERRIDDEN: {override.get('instruction', '')}",
+        }
+        return row, None, ("rounds", "derive_status", override)
+
+    if row_exit == 0:
+        row = {
+            "stage": "rounds", "required": True, "present": True,
+            "exit": 0, "head_ok": True, "overridden": False,
+            "reason": reason,
+        }
+        return row, None, None
+
+    row = {
+        "stage": "rounds", "required": True, "present": True,
+        "exit": 1, "head_ok": True, "overridden": False,
+        "reason": reason,
+    }
+    return row, ("rounds", "derive_status", reason), None
+
+
 # ---------------------------------------------------------------------------
 # check
 # ---------------------------------------------------------------------------
@@ -488,10 +534,10 @@ def _compute_stages(
     approval_present: bool, overrides: List[Dict[str, Any]], used: set,
     chain_ok: bool, records: List[Dict[str, Any]],
 ) -> Tuple[
-    Dict[int, Dict[str, Any]],
-    List[Tuple[int, str, str]],
-    List[Tuple[int, str, str]],
-    List[Tuple[int, str, Dict[str, Any]]],
+    Dict[Union[int, str], Dict[str, Any]],
+    List[Tuple[Union[int, str], str, str]],
+    List[Tuple[Union[int, str], str, str]],
+    List[Tuple[Union[int, str], str, Dict[str, Any]]],
 ]:
     """Evaluate every one of the fourteen stages.
 
@@ -623,6 +669,13 @@ def _compute_stages(
     if unconditional14:
         unconditional.append(unconditional14)
 
+    rounds_row, rounds_blocking, rounds_override = _evaluate_rounds(run_dir, overrides, used)
+    stage_rows["rounds"] = rounds_row
+    if rounds_blocking:
+        blocking.append(rounds_blocking)
+    if rounds_override:
+        overridden_detail.append(rounds_override)
+
     return stage_rows, unconditional, blocking, overridden_detail
 
 
@@ -698,10 +751,14 @@ def cmd_check(repo_root_arg: str, json_output: bool) -> int:
         for detail in unused
     ]
 
+    stages_list = [stage_rows[n] for n in range(1, STAGE_COUNT + 1)]
+    if "rounds" in stage_rows:
+        stages_list.append(stage_rows["rounds"])
+
     gate_data = {
         "argv": sys.argv, "cwd": os.getcwd(), "head": head, "exit": exit_code,
         "summary": summary, "verdict": verdict,
-        "stages": [stage_rows[n] for n in range(1, STAGE_COUNT + 1)],
+        "stages": stages_list,
         "overrides": overrides_out,
         "unused_overrides": unused_overrides_out,
         "status": {
@@ -864,6 +921,9 @@ _SELF_TEST_CASES: List[Tuple[str, int, Optional[str]]] = [
     ("ci-mirror-argv-differs", 1, "13: ci-mirror"),
     ("receipts-malformed-line", 1, "chain broken"),
     ("override-covers-approval", 0, None),
+    ("rounds-exceeded", 1, "exceeds 3"),
+    ("rounds-overridden", 0, None),
+    ("rounds-three", 0, None),
 ]
 
 

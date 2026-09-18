@@ -615,6 +615,48 @@ def make_recheck_before_proof(build_dir: Path) -> None:
     _write_evidence(repo, head, name)
 
 
+def make_rounds_exceeded(build_dir: Path) -> None:
+    """R5: four stage-opened receipts with stage=6, exceeding the limit of 3.
+    The rounds row should exit 1."""
+    name = "rounds-exceeded"
+    repo = _make_repo(build_dir, name)
+    head = _init_repo(repo)
+    run_dir = _start_run(build_dir, name, repo)
+    _build_standard(run_dir, repo, head)
+    _write_evidence(repo, head, name)
+    for i in range(4):
+        _append_receipt(run_dir, "stage-opened", {"stage": 6})
+
+
+def make_rounds_overridden(build_dir: Path) -> None:
+    """R5: four build rounds (exceeding 3) but overridden by an override receipt
+    naming gate 'rounds'. The verdict should be PASS_WITH_OVERRIDE."""
+    name = "rounds-overridden"
+    repo = _make_repo(build_dir, name)
+    head = _init_repo(repo)
+    run_dir = _start_run(build_dir, name, repo)
+    _build_standard(run_dir, repo, head)
+    _write_evidence(repo, head, name)
+    for i in range(4):
+        _append_receipt(run_dir, "stage-opened", {"stage": 6})
+    _append_receipt(run_dir, "override", {
+        "gate": "rounds", "instruction": "rounds-overridden instruction text", "by": "rijul",
+    })
+
+
+def make_rounds_three(build_dir: Path) -> None:
+    """R5: exactly three stage-opened receipts with stage=6, at the limit.
+    The rounds row should exit 0."""
+    name = "rounds-three"
+    repo = _make_repo(build_dir, name)
+    head = _init_repo(repo)
+    run_dir = _start_run(build_dir, name, repo)
+    _build_standard(run_dir, repo, head)
+    _write_evidence(repo, head, name)
+    for i in range(3):
+        _append_receipt(run_dir, "stage-opened", {"stage": 6})
+
+
 FIXTURE_MAKERS = [
     make_all_green,
     make_gate_missing_8,
@@ -636,6 +678,9 @@ FIXTURE_MAKERS = [
     make_check_from_subdirectory,
     make_gates_14_is_directory,
     make_recheck_before_proof,
+    make_rounds_exceeded,
+    make_rounds_overridden,
+    make_rounds_three,
 ]
 
 

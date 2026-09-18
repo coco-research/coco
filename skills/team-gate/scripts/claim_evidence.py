@@ -10,8 +10,18 @@ Subcommands:
     Every sentence (one non-blank line) inside the Results or Evidence
     section must carry an [E<n>] tag naming an entry in EVIDENCE.json, every
     quantitative claim's number or qualifier must match the cited entry, and
-    every unbacked-claim word from the lexicon must carry a citation. Any
-    finding is exit 1. Writes gates/12.json in the run directory.
+    every unbacked-claim word from the lexicon must carry a citation. Every
+    sentence of the whole PR body is also scanned for the lexicon's
+    mergeClaims phrases ("merged", "shipped", "ci green", and their
+    variants); each is a merge-claim finding unless its named condition
+    (ancestor-of-main, ci-mirror-pass, pr-opened) holds, checked at most
+    once per run. This is independent of the [E<n>] citation checks above.
+    Matching is fail closed: a conditional or future-tense sentence such
+    as "once this is merged, the cron picks it up" is a finding by
+    design; the cost is a reword, the benefit is that a merge masquerade
+    cannot pass. Fenced text is scanned like plain text, as the
+    forbidden-token precedent in check_artifacts does.
+    Any finding is exit 1. Writes gates/12.json in the run directory.
 
   matrix <plan.md> [--repo-root PATH]
     Extracts requirement identifiers from the plan's "requirements" and
@@ -328,6 +338,100 @@ def _extract_section(lines: List[str]) -> Optional[List[Tuple[int, str]]]:
     return section
 
 
+# --- merge-claim conditions ---------------------------------------------------
+
+def _condition_ancestor_of_main(root: Path, run_dir: Path) -> Tuple[bool, str]:
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "merge-base", "--is-ancestor", "HEAD", "origin/main"],
+            capture_output=True, text=True, timeout=10,
+        )
+    except subprocess.TimeoutExpired:
+        return False, "git merge-base --is-ancestor timed out after 10s"
+    except OSError as e:
+        return False, f"git is not available: {e}"
+    if result.returncode == 0:
+        return True, "HEAD is an ancestor of origin/main"
+    if result.returncode == 1:
+        return False, "HEAD is not an ancestor of origin/main"
+    return False, f"git merge-base --is-ancestor exited {result.returncode}: {result.stderr.strip()}"
+
+
+def _condition_ci_mirror_pass(root: Path, run_dir: Path) -> Tuple[bool, str]:
+    gate_path = run_dir / "gates" / "14.json"
+    if not gate_path.is_file():
+        return False, "gates/14.json not found"
+    try:
+        data = json.loads(gate_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        return False, f"gates/14.json unreadable: {e}"
+    for row in data.get("stages", []):
+        if isinstance(row, dict) and row.get("stage") == 13:
+            if row.get("exit") == 0 and row.get("head_ok") is True:
+                return True, "gates/14.json stage 13 exit 0, head_ok true"
+            return False, f"gates/14.json stage 13 exit {row.get('exit')!r}, head_ok {row.get('head_ok')!r}"
+    return False, "gates/14.json has no stage 13 row"
+
+
+def _condition_pr_opened(root: Path, run_dir: Path) -> Tuple[bool, str]:
+    receipts_file = run_dir / "receipts.jsonl"
+    if not receipts_file.is_file():
+        return False, "receipts.jsonl not found"
+    try:
+        raw = receipts_file.read_text(encoding="utf-8")
+    except OSError as e:
+        return False, f"receipts.jsonl unreadable: {e}"
+    for line in raw.splitlines():
+        if not line.strip():
+            continue
+        try:
+            record = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if record.get("kind") == "pr-opened":
+            return True, "receipts.jsonl carries a pr-opened receipt"
+    return False, "receipts.jsonl carries no pr-opened receipt"
+
+
+_MERGE_CONDITIONS = {
+    "ancestor-of-main": _condition_ancestor_of_main,
+    "ci-mirror-pass": _condition_ci_mirror_pass,
+    "pr-opened": _condition_pr_opened,
+}
+
+
+def _find_merge_claims(line_no: int, line: str, lexicon: Dict[str, Any],
+                       condition_cache: Dict[str, Tuple[bool, str]],
+                       root: Path, run_dir: Path) -> List[Dict[str, Any]]:
+    findings: List[Dict[str, Any]] = []
+    text = line.strip()
+    spans: List[Tuple[int, int]] = []
+    items = sorted(lexicon.get("mergeClaims", {}).items(), key=lambda kv: -len(kv[0]))
+    for phrase, condition in items:
+        match = re.search(r"\b" + re.escape(phrase) + r"\b", line, re.IGNORECASE)
+        if not match:
+            continue
+        span = match.span()
+        if any(span[0] >= s[0] and span[1] <= s[1] for s in spans):
+            continue  # already covered by a longer phrase match on this line
+        spans.append(span)
+        if condition not in condition_cache:
+            condition_fn = _MERGE_CONDITIONS.get(condition)
+            condition_cache[condition] = (
+                (False, f"unknown condition {condition!r}") if condition_fn is None
+                else condition_fn(root, run_dir)
+            )
+        holds, measured = condition_cache[condition]
+        if holds:
+            continue
+        findings.append({
+            "line": line_no, "text": text, "type": "merge-claim", "claim": phrase,
+            "condition": condition, "measured": measured,
+            "reason": f"claims {phrase!r} but {condition} does not hold: {measured}",
+        })
+    return findings
+
+
 def cmd_check(repo_root: str, pr_body_path: str) -> int:
     root = Path(repo_root).resolve()
 
@@ -371,6 +475,12 @@ def cmd_check(repo_root: str, pr_body_path: str) -> int:
         if not line.strip():
             continue
         findings.extend(_analyze_line(line_no, line, entries_by_id, lexicon))
+
+    condition_cache: Dict[str, Tuple[bool, str]] = {}
+    for line_no, line in enumerate(body_lines, start=1):
+        if not line.strip():
+            continue
+        findings.extend(_find_merge_claims(line_no, line, lexicon, condition_cache, root, run_dir))
 
     exit_code = 1 if findings else 0
     summary = f"{len(findings)} finding(s)" if findings else "no findings"
@@ -537,6 +647,10 @@ def _ensure_fixtures() -> int:
     return 0
 
 
+def _seed_pr_opened_receipt(run_dir: Path) -> None:
+    gate_state.append_receipt(run_dir, "pr-opened", {"url": "https://github.com/example/repo/pull/1"})
+
+
 def cmd_self_test() -> int:
     rc = _ensure_fixtures()
     if rc != 0:
@@ -545,7 +659,7 @@ def cmd_self_test() -> int:
     fixture_dir = _self_test_fixture_dir()
     all_pass = True
 
-    # check cases: (name, build_from, pr_body_filename, expected_exit, stderr_contains)
+    # check cases: (name, build_from, pr_body_filename, expected_exit, stderr_contains[, setup_fn(run_dir)])
     check_cases = [
         ("all-claims-backed", "all-claims-backed", "PR-BODY.md", 0, None),
         ("number-mismatch", "number-mismatch", "PR-BODY.md", 1, "contradicted"),
@@ -557,9 +671,16 @@ def cmd_self_test() -> int:
         ("unresolved-tag", "unresolved-tag", "PR-BODY.md", 1, "unresolved-tag"),
         ("no-failures-phrase", "no-failures-phrase", "PR-BODY.md", 0, None),
         ("no-failures-phrase-contradicted", "no-failures-phrase", "PR-BODY-2.md", 1, "contradicted"),
+        ("merged-not-ancestor", "merged-not-ancestor", "PR-BODY.md", 1, "merge-claim"),
+        ("merged-ancestor", "merged-ancestor", "PR-BODY.md", 0, None),
+        ("ci-green-without-stage-13", "ci-green-without-stage-13", "PR-BODY.md", 1, "merge-claim"),
+        ("shipped-without-pr", "shipped-without-pr", "PR-BODY.md", 1, "merge-claim"),
+        ("shipped-with-pr-receipt", "shipped-with-pr-receipt", "PR-BODY.md", 0, None, _seed_pr_opened_receipt),
     ]
 
-    for name, build_from, body_name, expected_exit, stderr_contains in check_cases:
+    for case in check_cases:
+        name, build_from, body_name, expected_exit, stderr_contains = case[:5]
+        setup_fn = case[5] if len(case) > 5 else None
         build_dir = fixture_dir / build_from / "_build"
         if not build_dir.is_dir():
             print(f"{name}: FIXTURE NOT FOUND", file=sys.stderr)
@@ -572,11 +693,13 @@ def cmd_self_test() -> int:
             state_root.mkdir()
             os.environ["TEAM_STATE_ROOT"] = str(state_root)
             try:
-                gate_state.start_run(str(repo_copy), "test", [])
+                run_id = gate_state.start_run(str(repo_copy), "test", [])
             except Exception as e:
                 print(f"{name}: FAIL - could not start run: {e}", file=sys.stderr)
                 all_pass = False
                 continue
+            if setup_fn is not None:
+                setup_fn(state_root / run_id)
 
             body_path = repo_copy / ".team-ship" / body_name
             result = subprocess.run([sys.executable, __file__, "check", str(body_path), "--repo-root", str(repo_copy)],

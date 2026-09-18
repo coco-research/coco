@@ -131,6 +131,44 @@ def _finish_fixture(output_root: Path, name: str, build_dir: Path, description: 
     (fixture_dir / "metadata.json").write_text(json.dumps(metadata, indent=2))
 
 
+def _rename_branch_main(repo_dir: Path, env: dict) -> None:
+    subprocess.run(["git", "branch", "-M", "main"], cwd=repo_dir, check=True, env=env)
+
+
+def _make_bare_origin_from(source_dir: Path, dest_bare: Path, env: dict) -> None:
+    """Bare-clone source_dir's already-committed history into dest_bare.
+
+    A local clone hardlinks the existing (already timestamp-pinned) loose
+    objects rather than repacking, so this is byte-identical across
+    generations, matching every other fixture's determinism guarantee.
+    """
+    if dest_bare.exists():
+        shutil.rmtree(dest_bare)
+    subprocess.run(["git", "clone", "-q", "--bare", str(source_dir), str(dest_bare)], check=True, env=env)
+
+
+def _make_unrelated_bare_origin(dest_bare: Path, env: dict) -> None:
+    """Build a bare repository whose history shares no commit with the fixture build."""
+    seed = dest_bare.parent / "_origin_seed"
+    if seed.exists():
+        shutil.rmtree(seed)
+    seed.mkdir(parents=True)
+    (seed / "README.md").write_text("Unrelated origin history, no shared commits with the fixture build.\n")
+    subprocess.run(["git", "init", "-q"], cwd=seed, check=True, env=env)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=seed, check=True)
+    subprocess.run(["git", "config", "user.name", "Test User"], cwd=seed, check=True)
+    subprocess.run(["git", "add", "-A"], cwd=seed, check=True, env=env)
+    subprocess.run(["git", "commit", "-q", "-m", "unrelated origin history"], cwd=seed, check=True, env=env)
+    _rename_branch_main(seed, env)
+    _make_bare_origin_from(seed, dest_bare, env)
+    shutil.rmtree(seed)
+
+
+def _add_origin_remote(build_dir: Path, bare_path: Path, env: dict) -> None:
+    subprocess.run(["git", "remote", "add", "origin", str(bare_path)], cwd=build_dir, check=True, env=env)
+    subprocess.run(["git", "fetch", "-q", "origin"], cwd=build_dir, check=True, env=env)
+
+
 def make_all_claims_backed(output_root: Path) -> None:
     build_dir = _new_fixture(output_root, "all-claims-backed")
     _common_artifacts(build_dir)
@@ -313,6 +351,71 @@ def make_no_failures_phrase(output_root: Path) -> None:
                      "a contradiction of the same 'no failures' phrase.")
 
 
+def make_merged_not_ancestor(output_root: Path) -> None:
+    build_dir = _new_fixture(output_root, "merged-not-ancestor")
+    _common_artifacts(build_dir)
+    _write(build_dir, ".team-ship/PR-BODY.md", (
+        "# PR\n\nThis change has already been merged.\n\n## Results\n"
+    ))
+    _finish_fixture(output_root, "merged-not-ancestor", build_dir,
+                     "HEAD is on a branch not reachable from origin/main via a local bare "
+                     "remote, so the 'merged' claim is a merge-claim finding.")
+    env = _git_env()
+    _rename_branch_main(build_dir, env)
+    bare = build_dir / "_origin.git"
+    _make_unrelated_bare_origin(bare, env)
+    _add_origin_remote(build_dir, bare, env)
+
+
+def make_merged_ancestor(output_root: Path) -> None:
+    build_dir = _new_fixture(output_root, "merged-ancestor")
+    _common_artifacts(build_dir)
+    _write(build_dir, ".team-ship/PR-BODY.md", (
+        "# PR\n\nThis change has already been merged.\n\n## Results\n"
+    ))
+    _finish_fixture(output_root, "merged-ancestor", build_dir,
+                     "HEAD is the tip of origin/main via a local bare remote, so the "
+                     "'merged' claim holds and is not a finding.")
+    env = _git_env()
+    _rename_branch_main(build_dir, env)
+    bare = build_dir / "_origin.git"
+    _make_bare_origin_from(build_dir, bare, env)
+    _add_origin_remote(build_dir, bare, env)
+
+
+def make_ci_green_without_stage_13(output_root: Path) -> None:
+    build_dir = _new_fixture(output_root, "ci-green-without-stage-13")
+    _common_artifacts(build_dir)
+    _write(build_dir, ".team-ship/PR-BODY.md", (
+        "# PR\n\nCI is green across the board.\n\n## Results\n"
+    ))
+    _finish_fixture(output_root, "ci-green-without-stage-13", build_dir,
+                     "gates/14.json has no stage 13 row, so the 'ci is green' claim is a "
+                     "merge-claim finding.")
+
+
+def make_shipped_without_pr(output_root: Path) -> None:
+    build_dir = _new_fixture(output_root, "shipped-without-pr")
+    _common_artifacts(build_dir)
+    _write(build_dir, ".team-ship/PR-BODY.md", (
+        "# PR\n\nThis feature has already been shipped.\n\n## Results\n"
+    ))
+    _finish_fixture(output_root, "shipped-without-pr", build_dir,
+                     "receipts.jsonl carries no pr-opened receipt, so the 'shipped' claim is "
+                     "a merge-claim finding.")
+
+
+def make_shipped_with_pr_receipt(output_root: Path) -> None:
+    build_dir = _new_fixture(output_root, "shipped-with-pr-receipt")
+    _common_artifacts(build_dir)
+    _write(build_dir, ".team-ship/PR-BODY.md", (
+        "# PR\n\nThis feature has already been shipped.\n\n## Results\n"
+    ))
+    _finish_fixture(output_root, "shipped-with-pr-receipt", build_dir,
+                     "Self-test appends a pr-opened receipt with the gate_state API before "
+                     "running check, so the 'shipped' claim holds and is not a finding.")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate claim_evidence fixtures")
     parser.add_argument("--out", type=Path, default=None, help="Output root directory")
@@ -336,6 +439,11 @@ def main() -> None:
     make_duplicate_evidence_id(output_root)
     make_unresolved_tag(output_root)
     make_no_failures_phrase(output_root)
+    make_merged_not_ancestor(output_root)
+    make_merged_ancestor(output_root)
+    make_ci_green_without_stage_13(output_root)
+    make_shipped_without_pr(output_root)
+    make_shipped_with_pr_receipt(output_root)
     print("Fixtures generated successfully")
 
 

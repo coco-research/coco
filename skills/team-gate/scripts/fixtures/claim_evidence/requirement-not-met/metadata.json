@@ -1,0 +1,4 @@
+{
+  "name": "requirement-not-met",
+  "description": "R1 maps to a gate that exits 1; self-test creates that gate at run time."
+}

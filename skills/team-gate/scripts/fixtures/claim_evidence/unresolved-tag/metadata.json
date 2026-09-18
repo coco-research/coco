@@ -1,0 +1,4 @@
+{
+  "name": "unresolved-tag",
+  "description": "The body cites [E99], which names no entry in EVIDENCE.json; reported as unresolved-tag, not as a missing field."
+}

@@ -1,11 +1,6 @@
 <div align="center">
 
-<br>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/logo-si.svg">
-  <img src="assets/logo-si-light.svg" alt="CoCo Super Intelligence" width="300">
-</picture>
+<img src="docs/readme/hero-dark.png" alt="CoCo Super Intelligence: two-arc mark on black, 495 personas, 226 skills, 386 commands" width="1600">
 
 # CoCo Super Intelligence
 
@@ -17,13 +12,13 @@ Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds
 
 <br>
 
-[![License: Open-core](https://img.shields.io/badge/License-Open--core-yellow.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.5.0-blue?style=for-the-badge)](CHANGELOG.md)
-[![npm](https://img.shields.io/npm/v/cocosuperintelligence?style=for-the-badge)](https://www.npmjs.com/package/cocosuperintelligence)
-[![Skills](https://img.shields.io/badge/skills-226-emerald?style=for-the-badge)](skills/)
-[![Commands](https://img.shields.io/badge/commands-386-indigo?style=for-the-badge)](commands/)
-[![Personas](https://img.shields.io/badge/personas-495-violet?style=for-the-badge)](systems/superintelligence/)
-[![CI](https://img.shields.io/github/actions/workflow/status/coco-research/coco/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/coco-research/coco/actions)
+[![License: Open-core](https://img.shields.io/badge/License-Open--core-5b6169?labelColor=0a0a0a&style=flat-square)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.5.0-5b6169?labelColor=0a0a0a&style=flat-square)](CHANGELOG.md)
+[![npm](https://img.shields.io/npm/v/cocosuperintelligence?labelColor=0a0a0a&color=5b6169&style=flat-square)](https://www.npmjs.com/package/cocosuperintelligence)
+[![Skills](https://img.shields.io/badge/skills-226-5b6169?labelColor=0a0a0a&style=flat-square)](skills/)
+[![Commands](https://img.shields.io/badge/commands-386-5b6169?labelColor=0a0a0a&style=flat-square)](commands/)
+[![Personas](https://img.shields.io/badge/personas-495-5b6169?labelColor=0a0a0a&style=flat-square)](systems/superintelligence/)
+[![CI](https://img.shields.io/github/actions/workflow/status/coco-research/coco/ci.yml?branch=main&style=flat-square&label=CI&labelColor=0a0a0a&color=5b6169)](https://github.com/coco-research/coco/actions)
 
 <br>
 
@@ -67,6 +62,10 @@ npx cocosuperintelligence
 <div align="center"><sub>A local governed department on Claude Code, Cursor, or Codex. Open-core. No telemetry.</sub></div>
 <div align="center"><sub>90 seconds. <code>npx</code> clones the pinned release (<code>v1.5.0</code>) into <code>./coco</code> and runs <code>install.sh</code>. Override with <code>--adapter cursor</code> or <code>--adapter claude-code</code>; narrow bundles with <code>--systems</code>. Per-adapter detail: <a href="docs/install.md">docs/install.md</a>.</sub></div>
 
+<p align="center">
+  <img src="docs/readme/local-first.png" alt="Install with npx, then a local session, then the board. Nothing leaves this machine." width="1600">
+</p>
+
 ---
 
 ## What CoCo Is (and Isn't)
@@ -80,6 +79,10 @@ Your model, your tool, your keys, your machine. When you see "parallel subagent 
 <a id="the-board"></a>
 
 ## ⭐ The Board — CoCo Super Intelligence
+
+<p align="center">
+  <img src="docs/readme/board-strip.png" alt="Board roster on black: 13 departments, 495 personas, type only" width="1600">
+</p>
 
 ### A cross-team advisory board of 495 world-class minds
 

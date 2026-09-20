@@ -12,7 +12,7 @@ Last updated: 2026-09-19.
 
 | # | Task | State | Where |
 | --- | --- | --- | --- |
-| 1 | Complete the Repo Standard document set: `docs/rules.md`, `prd.md`, `design.md`, `tasks.md`, `memory.md`, the PR template filename, and `.metagpt/` tracked | in review | this PR |
+| 1 | Complete the Repo Standard document set: `docs/rules.md`, `prd.md`, `design.md`, `tasks.md`, `memory.md`, the PR template filename, and `.metagpt/` tracked | in review | PR #199 |
 | 2 | Self-evolution loop, tasks 1 to 15 | plan approved 2026-09-18, task 1 starts next | `.metagpt/plan.md` |
 
 Task 2's first five tasks are the working set: land the skill tree with its count coupling,
@@ -23,7 +23,7 @@ and the first reviewed batch, are independent of the loop and can run in paralle
 
 | # | Task | Why now | Blocked on |
 | --- | --- | --- | --- |
-| 3 | Adapt `.githooks/pre-push` to this repo's real fast gates | the gate that landed in #198 runs the secret scan and `npm test`, which is `node bin/coco.js --help`. It does not run any check that actually catches a regression here: `check-command-refs`, `check-evidence-gate`, `check-asset-counts`, the frontmatter lint, `validate_roles`, or the index drift check. Those total about 4.2 s, measured, so they fit a pre-push budget | nothing |
+| 3 | Fix `.githooks/pre-push`: a false positive in the secret scan, then point it at this repo's real fast gates | the gate that landed in #198 runs the secret scan and `npm test`, which is `node bin/coco.js --help`. It runs no check that catches a regression here. Worse, its secret scan regex is `(api[_-]?key|secret|token).*=.*(sk-\|ghp_\|xox[baprs]-)`, and a single-line file mentioning a token count and the department `risk-compliance` matches on the `sk-` inside "risk". Reproduced on 2026-09-19 while wiring the hook: the gate blocked a push over its own repository's content. Fixed then by not committing the generated ripwire map, but the regex is still fragile, and the playbook's rule 10 is about exactly this: a tool that cries wolf gets ignored and then protects nothing. The real gates total about 4.2 s, measured, so they fit a pre-push budget | nothing |
 | 4 | `git config core.hooksPath .githooks` per clone | the hook file is committed, but nothing runs it until the path is wired. Local config, cannot be committed | human, one command per clone |
 | 5 | Persona scale toward 1000 | the owner asked for it on 2026-09-18; the roster is at 495 | tasks 10 and 11 of the loop plan |
 

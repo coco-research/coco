@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 226 skills** — 74 core, 152 across 8 bundles.
+**Total: 227 skills** — 75 core, 152 across 8 bundles.
 
 ## Design (15)
 
@@ -68,7 +68,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [workflow-routing](workflow-routing/SKILL.md) | Use when starting any task, before invoking any other skill or GSD command, to route between Superpowers skills and GSD commands from project state and task sco |
 | [writing-plans](writing-plans/SKILL.md) | Use when you have a spec or requirements for a multi-step task, before touching code |
 
-## Meta (9)
+## Meta (10)
 
 | Skill | Description |
 |-------|-------------|
@@ -80,6 +80,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [find-skills](find-skills/SKILL.md) | Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express int |
 | [goal](goal/SKILL.md) | Persistent project goal that survives across sessions and tools, with continuous-execution loop semantics. Use when someone asks to "set a goal", "what is my go |
 | [skill-creator](skill-creator/SKILL.md) | Use when the user asks to create, scaffold, update or package a skill, or asks how skill frontmatter, progressive disclosure or bundled resources should be stru |
+| [skill-evolution](skill-evolution/SKILL.md) | Use when running, reviewing or changing coco's self-evolution cycle: the 30-day loop that observes how skills are actually used, proposes evidence-backed edits  |
 | [writing-skills](writing-skills/SKILL.md) | Use when creating new skills, editing existing skills, or verifying skills work before deployment |
 
 ## Ops (6)

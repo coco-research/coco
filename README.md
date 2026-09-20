@@ -1,12 +1,12 @@
 <div align="center">
 
-<img src="docs/readme/hero-dark.png" alt="CoCo Super Intelligence: two-arc mark on black, 495 personas, 226 skills, 386 commands" width="1600">
+<img src="docs/readme/hero-dark.png" alt="CoCo Super Intelligence: two-arc mark on black, 495 personas, 227 skills, 386 commands" width="1600">
 
 # CoCo Super Intelligence
 
 ### Summon an advisory board of 495 world-class minds — right inside your AI coding session.
 
-CoCo Super Intelligence is the orchestration layer that turns Claude Code, Cursor, or Codex into an entire engineering department: routed expert panels that deliberate and decide, then **226 skills**, **386 commands**, and disk-persistent state that ship what they decided.
+CoCo Super Intelligence is the orchestration layer that turns Claude Code, Cursor, or Codex into an entire engineering department: routed expert panels that deliberate and decide, then **227 skills**, **386 commands**, and disk-persistent state that ship what they decided.
 
 Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds · 100% local · no telemetry
 
@@ -15,7 +15,7 @@ Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds
 [![License: Open-core](https://img.shields.io/badge/License-Open--core-5b6169?labelColor=0a0a0a&style=flat-square)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.5.0-5b6169?labelColor=0a0a0a&style=flat-square)](CHANGELOG.md)
 [![npm](https://img.shields.io/npm/v/cocosuperintelligence?labelColor=0a0a0a&color=5b6169&style=flat-square)](https://www.npmjs.com/package/cocosuperintelligence)
-[![Skills](https://img.shields.io/badge/skills-226-5b6169?labelColor=0a0a0a&style=flat-square)](skills/)
+[![Skills](https://img.shields.io/badge/skills-227-5b6169?labelColor=0a0a0a&style=flat-square)](skills/)
 [![Commands](https://img.shields.io/badge/commands-386-5b6169?labelColor=0a0a0a&style=flat-square)](commands/)
 [![Personas](https://img.shields.io/badge/personas-495-5b6169?labelColor=0a0a0a&style=flat-square)](systems/superintelligence/)
 [![CI](https://img.shields.io/github/actions/workflow/status/coco-research/coco/ci.yml?branch=main&style=flat-square&label=CI&labelColor=0a0a0a&color=5b6169)](https://github.com/coco-research/coco/actions)
@@ -227,7 +227,7 @@ A standard install equips your workspace with a lightweight core; full activatio
 
 <table align="center">
 <tr>
-<td align="center" width="20%"><h3>226</h3><sub>Skills</sub><br><small>74 Core + 152 Bundle</small></td>
+<td align="center" width="20%"><h3>227</h3><sub>Skills</sub><br><small>75 Core + 152 Bundle</small></td>
 <td align="center" width="20%"><h3>386</h3><sub>Slash Commands</sub><br><small>44 Core + 342 Generated</small></td>
 <td align="center" width="20%"><h3>35</h3><sub>Specialized Agents</sub><br><small>11 Core + 24 Bundle</small></td>
 <td align="center" width="20%"><h3>495</h3><sub>Expert Personas</sub><br><small>Super Intelligence Board</small></td>
@@ -236,7 +236,7 @@ A standard install equips your workspace with a lightweight core; full activatio
 </table>
 
 <div align="center">
-  <sub><strong>Core install:</strong> 144 active assets (74 Skills, 44 Commands, 11 Agents, 15 Rules)</sub><br>
+  <sub><strong>Core install:</strong> 145 active assets (75 Skills, 44 Commands, 11 Agents, 15 Rules)</sub><br>
   <sub><strong>A plain install ships every bundle except the security-testing tooling</strong>, which stays opt-in via <code>--systems reverse-skill</code>.</sub><br>
   <sub><strong>Orchestration bundles:</strong> <strong>+68 GSD skills</strong> · <strong>+24 GSD agents</strong> · <strong>+6 Brain skills</strong> · <strong>+13 Super Intelligence skills</strong> · <strong>+342 SI commands</strong> · <strong>3 Workflows</strong></sub>
 </div>
@@ -247,7 +247,7 @@ A standard install equips your workspace with a lightweight core; full activatio
 
 ## Skills Catalog
 
-CoCo ships **226 skills** (74 core + 152 across bundles). These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
+CoCo ships **227 skills** (75 core + 152 across bundles). These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
 
 ### Visual design & styling
 `ui-ux-pro-max` (50 styles, 21 palettes, 50 font pairings, 9 stacks) · `frontend-design` · `design-taste-frontend` · `redesign-existing-projects` · `axiom-liquid-glass` (Apple Liquid Glass, WWDC 2025) · `swiftui-liquid-glass` · `web-design-guidelines` · `tailwind-patterns` (Tailwind v4) · `vercel-react-best-practices` · `clone-website` · `c4-architecture` · `arb-review` · `expo-api-routes` · `ai-product` · `scroll-world` (scroll-scrubbed, cut-free camera flythrough landing pages, generated end to end via Higgsfield).
@@ -271,7 +271,7 @@ CoCo ships **226 skills** (74 core + 152 across bundles). These are not prompt s
 `coco` (conversational router) · `coco-cli` · `coco-loop` (compiles a plain-language goal into a confirmed charter, then runs a bounded, propose-only autonomous loop) · `skill-creator` · `writing-skills` · `find-skills`.
 
 <details>
-<summary><strong>▸ Full catalog — every one of the 226 skills</strong></summary>
+<summary><strong>▸ Full catalog — every one of the 227 skills</strong></summary>
 
 <br>
 
@@ -709,7 +709,7 @@ npx cocosuperintelligence update
 <table>
 <tr><td><strong>Spec Version</strong></td><td>1.5.0</td></tr>
 <tr><td><strong>License</strong></td><td>Open-core — <a href="LICENSE">MIT</a> core; Super Intelligence is <a href="systems/superintelligence/LICENSE">proprietary</a></td></tr>
-<tr><td><strong>Total Skills</strong></td><td>226 with all bundles installed (74 Core + 152 Bundle)</td></tr>
+<tr><td><strong>Total Skills</strong></td><td>227 with all bundles installed (75 Core + 152 Bundle)</td></tr>
 <tr><td><strong>Slash Commands</strong></td><td>386 with all bundles — 44 Core (shipped) + 342 Super Intelligence (325 per-team + 17 cross-team, generated at install)</td></tr>
 <tr><td><strong>Specialized Agents</strong></td><td>35 (11 Core + 24 Bundle)</td></tr>
 <tr><td><strong>Expert Personas</strong></td><td>495 across 13 departments and 70 cells</td></tr>
@@ -721,7 +721,7 @@ npx cocosuperintelligence update
 <tr><td><strong>Telemetry / SaaS</strong></td><td>None — 100% local files</td></tr>
 </table>
 
-<sub>Core install ships 74 skills + 44 commands + 11 agents + 15 rules (144 active assets). The totals above are what a plain <code>bash install.sh</code> delivers: every bundle in the default allow-list (GSD, Brain, Cognee, HyperFrames, Super Intelligence, M0) is installed by default. <code>--core-only</code> installs the core set alone, and <code>--systems &lt;list&gt;</code> installs an explicit subset — including <code>reverse-skill</code>, the security-testing bundle, which stays opt-in and is never part of the default set. Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely. <code>adapters/INDEX.md</code> records what each adapter actually delivers, measured by running it.</sub>
+<sub>Core install ships 75 skills + 44 commands + 11 agents + 15 rules (145 active assets). The totals above are what a plain <code>bash install.sh</code> delivers: every bundle in the default allow-list (GSD, Brain, Cognee, HyperFrames, Super Intelligence, M0) is installed by default. <code>--core-only</code> installs the core set alone, and <code>--systems &lt;list&gt;</code> installs an explicit subset — including <code>reverse-skill</code>, the security-testing bundle, which stays opt-in and is never part of the default set. Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely. <code>adapters/INDEX.md</code> records what each adapter actually delivers, measured by running it.</sub>
 
 ---
 

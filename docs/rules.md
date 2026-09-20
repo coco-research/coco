@@ -135,18 +135,30 @@ stale count is a false statement about what a user gets when they install.
 
 ---
 
-## R8. No em dash and no section sign, in any artifact
+## R8. Artifacts this pipeline writes carry no em dash and no section sign
 
-**Enforced by:** convention, checked by eye at review. The rule outranks verbatim protection:
-when quoting text that contains one, change the punctuation.
+**Enforced by:** convention, checked by eye at review, which is practical because the files it
+covers are short enough to read in one sitting. The rule outranks verbatim protection: when
+quoting a source that contains one, change the punctuation.
+
+**Scope, stated precisely because the first version of this rule overstated it.** The
+repository's pre-existing content is **not** covered and is not being retrofitted: 39,149 em
+dashes across 2,452 tracked files, measured on 2026-09-19 with
+`git grep -o "\u2014" -- . | wc -l`. Most of them are in skill prose and generated rosters.
+Writing a repo-wide rule here would have been false on arrival, and a rule that is false on
+arrival teaches people to ignore the file that contains it.
+
+What the rule does cover, held to zero: commit messages, pull request bodies, and
+`docs/rules.md`, `docs/memory.md`, `docs/tasks.md`, `docs/prd.md`, `docs/design.md`, plus the
+artifacts under `.metagpt/`.
 
 **Measured:** 21 em dashes were found in `.metagpt/INDEX.md` (13) and `.metagpt/interview.md`
-(8) written after the rule was already in force, and replaced. The merged team-gate scripts
-carry zero.
+(8) written after the rule was already in force, and replaced. The team-gate scripts merged in
+PR #196 carry zero, and so do the documents added in PR #199.
 
-**Why it matters:** it is the owner's stated preference, applied to every artifact including
-documentation and commit bodies. A rule that is followed only in the files anyone happens to
-re-read is not a rule.
+**Why it matters:** it is the owner's stated preference for everything this pipeline produces,
+including documentation and commit bodies. A rule that is followed only in the files anyone
+happens to re-read is not a rule.
 
 ---
 

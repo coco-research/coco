@@ -13,18 +13,19 @@ Last updated: 2026-09-19.
 | # | Task | State | Where |
 | --- | --- | --- | --- |
 | 1 | Complete the Repo Standard document set: `docs/rules.md`, `prd.md`, `design.md`, `tasks.md`, `memory.md`, the PR template filename, and `.metagpt/` tracked | in review | PR #199 |
-| 2 | Self-evolution loop, tasks 1 to 15 | plan approved 2026-09-18, task 1 starts next | `.metagpt/plan.md` |
+| 2 | Evolution loop task 1: the `skill-evolution` skill tree and its count coupling | in review | PR #200 |
+| 3 | Evolution loop tasks 2 to 15 | next | `.metagpt/plan.md` |
 
-Task 2's first five tasks are the working set: land the skill tree with its count coupling,
-then `ledger.py`, `lane.py`, `observe.py`, `validate.py`. Tasks 10 and 11, persona generation
-and the first reviewed batch, are independent of the loop and can run in parallel with 2 to 9.
+Task 3's first four tasks are the working set: `ledger.py`, `lane.py`, `observe.py` and
+`validate.py`, in that order, because `propose.py` needs the lane adapter and the guard.
+Tasks 10 and 11, persona generation and the first reviewed batch, are independent of the loop
+and can run in parallel.
 
 ## Next
 
 | # | Task | Why now | Blocked on |
 | --- | --- | --- | --- |
-| 3 | Fix `.githooks/pre-push`: a false positive in the secret scan, then point it at this repo's real fast gates | the gate that landed in #198 runs the secret scan and `npm test`, which is `node bin/coco.js --help`. It runs no check that catches a regression here. Worse, its secret scan regex is `(api[_-]?key|secret|token).*=.*(sk-\|ghp_\|xox[baprs]-)`, and a single-line file mentioning a token count and the department `risk-compliance` matches on the `sk-` inside "risk". Reproduced on 2026-09-19 while wiring the hook: the gate blocked a push over its own repository's content. Fixed then by not committing the generated ripwire map, but the regex is still fragile, and the playbook's rule 10 is about exactly this: a tool that cries wolf gets ignored and then protects nothing. The real gates total about 4.2 s, measured, so they fit a pre-push budget | nothing |
-| 4 | `git config core.hooksPath .githooks` per clone | the hook file is committed, but nothing runs it until the path is wired. Local config, cannot be committed | human, one command per clone |
+| 4 | Fix `.githooks/pre-push`: a false positive in the secret scan, then point it at this repo's real fast gates | the gate that landed in #198 runs the secret scan and `npm test`, which is `node bin/coco.js --help`. It runs no check that catches a regression here. Worse, its secret scan regex is `(api[_-]?key|secret|token).*=.*(sk-\|ghp_\|xox[baprs]-)`, and a single-line file mentioning a token count and the department `risk-compliance` matches on the `sk-` inside "risk". Reproduced on 2026-09-19 while wiring the hook: the gate blocked a push over its own repository's content. Fixed then by not committing the generated ripwire map, but the regex is still fragile, and the playbook's rule 10 is about exactly this: a tool that cries wolf gets ignored and then protects nothing. The real gates total about 4.2 s, measured, so they fit a pre-push budget | nothing |
 | 5 | Persona scale toward 1000 | the owner asked for it on 2026-09-18; the roster is at 495 | tasks 10 and 11 of the loop plan |
 
 ## Deferred on purpose
@@ -55,6 +56,7 @@ Reviewed on 2026-09-19, kept here because a queue nobody tracks hides the work t
 
 | PR | Merged | What it delivered |
 | --- | --- | --- |
+| local | 2026-09-19 | `git config core.hooksPath .githooks` wired in the working clone, so the gate now runs on push. Local config, cannot be committed; every clone needs the one command |
 | #198 | 2026-09-20 | Tier 1 Repo Standard: `AGENTS.md`, `.githooks/pre-push`, PR template content |
 | #197 | 2026-09-19 | README hero and roster assets |
 | #196 | 2026-09-18 | Team gate retrofit: 60 commits, 182 files under `skills/team-gate/`, 14 fixture suites. CI green on `main` at 14/14. Closed register rows 16 to 18, 5c, 5e, 5f, 9b (three of four), 12c, 12d, 23b |

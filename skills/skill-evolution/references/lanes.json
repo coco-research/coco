@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "description": "The model lanes one evolution cycle may use, and the budget it must stay inside. Read by scripts/lane.py. The lane ids mirror the model routing policy in the owner's agent configuration, which pins five models and forbids substitution or cross-model fallback; if the two disagree, the policy wins and this file is wrong.",
+  "default_lane": "grok-4.6",
+  "cycle_budget": {
+    "max_proposals": 5,
+    "max_diff_lines_per_proposal": 120,
+    "max_tokens": 400000,
+    "max_calls": 12
+  },
+  "lanes": {
+    "stub": {
+      "id": "stub",
+      "adapter": "stub",
+      "model": "none",
+      "purpose": "Tests and dry runs. Reads a fixture response from disk and never touches the network. Every --self-test case uses this lane, which is why the suite needs no credentials."
+    },
+    "grok-4.6": {
+      "id": "grok-4.6",
+      "adapter": "xai",
+      "model": "grok-4.6",
+      "purpose": "Default lane for a real cycle. Volume work and long context, which is the shape of a 30 day window over the skill tree.",
+      "batch_only": false,
+      "requires_owner_authorisation": false
+    },
+    "glm-5.3-flash": {
+      "id": "glm-5.3-flash",
+      "adapter": "zai",
+      "model": "GLM-5.3-Flash",
+      "purpose": "Vision and multimodal. Available for a cycle that needs an image or a PDF read.",
+      "batch_only": false,
+      "requires_owner_authorisation": false
+    },
+    "deepseek-v4.1-flash": {
+      "id": "deepseek-v4.1-flash",
+      "adapter": "commandcode",
+      "model": "deepseek-v4.1-flash",
+      "purpose": "Hard reasoning and planning. Available when a cycle's candidates need adjudication rather than generation.",
+      "batch_only": false,
+      "requires_owner_authorisation": false
+    },
+    "union-alpha": {
+      "id": "union-alpha",
+      "adapter": "openrouter",
+      "model": "stealth/union-alpha",
+      "purpose": "Zero cost overflow for bulk generation.",
+      "batch_only": true,
+      "requires_owner_authorisation": false,
+      "limits": {
+        "max_input_tokens": 196608,
+        "measured_rate_limit": "5 of 8 rapid calls returned HTTP 429",
+        "reason": "Free and rate limited, so it is permitted for batch generation and not for interactive work. It is a stealth test model and can disappear without notice, so it must never be the only route for anything."
+      }
+    },
+    "gpt-6-astra": {
+      "id": "gpt-6-astra",
+      "adapter": "fastaitoken",
+      "model": "gpt-6-astra",
+      "purpose": "Expensive review only, after a human has read the candidates.",
+      "batch_only": false,
+      "requires_owner_authorisation": true,
+      "authorisation_note": "The adapter refuses this lane unless the current cycle explicitly names it and the owner has authorised that use. It is never a default and never selected automatically."
+    }
+  },
+  "forbidden": {
+    "any_lane_not_listed_above": "An unlisted lane is a policy violation, not a configuration gap. lane.py exits 2 rather than falling back.",
+    "cross_model_fallback": "A route may fall back to another subscription serving the SAME model. It may never reroute to a different model, because a result produced by a different model than the one recorded is unattributable."
+  }
+}

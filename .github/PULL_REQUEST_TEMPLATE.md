@@ -1,29 +1,29 @@
-## Summary
+<!-- Keep this short. A PR nobody can review in two minutes is not a small PR. -->
 
-What changed and why.
+## What this changes
 
-## Type of change
+<!-- One or two sentences. What behaves differently after this merges? -->
 
-- [ ] Bug fix
-- [ ] New skill / agent / command / workflow
-- [ ] New adapter (or adapter update)
-- [ ] Documentation
-- [ ] Refactor
-- [ ] Breaking change
+## Why
 
-## Adapter coverage
+<!-- The problem. Link the task in docs/tasks.md. -->
 
-If this PR adds or changes a skill/command/agent, confirm which adapters are tested:
+## How it was verified
 
-- [ ] claude-code
-- [ ] cursor
-- [ ] codex
-- [ ] generic (AGENTS.md)
+<!-- Paste the real command and its real output. Not a summary of it. -->
+
+```
+$ cargo test --workspace
+```
 
 ## Checklist
 
-- [ ] Frontmatter valid (`domain`, `supports`, `description`)
-- [ ] INDEX.md regenerated (`scripts/build-index.sh` if applicable)
-- [ ] No personal/company-specific content
-- [ ] Tested locally with at least one adapter
-- [ ] CHANGELOG.md updated under `[Unreleased]`
+- [ ] Gate is green (`git push` ran the hook)
+- [ ] `docs/tasks.md` updated if this closes or opens a task
+- [ ] `docs/memory.md` updated if this settled a decision or a dead end
+- [ ] No secret, key, or personal path added to any file, including docs
+- [ ] If a documented invariant changed, `docs/rules.md` is updated here too
+
+## Risk
+
+<!-- What could this break, and what is the rollback? -->

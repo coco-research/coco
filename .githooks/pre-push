@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# The gate. CI is a backstop; this is what actually holds.
+# Install once per clone:  git config core.hooksPath .githooks
+# Bypass only in a real emergency:  git push --no-verify  (and say why in the PR)
+set -uo pipefail
+fail() { printf '\nGATE BLOCKED  %s\n' "$1" >&2; exit 1; }
+step() { printf '  ... %s\n' "$1"; }
+ok()   { printf '  ok  %s\n' "$1"; }
+
+# 1. Secret scan of staged-ish tracked names (cheap)
+step "secret scan"
+if git grep -I -E '(api[_-]?key|secret|token).*=.*(sk-|ghp_|xox[baprs]-)' -- ':!.githooks' ':!*.md' >/dev/null 2>&1; then
+  fail "possible secret pattern in tracked files"
+fi
+ok "secrets"
+
+# 2. package scripts if present
+if [ -f package.json ]; then
+  if node -e "const p=require('./package.json'); process.exit(p.scripts&&p.scripts.lint?0:1)"; then
+    step "npm run lint"
+    npm run lint >/tmp/pre-push-lint.out 2>&1 || { tail -40 /tmp/pre-push-lint.out >&2; fail "lint failed"; }
+    ok "lint"
+  fi
+  if node -e "const p=require('./package.json'); process.exit(p.scripts&&(p.scripts.test||p.scripts['test:unit'])?0:1)"; then
+    step "npm test"
+    npm test >/tmp/pre-push-test.out 2>&1 || { tail -40 /tmp/pre-push-test.out >&2; fail "tests failed"; }
+    ok "test"
+  fi
+fi
+printf '\nGATE OK\n'

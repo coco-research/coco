@@ -121,6 +121,20 @@ link_workflows() {
   done
 }
 
+link_si_personas() {
+  # 495-persona board → ~/.grok/personas/<dept>/<slug>.md
+  local sys_dir=$1
+  local dept personas_dir f
+  for dept in "$sys_dir"/*/; do
+    personas_dir="${dept}personas"
+    [[ -d "$personas_dir" ]] || continue
+    for f in "$personas_dir"/*.md; do
+      [[ -f "$f" ]] || continue
+      link_dir "$f" "$TARGET_HOME/personas/$(basename "$dept")/$(basename "$f")"
+    done
+  done
+}
+
 link_si_team_skills() {
   local sys_dir=$1
   local team_dir
@@ -152,6 +166,7 @@ link_system() {
   #   build_meta_commands.py → cross-team orchestrator    (/SI, /SI-Orchestrate, /SI-<Verb>, 17)
   if [[ -f "$sys_dir/ai/scripts/build_commands.py" ]]; then
     link_si_team_skills "$sys_dir"
+    link_si_personas "$sys_dir"
     if command -v python3 >/dev/null 2>&1; then
       run env COCO_SI_COMMANDS_DIR="$TARGET_HOME/commands" python3 "$sys_dir/ai/scripts/build_commands.py"
       if [[ -f "$sys_dir/scripts/build_meta_commands.py" ]]; then

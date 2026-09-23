@@ -8,7 +8,8 @@
     "agents": "~/.grok/agents",
     "rules": "~/.grok/rules",
     "hooks": "~/.grok/hooks",
-    "mcp": "~/.grok/config.toml [mcp_servers.coco-platform]"
+    "mcp": "~/.grok/config.toml [mcp_servers.coco-platform]",
+    "personas": "~/.grok/personas"
   },
   "transforms": [
     "flatten commands/<ns>/<name>.md to <ns>:<name>.md because Grok does not recurse into subdirectories of ~/.grok/commands",

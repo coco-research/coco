@@ -1,0 +1,4 @@
+{
+  "name": "no-failures-phrase",
+  "description": "PR-BODY.md cites E1 (failed 0), backed; PR-BODY-2.md cites E2 (failed 2), a contradiction of the same 'no failures' phrase."
+}

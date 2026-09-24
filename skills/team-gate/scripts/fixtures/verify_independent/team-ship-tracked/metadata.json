@@ -1,0 +1,8 @@
+{
+  "name": "team-ship-tracked",
+  "expected_exit": 1,
+  "description": ".team-ship/ is tracked in git, cannot achieve independence",
+  "tracked_files": [
+    ".team-ship/EVIDENCE.md"
+  ]
+}

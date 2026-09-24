@@ -1,0 +1,3 @@
+{"seq": 1, "timestamp": "2026-01-01T00:00:00Z", "kind": "run-started", "detail": {"test": 0}, "prev_hash": null, "hash": "ab98b3d62a54ac49f40c6be912cb7e45d5861f60b2bbc244c805e9f03adceb49"}
+{"seq": 2, "timestamp": "2026-01-01T00:00:00Z", "kind": "gate-result", "detail": {"test": 1}, "prev_hash": "ab98b3d62a54ac49f40c6be912cb7e45d5861f60b2bbc244c805e9f03adceb49", "hash": "f89c3922e247ffd75428e173664b3542be2f3ed8a827b58bfbd0d105d1e6c00c"}
+{"seq": 3, "timestamp": "2026-01-01T00:00:00Z", "kind": "gate-result", "detail": {"test": 2}, "prev_hash": "f89c3922e247ffd75428e173664b3542be2f3ed8a827b58bfbd0d105d1e6c00c", "hash": "37efa9628f8ddfd1118f88e50b61e4ea5079415dcb1fcb82405a4e1f8537cfaf"}

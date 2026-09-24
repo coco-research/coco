@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0",
+  "phrases": {
+    "all tests pass": [
+      {"field": "failed", "value": 0},
+      {"field": "skipped", "value": 0},
+      {"field": "exit", "value": 0}
+    ],
+    "tests pass": [
+      {"field": "failed", "value": 0},
+      {"field": "skipped", "value": 0}
+    ],
+    "ruff clean": [
+      {"field": "exit", "value": 0}
+    ],
+    "mypy clean": [
+      {"field": "exit", "value": 0}
+    ],
+    "no regressions": [
+      {"field": "failed", "value": 0}
+    ],
+    "no failures": [
+      {"field": "failed", "value": 0}
+    ],
+    "zero failures": [
+      {"field": "failed", "value": 0}
+    ],
+    "no skips": [
+      {"field": "skipped", "value": 0}
+    ]
+  },
+  "mergeClaims": {
+    "merged": "ancestor-of-main",
+    "is merged": "ancestor-of-main",
+    "landed on main": "ancestor-of-main",
+    "ci green": "ci-mirror-pass",
+    "ci is green": "ci-mirror-pass",
+    "shipped": "pr-opened",
+    "deployed": "pr-opened"
+  },
+  "unbackedWords": [
+    "comprehensive",
+    "robust",
+    "idempotent",
+    "thoroughly",
+    "production-ready",
+    "fully tested",
+    "bulletproof",
+    "tested",
+    "verified",
+    "seamless",
+    "battle-tested",
+    "rock-solid"
+  ]
+}

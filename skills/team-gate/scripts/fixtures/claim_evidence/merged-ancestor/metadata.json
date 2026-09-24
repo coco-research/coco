@@ -1,0 +1,4 @@
+{
+  "name": "merged-ancestor",
+  "description": "HEAD is the tip of origin/main via a local bare remote, so the 'merged' claim holds and is not a finding."
+}

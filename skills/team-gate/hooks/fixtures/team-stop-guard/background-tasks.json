@@ -1,0 +1,10 @@
+{
+  "hook_event_name": "Stop",
+  "session_id": "fixture-session",
+  "permission_mode": "auto",
+  "stop_hook_active": false,
+  "background_tasks": [
+    { "id": "bg1", "type": "shell", "status": "running", "description": "long build" }
+  ],
+  "last_assistant_message": "Waiting on a background task."
+}

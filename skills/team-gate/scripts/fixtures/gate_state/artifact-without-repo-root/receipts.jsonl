@@ -1,0 +1,2 @@
+{"seq": 1, "timestamp": "2026-01-01T00:00:00Z", "kind": "run-started", "detail": {}, "prev_hash": null, "hash": "3f958bcdc96ac6cfbf133218c795365ddacc40048a2373243adeb71ef4e36681"}
+{"seq": 2, "timestamp": "2026-01-01T00:00:00Z", "kind": "artifact-written", "detail": {"path": "test.txt", "sha256": "3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7"}, "prev_hash": "3f958bcdc96ac6cfbf133218c795365ddacc40048a2373243adeb71ef4e36681", "hash": "774a4263e4dfc8a86663ac6d860a00d48d43aaf4209585dfcfe7874a2bf10c3c"}

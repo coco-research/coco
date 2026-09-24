@@ -50,7 +50,7 @@ This stage exists so that the most common invocation costs nothing.
 4. For `drift`, run the scan and evaluate its gate:
 
 ```bash
-python3 skills/arch-index/scripts/arch_drift.py --repo-root .
+python3 ~/.claude/skills/arch-index/scripts/arch_drift.py --repo-root .
 ```
 
 | Gate | Action |
@@ -77,7 +77,7 @@ Only if neither exists, spawn `repo-cartographer` under the three-phase read bud
 `skills/arch-index/references/tool-frugality.md`, writing `.arch/ANALYSIS.md` against the
 seven-section skeleton in `references/analysis-taxonomy.md`.
 
-Always run `python3 skills/arch-index/scripts/repo_tree.py --repo-root .` for the
+Always run `python3 ~/.claude/skills/arch-index/scripts/repo_tree.py --repo-root .` for the
 authoritative current tree. If it reports truncation, propagate that into
 `ecosystem.treeTruncated` and **do not run `drift`** — reconciling against a partial
 tree deletes components whose code is merely unseen.
@@ -99,7 +99,7 @@ that should exist?
 ### Validation gate: deterministic, and a real BLOCK
 
 ```bash
-python3 skills/arch-index/scripts/validate_index.py .arch/index.json --repo-root .
+python3 ~/.claude/skills/arch-index/scripts/validate_index.py .arch/index.json --repo-root .
 ```
 
 Capture the command line, the exit code, and the per-check table into

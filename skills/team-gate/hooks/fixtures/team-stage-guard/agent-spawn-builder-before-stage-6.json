@@ -1,0 +1,13 @@
+{
+  "hook_event_name": "PreToolUse",
+  "session_id": "fixture-session",
+  "permission_mode": "auto",
+  "tool_name": "Agent",
+  "tool_use_id": "toolu_agent_builder",
+  "tool_input": {
+    "description": "Build the feature",
+    "prompt": "Implement the change described in PLAN.md",
+    "subagent_type": "general-purpose",
+    "model": "sonnet"
+  }
+}

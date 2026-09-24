@@ -1,0 +1,6 @@
+{
+  "hook_event_name": "UserPromptSubmit",
+  "session_id": "fixture-session",
+  "permission_mode": "auto",
+  "prompt": "Approved, go ahead with option B"
+}

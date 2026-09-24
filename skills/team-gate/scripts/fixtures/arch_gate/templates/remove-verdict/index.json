@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0",
+  "pinnedCommit": "PLACEHOLDER",
+  "ecosystem": {"treeTruncated": false},
+  "components": [
+    {"id": "a", "title": "A", "codeOwnership": {"primary": {"directories": ["src/a"], "rationale": "a"}}, "connections": ["deleted"]},
+    {"id": "deleted", "title": "Deleted", "codeOwnership": {"primary": {"directories": ["src/deleted"], "rationale": "gone"}}, "connections": ["a"]},
+    {"id": "c", "title": "C", "codeOwnership": {"primary": {"directories": ["src/c"], "rationale": "c"}}, "connections": []}
+  ]
+}

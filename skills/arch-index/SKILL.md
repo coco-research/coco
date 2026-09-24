@@ -80,7 +80,7 @@ from formatting is why the structured output stays in schema.
 **Step 3 — validate.**
 
 ```bash
-python3 skills/arch-index/scripts/validate_index.py .arch/index.json --repo-root .
+python3 ~/.claude/skills/arch-index/scripts/validate_index.py .arch/index.json --repo-root .
 ```
 
 Exit zero proceeds. Non-zero loops back to step 2 with the exact violation lines,
@@ -103,7 +103,7 @@ untouched, so a broken index can never present itself as current.
 **Deterministic first, and often only.**
 
 ```bash
-python3 skills/arch-index/scripts/arch_drift.py --repo-root .
+python3 ~/.claude/skills/arch-index/scripts/arch_drift.py --repo-root .
 ```
 
 The script reads the pin, diffs it against HEAD with `--name-status` and `--numstat`,

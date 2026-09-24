@@ -1,0 +1,4 @@
+{
+  "name": "all-claims-backed",
+  "description": "Every claim in the results section is correctly backed by EVIDENCE.json."
+}

@@ -1,0 +1,2 @@
+{"seq": 1, "timestamp": "2026-01-01T00:00:00Z", "kind": "run-started", "detail": {}, "prev_hash": null, "hash": "3f958bcdc96ac6cfbf133218c795365ddacc40048a2373243adeb71ef4e36681"}
+{"seq": 2, "timestamp": "2026-01-01T00:00:00Z", "kind": "gate-result", "detail": {"gate": "x", "gate_file": "gates/", "gate_sha256": "abc"}, "prev_hash": "3f958bcdc96ac6cfbf133218c795365ddacc40048a2373243adeb71ef4e36681", "hash": "0333a7d0b6ac1b412463114237bf3c07f3968c0b81e40eba7ef04923195558fa"}

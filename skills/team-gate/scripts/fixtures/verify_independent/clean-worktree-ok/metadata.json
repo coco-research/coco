@@ -1,0 +1,5 @@
+{
+  "name": "clean-worktree-ok",
+  "expected_exit": 0,
+  "description": "Clean worktree with .team-ship/ gitignored"
+}

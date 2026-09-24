@@ -75,14 +75,14 @@ and do not mix them.
 Execute the validator and capture its command line, exit code, and per-check results:
 
 ```bash
-python3 skills/arch-index/scripts/validate_index.py .arch/index.json --repo-root .
+python3 ~/.claude/skills/arch-index/scripts/validate_index.py .arch/index.json --repo-root .
 ```
 
 For a drift assessment, additionally execute the deterministic scan, which makes no
 model calls:
 
 ```bash
-python3 skills/arch-index/scripts/arch_drift.py --repo-root .
+python3 ~/.claude/skills/arch-index/scripts/arch_drift.py --repo-root .
 ```
 
 The orchestrator runs these commands and captures the output itself. A subagent's
@@ -134,7 +134,7 @@ request body.
 - git rev-parse HEAD:  <sha>
 - currency: CURRENT | STALE
 
-## Gate: validate (`python3 skills/arch-index/scripts/validate_index.py .arch/index.json --repo-root .`)
+## Gate: validate (`python3 ~/.claude/skills/arch-index/scripts/validate_index.py .arch/index.json --repo-root .`)
 exit: 0
 
 | # | Check | Result | Detail |
@@ -144,7 +144,7 @@ exit: 0
 
 paths verified: <n> | paths missing: <n> | untracked-but-present: <n>
 
-## Gate: drift (`python3 skills/arch-index/scripts/arch_drift.py --repo-root .`)
+## Gate: drift (`python3 ~/.claude/skills/arch-index/scripts/arch_drift.py --repo-root .`)
 gate: NONE | INCREMENTAL | FULL_REBUILD
 files changed since pin: <n> | lines changed: <n>
 

@@ -675,4 +675,4 @@ When `.planning/` exists, the ship pipeline creates GSD-compatible artifacts.
 - Build stage uses `/gsd-execute-phase` conventions
 - Verify stage cross-references REQUIREMENTS.md
 
-ARGUMENTS: {{ARGUMENTS}}
+ARGUMENTS: $ARGUMENTS

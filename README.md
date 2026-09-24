@@ -1,11 +1,6 @@
 <div align="center">
 
-<br>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/logo-si.svg">
-  <img src="assets/logo-si-light.svg" alt="CoCo Super Intelligence" width="300">
-</picture>
+<img src="docs/readme/hero-dark.png" alt="CoCo Super Intelligence: two-arc mark on black, 495 personas, 226 skills, 386 commands" width="1600">
 
 # CoCo Super Intelligence
 
@@ -17,12 +12,13 @@ Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds
 
 <br>
 
-[![License: Open-core](https://img.shields.io/badge/License-Open--core-yellow.svg?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue?style=for-the-badge)](CHANGELOG.md)
-[![Skills](https://img.shields.io/badge/skills-226-emerald?style=for-the-badge)](skills/)
-[![Commands](https://img.shields.io/badge/commands-386-indigo?style=for-the-badge)](commands/)
-[![Personas](https://img.shields.io/badge/personas-495-violet?style=for-the-badge)](systems/superintelligence/)
-[![CI](https://img.shields.io/github/actions/workflow/status/coco-research/coco/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/coco-research/coco/actions)
+[![License: Open-core](https://img.shields.io/badge/License-Open--core-5b6169?labelColor=0a0a0a&style=flat-square)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.5.0-5b6169?labelColor=0a0a0a&style=flat-square)](CHANGELOG.md)
+[![npm](https://img.shields.io/npm/v/cocosuperintelligence?labelColor=0a0a0a&color=5b6169&style=flat-square)](https://www.npmjs.com/package/cocosuperintelligence)
+[![Skills](https://img.shields.io/badge/skills-226-5b6169?labelColor=0a0a0a&style=flat-square)](skills/)
+[![Commands](https://img.shields.io/badge/commands-386-5b6169?labelColor=0a0a0a&style=flat-square)](commands/)
+[![Personas](https://img.shields.io/badge/personas-495-5b6169?labelColor=0a0a0a&style=flat-square)](systems/superintelligence/)
+[![CI](https://img.shields.io/github/actions/workflow/status/coco-research/coco/ci.yml?branch=main&style=flat-square&label=CI&labelColor=0a0a0a&color=5b6169)](https://github.com/coco-research/coco/actions)
 
 <br>
 
@@ -58,10 +54,17 @@ Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds
 <a id="install"></a>
 
 ```bash
-git clone https://github.com/coco-research/coco.git && cd coco && bash install.sh
+npx cocosuperintelligence
+# or: npm i -g cocosuperintelligence && coco
+# alternate: git clone https://github.com/coco-research/coco.git && cd coco && bash install.sh
 ```
 
-<div align="center"><sub>90 seconds. That's all it takes to wire CoCo into your AI coding tool.</sub></div>
+<div align="center"><sub>A local governed department on Claude Code, Cursor, or Codex. Open-core. No telemetry.</sub></div>
+<div align="center"><sub>90 seconds. <code>npx</code> clones the pinned release (<code>v1.5.0</code>) into <code>./coco</code> and runs <code>install.sh</code>. Override with <code>--adapter cursor</code> or <code>--adapter claude-code</code>; narrow bundles with <code>--systems</code>. Per-adapter detail: <a href="docs/install.md">docs/install.md</a>.</sub></div>
+
+<p align="center">
+  <img src="docs/readme/local-first.png" alt="Install with npx, then a local session, then the board. Nothing leaves this machine." width="1600">
+</p>
 
 ---
 
@@ -76,6 +79,10 @@ Your model, your tool, your keys, your machine. When you see "parallel subagent 
 <a id="the-board"></a>
 
 ## ⭐ The Board — CoCo Super Intelligence
+
+<p align="center">
+  <img src="docs/readme/board-strip.png" alt="Board roster on black: 13 departments, 495 personas, type only" width="1600">
+</p>
 
 ### A cross-team advisory board of 495 world-class minds
 
@@ -540,14 +547,15 @@ bash install.sh
 **Via the npm CLI wrapper**
 
 ```bash
-# The package name is reserved as `cocosuperintelligence` but is not published
-# on npmjs.com yet (registry 404). Until it is, run the wrapper from a clone:
-git clone --branch v1.2.0 --depth 1 https://github.com/coco-research/coco.git
-node coco/bin/coco.js --help
+npx cocosuperintelligence
+# or globally (the binary is coco):
+npm i -g cocosuperintelligence && coco
+
+# flags pass through to install.sh
+npx cocosuperintelligence install --adapter cursor
+npx cocosuperintelligence install --systems superintelligence
 ```
-*Do not `npx cocosuperintelligence` until the name is published — npx would
-resolve whatever first claims that name. The wrapper clones the pinned
-release tag, not floating `main`.*
+*Same installer as a clone: the wrapper clones the pinned release tag (currently `v1.5.0`), not floating `main`, then runs `install.sh`.*
 
 </td>
 </tr>
@@ -559,6 +567,7 @@ release tag, not floating `main`.*
 ```bash
 # Every bundle installs by default. To take a subset instead:
 bash install.sh --systems gsd,brain
+bash install.sh --systems superintelligence
 
 # Or the core set alone, with no bundles:
 bash install.sh --core-only
@@ -589,11 +598,13 @@ bash install.sh --adapter generic
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/coco-research/coco/main/bin/coco-bootstrap.sh)
 ```
-*Clones the pinned release tag (currently `v1.2.0`, not floating `main`) to `~/.coco`, then pauses and prints the commit hash, date, and message so you can verify it against [that release](https://github.com/coco-research/coco/releases/tag/v1.2.0) before it runs `install.sh`. Type `y` to proceed. Pass `--yes` or set `COCO_BOOTSTRAP_YES=1` to skip the prompt for CI or scripted installs, and pass adapter/systems flags after `--`, e.g. `-- --adapter cursor --systems gsd`.*
+*Clones the pinned release tag (currently `v1.5.0`, not floating `main`) to `~/.coco`, then pauses and prints the commit hash, date, and message so you can verify it against [that release](https://github.com/coco-research/coco/releases/tag/v1.5.0) before it runs `install.sh`. Type `y` to proceed. Pass `--yes` or set `COCO_BOOTSTRAP_YES=1` to skip the prompt for CI or scripted installs, and pass adapter/systems flags after `--`, e.g. `-- --adapter cursor --systems gsd`.*
 
 </td>
 </tr>
 </table>
+
+Adapter flags, bundle selection, and per-adapter targets: [`docs/install.md`](docs/install.md).
 
 The install paths above are deliberately conservative: the remote bootstrap never runs code before you have confirmed the commit it cloned, `install.sh` only ever reads and symlinks files already inside the repository, the CI workflows that build and publish Coco pin their `setup-node` and `setup-python` Actions to commit SHAs rather than mutable tags, and nothing Coco does locally or in CI sends data anywhere. See [`SECURITY.md`](SECURITY.md) for the full policy.
 
@@ -620,16 +631,15 @@ git pull --ff-only && bash install.sh
 </td>
 <td width="50%" valign="top">
 
-**CLI wrapper (from a clone)**
+**npm CLI wrapper**
 
 ```bash
 # print version + check for updates
-node bin/coco.js version
+npx cocosuperintelligence version
 
 # apply an update (checks out the pinned release tag)
-node bin/coco.js update
+npx cocosuperintelligence update
 ```
-Until `cocosuperintelligence` is published on npmjs.com, do not use `npx` for this.
 
 </td>
 </tr>
@@ -697,7 +707,7 @@ Until `cocosuperintelligence` is published on npmjs.com, do not use `npx` for th
 ## Technical Specifications
 
 <table>
-<tr><td><strong>Spec Version</strong></td><td>1.2.0</td></tr>
+<tr><td><strong>Spec Version</strong></td><td>1.5.0</td></tr>
 <tr><td><strong>License</strong></td><td>Open-core — <a href="LICENSE">MIT</a> core; Super Intelligence is <a href="systems/superintelligence/LICENSE">proprietary</a></td></tr>
 <tr><td><strong>Total Skills</strong></td><td>226 with all bundles installed (74 Core + 152 Bundle)</td></tr>
 <tr><td><strong>Slash Commands</strong></td><td>386 with all bundles — 44 Core (shipped) + 342 Super Intelligence (325 per-team + 17 cross-team, generated at install)</td></tr>
@@ -759,6 +769,7 @@ Re-run the installer with the new adapter flag (e.g. <code>bash install.sh --ada
 
 CoCo is open-core: the core is MIT-licensed and contributions are welcome. The Super Intelligence System (`systems/superintelligence/`) is proprietary — see [`systems/superintelligence/LICENSE`](systems/superintelligence/LICENSE).
 
+- **Star the repo:** [coco-research/coco](https://github.com/coco-research/coco) is the measurable ask.
 - **Start here:** [`CONTRIBUTING.md`](CONTRIBUTING.md) — how to add a skill, command, agent, or adapter.
 - **Good first issues:** [help wanted / good first issue](https://github.com/coco-research/coco/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) — small, well-scoped tasks for newcomers.
 - **Report a bug / request a feature:** [open an issue](https://github.com/coco-research/coco/issues/new/choose).

@@ -1,0 +1,5 @@
+{
+  "name": "not-a-git-repo",
+  "expected_exit": 2,
+  "description": "Directory is not a git repository"
+}

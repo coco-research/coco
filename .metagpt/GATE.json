@@ -1,0 +1,14 @@
+{
+  "repo": ".",
+  "commit": "0aff57a59f09a8d55251dac65abc50e75347686d",
+  "intent": "Build the self-evolution loop: a 30-day cycle that observes how coco's skills and personas are actually used, proposes evidence-backed edits as branches and pull requests, and lands nothing without the owner's merge. Close out the team-gate retrofit that PR #196 carries so the gates that certify work are enforced rather than described, including the three deny runs now unblocked by the per-guard hook flag. Scale the persona roster toward a thousand entries through bulk generation that keeps every count gate green.",
+  "task_index": 0,
+  "index": "done",
+  "interview": "done",
+  "prd": "approved",
+  "arch": "approved",
+  "plan": "in_progress",
+  "build": "blocked",
+  "ripwire": "ok",
+  "cartographer": "ok"
+}

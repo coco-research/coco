@@ -1,0 +1,14 @@
+{
+  "hook_event_name": "PostToolUse",
+  "session_id": "fixture-session",
+  "permission_mode": "auto",
+  "tool_name": "Write",
+  "tool_use_id": "toolu_post_no_cert",
+  "tool_input": {
+    "file_path": ".team-ship/ARCHITECTURE-OPTIONS.md",
+    "content": "architecture options"
+  },
+  "tool_response": {
+    "filePath": ".team-ship/ARCHITECTURE-OPTIONS.md"
+  }
+}

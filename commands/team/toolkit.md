@@ -161,7 +161,7 @@ description: "Use when a /team run must pick the best tool or skill for a capabi
 
 ## Architecture Conformance
 
-- **Best tool:** `team:architecture.md` (the canonical Architecture Conformance Protocol), enforced by `skills/arch-index/scripts/validate_index.py`
+- **Best tool:** `team:architecture.md` (the canonical Architecture Conformance Protocol), enforced by `~/.claude/skills/arch-index/scripts/validate_index.py`
 - **Quality notes:**
   - Paths or it does not exist. The validator exit code is the gate, and a validator that cannot be executed is a BLOCK rather than a pass. There is deliberately no prose fallback, because a fallback an agent can narrate is the failure this gate exists to remove.
   - Structural drift only. A component whose datastore was swapped inside its own already-claimed directory produces no violation, so never report a clean drift result as evidence that the architecture is sound.

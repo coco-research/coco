@@ -6,7 +6,7 @@ Verdict: disagreement on the same committed change. Cause is selection scope plu
 
 A real git repository outside this worktree:
 
-`/Users/rijulkalra/.pi-desktop/scratch/c9fcf8c9-8e42-41ea-8296-89a875ebd619/task23b-crosscheck/repo`
+`<scratch>/task23b-crosscheck/repo`
 
 Two commits.
 
@@ -22,7 +22,7 @@ M	test_calc.py
 
 Working tree at measurement time: clean for tracked files. `gate_state.py start` then wrote `.team-ship/RUN` (untracked).
 
-Binary: `/Users/rijulkalra/.local/bin/ripwire` version `ripwire 0.6.1 (Release, AppleClang 16.0.0.16000026, emit=std::print, built_from=30f14a274)`. `--test-gate` exists. Flag shape from `ripwire --help=--test-gate` (exit 0, stderr empty):
+Binary: `~/.local/bin/ripwire` version `ripwire 0.6.1 (Release, AppleClang 16.0.0.16000026, emit=std::print, built_from=30f14a274)`. `--test-gate` exists. Flag shape from `ripwire --help=--test-gate` (exit 0, stderr empty):
 
 ```
     --test-gate[=F1,F2]        before a PR: name the tests to run and the untested blast radius; exit 4 if either is non-empty
@@ -40,14 +40,14 @@ Binary: `/Users/rijulkalra/.local/bin/ripwire` version `ripwire 0.6.1 (Release, 
 
 CWD for every command below:
 
-`/Users/rijulkalra/.pi-desktop/scratch/c9fcf8c9-8e42-41ea-8296-89a875ebd619/task23b-crosscheck/repo`
+`<scratch>/task23b-crosscheck/repo`
 
 ripwire XML stdout is one HTML comment plus one `<test-gate>` element. The comments contain U+2014. Those comments are not copied here. The `<test-gate>` element and the `--json` object are copied byte for byte. stderr was empty for every ripwire invoke.
 
 ### 1. Default `--test-gate` (clean tree, default = git diff)
 
 ```
-/Users/rijulkalra/.local/bin/ripwire /Users/rijulkalra/.pi-desktop/scratch/c9fcf8c9-8e42-41ea-8296-89a875ebd619/task23b-crosscheck/repo --test-gate
+~/.local/bin/ripwire <scratch>/task23b-crosscheck/repo --test-gate
 ```
 
 exit 0
@@ -59,25 +59,25 @@ exit 0
 ### 2. Same change, files named (the comparable invoke)
 
 ```
-/Users/rijulkalra/.local/bin/ripwire /Users/rijulkalra/.pi-desktop/scratch/c9fcf8c9-8e42-41ea-8296-89a875ebd619/task23b-crosscheck/repo --test-gate=calc.py,test_calc.py
+~/.local/bin/ripwire <scratch>/task23b-crosscheck/repo --test-gate=calc.py,test_calc.py
 ```
 
 exit 4 (tests obligation non-empty)
 
 ```
-<test-gate changed="2" impacted="0" tests="1" untested="0" shown_tests="1" tests_capped="0" shown_untested="0" untested_capped="0" script_gates_unmodelled="0" script_gates_registered="0" script_gates_mapped="0" script_gates_unresolved_dynamic="0" ccx_bar="15" graph_ambiguous="0" graph_unresolved="0" counts_floor="1" at="803759dad" root="/Users/rijulkalra/.pi-desktop/scratch/c9fcf8c9-8e42-41ea-8296-89a875ebd619/task23b-crosscheck/repo" next="python3 test_calc.py"><t p="test_calc.py" changed="1" partner="1" run="python3 test_calc.py"/></test-gate>
+<test-gate changed="2" impacted="0" tests="1" untested="0" shown_tests="1" tests_capped="0" shown_untested="0" untested_capped="0" script_gates_unmodelled="0" script_gates_registered="0" script_gates_mapped="0" script_gates_unresolved_dynamic="0" ccx_bar="15" graph_ambiguous="0" graph_unresolved="0" counts_floor="1" at="803759dad" root="<scratch>/task23b-crosscheck/repo" next="python3 test_calc.py"><t p="test_calc.py" changed="1" partner="1" run="python3 test_calc.py"/></test-gate>
 ```
 
 ### 3. Same files, `--json`
 
 ```
-/Users/rijulkalra/.local/bin/ripwire /Users/rijulkalra/.pi-desktop/scratch/c9fcf8c9-8e42-41ea-8296-89a875ebd619/task23b-crosscheck/repo --test-gate=calc.py,test_calc.py --json
+~/.local/bin/ripwire <scratch>/task23b-crosscheck/repo --test-gate=calc.py,test_calc.py --json
 ```
 
 exit 4
 
 ```
-{"changed":2,"impacted":0,"tests":1,"untested":0,"shown_tests":1,"tests_capped":false,"shown_untested":0,"untested_capped":false,"script_gates_unmodelled":0,"script_gates_registered":0,"script_gates_mapped":0,"script_gates_unresolved_dynamic":0,"ccx_bar":15,"graph_ambiguous":0,"graph_unresolved":0,"counts_floor":true,"at":"803759dad","root":"/Users/rijulkalra/.pi-desktop/scratch/c9fcf8c9-8e42-41ea-8296-89a875ebd619/task23b-crosscheck/repo","next":"python3 test_calc.py","tests_to_run":[{"p":"test_calc.py","changed":true,"partner":true,"run":"python3 test_calc.py"}],"untested_blast_radius":[]}
+{"changed":2,"impacted":0,"tests":1,"untested":0,"shown_tests":1,"tests_capped":false,"shown_untested":0,"untested_capped":false,"script_gates_unmodelled":0,"script_gates_registered":0,"script_gates_mapped":0,"script_gates_unresolved_dynamic":0,"ccx_bar":15,"graph_ambiguous":0,"graph_unresolved":0,"counts_floor":true,"at":"803759dad","root":"<scratch>/task23b-crosscheck/repo","next":"python3 test_calc.py","tests_to_run":[{"p":"test_calc.py","changed":true,"partner":true,"run":"python3 test_calc.py"}],"untested_blast_radius":[]}
 ```
 
 ### 4. prove_red enumerate on the same two commits
@@ -85,8 +85,8 @@ exit 4
 Start:
 
 ```
-TEAM_STATE_ROOT=/Users/rijulkalra/.pi-desktop/scratch/c9fcf8c9-8e42-41ea-8296-89a875ebd619/task23b-crosscheck/state
-/usr/local/bin/python3 /Users/rijulkalra/.pi-desktop/scratch/c9fcf8c9-8e42-41ea-8296-89a875ebd619/gate-wt/skills/team-gate/scripts/gate_state.py start /Users/rijulkalra/.pi-desktop/scratch/c9fcf8c9-8e42-41ea-8296-89a875ebd619/task23b-crosscheck/repo ship
+TEAM_STATE_ROOT=<scratch>/task23b-crosscheck/state
+/usr/local/bin/python3 <scratch>/gate-wt/skills/team-gate/scripts/gate_state.py start <scratch>/task23b-crosscheck/repo ship
 ```
 
 exit 0, stdout `20260918-144703-266`
@@ -94,8 +94,8 @@ exit 0, stdout `20260918-144703-266`
 Enumerate (how prove_red selects tests: `changed_paths` then `do_enumerate` walks A/M/R `.py` files, `classify_path`, then `test_functions` for new or AST-changed `test_*` names):
 
 ```
-TEAM_STATE_ROOT=/Users/rijulkalra/.pi-desktop/scratch/c9fcf8c9-8e42-41ea-8296-89a875ebd619/task23b-crosscheck/state
-/usr/local/bin/python3 /Users/rijulkalra/.pi-desktop/scratch/c9fcf8c9-8e42-41ea-8296-89a875ebd619/gate-wt/skills/team-gate/scripts/prove_red.py enumerate --base f3db5808d4bc163f2f8ad74a423cddc0be6d671c --repo-root /Users/rijulkalra/.pi-desktop/scratch/c9fcf8c9-8e42-41ea-8296-89a875ebd619/task23b-crosscheck/repo
+TEAM_STATE_ROOT=<scratch>/task23b-crosscheck/state
+/usr/local/bin/python3 <scratch>/gate-wt/skills/team-gate/scripts/prove_red.py enumerate --base f3db5808d4bc163f2f8ad74a423cddc0be6d671c --repo-root <scratch>/task23b-crosscheck/repo
 ```
 
 exit 0

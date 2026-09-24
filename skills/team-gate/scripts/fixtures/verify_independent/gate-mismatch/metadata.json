@@ -1,0 +1,5 @@
+{
+  "name": "gate-mismatch",
+  "expected_exit": 1,
+  "description": "Builder passed=10/skipped=0, verifier passed=9/skipped=1"
+}

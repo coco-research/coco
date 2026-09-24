@@ -1,0 +1,16 @@
+{
+  "hook_event_name": "PostToolUse",
+  "session_id": "fixture-session",
+  "permission_mode": "auto",
+  "tool_name": "Bash",
+  "tool_use_id": "toolu_pr_all_green",
+  "tool_input": {
+    "command": "gh pr create --title \"ship it\" --body \"see EVIDENCE.md\"",
+    "description": "Open the PR"
+  },
+  "tool_response": {
+    "stdout": "https://github.com/example/repo/pull/42\n",
+    "stderr": "",
+    "interrupted": false
+  }
+}

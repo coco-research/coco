@@ -1,0 +1,16 @@
+{
+  "hook_event_name": "PostToolUse",
+  "session_id": "fixture-session",
+  "permission_mode": "auto",
+  "tool_name": "Agent",
+  "tool_use_id": "toolu_agent_researcher",
+  "tool_input": {
+    "description": "Research the competitive landscape",
+    "prompt": "Investigate how competitors price this feature",
+    "subagent_type": "search-specialist",
+    "model": "sonnet"
+  },
+  "tool_response": {
+    "result": "done"
+  }
+}

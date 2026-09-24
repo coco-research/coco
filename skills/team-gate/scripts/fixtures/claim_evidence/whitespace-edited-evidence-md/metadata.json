@@ -1,0 +1,4 @@
+{
+  "name": "whitespace-edited-evidence-md",
+  "description": "EVIDENCE.md carries one trailing space; --check treats whitespace as a difference."
+}

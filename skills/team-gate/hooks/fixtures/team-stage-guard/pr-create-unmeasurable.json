@@ -1,0 +1,11 @@
+{
+  "hook_event_name": "PreToolUse",
+  "session_id": "fixture-session",
+  "permission_mode": "auto",
+  "tool_name": "Bash",
+  "tool_use_id": "toolu_pr_unmeasurable",
+  "tool_input": {
+    "command": "gh pr create --title \"ship it\" --body \"see EVIDENCE.md\"",
+    "description": "Open the PR"
+  }
+}

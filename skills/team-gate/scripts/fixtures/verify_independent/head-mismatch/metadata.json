@@ -1,0 +1,5 @@
+{
+  "name": "head-mismatch",
+  "expected_exit": 1,
+  "description": "Builder and verifier gate files have different HEAD SHAs"
+}

@@ -1,0 +1,4 @@
+{
+  "name": "duplicate-evidence-id",
+  "description": "Two entries share id E1 in EVIDENCE.json; every consumer must exit 2 before doing any other work."
+}

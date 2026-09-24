@@ -1,0 +1,2 @@
+{"seq": 1, "timestamp": "2026-01-01T00:00:00Z", "kind": "run-started", "detail": {}, "prev_hash": null, "hash": "3f958bcdc96ac6cfbf133218c795365ddacc40048a2373243adeb71ef4e36681"}
+{"seq": 2, "timestamp": "2026-01-01T00:00:00Z", "kind": "artifact-written", "detail": {"path": "EVIDENCE.md", "sha256": "cc52c0d6367fb9edaa99d90776d0b4d9a052e81f1cebe495b85480344e53f455"}, "prev_hash": "3f958bcdc96ac6cfbf133218c795365ddacc40048a2373243adeb71ef4e36681", "hash": "a048f8677dd51b5627ed354072b34ce688f2bd44194f4c881ccac002a5838c39"}

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self-evolution loop: architecture</title>
+<style>
+  :root {
+    --paper: #ffffff;
+    --paper-2: #f4f8fd;
+    --ink: #0b1220;
+    --muted: #5a6b85;
+    --soft: #8fa0b8;
+    --rule: rgba(11, 18, 32, 0.10);
+    --accent: #0a84ff;
+    --accent-tint: rgba(10, 132, 255, 0.10);
+    --glass: rgba(255, 255, 255, 0.66);
+    --glass-edge: rgba(255, 255, 255, 0.85);
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    padding: clamp(16px, 3vw, 44px) clamp(12px, 3vw, 40px) clamp(28px, 5vw, 56px);
+    background:
+      radial-gradient(1200px 620px at 12% -8%, #e8f2ff 0%, rgba(232, 242, 255, 0) 62%),
+      radial-gradient(980px 520px at 96% 4%, #eef5ff 0%, rgba(238, 245, 255, 0) 58%),
+      var(--paper-2);
+    color: var(--ink);
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  header.sheet {
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid var(--glass-edge);
+    border-bottom-color: var(--rule);
+    border-radius: 14px;
+    padding: clamp(16px, 2.4vw, 26px) clamp(16px, 2.6vw, 28px);
+  }
+  .eyebrow {
+    margin: 0 0 6px;
+    font-family: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  h1 {
+    margin: 0;
+    font-family: 'Instrument Serif', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(26px, 4.4vw, 40px);
+    line-height: 1.1;
+  }
+  .sub { margin: 8px 0 0; color: var(--muted); font-size: clamp(13px, 1.7vw, 15px); max-width: 78ch; }
+  figure { margin: clamp(18px, 3vw, 30px) 0 0; }
+  .frame {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: clamp(4px, 1.4vw, 14px);
+    overflow-x: auto;
+  }
+  svg.diagram { display: block; width: 100%; height: auto; min-width: 700px; }
+  figcaption {
+    margin-top: 10px;
+    font-family: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+  }
+  .cards { display: grid; gap: 14px; margin-top: clamp(18px, 3vw, 28px); grid-template-columns: 1.15fr 1fr 0.9fr; }
+  @media (max-width: 900px) { .cards { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 620px) { .cards { grid-template-columns: 1fr; } }
+  .card {
+    background: rgba(255, 255, 255, 0.72);
+    -webkit-backdrop-filter: blur(12px) saturate(1.3);
+    backdrop-filter: blur(12px) saturate(1.3);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .card h3 { margin: 0 0 8px; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
+  .dot.coral { background: var(--accent); }
+  .dot.ink { background: var(--ink); }
+  .dot.muted { background: var(--soft); }
+  .card p, .card li { margin: 0; font-size: 13px; color: var(--muted); }
+  .card ul { margin: 0; padding-left: 18px; }
+  .card li + li { margin-top: 5px; }
+  code { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: var(--ink); }
+  footer {
+    margin-top: clamp(20px, 3vw, 30px);
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="sheet">
+    <p class="eyebrow">coco / architecture / stage 3</p>
+    <h1>The self-evolution loop</h1>
+    <p class="sub">One cycle: measure first with no model, let a model write only inside a proposal, refuse anything the guards do not clear, then let one human merge decide. Nothing reaches main without that merge.</p>
+  </header>
+
+  <figure>
+    <div class="frame">
+      <svg class="diagram" viewBox="0 0 1000 620" role="img" aria-labelledby="evolution-title evolution-desc" preserveAspectRatio="xMidYMid meet">
+        <title id="evolution-title">Self-evolution loop architecture for coco</title>
+        <desc id="evolution-desc">A cycle with nine stages: signal sources feed a deterministic observer that writes a pinned signal file, a proposer is the only stage where a model writes, its candidate edits are checked by a guard that enforces scope, caps and count coupling, the accepted edits become one branch and one pull request, a human reviews and merges, and the outcome is recorded in a committed ledger that feeds the next window.</desc>
+
+        <defs>
+          <marker id="evolution-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#5a6b85"/>
+          </marker>
+          <marker id="evolution-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#0a84ff"/>
+          </marker>
+        </defs>
+
+        <rect width="1000" height="620" fill="#ffffff"/>
+
+        <!-- connectors, drawn before the boxes -->
+        <line x1="208" y1="120" x2="244" y2="120" stroke="#5a6b85" stroke-width="1.2" marker-end="url(#evolution-arrow)"/>
+        <line x1="408" y1="120" x2="444" y2="120" stroke="#5a6b85" stroke-width="1.2" marker-end="url(#evolution-arrow)"/>
+        <line x1="632" y1="120" x2="668" y2="120" stroke="#5a6b85" stroke-width="1.2" marker-end="url(#evolution-arrow)"/>
+        <line x1="772" y1="152" x2="772" y2="244" stroke="#0a84ff" stroke-width="1.2" marker-end="url(#evolution-arrow-accent)"/>
+        <line x1="672" y1="280" x2="628" y2="280" stroke="#0a84ff" stroke-width="1.2" marker-end="url(#evolution-arrow-accent)"/>
+        <line x1="432" y1="280" x2="396" y2="280" stroke="#5a6b85" stroke-width="1.2" marker-end="url(#evolution-arrow)"/>
+        <line x1="208" y1="280" x2="180" y2="280" stroke="#5a6b85" stroke-width="1.2" marker-end="url(#evolution-arrow)"/>
+        <line x1="528" y1="312" x2="528" y2="384" stroke="#5a6b85" stroke-width="1.2" marker-end="url(#evolution-arrow)"/>
+        <line x1="96" y1="248" x2="96" y2="156" stroke="#8fa0b8" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#evolution-arrow)"/>
+
+        <!-- arrow labels, each with an opaque mask and a visible gap from its connector -->
+        <rect x="786" y="180" width="76" height="12" rx="2" fill="#ffffff"/>
+        <text x="824" y="189" fill="#5a6b85" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">MODEL CALL</text>
+        <rect x="542" y="336" width="72" height="12" rx="2" fill="#ffffff"/>
+        <text x="578" y="345" fill="#5a6b85" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">RECORD</text>
+        <rect x="116" y="182" width="96" height="12" rx="2" fill="#ffffff"/>
+        <text x="164" y="191" fill="#8fa0b8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">NEXT WINDOW</text>
+
+        <!-- node 1: sources -->
+        <rect x="32" y="88" width="176" height="64" rx="6" fill="#f3f6fa"/>
+        <rect x="32" y="88" width="176" height="64" rx="6" fill="rgba(90,107,133,0.10)" stroke="#8fa0b8" stroke-width="1"/>
+        <rect x="40" y="94" width="52" height="12" rx="2" fill="transparent" stroke="rgba(143,160,184,0.40)" stroke-width="0.8"/>
+        <text x="66" y="103" fill="rgba(90,107,133,0.9)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">INPUT</text>
+        <text x="120" y="126" fill="#0b1220" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Signal sources</text>
+        <text x="120" y="141" fill="#5a6b85" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">log, window, receipts</text>
+
+        <!-- node 2: observe -->
+        <rect x="248" y="88" width="160" height="64" rx="6" fill="#ffffff"/>
+        <rect x="248" y="88" width="160" height="64" rx="6" fill="#ffffff" stroke="#0b1220" stroke-width="1"/>
+        <rect x="256" y="94" width="62" height="12" rx="2" fill="transparent" stroke="rgba(11,18,32,0.40)" stroke-width="0.8"/>
+        <text x="287" y="103" fill="rgba(11,18,32,0.8)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">BACKEND</text>
+        <text x="328" y="126" fill="#0b1220" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">observe.py</text>
+        <text x="328" y="141" fill="#5a6b85" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">no model, deterministic</text>
+
+        <!-- node 3: signals store -->
+        <rect x="448" y="88" width="184" height="64" rx="6" fill="#ffffff"/>
+        <rect x="448" y="88" width="184" height="64" rx="6" fill="rgba(11,18,32,0.05)" stroke="#5a6b85" stroke-width="1"/>
+        <rect x="456" y="94" width="42" height="12" rx="2" fill="transparent" stroke="rgba(90,107,133,0.40)" stroke-width="0.8"/>
+        <text x="477" y="103" fill="rgba(90,107,133,0.9)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">STORE</text>
+        <text x="540" y="126" fill="#0b1220" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">signals/&lt;cycle&gt;.json</text>
+        <text x="540" y="141" fill="#5a6b85" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">pinned to one commit</text>
+
+        <!-- node 4: propose, focal -->
+        <rect x="672" y="88" width="200" height="64" rx="6" fill="#ffffff"/>
+        <rect x="672" y="88" width="200" height="64" rx="6" fill="rgba(10,132,255,0.10)" stroke="#0a84ff" stroke-width="1.2"/>
+        <rect x="680" y="94" width="62" height="12" rx="2" fill="transparent" stroke="rgba(10,132,255,0.50)" stroke-width="0.8"/>
+        <text x="711" y="103" fill="rgba(10,132,255,0.9)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">BACKEND</text>
+        <text x="772" y="126" fill="#0b1220" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">propose.py + lane</text>
+        <text x="772" y="141" fill="#5a6b85" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">the only model write</text>
+
+        <!-- node 5: proposals store -->
+        <rect x="672" y="248" width="200" height="64" rx="6" fill="#ffffff"/>
+        <rect x="672" y="248" width="200" height="64" rx="6" fill="rgba(11,18,32,0.05)" stroke="#5a6b85" stroke-width="1"/>
+        <rect x="680" y="254" width="42" height="12" rx="2" fill="transparent" stroke="rgba(90,107,133,0.40)" stroke-width="0.8"/>
+        <text x="701" y="263" fill="rgba(90,107,133,0.9)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">STORE</text>
+        <text x="772" y="286" fill="#0b1220" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">proposals/&lt;id&gt;.json</text>
+        <text x="772" y="301" fill="#5a6b85" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">plus .patch, with citations</text>
+
+        <!-- node 6: validate, focal -->
+        <rect x="432" y="248" width="192" height="64" rx="6" fill="#ffffff"/>
+        <rect x="432" y="248" width="192" height="64" rx="6" fill="rgba(10,132,255,0.10)" stroke="#0a84ff" stroke-width="1.2"/>
+        <rect x="440" y="254" width="62" height="12" rx="2" fill="transparent" stroke="rgba(10,132,255,0.50)" stroke-width="0.8"/>
+        <text x="471" y="263" fill="rgba(10,132,255,0.9)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">BACKEND</text>
+        <text x="528" y="286" fill="#0b1220" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">validate.py</text>
+        <text x="528" y="301" fill="#5a6b85" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">scope, caps, count coupling</text>
+
+        <!-- node 7: branch and PR -->
+        <rect x="216" y="248" width="176" height="64" rx="6" fill="#ffffff"/>
+        <rect x="216" y="248" width="176" height="64" rx="6" fill="rgba(11,18,32,0.03)" stroke="rgba(11,18,32,0.30)" stroke-width="1"/>
+        <rect x="224" y="254" width="62" height="12" rx="2" fill="transparent" stroke="rgba(11,18,32,0.30)" stroke-width="0.8"/>
+        <text x="255" y="263" fill="rgba(11,18,32,0.7)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">EXTERNAL</text>
+        <text x="304" y="286" fill="#0b1220" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">branch + one PR</text>
+        <text x="304" y="301" fill="#5a6b85" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">never main, never merge</text>
+
+        <!-- node 8: human gate -->
+        <rect x="16" y="248" width="160" height="64" rx="6" fill="#ffffff"/>
+        <rect x="16" y="248" width="160" height="64" rx="6" fill="rgba(10,132,255,0.05)" stroke="rgba(10,132,255,0.50)" stroke-width="1" stroke-dasharray="4,4"/>
+        <rect x="24" y="254" width="52" height="12" rx="2" fill="transparent" stroke="rgba(10,132,255,0.40)" stroke-width="0.8"/>
+        <text x="50" y="263" fill="rgba(10,132,255,0.9)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">HUMAN</text>
+        <text x="96" y="286" fill="#0b1220" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">owner review</text>
+        <text x="96" y="301" fill="#5a6b85" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">merge or reject</text>
+
+        <!-- node 9: ledger -->
+        <rect x="432" y="388" width="192" height="64" rx="6" fill="#ffffff"/>
+        <rect x="432" y="388" width="192" height="64" rx="6" fill="rgba(11,18,32,0.05)" stroke="#5a6b85" stroke-width="1"/>
+        <rect x="440" y="394" width="42" height="12" rx="2" fill="transparent" stroke="rgba(90,107,133,0.40)" stroke-width="0.8"/>
+        <text x="461" y="403" fill="rgba(90,107,133,0.9)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">STORE</text>
+        <text x="528" y="426" fill="#0b1220" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">ledger.jsonl + CYCLE.md</text>
+        <text x="528" y="441" fill="#5a6b85" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">proposed, merged, rejected</text>
+
+        <!-- legend, horizontal strip after the nodes -->
+        <line x1="32" y1="524" x2="968" y2="524" stroke="rgba(11,18,32,0.10)" stroke-width="0.8"/>
+        <text x="32" y="548" fill="#5a6b85" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+        <rect x="118" y="539" width="22" height="11" rx="2" fill="rgba(10,132,255,0.10)" stroke="#0a84ff" stroke-width="1"/>
+        <text x="148" y="548" fill="#5a6b85" font-size="8" font-family="'Geist Mono', monospace">GUARDED STAGE</text>
+        <rect x="272" y="539" width="22" height="11" rx="2" fill="rgba(11,18,32,0.05)" stroke="#5a6b85" stroke-width="1"/>
+        <text x="302" y="548" fill="#5a6b85" font-size="8" font-family="'Geist Mono', monospace">ARTIFACT</text>
+        <rect x="400" y="539" width="22" height="11" rx="2" fill="#ffffff" stroke="#0b1220" stroke-width="1"/>
+        <text x="430" y="548" fill="#5a6b85" font-size="8" font-family="'Geist Mono', monospace">PROCESS</text>
+        <rect x="524" y="539" width="22" height="11" rx="2" fill="rgba(10,132,255,0.05)" stroke="rgba(10,132,255,0.50)" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="554" y="548" fill="#5a6b85" font-size="8" font-family="'Geist Mono', monospace">HUMAN GATE</text>
+        <line x1="668" y1="545" x2="690" y2="545" stroke="#8fa0b8" stroke-width="1.2" stroke-dasharray="5,4"/>
+        <text x="698" y="548" fill="#5a6b85" font-size="8" font-family="'Geist Mono', monospace">FEEDS THE NEXT CYCLE</text>
+        <text x="32" y="576" fill="#8fa0b8" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.04em">EVERY STAGE EXITS 0 PASS, 1 BLOCKED, 2 UNRUNNABLE. PERSONA BATCHES ENTER AT validate.py, THEY DO NOT FORK THE PIPELINE.</text>
+      </svg>
+    </div>
+    <figcaption>One cycle, nine stages, one human decision. The two accented stages are the only places that need trust: where a model writes, and where its output is checked.</figcaption>
+  </figure>
+
+  <div class="cards">
+    <div class="card">
+      <p class="eyebrow">Why this shape</p>
+      <div><h3><span class="dot coral"></span>Model writes once, at one stage</h3></div>
+      <ul>
+        <li>observe, validate, open and record are deterministic Python with no model call, so they are testable without the network.</li>
+        <li>The model's output is data, a proposal file, never a direct edit to the tree.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">What stops it</p>
+      <div><h3><span class="dot coral"></span>Guards before branches</h3></div>
+      <ul>
+        <li>Scope: anything outside the skill tree is refused.</li>
+        <li>Caps: proposals per cycle, diff size per proposal, spend per cycle.</li>
+        <li>Counts: the repository's own checkers must pass, so a count cannot move alone.</li>
+        <li>A rejected diff is not proposed again for two cycles.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">Cadence and secrets</p>
+      <div><h3><span class="dot muted"></span>Dry run in CI, real run with keys</h3></div>
+      <ul>
+        <li>Monthly workflow runs <code>--dry-run</code>: no model credentials in GitHub.</li>
+        <li>The real cycle runs where credentials exist, today the owner's machine.</li>
+        <li>An empty cycle is a valid result, not a failure.</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>coco / .metagpt/arch-diagram.html / stage 3 architecture, awaiting the owner's approval / palette: electric blue on white, glass surfaces, no shadows</footer>
+</div>
+</body>
+</html>

@@ -117,8 +117,7 @@ Examples:
 
 Repo: https://github.com/coco-research/coco
 Install clones the ${PINNED_TAG} release tag, not floating main.
-The npm name cocosuperintelligence is reserved; until it is published, prefer
-git clone or bin/coco-bootstrap.sh over npx.
+npx cocosuperintelligence is the published path (clones the pin, then install).
 `);
 }
 

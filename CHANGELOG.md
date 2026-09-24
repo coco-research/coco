@@ -12,7 +12,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - **`stop-server.sh` no longer treats `/tmp/../…` as under `/tmp`.** The old `[[ $path == /tmp/* ]]` glob matched a traversal prefix and then `rm -rf` the directory. The path is canonicalized with `pwd -P` and compared against the real `/tmp` root; only a session directory under that root is deleted. PIDs must be numeric before `kill`.
 - **Uninstall no longer glob-matches any path containing the clone name.** `find -lname '*${dir}*'` deleted links into `coco-research` / `coco-connect` when the clone was `coco`. The CLI and the docs now match the resolved clone path plus a trailing slash.
 - **Skills no longer instruct `curl | sh` or `npx skills add -y`.** `browser-automation` and `ai-marketing-videos` fetch the inference.sh installer to a file for review; `find-skills` installs without `-y` and still requires an explicit yes that names the package.
-- **CLI clone is pinned to the release tag, not floating `main`.** `bin/coco.js` and `bin/coco-bootstrap.sh` clone `v1.2.0` (kept in sync with `package.json`). Existing branch checkouts still `git pull --ff-only` so a tagged pin cannot downgrade a `main` tree.
+- **CLI clone is pinned to the release tag, not floating `main`.** `bin/coco.js` and `bin/coco-bootstrap.sh` clone `v1.5.0` (kept in sync with `package.json`). Existing branch checkouts still `git pull --ff-only` so a tagged pin cannot downgrade a `main` tree.
 - **Documented that `cocosuperintelligence` is unpublished.** The name 404s on npmjs.com; README, `coco-cli`, and `SECURITY.md` tell users not to `npx` it until it is published.
 
 ### Added
@@ -48,6 +48,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - **An architecture-conformance hard gate in `/team ship`,** alongside the existing seven. Because `.arch/` is committed rather than gitignored, this gate also runs inside the Stage 11 clean checkout; an untracked index would have made it silently unrunnable in the one path the pipeline designates as authoritative.
 - **Registered six architecture-relevant assets in the team toolkit registry,** each of which existed in the repository but was invisible to every `/team` run because Layer 2 agents receive only registry excerpts and never browse the filesystem: `gsd-map-codebase` for codebase mapping, the gitnexus MCP for code-graph queries, `c4-architecture` for diagrams, `api-design-principles` for interface contracts, `/util:architecture-review` for audits, and `/util:create-architecture-documentation` for the formal document suite. Also clarified that the existing Architecture Review Decks entry is a presentation generator rather than an architecture tool.
 - **Credited devildev by lak7 (Apache-2.0)** in `CREDITS.md` for the reverse-architecture design that the forthcoming `arch-index` skill builds on.
+
+---
+
+## [1.5.0] — 2026-09-16
+
+### Changed
+
+- **Release bump 1.2.0 → 1.5.0.** Package, plugin, CLI pin, README badge/clone/bootstrap text, and Spec Version now read 1.5.0. No product-feature delta in this cut.
 
 ---
 

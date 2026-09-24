@@ -66,6 +66,11 @@ npx cocosuperintelligence
   <img src="docs/readme/local-first.png" alt="Install with npx, then a local session, then the board. Nothing leaves this machine." width="1600">
 </p>
 
+<p align="center">
+  <img src="docs/assets/dogfood-si.gif" alt="Real local meta_select.py Stage-A run on this Mac — degraded: keyword fallback (embedding endpoint unavailable)" width="720" />
+</p>
+<div align="center"><sub><em>Honest local dogfood, 2026-09-15: <code>python3 systems/superintelligence/scripts/meta_select.py</code> on this Mac. Embedding endpoint was down (<code>Connection refused</code>), so this is the <strong>degraded: keyword fallback</strong> path — <code>method: keyword</code>, <code>degraded: true</code> — labeled on-screen, not dressed up as embed cosine.</em></sub></div>
+
 ---
 
 ## What CoCo Is (and Isn't)

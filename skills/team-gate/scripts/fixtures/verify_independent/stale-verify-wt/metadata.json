@@ -1,0 +1,5 @@
+{
+  "name": "stale-verify-wt",
+  "expected_exit": 0,
+  "description": "Stale verify-wt directory exists and is removed before creating fresh one"
+}

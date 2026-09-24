@@ -1,0 +1,4 @@
+{
+  "name": "two-claims-one-tag",
+  "description": "One tag backs two claims; E1 has no coverage field so only that claim fails."
+}

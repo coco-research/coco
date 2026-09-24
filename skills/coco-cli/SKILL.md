@@ -1,6 +1,6 @@
 ---
 name: coco-cli
-description: Install, update, version-check, or uninstall the Coco open-source AI workflow framework via bin/coco.js. Use when setting up Coco on a machine, checking out the pinned release tag into an existing clone, checking the installed version, or removing it. Do not npx cocosuperintelligence until that name is published. Triggers on "install coco", "update coco", "set up coco", "coco cli", "uninstall coco".
+description: Install, update, version-check, or uninstall the Coco open-source AI workflow framework via bin/coco.js. Use when setting up Coco on a machine, checking out the pinned release tag into an existing clone, checking the installed version, or removing it. npx cocosuperintelligence is the published path (clones the pin and installs). Triggers on "install coco", "update coco", "set up coco", "coco cli", "uninstall coco".
 domain: meta
 ---
 
@@ -11,11 +11,10 @@ domain: meta
 Thin agent wrapper over `bin/coco.js` (package name `cocosuperintelligence`).
 Drives the real CLI; does not reimplement it.
 
-The npm name is reserved but **not published** on npmjs.com (registry 404). Do
-not run `npx cocosuperintelligence` until it is — npx would execute whatever
-first claims that name. From a clone, invoke `node bin/coco.js` instead.
+`npx cocosuperintelligence` is the published path: it clones the pinned
+release tag and runs install. From a clone, invoke `node bin/coco.js`.
 `install` / `update` check out the release tag matching `package.json`
-(`v1.2.0` today), not floating `main`.
+(`v1.5.0` today), not floating `main`.
 
 ## Commands
 
@@ -59,4 +58,4 @@ This CLI is human-output-oriented; it has **no native `--json` mode**. For agent
 
 - Side effects: `install` clones the pinned release tag and creates symlinks; `uninstall` removes them. `install`/`update` re-fetch, so they are not no-ops. Branch checkouts still `git pull --ff-only` and are not force-moved onto an older pin.
 - Network egress: `github.com` only. No telemetry. Disable update checks with `COCO_NO_UPDATE_CHECK=1`.
-- Prerequisites: `node`, `git`, and `bash`. Do not use `npx cocosuperintelligence` until the name is published on npmjs.com.
+- Prerequisites: `node`/`npx`, `git`, and `bash`. `npx cocosuperintelligence` is the published path (clones the pin and installs).

@@ -30,7 +30,6 @@ Coco is a library of markdown artifacts and shell installers. The most likely se
 | Adapter `install.sh` symlink behavior | low | Symlinks point only into the cloned repo; non-symlink files are left in place |
 | Hardcoded credentials | high | Coco ships zero secrets; report any you find immediately |
 | Supply-chain via plugin recommendations | medium | Skills must not `curl | sh` or `npx skills add -y`; third-party installs need an explicit yes |
-| Unpublished npm name | medium | `cocosuperintelligence` 404s on npmjs.com; do not `npx` it until it is published |
 
 ## Bootstrap installer behavior
 

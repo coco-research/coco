@@ -1,0 +1,4 @@
+{
+  "name": "real-run-gate-repo",
+  "description": "Two passing unittest tests discovered via ci.yml + scripts/test.sh, for self-test cases that run run_gate.py for real rather than hand-building its output."
+}

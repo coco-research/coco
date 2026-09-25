@@ -10,17 +10,17 @@ because most adapters link into the checkout rather than copying.
 |---|---:|---:|---:|---:|:--:|---:|
 | `aider` | 0 | 0 | 0 | 0 | yes | 0 |
 | `amazon-q` | 0 | 0 | 0 | 35 | — | 0 |
-| `claude-code` | 386 | 342 | 175 | 35 | — | 0 |
+| `claude-code` | 386 | 342 | 188 | 35 | — | 0 |
 | `cline` | 0 | 0 | 0 | 35 | — | 0 |
 | `codex` | 0 | 0 | 0 | 0 | yes | 0 |
 | `cursor` | 386 | 342 | 180 | 0 | — | 0 |
 | `generic` | 0 | 0 | 0 | 0 | yes | 0 |
 | `github-copilot-cli` | 0 | 0 | 0 | 0 | yes | 0 |
 | `grok` | 389 | 342 | 188 | 35 | — | 0 |
-| `hermes` | 386 | 342 | 175 | 35 | — | 0 |
-| `pi-desktop` | 386 | 342 | 178 | 37 | — | 0 |
+| `hermes` | 386 | 342 | 188 | 35 | — | 0 |
+| `pi-desktop` | 386 | 342 | 191 | 37 | — | 0 |
 | `roo-code` | 0 | 0 | 0 | 35 | — | 0 |
-| `vscode` | 386 | 342 | 175 | 35 | — | 0 |
+| `vscode` | 386 | 342 | 188 | 35 | — | 0 |
 | `vscode-continue` | 0 | 0 | 148 | 35 | — | 0 |
 | `windsurf` | 0 | 0 | 148 | 35 | — | 0 |
 | `zed` | 0 | 0 | 0 | 35 | — | 0 |
@@ -30,7 +30,7 @@ because most adapters link into the checkout rather than copying.
 | Surface | Best adapter | Advertised |
 |---|---:|---:|
 | Slash commands | 389 | 386 |
-| Skills | 188 | 226 |
+| Skills | 191 | 226 |
 
 ## Adapters below the command ceiling
 
@@ -54,6 +54,35 @@ This section is the standing list of who is short and by how much.
 
 Not comparable (AGENTS.md producers rather than tree installers): `aider`, `codex`, `generic`, `github-copilot-cli`.
 
+## Default install against the widest install
+
+The columns above measure the widest install. This measures what `bash
+adapters/<name>/install.sh` delivers with **no flags**, which is what a user runs.
+Every adapter installs its bundles by default, so a plain run should match the
+widest one. A shortfall here means an ordinary install silently misses part of
+the framework.
+
+| Adapter | Skills, plain run | Skills, widest | Short by |
+|---|---:|---:|---:|
+| `aider` | 0 | 0 | 0 |
+| `amazon-q` | 0 | 0 | 0 |
+| `claude-code` | 188 | 188 | 0 |
+| `cline` | 0 | 0 | 0 |
+| `codex` | 0 | 0 | 0 |
+| `cursor` | 180 | 180 | 0 |
+| `generic` | 0 | 0 | 0 |
+| `github-copilot-cli` | 0 | 0 | 0 |
+| `grok` | 188 | 188 | 0 |
+| `hermes` | 188 | 188 | 0 |
+| `pi-desktop` | 191 | 191 | 0 |
+| `roo-code` | 0 | 0 | 0 |
+| `vscode` | 188 | 188 | 0 |
+| `vscode-continue` | 175 | 148 | -27 |
+| `windsurf` | 175 | 148 | -27 |
+| `zed` | 0 | 0 | 0 |
+
+Every adapter delivers its full skill set on a plain run.
+
 ## Measurement notes
 
 Read the table with these in mind; each is a property of the adapter, not a
@@ -65,9 +94,11 @@ bug in the measurement.
   the editor user profile, so the measurement creates the two standard profile
   directories inside the throwaway HOME first. Without them it reports only the
   generated family.
-- **Skills stop at 188, not 226.** Five skills live under `adapters/cursor/skills`
-  and are Cursor-only; the rest of the 226 figure is the repository inventory
-  rather than what any single adapter installs.
+- **Skills stop at 191, not 226.** The advertised figure is the
+  repository inventory. The difference is two sets no default install claims: the
+  `reverse-skill` bundle, which is security tooling held back on purpose and reachable
+  with `--systems reverse-skill`, and the five skills under `adapters/cursor/skills`,
+  which are Cursor-only by construction. Neither is a shortfall.
 - **Counts include symlinks.** Most adapters link into the checkout instead of
   copying, and are deduplicated by resolved path.
 

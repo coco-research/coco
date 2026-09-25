@@ -12,16 +12,32 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TARGET_HOME="${CONTINUE_HOME:-$HOME/.continue}"
 DRY_RUN=0
 SYSTEMS=()
+CORE_ONLY=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run) DRY_RUN=1 ;;
     --systems) shift; IFS=',' read -ra SYSTEMS <<< "$1" ;;
+    --core-only) CORE_ONLY=1 ;;
     --help|-h) grep '^#' "$0" | sed 's/^# \?//'; exit 0 ;;
     *) echo "Unknown flag: $1" >&2; exit 1 ;;
   esac
   shift
 done
+
+# Bundles install by default. This adapter predates that contract and installed the
+# core set alone unless --systems was passed, so a plain run delivered 74 of its 188
+# skills. Naming a subset still wins; --core-only is the opt-out.
+if [[ $CORE_ONLY -eq 1 ]]; then
+  SYSTEMS=()
+elif [[ ${#SYSTEMS[@]} -eq 0 ]]; then
+  while IFS= read -r bundle; do
+    [[ -n "$bundle" ]] && SYSTEMS+=("$bundle")
+  done < <(bash "$REPO_ROOT/scripts/installable-bundles.sh" --one-per-line 2>/dev/null || true)
+  if [[ ${#SYSTEMS[@]} -eq 0 ]]; then
+    echo "WARNING: scripts/installable-bundles.sh listed no bundles; installing core only." >&2
+  fi
+fi
 
 run() { [[ $DRY_RUN -eq 1 ]] && echo "DRY: $*" || "$@"; }
 

@@ -170,6 +170,19 @@ link_system() {
       SKILL_COUNT=$((SKILL_COUNT + 1))
     done
   fi
+
+  # Team front doors: systems/<bundle>/<team>/SKILL.md. Some bundles keep one front
+  # door per team rather than under skills/ — the 13 Super Intelligence teams do — and
+  # this walked only skills/, so every one of them was missing from the install. The
+  # directory is a short slug (ai, gtm); the frontmatter name is the canonical id
+  # (ai-super-intelligence) that the generated index and the role roster use.
+  for t in "$sys_dir"/*/; do
+    [[ -f "$t/SKILL.md" ]] || continue
+    name=$(sed -n 's/^name: *//p' "$t/SKILL.md" | head -1 | tr -d '"')
+    [[ -n "$name" ]] || name=$(basename "$t")
+    link_dir "$t" "$TARGET_HOME/skills/$name"
+    SKILL_COUNT=$((SKILL_COUNT + 1))
+  done
   if [[ -d "$sys_dir/agents" ]]; then
     for a in "$sys_dir/agents"/*.md; do
       [[ -f "$a" ]] || continue

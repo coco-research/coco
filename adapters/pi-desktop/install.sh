@@ -259,12 +259,28 @@ def skill_sources():
                 if bundle not in SYSTEMS:
                     continue
                 skills = os.path.join(base, bundle, "skills")
-                if not os.path.isdir(skills):
-                    continue
-                for name in sorted(os.listdir(skills)):
-                    p = os.path.join(skills, name, "SKILL.md")
-                    if os.path.isfile(p):
-                        found.append((name, os.path.join(skills, name), p))
+                if os.path.isdir(skills):
+                    for name in sorted(os.listdir(skills)):
+                        p = os.path.join(skills, name, "SKILL.md")
+                        if os.path.isfile(p):
+                            found.append((name, os.path.join(skills, name), p))
+
+                # Team front doors sit one level up from skills/:
+                # systems/<bundle>/<team>/SKILL.md. The repo's own build-index.py
+                # recognises this as its `systems/*/*/SKILL.md` layout, but this
+                # adapter only walked skills/, so all 13 Super Intelligence team
+                # front doors were absent from every install — the roster you can
+                # summon, with no skill telling the agent how.
+                for team in sorted(os.listdir(os.path.join(base, bundle))):
+                    team_dir = os.path.join(base, bundle, team)
+                    front = os.path.join(team_dir, "SKILL.md")
+                    if not os.path.isfile(front):
+                        continue
+                    # The folder is a short slug (ai, gtm); the frontmatter name is the
+                    # canonical id (ai-super-intelligence) and is what the generated
+                    # index and every other adapter use.
+                    fm, _ = parse_frontmatter(open(front, encoding="utf-8", errors="replace").read())
+                    found.append((one_line(fm.get("name") or team), team_dir, front))
 
     # workflows are procedural instructions, so they ship as skills
     wf = os.path.join(SOURCE, "workflows")

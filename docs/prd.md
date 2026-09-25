@@ -43,7 +43,7 @@ fails any published claim that disagrees with it.
 
 | Asset | Count | Detail |
 | --- | --- | --- |
-| Skills | 226 | 74 core, 152 inside bundles |
+| Skills | 227 | 75 core, 152 inside bundles |
 | Commands | 386 | 44 shipped, 342 generated at install time across 7 namespaces |
 | Agents | 35 | 11 core roles plus bundle agents |
 | Rules | 15 | Cursor `.mdc` behavioural rules |

@@ -1,9 +1,9 @@
-Next action: start build task 1, land the skill-evolution tree with its count coupling.
+Next action: build task 2, ledger.py, the committed ledger with its rejected-recent window.
 
-**Current stage:** `index` done, `interview` done, `prd` approved, `arch` approved, `plan`
-approved by the owner's "continue the current task", `build` in progress at task 1.
-**Last action:** brought the repo to the Repo Standard (PR #199) and wired the local gate.
----
+**Current stage:** `build` in progress. Task 1 of the plan (the skill tree and its count
+coupling) is done and in review as PR #200, stacked on the Repo Standard PR #199.
+**Last action:** landed `skills/skill-evolution/` and moved 19 published skill counts and six
+core counts across six files until the count checker went quiet.
 
 ## This session's scope, as the owner set it
 
@@ -308,3 +308,32 @@ agent working in it, so the gate now runs on their pushes too. Worth knowing.
 
 Also redacted: 17 machine paths in the cross-check report merged with #196, now `<scratch>`
 and `~`.
+
+## Build task 1, the skill tree (2026-09-19)
+
+`skills/skill-evolution/` now exists: `SKILL.md` with the loop's instruction surface, three
+references (`lanes.json`, `proposal-schema.json`, `signal-sources.md`) and `state/README.md`.
+PR #200, stacked on #199 because it needs the documents that PR adds.
+
+**The count coupling, measured rather than estimated.** Adding one skill moved published
+numbers in six files: 19 occurrences of the skill count and six of the core count, plus two
+arithmetic totals that no checker watches but that would have been left lying. The checker
+itself named all 23 failures, which is why the fix took one pass instead of guesswork:
+`README.md` (7 skill counts, 5 core counts, 2 totals), `coco/index.html` (6 + 1),
+`.claude-plugin.json` (2), `index.html` (2), `package.json` (1),
+`adapters/pi-desktop/install.sh` (1).
+
+**One deliberate deviation from the plan.** The plan said to commit an empty
+`state/ledger.jsonl`. Not done: an empty file is exactly the placeholder the Repo Standard
+treats as worse than a missing one, and it is indistinguishable from a file nobody filled in.
+The ledger is created on the first write, and `state/README.md` documents its format instead.
+
+**A rule was corrected, not just written.** `docs/rules.md` R8 claimed no em dash anywhere in
+any artifact. Measured: this repository has 39,149 of them across 2,452 tracked files, almost
+all in skill prose and generated rosters that predate the rule. The rule now names its actual
+scope and carries both measurements. That correction is in PR #199, since that is where the
+rule lives.
+
+Verification so far: eight of coco's own fast gates pass, regeneration is idempotent, and
+`repo-check` is COMPLIANT. The fixture suites (`run_fixtures.sh`) do not exist for this skill
+yet, which is plan task 9, so CI on the PR is the cross-check.

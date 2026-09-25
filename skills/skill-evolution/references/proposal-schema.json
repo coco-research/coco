@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "coco/skill-evolution/proposal-schema.json",
+  "title": "Evolution proposal",
+  "description": "One candidate edit to one skill, with the evidence that motivated it. Written by scripts/propose.py, checked by scripts/validate.py, and the only artifact a model is allowed to produce. A proposal that does not satisfy this schema is refused rather than repaired.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "cycle", "skill", "class", "evidence", "files", "diff_sha256", "rationale", "cost"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]+$",
+      "description": "Cycle id plus the candidate's index within that cycle, for example 2026-10-3."
+    },
+    "cycle": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}$",
+      "description": "The cycle this proposal belongs to, by year and month."
+    },
+    "skill": {
+      "type": "string",
+      "description": "The skill being changed, as the directory name under skills/.",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "class": {
+      "enum": ["description", "references", "examples", "prose"],
+      "description": "What kind of change this is. The class decides which paths are in scope; validate.py refuses a class whose changed files do not match it."
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Why this change is proposed. At least one citation, and every citation must resolve at the pinned commit or the proposal is refused with exit 2.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind"],
+        "properties": {
+          "kind": {
+            "enum": ["signal", "ledger", "receipt", "git"],
+            "description": "What sort of evidence this is. signal cites a signals/ observation, ledger a prior cycle's record, receipt a gate receipt, git a commit or a diff window."
+          },
+          "path": {
+            "type": "string",
+            "description": "Repository-relative path the citation resolves against. Required for signal and git citations."
+          },
+          "line": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Line number within path, for a signal or git citation that names one."
+          },
+          "id": {
+            "type": "string",
+            "description": "The ledger row id or receipt id, for those kinds."
+          },
+          "observed": {
+            "type": "string",
+            "description": "The measurement itself, in one sentence, as the loop read it. This is what a reviewer checks by hand."
+          }
+        }
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Every repository-relative path the patch touches. validate.py refuses any path outside the skill's own directory, and refuses a persona, command, count or workflow file outright.",
+      "items": { "type": "string" }
+    },
+    "diff_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Hash of the patch, which is how a rejected diff is recognised and not proposed again inside the two cycle window."
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 40,
+      "description": "Plain prose, for the human who has to decide. Not a restatement of the diff."
+    },
+    "cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lane", "calls", "tokens"],
+      "description": "What this candidate cost, recorded by lane.py at the moment of the call rather than reconstructed afterwards.",
+      "properties": {
+        "lane": { "type": "string" },
+        "calls": { "type": "integer", "minimum": 0 },
+        "tokens": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "description": "Written by validate.py, never by the proposer. Absent until the proposal has been checked.",
+      "additionalProperties": false,
+      "required": ["verdict", "reason"],
+      "properties": {
+        "verdict": { "enum": ["accepted", "refused"] },
+        "reason": {
+          "type": "string",
+          "description": "Why, in the guard's own words. For a refusal this is the text a human reads, so it names the rule and the offending path or citation."
+        }
+      }
+    }
+  }
+}

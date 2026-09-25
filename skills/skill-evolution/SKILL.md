@@ -9,6 +9,11 @@ domain: meta
 A cycle that improves this repository's own skills from observed use, and proposes every
 change for a human to merge. It never writes to `main` and never merges.
 
+**Status:** the scripts this file documents, `scripts/evolve.py` and the steps it runs, are
+not on `main` yet, so the commands below do not run today. They land with plan tasks 2 to 9
+in `.metagpt/plan.md`: task 2 `ledger.py` through task 8 `evolve.py`, and task 9
+`run_fixtures.sh` with the CI join.
+
 ## The one rule
 
 **The loop proposes. The owner decides.** There is no confidence level, budget or green gate

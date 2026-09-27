@@ -46,6 +46,10 @@ echo "=== Smoke test: cursor --systems superintelligence ==="
 bash tests/cursor-si-commands.sh && pass "cursor --systems superintelligence writes SI-Decide.md" || fail "cursor --systems superintelligence did not write SI-Decide.md"
 
 echo ""
+echo "=== Smoke test: aider .aider.conf.yml keys ==="
+bash tests/aider-conf-keys.sh && pass "aider .aider.conf.yml uses only real aider option keys" || fail "aider .aider.conf.yml has keys aider does not recognize"
+
+echo ""
 echo "=== Smoke test: root install.sh ==="
 bash install.sh --list > /tmp/list.out 2>&1 && pass "install.sh --list runs" || fail "install.sh --list failed"
 bash install.sh --dry-run --adapter claude-code > /tmp/install-dry.out 2>&1 && pass "install.sh --dry-run" || fail "install.sh --dry-run"

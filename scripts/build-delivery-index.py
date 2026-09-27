@@ -266,8 +266,13 @@ def main():
     if gaps:
         lines += ['| Adapter | Commands | Short by | Cause |', '|---|---:|---:|---|']
         for r in sorted(gaps, key=lambda x: x['commands']):
-            cause = ('declares `supports_systems: []`' if not r['bundles']
-                     else 'does not invoke the SI generators')
+            if not r['bundles']:
+                cause = 'declares `supports_systems: []`'
+            elif r['agents_md'] and r['generated_commands'] > 0:
+                cause = ('AGENTS.md producer: generates the SI family, core commands '
+                         'are listed in AGENTS.md rather than installed as command files')
+            else:
+                cause = 'does not invoke the SI generators'
             lines.append(f"| `{r['adapter']}` | {r['commands']} | "
                          f"{best_cmd - r['commands']} | {cause} |")
     else:

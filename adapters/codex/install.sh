@@ -239,7 +239,9 @@ generate_si_commands() {
   local out
   if ! out=$(bash "$REPO_ROOT/scripts/generate-si-commands.sh" "${si_args[@]}" 2>&1); then
     echo "WARNING: scripts/generate-si-commands.sh failed; the SI-* command family is" >&2
-    echo "missing from this install. Re-run it by hand to see the generator error." >&2
+    echo "missing from this install. Generator output (last 5 lines):" >&2
+    printf '%s\n' "$out" | tail -n 5 >&2
+    rmdir "$SI_DIR" 2>/dev/null || true
     SI_SKIP="generator failed"
     return 0
   fi
@@ -279,7 +281,7 @@ emit_si_commands() {
   echo "The full workflow for each command is the file \`$SI_DIR/<command>.md\`."
   echo "When the user types \`/SI-Decide <prompt>\`, read that file and follow it, treating the text after the command as ARGUMENTS."
   echo ""
-  for f in $(printf '%s\n' "${files[@]}" | LC_ALL=C sort); do
+  while IFS= read -r f; do
     local first cmd desc
     first=$(head -n 1 "$f" 2>/dev/null || true)
     cmd="/$(basename "$f" .md)"
@@ -295,7 +297,7 @@ emit_si_commands() {
     else
       echo "- \`$cmd\`"
     fi
-  done
+  done < <(printf '%s\n' "${files[@]}" | LC_ALL=C sort)
 }
 
 generate() {

@@ -71,4 +71,68 @@ fi
 [[ -e "$tmp/h3/.coco" ]] && fail "dry-run: wrote $tmp/h3/.coco"
 [[ -f "$tmp/p3/AGENTS.md" ]] && fail "dry-run: wrote $tmp/p3/AGENTS.md"
 
+# --- Case 4: HOME path containing a space must not split command paths -------
+mkdir -p "$tmp/p4" "$tmp/h4 space"
+if ! (cd "$tmp/p4" && "${CLEAN[@]}" HOME="$tmp/h4 space" bash "$ROOT/install.sh" \
+    --adapter generic >"$tmp/log4" 2>&1); then
+  fail "spaced HOME: install.sh exited non-zero; log: $tmp/log4"
+fi
+
+agents4="$tmp/p4/AGENTS.md"
+si_dir4="$tmp/h4 space/.coco/si-commands"
+[[ -f "$agents4" ]] || fail "spaced HOME: $agents4 was not written"
+[[ -d "$si_dir4" ]] || fail "spaced HOME: SI directory $si_dir4 missing"
+
+si_listed4=$(awk '/^## Super Intelligence Commands$/{f=1;next} /^## /{f=0} f' "$agents4" \
+  | grep -c '^- `/SI' || true)
+[[ "$si_listed4" -eq 342 ]] \
+  || fail "spaced HOME: expected exactly 342 /SI command lines, found $si_listed4"
+
+junk4=$(awk '/^## Super Intelligence Commands$/{f=1;next} /^## /{f=0} f' "$agents4" \
+  | grep '^- `' | grep -v '^- `/SI' || true)
+[[ -z "$junk4" ]] || fail "spaced HOME: junk line in SI section: $junk4"
+
+while IFS= read -r cmd4; do
+  [[ -n "$cmd4" ]] || continue
+  [[ -f "$si_dir4/${cmd4#/}.md" ]] \
+    || fail "spaced HOME: listed command $cmd4 has no file in $si_dir4"
+done < <(awk '/^## Super Intelligence Commands$/{f=1;next} /^## /{f=0} f' "$agents4" \
+  | sed -n 's/^- `\(\/SI[^`]*\)`.*/\1/p')
+
+# --- Case 5: a failing SI generator is reported, cleaned up, and non-fatal ---
+brokencopy="$tmp/repo-broken"
+cp -R "$ROOT" "$brokencopy"
+cat >"$brokencopy/scripts/generate-si-commands.sh" <<'BROKEN'
+#!/usr/bin/env bash
+# Test stub: fails after creating the target dir, like a broken generator.
+target=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --target) shift; target="${1:-}" ;;
+  esac
+  shift || true
+done
+[[ -n "$target" ]] && mkdir -p "$target"
+echo "BROKEN GENERATOR: simulated failure" >&2
+exit 1
+BROKEN
+chmod +x "$brokencopy/scripts/generate-si-commands.sh"
+
+mkdir -p "$tmp/p5" "$tmp/h5"
+if ! (cd "$tmp/p5" && "${CLEAN[@]}" HOME="$tmp/h5" bash "$brokencopy/install.sh" \
+    --adapter generic >"$tmp/log5" 2>&1); then
+  fail "generator failure: install.sh exited non-zero; log: $tmp/log5"
+fi
+
+agents5="$tmp/p5/AGENTS.md"
+[[ -f "$agents5" ]] || fail "generator failure: $agents5 was not written"
+grep -q 'BROKEN GENERATOR: simulated failure' "$tmp/log5" \
+  || fail "generator failure: warning lacks generator output; log: $tmp/log5"
+grep -q '^Systems: .*SI commands not generated' "$agents5" \
+  || fail "generator failure: Systems header does not report missing SI commands"
+grep -q 'SI commands not generated' "$tmp/log5" \
+  || fail "generator failure: receipt does not report missing SI commands"
+[[ -e "$tmp/h5/.coco/si-commands" ]] \
+  && fail "generator failure: left behind $tmp/h5/.coco/si-commands"
+
 echo "PASS: generic first-run install ships the SI command family and front doors"

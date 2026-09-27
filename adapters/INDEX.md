@@ -46,8 +46,8 @@ This section is the standing list of who is short and by how much.
 | `vscode-continue` | 0 | 389 | does not invoke the SI generators |
 | `windsurf` | 0 | 389 | does not invoke the SI generators |
 | `zed` | 0 | 389 | does not invoke the SI generators |
-| `codex` | 342 | 47 | does not invoke the SI generators |
-| `generic` | 342 | 47 | does not invoke the SI generators |
+| `codex` | 342 | 47 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
+| `generic` | 342 | 47 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
 | `claude-code` | 386 | 3 | does not invoke the SI generators |
 | `cursor` | 386 | 3 | does not invoke the SI generators |
 | `hermes` | 386 | 3 | does not invoke the SI generators |

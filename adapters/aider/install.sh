@@ -24,6 +24,15 @@ done
 
 run() { [[ $DRY_RUN -eq 1 ]] && echo "DRY: $*" || "$@"; }
 
+backup_existing() {
+  local f=$1
+  if [[ -f "$f" ]]; then
+    local b="$f.backup-$(date +%Y%m%d-%H%M%S)"
+    cp -p "$f" "$b"
+    echo "Backed up existing $f → $b"
+  fi
+}
+
 echo "Coco · Aider CLI adapter"
 echo "Source: $REPO_ROOT"
 echo "Target: $(pwd) (project root)"
@@ -66,6 +75,7 @@ done
 if [[ $DRY_RUN -eq 1 ]]; then
   echo "DRY: write AGENTS.md ($(echo "$AGENTS_CONTENT" | wc -l) lines)"
 else
+  backup_existing AGENTS.md
   echo "$AGENTS_CONTENT" > AGENTS.md
   echo "Wrote: AGENTS.md"
 fi
@@ -96,6 +106,7 @@ CONF_CONTENT+="
 if [[ $DRY_RUN -eq 1 ]]; then
   echo "DRY: write .aider.conf.yml"
 else
+  backup_existing .aider.conf.yml
   echo "$CONF_CONTENT" > .aider.conf.yml
   echo "Wrote: .aider.conf.yml"
 fi

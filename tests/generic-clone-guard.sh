@@ -20,10 +20,18 @@ mkdir -p "$tmp/proj/coco" "$tmp/home"
 
 # Copy the working tree (git clone would miss uncommitted changes); then make the
 # copy a git repo with AGENTS.md tracked, so `git status` can prove it stays clean.
+# One tar reads the NUL-separated list from stdin: xargs would split a large
+# list into several `tar -cf -` runs whose concatenated archives make the
+# extractor stop at the first end-of-archive marker (SIGPIPE on Linux).
 (
-  cd "$ROOT"
-  git ls-files -z --cached --others --exclude-standard | xargs -0 tar -cf -
-) | tar -xf - -C "$tmp/proj/coco"
+  cd "$ROOT" || exit 1
+  git ls-files -z --cached --others --exclude-standard |
+    while IFS= read -r -d '' f; do
+      if [ -e "$f" ] || [ -L "$f" ]; then printf '%s\0' "$f"; fi
+    done |
+    tar --null -T - -cf -
+) | tar -xf - -C "$tmp/proj/coco" ||
+  fail "setup: failed to copy the working tree into $tmp/proj/coco"
 git -C "$tmp/proj/coco" init -q
 git -C "$tmp/proj/coco" add -A
 git -C "$tmp/proj/coco" -c user.email=t@t -c user.name=t commit -qm base

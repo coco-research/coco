@@ -10,6 +10,7 @@
 #   bash adapters/codex/install.sh --systems gsd,brain   # only these bundles
 #   bash adapters/codex/install.sh -o PATH     # write to PATH
 #   bash adapters/codex/install.sh --dry-run
+# Refuses to write inside the Coco checkout itself (issue #238); run from your project directory.
 #
 # Bundles default to every bundle that actually ships something
 # (scripts/installable-bundles.sh), not to the core alone: defaulting to core folded
@@ -222,6 +223,32 @@ generate() {
     echo ""
   done
 }
+
+# Issue #238: writing AGENTS.md inside the Coco checkout clobbers the repo's own
+# tracked AGENTS.md, so refuse (except in --dry-run, which only warns). Resolve both
+# sides physically so a symlinked path (e.g. /tmp -> /private/tmp) still compares equal.
+output_dir=""
+if [[ -n "$OUTPUT" ]]; then
+  output_dir="$(cd "$(dirname -- "$OUTPUT")" 2>/dev/null && pwd -P)" || output_dir=""
+fi
+repo_root_phys="$(cd "$REPO_ROOT" && pwd -P)"
+if [[ "$output_dir" == "$repo_root_phys" || "$output_dir" == "$repo_root_phys"/* ]]; then
+  if [[ $DRY_RUN -eq 1 ]]; then
+    echo "NOTE: a real run would refuse: $output_dir/$(basename -- "$OUTPUT") is inside the Coco checkout ($repo_root_phys); run from your project directory or pass -o."
+  else
+    {
+      echo "ERROR: refusing to write: no AI tool was detected and the AGENTS.md target resolved inside the Coco checkout itself."
+      echo "  target:   $output_dir/$(basename -- "$OUTPUT")"
+      echo "  checkout: $repo_root_phys"
+      echo "Coco will not overwrite the repository's own AGENTS.md."
+      echo "To proceed:"
+      echo "  (a) run from your project directory: cd /path/to/your/project && bash $REPO_ROOT/install.sh"
+      echo "  (b) or write to an explicit path: bash $REPO_ROOT/adapters/$ADAPTER_LABEL/install.sh -o /path/to/your/project/AGENTS.md"
+      echo "  (c) or pick your tool's adapter: bash $REPO_ROOT/install.sh --list, then --adapter <name>"
+    } >&2
+    exit 2
+  fi
+fi
 
 if [[ $DRY_RUN -eq 1 ]]; then
   # Capture full output to temp file, then preview first 50 lines.

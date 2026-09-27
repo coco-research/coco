@@ -92,6 +92,10 @@ echo "=== Smoke test: security surface ==="
 bash tests/check-security-surface.sh && pass "security-surface checks" || fail "security-surface checks"
 
 echo ""
+echo "=== Smoke test: aider installer backs up existing files ==="
+bash tests/aider-backup.sh && pass "aider installer backs up existing AGENTS.md and .aider.conf.yml" || fail "aider installer overwrote existing files without a backup"
+
+echo ""
 echo "=== Summary ==="
 echo "  passed: $PASS"
 echo "  failed: $FAIL"

@@ -22,6 +22,7 @@
 # Every flag is forwarded to adapters/codex/install.sh, which does the work.
 
 set -euo pipefail
+unset CDPATH
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 

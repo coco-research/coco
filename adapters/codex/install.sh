@@ -19,6 +19,7 @@
 # are given.
 
 set -euo pipefail
+unset CDPATH
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 OUTPUT="./AGENTS.md"
@@ -229,15 +230,25 @@ generate() {
 # sides physically so a symlinked path (e.g. /tmp -> /private/tmp) still compares equal.
 output_dir=""
 if [[ -n "$OUTPUT" ]]; then
-  output_dir="$(cd "$(dirname -- "$OUTPUT")" 2>/dev/null && pwd -P)" || output_dir=""
+  if [[ -d "$OUTPUT" ]]; then
+    # -o may name a directory; check that directory itself, not its parent.
+    output_dir="$(cd "$OUTPUT" 2>/dev/null && pwd -P)" || output_dir=""
+  else
+    output_dir="$(cd "$(dirname -- "$OUTPUT")" 2>/dev/null && pwd -P)" || output_dir=""
+  fi
 fi
 repo_root_phys="$(cd "$REPO_ROOT" && pwd -P)"
 if [[ "$output_dir" == "$repo_root_phys" || "$output_dir" == "$repo_root_phys"/* ]]; then
   if [[ $DRY_RUN -eq 1 ]]; then
-    echo "NOTE: a real run would refuse: $output_dir/$(basename -- "$OUTPUT") is inside the Coco checkout ($repo_root_phys); run from your project directory or pass -o."
+    echo "NOTE: a real run would refuse: $output_dir/$(basename -- "$OUTPUT") is inside the Coco checkout ($repo_root_phys); run from your project directory or pass -o <path outside the checkout>."
   else
+    if [[ "${COCO_AUTODETECTED:-}" == 1 ]]; then
+      refusal_reason="no AI tool was detected, so install.sh fell back to the generic adapter, whose AGENTS.md target resolved inside the Coco checkout itself."
+    else
+      refusal_reason="the AGENTS.md target is inside the Coco checkout itself."
+    fi
     {
-      echo "ERROR: refusing to write: no AI tool was detected and the AGENTS.md target resolved inside the Coco checkout itself."
+      echo "ERROR: refusing to write: $refusal_reason"
       echo "  target:   $output_dir/$(basename -- "$OUTPUT")"
       echo "  checkout: $repo_root_phys"
       echo "Coco will not overwrite the repository's own AGENTS.md."

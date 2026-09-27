@@ -96,6 +96,13 @@ echo "=== Smoke test: aider installer backs up existing files ==="
 bash tests/aider-backup.sh && pass "aider installer backs up existing AGENTS.md and .aider.conf.yml" || fail "aider installer overwrote existing files without a backup"
 
 echo ""
+echo "=== Smoke test: generic/codex clone guard (issue #238) ==="
+bash tests/generic-clone-guard.sh && pass "clone guard refuses in-repo AGENTS.md writes" || fail "clone guard let an in-repo write through"
+
+echo "=== Smoke test: generic adapter ships SI commands and front doors ==="
+bash tests/generic-si-commands.sh && pass "generic first-run install ships the SI command family and front doors" || fail "generic first-run install missing the SI command family or front doors"
+
+echo ""
 echo "=== Summary ==="
 echo "  passed: $PASS"
 echo "  failed: $FAIL"

@@ -266,8 +266,13 @@ def main():
     if gaps:
         lines += ['| Adapter | Commands | Short by | Cause |', '|---|---:|---:|---|']
         for r in sorted(gaps, key=lambda x: x['commands']):
-            cause = ('declares `supports_systems: []`' if not r['bundles']
-                     else 'does not invoke the SI generators')
+            if not r['bundles']:
+                cause = 'declares `supports_systems: []`'
+            elif r['agents_md'] and r['generated_commands'] > 0:
+                cause = ('AGENTS.md producer: generates the SI family, core commands '
+                         'are listed in AGENTS.md rather than installed as command files')
+            else:
+                cause = 'does not invoke the SI generators'
             lines.append(f"| `{r['adapter']}` | {r['commands']} | "
                          f"{best_cmd - r['commands']} | {cause} |")
     else:
@@ -338,8 +343,9 @@ def main():
         'Read the table with these in mind; each is a property of the adapter, not a',
         'bug in the measurement.',
         '',
-        '- **Codex and generic emit one `AGENTS.md`** and nothing else. They are',
-        '  AGENTS.md producers; the tree-side surfaces are not their job.',
+        '- **Codex and generic emit one `AGENTS.md` plus the generated Super Intelligence',
+        '  command files** under `~/.coco/si-commands`. They are AGENTS.md producers; the',
+        '  tree-side surfaces are not their job.',
         '- **The VS Code adapter needs a profile to exist.** It links core commands into',
         '  the editor user profile, so the measurement creates the two standard profile',
         '  directories inside the throwaway HOME first. Without them it reports only the',

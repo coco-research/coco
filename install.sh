@@ -31,6 +31,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ADAPTER=""
+AUTODETECTED=0
 DRY_RUN=""
 SYSTEMS=""
 CORE_ONLY=""
@@ -81,6 +82,7 @@ done
 
 if [[ -z "$ADAPTER" ]]; then
   ADAPTER=$(detect_adapter)
+  AUTODETECTED=1
   echo "Auto-detected adapter: $ADAPTER"
   echo "(override with --adapter <name>)"
 fi
@@ -123,6 +125,12 @@ else
   if [[ -n "$DEFAULT_SYSTEMS" ]] && adapter_supports_systems; then
     ARGS+=("--systems" "$DEFAULT_SYSTEMS")
   fi
+fi
+
+# The adapter's refusal message can only explain the generic fallback if it knows the
+# tool was auto-detected; a user who passed --adapter chose deliberately (issue #238).
+if [[ "$AUTODETECTED" -eq 1 ]]; then
+  export COCO_AUTODETECTED=1
 fi
 
 if [[ ${#ARGS[@]} -gt 0 ]]; then

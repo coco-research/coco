@@ -58,19 +58,20 @@ fi
 run() {  # run <dir> <cmd...> with a clean env in <dir>
   local dir=$1
   shift
-  ( cd "$dir" && env -u CLAUDECODE -u CLAUDE_HOME -u CURSOR_HOME -u COCO_HOME -u XDG_CONFIG_HOME \
+  ( cd "$dir" && env -u CLAUDECODE -u CLAUDE_HOME -u CURSOR_HOME -u COCO_HOME -u XDG_CONFIG_HOME -u COCO_AUTODETECTED \
       HOME="$tmp/home" PATH="$CLEAN_PATH" "$@" )
 }
 
-clone_clean() {
-  local dirty
-  dirty="$(git -C "$tmp/proj/coco" status --porcelain)"
-  [ -z "$dirty" ] || fail "$1: clone is dirty: $dirty"
+clone_clean() {  # clone_clean <name> [clone-dir]
+  local name=$1 dir=${2:-$tmp/proj/coco} dirty
+  dirty="$(git -C "$dir" status --porcelain)"
+  [ -z "$dirty" ] || fail "$name: clone is dirty: $dirty"
 }
 
-no_backup() {
-  if compgen -G "$tmp/proj/coco/AGENTS.md.backup-*" >/dev/null; then
-    fail "$1: AGENTS.md.backup-* written inside the clone"
+no_backup() {  # no_backup <name> [clone-dir]
+  local name=$1 dir=${2:-$tmp/proj/coco}
+  if compgen -G "$dir/AGENTS.md.backup-*" >/dev/null; then
+    fail "$name: AGENTS.md.backup-* written inside the clone"
   fi
 }
 
@@ -87,8 +88,8 @@ refuse_case() {  # refuse_case <name> <dir> <cmd...>
     *"project directory"*) ;;
     *) fail "$name: output does not mention the project directory: $out" ;;
   esac
-  clone_clean "$name"
-  no_backup "$name"
+  clone_clean "$name" "$dir"
+  no_backup "$name" "$dir"
 }
 
 # Case 1: README path, auto-detect -> generic -> must refuse.
@@ -138,4 +139,66 @@ if compgen -G "$tmp/proj/coco/sub/AGENTS.md.backup-*" >/dev/null; then
 fi
 clone_clean "case 7 (-o inside checkout)"
 
-echo "PASS: generic/codex clone guard (cases 1-7)"
+# Case 8: relative -o run from inside the clone is refused.
+refuse_case "case 8 (relative -o inside checkout)" "$tmp/proj/coco" "$BASH_BIN" "$tmp/proj/coco/adapters/codex/install.sh" -o sub/AGENTS.md
+[ ! -f "$tmp/proj/coco/sub/AGENTS.md" ] || fail "case 8 (relative -o inside checkout): sub/AGENTS.md was written"
+
+# Case 9: CDPATH must not make the guard resolve a relative -o elsewhere. The CDPATH
+# directory also holds a sub/AGENTS.md, so a wrong resolution would overwrite that or
+# the clone's sub/AGENTS.md; both must stay untouched.
+mkdir -p "$tmp/cdp/sub"
+printf 'hand-written cdp\n' > "$tmp/cdp/sub/AGENTS.md"
+export CDPATH="$tmp/cdp"
+refuse_case "case 9 (CDPATH)" "$tmp/proj/coco" "$BASH_BIN" "$tmp/proj/coco/adapters/codex/install.sh" -o sub/AGENTS.md
+unset CDPATH
+grep -q 'hand-written cdp' "$tmp/cdp/sub/AGENTS.md" || fail "case 9 (CDPATH): CDPATH target was modified"
+if compgen -G "$tmp/cdp/sub/AGENTS.md.backup-*" >/dev/null; then
+  fail "case 9 (CDPATH): backup written next to the CDPATH target"
+fi
+[ ! -f "$tmp/proj/coco/sub/AGENTS.md" ] || fail "case 9 (CDPATH): sub/AGENTS.md was written inside the clone"
+
+# Case 10: -o naming the checkout directory itself, with or without a trailing slash.
+refuse_case "case 10a (-o checkout dir)" "$tmp/proj/coco" "$BASH_BIN" "$tmp/proj/coco/adapters/codex/install.sh" -o "$tmp/proj/coco"
+refuse_case "case 10b (-o checkout dir/)" "$tmp/proj/coco" "$BASH_BIN" "$tmp/proj/coco/adapters/codex/install.sh" -o "$tmp/proj/coco/"
+
+# Case 11: a space in the clone path must not break the refusal.
+mkdir -p "$tmp/with space"
+cp -R "$tmp/proj/coco" "$tmp/with space/coco"
+refuse_case "case 11 (space in clone path)" "$tmp/with space/coco" "$BASH_BIN" install.sh
+
+# Case 12: a symlinked path to the clone must resolve physically and still refuse.
+ln -s "$tmp/proj" "$tmp/link"
+refuse_case "case 12 (symlinked clone path)" "$tmp/link/coco" "$BASH_BIN" install.sh
+
+# Case 13: refusal wording. Auto-detect explains the generic fallback; an explicit
+# --adapter does not claim no tool was found; --dry-run names the outside path.
+status=0
+out="$(run "$tmp/proj/coco" "$BASH_BIN" install.sh 2>&1)" || status=$?
+[ "$status" -ne 0 ] || fail "case 13 (auto-detect wording): expected non-zero exit, got 0"
+case "$out" in
+  *"no AI tool was detected"*) ;;
+  *) fail "case 13 (auto-detect wording): missing 'no AI tool was detected': $out" ;;
+esac
+
+status=0
+out="$(run "$tmp/proj/coco" "$BASH_BIN" install.sh --adapter generic 2>&1)" || status=$?
+[ "$status" -ne 0 ] || fail "case 13 (--adapter wording): expected non-zero exit, got 0"
+case "$out" in
+  *"no AI tool was detected"*) fail "case 13 (--adapter wording): claims no tool was detected: $out" ;;
+esac
+case "$out" in
+  *"inside the Coco checkout"*) ;;
+  *) fail "case 13 (--adapter wording): does not name the Coco checkout: $out" ;;
+esac
+
+status=0
+out="$(run "$tmp/proj/coco" "$BASH_BIN" install.sh --dry-run 2>&1)" || status=$?
+[ "$status" -eq 0 ] || fail "case 13 (dry-run wording): expected exit 0, got $status: $out"
+case "$out" in
+  *"outside the checkout"*) ;;
+  *) fail "case 13 (dry-run wording): missing 'outside the checkout': $out" ;;
+esac
+clone_clean "case 13 (dry-run wording)"
+no_backup "case 13 (dry-run wording)"
+
+echo "PASS: generic/codex clone guard (cases 1-13)"

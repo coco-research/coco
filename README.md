@@ -6,7 +6,9 @@
 
 ### Summon an advisory board of 495 world-class minds — right inside your AI coding session.
 
-CoCo Super Intelligence is the orchestration layer that turns Claude Code, Cursor, or Codex into an entire engineering department: routed expert panels that deliberate and decide, then **227 skills**, **386 commands**, and disk-persistent state that ship what they decided.
+CoCo Super Intelligence is the orchestration layer that turns Claude Code, Cursor, or Codex into an entire engineering department: routed expert panels that deliberate and decide, then **227 skills**[^installed], **386 commands**, and disk-persistent state that ship what they decided.
+
+[^installed]: 189 of the 227 skills install by default on Claude Code, together with all 386 commands and 34 agents. The other 38 are the opt-in `reverse-skill` security pack (33, installed only with `--systems reverse-skill`) and 5 Cursor-only skills. Measured by running the installer, not by counting files: see [`docs/delivered-counts.json`](docs/delivered-counts.json), and [`adapters/INDEX.md`](adapters/INDEX.md) for every other IDE.
 
 Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds · 100% local · no telemetry
 
@@ -228,22 +230,22 @@ Requires only Python 3 and `git`. No new dependencies. Design adapted from [lak7
 
 ## The CoCo Asset Library
 
-A standard install equips your workspace with a lightweight core; full activation unlocks up to **947 total assets** to orchestrate any software-engineering workflow.
+A default Claude Code install delivers **189 skills, 386 commands and 34 agents**, measured by running the installer. The repository holds 227 skills; the difference is the opt-in security pack and Cursor-only skills.
 
 <table align="center">
 <tr>
-<td align="center" width="20%"><h3>227</h3><sub>Skills</sub><br><small>75 Core + 152 Bundle</small></td>
+<td align="center" width="20%"><h3>227</h3><sub>Skills</sub><br><small>75 Core + 152 Bundle · 189 install by default</small></td>
 <td align="center" width="20%"><h3>386</h3><sub>Slash Commands</sub><br><small>44 Core + 342 Generated</small></td>
-<td align="center" width="20%"><h3>35</h3><sub>Specialized Agents</sub><br><small>11 Core + 24 Bundle</small></td>
+<td align="center" width="20%"><h3>34</h3><sub>Specialized Agents</sub><br><small>10 Core + 24 Bundle</small></td>
 <td align="center" width="20%"><h3>495</h3><sub>Expert Personas</sub><br><small>Super Intelligence Board</small></td>
 <td align="center" width="20%"><h3>15</h3><sub>Cross-IDE Rules</sub><br><small>Cursor MDC Rules</small></td>
 </tr>
 </table>
 
 <div align="center">
-  <sub><strong>Core install:</strong> 145 active assets (75 Skills, 44 Commands, 11 Agents, 15 Rules)</sub><br>
+  <sub><strong>Core install:</strong> 144 active assets (75 Skills, 44 Commands, 10 Agents, 15 Rules)</sub><br>
   <sub><strong>A plain install ships every bundle except the security-testing tooling</strong>, which stays opt-in via <code>--systems reverse-skill</code>.</sub><br>
-  <sub><strong>Orchestration bundles:</strong> <strong>+68 GSD skills</strong> · <strong>+24 GSD agents</strong> · <strong>+6 Brain skills</strong> · <strong>+13 Super Intelligence skills</strong> · <strong>+342 SI commands</strong> · <strong>3 Workflows</strong></sub>
+  <sub><strong>Orchestration bundles:</strong> <strong>+68 GSD skills</strong> · <strong>+24 GSD agents</strong> · <strong>+20 HyperFrames skills</strong> · <strong>+13 Super Intelligence skills</strong> · <strong>+342 SI commands</strong> · <strong>+6 Brain skills</strong> · <strong>+4 M0 skills</strong> · <strong>+3 Cognee skills</strong> · <strong>3 Workflows</strong></sub>
 </div>
 
 ---
@@ -252,7 +254,7 @@ A standard install equips your workspace with a lightweight core; full activatio
 
 ## Skills Catalog
 
-CoCo ships **227 skills** (75 core + 152 across bundles). These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
+CoCo ships **227 skills** (75 core + 152 across bundles)[^installed]. These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
 
 ### Visual design & styling
 `ui-ux-pro-max` (50 styles, 21 palettes, 50 font pairings, 9 stacks) · `frontend-design` · `design-taste-frontend` · `redesign-existing-projects` · `axiom-liquid-glass` (Apple Liquid Glass, WWDC 2025) · `swiftui-liquid-glass` · `web-design-guidelines` · `tailwind-patterns` (Tailwind v4) · `vercel-react-best-practices` · `clone-website` · `c4-architecture` · `arb-review` · `expo-api-routes` · `ai-product` · `scroll-world` (scroll-scrubbed, cut-free camera flythrough landing pages, generated end to end via Higgsfield).
@@ -280,15 +282,23 @@ CoCo ships **227 skills** (75 core + 152 across bundles). These are not prompt s
 
 <br>
 
-**Core skills (66)**
+**Core skills (75)**
 
-`agent-lightning` · `ai-marketing-videos` · `ai-product` · `api-design-principles` · `arb-review` · `axiom-liquid-glass` · `brainstorming` · `browser-automation` · `c4-architecture` · `change-log` · `cli-anything` · `clone-website` · `coco` · `coco-ads` · `coco-cli` · `coco-loop` · `code-verification` · `design-taste-frontend` · `dispatching-parallel-agents` · `doc-sync` · `dr-plan` · `executing-plans` · `expo-api-routes` · `find-skills` · `finishing-a-development-branch` · `frontend-design` · `generate-tests` · `irp` · `media-memory` · `meeting-notes` · `nfr-tracker` · `openai-agents` · `openai-api` · `openai-apps-mcp` · `openai-whisper` · `pmstudio` · `prd-generator` · `prd-mastery` · `project-docs` · `receiving-code-review` · `recovery-plan` · `redesign-existing-projects` · `requesting-code-review` · `scroll-world` · `skill-creator` · `stakeholder-comms` · `subagent-driven-development` · `swiftui-liquid-glass` · `systematic-debugging` · `tailwind-patterns` · `task-prd-creator` · `test-driven-development` · `ui-ux-pro-max` · `ultra-think` · `using-git-worktrees` · `using-superpowers` · `vercel-react-best-practices` · `verification-before-completion` · `voice-ai` · `web-design-guidelines` · `workflow-routing` · `writing-plans` · `writing-skills`
+`agent-lightning` · `agent-self-eval` · `ai-marketing-videos` · `ai-product` · `api-design-principles` · `arb-review` · `arch-index` · `axiom-liquid-glass` · `brainstorming` · `browser-automation` · `c4-architecture` · `change-log` · `cli-anything` · `clone-website` · `coco` · `coco-ads` · `coco-cli` · `coco-diagram` · `coco-loop` · `coco-ship` · `code-verification` · `context-budget` · `design-taste-frontend` · `dispatching-parallel-agents` · `doc-sync` · `dr-plan` · `executing-plans` · `expo-api-routes` · `find-skills` · `finishing-a-development-branch` · `frontend-design` · `generate-tests` · `goal` · `humanizer` · `irp` · `journey-map` · `karpathy-guidelines` · `local-llm` · `media-memory` · `meeting-notes` · `nfr-tracker` · `openai-agents` · `openai-api` · `openai-apps-mcp` · `openai-whisper` · `pmstudio` · `prd-generator` · `prd-mastery` · `project-docs` · `receiving-code-review` · `recovery-plan` · `redesign-existing-projects` · `requesting-code-review` · `scroll-world` · `skill-creator` · `skill-evolution` · `stakeholder-comms` · `subagent-driven-development` · `swiftui-liquid-glass` · `systematic-debugging` · `tailwind-patterns` · `task-prd-creator` · `test-driven-development` · `ui-ux-pro-max` · `ultra-think` · `using-git-worktrees` · `using-superpowers` · `vercel-react-best-practices` · `verification-before-completion` · `visual-explainer` · `voice-ai` · `web-design-guidelines` · `workflow-routing` · `writing-plans` · `writing-skills`
 
 **GSD bundle skills (68)** — the full `gsd-*` project-orchestration lifecycle: `gsd-new-project`, `gsd-plan-phase`, `gsd-execute-phase`, `gsd-verify-work`, `gsd-autonomous`, `gsd-debug`, `gsd-ui-phase`, `gsd-secure-phase`, `gsd-workstreams`, `gsd-forensics`, `gsd-milestone-summary`, `gsd-map-codebase`, `gsd-profile-user`, and 55 more (see [`systems/gsd/skills/`](systems/gsd/skills/)).
 
 **Brain bundle skills (6)** — `brain` · `brain-init` · `brain-rescan` · `brain-update` · `brain-export` · `brain-wiki`.
 
 **Super Intelligence bundle (13)** — one orchestration skill per built team (ai, engineering, product-design, finance, trading, risk-compliance, strategy, data-analytics, gtm, climate-energy, education-edtech, healthcare-life-sciences, legal-ip), which generate the 342 `/SI-*` commands at install.
+
+**HyperFrames bundle skills (20)** — `embedded-captions` · `faceless-explainer` · `figma` · `general-video` · `hyperframes` · `hyperframes-animation` · `hyperframes-cli` · `hyperframes-core` · `hyperframes-creative` · `hyperframes-keyframes` · `hyperframes-registry` · `media-use` · `motion-graphics` · `music-to-video` · `pr-to-video` · `product-launch-video` · `remotion-to-hyperframes` · `slideshow` · `talking-head-recut` · `website-to-video`.
+
+**M0 bundle skills (4)** — `m0` · `m0-handoff` · `m0-recall` · `m0-remember`.
+
+**Cognee bundle skills (3)** — `cognee` · `cognee-recall` · `cognee-store`.
+
+**Not installed by default (38):** the `reverse-skill` security pack (33 reverse-engineering and penetration-testing skills, installed only with `--systems reverse-skill`; see [`systems/reverse-skill/`](systems/reverse-skill/)) and 5 Cursor-only skills that ship with the Cursor adapter: `create-rule` · `create-skill` · `create-subagent` · `migrate-to-skills` · `update-cursor-settings`.
 
 </details>
 
@@ -298,21 +308,30 @@ CoCo ships **227 skills** (75 core + 152 across bundles). These are not prompt s
 
 ## System Bundles
 
-Bundles are opt-in packages that extend the workspace with specialized databases, pipelines, and rosters. Enable them with `--systems <name>`.
+Bundles extend the workspace with specialized databases, pipelines, and rosters. The six below install by default; `--core-only` skips them and `--systems <list>` installs an explicit subset.
 
-One further bundle, `reverse-skill`, is deliberately not part of any default install and is not counted among the four below: it vendors reverse-engineering and penetration-testing methodology under [`systems/reverse-skill/`](systems/reverse-skill/), and it is security tooling that stays installed only when it is asked for by name, with `--systems reverse-skill`. See [`systems/reverse-skill/README.md`](systems/reverse-skill/README.md) for what it contains and how it was curated.
+One further bundle, `reverse-skill`, is deliberately not part of any default install and is not one of the six below: it vendors reverse-engineering and penetration-testing methodology under [`systems/reverse-skill/`](systems/reverse-skill/), and it is security tooling that stays installed only when it is asked for by name, with `--systems reverse-skill`. See [`systems/reverse-skill/README.md`](systems/reverse-skill/README.md) for what it contains and how it was curated.
 
 ### 1. GSD (Get Shit Done)
-An orchestration engine of **68 skills and 24 agents** that manages the lifecycle of complex codebases. A disk-backed phase database records goals, decisions, milestones, and blockers; **workstreams** spin up isolated git checkouts to test refactors without polluting main; **forensics** performs post-mortem root-cause audits when a phase fails; and **autonomous mode** runs parallel waves of subagents through plan milestones end-to-end.
+An orchestration engine of **68 skills and 24 agents** that manages the lifecycle of complex codebases. Most GSD skills also need the upstream GSD toolkit at `~/.claude/get-shit-done/`, which the installer does not yet provide; see [`systems/gsd/README.md`](systems/gsd/README.md). A disk-backed phase database records goals, decisions, milestones, and blockers; **workstreams** spin up isolated git checkouts to test refactors without polluting main; **forensics** performs post-mortem root-cause audits when a phase fails; and **autonomous mode** runs parallel waves of subagents through plan milestones end-to-end.
 
 ### 2. Brain
 A local knowledge-graph engine of **6 skills** connecting email, chat, code, and docs. A local SQLite store indexes code entities, business decisions, project terms, and stakeholder feedback; a **wiki generator** builds hyperlinked articles for every recorded entity; and mail sync links project email threads to related files.
 
-### 3. Team
-A multi-agent product-team pipeline (`/team:ship`, `/team:plan`, `/team:review`, `/team:verify`, and more). It spawns specialized subagents — Research, Architect, QA — to execute changes, review diffs, and write tests, with deterministic gates that intercept merges to run lints, import audits, reference checks, and verification suites.
-
-### 4. Super Intelligence
+### 3. Super Intelligence
 The **495-persona advisory board** and its **342 generated `/SI-*` commands** across 13 teams — the hero capability described [above](#the-board).
+
+### 4. HyperFrames
+**20 skills** for video and motion: HTML-composition video authoring, captions, launch and explainer videos, and Figma import. Vendored from HeyGen's `hyperframes` under Apache-2.0.
+
+### 5. M0
+**4 skills** for cross-tool agent memory: one small local SQLite thread of what was done, what was verified, and what comes next, so a session in one tool can pick up work left in another. Python standard library only.
+
+### 6. Cognee
+**3 skills** for knowledge-graph memory backed by a local Cognee server (`cognee server start`); they fall back to Brain when the server is not running.
+
+### Not a bundle: `/team`
+A multi-agent product-team pipeline (`/team:ship`, `/team:plan`, `/team:review`, `/team:verify`, and more). It spawns specialized subagents — Research, Architect, QA — to execute changes, review diffs, and write tests, with deterministic gates that intercept merges to run lints, import audits, reference checks, and verification suites. It is part of the core install and needs no flag.
 
 ---
 
@@ -714,19 +733,18 @@ npx cocosuperintelligence update
 <table>
 <tr><td><strong>Spec Version</strong></td><td>1.5.0</td></tr>
 <tr><td><strong>License</strong></td><td>Open-core — <a href="LICENSE">MIT</a> core; Super Intelligence is <a href="systems/superintelligence/LICENSE">proprietary</a></td></tr>
-<tr><td><strong>Total Skills</strong></td><td>227 with all bundles installed (75 Core + 152 Bundle)</td></tr>
-<tr><td><strong>Slash Commands</strong></td><td>386 with all bundles — 44 Core (shipped) + 342 Super Intelligence (325 per-team + 17 cross-team, generated at install)</td></tr>
-<tr><td><strong>Specialized Agents</strong></td><td>35 (11 Core + 24 Bundle)</td></tr>
-<tr><td><strong>Expert Personas</strong></td><td>495 across 13 departments and 70 cells</td></tr>
+<tr><td><strong>Total Skills</strong></td><td>227 in the repository (75 Core + 152 Bundle); 189 install by default on Claude Code</td></tr>
+<tr><td><strong>Slash Commands</strong></td><td>386 on a default install — 44 Core (shipped) + 342 Super Intelligence (325 per-team + 17 cross-team, generated at install)</td></tr>
+<tr><td><strong>Specialized Agents</strong></td><td>34 (10 Core + 24 Bundle)</td></tr>
+<tr><td><strong>Expert Personas</strong></td><td>495 across 13 departments and 98 cells</td></tr>
 <tr><td><strong>System Bundles</strong></td><td>6 (GSD, Brain, Cognee, HyperFrames, Super Intelligence, M0) — installed by default. <code>reverse-skill</code>, the security-testing bundle, stays opt-in with <code>--systems reverse-skill</code>. <code>/team</code> is core and needs no flag.</td></tr>
 <tr><td><strong>Cross-IDE Rules</strong></td><td>15 (.mdc files)</td></tr>
 <tr><td><strong>Workflows Defined</strong></td><td>3 (.md pipelines)</td></tr>
-<tr><td><strong>Total Addressable Assets</strong></td><td>947 with all bundles enabled</td></tr>
 <tr><td><strong>Install Time</strong></td><td>&le; 90 seconds</td></tr>
 <tr><td><strong>Telemetry / SaaS</strong></td><td>None — 100% local files</td></tr>
 </table>
 
-<sub>Core install ships 75 skills + 44 commands + 11 agents + 15 rules (145 active assets). The totals above are what a plain <code>bash install.sh</code> delivers: every bundle in the default allow-list (GSD, Brain, Cognee, HyperFrames, Super Intelligence, M0) is installed by default. <code>--core-only</code> installs the core set alone, and <code>--systems &lt;list&gt;</code> installs an explicit subset — including <code>reverse-skill</code>, the security-testing bundle, which stays opt-in and is never part of the default set. Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely. <code>adapters/INDEX.md</code> records what each adapter actually delivers, measured by running it.</sub>
+<sub>Core install ships 75 skills + 44 commands + 10 agents + 15 rules (144 active assets). A plain <code>bash install.sh</code> delivers 189 skills, 386 commands and 34 agents on Claude Code: every bundle in the default allow-list (GSD, Brain, Cognee, HyperFrames, Super Intelligence, M0) is installed by default. <code>--core-only</code> installs the core set alone, and <code>--systems &lt;list&gt;</code> installs an explicit subset — including <code>reverse-skill</code>, the security-testing bundle, which stays opt-in and is never part of the default set. Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely. <code>adapters/INDEX.md</code> records what each adapter actually delivers, measured by running it.</sub>
 
 ---
 

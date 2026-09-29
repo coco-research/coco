@@ -79,7 +79,7 @@ def check_sum(parts, total, label):
 
 
 # 1. Hero line: "then **N skills**, **M commands**, and disk-persistent state..."
-check(r'then \*\*(\d+) skills\*\*, \*\*(\d+) commands\*\*, and disk-persistent state',
+check(r'then \*\*(\d+) skills\*\*(?:\[\^installed\])?, \*\*(\d+) commands\*\*, and disk-persistent state',
       'hero line', (SKILLS, COMMANDS))
 
 # 2. Skills Catalog opener: "CoCo ships **N skills** (X core + Y across bundles)."
@@ -128,8 +128,46 @@ else:
         pass_(f'{README}: "Core install ships" prose {(sk, cm, ag, ru)} matches')
     check_sum((sk, cm, ag, ru), total, '"Core install ships" prose')
 
+# 6-10. "Installed by default" figures. These are gated against docs/delivered-counts.json,
+# which scripts/build-delivery-index.py writes by running the claude-code installer into a
+# throwaway HOME, not against the repository walk above: the two differ by design, and
+# for months the README said the repository total was what a plain install delivers.
+delivered = json.load(open('docs/delivered-counts.json'))
+DS, DC, DA = delivered['skills'], delivered['commands'], delivered['agents']
+AGENTS = counts['agents']['total']
+print(f'=== measured default install: skills={DS} commands={DC} agents={DA} ===')
+
+m = re.search(r'\[\^installed\]: (\d+) of the (\d+) skills install by default on Claude Code, '
+              r'together with all (\d+) commands and (\d+) agents\. The other (\d+) are the opt-in '
+              r'`reverse-skill` security pack \((\d+),[^)]*\) and (\d+) Cursor-only skills', text)
+if not m:
+    fail_(f'{README}: could not find the [^installed] footnote (pattern not found)')
+else:
+    ds, total, dc, da, other, rev, cur = (int(g) for g in m.groups())
+    if (ds, total, dc, da) != (DS, SKILLS, DC, DA):
+        fail_(f'{README}: footnote claims {(ds, total, dc, da)}, truth is {(DS, SKILLS, DC, DA)}')
+    else:
+        pass_(f'{README}: footnote {(ds, total, dc, da)} matches the measured install')
+    check_sum((ds, other), total, 'footnote installed + not-installed')
+    check_sum((rev, cur), other, 'footnote not-installed')
+check(r'A default Claude Code install delivers \*\*(\d+) skills, (\d+) commands and (\d+) agents\*\*',
+      'asset library opener', (DS, DC, DA))
+check(r'<small>(\d+) Core \+ (\d+) Bundle · (\d+) install by default</small>',
+      'skills tile', (SKILLS_CORE, SKILLS_BUNDLE, DS))
+check(r'<h3>(\d+)</h3><sub>Specialized Agents</sub><br><small>(\d+) Core \+ (\d+) Bundle</small>',
+      'agents tile', (AGENTS, AGENTS_CORE, AGENTS - AGENTS_CORE))
+check(r'A plain <code>bash install\.sh</code> delivers (\d+) skills, (\d+) commands and (\d+) agents on Claude Code',
+      'spec note', (DS, DC, DA))
+check(r'; (\d+) install by default on Claude Code</td>', 'spec table skills row', (DS,))
+# Every agent in the repository installs, so the published agent total must be the measured one.
+if AGENTS != DA:
+    fail_(f'docs/asset-counts.json agents.total={AGENTS} but a default install delivers {DA}')
+else:
+    pass_(f'agents.total {AGENTS} equals the measured install')
+
 print()
 if fail == 0:
-    print('  all README skills/commands prose claims agree with docs/asset-counts.json')
+    print('  all README skills/commands prose claims agree with docs/asset-counts.json '
+          'and docs/delivered-counts.json')
     sys.exit(0)
 sys.exit(1)

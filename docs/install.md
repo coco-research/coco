@@ -173,6 +173,7 @@ The `generic` adapter is the same script under a different name — for users of
 | `cognee` | 3-skill knowledge-graph memory | `--systems cognee` |
 | `hyperframes` | 20-skill video and motion suite | `--systems hyperframes` |
 | `superintelligence` | 495-persona expert board, generates 342 commands at install | `--systems superintelligence` |
+| `m0` | 4-skill cross-tool agent memory | `--systems m0` |
 
 Combine freely:
 

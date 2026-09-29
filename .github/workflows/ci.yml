@@ -122,13 +122,19 @@ jobs:
           # invoking the Super Intelligence generators drops 342 commands and shows
           # up here as a diff, instead of surfacing as "why is my install missing
           # most of the framework" months later.
+          # docs/delivered-counts.json is the claude-code row of the same measurement.
+          # The README's "installed by default" figures are gated against it in the
+          # asset-count step above, so README -> this file -> a real install is one chain.
           python3 scripts/build-delivery-index.py
-          if ! git diff --quiet adapters/INDEX.md; then
-            echo "adapters/INDEX.md is out of date. Run: python3 scripts/build-delivery-index.py"
-            git diff adapters/INDEX.md | head -50
+          if ! git diff --quiet adapters/INDEX.md docs/delivered-counts.json; then
+            echo "Delivery index is out of date. Run: python3 scripts/build-delivery-index.py"
+            git diff adapters/INDEX.md docs/delivered-counts.json | head -50
             exit 1
           fi
           echo "Delivery index up to date."
+
+      - name: Default bundle allow-list accounts for every bundle
+        run: bash tests/check-default-bundle-allowlist.sh
 
       - name: Bundle install gate (every advertised bundle must change the install plan)
         run: |

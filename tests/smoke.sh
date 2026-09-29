@@ -53,6 +53,18 @@ echo ""
 echo "=== Smoke test: root install.sh ==="
 bash install.sh --list > /tmp/list.out 2>&1 && pass "install.sh --list runs" || fail "install.sh --list failed"
 bash install.sh --dry-run --adapter claude-code > /tmp/install-dry.out 2>&1 && pass "install.sh --dry-run" || fail "install.sh --dry-run"
+# The root installer forwards --core-only to any adapter whose manifest names bundles;
+# six adapters used to reject it with "Unknown flag" and exit 1.
+for d in adapters/*/; do
+  adapter=$(basename "$d")
+  bash install.sh --adapter "$adapter" --core-only --dry-run > "/tmp/core-only-$adapter.out" 2>&1 \
+    && pass "install.sh --adapter $adapter --core-only" \
+    || fail "install.sh --adapter $adapter --core-only"
+done
+
+echo ""
+echo "=== Smoke test: CLAUDE.md rules block ==="
+bash tests/check-claude-md-block.sh && pass "rules block never damages CLAUDE.md" || fail "rules block damaged CLAUDE.md"
 
 echo ""
 echo "=== Smoke test: frontmatter validity ==="

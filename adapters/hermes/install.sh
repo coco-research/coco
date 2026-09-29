@@ -173,18 +173,8 @@ EOF
 
   if [[ $DRY_RUN -eq 1 ]]; then
     echo "DRY: would write Coco rules block to $target"
-  elif [[ -f "$target" ]]; then
-    awk -v s="$marker_start" -v e="$marker_end" '
-      $0 == s { skip=1; next }
-      $0 == e { skip=0; next }
-      !skip
-    ' "$target" > "$target.tmp"
-    printf '%s\n' "" "$block" >> "$target.tmp"
-    mv "$target.tmp" "$target"
-    echo "Wrote rules block to $target"
   else
-    printf '%s\n' "$block" > "$target"
-    echo "Wrote rules block to $target"
+    printf '%s\n' "$block" | bash "$REPO_ROOT/scripts/write-rules-block.sh" "$target"
   fi
 
   install_system() {

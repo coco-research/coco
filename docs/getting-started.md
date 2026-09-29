@@ -21,7 +21,7 @@ Coco auto-detects your AI tool. Override if needed:
 | Codex CLI | `bash install.sh --adapter codex` |
 | Aider, Continue, Windsurf, Cline | `bash install.sh --adapter generic` |
 
-That's it. Your AI now has 68 skills, 37 commands, 10 agents.
+That's it. On Claude Code your AI now has 189 skills, 386 commands and 34 agents (measured in [`docs/delivered-counts.json`](delivered-counts.json)).
 
 ---
 
@@ -65,7 +65,7 @@ State persists in `.planning/` — survives context resets.
 
 ## Where things live
 
-- **Skills** → [`skills/`](../skills/) (59 entries, each `<name>/SKILL.md`)
+- **Skills** → [`skills/`](../skills/) (75 entries, each `<name>/SKILL.md`)
 - **Commands** → [`commands/<namespace>/`](../commands/) (`team/`, `email/`, `design/`, `eng/`, `pm/`, `util/`)
 - **Agents** → [`agents/`](../agents/)
 - **Systems** → [`systems/`](../systems/) (gsd, brain, team)

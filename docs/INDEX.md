@@ -12,16 +12,16 @@
 
 ## By artifact type
 
-- [Skills](../skills/) — flat library of 68 core skills (179 including bundles)
-- [Agents](../agents/) — 11 subagent definitions
-- [Commands](../commands/) — 37 slash commands grouped by namespace
+- [Skills](../skills/) — flat library of 75 core skills (227 including bundles; 189 install by default on Claude Code)
+- [Agents](../agents/) — 10 subagent definitions (34 with the GSD bundle)
+- [Commands](../commands/) — 44 slash commands grouped by namespace (386 with the 342 generated at install)
 - [Workflows](../workflows/) — multi-step playbooks
 - [Templates](../templates/) — memory templates
 - [Rules](../rules/) — cross-IDE rules
 
 ## By system bundle
 
-Installable with `install.sh --systems <name>`:
+Installed by default; `--core-only` skips them and `--systems <list>` picks a subset:
 
 - [GSD](../systems/gsd/) — project orchestration (68 skills, 24 agents)
 - [HyperFrames](../systems/hyperframes/) — video and motion suite (20 skills)

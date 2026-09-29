@@ -43,13 +43,13 @@ fails any published claim that disagrees with it.
 
 | Asset | Count | Detail |
 | --- | --- | --- |
-| Skills | 227 | 75 core, 152 inside bundles |
+| Skills | 227 | 75 core, 152 inside bundles; 189 install by default on Claude Code |
 | Commands | 386 | 44 shipped, 342 generated at install time across 7 namespaces |
-| Agents | 35 | 11 core roles plus bundle agents |
+| Agents | 34 | 10 core roles plus 24 GSD agents |
 | Rules | 15 | Cursor `.mdc` behavioural rules |
 | Personas | 495 | Across 13 Super Intelligence departments |
 | Adapters | 16 | One installer and manifest per target editor or CLI |
-| Bundles | 9 | Opt-in trees: gsd, brain, cognee, hyperframes, superintelligence, m0, team, learning, reverse-skill |
+| Bundles | 7 | Installed by default: gsd, brain, cognee, hyperframes, superintelligence, m0. Opt-in: reverse-skill. (`team` and `learning` ship no installable artifacts.) |
 
 Distribution: `npm install cocosuperintelligence`, a Homebrew formula pinned to a release
 tarball, a root `install.sh` for a clone, and one adapter per target. The npm wrapper clones

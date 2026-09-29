@@ -34,6 +34,8 @@ COMMANDS = counts['commands']['customer_facing']
 AGENTS = counts['agents']['total']
 PERSONAS = counts['personas']['total']
 DEPARTMENTS = counts['departments']['total']
+# Measured by running the claude-code installer (scripts/build-delivery-index.py).
+INSTALLED_SKILLS = json.load(open('docs/delivered-counts.json'))['skills']
 
 print(f'=== truth: skills={SKILLS} commands={COMMANDS} agents={AGENTS} '
       f'personas={PERSONAS} departments={DEPARTMENTS} ===')
@@ -55,6 +57,7 @@ CHECKS = [
     ('coco/index.html', r'<p class="n">(\d+)</p><p class="lbl">Agents</p>', 'stat tile (agents)', (AGENTS,)),
     ('coco/index.html', r'<h2 class="reveal">(\d+) skills\. One instruction set each\.</h2>', 'section heading (skills)', (SKILLS,)),
     ('coco/index.html', r'<tr><th>Skills</th><td>(\d+) in the repository', 'spec table row (skills)', (SKILLS,)),
+    ('coco/index.html', r'in the repository \(\d+ core \+ \d+ bundle\); (\d+) install by default on Claude Code', 'spec table row (installed skills)', (INSTALLED_SKILLS,)),
     ('coco/index.html', r'<tr><th>Commands</th><td>(\d+) customer-facing', 'spec table row (commands)', (COMMANDS,)),
     ('coco/index.html', r'<tr><th>Agents</th><td>(\d+)\.', 'spec table row (agents)', (AGENTS,)),
     ('coco/index.html', r'<tr><th>Personas</th><td>(\d+) across (\d+) departments', 'spec table row (personas, departments)', (PERSONAS, DEPARTMENTS)),

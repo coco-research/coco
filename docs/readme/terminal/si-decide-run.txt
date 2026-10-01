@@ -4,32 +4,32 @@ $ /SI-Decide "Should a 10-person startup move its public REST API to GraphQL thi
 - Evidence: the persona stances I read are about monoliths, discovery, decision quality and retention. None mentions GraphQL. Where I apply a stance to GraphQL, I mark it (extrapolated).
 
 Round 1: independent positions (16 seated)
-  Sam Newman (Eng)          No
-  Martin Fowler (Eng)       No
-  DHH (Eng)                 Hard no
-  Gregor Hohpe (Eng)        Conditional
-  Matthew Skelton (Eng)     No
-  Charity Majors (Eng)      Conditional
-  Bruce Schneier (Eng)      No this quarter
-  Corey Quinn (Eng)         Cost-skeptical
-  Marty Cagan (PD)          Not yet
-  Teresa Torres (PD)        Not yet
-  Eric Ries (PD)            Pilot
-  Richard Rumelt (Strat)    No
-  Olivier Sibony (Strat)    Challenge the process
-  Annie Duke (Fin)          Not now, with a kill rule
-  Lincoln Murphy (GTM)      No breaking changes
-  Blake Bartlett (GTM)      Conditional yes
+  Microservices architect (Eng)     No
+  Refactoring architect (Eng)       No
+  Monolith advocate (Eng)           Hard no
+  Enterprise architect (Eng)        Conditional
+  Team-topology lead (Eng)          No
+  Observability lead (Eng)          Conditional
+  Security lead (Eng)               No this quarter
+  Cloud-cost analyst (Eng)          Cost-skeptical
+  Product leader (PD)               Not yet
+  Discovery coach (PD)              Not yet
+  Lean-startup coach (PD)           Pilot
+  Strategy scholar (Strat)          No
+  Decision scientist (Strat)        Challenge the process
+  Decision strategist (Fin)         Not now, with a kill rule
+  Customer-success lead (GTM)       No breaking changes
+  Product-led-growth lead (GTM)     Conditional yes
 
 React rounds
-  Murphy vs Bartlett (updated): Bartlett concedes that a new endpoint must never force a REST sunset. Murphy concedes that DX can matter for adoption.
-  Majors vs Skelton, DHH (updated): Skelton agrees to a pilot only with observability and one named owner. Majors makes observability a gate, not a nice-to-have.
+  Customer-success lead vs Product-led-growth lead (updated): Product-led-growth lead concedes that a new endpoint must never force a REST sunset. Customer-success lead concedes that DX can matter for adoption.
+  Observability lead vs Team-topology lead, Monolith advocate (updated): Team-topology lead agrees to a pilot only with observability and one named owner. Observability lead makes observability a gate, not a nice-to-have.
   Round 3. No stance moved (held for everyone) and no unanswered question remained. I stopped at 3 of the 4-round cap.
   …
 
 Verdict: CONDITIONAL NO
 - Consensus: do not migrate. Do not sunset REST.
-- Named dissent: Blake Bartlett (GTM) and Gregor Hohpe (Eng) for option C even before evidence.
+- Named dissent: Product-led-growth lead (GTM) and Enterprise architect (Eng) for option C even before evidence.
 - Pilot criteria if you pick C:
   - Run it beside REST for one quarter, with 2-3 consenting customers and one named owner.
   - Enforce query-depth and cost limits and per-query observability before launch.

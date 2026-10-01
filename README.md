@@ -23,12 +23,12 @@ A hard call in a coding session usually gets one model's opinion, with no name o
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/readme/si-decide-dark.png">
-  <img src="docs/readme/si-decide-light.png" width="100%" alt="Terminal capture of /SI-Decide: Should a 10-person startup move its public REST API to GraphQL this quarter? Sixteen personas from five departments give positions, react in rounds, and return a conditional no with two named dissenters.">
+  <img src="docs/readme/si-decide-light.png" width="100%" alt="Terminal capture of /SI-Decide: Should a 10-person startup move its public REST API to GraphQL this quarter? Sixteen personas, shown as role archetypes from five departments, give positions, react in rounds, and return a conditional no with two named dissenters.">
 </picture>
 
-*Personas are simulated from each person's public writing. They are not the views of the real people, who are not affiliated with Coco. See the [persona disclaimer](systems/superintelligence/DISCLAIMER.md).*
+*Personas are simulated from public writing and are not the views of any real person. See the [persona disclaimer](systems/superintelligence/DISCLAIMER.md).*
 
-A real `/SI-Decide` run (Claude Sonnet 5.5, 30 September 2026, US$0.41). It is trimmed for length, with no words changed; the full output is in [`docs/readme/terminal/si-decide-full.md`](docs/readme/terminal/si-decide-full.md). Note what it admits: the embedding router was offline, so it fell back to keywords, and stances applied beyond their source are marked *extrapolated*.
+An illustration built from a real `/SI-Decide` run (Claude Sonnet 5.5, 30 September 2026, US$0.41). Persona names are replaced with role archetypes and the output is trimmed for length; no other words are changed. The full output, with the same replacements, is in [`docs/readme/terminal/si-decide-full.md`](docs/readme/terminal/si-decide-full.md). Note what it admits: the embedding router was offline, so it fell back to keywords, and stances applied beyond their source are marked *extrapolated*.
 
 ## Quick start
 

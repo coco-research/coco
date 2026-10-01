@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>claude — /SI-Decide</title>
+<!--
+  Empty terminal. shoot.mjs sets #out.textContent from si-decide-run.txt, then calls
+  styleTranscript(). sample.txt is a labelled SAMPLE for local preview and is not loaded.
+  No network requests.
+-->
+<style>
+  :root {
+    --paper: #F3F2EE;
+    --ink: #0B0B0B;
+    --ink-2: #3C3C37;
+    --ink-3: #5F5F58;
+    --blue: #1234FF;
+    --rule: #0B0B0B;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0B0C0E;
+      --ink: #ECEAE4;
+      --ink-2: #C8C6BE;
+      --ink-3: #929089;
+      --blue: #8FA2FF;
+      --rule: #ECEAE4;
+    }
+  }
+  html, body {
+    margin: 0;
+    background: var(--paper);
+  }
+  #term {
+    width: 1100px;
+    box-sizing: border-box;
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .titlebar {
+    padding: 7px 14px;
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink-3);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  #out {
+    margin: 0;
+    padding: 16px 18px 20px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-family: inherit;
+    font-size: inherit;
+  }
+  #out .prompt,
+  #out .verdict {
+    color: var(--blue);
+  }
+  #out .h {
+    font-weight: 700;
+  }
+  #out strong {
+    font-weight: 700;
+    color: inherit;
+  }
+</style>
+</head>
+<body>
+<div id="term">
+  <div class="titlebar">claude — /SI-Decide</div>
+  <pre id="out"></pre>
+</div>
+<script>
+/**
+ * Turn the exact #out text into light markdown.
+ * Words stay as written. ** and leading # are markers only.
+ * Tables gain spaces so columns line up. Nothing else is rewritten.
+ */
+function styleTranscript() {
+  var pre = document.getElementById('out');
+  var raw = (pre.textContent || '').replace(/\r\n/g, '\n');
+  var lines = raw.split('\n');
+  var aligned = alignTables(lines);
+  var frag = document.createDocumentFragment();
+  var promptUsed = false;
+  for (var i = 0; i < aligned.length; i++) {
+    var line = aligned[i];
+    var span = document.createElement('span');
+    var trimmed = line.trimStart();
+    if (!promptUsed && line.startsWith('$ ')) {
+      span.className = 'prompt';
+      promptUsed = true;
+    } else if (trimmed.startsWith('Verdict') || trimmed.startsWith('Pick')) {
+      span.className = 'verdict';
+    } else if (/^#{1,6} /.test(trimmed)) {
+      span.className = 'h';
+    }
+    appendInline(span, stripHeading(line));
+    frag.appendChild(span);
+    if (i !== aligned.length - 1) frag.appendChild(document.createTextNode('\n'));
+  }
+  pre.replaceChildren(frag);
+}
+
+function stripHeading(line) {
+  return line.replace(/^\s*#{1,6} /, '');
+}
+
+function appendInline(parent, line) {
+  var re = /\*\*([^*]+)\*\*/g;
+  var last = 0;
+  var m;
+  while ((m = re.exec(line))) {
+    if (m.index > last) parent.appendChild(document.createTextNode(line.slice(last, m.index)));
+    var strong = document.createElement('strong');
+    strong.textContent = m[1];
+    parent.appendChild(strong);
+    last = m.index + m[0].length;
+  }
+  if (last < line.length) parent.appendChild(document.createTextNode(line.slice(last)));
+  if (line.length === 0) parent.appendChild(document.createTextNode(''));
+}
+
+function alignTables(lines) {
+  var out = [];
+  for (var i = 0; i < lines.length; ) {
+    if (!isTableLine(lines[i])) {
+      out.push(lines[i]);
+      i++;
+      continue;
+    }
+    var block = [];
+    while (i < lines.length && isTableLine(lines[i])) block.push(lines[i++]);
+    var rows = block.map(splitRow);
+    var cols = 0;
+    rows.forEach(function (r) { if (r.length > cols) cols = r.length; });
+    var widths = [];
+    for (var c = 0; c < cols; c++) widths[c] = 0;
+    rows.forEach(function (r) {
+      r.forEach(function (cell, c) {
+        var shown = renderedCell(cell).length;
+        if (shown > widths[c]) widths[c] = shown;
+      });
+    });
+    rows.forEach(function (r) {
+      var cells = [];
+      for (var c = 0; c < cols; c++) {
+        var cell = r[c] || '';
+        var pad = widths[c] - renderedCell(cell).length;
+        cells.push(pad > 0 ? cell + ' '.repeat(pad) : cell);
+      }
+      out.push('| ' + cells.join(' | ') + ' |');
+    });
+  }
+  return out;
+}
+
+function isTableLine(line) {
+  return /^\s*\|.*\|\s*$/.test(line);
+}
+
+function splitRow(line) {
+  var s = line.trim();
+  if (s.charAt(0) === '|') s = s.slice(1);
+  if (s.charAt(s.length - 1) === '|') s = s.slice(0, -1);
+  return s.split('|').map(function (cell) { return cell.trim(); });
+}
+
+// Same text appendInline renders: **markers** are not visible, so they must not count.
+function renderedCell(cell) {
+  return cell.replace(/\*\*([^*]+)\*\*/g, '$1');
+}
+</script>
+</body>
+</html>

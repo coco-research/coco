@@ -1,0 +1,36 @@
+$ /SI-Decide "Should a 10-person startup move its public REST API to GraphQL this quarter?"
+
+- Routing: `meta_select.py` fell back to keywords because the embedding endpoint was down, and it ranked GTM first. I routed by hand to Engineering (8), Product Design (3), Strategy (2), Finance (1) and GTM (2), 16 personas in all.
+- Evidence: the persona stances I read are about monoliths, discovery, decision quality and retention. None mentions GraphQL. Where I apply a stance to GraphQL, I mark it (extrapolated).
+
+Round 1: independent positions (16 seated)
+  Sam Newman (Eng)          No
+  Martin Fowler (Eng)       No
+  DHH (Eng)                 Hard no
+  Gregor Hohpe (Eng)        Conditional
+  Matthew Skelton (Eng)     No
+  Charity Majors (Eng)      Conditional
+  Bruce Schneier (Eng)      No this quarter
+  Corey Quinn (Eng)         Cost-skeptical
+  Marty Cagan (PD)          Not yet
+  Teresa Torres (PD)        Not yet
+  Eric Ries (PD)            Pilot
+  Richard Rumelt (Strat)    No
+  Olivier Sibony (Strat)    Challenge the process
+  Annie Duke (Fin)          Not now, with a kill rule
+  Lincoln Murphy (GTM)      No breaking changes
+  Blake Bartlett (GTM)      Conditional yes
+
+React rounds
+  Murphy vs Bartlett (updated): Bartlett concedes that a new endpoint must never force a REST sunset. Murphy concedes that DX can matter for adoption.
+  Majors vs Skelton, DHH (updated): Skelton agrees to a pilot only with observability and one named owner. Majors makes observability a gate, not a nice-to-have.
+  Round 3. No stance moved (held for everyone) and no unanswered question remained. I stopped at 3 of the 4-round cap.
+  …
+
+Verdict: CONDITIONAL NO
+- Consensus: do not migrate. Do not sunset REST.
+- Named dissent: Blake Bartlett (GTM) and Gregor Hohpe (Eng) for option C even before evidence.
+- Pilot criteria if you pick C:
+  - Run it beside REST for one quarter, with 2-3 consenting customers and one named owner.
+  - Enforce query-depth and cost limits and per-query observability before launch.
+  - Pre-commit a kill criterion, for example: fewer than 2 customers actively using it, or more than X engineer-days of upkeep, means you shut it down.

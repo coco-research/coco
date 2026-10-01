@@ -32,9 +32,9 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-# No flag means every bundle in the default allow-list. The advertised totals (386
-# commands, 226 skills) are what a plain install is expected to deliver, and leaving them
-# behind an opt-in flag is how 74 of 226 skills went missing without a word.
+# No flag means every bundle in the default allow-list: a plain install is expected to
+# deliver the measured totals in docs/delivered-counts.json, and leaving the bundles
+# behind an opt-in flag is how 74 skills once went missing without a word.
 if [[ $CORE_ONLY -eq 1 ]]; then
   SYSTEMS=()
 elif [[ ${#SYSTEMS[@]} -eq 0 ]]; then
@@ -96,7 +96,9 @@ link_skills() {
   for skill in "$REPO_ROOT/skills"/*/; do
     name=$(basename "$skill")
     link_dir "$skill" "$TARGET_HOME/skills/$name"
-    SKILL_COUNT=$((SKILL_COUNT + 1))
+    # team-gate has no SKILL.md: it is the scripts the /team commands call, linked
+    # so they resolve, but not a skill, so the receipt does not count it.
+    if [[ -f "$skill/SKILL.md" ]]; then SKILL_COUNT=$((SKILL_COUNT + 1)); fi
   done
 }
 
@@ -121,10 +123,11 @@ link_agents() {
   for agent in "$REPO_ROOT/agents"/*.md; do
     name=$(basename "$agent")
     link_dir "$agent" "$TARGET_HOME/agents/$name"
-    # INDEX.md and README.md are navigation rather than subagents: still linked, not
-    # counted, so the receipt reports subagents instead of files.
+    # INDEX.md and README.md are navigation, and PROMPT-DEFENSE.md is the preamble every
+    # agent includes, rather than subagents: still linked, not counted, so the receipt
+    # reports subagents instead of files.
     case "$name" in
-      INDEX.md|README.md) ;;
+      INDEX.md|README.md|PROMPT-DEFENSE.md) ;;
       *) AGENT_COUNT=$((AGENT_COUNT + 1)) ;;
     esac
   done
@@ -241,19 +244,7 @@ EOF
     return
   fi
 
-  # If CLAUDE.md exists, strip prior Coco block then append new
-  if [[ -f "$target" ]]; then
-    awk -v s="$marker_start" -v e="$marker_end" '
-      $0 == s { skip=1; next }
-      $0 == e { skip=0; next }
-      !skip
-    ' "$target" > "$target.tmp"
-    printf '%s\n' "" "$block" >> "$target.tmp"
-    mv "$target.tmp" "$target"
-  else
-    printf '%s\n' "$block" > "$target"
-  fi
-  echo "Wrote rules block to $target"
+  printf '%s\n' "$block" | bash "$REPO_ROOT/scripts/write-rules-block.sh" "$target"
 }
 
 print_receipt() {

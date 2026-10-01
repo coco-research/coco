@@ -32,7 +32,7 @@ Restart PI-Desktop, or open a new session, and the commands and skills appear.
 
 | Flag | Effect |
 |---|---|
-| `--systems gsd,brain` | Add system bundles. Bundles are opt-in; the core install is skills, commands, agents and workflows. |
+| `--systems gsd,brain` | Add system bundles. Replaces the default bundle set, which installs when no flag is given; `--core-only` skips bundles. |
 | `--dry-run` | Print the plan and write nothing. |
 | `--uninstall` | Remove every file this adapter wrote, and nothing else. |
 | `--force` | Replace files that are not ours. |

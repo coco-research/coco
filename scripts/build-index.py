@@ -247,7 +247,9 @@ def collect_agents():
     for p in sorted(ROOT.glob('agents/*.md')):
         if not _shipped(p):
             continue
-        if p.name in ('README.md', 'INDEX.md'):
+        # PROMPT-DEFENSE.md is the preamble every agent includes, not a subagent:
+        # counting it made the published total 35 where Claude Code loads 34.
+        if p.name in ('README.md', 'INDEX.md', 'PROMPT-DEFENSE.md'):
             continue
         agents.append({'name': p.stem, 'desc': _first_prose_line(p),
                        'path': p.relative_to(ROOT)})

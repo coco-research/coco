@@ -1,99 +1,118 @@
-<div align="center">
-
-<img src="docs/readme/hero-dark.png" alt="CoCo Super Intelligence: two-arc mark on black, 495 personas, 227 skills, 386 commands" width="1600">
-
 # CoCo Super Intelligence
 
-### Summon an advisory board of 495 world-class minds — right inside your AI coding session.
+Summon an advisory board of 495 world-class minds inside the AI coding session you already use, then **227 skills**[^installed], **386 commands**, and disk-persistent state that ship the decision.
 
-CoCo Super Intelligence is the orchestration layer that turns Claude Code, Cursor, or Codex into an entire engineering department: routed expert panels that deliberate and decide, then **227 skills**[^installed], **386 commands**, and disk-persistent state that ship what they decided.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/readme/hero-dark-mode.png">
+  <img src="docs/readme/hero-light.png" width="100%" alt="Many small clusters of experts converging on one decision">
+</picture>
 
-[^installed]: 189 of the 227 skills install by default on Claude Code, together with all 386 commands and 34 agents. The other 38 are the opt-in `reverse-skill` security pack (33, installed only with `--systems reverse-skill`) and 5 Cursor-only skills. Measured by running the installer, not by counting files: see [`docs/delivered-counts.json`](docs/delivered-counts.json), and [`adapters/INDEX.md`](adapters/INDEX.md) for every other IDE.
+[![CI](https://img.shields.io/github/actions/workflow/status/coco-research/coco/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/coco-research/coco/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/coco-research/coco?style=flat-square&color=1234FF)](https://github.com/coco-research/coco/releases)
+[![Skills](https://img.shields.io/badge/skills-227?style=flat-square&color=5F5F58&labelColor=0B0B0B)](skills/)
+[![Commands](https://img.shields.io/badge/commands-386?style=flat-square&color=5F5F58&labelColor=0B0B0B)](commands/)
+[![Personas](https://img.shields.io/badge/personas-495-5F5F58?style=flat-square&color=5F5F58&labelColor=0B0B0B)](systems/superintelligence/)
 
-Open-core (MIT core · proprietary Super Intelligence) · installs in 90 seconds · 100% local · no telemetry
+Open-core: the core is [MIT](LICENSE), and Super Intelligence is [proprietary](systems/superintelligence/LICENSE). Files stay on your machine. No telemetry. A version check may contact GitHub once a day.
 
-<br>
+## Why it exists
 
-[![License: Open-core](https://img.shields.io/badge/License-Open--core-5b6169?labelColor=0a0a0a&style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.5.0-5b6169?labelColor=0a0a0a&style=flat-square)](CHANGELOG.md)
-[![npm](https://img.shields.io/npm/v/cocosuperintelligence?labelColor=0a0a0a&color=5b6169&style=flat-square)](https://www.npmjs.com/package/cocosuperintelligence)
-[![Skills](https://img.shields.io/badge/skills-227-5b6169?labelColor=0a0a0a&style=flat-square)](skills/)
-[![Commands](https://img.shields.io/badge/commands-386-5b6169?labelColor=0a0a0a&style=flat-square)](commands/)
-[![Personas](https://img.shields.io/badge/personas-495-5b6169?labelColor=0a0a0a&style=flat-square)](systems/superintelligence/)
-[![CI](https://img.shields.io/github/actions/workflow/status/coco-research/coco/ci.yml?branch=main&style=flat-square&label=CI&labelColor=0a0a0a&color=5b6169)](https://github.com/coco-research/coco/actions)
+A hard call in a coding session usually gets one model's opinion, with no name on it and no record of who disagreed. CoCo seats a cross-team board of 495 named experts, each answering from cited public stances, and returns one pick plus the dissent. The same install carries the skills and commands that do the work after the verdict, and writes phase state to disk so a cleared chat does not erase the plan. It is not a new model and not a new harness. It installs into the one you already run.
 
-<br>
+## See it
 
-<p>
-&nbsp;&nbsp;<a href="#install"><kbd> &nbsp; Install &nbsp; </kbd></a>&nbsp;&nbsp;
-<a href="#the-board"><kbd> &nbsp; The Board &nbsp; </kbd></a>&nbsp;&nbsp;
-<a href="#the-framework-underneath"><kbd> &nbsp; Framework &nbsp; </kbd></a>&nbsp;&nbsp;
-<a href="#skills-catalog"><kbd> &nbsp; Skills &nbsp; </kbd></a>&nbsp;&nbsp;
-<a href="#system-bundles"><kbd> &nbsp; Systems &nbsp; </kbd></a>&nbsp;&nbsp;
-<a href="#see-it-run"><kbd> &nbsp; Demos &nbsp; </kbd></a>
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/readme/si-decide-dark.png">
+  <img src="docs/readme/si-decide-light.png" width="100%" alt="Terminal capture of /SI-Decide: Should a 10-person startup move its public REST API to GraphQL this quarter? Sixteen personas, shown as role archetypes from five departments, give positions, react in rounds, and return a conditional no with two named dissenters.">
+</picture>
 
-<br>
+*Personas are simulated from public writing and are not the views of any real person. See the [persona disclaimer](systems/superintelligence/DISCLAIMER.md).*
 
-</div>
+An illustration built from a real `/SI-Decide` run (Claude Sonnet 5.5, 30 September 2026, US$0.41). Persona names are replaced with role archetypes and the output is trimmed for length; no other words are changed. The full output, with the same replacements, is in [`docs/readme/terminal/si-decide-full.md`](docs/readme/terminal/si-decide-full.md). Note what it admits: the embedding router was offline, so it fell back to keywords, and stances applied beyond their source are marked *extrapolated*.
 
-<p align="center">
-  <img src="assets/demo.gif" alt="/SI-Decide --debate: a routed expert panel argues in reacting rounds before an attributed verdict" width="720" />
-</p>
+## Quick start
 
-<div align="center"><sub><em>A real <code>/SI-Decide --debate</code> run — CoCo routes an expert panel, deliberates in reacting rounds, and returns an attributed verdict with named dissent.</em></sub></div>
+Prerequisites: git, bash, Node.js 14 or newer (for `npx`), and python3 (it generates the `/SI-*` commands).
 
----
-
-<div align="center">
-
-> **One developer writing single prompts? That was last year.**
->
-> CoCo Super Intelligence convenes a cross-team board of 495 named experts to pressure-test your hardest calls — then puts an orchestrated team of agents to work executing the verdict: parallel build waves, deterministic verification gates, and phase state that survives every `/clear`.
-
-</div>
-
-<a id="install"></a>
+`npx cocosuperintelligence` installs the latest release. It clones the pinned release tag (currently `v1.5.0`, not floating `main`) into `./coco` of the current directory, then runs `install.sh`. Run it from your home folder, so the clone is `~/coco` and not a folder inside another project. On a fresh machine it took about 3 minutes, including the download.
 
 ```bash
 npx cocosuperintelligence
-# or: npm i -g cocosuperintelligence && coco
-# alternate: git clone https://github.com/coco-research/coco.git && cd coco && bash install.sh
 ```
 
-<div align="center"><sub>A local governed department on Claude Code, Cursor, or Codex. Open-core. No telemetry.</sub></div>
-<div align="center"><sub>90 seconds. <code>npx</code> clones the pinned release (<code>v1.5.0</code>) into <code>./coco</code> and runs <code>install.sh</code>. Override with <code>--adapter cursor</code> or <code>--adapter claude-code</code>; narrow bundles with <code>--systems</code>. Per-adapter detail: <a href="docs/install.md">docs/install.md</a>.</sub></div>
+Open Claude Code and run:
 
-<p align="center">
-  <img src="docs/readme/local-first.png" alt="Install with npx, then a local session, then the board. Nothing leaves this machine." width="1600">
-</p>
+```bash
+/SI-Decide "Should a 10-person startup move its public REST API to GraphQL this quarter?"
+```
 
-<p align="center">
-  <img src="docs/assets/dogfood-si.gif" alt="Real local meta_select.py Stage-A run on this Mac — degraded: keyword fallback (embedding endpoint unavailable)" width="720" />
-</p>
-<div align="center"><sub><em>Honest local dogfood, 2026-09-15: <code>python3 systems/superintelligence/scripts/meta_select.py</code> on this Mac. Embedding endpoint was down (<code>Connection refused</code>), so this is the <strong>degraded: keyword fallback</strong> path — <code>method: keyword</code>, <code>degraded: true</code> — labeled on-screen, not dressed up as embed cosine.</em></sub></div>
+Newest main, which is ahead of that pin:
 
----
+```bash
+git clone https://github.com/coco-research/coco.git ~/coco && bash ~/coco/install.sh
+```
 
-## What CoCo Is (and Isn't)
+Adapter flags and bundle selection: [`docs/install.md`](docs/install.md).
 
-**CoCo is not a new AI model, and it is not another agent harness.** It doesn't run a model or an agent loop of its own. It's a portable layer of Markdown and YAML that installs *into* the agent harness you already use — Claude Code, Cursor, Codex CLI, or any `AGENTS.md`-compatible tool — and upgrades it with an expert advisory board, a skills library, persistent project memory, specialized subagents, and verification gates.
+## What it does
 
-Your model, your tool, your keys, your machine. When you see "parallel subagent waves," those subagents are executed by your host harness's own agent machinery; CoCo supplies the orchestration structure that makes it all behave like a coordinated team. That is exactly why CoCo is vendor-neutral: it's the operating layer, not the engine.
+- Get one clear pick on a hard call, with the disagreement named and each stance cited.
+- Ask in one line. `/SI-Decide` seats 16-32 of 495 personas across 13 departments. Add `--debate` for reaction rounds.
+- Keep going after `/clear`. Decisions, phase state, and progress stay on disk.
+- Install into Claude Code, Cursor, Codex, VS Code, or another adapter. Your model and your keys stay yours.
+- Carry the verdict into the work: planning, review, verification, PRDs, and a pull request, with gates that have real exit codes.
+- Stay local. CoCo adds no analytics. Set `COCO_NO_UPDATE_CHECK=1` to skip the daily GitHub version check.
 
----
+## How it works
 
-<a id="the-board"></a>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/readme/how-it-works-dark.svg">
+  <img src="docs/readme/how-it-works-light.svg" width="100%" alt="From /SI-Decide through an orchestrator seating 16-32 personas to a decision, with a dashed named-dissent branch off the debate step">
+</picture>
 
-## ⭐ The Board — CoCo Super Intelligence
+You type a question. The orchestrator scores 495 personas across 13 departments on domain fit, cell coverage, and productive conflict, then seats 16-32. Each seated persona answers from its cited public stances. `--debate` adds reaction rounds before the tally. The decision is one pick, the dissents are named, and a stance check flags anything that does not trace to a source.
 
-<p align="center">
-  <img src="docs/readme/board-strip.png" alt="Board roster on black: 13 departments, 495 personas, type only" width="1600">
-</p>
+How the router scores teams: [`systems/superintelligence/README.md`](systems/superintelligence/README.md). What each editor actually receives: [`adapters/INDEX.md`](adapters/INDEX.md).
 
-### A cross-team advisory board of 495 world-class minds
+## Status and roadmap
 
-Super Intelligence is CoCo's signature capability. It lets you summon custom, real-world expert panels directly inside your coding session to guide architectural, engineering, risk, finance, and business decisions — each contribution attributed to a named expert, grounded in cited public sources.
+Released: v1.5.0 on npm. Today `npx` installs v1.5.0. That tag already contains the 13 Super Intelligence team skill files, but its installer does not install them as front doors. That fix, and several other installer fixes, are on main. The measured 189 skills / 386 commands / 34 agents ([`docs/delivered-counts.json`](docs/delivered-counts.json)) apply to main.
+
+Known gap: most GSD skills need the upstream GSD toolkit at `~/.claude/get-shit-done` (see [`systems/gsd/README.md`](systems/gsd/README.md)).
+
+Next three milestones:
+
+1. v1.6.0, so `npx` installs what main already has.
+2. Bundle the GSD runtime, so those skills work without a separate toolkit.
+3. Installer safety: an uninstall guard, and a clearer clone location.
+
+<details>
+<summary><strong>Other install paths, updates, uninstall</strong></summary>
+
+From a checkout you already have, `bash install.sh` auto-detects the editor. Narrow it with `--adapter cursor` or `--systems gsd,brain`. `--core-only` skips bundles. `reverse-skill` stays opt-in: `--systems reverse-skill`.
+
+The remote bootstrap clones the pinned release tag (currently `v1.5.0`, not floating `main`) to `~/.coco`, prints the commit, and waits for you to type `y` before it runs `install.sh`:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/coco-research/coco/main/bin/coco-bootstrap.sh)
+```
+
+`npx cocosuperintelligence update` checks out the pinned release tag. A git clone updates with `git pull --ff-only && bash install.sh`. `bash scripts/check-update.sh` prints the version. The check contacts GitHub at most once a day and sends no telemetry.
+
+Uninstall removes symlinks whose target is this clone, and only those. Run it from the clone root:
+
+```bash
+CLONE="$(pwd)"
+find ~/.claude ~/.cursor ~/.grok ~/.copilot -type l -lname "${CLONE}/*" -delete
+```
+
+A contains-match on the folder name would also delete links into a path that merely contains that name (for example `coco-research` when the clone is `coco`). Hermes profiles live under `~/.hermes/profiles`; use the same `"${CLONE}/*"` prefix there. Uninstall does not remove the generated `SI*.md` command files or the rules block between `<!-- coco:rules-start -->` and `<!-- coco:rules-end -->` in `CLAUDE.md`; delete those by hand.
+
+</details>
+
+## The board
+
+Super Intelligence summons a panel inside the session you already have open. Every contribution is attributed to a named expert and grounded in a cited public source.
 
 ```bash
 /SI-Decide "Should we migrate our database to pgvector?"
@@ -120,162 +139,18 @@ Super Intelligence is CoCo's signature capability. It lets you summon custom, re
 | **Healthcare & Life Sciences** | 25 | Health economics, genomics, clinical medicine, public health policy |
 | **Sales / GTM / Marketing** | 23 | Product-market fit, sales ops, growth marketing, enterprise GTM |
 
-- **342 generated slash commands.** 17 cross-team meta commands (like `/SI-Decide` or `/SI-Tradeoff`, routing across domains) plus 325 per-team commands (25 verbs × 13 teams, such as `/SI-AI-Decide` or `/SI-Eng-Pre-Mortem`). These are generated locally at install time from the team registries — no command files are transmitted or stored remotely.
-- **70 expertise cells.** Each department is subdivided into focused cells (e.g. Engineering has 11, AI has 8) so the router can assemble a precise panel rather than a generic crowd.
-- **Cross-team meta-orchestration.** For complex queries spanning domains ("build and sell an AI audit tool"), a local router scores your prompt against team registries and cells, then greedily assembles a proportional 16–32-person panel.
-- **Citable and grounded.** Every stance is verified from public sources and carries a direct evidence URL. Personas are validated against a strict anti-fabrication gate.
-- **`--debate` deliberation.** Panels can argue in reacting rounds before returning a verdict, surfacing named dissent instead of false consensus.
+- **342 generated slash commands.** 17 cross-team commands (`/SI-Decide`, `/SI-Tradeoff`) plus 325 per-team commands (25 verbs × 13 teams, such as `/SI-AI-Decide`). Generated on your machine at install time. Nothing is uploaded.
+- **98 expertise cells.** Departments are split into cells so the router can seat a precise panel. The count is the sum of the `cells` fields in [`systems/superintelligence/registry.json`](systems/superintelligence/registry.json).
+- **Two-stage routing.** Stage A reads the meta-registry and picks the top teams. Stage B loads compact records for those teams only and seats 16-32 people with weights 0.40 domain, 0.30 cell coverage, 0.30 productive conflict, then pairs opposing views. If one team dominates, that team's own orchestrator takes the question.
+- **`--debate`.** The panel argues in reacting rounds, then returns a verdict with named dissent instead of a false consensus.
 
-### The selection algorithm (two-stage routing + approval)
+The 495-persona roster was compiled with a systematic multi-tier workflow. Candidate generation was evaluated across local Qwen (via LM Studio), a hosted small model, and Gemini Flash, but **Claude research agents proved the quality winner** for resolving historical data and citing verifiable signal. Personas are checked by an advisory validation gate (`validate_persona.py`) that enforces five things: every required frontmatter field is present; at least 4 cited URLs resolve live (non-404); every `public_stance` carries an `evidence_url`, so no stance is uncited; at least 2 recent signals within 12 months (or 2 persistent signals for historical archetypes); and any `pairs_well_with` / `productive_conflict_with` slug refers to a real roster member. Two limits are worth stating plainly: the gate confirms that a stance is *cited*, not that a quotation is authentic, and `home_team` is only checked for presence, not validated against the list of real teams. A `NEEDS-TOPUP` verdict is advisory. It does not currently affect which personas a council selects at runtime.
 
-The meta-orchestrator uses a staged algorithm so it never has to load the entire persona filesystem at runtime:
+## Skills catalog
 
-1. **Stage A — team & cell routing (cheap).** Reads the meta-registry (`systems/superintelligence/registry.json`) and scans only team descriptions and cell definitions, scoring relevance by keyword and domain overlap to select the top 1–4 teams. If one team dominates, it delegates to that team's own orchestrator.
-2. **Stage B — scoped persona selection.** Loads compact persona records (slugs, cells, domains, stances, conflict mappings) for only the selected teams, allocates the 16–32-person budget proportionally, runs the greedy scorer (`0.40·domain + 0.30·cell-coverage + 0.30·conflict-pairing`), and applies a cross-team tension pass to pair opposing viewpoints (e.g. security vs. growth).
-3. **Stage C — approval & execution.** Presents the roster grouped by team with a one-line rationale. The action verb then consumes the approved roster and returns output with full line-by-line attribution (e.g. "Aswath Damodaran (Finance): …").
+CoCo ships **227 skills** (75 core + 152 across bundles)[^installed]. Each one is an instruction set with state, checks, and error handling, not a one-line prompt. A slice:
 
-### Persona build & validation pipeline
-
-The 495-persona roster was compiled with a systematic multi-tier workflow. Candidate generation was evaluated across local Qwen (via LM Studio), a hosted small model, and Gemini Flash, but **Claude research agents proved the quality winner** for resolving historical data and citing verifiable signal. Personas are checked by an advisory validation gate (`validate_persona.py`) that enforces five things: every required frontmatter field is present; at least 4 cited URLs resolve live (non-404); every `public_stance` carries an `evidence_url`, so no stance is uncited; at least 2 recent signals within 12 months (or 2 persistent signals for historical archetypes); and any `pairs_well_with` / `productive_conflict_with` slug refers to a real roster member. Two limits are worth stating plainly: the gate confirms that a stance is *cited*, not that a quotation is authentic, and `home_team` is only checked for presence, not validated against the list of real teams. A `NEEDS-TOPUP` verdict is advisory — it does not currently affect which personas a council selects at runtime.
-
----
-
-<a id="the-framework-underneath"></a>
-
-## The Framework Underneath
-
-The board decides. The framework ships. Three pillars turn the verdict into merged, verified code.
-
-<table>
-<tr>
-<td width="33%" valign="top">
-
-### 1. Autonomous team execution
-`/team:ship` runs a fully coordinated build pipeline — 6 development stages, 7 hard verification gates, and 2 architecture conformance gates. Specialized agents act in their domains (Research, Architecture, Plan, Review, Build, QA). Code must clear the Test Evidence Protocol (independent re-runs, strict coverage, skip-prevention) **and land where the plan said it would** before a pull request is opened.
-
-</td>
-<td width="33%" valign="top">
-
-### 2. Disk-persistent state
-AI chat context is fragile and wipes on `/clear`. CoCo persists phase state, decisions, and progress logs to disk across resets, with atomic git commits for every successful step — so you can review history, roll back a bad design path, or resume a long-running migration from any checkpoint.
-
-</td>
-<td width="33%" valign="top">
-
-### 3. Vendor-neutral portability
-CoCo compiles its rules, templates, and agent definitions into pure Markdown and YAML frontmatter. Native IDE adapters inject the same library into Claude Code, Cursor, Codex CLI, PI-Desktop, VS Code, or any `AGENTS.md` tool — so your workflows follow you even if you switch AI editors.
-
-</td>
-</tr>
-</table>
-
----
-
-## Architecture conformance: the gate tests cannot give you
-
-Every test suite in existence shares one blind spot. **Tests fail when behaviour breaks — not when your architecture quietly dissolves.** A component can be relocated, folded into another module, or deleted outright, and a green build will tell you nothing. Requirements pass. Coverage holds. The design you agreed to is gone.
-
-`/team` now closes that gap in both directions, and both are enforced by Python scripts with real exit codes — not by instructions an agent can narrate its way around.
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### ◀ Backwards — drift detection
-
-A commit-pinned index at **`.arch/index.json`** maps every architectural component to the real directories and files that implement it. `/team:verify` gained failure mode **`(e)`**: structural drift against that index.
-
-Twelve validator checks run on every index. The central one is blunt and unfakeable: **every claimed path must resolve on disk.** A fabricated path exits non-zero and names itself.
-
-</td>
-<td width="50%" valign="top">
-
-### ▶ Forwards — built as declared
-
-`/team:ship` Stage 3 now declares its intended architecture to **`.team-ship/ARCH-PLAN.json`** — where each component will live, and what is explicitly out of scope.
-
-After the build, the **built-as-declared gate** checks it. A component you declared and then quietly dropped is a **BLOCK**. A file that lands in a path the plan ruled out of scope is a **BLOCK**. Neither appears in any test result.
-
-</td>
-</tr>
-</table>
-
-**Why this works.** Path existence cannot be checked at planning time, because nothing is built yet. So the plan is *written* when the knowledge exists and *tested* when the evidence exists. Deferring the check rather than weakening it is exactly what makes a forward architecture declaration enforceable.
-
-### Use it
-
-```bash
-/team arch build      # map this repository into a committed, commit-pinned index
-/team arch drift      # reconcile an existing index against the current tree
-/team arch check      # run the validator alone — no model calls, no writes to the index
-/team verify          # now includes failure mode (e): architecture abandoned
-/team ship            # declares intended architecture, then proves the build matches
-/team ship --no-arch  # opt out entirely; every gate reports DISABLED, never a silent pass
-```
-
-The approval gate now shows you the intended architecture as a table before the build starts. That is the cheapest moment to disagree with it.
-
-### What it does not do
-
-A gate that overstates its reach is worse than no gate, so these limits are stated in the artifacts themselves and are not marketing hedges.
-
-- **Structural drift only.** A component whose datastore was swapped *inside* its own already-claimed directory produces no drift. Every artifact says "structural drift only" in those words, deliberately.
-- **Not a work-allocation mechanism.** The index sits at C4-Container altitude, so one component can legitimately own thousands of files. Three separate design reviews rejected deriving per-agent file ownership from it.
-- **Currency is not yet mechanically enforced.** Comparing the index pin to `HEAD` is prose an agent follows, not a script. A stale index degrades every gate to `UNVERIFIED` rather than to a pass — but instrumenting this is the next piece of work, and it is named as such.
-- **A clean result licenses no claim** about whether the code at those paths does what the component promised. That remains a review judgement.
-
-Requires only Python 3 and `git`. No new dependencies. Design adapted from [lak7/devildev](https://github.com/lak7/devildev) (Apache-2.0); no upstream code was copied — see [`CREDITS.md`](CREDITS.md).
-
----
-
-## The CoCo Asset Library
-
-A default Claude Code install delivers **189 skills, 386 commands and 34 agents**, measured by running the installer. The repository holds 227 skills; the difference is the opt-in security pack and Cursor-only skills.
-
-<table align="center">
-<tr>
-<td align="center" width="20%"><h3>227</h3><sub>Skills</sub><br><small>75 Core + 152 Bundle · 189 install by default</small></td>
-<td align="center" width="20%"><h3>386</h3><sub>Slash Commands</sub><br><small>44 Core + 342 Generated</small></td>
-<td align="center" width="20%"><h3>34</h3><sub>Specialized Agents</sub><br><small>10 Core + 24 Bundle</small></td>
-<td align="center" width="20%"><h3>495</h3><sub>Expert Personas</sub><br><small>Super Intelligence Board</small></td>
-<td align="center" width="20%"><h3>15</h3><sub>Cross-IDE Rules</sub><br><small>Cursor MDC Rules</small></td>
-</tr>
-</table>
-
-<div align="center">
-  <sub><strong>Core install:</strong> 144 active assets (75 Skills, 44 Commands, 10 Agents, 15 Rules)</sub><br>
-  <sub><strong>A plain install ships every bundle except the security-testing tooling</strong>, which stays opt-in via <code>--systems reverse-skill</code>.</sub><br>
-  <sub><strong>Orchestration bundles:</strong> <strong>+68 GSD skills</strong> · <strong>+24 GSD agents</strong> · <strong>+20 HyperFrames skills</strong> · <strong>+13 Super Intelligence skills</strong> · <strong>+342 SI commands</strong> · <strong>+6 Brain skills</strong> · <strong>+4 M0 skills</strong> · <strong>+3 Cognee skills</strong> · <strong>3 Workflows</strong></sub>
-</div>
-
----
-
-<a id="skills-catalog"></a>
-
-## Skills Catalog
-
-CoCo ships **227 skills** (75 core + 152 across bundles)[^installed]. These are not prompt snippets — each is a full agent instruction set with state management, verification logic, and error handling. A representative slice by category:
-
-### Visual design & styling
-`ui-ux-pro-max` (50 styles, 21 palettes, 50 font pairings, 9 stacks) · `frontend-design` · `design-taste-frontend` · `redesign-existing-projects` · `axiom-liquid-glass` (Apple Liquid Glass, WWDC 2025) · `swiftui-liquid-glass` · `web-design-guidelines` · `tailwind-patterns` (Tailwind v4) · `vercel-react-best-practices` · `clone-website` · `c4-architecture` · `arb-review` · `expo-api-routes` · `ai-product` · `scroll-world` (scroll-scrubbed, cut-free camera flythrough landing pages, generated end to end via Higgsfield).
-
-### Engineering discipline & quality
-`brainstorming` · `writing-plans` · `executing-plans` · `subagent-driven-development` · `dispatching-parallel-agents` · `test-driven-development` · `systematic-debugging` · `requesting-code-review` · `receiving-code-review` · `verification-before-completion` · `finishing-a-development-branch` · `using-git-worktrees` · `code-verification` (7 bug-vector audit) · `generate-tests` · `api-design-principles` · `cli-anything` · `workflow-routing`.
-
-### AI / LLM engineering
-`openai-agents` · `openai-api` · `openai-apps-mcp` · `openai-whisper` · `agent-lightning` (Microsoft Agent Lightning, RL) · `voice-ai` · `ai-marketing-videos`.
-
-### Product management & communication
-`prd-generator` · `prd-mastery` · `task-prd-creator` · `project-docs` · `pmstudio` · `nfr-tracker` · `stakeholder-comms` · `meeting-notes` · `change-log`.
-
-### Operations, safety & recovery
-`dr-plan` (RTO/RPO) · `irp` (incident response) · `recovery-plan`.
-
-### Media, memory & analysis
-`coco-ads` (launch videos via HyperFrames) · `media-memory` (multimodal embeddings) · `doc-sync` · `ultra-think` · `browser-automation`.
-
-### The CoCo platform itself
-`coco` (conversational router) · `coco-cli` · `coco-loop` (compiles a plain-language goal into a confirmed charter, then runs a bounded, propose-only autonomous loop) · `skill-creator` · `writing-skills` · `find-skills`.
+`ui-ux-pro-max` · `frontend-design` · `brainstorming` · `writing-plans` · `test-driven-development` · `systematic-debugging` · `verification-before-completion` · `prd-generator` · `openai-agents` · `coco-loop` · `coco-ads` · `arch-index`
 
 <details>
 <summary><strong>▸ Full catalog — every one of the 227 skills</strong></summary>
@@ -302,433 +177,38 @@ CoCo ships **227 skills** (75 core + 152 across bundles)[^installed]. These are 
 
 </details>
 
----
+## System bundles
 
-<a id="system-bundles"></a>
+Six bundles install by default. `--core-only` skips them. `--systems <list>` installs an explicit subset. `reverse-skill` is not one of the six: it vendors reverse-engineering and penetration-testing methodology under [`systems/reverse-skill/`](systems/reverse-skill/) and installs only with `--systems reverse-skill`. See [`systems/reverse-skill/README.md`](systems/reverse-skill/README.md).
 
-## System Bundles
+1. **GSD.** An orchestration engine of **68 skills and 24 agents** for phased work on a large codebase. Most GSD skills also need the upstream GSD toolkit at `~/.claude/get-shit-done/`, which this installer does not yet provide; see [`systems/gsd/README.md`](systems/gsd/README.md). Phase state lives in `.planning/`. Workstreams are isolated git checkouts.
+2. **Brain.** A local knowledge-graph engine of **6 skills**. SQLite indexes code entities, decisions, and project terms. The wiki generator writes a page per entity.
+3. **Super Intelligence.** The **495-persona advisory board** and its **342 generated `/SI-*` commands** across 13 teams. This is the board [above](#the-board).
+4. **HyperFrames.** **20 skills** for video and motion, vendored from HeyGen's `hyperframes` under Apache-2.0.
+5. **M0.** **4 skills** for a cross-tool memory thread in one local SQLite file. Python standard library only.
+6. **Cognee.** **3 skills** for a local Cognee graph. They fall back to Brain when `cognee server` is not running.
 
-Bundles extend the workspace with specialized databases, pipelines, and rosters. The six below install by default; `--core-only` skips them and `--systems <list>` installs an explicit subset.
+`/team` is not a bundle. It is part of the core install (`/team ship`, `/team plan`, `/team review`, `/team verify`) and needs no flag. `/team ship` runs 6 development stages and 7 verification gates, and it can declare where files should land, then fail if they did not. The check is structural (paths exist), not a judgement that the code does what the component promised. Design adapted from [lak7/devildev](https://github.com/lak7/devildev) (Apache-2.0); no upstream code was copied. See [`CREDITS.md`](CREDITS.md).
 
-One further bundle, `reverse-skill`, is deliberately not part of any default install and is not one of the six below: it vendors reverse-engineering and penetration-testing methodology under [`systems/reverse-skill/`](systems/reverse-skill/), and it is security tooling that stays installed only when it is asked for by name, with `--systems reverse-skill`. See [`systems/reverse-skill/README.md`](systems/reverse-skill/README.md) for what it contains and how it was curated.
+## Technical specifications
 
-### 1. GSD (Get Shit Done)
-An orchestration engine of **68 skills and 24 agents** that manages the lifecycle of complex codebases. Most GSD skills also need the upstream GSD toolkit at `~/.claude/get-shit-done/`, which the installer does not yet provide; see [`systems/gsd/README.md`](systems/gsd/README.md). A disk-backed phase database records goals, decisions, milestones, and blockers; **workstreams** spin up isolated git checkouts to test refactors without polluting main; **forensics** performs post-mortem root-cause audits when a phase fails; and **autonomous mode** runs parallel waves of subagents through plan milestones end-to-end.
+A default Claude Code install delivers **189 skills, 386 commands and 34 agents**, measured by running the installer. The repository holds 227 skills; the difference is the opt-in security pack and Cursor-only skills. The measured row is main. The v1.5.0 release `npx` installs today is older. See [Status and roadmap](#status-and-roadmap).
 
-### 2. Brain
-A local knowledge-graph engine of **6 skills** connecting email, chat, code, and docs. A local SQLite store indexes code entities, business decisions, project terms, and stakeholder feedback; a **wiki generator** builds hyperlinked articles for every recorded entity; and mail sync links project email threads to related files.
-
-### 3. Super Intelligence
-The **495-persona advisory board** and its **342 generated `/SI-*` commands** across 13 teams — the hero capability described [above](#the-board).
-
-### 4. HyperFrames
-**20 skills** for video and motion: HTML-composition video authoring, captions, launch and explainer videos, and Figma import. Vendored from HeyGen's `hyperframes` under Apache-2.0.
-
-### 5. M0
-**4 skills** for cross-tool agent memory: one small local SQLite thread of what was done, what was verified, and what comes next, so a session in one tool can pick up work left in another. Python standard library only.
-
-### 6. Cognee
-**3 skills** for knowledge-graph memory backed by a local Cognee server (`cognee server start`); they fall back to Brain when the server is not running.
-
-### Not a bundle: `/team`
-A multi-agent product-team pipeline (`/team:ship`, `/team:plan`, `/team:review`, `/team:verify`, and more). It spawns specialized subagents — Research, Architect, QA — to execute changes, review diffs, and write tests, with deterministic gates that intercept merges to run lints, import audits, reference checks, and verification suites. It is part of the core install and needs no flag.
-
----
-
-## YOLO Mode: True Autonomy
-
-<table>
+<table align="center">
 <tr>
-<td valign="top">
-
-```bash
-/coco yolo
-```
-
-</td>
-<td valign="top">
-
-**Bypass approval gates and let the team run unattended.**<br>
-<sub>Activates autonomous multi-stage execution — pipelines advance phase to phase without manual confirmation. Combine with <code>/gsd-autonomous</code> and <code>--systems gsd</code> to run code migrations or test sweeps overnight. Revert to safety any time with <code>/coco careful</code> or <code>/coco normal</code>.</sub>
-
-</td>
+<td align="center" width="20%"><h3>227</h3><sub>Skills</sub><br><small>75 Core + 152 Bundle · 189 install by default</small></td>
+<td align="center" width="20%"><h3>386</h3><sub>Slash Commands</sub><br><small>44 Core + 342 Generated</small></td>
+<td align="center" width="20%"><h3>34</h3><sub>Specialized Agents</sub><br><small>10 Core + 24 Bundle</small></td>
+<td align="center" width="20%"><h3>495</h3><sub>Expert Personas</sub><br><small>Super Intelligence Board</small></td>
+<td align="center" width="20%"><h3>15</h3><sub>Cross-IDE Rules</sub><br><small>Cursor MDC Rules</small></td>
 </tr>
 </table>
 
----
-
-## Before CoCo vs. After CoCo
-
-<table>
-<tr>
-<th width="20%">Scenario</th>
-<th width="38%">Standard AI Assistant (Claude Code / Cursor / Codex)</th>
-<th width="42%">CoCo-Orchestrated Workspace</th>
-</tr>
-<tr>
-<td><strong>Hard decisions</strong></td>
-<td>One model's single opinion, no attribution, no dissent.</td>
-<td>A routed 16–32-person expert panel deliberates and returns an attributed verdict with named dissent.</td>
-</tr>
-<tr>
-<td><strong>Feature development</strong></td>
-<td>Generates a single component, misses side-effects, needs hand-holding.</td>
-<td>Scans repo, designs the interface, plans phases, runs parallel build agents, tests, and verifies.</td>
-</tr>
-<tr>
-<td><strong>Code auditing</strong></td>
-<td>Suggests basic syntax fixes; misses architectural constraints.</td>
-<td>Applies a 7-category audit (TDZ errors, import mismatches, dead code, CSS regressions, mock leaks).</td>
-</tr>
-<tr>
-<td><strong>System debugging</strong></td>
-<td>Repeats similar suggestions; loses track of prior attempts.</td>
-<td>Systematic loop (Reproduce → Isolate → Hypothesize → Fix → Verify) with saved checkpoints.</td>
-</tr>
-<tr>
-<td><strong>Context resets</strong></td>
-<td>Forgets the active plan; starts over from scratch.</td>
-<td>Reads workspace state from disk and resumes the active phase immediately.</td>
-</tr>
-</table>
-
----
-
-<a id="see-it-run"></a>
-
-## High-Impact Command Demos
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### Cross-team decision
-```bash
-/SI-Decide --debate "Buy vs. build our vector store"
-```
-> Routes a proportional expert panel, deliberates in reacting rounds, and returns an attributed verdict with named dissent.
-
-</td>
-<td width="50%" valign="top">
-
-### Code-integrity verification
-```bash
-/code-verification
-```
-> Audits fresh code against 7 bug vectors, preventing broken references, imports, and mock leakage.
-
-</td>
-</tr>
-<tr>
-<td valign="top">
-
-### Website re-engineering
-```bash
-/clone-website https://stripe.com
-```
-> Extracts colors, typography, spacing, shadows, and SVG assets from a live URL into a single-file responsive template.
-
-</td>
-<td valign="top">
-
-### Systematic debugging
-```bash
-/systematic-debugging
-```
-> Drives a methodical root-cause isolation workflow, preserving hypotheses and findings across API limits.
-
-</td>
-</tr>
-<tr>
-<td valign="top">
-
-### Spec & PRD generation
-```bash
-/prd-generator
-```
-> Produces a comprehensive PRD — user stories, metrics, risks, architecture.
-
-</td>
-<td valign="top">
-
-### Launch video
-```bash
-/coco-ads
-```
-> Turns the project you just shipped into a short, shareable launch video, rendered locally via HyperFrames.
-
-</td>
-</tr>
-</table>
-
----
-
-## Power Features
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### CoCo conversational router
-```bash
-/coco
-```
-> A central dashboard that routes plain-English asks — "what's blocking?", "summarize files", "run tests" — to the right sub-command.
-
-</td>
-<td width="50%" valign="top">
-
-### Multimodal memory
-```bash
-/media-memory
-```
-> A local embedding database (Gemini Embedding + ChromaDB) that indexes, searches, and associates diagrams, audio, and docs with your code.
-
-</td>
-</tr>
-<tr>
-<td valign="top">
-
-### Scheduled & loop agents
-```bash
-# Point your host CLI's scheduler at any CoCo command:
-/schedule run /team:review every Monday
-/loop 5m /team:verify
-```
-> CoCo ships no scheduler of its own. Where your host CLI provides scheduling or looping (such as Claude Code's `/schedule` and `/loop`), point it at any CoCo command to run reviews or watches unattended.
-
-</td>
-<td valign="top">
-
-### Email triage suite
-```bash
-/email:summary
-/email:today
-```
-> Reads your active Outlook instance (Legacy AppleScript or New Outlook MIME cache) to fetch, search, thread, and draft replies to project mail.
-
-</td>
-</tr>
-<tr>
-<td valign="top">
-
-### Workspace branching
-```bash
-/gsd-workstreams create feature-a
-/gsd-new-workspace
-```
-> Branch development workstreams within one repo — isolated, sandboxed checkouts with separate project state.
-
-</td>
-<td valign="top">
-
-### AGENTS.md compiler
-```bash
-bash adapters/codex/install.sh
-```
-> Compiles all active rules, skills, and command definitions into a standard `AGENTS.md` recognized by Aider, Cline, and Continue.
-
-</td>
-</tr>
-</table>
-
----
-
-## How CoCo Works
-
-```mermaid
-flowchart LR
-  U["You<br/>(Slash command, plain English)"] --> AI["Your AI Harness<br/>(Claude Code, Cursor, Codex…)"]
-  AI --> A["IDE Adapter"]
-  A --> S["CoCo Assets<br/>skills · agents · commands · rules · personas"]
-  S -. Read at runtime .-> AI
-  AI --> Agents["Parallel Subagents<br/>(executed by your harness)"]
-  Agents --> AI
-```
-
-<div align="center"><sub>CoCo is the asset + orchestration layer. Your harness runs the model and executes the agents.</sub></div>
-
----
-
-## Installation Matrix
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-**Standard 90-second setup**
-
-```bash
-git clone https://github.com/coco-research/coco.git
-cd coco
-bash install.sh
-```
-*The installer auto-detects your active IDE/CLI.*
-
-</td>
-<td width="50%" valign="top">
-
-**Via the npm CLI wrapper**
-
-```bash
-npx cocosuperintelligence
-# or globally (the binary is coco):
-npm i -g cocosuperintelligence && coco
-
-# flags pass through to install.sh
-npx cocosuperintelligence install --adapter cursor
-npx cocosuperintelligence install --systems superintelligence
-```
-*Same installer as a clone: the wrapper clones the pinned release tag (currently `v1.5.0`), not floating `main`, then runs `install.sh`.*
-
-</td>
-</tr>
-<tr>
-<td valign="top">
-
-**Narrow the install (optional)**
-
-```bash
-# Every bundle installs by default. To take a subset instead:
-bash install.sh --systems gsd,brain
-bash install.sh --systems superintelligence
-
-# Or the core set alone, with no bundles:
-bash install.sh --core-only
-```
-
-</td>
-<td valign="top">
-
-**Manual adapter overrides**
-
-```bash
-bash install.sh --adapter claude-code
-bash install.sh --adapter cursor
-bash install.sh --adapter grok
-bash install.sh --adapter vscode
-bash install.sh --adapter codex
-bash install.sh --adapter pi-desktop
-bash install.sh --adapter generic
-```
-
-</td>
-</tr>
-<tr>
-<td colspan="2" valign="top">
-
-**One-line remote install**
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/coco-research/coco/main/bin/coco-bootstrap.sh)
-```
-*Clones the pinned release tag (currently `v1.5.0`, not floating `main`) to `~/.coco`, then pauses and prints the commit hash, date, and message so you can verify it against [that release](https://github.com/coco-research/coco/releases/tag/v1.5.0) before it runs `install.sh`. Type `y` to proceed. Pass `--yes` or set `COCO_BOOTSTRAP_YES=1` to skip the prompt for CI or scripted installs, and pass adapter/systems flags after `--`, e.g. `-- --adapter cursor --systems gsd`.*
-
-</td>
-</tr>
-</table>
-
-Adapter flags, bundle selection, and per-adapter targets: [`docs/install.md`](docs/install.md).
-
-The install paths above are deliberately conservative: the remote bootstrap never runs code before you have confirmed the commit it cloned, `install.sh` only ever reads and symlinks files already inside the repository, the CI workflows that build and publish Coco pin their `setup-node` and `setup-python` Actions to commit SHAs rather than mutable tags, and nothing Coco does locally or in CI sends data anywhere. See [`SECURITY.md`](SECURITY.md) for the full policy.
-
----
-
-## Staying Current
-
-CoCo tells you when a newer version is available — it checks the GitHub repository at most once per day, prints a one-line banner, and sends **no telemetry**. Disable with `COCO_NO_UPDATE_CHECK=1`.
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-**git clones**
-
-```bash
-# print version + update status
-bash scripts/check-update.sh
-
-# apply an update
-git pull --ff-only && bash install.sh
-```
-
-</td>
-<td width="50%" valign="top">
-
-**npm CLI wrapper**
-
-```bash
-# print version + check for updates
-npx cocosuperintelligence version
-
-# apply an update (checks out the pinned release tag)
-npx cocosuperintelligence update
-```
-
-</td>
-</tr>
-</table>
-
-<sub>Releases are tracked in [`CHANGELOG.md`](CHANGELOG.md) and on the <a href="https://github.com/coco-research/coco/releases">GitHub Releases</a> page.</sub>
-
----
-
-## System Compatibility
-
-<table>
-<tr>
-<th>AI Tool / CLI</th>
-<th>Adapter Name</th>
-<th>Status</th>
-<th>Details</th>
-</tr>
-<tr>
-<td><strong><a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a></strong></td>
-<td><code>claude-code</code></td>
-<td>Stable</td>
-<td>Full support for slash commands, agents, and local settings.</td>
-</tr>
-<tr>
-<td><strong><a href="https://cursor.com/">Cursor</a></strong></td>
-<td><code>cursor</code></td>
-<td>Stable</td>
-<td>Links MDC rules and custom workspace skills.</td>
-</tr>
-<tr>
-<td><strong>Grok Build / Grok CLI</strong></td>
-<td><code>grok</code></td>
-<td>Stable</td>
-<td>Links skills, commands, agents and rules into <code>~/.grok/</code>. Registers <code>coco-platform</code> MCP and m0 hooks when those binaries are present.</td>
-</tr>
-<tr>
-<td><strong><a href="https://github.com/openai/codex">Codex CLI</a></strong></td>
-<td><code>codex</code></td>
-<td>Stable</td>
-<td>Compiles assets into root context.</td>
-</tr>
-<tr>
-<td><strong>Aider / Cline / Windsurf</strong></td>
-<td><code>generic</code></td>
-<td>Stable</td>
-<td>Generates a portable, root-level <code>AGENTS.md</code> definition.</td>
-</tr>
-<tr>
-<td><strong><a href="https://code.visualstudio.com/">VS Code</a> / Copilot CLI</strong></td>
-<td><code>vscode</code></td>
-<td>Stable</td>
-<td>Links skills, agents and rules into <code>~/.copilot/</code> and commands into the VS Code prompts folder. No extension needed.</td>
-</tr>
-<tr>
-<td><strong>Antigravity (Google)</strong></td>
-<td><code>antigravity</code></td>
-<td>Planned</td>
-<td>Integration planned for the v0.2 release.</td>
-</tr>
-</table>
-
----
-
-## Technical Specifications
+<div align="center">
+  <sub><strong>Core install:</strong> 144 active assets (75 Skills, 44 Commands, 10 Agents, 15 Rules)</sub><br>
+  <sub><strong>A plain install ships every bundle except the security-testing tooling</strong>, which stays opt-in via <code>--systems reverse-skill</code>.</sub><br>
+  <sub><strong>Orchestration bundles:</strong> <strong>+68 GSD skills</strong> · <strong>+24 GSD agents</strong> · <strong>+20 HyperFrames skills</strong> · <strong>+13 Super Intelligence skills</strong> · <strong>+342 SI commands</strong> · <strong>+6 Brain skills</strong> · <strong>+4 M0 skills</strong> · <strong>+3 Cognee skills</strong> · <strong>3 Workflows</strong></sub>
+</div>
 
 <table>
 <tr><td><strong>Spec Version</strong></td><td>1.5.0</td></tr>
@@ -740,82 +220,68 @@ npx cocosuperintelligence update
 <tr><td><strong>System Bundles</strong></td><td>6 (GSD, Brain, Cognee, HyperFrames, Super Intelligence, M0) — installed by default. <code>reverse-skill</code>, the security-testing bundle, stays opt-in with <code>--systems reverse-skill</code>. <code>/team</code> is core and needs no flag.</td></tr>
 <tr><td><strong>Cross-IDE Rules</strong></td><td>15 (.mdc files)</td></tr>
 <tr><td><strong>Workflows Defined</strong></td><td>3 (.md pipelines)</td></tr>
-<tr><td><strong>Install Time</strong></td><td>&le; 90 seconds</td></tr>
-<tr><td><strong>Telemetry / SaaS</strong></td><td>None — 100% local files</td></tr>
+<tr><td><strong>Install Time</strong></td><td>About 3 minutes on a fresh machine (measured 189 s with <code>npx</code>, including the download)</td></tr>
+<tr><td><strong>Telemetry / SaaS</strong></td><td>No telemetry, no hosted service. One optional version check against GitHub per day (<code>COCO_NO_UPDATE_CHECK=1</code> turns it off)</td></tr>
 </table>
 
 <sub>Core install ships 75 skills + 44 commands + 10 agents + 15 rules (144 active assets). A plain <code>bash install.sh</code> delivers 189 skills, 386 commands and 34 agents on Claude Code: every bundle in the default allow-list (GSD, Brain, Cognee, HyperFrames, Super Intelligence, M0) is installed by default. <code>--core-only</code> installs the core set alone, and <code>--systems &lt;list&gt;</code> installs an explicit subset — including <code>reverse-skill</code>, the security-testing bundle, which stays opt-in and is never part of the default set. Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely. <code>adapters/INDEX.md</code> records what each adapter actually delivers, measured by running it.</sub>
 
----
-
-## Frequently Asked Questions
+## FAQ
 
 <details>
 <summary><strong>Is CoCo an AI model or an agent harness?</strong></summary>
-Neither. CoCo is a portable layer of Markdown and YAML that installs into the agent harness you already use (Claude Code, Cursor, Codex CLI, or any AGENTS.md tool). Your host harness runs the model and executes the agents; CoCo supplies the skills, commands, agents, rules, and persona board that make it act like a coordinated team.
+
+Neither. It is Markdown and YAML that installs into the harness you already use (Claude Code, Cursor, Codex CLI, or any AGENTS.md tool). The host runs the model and the agents. CoCo supplies the skills, commands, agents, rules, and the persona board.
 </details>
 
 <details>
-<summary><strong>Is my codebase or data sent to a third party?</strong></summary>
-No. CoCo is entirely local — Markdown, configuration, and shell scripts on your machine. Your existing AI tool's privacy policy is unchanged, and CoCo adds no telemetry.
+<summary><strong>Is my codebase sent anywhere?</strong></summary>
+
+CoCo's files stay on your machine. It adds no telemetry and no hosted service. Your editor's own privacy policy is unchanged. The CLI checks GitHub for a newer version at most once a day. `COCO_NO_UPDATE_CHECK=1` turns that off.
 </details>
 
 <details>
-<summary><strong>How do I modify or customize a skill?</strong></summary>
-Every skill lives at <code>skills/&lt;name&gt;/SKILL.md</code>. Edit it directly to refine instructions or add tools, then run <code>bash install.sh</code> to refresh the symlinks.
+<summary><strong>How do I change a skill?</strong></summary>
+
+Edit `skills/&lt;name&gt;/SKILL.md`, then run `bash install.sh` so the symlinks pick up the edit.
 </details>
 
 <details>
-<summary><strong>How do I cleanly uninstall CoCo?</strong></summary>
-Because CoCo uses symbolic links, removal is non-destructive:
-<pre>CLONE="$(pwd)"
-find ~/.claude ~/.cursor ~/.grok ~/.copilot -type l -lname "${CLONE}/*" -delete</pre>
-This removes only links whose target is inside this clone. A contains-match such as
-<code>*$(pwd)*</code> would also delete links into any path that merely contains the
-folder name (for example <code>coco-research</code> when the clone is <code>coco</code>).
+<summary><strong>What if I switch editors?</strong></summary>
 
-For the Hermes adapter, profiles live under <code>~/.hermes/profiles</code>:
-<pre>CLONE="$(pwd)"
-find ~/.hermes/profiles -type l -lname "${CLONE}/*" -delete</pre>
-The appended rules block between <code>&lt;!-- coco:rules-start --&gt;</code> and
-<code>&lt;!-- coco:rules-end --&gt;</code> in each profile's CLAUDE.md is stripped automatically on the next install run without the repo.
+Run `bash install.sh --adapter cursor` (or the adapter you want). The skills and workflows come with you. The full list is [`adapters/INDEX.md`](adapters/INDEX.md).
 </details>
 
-<details>
-<summary><strong>What happens if I switch my AI assistant later?</strong></summary>
-Re-run the installer with the new adapter flag (e.g. <code>bash install.sh --adapter cursor</code>). All your custom skills and workflows follow you.
-</details>
+## Credits
 
----
+CoCo stands on other people's work. The short list:
 
-## Contributing & Community
+- **[obra/superpowers](https://github.com/obra/superpowers)** (Jesse Vincent) for the engineering-discipline skills: brainstorming, debugging, TDD, plans, worktrees, review, verification, skill authoring.
+- **[gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done)** for the 68-skill / 24-agent GSD bundle.
+- **[heygen-com/hyperframes](https://github.com/heygen-com/hyperframes)** (HeyGen, Inc., Apache-2.0) for the 20-skill video bundle under `systems/hyperframes/`.
+- **[JCodesMore/ai-website-cloner-template](https://github.com/JCodesMore/ai-website-cloner-template)** for the structure behind `clone-website`.
+- **[agents.md](https://agents.md/)** for the vendor-neutral context file the adapters follow.
+- **[nickwinder/synthteam](https://github.com/nickwinder/synthteam)** (Nick Winder) for the debate protocol behind `--debate`.
+- **[latent-spaces/brag](https://github.com/latent-spaces/brag)** (Shunit Haviv) and **[HyperFrames](https://www.npmjs.com/package/hyperframes)** (HeyGen) for the launch-video flow behind `coco-ads`.
+- **[leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill)** (Leon) for `design-taste-frontend` and `redesign-existing-projects`.
+- **[HKUDS/CLI-Anything](https://github.com/HKUDS/CLI-Anything)** for the method behind `cli-anything`.
+- **[Vercel](https://vercel.com/)** and **[vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines)** for `vercel-react-best-practices` and `web-design-guidelines`.
 
-CoCo is open-core: the core is MIT-licensed and contributions are welcome. The Super Intelligence System (`systems/superintelligence/`) is proprietary — see [`systems/superintelligence/LICENSE`](systems/superintelligence/LICENSE).
+Full attributions, including audio ([ende.app](https://ende.app), [Kenney.nl](https://kenney.nl)), are in [`CREDITS.md`](CREDITS.md). If something influenced CoCo and is missing, that is a bug: [open an issue](https://github.com/coco-research/coco/issues/new/choose).
 
-- **Star the repo:** [coco-research/coco](https://github.com/coco-research/coco) is the measurable ask.
-- **Start here:** [`CONTRIBUTING.md`](CONTRIBUTING.md) — how to add a skill, command, agent, or adapter.
-- **Good first issues:** [help wanted / good first issue](https://github.com/coco-research/coco/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) — small, well-scoped tasks for newcomers.
-- **Report a bug / request a feature:** [open an issue](https://github.com/coco-research/coco/issues/new/choose).
-- **Security:** see [`SECURITY.md`](SECURITY.md) for responsible disclosure.
-- **Conduct:** see [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
+## Contributing
 
-Before opening a PR, validate locally — CI runs a frontmatter linter, manifest validation, and an install-script syntax check.
+CoCo is open-core: the core is MIT-licensed and contributions are welcome. The Super Intelligence System (`systems/superintelligence/`) is proprietary. See [`systems/superintelligence/LICENSE`](systems/superintelligence/LICENSE).
 
----
+- Start with [`CONTRIBUTING.md`](CONTRIBUTING.md).
+- Good first issues: [help wanted / good first issue](https://github.com/coco-research/coco/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+- Bugs and features: [open an issue](https://github.com/coco-research/coco/issues/new/choose).
+- Security: [`SECURITY.md`](SECURITY.md). Conduct: [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
 
-## Built On
+Releases are in [`CHANGELOG.md`](CHANGELOG.md) and on the [GitHub Releases](https://github.com/coco-research/coco/releases) page.
 
-CoCo Super Intelligence stands on the shoulders of excellent open-source work. Special thanks to:
+## Licence
 
-- **[obra/superpowers](https://github.com/obra/superpowers)** (Jesse Vincent) — the foundational engineering-discipline skills (brainstorming, systematic debugging, TDD, plan writing/execution, git worktrees, code-review flows, verification, and skill authoring).
-- **[gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done)** — the 68-skill / 24-agent GSD project-orchestration bundle.
-- **[heygen-com/hyperframes](https://github.com/heygen-com/hyperframes)** (HeyGen, Inc., Apache License 2.0) — the 20-skill HyperFrames video/motion bundle vendored under `systems/hyperframes/` (composition engine, CLI, animation, creative direction, registry, and the video-authoring suite).
-- **[JCodesMore/ai-website-cloner-template](https://github.com/JCodesMore/ai-website-cloner-template)** — the site-cloning structure behind `clone-website`.
-- **[agents.md](https://agents.md/)** community — the vendor-neutral agent-context standard CoCo's adapters follow.
-- **[nickwinder/synthteam](https://github.com/nickwinder/synthteam)** (Nick Winder) — the multi-agent debate protocol behind `--debate` deliberation.
-- **[latent-spaces/brag](https://github.com/latent-spaces/brag)** (Shunit Haviv) and **[HyperFrames](https://www.npmjs.com/package/hyperframes)** (HeyGen) — the launch-video flow and local render engine behind `coco-ads`.
-- **[leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill)** (Leon) — the design-taste enforcement behind `design-taste-frontend` and `redesign-existing-projects`.
-- **[HKUDS/CLI-Anything](https://github.com/HKUDS/CLI-Anything)** — the "wrap any CLI into a structured skill" methodology behind `cli-anything`.
-- **[Vercel](https://vercel.com/)** and **[vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines)** — the source material behind `vercel-react-best-practices` and `web-design-guidelines`.
+Open-core. The core of this repository is MIT, in [`LICENSE`](LICENSE). Super Intelligence (`systems/superintelligence/`) is proprietary, in [`systems/superintelligence/LICENSE`](systems/superintelligence/LICENSE). Third-party bundles keep their own licences: HyperFrames is Apache-2.0, and `reverse-skill` documents its upstream licence in its own README.
 
-Full attributions — including feature-level inspirations, bundled audio ([ende.app](https://ende.app), [Kenney.nl](https://kenney.nl)), and licenses — live in [CREDITS.md](CREDITS.md). If something influenced CoCo and isn't listed, that's a bug: [open an issue](https://github.com/coco-research/coco/issues/new/choose).
+[^installed]: 189 of the 227 skills install by default on Claude Code, together with all 386 commands and 34 agents. The other 38 are the opt-in `reverse-skill` security pack (33, installed only with `--systems reverse-skill`) and 5 Cursor-only skills. Measured by running the installer, not by counting files: see [`docs/delivered-counts.json`](docs/delivered-counts.json), and [`adapters/INDEX.md`](adapters/INDEX.md) for every other IDE.

@@ -1,0 +1,36 @@
+$ /SI-Decide "Should a 10-person startup move its public REST API to GraphQL this quarter?"
+
+- Routing: `meta_select.py` fell back to keywords because the embedding endpoint was down, and it ranked GTM first. I routed by hand to Engineering (8), Product Design (3), Strategy (2), Finance (1) and GTM (2), 16 personas in all.
+- Evidence: the persona stances I read are about monoliths, discovery, decision quality and retention. None mentions GraphQL. Where I apply a stance to GraphQL, I mark it (extrapolated).
+
+Round 1: independent positions (16 seated)
+  Microservices architect (Eng)     No
+  Refactoring architect (Eng)       No
+  Monolith advocate (Eng)           Hard no
+  Enterprise architect (Eng)        Conditional
+  Team-topology lead (Eng)          No
+  Observability lead (Eng)          Conditional
+  Security lead (Eng)               No this quarter
+  Cloud-cost analyst (Eng)          Cost-skeptical
+  Product leader (PD)               Not yet
+  Discovery coach (PD)              Not yet
+  Lean-startup coach (PD)           Pilot
+  Strategy scholar (Strat)          No
+  Decision scientist (Strat)        Challenge the process
+  Decision strategist (Fin)         Not now, with a kill rule
+  Customer-success lead (GTM)       No breaking changes
+  Product-led-growth lead (GTM)     Conditional yes
+
+React rounds
+  Customer-success lead vs Product-led-growth lead (updated): Product-led-growth lead concedes that a new endpoint must never force a REST sunset. Customer-success lead concedes that DX can matter for adoption.
+  Observability lead vs Team-topology lead, Monolith advocate (updated): Team-topology lead agrees to a pilot only with observability and one named owner. Observability lead makes observability a gate, not a nice-to-have.
+  Round 3. No stance moved (held for everyone) and no unanswered question remained. I stopped at 3 of the 4-round cap.
+  …
+
+Verdict: CONDITIONAL NO
+- Consensus: do not migrate. Do not sunset REST.
+- Named dissent: Product-led-growth lead (GTM) and Enterprise architect (Eng) for option C even before evidence.
+- Pilot criteria if you pick C:
+  - Run it beside REST for one quarter, with 2-3 consenting customers and one named owner.
+  - Enforce query-depth and cost limits and per-query observability before launch.
+  - Pre-commit a kill criterion, for example: fewer than 2 customers actively using it, or more than X engineer-days of upkeep, means you shut it down.

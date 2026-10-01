@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img">
+  <title>How a CoCo Super Intelligence decision is made</title>
+  <desc>Left to right: your question, the orchestrator scoring 495 personas across 13 departments and seating 16-32, each persona answering from cited public stances with optional debate rounds, a dashed named-dissent branch, and a final decision with one pick and a stance check.</desc>
+  <rect width="1200" height="360" fill="#F3F2EE"/>
+  <g fill="none" stroke="#0B0B0B" stroke-width="1.5">
+    <rect x="28" y="18" width="230" height="200"/>
+    <rect x="306" y="18" width="250" height="200"/>
+    <rect x="604" y="18" width="250" height="200"/>
+  </g>
+  <rect x="902" y="18" width="270" height="200" fill="#1234FF"/>
+  <g fill="none" stroke="#0B0B0B" stroke-width="1.5">
+    <line x1="258" y1="118" x2="296" y2="118"/>
+    <polyline points="290,113 302,118 290,123"/>
+    <line x1="556" y1="118" x2="594" y2="118"/>
+    <polyline points="588,113 600,118 588,123"/>
+  </g>
+  <g fill="none" stroke="#1234FF" stroke-width="1.5">
+    <line x1="854" y1="118" x2="892" y2="118"/>
+    <polyline points="886,113 898,118 886,123"/>
+  </g>
+  <line x1="729" y1="218" x2="729" y2="278" fill="none" stroke="#0B0B0B" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <rect x="649" y="278" width="160" height="52" fill="#F3F2EE" stroke="#0B0B0B" stroke-width="1.5"/>
+  <text x="729" y="309" fill="#0B0B0B" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" text-anchor="middle">named dissent</text>
+
+  <g font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#0B0B0B">
+    <text x="44" y="48" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">1</text>
+    <text x="44" y="74" font-size="16" font-weight="700">Your question</text>
+    <text x="44" y="106" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13">/SI-Decide "…"</text>
+    <text x="44" y="134" font-size="14">One line, in the</text>
+    <text x="44" y="156" font-size="14">session you have open.</text>
+
+    <text x="322" y="48" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">2</text>
+    <text x="322" y="74" font-size="16" font-weight="700">Orchestrator</text>
+    <text x="322" y="102" font-size="14">Scores <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace">495</tspan> personas</text>
+    <text x="322" y="124" font-size="14">across <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace">13</tspan> departments.</text>
+    <text x="322" y="146" font-size="14">Domain fit, cell coverage,</text>
+    <text x="322" y="168" font-size="14">productive conflict.</text>
+    <text x="322" y="194" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13">Seats 16-32</text>
+
+    <text x="620" y="48" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">3</text>
+    <text x="620" y="74" font-size="16" font-weight="700">Seated personas</text>
+    <text x="620" y="102" font-size="14">Each answers from its</text>
+    <text x="620" y="124" font-size="14">cited public stances.</text>
+    <text x="620" y="154" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13">--debate</text>
+    <text x="620" y="176" font-size="14">adds reaction rounds.</text>
+  </g>
+
+  <g font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#FFFFFF">
+    <text x="918" y="48" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">4</text>
+    <text x="918" y="74" font-size="16" font-weight="700">Decision</text>
+    <text x="918" y="104" font-size="14">Tally. One clear pick.</text>
+    <text x="918" y="126" font-size="14">Named dissents stay.</text>
+    <text x="918" y="156" font-size="14">A stance check flags</text>
+    <text x="918" y="178" font-size="14">anything that does not</text>
+    <text x="918" y="200" font-size="14">trace to a source.</text>
+  </g>
+</svg>

@@ -1,0 +1,77 @@
+/* =============================================================================
+   SIGNAL · Color edition. Load after signal.css.
+   Same type, grid, rules and meanings as Lite. Changes only the surface:
+   white paper, a light rail, soft corners, and colour tiles for key numbers.
+   A tile is coloured only when its number carries that meaning (see KeyNumber `tile`).
+   ============================================================================= */
+
+:root {
+  --paper: #ffffff;
+  --surface: #f4f5f7;
+  --line: #e3e5e8;
+  --rail-bg: #f4f5f7;
+  --rail-ink: #0b0b0b;
+  --rail-ink-2: #3c3c37;
+  --rail-ink-3: #5f5f58;
+  --rail-line: #e3e5e8;
+  --rail-hover: #e8ebf3;
+  --r-ctl: 10px;
+  --r-tile: 14px;
+  --r-panel: 12px;
+  --r-pill: 999px;
+  --float-shadow: 0 12px 32px rgba(11, 11, 11, 0.14);
+}
+[data-theme="dark"] {
+  --paper: #0b0c0e;
+  --surface: #14161a;
+  --line: #262930;
+  --rail-bg: #111317;
+  --rail-ink: #eceae4;
+  --rail-ink-2: #b3b2ab;
+  --rail-ink-3: #8a8983;
+  --rail-line: #23262c;
+  --rail-hover: #1a1d22;
+  --float-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* rail: light surface, rounded active pill */
+.nav-item { margin: 0 10px; padding: 0 10px; border-radius: var(--r-ctl); }
+.badge { background: var(--blue-soft); color: var(--blue-text); }
+a.nav-item[aria-current="page"] .badge { background: var(--blue-ink); color: var(--blue); }
+.topbar .icon-btn, .rail .icon-btn { border-color: var(--rail-ink-3); }
+
+/* controls: primary actions are filled blue */
+.btn, .icon-btn { border-radius: var(--r-ctl); }
+.who .btn, .room-top .btn { background: var(--blue); border-color: var(--blue); color: var(--blue-ink); }
+.who .btn:hover, .room-top .btn:hover { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.status { border: 0; border-radius: var(--r-pill); padding: 0 8px; background: var(--blue-soft); color: var(--blue-text); }
+.toast { border-width: 1px; border-color: var(--line); }
+
+/* key numbers become tiles */
+.kns { border-top: 0; gap: 10px; margin-top: 16px; }
+.kn { display: flex; flex-direction: column; justify-content: flex-start; gap: 0; min-height: 132px; padding: 14px 16px 16px; border-radius: var(--r-tile); background: var(--surface); }
+.kn + .kn { border-left: 0; padding-left: 16px; }
+.kns .kn:first-child .kn-num { color: inherit; }
+.kn-blue { background: var(--blue); color: var(--blue-ink); }
+.kn-green { background: var(--green-fill); color: var(--blue-ink); }
+.kn-amber { background: var(--amber-fill); color: var(--amber-ink); }
+.kn-red { background: var(--red-fill); color: var(--blue-ink); }
+.kn[class*="kn-"] :is(.kn-num, .kn-label, .kn-denom, .tone-gap, .tone-stale, .mark) { color: inherit; }
+.kn[class*="kn-"] .kn-denom { opacity: 0.86; }
+
+/* bars and washes: soft */
+.bar { outline: 0; border-radius: var(--r-pill); height: 10px; gap: 3px; background: var(--surface); }
+.seg { border-right: 0; border-radius: var(--r-pill); }
+.seg-done { background: var(--green-fill); }
+.sw { border-radius: var(--r-pill); }
+.row-gap, .row-stale { border-radius: 0; }
+.person[aria-current="true"] { border-radius: 0; }
+
+@media (max-width: 799px) {
+  .topbar { border-bottom: 1px solid var(--rail-line); }
+  .kns { gap: 8px; }
+  .kn:nth-child(n + 3) { border-top: 0; }
+  .kn { min-height: 118px; }
+}
+.kn > .kn-num { margin-bottom: auto; padding-bottom: 12px; }
+.brand::before { border-radius: 6px; }

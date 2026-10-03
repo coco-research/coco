@@ -1,0 +1,16 @@
+/* SIGNAL · fonts. Load first, before layout.css. Self-hosted, OFL (see fonts/OFL-*.txt).
+   Latin subset only; family names match the --font and --mono tokens in signal.css. */
+@font-face {
+  font-family: "Schibsted Grotesk Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 900;
+  src: url("fonts/schibsted-grotesk-latin-wght-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Geist Mono Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("fonts/geist-mono-latin-wght-normal.woff2") format("woff2");
+}

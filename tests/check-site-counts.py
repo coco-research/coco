@@ -43,7 +43,7 @@ print(f'=== truth: skills={SKILLS} commands={COMMANDS} agents={AGENTS} '
 # (file, pattern, label, truth)
 CHECKS = [
     ('index.html', r'(\d+) experts deliberate\. Then (\d+) skills ship', 'hero prose (personas, skills)', (PERSONAS, SKILLS)),
-    ('index.html', r'(\d+) expert personas across (\d+) departments', 'hero image alt (personas, departments)', (PERSONAS, DEPARTMENTS)),
+    ('index.html', r'<p class="kn-num">(\d+)</p>\s*<p class="kn-label">expert personas, (\d+) departments</p>', 'key-number tile (personas, departments)', (PERSONAS, DEPARTMENTS)),
     ('index.html', r'MIT core &middot; (\d+) skills &middot; (\d+) commands', 'flagship stage-note (skills, commands)', (SKILLS, COMMANDS)),
     ('coco/index.html', r'<meta name="description" content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'meta description (personas, skills)', (PERSONAS, SKILLS)),
     ('coco/index.html', r'<meta property="og:description" content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'og:description (personas, skills)', (PERSONAS, SKILLS)),

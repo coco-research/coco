@@ -1,0 +1,7 @@
+{
+  "name": "planted",
+  "title": "Planted",
+  "summary": "Fixture for tests/check-pack-content.py",
+  "kind": "ours",
+  "licence": "MIT"
+}

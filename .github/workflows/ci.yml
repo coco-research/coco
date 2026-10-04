@@ -136,6 +136,13 @@ jobs:
       - name: Default bundle allow-list accounts for every bundle
         run: bash tests/check-default-bundle-allowlist.sh
 
+      - name: Every installable bundle ships a valid pack.json
+        run: |
+          python3 tests/check-packs.py
+          # The self-test plants a defect for each rule in a throwaway tree, so a rule that
+          # stops firing fails CI instead of letting a bad pack through.
+          python3 tests/check-packs.py --self-test
+
       - name: Bundle install gate (every advertised bundle must change the install plan)
         run: |
           # Each adapter manifest declares supports_systems. This gate makes that declaration

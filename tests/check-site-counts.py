@@ -42,9 +42,9 @@ print(f'=== truth: skills={SKILLS} commands={COMMANDS} agents={AGENTS} '
 
 # (file, pattern, label, truth)
 CHECKS = [
-    ('index.html', r'(\d+) experts deliberate\. Then (\d+) skills ship', 'hero prose (personas, skills)', (PERSONAS, SKILLS)),
-    ('index.html', r'(\d+) expert personas across (\d+) departments', 'hero image alt (personas, departments)', (PERSONAS, DEPARTMENTS)),
-    ('index.html', r'MIT core &middot; (\d+) skills &middot; (\d+) commands', 'flagship stage-note (skills, commands)', (SKILLS, COMMANDS)),
+    ('index.html', r'data-count="(\d+)">\d+</span> <span class="unit">experts\.', 'flagship stat (personas)', (PERSONAS,)),
+    ('index.html', r'data-count="(\d+)">\d+</span> <span class="unit">departments\.', 'flagship stat (departments)', (DEPARTMENTS,)),
+    ('index.html', r'<span class="nw">(\d+) skills, (\d+) commands\.</span>', 'flagship facts (skills, commands)', (SKILLS, COMMANDS)),
     ('coco/index.html', r'<meta name="description" content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'meta description (personas, skills)', (PERSONAS, SKILLS)),
     ('coco/index.html', r'<meta property="og:description" content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'og:description (personas, skills)', (PERSONAS, SKILLS)),
     ('coco/index.html', r'<meta name="twitter:description" content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'twitter:description (personas, skills)', (PERSONAS, SKILLS)),

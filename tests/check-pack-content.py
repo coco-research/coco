@@ -176,8 +176,11 @@ def pack_files(d):
 
 
 def valid_exception(e):
-    """A path and a reason are required; rule and contains, when given, must be real text."""
+    """A path and a reason are required; rule and contains, when given, must be real text.
+
+    Any other key is a typo that would silently widen the exception, so it is rejected."""
     return (isinstance(e, dict)
+            and set(e) <= {"path", "reason", "rule", "contains"}
             and all(isinstance(e.get(k), str) and e[k].strip() for k in ("path", "reason"))
             and all(isinstance(e[k], str) and e[k].strip() for k in ("rule", "contains") if k in e))
 
@@ -193,8 +196,8 @@ def pack_exceptions(d, allow, errors):
             listed = None
         if not (isinstance(listed, list) and all(map(valid_exception, listed))):
             errors.append(f"systems/{d.name}/pack.json: content_exceptions must be a list of "
-                          "objects that each have a path and a reason, and a rule and contains "
-                          "that are not empty when given")
+                          "objects with a path and a reason, and optionally a rule and contains "
+                          "that are not empty; other keys are rejected")
             listed = []
         exceptions += [dict(e, where=f"systems/{d.name}/pack.json") for e in listed]
     return exceptions
@@ -281,7 +284,8 @@ def self_test():
         hits, unused, errors = run(wide)
         if not (len(hits) == 1 and "skills/sub/deep.md" in hits[0] and not unused and not errors):
             failures.append(f"a * glob must not cross a slash: got {hits} {unused} {errors}")
-        for extra in ({"contains": ""}, {"contains": 5}, {"rule": None}, {"rule": " "}):
+        for extra in ({"contains": ""}, {"contains": 5}, {"rule": None}, {"rule": " "},
+                      {"rules": "x"}, {"contain": "x"}):
             hits, unused, errors = run({**wide, **extra})
             if not (len(hits) == 2 and errors):
                 failures.append(f"a malformed exception {extra} must be reported and excuse "

@@ -9,7 +9,7 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | brain | `systems/brain/` | 6 | 0 | 0 | 19 |
 | cognee | `systems/cognee/` | 3 | 0 | 0 | 4 |
 | gsd | `systems/gsd/` | 68 | 24 | 0 | 94 |
-| hyperframes | `systems/hyperframes/` | 20 | 0 | 0 | 928 |
+| hyperframes | `systems/hyperframes/` | 20 | 0 | 0 | 929 |
 | learning | `systems/learning/` | 0 | 0 | 0 | 11 |
 | m0 | `systems/m0/` | 4 | 0 | 0 | 9 |
 | reverse-skill | `systems/reverse-skill/` | 33 | 0 | 0 | 129 |

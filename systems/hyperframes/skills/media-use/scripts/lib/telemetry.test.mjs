@@ -29,6 +29,9 @@ function restoreEnv(saved) {
 function withoutTelemetryOptOut() {
   for (const k of ["DO_NOT_TRACK", "HYPERFRAMES_NO_TELEMETRY", "CI", "NODE_ENV"])
     delete process.env[k];
+  // Coco: telemetry is opt-in (see systems/hyperframes/MODIFICATIONS.md), so "tracking
+  // allowed" also needs the opt-in. Tests that prove the default delete it again.
+  process.env.COCO_HYPERFRAMES_TELEMETRY = "1";
 }
 
 function parseFetchBodies(calls) {
@@ -64,6 +67,7 @@ test("track is a no-op (no network, resolves) when opted out", async () => {
     calls.push(args);
     return { ok: true };
   };
+  process.env.COCO_HYPERFRAMES_TELEMETRY = "1";
   process.env.DO_NOT_TRACK = "1";
   try {
     // must resolve immediately without throwing or hitting the network
@@ -73,6 +77,68 @@ test("track is a no-op (no network, resolves) when opted out", async () => {
     assert.equal(existsSync(join(home, ".media/telemetry-notice-shown")), false);
   } finally {
     globalThis.fetch = originalFetch;
+    restoreEnv(savedEnv);
+    rmSync(root, { recursive: true, force: true });
+    __resetTelemetryForTest();
+  }
+});
+
+test("track makes no network call and writes no state by default (COCO_HYPERFRAMES_TELEMETRY unset)", async () => {
+  const savedEnv = { ...process.env };
+  const originalFetch = globalThis.fetch;
+  const originalError = console.error;
+  const { root, home } = sandbox();
+  const calls = [];
+  const stderr = [];
+  globalThis.fetch = async (...args) => {
+    calls.push(args);
+    return { ok: true };
+  };
+  console.error = (...args) => stderr.push(args.join(" "));
+  try {
+    withoutTelemetryOptOut();
+    delete process.env.COCO_HYPERFRAMES_TELEMETRY;
+    await track("media_use_resolve", { type: "bgm", source: "search" });
+    assert.equal(calls.length, 0, "fetch must not be called when the variable is unset");
+    assert.equal(stderr.length, 0, "no telemetry notice either");
+    assert.equal(existsSync(join(home, ".hyperframes/config.json")), false, "no install id written");
+
+    // Only the literal "1" opts in; anything else is still off.
+    for (const value of ["0", "true", "yes", ""]) {
+      process.env.COCO_HYPERFRAMES_TELEMETRY = value;
+      await track("media_use_resolve", { type: "bgm", source: "search" });
+    }
+    assert.equal(calls.length, 0, "values other than 1 must not enable telemetry");
+  } finally {
+    globalThis.fetch = originalFetch;
+    console.error = originalError;
+    restoreEnv(savedEnv);
+    rmSync(root, { recursive: true, force: true });
+    __resetTelemetryForTest();
+  }
+});
+
+test("track calls fetch when COCO_HYPERFRAMES_TELEMETRY=1", async () => {
+  const savedEnv = { ...process.env };
+  const originalFetch = globalThis.fetch;
+  const originalError = console.error;
+  const { root } = sandbox();
+  const calls = [];
+  globalThis.fetch = async (url, options) => {
+    calls.push({ url, options });
+    return { ok: true };
+  };
+  console.error = () => {}; // the first-run notice is expected here; keep test output clean
+  try {
+    withoutTelemetryOptOut();
+    process.env.COCO_HYPERFRAMES_TELEMETRY = "1";
+    await track("media_use_resolve", { type: "bgm", source: "search" });
+    const batch = parseFetchBodies(calls);
+    assert.equal(batch.length, 1);
+    assert.equal(batch[0].event, "media_use_resolve");
+  } finally {
+    globalThis.fetch = originalFetch;
+    console.error = originalError;
     restoreEnv(savedEnv);
     rmSync(root, { recursive: true, force: true });
     __resetTelemetryForTest();

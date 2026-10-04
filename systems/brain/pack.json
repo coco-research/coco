@@ -1,0 +1,7 @@
+{
+  "name": "brain",
+  "title": "Brain",
+  "summary": "Local knowledge base that remembers each project",
+  "kind": "ours",
+  "licence": "MIT"
+}

@@ -182,6 +182,13 @@ jobs:
           done
           [ "$fail" -eq 0 ] || exit 1
 
+      - name: Pack content gate (no secret reads, phone-home hosts, machine paths or curl-to-shell)
+        run: |
+          python3 tests/check-pack-content.py
+          # The self-test runs the gate over tests/fixtures/pack-content, where every planted
+          # line must fail and every benign line must pass, so a weakened rule fails CI.
+          python3 tests/check-pack-content.py --self-test
+
       - name: Validate the SI team role roster
         run: |
           # The roster is the catalogue a scheduler reads to pick roles and compose their

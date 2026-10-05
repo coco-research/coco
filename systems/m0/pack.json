@@ -1,0 +1,7 @@
+{
+  "name": "m0",
+  "title": "M0",
+  "summary": "Shared memory thread that carries work between tools",
+  "kind": "ours",
+  "licence": "MIT"
+}

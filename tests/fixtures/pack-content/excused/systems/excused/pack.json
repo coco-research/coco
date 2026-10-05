@@ -1,0 +1,25 @@
+{
+  "name": "excused",
+  "title": "Excused",
+  "summary": "Fixture for content_exceptions",
+  "kind": "ours",
+  "licence": "MIT",
+  "content_exceptions": [
+    {
+      "path": "lines.md",
+      "rule": "curl-pipe-shell",
+      "contains": "example.test/a.sh",
+      "reason": "fixture: the installer one-liner this pack documents"
+    },
+    {
+      "path": "lines.md",
+      "rule": "curl-pipe-shell",
+      "contains": "example.test/c.sh",
+      "reason": "fixture: excuses the curl rule only, on a line that also reads a secret"
+    },
+    {
+      "path": "gone.md",
+      "reason": "fixture: names a file that does not exist, so it must be reported as unused"
+    }
+  ]
+}

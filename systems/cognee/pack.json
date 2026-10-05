@@ -1,0 +1,8 @@
+{
+  "name": "cognee",
+  "title": "Cognee",
+  "summary": "Knowledge-graph memory through a local Cognee server",
+  "kind": "ours",
+  "licence": "MIT",
+  "attribution": "Talks to the Cognee memory engine by topoteretes (Apache-2.0). No upstream code is included."
+}

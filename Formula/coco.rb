@@ -41,7 +41,7 @@ class Coco < Formula
       To install Coco artifacts into your AI tool's expected paths:
         coco                              # auto-detect (Claude Code, Cursor, Codex, generic)
         coco --adapter claude-code        # override
-        coco --systems gsd,brain,team     # add bundles
+        coco --systems gsd,brain          # only these bundles
 
       To uninstall the symlinks (without removing the formula):
         find ~/.claude ~/.cursor ~/.copilot -type l -lname "#{libexec}/*" -delete

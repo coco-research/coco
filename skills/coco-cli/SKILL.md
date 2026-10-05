@@ -30,7 +30,7 @@ release tag and runs install. From a clone, invoke `node bin/coco.js`.
 ## Install flags (passed through to install.sh)
 
 - `--adapter <name>` — one of `claude-code` | `cursor` | `grok` | `codex` | `generic`
-- `--systems <list>` — comma-separated, e.g. `gsd,brain,team`
+- `--systems <list>` — comma-separated, e.g. `gsd,brain`
 - `--dry-run` — preview only, no writes
 
 ## Examples

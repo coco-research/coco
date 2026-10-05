@@ -53,8 +53,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 # No flag means every bundle in the default allow-list. The advertised totals (386
-# commands, 226 skills) are what a plain install is expected to deliver, and leaving them
-# behind an opt-in flag is how 74 of 226 skills went missing without a word.
+# commands, 227 skills in the repository, 189 installed) are what a plain install is expected to
+# deliver, and leaving them behind an opt-in flag is how 74 skills once went missing without a word.
 if [[ $CORE_ONLY -eq 1 ]]; then
   SYSTEMS=()
 elif [[ ${#SYSTEMS[@]} -eq 0 ]]; then

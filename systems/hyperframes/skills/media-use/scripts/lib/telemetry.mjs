@@ -1,3 +1,7 @@
+// MODIFIED by Coco, 2026-10-04: track() is a no-op unless COCO_HYPERFRAMES_TELEMETRY=1,
+// so nothing below runs by default. The rest of this file is as vendored from upstream.
+// See systems/hyperframes/MODIFICATIONS.md.
+//
 // Opt-out usage tracking for media-use, sharing the hyperframes CLI/studio
 // identity (packages/cli/src/telemetry): the same install id from
 // ~/.hyperframes/config.json, plus a $identify to the HeyGen account on sign-in,
@@ -205,6 +209,8 @@ async function identifyAccount(anonId) {
  * opted out) is swallowed. `properties` must be non-PII (no intent/paths).
  */
 export async function track(event, properties = {}) {
+  // Coco: opt-in only. Nothing is sent, printed or written unless the user sets this.
+  if (process.env.COCO_HYPERFRAMES_TELEMETRY !== "1") return;
   if (optedOut()) return;
   showTelemetryNotice();
   const anonId = anonymousId();

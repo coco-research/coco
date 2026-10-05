@@ -191,7 +191,7 @@ systems/gsd/
   state-spec/
 ```
 
-Systems are opt-in via `install.sh --systems gsd,team`.
+Systems install by default (see `scripts/installable-bundles.sh`); `--core-only` skips them and `--systems gsd,brain` picks a subset. `reverse-skill` is opt-in only.
 
 ## Generating indexes
 

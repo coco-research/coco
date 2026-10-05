@@ -123,8 +123,9 @@ the machine's answer.
 `check-adapter-list.py` and `check-si-counts.py`. `python3 scripts/build-index.py` regenerates
 the truth; the CI step fails if the regenerated files differ from the committed ones.
 
-**Measured:** 226 skills, 44 shipped commands plus 342 generated at install time (386 public),
-35 agents, 15 rules, 495 personas across 13 departments, 16 adapters. Adding a single skill
+**Measured:** 227 skills in the repository (189 on a default Claude Code install, recorded in
+`docs/delivered-counts.json` by running the installer), 44 shipped commands plus 342 generated at
+install time (386 public), 34 agents, 15 rules, 495 personas across 13 departments, 16 adapters. Adding a single skill
 moves published numbers in about a dozen hand written files, including `README.md`,
 `package.json`, `.claude-plugin.json`, `index.html`, `coco/index.html`, `docs/install.md`,
 `docs/INDEX.md`, `agents/README.md`, `assets/og-image.svg` and

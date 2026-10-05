@@ -30,3 +30,24 @@ if missing:
           f'adapters/{missing[0]}/ exists)')
     sys.exit(1)
 print(f'PASS: all {len(adapters)} adapters/ directories are allowed by KNOWN_ADAPTERS')
+
+# The vscode-continue adapter must be documented and agree across docs (#237): an install
+# section, uninstall steps, and no leftover claim that the adapter is "planned" / "not stable".
+install = open('docs/install.md').read()
+uninstall = install.split('\n## Uninstall', 1)[-1].split('\n## ', 1)[0]
+if 'vscode-continue' not in adapters:
+    print('FAIL: vscode-continue is no longer in adapters.list; update this check')
+    sys.exit(1)
+if not re.search(r'^## VS Code with Continue\b', install, re.M):
+    print('FAIL: docs/install.md has no "## VS Code with Continue" section for the vscode-continue adapter')
+    sys.exit(1)
+if '~/.continue' not in uninstall:
+    print('FAIL: docs/install.md Uninstall section has no steps for ~/.continue (vscode-continue)')
+    sys.exit(1)
+if '--adapter vscode-continue' not in open('docs/getting-started.md').read():
+    print('FAIL: docs/getting-started.md does not route Continue to --adapter vscode-continue')
+    sys.exit(1)
+if 'VS Code adapter (Continue-based) planned' in open('docs/guides/comparison.md').read():
+    print('FAIL: docs/guides/comparison.md still calls the shipped vscode-continue adapter "planned"')
+    sys.exit(1)
+print('PASS: vscode-continue is documented consistently (install, uninstall, getting-started, comparison)')

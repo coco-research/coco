@@ -1,0 +1,130 @@
+{
+  "shipped": [
+    {
+      "id": "coco-si",
+      "name": "CoCo Super Intelligence",
+      "tag": "Available now, v1.5.0, on npm",
+      "description_html": "An advisory board of expert personas that installs into Claude Code, Cursor or Codex, argues a hard call out, then hands the decision to its skills.",
+      "actions": [
+        {
+          "label": "Releases",
+          "href": "https://github.com/coco-research/coco/releases",
+          "kind": "primary",
+          "sr": " for CoCo Super Intelligence"
+        },
+        {
+          "label": "npm",
+          "href": "https://www.npmjs.com/package/cocosuperintelligence",
+          "kind": "ghost",
+          "sr": " package for CoCo Super Intelligence"
+        }
+      ],
+      "art": "assets/site/art/coco-si.svg",
+      "footer_href": "https://github.com/coco-research/coco"
+    },
+    {
+      "id": "connect",
+      "name": "CoCo Connect",
+      "tag": "Available now, v0.2.1, Apple silicon",
+      "description_html": "The Mac app that finds the AI coding tools on your machine, then installs and health-checks CoCo for each of them.",
+      "actions": [
+        {
+          "label": "Download",
+          "href": "https://github.com/coco-research/coco-connect-releases/releases",
+          "kind": "primary",
+          "sr": " CoCo Connect"
+        },
+        {
+          "label": "View releases",
+          "href": "https://github.com/coco-research/coco-connect-releases",
+          "kind": "ghost",
+          "sr": " for CoCo Connect"
+        }
+      ],
+      "art": "assets/site/art/connect.svg",
+      "footer_href": "https://github.com/coco-research/coco-connect-releases"
+    },
+    {
+      "id": "voice",
+      "name": "CoCo Voice",
+      "tag": "Available now, v0.9.4 · 0.10.0 on the way",
+      "description_html": "Offline speech to text for your desktop. Built on <a class=\"inline\" href=\"https://github.com/cjpais/Handy\" rel=\"noopener\">Handy by CJ Pais</a>, MIT licensed.",
+      "actions": [
+        {
+          "label": "Download",
+          "href": "https://github.com/coco-research/Coco-Voice/releases",
+          "kind": "primary",
+          "sr": " CoCo Voice"
+        },
+        {
+          "label": "View on GitHub",
+          "href": "https://github.com/coco-research/Coco-Voice",
+          "kind": "ghost",
+          "sr": " for CoCo Voice"
+        }
+      ],
+      "art": "assets/site/art/voice.svg",
+      "footer_href": "https://github.com/coco-research/Coco-Voice"
+    },
+    {
+      "id": "ads",
+      "name": "CoCo Ads",
+      "tag": "Skill in CoCo 1.5.0",
+      "description_html": "A skill inside CoCo that plans and renders a launch film for something you built. Adapts <a class=\"inline\" href=\"https://github.com/latent-spaces/brag\" rel=\"noopener\">brag</a> by Shunit Haviv; renders with HyperFrames.",
+      "actions": [
+        {
+          "label": "View on GitHub",
+          "href": "https://github.com/coco-research/coco/tree/main/skills/coco-ads",
+          "kind": "primary",
+          "sr": " for CoCo Ads"
+        }
+      ],
+      "art": "assets/site/art/ads.svg",
+      "footer_href": "https://github.com/coco-research/coco/tree/main/skills/coco-ads"
+    }
+  ],
+  "lab": [
+    {
+      "id": "teams-ng",
+      "name": "CoCo Teams NG",
+      "description": "A team of AI members you hire, brief and work with in one console.",
+      "status": "Private, in development"
+    },
+    {
+      "id": "atlas",
+      "name": "CoCo Atlas",
+      "description": "The live control room of our own lab.",
+      "status": "Private, pre-alpha"
+    },
+    {
+      "id": "status-zero",
+      "name": "Status Zero",
+      "description": "Compares what a plan says against what the code actually shipped.",
+      "status": "Private, in development"
+    },
+    {
+      "id": "m0",
+      "name": "CoCo M0",
+      "description": "Cross-tool memory.",
+      "status": "Private beta, used daily"
+    },
+    {
+      "id": "hermes",
+      "name": "CoCo Hermes",
+      "description": "Answers questions over your own files with an exact quote, or says it can't.",
+      "status": "Private, in development"
+    },
+    {
+      "id": "keydeck",
+      "name": "KeyDeck",
+      "description": "A local dashboard for your AI subscriptions: what's left, what's capped, and when it resets.",
+      "status": "Private, used daily"
+    },
+    {
+      "id": "storydeck",
+      "name": "StoryDeck",
+      "description": "Local-first story board: every ask becomes a story, on-device only.",
+      "status": "Private, used daily"
+    }
+  ]
+}

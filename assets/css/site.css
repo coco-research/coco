@@ -316,7 +316,8 @@ html.cine .rule-eyebrow { display: block; }
 @media (max-width: 820px) { .ch-rules .b-rule { grid-template-columns: 1fr; } }
 
 .b-shipped { margin-bottom: clamp(28px, 5svh, 48px); }
-.deck { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); gap: clamp(16px, 2vw, 28px); }
+.deck { display: grid; grid-template-columns: 1fr; gap: clamp(16px, 2vw, 28px); }
+@media (min-width: 640px) { .deck { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 .card {
   position: relative; display: flex; flex-direction: column; border-radius: 22px; overflow: hidden;

@@ -165,6 +165,39 @@ if AGENTS != DA:
 else:
     pass_(f'agents.total {AGENTS} equals the measured install')
 
+# 11. docs/getting-started.md "Where things live". Anchored to the three bullets (#244):
+# skills count, command namespaces and the systems list. Truth is the tree itself.
+import glob
+import os
+import subprocess
+
+GS = 'docs/getting-started.md'
+gs = open(GS).read()
+tree_skills = len(glob.glob('skills/*/SKILL.md'))
+tree_ns = sorted(os.path.basename(d.rstrip('/')) for d in glob.glob('commands/*/'))
+tree_sys = sorted(os.path.basename(d.rstrip('/')) for d in glob.glob('systems/*/'))
+default_n = len(subprocess.check_output(['bash', 'scripts/installable-bundles.sh', '--one-per-line']).split())
+
+m = re.search(r'\(\.\./skills/\) \((\d+) core skills', gs)
+if not m or int(m.group(1)) != tree_skills or tree_skills != SKILLS_CORE:
+    fail_(f'{GS}: skills count claims {m and m.group(1)}, tree has {tree_skills} SKILL.md (asset-counts core={SKILLS_CORE})')
+else:
+    pass_(f'{GS}: skills count {tree_skills} matches')
+
+m = re.search(r'\(\.\./commands/\) \(([^)]*)\)', gs)
+claimed = sorted(re.findall(r'`([a-z]+)/`', m.group(1))) if m else []
+if claimed != tree_ns:
+    fail_(f'{GS}: command namespaces claim {claimed}, tree has {tree_ns}')
+else:
+    pass_(f'{GS}: command namespaces {tree_ns} match')
+
+m = re.search(r'\(\.\./systems/\) \(([^;)]*); (\d+) install by default', gs)
+claimed = sorted(x.strip() for x in m.group(1).split(',')) if m else []
+if claimed != tree_sys or int(m.group(2)) != default_n:
+    fail_(f'{GS}: systems claim {claimed} / {m and m.group(2)} default, tree has {tree_sys} / {default_n} default')
+else:
+    pass_(f'{GS}: systems {tree_sys}, {default_n} default match')
+
 print()
 if fail == 0:
     print('  all README skills/commands prose claims agree with docs/asset-counts.json '

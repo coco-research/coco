@@ -83,7 +83,7 @@ STATE.md. Fields worth filling:
 | `branch`, `head_sha` | Version-control position. Without them a reader cannot tell whether the checkpoint describes the tree in front of them. |
 | `source_tool` | The tool you are running in (`claude_code`, `cococode`, `ambient`, `manual`, `hook`, `paperclip`), so the next reader knows where the work happened. |
 
-Never write handoffs anywhere under a folder named Mckinsey.
+Never write handoffs under a folder listed in ~/.coco/capture-deny (the operator's denied roots).
 
 ### What a good handoff looks like
 

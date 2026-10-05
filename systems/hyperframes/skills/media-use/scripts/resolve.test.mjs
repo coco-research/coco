@@ -1002,6 +1002,7 @@ test("track() posts to MEDIA_USE_TELEMETRY_HOST when set, proving real intercept
     // path). Every other test in this file keeps its untouched default env.
     runResolve(["--type", "bgm", "--intent", "telemetry seam test", "--project", tmp, "--json"], {
       env: {
+        COCO_HYPERFRAMES_TELEMETRY: "1", // Coco: telemetry is opt-in, so this test must opt in
         DO_NOT_TRACK: "0",
         HYPERFRAMES_NO_TELEMETRY: "0",
         CI: "",

@@ -17,11 +17,14 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run) DRY_RUN=1 ;;
     --systems) shift; IFS=',' read -ra SYSTEMS <<< "$1" ;;
+    --core-only) CORE_ONLY=1 ;;
     --help|-h) grep '^#' "$0" | sed 's/^# \?//'; exit 0 ;;
     *) echo "Unknown flag: $1" >&2; exit 1 ;;
   esac
   shift
 done
+# --core-only wins over --systems, as in every other adapter.
+[[ -z "${CORE_ONLY:-}" ]] || SYSTEMS=()
 
 run() { [[ $DRY_RUN -eq 1 ]] && echo "DRY: $*" || "$@"; }
 

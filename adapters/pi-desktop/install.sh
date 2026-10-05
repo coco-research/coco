@@ -255,7 +255,7 @@ def skill_sources():
                     found.append((name, os.path.join(base, name), p))
         elif entry == "systems" and os.path.isdir(base):
             for bundle in sorted(os.listdir(base)):
-                # Bundles are opt-in: without --systems the core install only.
+                # Only bundles in SYSTEMS: the default allow-list unless --systems or --core-only.
                 if bundle not in SYSTEMS:
                     continue
                 skills = os.path.join(base, bundle, "skills")

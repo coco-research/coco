@@ -9,21 +9,21 @@ because most adapters link into the checkout rather than copying.
 | Adapter | Commands | of which generated | Skills | Agents | AGENTS.md | Exit |
 |---|---:|---:|---:|---:|:--:|---:|
 | `aider` | 0 | 0 | 0 | 0 | yes | 0 |
-| `amazon-q` | 0 | 0 | 0 | 35 | — | 0 |
-| `claude-code` | 386 | 342 | 189 | 35 | — | 0 |
-| `cline` | 0 | 0 | 0 | 35 | — | 0 |
+| `amazon-q` | 0 | 0 | 0 | 34 | — | 0 |
+| `claude-code` | 386 | 342 | 189 | 34 | — | 0 |
+| `cline` | 0 | 0 | 0 | 34 | — | 0 |
 | `codex` | 0 | 0 | 0 | 0 | yes | 0 |
 | `cursor` | 386 | 342 | 181 | 0 | — | 0 |
 | `generic` | 0 | 0 | 0 | 0 | yes | 0 |
 | `github-copilot-cli` | 0 | 0 | 0 | 0 | yes | 0 |
-| `grok` | 389 | 342 | 189 | 35 | — | 0 |
-| `hermes` | 386 | 342 | 189 | 35 | — | 0 |
+| `grok` | 389 | 342 | 189 | 34 | — | 0 |
+| `hermes` | 386 | 342 | 189 | 34 | — | 0 |
 | `pi-desktop` | 386 | 342 | 192 | 37 | — | 0 |
-| `roo-code` | 0 | 0 | 0 | 35 | — | 0 |
-| `vscode` | 386 | 342 | 189 | 35 | — | 0 |
-| `vscode-continue` | 0 | 0 | 149 | 35 | — | 0 |
-| `windsurf` | 0 | 0 | 149 | 35 | — | 0 |
-| `zed` | 0 | 0 | 0 | 35 | — | 0 |
+| `roo-code` | 0 | 0 | 0 | 34 | — | 0 |
+| `vscode` | 386 | 342 | 189 | 34 | — | 0 |
+| `vscode-continue` | 0 | 0 | 176 | 34 | — | 0 |
+| `windsurf` | 0 | 0 | 176 | 34 | — | 0 |
+| `zed` | 0 | 0 | 0 | 34 | — | 0 |
 
 ## Widest install, against the published totals
 
@@ -40,17 +40,12 @@ This section is the standing list of who is short and by how much.
 
 | Adapter | Commands | Short by | Cause |
 |---|---:|---:|---|
-| `amazon-q` | 0 | 389 | does not invoke the SI generators |
-| `cline` | 0 | 389 | does not invoke the SI generators |
-| `roo-code` | 0 | 389 | does not invoke the SI generators |
-| `vscode-continue` | 0 | 389 | does not invoke the SI generators |
-| `windsurf` | 0 | 389 | does not invoke the SI generators |
-| `zed` | 0 | 389 | does not invoke the SI generators |
-| `claude-code` | 386 | 3 | does not invoke the SI generators |
-| `cursor` | 386 | 3 | does not invoke the SI generators |
-| `hermes` | 386 | 3 | does not invoke the SI generators |
-| `pi-desktop` | 386 | 3 | does not invoke the SI generators |
-| `vscode` | 386 | 3 | does not invoke the SI generators |
+| `amazon-q` | 0 | 386 | does not invoke the SI generators |
+| `cline` | 0 | 386 | does not invoke the SI generators |
+| `roo-code` | 0 | 386 | does not invoke the SI generators |
+| `vscode-continue` | 0 | 386 | does not invoke the SI generators |
+| `windsurf` | 0 | 386 | does not invoke the SI generators |
+| `zed` | 0 | 386 | does not invoke the SI generators |
 
 Not comparable (AGENTS.md producers rather than tree installers): `aider`, `codex`, `generic`, `github-copilot-cli`.
 
@@ -77,8 +72,8 @@ the framework.
 | `pi-desktop` | 192 | 192 | 0 |
 | `roo-code` | 0 | 0 | 0 |
 | `vscode` | 189 | 189 | 0 |
-| `vscode-continue` | 176 | 149 | -27 |
-| `windsurf` | 176 | 149 | -27 |
+| `vscode-continue` | 176 | 176 | 0 |
+| `windsurf` | 176 | 176 | 0 |
 | `zed` | 0 | 0 | 0 |
 
 Every adapter delivers its full skill set on a plain run.

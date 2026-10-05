@@ -34,15 +34,17 @@ COMMANDS = counts['commands']['customer_facing']
 AGENTS = counts['agents']['total']
 PERSONAS = counts['personas']['total']
 DEPARTMENTS = counts['departments']['total']
+# Measured by running the claude-code installer (scripts/build-delivery-index.py).
+INSTALLED_SKILLS = json.load(open('docs/delivered-counts.json'))['skills']
 
 print(f'=== truth: skills={SKILLS} commands={COMMANDS} agents={AGENTS} '
       f'personas={PERSONAS} departments={DEPARTMENTS} ===')
 
 # (file, pattern, label, truth)
 CHECKS = [
-    ('index.html', r'(\d+) experts deliberate\. Then (\d+) skills ship', 'hero prose (personas, skills)', (PERSONAS, SKILLS)),
-    ('index.html', r'(\d+) expert personas across (\d+) departments', 'hero image alt (personas, departments)', (PERSONAS, DEPARTMENTS)),
-    ('index.html', r'MIT core &middot; (\d+) skills &middot; (\d+) commands', 'flagship stage-note (skills, commands)', (SKILLS, COMMANDS)),
+    ('index.html', r'data-count="(\d+)">\d+</span> <span class="unit">experts\.', 'flagship stat (personas)', (PERSONAS,)),
+    ('index.html', r'data-count="(\d+)">\d+</span> <span class="unit">departments\.', 'flagship stat (departments)', (DEPARTMENTS,)),
+    ('index.html', r'<span class="nw">(\d+) skills, (\d+) commands\.</span>', 'flagship facts (skills, commands)', (SKILLS, COMMANDS)),
     ('coco/index.html', r'<meta name="description" content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'meta description (personas, skills)', (PERSONAS, SKILLS)),
     ('coco/index.html', r'<meta property="og:description" content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'og:description (personas, skills)', (PERSONAS, SKILLS)),
     ('coco/index.html', r'<meta name="twitter:description" content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'twitter:description (personas, skills)', (PERSONAS, SKILLS)),
@@ -55,6 +57,7 @@ CHECKS = [
     ('coco/index.html', r'<p class="n">(\d+)</p><p class="lbl">Agents</p>', 'stat tile (agents)', (AGENTS,)),
     ('coco/index.html', r'<h2 class="reveal">(\d+) skills\. One instruction set each\.</h2>', 'section heading (skills)', (SKILLS,)),
     ('coco/index.html', r'<tr><th>Skills</th><td>(\d+) in the repository', 'spec table row (skills)', (SKILLS,)),
+    ('coco/index.html', r'in the repository \(\d+ core \+ \d+ bundle\); (\d+) install by default on Claude Code', 'spec table row (installed skills)', (INSTALLED_SKILLS,)),
     ('coco/index.html', r'<tr><th>Commands</th><td>(\d+) customer-facing', 'spec table row (commands)', (COMMANDS,)),
     ('coco/index.html', r'<tr><th>Agents</th><td>(\d+)\.', 'spec table row (agents)', (AGENTS,)),
     ('coco/index.html', r'<tr><th>Personas</th><td>(\d+) across (\d+) departments', 'spec table row (personas, departments)', (PERSONAS, DEPARTMENTS)),

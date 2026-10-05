@@ -6,6 +6,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Fixed
+
+- **The README now says what an install delivers, and CI proves it.** The headline stays at 227 skills, the repository total, with a footnote giving the measured default install: 189 skills, 386 commands and 34 agents on Claude Code. The other 38 skills are the opt-in `reverse-skill` security pack (33) and five Cursor-only skills. `scripts/build-delivery-index.py` now writes `docs/delivered-counts.json` from a real install into a throwaway HOME, every "installed by default" figure in the README and on `coco/index.html` is gated against it, and CI fails if a fresh measurement differs from the committed file. Before this, every count gate compared against a walk of the repository, so nothing noticed that the README's "the totals above are what a plain `bash install.sh` delivers" was false.
+- **Agents are 34, not 35.** `agents/PROMPT-DEFENSE.md` is the preamble every agent includes, not a subagent, and is no longer counted by `build-index.py`, the delivery index or the claude-code install receipt. The receipt also stops counting `skills/team-gate`, which has no `SKILL.md`.
+- **Bundles are described as installed by default everywhere.** `package.json`, `.claude-plugin.json`, the README System Bundles section, `coco/index.html`, `docs/prd.md`, `docs/INDEX.md`, `docs/architecture.md` and the pi-desktop README still said "opt-in". The README also listed `/team` as a bundle (it is core), left HyperFrames, M0 and Cognee out of the bundle section, and its "full catalog" listed 66 of 75 core skills. The unverifiable "947 total assets" figure is gone; the persona row now says 98 cells, not 70.
+- **The CLAUDE.md rules block can no longer damage the file.** A start marker without an end marker made the claude-code and hermes adapters delete everything after it; each install added a blank line; a symlinked `CLAUDE.md` was replaced by a copy; CRLF markers produced a second block. Both adapters now call `scripts/write-rules-block.sh`, which leaves an unterminated block untouched with a warning, is byte-identical on re-run, writes through symlinks, and keeps a `.coco-bak`. Gated by `tests/check-claude-md-block.sh`.
+- **`--core-only` works for every adapter.** The root installer forwards it to any adapter whose manifest names bundles, and aider, amazon-q, cline, roo-code, zed and github-copilot-cli exited with "Unknown flag". `tests/smoke.sh` now runs `--core-only --dry-run` for all 16.
+- **The windsurf and vscode-continue manifests list the six bundles they install**, which removes a false "-27" row from `adapters/INDEX.md`; that report also measures command shortfalls against the published 386 rather than grok's 389, so adapters delivering all 386 are no longer listed as short.
+- **Removed a stale changelog claim** that `cocosuperintelligence` is unpublished; it is on npm at 1.5.0.
+
 ### Security
 
 - **`generate_prd.sh` no longer `eval`s user input.** Interactive answers were assigned with `eval "$var_name='$input'"`, so a value containing a quote could run as shell. Assignment is now `printf -v` into an allow-listed variable name.
@@ -13,7 +23,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - **Uninstall no longer glob-matches any path containing the clone name.** `find -lname '*${dir}*'` deleted links into `coco-research` / `coco-connect` when the clone was `coco`. The CLI and the docs now match the resolved clone path plus a trailing slash.
 - **Skills no longer instruct `curl | sh` or `npx skills add -y`.** `browser-automation` and `ai-marketing-videos` fetch the inference.sh installer to a file for review; `find-skills` installs without `-y` and still requires an explicit yes that names the package.
 - **CLI clone is pinned to the release tag, not floating `main`.** `bin/coco.js` and `bin/coco-bootstrap.sh` clone `v1.5.0` (kept in sync with `package.json`). Existing branch checkouts still `git pull --ff-only` so a tagged pin cannot downgrade a `main` tree.
-- **Documented that `cocosuperintelligence` is unpublished.** The name 404s on npmjs.com; README, `coco-cli`, and `SECURITY.md` tell users not to `npx` it until it is published.
 
 ### Added
 

@@ -30,3 +30,21 @@ if missing:
           f'adapters/{missing[0]}/ exists)')
     sys.exit(1)
 print(f'PASS: all {len(adapters)} adapters/ directories are allowed by KNOWN_ADAPTERS')
+
+# The dedicated aider adapter must be documented (#260): a section, its uninstall steps (it
+# writes .aider.conf.yml as well as AGENTS.md) and how its checksum-guarded backups are named.
+install = open('docs/install.md').read()
+uninstall = install.split('\n## Uninstall', 1)[-1].split('\n## ', 1)[0]
+if 'aider' not in adapters:
+    print('FAIL: aider is no longer in adapters.list; update this check')
+    sys.exit(1)
+if not re.search(r'^## Aider\b', install, re.M):
+    print('FAIL: docs/install.md has no "## Aider" section for the aider adapter')
+    sys.exit(1)
+if '--adapter aider' not in install:
+    print('FAIL: docs/install.md never shows `--adapter aider`')
+    sys.exit(1)
+if '.aider.conf.yml' not in uninstall or 'coco-backup' not in uninstall:
+    print('FAIL: docs/install.md Uninstall section does not cover .aider.conf.yml and the .coco-backup files')
+    sys.exit(1)
+print('PASS: docs/install.md documents the aider adapter and its uninstall')

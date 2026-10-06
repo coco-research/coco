@@ -1,0 +1,14 @@
+# Kernel paths for CoCo's gated self-improvement (RSI plan v3, section 3).
+# Changes here need review from the kernel owner, whose credentials are not on
+# any machine that runs the improvement loop. The ruleset on main enforces
+# "require review from code owners". Everything else follows the normal review rule.
+
+/.github/                         @cococyracto
+/evals/                           @cococyracto
+/tests/                           @cococyracto
+/install.sh                       @cococyracto
+/bin/                             @cococyracto
+/adapters/                        @cococyracto
+/Formula/                         @cococyracto
+/scripts/                         @cococyracto
+/skills/skill-evolution/scripts/  @cococyracto

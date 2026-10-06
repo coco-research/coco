@@ -208,6 +208,8 @@ jobs:
           # systems/<name>/ directory used to produce a phantom bundle row and show
           # up as unexplained INDEX drift on twenty unrelated branches.
           bash tests/check-index-tracks-git.sh
+          # The README one-line bootstrap must survive the npm CLI's ~/.coco update cache.
+          bash tests/check-bootstrap-coco-dir.sh
           if ! git diff --quiet; then
             echo "A test suite left the tree dirty:"
             git diff --stat

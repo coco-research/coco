@@ -58,6 +58,9 @@ jobs:
       - name: Validate command cross-references
         run: bash tests/check-command-refs.sh
 
+      - name: Validate unknown CLI subcommands fail before any clone
+        run: bash tests/check-cli-unknown-subcommand.sh
+
       - name: Validate /team evidence-gate integrity
         run: bash tests/check-evidence-gate.sh
 

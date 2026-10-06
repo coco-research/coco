@@ -1,0 +1,13 @@
+# Linguist: exclude site pages, docs, generated reports, skill example HTML,
+# and the vendored HyperFrames tree so the language bar counts project source.
+
+/index.html linguist-documentation=true
+coco/**/*.html linguist-documentation=true
+docs/**/*.html linguist-documentation=true
+skills/**/*.html linguist-documentation=true
+
+systems/superintelligence/**/*.html linguist-generated=true
+.arch/**/*.html linguist-generated=true
+.metagpt/**/*.html linguist-generated=true
+
+systems/hyperframes/** linguist-vendored=true

@@ -1,0 +1,10 @@
+{
+  "name": "gsd",
+  "title": "GSD",
+  "summary": "Plan, build and verify work in tracked phases",
+  "kind": "third-party",
+  "licence": "MIT",
+  "upstream": "https://github.com/gsd-build/get-shit-done@unknown",
+  "attribution": "GSD (Get Shit Done) by TÂCHES (Lex Christopherson), MIT. Vendored from the archived gsd-build/get-shit-done. CREDITS.md also lists open-gsd/gsd-core.",
+  "review": "pending"
+}

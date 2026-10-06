@@ -8,7 +8,7 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 |--------|----------|-------:|-------:|---------:|------:|
 | brain | `systems/brain/` | 6 | 0 | 0 | 20 |
 | cognee | `systems/cognee/` | 3 | 0 | 0 | 5 |
-| gsd | `systems/gsd/` | 68 | 24 | 0 | 95 |
+| gsd | `systems/gsd/` | 68 | 24 | 0 | 96 |
 | hyperframes | `systems/hyperframes/` | 20 | 0 | 0 | 930 |
 | learning | `systems/learning/` | 0 | 0 | 0 | 11 |
 | m0 | `systems/m0/` | 4 | 0 | 0 | 10 |

@@ -78,9 +78,11 @@ def check_sum(parts, total, label):
         pass_(f'{README}: {label} breakdown {parts} sums to its own stated total ({total})')
 
 
-# 1. Hero line: "then **N skills**, **M commands**, and disk-persistent state..."
-check(r'then \*\*(\d+) skills\*\*(?:\[\^installed\])?, \*\*(\d+) commands\*\*, and disk-persistent state',
-      'hero line', (SKILLS, COMMANDS))
+# 1. Hero line: "N personas across D departments, **S skills**[^installed] and **C commands** in the full catalog (coco <version or commit>, <date>)."
+PERSONAS = counts['personas']['total']
+DEPARTMENTS = counts['departments']['total']
+check(r'(\d+) personas across (\d+) departments, \*\*(\d+) skills\*\*\[\^installed\] and \*\*(\d+) commands\*\* in the full catalog \(coco [^)]+\)',
+      'hero line', (PERSONAS, DEPARTMENTS, SKILLS, COMMANDS))
 
 # 2. Skills Catalog opener: "CoCo ships **N skills** (X core + Y across bundles)."
 m = re.search(r'CoCo ships \*\*(\d+) skills\*\* \((\d+) core \+ (\d+) across bundles\)', text)

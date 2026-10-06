@@ -48,9 +48,10 @@ def check_one(path, pattern, label, group=1, expect=PERSONAS):
 
 
 README = 'README.md'
-check_one(README, r'advisory board of (\d+) world-class minds', 'hero line')
+check_one(README, r'(\d+) personas across (\d+) departments, \*\*\d+ skills\*\*\[\^installed\] and \*\*\d+ commands\*\* in the full catalog \(coco [^)]+\)', 'hero line')
+check_one(README, r'\d+ personas across (\d+) departments, \*\*\d+ skills\*\*\[\^installed\] and \*\*\d+ commands\*\* in the full catalog \(coco [^)]+\)', 'hero line departments', expect=DEPARTMENTS)
 check_one(README, r'badge/personas-(\d+)-', 'personas badge')
-check_one(README, r'cross-team board of (\d+) named experts', 'named-experts prose')
+check_one(README, r'cross-team board of (\d+) personas, each modeled on the public writing of a named expert', 'named-experts prose')
 check_one(README, r'(\d+)-persona roster was compiled', 'roster-compiled prose')
 check_one(README, r'<h3>(\d+)</h3><sub>Expert Personas</sub>', 'stat tile')
 check_one(README, r"The \*\*(\d+)-persona advisory board\*\*", 'system-bundles prose')

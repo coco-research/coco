@@ -23,6 +23,28 @@
       "footer_href": "https://github.com/coco-research/coco"
     },
     {
+      "id": "voice",
+      "name": "CoCo Voice",
+      "tag": "Available now, v0.9.4",
+      "description_html": "Offline speech to text for your desktop. Built on <a class=\"inline\" href=\"https://github.com/cjpais/Handy\" rel=\"noopener\">Handy by CJ Pais</a>, MIT licensed.",
+      "actions": [
+        {
+          "label": "Download",
+          "href": "https://github.com/coco-research/Coco-Voice/releases",
+          "kind": "primary",
+          "sr": " CoCo Voice"
+        },
+        {
+          "label": "View on GitHub",
+          "href": "https://github.com/coco-research/Coco-Voice",
+          "kind": "ghost",
+          "sr": " for CoCo Voice"
+        }
+      ],
+      "art": "assets/site/art/voice.svg",
+      "footer_href": "https://github.com/coco-research/Coco-Voice"
+    },
+    {
       "id": "connect",
       "name": "CoCo Connect",
       "tag": "Available now, v0.2.1, Apple silicon",
@@ -43,65 +65,39 @@
       ],
       "art": "assets/site/art/connect.svg",
       "footer_href": "https://github.com/coco-research/coco-connect-releases"
+    }
+  ],
+  "source": [
+    {
+      "id": "signal",
+      "name": "Signal",
+      "href": "https://github.com/coco-research/coco-design-language",
+      "description": "Our design language: three editions, CSS and docs.",
+      "status": "Source available, MIT, no release"
     },
     {
-      "id": "voice",
-      "name": "CoCo Voice",
-      "tag": "Available now, v0.9.4 · 0.10.0 on the way",
-      "description_html": "Offline speech to text for your desktop. Built on <a class=\"inline\" href=\"https://github.com/cjpais/Handy\" rel=\"noopener\">Handy by CJ Pais</a>, MIT licensed.",
-      "actions": [
-        {
-          "label": "Download",
-          "href": "https://github.com/coco-research/Coco-Voice/releases",
-          "kind": "primary",
-          "sr": " CoCo Voice"
-        },
-        {
-          "label": "View on GitHub",
-          "href": "https://github.com/coco-research/Coco-Voice",
-          "kind": "ghost",
-          "sr": " for CoCo Voice"
-        }
-      ],
-      "art": "assets/site/art/voice.svg",
-      "footer_href": "https://github.com/coco-research/Coco-Voice"
+      "id": "mira",
+      "name": "Mira",
+      "href": "https://github.com/coco-research/Mira",
+      "description": "Makes Reels and Shorts in English and Hindi, on your own machine.",
+      "status": "Source available, AGPL-3.0, Python, no release"
     },
     {
-      "id": "ads",
-      "name": "CoCo Ads",
-      "tag": "Skill in CoCo 1.5.0",
-      "description_html": "A skill inside CoCo that plans and renders a launch film for something you built. Adapts <a class=\"inline\" href=\"https://github.com/latent-spaces/brag\" rel=\"noopener\">brag</a> by Shunit Haviv; renders with HyperFrames.",
-      "actions": [
-        {
-          "label": "View on GitHub",
-          "href": "https://github.com/coco-research/coco/tree/main/skills/coco-ads",
-          "kind": "primary",
-          "sr": " for CoCo Ads"
-        }
-      ],
-      "art": "assets/site/art/ads.svg",
-      "footer_href": "https://github.com/coco-research/coco/tree/main/skills/coco-ads"
+      "id": "loops",
+      "name": "CoCo Loops",
+      "href": "https://github.com/coco-research/coco-loops",
+      "description": "Governance for autonomous agent loops: rules, adversary checks, budget caps and an audit trail.",
+      "status": "Source available, no release"
+    },
+    {
+      "id": "jev-use",
+      "name": "jev-use",
+      "href": "https://github.com/coco-research/jev-use",
+      "description": "Voice-driven control for macOS.",
+      "status": "Source available, Apache-2.0, pre-alpha"
     }
   ],
   "lab": [
-    {
-      "id": "teams-ng",
-      "name": "CoCo Teams NG",
-      "description": "A team of AI members you hire, brief and work with in one console.",
-      "status": "Private, in development"
-    },
-    {
-      "id": "atlas",
-      "name": "CoCo Atlas",
-      "description": "The live control room of our own lab.",
-      "status": "Private, pre-alpha"
-    },
-    {
-      "id": "status-zero",
-      "name": "Status Zero",
-      "description": "Compares what a plan says against what the code actually shipped.",
-      "status": "Private, in development"
-    },
     {
       "id": "m0",
       "name": "CoCo M0",
@@ -112,19 +108,31 @@
       "id": "hermes",
       "name": "CoCo Hermes",
       "description": "Answers questions over your own files with an exact quote, or says it can't.",
+      "status": "Private, no public build"
+    },
+    {
+      "id": "code",
+      "name": "CoCo Code",
+      "description": "A local-first coding harness for the terminal and the Mac.",
+      "status": "Private, internal pre-release"
+    },
+    {
+      "id": "teams-ng",
+      "name": "CoCo Teams NG",
+      "description": "A team of AI members you hire, brief and work with in one console.",
       "status": "Private, in development"
     },
     {
-      "id": "keydeck",
-      "name": "KeyDeck",
-      "description": "A local dashboard for your AI subscriptions: what's left, what's capped, and when it resets.",
-      "status": "Private, used daily"
+      "id": "status-zero",
+      "name": "Status Zero",
+      "description": "Compares what a plan says against what the code actually shipped.",
+      "status": "Private, in development"
     },
     {
-      "id": "storydeck",
-      "name": "StoryDeck",
-      "description": "Local-first story board: every ask becomes a story, on-device only.",
-      "status": "Private, used daily"
+      "id": "atlas",
+      "name": "CoCo Atlas",
+      "description": "The live control room of our own lab.",
+      "status": "Private, pre-alpha"
     }
   ]
 }

@@ -19,7 +19,8 @@ Coco auto-detects your AI tool. Override if needed:
 | Claude Code | `bash install.sh --adapter claude-code` |
 | Cursor | `bash install.sh --adapter cursor` |
 | Codex CLI | `bash install.sh --adapter codex` |
-| Aider, Continue, Windsurf, Cline | `bash install.sh --adapter generic` |
+| Aider | `bash install.sh --adapter aider` |
+| Continue, Windsurf, Cline | `bash install.sh --adapter generic` |
 
 That's it. On Claude Code your AI now has 189 skills, 386 commands and 34 agents (measured in [`docs/delivered-counts.json`](delivered-counts.json)).
 

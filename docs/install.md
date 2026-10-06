@@ -23,7 +23,8 @@ bash install.sh --systems superintelligence
 | `grok` | symlink | `~/.grok/{skills,commands,agents,rules,hooks}` | yes | Grok Build / Grok CLI |
 | `vscode` | symlink + file generation | `~/.copilot/{skills,agents,instructions}` + VS Code `prompts/` | yes | VS Code chat, Copilot CLI |
 | `codex` | file generation | `./AGENTS.md` (cwd) | overwrites | Codex CLI |
-| `generic` | file generation | `./AGENTS.md` (cwd) | overwrites | Aider, Continue, Windsurf, Cline |
+| `generic` | file generation | `./AGENTS.md` (cwd) | overwrites | Continue, Windsurf, Cline |
+| `aider` | file generation | `./AGENTS.md` + `./.aider.conf.yml` (cwd) | backs up edited files first | Aider |
 
 ---
 
@@ -160,7 +161,16 @@ bash /path/to/coco/adapters/codex/install.sh
 
 Generates `./AGENTS.md` in the project root. Codex picks it up automatically.
 
-The `generic` adapter is the same script under a different name — for users of Aider, Continue, Windsurf, Cline, etc.
+The `generic` adapter is the same script under a different name — for tools that read `AGENTS.md`, such as Continue, Windsurf and Cline.
+
+Aider does **not** load `AGENTS.md` by itself. Use the dedicated adapter, which also writes a `.aider.conf.yml` that loads it:
+
+```bash
+cd path/to/your/project
+bash /path/to/coco/install.sh --adapter aider
+```
+
+If you already ran `generic` and want to keep that file, tell Aider to read it: `aider --read AGENTS.md`, or add `read: AGENTS.md` to your `.aider.conf.yml`. The generic `AGENTS.md` is large (over a thousand lines), so expect it to take a good share of the model context.
 
 ---
 

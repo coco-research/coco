@@ -30,3 +30,18 @@ if missing:
           f'adapters/{missing[0]}/ exists)')
     sys.exit(1)
 print(f'PASS: all {len(adapters)} adapters/ directories are allowed by KNOWN_ADAPTERS')
+
+# Aider does not auto-load AGENTS.md (#263): no doc may list it as a plain AGENTS.md consumer
+# next to the generic adapter, and the docs must give the step that loads the file.
+sources = ('README.md', 'docs/install.md', 'docs/getting-started.md', 'adapters/generic/README.md',
+           'adapters/generic/install.sh', 'adapters/generic/manifest.json')
+for path in sources:
+    for n, line in enumerate(open(path).read().splitlines(), 1):
+        if re.search(r'Aider,\s*(Continue|Cline|Windsurf)|recognized by Aider|Aider\b.*\bconsume', line):
+            print(f'FAIL: {path}:{n} says Aider consumes the generated AGENTS.md; Aider needs `--read AGENTS.md`')
+            sys.exit(1)
+for path in ('docs/install.md', 'adapters/generic/README.md'):
+    if '--read AGENTS.md' not in open(path).read():
+        print(f'FAIL: {path} never gives the `aider --read AGENTS.md` step')
+        sys.exit(1)
+print('PASS: docs do not claim Aider auto-loads AGENTS.md and give the --read step')

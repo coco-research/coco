@@ -284,8 +284,16 @@ export function buildMaster(gsap, refs, view) {
   show(lab, l0 - 0.04);
   ft($('.lab-head'), { opacity: 0, y: 30, filter: 'blur(10px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.55, ease: 'power3.out' }, l0 - 0.02);
   ft($('.lab-sub'), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }, l0 + 0.3);
-  $$('.lab-item').forEach((it, i) => {
-    ft(it, { opacity: 0, y: 46, filter: 'blur(8px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.6, ease: 'power3.out' }, l0 + 0.28 + i * 0.26);
+  const labRows = $$('.lab-group, .lab-item');
+  // One sequence for both group headings and rows. Duration 0.6; the exit is at l1 - 0.3.
+  // The step is the chapter length, so the last element is fully in ~0.6 screen before that exit.
+  const rowDur = 0.6;
+  const lead = 0.28;
+  const hold = 0.6;
+  const span = (l1 - 0.3 - hold) - rowDur - (l0 + lead);
+  const rowStep = Math.min(0.26, span / Math.max(1, labRows.length - 1));
+  labRows.forEach((it, i) => {
+    ft(it, { opacity: 0, y: 46, filter: 'blur(8px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: rowDur, ease: 'power3.out' }, l0 + lead + i * rowStep);
   });
   // The list stays readable until the close title is already arriving (no empty beat between them).
   ft(lab, { y: 0, autoAlpha: 1 }, { y: -36, autoAlpha: 0, duration: 0.36, ease: 'power2.in' }, l1 - 0.3);

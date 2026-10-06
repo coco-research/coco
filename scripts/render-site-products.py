@@ -103,10 +103,24 @@ def render_card(product):
     return lines
 
 
+def check_ids(data):
+    seen = set()
+    for group in ('shipped', 'source', 'lab'):
+        for row in data[group]:
+            pid = row['id']
+            if not ID_OK.fullmatch(pid):
+                sys.exit('bad product id %r' % pid)
+            if pid in seen:
+                sys.exit('duplicate product id %s' % pid)
+            seen.add(pid)
+
+
+def require_https(href, where):
+    if '<' in href or '>' in href or not href.startswith('https://'):
+        sys.exit('%s: href must be a plain https:// URL' % where)
+
+
 def render_shipped(data):
-    ids = [product['id'] for product in data['shipped']]
-    if len(ids) != len(set(ids)):
-        sys.exit('shipped product ids must be unique')
     lines = []
     for index, product in enumerate(data['shipped']):
         if index:
@@ -115,13 +129,33 @@ def render_shipped(data):
     return lines
 
 
+def render_source_row(row):
+    pid = row['id']
+    require_https(row['href'], pid)
+    name = '<a class="inline" href="%s" rel="noopener">%s</a>' % (esc_attr(row['href']), esc_text(row['name']))
+    return (
+        '            <li class="lab-item"><h4>%s</h4><p>%s<span class="tag">%s</span></p></li>'
+        % (name, esc_text(row['description']), esc_text(row['status']))
+    )
+
+
+def render_lab_row(row):
+    if 'href' in row:
+        sys.exit('%s: lab rows have no href' % row['id'])
+    return (
+        '            <li class="lab-item"><h4>%s</h4><p>%s<span class="tag">%s</span></p></li>'
+        % (esc_text(row['name']), esc_text(row['description']), esc_text(row['status']))
+    )
+
+
 def render_lab(data):
-    lines = []
-    for row in data['lab']:
-        lines.append(
-            '          <li class="lab-item"><h3>%s</h3><p>%s<span class="tag">%s</span></p></li>'
-            % (esc_text(row['name']), esc_text(row['description']), esc_text(row['status']))
-        )
+    lines = ['          <h3 class="lab-group">Source available</h3>', '          <ul>']
+    lines.extend(render_source_row(row) for row in data['source'])
+    lines.append('          </ul>')
+    lines.append('          <h3 class="lab-group">Private, in the lab</h3>')
+    lines.append('          <ul>')
+    lines.extend(render_lab_row(row) for row in data['lab'])
+    lines.append('          </ul>')
     return lines
 
 
@@ -130,6 +164,14 @@ def render_foot_shipped(data):
         '          <li><a href="%s">%s</a></li>' % (esc_attr(row['footer_href']), esc_text(row['name']))
         for row in data['shipped']
     ]
+
+
+def render_foot_source(data):
+    lines = []
+    for row in data['source']:
+        require_https(row['href'], row['id'])
+        lines.append('          <li><a href="%s">%s</a></li>' % (esc_attr(row['href']), esc_text(row['name'])))
+    return lines
 
 
 def render_foot_lab(data):
@@ -157,9 +199,11 @@ def replace_region(text, name, inner):
 
 
 def render(text, data):
+    check_ids(data)
     text = replace_region(text, 'shipped', render_shipped(data))
     text = replace_region(text, 'lab', render_lab(data))
     text = replace_region(text, 'foot-shipped', render_foot_shipped(data))
+    text = replace_region(text, 'foot-source', render_foot_source(data))
     text = replace_region(text, 'foot-lab', render_foot_lab(data))
     return text
 

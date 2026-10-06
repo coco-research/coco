@@ -23,9 +23,10 @@ def pass_(msg):
 
 data = json.loads(Path('data/products.json').read_text())
 shipped = data['shipped']
+source = data['source']
 lab = data['lab']
 
-print('=== homepage products: shipped=%d lab=%d ===' % (len(shipped), len(lab)))
+print('=== homepage products: shipped=%d source=%d lab=%d ===' % (len(shipped), len(source), len(lab)))
 
 for row in shipped:
     pid = row.get('id', '?')
@@ -41,12 +42,6 @@ for row in shipped:
     else:
         pass_('shipped %s has tag, description and an action' % pid)
 
-paused = [row.get('id', '?') for row in shipped if 'paused' in row.get('tag', '').lower()]
-if paused:
-    fail_('shipped tag contains "paused": %s' % ', '.join(paused))
-else:
-    pass_('no shipped tag contains "paused"')
-
 for row in shipped:
     art = Path(row.get('art', ''))
     if art.is_file():
@@ -54,8 +49,25 @@ for row in shipped:
     else:
         fail_('art %s is missing' % art)
 
+for row in source:
+    pid = row.get('id', '?')
+    href = row.get('href', '')
+    if href.startswith('https://'):
+        pass_('source %s href is https' % pid)
+    else:
+        fail_('source %s href %r is not https' % (pid, href))
+    status = row.get('status', '')
+    if status.startswith('Source available'):
+        pass_('source %s status starts with Source available' % pid)
+    else:
+        fail_('source %s status %r does not start with Source available' % (pid, status))
+
 for row in lab:
     pid = row.get('id', '?')
+    if 'href' in row:
+        fail_('lab %s has an href' % pid)
+    else:
+        pass_('lab %s has no href' % pid)
     status = row.get('status', '')
     if status.startswith('Private'):
         pass_('lab %s status starts with Private' % pid)

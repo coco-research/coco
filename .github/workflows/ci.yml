@@ -90,6 +90,9 @@ jobs:
           node --check bin/coco.js
           node bin/coco.js --help | head -5
 
+      - name: Hyperframes telemetry is opt-in (no network call unless COCO_HYPERFRAMES_TELEMETRY=1)
+        run: node --test systems/hyperframes/skills/media-use/scripts/lib/telemetry.test.mjs
+
       - name: Test build-index.py runs cleanly
         run: |
           python3 scripts/build-index.py
@@ -136,6 +139,13 @@ jobs:
       - name: Default bundle allow-list accounts for every bundle
         run: bash tests/check-default-bundle-allowlist.sh
 
+      - name: Every installable bundle ships a valid pack.json
+        run: |
+          python3 tests/check-packs.py
+          # The self-test plants a defect for each rule in a throwaway tree, so a rule that
+          # stops firing fails CI instead of letting a bad pack through.
+          python3 tests/check-packs.py --self-test
+
       - name: Bundle install gate (every advertised bundle must change the install plan)
         run: |
           # Each adapter manifest declares supports_systems. This gate makes that declaration
@@ -181,6 +191,13 @@ jobs:
             done <<< "$bundles"
           done
           [ "$fail" -eq 0 ] || exit 1
+
+      - name: Pack content gate (no secret reads, phone-home hosts, machine paths or curl-to-shell)
+        run: |
+          python3 tests/check-pack-content.py
+          # The self-test runs the gate over tests/fixtures/pack-content, where every planted
+          # line must fail and every benign line must pass, so a weakened rule fails CI.
+          python3 tests/check-pack-content.py --self-test
 
       - name: Validate the SI team role roster
         run: |

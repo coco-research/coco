@@ -12,9 +12,9 @@ because most adapters link into the checkout rather than copying.
 | `amazon-q` | 0 | 0 | 0 | 34 | — | 0 |
 | `claude-code` | 386 | 342 | 189 | 34 | — | 0 |
 | `cline` | 0 | 0 | 0 | 34 | — | 0 |
-| `codex` | 0 | 0 | 0 | 0 | yes | 0 |
+| `codex` | 342 | 342 | 0 | 0 | yes | 0 |
 | `cursor` | 386 | 342 | 181 | 0 | — | 0 |
-| `generic` | 0 | 0 | 0 | 0 | yes | 0 |
+| `generic` | 342 | 342 | 0 | 0 | yes | 0 |
 | `github-copilot-cli` | 0 | 0 | 0 | 0 | yes | 0 |
 | `grok` | 389 | 342 | 189 | 34 | — | 0 |
 | `hermes` | 386 | 342 | 189 | 34 | — | 0 |
@@ -46,8 +46,10 @@ This section is the standing list of who is short and by how much.
 | `vscode-continue` | 0 | 386 | does not invoke the SI generators |
 | `windsurf` | 0 | 386 | does not invoke the SI generators |
 | `zed` | 0 | 386 | does not invoke the SI generators |
+| `codex` | 342 | 44 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
+| `generic` | 342 | 44 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
 
-Not comparable (AGENTS.md producers rather than tree installers): `aider`, `codex`, `generic`, `github-copilot-cli`.
+Not comparable (AGENTS.md producers rather than tree installers): `aider`, `github-copilot-cli`.
 
 ## Default install against the widest install
 
@@ -83,8 +85,9 @@ Every adapter delivers its full skill set on a plain run.
 Read the table with these in mind; each is a property of the adapter, not a
 bug in the measurement.
 
-- **Codex and generic emit one `AGENTS.md`** and nothing else. They are
-  AGENTS.md producers; the tree-side surfaces are not their job.
+- **Codex and generic emit one `AGENTS.md` plus the generated Super Intelligence
+  command files** under `~/.coco/si-commands`. They are AGENTS.md producers; the
+  tree-side surfaces are not their job.
 - **The VS Code adapter needs a profile to exist.** It links core commands into
   the editor user profile, so the measurement creates the two standard profile
   directories inside the throwaway HOME first. Without them it reports only the

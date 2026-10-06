@@ -1,0 +1,10 @@
+{
+  "name": "hyperframes",
+  "title": "HyperFrames",
+  "summary": "Make videos and motion graphics from HTML",
+  "kind": "third-party",
+  "licence": "Apache-2.0",
+  "upstream": "https://github.com/heygen-com/hyperframes@unknown",
+  "attribution": "HyperFrames by HeyGen, Inc. (Apache-2.0). Some files carry their own licences; see README.md.",
+  "review": "pending"
+}

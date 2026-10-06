@@ -30,6 +30,11 @@ import tempfile
 
 ROOT = pathlib.Path(__file__).parent.parent.resolve()
 OUT = ROOT / 'adapters' / 'INDEX.md'
+# What a plain Claude Code install delivers, measured. The README's "installed by
+# default" figures are gated against this file, not against the repository walk in
+# docs/asset-counts.json, because the two differ by design (reverse-skill is opt-in).
+DELIVERED = ROOT / 'docs' / 'delivered-counts.json'
+REFERENCE_ADAPTER = 'claude-code'
 
 BUNDLE_UNIVERSE = ('gsd', 'brain', 'cognee', 'hyperframes', 'superintelligence', 'm0')
 
@@ -97,9 +102,11 @@ def count_md(root, segments):
         if not (set(dirpath.parts) & segments):
             continue
         for name in filenames:
-            # INDEX.md and README.md are catalogs sitting in the same directory,
-            # not delivered commands or agents.
-            if name.endswith('.md') and name not in ('INDEX.md', 'README.md'):
+            # INDEX.md and README.md are catalogs sitting in the same directory, and
+            # PROMPT-DEFENSE.md is the preamble every agent includes: none of them is
+            # a delivered command or agent.
+            if name.endswith('.md') and name not in ('INDEX.md', 'README.md',
+                                                     'PROMPT-DEFENSE.md'):
                 seen.add(str((dirpath / name).resolve()))
     return len(seen)
 
@@ -214,6 +221,17 @@ def main():
         r['default_commands'] = d['commands']
         r['default_exit'] = d['exit']
 
+    ref = defaults[REFERENCE_ADAPTER]
+    delivered = json.dumps({
+        'schema': 1,
+        'adapter': REFERENCE_ADAPTER,
+        'mode': 'default (no flags)',
+        'skills': ref['skills'],
+        'commands': ref['commands'],
+        'generated_commands': ref['generated_commands'],
+        'agents': ref['agents'],
+    }, indent=2) + '\n'
+
     lines = [
         '# Install Adapters — Delivery Index',
         '',
@@ -251,7 +269,10 @@ def main():
     def comparable(r):
         return not (r['agents_md'] and r['commands'] == 0)
 
-    gaps = [r for r in rows if comparable(r) and r['commands'] < best_cmd]
+    # Measured against the published total, not the widest adapter: grok also links
+    # three workflow files as commands, and using its 389 as the ceiling marked every
+    # adapter that delivers the full 386 as short.
+    gaps = [r for r in rows if comparable(r) and r['commands'] < advertised['commands']]
     exempt = [r for r in rows if not comparable(r)]
     lines += [
         '',
@@ -271,10 +292,12 @@ def main():
             elif r['agents_md'] and r['generated_commands'] > 0:
                 cause = ('AGENTS.md producer: generates the SI family, core commands '
                          'are listed in AGENTS.md rather than installed as command files')
-            else:
+            elif r['generated_commands'] == 0:
                 cause = 'does not invoke the SI generators'
+            else:
+                cause = 'installs fewer core commands'
             lines.append(f"| `{r['adapter']}` | {r['commands']} | "
-                         f"{best_cmd - r['commands']} | {cause} |")
+                         f"{advertised['commands'] - r['commands']} | {cause} |")
     else:
         lines.append('None — every adapter delivers the full command surface.')
     if exempt:
@@ -373,16 +396,19 @@ def main():
         '',
     ]
 
+    outputs = {OUT: '\n'.join(lines) + '\n', DELIVERED: delivered}
     if '--check' in sys.argv:
-        current = OUT.read_text() if OUT.exists() else ''
-        if current != '\n'.join(lines) + '\n':
-            print('adapters/INDEX.md is out of date. Run: python3 scripts/build-delivery-index.py')
-            return 1
-        print('adapters/INDEX.md is up to date.')
-        return 0
+        stale = [p for p, text in outputs.items()
+                 if (p.read_text() if p.exists() else '') != text]
+        for p in stale:
+            print(f'{p.relative_to(ROOT)} is out of date. Run: python3 scripts/build-delivery-index.py')
+        if not stale:
+            print('adapters/INDEX.md and docs/delivered-counts.json are up to date.')
+        return 1 if stale else 0
 
-    OUT.write_text('\n'.join(lines) + '\n')
-    print(f'Wrote {OUT.relative_to(ROOT)}')
+    for p, text in outputs.items():
+        p.write_text(text)
+        print(f'Wrote {p.relative_to(ROOT)}')
     for r in rows:
         print(f"  {r['adapter']:14s} commands={r['commands']:4d} "
               f"generated={r['generated_commands']:4d} skills={r['skills']:4d} "

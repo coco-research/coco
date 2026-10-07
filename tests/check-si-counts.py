@@ -150,6 +150,24 @@ check_two(DELIV, r'report (\d+) commands where macOS reports (\d+)\.', 'platform
 META = 'systems/superintelligence/scripts/build_meta_commands.py'
 check_one(META, r'Do NOT dump the full (\d+)-command surface', 'dispatch template', COMMANDS)
 
+# SI embedding prerequisite (#241): the docs must name the endpoint and model that
+# meta_select.py actually hard-codes, so a changed constant fails here instead of drifting.
+src = open(META.replace('build_meta_commands', 'meta_select')).read()
+mu = re.search(r'^EMBED_URL = "([^"]+)"', src, re.M)
+mm = re.search(r'^EMBED_MODEL = "([^"]+)"', src, re.M)
+if not mu:
+    fail_(f'{META.replace("build_meta_commands", "meta_select")}: could not find EMBED_URL constant (pattern not found)')
+if not mm:
+    fail_(f'{META.replace("build_meta_commands", "meta_select")}: could not find EMBED_MODEL constant (pattern not found)')
+embed_url = mu.group(1) if mu else None
+embed_model = mm.group(1) if mm else None
+for doc in ('docs/install.md', 'docs/getting-started.md'):
+    if embed_url:
+        check_present(doc, embed_url, 'SI embedding endpoint (meta_select.py EMBED_URL)')
+    if embed_model:
+        check_present(doc, embed_model, 'SI embedding model (meta_select.py EMBED_MODEL)')
+    check_present(doc, 'keyword fallback active', 'SI keyword-fallback note')
+
 print()
 if fail == 0:
     print('  all published Super Intelligence team/cell/command claims agree with the live registries')

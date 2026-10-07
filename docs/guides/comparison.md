@@ -58,6 +58,6 @@ Coco is intentionally not a marketplace, not a framework, and not a chat extensi
 - Coco doesn't have a marketplace (yet). All skills are in this one repo.
 - No auto-update mechanism beyond `git pull && bash install.sh`
 - No web UI / GUI — pure CLI + IDE adapters
-- VS Code adapter (Continue-based) planned for v0.2 — not stable yet
+- The `vscode-continue` adapter links skills, agents and a rules README into `~/.continue/`; it does not generate slash commands
 - Antigravity adapter planned for v0.2 — not stable yet
 - No telemetry means we can't tell which skills are most-used (and we like it that way)

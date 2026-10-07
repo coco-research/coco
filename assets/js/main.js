@@ -80,7 +80,7 @@ function rescue(reason) {
   root.classList.remove('cine', 'gl', 'nogl', 'ready', 'show-cta', 'in-foot');
   root.classList.add('static', 'rescued');
   if (window.gsap) {
-    window.gsap.set($$('.beat, .sw, .swi, .sc, .dgi, .win, .win *, .card, .lab-wrap, .lab-item, .hero-sub, .hero-point, .cta .btn, .meta, .copy, .ring-cap, .facts, .stat-sub, .lab-sub, .rule-eyebrow, .num, .unit, .node, .ch-close'), { clearProps: 'all' });
+    window.gsap.set($$('.beat, .sw, .swi, .sc, .dgi, .win, .win *, .card, .lab-wrap, .lab-group, .lab-item, .hero-sub, .hero-point, .cta .btn, .meta, .copy, .ring-cap, .facts, .stat-sub, .lab-sub, .rule-eyebrow, .num, .unit, .node, .ch-close'), { clearProps: 'all' });
   }
 }
 

@@ -262,7 +262,7 @@ export function buildMaster(gsap, refs, view) {
     hide(r.beat, b1 + (last ? 0.2 : 0.02));
   });
 
-  /* 4. Shipped: heading, then a carousel of three posters flying in from depth. */
+  /* 4. Shipped: heading, then a carousel of posters, one per shipped product flying in from depth. */
   const [s0, s1] = TL.shipped;
   const head = $('.b-shipped');
   show(head, s0 + 0.2);
@@ -270,8 +270,12 @@ export function buildMaster(gsap, refs, view) {
   ft($('.b-shipped h2'), { opacity: 1, y: 0 }, { opacity: 0, y: -26, duration: 0.3, ease: 'power2.in' }, s1 - 0.34);
   hide(head, s1 - 0.03);
   const deck = view.deck;
-  [0, 1, 2].forEach((k) => ft(deck, { ['e' + k]: 0 }, { ['e' + k]: 1, duration: 0.8, ease: 'expo.out' }, s0 + 0.26 + k * 0.24));
-  ft(deck, { a: view.portrait ? 0 : 0.62 }, { a: view.portrait ? 2 : 1.38, duration: 1.7, ease: 'none' }, s0 + 1.1);
+  // One poster per product row in data/products.json. layoutDeck (main.js) reads deck['e' + i] for every card; each e{k}
+  // exists because this is the first tween on it (ft renders immediately), so keep exactly one ft per e{k}.
+  const n = document.querySelectorAll('.card').length;
+  const step = Math.min(0.24, (s1 - 0.6 - (s0 + 1.06)) / Math.max(1, n - 1)); // every entrance lands before the exit at s1 - 0.6
+  for (let k = 0; k < n; k++) ft(deck, { ['e' + k]: 0 }, { ['e' + k]: 1, duration: 0.8, ease: 'expo.out' }, s0 + 0.26 + k * step);
+  ft(deck, { a: 0 }, { a: n - 1, duration: 1.7, ease: 'none' }, s0 + 1.1); // opens on the flagship, ends on the last card
   ft(deck, { x: 0 }, { x: 1, duration: 0.55, ease: 'power2.in' }, s1 - 0.6);
 
   /* 5. In the lab: a calm list, each item drifting in. */
@@ -280,8 +284,16 @@ export function buildMaster(gsap, refs, view) {
   show(lab, l0 - 0.04);
   ft($('.lab-head'), { opacity: 0, y: 30, filter: 'blur(10px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.55, ease: 'power3.out' }, l0 - 0.02);
   ft($('.lab-sub'), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }, l0 + 0.3);
-  $$('.lab-item').forEach((it, i) => {
-    ft(it, { opacity: 0, y: 46, filter: 'blur(8px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.6, ease: 'power3.out' }, l0 + 0.28 + i * 0.26);
+  const labRows = $$('.lab-group, .lab-item');
+  // One sequence for both group headings and rows. Duration 0.6; the exit is at l1 - 0.3.
+  // The step is the chapter length, so the last element is fully in ~0.6 screen before that exit.
+  const rowDur = 0.6;
+  const lead = 0.28;
+  const hold = 0.6;
+  const span = (l1 - 0.3 - hold) - rowDur - (l0 + lead);
+  const rowStep = Math.min(0.26, span / Math.max(1, labRows.length - 1));
+  labRows.forEach((it, i) => {
+    ft(it, { opacity: 0, y: 46, filter: 'blur(8px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: rowDur, ease: 'power3.out' }, l0 + lead + i * rowStep);
   });
   // The list stays readable until the close title is already arriving (no empty beat between them).
   ft(lab, { y: 0, autoAlpha: 1 }, { y: -36, autoAlpha: 0, duration: 0.36, ease: 'power2.in' }, l1 - 0.3);

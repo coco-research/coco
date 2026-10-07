@@ -120,6 +120,8 @@ jobs:
       - name: Verify shipped asset counts match generated truth
         run: bash tests/check-asset-counts.sh
 
+      - name: Verify homepage product rows match data/products.json
+        run: python3 tests/check-site-products.py
       - name: Persona attribution wording is in every generated SI command
         run: |
           python3 tests/check-persona-attribution.py

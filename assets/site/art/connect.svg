@@ -1,0 +1,14 @@
+<svg viewBox="0 0 320 190" fill="none" stroke="currentColor" stroke-width="1.2">
+  <circle cx="160" cy="95" r="30" stroke-opacity=".38"/>
+  <circle cx="160" cy="95" r="62" stroke-opacity=".26"/>
+  <circle cx="160" cy="95" r="92" stroke-opacity=".17"/>
+  <g class="sweep"><path d="M160 95 L252 95 A92 92 0 0 0 238 55 Z" fill="currentColor" fill-opacity=".11" stroke="none"/><path d="M160 95 H252" stroke-opacity=".9"/></g>
+  <g fill="currentColor" stroke="none">
+    <circle class="ping" style="--t:5s" cx="191" cy="41" r="3.2"/>
+    <circle class="ping" style="--t:.33s" cx="246" cy="126" r="3.2"/>
+    <circle class="ping" style="--t:1.58s" cx="155" cy="157" r="3.2"/>
+    <circle class="ping" style="--t:2.83s" cx="69" cy="111" r="3.2"/>
+    <circle class="ping" style="--t:3.75s" cx="116" cy="51" r="3.2"/>
+    <circle cx="160" cy="95" r="5"/>
+  </g>
+</svg>

@@ -33,9 +33,7 @@ while [[ $# -gt 0 ]]; do
     --dry-run) DRY_RUN=1 ;;
     --systems) shift; IFS=',' read -ra SYSTEMS <<< "${1:-}" ;;
     --core-only) CORE_ONLY=1 ;;
-    # Header only: this adapter's --help used to grep every '^#' line, which would also
-    # print the explanatory comments inside the code as if they were usage.
-    --help|-h) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
+    --help|-h) bash "$REPO_ROOT/scripts/print-usage.sh" "$0"; exit 0 ;;
     *) echo "Unknown flag: $1" >&2; exit 1 ;;
   esac
   shift

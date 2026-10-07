@@ -34,6 +34,23 @@ for d in adapters/*/; do
     || fail "adapters/$adapter/install.sh --dry-run"
 done
 
+# --help must print usage, not the shebang line (#247); "!" form on GNU sed, "#!" on BSD sed
+for f in install.sh adapters/*/install.sh scripts/generate-si-commands.sh; do
+  status=0
+  out=$(bash "$f" --help 2>&1) || status=$?
+  if [ $status -ne 0 ]; then
+    fail "$f --help exited $status"
+  elif [ -z "$out" ]; then
+    fail "$f --help is empty"
+  else
+    first=${out%%$'\n'*}
+    case "$first" in
+      *"/usr/bin/env"*) fail "$f --help starts with the shebang" ;;
+      *) pass "$f --help OK" ;;
+    esac
+  fi
+done
+
 bash adapters/cursor/install.sh --dry-run --systems superintelligence > /tmp/cursor-systems.out 2>&1 \
   && pass "cursor install.sh --dry-run --systems superintelligence" \
   || fail "cursor install.sh --dry-run --systems superintelligence"

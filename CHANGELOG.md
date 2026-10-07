@@ -6,7 +6,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+## [1.5.1]
+
 ### Fixed
+
+- **Aider adapter maintains checksum-guarded backups for `AGENTS.md` and `.aider.conf.yml`.** (#272)
+- **Aider adapter writes real option keys to `.aider.conf.yml`.** (#271)
+- **Installed the 13 Super Intelligence team front doors, and defaulting every adapter to its bundles.** (#183)
+- **`/team` tools now use the placeholder the tooling actually expands.** (#189)
 
 - **The README now says what an install delivers, and CI proves it.** The headline stays at 227 skills, the repository total, with a footnote giving the measured default install: 189 skills, 386 commands and 34 agents on Claude Code. The other 38 skills are the opt-in `reverse-skill` security pack (33) and five Cursor-only skills. `scripts/build-delivery-index.py` now writes `docs/delivered-counts.json` from a real install into a throwaway HOME, every "installed by default" figure in the README and on `coco/index.html` is gated against it, and CI fails if a fresh measurement differs from the committed file. Before this, every count gate compared against a walk of the repository, so nothing noticed that the README's "the totals above are what a plain `bash install.sh` delivers" was false.
 - **Agents are 34, not 35.** `agents/PROMPT-DEFENSE.md` is the preamble every agent includes, not a subagent, and is no longer counted by `build-index.py`, the delivery index or the claude-code install receipt. The receipt also stops counting `skills/team-gate`, which has no `SKILL.md`.
@@ -18,6 +25,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ### Security
 
+- **Add a content gate for bundle pack files.** (#282)
+
 - **`generate_prd.sh` no longer `eval`s user input.** Interactive answers were assigned with `eval "$var_name='$input'"`, so a value containing a quote could run as shell. Assignment is now `printf -v` into an allow-listed variable name.
 - **`stop-server.sh` no longer treats `/tmp/../…` as under `/tmp`.** The old `[[ $path == /tmp/* ]]` glob matched a traversal prefix and then `rm -rf` the directory. The path is canonicalized with `pwd -P` and compared against the real `/tmp` root; only a session directory under that root is deleted. PIDs must be numeric before `kill`.
 - **Uninstall no longer glob-matches any path containing the clone name.** `find -lname '*${dir}*'` deleted links into `coco-research` / `coco-connect` when the clone was `coco`. The CLI and the docs now match the resolved clone path plus a trailing slash.
@@ -25,6 +34,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - **CLI clone is pinned to the release tag, not floating `main`.** `bin/coco.js` and `bin/coco-bootstrap.sh` clone `v1.5.0` (kept in sync with `package.json`). Existing branch checkouts still `git pull --ff-only` so a tagged pin cannot downgrade a `main` tree.
 
 ### Added
+
+- **Every installable bundle now ships a pack.json with a schema gate.** (#281)
+- **Hyperframes media-use telemetry is now opt-in.** (#280)
+- **Cinematic homepage.** (#279)
+- **The loop's skill tree is now documented, with updated PRD counts.** (#200)
+- **Completed the Repo Standard document set.** (#199)
+- **Vendor the upstream MIT LICENSE verbatim for GSD.** (#283)
 
 - **Local Superintelligence dogfood GIF.** A real `meta_select.py` Stage-A run on this Mac, linked from the README next to Install. Embedding was down (`Connection refused`), so the clip is labeled **degraded: keyword fallback** (`method: keyword`, `degraded: true`).
 

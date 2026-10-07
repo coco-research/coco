@@ -103,7 +103,11 @@ Usage:
 Update checks contact only github.com (no telemetry); disable with COCO_NO_UPDATE_CHECK=1.
 
 Install flags (passed to install.sh):
-  --adapter <name>                      claude-code | cursor | grok | vscode | codex | generic
+  --adapter <name>                      claude-code | cursor | grok | vscode |
+                                        codex | generic | aider | amazon-q |
+                                        cline | github-copilot-cli | hermes |
+                                        pi-desktop | roo-code | vscode-continue |
+                                        windsurf | zed
   --systems <list>                      gsd | brain | cognee | hyperframes | m0 |
                                         superintelligence   (comma-separated)
   --dry-run                             preview, no writes

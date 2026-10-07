@@ -30,3 +30,20 @@ if missing:
           f'adapters/{missing[0]}/ exists)')
     sys.exit(1)
 print(f'PASS: all {len(adapters)} adapters/ directories are allowed by KNOWN_ADAPTERS')
+
+# docs/install.md must document pi-desktop, hermes and zed (#230): a section heading and an
+# entry in its Uninstall section. Anchored to these three; windsurf/cline/roo-code are the
+# separate gap #212 and are not asserted here.
+install = open('docs/install.md').read()
+uninstall = install.split('\n## Uninstall', 1)[-1].split('\n## ', 1)[0]
+for name, heading in (('pi-desktop', 'PI-Desktop'), ('hermes', 'Hermes'), ('zed', 'Zed')):
+    if name not in adapters:
+        print(f'FAIL: {name} is no longer in adapters.list; update this check')
+        sys.exit(1)
+    if not re.search(rf'^## {heading}\b', install, re.M):
+        print(f'FAIL: docs/install.md has no "## {heading}" section for the {name} adapter')
+        sys.exit(1)
+    if heading not in uninstall:
+        print(f'FAIL: docs/install.md Uninstall section has no {heading} steps')
+        sys.exit(1)
+print('PASS: docs/install.md has a section and uninstall steps for pi-desktop, hermes and zed')

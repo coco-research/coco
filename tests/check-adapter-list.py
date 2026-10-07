@@ -47,3 +47,21 @@ for name, heading in (('pi-desktop', 'PI-Desktop'), ('hermes', 'Hermes'), ('zed'
         print(f'FAIL: docs/install.md Uninstall section has no {heading} steps')
         sys.exit(1)
 print('PASS: docs/install.md has a section and uninstall steps for pi-desktop, hermes and zed')
+
+# adapters/zed/README.md must exist and say plainly what Zed does not read (#231, #227).
+if 'zed' not in adapters:
+    print('FAIL: zed is no longer in adapters.list; update this check')
+    sys.exit(1)
+try:
+    zed_readme = open('adapters/zed/README.md').read()
+except FileNotFoundError:
+    print('FAIL: adapters/zed/README.md is missing')
+    sys.exit(1)
+for heading in ('## Install', '## What it does', '## Limitations', '## Uninstall'):
+    if heading not in zed_readme:
+        print(f'FAIL: adapters/zed/README.md has no "{heading}" section')
+        sys.exit(1)
+if 'ZED_HOME' not in zed_readme or 'AGENTS.md' not in zed_readme.split('## Limitations', 1)[-1]:
+    print('FAIL: adapters/zed/README.md must name ZED_HOME and the AGENTS.md file Zed actually reads')
+    sys.exit(1)
+print('PASS: adapters/zed/README.md documents install, targets, limitations and uninstall')

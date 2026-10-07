@@ -179,7 +179,7 @@ function cmdInstall(argv) {
   run('bash', [installScript, ...argv]);
 
   console.log(`\nDone. Coco installed at ${dir}.`);
-  console.log(`Re-run install / update later with:\n  npx cocosuperintelligence update`);
+  console.log(`Re-install later:  npx cocosuperintelligence install\nUpdate the clone to the pinned release:  npx cocosuperintelligence update`);
 }
 
 function cmdUpdate(argv) {

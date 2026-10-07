@@ -73,6 +73,9 @@ jobs:
       - name: Validate roster front-door frontmatter
         run: bash tests/check-roster-frontmatter.sh
 
+      - name: Validate the CLI closing hint
+        run: bash tests/check-cli-closing-hint.sh
+
       - name: Validate no hardcoded adapter list drifts from adapters/
         run: bash tests/check-adapter-drift.sh
 

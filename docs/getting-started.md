@@ -45,13 +45,9 @@ In Claude Code and Cursor, this appears as a first-class slash command. In Codex
 
 ---
 
-## Add an orchestration system
+## Orchestration is already installed
 
-```bash
-bash install.sh --systems gsd
-```
-
-Adds 68 skills for project orchestration: state-tracked phases, parallel agent waves, atomic commits, verification gates.
+A plain `bash install.sh` installs all 6 default bundles: GSD, Brain, Cognee, HyperFrames, Super Intelligence and M0. GSD's project orchestration (state-tracked phases, parallel agent waves, atomic commits, verification gates) is therefore available right away:
 
 ```text
 /gsd-new-project
@@ -60,6 +56,17 @@ Adds 68 skills for project orchestration: state-tracked phases, parallel agent w
 ```
 
 State persists in `.planning/` — survives context resets.
+
+### Narrow your install
+
+`--systems <list>` replaces the default bundle set, it does not add to it. `--core-only` installs no bundles at all.
+
+```bash
+bash install.sh --systems gsd      # GSD only; the other 5 bundles are not installed
+bash install.sh --core-only        # core skills and commands only
+```
+
+The install receipt counts only that run, so after `--systems gsd` it reports a much smaller install. A narrower run does not remove what an earlier run already linked: those files stay until you uninstall (see [`install.md`](install.md)). `reverse-skill` is not a default bundle; opt in with `--systems reverse-skill`.
 
 ---
 

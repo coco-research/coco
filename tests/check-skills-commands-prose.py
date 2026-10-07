@@ -26,6 +26,7 @@ Run from repo root: python3 tests/check-skills-commands-prose.py
 """
 import json
 import re
+import subprocess
 import sys
 
 fail = 0
@@ -199,6 +200,22 @@ if claimed != tree_sys or int(m.group(2)) != default_n:
     fail_(f'{GS}: systems claim {claimed} / {m and m.group(2)} default, tree has {tree_sys} / {default_n} default')
 else:
     pass_(f'{GS}: systems {tree_sys}, {default_n} default match')
+
+# 12. docs/getting-started.md orchestration section (#243): gsd is a default bundle, so the
+# doc must not tell users to "add" it with --systems, and its default-bundle count must
+# match scripts/installable-bundles.sh.
+GS = 'docs/getting-started.md'
+gs = open(GS).read()
+default_n = len(subprocess.check_output(['bash', 'scripts/installable-bundles.sh', '--one-per-line']).split())
+if 'Add an orchestration system' in gs or re.search(r'Adds \d+ skills for project orchestration', gs):
+    fail_(f'{GS}: still tells users to add GSD with --systems, but gsd is a default bundle')
+else:
+    pass_(f'{GS}: no stale "add an orchestration system" step')
+m = re.search(r'installs all (\d+) default bundles', gs)
+if not m or int(m.group(1)) != default_n or '`--systems <list>` replaces the default bundle set' not in gs:
+    fail_(f'{GS}: default bundle claim is {m and m.group(1)}, allow-list has {default_n}, or the --systems "replaces" note is missing')
+else:
+    pass_(f'{GS}: {default_n} default bundles and the --systems "replaces" note match')
 
 print()
 if fail == 0:

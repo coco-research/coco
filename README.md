@@ -38,7 +38,7 @@ An illustration built from a real `/SI-Decide` run (Claude Sonnet 5.5, 30 Septem
 
 Prerequisites: git, bash, Node.js 14 or newer (for `npx`), and python3 (it generates the `/SI-*` commands).
 
-`npx cocosuperintelligence` installs the latest release. It clones the pinned release tag (currently `v1.5.0`, not floating `main`) into `./coco` of the current directory, then runs `install.sh`. Run it from your home folder, so the clone is `~/coco` and not a folder inside another project. On a fresh machine it took about 3 minutes, including the download. <!-- x-release-please-version -->
+`npx cocosuperintelligence` installs the latest release. It clones the pinned release tag (currently `v1.5.1`, not floating `main`) into `./coco` of the current directory, then runs `install.sh`. Run it from your home folder, so the clone is `~/coco` and not a folder inside another project. On a fresh machine it took about 3 minutes, including the download. <!-- x-release-please-version -->
 
 ```bash
 npx cocosuperintelligence

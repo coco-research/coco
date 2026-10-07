@@ -251,7 +251,12 @@ function main() {
       cmdUninstall(rest);
       break;
     default:
-      // any unknown subcommand → pass through to install (e.g., npx cocosuperintelligence --adapter cursor)
+      // Flags pass through to install (e.g., npx cocosuperintelligence --adapter cursor).
+      // A bare word is an unknown subcommand: reject it before any clone touches disk.
+      if (!sub.startsWith('-')) {
+        console.error(`Error: unknown command '${sub}'. Run with --help to see the commands.`);
+        process.exit(2);
+      }
       cmdInstall(argv);
       checkForUpdate(false);
   }

@@ -19,6 +19,15 @@ any case. Four digests are of one exact spelling, and a different case does not 
 `tests/pack-content-names.local`. With neither, it plants synthetic names and adds only those
 digests to a test-only set, so a checkout with no local list still exercises the comparison.
 
+### Persona answers use one attribution wording
+
+**Decided:** 2026-10-05, legal policy. **Reason:** a persona answer was readable as the named
+person. The label sentence and the report footer live in
+`systems/superintelligence/templates/attribution.md`, and both command generators insert that
+file. `tests/check-persona-attribution.py` fails if a generated command drops either sentence,
+or if a generator template tells the model to write `<Name> says`. Removal is
+`docs/personas/TAKEDOWN.md`, a placeholder until legal review replaces it.
+
 ### Rebase and merge for PR #196, not squash
 
 **Decided:** 2026-09-18. **Reason:** the `main` ruleset sets `required_linear_history`, so a

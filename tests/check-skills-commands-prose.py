@@ -26,6 +26,7 @@ Run from repo root: python3 tests/check-skills-commands-prose.py
 """
 import json
 import re
+import subprocess
 import sys
 
 fail = 0
@@ -78,9 +79,11 @@ def check_sum(parts, total, label):
         pass_(f'{README}: {label} breakdown {parts} sums to its own stated total ({total})')
 
 
-# 1. Hero line: "then **N skills**, **M commands**, and disk-persistent state..."
-check(r'then \*\*(\d+) skills\*\*(?:\[\^installed\])?, \*\*(\d+) commands\*\*, and disk-persistent state',
-      'hero line', (SKILLS, COMMANDS))
+# 1. Hero line: "N personas across D departments, **S skills**[^installed] and **C commands** in the full catalog (coco <version or commit>, <date>)."
+PERSONAS = counts['personas']['total']
+DEPARTMENTS = counts['departments']['total']
+check(r'(\d+) personas across (\d+) departments, \*\*(\d+) skills\*\*\[\^installed\] and \*\*(\d+) commands\*\* in the full catalog \(coco [^)]+\)',
+      'hero line', (PERSONAS, DEPARTMENTS, SKILLS, COMMANDS))
 
 # 2. Skills Catalog opener: "CoCo ships **N skills** (X core + Y across bundles)."
 m = re.search(r'CoCo ships \*\*(\d+) skills\*\* \((\d+) core \+ (\d+) across bundles\)', text)
@@ -164,6 +167,55 @@ if AGENTS != DA:
     fail_(f'docs/asset-counts.json agents.total={AGENTS} but a default install delivers {DA}')
 else:
     pass_(f'agents.total {AGENTS} equals the measured install')
+
+# 11. docs/getting-started.md "Where things live". Anchored to the three bullets (#244):
+# skills count, command namespaces and the systems list. Truth is the tree itself.
+import glob
+import os
+import subprocess
+
+GS = 'docs/getting-started.md'
+gs = open(GS).read()
+tree_skills = len(glob.glob('skills/*/SKILL.md'))
+tree_ns = sorted(os.path.basename(d.rstrip('/')) for d in glob.glob('commands/*/'))
+tree_sys = sorted(os.path.basename(d.rstrip('/')) for d in glob.glob('systems/*/'))
+default_n = len(subprocess.check_output(['bash', 'scripts/installable-bundles.sh', '--one-per-line']).split())
+
+m = re.search(r'\(\.\./skills/\) \((\d+) core skills', gs)
+if not m or int(m.group(1)) != tree_skills or tree_skills != SKILLS_CORE:
+    fail_(f'{GS}: skills count claims {m and m.group(1)}, tree has {tree_skills} SKILL.md (asset-counts core={SKILLS_CORE})')
+else:
+    pass_(f'{GS}: skills count {tree_skills} matches')
+
+m = re.search(r'\(\.\./commands/\) \(([^)]*)\)', gs)
+claimed = sorted(re.findall(r'`([a-z]+)/`', m.group(1))) if m else []
+if claimed != tree_ns:
+    fail_(f'{GS}: command namespaces claim {claimed}, tree has {tree_ns}')
+else:
+    pass_(f'{GS}: command namespaces {tree_ns} match')
+
+m = re.search(r'\(\.\./systems/\) \(([^;)]*); (\d+) install by default', gs)
+claimed = sorted(x.strip() for x in m.group(1).split(',')) if m else []
+if claimed != tree_sys or int(m.group(2)) != default_n:
+    fail_(f'{GS}: systems claim {claimed} / {m and m.group(2)} default, tree has {tree_sys} / {default_n} default')
+else:
+    pass_(f'{GS}: systems {tree_sys}, {default_n} default match')
+
+# 12. docs/getting-started.md orchestration section (#243): gsd is a default bundle, so the
+# doc must not tell users to "add" it with --systems, and its default-bundle count must
+# match scripts/installable-bundles.sh.
+GS = 'docs/getting-started.md'
+gs = open(GS).read()
+default_n = len(subprocess.check_output(['bash', 'scripts/installable-bundles.sh', '--one-per-line']).split())
+if 'Add an orchestration system' in gs or re.search(r'Adds \d+ skills for project orchestration', gs):
+    fail_(f'{GS}: still tells users to add GSD with --systems, but gsd is a default bundle')
+else:
+    pass_(f'{GS}: no stale "add an orchestration system" step')
+m = re.search(r'installs all (\d+) default bundles', gs)
+if not m or int(m.group(1)) != default_n or '`--systems <list>` replaces the default bundle set' not in gs:
+    fail_(f'{GS}: default bundle claim is {m and m.group(1)}, allow-list has {default_n}, or the --systems "replaces" note is missing')
+else:
+    pass_(f'{GS}: {default_n} default bundles and the --systems "replaces" note match')
 
 print()
 if fail == 0:

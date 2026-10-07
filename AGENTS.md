@@ -45,3 +45,10 @@ If a task appears to require breaking one, stop and ask.
 `docs/memory.md` is not a diary. It records decisions with reasons and
 dead ends worth not repeating. If you spent an hour proving a
 hypothesis wrong, that sentence saves the next agent the hour.
+## 5. A bug you find is a bug you fix
+
+Found a bug while installing or working in this repo? Fix it and open a PR. A finding left in a chat is lost.
+
+- **Counts as a bug:** an install that delivers less than it advertises; a path, count, command or skill reference that does not resolve; a gate that cannot fail; a silent fallback where a loud failure belongs; docs that contradict the code.
+- **How:** reproduce in a throwaway `HOME` first. Fix the source, not generated output. Add the gate that would have caught it. Run the full `ci.yml` mirror, including `build-delivery-index.py`, before pushing. The PR says what broke, why it was invisible, and the command that proves the fix.
+- **Scope:** this repo, fix and PR. Any other repo, report to its owner and stop.

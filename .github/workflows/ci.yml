@@ -55,14 +55,26 @@ jobs:
           done
           echo "All install scripts pass syntax check."
 
+      - name: Version pins agree
+        run: bash tests/check-version-pins.sh
+
       - name: Validate command cross-references
         run: bash tests/check-command-refs.sh
+
+      - name: Validate unknown CLI subcommands fail before any clone
+        run: bash tests/check-cli-unknown-subcommand.sh
 
       - name: Validate /team evidence-gate integrity
         run: bash tests/check-evidence-gate.sh
 
+      - name: Validate uninstall removes the update-check cache
+        run: bash tests/check-cli-uninstall-cleanup.sh
+
       - name: Validate roster front-door frontmatter
         run: bash tests/check-roster-frontmatter.sh
+
+      - name: Validate the CLI closing hint
+        run: bash tests/check-cli-closing-hint.sh
 
       - name: Validate no hardcoded adapter list drifts from adapters/
         run: bash tests/check-adapter-drift.sh
@@ -116,6 +128,13 @@ jobs:
 
       - name: Verify shipped asset counts match generated truth
         run: bash tests/check-asset-counts.sh
+
+      - name: Verify homepage product rows match data/products.json
+        run: python3 tests/check-site-products.py
+      - name: Persona attribution wording is in every generated SI command
+        run: |
+          python3 tests/check-persona-attribution.py
+          python3 tests/check-persona-attribution.py --self-test
 
       - name: Verify the delivery index matches what the adapters install
         run: |
@@ -230,6 +249,8 @@ jobs:
           # systems/<name>/ directory used to produce a phantom bundle row and show
           # up as unexplained INDEX drift on twenty unrelated branches.
           bash tests/check-index-tracks-git.sh
+          # The README one-line bootstrap must survive the npm CLI's ~/.coco update cache.
+          bash tests/check-bootstrap-coco-dir.sh
           if ! git diff --quiet; then
             echo "A test suite left the tree dirty:"
             git diff --stat

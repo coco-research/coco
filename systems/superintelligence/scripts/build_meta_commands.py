@@ -190,7 +190,7 @@ For each `team:slug`, read `{REPO}/superintelligence/<team-dir>/personas/<slug>.
 {split_clause}{"Chain each sub-step as a real `/SI-<step>` invocation; re-orchestrate per step (teams may differ)." if chain else ""}
 
 ## Attribution (mandatory)
-Every claim cites **persona + team** — e.g. *Aswath Damodaran (Finance)*. Synthesis MUST surface cross-team disagreement explicitly, not just within-team. No "the panel said."
+Every claim cites **persona + team** — e.g. **Aswath Damodaran persona** (Finance). Synthesis MUST surface cross-team disagreement explicitly, not just within-team. No "the panel said." The label sentence and report footer below are mandatory.
 
 ## Conventions
 Registry is source of truth (re-read each run; no cache). Full English prose. Every cited stance traces to the persona's `public_stances`/`recent_signal_12mo`.
@@ -198,13 +198,27 @@ Registry is source of truth (re-read each run; no cache). Full English prose. Ev
 ARGUMENTS: {{{{ARGUMENTS}}}}
 """
 
+# Legal label + report footer. Same file build_commands.py reads. Do not copy the sentences.
+_ATTRIBUTION_PATH = pathlib.Path(__file__).resolve().parents[1] / "templates" / "attribution.md"
+
+
+def stamp_attribution(body: str) -> str:
+    """Insert templates/attribution.md before the ARGUMENTS slot."""
+    block = _ATTRIBUTION_PATH.read_text(encoding="utf-8").strip()
+    marker = "ARGUMENTS:"
+    idx = body.rfind(marker)
+    if idx == -1:
+        return body.rstrip() + "\n\n" + block + "\n"
+    return body[:idx].rstrip() + "\n\n" + block + "\n\n" + body[idx:]
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     files = {"SI.md": DISPATCH, "SI-Orchestrate.md": ORCHESTRATE}
     for title, (desc, shape) in VERBS.items():
         files[f"SI-{title}.md"] = verb_body(title, desc, shape, debate=title in DEBATE_VERBS)
     for name, body in files.items():
-        (OUT / name).write_text(body, encoding="utf-8")
+        (OUT / name).write_text(stamp_attribution(body), encoding="utf-8")
     print(f"Wrote {len(files)} meta-orchestrator command files to {OUT}:")
     print("  " + ", ".join(sorted(files)))
 

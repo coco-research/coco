@@ -148,11 +148,11 @@ export function createDirector(view) {
   // 6. Shipped and lab: the shape disperses into a field and the camera drifts through it.
   orbit(14.2, lerp(ang.rulesEnd, ang.shippedEnd, 0.55), 26 * fit, 1.2, 40);
   orbit(TL.shipped[1], ang.shippedEnd, 22 * fit, 0.6, 40);
-  orbit(16.9, lerp(ang.shippedEnd, ang.labEnd, 0.5), 19 * fit, 0.3, 40);
+  orbit(17.35, lerp(ang.shippedEnd, ang.labEnd, 0.5), 19 * fit, 0.3, 40);
   orbit(TL.lab[1], ang.labEnd, 14 * fit, 0.0, 40);
   // 7. Close: pull all the way back to reveal one constellation.
-  orbit(18.6, ang.labEnd, 28 * fit, 3.0, 40);
-  orbit(19.4, ang.labEnd, 62 * fit, 9.0, 37);
+  orbit(19.6, ang.labEnd, 28 * fit, 3.0, 40);
+  orbit(20.4, ang.labEnd, 62 * fit, 9.0, 37);
   orbit(TL.close[1], ang.labEnd, 88 * fit, 14.0, 34);
 
   const fx = {};
@@ -162,30 +162,30 @@ export function createDirector(view) {
   const flare = seg([
     [0, 1.0], [0.95, 1.1], [1.2, 1.35], [1.65, 0.0],
     [5.0, 0.0], [5.55, 0.6], [5.95, 1.25], [T.editor.hold, 1.25], [8.8, 2.0], [9.2, 0.0],
-    [17.8, 0.0], [18.2, 0.9], [19.8, 0.4],
+    [18.8, 0.0], [19.2, 0.9], [20.8, 0.4],
   ]);
-  const bloom = seg([[0, 0], [T.bloom[0], 0], [T.bloom[1], 1], [12.9, 1], [13.0, 0], [17.9, 0], [19.5, 1]]);
+  const bloom = seg([[0, 0], [T.bloom[0], 0], [T.bloom[1], 1], [12.9, 1], [13.0, 0], [18.9, 0], [20.5, 1]]);
   const converge = seg([[T.converge[0], 0], [T.converge[1], 1]]);
-  const starAlpha = seg([[0, 0], [1.0, 0], [1.3, 1], [8.7, 1], [9.1, 0], [17.8, 0], [18.1, 1]]);
-  const lineAlpha = seg([[0, 0], [1.3, 0], [2.1, 1], [5.4, 1], [5.95, 0.15], [17.9, 0.15], [18.6, 1]]);
+  const starAlpha = seg([[0, 0], [1.0, 0], [1.3, 1], [8.7, 1], [9.1, 0], [18.8, 0], [19.1, 1]]);
+  const lineAlpha = seg([[0, 0], [1.3, 0], [2.1, 1], [5.4, 1], [5.95, 0.15], [18.9, 0.15], [19.6, 1]]);
   const dissent = seg([[5.0, 0], [5.5, 1], [6.0, 1], [6.4, 0]]);
   const ring = seg([[6.8, 0], [7.5, 1], [T.editor.hold, 1], [T.editor.collapse[1] - 0.1, 0]]);
   const shapeAppear = seg([[8.7, 0], [9.4, 1]]);
   const shapeMorph = seg([[9.2, 0], [9.7, 0], [10.2, 1], [10.55, 1], [11.05, 2], [11.4, 2], [11.9, 3], [12.55, 3]]);
   const shapeDisperse = seg([[12.5, 0], [13.5, 1]]);
-  const shapeAlpha = seg([[12.55, 1], [17.85, 1], [19.6, 0.5]]);
+  const shapeAlpha = seg([[12.55, 1], [18.85, 1], [20.6, 0.5]]);
   const dust = seg([[0, 0], [0.9, 0], [1.9, 1]]);
   const streak = seg([[5.2, 0], [5.9, 0.45], [6.3, 0], [8.5, 0], [8.9, 1], [9.35, 0]]);
   const flash = seg([[8.62, 0], [8.84, 0.5], [9.14, 0]]); // peak capped (was 0.8) and shorter: no near-white frame
   const grade = seg([[8.7, 0], [9.5, 1], [12.2, 1], [13.0, 0]]);
   const bars = seg([[1.4, 0], [1.9, 1], [6.0, 1], [6.5, 0]]);
-  const fog = seg([[0, 1], [17.85, 1], [19.6, 1.9]]);
+  const fog = seg([[0, 1], [18.85, 1], [20.6, 1.9]]);
   const shiftX = seg([[8.9, 0], [9.5, portrait ? 0 : 0.24], [12.3, portrait ? 0 : 0.24], [13.0, 0]]);
   const shiftY = seg([
     [0, 0.17], [0.85, 0.17], [2.0, 0.0], [4.4, 0], [5.3, 0.14], [6.15, 0.14], [6.65, 0], [8.9, 0], [9.5, portrait ? 0.15 : 0], [12.3, portrait ? 0.15 : 0], [13.0, 0],
-    [17.85, 0], [19.6, portrait ? 0.1 : 0.13],
+    [18.85, 0], [20.6, portrait ? 0.1 : 0.13],
   ]);
-  const stage = seg([[12.4, 0], [13.3, 0.75], [15.4, 0.75], [16.1, 0.4], [17.5, 0.4], [18.2, 0]]);
+  const stage = seg([[12.4, 0], [13.3, 0.75], [15.4, 0.75], [16.1, 0.4], [18.5, 0.4], [19.2, 0]]);
 
   const P = {
     cam: { px: 0, py: 0, pz: 0, lx: 0, ly: 0, lz: 0, fov: 40, roll: 0 },

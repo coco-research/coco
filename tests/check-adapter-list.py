@@ -31,6 +31,41 @@ if missing:
     sys.exit(1)
 print(f'PASS: all {len(adapters)} adapters/ directories are allowed by KNOWN_ADAPTERS')
 
+# docs/install.md must document pi-desktop, hermes and zed (#230): a section heading and an
+# entry in its Uninstall section. Anchored to these three; windsurf/cline/roo-code are the
+# separate gap #212 and are not asserted here.
+install = open('docs/install.md').read()
+uninstall = install.split('\n## Uninstall', 1)[-1].split('\n## ', 1)[0]
+for name, heading in (('pi-desktop', 'PI-Desktop'), ('hermes', 'Hermes'), ('zed', 'Zed')):
+    if name not in adapters:
+        print(f'FAIL: {name} is no longer in adapters.list; update this check')
+        sys.exit(1)
+    if not re.search(rf'^## {heading}\b', install, re.M):
+        print(f'FAIL: docs/install.md has no "## {heading}" section for the {name} adapter')
+        sys.exit(1)
+    if heading not in uninstall:
+        print(f'FAIL: docs/install.md Uninstall section has no {heading} steps')
+        sys.exit(1)
+print('PASS: docs/install.md has a section and uninstall steps for pi-desktop, hermes and zed')
+
+# adapters/zed/README.md must exist and say plainly what Zed does not read (#231, #227).
+if 'zed' not in adapters:
+    print('FAIL: zed is no longer in adapters.list; update this check')
+    sys.exit(1)
+try:
+    zed_readme = open('adapters/zed/README.md').read()
+except FileNotFoundError:
+    print('FAIL: adapters/zed/README.md is missing')
+    sys.exit(1)
+for heading in ('## Install', '## What it does', '## Limitations', '## Uninstall'):
+    if heading not in zed_readme:
+        print(f'FAIL: adapters/zed/README.md has no "{heading}" section')
+        sys.exit(1)
+if 'ZED_HOME' not in zed_readme or 'AGENTS.md' not in zed_readme.split('## Limitations', 1)[-1]:
+    print('FAIL: adapters/zed/README.md must name ZED_HOME and the AGENTS.md file Zed actually reads')
+    sys.exit(1)
+print('PASS: adapters/zed/README.md documents install, targets, limitations and uninstall')
+
 # The vscode-continue adapter must be documented and agree across docs (#237): an install
 # section, uninstall steps, and no leftover claim that the adapter is "planned" / "not stable".
 install = open('docs/install.md').read()

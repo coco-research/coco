@@ -1,0 +1,33 @@
+<svg viewBox="0 0 320 190" fill="none" stroke="currentColor" stroke-width="1.2">
+  <path d="M76 36 Q160 24 276 95" stroke-opacity=".38"/>
+  <path d="M66 72 Q160 64 276 95" stroke-opacity=".32"/>
+  <path d="M82 116 Q170 128 276 95" stroke-opacity=".26"/>
+  <path d="M60 156 Q170 168 276 95" stroke-opacity=".17"/>
+  <g fill="currentColor" stroke="none">
+    <circle cx="40" cy="28" r="1.8" fill-opacity=".7"/>
+    <circle cx="54" cy="24" r="1.8" fill-opacity=".55"/>
+    <circle cx="68" cy="32" r="1.8" fill-opacity=".7"/>
+    <circle cx="38" cy="40" r="1.8" fill-opacity=".45"/>
+    <circle cx="52" cy="42" r="1.8" fill-opacity=".7"/>
+    <circle cx="66" cy="38" r="1.8" fill-opacity=".55"/>
+    <circle cx="32" cy="62" r="1.8" fill-opacity=".55"/>
+    <circle cx="46" cy="58" r="1.8" fill-opacity=".7"/>
+    <circle cx="60" cy="66" r="1.8" fill-opacity=".45"/>
+    <circle cx="36" cy="74" r="1.8" fill-opacity=".7"/>
+    <circle cx="52" cy="76" r="1.8" fill-opacity=".55"/>
+    <circle cx="48" cy="104" r="1.8" fill-opacity=".7"/>
+    <circle cx="62" cy="100" r="1.8" fill-opacity=".55"/>
+    <circle cx="76" cy="108" r="1.8" fill-opacity=".45"/>
+    <circle cx="44" cy="116" r="1.8" fill-opacity=".55"/>
+    <circle cx="58" cy="118" r="1.8" fill-opacity=".7"/>
+    <circle cx="74" cy="116" r="1.8" fill-opacity=".55"/>
+    <circle cx="56" cy="130" r="1.8" fill-opacity=".45"/>
+    <circle cx="26" cy="146" r="1.8" fill-opacity=".55"/>
+    <circle cx="40" cy="142" r="1.8" fill-opacity=".7"/>
+    <circle cx="54" cy="150" r="1.8" fill-opacity=".45"/>
+    <circle cx="30" cy="158" r="1.8" fill-opacity=".7"/>
+    <circle cx="46" cy="162" r="1.8" fill-opacity=".55"/>
+    <circle cx="36" cy="170" r="1.8" fill-opacity=".45"/>
+  </g>
+  <circle class="ping" style="--t:1.2s" cx="276" cy="95" r="6" fill="currentColor" stroke="none"/>
+</svg>

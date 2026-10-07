@@ -1,0 +1,11 @@
+{
+  "name": "reverse-skill",
+  "title": "Reverse Skill",
+  "summary": "Reverse-engineering and security reference skills",
+  "kind": "third-party",
+  "licence": "MIT",
+  "upstream": "https://github.com/zhaoxuya520/reverse-skill@a3bdfffcf2e6a611a1cbdcc9a312be44527ac043",
+  "attribution": "reverse-skill by zhaoxuya520 (MIT). A curated, reference-only subset.",
+  "explicit_only": true,
+  "review": "pending"
+}

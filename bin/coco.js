@@ -212,6 +212,9 @@ function cmdUninstall(argv) {
   if (fs.existsSync(dir)) {
     fs.rmSync(dir, { recursive: true, force: true });
   }
+  // The update notifier's cache is ours; drop it, and ~/.coco if that leaves it empty.
+  fs.rmSync(UPDATE_CACHE, { force: true });
+  try { fs.rmdirSync(path.dirname(UPDATE_CACHE)); } catch (_) { /* absent or holds other files */ }
   console.log('Uninstalled.');
 }
 

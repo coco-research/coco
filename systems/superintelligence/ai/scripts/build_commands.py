@@ -495,7 +495,7 @@ IDENTITY_VERBS = {
         "desc": "1-on-1 with one persona in their voice",
         "body": """Expects `<persona-slug> "<question>"`. No orchestration.
 
-Read `{REPO}/{DATA_DIR}/personas/<slug>.md`. Answer as that persona — voice_style register, signature_moves, mental_models. Cite `public_stances` inline with `evidence_url`. Acknowledge a `blind_spot` if the question hits one. Close with `— <Real Name>, <affiliation>, <cell>`.
+Read `{REPO}/{DATA_DIR}/personas/<slug>.md`. Answer as that persona — voice_style register, signature_moves, mental_models. Cite `public_stances` inline with `evidence_url`. Acknowledge a `blind_spot` if the question hits one. Close with the persona label for that person (the full sentence once in the answer). Do not sign as the real person.
 
 Stance validation (mitigation #6): every claim traces to the persona file or is labeled `[extrapolated]`.
 """,
@@ -691,6 +691,20 @@ def render_simple(short: str, cfg: dict, verb: dict, kind: str) -> str:
     )
 
 
+# Legal label + report footer. One file, both generators. Do not copy the sentences.
+_ATTRIBUTION_PATH = Path(__file__).resolve().parents[2] / "templates" / "attribution.md"
+
+
+def stamp_attribution(body: str) -> str:
+    """Insert templates/attribution.md before the ARGUMENTS slot."""
+    block = _ATTRIBUTION_PATH.read_text(encoding="utf-8").strip()
+    marker = "ARGUMENTS:"
+    idx = body.rfind(marker)
+    if idx == -1:
+        return body.rstrip() + "\n\n" + block + "\n"
+    return body[:idx].rstrip() + "\n\n" + block + "\n\n" + body[idx:]
+
+
 def files_for_team(short: str, cfg: dict) -> dict[str, str]:
     out: dict[str, str] = {}
     out[f"SI-{short}.md"] = dispatcher_body(short, cfg)
@@ -703,7 +717,7 @@ def files_for_team(short: str, cfg: dict) -> dict[str, str]:
         out[f"SI-{short}-{v['title']}.md"] = render_simple(short, cfg, v, "Roster")
     for v in MAINTENANCE_VERBS.values():
         out[f"SI-{short}-{v['title']}.md"] = render_simple(short, cfg, v, "Maintenance")
-    return out
+    return {name: stamp_attribution(body) for name, body in out.items()}
 
 
 def main() -> None:

@@ -67,6 +67,9 @@ jobs:
       - name: Validate /team evidence-gate integrity
         run: bash tests/check-evidence-gate.sh
 
+      - name: Validate uninstall removes the update-check cache
+        run: bash tests/check-cli-uninstall-cleanup.sh
+
       - name: Validate roster front-door frontmatter
         run: bash tests/check-roster-frontmatter.sh
 

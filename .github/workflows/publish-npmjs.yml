@@ -10,8 +10,8 @@ name: Publish to npmjs.com
 #   4. Trigger this workflow on a release or manually
 
 on:
-  release:
-    types: [published]
+  workflow_call:
+  # Release-please now calls this workflow when it creates a release, so a release trigger could publish the same version twice.
   workflow_dispatch:
 
 permissions:

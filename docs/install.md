@@ -229,6 +229,26 @@ bash install.sh --systems gsd,brain
 
 ---
 
+## Optional: semantic routing for Super Intelligence
+
+Super Intelligence picks which teams to seat with `systems/superintelligence/scripts/meta_select.py`. It embeds your prompt against each team's profile by calling an OpenAI-compatible embeddings endpoint on this machine:
+
+- URL: `http://127.0.0.1:1234/v1/embeddings` (LM Studio's default port)
+- Model name sent: `text-embedding-nomic-embed-text-v1.5`
+
+Both values are hard-coded in the script, so the server must answer on that port and accept that model name.
+
+Without the endpoint nothing breaks. The script falls back to keyword overlap, prints `meta_select WARN: keyword fallback active` on stderr, marks its output `"method": "keyword"` and `"degraded": true`, and never auto-delegates to a single team. Routing still works, but team selection is coarser.
+
+To use embeddings: load the nomic-embed-text-v1.5 model in LM Studio, start its local server, then check:
+
+```bash
+curl -s -m 3 http://127.0.0.1:1234/v1/models   # any JSON reply means the endpoint is up
+python3 systems/superintelligence/scripts/meta_select.py "should we ship an AI compliance product?"   # "method": "embed" when it is used
+```
+
+---
+
 ## Uninstall
 
 Symlink-based adapters (`claude-code`, `cursor`, `grok`, `vscode`):

@@ -174,6 +174,27 @@ and open **Chat: Configure Agent Skills** to see the skills.
 
 ---
 
+## Aider
+
+```bash
+cd path/to/your/project
+bash /path/to/coco/install.sh --adapter aider
+bash /path/to/coco/adapters/aider/install.sh --dry-run    # preview, writes nothing
+```
+
+Writes two files into the current directory and nothing under `~`:
+
+| File | Contents |
+|------|----------|
+| `./AGENTS.md` | Name and one-line description of each agent in `agents/`. With `install.sh` this includes the default bundles' agents (34 in all); running `adapters/aider/install.sh` directly lists the 10 core agents, plus a bundle's agents with `--systems gsd` |
+| `./.aider.conf.yml` | `auto-commits: true` and a `read:` list naming `AGENTS.md` and `.aider.conf.yml`, so Aider loads them as read-only context when started from this directory |
+
+Skills, commands and rules are not installed; the config only carries a comment pointing at the clone's `skills/` folder.
+
+Existing files are protected. A file that is still exactly what Coco last wrote (its first line carries a `coco-generated sha256=` checksum that matches the rest of the file) is overwritten in place. Anything else, such as your own `.aider.conf.yml` or an edited copy, is copied first to `<file>.coco-backup`; that first backup is never overwritten, so later backups get a timestamped name (`<file>.coco-backup-<YYYYMMDD-HHMMSS>`, then `-1`, `-2` if needed). Your settings are not merged into the new file: copy any you want back from the backup.
+
+---
+
 ## Codex / Generic (AGENTS.md)
 
 ```bash
@@ -331,6 +352,18 @@ for f in rules/*.md; do cmp -s "$f" ~/.continue/rules/"$(basename "$f")" && rm ~
 
 The `cmp` guard removes a copied rule only if it is still identical to the one in the clone, and the `find` touches only links that point into the clone. Use `$CONTINUE_HOME` in place of `~/.continue` if you set it. Empty `skills/`, `agents/` and `rules/` folders are left behind; remove them if you like.
 
+Aider (per project; the adapter writes into the project, not your home directory):
+
+```bash
+cd path/to/your/project
+for f in AGENTS.md .aider.conf.yml; do
+  head -n 1 "$f" 2>/dev/null | grep -q 'coco-generated sha256=' && rm "$f"
+done
+ls -a | grep 'coco-backup'      # backups from earlier installs; restore or delete by hand
+```
+
+The loop removes only files that still carry Coco's header, so a `.aider.conf.yml` you replaced is left alone. It checks the header, not the checksum: if you edited a generated file, copy your edits out first. The installer never deletes backups. To restore your own config, move the first backup back: `mv .aider.conf.yml.coco-backup .aider.conf.yml`.
+
 ---
 
 ## Conflicts
@@ -338,6 +371,6 @@ The `cmp` guard removes a copied rule only if it is still identical to the one i
 Existing target files are handled like this:
 
 - Symlink adapters — non-symlink files are skipped (won't overwrite)
-- File-generation adapters — existing `AGENTS.md` is overwritten
+- File-generation adapters — existing `AGENTS.md` is overwritten (the `aider` adapter backs up a file you edited first; see [Aider](#aider))
 
 Use `--dry-run` to preview before any destructive action.

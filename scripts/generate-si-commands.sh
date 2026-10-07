@@ -30,7 +30,7 @@ while [[ $# -gt 0 ]]; do
     --target) shift; TARGET="${1:-}" ;;
     --dry-run) DRY_RUN=1 ;;
     --quiet) QUIET=1 ;;
-    --help|-h) grep '^#' "$0" | sed 's/^# \?//'; exit 0 ;;
+    --help|-h) bash "$REPO_ROOT/scripts/print-usage.sh" "$0"; exit 0 ;;
     *) echo "generate-si-commands: unknown flag: $1" >&2; exit 1 ;;
   esac
   shift

@@ -37,7 +37,7 @@ SYSTEMS=""
 CORE_ONLY=""
 
 show_help() {
-  grep '^#' "$0" | sed 's/^# \?//'
+  bash "$REPO_ROOT/scripts/print-usage.sh" "${BASH_SOURCE[0]}"
 }
 
 list_adapters() {

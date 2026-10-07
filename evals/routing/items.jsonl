@@ -1,0 +1,300 @@
+{"id": "r001", "prompt": "How can we improve ai metrics this quarter?", "label": "ai", "kind": "positive", "split": "train", "draft": true}
+{"id": "r002", "prompt": "What are the latest trends in ai?", "label": "ai", "kind": "positive", "split": "train", "draft": true}
+{"id": "r003", "prompt": "Can you review the new ai architecture?", "label": "ai", "kind": "positive", "split": "train", "draft": true}
+{"id": "r004", "prompt": "Who is the lead for ai?", "label": "ai", "kind": "positive", "split": "train", "draft": true}
+{"id": "r005", "prompt": "Where is the ai roadmap?", "label": "ai", "kind": "positive", "split": "train", "draft": true}
+{"id": "r006", "prompt": "Please provide the ai Q3 summary.", "label": "ai", "kind": "positive", "split": "train", "draft": true}
+{"id": "r007", "prompt": "How do we integrate ai with the core platform?", "label": "ai", "kind": "positive", "split": "train", "draft": true}
+{"id": "r008", "prompt": "What are the compliance requirements for ai?", "label": "ai", "kind": "positive", "split": "train", "draft": true}
+{"id": "r009", "prompt": "Is there a ai API endpoint available?", "label": "ai", "kind": "positive", "split": "train", "draft": true}
+{"id": "r010", "prompt": "Who should I contact for ai access?", "label": "ai", "kind": "positive", "split": "train", "draft": true}
+{"id": "r011", "prompt": "Review this pull request for ai.", "label": "ai", "kind": "positive", "split": "train", "draft": true}
+{"id": "r012", "prompt": "What is the budget for ai next year?", "label": "ai", "kind": "positive", "split": "train", "draft": true}
+{"id": "r013", "prompt": "Are there any blockers for ai currently?", "label": "ai", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r014", "prompt": "Please analyze the competitor landscape for ai.", "label": "ai", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r015", "prompt": "What tools does the ai use?", "label": "ai", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r016", "prompt": "Schedule a sync for the ai guild.", "label": "ai", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r017", "prompt": "How do we onboard new hires to ai?", "label": "ai", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r018", "prompt": "What are the SLA targets for ai?", "label": "ai", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r019", "prompt": "Can you help me debug this ai issue?", "label": "ai", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r020", "prompt": "What's the best practice for ai deployments?", "label": "ai", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r021", "prompt": "How can we improve climate energy metrics this quarter?", "label": "climate-energy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r022", "prompt": "What are the latest trends in climate energy?", "label": "climate-energy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r023", "prompt": "Can you review the new climate energy architecture?", "label": "climate-energy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r024", "prompt": "Who is the lead for climate energy?", "label": "climate-energy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r025", "prompt": "Where is the climate energy roadmap?", "label": "climate-energy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r026", "prompt": "Please provide the climate energy Q3 summary.", "label": "climate-energy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r027", "prompt": "How do we integrate climate energy with the core platform?", "label": "climate-energy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r028", "prompt": "What are the compliance requirements for climate energy?", "label": "climate-energy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r029", "prompt": "Is there a climate energy API endpoint available?", "label": "climate-energy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r030", "prompt": "Who should I contact for climate energy access?", "label": "climate-energy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r031", "prompt": "Review this pull request for climate energy.", "label": "climate-energy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r032", "prompt": "What is the budget for climate energy next year?", "label": "climate-energy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r033", "prompt": "Are there any blockers for climate energy currently?", "label": "climate-energy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r034", "prompt": "Please analyze the competitor landscape for climate energy.", "label": "climate-energy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r035", "prompt": "What tools does the climate energy use?", "label": "climate-energy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r036", "prompt": "Schedule a sync for the climate energy guild.", "label": "climate-energy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r037", "prompt": "How do we onboard new hires to climate energy?", "label": "climate-energy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r038", "prompt": "What are the SLA targets for climate energy?", "label": "climate-energy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r039", "prompt": "Can you help me debug this climate energy issue?", "label": "climate-energy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r040", "prompt": "What's the best practice for climate energy deployments?", "label": "climate-energy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r041", "prompt": "How can we improve data analytics metrics this quarter?", "label": "data-analytics", "kind": "positive", "split": "train", "draft": true}
+{"id": "r042", "prompt": "What are the latest trends in data analytics?", "label": "data-analytics", "kind": "positive", "split": "train", "draft": true}
+{"id": "r043", "prompt": "Can you review the new data analytics architecture?", "label": "data-analytics", "kind": "positive", "split": "train", "draft": true}
+{"id": "r044", "prompt": "Who is the lead for data analytics?", "label": "data-analytics", "kind": "positive", "split": "train", "draft": true}
+{"id": "r045", "prompt": "Where is the data analytics roadmap?", "label": "data-analytics", "kind": "positive", "split": "train", "draft": true}
+{"id": "r046", "prompt": "Please provide the data analytics Q3 summary.", "label": "data-analytics", "kind": "positive", "split": "train", "draft": true}
+{"id": "r047", "prompt": "How do we integrate data analytics with the core platform?", "label": "data-analytics", "kind": "positive", "split": "train", "draft": true}
+{"id": "r048", "prompt": "What are the compliance requirements for data analytics?", "label": "data-analytics", "kind": "positive", "split": "train", "draft": true}
+{"id": "r049", "prompt": "Is there a data analytics API endpoint available?", "label": "data-analytics", "kind": "positive", "split": "train", "draft": true}
+{"id": "r050", "prompt": "Who should I contact for data analytics access?", "label": "data-analytics", "kind": "positive", "split": "train", "draft": true}
+{"id": "r051", "prompt": "Review this pull request for data analytics.", "label": "data-analytics", "kind": "positive", "split": "train", "draft": true}
+{"id": "r052", "prompt": "What is the budget for data analytics next year?", "label": "data-analytics", "kind": "positive", "split": "train", "draft": true}
+{"id": "r053", "prompt": "Are there any blockers for data analytics currently?", "label": "data-analytics", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r054", "prompt": "Please analyze the competitor landscape for data analytics.", "label": "data-analytics", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r055", "prompt": "What tools does the data analytics use?", "label": "data-analytics", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r056", "prompt": "Schedule a sync for the data analytics guild.", "label": "data-analytics", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r057", "prompt": "How do we onboard new hires to data analytics?", "label": "data-analytics", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r058", "prompt": "What are the SLA targets for data analytics?", "label": "data-analytics", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r059", "prompt": "Can you help me debug this data analytics issue?", "label": "data-analytics", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r060", "prompt": "What's the best practice for data analytics deployments?", "label": "data-analytics", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r061", "prompt": "How can we improve education edtech metrics this quarter?", "label": "education-edtech", "kind": "positive", "split": "train", "draft": true}
+{"id": "r062", "prompt": "What are the latest trends in education edtech?", "label": "education-edtech", "kind": "positive", "split": "train", "draft": true}
+{"id": "r063", "prompt": "Can you review the new education edtech architecture?", "label": "education-edtech", "kind": "positive", "split": "train", "draft": true}
+{"id": "r064", "prompt": "Who is the lead for education edtech?", "label": "education-edtech", "kind": "positive", "split": "train", "draft": true}
+{"id": "r065", "prompt": "Where is the education edtech roadmap?", "label": "education-edtech", "kind": "positive", "split": "train", "draft": true}
+{"id": "r066", "prompt": "Please provide the education edtech Q3 summary.", "label": "education-edtech", "kind": "positive", "split": "train", "draft": true}
+{"id": "r067", "prompt": "How do we integrate education edtech with the core platform?", "label": "education-edtech", "kind": "positive", "split": "train", "draft": true}
+{"id": "r068", "prompt": "What are the compliance requirements for education edtech?", "label": "education-edtech", "kind": "positive", "split": "train", "draft": true}
+{"id": "r069", "prompt": "Is there a education edtech API endpoint available?", "label": "education-edtech", "kind": "positive", "split": "train", "draft": true}
+{"id": "r070", "prompt": "Who should I contact for education edtech access?", "label": "education-edtech", "kind": "positive", "split": "train", "draft": true}
+{"id": "r071", "prompt": "Review this pull request for education edtech.", "label": "education-edtech", "kind": "positive", "split": "train", "draft": true}
+{"id": "r072", "prompt": "What is the budget for education edtech next year?", "label": "education-edtech", "kind": "positive", "split": "train", "draft": true}
+{"id": "r073", "prompt": "Are there any blockers for education edtech currently?", "label": "education-edtech", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r074", "prompt": "Please analyze the competitor landscape for education edtech.", "label": "education-edtech", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r075", "prompt": "What tools does the education edtech use?", "label": "education-edtech", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r076", "prompt": "Schedule a sync for the education edtech guild.", "label": "education-edtech", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r077", "prompt": "How do we onboard new hires to education edtech?", "label": "education-edtech", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r078", "prompt": "What are the SLA targets for education edtech?", "label": "education-edtech", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r079", "prompt": "Can you help me debug this education edtech issue?", "label": "education-edtech", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r080", "prompt": "What's the best practice for education edtech deployments?", "label": "education-edtech", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r081", "prompt": "How can we improve engineering metrics this quarter?", "label": "engineering", "kind": "positive", "split": "train", "draft": true}
+{"id": "r082", "prompt": "What are the latest trends in engineering?", "label": "engineering", "kind": "positive", "split": "train", "draft": true}
+{"id": "r083", "prompt": "Can you review the new engineering architecture?", "label": "engineering", "kind": "positive", "split": "train", "draft": true}
+{"id": "r084", "prompt": "Who is the lead for engineering?", "label": "engineering", "kind": "positive", "split": "train", "draft": true}
+{"id": "r085", "prompt": "Where is the engineering roadmap?", "label": "engineering", "kind": "positive", "split": "train", "draft": true}
+{"id": "r086", "prompt": "Please provide the engineering Q3 summary.", "label": "engineering", "kind": "positive", "split": "train", "draft": true}
+{"id": "r087", "prompt": "How do we integrate engineering with the core platform?", "label": "engineering", "kind": "positive", "split": "train", "draft": true}
+{"id": "r088", "prompt": "What are the compliance requirements for engineering?", "label": "engineering", "kind": "positive", "split": "train", "draft": true}
+{"id": "r089", "prompt": "Is there a engineering API endpoint available?", "label": "engineering", "kind": "positive", "split": "train", "draft": true}
+{"id": "r090", "prompt": "Who should I contact for engineering access?", "label": "engineering", "kind": "positive", "split": "train", "draft": true}
+{"id": "r091", "prompt": "Review this pull request for engineering.", "label": "engineering", "kind": "positive", "split": "train", "draft": true}
+{"id": "r092", "prompt": "What is the budget for engineering next year?", "label": "engineering", "kind": "positive", "split": "train", "draft": true}
+{"id": "r093", "prompt": "Are there any blockers for engineering currently?", "label": "engineering", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r094", "prompt": "Please analyze the competitor landscape for engineering.", "label": "engineering", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r095", "prompt": "What tools does the engineering use?", "label": "engineering", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r096", "prompt": "Schedule a sync for the engineering guild.", "label": "engineering", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r097", "prompt": "How do we onboard new hires to engineering?", "label": "engineering", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r098", "prompt": "What are the SLA targets for engineering?", "label": "engineering", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r099", "prompt": "Can you help me debug this engineering issue?", "label": "engineering", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r100", "prompt": "What's the best practice for engineering deployments?", "label": "engineering", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r101", "prompt": "How can we improve finance metrics this quarter?", "label": "finance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r102", "prompt": "What are the latest trends in finance?", "label": "finance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r103", "prompt": "Can you review the new finance architecture?", "label": "finance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r104", "prompt": "Who is the lead for finance?", "label": "finance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r105", "prompt": "Where is the finance roadmap?", "label": "finance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r106", "prompt": "Please provide the finance Q3 summary.", "label": "finance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r107", "prompt": "How do we integrate finance with the core platform?", "label": "finance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r108", "prompt": "What are the compliance requirements for finance?", "label": "finance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r109", "prompt": "Is there a finance API endpoint available?", "label": "finance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r110", "prompt": "Who should I contact for finance access?", "label": "finance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r111", "prompt": "Review this pull request for finance.", "label": "finance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r112", "prompt": "What is the budget for finance next year?", "label": "finance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r113", "prompt": "Are there any blockers for finance currently?", "label": "finance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r114", "prompt": "Please analyze the competitor landscape for finance.", "label": "finance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r115", "prompt": "What tools does the finance use?", "label": "finance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r116", "prompt": "Schedule a sync for the finance guild.", "label": "finance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r117", "prompt": "How do we onboard new hires to finance?", "label": "finance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r118", "prompt": "What are the SLA targets for finance?", "label": "finance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r119", "prompt": "Can you help me debug this finance issue?", "label": "finance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r120", "prompt": "What's the best practice for finance deployments?", "label": "finance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r121", "prompt": "How can we improve gtm metrics this quarter?", "label": "gtm", "kind": "positive", "split": "train", "draft": true}
+{"id": "r122", "prompt": "What are the latest trends in gtm?", "label": "gtm", "kind": "positive", "split": "train", "draft": true}
+{"id": "r123", "prompt": "Can you review the new gtm architecture?", "label": "gtm", "kind": "positive", "split": "train", "draft": true}
+{"id": "r124", "prompt": "Who is the lead for gtm?", "label": "gtm", "kind": "positive", "split": "train", "draft": true}
+{"id": "r125", "prompt": "Where is the gtm roadmap?", "label": "gtm", "kind": "positive", "split": "train", "draft": true}
+{"id": "r126", "prompt": "Please provide the gtm Q3 summary.", "label": "gtm", "kind": "positive", "split": "train", "draft": true}
+{"id": "r127", "prompt": "How do we integrate gtm with the core platform?", "label": "gtm", "kind": "positive", "split": "train", "draft": true}
+{"id": "r128", "prompt": "What are the compliance requirements for gtm?", "label": "gtm", "kind": "positive", "split": "train", "draft": true}
+{"id": "r129", "prompt": "Is there a gtm API endpoint available?", "label": "gtm", "kind": "positive", "split": "train", "draft": true}
+{"id": "r130", "prompt": "Who should I contact for gtm access?", "label": "gtm", "kind": "positive", "split": "train", "draft": true}
+{"id": "r131", "prompt": "Review this pull request for gtm.", "label": "gtm", "kind": "positive", "split": "train", "draft": true}
+{"id": "r132", "prompt": "What is the budget for gtm next year?", "label": "gtm", "kind": "positive", "split": "train", "draft": true}
+{"id": "r133", "prompt": "Are there any blockers for gtm currently?", "label": "gtm", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r134", "prompt": "Please analyze the competitor landscape for gtm.", "label": "gtm", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r135", "prompt": "What tools does the gtm use?", "label": "gtm", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r136", "prompt": "Schedule a sync for the gtm guild.", "label": "gtm", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r137", "prompt": "How do we onboard new hires to gtm?", "label": "gtm", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r138", "prompt": "What are the SLA targets for gtm?", "label": "gtm", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r139", "prompt": "Can you help me debug this gtm issue?", "label": "gtm", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r140", "prompt": "What's the best practice for gtm deployments?", "label": "gtm", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r141", "prompt": "How can we improve healthcare life sciences metrics this quarter?", "label": "healthcare-life-sciences", "kind": "positive", "split": "train", "draft": true}
+{"id": "r142", "prompt": "What are the latest trends in healthcare life sciences?", "label": "healthcare-life-sciences", "kind": "positive", "split": "train", "draft": true}
+{"id": "r143", "prompt": "Can you review the new healthcare life sciences architecture?", "label": "healthcare-life-sciences", "kind": "positive", "split": "train", "draft": true}
+{"id": "r144", "prompt": "Who is the lead for healthcare life sciences?", "label": "healthcare-life-sciences", "kind": "positive", "split": "train", "draft": true}
+{"id": "r145", "prompt": "Where is the healthcare life sciences roadmap?", "label": "healthcare-life-sciences", "kind": "positive", "split": "train", "draft": true}
+{"id": "r146", "prompt": "Please provide the healthcare life sciences Q3 summary.", "label": "healthcare-life-sciences", "kind": "positive", "split": "train", "draft": true}
+{"id": "r147", "prompt": "How do we integrate healthcare life sciences with the core platform?", "label": "healthcare-life-sciences", "kind": "positive", "split": "train", "draft": true}
+{"id": "r148", "prompt": "What are the compliance requirements for healthcare life sciences?", "label": "healthcare-life-sciences", "kind": "positive", "split": "train", "draft": true}
+{"id": "r149", "prompt": "Is there a healthcare life sciences API endpoint available?", "label": "healthcare-life-sciences", "kind": "positive", "split": "train", "draft": true}
+{"id": "r150", "prompt": "Who should I contact for healthcare life sciences access?", "label": "healthcare-life-sciences", "kind": "positive", "split": "train", "draft": true}
+{"id": "r151", "prompt": "Review this pull request for healthcare life sciences.", "label": "healthcare-life-sciences", "kind": "positive", "split": "train", "draft": true}
+{"id": "r152", "prompt": "What is the budget for healthcare life sciences next year?", "label": "healthcare-life-sciences", "kind": "positive", "split": "train", "draft": true}
+{"id": "r153", "prompt": "Are there any blockers for healthcare life sciences currently?", "label": "healthcare-life-sciences", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r154", "prompt": "Please analyze the competitor landscape for healthcare life sciences.", "label": "healthcare-life-sciences", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r155", "prompt": "What tools does the healthcare life sciences use?", "label": "healthcare-life-sciences", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r156", "prompt": "Schedule a sync for the healthcare life sciences guild.", "label": "healthcare-life-sciences", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r157", "prompt": "How do we onboard new hires to healthcare life sciences?", "label": "healthcare-life-sciences", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r158", "prompt": "What are the SLA targets for healthcare life sciences?", "label": "healthcare-life-sciences", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r159", "prompt": "Can you help me debug this healthcare life sciences issue?", "label": "healthcare-life-sciences", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r160", "prompt": "What's the best practice for healthcare life sciences deployments?", "label": "healthcare-life-sciences", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r161", "prompt": "How can we improve legal ip metrics this quarter?", "label": "legal-ip", "kind": "positive", "split": "train", "draft": true}
+{"id": "r162", "prompt": "What are the latest trends in legal ip?", "label": "legal-ip", "kind": "positive", "split": "train", "draft": true}
+{"id": "r163", "prompt": "Can you review the new legal ip architecture?", "label": "legal-ip", "kind": "positive", "split": "train", "draft": true}
+{"id": "r164", "prompt": "Who is the lead for legal ip?", "label": "legal-ip", "kind": "positive", "split": "train", "draft": true}
+{"id": "r165", "prompt": "Where is the legal ip roadmap?", "label": "legal-ip", "kind": "positive", "split": "train", "draft": true}
+{"id": "r166", "prompt": "Please provide the legal ip Q3 summary.", "label": "legal-ip", "kind": "positive", "split": "train", "draft": true}
+{"id": "r167", "prompt": "How do we integrate legal ip with the core platform?", "label": "legal-ip", "kind": "positive", "split": "train", "draft": true}
+{"id": "r168", "prompt": "What are the compliance requirements for legal ip?", "label": "legal-ip", "kind": "positive", "split": "train", "draft": true}
+{"id": "r169", "prompt": "Is there a legal ip API endpoint available?", "label": "legal-ip", "kind": "positive", "split": "train", "draft": true}
+{"id": "r170", "prompt": "Who should I contact for legal ip access?", "label": "legal-ip", "kind": "positive", "split": "train", "draft": true}
+{"id": "r171", "prompt": "Review this pull request for legal ip.", "label": "legal-ip", "kind": "positive", "split": "train", "draft": true}
+{"id": "r172", "prompt": "What is the budget for legal ip next year?", "label": "legal-ip", "kind": "positive", "split": "train", "draft": true}
+{"id": "r173", "prompt": "Are there any blockers for legal ip currently?", "label": "legal-ip", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r174", "prompt": "Please analyze the competitor landscape for legal ip.", "label": "legal-ip", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r175", "prompt": "What tools does the legal ip use?", "label": "legal-ip", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r176", "prompt": "Schedule a sync for the legal ip guild.", "label": "legal-ip", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r177", "prompt": "How do we onboard new hires to legal ip?", "label": "legal-ip", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r178", "prompt": "What are the SLA targets for legal ip?", "label": "legal-ip", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r179", "prompt": "Can you help me debug this legal ip issue?", "label": "legal-ip", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r180", "prompt": "What's the best practice for legal ip deployments?", "label": "legal-ip", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r181", "prompt": "How can we improve product design metrics this quarter?", "label": "product-design", "kind": "positive", "split": "train", "draft": true}
+{"id": "r182", "prompt": "What are the latest trends in product design?", "label": "product-design", "kind": "positive", "split": "train", "draft": true}
+{"id": "r183", "prompt": "Can you review the new product design architecture?", "label": "product-design", "kind": "positive", "split": "train", "draft": true}
+{"id": "r184", "prompt": "Who is the lead for product design?", "label": "product-design", "kind": "positive", "split": "train", "draft": true}
+{"id": "r185", "prompt": "Where is the product design roadmap?", "label": "product-design", "kind": "positive", "split": "train", "draft": true}
+{"id": "r186", "prompt": "Please provide the product design Q3 summary.", "label": "product-design", "kind": "positive", "split": "train", "draft": true}
+{"id": "r187", "prompt": "How do we integrate product design with the core platform?", "label": "product-design", "kind": "positive", "split": "train", "draft": true}
+{"id": "r188", "prompt": "What are the compliance requirements for product design?", "label": "product-design", "kind": "positive", "split": "train", "draft": true}
+{"id": "r189", "prompt": "Is there a product design API endpoint available?", "label": "product-design", "kind": "positive", "split": "train", "draft": true}
+{"id": "r190", "prompt": "Who should I contact for product design access?", "label": "product-design", "kind": "positive", "split": "train", "draft": true}
+{"id": "r191", "prompt": "Review this pull request for product design.", "label": "product-design", "kind": "positive", "split": "train", "draft": true}
+{"id": "r192", "prompt": "What is the budget for product design next year?", "label": "product-design", "kind": "positive", "split": "train", "draft": true}
+{"id": "r193", "prompt": "Are there any blockers for product design currently?", "label": "product-design", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r194", "prompt": "Please analyze the competitor landscape for product design.", "label": "product-design", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r195", "prompt": "What tools does the product design use?", "label": "product-design", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r196", "prompt": "Schedule a sync for the product design guild.", "label": "product-design", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r197", "prompt": "How do we onboard new hires to product design?", "label": "product-design", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r198", "prompt": "What are the SLA targets for product design?", "label": "product-design", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r199", "prompt": "Can you help me debug this product design issue?", "label": "product-design", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r200", "prompt": "What's the best practice for product design deployments?", "label": "product-design", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r201", "prompt": "How can we improve risk compliance metrics this quarter?", "label": "risk-compliance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r202", "prompt": "What are the latest trends in risk compliance?", "label": "risk-compliance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r203", "prompt": "Can you review the new risk compliance architecture?", "label": "risk-compliance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r204", "prompt": "Who is the lead for risk compliance?", "label": "risk-compliance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r205", "prompt": "Where is the risk compliance roadmap?", "label": "risk-compliance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r206", "prompt": "Please provide the risk compliance Q3 summary.", "label": "risk-compliance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r207", "prompt": "How do we integrate risk compliance with the core platform?", "label": "risk-compliance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r208", "prompt": "What are the compliance requirements for risk compliance?", "label": "risk-compliance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r209", "prompt": "Is there a risk compliance API endpoint available?", "label": "risk-compliance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r210", "prompt": "Who should I contact for risk compliance access?", "label": "risk-compliance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r211", "prompt": "Review this pull request for risk compliance.", "label": "risk-compliance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r212", "prompt": "What is the budget for risk compliance next year?", "label": "risk-compliance", "kind": "positive", "split": "train", "draft": true}
+{"id": "r213", "prompt": "Are there any blockers for risk compliance currently?", "label": "risk-compliance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r214", "prompt": "Please analyze the competitor landscape for risk compliance.", "label": "risk-compliance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r215", "prompt": "What tools does the risk compliance use?", "label": "risk-compliance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r216", "prompt": "Schedule a sync for the risk compliance guild.", "label": "risk-compliance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r217", "prompt": "How do we onboard new hires to risk compliance?", "label": "risk-compliance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r218", "prompt": "What are the SLA targets for risk compliance?", "label": "risk-compliance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r219", "prompt": "Can you help me debug this risk compliance issue?", "label": "risk-compliance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r220", "prompt": "What's the best practice for risk compliance deployments?", "label": "risk-compliance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r221", "prompt": "How can we improve strategy metrics this quarter?", "label": "strategy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r222", "prompt": "What are the latest trends in strategy?", "label": "strategy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r223", "prompt": "Can you review the new strategy architecture?", "label": "strategy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r224", "prompt": "Who is the lead for strategy?", "label": "strategy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r225", "prompt": "Where is the strategy roadmap?", "label": "strategy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r226", "prompt": "Please provide the strategy Q3 summary.", "label": "strategy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r227", "prompt": "How do we integrate strategy with the core platform?", "label": "strategy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r228", "prompt": "What are the compliance requirements for strategy?", "label": "strategy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r229", "prompt": "Is there a strategy API endpoint available?", "label": "strategy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r230", "prompt": "Who should I contact for strategy access?", "label": "strategy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r231", "prompt": "Review this pull request for strategy.", "label": "strategy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r232", "prompt": "What is the budget for strategy next year?", "label": "strategy", "kind": "positive", "split": "train", "draft": true}
+{"id": "r233", "prompt": "Are there any blockers for strategy currently?", "label": "strategy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r234", "prompt": "Please analyze the competitor landscape for strategy.", "label": "strategy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r235", "prompt": "What tools does the strategy use?", "label": "strategy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r236", "prompt": "Schedule a sync for the strategy guild.", "label": "strategy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r237", "prompt": "How do we onboard new hires to strategy?", "label": "strategy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r238", "prompt": "What are the SLA targets for strategy?", "label": "strategy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r239", "prompt": "Can you help me debug this strategy issue?", "label": "strategy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r240", "prompt": "What's the best practice for strategy deployments?", "label": "strategy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r241", "prompt": "How can we improve trading metrics this quarter?", "label": "trading", "kind": "positive", "split": "train", "draft": true}
+{"id": "r242", "prompt": "What are the latest trends in trading?", "label": "trading", "kind": "positive", "split": "train", "draft": true}
+{"id": "r243", "prompt": "Can you review the new trading architecture?", "label": "trading", "kind": "positive", "split": "train", "draft": true}
+{"id": "r244", "prompt": "Who is the lead for trading?", "label": "trading", "kind": "positive", "split": "train", "draft": true}
+{"id": "r245", "prompt": "Where is the trading roadmap?", "label": "trading", "kind": "positive", "split": "train", "draft": true}
+{"id": "r246", "prompt": "Please provide the trading Q3 summary.", "label": "trading", "kind": "positive", "split": "train", "draft": true}
+{"id": "r247", "prompt": "How do we integrate trading with the core platform?", "label": "trading", "kind": "positive", "split": "train", "draft": true}
+{"id": "r248", "prompt": "What are the compliance requirements for trading?", "label": "trading", "kind": "positive", "split": "train", "draft": true}
+{"id": "r249", "prompt": "Is there a trading API endpoint available?", "label": "trading", "kind": "positive", "split": "train", "draft": true}
+{"id": "r250", "prompt": "Who should I contact for trading access?", "label": "trading", "kind": "positive", "split": "train", "draft": true}
+{"id": "r251", "prompt": "Review this pull request for trading.", "label": "trading", "kind": "positive", "split": "train", "draft": true}
+{"id": "r252", "prompt": "What is the budget for trading next year?", "label": "trading", "kind": "positive", "split": "train", "draft": true}
+{"id": "r253", "prompt": "Are there any blockers for trading currently?", "label": "trading", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r254", "prompt": "Please analyze the competitor landscape for trading.", "label": "trading", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r255", "prompt": "What tools does the trading use?", "label": "trading", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r256", "prompt": "Schedule a sync for the trading guild.", "label": "trading", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r257", "prompt": "How do we onboard new hires to trading?", "label": "trading", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r258", "prompt": "What are the SLA targets for trading?", "label": "trading", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r259", "prompt": "Can you help me debug this trading issue?", "label": "trading", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r260", "prompt": "What's the best practice for trading deployments?", "label": "trading", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "r261", "prompt": "We need an AI model for trading algorithms", "label": "ai", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r262", "prompt": "What's the legal implication of our new AI feature?", "label": "legal-ip", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r263", "prompt": "How to design the product UI for our new data analytics dashboard?", "label": "product-design", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r264", "prompt": "Are there engineering best practices for the finance team?", "label": "engineering", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r265", "prompt": "What's the GTM strategy for the new healthcare product?", "label": "gtm", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r266", "prompt": "Can we use EdTech platforms for our engineering training?", "label": "education-edtech", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r267", "prompt": "How do we manage risk compliance when trading crypto?", "label": "risk-compliance", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r268", "prompt": "What's the climate energy footprint of our AI datacenters?", "label": "climate-energy", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r269", "prompt": "Can we get a data analytics report on our GTM performance?", "label": "data-analytics", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r270", "prompt": "Are there IP patents for our new trading algorithms?", "label": "legal-ip", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r271", "prompt": "Design a new logo for the strategy group", "label": "product-design", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r272", "prompt": "Who leads the engineering team for the healthcare life sciences division?", "label": "engineering", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r273", "prompt": "What is the AI strategy for the next decade?", "label": "strategy", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r274", "prompt": "Can we do an edtech seminar on legal IP?", "label": "education-edtech", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r275", "prompt": "Is there a new finance regulation affecting climate energy?", "label": "finance", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r276", "prompt": "How does the strategy team use data analytics?", "label": "strategy", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r277", "prompt": "What are the product design principles for our risk compliance tool?", "label": "product-design", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r278", "prompt": "Let's review the healthcare life sciences GTM plan", "label": "gtm", "kind": "near-miss", "split": "train", "draft": true}
+{"id": "r279", "prompt": "We need to optimize trading performance in engineering", "label": "engineering", "kind": "near-miss", "split": "heldout", "draft": true}
+{"id": "r280", "prompt": "Are there any legal constraints on our new climate energy project?", "label": "legal-ip", "kind": "near-miss", "split": "heldout", "draft": true}
+{"id": "r281", "prompt": "Can we train an AI to write product design specs?", "label": "ai", "kind": "near-miss", "split": "heldout", "draft": true}
+{"id": "r282", "prompt": "What's the finance projection for the new edtech initiative?", "label": "finance", "kind": "near-miss", "split": "heldout", "draft": true}
+{"id": "r283", "prompt": "Do we need data analytics to improve our trading models?", "label": "data-analytics", "kind": "near-miss", "split": "heldout", "draft": true}
+{"id": "r284", "prompt": "How do we ensure risk compliance in our new AI platform?", "label": "risk-compliance", "kind": "near-miss", "split": "heldout", "draft": true}
+{"id": "r285", "prompt": "What's the GTM approach for the new legal IP software?", "label": "gtm", "kind": "near-miss", "split": "heldout", "draft": true}
+{"id": "r286", "prompt": "Can the strategy team help with the healthcare life sciences roadmap?", "label": "strategy", "kind": "near-miss", "split": "heldout", "draft": true}
+{"id": "r287", "prompt": "What's the engineering challenge with climate energy data?", "label": "engineering", "kind": "near-miss", "split": "heldout", "draft": true}
+{"id": "r288", "prompt": "Are there any edtech courses for learning trading?", "label": "education-edtech", "kind": "near-miss", "split": "heldout", "draft": true}
+{"id": "r289", "prompt": "How to design the user experience for our finance app?", "label": "product-design", "kind": "near-miss", "split": "heldout", "draft": true}
+{"id": "r290", "prompt": "What's the legal IP implication of open sourcing our data analytics tool?", "label": "legal-ip", "kind": "near-miss", "split": "heldout", "draft": true}
+{"id": "r291", "prompt": "Hello, how are you today?", "label": "none", "kind": "none", "split": "train", "draft": true}
+{"id": "r292", "prompt": "What's the weather like in New York?", "label": "none", "kind": "none", "split": "train", "draft": true}
+{"id": "r293", "prompt": "Can you tell me a joke?", "label": "none", "kind": "none", "split": "train", "draft": true}
+{"id": "r294", "prompt": "I need a good recipe for chocolate cake.", "label": "none", "kind": "none", "split": "train", "draft": true}
+{"id": "r295", "prompt": "What are the best movies of 2023?", "label": "none", "kind": "none", "split": "train", "draft": true}
+{"id": "r296", "prompt": "How do I fix a flat tire on my bicycle?", "label": "none", "kind": "none", "split": "train", "draft": true}
+{"id": "r297", "prompt": "What's the capital of France?", "label": "none", "kind": "none", "split": "heldout", "draft": true}
+{"id": "r298", "prompt": "Who won the Super Bowl last year?", "label": "none", "kind": "none", "split": "heldout", "draft": true}
+{"id": "r299", "prompt": "Can you recommend a good book?", "label": "none", "kind": "none", "split": "heldout", "draft": true}
+{"id": "r300", "prompt": "What is the meaning of life?", "label": "none", "kind": "none", "split": "heldout", "draft": true}

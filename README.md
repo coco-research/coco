@@ -1,6 +1,6 @@
 # CoCo Super Intelligence
 
-Summon an advisory board of 495 world-class minds inside the AI coding session you already use, then **227 skills**[^installed], **386 commands**, and disk-persistent state that ship the decision.
+495 personas across 13 departments, **227 skills**[^installed] and **386 commands** in the full catalog (coco main, 2026-10-05).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/readme/hero-dark-mode.png">
@@ -17,7 +17,7 @@ Open-core: the core is [MIT](LICENSE), and Super Intelligence is [proprietary](s
 
 ## Why it exists
 
-A hard call in a coding session usually gets one model's opinion, with no name on it and no record of who disagreed. CoCo seats a cross-team board of 495 named experts, each answering from cited public stances, and returns one pick plus the dissent. The same install carries the skills and commands that do the work after the verdict, and writes phase state to disk so a cleared chat does not erase the plan. It is not a new model and not a new harness. It installs into the one you already run.
+A hard call in a coding session usually gets one model's opinion, with no name on it and no record of who disagreed. CoCo seats a cross-team board of 495 personas, each modeled on the public writing of a named expert, answering from cited public stances, and returns one pick plus the dissent. They are not those people's views or endorsement. The same install carries the skills and commands that do the work after the verdict, and writes phase state to disk so a cleared chat does not erase the plan. It is not a new model and not a new harness. It installs into the one you already run.
 
 ## See it
 
@@ -26,15 +26,19 @@ A hard call in a coding session usually gets one model's opinion, with no name o
   <img src="docs/readme/si-decide-light.png" width="100%" alt="Terminal capture of /SI-Decide: Should a 10-person startup move its public REST API to GraphQL this quarter? Sixteen personas, shown as role archetypes from five departments, give positions, react in rounds, and return a conditional no with two named dissenters.">
 </picture>
 
-*Personas are simulated from public writing and are not the views of any real person. See the [persona disclaimer](systems/superintelligence/DISCLAIMER.md).*
+*Personas are modeled on the public writing of named experts and are not those people's views or endorsement. See the [persona disclaimer](systems/superintelligence/DISCLAIMER.md). To request removal or correction of a persona, see [docs/personas/TAKEDOWN.md](docs/personas/TAKEDOWN.md).*
 
 An illustration built from a real `/SI-Decide` run (Claude Sonnet 5.5, 30 September 2026, US$0.41). Persona names are replaced with role archetypes and the output is trimmed for length; no other words are changed. The full output, with the same replacements, is in [`docs/readme/terminal/si-decide-full.md`](docs/readme/terminal/si-decide-full.md). Note what it admits: the embedding router was offline, so it fell back to keywords, and stances applied beyond their source are marked *extrapolated*.
+
+<img src="docs/assets/dogfood-si.gif" width="720" alt="Terminal recording of a local meta_select.py Stage-A run. The embedding endpoint was unavailable, so routing takes the keyword-fallback path.">
+
+*A real `meta_select.py` Stage-A run on this machine. The embedding router was offline (`Connection refused`), so this shows the keyword-fallback routing path (`method: keyword`, `degraded: true`), not embed cosine.*
 
 ## Quick start
 
 Prerequisites: git, bash, Node.js 14 or newer (for `npx`), and python3 (it generates the `/SI-*` commands).
 
-`npx cocosuperintelligence` installs the latest release. It clones the pinned release tag (currently `v1.5.0`, not floating `main`) into `./coco` of the current directory, then runs `install.sh`. Run it from your home folder, so the clone is `~/coco` and not a folder inside another project. On a fresh machine it took about 3 minutes, including the download.
+`npx cocosuperintelligence` installs the latest release. It clones the pinned release tag (currently `v1.5.0`, not floating `main`) into `./coco` of the current directory, then runs `install.sh`. Run it from your home folder, so the clone is `~/coco` and not a folder inside another project. On a fresh machine it took about 3 minutes, including the download. <!-- x-release-please-version -->
 
 ```bash
 npx cocosuperintelligence
@@ -70,13 +74,15 @@ Adapter flags and bundle selection: [`docs/install.md`](docs/install.md).
   <img src="docs/readme/how-it-works-light.svg" width="100%" alt="From /SI-Decide through an orchestrator seating 16-32 personas to a decision, with a dashed named-dissent branch off the debate step">
 </picture>
 
-You type a question. The orchestrator scores 495 personas across 13 departments on domain fit, cell coverage, and productive conflict, then seats 16-32. Each seated persona answers from its cited public stances. `--debate` adds reaction rounds before the tally. The decision is one pick, the dissents are named, and a stance check flags anything that does not trace to a source.
+You type a question. The orchestrator scores 495 personas across 13 departments on domain fit, cell coverage, and productive conflict, then seats 16-32. Each seated persona is modeled on the public writing of a named expert, answers from cited public stances, and is not that person's views or endorsement. `--debate` adds reaction rounds before the tally. The decision is one pick, the dissents are named, and a stance check flags anything that does not trace to a source.
 
 How the router scores teams: [`systems/superintelligence/README.md`](systems/superintelligence/README.md). What each editor actually receives: [`adapters/INDEX.md`](adapters/INDEX.md).
 
 ## Status and roadmap
 
-Released: v1.5.0 on npm. Today `npx` installs v1.5.0. That tag already contains the 13 Super Intelligence team skill files, but its installer does not install them as front doors. That fix, and several other installer fixes, are on main. The measured 189 skills / 386 commands / 34 agents ([`docs/delivered-counts.json`](docs/delivered-counts.json)) apply to main.
+Released: v1.5.0 on npm. Today `npx` installs v1.5.0. That tag already contains the 13 Super Intelligence team skill files, but its installer does not install them as front doors. That fix, and several other installer fixes, are on main.
+
+The measured 189 skills / 386 commands / 34 agents ([`docs/delivered-counts.json`](docs/delivered-counts.json)) apply to main.
 
 Known gap: most GSD skills need the upstream GSD toolkit at `~/.claude/get-shit-done` (see [`systems/gsd/README.md`](systems/gsd/README.md)).
 
@@ -112,7 +118,7 @@ A contains-match on the folder name would also delete links into a path that mer
 
 ## The board
 
-Super Intelligence summons a panel inside the session you already have open. Every contribution is attributed to a named expert and grounded in a cited public source.
+Super Intelligence summons a panel inside the session you already have open. Every contribution is from a persona modeled on the public writing of a named expert and grounded in a cited public source. It is not that person's views or endorsement.
 
 ```bash
 /SI-Decide "Should we migrate our database to pgvector?"
@@ -192,7 +198,9 @@ Six bundles install by default. `--core-only` skips them. `--systems <list>` ins
 
 ## Technical specifications
 
-A default Claude Code install delivers **189 skills, 386 commands and 34 agents**, measured by running the installer. The repository holds 227 skills; the difference is the opt-in security pack and Cursor-only skills. The measured row is main. The v1.5.0 release `npx` installs today is older. See [Status and roadmap](#status-and-roadmap).
+A default Claude Code install delivers **189 skills, 386 commands and 34 agents**, measured by running the installer. The repository holds 227 skills; the difference is the opt-in security pack and Cursor-only skills. The measured row is main.
+
+The v1.5.0 release `npx` installs today is older. See [Status and roadmap](#status-and-roadmap).
 
 <table align="center">
 <tr>
@@ -220,7 +228,7 @@ A default Claude Code install delivers **189 skills, 386 commands and 34 agents*
 <tr><td><strong>System Bundles</strong></td><td>6 (GSD, Brain, Cognee, HyperFrames, Super Intelligence, M0) — installed by default. <code>reverse-skill</code>, the security-testing bundle, stays opt-in with <code>--systems reverse-skill</code>. <code>/team</code> is core and needs no flag.</td></tr>
 <tr><td><strong>Cross-IDE Rules</strong></td><td>15 (.mdc files)</td></tr>
 <tr><td><strong>Workflows Defined</strong></td><td>3 (.md pipelines)</td></tr>
-<tr><td><strong>Install Time</strong></td><td>About 3 minutes on a fresh machine (measured 189 s with <code>npx</code>, including the download)</td></tr>
+<tr><td><strong>Install Time</strong></td><td>About 3 minutes on a fresh machine, including the download (measured at 189 seconds).</td></tr>
 <tr><td><strong>Telemetry / SaaS</strong></td><td>No telemetry, no hosted service. One optional version check against GitHub per day (<code>COCO_NO_UPDATE_CHECK=1</code> turns it off)</td></tr>
 </table>
 

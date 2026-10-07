@@ -50,6 +50,10 @@ echo "=== Smoke test: aider .aider.conf.yml keys ==="
 bash tests/aider-conf-keys.sh && pass "aider .aider.conf.yml uses only real aider option keys" || fail "aider .aider.conf.yml has keys aider does not recognize"
 
 echo ""
+echo "=== Smoke test: aider AGENTS.md agent descriptions ==="
+bash tests/aider-agent-desc.sh && pass "aider AGENTS.md carries full agent descriptions" || fail "aider AGENTS.md truncates agent descriptions"
+
+echo ""
 echo "=== Smoke test: root install.sh ==="
 bash install.sh --list > /tmp/list.out 2>&1 && pass "install.sh --list runs" || fail "install.sh --list failed"
 bash install.sh --dry-run --adapter claude-code > /tmp/install-dry.out 2>&1 && pass "install.sh --dry-run" || fail "install.sh --dry-run"
@@ -106,6 +110,13 @@ bash tests/check-security-surface.sh && pass "security-surface checks" || fail "
 echo ""
 echo "=== Smoke test: aider installer backs up existing files ==="
 bash tests/aider-backup.sh && pass "aider installer backs up existing AGENTS.md and .aider.conf.yml" || fail "aider installer overwrote existing files without a backup"
+
+echo ""
+echo "=== Smoke test: generic/codex clone guard (issue #238) ==="
+bash tests/generic-clone-guard.sh && pass "clone guard refuses in-repo AGENTS.md writes" || fail "clone guard let an in-repo write through"
+
+echo "=== Smoke test: generic adapter ships SI commands and front doors ==="
+bash tests/generic-si-commands.sh && pass "generic first-run install ships the SI command family and front doors" || fail "generic first-run install missing the SI command family or front doors"
 
 echo ""
 echo "=== Summary ==="

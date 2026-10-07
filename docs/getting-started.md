@@ -80,10 +80,10 @@ Super Intelligence routes a prompt to teams with a local embedding model (`text-
 
 ## Where things live
 
-- **Skills** → [`skills/`](../skills/) (75 entries, each `<name>/SKILL.md`)
-- **Commands** → [`commands/<namespace>/`](../commands/) (`team/`, `email/`, `design/`, `eng/`, `pm/`, `util/`)
+- **Skills** → [`skills/`](../skills/) (75 core skills, each `<name>/SKILL.md`)
+- **Commands** → [`commands/<namespace>/`](../commands/) (`coco/`, `design/`, `email/`, `eng/`, `pm/`, `team/`, `util/`)
 - **Agents** → [`agents/`](../agents/)
-- **Systems** → [`systems/`](../systems/) (gsd, brain, team)
+- **Systems** → [`systems/`](../systems/) (brain, cognee, gsd, hyperframes, learning, m0, reverse-skill, superintelligence, team; 6 install by default, `reverse-skill` is opt-in). The headline one is [Super Intelligence](../systems/superintelligence/README.md): the persona board behind the `/SI-*` commands.
 - **Architecture** → [`architecture.md`](architecture.md)
 - **Install matrix** → [`install.md`](install.md)
 - **Recommended plugins** → [`recommended-plugins.md`](recommended-plugins.md)

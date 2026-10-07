@@ -50,6 +50,10 @@ echo "=== Smoke test: aider .aider.conf.yml keys ==="
 bash tests/aider-conf-keys.sh && pass "aider .aider.conf.yml uses only real aider option keys" || fail "aider .aider.conf.yml has keys aider does not recognize"
 
 echo ""
+echo "=== Smoke test: aider AGENTS.md agent descriptions ==="
+bash tests/aider-agent-desc.sh && pass "aider AGENTS.md carries full agent descriptions" || fail "aider AGENTS.md truncates agent descriptions"
+
+echo ""
 echo "=== Smoke test: root install.sh ==="
 bash install.sh --list > /tmp/list.out 2>&1 && pass "install.sh --list runs" || fail "install.sh --list failed"
 bash install.sh --dry-run --adapter claude-code > /tmp/install-dry.out 2>&1 && pass "install.sh --dry-run" || fail "install.sh --dry-run"

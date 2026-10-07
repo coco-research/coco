@@ -4,7 +4,7 @@
 // is as exact as scrubbing forwards.
 
 export const TL = {
-  total: 20.1,
+  total: 21.1,
   hero: { exit: [0.12, 0.95] },
   bloom: [1.0, 2.9],
   flight: [1.25, 5.0],
@@ -17,8 +17,8 @@ export const TL = {
   warp: [8.45, 9.25],
   rules: [[9.1, 9.95], [9.95, 10.8], [10.8, 11.65], [11.65, 12.55]],
   shipped: [12.55, 15.85],
-  lab: [15.85, 17.85],
-  close: [17.85, 20.1],
+  lab: [15.85, 18.85],
+  close: [18.85, 21.1],
   modeFlip: 13.0, // star layout switches from "flight" to "final" while the stars are invisible
 };
 
@@ -28,8 +28,8 @@ export const CHAPTERS = [
   { id: 'flagship', at: 1.0, stop: 1.5 },
   { id: 'rules', at: 8.9, stop: 9.55 },
   { id: 'shipped', at: 12.45, stop: 14.1 },
-  { id: 'lab', at: 15.8, stop: 17.2 },
-  { id: 'close', at: 17.8, stop: 20.1 },
+  { id: 'lab', at: 15.8, stop: 18.2 },
+  { id: 'close', at: 18.8, stop: 21.1 },
 ];
 
 export const LAYOUT = {

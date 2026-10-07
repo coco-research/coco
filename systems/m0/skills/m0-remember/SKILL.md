@@ -1,54 +1,45 @@
 ---
 name: m0-remember
-description: "Use when the user says 'm0 remember', 'record what we did', 'note for next session' or 'write a checkpoint', or after finishing a step worth handing to the next session. Appends one idempotent entry to the M0 thread."
+description: "Use when the user says 'm0 remember', 'record what we did', 'note for next session' or 'write a checkpoint', or after finishing a step worth handing to the next session. Appends one entry to the M0 thread (re-sending writes a second entry unless you pass the same `id`)."
 ---
 
 # /m0-remember — Write to the Operational Thread
 
 The write path for M0. One call appends one entry to the shared thread for a
-project. Writing the same content twice creates one row, so this is safe to call
-after every step and safe to retry.
+project.
+
+The token is read from ~/.coco/m0-token on each call; never print it.
 
 ## Quick Reference
 
 ```bash
-M0="${M0_BASE_URL:-http://127.0.0.1:8787}"
-M0S="$HOME/.claude/skills/m0/scripts"
+M0="${COCO_M0_URL:-http://127.0.0.1:8000}"
 
-# Over HTTP
 curl -s -X POST "$M0/api/brain/checkpoint" \
   -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer $(cat ~/.coco/m0-token)" \
   -d '{"project":"acme-web","kind":"step_done",
        "text":"Fixed the token refresh race in the auth middleware.",
        "next_step":"Add a regression test for two concurrent refreshes.",
        "last_verified":"pytest tests/auth -q: 31 passed",
-       "source_tool":"claude-code","meta_json":{"pr":42}}'
-# {"id":"9a71de71…","ts":"2026-08-01T13:31:26.536Z","ok":true,"deferred":false}
-
-# Without a server (same store, same guarantees)
-python3 "$M0S/m0_server.py" write \
-  --project acme-web --kind step_done \
-  --text "Fixed the token refresh race in the auth middleware." \
-  --next-step "Add a regression test for two concurrent refreshes." \
-  --last-verified "pytest tests/auth -q: 31 passed" \
-  --source-tool claude-code --meta '{"pr":42}'
+       "source_tool":"claude_code"}'
 ```
 
-If the MCP tools are wired (`/m0 mcp`), call `m0_remember` directly instead — same
-endpoint, fewer moving parts, and `meta` takes a real JSON object.
+If the MCP tool is wired (`/m0 mcp`), call `m0` in `remember` mode directly —
+same endpoint, fewer moving parts.
 
 ## Fields
 
 | Field | Required | What to put in it |
 |-------|----------|-------------------|
 | `project` | yes | The project key. Use one stable value per project — the repository or directory name is the usual choice. Getting this wrong splits the thread. |
-| `text` | yes | What happened, in one or two plain sentences. Written for a reader with no other context. |
+| `text` | yes | What happened, in one or two plain sentences. Capped at 400 characters and redacted by the daemon. Written for a reader with no other context. |
 | `kind` | no | Defaults to `step_done`. See the table below. |
 | `next_step` | no | The single next action. Concrete enough to act on without re-deriving it. |
 | `last_verified` | no | What was actually checked, and how. A command and its result, not an impression. |
-| `meta_json` | no | Structured metadata as a JSON object, e.g. `{"pr":42,"tests":"green"}`. |
 | `session_id` | no | Session identifier, when known. |
-| `source_tool` | no | Which tool is writing. Fill it in — it is what makes the thread legible across tools. |
+| `role` | no | The role the entry was written under, when it matters. |
+| `source_tool` | no | Which tool is writing: `claude_code`, `cococode`, `ambient`, `manual`, `hook`, `paperclip`. Fill it in — it is what makes the thread legible across tools. |
 | `branch`, `head_sha` | no | Version-control position. Worth including whenever the entry is about code. |
 
 Kinds:
@@ -62,8 +53,8 @@ Kinds:
 | `lane_result` | The outcome of that work. |
 | `ambient_signal` | Context observed rather than reported. |
 
-An unknown `kind` is rejected with HTTP 400, deliberately: a typo would create a
-category no reader looks in.
+An unknown `kind` is rejected, deliberately: a typo would create a category no
+reader looks in.
 
 ## Procedure
 
@@ -81,10 +72,9 @@ category no reader looks in.
 4. **Be honest in `last_verified`.** Put the command and its actual result there.
    If nothing was verified, leave it empty. A false verification claim in a
    memory store outlives the session that made it and misleads every later reader.
-5. **Check the response.** `{"ok":true,"deferred":false}` means it is durable.
-   `"deferred":true` means the store was busy and the entry is spooled to a
-   sidecar file — it is not lost and lands on the next drain or server start. Say
-   so rather than reporting a clean write.
+5. **A durable Lab decision or ruling is not an m0-remember.** It becomes a
+   decision record via `decide new` (HQ commits records); the thread gets at most
+   a `step_done` pointing at it.
 
 ## Good and bad entries
 
@@ -103,11 +93,7 @@ last_verified: "Tests should pass now."               # a claim, not a check
 
 ## Notes
 
-- **Idempotent.** `id` is a SHA-256 of the content fields, `ts` excluded. Re-writing
-  identical content returns the identical response and leaves one row. Retry
-  freely.
-- **Metadata is lenient.** An object, a JSON string, or free text all work: a JSON
-  string is parsed and canonicalised, anything else is stored as `{"note": "…"}`.
-  It never rejects what it could have kept.
-- **Local-only.** SQLite on disk, loopback server, no outbound calls, no telemetry.
+- **Local-only.** Loopback daemon, no outbound calls, no telemetry. Text fields
+  are capped at 400 characters and redacted by the daemon.
+- There is no offline path: if the daemon is down, say so and stop; do not write anywhere else.
 - **Reading back:** `/m0-recall`. **Handoffs:** `/m0-handoff`. **Plumbing:** `/m0`.

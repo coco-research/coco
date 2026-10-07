@@ -1,6 +1,8 @@
 # Generic adapter (AGENTS.md)
 
-Produces a single `AGENTS.md` for any AI tool that follows the [AGENTS.md spec](https://agents.md/) — Aider, Continue, Windsurf, Cline, and others.
+Produces a single `AGENTS.md` for any AI tool that follows the [AGENTS.md spec](https://agents.md/) — Continue, Windsurf, Cline, and others.
+
+**Aider is not on that list:** it does not load `AGENTS.md` on its own. Use the dedicated `aider` adapter (`bash install.sh --adapter aider`), which also writes a `.aider.conf.yml` with `read: AGENTS.md`. With `generic`, load the file yourself: `aider --read AGENTS.md`.
 
 ## Install
 

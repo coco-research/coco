@@ -27,6 +27,7 @@ bash install.sh --systems superintelligence
 | `zed` | symlink + copy | `~/.config/zed/{agents,rules}` | yes | Zed |
 | `codex` | file generation | `./AGENTS.md` (cwd) | overwrites | Codex CLI |
 | `generic` | file generation | `./AGENTS.md` (cwd) | overwrites | Aider, Continue, Windsurf, Cline |
+| `vscode-continue` | symlink + copy | `~/.continue/{skills,agents,rules}` | yes | VS Code with the Continue extension |
 
 ---
 
@@ -110,6 +111,25 @@ ls ~/.grok/commands | head
 ```
 
 Start a new Grok session (or reload) so MCP and hooks pick up `config.toml`.
+
+---
+
+## VS Code with Continue
+
+```bash
+bash install.sh --adapter vscode-continue
+bash adapters/vscode-continue/install.sh --dry-run    # preview, writes nothing
+```
+
+Writes into `~/.continue/` (override the root with `CONTINUE_HOME`). Skills and agents are symlinked into the clone; the markdown files directly under `rules/` are copied. Skills come with the default bundles (176 skills and 34 agents on a plain run; `--core-only` installs the core set alone, `--systems gsd,brain` an explicit subset).
+
+| Coco source | Destination |
+|-------------|-------------|
+| `skills/<name>/` | `~/.continue/skills/<name>` (symlink) |
+| `agents/*.md` | `~/.continue/agents/<name>.md` (symlink) |
+| `rules/*.md` | `~/.continue/rules/` (copy) |
+
+Two things to know. The only markdown file directly under `rules/` is `rules/README.md`, so that is the only rule file copied; the Cursor `.mdc` rules are not. And the adapter does not generate slash commands, so the `/SI-*` commands are not part of this install. An existing real file or folder at a skill or agent path is skipped, not overwritten. This adapter only places the files; check that your Continue version loads these folders.
 
 ---
 
@@ -300,6 +320,16 @@ File-generation adapters (`codex`, `generic`):
 ```bash
 rm path/to/project/AGENTS.md
 ```
+
+VS Code with Continue (links from the clone root, plus the copied rules file):
+
+```bash
+CLONE="$(pwd)"
+find ~/.continue -type l -lname "${CLONE}/*" -delete
+for f in rules/*.md; do cmp -s "$f" ~/.continue/rules/"$(basename "$f")" && rm ~/.continue/rules/"$(basename "$f")"; done
+```
+
+The `cmp` guard removes a copied rule only if it is still identical to the one in the clone, and the `find` touches only links that point into the clone. Use `$CONTINUE_HOME` in place of `~/.continue` if you set it. Empty `skills/`, `agents/` and `rules/` folders are left behind; remove them if you like.
 
 ---
 

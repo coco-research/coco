@@ -1,6 +1,6 @@
 ---
 name: m0
-description: "Use when the user says 'm0', 'm0 status', 'start m0', 'cross-tool memory', 'operational thread', or 'where is my memory stored', or when the M0 server, store, spool, or MCP wiring needs attention."
+description: "Use when the user says 'm0', 'm0 status', 'start m0', 'cross-tool memory', 'operational thread', or 'where is my memory stored', or when the M0 daemon or MCP wiring needs attention."
 ---
 
 # /m0 — Cross-Tool Agent Memory
@@ -9,181 +9,72 @@ M0 keeps one local *operational thread* per project: what was done, what was
 verified, what is next. Any tool can write to it and read it back, so a session
 that starts cold can continue work another tool began.
 
-Two operations, one SQLite table, standard library only. The wire contract is in
-`systems/m0/SPEC.md`; the write path is `/m0-remember`, the read path is
-`/m0-recall`, and the session handoff flow is `/m0-handoff`.
+The live M0 is the Rust daemon `coco-m0d`, serving `127.0.0.1:8000` under the
+launchd job `com.coco.m0-backend`. The write path is `/m0-remember`, the read
+path is `/m0-recall`, and the session handoff flow is `/m0-handoff`.
+
+The token is read from ~/.coco/m0-token on each call; never print it.
 
 ## Quick Reference
 
 ```bash
-M0S="$HOME/.claude/skills/m0/scripts"          # installed location
-M0="${M0_BASE_URL:-http://127.0.0.1:8787}"     # server base URL
+M0="${COCO_M0_URL:-http://127.0.0.1:8000}"     # daemon base URL
 
-# Is it up, and where does it store?
-curl -s "$M0/api/health" | python3 -m json.tool
+# Is it up? (health needs no token)
+curl -s "$M0/api/health"
 
-# Start it (foreground)
-python3 "$M0S/m0_server.py" serve
+# Is the launchd job loaded?
+launchctl list | grep com.coco.m0-backend
 
-# Start it in the background, logging to the store directory
-nohup python3 "$M0S/m0_server.py" serve > "$HOME/.local/share/coco-m0/server.log" 2>&1 &
-
-# Write and read without any server at all
-python3 "$M0S/m0_server.py" write --project my-project --text "Did the thing."
-python3 "$M0S/m0_server.py" read  --project my-project --limit 5
-
-# Land any writes that were deferred while the store was busy
-python3 "$M0S/m0_server.py" drain
+# Everything else needs the token, for example the recent thread:
+curl -s -H "Authorization: Bearer $(cat ~/.coco/m0-token)" \
+  "$M0/api/brain/thread?project=my-project&limit=5"
 ```
 
-If the scripts are not at `$HOME/.claude/skills/m0/scripts`, the bundle was
-installed elsewhere: run `bash install.sh --systems m0` from the Coco checkout,
-or use the in-repo path `systems/m0/skills/m0/scripts`.
+There is no offline path: if the daemon is down, say so and stop; do not write anywhere else.
 
 ## Sub-commands
 
-### /m0 status — is memory working, and where does it live
+### /m0 status — is memory working
 
 ```bash
-M0="${M0_BASE_URL:-http://127.0.0.1:8787}"
-if curl -fsS "$M0/api/health" >/dev/null 2>&1; then
-    curl -s "$M0/api/health" | python3 -m json.tool
-else
-    echo "No M0 server at $M0."
-    echo "Direct store access still works:"
-    python3 "$HOME/.claude/skills/m0/scripts/m0_server.py" health
-fi
+M0="${COCO_M0_URL:-http://127.0.0.1:8000}"
+curl -s "$M0/api/health"
+launchctl list | grep com.coco.m0-backend
 ```
 
 Report to the user, in this order:
 
-1. **Server** — running at `<url>`, or not running (and that this is fine; the CLI
-   and the MCP tools both fall back to the store directly).
-2. **Store** — the `db` path and the `rows` count. This is the whole dataset.
-3. **Pending** — if `pending_sidecars` is above zero, some writes are spooled but
-   not yet landed. Run `drain`.
-4. **Degraded** — if `degraded` is set, another process holds the write lock.
-   Reads still work; writes will defer rather than fail.
+1. **Daemon** — reachable at `$M0` or not.
+2. **launchd** — whether the job `com.coco.m0-backend` is loaded and running.
 
-### /m0 start — run the server
+If either is missing, tell the user and stop. Do not work around it.
 
-Ask which the user wants:
+### /m0 start — you do not start it
 
-- **Foreground** for a quick session: `python3 "$M0S/m0_server.py" serve`
-- **Background** for daily use: the `nohup` line above.
-- **Nothing** — the CLI and MCP tools work against the store directly. A server
-  is only needed when several tools should share one process, or when something
-  can only speak HTTP.
+The daemon runs under launchd; if it is down, tell the user and stop (restarts
+and deploys are the owner's).
 
-Useful flags and variables:
+### /m0 mcp — the MCP tool
 
-| Setting | Effect |
-|---------|--------|
-| `--port` / `M0_PORT` | Listen port (default 8787) |
-| `--host` / `M0_HOST` | Bind address (default `127.0.0.1`; anything else warns, there is no auth) |
-| `--db` / `M0_DB` | Store path (default `$XDG_DATA_HOME/coco-m0/thread.db`) |
-| `--busy-timeout-ms` / `M0_BUSY_TIMEOUT_MS` | Per-call SQLite busy timeout (default 10000) |
-| `M0_PROJECT` | Default project when a caller omits one |
-| `M0_SOURCE_TOOL` | Stamped on writes, so you can tell which tool wrote what |
-
-Never set `M0_BUSY_TIMEOUT_MS` to a large value. A long wait inside a shutdown
-hook is indistinguishable from a hang; the deferred-write path exists so waiting
-is never necessary.
-
-### /m0 mcp — wire the two tools
-
-```bash
-claude mcp add coco-m0 -- python3 "$HOME/.claude/skills/m0/scripts/m0_mcp.py"
-claude mcp list          # confirm it is registered
-```
-
-That exposes `m0_remember` and `m0_recall` as tools the agent can call directly,
-which is the lowest-friction way to make memory habitual. For editors that read a
-project `.mcp.json`, the equivalent entry is:
-
-```json
-{
-  "mcpServers": {
-    "coco-m0": {
-      "command": "python3",
-      "args": ["<absolute path>/skills/m0/scripts/m0_mcp.py"],
-      "env": { "M0_PROJECT": "<this project>" }
-    }
-  }
-}
-```
-
-The MCP server prefers the HTTP server and falls back to the store directly when
-nothing is listening, so either mode works. Each result reports which path served
-it under `via`.
-
-### /m0 hooks — capture without being asked
-
-Automatic capture is opt-in. These are recipes for the user to install; **do not
-edit the user's settings files without asking first.** Show the snippet, explain
-what it does, and let them decide.
-
-Session end, so a closing session always leaves a trace:
-
-```bash
-python3 "$HOME/.claude/skills/m0/scripts/m0_server.py" write \
-  --project "$(basename "$PWD")" --kind session_end \
-  --source-tool claude-code \
-  --branch "$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" \
-  --head-sha "$(git rev-parse --short HEAD 2>/dev/null)" \
-  --text "Session ended."
-```
-
-This is exactly the case the deferred-write path was built for: if the store is
-locked at that moment, the entry is spooled to a sidecar file and lands on the
-next start rather than being lost.
-
-Session start, to inject the thread into a fresh session:
-
-```bash
-python3 "$HOME/.claude/skills/m0/scripts/m0_server.py" read \
-  --project "$(basename "$PWD")" --limit 10
-```
-
-### /m0 drain — land deferred writes
-
-```bash
-python3 "$HOME/.claude/skills/m0/scripts/m0_server.py" drain
-# {"drained": 1, "skipped": 0, "quarantined": 0}
-```
-
-- `drained` — entries moved from the spool into the store.
-- `skipped` — the store was still busy; they stay spooled for next time.
-- `quarantined` — files that were not valid entries, renamed `*.json.bad` so they
-  stop blocking the queue. Inspect them; they are plain JSON.
-
-A server drains automatically on start, so this is only needed when running
-serverless or after an unusual amount of write contention.
+The daemon's MCP binary `coco-platform-mcp` exposes one tool, `m0`, with modes
+`recall`, `context`, `wip`, `handoff`, and `remember`. Call it directly — it is
+the lowest-friction way to make memory habitual.
 
 ### /m0 verify — prove it works
 
 ```bash
-bash systems/m0/tests/m0-smoke.sh
+curl -s "$M0/api/health"
 ```
 
-27 assertions in a throwaway directory on an ephemeral port: the round trip,
-idempotency, a deferred write under a genuinely locked store, the drain on
-restart, and the MCP tools over stdio. It touches no existing store. Run it
-before trusting a change to this bundle, and quote the output rather than
+A healthy response means the daemon is serving. Quote the output rather than
 summarising it.
 
 ### /m0 privacy — what leaves the machine
 
-Nothing. The store is a SQLite file on local disk, the server binds to loopback,
-there are no outbound calls in the request path and no telemetry. To inspect,
-back up or forget:
-
-```bash
-DB="$(python3 "$HOME/.claude/skills/m0/scripts/m0_server.py" health | python3 -c 'import json,sys;print(json.load(sys.stdin)["db"])')"
-sqlite3 "$DB" "SELECT ts, kind, substr(text,1,60) FROM operational_thread ORDER BY ts DESC LIMIT 10;"
-cp "$DB" ~/m0-backup.db     # back up
-rm "$DB"                    # forget everything
-```
+Nothing. The daemon binds to loopback, there are no outbound calls in the
+request path and no telemetry. Text fields are capped at 400 characters and
+redacted by the daemon before storage.
 
 ## When to reach for this
 
@@ -192,8 +83,8 @@ rm "$DB"                    # forget everything
 - **Use `/m0-remember`** after a step lands, a decision is made, or something is
   verified.
 - **Use `/m0-handoff`** before context is compacted or a session ends.
-- **Use `/m0` (this skill)** for the plumbing: server, store, spool, wiring.
+- **Use `/m0` (this skill)** for the plumbing: daemon, token, wiring.
 
-M0 answers "where were we and what is next". It does not do semantic search,
-entity extraction or summarisation — see the comparison with the cognee bundle in
-`systems/m0/README.md` before choosing.
+M0 answers "where were we and what is next". For deeper knowledge-graph
+retrieval see the comparison with the cognee bundle in `systems/m0/README.md`
+before choosing.

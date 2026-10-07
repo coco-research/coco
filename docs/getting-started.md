@@ -70,6 +70,12 @@ The install receipt counts only that run, so after `--systems gsd` it reports a 
 
 ---
 
+## Optional: semantic routing
+
+Super Intelligence routes a prompt to teams with a local embedding model (`text-embedding-nomic-embed-text-v1.5` at `http://127.0.0.1:1234/v1/embeddings`, LM Studio's default port). It is optional: without it, routing falls back to keyword matching and says so (`keyword fallback active`). Setup and how to verify: [`install.md`](install.md#optional-semantic-routing-for-super-intelligence).
+
+---
+
 ## Where things live
 
 - **Skills** → [`skills/`](../skills/) (75 entries, each `<name>/SKILL.md`)

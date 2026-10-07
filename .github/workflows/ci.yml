@@ -193,7 +193,12 @@ jobs:
           [ "$fail" -eq 0 ] || exit 1
 
       - name: Pack content gate (no secret reads, phone-home hosts, machine paths or curl-to-shell)
+        env:
+          # Clear spellings of the hashed internal names, so the self-test checks every stored
+          # digest against its real name. Repo secret; empty on forks, where only the format is checked.
+          COCO_PACK_CONTENT_NAMES: ${{ secrets.COCO_PACK_CONTENT_NAMES }}
         run: |
+          [ -n "$COCO_PACK_CONTENT_NAMES" ] || echo "::notice::COCO_PACK_CONTENT_NAMES not set; stored name digests are format-checked only"
           python3 tests/check-pack-content.py
           # The self-test runs the gate over tests/fixtures/pack-content, where every planted
           # line must fail and every benign line must pass, so a weakened rule fails CI.

@@ -10,6 +10,15 @@ Newest first within each section. Update this file in the same PR that settles s
 
 ## Decisions
 
+### The pack-content gate stores blocked names as sha256 digests
+
+**Decided:** 2026-10-05. **Reason:** the previous encoding was reversible, so the spellings
+were still in the repository. The gate stores sha256 hex digests only. Digests of lowercased spellings match in
+any case. Four digests are of one exact spelling, and a different case does not match.
+`--self-test` reads the clear spellings from `COCO_PACK_CONTENT_NAMES` or gitignored
+`tests/pack-content-names.local`. With neither, it plants synthetic names and adds only those
+digests to a test-only set, so a checkout with no local list still exercises the comparison.
+
 ### Rebase and merge for PR #196, not squash
 
 **Decided:** 2026-09-18. **Reason:** the `main` ruleset sets `required_linear_history`, so a

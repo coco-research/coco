@@ -179,7 +179,7 @@ function cmdInstall(argv) {
   run('bash', [installScript, ...argv]);
 
   console.log(`\nDone. Coco installed at ${dir}.`);
-  console.log(`Re-run install / update later with:\n  npx cocosuperintelligence update`);
+  console.log(`Re-install later:  npx cocosuperintelligence install\nUpdate the clone to the pinned release:  npx cocosuperintelligence update`);
 }
 
 function cmdUpdate(argv) {
@@ -221,6 +221,9 @@ function cmdUninstall(argv) {
   if (fs.existsSync(dir)) {
     fs.rmSync(dir, { recursive: true, force: true });
   }
+  // The update notifier's cache is ours; drop it, and ~/.coco if that leaves it empty.
+  fs.rmSync(UPDATE_CACHE, { force: true });
+  try { fs.rmdirSync(path.dirname(UPDATE_CACHE)); } catch (_) { /* absent or holds other files */ }
   console.log('Uninstalled.');
 }
 
@@ -257,7 +260,12 @@ function main() {
       cmdUninstall(rest);
       break;
     default:
-      // any unknown subcommand → pass through to install (e.g., npx cocosuperintelligence --adapter cursor)
+      // Flags pass through to install (e.g., npx cocosuperintelligence --adapter cursor).
+      // A bare word is an unknown subcommand: reject it before any clone touches disk.
+      if (!sub.startsWith('-')) {
+        console.error(`Error: unknown command '${sub}'. Run with --help to see the commands.`);
+        process.exit(2);
+      }
       cmdInstall(argv);
       checkForUpdate(false);
   }

@@ -1,7 +1,7 @@
 {
   "name": "generic",
   "version": "0.1.0",
-  "description": "AGENTS.md producer for any AGENTS.md-compatible tool (Aider, Continue, Windsurf, Cline, ...)",
+  "description": "AGENTS.md producer for any AGENTS.md-compatible tool (Continue, Windsurf, Cline, ...)",
   "targets": {
     "agents_md": "./AGENTS.md (project root)"
   },

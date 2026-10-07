@@ -2,7 +2,7 @@
   "name": "coco",
   "displayName": "Coco",
   "description": "An entire team. Wherever your AI lives. A default install delivers 189 of its 227 skills, 386 commands and 34 agents for project orchestration, knowledge tracking, and multi-agent pipelines; the remaining skills are the opt-in reverse-skill security pack and Cursor-only skills. Open-core, vendor-neutral.",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "author": "Coco Inc",
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://github.com/coco-research/coco",
@@ -12,7 +12,9 @@
   },
   "install": {
     "command": "bash",
-    "args": ["adapters/claude-code/install.sh"]
+    "args": [
+      "adapters/claude-code/install.sh"
+    ]
   },
   "compatibility": {
     "claude-code": ">=0.1.0"

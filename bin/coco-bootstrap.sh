@@ -23,7 +23,7 @@ set -euo pipefail
 
 REPO_URL="https://github.com/coco-research/coco.git"
 # Keep in sync with package.json version. Clone the last tagged release, not floating main.
-PINNED_TAG="v1.5.0"
+PINNED_TAG="v1.5.1" # x-release-please-version
 INSTALL_DIR="${COCO_DIR:-$HOME/.coco}"
 YES="${COCO_BOOTSTRAP_YES:-}"
 PASS_THROUGH=()
@@ -83,7 +83,13 @@ if [ -d "$INSTALL_DIR/.git" ]; then
     git -C "$INSTALL_DIR" checkout --force "$PINNED_TAG"
   fi
 else
-  if [ -e "$INSTALL_DIR" ]; then
+  # bin/coco.js caches its update check in ~/.coco/.update-check.json, so a bare ~/.coco
+  # may hold only that regenerable file. Drop it so the clone can land; anything else
+  # in the directory is user data and is still refused below.
+  if [ -d "$INSTALL_DIR" ] && [ -f "$INSTALL_DIR/.update-check.json" ] && [ "$(ls -A "$INSTALL_DIR")" = ".update-check.json" ]; then
+    rm -f "$INSTALL_DIR/.update-check.json"
+  fi
+  if [ -e "$INSTALL_DIR" ] && ! { [ -d "$INSTALL_DIR" ] && [ -z "$(ls -A "$INSTALL_DIR")" ]; }; then
     echo "Error: $INSTALL_DIR exists but is not a Coco clone." >&2
     echo "Remove it manually or set COCO_DIR to a different path." >&2
     exit 1

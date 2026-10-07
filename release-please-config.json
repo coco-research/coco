@@ -1,0 +1,1 @@
+{"packages": {".": {"release-type": "node", "package-name": "cocosuperintelligence", "include-v-in-tag": true, "include-component-in-tag": false, "extra-files": [{"type": "json", "path": ".claude-plugin.json", "jsonpath": "$.version"}, "bin/coco-bootstrap.sh", "README.md"]}}, "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"}

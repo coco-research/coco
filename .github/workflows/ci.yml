@@ -55,6 +55,9 @@ jobs:
           done
           echo "All install scripts pass syntax check."
 
+      - name: Version pins agree
+        run: bash tests/check-version-pins.sh
+
       - name: Validate command cross-references
         run: bash tests/check-command-refs.sh
 

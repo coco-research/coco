@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Generic adapter — produces AGENTS.md for any tool that reads it.
-# Aider, Continue, Windsurf, Cline, and others all consume AGENTS.md.
+# Continue, Windsurf, Cline, and others consume AGENTS.md. Aider does not auto-load it:
+# use adapters/aider, or run `aider --read AGENTS.md`.
 #
 # Identical behavior to adapters/codex/install.sh — Codex is the
 # canonical AGENTS.md consumer; this exists for clarity for users
@@ -12,6 +13,7 @@
 #   bash adapters/generic/install.sh --systems gsd,brain  # only these bundles
 #   bash adapters/generic/install.sh -o PATH              # write to PATH
 #   bash adapters/generic/install.sh --dry-run
+# Refuses to write inside the Coco checkout itself (issue #238); run from your project directory.
 #
 # Bundles default to every bundle that actually ships something
 # (scripts/installable-bundles.sh), not to the core alone: defaulting to core folded about
@@ -21,6 +23,7 @@
 # Every flag is forwarded to adapters/codex/install.sh, which does the work.
 
 set -euo pipefail
+unset CDPATH
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 

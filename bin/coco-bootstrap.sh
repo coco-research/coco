@@ -23,7 +23,7 @@ set -euo pipefail
 
 REPO_URL="https://github.com/coco-research/coco.git"
 # Keep in sync with package.json version. Clone the last tagged release, not floating main.
-PINNED_TAG="v1.5.0" # x-release-please-version
+PINNED_TAG="v1.5.1" # x-release-please-version
 INSTALL_DIR="${COCO_DIR:-$HOME/.coco}"
 YES="${COCO_BOOTSTRAP_YES:-}"
 PASS_THROUGH=()

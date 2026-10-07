@@ -50,6 +50,10 @@ echo "=== Smoke test: aider .aider.conf.yml keys ==="
 bash tests/aider-conf-keys.sh && pass "aider .aider.conf.yml uses only real aider option keys" || fail "aider .aider.conf.yml has keys aider does not recognize"
 
 echo ""
+echo "=== Smoke test: grok --uninstall ==="
+bash tests/grok-uninstall.sh && pass "grok --uninstall removes generated files and keeps user files" || fail "grok --uninstall left generated files or removed user files"
+
+echo ""
 echo "=== Smoke test: root install.sh ==="
 bash install.sh --list > /tmp/list.out 2>&1 && pass "install.sh --list runs" || fail "install.sh --list failed"
 bash install.sh --dry-run --adapter claude-code > /tmp/install-dry.out 2>&1 && pass "install.sh --dry-run" || fail "install.sh --dry-run"

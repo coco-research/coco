@@ -208,6 +208,15 @@ function cmdUninstall(argv) {
     if (!fs.existsSync(home)) continue;
     run('find', [home, '-type', 'l', '-lname', `${prefix}*`, '-delete']);
   }
+  // grok also writes generated files (SI commands, config block, hooks); its installer removes them.
+  // Best-effort: an older pinned clone may not know --uninstall; never abort the uninstall over it.
+  const grokInstaller = path.join(dir, 'adapters', 'grok', 'install.sh');
+  if (fs.existsSync(path.join(os.homedir(), '.grok')) && fs.existsSync(grokInstaller)) {
+    const r = spawnSync('bash', [grokInstaller, '--uninstall'], { stdio: 'inherit' });
+    if (r.status !== 0) {
+      console.log('Note: grok installer cleanup failed (possibly an older pin without --uninstall); continuing.');
+    }
+  }
   console.log(`Removing clone at ${dir}...`);
   if (fs.existsSync(dir)) {
     fs.rmSync(dir, { recursive: true, force: true });

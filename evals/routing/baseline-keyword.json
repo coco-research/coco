@@ -1,0 +1,21 @@
+{
+  "top1_accuracy": 0.41379310344827586,
+  "top4_recall": 0.853448275862069,
+  "delegate_precision": 0.0,
+  "abstain_rate": 1.0,
+  "per_team_top1": {
+    "ai": 0.0,
+    "climate-energy": 0.625,
+    "data-analytics": 1.0,
+    "education-edtech": 0.5555555555555556,
+    "engineering": 0.1,
+    "finance": 0.6666666666666666,
+    "gtm": 0.2222222222222222,
+    "healthcare-life-sciences": 1.0,
+    "legal-ip": 0.6,
+    "product-design": 0.0,
+    "risk-compliance": 0.3333333333333333,
+    "strategy": 0.1111111111111111,
+    "trading": 0.25
+  }
+}

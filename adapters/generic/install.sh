@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Generic adapter — produces AGENTS.md for any tool that reads it.
-# Aider, Continue, Windsurf, Cline, and others all consume AGENTS.md.
+# Continue, Windsurf, Cline, and others consume AGENTS.md. Aider does not auto-load it:
+# use adapters/aider, or run `aider --read AGENTS.md`.
 #
 # Identical behavior to adapters/codex/install.sh — Codex is the
 # canonical AGENTS.md consumer; this exists for clarity for users

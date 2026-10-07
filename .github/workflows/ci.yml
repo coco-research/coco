@@ -119,6 +119,10 @@ jobs:
 
       - name: Verify homepage product rows match data/products.json
         run: python3 tests/check-site-products.py
+      - name: Persona attribution wording is in every generated SI command
+        run: |
+          python3 tests/check-persona-attribution.py
+          python3 tests/check-persona-attribution.py --self-test
 
       - name: Verify the delivery index matches what the adapters install
         run: |

@@ -9,11 +9,11 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | brain | `systems/brain/` | 6 | 0 | 0 | 20 |
 | cognee | `systems/cognee/` | 3 | 0 | 0 | 5 |
 | gsd | `systems/gsd/` | 68 | 24 | 0 | 96 |
-| hyperframes | `systems/hyperframes/` | 20 | 0 | 0 | 930 |
+| hyperframes | `systems/hyperframes/` | 20 | 0 | 0 | 954 |
 | learning | `systems/learning/` | 0 | 0 | 0 | 11 |
 | m0 | `systems/m0/` | 4 | 0 | 0 | 10 |
 | reverse-skill | `systems/reverse-skill/` | 33 | 0 | 0 | 130 |
-| superintelligence | `systems/superintelligence/` | 13 | 0 | 0 | 1335 |
+| superintelligence | `systems/superintelligence/` | 13 | 0 | 0 | 1336 |
 | team | `systems/team/` | 0 | 0 | 0 | 8 |
 | aider | `adapters/aider/` | 0 | 0 | 0 | 2 |
 | amazon-q | `adapters/amazon-q/` | 0 | 0 | 0 | 2 |
@@ -30,6 +30,6 @@ Bundles under `systems/` are opt-in via `install.sh --systems <name>`. Directori
 | vscode | `adapters/vscode/` | 0 | 0 | 0 | 3 |
 | vscode-continue | `adapters/vscode-continue/` | 0 | 0 | 0 | 2 |
 | windsurf | `adapters/windsurf/` | 0 | 0 | 0 | 2 |
-| zed | `adapters/zed/` | 0 | 0 | 0 | 2 |
+| zed | `adapters/zed/` | 0 | 0 | 0 | 3 |
 
 > **Advertised as a bundle but installs no artifacts:** `learning`, `team`. These directories hold documentation only, so passing them to `--systems` has no effect.

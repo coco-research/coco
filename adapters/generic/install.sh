@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Generic adapter — produces AGENTS.md for any tool that reads it.
-# Aider, Continue, Windsurf, Cline, and others all consume AGENTS.md.
+# Continue, Windsurf, Cline, and others consume AGENTS.md. Aider does not auto-load it:
+# use adapters/aider, or run `aider --read AGENTS.md`.
 #
 # Identical behavior to adapters/codex/install.sh — Codex is the
 # canonical AGENTS.md consumer; this exists for clarity for users
@@ -30,7 +31,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 # it takes instead of printing Codex's header.
 for arg in "$@"; do
   case "$arg" in
-    --help|-h) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
+    --help|-h) bash "$REPO_ROOT/scripts/print-usage.sh" "$0"; exit 0 ;;
   esac
 done
 

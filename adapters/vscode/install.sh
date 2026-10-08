@@ -44,9 +44,7 @@ while [[ $# -gt 0 ]]; do
     --systems) shift; IFS=',' read -ra SYSTEMS <<< "$1" ;;
     --source) shift; SOURCE_ROOT="$(cd "$1" && pwd)" ;;
     --user-dir) shift; EXTRA_USER_DIRS+=("$1") ;;
-    --help|-h)
-      grep '^#' "$0" | sed 's/^# \?//'
-      exit 0 ;;
+    --help|-h) bash "$REPO_ROOT/scripts/print-usage.sh" "${BASH_SOURCE[0]}"; exit 0 ;;
     *) echo "Unknown flag: $1" >&2; exit 1 ;;
   esac
   shift

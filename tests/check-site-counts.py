@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Assert the public website pages agree with docs/asset-counts.json.
+"""Assert the public website pages agree with docs/released-counts.json.
 
-index.html (repo root) and coco/index.html are the CoCo Research and CoCo
-product pages. Neither was covered by check-asset-counts.sh, which only ever
-read README.md, package.json and .claude-plugin.json — so a site page could
-drift from the generated truth with the gate still green. This is exactly how
-the persona figures went stale: the same defect class, on different files.
+index.html (repo root) and coco/index.html show the latest release, not
+whatever main has counted. docs/released-counts.json is that tag's
+asset-counts.json plus "version". README.md and tests/check-asset-counts.sh
+stay on main.
 
 Checks skills, commands, agents, personas and departments on both pages.
 
@@ -28,14 +27,21 @@ def pass_(msg):
     print(f'  PASS: {msg}')
 
 
-counts = json.load(open('docs/asset-counts.json'))
+counts = json.load(open('docs/released-counts.json'))
 SKILLS = counts['skills']['total']
 COMMANDS = counts['commands']['customer_facing']
 AGENTS = counts['agents']['total']
 PERSONAS = counts['personas']['total']
 DEPARTMENTS = counts['departments']['total']
-# Measured by running the claude-code installer (scripts/build-delivery-index.py).
-INSTALLED_SKILLS = json.load(open('docs/delivered-counts.json'))['skills']
+
+VERSION = counts['version']
+# The released version the counts come from must be the version the homepage names.
+index_text = open('index.html').read()
+for claim in (f'CoCo {VERSION} <span', f'Available now, v{VERSION}, on npm'):
+    if claim in index_text:
+        pass_(f'index.html: names release {VERSION} ({claim.split(" <")[0]})')
+    else:
+        fail_(f'index.html: expected "{claim}" to match docs/released-counts.json version {VERSION}')
 
 print(f'=== truth: skills={SKILLS} commands={COMMANDS} agents={AGENTS} '
       f'personas={PERSONAS} departments={DEPARTMENTS} ===')
@@ -57,7 +63,6 @@ CHECKS = [
     ('coco/index.html', r'<p class="n">(\d+)</p><p class="lbl">Agents</p>', 'stat tile (agents)', (AGENTS,)),
     ('coco/index.html', r'<h2 class="reveal">(\d+) skills\. One instruction set each\.</h2>', 'section heading (skills)', (SKILLS,)),
     ('coco/index.html', r'<tr><th>Skills</th><td>(\d+) in the repository', 'spec table row (skills)', (SKILLS,)),
-    ('coco/index.html', r'in the repository \(\d+ core \+ \d+ bundle\); (\d+) install by default on Claude Code', 'spec table row (installed skills)', (INSTALLED_SKILLS,)),
     ('coco/index.html', r'<tr><th>Commands</th><td>(\d+) customer-facing', 'spec table row (commands)', (COMMANDS,)),
     ('coco/index.html', r'<tr><th>Agents</th><td>(\d+)\.', 'spec table row (agents)', (AGENTS,)),
     ('coco/index.html', r'<tr><th>Personas</th><td>(\d+) across (\d+) departments', 'spec table row (personas, departments)', (PERSONAS, DEPARTMENTS)),
@@ -96,6 +101,6 @@ else:
 
 print()
 if fail == 0:
-    print('  all site-page counts agree with docs/asset-counts.json')
+    print('  all site-page counts agree with docs/released-counts.json')
     sys.exit(0)
 sys.exit(1)

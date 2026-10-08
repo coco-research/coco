@@ -26,7 +26,7 @@ A hard call in a coding session usually gets one model's opinion, with no name o
   <img src="docs/readme/si-decide-light.png" width="100%" alt="Terminal capture of /SI-Decide: Should a 10-person startup move its public REST API to GraphQL this quarter? Sixteen personas, shown as role archetypes from five departments, give positions, react in rounds, and return a conditional no with two named dissenters.">
 </picture>
 
-*Personas are modeled on the public writing of named experts and are not those people's views or endorsement. See the [persona disclaimer](systems/superintelligence/DISCLAIMER.md).*
+*Personas are modeled on the public writing of named experts and are not those people's views or endorsement. See the [persona disclaimer](systems/superintelligence/DISCLAIMER.md). To request removal or correction of a persona, see [docs/personas/TAKEDOWN.md](docs/personas/TAKEDOWN.md).*
 
 An illustration built from a real `/SI-Decide` run (Claude Sonnet 5.5, 30 September 2026, US$0.41). Persona names are replaced with role archetypes and the output is trimmed for length; no other words are changed. The full output, with the same replacements, is in [`docs/readme/terminal/si-decide-full.md`](docs/readme/terminal/si-decide-full.md). Note what it admits: the embedding router was offline, so it fell back to keywords, and stances applied beyond their source are marked *extrapolated*.
 
@@ -38,7 +38,7 @@ An illustration built from a real `/SI-Decide` run (Claude Sonnet 5.5, 30 Septem
 
 Prerequisites: git, bash, Node.js 14 or newer (for `npx`), and python3 (it generates the `/SI-*` commands).
 
-`npx cocosuperintelligence` installs the latest release. It clones the pinned release tag (currently `v1.5.0`, not floating `main`) into `./coco` of the current directory, then runs `install.sh`. Run it from your home folder, so the clone is `~/coco` and not a folder inside another project. On a fresh machine it took about 3 minutes, including the download.
+`npx cocosuperintelligence` installs the latest release. It clones the pinned release tag (currently `v1.5.1`, not floating `main`) into `./coco` of the current directory, then runs `install.sh`. Run it from your home folder, so the clone is `~/coco` and not a folder inside another project. On a fresh machine it took about 3 minutes, including the download. <!-- x-release-please-version -->
 
 ```bash
 npx cocosuperintelligence
@@ -110,6 +110,7 @@ Uninstall removes symlinks whose target is this clone, and only those. Run it fr
 ```bash
 CLONE="$(pwd)"
 find ~/.claude ~/.cursor ~/.grok ~/.copilot -type l -lname "${CLONE}/*" -delete
+for app in "Code" "Code - Insiders" "VSCodium" "VSCodium - Insiders"; do for base in "$HOME/Library/Application Support" "${XDG_CONFIG_HOME:-$HOME/.config}"; do [ -d "$base/$app/User" ] && find "$base/$app/User" -type l -lname "${CLONE}/*" -delete; done; done
 ```
 
 A contains-match on the folder name would also delete links into a path that merely contains that name (for example `coco-research` when the clone is `coco`). Hermes profiles live under `~/.hermes/profiles`; use the same `"${CLONE}/*"` prefix there. Uninstall does not remove the generated `SI*.md` command files or the rules block between `<!-- coco:rules-start -->` and `<!-- coco:rules-end -->` in `CLAUDE.md`; delete those by hand.

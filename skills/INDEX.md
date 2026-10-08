@@ -48,7 +48,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [test-driven-development](test-driven-development/SKILL.md) | Use when implementing any feature or bugfix, before writing implementation code |
 | [using-git-worktrees](using-git-worktrees/SKILL.md) | Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart  |
 | [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) | Use when writing, reviewing, or refactoring React or Next.js code, or optimizing data fetching, bundle size, and re-renders. Applies Vercel impact-prioritized p |
-| [voice-ai](voice-ai/SKILL.md) | Voice AI architecture and implementation guide. Covers two architectures: speech-to-speech (OpenAI Realtime API, lowest latency) and pipeline (STT->LLM->TTS, mo |
+| [voice-ai](voice-ai/SKILL.md) | Pointer to the upstream skill for building voice agents with speech-to-speech and STT-LLM-TTS pipelines, installed from upstream. |
 
 ## Foundational (13)
 

@@ -21,7 +21,7 @@ CoCo stands on the shoulders of excellent open-source work. This file credits ev
 | **Anthropic** | The `skill-creator` and `frontend-design` skills, vendored verbatim from Anthropic's published Agent Skills repository. Note that Anthropic ships these under Apache-2.0 with the appendix removed, so the bundled `LICENSE.txt` files name no copyright holder; ownership is established from the publisher rather than from the file. Attribution here satisfies Apache-2.0 section 4. | https://github.com/anthropics/skills | Apache-2.0 |
 | **vtake-skills** by leeoxiang | The `talking-head-recut` skill inside the HyperFrames bundle, adapted from the upstream `vtake-cut` project. Upstream notice retained at `systems/hyperframes/skills/talking-head-recut/NOTICE.md`. | https://github.com/notedit/vtake-skills | MIT |
 | **scroll-world** by cyw | The `scroll-world` skill — frame-locked scroll-scrub storytelling engine; upstream MIT notice retained at `skills/scroll-world/LICENSE` | https://github.com/oso95/scroll-world | MIT (Copyright (c) 2026 cyw) |
-| **vibeship-spawner-skills** | The `voice-ai` skill, which declares its own upstream in frontmatter as `source: vibeship-spawner-skills (Apache 2.0)` | https://github.com/vibeship | Apache-2.0 |
+| **vibeship-spawner-skills** | Upstream of the voice-ai skill; Coco ships only a link-only stub | https://github.com/vibeforge1111/vibeship-spawner-skills | No licence file upstream; not redistributed |
 | **prd-mastery** by Callum Bir | The `prd-mastery` skill — token-efficient PRD authoring with a fixed output folder structure; author declared in the skill's own frontmatter | — | See upstream |
 | **openai-agents** by Jeremy Dawes (Jezweb) | The `openai-agents` skill. Previously listed below as an original write-up on public OpenAI documentation, which was wrong: the skill ships a third-party MIT notice at `skills/openai-agents/LICENSE`. | https://github.com/jezweb | MIT (Copyright (c) 2025 Jeremy Dawes) |
 | **claude-code-templates** by Daniel (San) Ávila | Twenty-two agent definitions vendored verbatim at `agents/vendor/claude-code-templates/`, covering backend and frontend development, architecture review, AI and prompt engineering, Rust, cloud and Terraform infrastructure, CI/CD and observability, security auditing and penetration testing, product management, and screenshot analysis. Fetched from the upstream `main` branch via the project's CLI at version 1.29.4. Upstream MIT notice retained at `agents/vendor/claude-code-templates/LICENSE`; the directory's `README.md` records full provenance and the re-sync procedure. These files are kept in a nested vendor directory rather than in `agents/` because four of their filenames collide with CoCo-authored agents of the same name. | https://github.com/davila7/claude-code-templates | MIT (Copyright (c) 2025 Daniel (San) Ávila) |
@@ -50,6 +50,17 @@ Some skills teach or wrap third-party platforms. These are original write-ups bu
 | **React Flow / xyflow** (MIT) — the node-graph library `journey-map` builds on; the skill itself is CoCo's own write-up and vendors no upstream code | `journey-map` | https://github.com/xyflow/xyflow |
 | **Expo** — Router and EAS Hosting API-route conventions | `expo-api-routes` | https://docs.expo.dev |
 | **Cognee** by topoteretes (Apache-2.0) — knowledge-graph memory engine the `systems/cognee/` bundle wraps over its local HTTP API (no upstream code vendored; the bundle's skills are CoCo's own write-ups) | `cognee`, `cognee-store`, `cognee-recall` | https://github.com/topoteretes/cognee |
+
+## Attribution pending
+
+These items are held under the lab-0062 audit (GC ruling, 2026-10-07). Each stays out of packages until its attribution is confirmed or it is replaced.
+
+- `skills/voice-ai/`: attribution pending (lab-0062, GC ruling 2026-10-07).
+- `skills/vercel-react-best-practices/`: attribution pending (lab-0062, GC ruling 2026-10-07).
+- `skills/clone-website/`: attribution pending (lab-0062, GC ruling 2026-10-07).
+- `skills/prd-mastery/`: attribution pending (lab-0062, GC ruling 2026-10-07).
+- `skills/karpathy-guidelines/`: attribution pending (lab-0062, GC ruling 2026-10-07).
+- `systems/hyperframes/skills/embedded-captions/modes/standard/fonts/files/` (caption fonts): attribution pending (lab-0062, GC ruling 2026-10-07).
 
 ## How we credit
 

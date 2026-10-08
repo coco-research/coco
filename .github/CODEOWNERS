@@ -1,9 +1,15 @@
-# Kernel paths for CoCo's gated self-improvement (RSI plan v3, section 3).
+# Kernel paths for CoCo's gated self-improvement: the files an automated
+# improvement loop must never change without the kernel owner's review
+# (workflows, evals and their guard, tests, installers, scripts, and the
+# loop's own code, caps and proposal schema).
 # Changes here need review from the kernel owner, whose credentials are not on
 # any machine that runs the improvement loop. The ruleset on main enforces
 # "require review from code owners". Everything else follows the normal review rule.
 
 /.github/                         @cococyracto
+/.githooks/                       @cococyracto
+/AGENTS.md                        @cococyracto
+/docs/rules.md                    @cococyracto
 /evals/                           @cococyracto
 /tests/                           @cococyracto
 /install.sh                       @cococyracto
@@ -12,3 +18,25 @@
 /Formula/                         @cococyracto
 /scripts/                         @cococyracto
 /skills/skill-evolution/scripts/  @cococyracto
+/skills/skill-evolution/references/ @cococyracto
+/skills/skill-evolution/state/     @cococyracto
+/skills/skill-evolution/SKILL.md   @cococyracto
+/skills/team-gate/                @cococyracto
+/skills/arch-index/scripts/       @cococyracto
+/skills/arch-index/references/    @cococyracto
+/skills/arch-index/templates/     @cococyracto
+/skills/arch-index/SKILL.md       @cococyracto
+/commands/team/                   @cococyracto
+
+# The loop's code (skill-evolution/scripts), its caps and proposal schema
+# (skill-evolution/references) and the other rule-enforcing code and the rules it
+# loads (all of team-gate, which has no SKILL.md; arch-index scripts,
+# references and templates) are kernel. Listed folder by folder on purpose:
+# CODEOWNERS has no negation, so owning a whole skill folder would also own its SKILL.md.
+# The loop's ledger (skill-evolution/state) and the commands that call the gates
+# (commands/team) are kernel too, as are the push gate and secret scan (.githooks),
+# the rules of record (docs/rules.md, AGENTS.md) and the two SKILL.md files that define gate
+# and guard rules (arch-index, skill-evolution); those are listed file by file.
+# Other skill bodies (skills/*/SKILL.md) are deliberately NOT kernel: they are what the
+# loop may propose edits to, through a reviewed PR that the off-machine checker
+# scores.

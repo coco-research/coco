@@ -8,7 +8,9 @@
 #   COCO_DIR=~/tools/coco bash <(curl -fsSL ...)
 #
 # Flags (passed through to install.sh after --, or set via env):
-#   --adapter <name>    claude-code | cursor | grok | vscode | codex | generic
+#   --adapter <name>    claude-code | cursor | grok | vscode | codex | generic |
+#                       aider | amazon-q | cline | github-copilot-cli | hermes |
+#                       pi-desktop | roo-code | vscode-continue | windsurf | zed
 #   --systems <list>    e.g. gsd,brain,team
 #   --dry-run           preview only, no writes
 #   --yes               skip the commit-verification prompt (for CI/scripted installs)

@@ -175,7 +175,7 @@ def install(adapter, bundles, mode='widest', timeout=900):
     # Both the per-tool overrides and the platform config roots have to go, or the
     # throwaway HOME is not authoritative: a CI runner that exports XDG_CONFIG_HOME
     # makes the VS Code adapter look for its profile in the runner's real config
-    # directory, find nothing, and report 342 commands where macOS reports 386. The
+    # directory, find nothing, and report 342 commands where macOS reports 387. The
     # generated index is committed, so it has to measure the same on every platform.
     for var in env_override_vars():
         env.pop(var, None)

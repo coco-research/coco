@@ -36,7 +36,7 @@ CoCo stands on the shoulders of excellent open-source work. This file credits ev
 | **taste-skill** by Leonxlnx | Design-taste enforcement skills (`design-taste-frontend`, `redesign-existing-projects`) — *vendoring in progress* | https://github.com/leonxlnx/taste-skill | MIT |
 | **CLI-Anything** by HKUDS | The "wrap any CLI into a structured agent skill" methodology — *adoption in progress* | https://github.com/HKUDS/CLI-Anything | Apache-2.0 |
 | **devildev** by lak7 | The reverse-architecture design behind `arch-index` and `team:architecture.md`: the component-to-code ownership taxonomy, the exact-path-matching guard (implemented here as a validator with an exit code, which upstream specified in prose but never wrote), deletion-first drift reconciliation, the tool-frugality read budget, the component-count ladder and merge table, and the two-sided naming and purpose formulas. Prompt text and one schema idea were adapted; no upstream code was copied. | https://github.com/lak7/devildev | Apache-2.0 |
-| **agent-skills** by Vercel Labs | Upstream of the vercel-react-best-practices skill; Coco ships only a link-only stub | https://github.com/vercel-labs/agent-skills | No licence file upstream; not redistributed |
+| **agent-skills** by Vercel Labs | Upstream of the vercel-react-best-practices skill; Coco ships only a link-only stub | https://github.com/vercel-labs/agent-skills | MIT declared in the upstream README and SKILL.md frontmatter, but no LICENSE file or copyright notice; not redistributed |
 | **web-interface-guidelines** by Vercel Labs | `web-design-guidelines` — reviews UI code against the Web Interface Guidelines | https://github.com/vercel-labs/web-interface-guidelines | MIT |
 
 ## Reference material & SDKs

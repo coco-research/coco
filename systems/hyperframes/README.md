@@ -9,8 +9,8 @@ This entire bundle (`systems/hyperframes/`) is vendored third-party code, **not*
 That `LICENSE` does **not** govern every file underneath it, and an earlier version of this section wrongly said it did. Some skills carry material from other parties under other terms, so check for a nearer notice before reusing any individual file:
 
 - **`skills/talking-head-recut/`** carries its own [`NOTICE.md`](skills/talking-head-recut/NOTICE.md). It is adapted from [`notedit/vtake-skills`](https://github.com/notedit/vtake-skills) under the **MIT** licence, copyright leeoxiang, not from HeyGen.
-- **Two vendored GSAP builds** (`gsap.min.js`, reachable from the motion-primitives assets) are GreenSock's, under GreenSock's own **Standard License** rather than Apache-2.0.
-- **57 bundled font files** across the caption and stroke-font assets, including Hershey stroke fonts and Fontsource redistributions of Google Fonts, each carry their originating font licence. Fourteen files in the bundle reference GreenSock, Hershey or Fontsource directly.
+- **Two vendored GSAP builds** (`gsap.min.js`, reachable from the motion-primitives assets) are GreenSock's, under GreenSock's own **Standard License** rather than Apache-2.0. Each file's notice reads "Copyright 2026, GreenSock. All rights reserved. Subject to the terms at https://gsap.com/standard-license".
+- **56 bundled font files** across the caption and stroke-font assets, including Hershey stroke fonts and Fontsource redistributions of Google Fonts, each carry their originating font licence. Fourteen files in the bundle reference GreenSock, Hershey or Fontsource directly.
 
 Where a file or directory has a nearer `LICENSE` or `NOTICE`, that nearer one wins.
 

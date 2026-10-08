@@ -3,6 +3,8 @@ name: talking-head-recut
 description: Package an existing talking-head / interview / podcast video with timed, designed GRAPHIC OVERLAY cards — kinetic titles, lower-thirds, data callouts, quotes, side panels, picture-in-picture — synced to the transcript, on a 16:9 / 9:16 / 4:5 canvas of your choice; the clip plays untouched underneath. Trigger on "graphic overlays", "on-screen graphics", "package / dress up my video". Not plain subtitles (/embedded-captions). Unclear → /hyperframes.
 ---
 
+Modified by Coco, 2026-10-08: Virgil font removed (licence not confirmed). See MODIFICATIONS.md.
+
 > **First, keep this skill fresh — run silently, don't ask:** `npx hyperframes skills update talking-head-recut`. A fast no-op when everything is current; otherwise it refreshes this skill plus the core domain skills it depends on before you rely on them.
 
 # Talking Head Recut
@@ -500,8 +502,10 @@ Pick from these `themeId` palettes (use them as `--accent-N` /
 | mono    | `#000 #555 #888 #aaa #ccc`                | `#fff`            | `#000`    |
 
 Available fonts (woff2 in `<SKILL_DIR>/assets/fonts/`, staged to work dir in Step 9): `Caveat` (handwriting),
-`LXGW WenKai TC` (Chinese hand-script), `Inter` (modern sans), `Virgil`
-(geometric hand). Reference via `@font-face` or `font-family` directly.
+`LXGW WenKai TC` (Chinese hand-script), `Inter` (modern sans). Each has its
+licence text (`OFL-*.txt`) beside it. Reference via `@font-face` or `font-family` directly.
+`Virgil` is no longer bundled (its embedded licence could not be confirmed); for a
+hand-drawn look use `Caveat`, or the system's `cursive` font as the last fallback.
 
 For inspiration on visual patterns, `<SKILL_DIR>/references/styles/`
 ships 10 self-contained reference cards (academic / editorial / minimal
@@ -830,11 +834,6 @@ ffmpeg -y -i "$VIDEO_PATH" -c:v libx264 -crf 18 -g 30 -keyint_min 30 \
         font-family: "Inter";
         src: url("fonts/Inter-700-latin.woff2") format("woff2");
         font-weight: 700;
-        font-display: block;
-      }
-      @font-face {
-        font-family: "Virgil";
-        src: url("fonts/Virgil.woff2") format("woff2");
         font-display: block;
       }
 

@@ -4,6 +4,14 @@
 
 Everything not listed here is as vendored from upstream.
 
+## 2026-10-08: talking-head-recut no longer bundles Virgil (lab-0062)
+
+| | |
+|---|---|
+| **Files** | `skills/talking-head-recut/assets/fonts/Virgil.woff2` (removed), `skills/talking-head-recut/SKILL.md`, `skills/talking-head-recut/references/DESIGN_INDEX.md`, `skills/talking-head-recut/references/styles/editorial.html` |
+| **Change** | `Virgil.woff2` is deleted. `SKILL.md` drops its `@font-face` block and its entry in the available-fonts list, and points to `Caveat` or the system `cursive` font instead; the two reference files no longer list Virgil among the bundled fonts. Each edited file carries the notice `Modified by Coco, 2026-10-08: Virgil font removed (licence not confirmed). See MODIFICATIONS.md.` (in `SKILL.md`, on the first line after its front matter). Licence texts (`OFL-caveat.txt`, `OFL-inter.txt`, `OFL-lxgw-wenkai-tc.txt`, and `OFL-fredoka.txt` beside `music-to-video/references/templates/logo-split-lockup-pulse/assets/fredoka-700.woff2`) were added as new files; no vendored file was changed to add them. |
+| **Reason** | lab-0062 legal review (Kanika): every shipped font must have its licence text beside it or be removed. The bundled `Virgil.woff2` is byte-identical to `excalidraw/virgil`'s, whose repository LICENSE.md says OFL-1.1 (Ellinor Rapp, 2021), but the font file itself names "Your Own Font Foundry" (2011) and says "Freeware for personal use! For commercial license please go to https://www.yourownfont.com/". The licence could not be confirmed, so the file is removed. |
+
 ## 2026-10-04: media-use telemetry is off by default
 
 | | |

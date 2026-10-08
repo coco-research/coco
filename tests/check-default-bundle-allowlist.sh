@@ -60,6 +60,50 @@ else
 fi
 
 echo ""
+echo "=== Formula/coco.rb caveats match installer behaviour (--systems replaces; uninstall covers install.md's dirs) ==="
+# --systems REPLACES the default set, so a caveat example must say so, never "add bundles".
+if ! grep -qE -- '--systems' Formula/coco.rb; then
+  fail_ "Formula/coco.rb caveats no longer contain a --systems example"
+elif grep -E -- '--systems' Formula/coco.rb | grep -v -F 'replaces the default set' >/dev/null; then
+  fail_ "Formula/coco.rb has a --systems example that does not say it replaces the default set"
+else
+  pass "every --systems example in Formula/coco.rb says it replaces the default set"
+fi
+# The Formula's symlink-uninstall find must cover every dir install.md's find covers.
+doc_dirs="$(grep -E '^(find|for) ' docs/install.md | grep -oE '(~/\.[^ /]+|\$HOME/Library[^"]*|\$\{?XDG_CONFIG_HOME[^"]*|"[^"]+")' | tr -d '\"' | grep -v '^\$base' | grep -v '^\${CLONE}' | sort -u || true)"
+formula_find="$(grep -E '(find|for) ' Formula/coco.rb | tr -d '\"' | tr ';' ' ' | tr '\n' ' ' || true)"
+
+# Verify the test itself: a simulated doc finding a path the formula lacks must fail.
+mock_doc_dirs="$(echo "$doc_dirs" | sed 's/^Code$/Code - Fake/')"
+mock_missing=""
+if [[ "$mock_doc_dirs" == "$doc_dirs" ]]; then
+  fail_ "self-test could not build a mock: docs/install.md has no 'Code' path to mutate"
+  mock_missing="mock"  # skip the vacuous-pass branch below
+fi
+while IFS= read -r d; do
+  [[ -n "$d" ]] || continue
+  [[ " $formula_find " == *" $d "* ]] || mock_missing="$mock_missing $d"
+done <<< "$mock_doc_dirs"
+if [[ -z "$mock_missing" ]]; then
+  fail_ "self-test failed: modifying docs/install.md path to 'Code - Fake' did not trigger a failure"
+else
+  pass "self-test passed: mismatch between docs/install.md and Formula/coco.rb is caught"
+fi
+
+missing=""
+while IFS= read -r d; do
+  [[ -n "$d" ]] || continue
+  [[ " $formula_find " == *" $d "* ]] || missing="$missing $d"
+done <<< "$doc_dirs"
+if [[ -z "$doc_dirs" ]]; then
+  fail_ "could not read the uninstall find line from docs/install.md"
+elif [[ -n "$missing" ]]; then
+  fail_ "Formula/coco.rb uninstall find misses:$missing (docs/install.md covers: $(echo $doc_dirs | tr '\n' ' '))"
+else
+  pass "Formula/coco.rb uninstall find covers every dir docs/install.md covers"
+fi
+
+echo ""
 echo "=== Summary ==="
 if [[ "$fail" -eq 0 ]]; then
   echo "  all default-bundle-allowlist checks passed"

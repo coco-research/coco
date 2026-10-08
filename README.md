@@ -104,6 +104,7 @@ Uninstall removes symlinks whose target is this clone, and only those. Run it fr
 ```bash
 CLONE="$(pwd)"
 find ~/.claude ~/.cursor ~/.grok ~/.copilot -type l -lname "${CLONE}/*" -delete
+for app in "Code" "Code - Insiders" "VSCodium" "VSCodium - Insiders"; do for base in "$HOME/Library/Application Support" "${XDG_CONFIG_HOME:-$HOME/.config}"; do [ -d "$base/$app/User" ] && find "$base/$app/User" -type l -lname "${CLONE}/*" -delete; done; done
 ```
 
 A contains-match on the folder name would also delete links into a path that merely contains that name (for example `coco-research` when the clone is `coco`). Hermes profiles live under `~/.hermes/profiles`; use the same `"${CLONE}/*"` prefix there. Uninstall does not remove the generated `SI*.md` command files or the rules block between `<!-- coco:rules-start -->` and `<!-- coco:rules-end -->` in `CLAUDE.md`; delete those by hand.

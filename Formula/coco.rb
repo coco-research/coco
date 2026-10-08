@@ -39,12 +39,20 @@ class Coco < Formula
         #{libexec}
 
       To install Coco artifacts into your AI tool's expected paths:
-        coco                              # auto-detect (Claude Code, Cursor, Codex, generic)
+        coco                              # auto-detect; installs every default bundle
         coco --adapter claude-code        # override
-        coco --systems gsd,brain          # only these bundles
+        coco --systems gsd,brain          # replaces the default set: ONLY these bundles
+        coco --core-only                  # no bundles
+
+      The links point into the versioned path above. Re-run coco after
+      `brew upgrade` or `brew cleanup` so they follow the new version.
 
       To uninstall the symlinks (without removing the formula):
-        find ~/.claude ~/.cursor ~/.copilot -type l -lname "#{libexec}/*" -delete
+        find ~/.claude ~/.cursor ~/.grok ~/.copilot -type l -lname "#{libexec}/*" -delete
+        for app in "Code" "Code - Insiders" "VSCodium" "VSCodium - Insiders"; do for base in "$HOME/Library/Application Support" "${XDG_CONFIG_HOME:-$HOME/.config}"; do [ -d "$base/$app/User" ] && find "$base/$app/User" -type l -lname "#{libexec}/*" -delete; done; done
+      Generated files (Super Intelligence commands, the Coco block in
+      ~/.claude/CLAUDE.md) are real files, not links; see the Uninstall section of
+      https://github.com/coco-research/coco/blob/main/docs/install.md
     EOS
   end
 

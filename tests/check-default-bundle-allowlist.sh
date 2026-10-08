@@ -70,7 +70,9 @@ else
   pass "every --systems example in Formula/coco.rb says it replaces the default set"
 fi
 # The Formula's symlink-uninstall find must cover every dir install.md's find covers.
-doc_dirs="$(grep -E '^(find|for) ' docs/install.md | grep -oE '(~/\.[^ /]+|\$HOME/Library[^"]*|\$\{?XDG_CONFIG_HOME[^"]*|"[^"]+")' | tr -d '\"' | grep -v '^\$base' | grep -v '^\${CLONE}' | sort -u || true)"
+# Only the "Symlink-based adapters" uninstall code block, not every find/for line in install.md.
+uninstall_block="$(awk '/^## Uninstall/{u=1} u&&/^Symlink-based adapters/{s=1} s&&/^```bash/{c=1;next} c&&/^```/{exit} c' docs/install.md)"
+doc_dirs="$(printf '%s\n' "$uninstall_block" | grep -E '^(find|for) ' | grep -oE '(~/\.[^ /]+|\$HOME/Library[^"]*|\$\{?XDG_CONFIG_HOME[^"]*|"[^"]+")' | tr -d '\"' | grep -v '^\$base' | grep -v '^\${CLONE}' | sort -u || true)"
 formula_find="$(grep -E '(find|for) ' Formula/coco.rb | tr -d '\"' | tr ';' ' ' | tr '\n' ' ' || true)"
 
 # Verify the test itself: a simulated doc finding a path the formula lacks must fail.

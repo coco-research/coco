@@ -4,6 +4,21 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [1.6.0](https://github.com/coco-research/coco/compare/v1.5.1...v1.6.0) (2026-10-08)
+
+
+### Features
+
+* **skills:** maker-mdap study notes (CC BY 4.0) ([#329](https://github.com/coco-research/coco/issues/329)) ([8f6abd1](https://github.com/coco-research/coco/commit/8f6abd12417b3a172423f16cb1907d8a94368067))
+
+
+### Bug Fixes
+
+* **cli:** --help lists all 16 adapters, gated in CI ([#234](https://github.com/coco-research/coco/issues/234)) ([#310](https://github.com/coco-research/coco/issues/310)) ([20fb133](https://github.com/coco-research/coco/commit/20fb133eb7e22b9c52c664c8ac2493c9737635a5))
+* **cli:** --help lists all 16 adapters, gated in CI ([#234](https://github.com/coco-research/coco/issues/234)). ([20fb133](https://github.com/coco-research/coco/commit/20fb133eb7e22b9c52c664c8ac2493c9737635a5))
+* **install:** --help no longer prints the shebang ([#247](https://github.com/coco-research/coco/issues/247)) ([#313](https://github.com/coco-research/coco/issues/313)) ([2ddb559](https://github.com/coco-research/coco/commit/2ddb55987cf9471634673bf1c5382e63204340f2))
+* **install:** --help no longer prints the shebang ([#247](https://github.com/coco-research/coco/issues/247)). ([2ddb559](https://github.com/coco-research/coco/commit/2ddb55987cf9471634673bf1c5382e63204340f2))
+
 ## [Unreleased]
 
 ## [1.5.1]

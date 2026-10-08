@@ -280,7 +280,7 @@ def analyze_track(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Analyze a bundled music track and write /brag cue presets."
+        description="Analyze a music track and write /brag cue presets."
     )
     parser.add_argument("input", type=Path, help="Input audio file.")
     parser.add_argument("--output-json", type=Path, required=True)

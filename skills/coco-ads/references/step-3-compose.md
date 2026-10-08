@@ -100,6 +100,8 @@ mkdir -p <output-dir>/composition/assets/music
 cp <skill-assets>/music/<track>.mp3 <output-dir>/composition/assets/music/
 ```
 
+Music is not bundled with the skill. If `<skill-assets>/music/` has no `.mp3`, skip music, render without it, and tell the user to download a track from ende.app as `assets/music/README.md` describes.
+
 When running from an installed Claude skill, `<skill-assets>` is `~/.claude/skills/coco-ads/assets/`. From the repo, it is `skills/coco-ads/assets/`.
 
 Hyperframes copies any SFX it selects into the same `assets/` tree after choosing exact files.
@@ -190,7 +192,7 @@ Before moving to delivery, verify:
 - [ ] `<output-dir>/composition-brief.md` exists.
 - [ ] The brief clearly identifies the exact product moments to show.
 - [ ] The composition uses the current Hyperframes workflow, not a hardcoded `/coco-ads` template.
-- [ ] Music file is copied into `<output-dir>/composition/assets/music/`.
+- [ ] Music file is copied into `<output-dir>/composition/assets/music/` (or no track was downloaded and that is reported to the user).
 - [ ] At least one visual element subtly reacts to the music (audio-reactive treatment present), or extraction failure is documented.
 - [ ] At least 1 major tween is beat-locked to a strong cue (a `strongCue`, or the highest-`strength` beat from `hyperframes beats`) within ±0.15s, marked `// beat-locked` (or natural timing was chosen for readability).
 - [ ] Sequential events (cards, stats, list items) snap to consecutive `beats[]` timestamps (±0.10s), marked `// beat-grid` (or natural timing was chosen for readability).

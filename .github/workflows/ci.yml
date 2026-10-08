@@ -108,6 +108,11 @@ jobs:
       - name: Hyperframes telemetry is opt-in (no network call unless COCO_HYPERFRAMES_TELEMETRY=1)
         run: node --test systems/hyperframes/skills/media-use/scripts/lib/telemetry.test.mjs
 
+      - name: Caption font generator rejects unrecognised or mislabelled font files
+        # lab-0062: any font file in files/ that the generator doesn't embed and check
+        # (e.g. a reserved-name subset renamed Orbitron-Bold.woff2) must fail the build.
+        run: node --test systems/hyperframes/skills/embedded-captions/modes/standard/fonts/build-fonts-css.test.cjs
+
       - name: Test build-index.py runs cleanly
         run: |
           python3 scripts/build-index.py

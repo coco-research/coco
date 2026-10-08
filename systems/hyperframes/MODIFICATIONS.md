@@ -4,6 +4,30 @@
 
 Everything not listed here is as vendored from upstream.
 
+## 2026-10-08: caption font generator rejects unrecognised or mislabelled files (lab-0062)
+
+| | |
+|---|---|
+| **Files** | `skills/embedded-captions/modes/standard/fonts/build-fonts-css.cjs`; new `skills/embedded-captions/modes/standard/fonts/build-fonts-css.test.cjs`. |
+| **Change** | A font file in `files/` that the generator does not embed and check used to get only a warning (`*.woff2` with an unexpected name) or no message at all (`.woff`, `.otf` and other extensions), yet it still shipped. Now every file in `files/` must be a pinned upstream TTF, a `<slug>-latin-<weight>-<style>.woff2` subset or an `OFL-`/`Apache-2.0-` licence text, recognised by content as well as by extension; anything else fails the build. A subset's own name table must match its file name: family (after dropping trailing style words), OS/2 weight and italic flag. Every embedded family needs its licence text in `files/`. The generated `fonts.css` is byte-identical. The test is run by Coco's CI. |
+| **Reason** | Review of coco #334 (lab-0062): a reserved-name subset under another name (e.g. `Orbitron-Bold.woff2`) would have shipped unchecked. |
+
+## 2026-10-08: caption fonts with a Reserved Font Name ship unmodified (lab-0062)
+
+| | |
+|---|---|
+| **Files** | `skills/embedded-captions/modes/standard/fonts/files/`: removed `audiowide-latin-400-normal.woff2`, `creepster-latin-400-normal.woff2`, `monoton-latin-400-normal.woff2`, `orbitron-latin-{400,700}-normal.woff2` and `press-start-2p-latin-400-normal.woff2`; added `Audiowide-Regular.ttf`, `Creepster-Regular.ttf`, `Monoton-Regular.ttf`, `Orbitron[wght].ttf` and `PressStart2P-Regular.ttf`. `skills/embedded-captions/modes/standard/fonts/build-fonts-css.cjs`. |
+| **Change** | The five families' OFL texts reserve their font names, and a latin subset is a Modified Version that may not use them. The subsets are replaced by the unmodified files from google/fonts @ `2eb0b48d5f760f62e286216f0859a8c540dbc1bd` (sources and sha256 in Coco's `CREDITS.md`). The generator embeds each of those files as-is (`font/ttf`, `format('truetype')`; Orbitron is variable, `font-weight: 400 900`), checks its sha256 on every build and refuses a subset woff2 for any of these families. Advance widths and vertical metrics are identical to the old subsets (same font versions), so `assets/fonts/char-widths.json` is unchanged. |
+| **Reason** | lab-0062 legal ruling: no modified font may carry a Reserved Font Name. |
+
+## 2026-10-08: talking-head-recut no longer bundles Virgil (lab-0062)
+
+| | |
+|---|---|
+| **Files** | `skills/talking-head-recut/assets/fonts/Virgil.woff2` (removed), `skills/talking-head-recut/SKILL.md`, `skills/talking-head-recut/references/DESIGN_INDEX.md`, `skills/talking-head-recut/references/styles/editorial.html` |
+| **Change** | `Virgil.woff2` is deleted. `SKILL.md` drops its `@font-face` block and its entry in the available-fonts list, and points to `Caveat` or the system `cursive` font instead; the two reference files no longer list Virgil among the bundled fonts. Each edited file carries the notice `Modified by Coco, 2026-10-08: Virgil font removed (licence not confirmed). See MODIFICATIONS.md.` (in `SKILL.md`, on the first line after its front matter). Licence texts (`OFL-caveat.txt`, `OFL-inter.txt`, `OFL-lxgw-wenkai-tc.txt`, and `OFL-fredoka.txt` beside `music-to-video/references/templates/logo-split-lockup-pulse/assets/fredoka-700.woff2`) were added as new files; no vendored file was changed to add them. |
+| **Reason** | lab-0062 legal review (Kanika): every shipped font must have its licence text beside it or be removed. The bundled `Virgil.woff2` is byte-identical to `excalidraw/virgil`'s, whose repository LICENSE.md says OFL-1.1 (Ellinor Rapp, 2021), but the font file itself names "Your Own Font Foundry" (2011) and says "Freeware for personal use! For commercial license please go to https://www.yourownfont.com/". The licence could not be confirmed, so the file is removed. |
+
 ## 2026-10-04: media-use telemetry is off by default
 
 | | |

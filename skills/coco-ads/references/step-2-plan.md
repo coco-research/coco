@@ -182,7 +182,7 @@ Hyperframes can implement both patterns well — but only if the plan specifies 
 
 Choose the music direction in the plan. Leave exact SFX file selection and exact timestamps to Hyperframes during composition, because SFX should match the actual visual implementation.
 
-Default posture: include audio. Pick a music bed and a few tasteful SFX unless the user passed `--no-music` / `--no-sfx`, the assets are missing, or silence is explicitly part of the concept.
+Default posture: include audio. Pick a music bed and a few tasteful SFX unless the user passed `--no-music` / `--no-sfx`, the assets are missing (music is not bundled; it is only present if the user downloaded it, see `assets/music/README.md`), or silence is explicitly part of the concept.
 
 For each scene, note the intended audio role and likely audio-coupled opportunities:
 
@@ -198,7 +198,7 @@ Do not over-specify audio if the tone asks for restraint. For `yc-parody` or `de
 
 ## Music cue guidance
 
-Beat/cue sync is available for any track now (see `audio.md` → "Beat and cue sources"): bundled tracks have precomputed presets; custom tracks get cues at composition time via `analyze_music_cues.py` (rich, needs Python) or `npx hyperframes beats` (simple, zero-dep). When the plan chooses music, add a compact `Music cue guidance` section to `coco-ads-plan.md`:
+Beat/cue sync is available for any track now (see `audio.md` → "Beat and cue sources"): the suggested ende.app tracks have precomputed presets (once the user has downloaded them); custom tracks get cues at composition time via `analyze_music_cues.py` (rich, needs Python) or `npx hyperframes beats` (simple, zero-dep). When the plan chooses music, add a compact `Music cue guidance` section to `coco-ads-plan.md`:
 
 - The track and, if a preset exists, its tempo.
 - 1-3 strong-cue timestamps to target for major visual moments — from the preset if bundled, otherwise note "to be detected at composition time."

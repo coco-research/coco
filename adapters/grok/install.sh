@@ -20,7 +20,7 @@ while [[ $# -gt 0 ]]; do
     --systems) shift; IFS=',' read -ra SYSTEMS <<< "$1" ;;
     --core-only) CORE_ONLY=1 ;;
     --help|-h)
-      grep '^#' "$0" | sed 's/^# \?//'
+      bash "$REPO_ROOT/scripts/print-usage.sh" "$0"
       exit 0 ;;
     *) echo "Unknown flag: $1" >&2; exit 1 ;;
   esac

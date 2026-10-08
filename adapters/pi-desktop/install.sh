@@ -54,13 +54,13 @@ while [[ $# -gt 0 ]]; do
     --core-only) CORE_ONLY=1 ;;
     --systems) shift; SYSTEMS_CSV="${1:-}" ;;
     --source) shift; SOURCE_ROOT="$(cd "${1:-.}" && pwd)" ;;
-    --help|-h) grep '^#' "$0" | sed 's/^# \?//'; exit 0 ;;
+    --help|-h) bash "$REPO_ROOT/scripts/print-usage.sh" "${BASH_SOURCE[0]}"; exit 0 ;;
     *) echo "Unknown flag: $1" >&2; exit 1 ;;
   esac
   shift
 done
 
-# Bundles are the default. The framework advertises 227 skills and 386 commands and a
+# Bundles are the default. The framework advertises 228 skills and 387 commands and a
 # plain install used to deliver 70 and 38, because every bundle sat behind a flag nobody
 # knew to pass. --core-only is the opt-out; --systems still names an explicit subset.
 if [[ "$CORE_ONLY" -eq 1 ]]; then

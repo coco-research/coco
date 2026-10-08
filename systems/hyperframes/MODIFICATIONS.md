@@ -4,6 +4,14 @@
 
 Everything not listed here is as vendored from upstream.
 
+## 2026-10-08: caption font generator rejects unrecognised or mislabelled files (lab-0062)
+
+| | |
+|---|---|
+| **Files** | `skills/embedded-captions/modes/standard/fonts/build-fonts-css.cjs`; new `skills/embedded-captions/modes/standard/fonts/build-fonts-css.test.cjs`. |
+| **Change** | A font file in `files/` that the generator does not embed and check used to get only a warning (`*.woff2` with an unexpected name) or no message at all (`.woff`, `.otf` and other extensions), yet it still shipped. Now every file in `files/` must be a pinned upstream TTF, a `<slug>-latin-<weight>-<style>.woff2` subset or an `OFL-`/`Apache-2.0-` licence text, recognised by content as well as by extension; anything else fails the build. A subset's own name table must match its file name: family (after dropping trailing style words), OS/2 weight and italic flag. Every embedded family needs its licence text in `files/`. The generated `fonts.css` is byte-identical. The test is run by Coco's CI. |
+| **Reason** | Review of coco #334 (lab-0062): a reserved-name subset under another name (e.g. `Orbitron-Bold.woff2`) would have shipped unchecked. |
+
 ## 2026-10-08: caption fonts with a Reserved Font Name ship unmodified (lab-0062)
 
 | | |

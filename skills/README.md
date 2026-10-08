@@ -34,7 +34,7 @@ Skills organized by category. Each skill provides deep reference material for a 
 - **frontend-design** — Production-grade UI design avoiding AI slop
 - **tailwind-patterns** — Tailwind CSS v4 patterns and utilities
 - **web-design-guidelines** — Web interface compliance checker
-- **vercel-react-best-practices** — 57 React/Next.js performance rules
+- **vercel-react-best-practices** — pointer to Vercel's upstream React/Next.js performance skill (link-only stub)
 
 ## AI/APIs
 - **openai-api** — OpenAI stateless APIs (Chat, Embeddings, Images, Audio)

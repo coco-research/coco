@@ -66,8 +66,9 @@ mkdir -p coco-ads-output/composition/assets/music
 # From the repo copy:
 cp skills/coco-ads/assets/sfx/interface/bong_001.ogg coco-ads-output/composition/assets/sfx/interface/
 cp skills/coco-ads/assets/sfx/impact/impactBell_heavy_000.ogg coco-ads-output/composition/assets/sfx/impact/
-# Music only if the user downloaded it (it is not bundled):
-[ -f skills/coco-ads/assets/music/happy-beats-business-moves-vol-1-by-ende-dot-app.mp3 ] && cp skills/coco-ads/assets/music/happy-beats-business-moves-vol-1-by-ende-dot-app.mp3 coco-ads-output/composition/assets/music/
+# Music only if the user downloaded it (it is not bundled). This line succeeds
+# either way: it copies the track when present and prints a note when it is missing.
+if [ -f skills/coco-ads/assets/music/happy-beats-business-moves-vol-1-by-ende-dot-app.mp3 ]; then cp skills/coco-ads/assets/music/happy-beats-business-moves-vol-1-by-ende-dot-app.mp3 coco-ads-output/composition/assets/music/; else echo "music not downloaded; see skills/coco-ads/assets/music/README.md (continuing without music)"; fi
 
 # From an installed Claude skill, use ~/.claude/skills/coco-ads/assets/... instead.
 ```

@@ -23,7 +23,7 @@ Coco auto-detects your AI tool. Override if needed:
 | Windsurf, Cline | `bash install.sh --adapter generic` |
 | Continue (VS Code) | `bash install.sh --adapter vscode-continue` |
 
-That's it. On Claude Code your AI now has 189 skills, 386 commands and 34 agents (measured in [`docs/delivered-counts.json`](delivered-counts.json)).
+That's it. On Claude Code your AI now has 190 skills, 387 commands and 34 agents (measured in [`docs/delivered-counts.json`](delivered-counts.json)).
 
 ---
 
@@ -80,7 +80,7 @@ Super Intelligence routes a prompt to teams with a local embedding model (`text-
 
 ## Where things live
 
-- **Skills** → [`skills/`](../skills/) (75 core skills, each `<name>/SKILL.md`)
+- **Skills** → [`skills/`](../skills/) (76 core skills, each `<name>/SKILL.md`)
 - **Commands** → [`commands/<namespace>/`](../commands/) (`coco/`, `design/`, `email/`, `eng/`, `pm/`, `team/`, `util/`)
 - **Agents** → [`agents/`](../agents/)
 - **Systems** → [`systems/`](../systems/) (brain, cognee, gsd, hyperframes, learning, m0, reverse-skill, superintelligence, team; 6 install by default, `reverse-skill` is opt-in). The headline one is [Super Intelligence](../systems/superintelligence/README.md): the persona board behind the `/SI-*` commands.

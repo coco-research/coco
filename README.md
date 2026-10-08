@@ -1,6 +1,6 @@
 # CoCo Super Intelligence
 
-495 personas across 13 departments, **227 skills**[^installed] and **386 commands** in the full catalog (coco main, 2026-10-05).
+495 personas across 13 departments, **228 skills**[^installed] and **387 commands** in the full catalog (coco main, 2026-10-05).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/readme/hero-dark-mode.png">
@@ -9,8 +9,8 @@
 
 [![CI](https://img.shields.io/github/actions/workflow/status/coco-research/coco/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/coco-research/coco/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/coco-research/coco?style=flat-square&color=1234FF)](https://github.com/coco-research/coco/releases)
-[![Skills](https://img.shields.io/badge/skills-227?style=flat-square&color=5F5F58&labelColor=0B0B0B)](skills/)
-[![Commands](https://img.shields.io/badge/commands-386?style=flat-square&color=5F5F58&labelColor=0B0B0B)](commands/)
+[![Skills](https://img.shields.io/badge/skills-228?style=flat-square&color=5F5F58&labelColor=0B0B0B)](skills/)
+[![Commands](https://img.shields.io/badge/commands-387?style=flat-square&color=5F5F58&labelColor=0B0B0B)](commands/)
 [![Personas](https://img.shields.io/badge/personas-495-5F5F58?style=flat-square&color=5F5F58&labelColor=0B0B0B)](systems/superintelligence/)
 
 Open-core: the core is [MIT](LICENSE), and Super Intelligence is [proprietary](systems/superintelligence/LICENSE). Files stay on your machine. No telemetry. A version check may contact GitHub once a day.
@@ -82,7 +82,7 @@ How the router scores teams: [`systems/superintelligence/README.md`](systems/sup
 
 Released: v1.5.0 on npm. Today `npx` installs v1.5.0. That tag already contains the 13 Super Intelligence team skill files, but its installer does not install them as front doors. That fix, and several other installer fixes, are on main.
 
-The measured 189 skills / 386 commands / 34 agents ([`docs/delivered-counts.json`](docs/delivered-counts.json)) apply to main.
+The measured 190 skills / 387 commands / 34 agents ([`docs/delivered-counts.json`](docs/delivered-counts.json)) apply to main.
 
 Known gap: most GSD skills need the upstream GSD toolkit at `~/.claude/get-shit-done` (see [`systems/gsd/README.md`](systems/gsd/README.md)).
 
@@ -110,6 +110,7 @@ Uninstall removes symlinks whose target is this clone, and only those. Run it fr
 ```bash
 CLONE="$(pwd)"
 find ~/.claude ~/.cursor ~/.grok ~/.copilot -type l -lname "${CLONE}/*" -delete
+for app in "Code" "Code - Insiders" "VSCodium" "VSCodium - Insiders"; do for base in "$HOME/Library/Application Support" "${XDG_CONFIG_HOME:-$HOME/.config}"; do [ -d "$base/$app/User" ] && find "$base/$app/User" -type l -lname "${CLONE}/*" -delete; done; done
 ```
 
 A contains-match on the folder name would also delete links into a path that merely contains that name (for example `coco-research` when the clone is `coco`). Hermes profiles live under `~/.hermes/profiles`; use the same `"${CLONE}/*"` prefix there. Uninstall does not remove the generated `SI*.md` command files or the rules block between `<!-- coco:rules-start -->` and `<!-- coco:rules-end -->` in `CLAUDE.md`; delete those by hand.
@@ -154,16 +155,16 @@ The 495-persona roster was compiled with a systematic multi-tier workflow. Candi
 
 ## Skills catalog
 
-CoCo ships **227 skills** (75 core + 152 across bundles)[^installed]. Each one is an instruction set with state, checks, and error handling, not a one-line prompt. A slice:
+CoCo ships **228 skills** (76 core + 152 across bundles)[^installed]. Each one is an instruction set with state, checks, and error handling, not a one-line prompt. A slice:
 
 `ui-ux-pro-max` · `frontend-design` · `brainstorming` · `writing-plans` · `test-driven-development` · `systematic-debugging` · `verification-before-completion` · `prd-generator` · `openai-agents` · `coco-loop` · `coco-ads` · `arch-index`
 
 <details>
-<summary><strong>▸ Full catalog — every one of the 227 skills</strong></summary>
+<summary><strong>▸ Full catalog — every one of the 228 skills</strong></summary>
 
 <br>
 
-**Core skills (75)**
+**Core skills (76)**
 
 `agent-lightning` · `agent-self-eval` · `ai-marketing-videos` · `ai-product` · `api-design-principles` · `arb-review` · `arch-index` · `axiom-liquid-glass` · `brainstorming` · `browser-automation` · `c4-architecture` · `change-log` · `cli-anything` · `clone-website` · `coco` · `coco-ads` · `coco-cli` · `coco-diagram` · `coco-loop` · `coco-ship` · `code-verification` · `context-budget` · `design-taste-frontend` · `dispatching-parallel-agents` · `doc-sync` · `dr-plan` · `executing-plans` · `expo-api-routes` · `find-skills` · `finishing-a-development-branch` · `frontend-design` · `generate-tests` · `goal` · `humanizer` · `irp` · `journey-map` · `karpathy-guidelines` · `local-llm` · `media-memory` · `meeting-notes` · `nfr-tracker` · `openai-agents` · `openai-api` · `openai-apps-mcp` · `openai-whisper` · `pmstudio` · `prd-generator` · `prd-mastery` · `project-docs` · `receiving-code-review` · `recovery-plan` · `redesign-existing-projects` · `requesting-code-review` · `scroll-world` · `skill-creator` · `skill-evolution` · `stakeholder-comms` · `subagent-driven-development` · `swiftui-liquid-glass` · `systematic-debugging` · `tailwind-patterns` · `task-prd-creator` · `test-driven-development` · `ui-ux-pro-max` · `ultra-think` · `using-git-worktrees` · `using-superpowers` · `vercel-react-best-practices` · `verification-before-completion` · `visual-explainer` · `voice-ai` · `web-design-guidelines` · `workflow-routing` · `writing-plans` · `writing-skills`
 
@@ -198,14 +199,14 @@ Six bundles install by default. `--core-only` skips them. `--systems <list>` ins
 
 ## Technical specifications
 
-A default Claude Code install delivers **189 skills, 386 commands and 34 agents**, measured by running the installer. The repository holds 227 skills; the difference is the opt-in security pack and Cursor-only skills. The measured row is main.
+A default Claude Code install delivers **190 skills, 387 commands and 34 agents**, measured by running the installer. The repository holds 228 skills; the difference is the opt-in security pack and Cursor-only skills. The measured row is main.
 
 The v1.5.0 release `npx` installs today is older. See [Status and roadmap](#status-and-roadmap).
 
 <table align="center">
 <tr>
-<td align="center" width="20%"><h3>227</h3><sub>Skills</sub><br><small>75 Core + 152 Bundle · 189 install by default</small></td>
-<td align="center" width="20%"><h3>386</h3><sub>Slash Commands</sub><br><small>44 Core + 342 Generated</small></td>
+<td align="center" width="20%"><h3>228</h3><sub>Skills</sub><br><small>76 Core + 152 Bundle · 190 install by default</small></td>
+<td align="center" width="20%"><h3>387</h3><sub>Slash Commands</sub><br><small>45 Core + 342 Generated</small></td>
 <td align="center" width="20%"><h3>34</h3><sub>Specialized Agents</sub><br><small>10 Core + 24 Bundle</small></td>
 <td align="center" width="20%"><h3>495</h3><sub>Expert Personas</sub><br><small>Super Intelligence Board</small></td>
 <td align="center" width="20%"><h3>15</h3><sub>Cross-IDE Rules</sub><br><small>Cursor MDC Rules</small></td>
@@ -213,7 +214,7 @@ The v1.5.0 release `npx` installs today is older. See [Status and roadmap](#stat
 </table>
 
 <div align="center">
-  <sub><strong>Core install:</strong> 144 active assets (75 Skills, 44 Commands, 10 Agents, 15 Rules)</sub><br>
+  <sub><strong>Core install:</strong> 146 active assets (76 Skills, 45 Commands, 10 Agents, 15 Rules)</sub><br>
   <sub><strong>A plain install ships every bundle except the security-testing tooling</strong>, which stays opt-in via <code>--systems reverse-skill</code>.</sub><br>
   <sub><strong>Orchestration bundles:</strong> <strong>+68 GSD skills</strong> · <strong>+24 GSD agents</strong> · <strong>+20 HyperFrames skills</strong> · <strong>+13 Super Intelligence skills</strong> · <strong>+342 SI commands</strong> · <strong>+6 Brain skills</strong> · <strong>+4 M0 skills</strong> · <strong>+3 Cognee skills</strong> · <strong>3 Workflows</strong></sub>
 </div>
@@ -221,8 +222,8 @@ The v1.5.0 release `npx` installs today is older. See [Status and roadmap](#stat
 <table>
 <tr><td><strong>Spec Version</strong></td><td>1.5.0</td></tr>
 <tr><td><strong>License</strong></td><td>Open-core — <a href="LICENSE">MIT</a> core; Super Intelligence is <a href="systems/superintelligence/LICENSE">proprietary</a></td></tr>
-<tr><td><strong>Total Skills</strong></td><td>227 in the repository (75 Core + 152 Bundle); 189 install by default on Claude Code</td></tr>
-<tr><td><strong>Slash Commands</strong></td><td>386 on a default install — 44 Core (shipped) + 342 Super Intelligence (325 per-team + 17 cross-team, generated at install)</td></tr>
+<tr><td><strong>Total Skills</strong></td><td>228 in the repository (76 Core + 152 Bundle); 190 install by default on Claude Code</td></tr>
+<tr><td><strong>Slash Commands</strong></td><td>387 on a default install — 45 Core (shipped) + 342 Super Intelligence (325 per-team + 17 cross-team, generated at install)</td></tr>
 <tr><td><strong>Specialized Agents</strong></td><td>34 (10 Core + 24 Bundle)</td></tr>
 <tr><td><strong>Expert Personas</strong></td><td>495 across 13 departments and 98 cells</td></tr>
 <tr><td><strong>System Bundles</strong></td><td>6 (GSD, Brain, Cognee, HyperFrames, Super Intelligence, M0) — installed by default. <code>reverse-skill</code>, the security-testing bundle, stays opt-in with <code>--systems reverse-skill</code>. <code>/team</code> is core and needs no flag.</td></tr>
@@ -232,7 +233,7 @@ The v1.5.0 release `npx` installs today is older. See [Status and roadmap](#stat
 <tr><td><strong>Telemetry / SaaS</strong></td><td>No telemetry, no hosted service. One optional version check against GitHub per day (<code>COCO_NO_UPDATE_CHECK=1</code> turns it off)</td></tr>
 </table>
 
-<sub>Core install ships 75 skills + 44 commands + 10 agents + 15 rules (144 active assets). A plain <code>bash install.sh</code> delivers 189 skills, 386 commands and 34 agents on Claude Code: every bundle in the default allow-list (GSD, Brain, Cognee, HyperFrames, Super Intelligence, M0) is installed by default. <code>--core-only</code> installs the core set alone, and <code>--systems &lt;list&gt;</code> installs an explicit subset — including <code>reverse-skill</code>, the security-testing bundle, which stays opt-in and is never part of the default set. Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely. <code>adapters/INDEX.md</code> records what each adapter actually delivers, measured by running it.</sub>
+<sub>Core install ships 76 skills + 45 commands + 10 agents + 15 rules (146 active assets). A plain <code>bash install.sh</code> delivers 190 skills, 387 commands and 34 agents on Claude Code: every bundle in the default allow-list (GSD, Brain, Cognee, HyperFrames, Super Intelligence, M0) is installed by default. <code>--core-only</code> installs the core set alone, and <code>--systems &lt;list&gt;</code> installs an explicit subset — including <code>reverse-skill</code>, the security-testing bundle, which stays opt-in and is never part of the default set. Super Intelligence slash commands are generated locally at install time from the team registries — no command files are transmitted or stored remotely. <code>adapters/INDEX.md</code> records what each adapter actually delivers, measured by running it.</sub>
 
 ## FAQ
 
@@ -292,4 +293,4 @@ Releases are in [`CHANGELOG.md`](CHANGELOG.md) and on the [GitHub Releases](http
 
 Open-core. The core of this repository is MIT, in [`LICENSE`](LICENSE). Super Intelligence (`systems/superintelligence/`) is proprietary, in [`systems/superintelligence/LICENSE`](systems/superintelligence/LICENSE). Third-party bundles keep their own licences: HyperFrames is Apache-2.0, and `reverse-skill` documents its upstream licence in its own README.
 
-[^installed]: 189 of the 227 skills install by default on Claude Code, together with all 386 commands and 34 agents. The other 38 are the opt-in `reverse-skill` security pack (33, installed only with `--systems reverse-skill`) and 5 Cursor-only skills. Measured by running the installer, not by counting files: see [`docs/delivered-counts.json`](docs/delivered-counts.json), and [`adapters/INDEX.md`](adapters/INDEX.md) for every other IDE.
+[^installed]: 190 of the 228 skills install by default on Claude Code, together with all 387 commands and 34 agents. The other 38 are the opt-in `reverse-skill` security pack (33, installed only with `--systems reverse-skill`) and 5 Cursor-only skills. Measured by running the installer, not by counting files: see [`docs/delivered-counts.json`](docs/delivered-counts.json), and [`adapters/INDEX.md`](adapters/INDEX.md) for every other IDE.

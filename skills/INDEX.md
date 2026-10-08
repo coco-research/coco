@@ -48,7 +48,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [test-driven-development](test-driven-development/SKILL.md) | Use when implementing any feature or bugfix, before writing implementation code |
 | [using-git-worktrees](using-git-worktrees/SKILL.md) | Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart  |
 | [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) | Use when writing, reviewing, or refactoring React or Next.js code, or optimizing data fetching, bundle size, and re-renders. Applies Vercel impact-prioritized p |
-| [voice-ai](voice-ai/SKILL.md) | Voice AI architecture and implementation guide. Covers two architectures: speech-to-speech (OpenAI Realtime API, lowest latency) and pipeline (STT->LLM->TTS, mo |
+| [voice-ai](voice-ai/SKILL.md) | Pointer to the upstream skill for building voice agents with speech-to-speech and STT-LLM-TTS pipelines, installed from upstream. |
 
 ## Foundational (13)
 
@@ -59,7 +59,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [dispatching-parallel-agents](dispatching-parallel-agents/SKILL.md) | Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies |
 | [executing-plans](executing-plans/SKILL.md) | Use when you have a written implementation plan to execute in a separate session with review checkpoints |
 | [humanizer](humanizer/SKILL.md) | Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written. Based on Wikipedia's compreh |
-| [karpathy-guidelines](karpathy-guidelines/SKILL.md) | Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, reviewing, or refactoring code to avoid overcomplication, make surgical changes, s |
+| [karpathy-guidelines](karpathy-guidelines/SKILL.md) | Pointer to the upstream skill for behavioural guidelines that reduce common LLM coding mistakes, installed from upstream. |
 | [subagent-driven-development](subagent-driven-development/SKILL.md) | Use when executing implementation plans with independent tasks in the current session |
 | [systematic-debugging](systematic-debugging/SKILL.md) | Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes |
 | [ultra-think](ultra-think/SKILL.md) | Use when facing architectural decisions, complex trade-offs, strategic technology choices, or scaling and migration questions that deserve more than a quick ans |
@@ -104,7 +104,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [pmstudio-meeting-notes](meeting-notes/SKILL.md) | Generate structured meeting notes from transcripts or pasted text. Use when someone says "meeting notes", "process this transcript", "summarize this call", "not |
 | [pmstudio](pmstudio/SKILL.md) | PM Studio command center. Use for a quick overview of available commands and document inventory. Use when someone says "pmstudio", "show commands", "what can I  |
 | [prd-generator](prd-generator/SKILL.md) | Generate comprehensive Product Requirements Documents (PRDs) for product managers. Use this skill when users ask to "create a PRD", "write product requirements" |
-| [prd-mastery](prd-mastery/SKILL.md) | Use when the user asks for a PRD, requirements doc, or product spec grounded in the existing repo, or wants a token-efficient PRD folder. Runs repo reconnaissan |
+| [prd-mastery](prd-mastery/SKILL.md) | Pointer to the upstream skill for writing PRDs grounded in the existing repo, with a fixed output folder, installed from upstream. |
 | [project-docs](project-docs/SKILL.md) | Use when starting a new project, onboarding to an existing product, or auditing an existing folder structure against the standard. Scaffolds the 16-document set |
 | [pmstudio-comms](stakeholder-comms/SKILL.md) | Generate templated stakeholder communications from project context. Use when someone asks to "write a go-live email", "create a status update", "onboard someone |
 | [task-prd-creator](task-prd-creator/SKILL.md) | Use when the user says I want to add X, implement Y, create a task for Z, or plan this feature. Writes a task file plus a PRD under .agent/, links them, and wai |

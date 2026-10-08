@@ -2,7 +2,7 @@
 
 Auto-generated view. Filtered to `domain: engineering` skills.
 
-**21 skills.**
+**22 skills.**
 
 | Skill | Description |
 |-------|-------------|
@@ -16,6 +16,7 @@ Auto-generated view. Filtered to `domain: engineering` skills.
 | [expo-api-routes](../../skills/expo-api-routes/SKILL.md) | Use when adding server-side API routes to an Expo Router app (+api.ts files) for secrets, database access, third-party proxies, webhooks, CORS, or EAS Hosting deploys. Covers file routing, env vars, a |
 | [finishing-a-development-branch](../../skills/finishing-a-development-branch/SKILL.md) | Use when implementation is done and tests pass and the user must choose to merge locally, open a PR, keep the branch, or discard it. Presents those four options, executes the choice, and cleans up the |
 | [generate-tests](../../skills/generate-tests/SKILL.md) | Use when asked to generate tests for a file, module or component, to raise coverage, or to bootstrap a suite for untested code. Detects the project's test framework and conventions first, then writes  |
+| [maker-mdap](../../skills/maker-mdap/SKILL.md) | Knowledge base from "Solving a Million-Step LLM Task with Zero Errors" (Meyerson, Paolo, Dailey, Shahrzad, Francon, Hayes, Qiu, Hodjat, Miikkulainen — arXiv:2511.09030). Use when designing long-horizo |
 | [media-memory](../../skills/media-memory/SKILL.md) | Use when the user sends or generates an image, screenshot, video, audio or file and wants it saved, or asks to find past media (that diagram, the mockup from last week). Ingests and searches with loca |
 | [openai-agents](../../skills/openai-agents/SKILL.md) | Build AI applications with OpenAI Agents SDK - text agents, voice agents, multi-agent handoffs, tools with Zod schemas, guardrails, and streaming. Prevents 11 documented errors.
 

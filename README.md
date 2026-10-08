@@ -274,7 +274,7 @@ CoCo stands on other people's work. The short list:
 - **[latent-spaces/brag](https://github.com/latent-spaces/brag)** (Shunit Haviv) and **[HyperFrames](https://www.npmjs.com/package/hyperframes)** (HeyGen) for the launch-video flow behind `coco-ads`.
 - **[leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill)** (Leon) for `design-taste-frontend` and `redesign-existing-projects`.
 - **[HKUDS/CLI-Anything](https://github.com/HKUDS/CLI-Anything)** for the method behind `cli-anything`.
-- **[Vercel](https://vercel.com/)** and **[vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines)** for `vercel-react-best-practices` and `web-design-guidelines`.
+- **[Vercel](https://vercel.com/)**: **[vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines)** for `web-design-guidelines`, and **[vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)** for `vercel-react-best-practices` (link-only stub).
 
 Full attributions, including audio ([ende.app](https://ende.app), [Kenney.nl](https://kenney.nl)), are in [`CREDITS.md`](CREDITS.md). If something influenced CoCo and is missing, that is a bug: [open an issue](https://github.com/coco-research/coco/issues/new/choose).
 

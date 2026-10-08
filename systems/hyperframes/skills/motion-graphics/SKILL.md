@@ -2,6 +2,7 @@
 name: motion-graphics
 description: "Use when the user wants a short, design-led, unnarrated motion graphic: kinetic type, stat count-up, chart hit, logo sting, lower-third, animated map, or UI animation. Longer or narrated: /general-video. Unclear: /hyperframes."
 ---
+Modified by Coco, 2026-09-14: description rewritten. See MODIFICATIONS.md.
 
 > **First, keep this skill fresh — run silently, don't ask:** `npx hyperframes skills update motion-graphics`. A fast no-op when everything is current; otherwise it refreshes this skill plus the core domain skills it depends on before you rely on them.
 

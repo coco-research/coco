@@ -17,3 +17,11 @@ Notes:
 
 - `skills/media-use/references/meta.md` and `telemetry-dashboard.md` still describe the upstream behaviour (opt-out). In this bundle, telemetry from media-use is off unless `COCO_HYPERFRAMES_TELEMETRY=1` is set.
 - The separate `hyperframes` npm CLI (run with `npx hyperframes`) is not vendored here and is not changed by this edit. It manages its own telemetry (`npx hyperframes telemetry status`, `npx hyperframes telemetry disable`).
+
+## 2026-09-14: skill descriptions rewritten (e75f220)
+
+| | |
+|---|---|
+| **Files** | `skills/motion-graphics/SKILL.md`, `skills/music-to-video/SKILL.md`, `skills/pr-to-video/SKILL.md`, `skills/remotion-to-hyperframes/SKILL.md`, `skills/slideshow/SKILL.md`, `skills/website-to-video/SKILL.md` |
+| **Change** | The `description` in each file's front matter was rewritten in commit `e75f220` (2026-09-14). The same commit also changed a few body lines in three files: `music-to-video` (one sentence in the opening paragraph), `slideshow` (two copies of the presenter-notes paragraph and one reference path, `skills/slideshow/references/standalone-harness.md` to `references/standalone-harness.md`) and `website-to-video` (a deprecation note pointing to `/product-launch-video`, and two reference links moved to `../hyperframes-animation/`). Each file carries the notice `Modified by Coco, 2026-09-14: description rewritten. See MODIFICATIONS.md.` on the first line after its front matter (a line above the front matter would break the skill loader). |
+| **Reason** | Coco #168 rewrote skill descriptions repo-wide so each one says when to use the skill (the trigger), not only what it is: a description is the loader's only signal for whether to open the file. |

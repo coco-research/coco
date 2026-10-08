@@ -2,6 +2,7 @@
 name: pr-to-video
 description: "Use when the user wants a GitHub PR (URL, owner/repo#N, or 'this PR') made into a code-change explainer video from its diff and commits: changelog, feature reveal, fix, or refactor. Not a product promo; unclear goes to /hyperframes."
 ---
+Modified by Coco, 2026-09-14: description rewritten. See MODIFICATIONS.md.
 
 > **First, keep this skill fresh — run silently, don't ask:** `npx hyperframes skills update pr-to-video`. A fast no-op when everything is current; otherwise it refreshes this skill plus the core domain skills it depends on before you rely on them.
 

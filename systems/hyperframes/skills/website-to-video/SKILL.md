@@ -2,6 +2,7 @@
 name: website-to-video
 description: "Use when the user wants a video of a website (site tour, portfolio, docs or landing-page showcase) captured from a URL. Deprecated upstream since v0.7.59: folded into /product-launch-video, which owns URL promo work."
 ---
+Modified by Coco, 2026-09-14: description rewritten. See MODIFICATIONS.md.
 
 > **Deprecated upstream since v0.7.59 — folded into `/product-launch-video`; use that skill for new work.**
 

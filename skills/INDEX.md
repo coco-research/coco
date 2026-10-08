@@ -104,7 +104,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [pmstudio-meeting-notes](meeting-notes/SKILL.md) | Generate structured meeting notes from transcripts or pasted text. Use when someone says "meeting notes", "process this transcript", "summarize this call", "not |
 | [pmstudio](pmstudio/SKILL.md) | PM Studio command center. Use for a quick overview of available commands and document inventory. Use when someone says "pmstudio", "show commands", "what can I  |
 | [prd-generator](prd-generator/SKILL.md) | Generate comprehensive Product Requirements Documents (PRDs) for product managers. Use this skill when users ask to "create a PRD", "write product requirements" |
-| [prd-mastery](prd-mastery/SKILL.md) | Use when the user asks for a PRD, requirements doc, or product spec grounded in the existing repo, or wants a token-efficient PRD folder. Runs repo reconnaissan |
+| [prd-mastery](prd-mastery/SKILL.md) | Pointer to the upstream skill for writing PRDs grounded in the existing repo, with a fixed output folder, installed from upstream. |
 | [project-docs](project-docs/SKILL.md) | Use when starting a new project, onboarding to an existing product, or auditing an existing folder structure against the standard. Scaffolds the 16-document set |
 | [pmstudio-comms](stakeholder-comms/SKILL.md) | Generate templated stakeholder communications from project context. Use when someone asks to "write a go-live email", "create a status update", "onboard someone |
 | [task-prd-creator](task-prd-creator/SKILL.md) | Use when the user says I want to add X, implement Y, create a task for Z, or plan this feature. Writes a task file plus a PRD under .agent/, links them, and wai |

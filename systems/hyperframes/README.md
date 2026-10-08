@@ -10,7 +10,7 @@ That `LICENSE` does **not** govern every file underneath it, and an earlier vers
 
 - **`skills/talking-head-recut/`** carries its own [`NOTICE.md`](skills/talking-head-recut/NOTICE.md). It is adapted from [`notedit/vtake-skills`](https://github.com/notedit/vtake-skills) under the **MIT** licence, copyright leeoxiang, not from HeyGen.
 - **Two vendored GSAP builds** (`gsap.min.js`, reachable from the motion-primitives assets) are GreenSock's, under the **GSAP Standard License** granted by Webflow, Inc. (https://gsap.com/standard-license) rather than Apache-2.0. That licence is not open source: GSAP is free to use (commercial use included) on websites, apps and digital interfaces, but may not be used in no-code visual animation-building tools that compete with Webflow's without written consent, may not be reverse engineered to build such products, and its notices must stay. Each file's notice reads "Copyright 2026, GreenSock. All rights reserved. Subject to the terms at https://gsap.com/standard-license".
-- **56 bundled font files** across the caption and stroke-font assets, including Hershey stroke fonts and Fontsource redistributions of Google Fonts, each carry their originating font licence. Fourteen files in the bundle reference GreenSock, Hershey or Fontsource directly.
+- **55 bundled font files** across the caption and stroke-font assets, including Hershey stroke fonts, Fontsource redistributions of Google Fonts and five unmodified google/fonts TTFs for families with a Reserved Font Name (see CREDITS.md), each carry their originating font licence. Fourteen files in the bundle reference GreenSock, Hershey or Fontsource directly.
 
 Where a file or directory has a nearer `LICENSE` or `NOTICE`, that nearer one wins.
 

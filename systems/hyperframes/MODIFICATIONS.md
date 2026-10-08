@@ -4,6 +4,14 @@
 
 Everything not listed here is as vendored from upstream.
 
+## 2026-10-08: caption fonts with a Reserved Font Name ship unmodified (lab-0062)
+
+| | |
+|---|---|
+| **Files** | `skills/embedded-captions/modes/standard/fonts/files/`: removed `audiowide-latin-400-normal.woff2`, `creepster-latin-400-normal.woff2`, `monoton-latin-400-normal.woff2`, `orbitron-latin-{400,700}-normal.woff2` and `press-start-2p-latin-400-normal.woff2`; added `Audiowide-Regular.ttf`, `Creepster-Regular.ttf`, `Monoton-Regular.ttf`, `Orbitron[wght].ttf` and `PressStart2P-Regular.ttf`. `skills/embedded-captions/modes/standard/fonts/build-fonts-css.cjs`. |
+| **Change** | The five families' OFL texts reserve their font names, and a latin subset is a Modified Version that may not use them. The subsets are replaced by the unmodified files from google/fonts @ `2eb0b48d5f760f62e286216f0859a8c540dbc1bd` (sources and sha256 in Coco's `CREDITS.md`). The generator embeds each of those files as-is (`font/ttf`, `format('truetype')`; Orbitron is variable, `font-weight: 400 900`), checks its sha256 on every build and refuses a subset woff2 for any of these families. Advance widths and vertical metrics are identical to the old subsets (same font versions), so `assets/fonts/char-widths.json` is unchanged. |
+| **Reason** | lab-0062 legal ruling: no modified font may carry a Reserved Font Name. |
+
 ## 2026-10-08: talking-head-recut no longer bundles Virgil (lab-0062)
 
 | | |

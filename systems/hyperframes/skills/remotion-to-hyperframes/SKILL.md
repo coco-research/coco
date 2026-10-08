@@ -2,6 +2,7 @@
 name: remotion-to-hyperframes
 description: "Use when the user explicitly asks to port, convert or migrate a Remotion source to HyperFrames HTML: one-way, Remotion-only. A passing mention or a lookalike request is a fresh build (/general-video); unclear intent goes to /hyperframes."
 ---
+Modified by Coco, 2026-09-14: description rewritten. See MODIFICATIONS.md.
 
 > **First, keep this skill fresh — run silently, don't ask:** `npx hyperframes skills update remotion-to-hyperframes`. A fast no-op when everything is current; otherwise it refreshes this skill plus the core domain skills it depends on before you rely on them.
 

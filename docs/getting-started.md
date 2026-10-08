@@ -19,9 +19,11 @@ Coco auto-detects your AI tool. Override if needed:
 | Claude Code | `bash install.sh --adapter claude-code` |
 | Cursor | `bash install.sh --adapter cursor` |
 | Codex CLI | `bash install.sh --adapter codex` |
-| Aider, Continue, Windsurf, Cline | `bash install.sh --adapter generic` |
+| Aider | `bash install.sh --adapter aider` |
+| Windsurf, Cline | `bash install.sh --adapter generic` |
+| Continue (VS Code) | `bash install.sh --adapter vscode-continue` |
 
-That's it. On Claude Code your AI now has 189 skills, 386 commands and 34 agents (measured in [`docs/delivered-counts.json`](delivered-counts.json)).
+That's it. On Claude Code your AI now has 190 skills, 387 commands and 34 agents (measured in [`docs/delivered-counts.json`](delivered-counts.json)).
 
 ---
 
@@ -45,13 +47,9 @@ In Claude Code and Cursor, this appears as a first-class slash command. In Codex
 
 ---
 
-## Add an orchestration system
+## Orchestration is already installed
 
-```bash
-bash install.sh --systems gsd
-```
-
-Adds 68 skills for project orchestration: state-tracked phases, parallel agent waves, atomic commits, verification gates.
+A plain `bash install.sh` installs all 6 default bundles: GSD, Brain, Cognee, HyperFrames, Super Intelligence and M0. GSD's project orchestration (state-tracked phases, parallel agent waves, atomic commits, verification gates) is therefore available right away:
 
 ```text
 /gsd-new-project
@@ -61,14 +59,31 @@ Adds 68 skills for project orchestration: state-tracked phases, parallel agent w
 
 State persists in `.planning/` — survives context resets.
 
+### Narrow your install
+
+`--systems <list>` replaces the default bundle set, it does not add to it. `--core-only` installs no bundles at all.
+
+```bash
+bash install.sh --systems gsd      # GSD only; the other 5 bundles are not installed
+bash install.sh --core-only        # core skills and commands only
+```
+
+The install receipt counts only that run, so after `--systems gsd` it reports a much smaller install. A narrower run does not remove what an earlier run already linked: those files stay until you uninstall (see [`install.md`](install.md)). `reverse-skill` is not a default bundle; opt in with `--systems reverse-skill`.
+
+---
+
+## Optional: semantic routing
+
+Super Intelligence routes a prompt to teams with a local embedding model (`text-embedding-nomic-embed-text-v1.5` at `http://127.0.0.1:1234/v1/embeddings`, LM Studio's default port). It is optional: without it, routing falls back to keyword matching and says so (`keyword fallback active`). Setup and how to verify: [`install.md`](install.md#optional-semantic-routing-for-super-intelligence).
+
 ---
 
 ## Where things live
 
-- **Skills** → [`skills/`](../skills/) (75 entries, each `<name>/SKILL.md`)
-- **Commands** → [`commands/<namespace>/`](../commands/) (`team/`, `email/`, `design/`, `eng/`, `pm/`, `util/`)
+- **Skills** → [`skills/`](../skills/) (76 core skills, each `<name>/SKILL.md`)
+- **Commands** → [`commands/<namespace>/`](../commands/) (`coco/`, `design/`, `email/`, `eng/`, `pm/`, `team/`, `util/`)
 - **Agents** → [`agents/`](../agents/)
-- **Systems** → [`systems/`](../systems/) (gsd, brain, team)
+- **Systems** → [`systems/`](../systems/) (brain, cognee, gsd, hyperframes, learning, m0, reverse-skill, superintelligence, team; 6 install by default, `reverse-skill` is opt-in). The headline one is [Super Intelligence](../systems/superintelligence/README.md): the persona board behind the `/SI-*` commands.
 - **Architecture** → [`architecture.md`](architecture.md)
 - **Install matrix** → [`install.md`](install.md)
 - **Recommended plugins** → [`recommended-plugins.md`](recommended-plugins.md)

@@ -14,12 +14,12 @@
 class Coco < Formula
   desc "Open-source AI workflow framework — skills, agents, commands, multi-agent orchestration"
   homepage "https://github.com/coco-research/coco"
-  url "https://github.com/coco-research/coco/archive/refs/tags/v1.5.0.tar.gz"
-  sha256 "c9a5a50017122f38dbd62fd096af61b8e87dd59928366341541a1cb9e0679cc9"
+  url "https://github.com/coco-research/coco/archive/refs/tags/v1.5.1.tar.gz"
+  sha256 "bc2971276a4ee11f5ad3a3347ef1083eb9cd93ab95127e538bbfb97c82e5fd9d"
   # Open-core: MIT core (see LICENSE) + proprietary Super Intelligence
   # (see systems/superintelligence/LICENSE). Not a single SPDX identifier.
   license :cannot_represent
-  version "1.5.0"
+  version "1.5.1"
 
   depends_on "git"
   depends_on "bash"
@@ -39,12 +39,20 @@ class Coco < Formula
         #{libexec}
 
       To install Coco artifacts into your AI tool's expected paths:
-        coco                              # auto-detect (Claude Code, Cursor, Codex, generic)
+        coco                              # auto-detect; installs every default bundle
         coco --adapter claude-code        # override
-        coco --systems gsd,brain          # only these bundles
+        coco --systems gsd,brain          # replaces the default set: ONLY these bundles
+        coco --core-only                  # no bundles
+
+      The links point into the versioned path above. Re-run coco after
+      `brew upgrade` or `brew cleanup` so they follow the new version.
 
       To uninstall the symlinks (without removing the formula):
-        find ~/.claude ~/.cursor ~/.copilot -type l -lname "#{libexec}/*" -delete
+        find ~/.claude ~/.cursor ~/.grok ~/.copilot -type l -lname "#{libexec}/*" -delete
+        for app in "Code" "Code - Insiders" "VSCodium" "VSCodium - Insiders"; do for base in "$HOME/Library/Application Support" "${XDG_CONFIG_HOME:-$HOME/.config}"; do [ -d "$base/$app/User" ] && find "$base/$app/User" -type l -lname "#{libexec}/*" -delete; done; done
+      Generated files (Super Intelligence commands, the Coco block in
+      ~/.claude/CLAUDE.md) are real files, not links; see the Uninstall section of
+      https://github.com/coco-research/coco/blob/main/docs/install.md
     EOS
   end
 

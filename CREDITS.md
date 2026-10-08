@@ -6,7 +6,7 @@ CoCo stands on the shoulders of excellent open-source work. This file credits ev
 
 | Project | What CoCo took | Upstream | License |
 |---|---|---|---|
-| **Superpowers** by Jesse Vincent (obra) | The core engineering-discipline skill set bundled here (brainstorming, systematic-debugging, test-driven-development, writing-plans, executing-plans, using-git-worktrees, code-review flows, verification-before-completion, writing-skills, and the `using-superpowers` meta-skill) | https://github.com/obra/superpowers | See upstream |
+| **Superpowers** by Jesse Vincent (obra) | The core engineering-discipline skill set bundled here (brainstorming, systematic-debugging, test-driven-development, writing-plans, executing-plans, using-git-worktrees, code-review flows, verification-before-completion, writing-skills, and the `using-superpowers` meta-skill) | https://github.com/obra/superpowers | MIT (Copyright (c) 2025 Jesse Vincent; notice at `licenses/third-party/superpowers.LICENSE`) |
 | **GSD — Get Shit Done** by TÂCHES (Lex Christopherson) | The full GSD orchestration bundle (`systems/gsd/`: 68 skills + 24 agents for phase planning, atomic execution, verification gates), vendored from the archived original at https://github.com/gsd-build/get-shit-done | https://github.com/open-gsd/gsd-core | MIT (Copyright (c) 2025 Lex Christopherson) |
 | **humanizer** by Siqi Chen | The `humanizer` skill — detects and rewrites signs of AI-generated text (vendored, pinned at v2.8.0; upstream is at v2.9.x, ordinary version drift) | https://github.com/blader/humanizer | MIT |
 | **andrej-karpathy-skills** by forrestchang | The `karpathy-guidelines` skill — behavioral guidelines to reduce common LLM coding mistakes | https://github.com/multica-ai/andrej-karpathy-skills | MIT (per the plugin manifest; upstream has no LICENSE file, so no copyright line is quoted — see `skills/karpathy-guidelines/LICENSE`) |
@@ -51,6 +51,17 @@ Some skills teach or wrap third-party platforms. These are original write-ups bu
 | **React Flow / xyflow** (MIT) — the node-graph library `journey-map` builds on; the skill itself is CoCo's own write-up and vendors no upstream code | `journey-map` | https://github.com/xyflow/xyflow |
 | **Expo** — Router and EAS Hosting API-route conventions | `expo-api-routes` | https://docs.expo.dev |
 | **Cognee** by topoteretes (Apache-2.0) — knowledge-graph memory engine the `systems/cognee/` bundle wraps over its local HTTP API (no upstream code vendored; the bundle's skills are CoCo's own write-ups) | `cognee`, `cognee-store`, `cognee-recall` | https://github.com/topoteretes/cognee |
+
+## Attribution pending
+
+These items are held under the lab-0062 audit (GC ruling, 2026-10-07). Each stays out of packages until its attribution is confirmed or it is replaced.
+
+- `skills/voice-ai/`: attribution pending (lab-0062, GC ruling 2026-10-07).
+- `skills/vercel-react-best-practices/`: attribution pending (lab-0062, GC ruling 2026-10-07).
+- `skills/clone-website/`: attribution pending (lab-0062, GC ruling 2026-10-07).
+- `skills/prd-mastery/`: attribution pending (lab-0062, GC ruling 2026-10-07).
+- `skills/karpathy-guidelines/`: attribution pending (lab-0062, GC ruling 2026-10-07).
+- `systems/hyperframes/skills/embedded-captions/modes/standard/fonts/files/` (caption fonts): attribution pending (lab-0062, GC ruling 2026-10-07).
 
 ## How we credit
 

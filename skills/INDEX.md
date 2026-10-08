@@ -241,7 +241,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
 | Skill | Description |
 |-------|-------------|
-| [m0](../systems/m0/skills/m0/SKILL.md) | Use when the user says 'm0', 'm0 status', 'start m0', 'cross-tool memory', 'operational thread', or 'where is my memory stored', or when the M0 server, store, s |
+| [m0](../systems/m0/skills/m0/SKILL.md) | Use when the user says 'm0', 'm0 status', 'start m0', 'cross-tool memory', 'operational thread', or 'where is my memory stored', or when the M0 daemon or MCP wi |
 | [m0-handoff](../systems/m0/skills/m0-handoff/SKILL.md) | Use when the user says m0 handoff, before I compact, end of session, save session state, resume where we left off, or continue in Cursor or Claude Code. Writes  |
 | [m0-recall](../systems/m0/skills/m0-recall/SKILL.md) | Use when the user asks m0 recall, where were we, what did we do last time, catch me up, what is next, or to resume context from another tool. Reads the recent M |
 | [m0-remember](../systems/m0/skills/m0-remember/SKILL.md) | Use when the user says 'm0 remember', 'record what we did', 'note for next session' or 'write a checkpoint', or after finishing a step worth handing to the next |

@@ -34,6 +34,23 @@ for d in adapters/*/; do
     || fail "adapters/$adapter/install.sh --dry-run"
 done
 
+# --help must print usage, not the shebang line (#247); "!" form on GNU sed, "#!" on BSD sed
+for f in install.sh adapters/*/install.sh scripts/generate-si-commands.sh; do
+  status=0
+  out=$(bash "$f" --help 2>&1) || status=$?
+  if [ $status -ne 0 ]; then
+    fail "$f --help exited $status"
+  elif [ -z "$out" ]; then
+    fail "$f --help is empty"
+  else
+    first=${out%%$'\n'*}
+    case "$first" in
+      *"/usr/bin/env"*) fail "$f --help starts with the shebang" ;;
+      *) pass "$f --help OK" ;;
+    esac
+  fi
+done
+
 bash adapters/cursor/install.sh --dry-run --systems superintelligence > /tmp/cursor-systems.out 2>&1 \
   && pass "cursor install.sh --dry-run --systems superintelligence" \
   || fail "cursor install.sh --dry-run --systems superintelligence"
@@ -48,6 +65,10 @@ bash tests/cursor-si-commands.sh && pass "cursor --systems superintelligence wri
 echo ""
 echo "=== Smoke test: aider .aider.conf.yml keys ==="
 bash tests/aider-conf-keys.sh && pass "aider .aider.conf.yml uses only real aider option keys" || fail "aider .aider.conf.yml has keys aider does not recognize"
+
+echo ""
+echo "=== Smoke test: aider AGENTS.md agent descriptions ==="
+bash tests/aider-agent-desc.sh && pass "aider AGENTS.md carries full agent descriptions" || fail "aider AGENTS.md truncates agent descriptions"
 
 echo ""
 echo "=== Smoke test: root install.sh ==="
@@ -106,6 +127,13 @@ bash tests/check-security-surface.sh && pass "security-surface checks" || fail "
 echo ""
 echo "=== Smoke test: aider installer backs up existing files ==="
 bash tests/aider-backup.sh && pass "aider installer backs up existing AGENTS.md and .aider.conf.yml" || fail "aider installer overwrote existing files without a backup"
+
+echo ""
+echo "=== Smoke test: generic/codex clone guard (issue #238) ==="
+bash tests/generic-clone-guard.sh && pass "clone guard refuses in-repo AGENTS.md writes" || fail "clone guard let an in-repo write through"
+
+echo "=== Smoke test: generic adapter ships SI commands and front doors ==="
+bash tests/generic-si-commands.sh && pass "generic first-run install ships the SI command family and front doors" || fail "generic first-run install missing the SI command family or front doors"
 
 echo ""
 echo "=== Summary ==="

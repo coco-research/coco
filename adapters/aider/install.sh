@@ -17,7 +17,7 @@ while [[ $# -gt 0 ]]; do
     --dry-run) DRY_RUN=1 ;;
     --systems) shift; IFS=',' read -ra SYSTEMS <<< "$1" ;;
     --core-only) CORE_ONLY=1 ;;
-    --help|-h) grep '^#' "$0" | sed 's/^# \?//'; exit 0 ;;
+    --help|-h) bash "$REPO_ROOT/scripts/print-usage.sh" "$0"; exit 0 ;;
     *) echo "Unknown flag: $1" >&2; exit 1 ;;
   esac
   shift
@@ -109,7 +109,7 @@ for agent in "$REPO_ROOT/agents"/*.md; do
   [[ -f "$agent" ]] || continue
   name=$(basename "$agent" .md)
   [[ "$name" == "INDEX" || "$name" == "README" || "$name" == "PROMPT-DEFENSE" ]] && continue
-  desc=$(grep -m1 "^description:" "$agent" 2>/dev/null | sed 's/^description: *"*//;s/"*$//' | head -c 120 || true)
+  desc=$(grep -m1 "^description:" "$agent" 2>/dev/null | sed 's/^description: *"*//;s/"*$//' || true)
   AGENTS_CONTENT+="
 ### $name
 $desc
@@ -127,7 +127,7 @@ for sys in "${SYSTEMS[@]:-}"; do
   for a in "$sys_dir/agents"/*.md; do
     [[ -f "$a" ]] || continue
     aname=$(basename "$a" .md)
-    adesc=$(grep -m1 "^description:" "$a" 2>/dev/null | sed 's/^description: *"*//;s/"*$//' | head -c 120 || true)
+    adesc=$(grep -m1 "^description:" "$a" 2>/dev/null | sed 's/^description: *"*//;s/"*$//' || true)
     AGENTS_CONTENT+="
 ### $aname
 $adesc

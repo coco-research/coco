@@ -10,6 +10,7 @@
 #   bash adapters/codex/install.sh --systems gsd,brain   # only these bundles
 #   bash adapters/codex/install.sh -o PATH     # write to PATH
 #   bash adapters/codex/install.sh --dry-run
+# Refuses to write inside the Coco checkout itself (issue #238); run from your project directory.
 #
 # Bundles default to every bundle that actually ships something
 # (scripts/installable-bundles.sh), not to the core alone: defaulting to core folded
@@ -18,6 +19,7 @@
 # are given.
 
 set -euo pipefail
+unset CDPATH
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 OUTPUT="./AGENTS.md"
@@ -33,9 +35,7 @@ while [[ $# -gt 0 ]]; do
     --dry-run) DRY_RUN=1 ;;
     --systems) shift; IFS=',' read -ra SYSTEMS <<< "${1:-}" ;;
     --core-only) CORE_ONLY=1 ;;
-    # Header only: this adapter's --help used to grep every '^#' line, which would also
-    # print the explanatory comments inside the code as if they were usage.
-    --help|-h) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
+    --help|-h) bash "$REPO_ROOT/scripts/print-usage.sh" "$0"; exit 0 ;;
     *) echo "Unknown flag: $1" >&2; exit 1 ;;
   esac
   shift
@@ -57,6 +57,13 @@ if [[ "$CORE_ONLY" -eq 1 && "${#SYSTEMS[@]}" -gt 0 ]]; then
   SYSTEMS=()
 fi
 
+# The SI-* command family is generated (not committed) into a Coco-owned folder by
+# scripts/generate-si-commands.sh; AGENTS.md points at the real files there.
+SI_DIR="${COCO_HOME:-$HOME/.coco}/si-commands"
+SI_COUNT=""
+SI_SKIP=""
+SI_NOTE=""
+
 bundle_label() {
   if [[ ${#SYSTEMS[@]} -eq 0 ]]; then
     printf 'core only'
@@ -76,6 +83,19 @@ emit_skill() {
   local skill=$1
   local name desc
   name=$(basename "$(dirname "$skill")")
+  desc=$(awk -F': ' '/^description:/ {sub(/^description: */,""); gsub(/^"|"$/,""); print; exit}' "$skill")
+  echo "- **$name** — $desc"
+}
+
+# Team front doors: systems/<bundle>/<team>/SKILL.md. Some bundles keep one front
+# door per team rather than under skills/ — the 13 Super Intelligence teams do. The
+# directory is a short slug (ai, gtm); the frontmatter name is the canonical id
+# (ai-super-intelligence) the generated index and role roster use.
+emit_team_front_door() {
+  local skill=$1
+  local name desc
+  name=$(sed -n 's/^name: *//p' "$skill" | head -1 | tr -d '"')
+  [[ -n "$name" ]] || name=$(basename "$(dirname "$skill")")
   desc=$(awk -F': ' '/^description:/ {sub(/^description: */,""); gsub(/^"|"$/,""); print; exit}' "$skill")
   echo "- **$name** — $desc"
 }
@@ -113,6 +133,11 @@ emit_skills() {
     for skill in "$dir"/skills/*/SKILL.md; do
       [[ -f "$skill" ]] || continue
       emit_skill "$skill"
+      found=1
+    done
+    for skill in "$dir"/*/SKILL.md; do
+      [[ -f "$skill" ]] || continue
+      emit_team_front_door "$skill"
       found=1
     done
   done
@@ -192,12 +217,93 @@ emit_agents() {
   done
 }
 
+si_bundle_selected() {
+  local sys dir
+  for sys in ${SYSTEMS[@]+"${SYSTEMS[@]}"}; do
+    dir="$REPO_ROOT/systems/$sys"
+    [[ -f "$dir/ai/scripts/build_commands.py" ]] && return 0
+  done
+  return 1
+}
+
+generate_si_commands() {
+  if ! si_bundle_selected; then
+    SI_SKIP="superintelligence bundle not selected"
+    return 0
+  fi
+  local si_args=(--target "$SI_DIR")
+  [[ $DRY_RUN -eq 1 ]] && si_args+=(--dry-run)
+
+  local out
+  if ! out=$(bash "$REPO_ROOT/scripts/generate-si-commands.sh" "${si_args[@]}" 2>&1); then
+    echo "WARNING: scripts/generate-si-commands.sh failed; the SI-* command family is" >&2
+    echo "missing from this install. Generator output (last 5 lines):" >&2
+    printf '%s\n' "$out" | tail -n 5 >&2
+    rmdir "$SI_DIR" 2>/dev/null || true
+    SI_SKIP="generator failed"
+    return 0
+  fi
+  echo "$out"
+  [[ $DRY_RUN -eq 1 ]] && return 0
+
+  SI_COUNT=$(printf '%s\n' "$out" | sed -n 's/^Generated \([0-9][0-9]*\) SI commands.*/\1/p' | tail -n 1)
+  if [[ -z "$SI_COUNT" || "$SI_COUNT" == "0" ]]; then
+    SI_SKIP=$(printf '%s\n' "$out" | sed -n 's/^Skip SI generation: //p' | head -n 1)
+    [[ -n "$SI_SKIP" ]] || SI_SKIP="generator produced no commands"
+    SI_COUNT=""
+  fi
+}
+
+emit_si_commands() {
+  if ! si_bundle_selected; then
+    echo "Not generated: superintelligence bundle not selected"
+    return 0
+  fi
+  if [[ $DRY_RUN -eq 1 ]]; then
+    echo "Not generated: dry run"
+    return 0
+  fi
+
+  local f files=()
+  for f in "$SI_DIR"/SI.md "$SI_DIR"/SI-*.md; do
+    [[ -f "$f" ]] || continue
+    files+=("$f")
+  done
+
+  if [[ ${#files[@]} -eq 0 ]]; then
+    echo "Not generated: ${SI_SKIP:-unknown reason}"
+    return 0
+  fi
+
+  echo "These \`/SI-*\` commands are generated locally from the Super Intelligence team registries."
+  echo "The full workflow for each command is the file \`$SI_DIR/<command>.md\`."
+  echo "When the user types \`/SI-Decide <prompt>\`, read that file and follow it, treating the text after the command as ARGUMENTS."
+  echo ""
+  while IFS= read -r f; do
+    local first cmd desc
+    first=$(head -n 1 "$f" 2>/dev/null || true)
+    cmd="/$(basename "$f" .md)"
+    case "$first" in
+      '# /SI'*) cmd="${first#\# }"; cmd="${cmd%% *}" ;;
+    esac
+    desc=""
+    case "$first" in
+      *" — "*) desc="${first#* — }" ;;
+    esac
+    if [[ -n "$desc" ]]; then
+      echo "- \`$cmd\` — $desc"
+    else
+      echo "- \`$cmd\`"
+    fi
+  done < <(printf '%s\n' "${files[@]}" | LC_ALL=C sort)
+}
+
 generate() {
   echo "# AGENTS.md"
   echo ""
   echo "Generated by Coco · adapters/codex/install.sh"
   echo "Source: $REPO_ROOT"
-  echo "Systems: $(bundle_label)"
+  echo "Systems: $(bundle_label)$SI_NOTE"
   echo ""
   emit_invocation_guide
   echo ""
@@ -208,6 +314,10 @@ generate() {
   echo "## Commands"
   echo ""
   emit_commands
+  echo ""
+  echo "## Super Intelligence Commands"
+  echo ""
+  emit_si_commands
   echo ""
   echo "## Agents"
   echo ""
@@ -222,6 +332,48 @@ generate() {
     echo ""
   done
 }
+
+# Issue #238: writing AGENTS.md inside the Coco checkout clobbers the repo's own
+# tracked AGENTS.md, so refuse (except in --dry-run, which only warns). Resolve both
+# sides physically so a symlinked path (e.g. /tmp -> /private/tmp) still compares equal.
+output_dir=""
+if [[ -n "$OUTPUT" ]]; then
+  if [[ -d "$OUTPUT" ]]; then
+    # -o may name a directory; check that directory itself, not its parent.
+    output_dir="$(cd "$OUTPUT" 2>/dev/null && pwd -P)" || output_dir=""
+  else
+    output_dir="$(cd "$(dirname -- "$OUTPUT")" 2>/dev/null && pwd -P)" || output_dir=""
+  fi
+fi
+repo_root_phys="$(cd "$REPO_ROOT" && pwd -P)"
+if [[ "$output_dir" == "$repo_root_phys" || "$output_dir" == "$repo_root_phys"/* ]]; then
+  if [[ $DRY_RUN -eq 1 ]]; then
+    echo "NOTE: a real run would refuse: $output_dir/$(basename -- "$OUTPUT") is inside the Coco checkout ($repo_root_phys); run from your project directory or pass -o <path outside the checkout>."
+  else
+    if [[ "${COCO_AUTODETECTED:-}" == 1 ]]; then
+      refusal_reason="no AI tool was detected, so install.sh fell back to the generic adapter, whose AGENTS.md target resolved inside the Coco checkout itself."
+    else
+      refusal_reason="the AGENTS.md target is inside the Coco checkout itself."
+    fi
+    {
+      echo "ERROR: refusing to write: $refusal_reason"
+      echo "  target:   $output_dir/$(basename -- "$OUTPUT")"
+      echo "  checkout: $repo_root_phys"
+      echo "Coco will not overwrite the repository's own AGENTS.md."
+      echo "To proceed:"
+      echo "  (a) run from your project directory: cd /path/to/your/project && bash $REPO_ROOT/install.sh"
+      echo "  (b) or write to an explicit path: bash $REPO_ROOT/adapters/$ADAPTER_LABEL/install.sh -o /path/to/your/project/AGENTS.md"
+      echo "  (c) or pick your tool's adapter: bash $REPO_ROOT/install.sh --list, then --adapter <name>"
+    } >&2
+    exit 2
+  fi
+fi
+
+# Generate SI commands only after the #238 guard passed: an in-checkout run must write nothing.
+generate_si_commands
+if [[ $DRY_RUN -eq 0 && -z "$SI_COUNT" ]] && si_bundle_selected; then
+  SI_NOTE=" (superintelligence: SI commands not generated: ${SI_SKIP:-unknown reason})"
+fi
 
 if [[ $DRY_RUN -eq 1 ]]; then
   # Capture full output to temp file, then preview first 50 lines.
@@ -241,12 +393,20 @@ else
   fi
   generate > "$OUTPUT"
   lines=$(wc -l < "$OUTPUT" | tr -d ' ')
+  skills_listed=$(awk '/^## Skills$/{f=1;next} /^## /{f=0} f && /^- \*\*/{n++} END{print n+0}' "$OUTPUT")
+  if [[ -n "$SI_COUNT" ]]; then
+    si_receipt="$SI_COUNT in $SI_DIR"
+  else
+    si_receipt="0 (not generated: ${SI_SKIP:-unknown reason})"
+  fi
   echo "Wrote $OUTPUT ($lines lines)"
   # The deliverable is one file, not three trees, so the receipt reports what this adapter
   # actually produced rather than echoing zeroes for skills and subagents.
   echo
   echo "Installed for $ADAPTER_LABEL:"
   printf '  %-15s: %s\n' "AGENTS.md" "$OUTPUT ($lines lines)"
-  printf '  %-15s: %s\n' "Bundles" "$(bundle_label)"
+  printf '  %-15s: %s\n' "Bundles" "$(bundle_label)$SI_NOTE"
+  printf '  %-15s: %s\n' "Skills listed" "$skills_listed"
+  printf '  %-15s: %s\n' "SI commands" "$si_receipt"
   echo "Core-only install: bash install.sh --adapter $ADAPTER_LABEL --core-only"
 fi

@@ -59,7 +59,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [dispatching-parallel-agents](dispatching-parallel-agents/SKILL.md) | Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies |
 | [executing-plans](executing-plans/SKILL.md) | Use when you have a written implementation plan to execute in a separate session with review checkpoints |
 | [humanizer](humanizer/SKILL.md) | Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written. Based on Wikipedia's compreh |
-| [karpathy-guidelines](karpathy-guidelines/SKILL.md) | Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, reviewing, or refactoring code to avoid overcomplication, make surgical changes, s |
+| [karpathy-guidelines](karpathy-guidelines/SKILL.md) | Pointer to the upstream skill for behavioural guidelines that reduce common LLM coding mistakes, installed from upstream. |
 | [subagent-driven-development](subagent-driven-development/SKILL.md) | Use when executing implementation plans with independent tasks in the current session |
 | [systematic-debugging](systematic-debugging/SKILL.md) | Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes |
 | [ultra-think](ultra-think/SKILL.md) | Use when facing architectural decisions, complex trade-offs, strategic technology choices, or scaling and migration questions that deserve more than a quick ans |

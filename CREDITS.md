@@ -51,6 +51,17 @@ Some skills teach or wrap third-party platforms. These are original write-ups bu
 | **Expo** — Router and EAS Hosting API-route conventions | `expo-api-routes` | https://docs.expo.dev |
 | **Cognee** by topoteretes (Apache-2.0) — knowledge-graph memory engine the `systems/cognee/` bundle wraps over its local HTTP API (no upstream code vendored; the bundle's skills are CoCo's own write-ups) | `cognee`, `cognee-store`, `cognee-recall` | https://github.com/topoteretes/cognee |
 
+## Attribution pending
+
+These items are held under the lab-0062 audit (GC ruling, 2026-10-07). Each stays out of packages until its attribution is confirmed or it is replaced.
+
+- `skills/voice-ai/`: attribution pending (lab-0062, GC ruling 2026-10-07).
+- `skills/vercel-react-best-practices/`: attribution pending (lab-0062, GC ruling 2026-10-07).
+- `skills/clone-website/`: attribution pending (lab-0062, GC ruling 2026-10-07).
+- `skills/prd-mastery/`: attribution pending (lab-0062, GC ruling 2026-10-07).
+- `skills/karpathy-guidelines/`: attribution pending (lab-0062, GC ruling 2026-10-07).
+- `systems/hyperframes/skills/embedded-captions/modes/standard/fonts/files/` (caption fonts): attribution pending (lab-0062, GC ruling 2026-10-07).
+
 ## How we credit
 
 - Vendored code keeps its upstream license and attribution in place.

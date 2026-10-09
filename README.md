@@ -38,7 +38,7 @@ An illustration built from a real `/SI-Decide` run (Claude Sonnet 5.5, 30 Septem
 
 Prerequisites: git, bash, Node.js 14 or newer (for `npx`), and python3 (it generates the `/SI-*` commands).
 
-`npx cocosuperintelligence` installs the latest release. It clones the pinned release tag (currently `v1.5.1`, not floating `main`) into `./coco` of the current directory, then runs `install.sh`. Run it from your home folder, so the clone is `~/coco` and not a folder inside another project. On a fresh machine it took about 3 minutes, including the download. <!-- x-release-please-version -->
+`npx cocosuperintelligence` installs the latest release. It clones the pinned release tag (currently `v1.6.0`, not floating `main`) into `./coco` of the current directory, then runs `install.sh`. Run it from your home folder, so the clone is `~/coco` and not a folder inside another project. On a fresh machine it took about 3 minutes, including the download. <!-- x-release-please-version -->
 
 ```bash
 npx cocosuperintelligence
@@ -274,7 +274,7 @@ CoCo stands on other people's work. The short list:
 - **[latent-spaces/brag](https://github.com/latent-spaces/brag)** (Shunit Haviv) and **[HyperFrames](https://www.npmjs.com/package/hyperframes)** (HeyGen) for the launch-video flow behind `coco-ads`.
 - **[leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill)** (Leon) for `design-taste-frontend` and `redesign-existing-projects`.
 - **[HKUDS/CLI-Anything](https://github.com/HKUDS/CLI-Anything)** for the method behind `cli-anything`.
-- **[Vercel](https://vercel.com/)** and **[vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines)** for `vercel-react-best-practices` and `web-design-guidelines`.
+- **[Vercel](https://vercel.com/)**: **[vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines)** for `web-design-guidelines`, and **[vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)** for `vercel-react-best-practices` (link-only stub).
 
 Full attributions, including audio ([ende.app](https://ende.app), [Kenney.nl](https://kenney.nl)), are in [`CREDITS.md`](CREDITS.md). If something influenced CoCo and is missing, that is a bug: [open an issue](https://github.com/coco-research/coco/issues/new/choose).
 

@@ -48,7 +48,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [requesting-code-review](requesting-code-review/SKILL.md) | Use when completing tasks, implementing major features, or before merging to verify work meets requirements |
 | [test-driven-development](test-driven-development/SKILL.md) | Use when implementing any feature or bugfix, before writing implementation code |
 | [using-git-worktrees](using-git-worktrees/SKILL.md) | Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart  |
-| [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) | Use when writing, reviewing, or refactoring React or Next.js code, or optimizing data fetching, bundle size, and re-renders. Applies Vercel impact-prioritized p |
+| [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) | Pointer to the upstream skill for React and Next.js performance work (data fetching, bundle size, re-renders), installed from upstream. |
 | [voice-ai](voice-ai/SKILL.md) | Pointer to the upstream skill for building voice agents with speech-to-speech and STT-LLM-TTS pipelines, installed from upstream. |
 
 ## Foundational (13)

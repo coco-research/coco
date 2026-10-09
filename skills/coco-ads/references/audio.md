@@ -35,9 +35,9 @@ Hyperframes implementation note: follow the current hyperframes audio-reactive w
 
 SFX live under `sfx/{casino,impact,interface,ui}/`, and the individual keypress set under `sfx/keyboard/`. The assets root is `~/.claude/skills/coco-ads/assets/` in the installed skill and `skills/coco-ads/assets/` in this repo copy.
 
-Music lives in the installed skill at `~/.claude/skills/coco-ads/assets/music/`. In this repo copy, it lives at `skills/coco-ads/assets/music/`.
+Music is **not bundled**. Users download tracks themselves from ende.app (see `assets/music/README.md`) into `~/.claude/skills/coco-ads/assets/music/` in the installed skill, or `skills/coco-ads/assets/music/` in this repo copy. Before planning music, check whether any `.mp3` is actually there; if none is, plan without music and tell the user how to add it.
 
-Bundled music cue presets live beside the music:
+Precomputed cue presets for the suggested tracks live beside the music folder (they apply only once the matching track is downloaded):
 
 ```text
 skills/coco-ads/assets/music/cues/<track-stem>.music-cues.md
@@ -66,7 +66,9 @@ mkdir -p coco-ads-output/composition/assets/music
 # From the repo copy:
 cp skills/coco-ads/assets/sfx/interface/bong_001.ogg coco-ads-output/composition/assets/sfx/interface/
 cp skills/coco-ads/assets/sfx/impact/impactBell_heavy_000.ogg coco-ads-output/composition/assets/sfx/impact/
-cp skills/coco-ads/assets/music/happy-beats-business-moves-vol-1-by-ende-dot-app.mp3 coco-ads-output/composition/assets/music/
+# Music only if the user downloaded it (it is not bundled). This line succeeds
+# either way: it copies the track when present and prints a note when it is missing.
+if [ -f skills/coco-ads/assets/music/happy-beats-business-moves-vol-1-by-ende-dot-app.mp3 ]; then cp skills/coco-ads/assets/music/happy-beats-business-moves-vol-1-by-ende-dot-app.mp3 coco-ads-output/composition/assets/music/; else echo "music not downloaded; see skills/coco-ads/assets/music/README.md (continuing without music)"; fi
 
 # From an installed Claude skill, use ~/.claude/skills/coco-ads/assets/... instead.
 ```
@@ -221,7 +223,7 @@ Scene 2 — Reveal — 3s
 
 ### Available tracks
 
-All tracks are "Happy Beats / Business Moves" by ende.app. Upbeat, clean, corporate-adjacent. Good across multiple tones.
+Suggested tracks are "Happy Beats / Business Moves" by ende.app. Upbeat, clean, corporate-adjacent. Good across multiple tones. **None of them ships with Coco**: use one only if the user has downloaded it into `assets/music/` (see `assets/music/README.md`).
 
 | Filename | Duration | Character | Best for |
 |---|---|---|---|
@@ -247,16 +249,16 @@ If the music file doesn't exist, skip it and notify the user after rendering.
 
 ### Beat and cue sources
 
-Beat sync needs a cue source. Three are available — use the richest one the environment supports. Beat sync now works on **any** track, not just bundled ones. The two any-track methods (2 and 3) have orthogonal requirements — option 2 needs Python, option 3 needs a recent Hyperframes — so when one is unavailable the other usually covers it.
+Beat sync needs a cue source. Three are available — use the richest one the environment supports. Beat sync now works on **any** track, not just the suggested ones. The two any-track methods (2 and 3) have orthogonal requirements — option 2 needs Python, option 3 needs a recent Hyperframes — so when one is unavailable the other usually covers it.
 
-1. **Bundled track → precomputed preset (richest, instant, no deps).** The bundled tracks ship with cue metadata. Read the matching markdown summary, and pass the JSON path in `composition-brief.md`:
+1. **Suggested track → precomputed preset (richest, instant, no deps).** The suggested tracks have cue metadata in the skill (the audio itself is downloaded by the user). Read the matching markdown summary, and pass the JSON path in `composition-brief.md`:
 
 ```text
 assets/music/cues/<track-stem>.music-cues.md
 assets/music/cues/<track-stem>.music-cues.json
 ```
 
-2. **Any track → extended analysis (richest for custom tracks; needs Python, any Hyperframes version).** For a custom track — or to refresh a bundled one — run `analyze_music_cues.py` on the audio file. It produces the same rich cue JSON/Markdown for any track. Run it via `uv`, which auto-provisions the deps (`librosa`, `numpy`, `scipy`, `soundfile`) from `skills/coco-ads/scripts/pyproject.toml` — no manual `pip install` needed:
+2. **Any track → extended analysis (richest for custom tracks; needs Python, any Hyperframes version).** For a custom track — or to refresh a suggested one — run `analyze_music_cues.py` on the audio file. It produces the same rich cue JSON/Markdown for any track. Run it via `uv`, which auto-provisions the deps (`librosa`, `numpy`, `scipy`, `soundfile`) from `skills/coco-ads/scripts/pyproject.toml` — no manual `pip install` needed:
 
 ```bash
 uv run --project skills/coco-ads/scripts \

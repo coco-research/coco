@@ -40,13 +40,7 @@ Enforces:
 
 **Path**: `~/.cursor/skills/vercel-react-best-practices/SKILL.md` — Read this file NOW.
 
-57 rules across 8 categories, prioritized by impact:
-1. **CRITICAL**: Eliminate waterfalls (`async-parallel`, `async-defer-await`)
-2. **CRITICAL**: Bundle size (`bundle-barrel-imports`, `bundle-dynamic-imports`)
-3. **HIGH**: Server-side performance (`server-cache-react`, `server-parallel-fetching`)
-4. **MEDIUM**: Re-render optimization (`rerender-memo`, `rerender-derived-state`)
-
-Read individual rule files for code examples: `~/.cursor/skills/vercel-react-best-practices/rules/<rule-name>.md`
+Coco ships this skill as a link-only stub: the rule set itself is not bundled, because the upstream has no licence file. If the full skill is not installed yet, install it from upstream as the stub describes, then follow its impact-prioritized rules (waterfalls and bundle size first, then server-side, client-side data fetching and re-render work).
 
 ## 4. Web Interface Guidelines (for reviews/audits)
 

@@ -1,5 +1,7 @@
 # V—Take Visual Design Library
 
+Modified by Coco, 2026-10-08: Virgil font removed (licence not confirmed). See MODIFICATIONS.md.
+
 This directory is a **reference library** for the talking-head-recut skill. Style, layout,
 and video frame are three **orthogonal** dimensions you can freely mix when
 designing a takeaway video.
@@ -129,7 +131,8 @@ flip the long axis: `split` becomes top/bottom, `pip` video bubble shrinks
 
 1. **No `<script>`** — animations only via `data-anim-*` attributes
 2. **No external URLs** — no Google Fonts CDN, no remote images; the
-   skill provides Caveat / LXGW WenKai TC / Inter / Virgil locally
+   skill provides Caveat / LXGW WenKai TC / Inter locally (Virgil is no longer
+   bundled; use Caveat or the system `cursive` font for a hand-drawn look)
 3. **All `<style>` rules must be prefixed with `.card[data-card-id="..."]`** —
    the hyperframes sanitizer auto-scopes them, but write them already-scoped to
    stay readable

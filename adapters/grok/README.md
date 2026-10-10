@@ -34,8 +34,10 @@ Reload the Grok session (or start a new one) to pick up the new files.
 ## Uninstall
 
 ```bash
-# Run from the clone root. Match the clone path plus a trailing slash so a
-# directory named `coco` cannot also delete links into `coco-research`.
-CLONE="$(pwd)"
-find ~/.grok -type l -lname "${CLONE}/*" -delete
+# Run from the clone root.
+bash adapters/grok/install.sh --uninstall
 ```
+
+This removes the symlinks into the clone, the generated `SI*.md` commands (matched by
+the generator's marker line, so your own `SI*.md` files stay), the `coco:mcp` block in
+`~/.grok/config.toml`, and `~/.grok/hooks/coco-m0.json`. Add `--dry-run` to preview.

@@ -4,6 +4,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [1.6.1](https://github.com/coco-research/coco/compare/v1.6.0...v1.6.1) (2026-10-10)
+
+
+### Bug Fixes
+
+* **personas:** remove a minor's death and litigation details from noam-shazeer (lab-0054) ([41e7810](https://github.com/coco-research/coco/commit/41e7810cd93b497c8c9cf935498ea88571b1616c))
+* **personas:** remove a minor's death and litigation details from noam-shazeer (lab-0054) ([#338](https://github.com/coco-research/coco/issues/338)) ([41e7810](https://github.com/coco-research/coco/commit/41e7810cd93b497c8c9cf935498ea88571b1616c))
+
 ## [1.6.0](https://github.com/coco-research/coco/compare/v1.5.1...v1.6.0) (2026-10-08)
 
 

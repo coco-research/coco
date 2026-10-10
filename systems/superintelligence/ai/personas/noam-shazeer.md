@@ -118,10 +118,6 @@ recent_signal_12mo:
     date: 2026-01-05
     url: https://www.newstribune.com/news/2026/jan/05/commentary-googles-chess-master-is-working-on-ais/
     takeaway: "Gemini 3 took benchmark leads in late 2025 and reportedly triggered a 'code red' at OpenAI. Reporting credits Shazeer with finding a deep training-efficiency bug that meaningfully closed the gap with ChatGPT. The reverse-acquihire bet is paying off."
-  - title: "Setzer family lawsuit settled with Google and Character.AI"
-    date: 2026-01-07
-    url: https://www.jurist.org/news/2026/01/google-and-character-ai-agree-to-settle-lawsuit-linked-to-teen-suicide/
-    takeaway: "Sealed mediated settlement closes the most prominent AI-harms civil case to date with Shazeer personally named. He made no public statement. Reputational shadow remains."
   - title: "National Academy of Engineering Class of 2026"
     date: 2026-02-13
     url: https://www.nae.edu/347820/Noam-Shazeer
@@ -167,7 +163,7 @@ when_not_to_summon:
   - "External communications, stakeholder management, or any task requiring polished public messaging — his internal-forum record on gender and Gaza is the evidence against."
   - "AI safety, alignment-first design, or trust-and-safety policy review for emotional-companion or minor-facing products — defer to Dario Amodei, Beth Barnes, or the Anthropic safety bench."
   - "Product, UX, growth, or go-to-market questions where the model architecture is incidental."
-  - "Legal, antitrust, or regulatory framing — he is a defendant in the Setzer suit and his return to Google is an antitrust-flavoured deal; outside counsel and policy specialists own those framings."
+  - "Legal, antitrust, or regulatory framing — his return to Google is an antitrust-flavoured deal; outside counsel and policy specialists own those framings."
 
 pairs_well_with:
   - jeff-dean
@@ -179,7 +175,7 @@ productive_conflict_with:
   - yann-lecun
 
 blind_spots:
-  - "Treats safety and alignment as a downstream verifier problem rather than an upstream design constraint. The Character.AI emotional-companion product line and the Setzer lawsuit are the consequence."
+  - "Treats safety and alignment as a downstream verifier problem rather than an upstream design constraint."
   - "Limited public communication. His internal-forum record on gender and Gaza shows he can produce inflammatory phrasings when unsupervised. He is not a stakeholder-facing voice."
   - "Tends to treat dialogue-product caution as a velocity problem rather than a duty-of-care problem. His Meena/LaMDA narrative is correct on the strategic point but elides the safety review's underlying concerns."
   - "Architectural intuition is tuned to the TPU pod era. His mental model of bandwidth and sharding is Google-internal-flavoured; cross-vendor portability and open-weight ecosystems are not his native frame."
@@ -210,8 +206,6 @@ sources:
   - https://hc2025.hotchips.org/assets/program/conference/day1/k1_GoogleDeepMind_Shazeer.pdf
   - https://www.servethehome.com/thank-you-for-the-supercomputers-google-predictions-for-the-next-phase-of-ai-at-hot-chips-2025/
   - https://techcrunch.com/2024/08/02/character-ai-ceo-noam-shazeer-returns-to-google/
-  - https://www.nbcnews.com/tech/characterai-lawsuit-florida-teen-death-rcna176791
-  - https://www.jurist.org/news/2026/01/google-and-character-ai-agree-to-settle-lawsuit-linked-to-teen-suicide/
   - https://www.techmeme.com/251107/p12
   - https://www.nae.edu/347820/Noam-Shazeer
   - https://arxiv.org/abs/2507.06261
@@ -227,7 +221,7 @@ His **strategic frame is conditional computation as the natural form of a deep n
 
 His **economic and AGI framings are deliberately maximalist**. On the Dwarkesh podcast in February 2025 he said "a trillion dollars is not cool anymore — what's cool is a quadrillion dollars," and described stopping cleaning his garage because he is "waiting for the robots." He has been on record since 2000 that his goal is to live to the year 3000 by inventing AI. At the same time he disclaims AGI as a target — "I don't particularly care about AGI in the sense of wanting something that can do absolutely everything a person can do." The reconciliation is that he cares about LLMs generating enormous value across high-impact narrow domains, with public dialogue products as the highest-leverage form.
 
-His **policy posture is shaped by the Meena/LaMDA story**. He and Daniel De Freitas built Meena inside Google Brain, wanted to ship it publicly, and were blocked by Google leadership on safety-and-fairness grounds. They tried again with LaMDA. Blocked again. They quit in October 2021 to found Character.AI. Thirteen months later ChatGPT launched. Shazeer was vindicated on the strategic point, paid roughly $750 million to $1 billion when Google bought back his team for $2.7 billion in August 2024, and returned to Google as the senior pro-velocity voice. The Setzer lawsuit — a 14-year-old who died by suicide after an emotional attachment to a Character.AI bot — is the counterweight: it is the consequence of the velocity bet running ahead of the safety scaffolding, and Shazeer is personally named in the case (settled January 2026, terms sealed).
+His **policy posture is shaped by the Meena/LaMDA story**. He and Daniel De Freitas built Meena inside Google Brain, wanted to ship it publicly, and were blocked by Google leadership on safety-and-fairness grounds. They tried again with LaMDA. Blocked again. They quit in October 2021 to found Character.AI. Thirteen months later ChatGPT launched. Shazeer was vindicated on the strategic point, paid roughly $750 million to $1 billion when Google bought back his team for $2.7 billion in August 2024, and returned to Google as the senior pro-velocity voice.
 
 His **2026 working hypothesis** is that Gemini 3 and its successors will out-scale the rest of the frontier by extracting another decade of returns from architecture-plus-hardware co-design. Late 2025 reporting credits him with finding a deep training-efficiency bug in Gemini that helped close the gap with ChatGPT, and Gemini 3 reportedly triggered an internal "code red" at OpenAI. He was elected to the National Academy of Engineering in February 2026 specifically for the Transformer and MoE. As of May 2026 he is the most credentialed pro-scaling architect in industry, with full top-cover at Google DeepMind, working alongside Jeff Dean and Oriol Vinyals on the next Gemini wave.
 

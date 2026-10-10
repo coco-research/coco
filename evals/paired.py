@@ -11,6 +11,7 @@ CLI:
 """
 import argparse
 import json
+import math
 import random
 
 
@@ -61,14 +62,31 @@ def _no(reason, n, delta=None, ci=None, null_win_rate=None):
             "n": n, "null_win_rate": null_win_rate}
 
 
+def _first_nonfinite(vals):
+    """Index of the first NaN or ±Infinity, or None when every value is finite."""
+    for i, v in enumerate(vals):
+        if not math.isfinite(v):
+            return i
+    return None
+
+
 def decide(base, cand, null_arms, min_n=30, q=0.1, max_team_drop=None):
     """Accept iff: n >= min_n, the 95% CI excludes 0, and the candidate beats
     every null arm (cosmetic edits) by more than the null arm beats the
     baseline. max_team_drop, when set, additionally rejects if any single item
-    regresses by more than that amount."""
+    regresses by more than that amount.
+    Raises ValueError if any score is not finite (NaN, Infinity, -Infinity)."""
     n = len(base)
     if len(cand) != n or any(len(a) != n for a in null_arms):
         raise ValueError("all arms must have the same length (same item order)")
+    for arm_name, vals in (("base", base), ("cand", cand)):
+        i = _first_nonfinite(vals)
+        if i is not None:
+            raise ValueError(f"non-finite score at item {i} in {arm_name}")
+    for j, arm in enumerate(null_arms):
+        i = _first_nonfinite(arm)
+        if i is not None:
+            raise ValueError(f"non-finite score at item {i} in null[{j}]")
     if n < min_n:
         return _no(f"n={n} < min_n={min_n}", n)
     delta, lo, hi = paired_bootstrap(base, cand)
@@ -94,10 +112,16 @@ def decide(base, cand, null_arms, min_n=30, q=0.1, max_team_drop=None):
 
 
 def _load(path):
+    def reject(token):
+        raise ValueError(f"{path}: {token} is not a finite number")
+
     with open(path) as f:
-        vals = json.load(f)
+        vals = json.load(f, parse_constant=reject)
     if not isinstance(vals, list) or not all(isinstance(v, (int, float)) for v in vals):
         raise SystemExit(f"{path}: expected a JSON list of numbers")
+    i = _first_nonfinite(vals)
+    if i is not None:
+        raise SystemExit(f"{path}: item {i} is not a finite number")
     return [float(v) for v in vals]
 
 
@@ -134,7 +158,29 @@ def _self_test():
     assert not d["accept"] and "CI" in d["reason"], d
     assert d["delta"] < -0.05 and d["ci"][1] < 0, d  # measured stats are reported, not zeroed
 
-    print("self-test: 5/5 passed")
+    # 6–8. Non-finite scores are invalid. Never accept (NaN used to pass the CI gate).
+    def _nonfinite_rejected(fn, item, arm):
+        expected = f"non-finite score at item {item} in {arm}"
+        try:
+            got = fn()
+        except ValueError as e:
+            assert str(e) == expected, e
+            return
+        assert not got["accept"] and got["reason"] == expected, got
+
+    nan_cand = list(cand)
+    nan_cand[0] = float("nan")
+    _nonfinite_rejected(lambda: decide(base, nan_cand, []), 0, "cand")
+
+    nan_base = list(base)
+    nan_base[0] = float("nan")
+    _nonfinite_rejected(lambda: decide(nan_base, cand, []), 0, "base")
+
+    inf_null = list(base)
+    inf_null[0] = float("inf")
+    _nonfinite_rejected(lambda: decide(base, cand, [inf_null]), 0, "null[0]")
+
+    print("self-test: 8/8 passed")
 
 
 def main():

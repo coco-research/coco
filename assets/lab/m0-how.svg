@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 420" width="880" height="420" role="img" aria-labelledby="h-title h-desc">
+  <title id="h-title">How a checkpoint moves</title>
+  <desc id="h-desc">A writer, which may be a hook, a coordinator, or a person, appends to an append-only thread in SQLite plus a checkpoint sidecar directory. Any tool resumes from the latest entry.</desc>
+  <style>
+    .paper { fill: #F3F2EE; }
+    .surface { fill: #FFFFFF; }
+    .ink { fill: #0B0B0B; }
+    .ink2 { fill: #3C3C37; }
+    .ink3 { fill: #5F5F58; }
+    .stroke { stroke: #0B0B0B; }
+    .blue { fill: #1234FF; }
+    .sans { font-family: "Schibsted Grotesk", "Schibsted Grotesk Variable", ui-sans-serif, sans-serif; }
+    .mono { font-family: "Geist Mono", "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, monospace; }
+    @media all { /* site is dark-only */
+      .paper { fill: #0B0C0E; }
+      .surface { fill: #181A1F; }
+      .ink { fill: #ECEAE4; }
+      .ink2 { fill: #C1C0B9; }
+      .ink3 { fill: #929089; }
+      .stroke { stroke: #ECEAE4; }
+      .blue { fill: #8FA2FF; }
+    }
+  </style>
+  <rect class="paper" width="880" height="420" fill="#F3F2EE"/>
+  <text class="mono ink3" x="32" y="40" fill="#5F5F58" font-size="12" font-weight="600" letter-spacing="0.08em">HOW IT WORKS</text>
+  <text class="sans ink" x="32" y="76" fill="#0B0B0B" font-size="28" font-weight="650" letter-spacing="-0.035em">One checkpoint. Three stops.</text>
+  <line class="stroke" x1="32" y1="92" x2="848" y2="92" stroke="#0B0B0B" stroke-width="2"/>
+
+  <rect class="surface stroke" x="32" y="124" width="240" height="220" fill="#FFFFFF" stroke="#0B0B0B" stroke-width="1"/>
+  <rect class="blue" x="32" y="124" width="4" height="220" fill="#1234FF"/>
+  <text class="mono blue" x="52" y="156" fill="#1234FF" font-size="12" font-weight="600" letter-spacing="0.06em">01  WRITE</text>
+  <text class="sans ink" x="52" y="188" fill="#0B0B0B" font-size="22" font-weight="700">Writer</text>
+  <line class="stroke" x1="52" y1="204" x2="248" y2="204" stroke="#0B0B0B" stroke-width="1.5"/>
+  <text class="sans ink2" x="52" y="236" fill="#3C3C37" font-size="16">hook</text>
+  <text class="sans ink2" x="52" y="262" fill="#3C3C37" font-size="16">coordinator</text>
+  <text class="sans ink2" x="52" y="288" fill="#3C3C37" font-size="16">person</text>
+
+  <line class="stroke" x1="280" y1="234" x2="312" y2="234" stroke="#0B0B0B" stroke-width="1.5"/>
+  <polygon class="ink" points="312,228 324,234 312,240" fill="#0B0B0B"/>
+
+  <rect class="surface stroke" x="336" y="124" width="240" height="220" fill="#FFFFFF" stroke="#0B0B0B" stroke-width="1"/>
+  <rect class="ink" x="336" y="124" width="4" height="220" fill="#0B0B0B"/>
+  <text class="mono ink" x="356" y="156" fill="#0B0B0B" font-size="12" font-weight="600" letter-spacing="0.06em">02  STORE</text>
+  <text class="sans ink" x="356" y="188" fill="#0B0B0B" font-size="22" font-weight="700">Thread</text>
+  <line class="stroke" x1="356" y1="204" x2="552" y2="204" stroke="#0B0B0B" stroke-width="1.5"/>
+  <text class="sans ink2" x="356" y="236" fill="#3C3C37" font-size="16">SQLite</text>
+  <text class="mono ink" x="356" y="262" fill="#0B0B0B" font-size="14">operational_thread</text>
+  <text class="sans ink2" x="356" y="288" fill="#3C3C37" font-size="16">sidecar directory</text>
+
+  <line class="stroke" x1="584" y1="234" x2="616" y2="234" stroke="#0B0B0B" stroke-width="1.5"/>
+  <polygon class="ink" points="616,228 628,234 616,240" fill="#0B0B0B"/>
+
+  <rect class="surface stroke" x="640" y="124" width="208" height="220" fill="#FFFFFF" stroke="#0B0B0B" stroke-width="1"/>
+  <rect class="ink" x="640" y="124" width="4" height="220" fill="#0B0B0B"/>
+  <text class="mono ink" x="660" y="156" fill="#0B0B0B" font-size="12" font-weight="600" letter-spacing="0.06em">03  READ</text>
+  <text class="sans ink" x="660" y="188" fill="#0B0B0B" font-size="22" font-weight="700">Resume</text>
+  <line class="stroke" x1="660" y1="204" x2="824" y2="204" stroke="#0B0B0B" stroke-width="1.5"/>
+  <text class="sans ink2" x="660" y="236" fill="#3C3C37" font-size="16">any tool</text>
+  <text class="sans ink2" x="660" y="262" fill="#3C3C37" font-size="16">latest entry</text>
+
+  <text class="sans ink3" x="32" y="384" fill="#5F5F58" font-size="14">Append-only. A read returns that project's rows, newest first.</text>
+</svg>

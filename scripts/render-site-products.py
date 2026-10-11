@@ -11,6 +11,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from urllib.parse import quote
 
 ROOT = Path.cwd()
 INDEX = ROOT / 'index.html'
@@ -142,10 +143,31 @@ def render_source_row(row):
 def render_lab_row(row):
     if 'href' in row:
         sys.exit('%s: lab rows have no href' % row['id'])
-    return (
-        '            <li class="lab-item"><h4>%s</h4><p>%s<span class="tag">%s</span></p></li>'
-        % (esc_text(row['name']), esc_text(row['description']), esc_text(row['status']))
+    # Same-page link to the plain card. The data still has no repo href.
+    name = '<a class="inline" href="?motion=off#lab-%s">%s</a>' % (esc_attr(row['id']), esc_text(row['name']))
+    parts = [
+        '<li class="lab-item" id="lab-%s"><h4>%s</h4><p>%s<span class="tag">%s</span></p>'
+        % (esc_attr(row['id']), name, esc_text(row['description']), esc_text(row['status']))
+    ]
+    image = row.get('image')
+    if image:
+        parts.append(
+            '<div class="lab-shot-frame">'
+            '<img class="lab-shot" src="%s" alt="%s" width="%s" height="%s" loading="lazy" decoding="async">'
+            '</div>'
+            % (
+                esc_attr(image['src']),
+                esc_attr(image['alt']),
+                esc_attr(str(image['width'])),
+                esc_attr(str(image['height'])),
+            )
+        )
+    subject = quote('Tester seat: ' + row['name'])
+    parts.append(
+        '<a class="inline lab-ask" href="%s">Request a tester seat</a></li>'
+        % esc_attr('mailto:support@cocoresearch.org?subject=' + subject)
     )
+    return '            ' + ''.join(parts)
 
 
 def render_lab(data):
@@ -176,7 +198,7 @@ def render_foot_source(data):
 
 def render_foot_lab(data):
     return [
-        '          <li><a href="#lab" data-goto="lab">%s</a></li>' % esc_text(row['name'])
+        '          <li><a href="?motion=off#lab-%s">%s</a></li>' % (esc_attr(row['id']), esc_text(row['name']))
         for row in data['lab']
     ]
 

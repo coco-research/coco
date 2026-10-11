@@ -101,38 +101,56 @@
     {
       "id": "m0",
       "name": "CoCo M0",
-      "description": "Cross-tool memory.",
-      "status": "Private beta, used daily"
+      "description": "Cross-tool memory: one append-only thread that any AI tool can resume from.",
+      "status": "Private beta, used daily. Source planned for Oct 17.",
+      "image": {
+        "src": "assets/lab/m0-how.svg",
+        "alt": "How CoCo M0 works: a writer appends a checkpoint to a SQLite thread, and any tool resumes from the latest entry.",
+        "width": 880,
+        "height": 420
+      }
     },
     {
       "id": "hermes",
       "name": "CoCo Hermes",
       "description": "Answers questions over your own files with an exact quote, or says it can't.",
-      "status": "Private, no public build"
+      "status": "Private. No public date yet."
     },
     {
       "id": "code",
       "name": "CoCo Code",
       "description": "A local-first coding harness for the terminal and the Mac.",
-      "status": "Private, internal pre-release"
+      "status": "Private, internal pre-release. No public date yet."
     },
     {
       "id": "teams-ng",
       "name": "CoCo Teams NG",
       "description": "A team of AI members you hire, brief and work with in one console.",
-      "status": "Private, in development"
+      "status": "Private, in development. Source planned for Oct 31."
     },
     {
       "id": "status-zero",
       "name": "Status Zero",
       "description": "Compares what a plan says against what the code actually shipped.",
-      "status": "Private, in development"
+      "status": "Private, in development. Source planned for Oct 24.",
+      "image": {
+        "src": "assets/lab/status0-today-dark.webp",
+        "alt": "Status Zero's Today screen: a Jira story still marked in progress next to the GitHub pull request that already merged it.",
+        "width": 1400,
+        "height": 875
+      }
     },
     {
       "id": "atlas",
       "name": "CoCo Atlas",
       "description": "The live control room of our own lab.",
-      "status": "Private, pre-alpha"
+      "status": "Private, pre-alpha. Source planned for Oct 17.",
+      "image": {
+        "src": "assets/lab/atlas-how.svg",
+        "alt": "How CoCo Atlas works: local sources feed a read-only collector that serves the live map page.",
+        "width": 900,
+        "height": 420
+      }
     }
   ]
 }

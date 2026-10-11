@@ -10,14 +10,21 @@ Newest first within each section. Update this file in the same PR that settles s
 
 ## Decisions
 
-### The pack-content gate stores blocked names as sha256 digests
+### The pack-content gate stores no blocked names
 
-**Decided:** 2026-10-05. **Reason:** the previous encoding was reversible, so the spellings
-were still in the repository. The gate stores sha256 hex digests only. Digests of lowercased spellings match in
-any case. Four digests are of one exact spelling, and a different case does not match.
-`--self-test` reads the clear spellings from `COCO_PACK_CONTENT_NAMES` or gitignored
-`tests/pack-content-names.local`. With neither, it plants synthetic names and adds only those
-digests to a test-only set, so a checkout with no local list still exercises the comparison.
+**Decided:** 2026-10-10. **Reason:** the spellings must not be recoverable from this public
+repository. The previous encoding was reversible, so the spellings were still in the
+repository. Unsalted sha256 of short names is brute-forceable, and a salt committed next
+to the digests would not help. The gate stores nothing. At scan time it reads the list
+from `COCO_PACK_CONTENT_NAMES` or gitignored `tests/pack-content-names.local`
+(`COCO_PACK_CONTENT_NAMES` wins when it is non-empty). With neither, it prints a
+`::notice::` and skips only the internal-name rule. The other rules still run.
+`--self-test` plants synthetic names so the comparison still runs, and plants the real
+list when one of those sources is set.
+
+The old rot13 list is still on main and in history (main's `tests/check-pack-content.py`
+has it now). This PR removes it from the tree but not from history. There is no history
+rewrite.
 
 ### Persona answers use one attribution wording
 

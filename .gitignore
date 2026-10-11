@@ -19,7 +19,7 @@
 credentials.json
 secrets.yaml
 
-# Clear spellings for tests/check-pack-content.py --self-test. Never commit.
+# Clear spellings for the pack-content internal-name rule. Never commit.
 tests/pack-content-names.local
 
 # Brain DB and local memory artifacts (project-specific, not framework)

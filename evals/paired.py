@@ -13,10 +13,34 @@ import argparse
 import json
 import math
 import random
+import sys
+
+
+def _finite(v):
+    try:
+        return math.isfinite(v)
+    except OverflowError:  # a JSON int of ~309+ digits cannot become a float
+        return False
+
+
+def _require_scores(vals, where):
+    """Scores must be real and finite. bool is a subclass of int, so check it first."""
+    for i, v in enumerate(vals):
+        if isinstance(v, bool):
+            raise ValueError(f"boolean score at item {i} in {where}")
+        if not _finite(v):
+            raise ValueError(f"non-finite score at item {i} in {where}")
 
 
 def paired_bootstrap(base, cand, n_boot=10000, seed=0):
     """95% bootstrap CI for mean(cand - base) over paired items."""
+    if len(base) != len(cand):
+        raise ValueError(
+            f"base and cand must have the same length ({len(base)} != {len(cand)})")
+    if len(base) < 1:
+        raise ValueError("inputs must be non-empty")
+    _require_scores(base, "base")
+    _require_scores(cand, "cand")
     diffs = [c - b for b, c in zip(base, cand)]
     n = len(diffs)
     mean_delta = sum(diffs) / n
@@ -32,7 +56,13 @@ def paired_bootstrap(base, cand, n_boot=10000, seed=0):
 
 
 def bh_fdr(pvalues, q=0.1):
-    """Indices significant under Benjamini-Hochberg at level q."""
+    """Indices significant under Benjamini-Hochberg at level q.
+    Raises ValueError unless every p-value is finite and in [0, 1]."""
+    for i, p in enumerate(pvalues):
+        # bool is a subclass of int and would sort as 0 or 1.
+        if (isinstance(p, bool) or not isinstance(p, (int, float))
+                or not math.isfinite(p) or not 0.0 <= p <= 1.0):
+            raise ValueError(f"p-value at index {i} must be finite and in [0, 1]")
     m = len(pvalues)
     order = sorted(range(m), key=lambda i: pvalues[i])
     k = 0
@@ -62,31 +92,24 @@ def _no(reason, n, delta=None, ci=None, null_win_rate=None):
             "n": n, "null_win_rate": null_win_rate}
 
 
-def _first_nonfinite(vals):
-    """Index of the first NaN or ±Infinity, or None when every value is finite."""
-    for i, v in enumerate(vals):
-        if not math.isfinite(v):
-            return i
-    return None
-
-
 def decide(base, cand, null_arms, min_n=30, q=0.1, max_team_drop=None):
     """Accept iff: n >= min_n, the 95% CI excludes 0, and the candidate beats
     every null arm (cosmetic edits) by more than the null arm beats the
     baseline. max_team_drop, when set, additionally rejects if any single item
     regresses by more than that amount.
-    Raises ValueError if any score is not finite (NaN, Infinity, -Infinity)."""
+    Raises ValueError if min_n < 1, inputs are empty, arm lengths differ,
+    or any score is a boolean or not finite (NaN, Infinity, -Infinity)."""
+    if min_n < 1:
+        raise ValueError("min_n must be >= 1")
     n = len(base)
     if len(cand) != n or any(len(a) != n for a in null_arms):
         raise ValueError("all arms must have the same length (same item order)")
+    if n < 1:
+        raise ValueError("inputs must be non-empty")
     for arm_name, vals in (("base", base), ("cand", cand)):
-        i = _first_nonfinite(vals)
-        if i is not None:
-            raise ValueError(f"non-finite score at item {i} in {arm_name}")
+        _require_scores(vals, arm_name)
     for j, arm in enumerate(null_arms):
-        i = _first_nonfinite(arm)
-        if i is not None:
-            raise ValueError(f"non-finite score at item {i} in null[{j}]")
+        _require_scores(arm, f"null[{j}]")
     if n < min_n:
         return _no(f"n={n} < min_n={min_n}", n)
     delta, lo, hi = paired_bootstrap(base, cand)
@@ -117,11 +140,16 @@ def _load(path):
 
     with open(path) as f:
         vals = json.load(f, parse_constant=reject)
-    if not isinstance(vals, list) or not all(isinstance(v, (int, float)) for v in vals):
-        raise SystemExit(f"{path}: expected a JSON list of numbers")
-    i = _first_nonfinite(vals)
-    if i is not None:
-        raise SystemExit(f"{path}: item {i} is not a finite number")
+    if not isinstance(vals, list):
+        raise ValueError(f"{path}: expected a JSON list of numbers")
+    for i, v in enumerate(vals):
+        # bool is a subclass of int; float(True) is 1.0 and would look like a score.
+        if isinstance(v, bool):
+            raise ValueError(f"{path}: item {i} is a boolean, not a number")
+        if not isinstance(v, (int, float)):
+            raise ValueError(f"{path}: expected a JSON list of numbers")
+        if not _finite(v):
+            raise ValueError(f"{path}: item {i} is not a finite number")
     return [float(v) for v in vals]
 
 
@@ -180,7 +208,97 @@ def _self_test():
     inf_null[0] = float("inf")
     _nonfinite_rejected(lambda: decide(base, cand, [inf_null]), 0, "null[0]")
 
-    print("self-test: 8/8 passed")
+    # 9. Booleans are not scores. [false]*40 vs [true]*40 used to accept (bool subclasses int).
+    def _raises(fn, match):
+        try:
+            got = fn()
+        except ValueError as e:
+            assert match in str(e), e
+            return
+        raise AssertionError(f"expected ValueError containing {match!r}, got {got!r}")
+
+    _raises(lambda: decide([False] * 40, [True] * 40, []), "boolean score at item 0 in base")
+
+    # 10. min_n < 1 is invalid. Empty inputs crash the mean; reject them instead.
+    _raises(lambda: decide([0.5] * 40, [0.6] * 40, [], min_n=0), "min_n must be >= 1")
+    _raises(lambda: paired_bootstrap([], []), "inputs must be non-empty")
+    _raises(lambda: decide([], [], []), "inputs must be non-empty")
+
+    # 11. Extra items must not be dropped by zip.
+    _raises(lambda: paired_bootstrap([0.1, 0.2, 0.3], [0.2, 0.3]), "same length")
+
+    # 12. p-values: NaN used to be marked significant; 1.5 and -0.2 were accepted.
+    assert bh_fdr([0.0, 1.0], q=0.1) == {0}
+    for bad in (float("nan"), float("inf"), 1.5, -0.2, True):
+        _raises(lambda bad=bad: bh_fdr([0.04, bad]), "must be finite and in [0, 1]")
+
+    # 13. NaN in a null arm.
+    nan_null = list(base)
+    nan_null[4] = float("nan")
+    _nonfinite_rejected(lambda: decide(base, cand, [nan_null]), 4, "null[0]")
+
+    # 14. One item regressing past max_team_drop rejects even when the CI is positive.
+    drop_cand = [1.0] * 40
+    drop_cand[7] = 0.50 - 0.30
+    d = decide([0.50] * 40, drop_cand, [], max_team_drop=0.10)
+    assert not d["accept"] and "item 7" in d["reason"] and "max_team_drop" in d["reason"], d
+
+    # 15. Loader rejects booleans, non-numbers, and NaN/Infinity tokens.
+    import os
+    import shutil
+    import tempfile
+
+    def _loader_rejects(text, match):
+        fd, path = tempfile.mkstemp(suffix=".json")
+        try:
+            with os.fdopen(fd, "w") as f:
+                f.write(text)
+            _raises(lambda: _load(path), match)
+        finally:
+            os.remove(path)
+
+    _loader_rejects("[true, false]", "boolean, not a number")
+    _loader_rejects("[" + "9" * 400 + "]", "not a finite number")
+    _raises(lambda: decide([10 ** 400] * 40, [0.5] * 40, []), "non-finite score at item 0 in base")
+    _loader_rejects("[1, \"x\"]", "expected a JSON list of numbers")
+    _loader_rejects("[1, null]", "expected a JSON list of numbers")
+    _loader_rejects("{\"a\": 1}", "expected a JSON list of numbers")
+    _loader_rejects("[1, NaN]", "not a finite number")
+    _loader_rejects("[1, Infinity]", "not a finite number")
+
+    # 16. CLI: every ValueError is one stderr line and a non-zero exit. No traceback.
+    import subprocess
+
+    def _cli_error(base_text, cand_text):
+        td = tempfile.mkdtemp()
+        try:
+            bp = os.path.join(td, "base.json")
+            cp = os.path.join(td, "cand.json")
+            with open(bp, "w") as f:
+                f.write(base_text)
+            with open(cp, "w") as f:
+                f.write(cand_text)
+            r = subprocess.run(
+                [sys.executable, os.path.abspath(__file__), "--base", bp, "--cand", cp],
+                capture_output=True, text=True)
+            assert r.returncode != 0, (r.returncode, r.stdout, r.stderr)
+            assert "Traceback" not in r.stderr and "Traceback" not in r.stdout, r.stderr
+            line = r.stderr.strip()
+            assert line and "\n" not in line, r.stderr
+            return line
+        finally:
+            shutil.rmtree(td)
+
+    err = _cli_error(json.dumps([False] * 40), json.dumps([True] * 40))
+    assert "boolean" in err, err
+    err = _cli_error("[0.1, 0.2]", "[0.3]")
+    assert "same length" in err, err
+    err = _cli_error("[1, NaN]", "[1, 2]")
+    assert "finite" in err, err
+    err = _cli_error("[]", "[]")
+    assert "non-empty" in err, err
+
+    print("self-test: 16/16 passed")
 
 
 def main():
@@ -196,7 +314,12 @@ def main():
         return
     if not (a.base and a.cand):
         ap.error("--base and --cand are required (or use --self-test)")
-    print(json.dumps(decide(_load(a.base), _load(a.cand), [_load(p) for p in a.null]), indent=2))
+    try:
+        result = decide(_load(a.base), _load(a.cand), [_load(p) for p in a.null])
+    except ValueError as e:
+        print(e, file=sys.stderr)
+        raise SystemExit(1)
+    print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":

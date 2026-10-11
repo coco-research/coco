@@ -2,7 +2,7 @@
   "name": "coco",
   "displayName": "Coco",
   "description": "An entire team. Wherever your AI lives. A default install delivers 190 of its 228 skills, 387 commands and 34 agents for project orchestration, knowledge tracking, and multi-agent pipelines; the remaining skills are the opt-in reverse-skill security pack and Cursor-only skills. Open-core, vendor-neutral.",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "author": "Coco Inc",
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://github.com/coco-research/coco",

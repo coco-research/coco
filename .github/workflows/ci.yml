@@ -220,10 +220,17 @@ jobs:
           [ "$fail" -eq 0 ] || exit 1
 
       - name: Pack content gate (no secret reads, phone-home hosts, machine paths or curl-to-shell)
+        env:
+          # Clear spellings for the internal-name rule. Repo secret; empty on forks and fresh
+          # clones. The script then prints a ::notice:: and skips only that rule. The gitignored
+          # tests/pack-content-names.local file is the other source, and this env var wins
+          # when it is non-empty.
+          COCO_PACK_CONTENT_NAMES: ${{ secrets.COCO_PACK_CONTENT_NAMES }}
         run: |
           python3 tests/check-pack-content.py
           # The self-test runs the gate over tests/fixtures/pack-content, where every planted
           # line must fail and every benign line must pass, so a weakened rule fails CI.
+          # It also plants synthetic names, and the real list when one is set.
           python3 tests/check-pack-content.py --self-test
 
       - name: Validate the SI team role roster

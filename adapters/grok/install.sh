@@ -54,7 +54,7 @@ run() {
 # binary path it contains). Anything else under the target is left alone.
 uninstall() {
   [[ -d "$TARGET_HOME" ]] || { echo "Nothing to remove: $TARGET_HOME does not exist."; return 0; }
-  local f cfg="$TARGET_HOME/config.toml" hook="$TARGET_HOME/hooks/coco-m0.json"
+  local f cfg="$TARGET_HOME/config.toml" hook="$TARGET_HOME/hooks/coco-m0.json" mode
   if [[ $DRY_RUN -eq 1 ]]; then
     echo "DRY: remove symlinks into $REPO_ROOT/ under $TARGET_HOME"
   else
@@ -68,8 +68,22 @@ uninstall() {
     if [[ $DRY_RUN -eq 1 ]]; then
       echo "DRY: remove the coco:mcp block from $cfg"
     else
-      awk '/^# coco:mcp-start$/{skip=1} !skip{print} /^# coco:mcp-end$/{skip=0}' "$cfg" > "$cfg.coco-tmp" && mv "$cfg.coco-tmp" "$cfg"
+      # umask 077 so the temp is never world-readable. chmod restores the original
+      # mode (GNU stat, then BSD) before mv replaces the file.
+      rm -f "$cfg.coco-tmp"  # a stale temp from an older run may be world-readable; > keeps its mode
+      ( umask 077; awk '/^# coco:mcp-start$/{skip=1} !skip{print} /^# coco:mcp-end$/{skip=0}' "$cfg" > "$cfg.coco-tmp" )
+      mode=$(stat -c %a "$cfg" 2>/dev/null || stat -f %Lp "$cfg" || true)
+      mode=${mode:-600}
+      chmod "$mode" "$cfg.coco-tmp"
+      mv "$cfg.coco-tmp" "$cfg"
       grep -q '[^[:space:]]' "$cfg" || rm -f "$cfg"
+      # A group- or world-readable file that still holds a secret must not stay that way.
+      if [[ -f "$cfg" ]] && grep -Eq 'api_key|token' "$cfg"; then
+        if (( (8#$mode & 0044) != 0 )); then
+          chmod 600 "$cfg"
+          echo "WARNING: $cfg contains api_key or token and was group- or world-readable; set mode to 0600." >&2
+        fi
+      fi
     fi
   fi
   if [[ -f "$hook" ]] && grep -qF "$HOME/.coco/bin/coco-m0-hook " "$hook"; then
@@ -249,6 +263,8 @@ wire_mcp() {
     echo "MCP: coco-platform already in $cfg"
     return 0
   fi
+  # Create a missing config as 0600. umask applies only on create, so an existing file keeps its mode.
+  ( umask 077; : >> "$cfg" )
   {
     echo ""
     echo "$marker_start"

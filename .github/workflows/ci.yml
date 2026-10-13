@@ -260,3 +260,6 @@ jobs:
             git diff --stat
             exit 1
           fi
+
+      - name: RSI stats self-test
+        run: python3 evals/paired.py --self-test

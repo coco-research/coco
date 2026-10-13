@@ -4,6 +4,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [1.7.0](https://github.com/coco-research/coco/compare/v1.6.1...v1.7.0) (2026-10-13)
+
+
+### Features
+
+* **evals:** paired bootstrap and FDR for candidate-vs-baseline decisions (RSI PR 3) ([d0b2929](https://github.com/coco-research/coco/commit/d0b29297a44e1a13080215ee7b2ed54687bd75de))
+* **evals:** paired bootstrap and FDR for RSI decisions ([#311](https://github.com/coco-research/coco/issues/311)) ([d0b2929](https://github.com/coco-research/coco/commit/d0b29297a44e1a13080215ee7b2ed54687bd75de))
+
 ## [1.6.1](https://github.com/coco-research/coco/compare/v1.6.0...v1.6.1) (2026-10-10)
 
 

@@ -40,18 +40,18 @@
 
   <g>
     <rect class="box" x="24" y="80" width="168" height="44"/>
-    <text class="lbl" x="34" y="98">Lab board</text>
-    <text class="mono" x="34" y="114">lab/board.md</text>
+    <text class="lbl" x="34" y="98">Board file</text>
+    <text class="mono" x="34" y="114">one line per update</text>
     <rect class="box" x="24" y="132" width="168" height="44"/>
-    <text class="lbl" x="34" y="150">HQ queue</text>
-    <text class="mono" x="34" y="166">hq/</text>
+    <text class="lbl" x="34" y="150">Team inbox</text>
+    <text class="mono" x="34" y="166">local folder</text>
     <rect class="box" x="24" y="184" width="168" height="44"/>
-    <text class="lbl" x="34" y="202">Factory queue</text>
-    <text class="mono" x="34" y="218">pi/</text>
+    <text class="lbl" x="34" y="202">Job queue</text>
+    <text class="mono" x="34" y="218">local folder</text>
     <rect class="box" x="24" y="236" width="168" height="44"/>
-    <text class="lbl" x="34" y="254">Transcripts mtime</text>
+    <text class="lbl" x="34" y="254">Transcripts</text>
     <rect class="box" x="24" y="288" width="168" height="44"/>
-    <text class="lbl" x="34" y="306">GitHub</text>
+    <text class="lbl" x="34" y="306">Code host</text>
   </g>
 
   <rect class="box accent" x="232" y="80" width="196" height="252"/>

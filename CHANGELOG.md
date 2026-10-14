@@ -29,6 +29,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+- uninstall, install and update refuse a directory that is not a coco-research/coco clone.
+
 ## [1.5.1]
 
 ### Fixed

@@ -70,6 +70,9 @@ jobs:
       - name: Validate uninstall removes the update-check cache
         run: bash tests/check-cli-uninstall-cleanup.sh
 
+      - name: Validate CLI refuses a directory that is not the Coco clone
+        run: bash tests/check-cli-clone-guard.sh
+
       - name: Validate roster front-door frontmatter
         run: bash tests/check-roster-frontmatter.sh
 

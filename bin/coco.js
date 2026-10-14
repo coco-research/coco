@@ -137,7 +137,37 @@ function run(cmd, args, opts = {}) {
   }
 }
 
+// Any common spelling of github.com/coco-research/coco: https/ssh/git URLs with optional
+// user[:token]@ and :port, or scp form with or without user@. GitHub names are case-insensitive.
+const ORIGIN_RE = /^(?:(?:https?|ssh|git):\/\/(?:[^@\/]+@)?github\.com(?::\d+)?\/|(?:[^@\/:]+@)?github\.com:)coco-research\/coco(?:\.git)?\/?$/i;
+
+// Null when dir is a coco-research/coco clone. Git missing or an unreadable origin fails closed.
+function cloneRejection(dir) {
+  if (!fs.existsSync(dir)) return 'it does not exist';
+  let name = null;
+  try { name = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8')).name; } catch (_) { name = null; }
+  if (name !== 'cocosuperintelligence') return 'package.json name is not "cocosuperintelligence"';
+  let gitSt = null;
+  try { gitSt = fs.statSync(path.join(dir, '.git')); } catch (_) { gitSt = null; }
+  if (!gitSt || (!gitSt.isDirectory() && !gitSt.isFile())) return 'it has no .git directory or file';
+  const remote = spawnSync('git', ['-C', dir, 'remote', 'get-url', 'origin'], { encoding: 'utf8' });
+  if ((remote.error && remote.error.code === 'ENOENT') || remote.status !== 0) {
+    return 'its origin could not be verified; remove the directory by hand';
+  }
+  if (!ORIGIN_RE.test(String(remote.stdout || '').trim())) return 'its origin is not coco-research/coco';
+  return null;
+}
+
+function refuseClone(dir, why) {
+  console.error(`Not removing ${dir}: ${why}. Nothing was deleted.`);
+  process.exit(2);
+}
+
 function cloneOrUpdate(dir) {
+  if (fs.existsSync(dir)) {
+    const why = cloneRejection(dir);
+    if (why) refuseClone(dir, why);
+  }
   if (fs.existsSync(dir) && fs.existsSync(path.join(dir, '.git'))) {
     // Detached HEAD is the tagged install. A branch checkout (typical `git clone` of
     // main) must not be force-moved onto an older pin.
@@ -198,6 +228,13 @@ function cmdUpdate(argv) {
 
 function cmdUninstall(argv) {
   const dir = path.resolve(argv[0] && !argv[0].startsWith('--') ? argv[0] : DEFAULT_DIR);
+  if (fs.existsSync(dir)) {
+    const why = cloneRejection(dir);
+    // Empty: no data to lose. tests/check-cli-uninstall-cleanup.sh uninstalls an empty dir.
+    let entries = 1;  // not a readable directory (a file, no permission): refuse, never crash
+    try { entries = fs.readdirSync(dir).length; } catch (_) {}
+    if (why && entries) refuseClone(dir, why);
+  }
   // Prefix match on the resolved clone path plus a trailing slash, so a clone
   // named `coco` cannot also delete links into `coco-research` / `coco-connect`.
   const prefix = dir.endsWith(path.sep) ? dir : dir + path.sep;

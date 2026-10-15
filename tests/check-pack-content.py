@@ -11,7 +11,9 @@ with a pack.json) and fails with file:line for each hit. Rules (optional-packs a
   internal-name    names of internal tooling, whole words and hyphenated compounds.
                    Spellings are not stored. At scan time they are read from
                    COCO_PACK_CONTENT_NAMES or tests/pack-content-names.local.
-                   With neither, this rule is skipped and a ::notice:: is printed.
+                   With neither, a local run or a pull request prints a ::notice::
+                   and skips only this rule. Push and workflow_dispatch of main in
+                   coco-research/coco (GitHub Actions) are a hard error.
   telemetry-host   an ingestion host of PostHog, Segment, Mixpanel, Amplitude or Sentry. A vendor
                    blog link is not a telemetry host, so only the ingestion hosts are matched.
   curl-pipe-shell  curl or wget piped to a shell, or run as sh -c "$(curl ...)" or bash <(curl ...)
@@ -29,8 +31,8 @@ not scanned, because its exceptions quote the text they excuse.
 
 Run from repo root:
   python3 tests/check-pack-content.py              # check the real tree
-  python3 tests/check-pack-content.py --self-test  # fixtures, plus the name rule with and
-                                                    # without a name list
+  python3 tests/check-pack-content.py --self-test  # fixtures, name sources, missing list
+                                                    # on CI main versus a pull request
 """
 import contextlib
 import fnmatch
@@ -40,6 +42,7 @@ import os
 import re
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -59,16 +62,22 @@ TELEMETRY_HOSTS = "|".join((
 
 
 # A word, or words joined by hyphens. Hyphen is not a word character, so a name also
-# matches inside a longer hyphenated chain: every bounded sub-compound is a candidate.
+# matches inside a longer hyphenated chain: every sub-compound up to the longest
+# loaded name (at least 1 part). Cost is linear in the chain length times that maximum.
 _COMPOUND = re.compile(r"\w+(?:-\w+)*")
 # Clear spellings for the internal-name rule. The env var wins when it is non-empty.
 # Otherwise the gitignored file. Entries are comma- or newline-separated. Prefix
-# exact: for a spelling that matches only in that case. With neither, the rule is skipped.
+# exact: for a spelling that matches only in that case. With neither, local runs
+# and pull requests skip the rule. Push and workflow_dispatch of main error.
 NAMES_ENV = "COCO_PACK_CONTENT_NAMES"
 NAMES_FILE = ROOT / "tests" / "pack-content-names.local"
 MISSING_NAMES_NOTICE = (
     "::notice::COCO_PACK_CONTENT_NAMES is not set and "
     "tests/pack-content-names.local is absent; skipping the internal-name rule")
+MISSING_NAMES_ERROR = (
+    "::error::COCO_PACK_CONTENT_NAMES is not set and "
+    "tests/pack-content-names.local is absent; the internal-name rule is required "
+    "on push and workflow_dispatch of main in coco-research/coco")
 SHELL = r"(?:ba|z|da|k)?sh"
 FETCH = r"(?:curl|wget)"
 # Where a shell command can start: a line start (after a list marker or prompt), ; & | ` or (.
@@ -160,35 +169,47 @@ def executable(mode):
     return bool(re.search(r"[+=][rwXst]*x", mode))
 
 
-def name_tokens(line):
-    """Words and hyphenated compounds, including a name inside a longer chain."""
+def name_window(names):
+    """Longest loaded spelling, in hyphen-separated parts. At least 1."""
+    return max((name.count("-") + 1 for name in names), default=1)
+
+
+def name_tokens(line, window):
+    """Words and hyphenated compounds, including a name inside a longer chain.
+
+    ponytail: windows stop at `window` parts (longest loaded name, at least 1).
+    A chain of k parts yields O(k * window) tokens. Anything longer than every
+    loaded spelling cannot match, so the whole chain is not yielded separately.
+    """
     for match in _COMPOUND.finditer(line):
         parts = match.group(0).split("-")
-        for size in range(1, len(parts) + 1):
-            for start in range(len(parts) - size + 1):
+        n = len(parts)
+        for size in range(1, min(n, window) + 1):
+            for start in range(n - size + 1):
                 yield "-".join(parts[start:start + size])
 
 
-def internal_name(line, fold, exact):
+def internal_name(line, fold, exact, window):
     """True when a token is a blocked spelling.
 
     `fold` holds lowercased spellings and matches in any case. `exact` holds
-    spellings that match only as written.
+    spellings that match only as written. `window` is the longest loaded name
+    in parts, computed once per scan.
     """
-    for token in name_tokens(line):
+    for token in name_tokens(line, window):
         if token.lower() in fold or token in exact:
             return True
     return False
 
 
-def scan_lines(lines, fold=frozenset(), exact=frozenset(), check_names=True):
+def scan_lines(lines, fold=frozenset(), exact=frozenset(), check_names=True, window=1):
     """Yield (line number, rule, line) for every rule that fires.
 
     `check_names` is false when the name list is absent. The internal-name rule
     is skipped, and every other rule still runs.
     """
     for n, line in enumerate(lines, 1):
-        if check_names and internal_name(line, fold, exact):
+        if check_names and internal_name(line, fold, exact, window):
             yield n, "internal-name", line
         for rule, rx in RULES.items():
             if rx.search(line):
@@ -253,7 +274,7 @@ def excuses(e, rel, rule, line):
             and e.get("contains", line) in line)
 
 
-def scan(root, allow, fold=frozenset(), exact=frozenset(), check_names=True):
+def scan(root, allow, fold=frozenset(), exact=frozenset(), check_names=True, window=1):
     """Return (hits, unused, errors) for every pack under root/systems.
 
     A hit is "systems/<pack>/<file>:<line>: [rule] <text>"; unused lists exceptions that excused
@@ -265,7 +286,7 @@ def scan(root, allow, fold=frozenset(), exact=frozenset(), check_names=True):
         exceptions = pack_exceptions(d, allow, errors)
         used = set()
         for rel, lines in pack_files(d):
-            for n, rule, line in scan_lines(lines, fold, exact, check_names):
+            for n, rule, line in scan_lines(lines, fold, exact, check_names, window):
                 matching = [i for i, e in enumerate(exceptions) if excuses(e, rel, rule, line)]
                 used.update(matching)
                 if not matching:
@@ -310,17 +331,53 @@ def load_name_list():
     return None
 
 
+def ci_requires_name_list():
+    """True for canonical-repo Actions on push or workflow_dispatch of main.
+
+    Local runs, pull requests, and any other ref are false. This reads the
+    process env. The workflow file is not the check.
+    """
+    return (os.environ.get("GITHUB_ACTIONS") == "true"
+            and os.environ.get("GITHUB_REPOSITORY") == "coco-research/coco"
+            and os.environ.get("GITHUB_EVENT_NAME") in ("push", "workflow_dispatch")
+            and os.environ.get("GITHUB_REF") == "refs/heads/main")
+
+
 def scan_with_policy(root, allow, loaded):
     """Scan packs. `loaded` is (fold spellings, exact spellings), or None.
 
     None means neither name source is set: print a ::notice:: and skip only the
-    internal-name rule. The other rules still run.
+    internal-name rule. The other rules still run. `run` does not use this path
+    when a canonical push or workflow_dispatch requires the list.
     """
     if loaded is None:
         print(MISSING_NAMES_NOTICE)
         return scan(root, allow, check_names=False)
     fold_names, exact_names = loaded
-    return scan(root, allow, frozenset(name.lower() for name in fold_names), frozenset(exact_names))
+    return scan(root, allow, frozenset(name.lower() for name in fold_names), frozenset(exact_names),
+                window=name_window(fold_names + exact_names))
+
+
+def run(root, allow):
+    """Return 0 when the tree is clean. A required missing name list is an error.
+
+    Other rules still run when the list is missing. The internal-name rule does
+    not, and on push or workflow_dispatch of main that is itself a failure.
+    """
+    loaded = load_name_list()
+    missing = loaded is None and ci_requires_name_list()
+    if missing:
+        print(MISSING_NAMES_ERROR)
+        hits, unused, errors = scan(root, allow, check_names=False)
+    else:
+        hits, unused, errors = scan_with_policy(root, allow, loaded)
+    for line in errors + unused + hits:
+        print(f"  FAIL: {line}")
+    if missing or hits or unused or errors:
+        return 1
+    print("PASS: no pack content trips a rule "
+          f"({len(allow)} exceptions in ALLOW, plus any in pack.json)")
+    return 0
 
 
 def planted_name_failures(fold_names, exact_names):
@@ -340,6 +397,9 @@ def planted_name_failures(fold_names, exact_names):
     if hyphenated:
         probes.append((f"see {hyphenated}-extra", True))
         probes.append((f"see pre-{hyphenated}", True))
+    # A 5+-part list entry inside a longer chain. The window is the list's max, not a fixed 4.
+    for name in (name for kind, name in names if kind == "fold" and name.count("-") >= 4):
+        probes.append((f"see pre-{name}", True))
     lines += [text for text, _ in probes]
     with tempfile.TemporaryDirectory() as tmp:
         pack = Path(tmp) / "systems" / "names"
@@ -433,6 +493,115 @@ def source_failures():
     return failures
 
 
+@contextlib.contextmanager
+def without_name_list():
+    """Hide the env var and the gitignored file so the list is missing."""
+    saved = os.environ.pop(NAMES_ENV, None)
+    aside = None
+    if NAMES_FILE.is_file():
+        aside = NAMES_FILE.with_name(f".{NAMES_FILE.name}.{os.getpid()}.aside")
+        NAMES_FILE.rename(aside)
+    try:
+        yield
+    finally:
+        if aside is not None:
+            aside.rename(NAMES_FILE)
+        if saved is None:
+            os.environ.pop(NAMES_ENV, None)
+        else:
+            os.environ[NAMES_ENV] = saved
+
+
+def policy_failures():
+    """Missing list: hard error on push or dispatch of main; notice otherwise."""
+    failures = []
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        pack = root / "systems" / "skip"
+        pack.mkdir(parents=True)
+        (pack / "pack.json").write_text("{}")
+        (pack / "lines.md").write_text("run zz-pack-gate-tool now\n")
+        keys = ("GITHUB_ACTIONS", "GITHUB_REPOSITORY", "GITHUB_EVENT_NAME", "GITHUB_REF")
+        saved = {key: os.environ.get(key) for key in keys}
+
+        def once(label, want_error):
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = run(root, [])
+            out = buf.getvalue()
+            want = 1 if want_error else 0
+            if code != want:
+                failures.append(f"{label}: exit {code}, want {want}")
+            if want_error:
+                if MISSING_NAMES_ERROR not in out:
+                    failures.append(f"{label}: missing the hard-error message")
+                if MISSING_NAMES_NOTICE in out:
+                    failures.append(f"{label}: printed the skip notice")
+            elif not out.startswith(MISSING_NAMES_NOTICE) or "::error::" in out:
+                failures.append(f"{label}: expected a skip notice, got {out!r}")
+            if "[internal-name]" in out:
+                failures.append(f"{label}: flagged an internal name with no list")
+
+        try:
+            with without_name_list():
+                os.environ["GITHUB_ACTIONS"] = "true"
+                os.environ["GITHUB_REPOSITORY"] = "coco-research/coco"
+                os.environ["GITHUB_REF"] = "refs/heads/main"
+                for event in ("push", "workflow_dispatch"):
+                    os.environ["GITHUB_EVENT_NAME"] = event
+                    once(f"canonical {event}", True)
+                os.environ["GITHUB_REF"] = "refs/heads/other"
+                for event in ("push", "workflow_dispatch"):
+                    os.environ["GITHUB_EVENT_NAME"] = event
+                    once(f"{event} of another branch", False)
+                os.environ["GITHUB_REF"] = "refs/heads/main"
+                os.environ["GITHUB_EVENT_NAME"] = "pull_request"
+                once("canonical pull_request", False)
+                os.environ["GITHUB_REPOSITORY"] = "fork/coco"
+                once("fork pull_request", False)
+                os.environ["GITHUB_EVENT_NAME"] = "push"
+                once("fork push", False)
+                os.environ.pop("GITHUB_ACTIONS", None)
+                os.environ["GITHUB_REPOSITORY"] = "coco-research/coco"
+                os.environ["GITHUB_EVENT_NAME"] = "push"
+                once("push outside Actions", False)
+                for key in keys:
+                    os.environ.pop(key, None)
+                once("local", False)
+        finally:
+            for key, value in saved.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+    return failures
+
+
+def hyphen_chain_failures():
+    """A 40-part chain uses a 3-part list's window and stays under the time bound."""
+    parts = [f"w{i}" for i in range(40)]
+    line = "-".join(parts)
+    names = ["aa-bb-cc", "w20-w21"]
+    window = name_window(names)
+    started = time.perf_counter()
+    tokens = list(name_tokens(line, window))
+    hit = internal_name(line, frozenset(names), frozenset(), window)
+    elapsed = time.perf_counter() - started
+    expect = sum(40 - size + 1 for size in range(1, window + 1))
+    failures = []
+    if window != 3:
+        failures.append(f"3-part list set window {window}, want 3")
+    if len(tokens) != expect:
+        failures.append(f"40-part chain yielded {len(tokens)} tokens, want {expect}")
+    if any(token.count("-") + 1 > window for token in tokens):
+        failures.append("40-part chain yielded a window longer than the name list")
+    if not hit:
+        failures.append("a 2-part name inside a 40-part chain was not flagged")
+    if elapsed > 0.5:
+        failures.append(f"40-part chain took {elapsed:.3f}s")
+    return failures
+
+
 def self_test():
     """Planted lines must fail, benign lines must pass, and exceptions must work and expire."""
     failures = []
@@ -452,14 +621,19 @@ def self_test():
 
     # Synthetic names always exercise the comparison, including on a fork with no list.
     # The env var and the gitignored file are planted too, when each can be set here.
-    # A scan with no list prints a ::notice:: and skips only the internal-name rule.
-    found, nflag = planted_name_failures(
-        ["zz-pack-gate-tool", "zzpackgateword"], ["ZzPackGate"])
+    # A missing list on push or workflow_dispatch of main is a hard error.
+    # A pull request or a local run prints a ::notice:: and skips only that rule.
+    synthetic = ["zz-pack-gate-tool", "zzpackgateword", "foo-bar-baz-qux-quux",
+                 "zz-aa-bb-cc-dd-ee"]
+    found, nflag = planted_name_failures(synthetic, ["ZzPackGate"])
     failures += found
-    print(f"  internal names: 3 planted (synthetic), {nflag} reported")
+    print(f"  internal names: {len(synthetic) + 1} planted "
+          f"(synthetic, 5-part inside a longer chain), {nflag} reported")
     failures += source_failures()
     failures += missing_list_failures()
-    print("  name sources: env and gitignored file; missing list skips internal-name")
+    failures += policy_failures()
+    failures += hyphen_chain_failures()
+    print("  name sources: missing list errors on push of main, else skips")
 
     # Exception globs stay inside one path segment, and a malformed exception excuses nothing.
     with tempfile.TemporaryDirectory() as tmp:
@@ -504,14 +678,7 @@ def self_test():
 def main(argv):
     if "--self-test" in argv:
         return self_test()
-    hits, unused, errors = scan_with_policy(ROOT, ALLOW, load_name_list())
-    for line in errors + unused + hits:
-        print(f"  FAIL: {line}")
-    if hits or unused or errors:
-        return 1
-    print("PASS: no pack content trips a rule "
-          f"({len(ALLOW)} exceptions in ALLOW, plus any in pack.json)")
-    return 0
+    return run(ROOT, ALLOW)
 
 
 if __name__ == "__main__":

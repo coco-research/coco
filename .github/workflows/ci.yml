@@ -283,48 +283,36 @@ jobs:
   router-eval:
     # Router regression gate (router eval audit step 3). Reruns evals/routing/score.py
     # in auto mode on the heldout split and fails if top-1 or delegate precision drops
-    # below the newest file in evals/routing/runs/. Embeddings come from a local Ollama
-    # on this runner (nomic-embed-text, ~270 MB, cached); no paid API, no key, and the
-    # gate refuses any non-loopback endpoint. Any keyword fallback fails the job.
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # below the newest file in evals/routing/runs/ (or the pinned model digest changed).
+    # Runs on the self-hosted Mac (no GitHub-hosted minutes) against an Ollama that is
+    # already there. Nothing is downloaded or pulled; if Ollama or the model is missing
+    # the job prints a skip and exits 0. No paid API, no key, loopback only.
+    # Fork PRs never get the self-hosted runner.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, macOS, ARM64, local]
+    timeout-minutes: 15
     env:
-      OLLAMA_VERSION: v0.40.5
       COCO_EMBED_URL: http://127.0.0.1:11434/v1/embeddings
       COCO_EMBED_MODEL: nomic-embed-text
+      COCO_ROUTER_M0: '0'
     steps:
       - uses: actions/checkout@v7
 
-      - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: '3.11'
-
+      # No actions/setup-python here: it is broken on this runner (see self-hosted-probe.yml).
       - name: Gate self-test
         run: python3 evals/routing/check_regression.py --self-test
 
-      - name: Cache the embedding model
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.ollama/models
-          key: ollama-models-nomic-embed-text-${{ env.OLLAMA_VERSION }}
-
-      - name: Start local Ollama
+      - name: Probe local Ollama
+        id: probe
         run: |
-          mkdir -p "$RUNNER_TEMP/ollama"
-          wget -q -O "$RUNNER_TEMP/ollama.tar.zst" \
-            "https://github.com/ollama/ollama/releases/download/${OLLAMA_VERSION}/ollama-linux-amd64.tar.zst"
-          tar --zstd -xf "$RUNNER_TEMP/ollama.tar.zst" -C "$RUNNER_TEMP/ollama"
-          OLLAMA_HOST=127.0.0.1:11434 nohup "$RUNNER_TEMP/ollama/bin/ollama" serve > "$RUNNER_TEMP/ollama.log" 2>&1 &
-          for i in $(seq 1 30); do
-            python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:11434/api/version', timeout=2)" 2>/dev/null && break
-            sleep 1
-          done
-          "$RUNNER_TEMP/ollama/bin/ollama" pull nomic-embed-text
+          if python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:11434/api/version', timeout=3)" 2>/dev/null \
+             && command -v ollama >/dev/null && ollama show nomic-embed-text >/dev/null 2>&1; then
+            echo "ok=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "SKIP: no local Ollama on 127.0.0.1:11434 or nomic-embed-text not present; router gate not run"
+            echo "ok=0" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Router regression gate
+        if: steps.probe.outputs.ok == '1'
         run: python3 evals/routing/check_regression.py --write "$RUNNER_TEMP/router-run.json"
-
-      - name: Ollama log on failure
-        if: failure()
-        run: tail -50 "$RUNNER_TEMP/ollama.log" || true

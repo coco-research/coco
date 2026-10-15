@@ -24,9 +24,39 @@ sys.path.insert(0, str(ROOT / "evals" / "routing"))
 LOOPBACK = {"127.0.0.1", "localhost", "::1"}
 
 
+def _run_date(p):
+    """Sort key: the run's own date (run.date), else the YYYY-MM-DD filename prefix."""
+    import datetime
+    d = None
+    try:
+        d = (json.loads(p.read_text()).get("run") or {}).get("date")
+    except Exception:
+        pass
+    for cand in (d, p.name[:10]):
+        try:
+            return (datetime.date.fromisoformat(cand), p.name)
+        except (TypeError, ValueError):
+            continue
+    return (datetime.date.min, p.name)
+
+
 def latest_run(runs_dir=RUNS):
-    files = sorted(p for p in runs_dir.glob("*.json"))
+    files = sorted(runs_dir.glob("*.json"), key=_run_date)
     return files[-1] if files else None
+
+
+def model_digest(embed_url, model):
+    """Ollama model digest (the tag is floating). None if not an Ollama endpoint."""
+    import urllib.request
+    u = urllib.parse.urlparse(embed_url)
+    try:
+        with urllib.request.urlopen(f"{u.scheme}://{u.netloc}/api/tags", timeout=5) as r:
+            for m in json.load(r).get("models", []):
+                if m.get("name") in (model, model + ":latest") or m.get("model") in (model, model + ":latest"):
+                    return m.get("digest")
+    except Exception:
+        return None
+    return None
 
 
 def compare(prev, cur, tolerance=0.02, delegate_tolerance=0.05):
@@ -37,6 +67,9 @@ def compare(prev, cur, tolerance=0.02, delegate_tolerance=0.05):
     if cur["delegate_precision"] < prev["delegate_precision"] - delegate_tolerance:
         fails.append(f"delegate precision {cur['delegate_precision']:.3f} < previous "
                      f"{prev['delegate_precision']:.3f} - {delegate_tolerance}")
+    pd, cd = (prev.get("run") or {}).get("embed_digest"), (cur.get("run") or {}).get("embed_digest")
+    if pd and cd and pd != cd:
+        fails.append(f"embedding model digest {cd[:12]} != pinned {pd[:12]}; re-baseline in a separate PR")
     return fails
 
 
@@ -68,7 +101,8 @@ def run_scorer():
     metrics = score.evaluate(items, select)
     if fallbacks:
         sys.exit(f"FAIL: {len(fallbacks)} keyword fallbacks (first: {fallbacks[0]}); embeddings not reachable")
-    metrics["run"] = {"mode": "auto", "split": "heldout", "embed_model": meta_select.EMBED_MODEL}
+    metrics["run"] = {"mode": "auto", "split": "heldout", "embed_model": meta_select.EMBED_MODEL,
+                      "embed_digest": model_digest(meta_select.EMBED_URL, meta_select.EMBED_MODEL)}
     return metrics
 
 
@@ -79,12 +113,18 @@ def self_test():
     assert len(compare(base, {"top1_accuracy": 0.85, "delegate_precision": 1.0})) == 1
     assert len(compare(base, {"top1_accuracy": 0.90, "delegate_precision": 0.80})) == 1
     assert len(compare(base, {"top1_accuracy": 0.10, "delegate_precision": 0.0})) == 2
+    pin = dict(base, run={"embed_digest": "a" * 64})
+    assert compare(pin, dict(base, run={"embed_digest": "a" * 64})) == []
+    assert len(compare(pin, dict(base, run={"embed_digest": "b" * 64}))) == 1
+    assert compare(base, dict(base, run={"embed_digest": "b" * 64})) == []
     import tempfile
     with tempfile.TemporaryDirectory() as d:
         d = pathlib.Path(d)
         assert latest_run(d) is None
         for n in ("2026-10-15-aaaaaaa.json", "2026-11-01-bbbbbbb.json", "2026-10-20-ccccccc.json"):
             (d / n).write_text("{}")
+        assert latest_run(d).name == "2026-11-01-bbbbbbb.json"
+        (d / "zz-misc.json").write_text(json.dumps({"run": {"date": "2026-10-01"}}))
         assert latest_run(d).name == "2026-11-01-bbbbbbb.json"
     print("check_regression self-test passed")
 

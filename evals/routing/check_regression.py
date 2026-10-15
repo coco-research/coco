@@ -68,7 +68,9 @@ def compare(prev, cur, tolerance=0.02, delegate_tolerance=0.05):
         fails.append(f"delegate precision {cur['delegate_precision']:.3f} < previous "
                      f"{prev['delegate_precision']:.3f} - {delegate_tolerance}")
     pd, cd = (prev.get("run") or {}).get("embed_digest"), (cur.get("run") or {}).get("embed_digest")
-    if pd and cd and pd != cd:
+    if pd and not cd:
+        fails.append(f"baseline pins embedding digest {pd[:12]} but this run has none (tags lookup failed?)")
+    elif pd and cd and pd != cd:
         fails.append(f"embedding model digest {cd[:12]} != pinned {pd[:12]}; re-baseline in a separate PR")
     return fails
 
@@ -106,6 +108,24 @@ def run_scorer():
     return metrics
 
 
+def probe_exit(ok, ref):
+    """Exit code when the local Ollama probe result is `ok`: a miss fails on main, skips elsewhere."""
+    if ok:
+        return 0
+    return 1 if ref == "refs/heads/main" else 0
+
+
+def probe(url="http://127.0.0.1:11434", model="nomic-embed-text"):
+    import shutil, subprocess, urllib.request
+    try:
+        urllib.request.urlopen(f"{url}/api/version", timeout=3)
+    except Exception:
+        return False
+    if not shutil.which("ollama"):
+        return False
+    return subprocess.run(["ollama", "show", model], capture_output=True, timeout=30).returncode == 0
+
+
 def self_test():
     base = {"top1_accuracy": 0.90, "delegate_precision": 1.0}
     assert compare(base, {"top1_accuracy": 0.89, "delegate_precision": 1.0}) == []
@@ -117,6 +137,13 @@ def self_test():
     assert compare(pin, dict(base, run={"embed_digest": "a" * 64})) == []
     assert len(compare(pin, dict(base, run={"embed_digest": "b" * 64}))) == 1
     assert compare(base, dict(base, run={"embed_digest": "b" * 64})) == []
+    assert len(compare(pin, dict(base, run={"embed_digest": None}))) == 1
+    assert len(compare(pin, dict(base))) == 1
+    assert compare(base, dict(base)) == []
+    assert probe_exit(True, "refs/heads/main") == 0
+    assert probe_exit(False, "refs/heads/main") == 1
+    assert probe_exit(False, "refs/pull/345/merge") == 0
+    assert probe_exit(False, "") == 0
     import tempfile
     with tempfile.TemporaryDirectory() as d:
         d = pathlib.Path(d)
@@ -136,9 +163,24 @@ def main():
     ap.add_argument("--delegate-tolerance", type=float, default=0.05)
     ap.add_argument("--write", metavar="PATH", help="also write this run's metrics JSON")
     ap.add_argument("--self-test", action="store_true")
+    ap.add_argument("--probe", action="store_true",
+                    help="check local Ollama + model; write ok=0/1 to $GITHUB_OUTPUT; exit 1 on a miss only on main")
     a = ap.parse_args()
     if a.self_test:
         self_test(); return
+    if a.probe:
+        import os
+        ok = probe()
+        out = os.environ.get("GITHUB_OUTPUT")
+        if out:
+            with open(out, "a") as f:
+                f.write(f"ok={int(ok)}\n")
+        ref = os.environ.get("GITHUB_REF", "")
+        code = probe_exit(ok, ref)
+        if not ok:
+            print(("FAIL" if code else "SKIP") + ": no local Ollama on 127.0.0.1:11434 or nomic-embed-text "
+                  f"not present ({ref or 'no ref'}); router gate not run")
+        sys.exit(code)
     prev_path = latest_run()
     if prev_path is None:
         sys.exit("FAIL: no run file in evals/routing/runs/")

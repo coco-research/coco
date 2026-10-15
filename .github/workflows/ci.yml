@@ -286,7 +286,7 @@ jobs:
     # below the newest file in evals/routing/runs/ (or the pinned model digest changed).
     # Runs on the self-hosted Mac (no GitHub-hosted minutes) against an Ollama that is
     # already there. Nothing is downloaded or pulled; if Ollama or the model is missing
-    # the job prints a skip and exits 0. No paid API, no key, loopback only.
+    # the job fails on main and prints a skip (exit 0) on PRs. No paid API, no key, loopback only.
     # Fork PRs never get the self-hosted runner.
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, macOS, ARM64, local]
@@ -304,14 +304,8 @@ jobs:
 
       - name: Probe local Ollama
         id: probe
-        run: |
-          if python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:11434/api/version', timeout=3)" 2>/dev/null \
-             && command -v ollama >/dev/null && ollama show nomic-embed-text >/dev/null 2>&1; then
-            echo "ok=1" >> "$GITHUB_OUTPUT"
-          else
-            echo "SKIP: no local Ollama on 127.0.0.1:11434 or nomic-embed-text not present; router gate not run"
-            echo "ok=0" >> "$GITHUB_OUTPUT"
-          fi
+        # A miss fails on main (the resident engine should be up) and is a skip on PRs.
+        run: python3 evals/routing/check_regression.py --probe
 
       - name: Router regression gate
         if: steps.probe.outputs.ok == '1'

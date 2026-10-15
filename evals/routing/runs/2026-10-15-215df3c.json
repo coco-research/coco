@@ -47,7 +47,9 @@
       "method": "evals/paired.py paired_bootstrap and _boot_p_greater, n_boot=10000, seed=0 (p is the bootstrap floor)"
     },
     "delegates": 32,
-    "delegates_correct": 32
+    "delegates_correct": 32,
+    "embed_model": "nomic-embed-text",
+    "embed_digest": "0a109f422b47e3a30ba2b10eca18548e944e8a23073ee3f3e947efcf3c45e59f"
   },
   "per_item": [
     {

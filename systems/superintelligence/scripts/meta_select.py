@@ -17,11 +17,12 @@ Do not reuse embed FLOOR/DELEGATE_MARGIN as if Jaccard were commensurate with co
     python3 superintelligence/scripts/meta_select.py "should we ship an AI compliance product?"
     -> JSON {prompt, method, teams:[{team_id,short,score,weight,cells:[{cell,score}]}], delegate}
 """
-import sys, json, math, re, urllib.request, urllib.error, pathlib
+import os, sys, json, math, re, urllib.request, urllib.error, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-EMBED_URL = "http://127.0.0.1:1234/v1/embeddings"
-EMBED_MODEL = "text-embedding-nomic-embed-text-v1.5"
+# Any local OpenAI-compatible endpoint (LM Studio by default; Ollama in CI). Local only.
+EMBED_URL = os.environ.get("COCO_EMBED_URL", "http://127.0.0.1:1234/v1/embeddings")
+EMBED_MODEL = os.environ.get("COCO_EMBED_MODEL", "text-embedding-nomic-embed-text-v1.5")
 META = json.loads((ROOT / "registry.json").read_text())
 FLOOR = 0.55          # cosine relevance floor for a team to be considered (embed only)
 DELEGATE_MARGIN = 0.12  # if top team beats 2nd by this much -> single-domain delegate (embed only)

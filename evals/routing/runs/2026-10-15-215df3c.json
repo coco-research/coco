@@ -1,0 +1,866 @@
+{
+  "top1_accuracy": 0.896551724137931,
+  "top4_recall": 0.9827586206896551,
+  "delegate_precision": 1.0,
+  "abstain_rate": 1.0,
+  "per_team_top1": {
+    "ai": 0.6666666666666666,
+    "climate-energy": 1.0,
+    "data-analytics": 1.0,
+    "education-edtech": 0.8888888888888888,
+    "engineering": 0.7,
+    "finance": 0.8888888888888888,
+    "gtm": 0.8888888888888888,
+    "healthcare-life-sciences": 1.0,
+    "legal-ip": 0.9,
+    "product-design": 0.8888888888888888,
+    "risk-compliance": 1.0,
+    "strategy": 0.8888888888888888,
+    "trading": 1.0
+  },
+  "run": {
+    "commit": "215df3c",
+    "date": "2026-10-15",
+    "mode": "auto",
+    "split": "heldout",
+    "n_labelled": 116,
+    "n_none": 4,
+    "embed": {
+      "backend": "ollama, local",
+      "model": "nomic-embed-text",
+      "url": "http://127.0.0.1:11434/v1/embeddings"
+    },
+    "keyword_fallbacks": 0,
+    "items_draft": true,
+    "vs_keyword": {
+      "baseline_top1": 0.41379310344827586,
+      "auto_correct": 104,
+      "keyword_correct": 48,
+      "mean_delta": 0.4827586206896552,
+      "ci95": [
+        0.3879310344827586,
+        0.5775862068965517
+      ],
+      "p_one_sided": 9.999000099990002e-05,
+      "wins": 57,
+      "losses": 1,
+      "method": "evals/paired.py paired_bootstrap and _boot_p_greater, n_boot=10000, seed=0 (p is the bootstrap floor)"
+    },
+    "delegates": 32,
+    "delegates_correct": 32
+  },
+  "per_item": [
+    {
+      "id": "r013",
+      "label": "ai",
+      "top1": "ai",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r014",
+      "label": "ai",
+      "top1": "strategy",
+      "correct": 0,
+      "delegate": false
+    },
+    {
+      "id": "r015",
+      "label": "ai",
+      "top1": "ai",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r016",
+      "label": "ai",
+      "top1": "ai",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r017",
+      "label": "ai",
+      "top1": "ai",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r018",
+      "label": "ai",
+      "top1": "ai",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r019",
+      "label": "ai",
+      "top1": "ai",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r020",
+      "label": "ai",
+      "top1": "engineering",
+      "correct": 0,
+      "delegate": false
+    },
+    {
+      "id": "r033",
+      "label": "climate-energy",
+      "top1": "climate-energy",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r034",
+      "label": "climate-energy",
+      "top1": "climate-energy",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r035",
+      "label": "climate-energy",
+      "top1": "climate-energy",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r036",
+      "label": "climate-energy",
+      "top1": "climate-energy",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r037",
+      "label": "climate-energy",
+      "top1": "climate-energy",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r038",
+      "label": "climate-energy",
+      "top1": "climate-energy",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r039",
+      "label": "climate-energy",
+      "top1": "climate-energy",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r040",
+      "label": "climate-energy",
+      "top1": "climate-energy",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r053",
+      "label": "data-analytics",
+      "top1": "data-analytics",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r054",
+      "label": "data-analytics",
+      "top1": "data-analytics",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r055",
+      "label": "data-analytics",
+      "top1": "data-analytics",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r056",
+      "label": "data-analytics",
+      "top1": "data-analytics",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r057",
+      "label": "data-analytics",
+      "top1": "data-analytics",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r058",
+      "label": "data-analytics",
+      "top1": "data-analytics",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r059",
+      "label": "data-analytics",
+      "top1": "data-analytics",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r060",
+      "label": "data-analytics",
+      "top1": "data-analytics",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r073",
+      "label": "education-edtech",
+      "top1": "education-edtech",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r074",
+      "label": "education-edtech",
+      "top1": "education-edtech",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r075",
+      "label": "education-edtech",
+      "top1": "education-edtech",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r076",
+      "label": "education-edtech",
+      "top1": "education-edtech",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r077",
+      "label": "education-edtech",
+      "top1": "education-edtech",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r078",
+      "label": "education-edtech",
+      "top1": "education-edtech",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r079",
+      "label": "education-edtech",
+      "top1": "education-edtech",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r080",
+      "label": "education-edtech",
+      "top1": "education-edtech",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r093",
+      "label": "engineering",
+      "top1": "engineering",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r094",
+      "label": "engineering",
+      "top1": "engineering",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r095",
+      "label": "engineering",
+      "top1": "engineering",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r096",
+      "label": "engineering",
+      "top1": "engineering",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r097",
+      "label": "engineering",
+      "top1": "education-edtech",
+      "correct": 0,
+      "delegate": false
+    },
+    {
+      "id": "r098",
+      "label": "engineering",
+      "top1": "engineering",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r099",
+      "label": "engineering",
+      "top1": "engineering",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r100",
+      "label": "engineering",
+      "top1": "engineering",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r113",
+      "label": "finance",
+      "top1": "finance",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r114",
+      "label": "finance",
+      "top1": "finance",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r115",
+      "label": "finance",
+      "top1": "finance",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r116",
+      "label": "finance",
+      "top1": "finance",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r117",
+      "label": "finance",
+      "top1": "finance",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r118",
+      "label": "finance",
+      "top1": "finance",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r119",
+      "label": "finance",
+      "top1": "finance",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r120",
+      "label": "finance",
+      "top1": "finance",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r133",
+      "label": "gtm",
+      "top1": "gtm",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r134",
+      "label": "gtm",
+      "top1": "gtm",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r135",
+      "label": "gtm",
+      "top1": "gtm",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r136",
+      "label": "gtm",
+      "top1": "gtm",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r137",
+      "label": "gtm",
+      "top1": "gtm",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r138",
+      "label": "gtm",
+      "top1": "gtm",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r139",
+      "label": "gtm",
+      "top1": "gtm",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r140",
+      "label": "gtm",
+      "top1": "gtm",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r153",
+      "label": "healthcare-life-sciences",
+      "top1": "healthcare-life-sciences",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r154",
+      "label": "healthcare-life-sciences",
+      "top1": "healthcare-life-sciences",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r155",
+      "label": "healthcare-life-sciences",
+      "top1": "healthcare-life-sciences",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r156",
+      "label": "healthcare-life-sciences",
+      "top1": "healthcare-life-sciences",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r157",
+      "label": "healthcare-life-sciences",
+      "top1": "healthcare-life-sciences",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r158",
+      "label": "healthcare-life-sciences",
+      "top1": "healthcare-life-sciences",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r159",
+      "label": "healthcare-life-sciences",
+      "top1": "healthcare-life-sciences",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r160",
+      "label": "healthcare-life-sciences",
+      "top1": "healthcare-life-sciences",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r173",
+      "label": "legal-ip",
+      "top1": "legal-ip",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r174",
+      "label": "legal-ip",
+      "top1": "legal-ip",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r175",
+      "label": "legal-ip",
+      "top1": "legal-ip",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r176",
+      "label": "legal-ip",
+      "top1": "legal-ip",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r177",
+      "label": "legal-ip",
+      "top1": "legal-ip",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r178",
+      "label": "legal-ip",
+      "top1": "legal-ip",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r179",
+      "label": "legal-ip",
+      "top1": "legal-ip",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r180",
+      "label": "legal-ip",
+      "top1": "legal-ip",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r193",
+      "label": "product-design",
+      "top1": "product-design",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r194",
+      "label": "product-design",
+      "top1": "product-design",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r195",
+      "label": "product-design",
+      "top1": "product-design",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r196",
+      "label": "product-design",
+      "top1": "product-design",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r197",
+      "label": "product-design",
+      "top1": "product-design",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r198",
+      "label": "product-design",
+      "top1": "product-design",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r199",
+      "label": "product-design",
+      "top1": "product-design",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r200",
+      "label": "product-design",
+      "top1": "product-design",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r213",
+      "label": "risk-compliance",
+      "top1": "risk-compliance",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r214",
+      "label": "risk-compliance",
+      "top1": "risk-compliance",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r215",
+      "label": "risk-compliance",
+      "top1": "risk-compliance",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r216",
+      "label": "risk-compliance",
+      "top1": "risk-compliance",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r217",
+      "label": "risk-compliance",
+      "top1": "risk-compliance",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r218",
+      "label": "risk-compliance",
+      "top1": "risk-compliance",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r219",
+      "label": "risk-compliance",
+      "top1": "risk-compliance",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r220",
+      "label": "risk-compliance",
+      "top1": "risk-compliance",
+      "correct": 1,
+      "delegate": true
+    },
+    {
+      "id": "r233",
+      "label": "strategy",
+      "top1": "strategy",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r234",
+      "label": "strategy",
+      "top1": "strategy",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r235",
+      "label": "strategy",
+      "top1": "strategy",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r236",
+      "label": "strategy",
+      "top1": "strategy",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r237",
+      "label": "strategy",
+      "top1": "strategy",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r238",
+      "label": "strategy",
+      "top1": "strategy",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r239",
+      "label": "strategy",
+      "top1": "strategy",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r240",
+      "label": "strategy",
+      "top1": "strategy",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r253",
+      "label": "trading",
+      "top1": "trading",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r254",
+      "label": "trading",
+      "top1": "trading",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r255",
+      "label": "trading",
+      "top1": "trading",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r256",
+      "label": "trading",
+      "top1": "trading",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r257",
+      "label": "trading",
+      "top1": "trading",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r258",
+      "label": "trading",
+      "top1": "trading",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r259",
+      "label": "trading",
+      "top1": "trading",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r260",
+      "label": "trading",
+      "top1": "trading",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r279",
+      "label": "engineering",
+      "top1": "trading",
+      "correct": 0,
+      "delegate": false
+    },
+    {
+      "id": "r280",
+      "label": "legal-ip",
+      "top1": "climate-energy",
+      "correct": 0,
+      "delegate": false
+    },
+    {
+      "id": "r281",
+      "label": "ai",
+      "top1": "product-design",
+      "correct": 0,
+      "delegate": false
+    },
+    {
+      "id": "r282",
+      "label": "finance",
+      "top1": "education-edtech",
+      "correct": 0,
+      "delegate": false
+    },
+    {
+      "id": "r283",
+      "label": "data-analytics",
+      "top1": "data-analytics",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r284",
+      "label": "risk-compliance",
+      "top1": "risk-compliance",
+      "correct": 1,
+      "delegate": false
+    },
+    {
+      "id": "r285",
+      "label": "gtm",
+      "top1": "legal-ip",
+      "correct": 0,
+      "delegate": false
+    },
+    {
+      "id": "r286",
+      "label": "strategy",
+      "top1": "healthcare-life-sciences",
+      "correct": 0,
+      "delegate": false
+    },
+    {
+      "id": "r287",
+      "label": "engineering",
+      "top1": "climate-energy",
+      "correct": 0,
+      "delegate": false
+    },
+    {
+      "id": "r288",
+      "label": "education-edtech",
+      "top1": "trading",
+      "correct": 0,
+      "delegate": false
+    },
+    {
+      "id": "r289",
+      "label": "product-design",
+      "top1": "finance",
+      "correct": 0,
+      "delegate": false
+    },
+    {
+      "id": "r290",
+      "label": "legal-ip",
+      "top1": "legal-ip",
+      "correct": 1,
+      "delegate": false
+    }
+  ]
+}

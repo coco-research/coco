@@ -279,3 +279,52 @@ jobs:
 
       - name: RSI stats self-test
         run: python3 evals/paired.py --self-test
+
+  router-eval:
+    # Router regression gate (router eval audit step 3). Reruns evals/routing/score.py
+    # in auto mode on the heldout split and fails if top-1 or delegate precision drops
+    # below the newest file in evals/routing/runs/. Embeddings come from a local Ollama
+    # on this runner (nomic-embed-text, ~270 MB, cached); no paid API, no key, and the
+    # gate refuses any non-loopback endpoint. Any keyword fallback fails the job.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OLLAMA_VERSION: v0.40.5
+      COCO_EMBED_URL: http://127.0.0.1:11434/v1/embeddings
+      COCO_EMBED_MODEL: nomic-embed-text
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Gate self-test
+        run: python3 evals/routing/check_regression.py --self-test
+
+      - name: Cache the embedding model
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.ollama/models
+          key: ollama-models-nomic-embed-text-${{ env.OLLAMA_VERSION }}
+
+      - name: Start local Ollama
+        run: |
+          mkdir -p "$RUNNER_TEMP/ollama"
+          wget -q -O "$RUNNER_TEMP/ollama.tar.zst" \
+            "https://github.com/ollama/ollama/releases/download/${OLLAMA_VERSION}/ollama-linux-amd64.tar.zst"
+          tar --zstd -xf "$RUNNER_TEMP/ollama.tar.zst" -C "$RUNNER_TEMP/ollama"
+          OLLAMA_HOST=127.0.0.1:11434 nohup "$RUNNER_TEMP/ollama/bin/ollama" serve > "$RUNNER_TEMP/ollama.log" 2>&1 &
+          for i in $(seq 1 30); do
+            python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:11434/api/version', timeout=2)" 2>/dev/null && break
+            sleep 1
+          done
+          "$RUNNER_TEMP/ollama/bin/ollama" pull nomic-embed-text
+
+      - name: Router regression gate
+        run: python3 evals/routing/check_regression.py --write "$RUNNER_TEMP/router-run.json"
+
+      - name: Ollama log on failure
+        if: failure()
+        run: tail -50 "$RUNNER_TEMP/ollama.log" || true

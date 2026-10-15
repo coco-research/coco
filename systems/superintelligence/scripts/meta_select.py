@@ -14,10 +14,14 @@ Honesty bar: surface method=keyword + degraded; never claim keyword ≡ embed co
 NEVER auto-delegate on keyword; warn loudly; if keyword also cannot run, fail closed.
 Do not reuse embed FLOOR/DELEGATE_MARGIN as if Jaccard were commensurate with cosine.
 
+M0: with COCO_ROUTER_M0=1, each select() call writes one row to the local M0 sqlite
+store (M0_DB, default ~/.local/share/coco-m0/thread.db): prompt SHA-256 (never the
+text), team keys, delegate. Off by default; nothing leaves the machine.
+
     python3 superintelligence/scripts/meta_select.py "should we ship an AI compliance product?"
     -> JSON {prompt, method, teams:[{team_id,short,score,weight,cells:[{cell,score}]}], delegate}
 """
-import sys, json, math, re, urllib.request, urllib.error, pathlib
+import os, sys, json, math, re, hashlib, urllib.request, urllib.error, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 EMBED_URL = "http://127.0.0.1:1234/v1/embeddings"
@@ -139,7 +143,44 @@ def select_keyword(prompt, profs):
             "teams": teams_out}
 
 
-def select(prompt):
+M0_FLAG = "COCO_ROUTER_M0"  # set to 1 to record each decision in the local M0 store
+M0_PROJECT = "coco-router"
+M0_SCRIPTS = pathlib.Path(__file__).resolve().parents[2] / "m0" / "skills" / "m0" / "scripts"
+
+
+def m0_record(prompt, out, store=None):
+    """Write one M0 row for a routing decision. Opt-in, local sqlite only.
+
+    Stores the SHA-256 of the prompt, never the prompt text. Never raises:
+    a logging failure must not change routing.
+    """
+    if store is None and os.environ.get(M0_FLAG) != "1":
+        return None
+    try:
+        if store is None:
+            sys.path.insert(0, str(M0_SCRIPTS))
+            try:
+                import m0_server
+            finally:
+                sys.path.remove(str(M0_SCRIPTS))
+            store = m0_server.Store()  # honours M0_DB; default ~/.local/share/coco-m0/thread.db
+        digest = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
+        teams = [t.get("team_key") for t in out.get("teams", [])]
+        delegate_team = teams[0] if out.get("delegate") and teams else None
+        return store.write({
+            "project": M0_PROJECT,
+            "kind": "ambient_signal",
+            "source_tool": "meta_select",
+            "text": f"router decision {digest[:12]}",
+            "meta": {"prompt_sha256": digest, "method": out.get("method"), "teams": teams,
+                     "delegate": bool(out.get("delegate")), "delegate_team": delegate_team},
+        })
+    except Exception as e:  # noqa: BLE001 - logging is best effort
+        print(f"meta_select WARN: M0 write skipped ({type(e).__name__})", file=sys.stderr)
+        return None
+
+
+def _select(prompt):
     profs = team_profiles()
     try:
         return select_embed(prompt, profs)
@@ -147,6 +188,12 @@ def select(prompt):
         out = select_keyword(prompt, profs)
         out["fallback_reason"] = f"{type(e).__name__}: {e}"
         return out
+
+
+def select(prompt):
+    out = _select(prompt)
+    m0_record(prompt, out)
+    return out
 
 
 if __name__ == "__main__":

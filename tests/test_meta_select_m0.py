@@ -59,8 +59,15 @@ class M0RecordTest(unittest.TestCase):
         rows = self.rows()
         self.assertEqual(len(rows), 2)
         meta = json.loads(rows[0]["meta_json"])
-        import hashlib
-        self.assertIn(meta["prompt_sha256"], {hashlib.sha256(p.encode()).hexdigest() for p in (PROMPT, PROMPT + " v2")})
+        import hashlib, hmac
+        salt_path = os.path.join(self.tmp.name, meta_select.M0_SALT_NAME)
+        self.assertEqual(os.stat(salt_path).st_mode & 0o777, 0o600)
+        salt = open(salt_path, "rb").read()
+        self.assertEqual(len(salt), 32)
+        macs = {hmac.new(salt, p.encode(), hashlib.sha256).hexdigest() for p in (PROMPT, PROMPT + " v2")}
+        self.assertIn(meta["prompt_hmac_sha256"], macs)
+        self.assertNotIn(hashlib.sha256(PROMPT.encode()).hexdigest(), json.dumps(rows))
+        self.assertIn(meta["prompt_hmac_sha256"][:12], rows[0]["text"] if "text" in rows[0] else json.dumps(rows[0]))
         self.assertEqual(meta["teams"], ["risk-compliance", "legal-ip"])
         self.assertTrue(meta["delegate"])
         self.assertEqual(meta["delegate_team"], "risk-compliance")
@@ -78,10 +85,19 @@ class M0RecordTest(unittest.TestCase):
     def test_write_failure_does_not_break_routing(self):
         os.environ[meta_select.M0_FLAG] = "1"
         broken = mock.Mock()
+        broken.db_path = self.db
         broken.write.side_effect = RuntimeError("disk full")
-        out = meta_select.select(PROMPT)  # real store works
+        with mock.patch.object(meta_select, "_m0_store", return_value=broken):
+            out = meta_select.select(PROMPT)
         self.assertEqual(out["teams"][0]["team_key"], "risk-compliance")
-        self.assertIsNone(meta_select.m0_record(PROMPT, out, store=broken))
+        broken.write.assert_called_once()
+
+    def test_store_sys_exit_does_not_break_routing(self):
+        os.environ[meta_select.M0_FLAG] = "1"
+        with mock.patch.object(meta_select, "_m0_store", side_effect=SystemExit(2)):
+            out = meta_select.select(PROMPT)
+        self.assertEqual(out["teams"][0]["team_key"], "risk-compliance")
+        self.assertEqual(self.rows(), [])
 
     def test_keyword_path_records_no_delegate(self):
         os.environ[meta_select.M0_FLAG] = "1"

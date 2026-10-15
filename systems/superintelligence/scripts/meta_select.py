@@ -15,13 +15,14 @@ NEVER auto-delegate on keyword; warn loudly; if keyword also cannot run, fail cl
 Do not reuse embed FLOOR/DELEGATE_MARGIN as if Jaccard were commensurate with cosine.
 
 M0: with COCO_ROUTER_M0=1, each select() call writes one row to the local M0 sqlite
-store (M0_DB, default ~/.local/share/coco-m0/thread.db): prompt SHA-256 (never the
-text), team keys, delegate. Off by default; nothing leaves the machine.
+store (M0_DB, default ~/.local/share/coco-m0/thread.db): an HMAC-SHA256 of the prompt
+keyed by a per-install salt (never the text), team keys, delegate. Off by default;
+nothing leaves the machine.
 
     python3 superintelligence/scripts/meta_select.py "should we ship an AI compliance product?"
     -> JSON {prompt, method, teams:[{team_id,short,score,weight,cells:[{cell,score}]}], delegate}
 """
-import os, sys, json, math, re, hashlib, urllib.request, urllib.error, pathlib
+import os, sys, json, math, re, hashlib, hmac, urllib.request, urllib.error, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 EMBED_URL = "http://127.0.0.1:1234/v1/embeddings"
@@ -148,23 +149,55 @@ M0_PROJECT = "coco-router"
 M0_SCRIPTS = pathlib.Path(__file__).resolve().parents[2] / "m0" / "skills" / "m0" / "scripts"
 
 
+M0_SALT_NAME = "router-salt"
+M0_TIMEOUT_MS = 500  # short sqlite busy timeout so a locked store can't stall routing
+
+
+def _m0_store():
+    sys.path.insert(0, str(M0_SCRIPTS))
+    try:
+        import m0_server
+    finally:
+        sys.path.remove(str(M0_SCRIPTS))
+    db = m0_server.default_db_path()  # honours M0_DB; default ~/.local/share/coco-m0/thread.db
+    if not db.parent.exists():
+        os.makedirs(db.parent, mode=0o700, exist_ok=True)
+    return m0_server.Store(db_path=db, timeout_ms=M0_TIMEOUT_MS)
+
+
+def _m0_salt(data_dir):
+    """32-byte per-install salt at <m0 data dir>/router-salt, created once with mode 0600."""
+    path = os.path.join(str(data_dir), M0_SALT_NAME)
+    try:
+        fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+    except FileExistsError:
+        with open(path, "rb") as f:
+            salt = f.read()
+        if len(salt) != 32:
+            raise ValueError("router-salt is not 32 bytes")
+        return salt
+    salt = os.urandom(32)
+    try:
+        os.write(fd, salt)
+    finally:
+        os.close(fd)
+    return salt
+
+
 def m0_record(prompt, out, store=None):
     """Write one M0 row for a routing decision. Opt-in, local sqlite only.
 
-    Stores the SHA-256 of the prompt, never the prompt text. Never raises:
-    a logging failure must not change routing.
+    Stores an HMAC-SHA256 of the prompt under a per-install salt, never the
+    prompt text, so short prompts can't be recovered by dictionary. Never
+    raises (SystemExit included): a logging failure must not change routing.
     """
     if store is None and os.environ.get(M0_FLAG) != "1":
         return None
     try:
         if store is None:
-            sys.path.insert(0, str(M0_SCRIPTS))
-            try:
-                import m0_server
-            finally:
-                sys.path.remove(str(M0_SCRIPTS))
-            store = m0_server.Store()  # honours M0_DB; default ~/.local/share/coco-m0/thread.db
-        digest = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
+            store = _m0_store()
+        salt = _m0_salt(pathlib.Path(store.db_path).parent)
+        digest = hmac.new(salt, prompt.encode("utf-8"), hashlib.sha256).hexdigest()
         teams = [t.get("team_key") for t in out.get("teams", [])]
         delegate_team = teams[0] if out.get("delegate") and teams else None
         return store.write({
@@ -172,10 +205,10 @@ def m0_record(prompt, out, store=None):
             "kind": "ambient_signal",
             "source_tool": "meta_select",
             "text": f"router decision {digest[:12]}",
-            "meta": {"prompt_sha256": digest, "method": out.get("method"), "teams": teams,
+            "meta": {"prompt_hmac_sha256": digest, "method": out.get("method"), "teams": teams,
                      "delegate": bool(out.get("delegate")), "delegate_team": delegate_team},
         })
-    except Exception as e:  # noqa: BLE001 - logging is best effort
+    except (Exception, SystemExit) as e:  # noqa: BLE001 - logging is best effort
         print(f"meta_select WARN: M0 write skipped ({type(e).__name__})", file=sys.stderr)
         return None
 

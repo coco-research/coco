@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -219,12 +220,27 @@ jobs:
           done
           [ "$fail" -eq 0 ] || exit 1
 
-      - name: Pack content gate (no secret reads, phone-home hosts, machine paths or curl-to-shell)
-        run: |
-          python3 tests/check-pack-content.py
-          # The self-test runs the gate over tests/fixtures/pack-content, where every planted
-          # line must fail and every benign line must pass, so a weakened rule fails CI.
-          python3 tests/check-pack-content.py --self-test
+      - name: Pack content gate (synthetic self-test)
+        # Must not receive the names secret: on pull_request the script is the
+        # PR's own code.
+        run: python3 tests/check-pack-content.py --self-test
+
+      - name: Pack content gate
+        # Every event, including pull_request. No names secret: the internal-name
+        # rule skips with a notice, and telemetry, curl|sh, and machine paths
+        # still scan this tree. On main this command is the missing-list hard
+        # error, so that ref is the secret-bearing step below.
+        if: github.ref != 'refs/heads/main'
+        run: python3 tests/check-pack-content.py
+
+      - name: Pack content gate on main
+        # Real spellings, only on main. An empty secret is a hard error in the script.
+        if: >-
+          github.ref == 'refs/heads/main' &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        env:
+          COCO_PACK_CONTENT_NAMES: ${{ secrets.COCO_PACK_CONTENT_NAMES }}
+        run: python3 tests/check-pack-content.py
 
       - name: Validate the SI team role roster
         run: |

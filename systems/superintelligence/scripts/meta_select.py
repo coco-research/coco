@@ -21,8 +21,11 @@ import os, sys, json, math, re, urllib.request, urllib.error, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 # Any local OpenAI-compatible endpoint (LM Studio by default; Ollama in CI). Local only.
-EMBED_URL = os.environ.get("COCO_EMBED_URL", "http://127.0.0.1:1234/v1/embeddings")
-EMBED_MODEL = os.environ.get("COCO_EMBED_MODEL", "text-embedding-nomic-embed-text-v1.5")
+# Literal defaults stay greppable for tests/check-si-counts.py; env overrides below.
+EMBED_URL = "http://127.0.0.1:1234/v1/embeddings"
+EMBED_MODEL = "text-embedding-nomic-embed-text-v1.5"
+EMBED_URL = os.environ.get("COCO_EMBED_URL", EMBED_URL)
+EMBED_MODEL = os.environ.get("COCO_EMBED_MODEL", EMBED_MODEL)
 META = json.loads((ROOT / "registry.json").read_text())
 FLOOR = 0.55          # cosine relevance floor for a team to be considered (embed only)
 DELEGATE_MARGIN = 0.12  # if top team beats 2nd by this much -> single-domain delegate (embed only)

@@ -4,6 +4,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [1.7.1](https://github.com/coco-research/coco/compare/v1.7.0...v1.7.1) (2026-10-16)
+
+
+### Bug Fixes
+
+* **assets:** re-render the social card from its source ([#348](https://github.com/coco-research/coco/issues/348)) ([21286b7](https://github.com/coco-research/coco/commit/21286b7d52614aa9b8a03b34c7376e93d3962d5b))
+* **cli:** uninstall, install and update only act on a real coco-research/coco clone ([#342](https://github.com/coco-research/coco/issues/342)) ([1ac6cbb](https://github.com/coco-research/coco/commit/1ac6cbb59cbe766758b9036b79ce89234a36969f))
+* **evals:** validate q in bh_fdr ([8e14567](https://github.com/coco-research/coco/commit/8e145676dbfec0d312b59947c5fbc00c4e1f69de))
+* **grok:** uninstall removes generated commands, MCP block and hooks ([#267](https://github.com/coco-research/coco/issues/267)) ([eaa1110](https://github.com/coco-research/coco/commit/eaa111066f86ea8b75bafedb8811bf188936d4d9))
+* **packs:** content gate stores no internal names; reads them at scan time ([#317](https://github.com/coco-research/coco/issues/317)) ([215df3c](https://github.com/coco-research/coco/commit/215df3c6573c2842d0163065fd0344b369404d65))
+
 ## [1.7.0](https://github.com/coco-research/coco/compare/v1.6.1...v1.7.0) (2026-10-13)
 
 

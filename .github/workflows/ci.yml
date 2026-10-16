@@ -279,3 +279,34 @@ jobs:
 
       - name: RSI stats self-test
         run: python3 evals/paired.py --self-test
+
+  router-eval:
+    # Router regression gate (router eval audit step 3). Reruns evals/routing/score.py
+    # in auto mode on the heldout split and fails if top-1 or delegate precision drops
+    # below the newest file in evals/routing/runs/ (or the pinned model digest changed).
+    # Runs on the self-hosted Mac (no GitHub-hosted minutes) against an Ollama that is
+    # already there. Nothing is downloaded or pulled; if Ollama or the model is missing
+    # the job fails on main and prints a skip (exit 0) on PRs. No paid API, no key, loopback only.
+    # Fork PRs never get the self-hosted runner.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, macOS, ARM64, local]
+    timeout-minutes: 15
+    env:
+      COCO_EMBED_URL: http://127.0.0.1:11434/v1/embeddings
+      COCO_EMBED_MODEL: nomic-embed-text
+      COCO_ROUTER_M0: '0'
+    steps:
+      - uses: actions/checkout@v7
+
+      # No actions/setup-python here: it is broken on this runner (see self-hosted-probe.yml).
+      - name: Gate self-test
+        run: python3 evals/routing/check_regression.py --self-test
+
+      - name: Probe local Ollama
+        id: probe
+        # A miss fails on main (the resident engine should be up) and is a skip on PRs.
+        run: python3 evals/routing/check_regression.py --probe
+
+      - name: Router regression gate
+        if: steps.probe.outputs.ok == '1'
+        run: python3 evals/routing/check_regression.py --write "$RUNNER_TEMP/router-run.json"

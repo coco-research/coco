@@ -17,11 +17,25 @@ Do not reuse embed FLOOR/DELEGATE_MARGIN as if Jaccard were commensurate with co
     python3 superintelligence/scripts/meta_select.py "should we ship an AI compliance product?"
     -> JSON {prompt, method, teams:[{team_id,short,score,weight,cells:[{cell,score}]}], delegate}
 """
-import sys, json, math, re, urllib.request, urllib.error, pathlib
+import os, sys, json, math, re, urllib.request, urllib.error, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+# Any local OpenAI-compatible endpoint (LM Studio by default; Ollama in CI). Local only.
+# Literal defaults stay greppable for tests/check-si-counts.py; env overrides below.
 EMBED_URL = "http://127.0.0.1:1234/v1/embeddings"
 EMBED_MODEL = "text-embedding-nomic-embed-text-v1.5"
+EMBED_URL = os.environ.get("COCO_EMBED_URL", EMBED_URL)
+EMBED_MODEL = os.environ.get("COCO_EMBED_MODEL", EMBED_MODEL)
+_LOOPBACK = {"127.0.0.1", "localhost", "::1"}
+
+
+def _check_embed_host(url):
+    """The prompt body goes to EMBED_URL, so refuse non-loopback hosts unless
+    COCO_EMBED_ALLOW_REMOTE=1 is set explicitly."""
+    import urllib.parse
+    host = urllib.parse.urlparse(url).hostname
+    if host not in _LOOPBACK and os.environ.get("COCO_EMBED_ALLOW_REMOTE") != "1":
+        raise PermissionError(f"refusing non-loopback embedding host {host!r} (set COCO_EMBED_ALLOW_REMOTE=1 to allow)")
 META = json.loads((ROOT / "registry.json").read_text())
 FLOOR = 0.55          # cosine relevance floor for a team to be considered (embed only)
 DELEGATE_MARGIN = 0.12  # if top team beats 2nd by this much -> single-domain delegate (embed only)
@@ -31,6 +45,7 @@ KEYWORD_MAX_TEAMS = 4
 
 
 def embed(texts):
+    _check_embed_host(EMBED_URL)
     payload = json.dumps({"model": EMBED_MODEL, "input": texts}).encode()
     req = urllib.request.Request(EMBED_URL, data=payload, headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=60) as r:

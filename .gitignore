@@ -19,6 +19,9 @@
 credentials.json
 secrets.yaml
 
+# Clear spellings for the pack-content internal-name rule. Never commit.
+tests/pack-content-names.local
+
 # Brain DB and local memory artifacts (project-specific, not framework)
 project_brain.db*
 _brain_manifest.json

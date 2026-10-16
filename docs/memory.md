@@ -10,6 +10,33 @@ Newest first within each section. Update this file in the same PR that settles s
 
 ## Decisions
 
+### Uninstall reads the directory's own git dir, and keeps local work
+
+**Decided:** 2026-10-14, PR #342 review. **Reason:** `git -C dir` does not override
+`GIT_DIR`. `config --get` and `remote get-url` then describe the inherited repo, while
+`rev-parse --show-toplevel` still prints `dir`, so a toplevel comparison alone does not
+catch a hook's `GIT_DIR`. Every guard git call drops only the variables that redirect
+which repo or config git uses: `GIT_DIR`, `GIT_WORK_TREE`, `GIT_COMMON_DIR`,
+`GIT_INDEX_FILE`, `GIT_OBJECT_DIRECTORY`, `GIT_ALTERNATE_OBJECT_DIRECTORIES`,
+`GIT_NAMESPACE`, `GIT_CEILING_DIRECTORIES`, `GIT_DISCOVERY_ACROSS_FILESYSTEM`,
+`GIT_CONFIG`, `GIT_CONFIG_GLOBAL`, `GIT_CONFIG_SYSTEM`, `GIT_CONFIG_NOSYSTEM`,
+`GIT_CONFIG_PARAMETERS`, `GIT_CONFIG_COUNT`, and every `GIT_CONFIG_KEY_n` /
+`GIT_CONFIG_VALUE_n`. `GIT_SSH_COMMAND`, `GIT_SSH`, `GIT_ASKPASS`,
+`GIT_TERMINAL_PROMPT`, and proxy settings are kept. Untracked `si-commands/`
+(the Codex adapter writes it into `~/.coco`) is excluded from the status check,
+the same way `.update-check.json` is. A `.git`
+file of `gitdir: <other>/.git` also reports itself as toplevel (git 2.55); it is refused
+unless `--absolute-git-dir` is this directory's own `.git` or a linked worktree whose
+`gitdir` file points back here. A real coco-research clone with uncommitted changes, a
+stash, or commits reachable from HEAD or any branch that are not on a remote-tracking
+ref or a tag is kept unless `--force`. Counting only `--branches` misses a commit made
+on the detached pin; `--not --tags='v[0-9]*'` still lets a pristine release-tag checkout uninstall, while a commit the user tagged locally (`git tag wip`) still counts as local work. A local-work
+git call that errors or exits non-zero (ENOBUFS, a null status, old git rejecting
+`:(exclude)`) is treated as local work too: uninstall exits 2 unless `--force`.
+`gitIn` allows 64 MiB of git output. Origin stays `config --get remote.origin.url`
+(the raw stored value). An insteadOf alias is refused; the message says the origin
+must be stored as a github.com/coco-research/coco URL.
+
 ### Persona answers use one attribution wording
 
 **Decided:** 2026-10-05, legal policy. **Reason:** a persona answer was readable as the named

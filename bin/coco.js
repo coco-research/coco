@@ -324,9 +324,13 @@ function cmdUninstall(argv) {
       if (found.length) refuseClone(dir, `it has ${found.join(' and ')}; pass --force to remove it`);
     }
   }
-  // Prefix match on the resolved clone path plus a trailing slash, so a clone
-  // named `coco` cannot also delete links into `coco-research` / `coco-connect`.
-  const prefix = dir.endsWith(path.sep) ? dir : dir + path.sep;
+  // Prefix match plus a trailing slash, so a clone named `coco` cannot also delete links
+  // into `coco-research` / `coco-connect`. install.sh links through whichever path it ran
+  // from, so match both the path given and its real path (a symlinked clone dir).
+  let real = dir;
+  try { real = fs.realpathSync(dir); } catch (_) { /* absent: only the given path */ }
+  const match = [...new Set([dir, real])]
+    .flatMap((d, i) => [...(i ? ['-o'] : []), '-lname', `${d.endsWith(path.sep) ? d : d + path.sep}*`]);
   console.log(`Removing symlinks pointing into ${dir}...`);
   const homes = [
     path.join(os.homedir(), '.claude'),
@@ -336,7 +340,7 @@ function cmdUninstall(argv) {
   ];
   for (const home of homes) {
     if (!fs.existsSync(home)) continue;
-    run('find', [home, '-type', 'l', '-lname', `${prefix}*`, '-delete']);
+    run('find', [home, '-type', 'l', '(', ...match, ')', '-delete']);
   }
   console.log(`Removing clone at ${dir}...`);
   if (fs.existsSync(dir)) {

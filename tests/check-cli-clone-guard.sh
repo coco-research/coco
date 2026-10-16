@@ -361,4 +361,18 @@ coco node "$CLI" uninstall --force "$T/b"
 coco node "$CLI" uninstall --force "$T/c"
 [ "$RC" -eq 2 ] && [ -f "$T/c/keep.txt" ] || fail "(z) --force removed no-origin (RC $RC: $(cat "$T/err"))"
 
+# (sl) --force on a symlinked clone dir removes links through either path
+repo "$T/sl-real" "https://github.com/coco-research/coco.git"
+settle "$T/sl-real"
+ln -s "$T/sl-real" "$T/sl"
+mkdir "$T/sl-real-other"
+touch "$T/sl-real-other/x"
+REAL="$(cd "$T/sl-real" && pwd -P)"
+mkdir -p "$T/home/.claude/sl"
+ln -s "$REAL/keep.txt" "$T/home/.claude/sl/via-real"
+ln -s "$T/sl/keep.txt" "$T/home/.claude/sl/via-link"
+ln -s "$T/sl-real-other/x" "$T/home/.claude/sl/other"
+coco node "$CLI" uninstall --force "$T/sl"
+[ "$RC" -eq 0 ] && [ ! -L "$T/home/.claude/sl/via-real" ] && [ ! -L "$T/home/.claude/sl/via-link" ] && [ -L "$T/home/.claude/sl/other" ] || fail "(sl) links (RC $RC: $(cat "$T/err"))"
+
 echo "PASS: clone guard refuses non-clones and removes a real one"

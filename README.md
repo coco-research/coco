@@ -82,7 +82,7 @@ How the router scores teams: [`systems/superintelligence/README.md`](systems/sup
 
 Released on npm: `npx cocosuperintelligence` installs the latest release ([CHANGELOG](CHANGELOG.md)).
 
-Measured on main, a default Claude Code install delivers 190 skills / 387 commands / 34 agents ([`docs/delivered-counts.json`](docs/delivered-counts.json)).
+Measured on main, a default Claude Code install delivers 190 of the 228 skills (the rest are the opt-in security pack and Cursor-only skills), 387 commands and 34 agents ([`docs/delivered-counts.json`](docs/delivered-counts.json)).
 
 Known gap: most GSD skills need the upstream GSD toolkit at `~/.claude/get-shit-done` (see [`systems/gsd/README.md`](systems/gsd/README.md)).
 

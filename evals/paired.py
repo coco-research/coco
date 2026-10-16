@@ -57,7 +57,9 @@ def paired_bootstrap(base, cand, n_boot=10000, seed=0):
 
 def bh_fdr(pvalues, q=0.1):
     """Indices significant under Benjamini-Hochberg at level q.
-    Raises ValueError unless every p-value is finite and in [0, 1]."""
+    Raises ValueError unless every p-value is finite and in [0, 1] and 0 < q <= 1."""
+    if isinstance(q, bool) or not isinstance(q, (int, float)) or not _finite(q) or not 0.0 < q <= 1.0:
+        raise ValueError("q must be a finite number in (0, 1]")
     for i, p in enumerate(pvalues):
         # bool is a subclass of int and would sort as 0 or 1.
         if (isinstance(p, bool) or not isinstance(p, (int, float))
@@ -229,6 +231,8 @@ def _self_test():
 
     # 12. p-values: NaN used to be marked significant; 1.5 and -0.2 were accepted.
     assert bh_fdr([0.0, 1.0], q=0.1) == {0}
+    for bad_q in (True, float("nan"), 0, -0.1, 1.5, "0.1", 10 ** 400):
+        _raises(lambda bad_q=bad_q: bh_fdr([0.01], q=bad_q), "q must be a finite number in (0, 1]")
     for bad in (float("nan"), float("inf"), 1.5, -0.2, True):
         _raises(lambda bad=bad: bh_fdr([0.04, bad]), "must be finite and in [0, 1]")
 

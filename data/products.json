@@ -102,7 +102,7 @@
       "id": "m0",
       "name": "CoCo M0",
       "description": "Cross-tool memory: one append-only thread that any AI tool can resume from.",
-      "status": "Private beta, used daily. Source planned for Oct 17.",
+      "status": "Private beta, used daily. Source release planned.",
       "image": {
         "src": "assets/lab/m0-how.svg",
         "alt": "How CoCo M0 works: a writer appends a checkpoint to a SQLite thread, and any tool resumes from the latest entry.",
@@ -126,13 +126,13 @@
       "id": "teams-ng",
       "name": "CoCo Teams NG",
       "description": "A team of AI members you hire, brief and work with in one console.",
-      "status": "Private, in development. Source planned for Oct 31."
+      "status": "Private, in development. Source release planned."
     },
     {
       "id": "status-zero",
       "name": "Status Zero",
       "description": "Compares what a plan says against what the code actually shipped.",
-      "status": "Private, in development. Source planned for Oct 24.",
+      "status": "Private, in development. Source release planned.",
       "image": {
         "src": "assets/lab/status0-today-dark.webp",
         "alt": "Status Zero's Today screen: a Jira story still marked in progress next to the GitHub pull request that already merged it.",
@@ -144,7 +144,7 @@
       "id": "atlas",
       "name": "CoCo Atlas",
       "description": "The live control room of our own lab.",
-      "status": "Private, pre-alpha. Source planned for Oct 17.",
+      "status": "Private, pre-alpha. Source release planned.",
       "image": {
         "src": "assets/lab/atlas-how.svg",
         "alt": "How CoCo Atlas works: local sources feed a read-only collector that serves the live map page.",

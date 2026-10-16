@@ -9,8 +9,8 @@
 
 [![CI](https://img.shields.io/github/actions/workflow/status/coco-research/coco/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/coco-research/coco/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/coco-research/coco?style=flat-square&color=1234FF)](https://github.com/coco-research/coco/releases)
-[![Skills](https://img.shields.io/badge/skills-228?style=flat-square&color=5F5F58&labelColor=0B0B0B)](skills/)
-[![Commands](https://img.shields.io/badge/commands-387?style=flat-square&color=5F5F58&labelColor=0B0B0B)](commands/)
+[![Skills](https://img.shields.io/badge/skills-228-5F5F58?style=flat-square&labelColor=0B0B0B)](skills/)
+[![Commands](https://img.shields.io/badge/commands-387-5F5F58?style=flat-square&labelColor=0B0B0B)](commands/)
 [![Personas](https://img.shields.io/badge/personas-495-5F5F58?style=flat-square&color=5F5F58&labelColor=0B0B0B)](systems/superintelligence/)
 
 Open-core: the core is [MIT](LICENSE), and Super Intelligence is [proprietary](systems/superintelligence/LICENSE). Files stay on your machine. No telemetry. A version check may contact GitHub once a day.
@@ -78,26 +78,20 @@ You type a question. The orchestrator scores 495 personas across 13 departments 
 
 How the router scores teams: [`systems/superintelligence/README.md`](systems/superintelligence/README.md). What each editor actually receives: [`adapters/INDEX.md`](adapters/INDEX.md).
 
-## Status and roadmap
+## Status
 
-Released: v1.5.0 on npm. Today `npx` installs v1.5.0. That tag already contains the 13 Super Intelligence team skill files, but its installer does not install them as front doors. That fix, and several other installer fixes, are on main.
+Released on npm: `npx cocosuperintelligence` installs the latest release ([CHANGELOG](CHANGELOG.md)).
 
-The measured 190 skills / 387 commands / 34 agents ([`docs/delivered-counts.json`](docs/delivered-counts.json)) apply to main.
+Measured on main, a default Claude Code install delivers 190 skills / 387 commands / 34 agents ([`docs/delivered-counts.json`](docs/delivered-counts.json)).
 
 Known gap: most GSD skills need the upstream GSD toolkit at `~/.claude/get-shit-done` (see [`systems/gsd/README.md`](systems/gsd/README.md)).
-
-Next three milestones:
-
-1. v1.6.0, so `npx` installs what main already has.
-2. Bundle the GSD runtime, so those skills work without a separate toolkit.
-3. Installer safety: an uninstall guard, and a clearer clone location.
 
 <details>
 <summary><strong>Other install paths, updates, uninstall</strong></summary>
 
 From a checkout you already have, `bash install.sh` auto-detects the editor. Narrow it with `--adapter cursor` or `--systems gsd,brain`. `--core-only` skips bundles. `reverse-skill` stays opt-in: `--systems reverse-skill`.
 
-The remote bootstrap clones the pinned release tag (currently `v1.5.0`, not floating `main`) to `~/.coco`, prints the commit, and waits for you to type `y` before it runs `install.sh`:
+The remote bootstrap clones the same pinned release tag as `npx` (not floating `main`) to `~/.coco`, prints the commit, and waits for you to type `y` before it runs `install.sh`:
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/coco-research/coco/main/bin/coco-bootstrap.sh)
@@ -201,8 +195,6 @@ Six bundles install by default. `--core-only` skips them. `--systems <list>` ins
 
 A default Claude Code install delivers **190 skills, 387 commands and 34 agents**, measured by running the installer. The repository holds 228 skills; the difference is the opt-in security pack and Cursor-only skills. The measured row is main.
 
-The v1.5.0 release `npx` installs today is older. See [Status and roadmap](#status-and-roadmap).
-
 <table align="center">
 <tr>
 <td align="center" width="20%"><h3>228</h3><sub>Skills</sub><br><small>76 Core + 152 Bundle · 190 install by default</small></td>
@@ -220,7 +212,7 @@ The v1.5.0 release `npx` installs today is older. See [Status and roadmap](#stat
 </div>
 
 <table>
-<tr><td><strong>Spec Version</strong></td><td>1.5.0</td></tr>
+<tr><td><strong>Spec Version</strong></td><td><a href="https://github.com/coco-research/coco/releases/latest">latest release</a></td></tr>
 <tr><td><strong>License</strong></td><td>Open-core — <a href="LICENSE">MIT</a> core; Super Intelligence is <a href="systems/superintelligence/LICENSE">proprietary</a></td></tr>
 <tr><td><strong>Total Skills</strong></td><td>228 in the repository (76 Core + 152 Bundle); 190 install by default on Claude Code</td></tr>
 <tr><td><strong>Slash Commands</strong></td><td>387 on a default install — 45 Core (shipped) + 342 Super Intelligence (325 per-team + 17 cross-team, generated at install)</td></tr>

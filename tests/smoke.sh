@@ -67,6 +67,10 @@ echo "=== Smoke test: aider .aider.conf.yml keys ==="
 bash tests/aider-conf-keys.sh && pass "aider .aider.conf.yml uses only real aider option keys" || fail "aider .aider.conf.yml has keys aider does not recognize"
 
 echo ""
+echo "=== Smoke test: grok --uninstall ==="
+bash tests/grok-uninstall.sh && pass "grok --uninstall removes generated files and keeps user files" || fail "grok --uninstall left generated files or removed user files"
+
+echo ""
 echo "=== Smoke test: aider AGENTS.md agent descriptions ==="
 bash tests/aider-agent-desc.sh && pass "aider AGENTS.md carries full agent descriptions" || fail "aider AGENTS.md truncates agent descriptions"
 

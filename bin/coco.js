@@ -324,9 +324,13 @@ function cmdUninstall(argv) {
       if (found.length) refuseClone(dir, `it has ${found.join(' and ')}; pass --force to remove it`);
     }
   }
-  // Prefix match on the resolved clone path plus a trailing slash, so a clone
-  // named `coco` cannot also delete links into `coco-research` / `coco-connect`.
-  const prefix = dir.endsWith(path.sep) ? dir : dir + path.sep;
+  // Prefix match plus a trailing slash, so a clone named `coco` cannot also delete links
+  // into `coco-research` / `coco-connect`. install.sh links through whichever path it ran
+  // from, so match both the path given and its real path (a symlinked clone dir).
+  let real = dir;
+  try { real = fs.realpathSync(dir); } catch (_) { /* absent: only the given path */ }
+  const match = [...new Set([dir, real])]
+    .flatMap((d, i) => [...(i ? ['-o'] : []), '-lname', `${d.endsWith(path.sep) ? d : d + path.sep}*`]);
   console.log(`Removing symlinks pointing into ${dir}...`);
   const homes = [
     path.join(os.homedir(), '.claude'),
@@ -336,7 +340,8 @@ function cmdUninstall(argv) {
   ];
   for (const home of homes) {
     if (!fs.existsSync(home)) continue;
-    run('find', [home, '-type', 'l', '-lname', `${prefix}*`, '-delete']);
+    // -H: a symlinked ~/.claude (dotfiles) is still searched.
+    run('find', ['-H', home, '-type', 'l', '(', ...match, ')', '-delete']);
   }
   // grok also writes generated files (SI commands, config block, hooks); its installer removes them.
   // Best-effort: an older pinned clone may not know --uninstall; never abort the uninstall over it.
@@ -347,9 +352,17 @@ function cmdUninstall(argv) {
       console.log('Note: grok installer cleanup failed (possibly an older pin without --uninstall); continuing.');
     }
   }
-  console.log(`Removing clone at ${dir}...`);
-  if (fs.existsSync(dir)) {
-    fs.rmSync(dir, { recursive: true, force: true });
+  let isLink = false;
+  try { isLink = fs.lstatSync(dir).isSymbolicLink(); } catch (_) { /* absent */ }
+  if (isLink) {
+    // A symlinked clone dir may point at a checkout the user keeps elsewhere: drop only the link.
+    fs.rmSync(dir, { force: true });
+    console.log(`Removed the link ${dir}; kept the clone it points to at ${real}. Delete that by hand if you want it gone.`);
+  } else {
+    console.log(`Removing clone at ${dir}...`);
+    if (fs.existsSync(dir)) {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   }
   // The update notifier's cache is ours; drop it, and ~/.coco if that leaves it empty.
   fs.rmSync(UPDATE_CACHE, { force: true });

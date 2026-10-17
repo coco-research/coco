@@ -4,6 +4,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [1.8.0](https://github.com/coco-research/coco/compare/v1.7.3...v1.8.0) (2026-10-17)
+
+
+### Features
+
+* **evals:** skill eval harness with dev and held-out splits ([#351](https://github.com/coco-research/coco/issues/351)) ([31c57de](https://github.com/coco-research/coco/commit/31c57debb95ee90e07ef3141c9134c03f378cfad))
+* **router:** record decision outcomes (rerouted, kept, overridden, bad) in the local log ([#353](https://github.com/coco-research/coco/issues/353)) ([3433ba4](https://github.com/coco-research/coco/commit/3433ba42f449a66eee56418555c8cf9763851a98))
+
 ## [1.7.3](https://github.com/coco-research/coco/compare/v1.7.2...v1.7.3) (2026-10-17)
 
 

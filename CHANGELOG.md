@@ -4,6 +4,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [1.7.2](https://github.com/coco-research/coco/compare/v1.7.1...v1.7.2) (2026-10-17)
+
+
+### Bug Fixes
+
+* **cli:** uninstall handles a symlinked clone dir and a symlinked ~/.claude ([#350](https://github.com/coco-research/coco/issues/350)) ([6479205](https://github.com/coco-research/coco/commit/6479205f058447620c4f328b27093856a9369e44))
+
 ## [1.7.1](https://github.com/coco-research/coco/compare/v1.7.0...v1.7.1) (2026-10-16)
 
 

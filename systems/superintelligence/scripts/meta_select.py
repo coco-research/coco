@@ -21,11 +21,18 @@ nothing leaves the machine. Outcome rows are append-only and point at a decision
 (kept, overridden, rerouted, or bad) with no prompt and no HMAC. The same prompt
 routed again within 600s records rerouted for the previous decision.
 
-    python3 superintelligence/scripts/meta_select.py "should we ship an AI compliance product?"
+    python3 superintelligence/scripts/meta_select.py -- "should we ship an AI compliance product?"
     -> JSON {prompt, method, teams:[{team_id,short,score,weight,cells:[{cell,score}]}], delegate}
+
+`--` ends options: what follows is always the prompt, even if it starts with --outcome.
+Option errors (M0 off, unknown outcome, bad --days, no decision) print one line to
+stderr and exit 2, leaving stdout empty. Run with no arguments for the full usage,
+including the 500-row cap on --outcomes-summary.
 """
 import os, sys, json, math, re, hashlib, hmac, urllib.request, urllib.error, pathlib
 from datetime import datetime, timezone
+
+from local_http import local_opener  # sibling module, shared with evals/skills/run.py
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 # Any local OpenAI-compatible endpoint (LM Studio by default; Ollama in CI). Local only.
@@ -50,18 +57,6 @@ DELEGATE_MARGIN = 0.12  # if top team beats 2nd by this much -> single-domain de
 MAX_TEAMS = 4
 # Keyword scores are Jaccard-ish on a different scale than cosine — never reuse FLOOR.
 KEYWORD_MAX_TEAMS = 4
-
-
-class _NoRedirect(urllib.request.HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        err = urllib.error.HTTPError(req.full_url, code, msg, headers, fp)
-        err.close()
-        raise err
-
-
-def local_opener():
-    """Ignore proxy env vars and refuse redirects, so a request cannot leave the machine."""
-    return urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect())
 
 
 def embed(texts):
@@ -337,14 +332,19 @@ def _find_decision(store, decision_id=None, limit=SUMMARY_LIMIT):
 
 
 def m0_outcomes_summary(store, days=7, now=None):
-    """Count decisions and outcomes in the last `days` days. Read-only."""
+    """Count decisions and outcomes in the last `days` days. Read-only.
+
+    Reads the newest SUMMARY_LIMIT rows. When that page is full, older rows are not
+    counted and the result adds truncated=True and rows_read.
+    """
     now = now or datetime.now(timezone.utc)
     window = days * 86400
     page = store.read(project=M0_PROJECT, limit=SUMMARY_LIMIT, kind="ambient_signal")
+    rows = _entries(page)
     decisions = []
     counts = {name: 0 for name in M0_OUTCOMES}
     linked = set()
-    for row in _entries(page):
+    for row in rows:
         meta = _m0_meta(row)
         age = _age_s(row.get("ts"), now)
         in_window = age is not None and 0 <= age <= window
@@ -364,7 +364,11 @@ def m0_outcomes_summary(store, days=7, now=None):
         1 for did, age in decisions
         if age > IMPLICIT_KEPT_S and isinstance(did, str) and did not in linked
     )
-    return {"days": days, "decisions": len(decisions), "outcomes": counts, "no_outcome_kept": implicit}
+    out = {"days": days, "decisions": len(decisions), "outcomes": counts, "no_outcome_kept": implicit}
+    if len(rows) >= SUMMARY_LIMIT:
+        # ponytail: the store's read() has no offset or before cursor, so one page is all there is.
+        out.update(truncated=True, rows_read=len(rows))
+    return out
 
 
 def _select(prompt):
@@ -383,8 +387,18 @@ def select(prompt):
     return out
 
 
+USAGE = """usage: meta_select.py [--] "<prompt>"
+       meta_select.py --outcome kept|overridden|bad [--decision ID]
+       meta_select.py --outcomes-summary [--days N]
+`--` ends options: everything after it is the prompt, even if it starts with --outcome.
+--outcome and --outcomes-summary need COCO_ROUTER_M0=1. Their errors go to stderr, exit 2.
+--outcomes-summary reads the newest 500 router rows only (the store has no cursor). When
+that page is full the JSON adds "truncated": true and "rows_read": 500, and older rows
+are not counted."""
+
+
 def _exit2(msg):
-    print(msg)
+    print(msg, file=sys.stderr)
     raise SystemExit(2)
 
 
@@ -449,14 +463,16 @@ def _cli_summary(args):
 
 def main(argv=None):
     args = list(sys.argv[1:] if argv is None else argv)
-    if not args:
-        sys.exit('usage: meta_select.py "<prompt>"')
-    if args[0] == "--outcome":
+    if args[:1] == ["--"]:  # end of options: the rest is the prompt, whatever it starts with
+        args = args[1:]
+    elif args[:1] == ["--outcome"]:
         _cli_outcome(args[1:])
         return
-    if args[0] == "--outcomes-summary":
+    elif args[:1] == ["--outcomes-summary"]:
         _cli_summary(args[1:])
         return
+    if not args:
+        sys.exit(USAGE)
     print(json.dumps(select(" ".join(args)), indent=2, ensure_ascii=False))
 
 

@@ -49,11 +49,23 @@ MAX_TEAMS = 4
 KEYWORD_MAX_TEAMS = 4
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        err = urllib.error.HTTPError(req.full_url, code, msg, headers, fp)
+        err.close()
+        raise err
+
+
+def local_opener():
+    """Ignore proxy env vars and refuse redirects, so a request cannot leave the machine."""
+    return urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect())
+
+
 def embed(texts):
     _check_embed_host(EMBED_URL)
     payload = json.dumps({"model": EMBED_MODEL, "input": texts}).encode()
     req = urllib.request.Request(EMBED_URL, data=payload, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=60) as r:
+    with local_opener().open(req, timeout=60) as r:
         d = json.loads(r.read())
     return [e["embedding"] for e in d["data"]]
 

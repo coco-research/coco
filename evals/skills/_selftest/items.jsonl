@@ -1,0 +1,8 @@
+{"id": "d1", "split": "dev", "input": "red cube", "expect": "red"}
+{"id": "d2", "split": "dev", "input": "red cube", "expect": "blue"}
+{"id": "d3", "split": "dev", "input": "green sphere", "expect": "sphere"}
+{"id": "d4", "split": "dev", "input": "green sphere", "expect": "cube"}
+{"id": "h1", "split": "heldout", "input": "oak table", "expect": "oak"}
+{"id": "h2", "split": "heldout", "input": "oak table", "expect": "table"}
+{"id": "h3", "split": "heldout", "input": "pine chair", "expect": "pine"}
+{"id": "h4", "split": "heldout", "input": "pine chair", "expect": "maple"}

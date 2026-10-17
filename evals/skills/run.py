@@ -7,6 +7,8 @@ message to Ollama /api/chat. stub() is the offline stand-in used by tests.
 The server URL is COCO_SKILL_EXEC_URL (default http://127.0.0.1:11434).
 The model is COCO_SKILL_EXEC_MODEL (default qwen3:4b-instruct-2507-q4_K_M).
 A non-loopback host is refused, same host set as the router regression gate.
+Proxy environment variables are ignored and redirects are refused.
+Pass cache=False so a reply is not written under evals/skills/.cache/.
 """
 import hashlib
 import json
@@ -19,6 +21,18 @@ import urllib.request
 
 # Same hosts the router regression gate accepts (evals/routing/check_regression.py).
 LOOPBACK = {"127.0.0.1", "localhost", "::1"}
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        err = urllib.error.HTTPError(req.full_url, code, msg, headers, fp)
+        err.close()
+        raise err
+
+
+def _local_opener():
+    # Same opener as systems/superintelligence/scripts/meta_select.py local_opener.
+    return urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect())
 DEFAULT_URL = "http://127.0.0.1:11434"
 DEFAULT_MODEL = "qwen3:4b-instruct-2507-q4_K_M"
 CACHE = pathlib.Path(__file__).resolve().parent / ".cache"
@@ -72,15 +86,20 @@ def _write_cache(path, output):
     tmp.replace(path)
 
 
-def generate(skill_md: str, user_input: str, *, model: str, seed: int = 0, url: str) -> str:
-    """Call Ollama /api/chat. url is required and must be loopback. seed defaults to 0."""
+def generate(skill_md: str, user_input: str, *, model: str, seed: int = 0, url: str, cache: bool = True) -> str:
+    """Call Ollama /api/chat. url is required and must be loopback. seed defaults to 0.
+
+    cache=False does not read or write the on-disk cache.
+    """
     require_loopback(url)
     options = chat_options(seed)
-    path = CACHE / (cache_digest(model, seed, options, skill_md, user_input) + ".json")
-    if path.is_file():
-        cached = _read_cache(path)
-        if isinstance(cached, str):
-            return cached
+    path = None
+    if cache:
+        path = CACHE / (cache_digest(model, seed, options, skill_md, user_input) + ".json")
+        if path.is_file():
+            cached = _read_cache(path)
+            if isinstance(cached, str):
+                return cached
     body = json.dumps({
         "model": model,
         "messages": [
@@ -97,7 +116,7 @@ def generate(skill_md: str, user_input: str, *, model: str, seed: int = 0, url: 
         method="POST",
     )
     try:
-        with urllib.request.urlopen(req, timeout=600) as resp:
+        with _local_opener().open(req, timeout=600) as resp:
             payload = json.load(resp)
     except urllib.error.HTTPError as e:
         sys.exit(f"skill executor HTTP {e.code}")
@@ -109,7 +128,8 @@ def generate(skill_md: str, user_input: str, *, model: str, seed: int = 0, url: 
         sys.exit("skill executor returned no message content")
     if not isinstance(output, str):
         sys.exit("skill executor returned a non-string message")
-    _write_cache(path, output)
+    if cache:
+        _write_cache(path, output)
     return output
 
 

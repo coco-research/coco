@@ -2,8 +2,9 @@
 """Score one agent skill on a fixed dev or held-out item split. Stdlib only.
 
 Held-out records carry ids and scores only: no model outputs and no grader notes.
+Held-out model output is not written to the executor cache.
 The executor is local. COCO_SKILL_EXEC_URL must be a loopback host, the same
-rule as the router regression gate.
+rule as the router regression gate. Proxies are ignored and redirects are refused.
 
 Directory names starting with "_" are fixtures for this harness, not pilots.
 
@@ -145,7 +146,9 @@ def score_run(name, split, executor, items_path, grader_path, skill_md_path, *, 
         if executor == "stub":
             output = run.stub(skill_md, user_input, model=model or "", url=url, seed=seed)
         else:
-            output = run.generate(skill_md, user_input, model=model, url=url, seed=seed)
+            output = run.generate(
+                skill_md, user_input, model=model, url=url, seed=seed, cache=split != "heldout",
+            )
         score, note_list = _check_result(item_id, grade(item, output))
         per_item[item_id] = score
         outputs[item_id] = output
@@ -284,6 +287,228 @@ def _assert_cache_key():
     assert base != run.cache_digest("m", 0, opts, "other", "input")
 
 
+def _start_server(handler):
+    import http.server
+    import threading
+    httpd = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+    thread.start()
+    return httpd, thread
+
+
+def _stop_server(httpd, thread):
+    httpd.shutdown()
+    httpd.server_close()
+    thread.join(timeout=5)
+
+
+def _reserve_port():
+    import socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.bind(("127.0.0.1", 0))
+    return sock
+
+
+def _proxy_names():
+    return (
+        "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
+        "http_proxy", "https_proxy", "all_proxy",
+        "NO_PROXY", "no_proxy",
+    )
+
+
+def _push_dead_proxy(port):
+    import os
+    old = {k: os.environ.get(k) for k in _proxy_names()}
+    dead = f"http://127.0.0.1:{port}"
+    for key in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy"):
+        os.environ[key] = dead
+    os.environ["NO_PROXY"] = ""
+    os.environ["no_proxy"] = ""
+    return old
+
+
+def _pop_env(old):
+    import os
+    for key, value in old.items():
+        if value is None:
+            os.environ.pop(key, None)
+        else:
+            os.environ[key] = value
+
+
+def _chat_handler(content, hits):
+    import http.server
+    body = json.dumps({"message": {"content": content}}).encode()
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def _read(self):
+            n = int(self.headers.get("Content-Length", "0") or "0")
+            if n:
+                self.rfile.read(n)
+
+        def do_POST(self):
+            self._read()
+            hits.append(self.path)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def do_GET(self):
+            hits.append(("GET", self.path))
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, fmt, *args):
+            return
+
+    return Handler
+
+
+def _redirect_handler(location):
+    import http.server
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def do_POST(self):
+            n = int(self.headers.get("Content-Length", "0") or "0")
+            if n:
+                self.rfile.read(n)
+            self.send_response(302)
+            self.send_header("Location", location)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
+        def log_message(self, fmt, *args):
+            return
+
+    return Handler
+
+
+def _files_containing(needle):
+    import os
+    raw = needle.encode()
+    found = []
+    for dirpath, dirnames, filenames in os.walk(ROOT):
+        if ".git" in dirnames:
+            dirnames.remove(".git")
+        for name in filenames:
+            path = pathlib.Path(dirpath) / name
+            try:
+                with open(path, "rb") as fh:
+                    tail = b""
+                    while True:
+                        block = fh.read(1024 * 1024)
+                        if not block:
+                            break
+                        if raw in tail + block:
+                            found.append(path)
+                            break
+                        tail = block[1 - len(raw):] if len(raw) > 1 else b""
+            except OSError:
+                continue
+    return found
+
+
+def _assert_direct_despite_proxy():
+    hits = []
+    httpd, thread = _start_server(_chat_handler("direct-ok", hits))
+    sock = _reserve_port()
+    old = _push_dead_proxy(sock.getsockname()[1])
+    try:
+        url = f"http://127.0.0.1:{httpd.server_address[1]}"
+        try:
+            got = run.generate("skill", "proxy-probe", model="m", seed=0, url=url, cache=False)
+        except SystemExit as e:
+            raise AssertionError(f"generate exited: {e}") from None
+        assert got == "direct-ok", got
+        assert hits == ["/api/chat"], hits
+    finally:
+        _pop_env(old)
+        sock.close()
+        _stop_server(httpd, thread)
+
+
+def _assert_redirect_refused():
+    hits = []
+    sink, sink_thread = _start_server(_chat_handler("leaked", hits))
+    location = f"http://127.0.0.1:{sink.server_address[1]}/api/chat"
+    httpd, thread = _start_server(_redirect_handler(location))
+    try:
+        url = f"http://127.0.0.1:{httpd.server_address[1]}"
+        try:
+            run.generate("skill", "redirect-probe", model="m", seed=0, url=url, cache=False)
+        except SystemExit as e:
+            assert "302" in str(e), e
+        else:
+            raise AssertionError("redirect was not refused")
+        assert hits == [], hits
+    finally:
+        _stop_server(httpd, thread)
+        _stop_server(sink, sink_thread)
+
+
+def _assert_heldout_not_on_disk():
+    import os
+    import tempfile
+    import uuid
+    marker = "out-" + uuid.uuid4().hex
+    hits = []
+    httpd, thread = _start_server(_chat_handler(marker, hits))
+    fix = HERE / "_selftest"
+    old_url = os.environ.get("COCO_SKILL_EXEC_URL")
+    os.environ["COCO_SKILL_EXEC_URL"] = f"http://127.0.0.1:{httpd.server_address[1]}"
+    try:
+        with tempfile.TemporaryDirectory() as td:
+            skill = pathlib.Path(td) / "SKILL.md"
+            skill.write_text((fix / "SKILL.md").read_text() + "\n" + uuid.uuid4().hex + "\n")
+            url = run.executor_url()
+            kw = dict(
+                model="m", seed=SEED, url=url,
+            )
+            score_run(
+                "_selftest", "heldout", "ollama",
+                fix / "items.jsonl", fix / "grader.py", skill, **kw,
+            )
+            assert len(hits) == 4, hits
+            leaked = _files_containing(marker)
+            assert leaked == [], leaked
+            score_run(
+                "_selftest", "dev", "ollama",
+                fix / "items.jsonl", fix / "grader.py", skill, **kw,
+            )
+            # Dev repeats two inputs, so those two replies are cache hits.
+            assert len(hits) == 6, hits
+            cached = _files_containing(marker)
+            assert cached, "dev run did not write a cache file"
+            assert all(p.parent == run.CACHE for p in cached), cached
+    finally:
+        if old_url is None:
+            os.environ.pop("COCO_SKILL_EXEC_URL", None)
+        else:
+            os.environ["COCO_SKILL_EXEC_URL"] = old_url
+        for path in _files_containing(marker):
+            if path.parent == run.CACHE:
+                path.unlink(missing_ok=True)
+        _stop_server(httpd, thread)
+
+
+def _assert_cache_gitignored():
+    import shutil
+    if shutil.which("git") is None:
+        print("note: git unavailable, skipped check-ignore")
+        return
+    r = subprocess.run(
+        ["git", "check-ignore", "-q", "evals/skills/.cache/anything.json"],
+        cwd=ROOT,
+    )
+    assert r.returncode == 0, "evals/skills/.cache/anything.json is not gitignored"
+
+
 def self_test():
     fix = HERE / "_selftest"
     kw = dict(model=None, seed=SEED, url=run.DEFAULT_URL)
@@ -328,6 +553,10 @@ def self_test():
     _assert_hashes_track_files()
     _assert_loopback()
     _assert_cache_key()
+    _assert_direct_despite_proxy()
+    _assert_redirect_refused()
+    _assert_heldout_not_on_disk()
+    _assert_cache_gitignored()
 
     good = 'def grade(item, output):\n    return {"score": 1.0, "notes": []}\n'
     one = '{"id": "x", "split": "dev", "input": "hello"}\n'

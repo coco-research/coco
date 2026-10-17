@@ -2,7 +2,7 @@
 
 This harness scores a skill file (`SKILL.md`) on a fixed set of items. Each item is `dev` or `heldout`. One run scores one split and writes a JSON record.
 
-The executor talks to a local model server on a loopback address only (`127.0.0.1`, `localhost`, or `::1`). Any other host is refused. The default server is `http://127.0.0.1:11434` (`COCO_SKILL_EXEC_URL`) and the default model is `qwen3:4b-instruct-2507-q4_K_M` (`COCO_SKILL_EXEC_MODEL`). Calls use temperature 0, a fixed seed, and a 16384-token context. Replies are cached under `evals/skills/.cache/`, which is not committed. `--executor stub` scores without a server.
+The executor talks to a local model server on a loopback address only (`127.0.0.1`, `localhost`, or `::1`). Any other host is refused. Proxy environment variables are ignored and HTTP redirects are refused, so a prompt cannot leave the machine that way. The default server is `http://127.0.0.1:11434` (`COCO_SKILL_EXEC_URL`) and the default model is `qwen3:4b-instruct-2507-q4_K_M` (`COCO_SKILL_EXEC_MODEL`). Calls use temperature 0, a fixed seed, and a 16384-token context. Dev replies are cached under `evals/skills/.cache/`, which is not committed. Held-out replies are not written to disk. `--executor stub` scores without a server.
 
 ## Dev and held-out
 

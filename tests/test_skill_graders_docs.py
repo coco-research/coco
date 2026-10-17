@@ -24,7 +24,7 @@ sys.path.insert(0, str(SKILLS))
 import run  # noqa: E402
 import score  # noqa: E402
 
-SPLIT_SIZE = 12
+SIZES = {"dev": 12, "heldout": 24}  # held-out is larger so the keep gate can see a real gain
 IRRELEVANT = "The weather is lovely today. Pancakes need flour, eggs and milk."
 
 
@@ -90,10 +90,10 @@ class PilotChecks:
         ids = [json.loads(l)["id"] for l in lines]
         self.assertEqual(len(ids), len(set(ids)), "duplicate id")
         rows = list(self.items.values())
-        self.assertEqual(len(rows), 2 * SPLIT_SIZE)
+        self.assertEqual(len(rows), sum(SIZES.values()))
         self.assertEqual(len({r["input"] for r in rows}), len(rows), "two rows share an input")
         for split in ("dev", "heldout"):
-            self.assertEqual(sum(r["split"] == split for r in rows), SPLIT_SIZE, split)
+            self.assertEqual(sum(r["split"] == split for r in rows), SIZES[split], split)
         for row in rows:
             self.assertTrue(row["id"] and isinstance(row["id"], str))
             self.assertTrue(row["input"].strip() and isinstance(row["input"], str))
@@ -139,7 +139,7 @@ class PilotChecks:
                 ROOT / "skills" / self.skill / "SKILL.md",
                 model=None, seed=0, url=run.DEFAULT_URL,
             )
-            self.assertEqual(record["n"], SPLIT_SIZE)
+            self.assertEqual(record["n"], SIZES[split])
             self.assertAlmostEqual(record["mean"], self.stub_mean)
             self.assertEqual("outputs" in record, split == "dev")
 

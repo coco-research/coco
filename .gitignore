@@ -33,6 +33,9 @@ AGENTS.md.bak
 node_modules/
 __pycache__/
 *.pyc
+
+# Local replies from the skill-eval executor
+evals/skills/.cache/
 .repowise/
 coco-ads-output*/
 

@@ -308,6 +308,41 @@ function cmdUpdate(argv) {
   console.log(`\nCoco updated at ${dir}. Re-run install if you want to refresh symlinks:\n  bash ${path.join(dir, 'install.sh')}`);
 }
 
+// Remove symlinks under home that point at a root or anything inside it.
+// Relative link text is resolved from the link's own directory, then realpath
+// when the target exists. Comparison is a plain string: a clone path is not a
+// glob. The prefix is root plus a separator, so a clone named coco does not
+// take links into coco-research. realpath at the start is find -H: a symlinked
+// home is searched, and a symlinked directory below it is not.
+function sweepLinks(home, roots) {
+  if (!fs.existsSync(home)) return;
+  let start;
+  try { start = fs.realpathSync(home); } catch (_) { return; }
+  const inside = (p) => roots.some((r) => p === r || p.startsWith(r.endsWith(path.sep) ? r : r + path.sep));
+  const walk = (dir) => {
+    let names;
+    try { names = fs.readdirSync(dir); } catch (_) { return; }
+    for (const name of names) {
+      const link = path.join(dir, name);
+      let st;
+      try { st = fs.lstatSync(link); } catch (_) { continue; }
+      if (st.isSymbolicLink()) {
+        let target;
+        try { target = fs.readlinkSync(link); } catch (_) { continue; }
+        const abs = path.resolve(path.dirname(link), target);
+        let canon = null;
+        try { canon = fs.realpathSync(abs); } catch (_) { /* dangling */ }
+        if (inside(abs) || (canon && inside(canon))) {
+          try { fs.unlinkSync(link); } catch (e) { console.error(`Could not remove ${link}: ${e.code}`); }
+        }
+      } else if (st.isDirectory()) {
+        walk(link);
+      }
+    }
+  };
+  walk(start);
+}
+
 function cmdUninstall(argv) {
   const force = argv.includes('--force');
   const dirArg = argv.find((a) => !a.startsWith('--'));
@@ -324,9 +359,10 @@ function cmdUninstall(argv) {
       if (found.length) refuseClone(dir, `it has ${found.join(' and ')}; pass --force to remove it`);
     }
   }
-  // Prefix match on the resolved clone path plus a trailing slash, so a clone
-  // named `coco` cannot also delete links into `coco-research` / `coco-connect`.
-  const prefix = dir.endsWith(path.sep) ? dir : dir + path.sep;
+  // install.sh links through whichever path it ran from, so match both.
+  let real = dir;
+  try { real = fs.realpathSync(dir); } catch (_) { /* absent: only the given path */ }
+  const roots = [...new Set([dir, real])];
   console.log(`Removing symlinks pointing into ${dir}...`);
   const homes = [
     path.join(os.homedir(), '.claude'),
@@ -334,10 +370,7 @@ function cmdUninstall(argv) {
     path.join(os.homedir(), '.grok'),
     path.join(os.homedir(), '.copilot'),
   ];
-  for (const home of homes) {
-    if (!fs.existsSync(home)) continue;
-    run('find', [home, '-type', 'l', '-lname', `${prefix}*`, '-delete']);
-  }
+  for (const home of homes) sweepLinks(home, roots);
   // grok also writes generated files (SI commands, config block, hooks); its installer removes them.
   // Best-effort: an older pinned clone may not know --uninstall; never abort the uninstall over it.
   const grokInstaller = path.join(dir, 'adapters', 'grok', 'install.sh');
@@ -347,9 +380,17 @@ function cmdUninstall(argv) {
       console.log('Note: grok installer cleanup failed (possibly an older pin without --uninstall); continuing.');
     }
   }
-  console.log(`Removing clone at ${dir}...`);
-  if (fs.existsSync(dir)) {
-    fs.rmSync(dir, { recursive: true, force: true });
+  let isLink = false;
+  try { isLink = fs.lstatSync(dir).isSymbolicLink(); } catch (_) { /* absent */ }
+  if (isLink) {
+    // A symlinked clone dir may point at a checkout the user keeps elsewhere: drop only the link.
+    fs.rmSync(dir, { force: true });
+    console.log(`Removed the link ${dir}; kept the clone it points to at ${real}. Delete that by hand if you want it gone.`);
+  } else {
+    console.log(`Removing clone at ${dir}...`);
+    if (fs.existsSync(dir)) {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   }
   // The update notifier's cache is ours; drop it, and ~/.coco if that leaves it empty.
   fs.rmSync(UPDATE_CACHE, { force: true });

@@ -47,10 +47,10 @@ def latest_run(runs_dir=RUNS):
 
 def model_digest(embed_url, model):
     """Ollama model digest (the tag is floating). None if not an Ollama endpoint."""
-    import urllib.request
+    import meta_select
     u = urllib.parse.urlparse(embed_url)
     try:
-        with urllib.request.urlopen(f"{u.scheme}://{u.netloc}/api/tags", timeout=5) as r:
+        with meta_select.local_opener().open(f"{u.scheme}://{u.netloc}/api/tags", timeout=5) as r:
             for m in json.load(r).get("models", []):
                 if m.get("name") in (model, model + ":latest") or m.get("model") in (model, model + ":latest"):
                     return m.get("digest")
@@ -116,9 +116,11 @@ def probe_exit(ok, ref):
 
 
 def probe(url="http://127.0.0.1:11434", model="nomic-embed-text"):
-    import shutil, subprocess, urllib.request
+    import shutil, subprocess
+    import meta_select
     try:
-        urllib.request.urlopen(f"{url}/api/version", timeout=3)
+        with meta_select.local_opener().open(f"{url}/api/version", timeout=3):
+            pass
     except Exception:
         return False
     if not shutil.which("ollama"):
@@ -153,7 +155,75 @@ def self_test():
         assert latest_run(d).name == "2026-11-01-bbbbbbb.json"
         (d / "zz-misc.json").write_text(json.dumps({"run": {"date": "2026-10-01"}}))
         assert latest_run(d).name == "2026-11-01-bbbbbbb.json"
+    _assert_local_http_ignores_proxy()
     print("check_regression self-test passed")
+
+
+def _assert_local_http_ignores_proxy():
+    """Tags and version probes still reach loopback when proxy env vars point at a closed port."""
+    import os
+    import shutil
+    import socket
+    import stat
+    import tempfile
+    import threading
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            if self.path == "/api/tags":
+                body = b'{"models":[{"name":"nomic-embed-text","digest":"abc"}]}'
+            elif self.path == "/api/version":
+                body = b'{"version":"0"}'
+            else:
+                self.send_error(404)
+                return
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, fmt, *args):
+            return
+
+    httpd = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    port = httpd.server_address[1]
+    thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+    thread.start()
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.bind(("127.0.0.1", 0))
+    names = (
+        "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
+        "http_proxy", "https_proxy", "all_proxy",
+        "NO_PROXY", "no_proxy", "PATH",
+    )
+    old = {k: os.environ.get(k) for k in names}
+    fake = tempfile.mkdtemp()
+    try:
+        dead = f"http://127.0.0.1:{sock.getsockname()[1]}"
+        for key in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy", "all_proxy"):
+            os.environ[key] = dead
+        os.environ["NO_PROXY"] = ""
+        os.environ["no_proxy"] = ""
+        exe = pathlib.Path(fake) / "ollama"
+        exe.write_text("#!/bin/sh\nexit 0\n")
+        exe.chmod(exe.stat().st_mode | stat.S_IEXEC)
+        os.environ["PATH"] = fake + os.pathsep + (old["PATH"] or "")
+        base = f"http://127.0.0.1:{port}"
+        assert model_digest(base, "nomic-embed-text") == "abc"
+        assert probe(base, "nomic-embed-text") is True
+    finally:
+        for key, value in old.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+        sock.close()
+        httpd.shutdown()
+        httpd.server_close()
+        thread.join(timeout=5)
+        shutil.rmtree(fake, ignore_errors=True)
 
 
 def main():

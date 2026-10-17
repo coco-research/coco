@@ -388,4 +388,25 @@ rm "$T/home/.claude"
 mv "$T/home/.claude.bak" "$T/home/.claude" 2>/dev/null || true
 [ "$RC" -eq 0 ] && [ ! -L "$T/dot-claude/x/link" ] || fail "(sh) symlinked home (RC $RC: $(cat "$T/err"))"
 
+# (gl) glob characters in the clone path must not delete a sibling
+repo "$T/gl/co?o" "https://github.com/coco-research/coco.git"
+settle "$T/gl/co?o"
+mkdir -p "$T/gl/coco"
+echo x > "$T/gl/coco/x"
+mkdir -p "$T/home/.claude/gl"
+ln -s "$T/gl/co?o/keep.txt" "$T/home/.claude/gl/into-clone"
+ln -s "$T/gl/coco/x" "$T/home/.claude/gl/into-sibling"
+coco node "$CLI" uninstall "$T/gl/co?o"
+[ "$RC" -eq 0 ] && [ ! -L "$T/home/.claude/gl/into-clone" ] && [ ! -e "$T/home/.claude/gl/into-clone" ] && [ -L "$T/home/.claude/gl/into-sibling" ] || fail "(gl) glob path (RC $RC: $(cat "$T/err"))"
+
+# (rel) a relative symlink into the clone is removed
+repo "$T/rel" "https://github.com/coco-research/coco.git"
+settle "$T/rel"
+mkdir -p "$T/home/.claude/rel"
+reltarget="$(python3 -c 'import os,sys;print(os.path.relpath(sys.argv[1],sys.argv[2]))' "$T/rel/keep.txt" "$T/home/.claude/rel")"
+case "$reltarget" in /*) fail "(rel) not relative: $reltarget";; esac
+ln -s "$reltarget" "$T/home/.claude/rel/link"
+coco node "$CLI" uninstall "$T/rel"
+[ "$RC" -eq 0 ] && [ ! -L "$T/home/.claude/rel/link" ] || fail "(rel) relative link (RC $RC: $(cat "$T/err"))"
+
 echo "PASS: clone guard refuses non-clones and removes a real one"

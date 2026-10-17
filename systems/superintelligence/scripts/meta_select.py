@@ -17,12 +17,15 @@ Do not reuse embed FLOOR/DELEGATE_MARGIN as if Jaccard were commensurate with co
 M0: with COCO_ROUTER_M0=1, each select() call writes one row to the local M0 sqlite
 store (M0_DB, default ~/.local/share/coco-m0/thread.db): an HMAC-SHA256 of the prompt
 keyed by a per-install salt (never the text), team keys, delegate. Off by default;
-nothing leaves the machine.
+nothing leaves the machine. Outcome rows are append-only and point at a decision
+(kept, overridden, rerouted, or bad) with no prompt and no HMAC. The same prompt
+routed again within 600s records rerouted for the previous decision.
 
     python3 superintelligence/scripts/meta_select.py "should we ship an AI compliance product?"
     -> JSON {prompt, method, teams:[{team_id,short,score,weight,cells:[{cell,score}]}], delegate}
 """
 import os, sys, json, math, re, hashlib, hmac, urllib.request, urllib.error, pathlib
+from datetime import datetime, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 # Any local OpenAI-compatible endpoint (LM Studio by default; Ollama in CI). Local only.
@@ -166,6 +169,11 @@ M0_SCRIPTS = pathlib.Path(__file__).resolve().parents[2] / "m0" / "skills" / "m0
 
 M0_SALT_NAME = "router-salt"
 M0_TIMEOUT_MS = 500  # short sqlite busy timeout so a locked store can't stall routing
+M0_OUTCOMES = ("kept", "overridden", "rerouted", "bad")
+M0_CLI_OUTCOMES = ("kept", "overridden", "bad")  # rerouted is written only by select()
+REROUTE_WINDOW_S = 600
+IMPLICIT_KEPT_S = 24 * 60 * 60
+SUMMARY_LIMIT = 500  # one store page; older than this page is outside the summary
 
 
 def _m0_store():
@@ -199,12 +207,86 @@ def _m0_salt(data_dir):
     return salt
 
 
+def _age_s(ts, now):
+    if not isinstance(ts, str) or not ts:
+        return None
+    try:
+        stamp = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if stamp.tzinfo is None:
+        stamp = stamp.replace(tzinfo=timezone.utc)
+    return (now - stamp).total_seconds()
+
+
+def _m0_meta(row):
+    raw = row.get("meta_json")
+    if raw is None:
+        raw = row.get("meta")
+    if isinstance(raw, dict):
+        return raw
+    if not isinstance(raw, str) or not raw.strip():
+        return {}
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError:
+        return {}
+    return parsed if isinstance(parsed, dict) else {}
+
+
+def _entries(page):
+    if not isinstance(page, dict):
+        return []
+    entries = page.get("entries")
+    if not isinstance(entries, list):
+        return []
+    return [row for row in entries if isinstance(row, dict)]
+
+
+def _is_decision(row):
+    meta = _m0_meta(row)
+    return "prompt_hmac_sha256" in meta and "outcome" not in meta
+
+
+def _write_outcome(store, decision_id, outcome):
+    """Append one outcome row. No prompt and no HMAC."""
+    if outcome not in M0_OUTCOMES:
+        raise ValueError(outcome)
+    return store.write({
+        "project": M0_PROJECT,
+        "kind": "ambient_signal",
+        "source_tool": "meta_select",
+        "text": f"router outcome {outcome} {decision_id[:12]}",
+        "meta": {"decision_id": decision_id, "outcome": outcome},
+    })
+
+
+def _maybe_reroute(store, digest):
+    """Same prompt again inside 600s → the previous answer did not land."""
+    page = store.read(project=M0_PROJECT, limit=50, kind="ambient_signal")
+    row = next((r for r in _entries(page) if _is_decision(r)), None)
+    if row is None:
+        return
+    age = _age_s(row.get("ts"), datetime.now(timezone.utc))
+    decision_id = row.get("id")
+    if (
+        age is not None
+        and 0 <= age < REROUTE_WINDOW_S
+        and _m0_meta(row).get("prompt_hmac_sha256") == digest
+        and isinstance(decision_id, str)
+        and decision_id
+    ):
+        _write_outcome(store, decision_id, "rerouted")
+
+
 def m0_record(prompt, out, store=None):
     """Write one M0 row for a routing decision. Opt-in, local sqlite only.
 
     Stores an HMAC-SHA256 of the prompt under a per-install salt, never the
-    prompt text, so short prompts can't be recovered by dictionary. Never
-    raises (SystemExit included): a logging failure must not change routing.
+    prompt text, so short prompts can't be recovered by dictionary. The same
+    prompt again within 600s also appends a rerouted outcome for the previous
+    decision. Never raises (SystemExit included): a logging failure must not
+    change routing.
     """
     if store is None and os.environ.get(M0_FLAG) != "1":
         return None
@@ -213,6 +295,10 @@ def m0_record(prompt, out, store=None):
             store = _m0_store()
         salt = _m0_salt(pathlib.Path(store.db_path).parent)
         digest = hmac.new(salt, prompt.encode("utf-8"), hashlib.sha256).hexdigest()
+        try:
+            _maybe_reroute(store, digest)
+        except (Exception, SystemExit):
+            pass  # lookup is best effort; the decision write still happens
         teams = [t.get("team_key") for t in out.get("teams", [])]
         delegate_team = teams[0] if out.get("delegate") and teams else None
         return store.write({
@@ -226,6 +312,47 @@ def m0_record(prompt, out, store=None):
     except (Exception, SystemExit) as e:  # noqa: BLE001 - logging is best effort
         print(f"meta_select WARN: M0 write skipped ({type(e).__name__})", file=sys.stderr)
         return None
+
+
+def _find_decision(store, decision_id=None, limit=SUMMARY_LIMIT):
+    page = store.read(project=M0_PROJECT, limit=limit, kind="ambient_signal")
+    for row in _entries(page):
+        if not _is_decision(row):
+            continue
+        if decision_id is None or row.get("id") == decision_id:
+            return row
+    return None
+
+
+def m0_outcomes_summary(store, days=7, now=None):
+    """Count decisions and outcomes in the last `days` days. Read-only."""
+    now = now or datetime.now(timezone.utc)
+    window = days * 86400
+    page = store.read(project=M0_PROJECT, limit=SUMMARY_LIMIT, kind="ambient_signal")
+    decisions = []
+    counts = {name: 0 for name in M0_OUTCOMES}
+    linked = set()
+    for row in _entries(page):
+        meta = _m0_meta(row)
+        age = _age_s(row.get("ts"), now)
+        in_window = age is not None and 0 <= age <= window
+        if _is_decision(row):
+            if in_window:
+                decisions.append((row.get("id"), age))
+            continue
+        outcome = meta.get("outcome")
+        if outcome not in counts:
+            continue
+        decision_id = meta.get("decision_id")
+        if isinstance(decision_id, str):
+            linked.add(decision_id)
+        if in_window:
+            counts[outcome] += 1
+    implicit = sum(
+        1 for did, age in decisions
+        if age > IMPLICIT_KEPT_S and isinstance(did, str) and did not in linked
+    )
+    return {"days": days, "decisions": len(decisions), "outcomes": counts, "no_outcome_kept": implicit}
 
 
 def _select(prompt):
@@ -244,7 +371,82 @@ def select(prompt):
     return out
 
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
+def _exit2(msg):
+    print(msg)
+    raise SystemExit(2)
+
+
+def _require_m0():
+    if os.environ.get(M0_FLAG) != "1":
+        _exit2("COCO_ROUTER_M0=1 required")
+
+
+def _parse_days(args):
+    if not args:
+        return 7
+    if len(args) != 2 or args[0] != "--days":
+        _exit2("invalid days")
+    try:
+        days = int(args[1])
+    except ValueError:
+        _exit2("invalid days")
+    if days < 1:
+        _exit2("invalid days")
+    return days
+
+
+def _parse_outcome_args(args):
+    outcome = None
+    decision = None
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--decision":
+            if decision is not None or i + 1 >= len(args):
+                _exit2("no decision found")
+            decision = args[i + 1]
+            i += 2
+            continue
+        if arg.startswith("-") or outcome is not None:
+            _exit2("unknown outcome")
+        outcome = arg
+        i += 1
+    if outcome is None:
+        _exit2("unknown outcome")
+    return outcome, decision
+
+
+def _cli_outcome(args):
+    _require_m0()
+    outcome, decision_id = _parse_outcome_args(args)
+    if outcome not in M0_CLI_OUTCOMES:
+        _exit2("unknown outcome")
+    store = _m0_store()
+    row = _find_decision(store, decision_id)
+    if row is None or not isinstance(row.get("id"), str) or not row.get("id"):
+        _exit2("no decision found")
+    _write_outcome(store, row["id"], outcome)
+
+
+def _cli_summary(args):
+    _require_m0()
+    days = _parse_days(args)
+    store = _m0_store()
+    print(json.dumps(m0_outcomes_summary(store, days=days)))
+
+
+def main(argv=None):
+    args = list(sys.argv[1:] if argv is None else argv)
+    if not args:
         sys.exit('usage: meta_select.py "<prompt>"')
-    print(json.dumps(select(" ".join(sys.argv[1:])), indent=2, ensure_ascii=False))
+    if args[0] == "--outcome":
+        _cli_outcome(args[1:])
+        return
+    if args[0] == "--outcomes-summary":
+        _cli_summary(args[1:])
+        return
+    print(json.dumps(select(" ".join(args)), indent=2, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

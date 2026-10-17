@@ -3,10 +3,12 @@
 
 Run from repo root: python3 tests/check-site-products.py
 """
+import html
 import json
 import subprocess
 import sys
 from pathlib import Path
+from urllib.parse import quote
 
 fail = 0
 
@@ -62,6 +64,8 @@ for row in source:
     else:
         fail_('source %s status %r does not start with Source available' % (pid, status))
 
+index = Path('index.html').read_text()
+
 for row in lab:
     pid = row.get('id', '?')
     if 'href' in row:
@@ -73,6 +77,45 @@ for row in lab:
         pass_('lab %s status starts with Private' % pid)
     else:
         fail_('lab %s status %r does not start with Private' % (pid, status))
+    image = row.get('image')
+    if image:
+        src = image.get('src') or ''
+        if Path(src).is_file():
+            pass_('lab %s image %s exists' % (pid, src))
+        else:
+            fail_('lab %s image %r is missing' % (pid, src))
+        alt = image.get('alt')
+        if isinstance(alt, str) and alt.strip():
+            pass_('lab %s image alt is set' % pid)
+        else:
+            fail_('lab %s image alt is empty' % pid)
+        width, height = image.get('width'), image.get('height')
+        if type(width) is int and type(height) is int:
+            pass_('lab %s image is %sx%s' % (pid, width, height))
+        else:
+            fail_('lab %s image width/height must be integers' % pid)
+    if ('id="lab-%s"' % pid) in index:
+        pass_('index.html has id lab-%s' % pid)
+    else:
+        fail_('index.html missing id lab-%s' % pid)
+    mailto = 'mailto:support@cocoresearch.org?subject=' + quote('Tester seat: ' + row.get('name', ''))
+    if mailto in index:
+        pass_('lab %s has a tester mailto' % pid)
+    else:
+        fail_('lab %s missing tester mailto' % pid)
+    name_link = '<h4><a class="inline" href="?motion=off#lab-%s">%s</a></h4>' % (
+        pid, html.escape(row.get('name') or '', quote=False))
+    if name_link in index:
+        pass_('lab %s name links to ?motion=off#lab-%s' % (pid, pid))
+    else:
+        fail_('lab %s name does not link to ?motion=off#lab-%s' % (pid, pid))
+
+door = 'class="lab-sub lab-door"'
+door_mailto = 'href="mailto:support@cocoresearch.org?subject=Tester%20seat"'
+if door in index and door_mailto in index:
+    pass_('index.html has the lab-door mailto')
+else:
+    fail_('index.html missing the lab-door mailto')
 
 proc = subprocess.run(
     [sys.executable, 'scripts/render-site-products.py', '--check'],

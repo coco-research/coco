@@ -4,6 +4,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [1.7.3](https://github.com/coco-research/coco/compare/v1.7.2...v1.7.3) (2026-10-17)
+
+
+### Bug Fixes
+
+* **cli:** uninstall matches link targets as paths, not globs, and resolves relative links ([#354](https://github.com/coco-research/coco/issues/354)) ([ee36e66](https://github.com/coco-research/coco/commit/ee36e6649630b8175a89278bcde996f618339591))
+
 ## [1.7.2](https://github.com/coco-research/coco/compare/v1.7.1...v1.7.2) (2026-10-17)
 
 

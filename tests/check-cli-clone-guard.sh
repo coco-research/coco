@@ -361,4 +361,52 @@ coco node "$CLI" uninstall --force "$T/b"
 coco node "$CLI" uninstall --force "$T/c"
 [ "$RC" -eq 2 ] && [ -f "$T/c/keep.txt" ] || fail "(z) --force removed no-origin (RC $RC: $(cat "$T/err"))"
 
+# (sl) --force on a symlinked clone dir removes links through either path
+repo "$T/sl-real" "https://github.com/coco-research/coco.git"
+settle "$T/sl-real"
+ln -s "$T/sl-real" "$T/sl"
+mkdir "$T/sl-real-other"
+touch "$T/sl-real-other/x"
+REAL="$(cd "$T/sl-real" && pwd -P)"
+mkdir -p "$T/home/.claude/sl"
+ln -s "$REAL/keep.txt" "$T/home/.claude/sl/via-real"
+ln -s "$T/sl/keep.txt" "$T/home/.claude/sl/via-link"
+ln -s "$T/sl-real-other/x" "$T/home/.claude/sl/other"
+coco node "$CLI" uninstall --force "$T/sl"
+[ "$RC" -eq 0 ] && [ ! -L "$T/home/.claude/sl/via-real" ] && [ ! -L "$T/home/.claude/sl/via-link" ] && [ -L "$T/home/.claude/sl/other" ] || fail "(sl) links (RC $RC: $(cat "$T/err"))"
+[ ! -L "$T/sl" ] && [ -f "$T/sl-real/keep.txt" ] && grep -q "kept the clone" "$T/out" || fail "(sl) kept clone (RC $RC: $(cat "$T/out"))"
+
+# (sh) a symlinked ~/.claude is still swept
+repo "$T/sh" "https://github.com/coco-research/coco.git"
+settle "$T/sh"
+mkdir -p "$T/dot-claude/x"
+ln -s "$(cd "$T/sh" && pwd -P)/keep.txt" "$T/dot-claude/x/link"
+mv "$T/home/.claude" "$T/home/.claude.bak" 2>/dev/null || true
+ln -s "$T/dot-claude" "$T/home/.claude"
+coco node "$CLI" uninstall "$T/sh"
+rm "$T/home/.claude"
+mv "$T/home/.claude.bak" "$T/home/.claude" 2>/dev/null || true
+[ "$RC" -eq 0 ] && [ ! -L "$T/dot-claude/x/link" ] || fail "(sh) symlinked home (RC $RC: $(cat "$T/err"))"
+
+# (gl) glob characters in the clone path must not delete a sibling
+repo "$T/gl/co?o" "https://github.com/coco-research/coco.git"
+settle "$T/gl/co?o"
+mkdir -p "$T/gl/coco"
+echo x > "$T/gl/coco/x"
+mkdir -p "$T/home/.claude/gl"
+ln -s "$T/gl/co?o/keep.txt" "$T/home/.claude/gl/into-clone"
+ln -s "$T/gl/coco/x" "$T/home/.claude/gl/into-sibling"
+coco node "$CLI" uninstall "$T/gl/co?o"
+[ "$RC" -eq 0 ] && [ ! -L "$T/home/.claude/gl/into-clone" ] && [ ! -e "$T/home/.claude/gl/into-clone" ] && [ -L "$T/home/.claude/gl/into-sibling" ] || fail "(gl) glob path (RC $RC: $(cat "$T/err"))"
+
+# (rel) a relative symlink into the clone is removed
+repo "$T/rel" "https://github.com/coco-research/coco.git"
+settle "$T/rel"
+mkdir -p "$T/home/.claude/rel"
+reltarget="$(python3 -c 'import os,sys;print(os.path.relpath(sys.argv[1],sys.argv[2]))' "$T/rel/keep.txt" "$T/home/.claude/rel")"
+case "$reltarget" in /*) fail "(rel) not relative: $reltarget";; esac
+ln -s "$reltarget" "$T/home/.claude/rel/link"
+coco node "$CLI" uninstall "$T/rel"
+[ "$RC" -eq 0 ] && [ ! -L "$T/home/.claude/rel/link" ] || fail "(rel) relative link (RC $RC: $(cat "$T/err"))"
+
 echo "PASS: clone guard refuses non-clones and removes a real one"

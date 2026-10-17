@@ -308,6 +308,41 @@ function cmdUpdate(argv) {
   console.log(`\nCoco updated at ${dir}. Re-run install if you want to refresh symlinks:\n  bash ${path.join(dir, 'install.sh')}`);
 }
 
+// Remove symlinks under home that point at a root or anything inside it.
+// Relative link text is resolved from the link's own directory, then realpath
+// when the target exists. Comparison is a plain string: a clone path is not a
+// glob. The prefix is root plus a separator, so a clone named coco does not
+// take links into coco-research. realpath at the start is find -H: a symlinked
+// home is searched, and a symlinked directory below it is not.
+function sweepLinks(home, roots) {
+  if (!fs.existsSync(home)) return;
+  let start;
+  try { start = fs.realpathSync(home); } catch (_) { return; }
+  const inside = (p) => roots.some((r) => p === r || p.startsWith(r.endsWith(path.sep) ? r : r + path.sep));
+  const walk = (dir) => {
+    let names;
+    try { names = fs.readdirSync(dir); } catch (_) { return; }
+    for (const name of names) {
+      const link = path.join(dir, name);
+      let st;
+      try { st = fs.lstatSync(link); } catch (_) { continue; }
+      if (st.isSymbolicLink()) {
+        let target;
+        try { target = fs.readlinkSync(link); } catch (_) { continue; }
+        const abs = path.resolve(path.dirname(link), target);
+        let canon = null;
+        try { canon = fs.realpathSync(abs); } catch (_) { /* dangling */ }
+        if (inside(abs) || (canon && inside(canon))) {
+          try { fs.unlinkSync(link); } catch (e) { console.error(`Could not remove ${link}: ${e.code}`); }
+        }
+      } else if (st.isDirectory()) {
+        walk(link);
+      }
+    }
+  };
+  walk(start);
+}
+
 function cmdUninstall(argv) {
   const force = argv.includes('--force');
   const dirArg = argv.find((a) => !a.startsWith('--'));
@@ -324,13 +359,10 @@ function cmdUninstall(argv) {
       if (found.length) refuseClone(dir, `it has ${found.join(' and ')}; pass --force to remove it`);
     }
   }
-  // Prefix match plus a trailing slash, so a clone named `coco` cannot also delete links
-  // into `coco-research` / `coco-connect`. install.sh links through whichever path it ran
-  // from, so match both the path given and its real path (a symlinked clone dir).
+  // install.sh links through whichever path it ran from, so match both.
   let real = dir;
   try { real = fs.realpathSync(dir); } catch (_) { /* absent: only the given path */ }
-  const match = [...new Set([dir, real])]
-    .flatMap((d, i) => [...(i ? ['-o'] : []), '-lname', `${d.endsWith(path.sep) ? d : d + path.sep}*`]);
+  const roots = [...new Set([dir, real])];
   console.log(`Removing symlinks pointing into ${dir}...`);
   const homes = [
     path.join(os.homedir(), '.claude'),
@@ -338,11 +370,7 @@ function cmdUninstall(argv) {
     path.join(os.homedir(), '.grok'),
     path.join(os.homedir(), '.copilot'),
   ];
-  for (const home of homes) {
-    if (!fs.existsSync(home)) continue;
-    // -H: a symlinked ~/.claude (dotfiles) is still searched.
-    run('find', ['-H', home, '-type', 'l', '(', ...match, ')', '-delete']);
-  }
+  for (const home of homes) sweepLinks(home, roots);
   // grok also writes generated files (SI commands, config block, hooks); its installer removes them.
   // Best-effort: an older pinned clone may not know --uninstall; never abort the uninstall over it.
   const grokInstaller = path.join(dir, 'adapters', 'grok', 'install.sh');

@@ -337,8 +337,9 @@ def _pop_env(old):
             os.environ[key] = value
 
 
-def _chat_handler(content, hits):
+def _chat_handler(content, hits, delay=0.0):
     import http.server
+    import time
     body = json.dumps({"message": {"content": content}}).encode()
 
     class Handler(http.server.BaseHTTPRequestHandler):
@@ -349,6 +350,8 @@ def _chat_handler(content, hits):
 
         def do_POST(self):
             self._read()
+            if delay:
+                time.sleep(delay)
             hits.append(self.path)
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -450,6 +453,37 @@ def _assert_redirect_refused():
     finally:
         _stop_server(httpd, thread)
         _stop_server(sink, sink_thread)
+
+
+def _assert_slow_executor_times_out():
+    import os
+    old = os.environ.get("COCO_SKILL_EXEC_TIMEOUT")
+    hits = []
+    httpd, thread = _start_server(_chat_handler("late", hits, delay=3.0))
+    try:
+        os.environ["COCO_SKILL_EXEC_TIMEOUT"] = "1"
+        url = f"http://127.0.0.1:{httpd.server_address[1]}"
+        try:
+            run.generate("skill", "slow-probe", model="m", seed=0, url=url, cache=False)
+        except SystemExit as e:
+            assert "timed out after 1" in str(e), e
+        else:
+            raise AssertionError("slow executor did not time out")
+
+        for bad in ("abc", "0"):
+            os.environ["COCO_SKILL_EXEC_TIMEOUT"] = bad
+            try:
+                run.executor_timeout()
+            except SystemExit as e:
+                assert "COCO_SKILL_EXEC_TIMEOUT" in str(e), e
+            else:
+                raise AssertionError(f"COCO_SKILL_EXEC_TIMEOUT={bad!r} was accepted")
+    finally:
+        if old is None:
+            os.environ.pop("COCO_SKILL_EXEC_TIMEOUT", None)
+        else:
+            os.environ["COCO_SKILL_EXEC_TIMEOUT"] = old
+        _stop_server(httpd, thread)
 
 
 def _assert_heldout_not_on_disk():
@@ -555,6 +589,7 @@ def self_test():
     _assert_cache_key()
     _assert_direct_despite_proxy()
     _assert_redirect_refused()
+    _assert_slow_executor_times_out()
     _assert_heldout_not_on_disk()
     _assert_cache_gitignored()
 

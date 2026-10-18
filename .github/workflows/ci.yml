@@ -285,6 +285,8 @@ jobs:
 
       - name: Skill eval harness self-test
         run: python3 evals/skills/score.py --self-test
+      - name: Skill improve-round core tests
+        run: python3 -m unittest tests/test_skill_improve.py
 
       - name: Router M0 decision log (opt-in, hash only)
         run: python3 -m unittest tests/test_meta_select_m0.py tests/test_meta_select_embed.py

@@ -22,20 +22,12 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+# Same opener as the router, found the same way evals/routing/check_regression.py finds meta_select.
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "systems" / "superintelligence" / "scripts"))
+from local_http import local_opener  # noqa: E402
+
 # Same hosts the router regression gate accepts (evals/routing/check_regression.py).
 LOOPBACK = {"127.0.0.1", "localhost", "::1"}
-
-
-class _NoRedirect(urllib.request.HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        err = urllib.error.HTTPError(req.full_url, code, msg, headers, fp)
-        err.close()
-        raise err
-
-
-def _local_opener():
-    # Same opener as systems/superintelligence/scripts/meta_select.py local_opener.
-    return urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect())
 DEFAULT_URL = "http://127.0.0.1:11434"
 DEFAULT_MODEL = "qwen3:4b-instruct-2507-q4_K_M"
 CACHE = pathlib.Path(__file__).resolve().parent / ".cache"
@@ -132,7 +124,7 @@ def generate(skill_md: str, user_input: str, *, model: str, seed: int = 0, url: 
     )
     timeout = executor_timeout()
     try:
-        with _local_opener().open(req, timeout=timeout) as resp:
+        with local_opener().open(req, timeout=timeout) as resp:
             payload = json.load(resp)
     except urllib.error.HTTPError as e:
         sys.exit(f"skill executor HTTP {e.code}")

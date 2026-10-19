@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 228 skills** — 76 core, 152 across 8 bundles.
+**Total: 229 skills** — 77 core, 152 across 8 bundles.
 
 ## Design (15)
 
@@ -109,6 +109,12 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [project-docs](project-docs/SKILL.md) | Use when starting a new project, onboarding to an existing product, or auditing an existing folder structure against the standard. Scaffolds the 16-document set |
 | [pmstudio-comms](stakeholder-comms/SKILL.md) | Generate templated stakeholder communications from project context. Use when someone asks to "write a go-live email", "create a status update", "onboard someone |
 | [task-prd-creator](task-prd-creator/SKILL.md) | Use when the user says I want to add X, implement Y, create a task for Z, or plan this feature. Writes a task file plus a PRD under .agent/, links them, and wai |
+
+## Unspecified (1)
+
+| Skill | Description |
+|-------|-------------|
+| [officecli](officecli/SKILL.md) | Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check fo |
 
 ## Bundle: brain (6 skills)
 

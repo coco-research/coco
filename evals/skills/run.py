@@ -7,11 +7,13 @@ message to Ollama /api/chat. stub() is the offline stand-in used by tests.
 The server URL is COCO_SKILL_EXEC_URL (default http://127.0.0.1:11434).
 The model is COCO_SKILL_EXEC_MODEL (default qwen3:4b-instruct-2507-q4_K_M).
 The per-request timeout is COCO_SKILL_EXEC_TIMEOUT seconds (default 600).
+Each reply is capped at COCO_SKILL_EXEC_MAX_TOKENS output tokens (default 2048).
 A non-loopback host is refused, same host set as the router regression gate.
 Proxy environment variables are ignored and redirects are refused.
 Pass cache=False so a reply is not written under evals/skills/.cache/.
 """
 import hashlib
+import http.client
 import json
 import math
 import os
@@ -70,8 +72,19 @@ def executor_timeout():
     return seconds
 
 
+MAX_TOKENS_DEFAULT = 2048  # answers past this are cut; long skills otherwise ran past the timeout
+
+
+def executor_max_tokens():
+    """Output-token cap per reply. COCO_SKILL_EXEC_MAX_TOKENS, default 2048."""
+    raw = os.environ.get("COCO_SKILL_EXEC_MAX_TOKENS", str(MAX_TOKENS_DEFAULT))
+    if not raw.isdigit() or int(raw) <= 0:
+        sys.exit(f"COCO_SKILL_EXEC_MAX_TOKENS must be a positive integer, got {raw!r}")
+    return int(raw)
+
+
 def chat_options(seed):
-    return {"temperature": 0, "seed": seed, "num_ctx": 16384}
+    return {"temperature": 0, "seed": seed, "num_ctx": 16384, "num_predict": executor_max_tokens()}
 
 
 def cache_digest(model, seed, options, skill_md, user_input):
@@ -142,6 +155,9 @@ def generate(skill_md: str, user_input: str, *, model: str, seed: int = 0, url: 
         sys.exit(f"skill executor timed out after {timeout:g}s")
     except json.JSONDecodeError:
         sys.exit("skill executor returned invalid JSON")
+    except (OSError, http.client.HTTPException, UnicodeDecodeError) as e:
+        # e.g. the server dropped the connection mid-reply; TimeoutError is caught above
+        sys.exit(f"skill executor connection failed: {type(e).__name__}")
     try:
         output = payload["message"]["content"]
     except (KeyError, TypeError):

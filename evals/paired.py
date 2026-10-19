@@ -88,6 +88,11 @@ def _boot_p_greater(vals, n_boot, seed):
     return (below + 1) / (n_boot + 1)
 
 
+def boot_p_greater(diffs, n_boot, seed):
+    """Public one-sided bootstrap p-value that the mean of diffs is > 0 (see _boot_p_greater)."""
+    return _boot_p_greater(diffs, n_boot, seed)
+
+
 def _no(reason, n, delta=None, ci=None, null_win_rate=None):
     """Reject. Stats that were never computed are None, never a misleading 0."""
     return {"accept": False, "reason": reason, "delta": delta, "ci": ci,

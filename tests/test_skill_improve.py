@@ -21,7 +21,7 @@ class ImproveCoreTest(unittest.TestCase):
         self.assertIs(improve.run, run)
         self.assertIs(improve.score, score)
         self.assertTrue(callable(improve.paired.paired_bootstrap))
-        self.assertTrue(callable(improve.paired._boot_p_greater))
+        self.assertTrue(callable(improve.paired.boot_p_greater))
         self.assertEqual(improve.sha256_text(""), hashlib.sha256(b"").hexdigest())
         self.assertEqual(improve.sha256_text("abc"), hashlib.sha256(b"abc").hexdigest())
         self.assertIsInstance(improve.Reject("x"), Exception)
@@ -100,22 +100,32 @@ class ImproveCoreTest(unittest.TestCase):
         cand = [0.5, 0.75, 1.0, 1.0]
         with mock.patch.object(improve.paired, "paired_bootstrap",
                                return_value=(0.25, 0.1, 0.4)) as boot, \
-                mock.patch.object(improve.paired, "_boot_p_greater", return_value=0.01) as pg:
+                mock.patch.object(improve.paired, "boot_p_greater", return_value=0.005) as pg:
             stats = improve.peek_stats(base, cand)
         boot.assert_called_once()
         pg.assert_called_once()
         self.assertEqual(stats["n"], 4)
         self.assertEqual(stats["delta"], 0.25)
         self.assertEqual(stats["ci95"], [0.1, 0.4])
-        self.assertEqual(stats["p_one_sided"], 0.01)
-        self.assertEqual(stats["alpha"], improve.ALPHA)
+        self.assertEqual(stats["p_one_sided"], 0.005)
+        self.assertEqual(stats["alpha"], improve.PEEK_ALPHA)
         self.assertTrue(stats["pass"])
         with mock.patch.object(improve.paired, "paired_bootstrap", return_value=(0.0, -0.1, 0.1)), \
-                mock.patch.object(improve.paired, "_boot_p_greater", return_value=0.4):
+                mock.patch.object(improve.paired, "boot_p_greater", return_value=0.4):
             self.assertFalse(improve.peek_stats(base, cand)["pass"])
         with mock.patch.object(improve.paired, "paired_bootstrap", return_value=(0.25, 0.1, 0.4)), \
-                mock.patch.object(improve.paired, "_boot_p_greater", return_value=0.2):
+                mock.patch.object(improve.paired, "boot_p_greater", return_value=0.2):
             self.assertFalse(improve.peek_stats(base, cand)["pass"])
+
+    def test_peek_stats_real_bootstrap(self):
+        # No mocks: the real paired bootstrap must keep a clear gain and refuse noise.
+        base = [0.5] * 24
+        self.assertTrue(improve.peek_stats(base, [0.75] * 24)["pass"])
+        noise = [0.5 + (0.25 if i % 2 else -0.25) for i in range(24)]
+        self.assertFalse(improve.peek_stats(base, noise)["pass"])
+        # Swapped arguments (a candidate that is worse) must never pass.
+        self.assertFalse(improve.peek_stats([0.75] * 24, base)["pass"])
+        self.assertLess(improve.PEEK_ALPHA, improve.ALPHA)
 
     def test_others_check(self):
         own = "skills/toy/SKILL.md"

@@ -13,7 +13,11 @@ check() { if eval "$2"; then echo "ok   $1"; else echo "FAIL $1"; fail=1; fi; }
 
 H="$WORK/home"
 mkdir -p "$H"
-HOME="$H" CLAUDE_HOME="$H/.claude" bash "$ROOT/adapters/claude-code/install.sh" >/dev/null
+if ! HOME="$H" CLAUDE_HOME="$H/.claude" bash "$ROOT/adapters/claude-code/install.sh" >"$WORK/install.log" 2>&1; then
+  echo "FAIL installer exited non-zero; last lines of its output:"
+  tail -20 "$WORK/install.log"
+  exit 1
+fi
 
 SKILL="$H/.claude/skills/officecli/SKILL.md"
 CMD="$H/.claude/commands/officecli.md"

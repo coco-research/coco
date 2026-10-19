@@ -6,14 +6,17 @@ message to Ollama /api/chat. stub() is the offline stand-in used by tests.
 
 The server URL is COCO_SKILL_EXEC_URL (default http://127.0.0.1:11434).
 The model is COCO_SKILL_EXEC_MODEL (default qwen3:4b-instruct-2507-q4_K_M).
+The per-request timeout is COCO_SKILL_EXEC_TIMEOUT seconds (default 600).
 A non-loopback host is refused, same host set as the router regression gate.
 Proxy environment variables are ignored and redirects are refused.
 Pass cache=False so a reply is not written under evals/skills/.cache/.
 """
 import hashlib
 import json
+import math
 import os
 import pathlib
+import socket
 import sys
 import urllib.error
 import urllib.parse
@@ -53,6 +56,18 @@ def executor_url():
 
 def executor_model():
     return os.environ.get("COCO_SKILL_EXEC_MODEL", DEFAULT_MODEL)
+
+
+def executor_timeout():
+    """Seconds before a request is abandoned. COCO_SKILL_EXEC_TIMEOUT, default 600."""
+    raw = os.environ.get("COCO_SKILL_EXEC_TIMEOUT", "600")
+    try:
+        seconds = float(raw)
+    except ValueError:
+        seconds = None
+    if seconds is None or not math.isfinite(seconds) or seconds <= 0:
+        sys.exit(f"COCO_SKILL_EXEC_TIMEOUT must be a positive number, got {raw!r}")
+    return seconds
 
 
 def chat_options(seed):
@@ -115,13 +130,18 @@ def generate(skill_md: str, user_input: str, *, model: str, seed: int = 0, url: 
         headers={"Content-Type": "application/json"},
         method="POST",
     )
+    timeout = executor_timeout()
     try:
-        with _local_opener().open(req, timeout=600) as resp:
+        with _local_opener().open(req, timeout=timeout) as resp:
             payload = json.load(resp)
     except urllib.error.HTTPError as e:
         sys.exit(f"skill executor HTTP {e.code}")
     except urllib.error.URLError as e:
         sys.exit(f"skill executor request failed: {e.reason}")
+    except (TimeoutError, socket.timeout):
+        sys.exit(f"skill executor timed out after {timeout:g}s")
+    except json.JSONDecodeError:
+        sys.exit("skill executor returned invalid JSON")
     try:
         output = payload["message"]["content"]
     except (KeyError, TypeError):

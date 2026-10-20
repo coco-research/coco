@@ -1,20 +1,20 @@
 {
-  "version": "1.5.0",
+  "version": "1.8.0",
   "schema": 1,
   "skills": {
-    "total": 226,
-    "core": 74,
+    "total": 228,
+    "core": 76,
     "bundle": 152
   },
   "commands": {
-    "shipped": 44,
+    "shipped": 45,
     "generated_si": 342,
-    "customer_facing": 386,
+    "customer_facing": 387,
     "namespaces": 7
   },
   "agents": {
-    "total": 35,
-    "core": 11
+    "total": 34,
+    "core": 10
   },
   "rules": 15,
   "personas": {
@@ -58,5 +58,11 @@
       "zed"
     ],
     "total": 16
+  },
+  "delivered": {
+    "adapter": "claude-code",
+    "skills": 190,
+    "commands": 387,
+    "agents": 34
   }
 }

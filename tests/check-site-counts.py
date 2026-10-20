@@ -7,10 +7,15 @@ asset-counts.json plus "version". README.md and tests/check-asset-counts.sh
 stay on main.
 
 Checks skills, commands, agents, personas and departments on both pages.
+<span data-count="KEY">N</span> on index.html and every HTML file under
+coco/ (coco/skills/ skipped) must use KEY skills, commands or agents, and
+N must equal docs/released-counts.json "delivered"[KEY]. No such spans is
+a pass.
 
 Run from repo root: python3 tests/check-site-counts.py
 """
 import json
+import os
 import re
 import sys
 
@@ -98,6 +103,49 @@ else:
         fail_(f'coco/index.html: hero diagram depts array sums to {sum(dot_counts)}, truth is {PERSONAS}')
     else:
         pass_(f'coco/index.html: hero diagram depts array sum ({sum(dot_counts)}) matches')
+
+# <span data-count="KEY">N</span> is the delivered-count claim. The flagship
+# stats use <span class="num" data-count="495"> and are checked above.
+SPAN_RE = re.compile(r'<span data-count="([^"]*)">([^<]*)</span>')
+DELIVERED_KEYS = ('skills', 'commands', 'agents')
+
+
+def html_pages():
+    yield 'index.html'
+    for dirpath, dirnames, filenames in os.walk('coco'):
+        rel = dirpath.replace('\\', '/')
+        if rel == 'coco':
+            dirnames[:] = [d for d in dirnames if d != 'skills']
+        if rel == 'coco/skills' or rel.startswith('coco/skills/'):
+            continue
+        for name in sorted(filenames):
+            if name.endswith('.html'):
+                yield rel + '/' + name
+
+
+span_total = 0
+for path in html_pages():
+    text = open(path).read()
+    for match in SPAN_RE.finditer(text):
+        span_total += 1
+        line = text.count('\n', 0, match.start()) + 1
+        key = match.group(1)
+        raw = match.group(2).strip()
+        where = f'{path}:{line}'
+        if key not in DELIVERED_KEYS:
+            fail_(f'{where}: data-count key "{key}" is not one of {", ".join(DELIVERED_KEYS)}')
+            continue
+        if not raw.isdecimal():
+            fail_(f'{where}: data-count "{key}" value "{match.group(2)}" is not numeric')
+            continue
+        got = int(raw)
+        expect = counts['delivered'][key]
+        if got != expect:
+            fail_(f'{where}: data-count "{key}" is {got}, delivered is {expect}')
+        else:
+            pass_(f'{where}: data-count "{key}" {got} matches delivered')
+if span_total == 0:
+    pass_('no <span data-count="KEY"> spans on index.html or under coco/; check passed')
 
 print()
 if fail == 0:

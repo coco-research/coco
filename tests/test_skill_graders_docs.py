@@ -140,12 +140,15 @@ class PilotChecks:
                 model=None, seed=0, url=run.DEFAULT_URL,
             )
             self.assertEqual(record["n"], SIZES[split])
-            self.assertAlmostEqual(record["mean"], self.stub_mean)
+            expected = self.stub_mean[split] if isinstance(self.stub_mean, dict) else self.stub_mean
+            self.assertAlmostEqual(record["mean"], expected)
             self.assertEqual("outputs" in record, split == "dev")
 
 
 class PrdGeneratorTest(PilotChecks, unittest.TestCase):
-    skill, item_id, stub_mean = "prd-generator", "pr01", 0.4
+    skill, item_id = "prd-generator", "pr01"
+    # The stub repeats the brief, so the echo penalty pulls both splits down from the old 0.4.
+    stub_mean = {"dev": 0.008066666666666668, "heldout": 0.008058333333333336}
     good = """# Ledgerly Theme Scheduler
 
 ## Problem Statement
@@ -196,7 +199,7 @@ Only two schedule slots per account are allowed.
 
     @staticmethod
     def perfect(row):
-        facts = "\n".join("- " + f for f in row["facts"])
+        facts = "\n".join("- The release promises %s, in the team's own sentence." % f for f in row["facts"])
         return (
             "## Problem Statement\n%s\n\n## Goals and Success Metrics\n- Measure it.\n\n"
             "## User Stories and Requirements\n1. As a user, I want the feature.\n\n"
@@ -325,7 +328,8 @@ Only two schedule slots per account are allowed.
 
     def test_typographic_quotes_match_straight_quotes(self):
         item = {"id": "x", "split": "dev", "input": "", "facts": ["the user's \"note\""]}
-        self.assertEqual(self.points("the user’s “note”", item), 0.4)
+        # Five words: under five, novelty is 0 and the echo penalty would hide this fact match.
+        self.assertEqual(self.points("the user’s “note” is kept", item), 0.4)
 
     def test_placeholders_cost_a_tenth_each(self):
         top = self.points(self.good)
@@ -353,6 +357,20 @@ Only two schedule slots per account are allowed.
     def test_fractions_follow_the_items_own_counts(self):
         item = {"id": "x", "split": "dev", "input": "", "facts": ["alpha kilo", "beta lima", "gamma mike"]}
         self.assertEqual(self.points(self.perfect({"facts": ["alpha kilo", "beta lima"]}), item), 0.8667)
+
+    def test_pasting_the_brief_under_every_heading_scores_at_most_half(self):
+        brief = self.item["input"]
+        pasted = "\n".join(heading + brief for heading in self.headings.values())
+        result = self.result(pasted)
+        self.assertLessEqual(result["score"], 0.5)
+        self.assertTrue(any(note.startswith("mostly restates the brief (novelty ") for note in result["notes"]))
+
+    def test_novelty_is_zero_on_identical_text_and_one_on_unrelated_text(self):
+        ns = {}
+        exec(compile((self.path / "grader.py").read_text(), "grader.py", "exec"), ns)
+        same = "alpha bravo charlie delta echo"
+        self.assertEqual(ns["novelty"](same, same), 0)
+        self.assertEqual(ns["novelty"](same, "hotel india juliet kilo lima"), 1)
 
 
 class C4ArchitectureTest(PilotChecks, unittest.TestCase):

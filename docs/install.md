@@ -295,7 +295,7 @@ To use embeddings: load the nomic-embed-text-v1.5 model in LM Studio, start its 
 
 ```bash
 curl -s -m 3 http://127.0.0.1:1234/v1/models   # any JSON reply means the endpoint is up
-python3 systems/superintelligence/scripts/meta_select.py "should we ship an AI compliance product?"   # "method": "embed" when it is used
+python3 systems/superintelligence/scripts/meta_select.py -- "should we ship an AI compliance product?"   # "method": "embed" when it is used
 ```
 
 ---

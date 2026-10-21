@@ -4,6 +4,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [1.9.0](https://github.com/coco-research/coco/compare/v1.8.0...v1.9.0) (2026-10-21)
+
+
+### Features
+
+* **evals:** code-verification pilot skill with grader ([#367](https://github.com/coco-research/coco/issues/367)) ([49636ee](https://github.com/coco-research/coco/commit/49636ee6840747197787b33a8af2a01948d43a6c))
+* **evals:** core of the skill improvement round (proposal checks, compose, dev and held-out gates) ([#360](https://github.com/coco-research/coco/issues/360)) ([1984a3d](https://github.com/coco-research/coco/commit/1984a3d30f403e459185a813fe6a410f744c634f))
+* **evals:** generate-tests and humanizer pilot skills with graders ([#365](https://github.com/coco-research/coco/issues/365)) ([f0e2644](https://github.com/coco-research/coco/commit/f0e2644a1f84279d16479835dca0e946fd3fe7fe))
+* **evals:** improvement-round helpers (dev-only proposer workspace, round ledger, gates) ([#376](https://github.com/coco-research/coco/issues/376)) ([d6312e4](https://github.com/coco-research/coco/commit/d6312e435d0c32d5dd88cb606a8eed73dd45225a))
+* **evals:** prd-generator, c4-architecture and writing-plans pilot skills with graders ([#359](https://github.com/coco-research/coco/issues/359)) ([fdc4cc4](https://github.com/coco-research/coco/commit/fdc4cc45503aec4dd7e97d77e6a2c1b631095820))
+* **evals:** run one skill improvement round (run_round + CLI) ([#379](https://github.com/coco-research/coco/issues/379)) ([cc8a3f2](https://github.com/coco-research/coco/commit/cc8a3f24a15fcede9c7b0fd97d6c192d30eed3c8))
+* **skills:** c4-architecture edit kept by the improvement loop (held-out 0.132 to 0.879) ([#373](https://github.com/coco-research/coco/issues/373)) ([0726926](https://github.com/coco-research/coco/commit/07269261f64d03ac1363ee2adf14b7665dab62d5))
+* **skills:** officecli skill and /officecli command for Office files ([#369](https://github.com/coco-research/coco/issues/369)) ([2c17c15](https://github.com/coco-research/coco/commit/2c17c155e6e1363ab922c0f14429a4889c5e4922))
+
+
+### Bug Fixes
+
+* **evals:** a slow skill executor exits with one line instead of a traceback; timeout configurable ([#358](https://github.com/coco-research/coco/issues/358)) ([460e284](https://github.com/coco-research/coco/commit/460e28471ad2552560b0a751b51051eae28019e0))
+* **evals:** held-out gate split across life-time peeks; real-bootstrap tests; public paired helper ([#364](https://github.com/coco-research/coco/issues/364)) ([4656083](https://github.com/coco-research/coco/commit/46560839de52e1db11c2e2cd5d83c1934e18e242))
+* **evals:** prd-generator grader penalises restating the brief ([#368](https://github.com/coco-research/coco/issues/368)) ([112c74b](https://github.com/coco-research/coco/commit/112c74bf1f3d07a15b0f59a2fd3facd8d8f1dbbb))
+* **evals:** skill executor exits cleanly on a dropped connection and caps reply length ([#363](https://github.com/coco-research/coco/issues/363)) ([85559c8](https://github.com/coco-research/coco/commit/85559c8ef84e64f74641b433d616d1f113ba7358))
+* **router:** one shared local opener, '--' ends options, summary truncation flag, errors on stderr ([#370](https://github.com/coco-research/coco/issues/370)) ([715e8ec](https://github.com/coco-research/coco/commit/715e8ec4f4552c4676034d7c8c2e3ddbadc599b6))
+
+## [Unreleased]
+
+### Added
+
+- `officecli` skill and `/officecli` command, adapted from OfficeCLI (Apache-2.0) with the install section replaced by a Homebrew check and the update check disabled.
+
 ## [1.8.0](https://github.com/coco-research/coco/compare/v1.7.3...v1.8.0) (2026-10-17)
 
 

@@ -47,6 +47,27 @@ C4Context
 ```
 
 ### Container Diagram (Level 2)
+
+When the request names apps, services, workers, databases, or queues, draw each name as exactly one element: `Container` for an app, service, or worker; `ContainerDb` for a database or store; `ContainerQueue` for a queue or topic. Put that name in the label. Do not make it a `Container_Boundary` and do not invent inner containers or components. Pass only element aliases to `Rel`, never a boundary alias. Keep the request's direction: `A calls B`, `A writes to B`, `A reads B`, `A pulls from B`, `A drains B`, and `from A to B` are all `Rel(a, b, ...)`.
+
+```mermaid
+C4Container
+  title Container Diagram - Checkout
+
+  Container(shop, "Basket App", "React", "Places orders")
+  Container(api, "Catalog API", "Java", "Accepts orders")
+  ContainerDb(db, "Catalog DB", "PostgreSQL", "Product rows")
+  ContainerQueue(bus, "Price Queue", "Kafka", "Price events")
+  Container(worker, "Index Worker", "Java", "Updates search")
+
+  Rel(shop, api, "Sends orders to", "JSON/HTTPS")
+  Rel(api, db, "Writes to", "JDBC")
+  Rel(api, bus, "Publishes to")
+  Rel(bus, worker, "Delivers events to")
+```
+
+The workout diagram below breaks one app into internal containers. For a list of named containers, use the flat form above.
+
 ```mermaid
 C4Container
   title Container Diagram - Workout Tracker
@@ -63,6 +84,33 @@ C4Container
   Rel(spa, pinia, "Reads/writes state")
   Rel(pinia, indexeddb, "Persists", "Dexie ORM")
 ```
+
+**Named parts are elements, not boundaries.** On `C4Container`, each app, service, worker, portal, console, screen, database, store, and queue the user names is one element. Put that exact name in the label:
+
+- app, service, worker, portal, console, or screen → `Container(alias, "Name", "tech", "description")`
+- database or store → `ContainerDb(alias, "Name", "tech", "description")`
+- queue or topic → `ContainerQueue(alias, "Name", "tech", "description")`
+
+Do not declare that name as `Container_Boundary` and do not nest `Component`s under it. A boundary cannot be a `Rel` endpoint. Aim the arrow with the sentence: "A calls B" / "A writes to B" → `Rel(a, b, "...")`; "events flow from the queue to the worker" → `Rel(queue, worker, "...")`; "the worker pulls or drains the queue" → `Rel(worker, queue, "...")`.
+
+```mermaid
+C4Container
+  title Container Diagram - Parcel Desk
+  Container(desk, "Desk App", "React", "Creates bookings")
+  Container(api, "Booking API", "Go", "Reads and writes bookings")
+  ContainerDb(db, "Booking DB", "PostgreSQL", "Booking records")
+  ContainerQueue(q, "Job Queue", "SQS", "Booking events")
+  Container(worker, "Ticket Worker", "Go", "Issues tickets")
+  Rel(desk, api, "Calls", "JSON/HTTPS")
+  Rel(api, db, "Reads and writes", "SQL")
+  Rel(api, q, "Publishes events to")
+  Rel(q, worker, "Delivers events to")
+```
+
+A container diagram declares each named app, service, worker, database, queue, or external system once: `Container`, `ContainerDb`, `ContainerQueue`, or `Container_Ext`, with that name as the label. `Rel` may use only those aliases, or `Person` for a human. Never pass a `Container_Boundary`, `System_Boundary`, or `Deployment_Node` alias — above, arrows go to `spa`, not `app`. Do not replace a named container with a boundary that holds some other element.
+
+Invalid: `Container_Boundary(api, "Checkout API") { Container(handler, "Handler", "Node", "Handles calls") }` then `Rel(shop, api, "Calls")`.
+Valid: `Container(shop, "Storefront", "React", "Takes orders")`, `Container(api, "Checkout API", "Node.js", "Validates orders")`, `ContainerDb(db, "Catalog DB", "PostgreSQL", "Product rows")`, `Rel(shop, api, "Submits orders", "JSON/HTTPS")`, `Rel(api, db, "Reads", "SQL")`.
 
 ### Component Diagram (Level 3)
 ```mermaid

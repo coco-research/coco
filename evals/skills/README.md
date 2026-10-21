@@ -23,3 +23,8 @@ python3 evals/skills/score.py --self-test
 ```
 
 Directory names starting with `_` are fixtures, not pilots.
+
+## Pilot skills
+
+- **generate-tests.** The grader takes the first Python or unlabeled code fence that contains `unittest`, runs it on the correct function, then on three buggy mutants. The score is the fraction of mutants killed. Tests that fail on the correct function score 0. Model-written test code runs only when `COCO_SKILL_EXEC_UNTRUSTED=1` is set, and then inside macOS `sandbox-exec` (no network, writes confined to a temp directory); on other systems it is not run and scores 0; without a sandbox the score is 0.
+- **humanizer.** The grader counts a fixed list of AI-tell phrases before and after the rewrite, and the fraction of required facts still present. The score is half tell-removal and half facts kept, and is halved when the rewrite is under 40% or over 160% of the original word count.

@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
 """Run one automatic improvement round on one agent skill. Stdlib only.
 
-Helpers for one round: the proposer workspace, the peek ledger, baseline
-lookup, the router gate and record writing. The round runner and the CLI
-land next.
+One round proposes edits, probes them on the dev items, and composes the
+winners. The chosen candidate gets one held-out peek and is kept only when
+the delta is positive and a one-sided bootstrap p is below PEEK_ALPHA. The
+ledger caps those peeks at MAX_TOTAL_PEEKS per held-out set (items.jsonl hash).
+Stub executor rounds do not spend that cap.
+--apply is off by default.
 
-Held-out decision: one-sided paired bootstrap, kept only when the delta is
-positive and p is below ALPHA / MAX_TOTAL_PEEKS. A held-out set may be peeked
-at most MAX_TOTAL_PEEKS times over its life, so the per-peek threshold is
-Bonferroni-split across them and the life-time false-keep rate stays near ALPHA.
+    python3 evals/skills/improve.py --skill NAME [--executor ollama|stub]
 """
+import argparse
+import contextlib
+import datetime
 import difflib
 import hashlib
+import io
 import json
 import os
 import pathlib
@@ -23,6 +27,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import types
 
 import run, score
 
@@ -30,7 +35,9 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "evals"))
 import paired
 
+K_DEFAULT, K_MAX = 4, 8
 DEV_MARGIN, MIN_WINS, WIN_EPS = 0.05, 2, 0.01
+MIN_HELDOUT = 20  # below this, the held-out bootstrap p is noise; pilot skills have 24
 MAX_CHANGED_LINES, MAX_GROWTH_BYTES = 30, 4000
 MAX_FAILURES, CASE_CHARS = 6, 2000
 PROPOSER_TIMEOUT, PROPOSER_MAX_BYTES = 900, 200_000
@@ -669,11 +676,14 @@ def apply_branch(out, root, skill, base_sha):
     # evals/skills/_rounds/<skill>/ (cfg.rounds_dir). The branch/ copy is only for the PR.
 
 
-def _peeked_in(rounds_dir, sha, this_round):
+def _peeked_in(rounds_dir, sha, this_round, items_hash):
+    # Same filter as the life-time cap: this items.jsonl, and not a stub executor.
     for old in ledger_records(rounds_dir):
-        if old.get("round") == this_round:
+        if old.get("round") == this_round or not old.get("peek_count"):
             continue
-        if not old.get("peek_count"):
+        hashes = old.get("hashes") if isinstance(old.get("hashes"), dict) else {}
+        executor = old.get("executor") if isinstance(old.get("executor"), dict) else {}
+        if hashes.get("items") != items_hash or executor.get("kind") == "stub":
             continue
         if (old.get("candidate") or {}).get("skill_sha256") == sha:
             return old.get("round")
@@ -690,3 +700,305 @@ def _same_heldout(held, base):
 def _peek_reason(peek, kept):
     core = "delta %+0.3f, p %.3f, n %d" % (peek["delta"], peek["p_one_sided"], peek["n"])
     return ("held-out " + core) if kept else ("held-out gate not met: " + core)
+
+
+class _TeeStderr(io.StringIO):
+    """Keeps what is written (for the ledger reason) and passes it straight through."""
+
+    def __init__(self, real):
+        super().__init__()
+        self._real = real
+
+    def write(self, text):
+        self._real.write(text)
+        return super().write(text)
+
+
+def _exit_reason(buf, exc):
+    # str code: run.py executor/config exit (caller re-raises). int: score.die.
+    lines = [ln for ln in buf.getvalue().splitlines() if ln.strip()]
+    return lines[-1] if lines else str(exc.code)
+
+
+def run_round(cfg):
+    cfg.proposer_argv = require_proposer_cmd()
+    cfg.proposer_id = os.environ.get("COCO_PROPOSER_ID") or None
+    if not score._NAME.fullmatch(cfg.skill or ""):
+        die("invalid skill name %r" % (cfg.skill,))
+    if not 1 <= cfg.k <= K_MAX:
+        die("--max-proposals must be from 1 to %d" % K_MAX)
+    out = pathlib.Path(cfg.out)
+    if out.exists() and (not out.is_dir() or any(out.iterdir())):
+        die("--out must be absent or empty")
+    out.mkdir(parents=True, exist_ok=True)
+    cfg.out = out
+    for label, path in (("SKILL.md", cfg.skill_md_path), ("items.jsonl", cfg.items_path),
+                        ("grader.py", cfg.grader_path)):
+        if not pathlib.Path(path).is_file():
+            die("missing %s" % label)
+    base_text = pathlib.Path(cfg.skill_md_path).read_text()
+    if not base_text.endswith("\n") or base_text.endswith("\n\n"):
+        die("SKILL.md must end with exactly one newline")
+    rows = score.load_items(cfg.items_path)
+    n_dev = sum(1 for r in rows if r["split"] == "dev")
+    n_heldout = sum(1 for r in rows if r["split"] == "heldout")
+    if n_dev < MIN_WINS or n_heldout < MIN_HELDOUT:
+        die("dev and held-out splits are too small: need %d dev and %d held-out"
+            % (MIN_WINS, MIN_HELDOUT))
+    check_split_overlap(cfg.items_path)
+    rels = ["evals/skills/%s/items.jsonl" % cfg.skill, "evals/skills/%s/grader.py" % cfg.skill,
+            "evals/skills/score.py", "evals/skills/run.py", "evals/paired.py",
+            "evals/skills/improve.py",
+            "evals/routing/check_regression.py",
+            "systems/superintelligence/scripts/local_http.py"]
+    checked = base_check(cfg.root, cfg.base_ref, rels)
+    file_hashes = {"items": score.sha256_file(cfg.items_path), "grader": score.sha256_file(cfg.grader_path),
+                   "skill": score.sha256_file(cfg.skill_md_path)}
+    base_path, base_held = find_baseline_heldout(cfg, file_hashes, n_heldout)
+    # ponytail: the cap is a sum read before claim, so two processes can both pass it.
+    # Upgrade path: lock the ledger around the check and the claim.
+    # Only a real executor's peeks of this items.jsonl count. Stub rounds and any
+    # other held-out set (a different items hash) do not spend this set's cap.
+    earlier = 0
+    for old in ledger_records(cfg.rounds_dir):
+        hashes = old.get("hashes") if isinstance(old.get("hashes"), dict) else {}
+        executor = old.get("executor") if isinstance(old.get("executor"), dict) else {}
+        if hashes.get("items") != file_hashes["items"] or executor.get("kind") == "stub":
+            continue
+        earlier += int(old.get("peek_count") or 0)
+    if earlier >= MAX_TOTAL_PEEKS:
+        die("held-out peek cap reached", code=1)
+    router = router_gate(cfg.root)
+    tail = router.pop("_tail")
+    if router["exit"] != 0:
+        die("router gate failed: %s" % " | ".join(tail), code=1)
+    dev_rows = [r for r in rows if r["split"] == "dev"]
+    rec = {
+        "schema": 1, "skill": cfg.skill, "round": None, "date": datetime.date.today().isoformat(),
+        "commit": score.git_short(), "outcome": "started", "reason": None, "peek_count": 0,
+        "total_peeks": earlier, "executor": {"kind": cfg.executor, "model": cfg.model, "seed": score.SEED},
+        "proposer": {"id": cfg.proposer_id, "cmd_sha256": sha256_text("\n".join(cfg.proposer_argv)), "calls": 0},
+        "params": {"k": cfg.k, "dev_margin": cfg.margin, "min_wins": MIN_WINS, "win_eps": WIN_EPS,
+                   "max_changed_lines": cfg.max_changed, "alpha": ALPHA, "peek_alpha": PEEK_ALPHA,
+                   "n_boot": N_BOOT},
+        "hashes": {"items": file_hashes["items"], "grader": file_hashes["grader"],
+                   "score_py": score.sha256_file(score.__file__), "run_py": score.sha256_file(run.__file__),
+                   "paired_py": score.sha256_file(paired.__file__),
+                   "improve_py": score.sha256_file(pathlib.Path(__file__).resolve()),
+                   "router_gate_py": score.sha256_file(
+                       cfg.root / "evals" / "routing" / "check_regression.py"),
+                   "local_http_py": score.sha256_file(
+                       cfg.root / "systems" / "superintelligence" / "scripts" / "local_http.py"),
+                   "base_skill": file_hashes["skill"],
+                   "baseline_heldout_record": score.sha256_file(base_path)},
+        "base_check": checked,
+        "baseline": {"dev_mean": None, "heldout_mean": base_held["mean"], "n_dev": n_dev,
+                     "n_heldout": n_heldout, "heldout_record": _rel_to(cfg.root, base_path)},
+        "workspace": {"SKILL.md": None, "dev_items.jsonl": None, "dev_run.json": None},
+        "proposals": [], "compose": None,
+        "gate": {"router": router, "others": None, "peek": None}, "candidate": None,
+    }
+    _rid, ledger_path = claim_round(cfg.rounds_dir, rec)
+    proposals, picked = [], {}
+    state = {"peeked": False}
+    watched = [cfg.items_path, cfg.grader_path, score.__file__, run.__file__, paired.__file__,
+               pathlib.Path(__file__).resolve(), cfg.skill_md_path, base_path,
+               cfg.root / "evals" / "routing" / "check_regression.py",
+               cfg.root / "systems" / "superintelligence" / "scripts" / "local_http.py"]
+    fp0 = fingerprint(watched)
+
+    def save():
+        rec["proposer"]["calls"] = len(proposals)
+        rec["proposals"] = [_public_proposal(p) for p in proposals]
+        write_json_atomic(ledger_path, rec)
+
+    def finish(outcome, reason):
+        rec["outcome"] = outcome
+        rec["reason"] = reason
+        save()
+        if outcome == "kept":
+            write_branch(cfg.out, cfg.skill, rec["round"], picked["text"], picked["dev"],
+                         picked["held"], rec, base_text)
+            if cfg.apply:
+                apply_branch(cfg.out, cfg.root, cfg.skill, file_hashes["skill"])
+        print(json.dumps({"skill": cfg.skill, "round": rec["round"], "outcome": outcome,
+                          "reason": reason, "peek_count": rec["peek_count"],
+                          "total_peeks": rec["total_peeks"], "out": cfg.out.as_posix()}))
+        if outcome == "aborted":
+            die(reason, code=1)
+
+    base_dev = score_split(cfg, "dev", cfg.skill_md_path)
+    _write(cfg.out / "records" / "base-dev.json", score.record_json(base_dev))
+    rec["baseline"]["dev_mean"] = base_dev["mean"]
+    dev_items = "".join(json.dumps(r, sort_keys=True, ensure_ascii=False) + "\n" for r in dev_rows)
+    rec["workspace"] = {"SKILL.md": sha256_text(base_text), "dev_items.jsonl": sha256_text(dev_items),
+                        "dev_run.json": sha256_text(score.record_json(base_dev))}
+    failures = failures_from(dev_rows, base_dev)
+    save()
+    if not failures:
+        finish("no change", "no dev headroom")
+        return
+    cache_path = pathlib.Path(run.CACHE)
+    cache0 = snapshot(cache_path) if cache_path.is_dir() else {}
+    proposals = propose_all(cfg.skill, base_text, dev_rows, base_dev, cfg.out, cfg.proposer_argv,
+                            cfg.k, cfg.max_changed, state)
+    now = fingerprint(watched)
+    if now != fp0:
+        changed = [p for p in watched if now.get(str(p)) != fp0.get(str(p))]
+        finish("aborted", "eval files changed during the round: " +
+               ", ".join(_rel_to(cfg.root, p) for p in changed))
+        return
+    cache1 = snapshot(cache_path) if cache_path.is_dir() else {}
+    if cache1 != cache0:
+        finish("aborted", "eval cache changed during the round: " + _rel_to(cfg.root, cache_path))
+        return
+    save()
+    if not any(p["status"] == "ok" for p in proposals):
+        finish("no change", "no valid proposals")
+        return
+    for p in proposals:
+        if p["status"] != "ok":
+            continue
+        buf = _TeeStderr(sys.stderr)
+        try:
+            with contextlib.redirect_stderr(buf):
+                drec = score_split(cfg, "dev", cfg.out / "proposals" / p["id"] / "SKILL.md")
+        except SystemExit as e:
+            reason = _exit_reason(buf, e)
+            if isinstance(e.code, str):
+                raise
+            p["status"], p["reason"] = "score_failed", reason
+            save()
+            continue
+        if drec.get("skill_sha256") != p["skill_sha256"]:
+            p["status"], p["reason"] = "score_failed", "proposal SKILL.md changed during scoring"
+            save()
+            continue
+        p["dev"] = dev_verdict(base_dev["per_item"], drec["per_item"], cfg.margin, MIN_WINS)
+        p["status"], p["_drec"] = "scored", drec
+        _write(cfg.out / "records" / ("%s-dev.json" % p["id"]), score.record_json(drec))
+        save()
+    winners = [p for p in proposals if p.get("dev", {}).get("pass")]
+    if not winners:
+        finish("no change", "no proposal beat baseline dev by the margin")
+        return
+    winners.sort(key=lambda p: (-p["dev"]["gain"], p["changed_lines"], int(p["id"][1:])))
+    lines, used, dropped = compose(
+        base_text.split("\n"), [(p["id"], p["edits"]) for p in winners], 2 * cfg.max_changed)
+    best, composed_mean, why = winners[0], None, "best single %s" % winners[0]["id"]
+    cand_text, cand_dev, chosen = best["text"], best["_drec"], best["id"]
+    if len(used) >= 2:
+        composed = "\n".join(lines)
+        if frontmatter(composed) != frontmatter(base_text):
+            why = "composed text changed the front matter"
+        elif len(composed.encode()) - len(base_text.encode()) > MAX_GROWTH_BYTES:
+            why = "composed text grows by more than %d bytes" % MAX_GROWTH_BYTES
+        else:
+            cand_path = cfg.out / "candidate" / "SKILL.md"
+            _write(cand_path, composed)
+            buf = _TeeStderr(sys.stderr)
+            try:
+                with contextlib.redirect_stderr(buf):
+                    crec = score_split(cfg, "dev", cand_path)
+            except SystemExit as e:
+                reason = _exit_reason(buf, e)
+                if isinstance(e.code, str):
+                    raise
+                why = reason
+            else:
+                if crec.get("skill_sha256") != sha256_text(composed):
+                    why = "proposal SKILL.md changed during scoring"
+                else:
+                    _write(cfg.out / "records" / "composed-dev.json", score.record_json(crec))
+                    composed_mean = crec["mean"]
+                    if crec["mean"] > best["dev"]["mean"]:
+                        cand_text, cand_dev, chosen = composed, crec, "composed"
+                        why = "composed dev mean higher than the best single"
+                    else:
+                        why = "composed dev mean is not above the best single"
+    _write(cfg.out / "candidate" / "SKILL.md", cand_text)
+    rec["compose"] = {"winners": [p["id"] for p in winners], "used": used, "dropped": dropped,
+                      "composed_dev_mean": composed_mean, "chosen": chosen, "why": why}
+    rec["candidate"] = {"id": chosen, "skill_sha256": sha256_text(cand_text), "dev_mean": cand_dev["mean"]}
+    save()
+    seen = _peeked_in(cfg.rounds_dir, rec["candidate"]["skill_sha256"], rec["round"],
+                      file_hashes["items"])
+    if seen:
+        finish("no change", "candidate already peeked in %s" % seen)
+        return
+    if fingerprint(watched) != fp0:
+        finish("aborted", "eval files changed during the round")
+        return
+    rec["gate"]["others"] = {
+        "status": "not needed",
+        "reason": "a round can change only skills/<skill>/SKILL.md",
+    }
+    save()
+    begin_peek(rec, ledger_path, state)
+    buf = _TeeStderr(sys.stderr)
+    try:
+        with contextlib.redirect_stderr(buf):
+            held = score_split(cfg, "heldout", cfg.out / "candidate" / "SKILL.md")
+    except SystemExit as e:
+        # The peek is already spent. Record the abort, then keep the scoring exit
+        # (finish dies with code 1, which would hide this SystemExit).
+        reason = _exit_reason(buf, e)
+        try:
+            finish("aborted", "held-out scoring failed after the peek was spent: " + reason)
+        except SystemExit:
+            pass
+        raise
+    if held.get("skill_sha256") != rec["candidate"]["skill_sha256"]:
+        finish("aborted", "candidate SKILL.md changed during held-out scoring")  # peek spent; exits 1
+    if not _same_heldout(held, base_held):
+        finish("aborted", "held-out record does not match the baseline")
+        return
+    _write(cfg.out / "records" / "cand-heldout.json", score.record_json(held))
+    ids = sorted(base_held["per_item"])
+    peek = peek_stats([base_held["per_item"][i] for i in ids], [held["per_item"][i] for i in ids])
+    rec["gate"]["peek"] = peek
+    print("PEEK: held-out scored for %s %s (total %d of %d)" % (
+        cfg.skill, rec["round"], rec["total_peeks"], MAX_TOTAL_PEEKS), file=sys.stderr)
+    picked["text"], picked["dev"], picked["held"] = cand_text, cand_dev, held
+    if peek["pass"]:
+        finish("kept", _peek_reason(peek, True))
+    else:
+        finish("no change", _peek_reason(peek, False))
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="Run one improvement round on one skill.")
+    ap.add_argument("--skill", required=True)
+    ap.add_argument("--executor", choices=("ollama", "stub"), default="ollama")
+    ap.add_argument("--max-proposals", type=int, default=K_DEFAULT)
+    ap.add_argument("--dev-margin", type=float, default=DEV_MARGIN)
+    ap.add_argument("--max-changed-lines", type=int, default=MAX_CHANGED_LINES)
+    ap.add_argument("--out", default=None)
+    ap.add_argument("--root", default=None)
+    ap.add_argument("--base-ref", default="origin/main")
+    ap.add_argument("--baseline-heldout", default=None)
+    ap.add_argument("--apply", action="store_true")
+    args = ap.parse_args(argv)
+    root = pathlib.Path(args.root) if args.root else ROOT
+    if args.executor == "stub":
+        url, model = run.DEFAULT_URL, None
+    else:
+        url, model = run.executor_url(), run.executor_model()
+    cfg = types.SimpleNamespace(
+        skill=args.skill, root=root,
+        skill_md_path=root / "skills" / args.skill / "SKILL.md",
+        items_path=root / "evals" / "skills" / args.skill / "items.jsonl",
+        grader_path=root / "evals" / "skills" / args.skill / "grader.py",
+        rounds_dir=root / "evals" / "skills" / ROUNDS_DIR / args.skill,
+        runs_dir=root / "evals" / "skills" / args.skill / RUNS_DIR,
+        executor=args.executor, model=model, url=url, k=args.max_proposals, margin=args.dev_margin,
+        max_changed=args.max_changed_lines,
+        out=pathlib.Path(args.out) if args.out else pathlib.Path(tempfile.mkdtemp(prefix="skill-improve-")),
+        base_ref=args.base_ref,
+        baseline_heldout=pathlib.Path(args.baseline_heldout) if args.baseline_heldout else None,
+        apply=args.apply, proposer_argv=None, proposer_id=None)
+    run_round(cfg)
+
+
+if __name__ == "__main__":
+    main()

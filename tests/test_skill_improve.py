@@ -1,4 +1,4 @@
-"""Tests for the skill improve helpers: the pure core, the proposer, and the ledger. The round runner and the CLI land next."""
+"""Tests for the skill improve runner: the pure core, the proposer, and one round."""
 
 import contextlib
 import hashlib
@@ -141,17 +141,35 @@ class ImproveCoreTest(unittest.TestCase):
         self.addCleanup(tmp.cleanup)
         rounds = pathlib.Path(tmp.name)
         sha = "ab" * 32
+        items = "12" * 32
         (rounds / "r001.json").write_text(json.dumps({
             "round": "r001", "peek_count": 0,
+            "hashes": {"items": items},
             "candidate": {"skill_sha256": sha},
         }))
         (rounds / "r002.json").write_text(json.dumps({
             "round": "r002", "peek_count": 1,
+            "hashes": {"items": items},
             "candidate": {"skill_sha256": sha},
         }))
         # A round that saved a candidate but never peeked must not block a later one.
-        self.assertEqual(improve._peeked_in(rounds, sha, "r003"), "r002")
-        self.assertIsNone(improve._peeked_in(rounds, sha, "r002"))
+        self.assertEqual(improve._peeked_in(rounds, sha, "r003", items), "r002")
+        self.assertIsNone(improve._peeked_in(rounds, sha, "r002", items))
+        # Same candidate peeked on a different items.jsonl does not count.
+        other = "34" * 32
+        (rounds / "r004.json").write_text(json.dumps({
+            "round": "r004", "peek_count": 1,
+            "hashes": {"items": other},
+            "candidate": {"skill_sha256": sha},
+        }))
+        self.assertEqual(improve._peeked_in(rounds, sha, "r005", items), "r002")
+        self.assertEqual(improve._peeked_in(rounds, sha, "r005", other), "r004")
+        (rounds / "r006.json").write_text(json.dumps({
+            "round": "r006", "peek_count": 1,
+            "hashes": {"items": items}, "executor": {"kind": "stub"},
+            "candidate": {"skill_sha256": "cd" * 32},
+        }))
+        self.assertIsNone(improve._peeked_in(rounds, "cd" * 32, "r007", items))
 
     def test_claim_round_publish_is_atomic(self):
         tmp = tempfile.TemporaryDirectory()
@@ -413,6 +431,12 @@ def make_tree(root, held_canary="", dev_canary=""):
             "toy", "heldout", "stub", ev / "items.jsonl", ev / "grader.py", skill,
             model=None, seed=score.SEED, url=run.DEFAULT_URL)
     (runs / "baseline-heldout.json").write_text(score.record_json(rec))
+    # Watched by the round: the router gate and the opener run.py imports.
+    for rel in ("evals/routing/check_regression.py",
+                "systems/superintelligence/scripts/local_http.py"):
+        path = root / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("# toy\n")
     return skill, ev / "items.jsonl", ev / "grader.py"
 
 
@@ -541,6 +565,25 @@ class ImproveProposerTest(unittest.TestCase):
             argv = improve.require_proposer_cmd()
         self.assertTrue(os.path.isabs(argv[0]))
         self.assertEqual(argv[1:], ["--flag", "two words"])
+        out = self.tmp / "empty-out"
+        out.mkdir()
+        tree = self.tmp / "no-proposer-tree"
+        make_tree(tree)
+        argv = ["--skill", "toy", "--root", str(tree), "--out", str(out),
+                "--executor", "stub", "--base-ref", "none"]
+        err = io.StringIO()
+        with mock.patch.dict(os.environ, {"COCO_ROUTER_GATE_CMD": shlex.join(
+                [sys.executable, "-c", "pass"])}):
+            os.environ.pop("COCO_PROPOSER_CMD", None)
+            with contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()):
+                with self.assertRaises(SystemExit) as caught:
+                    improve.main(argv)
+        code = caught.exception.code
+        self.assertEqual(2 if isinstance(code, str) else code, 2)
+        self.assertEqual(len(err.getvalue().splitlines()), 1)
+        self.assertEqual(list(out.iterdir()), [])
+        self.assertFalse((tree / "evals" / "skills" / "_rounds").exists())
+        self.assertFalse(self.log.exists())
 
     def test_k_proposals_make_k_calls(self):
         self.assertEqual(len(self.propose([{}, {}], 2)), 2)
@@ -826,6 +869,655 @@ class ImproveProposerTest(unittest.TestCase):
                     improve.base_check(repo, "HEAD", [rel])
             self.assertEqual(caught.exception.code, 1)
             self.assertIn("differs", err.getvalue())
+
+
+def reply(text):
+    return {"stdout": fenced(text)}
+
+
+def keep_steps():
+    return [reply(RULE_A), reply(RULE_B), reply(BASE), reply(FRONT_CHANGED)]
+
+
+def file_sha256(path):
+    return hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
+
+
+def tree_sha256(root):
+    digest = hashlib.sha256()
+    root = pathlib.Path(root)
+    for path in sorted(p for p in root.rglob("*") if p.is_file()):
+        digest.update(path.relative_to(root).as_posix().encode())
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+    return digest.hexdigest()
+
+
+def ledger_path(root, rid):
+    return pathlib.Path(root) / "evals" / "skills" / "_rounds" / "toy" / ("%s.json" % rid)
+
+
+def last_json(text):
+    lines = [ln for ln in text.splitlines() if ln.startswith("{")]
+    assert lines, "no JSON line in %r" % text
+    return json.loads(lines[-1])
+
+
+class ImproveRoundTest(unittest.TestCase):
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.tmp = pathlib.Path(tmp.name)
+        self.log = self.tmp / "stub.log"
+        self.stub = self.tmp / "stub_proposer.py"
+        self.stub.write_text(STUB_PROPOSER)
+        self.tree = self.tmp / "tree"
+        make_tree(self.tree)
+        self.skill = self.tree / "skills" / "toy" / "SKILL.md"
+
+    def invoke(self, argv, env=None):
+        base = {
+            "COCO_PROPOSER_CMD": shlex.join([sys.executable, str(self.stub)]),
+            "STUB_PLAN": str(self.tmp / "plan.json"),
+            "STUB_LOG": str(self.log),
+            "COCO_ROUTER_GATE_CMD": shlex.join([sys.executable, "-c", "pass"]),
+        }
+        if env:
+            base.update(env)
+        stdout, stderr = io.StringIO(), io.StringIO()
+        with mock.patch.dict(os.environ, base), mock.patch.object(run, "stub", fake_stub), \
+                contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+            try:
+                improve.main(argv)
+                code = 0
+            except SystemExit as e:
+                code = e.code
+                if code is None:
+                    code = 0
+                elif isinstance(code, str):
+                    code = 2
+        return code, stdout.getvalue(), stderr.getvalue()
+
+    def run_case(self, steps, out, k=4, root=None, extra=None, env=None):
+        root = pathlib.Path(root) if root else self.tree
+        (self.tmp / "plan.json").write_text(
+            json.dumps({str(n): step for n, step in enumerate(steps, 1)}))
+        argv = ["--skill", "toy", "--root", str(root), "--out", str(out),
+                "--executor", "stub", "--base-ref", "none", "--max-proposals", str(k)]
+        if extra:
+            argv.extend(extra)
+        # Toy items have 12 held-out rows; the production floor is MIN_HELDOUT (20).
+        with mock.patch.object(improve, "MIN_HELDOUT", 12):
+            code, stdout, stderr = self.invoke(argv, env)
+        self.assert_no_abs(root / "evals" / "skills" / "_rounds")
+        self.assert_no_abs(out)
+        return code, stdout, stderr
+
+    def assert_no_abs(self, root):
+        root = pathlib.Path(root)
+        if not root.exists():
+            return
+        prefix = str(self.tmp).encode()
+        for path in root.rglob("*"):
+            if not path.is_file():
+                continue
+            raw = path.read_bytes()
+            self.assertNotIn(prefix, raw, path.name)
+            if path.suffix == ".json":
+                self._walk_no_abs(json.loads(raw.decode()), path.name)
+
+    def _walk_no_abs(self, obj, where):
+        if isinstance(obj, dict):
+            for value in obj.values():
+                self._walk_no_abs(value, where)
+        elif isinstance(obj, list):
+            for value in obj:
+                self._walk_no_abs(value, where)
+        elif isinstance(obj, str):
+            self.assertFalse(obj.startswith("/"), "%s: %s" % (where, obj))
+
+    def count_scores(self):
+        calls = []
+        orig = score.score_run
+
+        def wrapped(name, split, *args, **kwargs):
+            calls.append(split)
+            return orig(name, split, *args, **kwargs)
+
+        return calls, mock.patch.object(score, "score_run", wrapped)
+
+    def test_keep_path(self):
+        before, skills_before = file_sha256(self.skill), tree_sha256(self.tree / "skills")
+        out = self.tmp / "out-keep"
+        code, stdout, stderr = self.run_case(keep_steps(), out)
+        self.assertEqual(code, 0)
+        self.assertIn("PEEK:", stderr)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["outcome"], "kept")
+        self.assertEqual(rec["peek_count"], 1)
+        self.assertEqual(rec["params"]["alpha"], improve.ALPHA)
+        self.assertEqual(rec["params"]["peek_alpha"], improve.PEEK_ALPHA)
+        self.assertEqual(rec["base_check"], "skipped")
+        self.assertEqual(rec["compose"]["chosen"], "composed")
+        self.assertTrue(rec["gate"]["peek"]["pass"])
+        self.assertEqual(last_json(stdout)["outcome"], "kept")
+        by_id = {p["id"]: p for p in rec["proposals"]}
+        self.assertEqual(by_id["p3"]["status"], "noop")
+        self.assertEqual(by_id["p4"]["status"], "rejected")
+        self.assertIn("front matter", by_id["p4"]["reason"])
+        branch = out / "branch"
+        self.assertEqual((branch / "skills" / "toy" / "SKILL.md").read_text(),
+                         RULE_A.replace("Rules B:\n- none", "Rules B:\n- rule b"))
+        runs = branch / "evals" / "skills" / "toy" / "runs"
+        self.assertTrue((runs / "r001-dev.json").is_file())
+        self.assertTrue((runs / "r001-heldout.json").is_file())
+        self.assertTrue((branch / "evals" / "skills" / "_rounds" / "toy" / "r001.json").is_file())
+        self.assertTrue((out / "skill.diff").is_file())
+        for path in (runs / "r001-heldout.json", out / "records" / "cand-heldout.json"):
+            held = json.loads(path.read_text())
+            self.assertNotIn("outputs", held)
+            self.assertNotIn("notes", held)
+        self.assertEqual(file_sha256(self.skill), before)
+        self.assertEqual(tree_sha256(self.tree / "skills"), skills_before)
+        self.assertEqual(self.skill.read_text(), BASE)
+        # Records that can be committed carry no absolute paths (no machine paths in the repo).
+        committed = list(branch.rglob("*.json")) + [ledger_path(self.tree, "r001")]
+        for path in committed:
+            text = path.read_text()
+            for root in {str(self.tmp), os.path.realpath(self.tmp), str(pathlib.Path.home())}:
+                self.assertNotIn(root, text, path.name)
+
+    def test_compose_end_to_end(self):
+        out = self.tmp / "out-compose"
+        code, stdout, stderr = self.run_case(
+            [reply(RULE_A), reply(RULE_BC), reply(RULE_A_ON_B)], out, k=3)
+        self.assertEqual(code, 0)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["compose"]["dropped"], [{"id": "p1", "why": "conflicts with p2"}])
+        self.assertEqual(rec["compose"]["used"], ["p2", "p3"])
+        self.assertEqual(rec["compose"]["composed_dev_mean"], 0.75)
+        self.assertEqual(rec["outcome"], "kept")
+        self.assertEqual(last_json(stdout)["peek_count"], 1)
+        want = RULE_BC.replace("Rules B:\n- none", "Rules B:\n- rule a")
+        self.assertEqual((out / "branch" / "skills" / "toy" / "SKILL.md").read_text(), want)
+
+    def test_composed_over_max_growth_falls_back(self):
+        pad = 2200
+        big_a = RULE_A.replace("Rules A:\n- rule a\n",
+                               "Rules A:\n- rule a\n" + ("A" * pad) + "\n")
+        big_b = RULE_B.replace("Rules B:\n- rule b\n",
+                               "Rules B:\n- rule b\n" + ("B" * pad) + "\n")
+        self.assertLessEqual(len(big_a.encode()) - len(BASE.encode()), improve.MAX_GROWTH_BYTES)
+        self.assertLessEqual(len(big_b.encode()) - len(BASE.encode()), improve.MAX_GROWTH_BYTES)
+        self.assertGreater((len(big_a.encode()) - len(BASE.encode()))
+                           + (len(big_b.encode()) - len(BASE.encode())),
+                           improve.MAX_GROWTH_BYTES)
+        out = self.tmp / "out-growth"
+        code, stdout, stderr = self.run_case([reply(big_a), reply(big_b)], out, k=2)
+        self.assertEqual(code, 0, stderr)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["compose"]["used"], ["p1", "p2"])
+        self.assertEqual(rec["compose"]["chosen"], "p1")
+        self.assertIsNone(rec["compose"]["composed_dev_mean"])
+        self.assertEqual(
+            rec["compose"]["why"],
+            "composed text grows by more than %d bytes" % improve.MAX_GROWTH_BYTES)
+        self.assertEqual((out / "candidate" / "SKILL.md").read_text(), big_a)
+        self.assertFalse((out / "records" / "composed-dev.json").exists())
+
+    def test_refuse_at_the_gate(self):
+        before, skills_before = file_sha256(self.skill), tree_sha256(self.tree / "skills")
+        out = self.tmp / "out-refuse"
+        code, stdout, stderr = self.run_case([reply(RULE_Z)], out, k=1)
+        self.assertEqual(code, 0)
+        self.assertIn("PEEK:", stderr)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["outcome"], "no change")
+        self.assertEqual(rec["peek_count"], 1)
+        self.assertEqual(last_json(stdout)["peek_count"], 1)
+        self.assertFalse(rec["gate"]["peek"]["pass"])
+        self.assertFalse((out / "branch").exists())
+        self.assertEqual(file_sha256(self.skill), before)
+        self.assertEqual(tree_sha256(self.tree / "skills"), skills_before)
+
+    def test_no_winner(self):
+        calls, patch = self.count_scores()
+        with patch:
+            code, stdout, stderr = self.run_case(
+                [reply(BASE), reply(RULE_Q)], self.tmp / "out-none", k=2)
+        self.assertEqual(code, 0)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["outcome"], "no change")
+        self.assertEqual(rec["reason"], "no proposal beat baseline dev by the margin")
+        self.assertEqual(rec["peek_count"], 0)
+        self.assertEqual(calls.count("heldout"), 0)
+        self.assertNotIn("PEEK:", stderr)
+        self.assertEqual(last_json(stdout)["peek_count"], 0)
+
+    def test_score_die_keeps_the_message(self):
+        orig = score.score_run
+
+        def wrapped(name, split, executor, items_path, grader_path, skill_md_path, **kw):
+            if "proposals" in pathlib.Path(skill_md_path).parts:
+                score.die("bad record X")
+            return orig(name, split, executor, items_path, grader_path, skill_md_path, **kw)
+
+        with mock.patch.object(score, "score_run", wrapped):
+            code, stdout, stderr = self.run_case([reply(RULE_A)], self.tmp / "out-die", k=1)
+        self.assertEqual(code, 0, stderr)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["proposals"][0]["status"], "score_failed")
+        self.assertEqual(rec["proposals"][0]["reason"], "bad record X")
+        self.assertIn("bad record X", stderr)
+
+    def test_executor_string_exit_propagates(self):
+        orig = score.score_run
+        msg = "refusing non-local skill executor host 'x'"
+
+        def wrapped(name, split, executor, items_path, grader_path, skill_md_path, **kw):
+            if "proposals" in pathlib.Path(skill_md_path).parts:
+                raise SystemExit(msg)
+            return orig(name, split, executor, items_path, grader_path, skill_md_path, **kw)
+
+        with mock.patch.object(score, "score_run", wrapped):
+            code, stdout, stderr = self.run_case([reply(RULE_A)], self.tmp / "out-exec-host", k=1)
+        self.assertEqual(code, 2, stderr)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertNotEqual(rec["proposals"][0]["status"], "score_failed")
+        self.assertEqual(rec["outcome"], "started")
+        self.assertEqual(rec["peek_count"], 0)
+        self.assertNotIn("PEEK:", stderr)
+
+    def test_one_peek_per_round(self):
+        keep_tree, refuse_tree, none_tree = (self.tmp / name for name in ("pk", "pr", "pn"))
+        make_tree(keep_tree)
+        make_tree(refuse_tree)
+        make_tree(none_tree)
+        calls, patch = self.count_scores()
+        with patch:
+            def held():
+                return calls.count("heldout")
+
+            n = held()
+            code, stdout, stderr = self.run_case(
+                [reply(RULE_A), reply(RULE_B)], self.tmp / "out-pk", k=2, root=keep_tree)
+            self.assertEqual(code, 0)
+            self.assertEqual(held() - n, 1)
+            self.assertEqual(last_json(stdout)["outcome"], "kept")
+            n = held()
+            code, stdout, stderr = self.run_case(
+                [reply(RULE_Z)], self.tmp / "out-pr", k=1, root=refuse_tree)
+            self.assertEqual(code, 0)
+            self.assertEqual(held() - n, 1)
+            self.assertEqual(last_json(stdout)["outcome"], "no change")
+            n = held()
+            code, stdout, stderr = self.run_case(
+                [reply(BASE), reply(RULE_Q)], self.tmp / "out-pn", k=2, root=none_tree)
+            self.assertEqual(code, 0)
+            self.assertEqual(held() - n, 0)
+
+            rec = {"peek_count": 0, "total_peeks": 0}
+            improve.begin_peek(rec, self.tmp / "peek.json", {"peeked": False})
+            with self.assertRaises(RuntimeError):
+                improve.begin_peek(rec, self.tmp / "peek.json", {"peeked": True})
+
+            code, stdout, stderr = self.run_case(
+                [reply(RULE_A), reply(RULE_B)], self.tmp / "out-r1", k=2)
+            self.assertEqual(code, 0)
+            self.assertEqual(last_json(stdout)["round"], "r001")
+            code, stdout, stderr = self.run_case([reply(RULE_BC)], self.tmp / "out-r2", k=1)
+            self.assertEqual(code, 0)
+            summary = last_json(stdout)
+            self.assertEqual(summary["round"], "r002")
+            # Stub rounds do not spend the held-out cap, so the second peek is still 1.
+            self.assertEqual(summary["total_peeks"], 1)
+            saved = json.loads(ledger_path(self.tree, "r002").read_text())
+            self.assertEqual(saved["total_peeks"], 1)
+            self.assertEqual(saved["peek_count"], 1)
+
+            logged = self.log.read_text()
+            ledger_path(self.tree, "r003").write_text(json.dumps({
+                "round": "r003", "peek_count": 1,
+                "hashes": {"items": saved["hashes"]["items"]},
+                "executor": {"kind": "ollama"},
+            }) + "\n")
+            with mock.patch.object(improve, "MAX_TOTAL_PEEKS", 1):
+                code, stdout, stderr = self.run_case([reply(RULE_A)], self.tmp / "out-cap", k=1)
+            self.assertEqual(code, 1)
+            self.assertIn("held-out peek cap reached", stderr)
+            self.assertEqual(self.log.read_text(), logged)
+            self.assertFalse(ledger_path(self.tree, "r004").exists())
+
+    def test_apply_off_by_default(self):
+        skill_sha, skills_sha = file_sha256(self.skill), tree_sha256(self.tree / "skills")
+        out = self.tmp / "out-off"
+        code, stdout, stderr = self.run_case(keep_steps(), out)
+        self.assertEqual(code, 0)
+        self.assertEqual(last_json(stdout)["outcome"], "kept")
+        self.assertEqual(file_sha256(self.skill), skill_sha)
+        self.assertEqual(tree_sha256(self.tree / "skills"), skills_sha)
+        runs = self.tree / "evals" / "skills" / "toy" / "runs"
+        self.assertEqual([p.name for p in sorted(runs.iterdir())], ["baseline-heldout.json"])
+
+        edited = BASE.replace("Answer the topic.", "Answer it.")
+        self.skill.write_text(edited)
+        base_sha = json.loads(ledger_path(self.tree, "r001").read_text())["hashes"]["base_skill"]
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            with self.assertRaises(SystemExit) as caught:
+                improve.apply_branch(out, self.tree, "toy", base_sha)
+        self.assertEqual(caught.exception.code, 1)
+        self.assertIn("no longer matches", err.getvalue())
+        self.assertEqual(self.skill.read_text(), edited)
+        self.assertEqual([p.name for p in sorted(runs.iterdir())], ["baseline-heldout.json"])
+
+        applied = self.tmp / "tree-on"
+        make_tree(applied)
+        out_on = self.tmp / "out-on"
+        code, stdout, stderr = self.run_case(keep_steps(), out_on, root=applied, extra=["--apply"])
+        self.assertEqual(code, 0)
+        self.assertEqual(last_json(stdout)["outcome"], "kept")
+        branch_skill = out_on / "branch" / "skills" / "toy" / "SKILL.md"
+        self.assertEqual((applied / "skills" / "toy" / "SKILL.md").read_text(), branch_skill.read_text())
+        on_runs = applied / "evals" / "skills" / "toy" / "runs"
+        branch_runs = out_on / "branch" / "evals" / "skills" / "toy" / "runs"
+        for name in ("r001-dev.json", "r001-heldout.json"):
+            self.assertEqual((on_runs / name).read_text(), (branch_runs / name).read_text())
+        held = json.loads((on_runs / "r001-heldout.json").read_text())
+        self.assertNotIn("outputs", held)
+        self.assertNotIn("notes", held)
+
+    def test_router_gate(self):
+        fail = shlex.join([sys.executable, "-c", "import sys; sys.exit(1)"])
+        out = self.tmp / "out-gate"
+        code, stdout, stderr = self.run_case(
+            [reply(RULE_A)], out, k=1, env={"COCO_ROUTER_GATE_CMD": fail})
+        self.assertEqual(code, 1)
+        self.assertIn("router gate failed", stderr)
+        self.assertFalse(self.log.exists())
+        self.assertFalse(ledger_path(self.tree, "r001").exists())
+        self.assertFalse((out / "prompts").exists())
+
+        code, stdout, stderr = self.run_case([reply(RULE_A), reply(RULE_B)], self.tmp / "out-gate-ok", k=2)
+        self.assertEqual(code, 0)
+        self.assertEqual(len(self.log.read_text().splitlines()), 2)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["round"], "r001")
+        self.assertEqual(rec["peek_count"], 1)
+        self.assertIn(rec["outcome"], ("kept", "no change"))
+
+    def test_proposer_escapes_workspace(self):
+        grader = self.tree / "evals" / "skills" / "toy" / "grader.py"
+        steps = [{"write": {str(grader): GRADER + "# touched\n"}, "stdout": fenced(RULE_A)}]
+        calls, patch = self.count_scores()
+        with patch:
+            code, stdout, stderr = self.run_case(steps, self.tmp / "out-escape", k=1)
+        self.assertEqual(code, 1)
+        self.assertNotEqual(grader.read_text(), GRADER)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["outcome"], "aborted")
+        self.assertEqual(rec["peek_count"], 0)
+        self.assertIn("eval files changed", rec["reason"])
+        self.assertEqual(calls.count("heldout"), 0)
+        self.assertNotIn("PEEK:", stderr)
+        self.assertEqual(last_json(stdout)["outcome"], "aborted")
+
+    def test_escape_aborts_with_no_valid_proposals(self):
+        grader = self.tree / "evals" / "skills" / "toy" / "grader.py"
+        steps = [{"write": {str(grader): GRADER + "# touched\n"}, "stdout": ""}]
+        code, stdout, stderr = self.run_case(steps, self.tmp / "out-escape-early", k=1)
+        self.assertEqual(code, 1)
+        self.assertNotEqual(grader.read_text(), GRADER)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["outcome"], "aborted")
+        self.assertEqual(rec["peek_count"], 0)
+        self.assertIn("evals/skills/toy/grader.py", rec["reason"])
+        self.assertNotIn("PEEK:", stderr)
+        self.assertEqual(last_json(stdout)["outcome"], "aborted")
+
+    def test_others_not_a_gate(self):
+        code, stdout, stderr = self.run_case([reply(RULE_Z)], self.tmp / "out-others", k=1)
+        self.assertEqual(code, 0, stderr)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["gate"]["others"], {
+            "status": "not needed",
+            "reason": "a round can change only skills/<skill>/SKILL.md",
+        })
+
+    def test_peek_budget_is_per_heldout_set(self):
+        items_hash = score.sha256_file(self.tree / "evals" / "skills" / "toy" / "items.jsonl")
+        rounds = self.tree / "evals" / "skills" / "_rounds" / "toy"
+        rounds.mkdir(parents=True)
+        # A stub peek, and a real peek of a different items.jsonl, do not spend this set.
+        (rounds / "r001.json").write_text(json.dumps({
+            "round": "r001", "peek_count": 1,
+            "hashes": {"items": items_hash}, "executor": {"kind": "stub"},
+        }) + "\n")
+        (rounds / "r002.json").write_text(json.dumps({
+            "round": "r002", "peek_count": 1,
+            "hashes": {"items": "f" * 64}, "executor": {"kind": "ollama"},
+        }) + "\n")
+        with mock.patch.object(improve, "MAX_TOTAL_PEEKS", 1):
+            code, stdout, stderr = self.run_case([reply(RULE_Z)], self.tmp / "out-budget-free", k=1)
+        self.assertEqual(code, 0, stderr)
+        self.assertIn("PEEK:", stderr)
+        rec = json.loads(ledger_path(self.tree, "r003").read_text())
+        self.assertEqual(rec["peek_count"], 1)
+        self.assertEqual(rec["total_peeks"], 1)
+
+        capped = self.tmp / "capped-tree"
+        make_tree(capped)
+        same = score.sha256_file(capped / "evals" / "skills" / "toy" / "items.jsonl")
+        (capped / "evals" / "skills" / "_rounds" / "toy").mkdir(parents=True)
+        (capped / "evals" / "skills" / "_rounds" / "toy" / "r001.json").write_text(json.dumps({
+            "round": "r001", "peek_count": 1,
+            "hashes": {"items": same}, "executor": {"kind": "ollama"},
+        }) + "\n")
+        logged = self.log.read_text() if self.log.exists() else ""
+        with mock.patch.object(improve, "MAX_TOTAL_PEEKS", 1):
+            code, stdout, stderr = self.run_case(
+                [reply(RULE_Z)], self.tmp / "out-budget-cap", k=1, root=capped)
+        self.assertEqual(code, 1)
+        self.assertIn("held-out peek cap reached", stderr)
+        self.assertFalse((capped / "evals" / "skills" / "_rounds" / "toy" / "r002.json").exists())
+        self.assertEqual(self.log.read_text() if self.log.exists() else "", logged)
+
+    def test_repeat_candidate(self):
+        code, stdout, stderr = self.run_case(keep_steps(), self.tmp / "out-rep1")
+        self.assertEqual(code, 0)
+        self.assertEqual(last_json(stdout)["outcome"], "kept")
+        # Stub peeks do not count; the gate reads a real executor's record.
+        prior = ledger_path(self.tree, "r001")
+        saved = json.loads(prior.read_text())
+        saved["executor"]["kind"] = "ollama"
+        prior.write_text(json.dumps(saved) + "\n")
+        code, stdout, stderr = self.run_case(keep_steps(), self.tmp / "out-rep2")
+        self.assertEqual(code, 0)
+        rec = json.loads(ledger_path(self.tree, "r002").read_text())
+        self.assertEqual(rec["outcome"], "no change")
+        self.assertIn("already peeked in r001", rec["reason"])
+        self.assertEqual(rec["peek_count"], 0)
+        self.assertNotIn("PEEK:", stderr)
+        self.assertEqual(self.skill.read_text(), BASE)
+
+    def test_heldout_score_exit_aborts_after_peek(self):
+        orig = score.score_run
+
+        def wrapped(name, split, *args, **kwargs):
+            if split == "heldout":
+                score.die("heldout broke")
+            return orig(name, split, *args, **kwargs)
+
+        with mock.patch.object(score, "score_run", wrapped):
+            code, stdout, stderr = self.run_case([reply(RULE_Z)], self.tmp / "out-peek-die", k=1)
+        self.assertEqual(code, 2, stderr)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["outcome"], "aborted")
+        self.assertEqual(rec["peek_count"], 1)
+        self.assertEqual(
+            rec["reason"],
+            "held-out scoring failed after the peek was spent: heldout broke")
+        self.assertEqual(last_json(stdout)["outcome"], "aborted")
+        self.assertEqual(last_json(stdout)["peek_count"], 1)
+
+    def test_heldout_skill_hash_mismatch_aborts_after_peek(self):
+        orig = improve.score_split
+
+        def wrapped(cfg, split, skill_md_path):
+            rec = orig(cfg, split, skill_md_path)
+            if split == "heldout":
+                rec = dict(rec, skill_sha256="0" * 64)
+            return rec
+
+        with mock.patch.object(improve, "score_split", wrapped):
+            code, stdout, stderr = self.run_case([reply(RULE_Z)], self.tmp / "out-held-hash", k=1)
+        self.assertEqual(code, 1, stderr)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["outcome"], "aborted")
+        self.assertEqual(rec["peek_count"], 1)
+        self.assertEqual(rec["reason"], "candidate SKILL.md changed during held-out scoring")
+        self.assertEqual(last_json(stdout)["outcome"], "aborted")
+        self.assertEqual(last_json(stdout)["peek_count"], 1)
+
+    def test_dev_skill_hash_mismatch_fails_the_proposal(self):
+        orig = improve.score_split
+
+        def wrapped(cfg, split, skill_md_path):
+            rec = orig(cfg, split, skill_md_path)
+            if split == "dev" and "proposals" in pathlib.Path(skill_md_path).parts:
+                rec = dict(rec, skill_sha256="0" * 64)
+            return rec
+
+        with mock.patch.object(improve, "score_split", wrapped):
+            code, stdout, stderr = self.run_case([reply(RULE_A)], self.tmp / "out-dev-hash", k=1)
+        self.assertEqual(code, 0, stderr)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["proposals"][0]["status"], "score_failed")
+        self.assertEqual(rec["proposals"][0]["reason"], "proposal SKILL.md changed during scoring")
+        self.assertEqual(rec["outcome"], "no change")
+        self.assertEqual(rec["peek_count"], 0)
+        self.assertNotIn("PEEK:", stderr)
+
+    def test_composed_dev_score_exit_falls_back(self):
+        orig = score.score_run
+
+        def wrapped(name, split, executor, items_path, grader_path, skill_md_path, **kw):
+            if split == "dev" and pathlib.Path(skill_md_path).parent.name == "candidate":
+                score.die("composed broke")
+            return orig(name, split, executor, items_path, grader_path, skill_md_path, **kw)
+
+        out = self.tmp / "out-compose-die"
+        with mock.patch.object(score, "score_run", wrapped):
+            code, stdout, stderr = self.run_case([reply(RULE_A), reply(RULE_B)], out, k=2)
+        self.assertEqual(code, 0, stderr)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["compose"]["chosen"], "p1")
+        self.assertIsNone(rec["compose"]["composed_dev_mean"])
+        self.assertEqual(rec["compose"]["why"], "composed broke")
+        self.assertEqual((out / "candidate" / "SKILL.md").read_text(), RULE_A)
+        self.assertFalse((out / "records" / "composed-dev.json").exists())
+        self.assertIn("composed broke", stderr)
+
+        def executor_blow(name, split, executor, items_path, grader_path, skill_md_path, **kw):
+            if split == "dev" and pathlib.Path(skill_md_path).parent.name == "candidate":
+                raise SystemExit("skill executor down")
+            return orig(name, split, executor, items_path, grader_path, skill_md_path, **kw)
+
+        tree = self.tmp / "exec-tree"
+        make_tree(tree)
+        with mock.patch.object(score, "score_run", executor_blow):
+            code, stdout, stderr = self.run_case(
+                [reply(RULE_A), reply(RULE_B)], self.tmp / "out-compose-exec", k=2, root=tree)
+        self.assertEqual(code, 2, stderr)
+        rec = json.loads(ledger_path(tree, "r001").read_text())
+        self.assertEqual(rec["outcome"], "started")
+        self.assertEqual(rec["peek_count"], 0)
+        self.assertIsNone(rec["compose"])
+        self.assertNotIn("PEEK:", stderr)
+
+    def test_runner_is_watched_and_hashed(self):
+        seen = []
+        real_check = improve.base_check
+
+        def spy(root, ref, rels):
+            seen.append(list(rels))
+            return real_check(root, ref, rels)
+
+        with mock.patch.object(improve, "base_check", spy):
+            code, stdout, stderr = self.run_case([reply(RULE_Z)], self.tmp / "out-hash", k=1)
+        self.assertEqual(code, 0, stderr)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["hashes"]["improve_py"], score.sha256_file(improve.__file__))
+        self.assertEqual(rec["hashes"]["router_gate_py"], score.sha256_file(
+            self.tree / "evals" / "routing" / "check_regression.py"))
+        self.assertEqual(rec["hashes"]["local_http_py"], score.sha256_file(
+            self.tree / "systems" / "superintelligence" / "scripts" / "local_http.py"))
+        self.assertIn("evals/skills/improve.py", seen[0])
+        self.assertIn("evals/routing/check_regression.py", seen[0])
+        self.assertIn("systems/superintelligence/scripts/local_http.py", seen[0])
+
+        decoy = self.tmp / "improve.py"
+        decoy.write_text("version one\n")
+        tree = self.tmp / "tamper-tree"
+        make_tree(tree)
+        steps = [{"write": {str(decoy): "version two\n"}, "stdout": fenced(RULE_A)}]
+        with mock.patch.object(improve, "__file__", str(decoy)):
+            code, stdout, stderr = self.run_case(
+                steps, self.tmp / "out-tamper", k=1, root=tree)
+        self.assertEqual(code, 1, stderr)
+        rec = json.loads(ledger_path(tree, "r001").read_text())
+        self.assertEqual(rec["outcome"], "aborted")
+        self.assertEqual(rec["peek_count"], 0)
+        self.assertIn("improve.py", rec["reason"])
+
+    def test_check_regression_change_aborts(self):
+        gate = self.tree / "evals" / "routing" / "check_regression.py"
+        steps = [{"write": {str(gate): gate.read_text() + "# tamper\n"}, "stdout": fenced(RULE_A)}]
+        code, stdout, stderr = self.run_case(steps, self.tmp / "out-gate-tamper", k=1)
+        self.assertEqual(code, 1, stderr)
+        self.assertNotEqual(gate.read_text(), "# toy\n")
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["outcome"], "aborted")
+        self.assertEqual(rec["peek_count"], 0)
+        self.assertIn("eval files changed", rec["reason"])
+        self.assertIn("check_regression.py", rec["reason"])
+        self.assertNotIn("PEEK:", stderr)
+        self.assertEqual(last_json(stdout)["outcome"], "aborted")
+
+    def test_proposer_cache_write_aborts(self):
+        cache = self.tmp / "round-cache"
+        cache.mkdir()
+        planted = cache / "planted.json"
+        steps = [{"write": {str(planted): "{}\n"}, "stdout": fenced(RULE_A)}]
+        with mock.patch.object(run, "CACHE", cache):
+            code, stdout, stderr = self.run_case(steps, self.tmp / "out-cache", k=1)
+        self.assertTrue(planted.is_file())
+        self.assertEqual(code, 1, stderr)
+        rec = json.loads(ledger_path(self.tree, "r001").read_text())
+        self.assertEqual(rec["outcome"], "aborted")
+        self.assertEqual(rec["peek_count"], 0)
+        self.assertEqual(rec["reason"], "eval cache changed during the round: round-cache")
+        self.assertNotIn("PEEK:", stderr)
+        self.assertEqual(last_json(stdout)["outcome"], "aborted")
+
+    def test_heldout_minimum_rejects_19(self):
+        root = self.tmp / "min-tree"
+        make_tree(root)
+        rows = [{"id": "d%d" % n, "split": "dev", "want": "ans-a",
+                 "input": "topic:a item:d%d" % n} for n in range(1, 3)]
+        rows += [{"id": "h%d" % n, "split": "heldout", "want": "ans-a",
+                  "input": "topic:a item:h%d" % n} for n in range(1, 20)]
+        write_items(root / "evals" / "skills" / "toy" / "items.jsonl", rows)
+        self.assertEqual(improve.MIN_HELDOUT, 20)
+        self.assertEqual(len([r for r in rows if r["split"] == "heldout"]), 19)
+        argv = ["--skill", "toy", "--root", str(root), "--out", str(self.tmp / "out-min"),
+                "--executor", "stub", "--base-ref", "none", "--max-proposals", "1"]
+        code, stdout, stderr = self.invoke(argv)
+        self.assertEqual(code, 2, stderr)
+        self.assertIn("need %d dev and %d held-out" % (improve.MIN_WINS, improve.MIN_HELDOUT),
+                      stderr)
+        self.assertFalse(ledger_path(root, "r001").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

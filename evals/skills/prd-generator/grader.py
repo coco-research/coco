@@ -4,7 +4,14 @@ grade(item, output) scores a generated PRD against the brief it was written from
 
     score = 0.4 * sections + 0.2 * acceptance + 0.4 * facts - 0.1 * placeholders
 
-The result is floored at 0, capped at 1 and rounded to four places.
+The result is floored at 0 and capped at 1. novelty is the share of the reply's word
+5-grams that do not appear in the brief (item["input"]). Words are lowercased,
+punctuation is stripped, and what remains is split on whitespace. Fewer than five
+reply words counts as novelty 0. Below 0.5, the score is multiplied by novelty / 0.5
+and the note "mostly restates the brief (novelty X.XX)" is added. At 0.5 or above the
+score is left unchanged. The score is then rounded to four places.
+
+ponytail: 5-gram overlap is a cheap proxy. Upgrade path: a semantic similarity check.
 
 sections      Fraction of five required parts that have a heading with content under
               it: problem or overview, goals or success metrics, requirements or user
@@ -136,6 +143,26 @@ def _norm(s):
     return " ".join(re.sub(r"[*_`~]", "", s.lower().translate(_TYPOGRAPHY)).split())
 
 
+def _words(text):
+    """Lowercased words with punctuation removed, then split on whitespace."""
+    return "".join(ch if ch.isalnum() or ch.isspace() else "" for ch in text.lower()).split()
+
+
+def novelty(output, brief):
+    """Share of the output's word 5-grams that the brief does not contain.
+
+    Fewer than five output words is 0: there is nothing new to measure.
+    """
+    out = _words(output)
+    if len(out) < 5:
+        return 0.0
+    src = _words(brief)
+    known = {tuple(src[i:i + 5]) for i in range(len(src) - 4)}
+    total = len(out) - 4
+    fresh = sum(tuple(out[i:i + 5]) not in known for i in range(total))
+    return fresh / total
+
+
 def grade(item, output):
     output = (output if isinstance(output, str) else "")[:MAX_CHARS]
     lines = [line[:MAX_LINE] for line in output.splitlines()]
@@ -161,6 +188,8 @@ def grade(item, output):
     slots = [m.group(0) for m in _PLACEHOLDER.finditer(output)]
 
     raw = W_SECTIONS * sections + W_ACCEPTANCE * criteria + W_FACTS * kept - PLACEHOLDER_COST * len(slots)
+    score = min(1.0, max(0.0, raw))
+    nov = novelty(output, item["input"])
     notes = []
     if missing:
         notes.append("missing sections: " + ", ".join(missing))
@@ -170,4 +199,7 @@ def grade(item, output):
         notes.append("facts kept %d/%d, missing: %s" % (len(facts) - len(lost), len(facts), "; ".join(lost)))
     if slots:
         notes.append("%d placeholder(s): %s" % (len(slots), ", ".join(sorted(set(slots))[:5])))
-    return {"score": round(min(1.0, max(0.0, raw)), 4), "notes": notes}
+    if nov < 0.5:
+        score *= nov / 0.5
+        notes.append("mostly restates the brief (novelty %.2f)" % nov)
+    return {"score": round(score, 4), "notes": notes}

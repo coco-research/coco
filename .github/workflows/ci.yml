@@ -297,6 +297,9 @@ jobs:
       - name: Router M0 decision log (opt-in, hash only)
         run: python3 -m unittest tests/test_meta_select_m0.py tests/test_meta_select_embed.py
 
+      - name: Code verification skill grader
+        run: python3 -m unittest tests/test_skill_grader_codeverify.py
+
   router-eval:
     # Router regression gate (router eval audit step 3). Reruns evals/routing/score.py
     # in auto mode on the heldout split and fails if top-1 or delegate precision drops

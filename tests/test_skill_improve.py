@@ -807,6 +807,23 @@ class ImproveProposerTest(unittest.TestCase):
         one.write_text("b")
         self.assertNotEqual(improve.fingerprint([one, two]), fp)
 
+    def test_snapshot_records_vanished_when_lstat_misses(self):
+        ws = self.tmp / "vanish"
+        ws.mkdir()
+        (ws / "keep.txt").write_text("a")
+        (ws / "gone.txt").write_text("b")
+        real = pathlib.Path.lstat
+
+        def lstat(self, *args, **kwargs):
+            if self.name == "gone.txt":
+                raise FileNotFoundError(self)
+            return real(self, *args, **kwargs)
+
+        with mock.patch.object(pathlib.Path, "lstat", lstat):
+            snap = improve.snapshot(ws)
+        self.assertEqual(snap["gone.txt"], "vanished")
+        self.assertEqual(snap["keep.txt"], hashlib.sha256(b"a").hexdigest())
+
     def test_run_proposer_refuses_after_the_peek(self):
         with self.assertRaises(RuntimeError):
             improve.run_proposer(self.argv, "prompt", self.tmp, 1, {"peeked": True})

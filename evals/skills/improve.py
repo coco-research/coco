@@ -348,12 +348,17 @@ def make_workspace(dest, skill_md, dev_rows, dev_record):
 
 
 def snapshot(dirpath):
-    """{relative posix path: sha256, "dir", "other", or "unreadable"} for everything under dirpath."""
+    """{relative posix path: sha256, "dir", "other", "unreadable", or "vanished"} for everything under dirpath."""
     snap = {}
     for here, dirs, names in os.walk(dirpath):
         for name in dirs + names:
             p = pathlib.Path(here, name)
-            mode = p.lstat().st_mode
+            try:
+                mode = p.lstat().st_mode
+            except FileNotFoundError:
+                # A leftover proposer can delete the entry between the scan and the stat.
+                snap[p.relative_to(dirpath).as_posix()] = "vanished"
+                continue
             if stat.S_ISDIR(mode):
                 val = "dir"
             elif stat.S_ISREG(mode):
@@ -507,7 +512,7 @@ def ledger_records(rounds_dir):
     recs = []
     for path in sorted(rounds_dir.glob("r*.json")):
         try:
-            rec = json.loads(path.read_text())
+            rec = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, UnicodeError, json.JSONDecodeError):
             die("malformed ledger record %s" % path.name)
         if not isinstance(rec, dict):
@@ -566,7 +571,7 @@ def _baseline_ok(rec, cfg, hashes, n_heldout):
 def find_baseline_heldout(cfg, hashes, n_heldout):
     def load(path):
         try:
-            rec = json.loads(pathlib.Path(path).read_text())
+            rec = json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
         except (OSError, UnicodeError, json.JSONDecodeError):
             die("baseline held-out record is unreadable")
         if not _baseline_ok(rec, cfg, hashes, n_heldout):
@@ -580,7 +585,7 @@ def find_baseline_heldout(cfg, hashes, n_heldout):
     if runs.is_dir():
         for path in runs.glob("*.json"):
             try:
-                rec = json.loads(path.read_text())
+                rec = json.loads(path.read_text(encoding="utf-8"))
             except (OSError, UnicodeError, json.JSONDecodeError):
                 continue
             if _baseline_ok(rec, cfg, hashes, n_heldout):

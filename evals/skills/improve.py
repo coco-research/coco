@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
 """Run one automatic improvement round on one agent skill. Stdlib only.
 
-A proposer command reads a prompt on stdin and prints one full SKILL.md or a
-unified diff. Every valid proposal is scored on the dev items only. The winners
-are composed and the chosen candidate is scored exactly once on the held-out
-items, so the held-out peek count stays 0 or 1 and never more. A round is kept
-only when the held-out delta is positive and a one-sided bootstrap p is below
-ALPHA, so a refusal is a normal result.
+Pure core; the CLI lands in slice 3. This module checks a proposed SKILL.md edit,
+composing several edits, and the dev and held-out decisions. The proposer, the
+round driver, the peek ledger and the CLI come in follow-up changes. Constants
+named here for those parts are limits the follow-up enforces, not yet checked.
 
-The ledger under evals/skills/_rounds/<skill>/ records every state change.
-Records carry no absolute paths and no environment values.
-
-    python3 evals/skills/improve.py --skill NAME [--executor ollama|stub]
-
-This module holds the pure core only.
+Held-out decision: one-sided paired bootstrap, kept only when the delta is
+positive and p is below ALPHA / MAX_TOTAL_PEEKS. A held-out set may be peeked
+at most MAX_TOTAL_PEEKS times over its life, so the per-peek threshold is
+Bonferroni-split across them and the life-time false-keep rate stays near ALPHA.
 """
 import difflib
 import hashlib
@@ -27,15 +23,11 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "evals"))
 import paired
 
-K_DEFAULT, K_MAX = 4, 8
 DEV_MARGIN, MIN_WINS, WIN_EPS = 0.05, 2, 0.01
 MAX_CHANGED_LINES, MAX_GROWTH_BYTES = 30, 4000
-MAX_FAILURES, CASE_CHARS = 6, 2000
-PROPOSER_TIMEOUT, PROPOSER_MAX_BYTES = 900, 200_000
 ALPHA, N_BOOT, BOOT_SEED = 0.05, 10000, 0
-MAX_TOTAL_PEEKS = 5
-ROUTER_TIMEOUT = 1800
-RUNS_DIR, ROUNDS_DIR = "runs", "_rounds"
+MAX_TOTAL_PEEKS = 5  # life-time peeks per held-out set (enforced by the round driver)
+PEEK_ALPHA = ALPHA / MAX_TOTAL_PEEKS  # Bonferroni split across those peeks
 
 
 class Reject(Exception):
@@ -181,9 +173,9 @@ def dev_verdict(base, cand, margin, min_wins):
             "pass": gain >= margin and wins >= min_wins and wins > losses}
 
 
-def peek_stats(base, cand, alpha=ALPHA):
+def peek_stats(base, cand, alpha=PEEK_ALPHA):
     delta, lo, hi = paired.paired_bootstrap(base, cand, N_BOOT, BOOT_SEED)
-    p = paired._boot_p_greater([c - b for b, c in zip(base, cand)], N_BOOT, BOOT_SEED)
+    p = paired.boot_p_greater([c - b for b, c in zip(base, cand)], N_BOOT, BOOT_SEED)
     return {"n": len(base), "base_mean": sum(base) / len(base), "cand_mean": sum(cand) / len(cand),
             "delta": delta, "ci95": [lo, hi], "p_one_sided": p, "alpha": alpha,
             "pass": delta > 0 and p < alpha}

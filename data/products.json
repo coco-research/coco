@@ -3,7 +3,7 @@
     {
       "id": "coco-si",
       "name": "CoCo Super Intelligence",
-      "tag": "Available now, v1.8.0, on npm",
+      "tag": "Available now, v1.9.0, on npm",
       "description_html": "An advisory board of expert personas that installs into Claude Code, Cursor or Codex, argues a hard call out, then hands the decision to its skills.",
       "actions": [
         {

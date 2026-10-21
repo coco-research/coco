@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "skill": "c4-architecture",
+  "round": "r001",
+  "date": "2026-10-21",
+  "commit": "49636ee",
+  "outcome": "no change",
+  "reason": "no valid proposals",
+  "peek_count": 0,
+  "total_peeks": 0,
+  "executor": {
+    "kind": "ollama",
+    "model": "qwen3:4b-instruct-2507-q4_K_M",
+    "seed": 0
+  },
+  "proposer": {
+    "id": "grok-4.7",
+    "cmd_sha256": "1d84a1a4c30d2d8d23992a3b695e551c864dd425dba72ff23160b93aedc3269a",
+    "calls": 4
+  },
+  "params": {
+    "k": 4,
+    "dev_margin": 0.05,
+    "min_wins": 2,
+    "win_eps": 0.01,
+    "max_changed_lines": 30,
+    "alpha": 0.05,
+    "n_boot": 10000
+  },
+  "hashes": {
+    "items": "bfdbb8a29db4ea7c530e8a34e75ac9b8102ce499bb84a4dd8b522d86ddca4d1b",
+    "grader": "6cd43d77a5b5acae26594dc1e9f45f685d49855d3e1e964bfcad06e070f39071",
+    "score_py": "4101c6b68efc8f105dd236bd2dc28d15ccf339b248ef144a8efd1fa219e39f7d",
+    "run_py": "34b1d038d3a85aa7cd7c3a556165b6f29ec9b2b5d740c63cba588d1e37cbb568",
+    "paired_py": "ef35601f2a8baaff19632d9ab898d5bed6e3dbd8be4bfe90fff16cc8021d0b92",
+    "base_skill": "a8a8d19bdc43961856c722cc93a247284dd0cc38ab9b6b94271d677bd9f1d758",
+    "baseline_heldout_record": "482e83b82f98b1522ace5f06e70debb17f4e5247e5827a157c828024fb764ed5"
+  },
+  "base_check": "ok",
+  "baseline": {
+    "dev_mean": 0.146025,
+    "heldout_mean": 0.13155,
+    "n_dev": 12,
+    "n_heldout": 24,
+    "heldout_record": "baseline-heldout.json"
+  },
+  "workspace": {
+    "SKILL.md": "a8a8d19bdc43961856c722cc93a247284dd0cc38ab9b6b94271d677bd9f1d758",
+    "dev_items.jsonl": "0f623b8222672c30a7f6a32a8def488220890d202e576f48193a1842b4cefce6",
+    "dev_run.json": "acab024fedf846086580b3e2958fad59722e1a040161051e1ef6f1ae53caf9ac"
+  },
+  "proposals": [
+    {
+      "id": "p1",
+      "focus": "c401",
+      "status": "rejected",
+      "reason": "hunk 1 has no context or no change",
+      "prompt_sha256": "a15b6c7383908349ad9e446be2eaeb595807e66649bbbb16ed6a6a69accbbfb5",
+      "raw_sha256": "f2aec757ed52e8b729c362fe689dc0f892a15ae081fd5c998fea1483e179a77d",
+      "skill_sha256": null,
+      "changed_lines": null
+    },
+    {
+      "id": "p2",
+      "focus": "c408",
+      "status": "rejected",
+      "reason": "hunk 1 has no context or no change",
+      "prompt_sha256": "8f796981a920a478f5d12ea4196609123bfaa1753a8136e749218581f8bca63f",
+      "raw_sha256": "cc74d55f24df7ab2b78f2fd1b95dcf0832b472c2a75a6fc77d7bed2181362126",
+      "skill_sha256": null,
+      "changed_lines": null
+    },
+    {
+      "id": "p3",
+      "focus": "c410",
+      "status": "rejected",
+      "reason": "hunk 1 has no context or no change",
+      "prompt_sha256": "09c7d45fd6a8b45100ba3842e3ce87cad22f41540bb1478e9c83e1dc30c5ad9b",
+      "raw_sha256": "c9402b94e3c559d7e480f31b5af682b07a8dd251a83df963346522e11648cad2",
+      "skill_sha256": null,
+      "changed_lines": null
+    },
+    {
+      "id": "p4",
+      "focus": "c404",
+      "status": "rejected",
+      "reason": "hunk 1 has no context or no change",
+      "prompt_sha256": "12a4ba79ef7bb122bdc3f912357beb5373afa2a0fcf7093b7458cf1779d4031c",
+      "raw_sha256": "362cd5bbd1fb319fabd97e818d2e13c2b8db1fd610dfaa77e38f514e5252a471",
+      "skill_sha256": null,
+      "changed_lines": null
+    }
+  ],
+  "compose": null,
+  "gate": {
+    "router": {
+      "cmd": "default",
+      "exit": 0
+    },
+    "others": null,
+    "peek": null
+  },
+  "candidate": null
+}

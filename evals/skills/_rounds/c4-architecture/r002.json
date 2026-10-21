@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "skill": "c4-architecture",
+  "round": "r002",
+  "date": "2026-10-21",
+  "commit": "49636ee",
+  "outcome": "kept",
+  "reason": "held-out delta +0.747, p 0.000, n 24",
+  "peek_count": 1,
+  "total_peeks": 1,
+  "executor": {
+    "kind": "ollama",
+    "model": "qwen3:4b-instruct-2507-q4_K_M",
+    "seed": 0
+  },
+  "proposer": {
+    "id": "grok-4.7",
+    "cmd_sha256": "1d84a1a4c30d2d8d23992a3b695e551c864dd425dba72ff23160b93aedc3269a",
+    "calls": 4
+  },
+  "params": {
+    "k": 4,
+    "dev_margin": 0.05,
+    "min_wins": 2,
+    "win_eps": 0.01,
+    "max_changed_lines": 30,
+    "alpha": 0.05,
+    "n_boot": 10000
+  },
+  "hashes": {
+    "items": "bfdbb8a29db4ea7c530e8a34e75ac9b8102ce499bb84a4dd8b522d86ddca4d1b",
+    "grader": "6cd43d77a5b5acae26594dc1e9f45f685d49855d3e1e964bfcad06e070f39071",
+    "score_py": "4101c6b68efc8f105dd236bd2dc28d15ccf339b248ef144a8efd1fa219e39f7d",
+    "run_py": "34b1d038d3a85aa7cd7c3a556165b6f29ec9b2b5d740c63cba588d1e37cbb568",
+    "paired_py": "ef35601f2a8baaff19632d9ab898d5bed6e3dbd8be4bfe90fff16cc8021d0b92",
+    "base_skill": "a8a8d19bdc43961856c722cc93a247284dd0cc38ab9b6b94271d677bd9f1d758",
+    "baseline_heldout_record": "482e83b82f98b1522ace5f06e70debb17f4e5247e5827a157c828024fb764ed5"
+  },
+  "base_check": "ok",
+  "baseline": {
+    "dev_mean": 0.146025,
+    "heldout_mean": 0.13155,
+    "n_dev": 12,
+    "n_heldout": 24,
+    "heldout_record": "baseline-heldout.json"
+  },
+  "workspace": {
+    "SKILL.md": "a8a8d19bdc43961856c722cc93a247284dd0cc38ab9b6b94271d677bd9f1d758",
+    "dev_items.jsonl": "0f623b8222672c30a7f6a32a8def488220890d202e576f48193a1842b4cefce6",
+    "dev_run.json": "acab024fedf846086580b3e2958fad59722e1a040161051e1ef6f1ae53caf9ac"
+  },
+  "proposals": [
+    {
+      "id": "p1",
+      "focus": "c401",
+      "status": "scored",
+      "reason": null,
+      "prompt_sha256": "a15b6c7383908349ad9e446be2eaeb595807e66649bbbb16ed6a6a69accbbfb5",
+      "raw_sha256": "db60d2a56ef8c523abfff71cc847afff5d43c63bd3f14699cb25c4b4ece3ba20",
+      "skill_sha256": "8935bb18d82d6d0b281656999f4ad42dcaf3d2dfb2e3b709a930a4699025cb66",
+      "changed_lines": 4,
+      "dev": {
+        "mean": 0.32443333333333335,
+        "gain": 0.1784083333333333,
+        "wins": 7,
+        "losses": 0,
+        "pass": true
+      }
+    },
+    {
+      "id": "p2",
+      "focus": "c408",
+      "status": "scored",
+      "reason": null,
+      "prompt_sha256": "8f796981a920a478f5d12ea4196609123bfaa1753a8136e749218581f8bca63f",
+      "raw_sha256": "2dde72e9124d560aaddfb31b109084f767aa1b8c864f102be6fbf85cb6147e9c",
+      "skill_sha256": "48a754e8b70291f32d84a19114980772539c1a405282e165a1828526281e5407",
+      "changed_lines": 21,
+      "dev": {
+        "mean": 0.8620666666666666,
+        "gain": 0.7160416666666666,
+        "wins": 12,
+        "losses": 0,
+        "pass": true
+      }
+    },
+    {
+      "id": "p3",
+      "focus": "c410",
+      "status": "scored",
+      "reason": null,
+      "prompt_sha256": "09c7d45fd6a8b45100ba3842e3ce87cad22f41540bb1478e9c83e1dc30c5ad9b",
+      "raw_sha256": "bb491f950af853e3a1c2ba25ddf8f26bc168cb1820d53a2d6ece675e438d0fec",
+      "skill_sha256": "10a5c65664bcdd60ad3864f7d1b2767248d27aefcff8c2d96a692b77e619774a",
+      "changed_lines": 22,
+      "dev": {
+        "mean": 0.8620666666666666,
+        "gain": 0.7160416666666666,
+        "wins": 12,
+        "losses": 0,
+        "pass": true
+      }
+    },
+    {
+      "id": "p4",
+      "focus": "c404",
+      "status": "scored",
+      "reason": null,
+      "prompt_sha256": "12a4ba79ef7bb122bdc3f912357beb5373afa2a0fcf7093b7458cf1779d4031c",
+      "raw_sha256": "21ee04e0375223982cf32404609e5579421175c5a17c4217f6dc33e505d9a921",
+      "skill_sha256": "bacd8b4fb3c274eab6cced7fe5e2af1c975d1ba2f7a7605372972bd4caa02443",
+      "changed_lines": 5,
+      "dev": {
+        "mean": 0.7706416666666667,
+        "gain": 0.6246166666666667,
+        "wins": 12,
+        "losses": 0,
+        "pass": true
+      }
+    }
+  ],
+  "compose": {
+    "winners": [
+      "p2",
+      "p3",
+      "p4",
+      "p1"
+    ],
+    "used": [
+      "p2",
+      "p3",
+      "p4"
+    ],
+    "dropped": [
+      {
+        "id": "p1",
+        "why": "conflicts with p4"
+      }
+    ],
+    "composed_dev_mean": 0.8834916666666667,
+    "chosen": "composed",
+    "why": "composed dev mean higher than the best single"
+  },
+  "gate": {
+    "router": {
+      "cmd": "default",
+      "exit": 0
+    },
+    "others": {
+      "status": "skipped",
+      "reason": "only skills/c4-architecture/SKILL.md changed"
+    },
+    "peek": {
+      "n": 24,
+      "base_mean": 0.13155,
+      "cand_mean": 0.8787958333333333,
+      "delta": 0.7472458333333334,
+      "ci95": [
+        0.6693708333333334,
+        0.8174041666666666
+      ],
+      "p_one_sided": 9.999000099990002e-05,
+      "alpha": 0.01,
+      "pass": true
+    }
+  },
+  "candidate": {
+    "id": "composed",
+    "skill_sha256": "916bad2f9a1cfb5fd3d1985f1e748d69c5455887e537978f09c42d0bca57f5d3",
+    "dev_mean": 0.8834916666666667
+  }
+}

@@ -1,6 +1,7 @@
 """meta_select.select() records one opt-in, local M0 row per call, plus outcome rows."""
 
 import contextlib
+import hashlib
 import io
 import json
 import os
@@ -80,12 +81,14 @@ class M0RecordTest(unittest.TestCase):
             conn.close()
 
     def assert_exit2(self, argv):
-        buf = io.StringIO()
-        with contextlib.redirect_stdout(buf):
+        """Exit 2 with stdout empty and one line on stderr. Returns that line."""
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
             with self.assertRaises(SystemExit) as caught:
                 meta_select.main(argv)
         self.assertEqual(caught.exception.code, 2)
-        text = buf.getvalue()
+        self.assertEqual(out.getvalue(), "")
+        text = err.getvalue()
         self.assertEqual(text.count("\n"), 1)
         self.assertTrue(text.strip())
         return text.strip()
@@ -272,6 +275,84 @@ class M0RecordTest(unittest.TestCase):
         self.assertEqual(report["decisions"], 6)
         self.assertEqual(report["outcomes"], {"kept": 1, "overridden": 1, "rerouted": 1, "bad": 1})
         self.assertEqual(report["no_outcome_kept"], 1)
+
+    def test_cli_errors_go_to_stderr_with_stdout_empty(self):
+        cases = [
+            (False, ["--outcome", "kept"], "COCO_ROUTER_M0=1 required"),
+            (False, ["--outcomes-summary"], "COCO_ROUTER_M0=1 required"),
+            (True, ["--outcomes-summary", "--days", "0"], "invalid days"),
+            (True, ["--outcomes-summary", "--days", "x"], "invalid days"),
+            (True, ["--outcomes-summary", "--days"], "invalid days"),
+            (True, ["--outcome"], "unknown outcome"),
+            (True, ["--outcome", "nope"], "unknown outcome"),
+            (True, ["--outcome", "rerouted"], "unknown outcome"),
+            (True, ["--outcome", "kept"], "no decision found"),
+            (True, ["--outcome", "kept", "--decision", "0" * 64], "no decision found"),
+            (True, ["--outcome", "kept", "--decision"], "no decision found"),
+        ]
+        for flag_on, argv, message in cases:
+            with self.subTest(argv=argv, flag_on=flag_on):
+                if flag_on:
+                    os.environ[meta_select.M0_FLAG] = "1"
+                else:
+                    os.environ.pop(meta_select.M0_FLAG, None)
+                self.assertEqual(self.assert_exit2(argv), message)
+        self.assertEqual(self.outcome_rows(), [])
+
+    def test_double_dash_ends_options(self):
+        os.environ[meta_select.M0_FLAG] = "1"
+        # Each of these starts with a CLI command word. After `--` it is just the prompt.
+        for argv, prompt in (
+            (["--", "--outcome bad"], "--outcome bad"),
+            (["--", "--outcome", "kept"], "--outcome kept"),
+            (["--", "--outcomes-summary"], "--outcomes-summary"),
+        ):
+            with self.subTest(argv=argv):
+                out = io.StringIO()
+                with mock.patch.object(meta_select, "_select", return_value=dict(FAKE)) as sel:
+                    with contextlib.redirect_stdout(out):
+                        meta_select.main(argv)
+                sel.assert_called_once_with(prompt)
+                self.assertEqual(json.loads(out.getvalue())["method"], "embed")  # a routing result
+        self.assertEqual(self.outcome_rows(), [])
+        self.assertEqual(len(self.decision_rows()), 3)
+
+    def test_double_dash_alone_is_usage_not_a_prompt(self):
+        os.environ[meta_select.M0_FLAG] = "1"
+        with mock.patch.object(meta_select, "_select") as sel:
+            with self.assertRaises(SystemExit) as caught:
+                meta_select.main(["--"])
+        self.assertTrue(str(caught.exception.code).startswith("usage:"))
+        sel.assert_not_called()
+        self.assertEqual(self.rows(), [])
+
+    def test_outcomes_summary_flags_a_full_page(self):
+        os.environ[meta_select.M0_FLAG] = "1"
+        store = meta_select._m0_store()
+        cap = meta_select.SUMMARY_LIMIT
+
+        def write_kept(first, stop):
+            for i in range(first, stop):
+                digest = hashlib.sha256(str(i).encode()).hexdigest()
+                meta_select._write_outcome(store, digest, "kept")
+
+        write_kept(0, cap - 1)  # one short of a full page: complete, so no flag
+        report = self.run_summary()
+        self.assertEqual(report["outcomes"]["kept"], cap - 1)
+        self.assertNotIn("truncated", report)
+        self.assertNotIn("rows_read", report)
+
+        write_kept(cap - 1, cap)  # exactly a full page: older rows may exist, so flag it
+        report = self.run_summary()
+        self.assertIs(report["truncated"], True)
+        self.assertEqual(report["rows_read"], cap)
+        self.assertEqual(report["outcomes"]["kept"], cap)
+
+        write_kept(cap, cap + 1)  # past the page: the oldest row is not counted
+        report = self.run_summary()
+        self.assertIs(report["truncated"], True)
+        self.assertEqual(report["rows_read"], cap)
+        self.assertEqual(report["outcomes"]["kept"], cap)
 
     def test_outcome_rows_omit_prompt_and_hmac(self):
         os.environ[meta_select.M0_FLAG] = "1"

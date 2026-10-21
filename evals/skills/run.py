@@ -7,11 +7,13 @@ message to Ollama /api/chat. stub() is the offline stand-in used by tests.
 The server URL is COCO_SKILL_EXEC_URL (default http://127.0.0.1:11434).
 The model is COCO_SKILL_EXEC_MODEL (default qwen3:4b-instruct-2507-q4_K_M).
 The per-request timeout is COCO_SKILL_EXEC_TIMEOUT seconds (default 600).
+Each reply is capped at COCO_SKILL_EXEC_MAX_TOKENS output tokens (default 2048).
 A non-loopback host is refused, same host set as the router regression gate.
 Proxy environment variables are ignored and redirects are refused.
 Pass cache=False so a reply is not written under evals/skills/.cache/.
 """
 import hashlib
+import http.client
 import json
 import math
 import os
@@ -22,20 +24,12 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+# Same opener as the router, found the same way evals/routing/check_regression.py finds meta_select.
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "systems" / "superintelligence" / "scripts"))
+from local_http import local_opener  # noqa: E402
+
 # Same hosts the router regression gate accepts (evals/routing/check_regression.py).
 LOOPBACK = {"127.0.0.1", "localhost", "::1"}
-
-
-class _NoRedirect(urllib.request.HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        err = urllib.error.HTTPError(req.full_url, code, msg, headers, fp)
-        err.close()
-        raise err
-
-
-def _local_opener():
-    # Same opener as systems/superintelligence/scripts/meta_select.py local_opener.
-    return urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect())
 DEFAULT_URL = "http://127.0.0.1:11434"
 DEFAULT_MODEL = "qwen3:4b-instruct-2507-q4_K_M"
 CACHE = pathlib.Path(__file__).resolve().parent / ".cache"
@@ -70,8 +64,19 @@ def executor_timeout():
     return seconds
 
 
+MAX_TOKENS_DEFAULT = 2048  # answers past this are cut; long skills otherwise ran past the timeout
+
+
+def executor_max_tokens():
+    """Output-token cap per reply. COCO_SKILL_EXEC_MAX_TOKENS, default 2048."""
+    raw = os.environ.get("COCO_SKILL_EXEC_MAX_TOKENS", str(MAX_TOKENS_DEFAULT))
+    if not raw.isdigit() or int(raw) <= 0:
+        sys.exit(f"COCO_SKILL_EXEC_MAX_TOKENS must be a positive integer, got {raw!r}")
+    return int(raw)
+
+
 def chat_options(seed):
-    return {"temperature": 0, "seed": seed, "num_ctx": 16384}
+    return {"temperature": 0, "seed": seed, "num_ctx": 16384, "num_predict": executor_max_tokens()}
 
 
 def cache_digest(model, seed, options, skill_md, user_input):
@@ -132,7 +137,7 @@ def generate(skill_md: str, user_input: str, *, model: str, seed: int = 0, url: 
     )
     timeout = executor_timeout()
     try:
-        with _local_opener().open(req, timeout=timeout) as resp:
+        with local_opener().open(req, timeout=timeout) as resp:
             payload = json.load(resp)
     except urllib.error.HTTPError as e:
         sys.exit(f"skill executor HTTP {e.code}")
@@ -142,6 +147,9 @@ def generate(skill_md: str, user_input: str, *, model: str, seed: int = 0, url: 
         sys.exit(f"skill executor timed out after {timeout:g}s")
     except json.JSONDecodeError:
         sys.exit("skill executor returned invalid JSON")
+    except (OSError, http.client.HTTPException, UnicodeDecodeError) as e:
+        # e.g. the server dropped the connection mid-reply; TimeoutError is caught above
+        sys.exit(f"skill executor connection failed: {type(e).__name__}")
     try:
         output = payload["message"]["content"]
     except (KeyError, TypeError):

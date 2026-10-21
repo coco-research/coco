@@ -10,44 +10,44 @@ because most adapters link into the checkout rather than copying.
 |---|---:|---:|---:|---:|:--:|---:|
 | `aider` | 0 | 0 | 0 | 0 | yes | 0 |
 | `amazon-q` | 0 | 0 | 0 | 34 | — | 0 |
-| `claude-code` | 387 | 342 | 190 | 34 | — | 0 |
+| `claude-code` | 388 | 342 | 191 | 34 | — | 0 |
 | `cline` | 0 | 0 | 0 | 34 | — | 0 |
 | `codex` | 342 | 342 | 0 | 0 | yes | 0 |
-| `cursor` | 387 | 342 | 182 | 0 | — | 0 |
+| `cursor` | 388 | 342 | 183 | 0 | — | 0 |
 | `generic` | 342 | 342 | 0 | 0 | yes | 0 |
 | `github-copilot-cli` | 0 | 0 | 0 | 0 | yes | 0 |
-| `grok` | 390 | 342 | 190 | 34 | — | 0 |
-| `hermes` | 387 | 342 | 190 | 34 | — | 0 |
-| `pi-desktop` | 387 | 342 | 193 | 37 | — | 0 |
+| `grok` | 391 | 342 | 191 | 34 | — | 0 |
+| `hermes` | 388 | 342 | 191 | 34 | — | 0 |
+| `pi-desktop` | 388 | 342 | 194 | 37 | — | 0 |
 | `roo-code` | 0 | 0 | 0 | 34 | — | 0 |
-| `vscode` | 387 | 342 | 190 | 34 | — | 0 |
-| `vscode-continue` | 0 | 0 | 177 | 34 | — | 0 |
-| `windsurf` | 0 | 0 | 177 | 34 | — | 0 |
+| `vscode` | 388 | 342 | 191 | 34 | — | 0 |
+| `vscode-continue` | 0 | 0 | 178 | 34 | — | 0 |
+| `windsurf` | 0 | 0 | 178 | 34 | — | 0 |
 | `zed` | 0 | 0 | 0 | 34 | — | 0 |
 
 ## Widest install, against the published totals
 
 | Surface | Best adapter | Advertised |
 |---|---:|---:|
-| Slash commands | 390 | 387 |
-| Skills | 193 | 228 |
+| Slash commands | 391 | 388 |
+| Skills | 194 | 229 |
 
 ## Adapters below the command ceiling
 
 The Super Intelligence family is generated at install time, not committed, so an
-adapter that does not invoke the generators delivers 45 commands instead of 387.
+adapter that does not invoke the generators delivers 46 commands instead of 388.
 This section is the standing list of who is short and by how much.
 
 | Adapter | Commands | Short by | Cause |
 |---|---:|---:|---|
-| `amazon-q` | 0 | 387 | does not invoke the SI generators |
-| `cline` | 0 | 387 | does not invoke the SI generators |
-| `roo-code` | 0 | 387 | does not invoke the SI generators |
-| `vscode-continue` | 0 | 387 | does not invoke the SI generators |
-| `windsurf` | 0 | 387 | does not invoke the SI generators |
-| `zed` | 0 | 387 | does not invoke the SI generators |
-| `codex` | 342 | 45 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
-| `generic` | 342 | 45 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
+| `amazon-q` | 0 | 388 | does not invoke the SI generators |
+| `cline` | 0 | 388 | does not invoke the SI generators |
+| `roo-code` | 0 | 388 | does not invoke the SI generators |
+| `vscode-continue` | 0 | 388 | does not invoke the SI generators |
+| `windsurf` | 0 | 388 | does not invoke the SI generators |
+| `zed` | 0 | 388 | does not invoke the SI generators |
+| `codex` | 342 | 46 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
+| `generic` | 342 | 46 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
 
 Not comparable (AGENTS.md producers rather than tree installers): `aider`, `github-copilot-cli`.
 
@@ -63,19 +63,19 @@ the framework.
 |---|---:|---:|---:|
 | `aider` | 0 | 0 | 0 |
 | `amazon-q` | 0 | 0 | 0 |
-| `claude-code` | 190 | 190 | 0 |
+| `claude-code` | 191 | 191 | 0 |
 | `cline` | 0 | 0 | 0 |
 | `codex` | 0 | 0 | 0 |
-| `cursor` | 182 | 182 | 0 |
+| `cursor` | 183 | 183 | 0 |
 | `generic` | 0 | 0 | 0 |
 | `github-copilot-cli` | 0 | 0 | 0 |
-| `grok` | 190 | 190 | 0 |
-| `hermes` | 190 | 190 | 0 |
-| `pi-desktop` | 193 | 193 | 0 |
+| `grok` | 191 | 191 | 0 |
+| `hermes` | 191 | 191 | 0 |
+| `pi-desktop` | 194 | 194 | 0 |
 | `roo-code` | 0 | 0 | 0 |
-| `vscode` | 190 | 190 | 0 |
-| `vscode-continue` | 177 | 177 | 0 |
-| `windsurf` | 177 | 177 | 0 |
+| `vscode` | 191 | 191 | 0 |
+| `vscode-continue` | 178 | 178 | 0 |
+| `windsurf` | 178 | 178 | 0 |
 | `zed` | 0 | 0 | 0 |
 
 Every adapter delivers its full skill set on a plain run.
@@ -92,7 +92,7 @@ bug in the measurement.
   the editor user profile, so the measurement creates the two standard profile
   directories inside the throwaway HOME first. Without them it reports only the
   generated family.
-- **Skills stop at 193, not 228.** The advertised figure is the
+- **Skills stop at 194, not 229.** The advertised figure is the
   repository inventory. The difference is two sets no default install claims: the
   `reverse-skill` bundle, which is security tooling held back on purpose and reachable
   with `--systems reverse-skill`, and the five skills under `adapters/cursor/skills`,

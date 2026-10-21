@@ -4,6 +4,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- `officecli` skill and `/officecli` command, adapted from OfficeCLI (Apache-2.0) with the install section replaced by a Homebrew check and the update check disabled.
+
 ## [1.8.0](https://github.com/coco-research/coco/compare/v1.7.3...v1.8.0) (2026-10-17)
 
 

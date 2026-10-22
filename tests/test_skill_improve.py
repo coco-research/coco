@@ -103,6 +103,15 @@ class ImproveCoreTest(unittest.TestCase):
         self.assertEqual(v["wins"], 0)
         self.assertFalse(v["pass"])
 
+    def test_dev_verdict_empty(self):
+        for base, cand in (({}, {}), ({}, {"d1": 0.5}), ({"d1": 0.5}, {})):
+            with self.subTest(base=base, cand=cand):
+                err = io.StringIO()
+                with contextlib.redirect_stderr(err), self.assertRaises(SystemExit) as caught:
+                    improve.dev_verdict(base, cand, 0.05, 2)
+                self.assertEqual(caught.exception.code, 2)
+                self.assertEqual(err.getvalue(), "dev scores must be non-empty\n")
+
     def test_peek_stats(self):
         base = [0.25, 0.5, 0.75, 1.0]
         cand = [0.5, 0.75, 1.0, 1.0]
@@ -125,6 +134,21 @@ class ImproveCoreTest(unittest.TestCase):
         with mock.patch.object(improve.paired, "paired_bootstrap", return_value=(0.25, 0.1, 0.4)), \
                 mock.patch.object(improve.paired, "boot_p_greater", return_value=0.2):
             self.assertFalse(improve.peek_stats(base, cand)["pass"])
+
+    def test_peek_stats_empty(self):
+        for base, cand in (([], []), ([], [0.5]), ([0.5], [])):
+            with self.subTest(base=base, cand=cand):
+                err = io.StringIO()
+                with mock.patch.object(improve.paired, "paired_bootstrap",
+                                       wraps=improve.paired.paired_bootstrap) as boot, \
+                        mock.patch.object(improve.paired, "boot_p_greater",
+                                          wraps=improve.paired.boot_p_greater) as pg:
+                    with contextlib.redirect_stderr(err), self.assertRaises(SystemExit) as caught:
+                        improve.peek_stats(base, cand)
+                self.assertEqual(caught.exception.code, 2)
+                self.assertEqual(err.getvalue(), "held-out scores must be non-empty\n")
+                boot.assert_not_called()
+                pg.assert_not_called()
 
     def test_peek_stats_real_bootstrap(self):
         # No mocks: the real paired bootstrap must keep a clear gain and refuse noise.

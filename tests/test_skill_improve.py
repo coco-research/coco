@@ -103,6 +103,15 @@ class ImproveCoreTest(unittest.TestCase):
         self.assertEqual(v["wins"], 0)
         self.assertFalse(v["pass"])
 
+    def test_dev_verdict_empty(self):
+        for base, cand in (({}, {}), ({}, {"d1": 0.5}), ({"d1": 0.5}, {})):
+            with self.subTest(base=base, cand=cand):
+                err = io.StringIO()
+                with contextlib.redirect_stderr(err), self.assertRaises(SystemExit) as caught:
+                    improve.dev_verdict(base, cand, 0.05, 2)
+                self.assertEqual(caught.exception.code, 2)
+                self.assertEqual(err.getvalue(), "dev scores must be non-empty\n")
+
     def test_peek_stats(self):
         base = [0.25, 0.5, 0.75, 1.0]
         cand = [0.5, 0.75, 1.0, 1.0]
@@ -125,6 +134,21 @@ class ImproveCoreTest(unittest.TestCase):
         with mock.patch.object(improve.paired, "paired_bootstrap", return_value=(0.25, 0.1, 0.4)), \
                 mock.patch.object(improve.paired, "boot_p_greater", return_value=0.2):
             self.assertFalse(improve.peek_stats(base, cand)["pass"])
+
+    def test_peek_stats_empty(self):
+        for base, cand in (([], []), ([], [0.5]), ([0.5], [])):
+            with self.subTest(base=base, cand=cand):
+                err = io.StringIO()
+                with mock.patch.object(improve.paired, "paired_bootstrap",
+                                       wraps=improve.paired.paired_bootstrap) as boot, \
+                        mock.patch.object(improve.paired, "boot_p_greater",
+                                          wraps=improve.paired.boot_p_greater) as pg:
+                    with contextlib.redirect_stderr(err), self.assertRaises(SystemExit) as caught:
+                        improve.peek_stats(base, cand)
+                self.assertEqual(caught.exception.code, 2)
+                self.assertEqual(err.getvalue(), "held-out scores must be non-empty\n")
+                boot.assert_not_called()
+                pg.assert_not_called()
 
     def test_peek_stats_real_bootstrap(self):
         # No mocks: the real paired bootstrap must keep a clear gain and refuse noise.
@@ -861,7 +885,13 @@ class ImproveProposerTest(unittest.TestCase):
             git("add", rel)
             git("-c", "user.name=t", "-c", "user.email=t@example.invalid", "commit", "-q", "-m", "t")
             self.assertEqual(improve.base_check(repo, "none", [rel]), "skipped")
-            self.assertEqual(improve.base_check(repo, "HEAD", [rel]), "ok")
+            with mock.patch.object(improve.subprocess, "run", wraps=subprocess.run) as run_git:
+                self.assertEqual(improve.base_check(repo, "HEAD", [rel]), "ok")
+            timeout = run_git.call_args.kwargs.get("timeout", 0)
+            self.assertGreater(timeout, 0)
+            self.assertLess(timeout, float("inf"))
+            code, msg = self.exits(improve.base_check, repo, "missing-ref", [rel])
+            self.assertEqual((code, msg), (2, "cannot read missing-ref:%s\n" % rel))
             target.write_text(GRADER + "# x\n")
             err = io.StringIO()
             with contextlib.redirect_stderr(err):
@@ -869,6 +899,20 @@ class ImproveProposerTest(unittest.TestCase):
                     improve.base_check(repo, "HEAD", [rel])
             self.assertEqual(caught.exception.code, 1)
             self.assertIn("differs", err.getvalue())
+
+    def test_base_check_git_failures(self):
+        rel = "evals/skills/toy/grader.py"
+        target = self.tmp / rel
+        target.parent.mkdir(parents=True)
+        target.write_text(GRADER)
+        for exc in (FileNotFoundError("git"), subprocess.TimeoutExpired("git", 30)):
+            with self.subTest(error=type(exc).__name__), \
+                    mock.patch.object(improve.subprocess, "run", side_effect=exc) as run_git:
+                self.assertEqual(improve.base_check(self.tmp, "none", [rel]), "skipped")
+                run_git.assert_not_called()
+                code, msg = self.exits(improve.base_check, self.tmp, "HEAD", [rel])
+                self.assertEqual((code, msg), (2, "cannot read HEAD:%s\n" % rel))
+                run_git.assert_called_once()
 
 
 def reply(text):

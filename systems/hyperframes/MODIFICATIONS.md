@@ -4,6 +4,14 @@
 
 Everything not listed here is as vendored from upstream.
 
+## 2026-10-22: caption font licence contents are validated (#335)
+
+| | |
+|---|---|
+| **Files** | `skills/embedded-captions/modes/standard/fonts/build-fonts-css.cjs`; `skills/embedded-captions/modes/standard/fonts/build-fonts-css.test.cjs`. |
+| **Change** | Every `OFL-`/`Apache-2.0-` licence file must be non-empty UTF-8 text without binary control bytes and contain its own licence heading. Heading whitespace may include line breaks. `.gitattributes` remains exempt. Tests reject empty, binary, malformed UTF-8 and wrong-heading files. Font assets and generated CSS are unchanged. |
+| **Reason** | Issue #335: a licence-looking filename previously passed even when the file contained no licence text. |
+
 ## 2026-10-08: caption font generator rejects unrecognised or mislabelled files (lab-0062)
 
 | | |

@@ -1,6 +1,7 @@
 // Tests for build-fonts-css.cjs: every font file in files/ must be one the
 // generator embeds and checks; odd or mislabelled files are errors, not warnings.
 // Added by Coco, 2026-10-08 (lab-0062). Run: node --test build-fonts-css.test.cjs
+// Modified by Coco, 2026-10-22 (#335): test licence text validation. See MODIFICATIONS.md.
 const test = require("node:test");
 const assert = require("node:assert");
 const fs = require("node:fs");
@@ -67,6 +68,59 @@ test("a font disguised as a licence text or any other file is an error", () => {
     /notes\.md: unrecognized font file name/,
   );
   fails((d) => fs.writeFileSync(path.join(d, "README.md"), "hi"), /README\.md: unexpected file/);
+});
+
+for (const [file, heading, other] of [
+  ["OFL-anton.txt", "SIL OPEN FONT LICENSE Version 1.1", "Apache-2.0-permanent-marker.txt"],
+  ["Apache-2.0-permanent-marker.txt", "Apache License\nVersion 2.0", "OFL-anton.txt"],
+]) {
+  test(`${file}: empty or whitespace-only licence text is refused`, () => {
+    for (const text of ["", " \t\r\n"]) {
+      fails(
+        (d) => fs.writeFileSync(path.join(d, file), text),
+        new RegExp(`${file}: licence must be non-empty UTF-8 text`),
+      );
+    }
+  });
+
+  test(`${file}: malformed UTF-8 is refused even with the correct heading`, () => {
+    fails(
+      (d) => fs.writeFileSync(
+        path.join(d, file), Buffer.concat([Buffer.from([0xff]), Buffer.from(heading)]),
+      ),
+      new RegExp(`${file}: licence must be non-empty UTF-8 text`),
+    );
+  });
+
+  test(`${file}: binary control bytes are refused even with the correct heading`, () => {
+    fails(
+      (d) => fs.writeFileSync(path.join(d, file), `${heading}\n\0\x01`),
+      new RegExp(`${file}: licence must be non-empty UTF-8 text`),
+    );
+  });
+
+  test(`${file}: missing or wrong licence heading is refused`, () => {
+    fails(
+      (d) => fs.writeFileSync(path.join(d, file), "This is not a licence."),
+      new RegExp(`${file}: missing licence heading`),
+    );
+    fails((d) => cp(d, other, file), new RegExp(`${file}: missing licence heading`));
+  });
+}
+
+test("valid UTF-8 licence texts with CRLF and heading whitespace build identically", () => {
+  const r = withCopy((d) => {
+    for (const file of ["OFL-anton.txt", "Apache-2.0-permanent-marker.txt"]) {
+      const text = fs.readFileSync(path.join(d, file), "utf8");
+      fs.writeFileSync(path.join(d, file), `Copyright ©\r\n${text.replace(/\s+/g, "\r\n\t")}`);
+    }
+  });
+  assert.strictEqual(r.css, build().css);
+});
+
+test(".gitattributes is allowed without a licence heading", () => {
+  const r = withCopy((d) => fs.writeFileSync(path.join(d, ".gitattributes"), "*.woff2 binary\n"));
+  assert.strictEqual(r.css, build().css);
 });
 
 test("a subset whose name table names another family is an error", () => {

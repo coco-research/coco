@@ -15,6 +15,7 @@ Last updated: 2026-09-19.
 | 1 | Complete the Repo Standard document set: `docs/rules.md`, `prd.md`, `design.md`, `tasks.md`, `memory.md`, the PR template filename, and `.metagpt/` tracked | in review | PR #199 |
 | 2 | Evolution loop task 1: the `skill-evolution` skill tree and its count coupling | in review | PR #200 |
 | 3 | Evolution loop tasks 2 to 15 | next | `.metagpt/plan.md` |
+| 10 | Reject empty dev and held-out scores in skill improvement helpers (#366) | ready for review | `evals/skills/improve.py`, `tests/test_skill_improve.py` |
 
 Task 3's first four tasks are the working set: `ledger.py`, `lane.py`, `observe.py` and
 `validate.py`, in that order, because `propose.py` needs the lane adapter and the guard.

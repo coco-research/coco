@@ -181,6 +181,8 @@ def compose(base_lines, ranked, cap):
 
 
 def dev_verdict(base, cand, margin, min_wins):
+    if not base or not cand:
+        die("dev scores must be non-empty")
     ids = sorted(base)
     d = [cand[i] - base[i] for i in ids]
     wins = sum(1 for x in d if x >= WIN_EPS)
@@ -192,6 +194,8 @@ def dev_verdict(base, cand, margin, min_wins):
 
 
 def peek_stats(base, cand, alpha=PEEK_ALPHA):
+    if not base or not cand:
+        die("held-out scores must be non-empty")
     delta, lo, hi = paired.paired_bootstrap(base, cand, N_BOOT, BOOT_SEED)
     p = paired.boot_p_greater([c - b for b, c in zip(base, cand)], N_BOOT, BOOT_SEED)
     return {"n": len(base), "base_mean": sum(base) / len(base), "cand_mean": sum(cand) / len(cand),

@@ -58,6 +58,7 @@ Reviewed on 2026-09-19, kept here because a queue nobody tracks hides the work t
 | PR | Merged | What it delivered |
 | --- | --- | --- |
 | pending | - | [Issue #335](https://github.com/coco-research/coco/issues/335): caption font generator validates non-empty UTF-8 licence text and the matching licence heading, with regression tests |
+| pending | not merged | Bound skill improvement `base_check` git reads to 30 seconds and report missing git or timeout as exit 2; regression coverage for [issue #375](https://github.com/coco-research/coco/issues/375) |
 | local | 2026-09-19 | `git config core.hooksPath .githooks` wired in the working clone, so the gate now runs on push. Local config, cannot be committed; every clone needs the one command |
 | #198 | 2026-09-20 | Tier 1 Repo Standard: `AGENTS.md`, `.githooks/pre-push`, PR template content |
 | #197 | 2026-09-19 | README hero and roster assets |

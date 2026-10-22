@@ -885,7 +885,13 @@ class ImproveProposerTest(unittest.TestCase):
             git("add", rel)
             git("-c", "user.name=t", "-c", "user.email=t@example.invalid", "commit", "-q", "-m", "t")
             self.assertEqual(improve.base_check(repo, "none", [rel]), "skipped")
-            self.assertEqual(improve.base_check(repo, "HEAD", [rel]), "ok")
+            with mock.patch.object(improve.subprocess, "run", wraps=subprocess.run) as run_git:
+                self.assertEqual(improve.base_check(repo, "HEAD", [rel]), "ok")
+            timeout = run_git.call_args.kwargs.get("timeout", 0)
+            self.assertGreater(timeout, 0)
+            self.assertLess(timeout, float("inf"))
+            code, msg = self.exits(improve.base_check, repo, "missing-ref", [rel])
+            self.assertEqual((code, msg), (2, "cannot read missing-ref:%s\n" % rel))
             target.write_text(GRADER + "# x\n")
             err = io.StringIO()
             with contextlib.redirect_stderr(err):
@@ -893,6 +899,20 @@ class ImproveProposerTest(unittest.TestCase):
                     improve.base_check(repo, "HEAD", [rel])
             self.assertEqual(caught.exception.code, 1)
             self.assertIn("differs", err.getvalue())
+
+    def test_base_check_git_failures(self):
+        rel = "evals/skills/toy/grader.py"
+        target = self.tmp / rel
+        target.parent.mkdir(parents=True)
+        target.write_text(GRADER)
+        for exc in (FileNotFoundError("git"), subprocess.TimeoutExpired("git", 30)):
+            with self.subTest(error=type(exc).__name__), \
+                    mock.patch.object(improve.subprocess, "run", side_effect=exc) as run_git:
+                self.assertEqual(improve.base_check(self.tmp, "none", [rel]), "skipped")
+                run_git.assert_not_called()
+                code, msg = self.exits(improve.base_check, self.tmp, "HEAD", [rel])
+                self.assertEqual((code, msg), (2, "cannot read HEAD:%s\n" % rel))
+                run_git.assert_called_once()
 
 
 def reply(text):

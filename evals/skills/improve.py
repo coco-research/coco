@@ -44,7 +44,7 @@ PROPOSER_TIMEOUT, PROPOSER_MAX_BYTES = 900, 200_000
 ALPHA, N_BOOT, BOOT_SEED = 0.05, 10000, 0
 MAX_TOTAL_PEEKS = 5  # life-time peeks per held-out set (items.jsonl hash); stub rounds do not count
 PEEK_ALPHA = ALPHA / MAX_TOTAL_PEEKS  # Bonferroni split across those peeks
-ROUTER_TIMEOUT = 1800
+BASE_CHECK_TIMEOUT, ROUTER_TIMEOUT = 30, 1800
 RUNS_DIR, ROUNDS_DIR = "runs", "_rounds"
 
 
@@ -613,8 +613,12 @@ def base_check(root, ref, rels):
         local = root / rel
         if not local.is_file():
             die("cannot read %s" % rel)
-        got = subprocess.run(
-            ["git", "-C", str(root), "show", "%s:%s" % (ref, rel)], capture_output=True)
+        try:
+            got = subprocess.run(
+                ["git", "-C", str(root), "show", "%s:%s" % (ref, rel)],
+                capture_output=True, timeout=BASE_CHECK_TIMEOUT)
+        except (OSError, subprocess.TimeoutExpired):
+            die("cannot read %s:%s" % (ref, rel))
         if got.returncode != 0:
             die("cannot read %s:%s" % (ref, rel))
         if got.stdout != local.read_bytes():

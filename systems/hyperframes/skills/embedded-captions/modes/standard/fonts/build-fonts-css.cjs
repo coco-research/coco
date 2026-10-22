@@ -21,11 +21,14 @@
  * (OFL-<slug>.txt / Apache-2.0-<slug>.txt): any other font file, whatever its
  * extension, is an error, and a subset's own name table (family, OS/2 weight,
  * italic flag) must match its file name. Tests: build-fonts-css.test.cjs.
+ * Modified by Coco, 2026-10-22 (#335): licence files must be non-empty UTF-8
+ * text containing their own licence heading. See MODIFICATIONS.md.
  */
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const zlib = require("zlib");
+const { TextDecoder } = require("util");
 
 const FILES = path.join(__dirname, "files");
 const OUT = path.join(__dirname, "fonts.css");
@@ -99,7 +102,11 @@ const SLUG_OF = Object.fromEntries(Object.entries(FAMILY).map(([s, f]) => [f, s]
 
 // ---- font sniffing and name-table reading (no dependencies) ----
 const FONT_EXT = /\.(woff2?|[ot]t[fc]|eot|dfont|pf[ab]|fon|fnt|bdf|pcf)$/i;
-const LICENCE_TEXT = /^((OFL|Apache-2\.0)-[a-z0-9-]+\.txt|\.gitattributes)$/;
+const LICENCE_TEXT = /^(OFL|Apache-2\.0)-[a-z0-9-]+\.txt$/;
+const LICENCE_HEADING = {
+  OFL: /SIL\s+OPEN\s+FONT\s+LICENSE\s+Version\s+1\.1\b/,
+  "Apache-2.0": /Apache\s+License\s+Version\s+2\.0\b/,
+};
 // Style and optical-size words that Fontsource's static instances append to
 // name ID 1 (e.g. "Teko Light" for teko-latin-700, "Bodoni Moda 11pt").
 const STYLE_WORD =
@@ -242,10 +249,26 @@ function build({ filesDir = FILES } = {}) {
     const buf = fs.readFileSync(p);
     const kind = fontKind(buf);
     if (!kind && !FONT_EXT.test(f)) {
-      if (!LICENCE_TEXT.test(f))
+      if (f === ".gitattributes") continue;
+      const licence = f.match(LICENCE_TEXT);
+      if (!licence) {
         errors.push(
           `${f}: unexpected file; files/ holds only embedded fonts and their OFL-/Apache-2.0- licence texts`,
         );
+        continue;
+      }
+      let text;
+      try {
+        text = new TextDecoder("utf-8", { fatal: true }).decode(buf);
+      } catch {
+        errors.push(`${f}: licence must be non-empty UTF-8 text`);
+        continue;
+      }
+      // Tabs and line endings are text; other ASCII control bytes are not.
+      if (!text.trim() || /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(text))
+        errors.push(`${f}: licence must be non-empty UTF-8 text (no binary control bytes)`);
+      else if (!LICENCE_HEADING[licence[1]].test(text))
+        errors.push(`${f}: missing licence heading for ${licence[1]}`);
       continue;
     }
     const u = UPSTREAM[f];

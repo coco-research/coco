@@ -4,6 +4,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [1.9.1](https://github.com/coco-research/coco/compare/v1.9.0...v1.9.1) (2026-10-23)
+
+
+### Bug Fixes
+
+* **captions:** validate bundled font licence contents ([#381](https://github.com/coco-research/coco/issues/381)) ([6d8e06e](https://github.com/coco-research/coco/commit/6d8e06e77b69d3bccd60c453b08ee42446ad508a))
+* **evals:** bound base-check git reads and handle failures ([#380](https://github.com/coco-research/coco/issues/380)) ([f6a9040](https://github.com/coco-research/coco/commit/f6a90400540ab49ddf3a64fd61fe22b011caea20))
+* **evals:** reject empty skill improvement scores ([#382](https://github.com/coco-research/coco/issues/382)) ([6f6308b](https://github.com/coco-research/coco/commit/6f6308bdd864f8329b49416d98f928f9b42ed2f9))
+* **site:** release figures to 1.9.0; gate checks data-count spans on product pages ([#372](https://github.com/coco-research/coco/issues/372)) ([13d0129](https://github.com/coco-research/coco/commit/13d0129ecc3e238a0a6eefed01d219e24e47369d))
+
 ## [1.9.0](https://github.com/coco-research/coco/compare/v1.8.0...v1.9.0) (2026-10-21)
 
 

@@ -1,6 +1,12 @@
 # CoCo Super Intelligence
 
-495 personas across 13 departments, **229 skills**[^installed] and **388 commands** in the full catalog (coco main, 2026-10-05).
+495 personas across 13 departments, **229 skills**[^installed] and **388 commands** in the full catalog (coco 1.9.0, 2026-10-21).
+
+Agent skills, slash commands and subagents for Claude Code, Cursor, Codex and other AI coding agents. One command installs them into the tool you already use, and everything runs locally:
+
+```bash
+npx cocosuperintelligence
+```
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/readme/hero-dark-mode.png">

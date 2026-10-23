@@ -24,7 +24,14 @@
     "mcp",
     "llm-tools",
     "developer-tools",
-    "productivity"
+    "productivity",
+    "claude-code-skills",
+    "cursor-rules",
+    "subagents",
+    "slash-commands",
+    "ai-coding-agent",
+    "agentic-coding",
+    "prompt-library"
   ],
   "author": "Coco Inc",
   "license": "SEE LICENSE IN LICENSE",

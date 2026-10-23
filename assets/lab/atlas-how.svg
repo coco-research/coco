@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" role="img" aria-labelledby="title desc">
+  <title id="title">How Coco Atlas works</title>
+  <desc id="desc">Local sources feed a read-only collector. It serves GET /api/state, the event stream, and the map page. POST /api/post appends one board line with the local token.</desc>
+  <style>
+    svg {
+      --paper: #F3F2EE;
+      --ink: #0B0B0B;
+      --ink-2: #3C3C37;
+      --ink-3: #5F5F58;
+      --blue: #1234FF;
+    }
+    @media all { /* site is dark-only */
+      svg {
+        --paper: #0B0C0E;
+        --ink: #ECEAE4;
+        --ink-2: #C1C0B9;
+        --ink-3: #929089;
+        --blue: #8FA2FF;
+      }
+    }
+    .paper { fill: var(--paper); }
+    .box { fill: var(--paper); stroke: var(--ink); stroke-width: 1; }
+    .accent { stroke: var(--blue); }
+    .title { font-family: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif; font-size: 20px; font-weight: 650; fill: var(--ink); }
+    .lbl { font-family: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif; font-size: 13px; fill: var(--ink); }
+    .name { font-size: 16px; font-weight: 650; }
+    .sub { font-size: 12px; }
+    .mono { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; fill: var(--ink-2); letter-spacing: 0.04em; }
+    .path { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12px; fill: var(--ink); }
+    .col { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; fill: var(--ink-3); letter-spacing: 0.12em; }
+    .arrow { stroke: var(--ink); stroke-width: 1; fill: none; }
+    .head { fill: var(--ink); }
+  </style>
+  <rect class="paper" width="900" height="420"/>
+  <text class="title" x="24" y="36">How Coco Atlas works</text>
+  <text class="col" x="24" y="64">SOURCES</text>
+  <text class="col" x="232" y="64">COLLECTOR</text>
+  <text class="col" x="468" y="64">API</text>
+  <text class="col" x="708" y="64">PAGE</text>
+
+  <g>
+    <rect class="box" x="24" y="80" width="168" height="44"/>
+    <text class="lbl" x="34" y="98">Board file</text>
+    <text class="mono" x="34" y="114">one line per update</text>
+    <rect class="box" x="24" y="132" width="168" height="44"/>
+    <text class="lbl" x="34" y="150">Team inbox</text>
+    <text class="mono" x="34" y="166">local folder</text>
+    <rect class="box" x="24" y="184" width="168" height="44"/>
+    <text class="lbl" x="34" y="202">Job queue</text>
+    <text class="mono" x="34" y="218">local folder</text>
+    <rect class="box" x="24" y="236" width="168" height="44"/>
+    <text class="lbl" x="34" y="254">Transcripts</text>
+    <rect class="box" x="24" y="288" width="168" height="44"/>
+    <text class="lbl" x="34" y="306">Code host</text>
+  </g>
+
+  <rect class="box accent" x="232" y="80" width="196" height="252"/>
+  <text class="lbl name" x="330" y="188" text-anchor="middle">Collector</text>
+  <text class="lbl sub" x="330" y="210" text-anchor="middle">stdlib Python, read-only</text>
+  <text class="mono" x="330" y="230" text-anchor="middle">one write: POST /api/post</text>
+
+  <rect class="box" x="468" y="118" width="188" height="56"/>
+  <text class="path" x="562" y="142" text-anchor="middle">GET /api/state</text>
+  <text class="lbl" x="562" y="160" text-anchor="middle" font-size="12">snapshot</text>
+  <rect class="box" x="468" y="214" width="188" height="68"/>
+  <text class="path" x="562" y="242" text-anchor="middle">GET /api/events</text>
+  <text class="mono" x="562" y="260" text-anchor="middle">SSE</text>
+
+  <rect class="box" x="708" y="130" width="168" height="152"/>
+  <text class="lbl" x="792" y="198" text-anchor="middle" font-weight="650">Map page</text>
+
+  <g class="arrow" fill="none">
+    <line x1="192" y1="102" x2="226" y2="102"/>
+    <line x1="192" y1="154" x2="226" y2="154"/>
+    <line x1="192" y1="206" x2="226" y2="206"/>
+    <line x1="192" y1="258" x2="226" y2="258"/>
+    <line x1="192" y1="310" x2="226" y2="310"/>
+    <line x1="428" y1="146" x2="462" y2="146"/>
+    <line x1="428" y1="248" x2="462" y2="248"/>
+    <line x1="656" y1="146" x2="702" y2="146"/>
+    <line x1="656" y1="248" x2="702" y2="248"/>
+  </g>
+  <g class="head">
+    <polygon points="232,102 226,99 226,105"/>
+    <polygon points="232,154 226,151 226,157"/>
+    <polygon points="232,206 226,203 226,209"/>
+    <polygon points="232,258 226,255 226,261"/>
+    <polygon points="232,310 226,307 226,313"/>
+    <polygon points="468,146 462,143 462,149"/>
+    <polygon points="468,248 462,245 462,251"/>
+    <polygon points="708,146 702,143 702,149"/>
+    <polygon points="708,248 702,245 702,251"/>
+  </g>
+  <text class="mono" x="24" y="392">Reads local files. One write: a board line, token only.</text>
+</svg>

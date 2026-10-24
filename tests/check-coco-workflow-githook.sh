@@ -170,6 +170,13 @@ OUT="$( cd "$WORK" && COCO_CHAIN_HOOK="$T/chain.sh" "$T/lonely/hooks/pre-commit"
 [ "$RC" -eq 3 ] || fail "T3b no verifier: the user's hook must still decide (exit 3), got $RC: $OUT"
 case "$OUT" in *"chained ran"*) ;; *) fail "T3b no verifier: the chain hook did not run: $OUT" ;; esac
 ok "T3b no verifier beside the hook: the user's hook still runs and decides"
+chmod -x "$T/chain.sh"
+RC=0
+OUT="$( cd "$WORK" && COCO_CHAIN_HOOK="$T/chain.sh" "$HOOK" 2>&1 )" || RC=$?
+[ "$RC" -ne 0 ] || fail "T3c a chained hook that can't run must not pass: $OUT"
+case "$OUT" in *"is not executable"*) ;; *) fail "T3c no reason given: $OUT" ;; esac
+chmod +x "$T/chain.sh"
+ok "T3c a configured chain hook that isn't executable stops the commit with a reason"
 
 # --- 5. check-show: an unticked box is named ---------------------------------
 CL=docs/specs/h/show.md

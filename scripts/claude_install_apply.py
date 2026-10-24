@@ -198,26 +198,24 @@ class ApplyMixin:
         self.say("installer afterwards to link them.")
 
     def body(self):
-        counts = {"link": 0, "write": 0, "block": 0, "skip": 0}
+        # summary_ops is the receipt's op set. Install uses link/write/block/skip;
+        # uninstall uses remove/skip. path_ops are the ones that change the tree.
+        counts = {op: 0 for op in self.summary_ops}
         lines = []
         for rec in self.records:
             counts[rec["op"]] += 1
             lines.append(dumps(rec))
         summary = {
-            "summary": {
-                "adapter": "claude-code",
-                "version": self.version,
-                "commit": self.commit,
-                "target": self.home,
-                "link": counts["link"],
-                "write": counts["write"],
-                "block": counts["block"],
-                "skip": counts["skip"],
-                "paths": counts["link"] + counts["write"] + counts["block"],
-                "managed_settings": self.managed,
-            }
+            "adapter": "claude-code",
+            "version": self.version,
+            "commit": self.commit,
+            "target": self.home,
         }
-        lines.append(dumps(summary))
+        for op in self.summary_ops:
+            summary[op] = counts[op]
+        summary["paths"] = sum(counts[op] for op in self.path_ops)
+        summary["managed_settings"] = self.managed
+        lines.append(dumps({"summary": summary}))
         return "\n".join(lines) + "\n"
 
     def finish_manifest(self):
@@ -277,6 +275,10 @@ class ApplyMixin:
                 elif kind == "bytes":
                     with open(path, "wb") as fh:
                         fh.write(entry[2])
+                elif kind == "mkdir":
+                    # Uninstall removed an empty directory. Install never records this.
+                    if not os.path.isdir(path):
+                        os.mkdir(path)
             except OSError as exc:
                 print("rollback: %s" % exc, file=sys.stderr)
 

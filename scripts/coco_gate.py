@@ -6,12 +6,13 @@ person or agent role; this verifies those sign-offs are real, current and
 signed by the right role. Local hooks only nudge. This is the lock.
 
   init   --branch B --size feature|small --builder ID [--prd P --arch P --plan P] [--ui GLOB ...]
-  sign   --stage prd|arch|plan|mock|approve|size|infra --signer ID --key KEY [--artifact P]
-         [--decision P] [--base REF] [--base-commit SHA]
+  sign   --stage prd|arch|plan|mock|approve|size|infra|show --signer ID --key KEY
+         [--artifact P] [--decision P] [--base REF] [--base-commit SHA] [--checklist P]
   verify [--ci --base REF] [--signers FILE] [--policy FILE] [--branch B] [--changed FILE]
          [--changed-numstat FILE]
-  status [--branch B] [--line]
+  status [--branch B] [--line] [--warn]
   check-edit --path P [--branch B]
+  check-show --checklist P [--signers FILE]
 
 In CI the signers, the policy and this verifier come from the base branch, so a
 PR cannot add a key, loosen the policy or edit this file and benefit in the same
@@ -37,7 +38,7 @@ SIGNERS_PATH = ".coco/allowed_signers"
 POLICY_PATH = ".coco/workflow.json"
 NAMESPACE = "coco-gate"
 CHAIN = ("prd", "arch", "plan")
-STAGES = ("prd", "arch", "plan", "mock", "approve", "size", "infra")
+STAGES = ("prd", "arch", "plan", "mock", "approve", "size", "infra", "show")
 MESSAGE_KEYS = ("repo", "branch", "base", "stage", "size", "artifact", "sha256",
                 "prev", "decision", "signer", "at")
 POLICY_STAGE = {"size": "arch", "infra": "arch"}
@@ -640,6 +641,7 @@ def cmd_sign(args):
     path = gate_path(branch)
     gate = check_gate(parse_json(read_text(path, "gate file"), path), path)
     base = args.base_commit or merge_base(args.base or "main")
+    store = ((args.checklist or "") + ".signoffs.json") if args.stage == "show" else path
     artifact, digest = "size:small", sha_hex(b"small")
     if args.stage == "infra":
         # The base commit's policy, not the work tree's: verify must hash the same set.
@@ -650,6 +652,10 @@ def cmd_sign(args):
         need(paths, "no protected path changed against %s" % base)
         digest = infra_hex(paths)
         artifact = "infra:" + digest
+    elif args.stage == "show":
+        # H7: show sign-offs live beside the checklist, not in the gate file.
+        need(safe_rel(args.checklist or "") and os.path.isfile(args.checklist), "show needs --checklist")
+        artifact, digest = args.checklist, sha_file(args.checklist)
     elif args.stage != "size":
         artifact = args.artifact or (gate.get("artifacts") or {}).get(args.stage, "")
         need(artifact, "%s needs --artifact" % args.stage)
@@ -667,25 +673,48 @@ def cmd_sign(args):
              % (args.stage, prev_stage(args.stage)))
         entry["prev"] = sha_hex(canonical(parent).encode("utf-8"))
     entry["sig"] = ssh_sign(args.key, canonical(entry))
-    gate.setdefault("signoffs", []).append(entry)
-    write_json(path, gate)
+    entries = parse_json(read_text(store) or "[]", store) if args.stage == "show" \
+        else gate.setdefault("signoffs", [])
+    entries.append(entry)
+    write_json(store, entries if args.stage == "show" else gate)
     say("signed %s as %s (%s)" % (args.stage, args.signer, artifact))
     return 0
+
+
+def chain_fails(gate, branch):
+    check = Check(argparse.Namespace(ci=False, base=None, branch=branch, policy=None,
+                                     signers=None, changed=None, changed_numstat=None))
+    check.gate = gate
+    check.tmp = tempfile.mkdtemp(prefix="coco-gate-")
+    try:
+        check.policy = check.load_policy()
+        check.load_signers()
+        check.check_stages()
+    finally:
+        shutil.rmtree(check.tmp, ignore_errors=True)
+    return check.fails
 
 
 def cmd_status(args):
     branch = args.branch or os.environ.get("GITHUB_HEAD_REF", "") or current_branch()
     path = gate_path(branch)
     text = read_text(path)
-    if args.line:
-        # Hook form: one line or nothing, and never a failure exit.
+    if args.line or args.warn:
+        # Hook form: one line or nothing, and never a failure exit. --warn is
+        # the pre-commit shape: only a chain that does not verify gets a line.
         try:
             gate = None if text is None else check_gate(parse_json(text, path), path)
             if gate is not None and gate["size"] != "small":
-                stage = next((s for s in CHAIN if latest(gate, s) is None), CHAIN[-1])
-                nxt = "build" if latest(gate, CHAIN[-1]) is not None else \
-                    (gate.get("artifacts") or {}).get(stage) or "sign " + stage
-                print("Coco workflow: stage %s; next: %s" % (stage, nxt))
+                if args.warn:
+                    fails = chain_fails(gate, branch)
+                    stage = fails[0].split(":", 1)[0] if fails else None
+                else:
+                    stage = next((s for s in CHAIN if latest(gate, s) is None), CHAIN[-1])
+                if stage is not None:
+                    nxt = "build" if not args.warn and latest(gate, CHAIN[-1]) is not None \
+                        else (gate.get("artifacts") or {}).get(stage) or "sign " + stage
+                    print("%sstage %s; next: %s"
+                          % ("Coco workflow: " if args.line else "", stage, nxt))
         except GateError:
             pass
         return 0
@@ -714,8 +743,8 @@ def cmd_check_edit(args):
         if not root or rel.split("/", 1)[0] == "..":
             return 0
         os.chdir(root)
-        path = gate_path(args.branch or os.environ.get("GITHUB_HEAD_REF", "")
-                         or current_branch())
+        branch = args.branch or os.environ.get("GITHUB_HEAD_REF", "") or current_branch()
+        path = gate_path(branch)
         text = read_text(path)
         if text is None:
             return 0
@@ -723,26 +752,64 @@ def cmd_check_edit(args):
         if gate["size"] == "small" or ("/" not in rel and rel.endswith(".md")) \
                 or glob_match(rel, "docs/specs/**") or glob_match(rel, ".coco/**"):
             return 0
-        check = Check(argparse.Namespace(ci=False, base=None, branch=args.branch,
-                                         policy=None, signers=None, changed=None,
-                                         changed_numstat=None))
-        check.gate = gate
-        check.tmp = tempfile.mkdtemp(prefix="coco-gate-")
-        try:
-            check.policy = check.load_policy()
-            check.load_signers()
-            check.check_stages()
-        finally:
-            shutil.rmtree(check.tmp, ignore_errors=True)
-        if not check.fails:
+        fails = chain_fails(gate, branch)
+        if not fails:
             return 0
-        stage = check.fails[0].split(":", 1)[0]
+        stage = fails[0].split(":", 1)[0]
         say("%s is not signed yet; next: %s. Code edits wait until the plan is signed."
             % (stage, (gate.get("artifacts") or {}).get(stage) or "sign " + stage))
         return 2
     except GateError as exc:
         say(exc)
         return 2
+
+
+def cmd_check_show(args):
+    need(safe_rel(args.checklist or ""), "not a repo-relative path: %s" % args.checklist)
+    text = read_text(args.checklist, "checklist")
+    store = args.checklist + ".signoffs.json"
+    entries = parse_json(read_text(store, "sign-offs file"), store)
+    need(isinstance(entries, list) and all(isinstance(e, dict) and isinstance(e.get("sig"), str)
+                                           for e in entries),
+         "%s: not a list of sign-off objects with a string sig" % store)
+    fails = ["unticked: %s" % line.strip() for line in text.splitlines()
+             if re.match(r"^\s*- \[ \]", line)]
+    digest = sha_file(args.checklist)
+    check = Check(argparse.Namespace(ci=False, base=None, branch=None, policy=None,
+                                     signers=args.signers, changed=None, changed_numstat=None))
+    check.policy = check.load_policy()
+    check.tmp = tempfile.mkdtemp(prefix="coco-gate-")
+    try:
+        check.load_signers()
+        steves, others = set(), set()
+        for entry in entries:
+            if any(entry.get(k) != v for k, v in
+                   (("stage", "show"), ("artifact", args.checklist),
+                    ("branch", check.branch), ("prev", ""))):
+                continue
+            who = str(entry.get("signer"))
+            found = check.roles.get(who)
+            if found is None or found[0] in check.policy["no_sign_roles"] \
+                    or entry.get("sha256") != digest \
+                    or not ssh_verify(check.signers_file, who, canonical(entry),
+                                      entry["sig"]):
+                continue
+            if found[0] == "steve":
+                steves.add(who)
+            elif found[0] in ("reviewer", "design", "council"):
+                others.add(who)
+        if not steves:
+            fails.append("no valid show sign-off by steve")
+        if not others - steves:
+            fails.append("no valid show sign-off by reviewer, design or council")
+    finally:
+        shutil.rmtree(check.tmp, ignore_errors=True)
+    if fails:
+        for item in fails:
+            say("FAIL " + item)
+        return 1
+    say("ok show %s" % args.checklist)
+    return 0
 
 
 def build_parser():
@@ -758,7 +825,8 @@ def build_parser():
     sign.add_argument("--stage", required=True, choices=STAGES)
     for flag in ("--signer", "--key"):
         sign.add_argument(flag, required=True)
-    for flag in ("--artifact", "--decision", "--branch", "--base", "--base-commit"):
+    for flag in ("--artifact", "--decision", "--branch", "--base", "--base-commit",
+                 "--checklist"):
         sign.add_argument(flag)
     verify = subs.add_parser("verify", help="check the gate for a branch")
     verify.add_argument("--ci", action="store_true")
@@ -768,9 +836,13 @@ def build_parser():
     status = subs.add_parser("status", help="print the stage and the next artifact")
     status.add_argument("--branch")
     status.add_argument("--line", action="store_true", help="one line for hooks")
+    status.add_argument("--warn", action="store_true", help="the pre-commit warning")
     edit = subs.add_parser("check-edit", help="allow or refuse a code edit")
     edit.add_argument("--path", required=True)
     edit.add_argument("--branch")
+    show = subs.add_parser("check-show", help="a show checklist is ticked and signed")
+    show.add_argument("--checklist", required=True)
+    show.add_argument("--signers")
     return parser
 
 
@@ -782,8 +854,8 @@ def main(argv):
         return 2
     try:
         return {"init": cmd_init, "sign": cmd_sign, "status": cmd_status,
-                "verify": lambda a: Check(a).run(),
-                "check-edit": cmd_check_edit}[args.cmd](args)
+                "verify": lambda a: Check(a).run(), "check-edit": cmd_check_edit,
+                "check-show": cmd_check_show}[args.cmd](args)
     except GateError as exc:
         say("FAIL " + one_line(exc))
         return 1

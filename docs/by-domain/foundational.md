@@ -2,12 +2,13 @@
 
 Auto-generated view. Filtered to `domain: foundational` skills.
 
-**13 skills.**
+**14 skills.**
 
 | Skill | Description |
 |-------|-------------|
 | [brainstorming](../../skills/brainstorming/SKILL.md) | You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation. |
 | [coco](../../skills/coco/SKILL.md) | Use when the user invokes /coco or /coco!, says catch me up, or asks what needs attention, a project status, their todos, decisions or people. Renders the PM dashboard and routes each subcommand to it |
+| [coco-spec](../../skills/coco-spec/SKILL.md) | Use when a feature will land as more than about three PRs and needs a signed PRD, architecture and plan before any code is written |
 | [dispatching-parallel-agents](../../skills/dispatching-parallel-agents/SKILL.md) | Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies |
 | [executing-plans](../../skills/executing-plans/SKILL.md) | Use when you have a written implementation plan to execute in a separate session with review checkpoints |
 | [humanizer](../../skills/humanizer/SKILL.md) | Remove signs of AI-generated writing from text. Use when editing or reviewing

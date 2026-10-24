@@ -66,71 +66,145 @@ if summary["skip"] != len(skips):
 print("ok   skip kept the user file, directory, and symlink")
 PY
 
-echo "=== managed settings are reported and do not change the install ==="
-MANAGED="$WORK/managed dir/managed-settings.json"
-mkdir -p "$WORK/managed dir"
-printf '{}\n' > "$MANAGED"
-H="$WORK/managed"
-mkdir -p "$H"
-if ! HOME="$H" CLAUDE_HOME="$H/.claude" COCO_MANAGED_SETTINGS_PATHS="$WORK/missing-managed.json:$MANAGED" bash "$ADAPTER" --core-only --dry-run --json >"$WORK/managed.json" 2>"$WORK/managed.err"; then
-  fail "managed dry-run exited non-zero"
-fi
-python3 - "$WORK/managed.json" "$MANAGED" <<'PY'
+echo "=== every org-managed settings source is reported ==="
+# COCO_MANAGED_ROOT replaces the filesystem root, so each source is testable here.
+LOGIN_NAME=$(python3 -c 'import getpass; print(getpass.getuser())')
+MR="$WORK/managed-root"
+MANAGED_RELS=(
+  "Library/Application Support/ClaudeCode/managed-settings.json"
+  "etc/claude-code/managed-mcp.json"
+  "etc/claude-code/managed-settings.d/org.json"
+  "Library/Managed Preferences/com.anthropic.claudecode.plist"
+  "Library/Managed Preferences/$LOGIN_NAME/com.anthropic.claudecode.plist"
+)
+managed_case=0
+for rel in "${MANAGED_RELS[@]}"; do
+  managed_case=$((managed_case + 1))
+  rm -rf "$MR"
+  mkdir -p "$MR/$(dirname "$rel")"
+  printf '{}\n' > "$MR/$rel"
+  H="$WORK/managed$managed_case"
+  mkdir -p "$H"
+  if ! HOME="$H" CLAUDE_HOME="$H/.claude" COCO_MANAGED_ROOT="$MR" bash "$ADAPTER" --core-only --dry-run --json >"$WORK/managed$managed_case.json" 2>"$WORK/managed$managed_case.err"; then
+    fail "managed source $rel: dry-run exited non-zero"
+  fi
+  python3 - "$WORK/managed$managed_case.json" "$MR/$rel" <<'PY'
 import json, sys
 rows = [json.loads(l) for l in open(sys.argv[1], encoding="utf-8")]
+want = [sys.argv[2]]
 got = rows[-1]["summary"]["managed_settings"]
-if got != sys.argv[2]:
-    sys.exit(f"managed_settings {got!r} != {sys.argv[2]!r}")
-print("ok   managed_settings reports the first existing file")
+if got != want:
+    sys.exit("managed_settings %r != %r" % (got, want))
+print("ok   managed_settings reports %s" % want[0])
 PY
-grep -F -q "Managed settings: $MANAGED" "$WORK/managed.err" || fail "managed settings line missing from stderr"
-if ! HOME="$H" CLAUDE_HOME="$H/.claude" COCO_MANAGED_SETTINGS_PATHS="$WORK/missing-managed.json" bash "$ADAPTER" --core-only --dry-run >"$WORK/managed-none.txt" 2>"$WORK/managed-none.err"; then
-  fail "missing managed dry-run exited non-zero"
+  grep -F -q "Managed settings: $MR/$rel" "$WORK/managed$managed_case.err" || fail "managed source $rel: human line missing"
+done
+rm -rf "$MR"
+mkdir -p "$MR"
+H="$WORK/managed-none"
+mkdir -p "$H"
+if ! HOME="$H" CLAUDE_HOME="$H/.claude" COCO_MANAGED_ROOT="$MR" bash "$ADAPTER" --core-only --dry-run >"$WORK/managed-none.txt" 2>"$WORK/managed-none.err"; then
+  fail "no managed source: dry-run exited non-zero"
 fi
 grep -F -q "Managed settings: none" "$WORK/managed-none.txt" || fail "human output did not say managed settings none"
-if ! HOME="$H" CLAUDE_HOME="$H/.claude" COCO_MANAGED_SETTINGS_PATHS="$WORK/missing-managed.json" bash "$ADAPTER" --core-only --dry-run --json >"$WORK/managed-none.json" 2>/dev/null; then
-  fail "missing managed json dry-run exited non-zero"
+if ! HOME="$H" CLAUDE_HOME="$H/.claude" COCO_MANAGED_ROOT="$MR" bash "$ADAPTER" --core-only --dry-run --json >"$WORK/managed-none.json" 2>/dev/null; then
+  fail "no managed source: json dry-run exited non-zero"
 fi
 python3 - "$WORK/managed-none.json" <<'PY'
 import json, sys
 rows = [json.loads(l) for l in open(sys.argv[1], encoding="utf-8")]
-if rows[-1]["summary"]["managed_settings"] is not None:
-    sys.exit(rows[-1]["summary"]["managed_settings"])
-print("ok   missing managed settings file reports null")
+got = rows[-1]["summary"]["managed_settings"]
+if got != []:
+    sys.exit("managed_settings %r != []" % (got,))
+print("ok   no managed source reports []")
 PY
+rm -rf "$MR"
+for rel in "${MANAGED_RELS[@]}"; do
+  mkdir -p "$MR/$(dirname "$rel")"
+  printf '{}\n' > "$MR/$rel"
+done
+printf 'notes\n' > "$MR/etc/claude-code/managed-settings.d/README.txt"
+H="$WORK/managed-all"
+mkdir -p "$H"
+if ! HOME="$H" CLAUDE_HOME="$H/.claude" COCO_MANAGED_ROOT="$MR" bash "$ADAPTER" --core-only --dry-run --json >"$WORK/managed-all.json" 2>"$WORK/managed-all.err"; then
+  fail "all managed sources: dry-run exited non-zero"
+fi
+python3 - "$WORK/managed-all.json" "$MR" "${MANAGED_RELS[@]}" <<'PY'
+import json, os, sys
+rows = [json.loads(l) for l in open(sys.argv[1], encoding="utf-8")]
+root = sys.argv[2]
+want = sorted(os.path.join(root, rel) for rel in sys.argv[3:])
+got = rows[-1]["summary"]["managed_settings"]
+if got != want:
+    sys.exit("managed_settings\n%r\n!= %r" % (got, want))
+print("ok   all managed sources are reported once, sorted")
+PY
+grep -F -q "Managed settings: $MR/Library/Managed Preferences/$LOGIN_NAME/com.anthropic.claudecode.plist" "$WORK/managed-all.err" \
+  || fail "per-user plist line missing from the human output"
 
-echo "=== a user SI file is not recorded; a generated name is backed up ==="
+echo "=== a user SI command is skipped; a coco footer file is replaced ==="
 H="$WORK/simine"
 mkdir -p "$H/.claude/commands"
-printf 'mine-bytes-v1\n' > "$H/.claude/commands/SI-mine.md"
-printf 'orch-bytes-v1\n' > "$H/.claude/commands/SI-AI-Orchestrate.md"
-cp "$H/.claude/commands/SI-mine.md" "$WORK/simine-before"
+printf 'mine-bytes-v1\n' > "$H/.claude/commands/SI-AI-Analyse.md"
+printf 'coco-bytes-v1\n\nMade with CoCo Super Intelligence.\n' > "$H/.claude/commands/SI-AI-Orchestrate.md"
+cp "$H/.claude/commands/SI-AI-Analyse.md" "$WORK/simine-before"
 cp "$H/.claude/commands/SI-AI-Orchestrate.md" "$WORK/siorch-before"
 if ! HOME="$H" CLAUDE_HOME="$H/.claude" bash "$ADAPTER" --systems superintelligence --json >"$WORK/simine.json" 2>"$WORK/simine.err"; then
   echo "installer failed; stderr tail:" >&2
   tail -30 "$WORK/simine.err" >&2
-  fail "SI-mine install exited non-zero"
+  fail "SI ownership install exited non-zero"
 fi
-cmp -s "$H/.claude/commands/SI-mine.md" "$WORK/simine-before" || fail "SI-mine.md bytes changed"
-python3 - "$WORK/simine.json" "$H/.claude/commands/SI-mine.md" "$H/.claude/commands/SI-AI-Orchestrate.md" "$WORK/siorch-before" <<'PY'
-import json, sys
+cmp -s "$H/.claude/commands/SI-AI-Analyse.md" "$WORK/simine-before" || fail "user SI command bytes changed"
+grep -F -x "Skip: $H/.claude/commands/SI-AI-Analyse.md (user file, not overwritten)" "$WORK/simine.err" \
+  || fail "user SI command: skip line missing from stderr"
+python3 - "$WORK/simine.json" "$H/.claude/commands/SI-AI-Analyse.md" "$H/.claude/commands/SI-AI-Orchestrate.md" "$WORK/siorch-before" <<'PY'
+import json, os, sys
 man, mine, generated, orig = sys.argv[1:]
-raw = open(man, encoding="utf-8").read()
-if mine in raw:
-    sys.exit("user SI file appears in the manifest")
+rows = [json.loads(l) for l in open(man, encoding="utf-8")]
+mine_rows = [o for o in rows if o.get("path") == mine]
+if len(mine_rows) != 1 or mine_rows[0].get("op") != "skip" or mine_rows[0].get("reason") != "user file, not overwritten":
+    sys.exit("user SI command record: %s" % mine_rows)
 orig_bytes = open(orig, "rb").read()
-rows = [json.loads(l) for l in raw.splitlines()]
 rec = [o for o in rows if o.get("path") == generated]
-if len(rec) != 1 or not rec[0].get("backup"):
-    sys.exit(f"generated file has no backup: {rec}")
-bak = rec[0]["backup"]
-if open(bak, "rb").read() != orig_bytes:
-    sys.exit("backup is not the pre-existing generated-name file")
+if len(rec) != 1:
+    sys.exit("footed SI command records: %s" % rec)
+row = rec[0]
+if row.get("op") != "write" or row.get("replaces") != "previous coco file":
+    sys.exit("footed SI command is not a replacement: %s" % row)
+if open(generated, "rb").read() == orig_bytes:
+    sys.exit("footed SI command was not replaced")
+bak = row.get("backup") or ""
+if not bak or not os.path.isfile(bak) or open(bak, "rb").read() != orig_bytes:
+    sys.exit("backup is not the pre-existing footed file: %s" % bak)
 kind = [o for o in rows if o.get("op") == "write" and o.get("kind") == "backup" and o.get("path") == bak]
 if len(kind) != 1:
-    sys.exit(f"missing backup record for {bak}")
-print("ok   user SI file untouched and unrecorded; overwritten generated name has a backup")
+    sys.exit("missing backup record for %s" % bak)
+if "Made with CoCo Super Intelligence." not in open(generated, encoding="utf-8").read():
+    sys.exit("replacement lost the footer")
+print("ok   user SI command skipped; footed coco file replaced with a pristine backup")
 PY
+
+echo "=== a file that appears after the plan is refused and left alone ==="
+H="$WORK/race"
+# Pre-existing dirs keep rollback out of rmdir, so the raced file's parent stays.
+mkdir -p "$H/.claude/commands"
+RACED="$H/.claude/commands/SI-AI-Orchestrate.md"
+tree_id "$H" "$RACED" >"$WORK/race-before"
+race_status=0
+HOME="$H" CLAUDE_HOME="$H/.claude" COCO_INSTALL_RACE_CREATE="$RACED" \
+  bash "$ADAPTER" --systems superintelligence --json >"$WORK/race.json" 2>"$WORK/race.err" || race_status=$?
+[[ $race_status -eq 1 ]] || fail "race: exit $race_status"
+grep -F -q "REFUSE: $RACED appeared after the plan" "$WORK/race.err" || fail "race: refusal line missing"
+printf 'raced\n' > "$WORK/race-expected"
+cmp -s "$RACED" "$WORK/race-expected" || fail "race: raced file bytes changed"
+tree_id "$H" "$RACED" >"$WORK/race-after"
+if ! cmp -s "$WORK/race-before" "$WORK/race-after"; then
+  diff -u "$WORK/race-before" "$WORK/race-after" | head -40 >&2 || true
+  fail "race: HOME was not rolled back"
+fi
+grep -q '{"summary":' "$WORK/race.json" && fail "race: emitted a summary" || true
+[[ ! -e "$H/.claude/.coco/install.lock" ]] || fail "race: left install.lock"
+echo "ok   raced file refused, exit 1, HOME rolled back"
 
 echo "=== a failing SI generator aborts --dry-run --json with no summary ==="
 COPY="$WORK/broken-repo"

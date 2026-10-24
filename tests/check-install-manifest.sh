@@ -89,14 +89,30 @@ if bad:
     sys.exit("re-install touched more than the manifest and .coco/backup:\n" + "\n".join(bad[:40]))
 print("ok   re-install left prior bytes; new files are under .coco/backup")
 PY
-cmp -s "$WORK/again.json" "$MAN" || fail "second install manifest is not byte-identical to the first"
-python3 - "$MAN" <<'PY'
+# A re-install marks every generated SI file it replaced, so the two manifests
+# differ in exactly that field.
+python3 - "$WORK/again.json" "$MAN" <<'PY'
 import json, sys
-rows = [json.loads(l) for l in open(sys.argv[1], encoding="utf-8")]
-block = [o for o in rows if o.get("op") == "block"][0]
+first = [json.loads(l) for l in open(sys.argv[1], encoding="utf-8")]
+second = [json.loads(l) for l in open(sys.argv[2], encoding="utf-8")]
+
+def strip(rows):
+    return [{k: v for k, v in o.items() if k != "replaces"} for o in rows]
+
+if strip(first) != strip(second):
+    sys.exit("second manifest changed more than the replaces field")
+if any("replaces" in o for o in first):
+    sys.exit("first install recorded replaces")
+replaced = [o for o in second if o.get("op") == "write" and o.get("kind") == "generated"]
+if not replaced:
+    sys.exit("second install recorded no generated writes")
+bad = [o["path"] for o in replaced if o.get("replaces") != "previous coco file"]
+if bad:
+    sys.exit("generated record without replaces: %s" % bad[:5])
+block = [o for o in second if o.get("op") == "block"][0]
 if block.get("created") is not True:
     sys.exit(f"re-install lost created: {block}")
-print("ok   second manifest matches the first, block created is still true")
+print("ok   second manifest differs only by replaces, block created is still true")
 PY
 grep -q "^Wrote: " "$WORK/human.txt" || fail "human output has no Wrote: lines"
 grep -q "^Linked: " "$WORK/human.txt" || fail "human output has no Linked: lines"
@@ -152,7 +168,7 @@ ln -s "$ROOT/skills/coco" "$H/.claude/skills/brainstorming"
 printf 'user rules\n' > "$H/.claude/CLAUDE.md"
 printf 'user si bytes\n' > "$H/user-si.md"
 ln -s "$H/user-si.md" "$H/.claude/commands/SI-AI.md"
-printf 'user command\n' > "$H/.claude/commands/SI-AI-Orchestrate.md"
+printf 'old coco command\n\nMade with CoCo Super Intelligence.\n' > "$H/.claude/commands/SI-AI-Orchestrate.md"
 printf 'settings-v1\n' > "$H/.claude/settings.json"
 printf 'local-v1\n' > "$H/.claude/settings.local.json"
 printf 'cred-v1\n' > "$H/.claude/.credentials.json"
@@ -163,7 +179,7 @@ cp "$H/user-si.md" "$WORK/equiv-user-si"
 cp "$H/.claude/settings.json" "$WORK/equiv-settings"
 cp "$H/.claude/.credentials.json" "$WORK/equiv-cred"
 snap_tree "$H" "$WORK/equiv-tree.json"
-if ! HOME="$H" CLAUDE_HOME="$H/.claude" COCO_MANAGED_SETTINGS_PATHS="" bash "$ADAPTER" --dry-run --json >"$WORK/equiv-plan.json" 2>"$WORK/equiv-plan.err"; then
+if ! HOME="$H" CLAUDE_HOME="$H/.claude" COCO_MANAGED_ROOT="$WORK/no-managed" bash "$ADAPTER" --dry-run --json >"$WORK/equiv-plan.json" 2>"$WORK/equiv-plan.err"; then
   echo "installer failed; stderr tail:" >&2
   tail -40 "$WORK/equiv-plan.err" >&2
   fail "equivalence dry-run exited non-zero"
@@ -177,7 +193,7 @@ if after != before:
     sys.exit("dry-run changed the equivalence HOME")
 print("ok   equivalence dry-run wrote nothing")
 PY
-if ! HOME="$H" CLAUDE_HOME="$H/.claude" COCO_MANAGED_SETTINGS_PATHS="" bash "$ADAPTER" --json >"$WORK/equiv-real.json" 2>"$WORK/equiv-real.err"; then
+if ! HOME="$H" CLAUDE_HOME="$H/.claude" COCO_MANAGED_ROOT="$WORK/no-managed" bash "$ADAPTER" --json >"$WORK/equiv-real.json" 2>"$WORK/equiv-real.err"; then
   echo "installer failed; stderr tail:" >&2
   tail -40 "$WORK/equiv-real.err" >&2
   fail "equivalence install exited non-zero"
@@ -256,7 +272,7 @@ cp "$H/.claude/.coco/backup/CLAUDE.md" "$WORK/pristine-claude"
 cp "$H/.claude/.coco/backup/commands/SI-AI-Orchestrate.md" "$WORK/pristine-si"
 printf 'APPENDED\n' >> "$H/.claude/CLAUDE.md"
 printf 'APPENDED\n' >> "$H/.claude/commands/SI-AI-Orchestrate.md"
-if ! HOME="$H" CLAUDE_HOME="$H/.claude" COCO_MANAGED_SETTINGS_PATHS="" bash "$ADAPTER" >/dev/null 2>"$WORK/equiv-again.err"; then
+if ! HOME="$H" CLAUDE_HOME="$H/.claude" COCO_MANAGED_ROOT="$WORK/no-managed" bash "$ADAPTER" >/dev/null 2>"$WORK/equiv-again.err"; then
   fail "second equivalence install exited non-zero"
 fi
 cmp -s "$H/.claude/.coco/backup/CLAUDE.md" "$WORK/pristine-claude" || fail "second install overwrote the pristine CLAUDE.md backup"

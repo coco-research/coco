@@ -20,16 +20,20 @@ fail() { echo "FAIL $*" >&2; exit 1; }
 
 snap() { (cd "$1" && find . -print | LC_ALL=C sort); }
 
-# Bytes, symlink targets, and directories. Not mtimes.
+# Bytes, symlink targets, and directories. Not mtimes. An optional second
+# argument names one path to leave out, for a test that plants a file mid-apply.
 tree_id() {
-  python3 - "$1" <<'PY'
+  python3 - "$1" "${2:-}" <<'PY'
 import hashlib, os, sys
 root = os.path.abspath(sys.argv[1])
+skip = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2] else None
 rows = []
 if os.path.isdir(root):
     for dirpath, dirnames, filenames in os.walk(root, followlinks=False):
         for name in sorted(dirnames):
             p = os.path.join(dirpath, name)
+            if skip and os.path.abspath(p) == skip:
+                continue
             rel = os.path.relpath(p, root)
             if os.path.islink(p):
                 rows.append("l " + rel + " -> " + os.readlink(p))
@@ -37,6 +41,8 @@ if os.path.isdir(root):
                 rows.append("d " + rel)
         for name in sorted(filenames):
             p = os.path.join(dirpath, name)
+            if skip and os.path.abspath(p) == skip:
+                continue
             rel = os.path.relpath(p, root)
             if os.path.islink(p):
                 rows.append("l " + rel + " -> " + os.readlink(p))
@@ -128,7 +134,7 @@ if summary["commit"] != (commit or None):
 if summary["target"] != target:
     sys.exit(f"target {summary['target']} != {target}")
 ms = summary["managed_settings"]
-if ms is not None and not isinstance(ms, str):
+if not isinstance(ms, list) or ms != sorted(set(ms)) or not all(isinstance(p, str) and os.path.isabs(p) for p in ms):
     sys.exit(f"managed_settings {ms!r}")
 counts = {op: 0 for op in ops}
 seen = {}
@@ -165,6 +171,8 @@ for obj in records:
         if mode == "install" and obj.get("backup") is not None:
             if not os.path.isfile(obj["backup"]):
                 sys.exit(f"missing backup: {obj['backup']}")
+        if "replaces" in obj and obj["replaces"] != "previous coco file":
+            sys.exit(f"replaces: {obj}")
     elif obj["op"] == "link" and mode == "install":
         if not os.path.islink(p):
             sys.exit(f"not a symlink: {p}")

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import errno
 import fcntl
+import getpass
 import hashlib
 import json
 import os
@@ -12,10 +13,22 @@ import sys
 import tempfile
 import traceback
 
-DEFAULT_MANAGED = (
-    "/Library/Application Support/ClaudeCode/managed-settings.json:"
-    "/etc/claude-code/managed-settings.json"
-)
+MANAGED_NAMES = ("managed-settings.json", "managed-mcp.json")
+MANAGED_DROPIN = "managed-settings.d"
+MDM_PLIST = "com.anthropic.claudecode.plist"
+MAC_SYSTEM = ("Library", "Application Support", "ClaudeCode")
+MAC_MDM = ("Library", "Managed Preferences")
+LINUX_SYSTEM = ("etc", "claude-code")
+# Every command coco 1.9.x generates ends with this line, from
+# systems/superintelligence/templates/attribution.md.
+COCO_FOOTER = b"Made with CoCo Super Intelligence."
+
+
+def login_name():
+    try:
+        return getpass.getuser()
+    except (KeyError, OSError):
+        return None
 
 
 class InstallError(Exception):
@@ -113,13 +126,32 @@ class ApplyMixin:
         rec["sha256"] = digest
         rec["sha256_after"] = digest
 
+    def race_create(self, path):
+        """Test hook: plant a file at path, as if a user made it just before the apply."""
+        want = os.environ.get("COCO_INSTALL_RACE_CREATE")
+        if not want or os.path.normpath(want) != os.path.normpath(path):
+            return
+        del os.environ["COCO_INSTALL_RACE_CREATE"]
+        if os.path.lexists(want):
+            return
+        with open(want, "w", encoding="utf-8") as fh:
+            fh.write("raced\n")
+
     def apply_generated(self, dest, src, rec):
         self.fail_if(dest)
         if self.dry:
             return
+        self.race_create(dest)
         if os.path.islink(dest):
+            # Re-checked at apply time, as apply_link does: a user link made or repointed
+            # after the plan is never replaced.
+            if not self.link_is_ours(dest):
+                self.die("REFUSE: %s became a user link after the plan" % dest)
             self.undo.append(("symlink", dest, os.readlink(dest)))
             os.remove(dest)
+        elif dest in self.planned_new and os.path.lexists(dest):
+            # Planned as new, so whatever sits here now is not ours to overwrite.
+            self.die("REFUSE: %s appeared after the plan" % dest)
         elif os.path.isfile(dest):
             with open(dest, "rb") as fh:
                 self.undo.append(("bytes", dest, fh.read()))
@@ -309,24 +341,52 @@ class ApplyMixin:
                 traceback.print_exc()
             raise SystemExit(1)
 
+    def scan_managed_dir(self, directory, found):
+        for name in MANAGED_NAMES:
+            found.append(os.path.join(directory, name))
+        dropin = os.path.join(directory, MANAGED_DROPIN)
+        try:
+            names = sorted(os.listdir(dropin))
+        except OSError:
+            return
+        for name in names:
+            if name.endswith(".json"):
+                found.append(os.path.join(dropin, name))
+
     def detect_managed(self):
-        if "COCO_MANAGED_SETTINGS_PATHS" in os.environ:
-            raw = os.environ["COCO_MANAGED_SETTINGS_PATHS"]
+        """Every org-managed source that exists, sorted. Existence only, never read.
+
+        COCO_MANAGED_ROOT replaces the filesystem root for tests: the same macOS and
+        Linux layout is searched under it, so every source is reachable on one platform.
+        """
+        root = os.environ.get("COCO_MANAGED_ROOT")
+        if root:
+            systems = [os.path.join(root, *MAC_SYSTEM), os.path.join(root, *LINUX_SYSTEM)]
+            mdm = os.path.join(root, *MAC_MDM)
+        elif sys.platform == "darwin":
+            systems = [os.path.join(os.sep, *MAC_SYSTEM)]
+            mdm = os.path.join(os.sep, *MAC_MDM)
         else:
-            raw = DEFAULT_MANAGED
-        for part in raw.split(":"):
-            if part and os.path.isfile(part):
-                return part
-        return None
+            systems = [os.path.join(os.sep, *LINUX_SYSTEM)]
+            mdm = None
+        found = []
+        for directory in systems:
+            self.scan_managed_dir(directory, found)
+        if mdm:
+            found.append(os.path.join(mdm, MDM_PLIST))
+            login = login_name()
+            if login:
+                found.append(os.path.join(mdm, login, MDM_PLIST))
+        return sorted({path for path in found if os.path.isfile(path)})
 
     def header(self):
         self.managed = self.detect_managed()
         self.say("Coco · Claude Code adapter")
         self.say("Source: %s" % self.repo)
         self.say("Target: %s" % self.home)
-        if self.managed:
-            self.say("Managed settings: %s" % self.managed)
-        else:
+        for path in self.managed:
+            self.say("Managed settings: %s" % path)
+        if not self.managed:
             self.say("Managed settings: none")
         if self.dry:
             self.say("(dry-run mode)")

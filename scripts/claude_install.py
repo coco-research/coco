@@ -19,13 +19,18 @@ import subprocess
 import sys
 import tempfile
 
-from claude_install_apply import ApplyMixin, InstallError, dumps, inside, sha256_file
+from claude_install_apply import (
+    ApplyMixin, COCO_FOOTER, InstallError, dumps, inside, sha256_file,
+)
 
 MARKER = "coco:rules"
 PROTECTED_BASENAMES = ("settings.json", "settings.local.json", ".credentials.json")
 OLD_PARTS = ("skills", "commands", "agents", "systems")
 AGENT_SKIP_CORE = ("INDEX.md", "README.md", "PROMPT-DEFENSE.md")
 AGENT_SKIP_SYSTEM = ("INDEX.md", "README.md")
+# The generator footer is the last thing in the file, so the tail is enough and a
+# huge file at a generated path is never read whole.
+FOOTER_TAIL = 65536
 
 
 class Installer(ApplyMixin):
@@ -53,7 +58,8 @@ class Installer(ApplyMixin):
         self.command_count = 0
         self.si_count = None
         self.stale_count = 0
-        self.managed = None
+        self.managed = []
+        self.planned_new = set()
         self.prior_created = {}
         self.prior_backup = {}
         self.prior_replaced = {}
@@ -299,6 +305,17 @@ class Installer(ApplyMixin):
             return False
         return sha256_file(path) == sha
 
+    def coco_owned(self, path):
+        """True when a file at a generated path still carries the coco footer line."""
+        try:
+            size = os.path.getsize(path)
+            with open(path, "rb") as fh:
+                if size > FOOTER_TAIL:
+                    fh.seek(size - FOOTER_TAIL)
+                return COCO_FOOTER in fh.read()
+        except OSError:
+            return False
+
     def stage_backup(self, path, source=None):
         """Pristine copy once. A symlink records no content unless source is the resolved file."""
         src = path if source is None else source
@@ -532,15 +549,26 @@ class Installer(ApplyMixin):
                 self.add_skip(dest, "user file, not overwritten")
                 self.ops.append(("stale", dest))
                 continue
+            owned = False
             backup = None
             if os.path.isfile(dest) and not os.path.islink(dest):
+                # A regular file here is coco's own only when the previous plan wrote it
+                # or it still carries the generator footer. Anything else is the user's.
+                owned = self.prior_kind.get(dest) == "generated" or self.coco_owned(dest)
+                if not owned:
+                    self.add_skip(dest, "user file, not overwritten")
+                    self.ops.append(("skip", dest, "user file, not overwritten"))
+                    continue
                 if self.prior_unchanged(dest):
                     backup = self.prior_backup.get(dest) or None
                 else:
                     backup = self.stage_backup(dest)
             else:
                 self.ensure_dir(os.path.dirname(dest))
+                self.planned_new.add(dest)
             rec = self.add_write(dest, "generated", backup=backup, carry=False)
+            if owned:
+                rec["replaces"] = "previous coco file"
             self.ops.append(("generated", dest, src, rec))
             written += 1
         self.ops.append(("si_done", written, commands))

@@ -10,6 +10,25 @@ Newest first within each section. Update this file in the same PR that settles s
 
 ## Decisions
 
+### The install plan names every path it writes
+
+**Decided:** 2026-10-24, feat/install-manifest. **Reason:** Uninstall has to restore
+byte-identical originals and must not touch Claude Code's own files. The claude-code
+installer records every new directory, generated file, pristine backup, and the
+manifest itself as `write` with a `kind` of `generated`, `manifest`, `backup`, or
+`dir`. Ops stay `link`, `write`, `block`, and `skip`. `summary.paths` counts
+link + write + block. `settings.json`, `settings.local.json`, `.credentials.json`,
+and anything under `projects/` are refused. A pre-existing file is copied once to
+`.coco/backup/<relative>` and that copy is never replaced. `CLAUDE.md.coco-bak` is
+still rewritten on every change, because hermes shares `write-rules-block.sh`. A
+symlink is replaced only when it is dangling or already points into this checkout;
+a user's own link is `skip` with reason `user link, not replaced`. `managed_settings`
+reports an org-managed settings file when one exists and does not change the install.
+A re-install carries `created`, `backup` and `replaced_link` forward from the previous
+manifest, so the first install's facts survive; the pristine backup is what uninstall
+trusts for the original bytes. The manifest record's
+hash stays null, because the line is inside the file it would hash.
+
 ### Uninstall reads the directory's own git dir, and keeps local work
 
 **Decided:** 2026-10-14, PR #342 review. **Reason:** `git -C dir` does not override

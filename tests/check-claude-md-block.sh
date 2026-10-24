@@ -50,4 +50,13 @@ install_rules "$H"
 check "CRLF block replaced, not duplicated"  '[[ $(blocks "$H/CLAUDE.md") == 1 ]]'
 check "CRLF user line kept as-is"            'grep -q $'"'"'^win\r$'"'"' "$H/CLAUDE.md"'
 
+# 5. A flag that is not exactly --plan is a usage error and does not write.
+printf 'keep\n' > "$WORK/typo.md"
+cp "$WORK/typo.md" "$WORK/typo-before"
+typo_status=0
+printf '<!-- coco:rules-start -->\nnew\n<!-- coco:rules-end -->\n' \
+  | bash "$ROOT/scripts/write-rules-block.sh" "$WORK/typo.md" --Plan >/dev/null 2>&1 || typo_status=$?
+check "--Plan exits 2 and leaves the target untouched" \
+  '[[ $typo_status -eq 2 ]] && cmp -s "$WORK/typo-before" "$WORK/typo.md"'
+
 exit $fail

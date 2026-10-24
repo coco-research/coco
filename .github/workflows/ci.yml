@@ -71,6 +71,9 @@ jobs:
       - name: coco-workflow hook cases (deny code edits until the plan is signed)
         run: bash tests/check-coco-workflow-hook.sh
 
+      - name: coco-workflow git-hook cases (pre-commit warning and the H7 show check)
+        run: bash tests/check-coco-workflow-githook.sh
+
       - name: Validate unknown CLI subcommands fail before any clone
         run: bash tests/check-cli-unknown-subcommand.sh
 

@@ -4,7 +4,10 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 out=$(mktemp -d)
 err=$(mktemp)
-trap 'rm -rf "$out"; rm -f "$err"' EXIT
+fake=$(mktemp -d)
+fake_out=$(mktemp -d)
+fake_err=$(mktemp)
+trap 'rm -rf "$out" "$fake" "$fake_out"; rm -f "$err" "$fake_err"' EXIT
 
 python3 scripts/build-skill-pages.py --out "$out" 2>"$err"
 cat "$err" >&2
@@ -23,7 +26,7 @@ print(n)
 PY
 )
 skipped=$(grep -c '^skip ' "$err" || true)
-pages=$(find "$out/coco/skills" -mindepth 2 -maxdepth 2 -type f -name index.html | wc -l | tr -d ' ')
+pages=$(find "$out/coco/skills" -mindepth 2 -maxdepth 2 -type f -name index.html ! -path '*/measured/*' | wc -l | tr -d ' ')
 echo "discovered $discovered"; echo "skipped $skipped"; echo "$pages skill pages"
 if [[ "$pages" -ne $((discovered - skipped)) ]]; then
   echo "page count $pages != discovered $discovered - skipped $skipped" >&2
@@ -119,6 +122,8 @@ sources = {skill['slug']: skill for skill in mod.discover(mod.installable_bundle
 pages = {}
 for path in sorted((out / 'coco' / 'skills').glob('*/index.html')):
     slug, raw = path.parent.name, path.read_text(encoding='utf-8')
+    if slug == 'measured':
+        continue
     h1 = html.unescape(re.search(r'<h1>(.*?)</h1>', raw, re.S).group(1)).strip()
     lede = html.unescape(re.search(r'<p class="lede">(.*?)</p>', raw, re.S).group(1)).strip()
     meta = re.search(r'<meta name="description" content="([^"]*)"', raw)
@@ -189,6 +194,98 @@ for slug, pair in pages.items():
 if failed:
     sys.exit(1)
 PY
+
+measured="$out/coco/skills/measured/index.html"
+[[ -f "$measured" ]]
+grep -F -q '<link rel="canonical" href="https://cocoresearch.org/coco/skills/measured/">' "$measured"
+grep -F -q 'https://cocoresearch.org/coco/skills/measured/' "$out/sitemap.xml"
+grep -F -q 'Measured: 0.88 on 24 held-out tasks · Oct 21' "$out/coco/skills/c4-architecture/index.html"
+if grep -F -q 'noindex' "$measured"; then
+  echo 'measured page carries noindex' >&2
+  exit 1
+fi
+if grep -F -q 'Layout sample' "$measured" || grep -F -q 'SAMPLE' "$measured"; then
+  echo 'measured page carries sample text' >&2
+  exit 1
+fi
+
+# A committed record the generator rejects is a repo bug: name it here, before the row count.
+if grep -F 'bad record' "$err" >&2; then
+  echo 'a committed eval record is malformed (see above)' >&2
+  exit 1
+fi
+
+expected=$(python3 - <<'PY'
+import hashlib, json
+from pathlib import Path
+root = Path('.').resolve()
+shas = {}
+for pattern in ('skills/*/SKILL.md', 'systems/*/skills/*/SKILL.md', 'systems/*/*/SKILL.md'):
+    for path in root.glob(pattern):
+        if path.is_file():
+            shas[path.parent.name] = hashlib.sha256(path.read_bytes()).hexdigest()
+def rate(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and 0 <= value <= 1
+def count(value):
+    return isinstance(value, int) and not isinstance(value, bool) and value > 0
+def load(path):
+    try:
+        record = json.loads(path.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        return None
+    return record if isinstance(record, dict) else None
+evals, rows = root / 'evals' / 'skills', 0
+for path in sorted(evals.iterdir()):
+    baseline_path = path / 'runs' / 'baseline-heldout.json'
+    if not path.is_dir() or path.name.startswith('_') or not baseline_path.is_file(): continue
+    sha = shas.get(path.name)
+    if not sha: continue
+    shown = []
+    for record_path in sorted((path / 'runs').glob('*-heldout.json')):
+        stem, record = record_path.name[:-len('-heldout.json')], load(record_path)
+        if not record or record.get('split') != 'heldout' or record.get('skill_sha256') != sha: continue
+        if stem != 'baseline':
+            outcome = (load(evals / '_rounds' / path.name / (stem + '.json')) or {}).get('outcome')
+            if outcome != 'kept': continue
+        shown.append(record)
+    if not shown: continue
+    chosen, baseline = max(shown, key=lambda r: str(r.get('date') or '')), load(baseline_path)
+    if baseline and rate(baseline.get('mean')) and count(baseline.get('n')) and rate(chosen.get('mean')) and count(chosen.get('n')):
+        rows += 1
+runs = root / 'evals' / 'routing' / 'runs'
+for record_path in (sorted(runs.glob('*.json')) if runs.is_dir() else []):
+    data = load(record_path) or {}
+    run = data.get('run') if isinstance(data.get('run'), dict) else {}
+    vs = run.get('vs_keyword') if isinstance(run.get('vs_keyword'), dict) else {}
+    if rate(data.get('top1_accuracy')) and rate(vs.get('baseline_top1')) and count(run.get('n_labelled')):
+        rows += 1
+        break
+print(rows)
+PY
+)
+actual=$(grep -c 'data-label="Skill"' "$measured" || true)
+if [[ "$actual" -ne "$expected" ]]; then
+  echo "measured rows $actual != expected $expected" >&2
+  exit 1
+fi
+
+mkdir -p "$fake/skills/zz-fake/runs" "$fake/skills/c4-architecture/runs"
+zeros=$(python3 -c 'print("0" * 64)')
+sha=$(python3 -c 'import hashlib; print(hashlib.sha256(open("skills/c4-architecture/SKILL.md", "rb").read()).hexdigest())')
+cat > "$fake/skills/zz-fake/runs/baseline-heldout.json" <<JSON
+{"date": "2026-10-21", "split": "heldout", "executor": "ollama", "model": "qwen3:4b-instruct-2507-q4_K_M", "n": 24, "mean": 0.5, "skill_sha256": "$zeros"}
+JSON
+cat > "$fake/skills/c4-architecture/runs/baseline-heldout.json" <<JSON
+{"date": "2026-10-21", "split": "heldout", "executor": "ollama", "model": "qwen3:4b-instruct-2507-q4_K_M", "n": 24, "mean": 2, "skill_sha256": "$sha"}
+JSON
+python3 scripts/build-skill-pages.py --out "$fake_out" --evals "$fake" 2>"$fake_err"
+grep -F -q 'measured skip zz-fake: no run for the current SKILL.md' "$fake_err"
+grep -F -q 'measured skip c4-architecture: bad record ' "$fake_err"
+grep -F -q '<p class="empty">No measured skills yet.</p>' "$fake_out/coco/skills/measured/index.html"
+if grep -F -q 'data-label="Skill"' "$fake_out/coco/skills/measured/index.html"; then
+  echo 'a fake record became a measured row' >&2
+  exit 1
+fi
 
 tracked=$(git ls-files coco/skills sitemap.xml)
 if [[ -n "$tracked" ]]; then

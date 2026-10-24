@@ -21,5 +21,9 @@ if [ -n "$gate" ] && [ -f "$gate" ]; then
 fi
 
 chain="${COCO_CHAIN_HOOK:-}"
-[ -n "$chain" ] && [ -x "$chain" ] && exec "$chain" "$@"
+if [ -n "$chain" ]; then
+  # A configured chain that can't run must not turn into a silent pass of the user's hook.
+  [ -x "$chain" ] || { echo "coco-workflow: COCO_CHAIN_HOOK is set but $chain is not executable" >&2; exit 1; }
+  exec "$chain" "$@"
+fi
 exit 0

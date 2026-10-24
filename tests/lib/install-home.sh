@@ -39,7 +39,7 @@ if os.path.isdir(root):
             if os.path.islink(p):
                 rows.append("l " + rel + " -> " + os.readlink(p))
             else:
-                rows.append("d " + rel)
+                rows.append("d " + rel + " %o" % (os.lstat(p).st_mode & 0o7777))
         for name in sorted(filenames):
             p = os.path.join(dirpath, name)
             if skip and os.path.abspath(p) == skip:
@@ -49,7 +49,7 @@ if os.path.isdir(root):
                 rows.append("l " + rel + " -> " + os.readlink(p))
             elif os.path.isfile(p):
                 digest = hashlib.sha256(open(p, "rb").read()).hexdigest()
-                rows.append("f " + rel + " " + digest)
+                rows.append("f " + rel + " " + digest + " %o" % (os.lstat(p).st_mode & 0o7777))
             else:
                 rows.append("o " + rel)
 rows.sort()
@@ -58,7 +58,7 @@ PY
 }
 
 # Manifest checks compare this JSON. Absolute path to link+target, dir,
-# file+sha256, or other. Symlink directories are not walked. Not mtimes.
+# file+sha256+mode, or other. Symlink directories are not walked. Not mtimes.
 snap_tree() {
   python3 - "$1" "$2" <<'PY'
 import hashlib, json, os, sys
@@ -79,7 +79,8 @@ def snap(root):
             if os.path.islink(p):
                 out[p] = ["link", os.readlink(p)]
             elif os.path.isfile(p):
-                out[p] = ["file", hashlib.sha256(open(p, "rb").read()).hexdigest()]
+                out[p] = ["file", hashlib.sha256(open(p, "rb").read()).hexdigest(),
+                          os.lstat(p).st_mode & 0o7777]
             else:
                 out[p] = ["other"]
     return out

@@ -320,8 +320,11 @@ def check_ssh():
 
 
 def ssh_sign(key, message):
-    need(not key.endswith(".pub") or os.environ.get("SSH_AUTH_SOCK"),
-         "a .pub key signs through ssh-agent, and SSH_AUTH_SOCK is unset")
+    # T7 (lab-0514): coco-gate never opens a private key file. It takes the public
+    # key and ssh-keygen asks ssh-agent to sign with the matching private key.
+    need(key.endswith(".pub"),
+         "--key takes a public key (.pub); signing goes through ssh-agent and coco-gate never opens a private key")
+    need(os.environ.get("SSH_AUTH_SOCK"), "SSH_AUTH_SOCK is unset; load the key into ssh-agent first")
     work = tempfile.mkdtemp(prefix="coco-sign-")
     try:
         msg = write_file(os.path.join(work, "message"), message.encode("utf-8"))

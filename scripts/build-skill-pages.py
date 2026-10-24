@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""One HTML page per installable skill, plus an index and a sitemap. stdlib only. --out DIR."""
-import html, json, re, subprocess, sys
+"""Skill pages, a measured page and a sitemap. stdlib only. --out DIR [--evals DIR]."""
+import datetime, hashlib, html, json, re, subprocess, sys
 from pathlib import Path
 from urllib.parse import quote
 
 ROOT = Path(__file__).parent.parent.resolve()
 PAGES = ROOT / 'scripts' / 'skill-pages'
+EVALS = ROOT / 'evals'
 SITE, ORIGIN = 'https://cocoresearch.org', 'https://github.com/coco-research/coco'
 SOURCE_PREFIX, INSTALL = 'https://github.com/coco-research/', 'npx cocosuperintelligence'
 WHEN_LIMIT, WHEN_MAX = 80, 6
@@ -20,7 +21,10 @@ _ING_SKIP = frozenset({'something', 'nothing', 'anything', 'everything', 'during
 _CALLOUT = re.compile(r"(?i)^(?:announce at start\b|version\b|package\b|flags:|arguments:|last updated\b|stop\b|do not read\b|i(?:'m| am) using the .+ skill\b)")
 _SLOTS = ('name', 'title', 'summary', 'domain', 'install', 'source_url')
 _SLOT_RE, _WHEN_RE = re.compile(r'\{\{([a-z_]+)\}\}'), re.compile(r'\{\{#when\}\}(.*?)\{\{/when\}\}', re.S)
-_ALLOWED = {'{{name}}', '{{title}}', '{{summary}}', '{{domain}}', '{{install}}', '{{source_url}}', '{{#when}}', '{{/when}}', '{{.}}'}
+_MEASURED_RE = re.compile(r'[ \t]*\{\{#measured\}\}(.*?)\{\{/measured\}\}\n?', re.S)
+_ALLOWED = {'{{name}}', '{{title}}', '{{summary}}', '{{domain}}', '{{install}}', '{{source_url}}', '{{#when}}', '{{/when}}', '{{.}}', '{{#measured}}', '{{/measured}}', '{{score}}', '{{tasks}}', '{{run_date}}'}
+MONTHS = ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
+_ISO, _SHA256, _RECORD = re.compile(r'\d{4}-\d{2}-\d{2}'), re.compile(r'[0-9a-f]{64}'), '-heldout.json'
 _DANGLING = re.compile(r'(?i)\s+(?:for|to|and|or|with|of|in|on|a|an|the|its|their|by|from|as|into|before|after|when|if|not|that|via|per|without|within|about|than|then|so)$')
 _PEEL = re.compile(r"^(?:(?:the|a|an)\s+)?(?:user|users|agent|someone|somebody|you)\s+(?:(?:wants|want|asks|ask|needs|need|must|should)\s+)?(?:to\s+)?(?=\S)(.+)$", re.I)
 _MACHINE, _STYLES = ('~/', '/Users/', '/home/', 'C:\\'), {'>', '>-', '>+', '|', '|-', '|+'}
@@ -363,7 +367,132 @@ def present(skill, domains):
         summary = paragraph if paragraph and not _bad_summary(paragraph) else f'{title} skill for CoCo Super Intelligence.'
     return {'slug': skill['slug'], 'name': skill['slug'], 'title': title, 'summary': summary,
             'when': when_items(skill['description']), 'domain': domains.get(skill['bundle'], skill['bundle']),
-            'install': INSTALL, 'source_url': source_url(skill['rel'])}
+            'install': INSTALL, 'source_url': source_url(skill['rel']), 'rel': skill['rel']}
+
+def _load(path):
+    """Parsed JSON, or None. Records are repo data, but they are still checked before use."""
+    try: return json.loads(Path(path).read_text(encoding='utf-8'))
+    except (OSError, ValueError): return None
+
+def _num(value, low=0.0, high=1.0):
+    return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) and low <= value <= high else None
+
+def _count(value): return value if isinstance(value, int) and not isinstance(value, bool) and value > 0 else None
+def _skip(slug, why): print(f'measured skip {slug}: {why}', file=sys.stderr)
+
+def _date(value):
+    if not isinstance(value, str) or not _ISO.fullmatch(value): return None
+    try: datetime.date.fromisoformat(value)
+    except ValueError: return None
+    return value
+
+def _rel(path):
+    try: return Path(path).resolve().relative_to(ROOT).as_posix()
+    except ValueError: return str(path)
+
+def run_date(iso): return f'{MONTHS[int(iso[5:7]) - 1]} {int(iso[8:10])}'
+
+def skill_record(record):
+    """(score, tasks, date) from a held-out skill run, else None. Every field is checked."""
+    if not isinstance(record, dict): return None
+    score, tasks, date, sha = _num(record.get('mean')), _count(record.get('n')), _date(record.get('date')), record.get('skill_sha256')
+    if score is None or tasks is None or date is None or not isinstance(sha, str) or not _SHA256.fullmatch(sha): return None
+    return score, tasks, date
+
+def shown_run(evals, skill_dir, slug, sha):
+    """Newest kept held-out record for this exact SKILL.md: (file, record), else (None, None)."""
+    found = []
+    for path in sorted((skill_dir / 'runs').glob('*' + _RECORD)):
+        stem, record = path.name[:-len(_RECORD)], _load(path)
+        if not isinstance(record, dict) or record.get('split') != 'heldout' or record.get('skill_sha256') != sha: continue
+        if stem != 'baseline':
+            kept = _load(Path(evals) / 'skills' / '_rounds' / slug / (stem + '.json'))
+            if not isinstance(kept, dict) or kept.get('outcome') != 'kept': continue
+        found.append((str(record.get('date') or ''), stem != 'baseline', path, record))
+    if not found: return None, None
+    _, _, path, record = max(found, key=lambda item: (item[0], item[1]))
+    return path, record
+
+def measured_rows(evals, skills, kept):
+    """One row per measured skill, from committed records. Anything unclear drops the row."""
+    by_slug, rows = {skill['slug']: skill for skill in skills}, []
+    skills_dir = Path(evals) / 'skills'
+    for path in (sorted(skills_dir.iterdir()) if skills_dir.is_dir() else []):
+        baseline_path = path / 'runs' / 'baseline-heldout.json'
+        if not path.is_dir() or path.name.startswith('_') or not baseline_path.is_file(): continue
+        slug, source = path.name, by_slug.get(path.name)
+        if source is None: _skip(slug, 'no run for the current SKILL.md'); continue
+        run_path, record = shown_run(evals, path, slug, hashlib.sha256((ROOT / source['rel']).read_bytes()).hexdigest())
+        if run_path is None: _skip(slug, 'no run for the current SKILL.md'); continue
+        baseline, shown = skill_record(_load(baseline_path)), skill_record(record)
+        if baseline is None: _skip(slug, f'bad record {_rel(baseline_path)}'); continue
+        if shown is None: _skip(slug, f'bad record {_rel(run_path)}'); continue
+        rows.append({'slug': slug, 'title': source['title'], 'score': shown[0], 'baseline': baseline[0],
+                     'tasks': shown[1], 'date': shown[2], 'model': record.get('model'), 'executor': record.get('executor'),
+                     'embed_model': None, 'href': f'/coco/skills/{quote(slug)}/' if slug in kept else None})
+    return rows
+
+def router_row(evals):
+    """Newest routing record by run.date, then filename. None when none is usable."""
+    runs, best = Path(evals) / 'routing' / 'runs', None
+    for path in (sorted(runs.glob('*.json')) if runs.is_dir() else []):
+        data = _load(path)
+        run = data.get('run') if isinstance(data, dict) else None
+        if not isinstance(run, dict): continue
+        vs = run.get('vs_keyword')
+        score = _num(data.get('top1_accuracy'))
+        baseline = _num(vs.get('baseline_top1')) if isinstance(vs, dict) else None
+        tasks, date = _count(run.get('n_labelled')), _date(run.get('date'))
+        if score is None or baseline is None or tasks is None or date is None: _skip('router', f'bad record {_rel(path)}'); continue
+        if best is None or (date, path.name) > best[0]:
+            embed = run.get('embed_model')
+            best = ((date, path.name), {'slug': 'skill-router', 'title': 'Skill router', 'href': None, 'score': score,
+                                        'baseline': baseline, 'tasks': tasks, 'date': date, 'model': None,
+                                        'executor': None, 'embed_model': embed if isinstance(embed, str) else None})
+    return best[1] if best else None
+
+def _change(score, baseline):
+    delta = round(round(score, 2) - round(baseline, 2), 2)
+    return ('up', f'↑ {delta:.2f}') if delta > 0 else ('down', f'↓ {-delta:.2f}') if delta < 0 else ('flat', 'no change')
+
+def score_row(row):
+    name = f'<a href="{esc(row["href"])}">{esc(row["title"])}</a>' if row['href'] else esc(row['title'])
+    score, cls, change = f'{row["score"]:.2f}', *_change(row['score'], row['baseline'])
+    return _ROW % (name, score, score, f'{row["baseline"]:.2f}', cls, change, row['tasks'], run_date(row['date']))
+
+def _notes(rows):
+    models = sorted({(row['model'], row['executor']) for row in rows
+                     if isinstance(row.get('model'), str) and isinstance(row.get('executor'), str)})
+    embeds = sorted({row['embed_model'] for row in rows if isinstance(row.get('embed_model'), str)})
+    lines = ['      <p class="note">Skill score = mean grader score (0 to 1) on that skill\'s held-out tasks. Baseline = the skill as first measured. Router score = share of held-out requests routed to the right team; its baseline is plain keyword matching. Tasks and graders are committed in evals/.</p>']
+    lines += [f'      <p class="note">Skills scored with {esc(model)} ({esc(executor)}).</p>' for model, executor in models]
+    lines += [f'      <p class="note">Router scored with {esc(embed)} embeddings.</p>' for embed in embeds]
+    return '\n'.join(lines)
+
+_ROW = ('          <tr>\n            <td class="skill" data-label="Skill">%s</td>\n'
+        '            <td data-label="Score">%s<span class="track"><span class="bar" style="--v:%s"></span></span></td>\n'
+        '            <td data-label="Baseline">%s</td>\n            <td class="%s" data-label="Change">%s</td>\n'
+        '            <td data-label="Tasks">%s</td>\n            <td data-label="Last run">%s</td>\n          </tr>')
+
+def measured_page(template, rows):
+    header, footer = _chrome(template, 'header', 'top'), _chrome(template, 'footer', 'foot')
+    table = ('      <table class="scores">\n        <thead>\n          <tr>\n'
+             '            <th scope="col">Skill</th>\n            <th scope="col">Score</th>\n'
+             '            <th scope="col">Baseline</th>\n            <th scope="col">Change</th>\n'
+             '            <th scope="col">Tasks</th>\n            <th scope="col">Last run</th>\n'
+             '          </tr>\n        </thead>\n        <tbody>\n%s\n        </tbody>\n      </table>')
+    body = table % '\n'.join(score_row(row) for row in rows) if rows else '      <p class="empty">No measured skills yet.</p>'
+    description = 'Held-out scores for the skills we measure, from the eval runs committed in the repository.'
+    page = ('<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="utf-8">\n'
+            '  <meta name="viewport" content="width=device-width, initial-scale=1">\n'
+            '  <title>Measured skills · CoCo skills</title>\n'
+            f'  <meta name="description" content="{esc(description)}">\n'
+            '  <link rel="canonical" href="https://cocoresearch.org/coco/skills/measured/">\n'
+            '  <link rel="stylesheet" href="/coco/skills/skills.css">\n</head>\n<body>\n'
+            f'  {header}\n  <div class="col">\n    <main>\n      <h1>Measured skills</h1>\n'
+            f'      <p class="lede">{esc(description)}</p>\n{body}\n{_notes(rows)}\n    </main>\n'
+            f'    {footer}\n  </div>\n</body>\n</html>\n')
+    return finish(page, 'coco/skills/measured/index.html')
 
 def load_template():
     text = (PAGES / 'skill.template.html').read_text(encoding='utf-8')
@@ -371,8 +500,7 @@ def load_template():
         end = text.find('-->')
         if end < 0: raise SystemExit('ERROR: unclosed slot comment in skill template')
         text = text[end + 3:].lstrip('\r\n')
-    text, removed = re.subn(r'[ \t]*\{\{#measured\}\}.*?\{\{/measured\}\}\n?', '', text, count=1, flags=re.S)
-    if removed != 1: raise SystemExit('ERROR: template is missing the {{#measured}} block')
+    if not _MEASURED_RE.search(text): raise SystemExit('ERROR: template is missing the {{#measured}} block')
     if 'href="/coco/skills/skills.css"' not in text: raise SystemExit('ERROR: skill template stylesheet must be /coco/skills/skills.css')
     unknown = set(re.findall(r'\{\{[^{}]+\}\}', text)) - _ALLOWED
     if unknown: raise SystemExit('ERROR: template has unexpected slots: ' + ', '.join(sorted(unknown)))
@@ -408,9 +536,24 @@ def drop_when(template):
     if count != 1: raise SystemExit('ERROR: template is missing the Use it when section')
     return page
 
-def skill_page(template, skill):
-    page = expand_when(template, skill['when']) if skill['when'] else drop_when(template)
+def skill_page(template, skill, measured=None):
+    page = expand_measured(template, measured) if measured else drop_measured(template)
+    page = expand_when(page, skill['when']) if skill['when'] else drop_when(page)
     return finish(fill_slots(page, skill), f'coco/skills/{skill["slug"]}/index.html')
+
+def expand_measured(template, row):
+    match = _MEASURED_RE.search(template)
+    if not match: raise SystemExit('ERROR: template is missing the {{#measured}} block')
+    lines = match.group(1).strip('\n').split('\n')
+    if lines and not lines[-1].strip(): lines.pop()
+    block, values = '\n'.join(lines), {'{{score}}': f'{row["score"]:.2f}', '{{tasks}}': str(row['tasks']), '{{run_date}}': run_date(row['date'])}
+    for slot, value in values.items(): block = block.replace(slot, esc(value))
+    return template[:match.start()] + block + '\n' + template[match.end():]
+
+def drop_measured(template):
+    page, count = re.subn(r'[ \t]*\{\{#measured\}\}.*?\{\{/measured\}\}\n?', '', template, count=1, flags=re.S)
+    if count != 1: raise SystemExit('ERROR: template is missing the {{#measured}} block')
+    return page
 
 def index_page(template, skills, bundles, domains):
     header, footer = _chrome(template, 'header', 'top'), _chrome(template, 'footer', 'foot')
@@ -442,11 +585,13 @@ def index_page(template, skills, bundles, domains):
             '  <link rel="canonical" href="https://cocoresearch.org/coco/skills/">\n'
             '  <link rel="stylesheet" href="/coco/skills/skills.css">\n</head>\n<body>\n'
             f'  {header}\n  <div class="col">\n    <main>\n      <h1>Skills</h1>\n'
-            f'      <p class="lede">{esc(description)}</p>\n{body}\n    </main>\n    {footer}\n  </div>\n</body>\n</html>\n')
+            f'      <p class="lede">{esc(description)}</p>\n'
+            '      <p class="lede"><a href="/coco/skills/measured/">Measured skills →</a></p>\n'
+            f'{body}\n    </main>\n    {footer}\n  </div>\n</body>\n</html>\n')
     return finish(page, 'coco/skills/index.html')
 
 def sitemap(skills):
-    locs = [f'{SITE}/', f'{SITE}/coco/', f'{SITE}/coco/skills/'] + [
+    locs = [f'{SITE}/', f'{SITE}/coco/', f'{SITE}/coco/skills/', f'{SITE}/coco/skills/measured/'] + [
         f'{SITE}/coco/skills/{quote(s["slug"])}/' for s in sorted(skills, key=lambda i: i['slug'])]
     body = '\n'.join(f'<url><loc>{esc(loc)}</loc></url>' for loc in locs)
     return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + body + '\n</urlset>\n'
@@ -473,18 +618,29 @@ def main(argv):
     if argv == ['--print-names']:
         for name in sorted(persona_names(), key=str.casefold): print(name)
         return 0
-    if len(argv) != 2 or argv[0] != '--out' or not argv[1]:
-        print('usage: python3 scripts/build-skill-pages.py --out DIR\n'
+    args, out, evals = list(argv), None, str(EVALS)
+    while args:
+        flag = args.pop(0)
+        if flag == '--out' and args: out = args.pop(0)
+        elif flag == '--evals' and args: evals = args.pop(0)
+        else: out = None; break
+    if not out:
+        print('usage: python3 scripts/build-skill-pages.py --out DIR [--evals DIR]\n'
               '       python3 scripts/build-skill-pages.py --print-names', file=sys.stderr)
         return 2
     bundles = installable_bundles()
     domains = bundle_domains(bundles)
-    kept = select([present(skill, domains) for skill in discover(bundles)], persona_names())
+    skills = [present(skill, domains) for skill in discover(bundles)]
+    kept = select(skills, persona_names())
+    rows = sorted(measured_rows(evals, skills, {skill['slug'] for skill in kept}), key=lambda row: (row['title'].casefold(), row['slug']))
+    router = router_row(evals)
+    measured = {row['slug']: row for row in rows}
     template = load_template()
-    files = {f'coco/skills/{skill["slug"]}/index.html': skill_page(template, skill) for skill in kept}
+    files = {f'coco/skills/{skill["slug"]}/index.html': skill_page(template, skill, measured.get(skill['slug'])) for skill in kept}
     files['coco/skills/index.html'] = index_page(template, kept, bundles, domains)
+    files['coco/skills/measured/index.html'] = measured_page(template, rows + ([router] if router else []))
     files['sitemap.xml'] = sitemap(kept)
-    write_out(argv[1], files)
+    write_out(out, files)
     print(f'wrote {len(kept)} skill pages')
     return 0
 

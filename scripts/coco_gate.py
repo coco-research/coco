@@ -10,7 +10,8 @@ signed by the right role. Local hooks only nudge. This is the lock.
          [--decision P] [--base REF] [--base-commit SHA]
   verify [--ci --base REF] [--signers FILE] [--policy FILE] [--branch B] [--changed FILE]
          [--changed-numstat FILE]
-  status [--branch B]
+  status [--branch B] [--line]
+  check-edit --path P [--branch B]
 
 In CI the signers, the policy and this verifier come from the base branch, so a
 PR cannot add a key, loosen the policy or edit this file and benefit in the same
@@ -676,6 +677,18 @@ def cmd_status(args):
     branch = args.branch or os.environ.get("GITHUB_HEAD_REF", "") or current_branch()
     path = gate_path(branch)
     text = read_text(path)
+    if args.line:
+        # Hook form: one line or nothing, and never a failure exit.
+        try:
+            gate = None if text is None else check_gate(parse_json(text, path), path)
+            if gate is not None and gate["size"] != "small":
+                stage = next((s for s in CHAIN if latest(gate, s) is None), CHAIN[-1])
+                nxt = "build" if latest(gate, CHAIN[-1]) is not None else \
+                    (gate.get("artifacts") or {}).get(stage) or "sign " + stage
+                print("Coco workflow: stage %s; next: %s" % (stage, nxt))
+        except GateError:
+            pass
+        return 0
     if text is None:
         print("stage none; next: init (%s)" % path)
         return 0
@@ -689,6 +702,47 @@ def cmd_status(args):
         nxt = CHAIN[CHAIN.index(last) + 1]
         print("stage %s; next: %s" % (last, (gate.get("artifacts") or {}).get(nxt) or "sign " + nxt))
     return 0
+
+
+def cmd_check_edit(args):
+    # realpath on both sides: macOS /var is a link to /private/var, and git reports the real one.
+    target = os.path.realpath(args.path)
+    where = os.path.dirname(target) if os.path.exists(target) else os.getcwd()
+    root = os.path.realpath((git_text(["-C", where, "rev-parse", "--show-toplevel"]) or "").strip() or ".")
+    rel = os.path.relpath(target, root or target).replace(os.sep, "/")
+    try:
+        if not root or rel.split("/", 1)[0] == "..":
+            return 0
+        os.chdir(root)
+        path = gate_path(args.branch or os.environ.get("GITHUB_HEAD_REF", "")
+                         or current_branch())
+        text = read_text(path)
+        if text is None:
+            return 0
+        gate = check_gate(parse_json(text, path), path)
+        if gate["size"] == "small" or ("/" not in rel and rel.endswith(".md")) \
+                or glob_match(rel, "docs/specs/**") or glob_match(rel, ".coco/**"):
+            return 0
+        check = Check(argparse.Namespace(ci=False, base=None, branch=args.branch,
+                                         policy=None, signers=None, changed=None,
+                                         changed_numstat=None))
+        check.gate = gate
+        check.tmp = tempfile.mkdtemp(prefix="coco-gate-")
+        try:
+            check.policy = check.load_policy()
+            check.load_signers()
+            check.check_stages()
+        finally:
+            shutil.rmtree(check.tmp, ignore_errors=True)
+        if not check.fails:
+            return 0
+        stage = check.fails[0].split(":", 1)[0]
+        say("%s is not signed yet; next: %s. Code edits wait until the plan is signed."
+            % (stage, (gate.get("artifacts") or {}).get(stage) or "sign " + stage))
+        return 2
+    except GateError as exc:
+        say(exc)
+        return 2
 
 
 def build_parser():
@@ -713,6 +767,10 @@ def build_parser():
         verify.add_argument(flag)
     status = subs.add_parser("status", help="print the stage and the next artifact")
     status.add_argument("--branch")
+    status.add_argument("--line", action="store_true", help="one line for hooks")
+    edit = subs.add_parser("check-edit", help="allow or refuse a code edit")
+    edit.add_argument("--path", required=True)
+    edit.add_argument("--branch")
     return parser
 
 
@@ -724,7 +782,8 @@ def main(argv):
         return 2
     try:
         return {"init": cmd_init, "sign": cmd_sign, "status": cmd_status,
-                "verify": lambda a: Check(a).run()}[args.cmd](args)
+                "verify": lambda a: Check(a).run(),
+                "check-edit": cmd_check_edit}[args.cmd](args)
     except GateError as exc:
         say("FAIL " + one_line(exc))
         return 1

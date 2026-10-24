@@ -1,0 +1,66 @@
+<!--
+Slots. A generator replaces these and leaves no braces behind.
+{{name}}        URL slug, lower-case letters, digits and hyphens only. Breadcrumb and canonical path.
+{{title}}       Skill title. Also the h1.
+{{summary}}     One sentence. Also the meta description.
+{{domain}}      Domain label, shown in the eyebrow.
+{{install}}     One command line, inside the code box.
+{{#when}}       Repeat once per "use it when" item, in order.
+  {{.}}         That item's text.
+{{/when}}
+{{source_url}}  URL of this skill's SKILL.md.
+{{#measured}}   Optional. Delete the whole block when there is no score.
+  {{score}}     Held-out pass rate.
+  {{tasks}}     Number of held-out tasks.
+  {{run_date}}  Date of that run.
+{{/measured}}
+Every slot value MUST be HTML-escaped (text and attributes).
+{{source_url}} must start with https://github.com/coco-research/. The generator stops with an error otherwise; it never blanks the link.
+When there are no "use it when" items the generator removes the whole "Use it when" section, not just the list items.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{title}} · CoCo skills</title>
+  <meta name="description" content="{{summary}}">
+  <link rel="canonical" href="https://cocoresearch.org/coco/skills/{{name}}/">
+  <link rel="stylesheet" href="/coco/skills/skills.css">
+</head>
+<body>
+  <header class="top">
+    <a class="wordmark" href="/">CoCo Research</a>
+    <nav>
+      <a href="/coco/skills/">Skills</a>
+      <a href="https://github.com/coco-research/coco">GitHub</a>
+    </nav>
+  </header>
+  <div class="col">
+    <main>
+      <p class="crumb"><a href="/coco/">CoCo Super Intelligence</a> / <a href="/coco/skills/">Skills</a> / {{name}}</p>
+      <p class="eyebrow">{{domain}} · skill</p>
+      <h1>{{title}}</h1>
+      <p class="lede">{{summary}}</p>
+      <section class="block">
+        <p class="label">Install</p>
+        <pre class="install"><code>{{install}}</code></pre>
+      </section>
+      <section class="block">
+        <h2>Use it when</h2>
+        <ul class="when">
+          {{#when}}<li>{{.}}</li>{{/when}}
+        </ul>
+      </section>
+      {{#measured}}
+      <p class="measured">Measured: {{score}} on {{tasks}} held-out tasks · {{run_date}} <a href="/coco/skills/measured/">How we measure →</a></p>
+      {{/measured}}
+      <p class="source"><a href="{{source_url}}">Read the full SKILL.md on GitHub →</a></p>
+    </main>
+    <footer class="foot">
+      <p>Part of CoCo Super Intelligence · MIT core</p>
+      <a href="/coco/skills/">All skills</a>
+    </footer>
+  </div>
+</body>
+</html>

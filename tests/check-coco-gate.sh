@@ -555,4 +555,22 @@ case "$OUT" in
   *) fail "21b no bootstrap notice: $OUT" ;;
 esac
 
+# --- 22. a repo with no signers file on base has not adopted the workflow ---
+git -C "$WORK" checkout -q main
+git -C "$WORK" rm -q .coco/allowed_signers
+git -C "$WORK" commit -qm "no signers yet"
+git -C "$WORK" push -q origin main
+git -C "$WORK" fetch -q origin
+reset feat/unadopted
+capture feat/unadopted
+want_ok "22 no signers on base: not adopted, the check passes"
+case "$OUT" in
+  *"not adopted"*) ok "22b the notice says the repo has not adopted the workflow" ;;
+  *) fail "22b no not-adopted notice: $OUT" ;;
+esac
+
+capture feat/unadopted --base no-such-branch
+[ "$RC" -ne 0 ] || fail "22c an unreadable base must fail, not count as not adopted: $OUT"
+ok "22c an unreadable base fails closed"
+
 echo "ok   all coco-workflow cases passed"

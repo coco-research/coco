@@ -72,7 +72,7 @@ coco-gate sign --stage plan --signer <id>
 - The signature covers the artifact's exact bytes. Editing it after signing voids the signature, so the stage returns to unsigned.
 - Stages are ordered. An arch sign-off is refused until the PRD sign-off is valid, and a plan sign-off is refused until the architecture is signed. Skipping a gate is refused, not warned about.
 - A requested change counts as a rejection. Revise the artifact in place, same path, and sign again. Never write a second PRD at a new path to dodge a review.
-- A rejection blocks every later stage until the rejected stage is signed.
+- After a rejection, every later stage waits until the rejected stage is signed again.
 
 Who signs is recorded in the sign-off. The owner signs the PRD. The architect (or a review council) signs the architecture and the plan. Whoever builds the feature never signs its own gate, and a build agent holds no signing key. A signer is a person or a named role key, never an anonymous edit.
 
@@ -103,7 +103,7 @@ The gate file sits at `.coco/gates/<branch>.json`, with every `/` in the branch 
 | `/coco-spec` | resumes at the first stage that is not signed, and runs it |
 | `/coco-spec <stage>` | runs one stage only: `index`, `interview`, `prd`, `arch`, `plan`, `build` |
 | `approve` | sends the current artifact to its signer, who signs with `coco-gate sign` |
-| `reject <reason>` | records a rejection, blocks later stages, revises the artifact in place |
+| `reject <reason>` | records a rejection, holds later stages, revises the artifact in place |
 
 ## Where the gate stops
 

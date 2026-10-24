@@ -6,7 +6,9 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/install-home.sh"
 
 run_at() {
   local h=$1; shift
-  HOME="$h" CLAUDE_HOME="$h/.claude" COCO_MANAGED_SETTINGS_PATHS="" "$@"
+  # An empty managed root keeps this machine's real org settings out of the run.
+  mkdir -p "$WORK/no-managed"
+  HOME="$h" CLAUDE_HOME="$h/.claude" COCO_MANAGED_ROOT="$WORK/no-managed" "$@"
 }
 install_core() {
   local h=$1
@@ -142,7 +144,7 @@ def check_summary(summary, nremove, nskip, label):
     if summary["remove"] != nremove or summary["skip"] != nskip or summary["paths"] != nremove:
         sys.exit("%s summary counts: %s" % (label, summary))
     ms = summary["managed_settings"]
-    if ms is not None and not isinstance(ms, str):
+    if not isinstance(ms, list) or not all(isinstance(m, str) for m in ms):
         sys.exit("managed_settings %r" % ms)
 
 dry_r, dry_s, dry_sum = load(dry_p)

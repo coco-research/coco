@@ -579,6 +579,17 @@ class Check(object):
         self.tmp = tempfile.mkdtemp(prefix="coco-gate-")
         try:
             check_ssh()
+            # A repo adopts the workflow by putting .coco/allowed_signers on its base
+            # branch. Until then there is nobody who could sign, so the check reports
+            # and passes. Adding the file is itself a protected-path change.
+            # Fail closed: only a readable base tree that lacks the file counts as
+            # not adopted. An unreadable or unfetched base is a FAIL, never a pass.
+            if self.ci and not self.args.signers:
+                code, out, _err = git(["ls-tree", "--name-only", self.base_ref, "--", SIGNERS_PATH])
+                need(code == 0, "cannot read the base tree %s; fetch it first" % self.base_ref)
+                if not out.strip():
+                    say("ok not adopted: no %s on %s" % (SIGNERS_PATH, self.base_ref))
+                    return 0
             self.policy = self.load_policy()
             text = read_text(self.path)
             if text is None:

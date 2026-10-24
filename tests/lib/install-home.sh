@@ -14,6 +14,9 @@ WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
 ADAPTER="$ROOT/adapters/claude-code/install.sh"
 
+# The installer's fault and race hooks are inert unless this is 1; tests switch them on.
+export COCO_INSTALL_TEST_HOOKS=1
+
 VERSION=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$ROOT/package.json")
 COMMIT=$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || true)
 

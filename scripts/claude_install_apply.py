@@ -22,6 +22,8 @@ LINUX_SYSTEM = ("etc", "claude-code")
 # Every command coco 1.9.x generates ends with this line, from
 # systems/superintelligence/templates/attribution.md.
 COCO_FOOTER = b"Made with CoCo Super Intelligence."
+# The fault and race hooks below are test-only. Shipped use never sets these vars.
+TEST_HOOKS = os.environ.get("COCO_INSTALL_TEST_HOOKS") == "1"
 
 
 def login_name():
@@ -55,6 +57,8 @@ def inside(path, root):
 
 class ApplyMixin:
     def fail_if(self, path):
+        if not TEST_HOOKS:
+            return
         want = os.environ.get("COCO_INSTALL_FAIL_AT")
         if want and os.path.normpath(want) == os.path.normpath(path):
             raise InstallError("")
@@ -130,6 +134,8 @@ class ApplyMixin:
 
     def race_create(self, path):
         """Test hook: plant a file at path, as if a user made it just before the apply."""
+        if not TEST_HOOKS:
+            return
         want = os.environ.get("COCO_INSTALL_RACE_CREATE")
         if not want or os.path.normpath(want) != os.path.normpath(path):
             return
@@ -139,11 +145,28 @@ class ApplyMixin:
         with open(want, "w", encoding="utf-8") as fh:
             fh.write("raced\n")
 
+    def race_relink(self, path):
+        """Test hook: repoint an existing symlink at path, as if the user had."""
+        if not TEST_HOOKS:
+            return
+        want = os.environ.get("COCO_INSTALL_RACE_RELINK")
+        if not want or "|" not in want:
+            return
+        target, new = want.split("|", 1)
+        if os.path.normpath(target) != os.path.normpath(path):
+            return
+        del os.environ["COCO_INSTALL_RACE_RELINK"]
+        if not os.path.islink(path):
+            return
+        os.remove(path)
+        os.symlink(new, path)
+
     def apply_generated(self, dest, src, rec):
         self.fail_if(dest)
         if self.dry:
             return
         self.race_create(dest)
+        self.race_relink(dest)
         if os.path.islink(dest):
             # Re-checked at apply time, as apply_link does: a user link made or repointed
             # after the plan is never replaced.

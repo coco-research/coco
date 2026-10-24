@@ -181,6 +181,115 @@ grep -F "nothing to uninstall (no manifest)" "$WORK/pop-again.out" "$WORK/pop-ag
   || fail "second uninstall did not say nothing to uninstall"
 echo "ok   populated HOME matches the pre-install tree"
 
+echo "=== SI install round trip: user and coco SI files, modes kept ==="
+H="$WORK/si"
+mkdir -p "$H/.claude/commands"
+printf 'my own analyse notes\n' > "$H/.claude/commands/SI-AI-Analyse.md"
+printf 'my own orchestrate notes\nMade with CoCo Super Intelligence.\n' > "$H/.claude/commands/SI-AI-Orchestrate.md"
+chmod 600 "$H/.claude/commands/SI-AI-Orchestrate.md"
+printf '{"userSetting":true}\n' > "$H/.claude/settings.json"
+printf 'user rules for SI\n' > "$H/.claude/CLAUDE.md"
+chmod 640 "$H/.claude/CLAUDE.md"
+cp "$H/.claude/commands/SI-AI-Analyse.md" "$WORK/si-analyse-bytes"
+cp "$H/.claude/settings.json" "$WORK/si-settings-bytes"
+cp "$H/.claude/CLAUDE.md" "$WORK/si-claudemd-bytes"
+save_tree "$H" si
+if ! run_at "$H" bash "$ADAPTER" --systems superintelligence >"$WORK/si.out" 2>"$WORK/si.err"; then
+  tail -30 "$WORK/si.err" >&2
+  fail "SI install failed: $H"
+fi
+tree_id "$H" >"$WORK/si-tree-installed"
+grep -q -F '<!-- coco:rules-start -->' "$H/.claude/CLAUDE.md" || fail "SI install did not add the rules block to CLAUDE.md"
+python3 - "$H/.claude/.coco/manifest.jsonl" <<'PY' || fail "SI manifest check failed"
+import json, os, sys
+rows = [json.loads(line) for line in open(sys.argv[1], encoding="utf-8") if line.strip()]
+target = os.path.abspath([r for r in rows if "summary" in r][-1]["summary"]["target"])
+commands = os.path.join(target, "commands")
+
+def only(path):
+    return [r for r in rows if "path" in r and os.path.abspath(r["path"]) == path]
+
+analyse = os.path.join(commands, "SI-AI-Analyse.md")
+orch = os.path.join(commands, "SI-AI-Orchestrate.md")
+hits = only(analyse)
+if len(hits) != 1 or hits[0].get("op") != "skip" or hits[0].get("reason") != "user file, not overwritten":
+    sys.exit("SI-AI-Analyse.md was not skipped as a user file: %s" % hits)
+hits = only(orch)
+if len(hits) != 1 or hits[0].get("op") != "write":
+    sys.exit("SI-AI-Orchestrate.md is not one write record: %s" % hits)
+rec = hits[0]
+if rec.get("kind") != "generated" or rec.get("replaces") != "previous coco file":
+    sys.exit("SI-AI-Orchestrate.md record: %s" % rec)
+backup = rec.get("backup")
+root = os.path.join(target, ".coco", "backup") + os.sep
+if not isinstance(backup, str) or not backup.startswith(root) or not os.path.isfile(backup):
+    sys.exit("SI-AI-Orchestrate.md backup is not under .coco/backup: %s" % backup)
+mode = os.stat(backup).st_mode & 0o777
+if mode != 0o600:
+    sys.exit("SI-AI-Orchestrate.md backup mode is %o" % mode)
+print("ok   SI manifest: user file skipped, coco file replaced with a 0600 backup")
+PY
+if ! run_at "$H" bash "$ADAPTER" --uninstall --dry-run --json >"$WORK/si-dry.json" 2>"$WORK/si-dry.err"; then
+  tail -40 "$WORK/si-dry.err" >&2
+  fail "SI uninstall dry-run failed"
+fi
+tree_id "$H" >"$WORK/si-tree-dry"
+if ! cmp -s "$WORK/si-tree-installed" "$WORK/si-tree-dry"; then
+  diff -u "$WORK/si-tree-installed" "$WORK/si-tree-dry" | head -40 >&2 || true
+  fail "SI uninstall dry-run changed HOME"
+fi
+if ! run_at "$H" bash "$ADAPTER" --uninstall --json >"$WORK/si-real.json" 2>"$WORK/si-real.err"; then
+  tail -40 "$WORK/si-real.err" >&2
+  fail "SI uninstall failed"
+fi
+tree_id "$H" >"$WORK/si-tree-after"
+if ! cmp -s "$WORK/si-tree-before" "$WORK/si-tree-after"; then
+  diff -u "$WORK/si-tree-before" "$WORK/si-tree-after" | head -60 >&2 || true
+  fail "SI round trip did not restore the pre-install tree (bytes and modes)"
+fi
+python3 - "$WORK/si-real.json" "$WORK/si-analyse-bytes" "$WORK/si-settings-bytes" \
+  "$WORK/si-claudemd-bytes" "$WORK/si-dry.json" <<'PY' || fail "SI round trip check failed"
+import json, os, sys
+src, analyse_copy, settings_copy, claudemd_copy, dry_src = sys.argv[1:]
+rows = [json.loads(line) for line in open(src, encoding="utf-8") if line.strip()]
+dry = [json.loads(line) for line in open(dry_src, encoding="utf-8") if line.strip()]
+
+def ops(records):
+    return {(o["op"], os.path.abspath(o["path"])) for o in records if o.get("op") in ("remove", "skip")}
+
+# The dry run is the "what Remove will undo" list: it must name exactly what the real run did.
+if ops(dry) != ops(rows):
+    sys.exit("SI dry-run plan differs from the real uninstall: %s" % sorted(ops(dry) ^ ops(rows))[:10])
+if not ops(rows):
+    sys.exit("SI uninstall removed nothing")
+target = os.path.abspath([o for o in rows if "summary" in o][-1]["summary"]["target"])
+
+def mode(path):
+    return os.stat(path).st_mode & 0o777
+
+def same(path, copy):
+    return open(path, "rb").read() == open(copy, "rb").read()
+
+orch = os.path.join(target, "commands", "SI-AI-Orchestrate.md")
+claude = os.path.join(target, "CLAUDE.md")
+analyse = os.path.join(target, "commands", "SI-AI-Analyse.md")
+settings = os.path.join(target, "settings.json")
+if not os.path.isfile(orch) or mode(orch) != 0o600:
+    sys.exit("SI-AI-Orchestrate.md is not back at 0600")
+if not os.path.isfile(claude) or mode(claude) != 0o640:
+    sys.exit("CLAUDE.md is not back at 0640")
+if not same(claude, claudemd_copy):
+    sys.exit("CLAUDE.md bytes differ from the pre-install file")
+if not same(analyse, analyse_copy):
+    sys.exit("SI-AI-Analyse.md was touched")
+if not same(settings, settings_copy):
+    sys.exit("settings.json was touched")
+removes = [o for o in rows if o.get("op") == "remove" and os.path.abspath(o.get("path", "")) == orch]
+if len(removes) != 1 or removes[0].get("restore") != "backup":
+    sys.exit("SI-AI-Orchestrate.md remove record: %s" % removes)
+print("ok   SI round trip restored bytes and modes")
+PY
+
 echo "=== an edited generated file is kept; an unedited one is restored ==="
 H="$WORK/probe"
 mkdir -p "$H"

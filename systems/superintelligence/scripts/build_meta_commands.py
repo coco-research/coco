@@ -213,22 +213,10 @@ def stamp_attribution(body: str) -> str:
 
 
 def main():
-    import argparse
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--list", action="store_true", help="list files without writing")
-    args = ap.parse_args()
-
-    # One source of truth for the names: --list prints the keys of the dict the write uses.
+    OUT.mkdir(parents=True, exist_ok=True)
     files = {"SI.md": DISPATCH, "SI-Orchestrate.md": ORCHESTRATE}
     for title, (desc, shape) in VERBS.items():
         files[f"SI-{title}.md"] = verb_body(title, desc, shape, debate=title in DEBATE_VERBS)
-    if args.list:
-        for name in files:
-            print(f"  would write {OUT / name}")
-        print(f"Would generate {len(files)} command files.")
-        return
-
-    OUT.mkdir(parents=True, exist_ok=True)
     for name, body in files.items():
         (OUT / name).write_text(stamp_attribution(body), encoding="utf-8")
     print(f"Wrote {len(files)} meta-orchestrator command files to {OUT}:")

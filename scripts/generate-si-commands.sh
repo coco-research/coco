@@ -12,11 +12,10 @@
 #   systems/superintelligence/scripts/build_meta_commands.py       17 cross-team
 #
 # Usage:
-#   bash scripts/generate-si-commands.sh --target <dir> [--dry-run] [--quiet] [--manifest]
+#   bash scripts/generate-si-commands.sh --target <dir> [--dry-run] [--quiet]
 #
 # Exit codes: 0 generated or legitimately skipped (no python3), 1 the generators
-# failed. Failure prints the generator's stderr and exits before any path is
-# listed, so a manifest install cannot record a plan that omits the SI files.
+# failed. Adapters run this non-fatally and report the count they got.
 
 set -euo pipefail
 
@@ -25,14 +24,12 @@ SI_DIR="$REPO_ROOT/systems/superintelligence"
 TARGET=""
 DRY_RUN=0
 QUIET=0
-MANIFEST=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --target) shift; TARGET="${1:-}" ;;
     --dry-run) DRY_RUN=1 ;;
     --quiet) QUIET=1 ;;
-    --manifest) MANIFEST=1 ;;
     --help|-h) bash "$REPO_ROOT/scripts/print-usage.sh" "$0"; exit 0 ;;
     *) echo "generate-si-commands: unknown flag: $1" >&2; exit 1 ;;
   esac
@@ -46,43 +43,6 @@ fi
 
 say() { [[ "$QUIET" -eq 1 ]] || echo "$@"; }
 
-# Paths the generators themselves name (--list / "would write"). Sorted, unique.
-# python3's status is checked on its own: a pipe would report sed, and a process
-# substitution would hide a failure from the caller. Stderr is the generator's.
-planned_paths() {
-  local py tmp err list_out py_status
-  tmp=$(mktemp "${TMPDIR:-/tmp}/coco-si-plan.XXXXXX")
-  err=$(mktemp "${TMPDIR:-/tmp}/coco-si-plan-err.XXXXXX")
-  for py in "$SI_DIR/ai/scripts/build_commands.py" "$SI_DIR/scripts/build_meta_commands.py"; do
-    [[ -f "$py" ]] || continue
-    list_out=$(mktemp "${TMPDIR:-/tmp}/coco-si-plan-out.XXXXXX")
-    py_status=0
-    env COCO_SI_COMMANDS_DIR="$TARGET" python3 "$py" --list >"$list_out" 2>"$err" || py_status=$?
-    if [[ $py_status -ne 0 ]]; then
-      cat "$err" >&2
-      rm -f "$tmp" "$err" "$list_out"
-      exit "$py_status"
-    fi
-    sed -n 's/^  would write //p' "$list_out" >> "$tmp"
-    rm -f "$list_out"
-  done
-  rm -f "$err"
-  if [[ -s "$tmp" ]]; then
-    LC_ALL=C sort -u "$tmp"
-  fi
-  rm -f "$tmp"
-}
-
-# Planned paths for a dry run. Names only; the bodies are not written.
-manifest_plan() {
-  local path planned
-  planned=$(planned_paths) || return $?
-  while IFS= read -r path; do
-    [[ -n "$path" ]] || continue
-    printf 'PLAN: %s\n' "$path"
-  done <<< "$planned"
-}
-
 if [[ ! -f "$SI_DIR/ai/scripts/build_commands.py" ]]; then
   say "Skip SI generation: $SI_DIR/ai/scripts/build_commands.py not found."
   exit 0
@@ -95,9 +55,6 @@ fi
 
 if [[ "$DRY_RUN" -eq 1 ]]; then
   say "DRY: generate 342 SI commands into $TARGET"
-  if [[ $MANIFEST -eq 1 ]]; then
-    manifest_plan || exit $?
-  fi
   exit 0
 fi
 
@@ -111,19 +68,8 @@ if [[ -f "$SI_DIR/scripts/build_meta_commands.py" ]]; then
 fi
 
 count=0
-if [[ $MANIFEST -eq 1 ]]; then
-  # Intersect the generator's own names with files this run left behind.
-  # find SI*.md would record a user's SI-mine.md, and uninstall would delete it.
-  planned=$(planned_paths) || exit $?
-  while IFS= read -r file; do
-    [[ -n "$file" && -f "$file" && ! -L "$file" ]] || continue
-    printf 'Wrote: %s\n' "$file"
-    count=$((count + 1))
-  done <<< "$planned"
-else
-  for file in "$TARGET"/SI*.md; do
-    [[ -f "$file" ]] && count=$((count + 1))
-  done
-fi
+for file in "$TARGET"/SI*.md; do
+  [[ -f "$file" ]] && count=$((count + 1))
+done
 
 say "Generated $count SI commands into $TARGET"

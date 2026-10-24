@@ -21,8 +21,10 @@ link + write + block. `settings.json`, `settings.local.json`, `.credentials.json
 and anything under `projects/` are refused. A pre-existing file is copied once to
 `.coco/backup/<relative>` and that copy is never replaced. `CLAUDE.md.coco-bak` is
 still rewritten on every change, because hermes shares `write-rules-block.sh`. A
-symlink is replaced only when it is dangling or already points into this checkout;
-a user's own link is `skip` with reason `user link, not replaced`. `managed_settings`
+symlink is replaced only when its text points into this checkout (dangling or not)
+or exactly matches an older coco checkout path recorded in the previous manifest;
+a dangling link that points elsewhere is a user link and is left in place. A
+user's own link is `skip` with reason `user link, not replaced`. `managed_settings`
 reports an org-managed settings file when one exists and does not change the install.
 A re-install carries `created`, `backup` and `replaced_link` forward from the previous
 manifest, so the first install's facts survive; the pristine backup is what uninstall

@@ -1,0 +1,97 @@
+name: coco-workflow
+
+on:
+  pull_request:
+  workflow_call:
+    inputs:
+      verifier_ref:
+        description: 40-hex commit of coco-research/coco holding scripts/coco_gate.py
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# One run per PR: a newer push cancels the older run, so stale runs can't report the check.
+concurrency:
+  group: coco-workflow-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coco-workflow:
+    # The required check for feature work: PRD -> architecture -> plan, each stage
+    # signed by a named person or agent role. The verifier, the signers and the
+    # policy all come from the base branch, so a PR cannot add a key, loosen the
+    # policy or edit the gate in the same PR that benefits from it. A reusable
+    # call runs the verifier pinned by verifier_ref, never the caller's copy.
+    # No secret context, no network beyond the git fetch of the repo itself.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Check the verifier pin
+        # Before any checkout: outside coco-research/coco the verifier must come
+        # from coco at a pinned 40-hex commit, never from the calling repo.
+        env:
+          VERIFIER: ${{ inputs.verifier_ref }}
+        run: |
+          set -eu
+          if [ "$GITHUB_REPOSITORY" != "coco-research/coco" ] && [ -z "$VERIFIER" ]; then
+            echo "coco-workflow: FAIL verifier_ref is required outside coco-research/coco"
+            exit 1
+          fi
+          if [ -n "$VERIFIER" ] && ! printf '%s' "$VERIFIER" | grep -qE '^[0-9a-f]{40}$'; then
+            echo "coco-workflow: FAIL verifier_ref must be a 40-hex commit"
+            exit 1
+          fi
+
+      - name: Check out the pinned verifier
+        # In a called workflow github.event_name is the caller's event, so the
+        # reusable path is told apart by its input, which pull_request never sets.
+        if: inputs.verifier_ref != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: coco-research/coco
+          ref: ${{ inputs.verifier_ref }}
+          # Relative, then moved into $RUNNER_TEMP: checkout refuses a path
+          # that is not under the workspace.
+          path: coco-verifier
+
+      - name: Fetch the base branch
+        env:
+          BASE_REF: ${{ github.base_ref || github.event.repository.default_branch }}
+        run: git fetch --no-tags origin "+refs/heads/$BASE_REF:refs/remotes/origin/$BASE_REF"
+
+      - name: Verify the coco-workflow gate
+        env:
+          VERIFIER: ${{ inputs.verifier_ref }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -eu
+          BASE="${GITHUB_BASE_REF:-$DEFAULT_BRANCH}"
+          V="$RUNNER_TEMP/coco_gate.py"
+          if [ -n "$VERIFIER" ]; then
+            case "$VERIFIER" in
+              *[!0-9a-f]*|"") echo "coco-workflow: verifier_ref must be a 40-hex commit"; exit 1 ;;
+            esac
+            [ "${#VERIFIER}" -eq 40 ] || { echo "coco-workflow: verifier_ref must be a 40-hex commit"; exit 1; }
+            cp -R "$GITHUB_WORKSPACE/coco-verifier" "$RUNNER_TEMP/coco"
+            V="$RUNNER_TEMP/coco/scripts/coco_gate.py"
+          elif git show "origin/$BASE:scripts/coco_gate.py" > "$V" 2>/dev/null; then
+            :
+          else
+            # Bootstrap only: base has no verifier yet. That is allowed only for the PR
+            # that adds scripts/coco_gate.py, which is then judged by its own copy, so
+            # it rests on code-owner review. Make coco-workflow a required check only
+            # after this verifier is on base, and this window never applies.
+            if ! git diff --name-status "origin/$BASE...HEAD" | grep -qE '^A[[:space:]]+scripts/coco_gate.py$'; then
+              echo "coco-workflow: FAIL no verifier on base and this PR does not add one"
+              exit 1
+            fi
+            echo "coco-workflow: verifier not on base yet, using head copy (bootstrap PR; needs code-owner review)"
+            V=scripts/coco_gate.py
+          fi
+          python3 "$V" verify --ci --base "$BASE"

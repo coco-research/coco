@@ -1,0 +1,10 @@
+# Reusable coco-workflow call; both shas must match (workflow and verifier).
+name: coco-workflow
+on: pull_request
+permissions:
+  contents: read
+jobs:
+  coco-workflow:
+    uses: coco-research/coco/.github/workflows/coco-workflow.yml@0000000000000000000000000000000000000000
+    with:
+      verifier_ref: 0000000000000000000000000000000000000000

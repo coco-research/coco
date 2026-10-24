@@ -1,0 +1,414 @@
+/* CDN faces for now. These switch to self-hosted files later. */
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62.5% 125%;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/npm/@fontsource-variable/archivo@5.3.0/files/archivo-latin-wdth-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Martian Mono";
+  font-style: normal;
+  font-weight: 100 800;
+  font-stretch: 75% 112.5%;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/npm/@fontsource-variable/martian-mono@5.3.0/files/martian-mono-latin-wdth-normal.woff2") format("woff2");
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #03050B;
+  --surface: #0B0F1A;
+  --line: rgba(150, 178, 255, .16);
+  --ink: #EEF2FB;
+  --ink-2: #B4BED4;
+  --ink-3: #8D98B2;
+  --link: #8FA2FF;
+  --up: #3FD98A;
+  --down: #FF6A55;
+  /* WCAG AA text (4.5:1) on --bg / --surface:
+     ink 18.18 / 17.07, ink-2 10.92 / 10.26, ink-3 7.05 / 6.62,
+     link 8.52 / 8.00, up 11.16 / 10.48, down 7.23 / 6.78. */
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --bg: #F3F2EE;
+    --surface: #FFFFFF;
+    --line: #D6D5CD;
+    --ink: #0B0B0B;
+    --ink-2: #3C3C37;
+    --ink-3: #5F5F58;
+    --link: #1234FF;
+    --up: #0B7A45;
+    --down: #C42414;
+    /* WCAG AA text (4.5:1) on --bg / --surface:
+       ink 17.57 / 19.68, ink-2 9.90 / 11.09, ink-3 5.74 / 6.43,
+       link 6.33 / 7.09, up 4.83 / 5.41, down 5.19 / 5.82. */
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Archivo, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+a:hover,
+a:focus {
+  text-decoration: underline;
+}
+
+a:focus {
+  outline: 2px solid var(--link);
+  outline-offset: 3px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 64px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.wordmark {
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.top nav {
+  display: flex;
+  gap: 20px;
+}
+
+.top nav a {
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+.col {
+  width: 100%;
+  max-width: calc(760px + 48px);
+  margin-inline: auto;
+  padding: 32px 24px 48px;
+}
+
+.crumb,
+.eyebrow,
+.label,
+.install,
+.measured,
+.note,
+.foot,
+.scores th,
+.scores td,
+.empty {
+  font-family: "Martian Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.crumb {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.crumb a {
+  color: var(--ink-3);
+}
+
+.eyebrow {
+  margin: 28px 0 0;
+  color: var(--ink-3);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 10px 0 0;
+  font-family: Archivo, sans-serif;
+  font-stretch: 125%;
+  font-weight: 650;
+  font-size: clamp(36px, 6vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.lede {
+  margin: 16px 0 0;
+  color: var(--ink-2);
+  font-size: 19px;
+  line-height: 30px;
+}
+
+.block {
+  margin-top: 36px;
+}
+
+.label {
+  margin: 0 0 8px;
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+.install {
+  margin: 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  user-select: all;
+  white-space: pre;
+}
+
+.install code {
+  font: inherit;
+}
+
+h2 {
+  margin: 0 0 12px;
+  font-family: Archivo, sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.when {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.when li {
+  position: relative;
+  margin: 0;
+  padding-left: 18px;
+  font-size: 16px;
+  line-height: 26px;
+}
+
+.when li + li {
+  margin-top: 6px;
+}
+
+.when li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  background: var(--ink-3);
+}
+
+.measured {
+  margin: 36px 0 0;
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.source {
+  margin: 20px 0 0;
+  font-size: 16px;
+  line-height: 26px;
+}
+
+.note,
+.empty {
+  margin: 16px 0 0;
+  color: var(--ink-3);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.scores {
+  width: 100%;
+  margin-top: 28px;
+  border-collapse: collapse;
+}
+
+.scores th {
+  padding: 0 12px 8px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-3);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.scores td {
+  padding: 14px 12px 14px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 13px;
+  vertical-align: top;
+}
+
+.skill {
+  font-family: Archivo, sans-serif;
+  font-size: 16px;
+}
+
+.track {
+  display: block;
+  width: 96px;
+  max-width: 100%;
+  height: 2px;
+  margin-top: 6px;
+  background: var(--ink-3);
+}
+
+.bar {
+  display: block;
+  width: calc(var(--v) * 100%);
+  height: 100%;
+  background: var(--ink);
+}
+
+.scores td.up {
+  color: var(--up);
+}
+
+.scores td.down {
+  color: var(--down);
+}
+
+.scores td.flat {
+  color: var(--ink-3);
+}
+
+/* WHY: the arrow never wraps onto its own line. */
+.measured a {
+  white-space: nowrap;
+}
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+.foot p {
+  margin: 0;
+}
+
+.foot a {
+  color: var(--ink-3);
+}
+
+@media (max-width: 639px) {
+  .scores thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .scores,
+  .scores tbody,
+  .scores tr,
+  .scores td {
+    display: block;
+    width: auto;
+  }
+
+  /* WHY: two columns halve the card height; the skill and its score bar span both. */
+  .scores tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 16px;
+    margin-top: 12px;
+    padding: 4px 14px 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+  }
+
+  .scores td {
+    padding: 10px 0;
+    border: 0;
+  }
+
+  .scores td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 2px;
+    color: var(--ink-3);
+    font-family: "Martian Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+
+  .scores td.skill,
+  .scores td:nth-child(2) {
+    grid-column: 1 / -1;
+  }
+
+  .track {
+    width: 100%;
+  }
+}
+
+@media (max-width: 479px) {
+  .top {
+    padding-inline: 16px;
+  }
+
+  .col {
+    max-width: calc(760px + 32px);
+    padding-inline: 16px;
+  }
+
+  .top nav {
+    gap: 14px;
+  }
+}

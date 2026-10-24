@@ -41,6 +41,14 @@ fail() { echo "FAIL $1" >&2; exit 1; }
 for k in brain steve design factory outsider; do
   ssh-keygen -t ed25519 -N '' -q -C "$k" -f "$T/keys/$k"
 done
+# Signing goes only through ssh-agent (T7), so one agent holds every throwaway key.
+AGENT_ENV="$(ssh-agent -a "$AGENT_SOCK" -s 2>&1)" || fail "cannot start ssh-agent: $AGENT_ENV"
+eval "$AGENT_ENV" >/dev/null
+[ -n "${SSH_AGENT_PID:-}" ] || fail "ssh-agent did not start"
+AGENT_PID="$SSH_AGENT_PID"
+for k in brain steve design factory outsider; do
+  ssh-add "$T/keys/$k" </dev/null >/dev/null 2>&1 || fail "ssh-add $k failed"
+done
 
 # --- a bare origin with a base main that owns the trust roots ------------
 git config --global init.defaultBranch main
@@ -143,7 +151,7 @@ init_gate() {
 sign_stage() {
   local st="$1" who="$2"
   shift 2
-  gate sign --stage "$st" --signer "$who" --key "$T/keys/$who" "$@"
+  gate sign --stage "$st" --signer "$who" --key "$T/keys/$who.pub" "$@"
 }
 
 # A gate with no artifacts and no chain: the shape a protected-path-only PR uses.
@@ -265,14 +273,14 @@ docs outsider
 init_gate feat/outsider outsider
 sign_stage prd brain
 sign_stage arch steve
-gate sign --stage plan --signer steve --key "$T/keys/outsider"
+gate sign --stage plan --signer steve --key "$T/keys/outsider.pub"
 capture feat/outsider
 want_fail "6a an outsider key under a trusted name" "signature does not verify"
 
 reset feat/factory
 docs factory
 init_gate feat/factory factory
-gate sign --stage prd --signer factory --key "$T/keys/factory"
+gate sign --stage prd --signer factory --key "$T/keys/factory.pub"
 capture feat/factory
 want_fail "6b a role in no_sign_roles is rejected" "no_sign_roles"
 
@@ -284,7 +292,7 @@ gate init --branch feat/builder --size feature --builder steve \
 sign_stage prd brain
 sign_stage arch steve
 capture feat/builder
-want_fail "6c the gate builder cannot sign its own gate" "gate builder"
+want_fail "T5 6c the gate builder cannot sign its own gate" "gate builder"
 
 # --- 7. a key added on the branch is ignored in CI -----------------------
 reset feat/keyadd
@@ -293,7 +301,7 @@ signed_gate feat/keyadd keyadd
 printf 'steve namespaces="coco-gate" %s coco-role=steve\n' \
   "$(cat "$T/keys/outsider.pub")" >> "$WORK/.coco/allowed_signers"
 drop_stage feat__keyadd plan
-gate sign --stage plan --signer steve --key "$T/keys/outsider"
+gate sign --stage plan --signer steve --key "$T/keys/outsider.pub"
 capture feat/keyadd
 want_fail "7 a key added on the branch is ignored in ci" "signature does not verify"
 # Control: the branch's own signers file is what would have said yes.
@@ -469,7 +477,7 @@ for st in prd arch plan; do
     prd) who=brain ;;
     *) who=steve ;;
   esac
-  gate sign --stage "$st" --signer "$who" --key "$T/keys/$who" \
+  gate sign --stage "$st" --signer "$who" --key "$T/keys/$who.pub" \
     --branch feat/orphancopy --base-commit "$ORPHAN"
 done
 git -C "$WORK" checkout -q -B feat/orphancopy origin/main
@@ -502,23 +510,23 @@ sign_stage infra steve
 capture fix/prot
 want_ok "18b a protected path with a steve infra sign-off"
 
-# --- 19. a .pub key signs through ssh-agent -----------------------------
+# --- 19. T7: signing only through ssh-agent; a private key path is refused ---
 reset feat/agent
 docs agent
 init_gate feat/agent agent
 sign_stage prd brain
 sign_stage arch steve
-AGENT_ENV="$(ssh-agent -a "$AGENT_SOCK" -s 2>&1)" || fail "19 cannot start ssh-agent: $AGENT_ENV"
-eval "$AGENT_ENV" >/dev/null
-[ -n "${SSH_AGENT_PID:-}" ] || fail "19 ssh-agent did not start"
-AGENT_PID="$SSH_AGENT_PID"
-ssh-add "$T/keys/steve" </dev/null >/dev/null 2>&1 || fail "19 ssh-add failed"
+RC=0; OUT="$( (cd "$WORK" && python3 "$GATE_SRC" sign --stage plan --signer steve --key "$T/keys/steve") 2>&1 )" || RC=$?
+[ "$RC" -ne 0 ] || fail "T7 a private key path was accepted: $OUT"
+case "$OUT" in *"never opens a private key"*) ;; *) fail "T7 wrong refusal: $OUT" ;; esac
+case "$OUT" in *Traceback*) fail "T7 traceback: $OUT" ;; esac
+ok "T7 sign refuses a private key file and names the ssh-agent route"
+RC=0; OUT="$( (cd "$WORK" && env -u SSH_AUTH_SOCK python3 "$GATE_SRC" sign --stage plan --signer steve --key "$T/keys/steve.pub") 2>&1 )" || RC=$?
+[ "$RC" -ne 0 ] || fail "T7 signed with no ssh-agent: $OUT"
+ok "T7b no ssh-agent, no signature"
 gate sign --stage plan --signer steve --key "$T/keys/steve.pub"
 capture feat/agent
 want_ok "19 a .pub key signs through ssh-agent"
-ssh-agent -k >/dev/null 2>&1 || true
-unset SSH_AUTH_SOCK SSH_AGENT_PID
-AGENT_PID=""
 
 # --- 20. workflow hygiene: pinned actions, no secrets, read-only ---------
 WF="$HERE/.github/workflows/coco-workflow.yml"

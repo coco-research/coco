@@ -504,7 +504,9 @@ class Check(object):
             added, deleted, path = (raw.split("\t") + ["", "", ""])[:3]
             if not (added.isdigit() and deleted.isdigit()):
                 continue
-            if path.startswith(("tests/", "docs/")) or path.endswith(".md"):
+            # Only Markdown prose is free. Code under docs/ or tests/ counts like any
+            # other code, or a feature could ride in under those folders ungated.
+            if path.endswith(".md"):
                 continue
             total += int(added) + int(deleted)
         return total
@@ -559,6 +561,10 @@ class Check(object):
                       "approve")
         elif not re.search(r"(?m)^\s*by:\s*\S+", text):
             self.fail("decision record %s has no 'by: <id>' line" % decision, "approve")
+        elif approve["artifact"] not in text:
+            # Bind the relayed yes to this mock: any record with a by: line won't do.
+            self.fail("decision record %s does not name the mock %s"
+                      % (decision, approve["artifact"]), "approve")
 
     def absent_gate(self):
         # Base first: otherwise the feature rule fires and the deletion is never named.

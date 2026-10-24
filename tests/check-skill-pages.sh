@@ -6,8 +6,11 @@ out=$(mktemp -d)
 err=$(mktemp)
 trap 'rm -rf "$out"; rm -f "$err"' EXIT
 
-python3 scripts/build-skill-pages.py --out "$out" 2>"$err"
+# Show the generator stderr even when it fails, before set -e ends the script.
+rc=0
+python3 scripts/build-skill-pages.py --out "$out" 2>"$err" || rc=$?
 cat "$err" >&2
+[ "$rc" -eq 0 ] || { echo "build-skill-pages.py exited $rc" >&2; exit "$rc"; }
 
 discovered=$(python3 - <<'PY'
 from pathlib import Path

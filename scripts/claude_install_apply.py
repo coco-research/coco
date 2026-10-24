@@ -331,11 +331,6 @@ class ApplyMixin:
         if self.dry:
             self.say("(dry-run mode)")
 
-    def legacy_lock(self):
-        lock = os.path.join(self.home, ".coco", "install.lock")
-        if os.path.lexists(lock):
-            self.die("another coco install is running (remove %s if it is stale)" % lock)
-
     def acquire_flock(self):
         key = hashlib.sha256(self.home_real.encode("utf-8")).hexdigest()
         path = os.path.join(tempfile.gettempdir(), "coco-install-%s.lock" % key)
@@ -365,7 +360,6 @@ class ApplyMixin:
         try:
             self.header()
             if not self.dry:
-                self.legacy_lock()
                 self.acquire_flock()
             self.load_prior()
             self.plan_all()

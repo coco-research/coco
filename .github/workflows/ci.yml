@@ -65,6 +65,9 @@ jobs:
       - name: Validate officecli install instructions
         run: bash tests/check-officecli-install.sh
 
+      - name: Workflow skill copy (GC word list)
+        run: bash tests/check-workflow-copy.sh
+
       - name: Validate unknown CLI subcommands fail before any clone
         run: bash tests/check-cli-unknown-subcommand.sh
 

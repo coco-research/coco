@@ -70,11 +70,11 @@ coco-gate sign --stage plan --signer <id>
 ```
 
 - The signature covers the artifact's exact bytes. Editing it after signing voids the signature, so the stage returns to unsigned.
-- Stages are ordered. An arch sign-off is refused until the PRD sign-off is valid, and a plan sign-off is refused until the architecture is signed. Skipping a gate is refused, not warned about.
+- Stages are ordered. An arch sign-off is refused until the PRD sign-off is valid, and a plan sign-off is refused until the architecture is signed. Skipping a gate is refused, not warned about (see Where the gate stops).
 - A requested change counts as a rejection. Revise the artifact in place, same path, and sign again. Never write a second PRD at a new path to dodge a review.
 - After a rejection, every later stage waits until the rejected stage is signed again.
 
-Who signs is recorded in the sign-off. The owner signs the PRD. The architect (or a review council) signs the architecture and the plan. Whoever builds the feature never signs its own gate, and a build agent holds no signing key. A signer is a person or a named role key, never an anonymous edit.
+Who signs is recorded in the sign-off. The owner signs the PRD. The architect (or a review council) signs the architecture and the plan. Whoever builds the feature never signs its own gate, and a build agent is never given a signing key. A signer is a person or a named role key, never an anonymous edit.
 
 ## State
 
@@ -109,10 +109,10 @@ The gate file sits at `.coco/gates/<branch>.json`, with every `/` in the branch 
 
 Locally the gates are tamper-evident, not tamper-proof. An agent running as the same OS user can read any key file that user can read, so a determined local agent could sign as someone else. A local gate proves a step happened and shows when bytes changed after signing. It cannot stop a process that already has the user's file access.
 
-What gives it teeth is the pull request. A required check, `coco-workflow`, verifies the gate with the signer keys, the policy and the verifier taken from the base branch, so a key, a looser rule or an edited checker added on the feature branch proves nothing. The final lock is the merge, made by a person from their own account and machine. Each role has its own key, so a forged sign-off names who it impersonated.
+What gives it teeth is the pull request. A required check, `coco-workflow`, verifies the gate with the signer keys, the policy and the verifier taken from the base branch, so a key, a looser rule or an edited checker added on the feature branch proves nothing. The final lock is the merge, made by a person from their own account and machine. This holds only if the repo makes `coco-workflow` a required check and limits who can merge. GitHub admins can bypass branch rules unless that's turned off. Each role has its own key, so one leaked key affects only that role.
 
 In this version a human approver's yes is relayed: a signer records it with a reference to a written decision that must already be on the base branch. Approvers who want to sign directly can turn on hardware-backed keys (`sk-` keys) in the policy.
 
 ## Credits
 
-MetaGPT (https://github.com/FoundationAgents/MetaGPT, MIT) is the source of the idea: a software company run as a standard operating procedure, with a role packet for each stage. Coco Spec is fresh text and a different mechanism, a signed gate file checked by `coco-gate`, not a chat between agents. No MetaGPT code, prompt or command line tool is used, and none is required.
+MetaGPT (https://github.com/FoundationAgents/MetaGPT, MIT) is the source of the idea: a software company run as a standard operating procedure, with a role packet for each stage. Coco Spec is fresh text and a different mechanism, a signed gate file checked by `coco-gate`, not a chat between agents. No MetaGPT code, prompt or command line tool is used, and none is required. Coco Research isn't affiliated with MetaGPT or FoundationAgents.

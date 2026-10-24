@@ -206,6 +206,46 @@ grep -q '{"summary":' "$WORK/race.json" && fail "race: emitted a summary" || tru
 [[ ! -e "$H/.claude/.coco/install.lock" ]] || fail "race: left install.lock"
 echo "ok   raced file refused, exit 1, HOME rolled back"
 
+echo "=== a coco link repointed after the plan is refused and left alone ==="
+H="$WORK/relink"
+mkdir -p "$H/.claude/commands" "$H/outside"
+LINK="$H/.claude/commands/SI-AI-Ask.md"
+USER_TARGET="$H/outside/user-ask.md"
+printf 'user target stays\n' > "$USER_TARGET"
+# Ours at plan time: the link points inside the checkout, so the plan owns it.
+ln -s "$ROOT/package.json" "$LINK"
+# Skip the link itself: the repoint is the one change rollback may leave behind.
+tree_id "$H" "$LINK" >"$WORK/relink-before"
+relink_status=0
+HOME="$H" CLAUDE_HOME="$H/.claude" COCO_INSTALL_RACE_RELINK="$LINK|$USER_TARGET" \
+  bash "$ADAPTER" --systems superintelligence --json >"$WORK/relink.json" 2>"$WORK/relink.err" || relink_status=$?
+[[ $relink_status -eq 1 ]] || fail "relink: exit $relink_status"
+grep -F -q "REFUSE: $LINK became a user link after the plan" "$WORK/relink.err" || fail "relink: refusal line missing"
+[[ -L "$LINK" ]] || fail "relink: the link is gone"
+[[ "$(readlink "$LINK")" == "$USER_TARGET" ]] || fail "relink: link is not at the user target"
+tree_id "$H" "$LINK" >"$WORK/relink-after"
+if ! cmp -s "$WORK/relink-before" "$WORK/relink-after"; then
+  diff -u "$WORK/relink-before" "$WORK/relink-after" | head -60 >&2 || true
+  fail "relink: HOME was not rolled back"
+fi
+grep -q '{"summary":' "$WORK/relink.json" && fail "relink: emitted a summary" || true
+echo "ok   repointed coco link refused, exit 1, HOME rolled back"
+
+echo "=== installer hooks are inert unless COCO_INSTALL_TEST_HOOKS=1 ==="
+H="$WORK/inert"
+mkdir -p "$H"
+inert_status=0
+HOME="$H" CLAUDE_HOME="$H/.claude" \
+  env -u COCO_INSTALL_TEST_HOOKS COCO_INSTALL_FAIL_AT="$H/.claude/.coco/manifest.jsonl" \
+  bash "$ADAPTER" --core-only --json >"$WORK/inert.json" 2>"$WORK/inert.err" || inert_status=$?
+if [[ $inert_status -ne 0 ]]; then
+  tail -30 "$WORK/inert.err" >&2
+  fail "inert hooks: a real install exited $inert_status"
+fi
+grep -q '{"summary":' "$WORK/inert.json" || fail "inert hooks: no summary line"
+[[ -f "$H/.claude/.coco/manifest.jsonl" ]] || fail "inert hooks: manifest missing"
+echo "ok   COCO_INSTALL_FAIL_AT did nothing with the test switch unset"
+
 echo "=== a failing SI generator aborts --dry-run --json with no summary ==="
 COPY="$WORK/broken-repo"
 cp -cR "$ROOT" "$COPY" 2>/dev/null || { rm -rf "$COPY"; cp -R "$ROOT" "$COPY"; }

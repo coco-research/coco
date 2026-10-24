@@ -66,7 +66,8 @@ cp "$GATE_SRC" "$WORK/scripts/coco_gate.py"
       "$k" "$(cat "$T/keys/$k.pub")" "$k"
   done
 } > "$WORK/.coco/allowed_signers"
-printf 'approved by hand\nby: rijul\n' > "$WORK/docs/specs/x/decision-approve.md"
+printf 'approved by hand: docs/specs/ui/mock.md\nby: rijul\n' > "$WORK/docs/specs/x/decision-approve.md"
+printf 'an unrelated budget call\nby: someone\n' > "$WORK/docs/specs/x/decision-other.md"
 # A gate for a branch that does not exist yet, so "deleted in the PR" is testable.
 printf '{"schema":1,"note":"placeholder on base"}\n' > "$WORK/.coco/gates/feat__deleted.json"
 git -C "$WORK" add -A
@@ -402,6 +403,15 @@ sign_stage approve steve --artifact docs/specs/uibranch/mock.md \
 capture feat/uibranch --changed "$T/changed.txt"
 want_fail "12c a decision record that only exists on the branch" "decision record"
 
+reset feat/uiother
+docs ui
+signed_gate feat/uiother ui
+sign_stage mock design --artifact docs/specs/ui/mock.md
+sign_stage approve steve --artifact docs/specs/ui/mock.md \
+  --decision docs/specs/x/decision-other.md
+capture feat/uiother --changed "$T/changed.txt"
+want_fail "12d a decision record that doesn't name this mock" "does not name the mock"
+
 # --- 13. fail closed ------------------------------------------------------
 reset feat/badjson
 printf 'not json at all\n' > "$WORK/.coco/gates/feat__badjson.json"
@@ -494,7 +504,13 @@ want_fail "17a no gate and 350 changed code lines" \
   "no gate and 350 changed lines (limit 300)"
 printf '300\t60\tdocs/specs/big.md\n' > "$T/numstat.txt"
 capture fix/y --changed-numstat "$T/numstat.txt"
-want_ok "17b no gate and 360 changed lines, all docs and markdown"
+want_ok "17b no gate and 360 changed lines, all Markdown"
+printf '200\t150\tdocs/huge.js\n' > "$T/numstat.txt"
+capture fix/y --changed-numstat "$T/numstat.txt"
+want_fail "17c code under docs/ counts like any code" "no gate and 350 changed lines (limit 300)"
+printf '200\t150\ttests/huge.sh\n' > "$T/numstat.txt"
+capture fix/y --changed-numstat "$T/numstat.txt"
+want_fail "17d code under tests/ counts too" "no gate and 350 changed lines (limit 300)"
 
 # --- 18. protected paths need an infra sign-off -------------------------
 reset fix/prot

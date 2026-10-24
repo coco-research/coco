@@ -10,6 +10,7 @@
 /.githooks/                       @cococyracto
 /AGENTS.md                        @cococyracto
 /docs/rules.md                    @cococyracto
+/.coco/                           @cococyracto
 /evals/                           @cococyracto
 /tests/                           @cococyracto
 /install.sh                       @cococyracto

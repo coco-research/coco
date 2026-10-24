@@ -122,6 +122,8 @@ class ApplyMixin:
             data = fh.read()
         with open(dest, "wb") as fh:
             fh.write(data)
+        # Keep the original's permission bits, so a restore puts back the same mode, not the umask's.
+        shutil.copymode(src, dest)
         digest = hashlib.sha256(data).hexdigest()
         rec["sha256"] = digest
         rec["sha256_after"] = digest

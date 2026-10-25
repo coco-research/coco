@@ -8,6 +8,7 @@
 #   bash adapters/claude-code/install.sh --dry-run          # preview only
 #   bash adapters/claude-code/install.sh --json             # JSONL on stdout, manifest on a real install
 #   bash adapters/claude-code/install.sh --dry-run --json   # plan only; writes nothing
+#   bash adapters/claude-code/install.sh --workflow   # also link coco-gate and the workflow hooks; prints the hook lines
 #
 # Bundles default to every bundle that ships skills or agents, derived by
 # scripts/installable-bundles.sh so a new bundle needs no edit here. --core-only opts out
@@ -25,12 +26,14 @@ JSON=0
 SYSTEMS=()
 CORE_ONLY=0
 EXPLICIT=0
+WORKFLOW=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run) DRY_RUN=1 ;;
     --json) JSON=1 ;;
     --core-only) CORE_ONLY=1 ;;
+    --workflow) WORKFLOW=1 ;;
     --systems)
       shift
       EXPLICIT=1
@@ -52,6 +55,7 @@ fi
 args=()
 if [[ $DRY_RUN -eq 1 ]]; then args+=(--dry-run); fi
 if [[ $JSON -eq 1 ]]; then args+=(--json); fi
+if [[ $WORKFLOW -eq 1 ]]; then args+=(--workflow); fi
 
 # No flag means every bundle in the default allow-list. --core-only wins over --systems.
 if [[ $CORE_ONLY -eq 1 ]]; then

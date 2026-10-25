@@ -71,6 +71,9 @@ jobs:
       - name: Validate the Claude Code install safety checks
         run: bash tests/check-install-safety.sh
 
+      - name: Install --workflow (links, printed hook lines, no settings write)
+        run: bash tests/check-install-workflow.sh
+
       - name: coco-workflow gate cases (forgery, happy path, workflow hygiene)
         run: bash tests/check-coco-gate.sh
 

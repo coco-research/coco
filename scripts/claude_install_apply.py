@@ -268,7 +268,10 @@ class ApplyMixin:
         counts = {op: 0 for op in self.summary_ops}
         lines = []
         for rec in self.records:
-            counts[rec["op"]] += 1
+            # Carried rows are an earlier install's work. They stay in the manifest,
+            # but this run wrote nothing for them, so they are not counted.
+            if not rec.get("carried"):
+                counts[rec["op"]] += 1
             lines.append(dumps(rec))
         summary = {
             "adapter": "claude-code",

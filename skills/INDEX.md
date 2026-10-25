@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 230 skills** — 78 core, 152 across 8 bundles.
+**Total: 231 skills** — 79 core, 152 across 8 bundles.
 
 ## Design (15)
 
@@ -51,13 +51,14 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) | Pointer to the upstream skill for React and Next.js performance work (data fetching, bundle size, re-renders), installed from upstream. |
 | [voice-ai](voice-ai/SKILL.md) | Pointer to the upstream skill for building voice agents with speech-to-speech and STT-LLM-TTS pipelines, installed from upstream. |
 
-## Foundational (14)
+## Foundational (15)
 
 | Skill | Description |
 |-------|-------------|
 | [brainstorming](brainstorming/SKILL.md) | You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirem |
 | [coco](coco/SKILL.md) | Use when the user invokes /coco or /coco!, says catch me up, or asks what needs attention, a project status, their todos, decisions or people. Renders the PM da |
 | [coco-spec](coco-spec/SKILL.md) | Use when a feature will land as more than about three PRs and needs a signed PRD, architecture and plan before any code is written |
+| [coco-workflow](coco-workflow/SKILL.md) | Use when a piece of work must move from a request to shown work, to see the ten stages, who signs each one, and which check applies |
 | [dispatching-parallel-agents](dispatching-parallel-agents/SKILL.md) | Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies |
 | [executing-plans](executing-plans/SKILL.md) | Use when you have a written implementation plan to execute in a separate session with review checkpoints |
 | [humanizer](humanizer/SKILL.md) | Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written. Based on Wikipedia's compreh |

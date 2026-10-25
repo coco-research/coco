@@ -2,7 +2,7 @@
   "schema": 1,
   "adapter": "claude-code",
   "mode": "default (no flags)",
-  "skills": 192,
+  "skills": 193,
   "commands": 388,
   "generated_commands": 342,
   "agents": 34

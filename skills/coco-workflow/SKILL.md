@@ -53,7 +53,7 @@ Everything else is a feature and runs every stage. Size is part of every signatu
 
 ## Roles and separation
 
-Whoever builds never signs their own gate, and a build agent is never given a signing key. The gate names its builder, so a sign-off by that id is invalid even with a real key. The architecture and the plan are signed by an architect or a council, not by the person building. A human approver's yes is recorded as a decision that must already be on the base branch, then relayed by a signer, and the decision must name the mock it approves. When a repo's policy turns on direct approver signing, the approver needs a hardware-backed key.
+Whoever builds never signs their own gate. Don't give a build agent a signing key. The gate names its builder, so a sign-off by that id is invalid even with a real key. The architecture and the plan are signed by an architect or a council, not by the person building. A human approver's yes is recorded as a decision that must already be on the base branch, then relayed by a signer, and the decision must name the mock it approves. When a repo's policy turns on direct approver signing, the approver needs a hardware-backed key.
 
 The Claude Code hook holds those four edit tools on code paths, which is a stop for an editor session. Shell commands are not intercepted, so a write through a shell command gets through. Treat that hook as a guide, not a lock.
 
@@ -61,16 +61,16 @@ The Claude Code hook holds those four edit tools on code paths, which is a stop 
 
 Locally the gate is tamper-evident, not tamper-proof: an agent running as the same OS user can read any key that user can read, so a local process could sign as someone else. Keys on one machine show that a step happened and when bytes changed after signing. They do not stop same-user access.
 
-GitHub runs the workflow file as the pull request has it. A change to `.github/workflows/coco-workflow.yml` is therefore only as strong as the code-owner review it needs, so require code-owner review on `.github/` and `.coco/`. The required check plus a person's merge, from their own account and machine, is the lock. Every local hook is a guide.
+On pull requests, GitHub runs the workflow file as the pull request has it, so a pull request can change `.github/workflows/coco-workflow.yml` to skip the check. Require code-owner review on `.github/` and `.coco/`, turn on the branch rule that makes that review required with no bypass, and make `coco-workflow` a required check. With those on, the required check plus a person's merge, from their own account and machine, is the lock. Every local hook is a guide.
 
 ## Helpers per stage
 
 | Stage | Skill |
 |---|---|
-| understand | `graphify`, `arch-index` |
+| understand | `arch-index` |
 | design | `design-taste-frontend` |
 | spec | `coco-spec` |
-| build | `ponytail`, `test-driven-development` |
-| review | `ocr`, `requesting-code-review`, `code-verification` |
+| build | `test-driven-development` |
+| review | `requesting-code-review`, `code-verification` |
 
 Only skills that ship in this repo are listed. Helpers that live outside this repo are not named here.

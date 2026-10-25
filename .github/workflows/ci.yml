@@ -74,6 +74,9 @@ jobs:
       - name: Validate the Claude Code uninstall
         run: bash tests/check-uninstall.sh
 
+      - name: coco-workflow gate cases (forgery, happy path, workflow hygiene)
+        run: bash tests/check-coco-gate.sh
+
       - name: Validate unknown CLI subcommands fail before any clone
         run: bash tests/check-cli-unknown-subcommand.sh
 

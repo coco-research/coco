@@ -67,6 +67,8 @@ class Installer(ApplyMixin):
         self.prior_sha = {}
         self.old_sources = set()
         self.manifest_path = os.path.join(self.home, ".coco", "manifest.jsonl")
+        self.summary_ops = ("link", "write", "block", "skip")
+        self.path_ops = ("link", "write", "block")
         self.version = self._version()
         self.commit = self._commit()
         self.rules_script = os.path.join(self.repo, "scripts", "write-rules-block.sh")
@@ -656,7 +658,12 @@ def main(argv):
     parser.add_argument("--system", action="append", default=[])
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--uninstall", action="store_true")
     args = parser.parse_args(argv)
+    if args.uninstall:
+        from claude_uninstall import Uninstaller
+        Uninstaller(args.repo, args.target, args.dry_run, args.json).run()
+        return
     Installer(args.repo, args.target, args.system, args.dry_run, args.json).run()
 
 

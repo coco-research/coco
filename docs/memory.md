@@ -10,6 +10,13 @@ Newest first within each section. Update this file in the same PR that settles s
 
 ## Decisions
 
+### agent-qa uses a project-scoped MCP configuration
+
+**Decided:** 2026-10-25, docs/agent-qa-mcp.
+The catalog guide registers the server from an initialized application project so it reads that project's `agent-qa.config.yaml`.
+The linked host setup guide supplies the long tool timeout and version-matched skills.
+Coco provides the connector documentation; users install and configure the agent-qa runtime separately.
+
 ### The install plan names every path it writes
 
 **Decided:** 2026-10-24, feat/install-manifest. **Reason:** Uninstall has to restore

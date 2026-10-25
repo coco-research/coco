@@ -16,6 +16,7 @@ Each server file in `mcps/servers/` contains installation instructions, configur
 | Notion | [notion.md](servers/notion.md) | Knowledge base and database sync | MEDIUM |
 | Linear | [linear.md](servers/linear.md) | Issue tracking and project management | MEDIUM |
 | Supabase | [supabase.md](servers/supabase.md) | Backend-as-a-service DB and auth | MEDIUM |
+| agent-qa by vostride | [agent-qa.md](servers/agent-qa.md) | Web/mobile testing with run evidence, advanced memidex memory, and self-improvement | MEDIUM |
 
 ## Configuration Locations by Adapter
 

@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # `coco-gate githook install` and `remove`: the wrapper lands in the repo's hooks
 # dir, a pre-commit hook that is already there is kept by chaining it, nothing
-# that is not ours is overwritten, and `remove` puts the kept hook back. The last
-# case commits through git itself, so the hooks-dir lookup is tested and not
-# assumed. Throwaway repos and CLAUDE_HOME; no network.
+# that is not ours is overwritten, and `remove` puts the kept hook back. The
+# hooks dir is scoped to the repo, a hook with a second link is refused, ours
+# means byte-identical to what install wrote, and --dry-run --json reports the
+# same plan without writing. One case commits through git itself, so the
+# hooks-dir lookup is tested and not assumed. Throwaway repos and CLAUDE_HOME;
+# no network.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -43,11 +46,39 @@ repo() {
   echo "$WORK/$1"
 }
 
-# The hooks dir git itself names for repo $1.
-hooks_of() { ( cd "$1" && git rev-parse --path-format=absolute --git-path hooks ); }
+# The hooks dir git itself names for repo $1, absolute. git before 2.31 has no
+# --path-format, so fall back to the plain spelling resolved from the repo.
+hooks_of() {
+  if ( cd "$1" && git rev-parse --path-format=absolute --git-path hooks ) 2>/dev/null; then
+    return 0
+  fi
+  ( cd "$1" && python3 -c 'import os, subprocess
+out = subprocess.run(["git", "rev-parse", "--git-path", "hooks"],
+                     stdout=subprocess.PIPE, text=True).stdout
+print(os.path.abspath(out.strip()))' )
+}
 
 # The mode, spelled the same on both stat flavours.
 mode() { python3 -c 'import os, sys; print(oct(os.stat(sys.argv[1]).st_mode & 0o777))' "$1"; }
+
+# A stable snapshot of a hooks dir: names, modes, bytes, and symlink targets.
+snapshot() {
+  python3 - "$1" <<'PY'
+import hashlib, os, sys
+root = sys.argv[1]
+for name in sorted(os.listdir(root)):
+    path = os.path.join(root, name)
+    st = os.lstat(path)
+    if os.path.islink(path):
+        print("%s link %s" % (name, os.readlink(path)))
+    elif os.path.isfile(path):
+        with open(path, "rb") as fh:
+            print("%s file %s %s" % (name, oct(st.st_mode & 0o777),
+                                     hashlib.sha256(fh.read()).hexdigest()))
+    else:
+        print("%s other %s" % (name, oct(st.st_mode & 0o777)))
+PY
+}
 
 # Runs `coco-gate githook ...` inside repo $1; sets RC and OUT (stdout+stderr).
 run() {
@@ -55,6 +86,45 @@ run() {
   shift
   RC=0
   OUT="$( cd "$dir" && "$GATE" githook "$@" 2>&1 )" || RC=$?
+}
+
+# Runs `coco-gate githook ... --json` inside repo $1; sets RC, OUT (stdout) and ERR.
+run_json() {
+  local dir="$1"
+  shift
+  RC=0
+  OUT="$( cd "$dir" && "$GATE" githook "$@" --json 2>"$T/json.err" )" || RC=$?
+  ERR="$(cat "$T/json.err")"
+}
+
+# One field of the JSON object on stdin; true/false stay true/false.
+jget() {
+  python3 -c 'import json, sys
+obj = json.load(sys.stdin)
+for key in sys.argv[1:]:
+    obj = obj.get(key, "")
+print("true" if obj is True else "false" if obj is False else obj)' "$@"
+}
+
+# Field $2 of the JSON object in $1.
+jfield() { printf '%s' "$1" | jget "$2"; }
+
+# One line per op of the JSON object in $1: `rename A -> B` or `op path`.
+ops_of() {
+  printf '%s' "$1" | python3 -c 'import json, sys
+for op in json.load(sys.stdin)["ops"]:
+    if op["op"] == "rename":
+        print("rename %s -> %s" % (op["from"], op["to"]))
+    else:
+        print("%s %s" % (op["op"], op["path"]))'
+}
+
+# Asserts the JSON in $1 is a refusal with reason $2; $3 names the case.
+refused_json() {
+  [ "$(jfield "$1" ok)" = "false" ] || fail "$3: ok is not false: $1"
+  [ "$(jfield "$1" reason)" = "$2" ] \
+    || fail "$3: expected reason $2, got $(jfield "$1" reason): $1"
+  [ -n "$(jfield "$1" message)" ] || fail "$3: refusal has no message: $1"
 }
 
 # --- 1. a repo with no pre-commit gets the wrapper --------------------------
@@ -67,6 +137,12 @@ run "$R" install
 [ -x "$H/pre-commit" ] || fail "1 pre-commit is not executable"
 [ "$(sed -n 2p "$H/pre-commit")" = "# coco-workflow pre-commit wrapper" ] \
   || fail "1 the second line is not the marker: $(sed -n 2p "$H/pre-commit")"
+LINE3="$(sed -n 3p "$H/pre-commit")"
+case "$LINE3" in
+  "# sha256: "*) ;;
+  *) fail "1 the third line is not the sha256 line: $LINE3" ;;
+esac
+[ "${#LINE3}" -eq 74 ] || fail "1 the third line is not a 64-hex hash: $LINE3"
 ( cd "$R" && "$H/pre-commit" ) || fail "1 the wrapper did not exit 0"
 cp "$H/pre-commit" "$T/wrapper.1"
 run "$R" install
@@ -182,5 +258,159 @@ chmod 0755 "$H/pre-commit"
 git -C "$R" -c user.name=t -c user.email=t@example.test commit --allow-empty -qm t \
   || fail "8 the commit failed with a user hook exiting 0"
 ok "8 a real commit runs the wrapper git found, and remove puts the hook back"
+
+# --- 9. a hooks dir outside the repo is refused -----------------------------
+R="$(repo nine)"
+mkdir -p "$T/global-hooks"
+git -C "$R" config core.hooksPath "$T/global-hooks"
+BEFORE="$(ls -A "$T/global-hooks")"
+run "$R" install
+[ "$RC" -eq 1 ] || fail "9 a global core.hooksPath: expected exit 1, got $RC: $OUT"
+run_json "$R" install
+[ "$RC" -eq 1 ] || fail "9 a global core.hooksPath (json): expected exit 1, got $RC: $ERR"
+refused_json "$OUT" hooks-dir-outside-repo "9 a global core.hooksPath"
+[ "$(ls -A "$T/global-hooks")" = "$BEFORE" ] \
+  || fail "9 install wrote into the global hooks dir: $(ls -A "$T/global-hooks")"
+git -C "$R" config core.hooksPath .husky/_
+run_json "$R" install
+[ "$RC" -eq 1 ] || fail "9 an in-tree core.hooksPath: expected exit 1, got $RC: $ERR"
+refused_json "$OUT" hooks-dir-outside-repo "9 an in-tree core.hooksPath"
+[ ! -e "$R/.husky" ] || fail "9 install created .husky"
+ok "9 a hooks dir outside the repo is refused, and nothing is created"
+
+# --- 10. a hooks dir that is a symlink is refused ---------------------------
+R="$(repo ten)"
+H="$(hooks_of "$R")"
+TARGET="$T/ten-target"
+mkdir -p "$TARGET"
+printf '#!/bin/sh\nexit 0\n' > "$TARGET/keep"
+rm -rf "$H"
+ln -s "$TARGET" "$H"
+BEFORE="$(snapshot "$TARGET")"
+run "$R" install
+[ "$RC" -eq 1 ] || fail "10 a symlinked hooks dir: expected exit 1, got $RC: $OUT"
+run_json "$R" install
+[ "$RC" -eq 1 ] || fail "10 a symlinked hooks dir (json): expected exit 1, got $RC: $ERR"
+refused_json "$OUT" hooks-dir-symlink "10 a symlinked hooks dir"
+[ "$(snapshot "$TARGET")" = "$BEFORE" ] || fail "10 the symlink target changed"
+ok "10 a hooks dir that is a symlink is refused and its target is untouched"
+
+# --- 11. a wrapper that was edited is not ours ------------------------------
+R="$(repo eleven)"
+run "$R" install
+[ "$RC" -eq 0 ] || fail "11 install: expected exit 0, got $RC: $OUT"
+H="$(hooks_of "$R")"
+printf '# a line somebody added\n' >> "$H/pre-commit"
+cp "$H/pre-commit" "$T/eleven.1"
+run "$R" remove
+[ "$RC" -eq 1 ] || fail "11 remove an edited wrapper: expected exit 1, got $RC: $OUT"
+run_json "$R" remove
+[ "$RC" -eq 1 ] || fail "11 remove an edited wrapper (json): expected exit 1, got $RC: $ERR"
+refused_json "$OUT" wrapper-changed "11 remove an edited wrapper"
+cmp -s "$H/pre-commit" "$T/eleven.1" || fail "11 remove changed the edited wrapper"
+run_json "$R" install
+[ "$RC" -eq 1 ] || fail "11 install over an edited wrapper: expected exit 1, got $RC: $ERR"
+refused_json "$OUT" wrapper-changed "11 install over an edited wrapper"
+cmp -s "$H/pre-commit" "$T/eleven.1" || fail "11 install changed the edited wrapper"
+ok "11 a wrapper with an extra line is refused by both commands and kept"
+
+# --- 12. a hand-deleted wrapper does not leave the hook parked --------------
+R="$(repo twelve)"
+H="$(hooks_of "$R")"
+cat > "$H/pre-commit" <<EOF
+#!/bin/sh
+printf '%s\n' "user" > "$T/twelve.ran"
+exit 0
+EOF
+chmod 0755 "$H/pre-commit"
+cp "$H/pre-commit" "$T/twelve.1"
+MODE12="$(mode "$H/pre-commit")"
+run "$R" install --chain
+[ "$RC" -eq 0 ] || fail "12 install --chain: expected exit 0, got $RC: $OUT"
+rm -f "$H/pre-commit"
+run_json "$R" remove --dry-run
+[ "$RC" -eq 0 ] || fail "12 remove after a hand-deleted wrapper: expected exit 0, got $RC: $ERR"
+[ "$(jfield "$OUT" ok)" = "true" ] || fail "12 the dry run is not ok: $OUT"
+[ "$(ops_of "$OUT")" = "rename $H/pre-commit.coco-chained -> $H/pre-commit" ] \
+  || fail "12 the dry run plans: $(ops_of "$OUT")"
+run "$R" remove
+[ "$RC" -eq 0 ] || fail "12 remove with the wrapper gone: expected exit 0, got $RC: $OUT"
+cmp -s "$H/pre-commit" "$T/twelve.1" || fail "12 the parked hook did not come back byte for byte"
+[ "$(mode "$H/pre-commit")" = "$MODE12" ] || fail "12 the restored hook lost its mode"
+[ ! -e "$H/pre-commit.coco-chained" ] || fail "12 pre-commit.coco-chained is still there"
+run_json "$R" remove
+[ "$RC" -eq 1 ] || fail "12 a second remove over a user hook: expected exit 1, got $RC: $ERR"
+refused_json "$OUT" not-coco-wrapper "12 a second remove over a user hook"
+ok "12 a hand-deleted wrapper: remove puts the parked hook back"
+
+# --- 13. a hard-linked hook is refused -------------------------------------
+R="$(repo thirteen)"
+H="$(hooks_of "$R")"
+printf '#!/bin/sh\nexit 0\n' > "$H/pre-commit"
+chmod 0755 "$H/pre-commit"
+ln "$H/pre-commit" "$T/thirteen-hard"
+BEFORE="$(snapshot "$H")"
+run "$R" install --chain
+[ "$RC" -eq 1 ] || fail "13 a hard-linked hook: expected exit 1, got $RC: $OUT"
+run_json "$R" install --chain
+[ "$RC" -eq 1 ] || fail "13 a hard-linked hook (json): expected exit 1, got $RC: $ERR"
+refused_json "$OUT" hardlinked-hook "13 a hard-linked hook"
+[ "$(snapshot "$H")" = "$BEFORE" ] || fail "13 the hard-linked hook changed"
+ok "13 a hook with a second hard link is refused and nothing changes"
+
+# --- 14. --dry-run --json plans and writes nothing -------------------------
+R="$(repo fourteen)"
+H="$(hooks_of "$R")"
+printf '#!/bin/sh\nexit 0\n' > "$H/pre-commit"
+chmod 0755 "$H/pre-commit"
+BEFORE="$(snapshot "$H")"
+run_json "$R" install --dry-run
+[ "$RC" -eq 1 ] || fail "14 install --dry-run over a user hook: expected exit 1, got $RC: $ERR"
+refused_json "$OUT" existing-hook "14 install --dry-run over a user hook"
+[ "$(jfield "$OUT" existing)" = "file" ] || fail "14 existing is not file: $OUT"
+[ "$(jfield "$OUT" dry_run)" = "true" ] || fail "14 dry_run is not true: $OUT"
+[ "$(snapshot "$H")" = "$BEFORE" ] || fail "14 the first dry run changed the hooks dir"
+run_json "$R" install --chain --dry-run
+[ "$RC" -eq 0 ] || fail "14 install --chain --dry-run: expected exit 0, got $RC: $ERR"
+[ "$(jfield "$OUT" ok)" = "true" ] || fail "14 install --chain --dry-run: ok is not true: $OUT"
+[ "$(jfield "$OUT" hooks_dir)" = "$H" ] || fail "14 hooks_dir is not $H: $OUT"
+EXPECT="rename $H/pre-commit -> $H/pre-commit.coco-chained
+write $H/pre-commit"
+[ "$(ops_of "$OUT")" = "$EXPECT" ] \
+  || fail "14 install --chain --dry-run plans: $(ops_of "$OUT")"
+[ "$(snapshot "$H")" = "$BEFORE" ] || fail "14 the chain dry run changed the hooks dir"
+run "$R" install --chain
+[ "$RC" -eq 0 ] || fail "14 install --chain: expected exit 0, got $RC: $OUT"
+AFTER="$(snapshot "$H")"
+run_json "$R" remove --dry-run
+[ "$RC" -eq 0 ] || fail "14 remove --dry-run: expected exit 0, got $RC: $ERR"
+EXPECT="delete $H/pre-commit
+rename $H/pre-commit.coco-chained -> $H/pre-commit"
+[ "$(ops_of "$OUT")" = "$EXPECT" ] \
+  || fail "14 remove --dry-run plans: $(ops_of "$OUT")"
+[ "$(jfield "$OUT" existing)" = "coco-wrapper" ] \
+  || fail "14 remove existing is not coco-wrapper: $OUT"
+[ "$(snapshot "$H")" = "$AFTER" ] || fail "14 remove --dry-run changed the hooks dir"
+ok "14 --dry-run plans the same ops as the real run and writes nothing"
+
+# --- 15. install --chain then remove is a round trip -----------------------
+R="$(repo fifteen)"
+H="$(hooks_of "$R")"
+printf '#!/bin/sh\nexit 7\n' > "$H/pre-commit"
+chmod 0750 "$H/pre-commit"
+BEFORE="$(snapshot "$H")"
+run "$R" install --chain
+[ "$RC" -eq 0 ] || fail "15 install --chain: expected exit 0, got $RC: $OUT"
+RC=0
+( cd "$R" && "$H/pre-commit" ) || RC=$?
+[ "$RC" -eq 7 ] || fail "15 running the wrapper: expected the user hook's exit 7, got $RC"
+run_json "$R" remove
+[ "$RC" -eq 0 ] || fail "15 remove: expected exit 0, got $RC: $ERR"
+[ "$(jfield "$OUT" ok)" = "true" ] || fail "15 the remove is not ok: $OUT"
+EXPECT="delete $H/pre-commit
+rename $H/pre-commit.coco-chained -> $H/pre-commit"
+[ "$(ops_of "$OUT")" = "$EXPECT" ] || fail "15 remove plans: $(ops_of "$OUT")"
+[ "$(snapshot "$H")" = "$BEFORE" ] || fail "15 the hooks dir is not back to its snapshot"
+ok "15 a round trip leaves the hooks dir identical"
 
 echo "ok   coco-gate githook installs, chains, removes, and overwrites nothing"

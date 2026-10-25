@@ -254,6 +254,14 @@ class ApplyMixin:
         self.say("untouched. They will keep serving stale content until you remove them. Re-run this")
         self.say("installer afterwards to link them.")
 
+    def note_carried(self):
+        if not self.carried_count:
+            return
+        self.say(
+            "%s item(s) from an earlier install are not in this selection. They stay installed "
+            "and stay in the manifest, so --uninstall still removes them." % self.carried_count
+        )
+
     def body(self):
         # summary_ops is the receipt's op set. Install uses link/write/block/skip;
         # uninstall uses remove/skip. path_ops are the ones that change the tree.
@@ -270,6 +278,9 @@ class ApplyMixin:
         }
         for op in self.summary_ops:
             summary[op] = counts[op]
+        if "link" in self.summary_ops:
+            # Install only: rows carried from an earlier, wider selection.
+            summary["carried"] = self.carried_count
         summary["paths"] = sum(counts[op] for op in self.path_ops)
         summary["managed_settings"] = self.managed
         lines.append(dumps({"summary": summary}))
@@ -345,6 +356,7 @@ class ApplyMixin:
             for op in self.ops:
                 self.apply(op)
             self.warn_stale()
+            self.note_carried()
             if self.dry:
                 body = self.body()
             else:

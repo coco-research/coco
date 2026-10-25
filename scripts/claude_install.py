@@ -28,13 +28,18 @@ PROTECTED_BASENAMES = ("settings.json", "settings.local.json", ".credentials.jso
 OLD_PARTS = ("skills", "commands", "agents", "systems")
 AGENT_SKIP_CORE = ("INDEX.md", "README.md", "PROMPT-DEFENSE.md")
 AGENT_SKIP_SYSTEM = ("INDEX.md", "README.md")
+WORKFLOW_HOOKS = (
+    "coco-workflow-pretooluse.sh",
+    "coco-workflow-context.sh",
+    "coco-workflow-pre-commit.sh",
+)
 # The generator footer is the last thing in the file, so the tail is enough and a
 # huge file at a generated path is never read whole.
 FOOTER_TAIL = 65536
 
 
 class Installer(ApplyMixin):
-    def __init__(self, repo, target, systems, dry, as_json):
+    def __init__(self, repo, target, systems, dry, as_json, workflow=False):
         self.repo = os.path.abspath(repo)
         self.repo_real = os.path.realpath(self.repo)
         self.home = os.path.abspath(target)
@@ -44,6 +49,7 @@ class Installer(ApplyMixin):
         self.systems = [s for s in systems if s]
         self.dry = dry
         self.json = as_json
+        self.workflow = workflow
         self.applying = False
         self.records = []
         self.seen_paths = set()
@@ -642,10 +648,71 @@ class Installer(ApplyMixin):
         self.ensure_dir(os.path.join(self.home, ".coco"))
         self.add_write(self.manifest_path, "manifest", carry=False)
 
+    def workflow_path(self, *parts):
+        return os.path.join(self.home, "coco", *parts)
+
+    def hook_line(self, name):
+        """The guarded sh -c line a settings file runs. The default target spells $HOME."""
+        path = self.workflow_path("hooks", name)
+        if os.path.normpath(self.home) == os.path.normpath(os.path.expanduser("~/.claude")):
+            path = "$HOME/.claude/coco/hooks/%s" % name
+        return "sh -c '[ -x \"%s\" ] && exec \"%s\" || exit 0'" % (path, path)
+
+    def workflow_info(self):
+        return {
+            "settings_file": ".claude/settings.local.json",
+            "hooks": {
+                "PreToolUse": [{
+                    "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+                    "hooks": [{"type": "command",
+                               "command": self.hook_line("coco-workflow-pretooluse.sh")}],
+                }],
+                "UserPromptSubmit": [{
+                    "hooks": [{"type": "command",
+                               "command": self.hook_line("coco-workflow-context.sh")}],
+                }],
+            },
+            "bin": self.workflow_path("bin"),
+        }
+
+    @property
+    def summary_extra(self):
+        """Extra summary fields for this install; None leaves the shared summary alone."""
+        if not self.workflow:
+            return None
+        return {"workflow": self.workflow_info()}
+
+    def extra_notes(self):
+        if not self.workflow:
+            return
+        info = self.workflow_info()
+        self.say("")
+        state = "would be linked" if self.dry else "linked"
+        self.say("coco-workflow: hooks %s into %s, coco-gate into %s" % (
+            state, self.workflow_path("hooks"), info["bin"]))
+        self.say('export PATH="%s:$PATH"' % info["bin"])
+        self.say("Add these hook lines to %s in each repo that uses the workflow; "
+                 "the installer never writes that file." % info["settings_file"])
+        self.say("  PreToolUse      : %s" % self.hook_line("coco-workflow-pretooluse.sh"))
+        self.say("  UserPromptSubmit: %s" % self.hook_line("coco-workflow-context.sh"))
+        self.say(json.dumps({"hooks": info["hooks"]}, indent=2))
+
+    def plan_workflow(self):
+        links = [(os.path.join(self.repo, "hooks", name), self.workflow_path("hooks", name))
+                 for name in WORKFLOW_HOOKS]
+        links.append((os.path.join(self.repo, "bin", "coco-gate"),
+                      self.workflow_path("bin", "coco-gate")))
+        for src, dst in links:
+            if not os.path.isfile(src):
+                self.die("REFUSE: --workflow needs %s, which this checkout doesn't have" % src)
+            self.plan_link(src, dst)
+
     def plan_all(self):
         self.plan_core()
         for sys in self.systems:
             self.plan_system(sys)
+        if self.workflow:
+            self.plan_workflow()
         self.plan_manifest()
 
 
@@ -656,8 +723,10 @@ def main(argv):
     parser.add_argument("--system", action="append", default=[])
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--workflow", action="store_true")
     args = parser.parse_args(argv)
-    Installer(args.repo, args.target, args.system, args.dry_run, args.json).run()
+    Installer(args.repo, args.target, args.system, args.dry_run, args.json,
+              args.workflow).run()
 
 
 if __name__ == "__main__":

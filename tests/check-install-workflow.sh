@@ -109,4 +109,29 @@ if HOME="$WORK/root-home" CLAUDE_HOME="$WORK/root-home/.claude" COCO_MANAGED_ROO
 fi
 grep -q "claude-code" "$WORK/wf-root.err" || fail "the refusal does not name claude-code"
 
+echo "=== a target with an apostrophe in its path gets a quoted hook line ==="
+H="$WORK/it's here"
+AH="$WORK/apostrophe-home"
+mkdir -p "$H" "$AH"
+if ! HOME="$AH" CLAUDE_HOME="$H/.claude" COCO_MANAGED_ROOT="$WORK/no-managed" \
+  bash "$ADAPTER" --core-only --workflow --json >"$WORK/wf-quote.json" 2>"$WORK/wf-quote.err"; then
+  echo "installer failed; stderr tail:" >&2
+  tail -30 "$WORK/wf-quote.err" >&2
+  fail "--workflow install with an apostrophe in the target exited non-zero"
+fi
+CMD=$(python3 - "$WORK/wf-quote.json" <<'PY'
+import json, sys
+lines = [l for l in open(sys.argv[1], encoding="utf-8").read().splitlines() if l.strip()]
+workflow = json.loads(lines[-1])["summary"]["workflow"]
+print(workflow["hooks"]["PreToolUse"][0]["hooks"][0]["command"])
+PY
+)
+printf '#!/bin/sh\nexit 7\n' > "$WORK/seven.sh"
+chmod +x "$WORK/seven.sh"
+ln -sfn "$WORK/seven.sh" "$H/.claude/coco/hooks/coco-workflow-pretooluse.sh"
+RC=0
+HOME="$AH" sh -c "$CMD" </dev/null || RC=$?
+[[ "$RC" -eq 7 ]] || fail "the quoted hook line did not reach its hook (exit $RC): $CMD"
+echo "ok   the hook line for a target containing an apostrophe runs that target"
+
 echo "ok   --core-only --workflow links coco-gate and the three workflow hooks, prints the hook lines, writes no settings file"

@@ -74,6 +74,9 @@ jobs:
       - name: Install --workflow (links, printed hook lines, no settings write)
         run: bash tests/check-install-workflow.sh
 
+      - name: coco-gate githook (chain or skip, never overwrite)
+        run: bash tests/check-coco-githook-install.sh
+
       - name: coco-workflow gate cases (forgery, happy path, workflow hygiene)
         run: bash tests/check-coco-gate.sh
 

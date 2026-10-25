@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -653,10 +654,11 @@ class Installer(ApplyMixin):
 
     def hook_line(self, name):
         """The guarded sh -c line a settings file runs. The default target spells $HOME."""
-        path = self.workflow_path("hooks", name)
         if os.path.normpath(self.home) == os.path.normpath(os.path.expanduser("~/.claude")):
-            path = "$HOME/.claude/coco/hooks/%s" % name
-        return "sh -c '[ -x \"%s\" ] && exec \"%s\" || exit 0'" % (path, path)
+            path = '"$HOME/.claude/coco/hooks/%s"' % name
+        else:
+            path = shlex.quote(os.path.abspath(self.workflow_path("hooks", name)))
+        return "sh -c " + shlex.quote("[ -x %s ] && exec %s || exit 0" % (path, path))
 
     def workflow_info(self):
         return {
@@ -673,6 +675,7 @@ class Installer(ApplyMixin):
                 }],
             },
             "bin": self.workflow_path("bin"),
+            "git_hook": "coco-gate githook install",
         }
 
     @property
@@ -695,6 +698,8 @@ class Installer(ApplyMixin):
                  "the installer never writes that file." % info["settings_file"])
         self.say("  PreToolUse      : %s" % self.hook_line("coco-workflow-pretooluse.sh"))
         self.say("  UserPromptSubmit: %s" % self.hook_line("coco-workflow-context.sh"))
+        self.say("Per repo, for the git warning: coco-gate githook install (add --chain "
+                 "to keep an existing pre-commit hook).")
         self.say(json.dumps({"hooks": info["hooks"]}, indent=2))
 
     def plan_workflow(self):

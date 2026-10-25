@@ -1,5 +1,6 @@
 # Shared throwaway-HOME helpers for the Claude Code install checks.
-# Sourced by tests/check-install-manifest.sh and tests/check-install-safety.sh.
+# Sourced by tests/check-install-manifest.sh, tests/check-install-safety.sh,
+# and tests/check-uninstall.sh.
 # Defines functions and the temp-HOME variables. Callers set -euo pipefail.
 # shellcheck shell=bash
 

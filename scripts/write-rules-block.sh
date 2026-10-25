@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Replace the Coco-managed rules block in a CLAUDE.md, or append it if absent.
 #
-# Usage: printf '%s\n' "$block" | bash scripts/write-rules-block.sh <target>
+# Usage: printf '%s\n' "$block" | bash scripts/write-rules-block.sh <target> [--plan]
+#
+# --plan writes nothing. If a real run would keep a .coco-bak, the path is printed
+# on stdout; otherwise stdout is empty.
 #
 # The block on stdin must start with <!-- coco:rules-start --> and end with
 # <!-- coco:rules-end -->. Shared by the claude-code and hermes adapters, which
@@ -17,12 +20,22 @@
 
 set -euo pipefail
 
-target=${1:?usage: write-rules-block.sh <target> < block}
+usage="usage: write-rules-block.sh <target> [--plan] < block"
+target=${1:?$usage}
+plan=0
+if [[ $# -gt 1 ]]; then
+  if [[ $# -ne 2 || "$2" != "--plan" ]]; then
+    echo "$usage" >&2
+    exit 2
+  fi
+  plan=1
+fi
 start="<!-- coco:rules-start -->"
 end="<!-- coco:rules-end -->"
 block=$(cat)
 
 if [[ ! -f "$target" ]]; then
+  [[ $plan -eq 1 ]] && exit 0
   printf '%s\n' "$block" > "$target"
   echo "Wrote rules block to $target"
   exit 0
@@ -54,6 +67,14 @@ if [[ -s "$tmp" ]]; then
   printf '\n%s\n' "$block" >> "$tmp"
 else
   printf '%s\n' "$block" > "$tmp"
+fi
+
+if [[ $plan -eq 1 ]]; then
+  if ! cmp -s "$tmp" "$target"; then
+    printf '%s\n' "$target.coco-bak"
+  fi
+  rm -f "$tmp"
+  exit 0
 fi
 
 if ! cmp -s "$tmp" "$target"; then

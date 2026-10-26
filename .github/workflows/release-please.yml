@@ -7,6 +7,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write # the last step starts CI on the release PR
 
 jobs:
   release-please:
@@ -19,6 +20,14 @@ jobs:
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+      # A push made with GITHUB_TOKEN starts no workflow runs, so the release PR would get no checks.
+      # A dispatch does start one, and its checks land on the PR's head commit.
+      - name: Run CI on the release PR
+        if: steps.release.outputs.prs_created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
+        run: gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$BRANCH"
 
   publish:
     needs: release-please

@@ -413,4 +413,50 @@ rename $H/pre-commit.coco-chained -> $H/pre-commit"
 [ "$(snapshot "$H")" = "$BEFORE" ] || fail "15 the hooks dir is not back to its snapshot"
 ok "15 a round trip leaves the hooks dir identical"
 
+# --- 16. a parked hook with no pre-commit is one refusal, not a plain write --
+R="$(repo sixteen)"
+H="$(hooks_of "$R")"
+cat > "$H/pre-commit" <<EOF
+#!/bin/sh
+printf '%s\n' "sixteen" > "$T/sixteen.ran"
+exit 0
+EOF
+chmod 0755 "$H/pre-commit"
+cp "$H/pre-commit" "$T/sixteen.1"
+MODE16="$(mode "$H/pre-commit")"
+run "$R" install --chain
+[ "$RC" -eq 0 ] || fail "16 install --chain: expected exit 0, got $RC: $OUT"
+rm -f "$H/pre-commit"
+run_json "$R" install
+[ "$RC" -eq 1 ] || fail "16 install after a hand-deleted wrapper: expected exit 1, got $RC: $ERR"
+refused_json "$OUT" chained-name-taken "16 install after a hand-deleted wrapper"
+[ ! -e "$H/pre-commit" ] || fail "16 the refusal wrote a pre-commit"
+cmp -s "$H/pre-commit.coco-chained" "$T/sixteen.1" \
+  || fail "16 the refusal changed the parked hook"
+run "$R" remove
+[ "$RC" -eq 0 ] || fail "16 remove: expected exit 0, got $RC: $OUT"
+cmp -s "$H/pre-commit" "$T/sixteen.1" || fail "16 the parked hook did not come back byte for byte"
+[ "$(mode "$H/pre-commit")" = "$MODE16" ] || fail "16 the restored hook lost its mode"
+[ ! -e "$H/pre-commit.coco-chained" ] || fail "16 pre-commit.coco-chained is still there"
+ok "16 a deleted wrapper over a parked hook is refused, and remove puts it back"
+
+# --- 17. the installer leaves the repo's git hooks alone -------------------
+R="$(repo seventeen)"
+H="$(hooks_of "$R")"
+BEFORE="$(snapshot "$H")"
+H17="$T/home-seventeen"
+mkdir -p "$H17" "$T/seventeen-managed"
+for flags in "--core-only" "--core-only --workflow"; do
+  RC=0
+  ( cd "$R" && HOME="$H17" CLAUDE_HOME="$H17/.claude" \
+      COCO_MANAGED_ROOT="$T/seventeen-managed" \
+      bash "$ROOT/adapters/claude-code/install.sh" $flags ) \
+    >"$T/seventeen.out" 2>&1 || RC=$?
+  [ "$RC" -eq 0 ] || fail "17 install.sh $flags: expected exit 0, got $RC: $(tail -3 "$T/seventeen.out")"
+done
+[ "$(snapshot "$H")" = "$BEFORE" ] \
+  || fail "17 the installer changed the repo's hooks dir: [$(snapshot "$H")] != [$BEFORE]"
+[ ! -e "$H/pre-commit" ] || fail "17 the installer wrote a hook the repo never had"
+ok "17 the installer writes no git hook into the repo it runs in"
+
 echo "ok   coco-gate githook installs, chains, removes, and overwrites nothing"

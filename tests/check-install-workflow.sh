@@ -186,4 +186,28 @@ if ! cmp -s "$WORK/links-plain-home" "$WORK/links-wf-home"; then
   fail "the two HOMEs differ outside the target"
 fi
 
-echo "ok   --core-only --workflow links coco-gate and the three workflow hooks, prints the hook lines, writes no settings file"
+echo "=== --uninstall after --workflow puts the home back ==="
+H="$WORK/roundtrip-home"
+mkdir -p "$H/.claude"
+printf '{"a": 1}\n' > "$H/.claude/settings.json"
+printf '{"b": 2}\n' > "$H/.claude/settings.local.json"
+chmod 644 "$H/.claude/settings.json"
+chmod 600 "$H/.claude/settings.local.json"
+tree_id "$H" > "$WORK/roundtrip-before"
+if ! run_at "$H" --core-only --workflow >"$WORK/roundtrip-install.out" 2>"$WORK/roundtrip-install.err"; then
+  tail -30 "$WORK/roundtrip-install.err" >&2
+  fail "--workflow install exited non-zero"
+fi
+[[ -L "$H/.claude/coco/bin/coco-gate" ]] || fail "the round-trip install linked no coco-gate"
+if ! run_at "$H" --uninstall >"$WORK/roundtrip-remove.out" 2>"$WORK/roundtrip-remove.err"; then
+  tail -30 "$WORK/roundtrip-remove.err" >&2
+  fail "--uninstall after --workflow exited non-zero"
+fi
+[[ ! -e "$H/.claude/coco" && ! -L "$H/.claude/coco" ]] || fail "--uninstall left <target>/coco behind"
+tree_id "$H" > "$WORK/roundtrip-after"
+if ! cmp -s "$WORK/roundtrip-before" "$WORK/roundtrip-after"; then
+  diff -u "$WORK/roundtrip-before" "$WORK/roundtrip-after" >&2 || true
+  fail "--uninstall after --workflow did not put the home back byte- and mode-identical"
+fi
+
+echo "ok   --core-only --workflow links coco-gate and the three workflow hooks, prints the hook lines, writes no settings file, and --uninstall puts the home back"

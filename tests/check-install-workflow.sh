@@ -109,6 +109,83 @@ if HOME="$WORK/root-home" CLAUDE_HOME="$WORK/root-home/.claude" COCO_MANAGED_ROO
 fi
 grep -q "claude-code" "$WORK/wf-root.err" || fail "the refusal does not name claude-code"
 
+echo "=== settings files are byte-identical after --workflow, from inside a repo ==="
+H="$WORK/settings-home"
+mkdir -p "$H/.claude"
+printf '{"a": 1}\n' > "$H/.claude/settings.json"
+printf '{"b": 2}\n' > "$H/.claude/settings.local.json"
+chmod 644 "$H/.claude/settings.json"
+chmod 600 "$H/.claude/settings.local.json"
+REPO="$WORK/settings-repo"
+mkdir -p "$REPO/.claude"
+git -C "$REPO" init -q
+printf '{"c": 3}\n' > "$REPO/.claude/settings.local.json"
+cp -p "$H/.claude/settings.json" "$WORK/settings-seed.json"
+cp -p "$H/.claude/settings.local.json" "$WORK/settings-seed-local.json"
+cp -p "$REPO/.claude/settings.local.json" "$WORK/settings-repo-local.json"
+if ! (cd "$REPO" && run_at "$H" --core-only --workflow >"$WORK/settings.out" 2>"$WORK/settings.err"); then
+  echo "installer failed; stderr tail:" >&2
+  tail -30 "$WORK/settings.err" >&2
+  fail "--workflow install from a repo exited non-zero"
+fi
+cmp -s "$WORK/settings-seed.json" "$H/.claude/settings.json" || fail "settings.json changed"
+cmp -s "$WORK/settings-seed-local.json" "$H/.claude/settings.local.json" || fail "settings.local.json changed"
+cmp -s "$WORK/settings-repo-local.json" "$REPO/.claude/settings.local.json" || fail "the repo's settings.local.json changed"
+[[ -L "$H/.claude/coco/bin/coco-gate" ]] || fail "--workflow linked nothing when run from a repo"
+python3 - "$WORK/settings-seed.json" "$H/.claude/settings.json" \
+         "$WORK/settings-seed-local.json" "$H/.claude/settings.local.json" \
+         "$WORK/settings-repo-local.json" "$REPO/.claude/settings.local.json" <<'PY'
+import os, sys
+for before, after in zip(sys.argv[1::2], sys.argv[2::2]):
+    want = os.lstat(before).st_mode & 0o777
+    got = os.lstat(after).st_mode & 0o777
+    if got != want:
+        sys.exit(f"{after}: mode {got:o} != {want:o}")
+print("ok   three settings files keep their bytes and modes")
+PY
+FOUND=$(find "$H" "$REPO" -name 'settings*.json' | LC_ALL=C sort)
+WANT=$(printf '%s\n' "$H/.claude/settings.json" "$H/.claude/settings.local.json" \
+  "$REPO/.claude/settings.local.json" | LC_ALL=C sort)
+if [[ "$FOUND" != "$WANT" ]]; then
+  echo "settings files found:" >&2
+  echo "$FOUND" >&2
+  fail "--workflow left a settings file other than the three seeded ones"
+fi
+
+echo "=== --workflow adds links only under <target>/coco ==="
+HA="$WORK/links-plain"
+HB="$WORK/links-workflow"
+mkdir -p "$HA" "$HB"
+if ! run_at "$HA" --core-only >"$WORK/links-plain.out" 2>"$WORK/links-plain.err"; then
+  fail "plain --core-only install exited non-zero"
+fi
+if ! run_at "$HB" --core-only --workflow >"$WORK/links-wf.out" 2>"$WORK/links-wf.err"; then
+  fail "--workflow install exited non-zero"
+fi
+snap "$HA/.claude" | sed 's|^\./||' > "$WORK/links-plain-list"
+snap "$HB/.claude" | sed 's|^\./||' > "$WORK/links-wf-list"
+LC_ALL=C comm -13 "$WORK/links-plain-list" "$WORK/links-wf-list" > "$WORK/links-added"
+LC_ALL=C comm -23 "$WORK/links-plain-list" "$WORK/links-wf-list" > "$WORK/links-dropped"
+printf '%s\n' coco coco/bin coco/bin/coco-gate coco/hooks \
+  coco/hooks/coco-workflow-context.sh coco/hooks/coco-workflow-pre-commit.sh \
+  coco/hooks/coco-workflow-pretooluse.sh > "$WORK/links-want"
+if ! cmp -s "$WORK/links-want" "$WORK/links-added"; then
+  echo "paths --workflow added:" >&2
+  cat "$WORK/links-added" >&2
+  fail "--workflow added paths beyond <target>/coco"
+fi
+if [[ -s "$WORK/links-dropped" ]]; then
+  cat "$WORK/links-dropped" >&2
+  fail "--workflow dropped paths the plain install makes"
+fi
+# tree_id lines start with the relative path in field 2; the target is .claude.
+tree_id "$HA" | awk '$2 != ".claude" && $2 !~ /^\.claude\//' > "$WORK/links-plain-home"
+tree_id "$HB" | awk '$2 != ".claude" && $2 !~ /^\.claude\//' > "$WORK/links-wf-home"
+if ! cmp -s "$WORK/links-plain-home" "$WORK/links-wf-home"; then
+  diff -u "$WORK/links-plain-home" "$WORK/links-wf-home" >&2 || true
+  fail "the two HOMEs differ outside the target"
+fi
+
 echo "=== a target with an apostrophe in its path gets a quoted hook line ==="
 H="$WORK/it's here"
 AH="$WORK/apostrophe-home"

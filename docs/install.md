@@ -303,6 +303,15 @@ python3 systems/superintelligence/scripts/meta_select.py -- "should we ship an A
 
 ## Uninstall
 
+Claude Code records the install in `~/.claude/.coco/manifest.jsonl`. This undoes that record and writes nothing in the dry run:
+
+```bash
+bash adapters/claude-code/install.sh --uninstall
+bash adapters/claude-code/install.sh --uninstall --dry-run --json
+```
+
+Files you edited after install stay. The steps below cover adapters that do not write this manifest.
+
 Symlink-based adapters (`claude-code`, `cursor`, `grok`, `vscode`):
 
 ```bash

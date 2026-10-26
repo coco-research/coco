@@ -8,6 +8,8 @@
 #   bash adapters/claude-code/install.sh --dry-run          # preview only
 #   bash adapters/claude-code/install.sh --json             # JSONL on stdout, manifest on a real install
 #   bash adapters/claude-code/install.sh --dry-run --json   # plan only; writes nothing
+#   bash adapters/claude-code/install.sh --uninstall        # undo the manifest; keep edited user files
+#   bash adapters/claude-code/install.sh --uninstall --dry-run --json   # what Remove will undo; writes nothing
 #   bash adapters/claude-code/install.sh --workflow   # also link coco-gate and the workflow hooks; prints the hook lines
 #
 # Bundles default to every bundle that ships skills or agents, derived by
@@ -23,6 +25,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TARGET_HOME="${CLAUDE_HOME:-$HOME/.claude}"
 DRY_RUN=0
 JSON=0
+UNINSTALL=0
 SYSTEMS=()
 CORE_ONLY=0
 EXPLICIT=0
@@ -32,6 +35,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run) DRY_RUN=1 ;;
     --json) JSON=1 ;;
+    --uninstall) UNINSTALL=1 ;;
     --core-only) CORE_ONLY=1 ;;
     --workflow) WORKFLOW=1 ;;
     --systems)
@@ -50,6 +54,14 @@ done
 if ! command -v python3 >/dev/null 2>&1; then
   echo "coco install needs python3 (macOS: xcode-select --install; Linux: your package manager)" >&2
   exit 1
+fi
+
+if [[ $UNINSTALL -eq 1 ]]; then
+  args=(--uninstall)
+  if [[ $DRY_RUN -eq 1 ]]; then args+=(--dry-run); fi
+  if [[ $JSON -eq 1 ]]; then args+=(--json); fi
+  exec python3 "$REPO_ROOT/scripts/claude_install.py" \
+    --repo "$REPO_ROOT" --target "$TARGET_HOME" "${args[@]}"
 fi
 
 args=()

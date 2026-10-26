@@ -209,9 +209,13 @@ def plan_install(args):
                       "%s already exists. Re-run with --chain to keep it: it runs "
                       "after the warning, and its result decides. Or leave it as it "
                       "is." % target, hooks, kind)
-    if kind != "none" and os.path.lexists(chained):
-        raise Refusal("chained-name-taken", "%s already exists; move it away first"
-                      % chained, hooks, kind)
+    # An intact chained wrapper has this file too, and it returned above; here it
+    # means the user's hook is parked with no pre-commit to reach it, so writing
+    # an unchained wrapper would leave it unreachable.
+    if os.path.lexists(chained):
+        raise Refusal("chained-name-taken",
+                      "%s already exists; run `coco-gate githook remove` to put it "
+                      "back as pre-commit, or move it away first" % chained, hooks, kind)
     if kind == "none":
         plan["ops"].append({"op": "write", "path": target})
         plan["message"] = "installed %s" % target

@@ -438,5 +438,14 @@ HOME="$WORK/root-home" CLAUDE_HOME="$WORK/root-home/.claude" COCO_MANAGED_ROOT="
   >"$WORK/root-codex.out" 2>"$WORK/root-codex.err" || codex_status=$?
 [[ $codex_status -eq 1 ]] || fail "root --adapter codex --workflow-only exited $codex_status"
 grep -q "claude-code" "$WORK/root-codex.err" || fail "the refusal does not name claude-code"
+for extra in --core-only "--systems gsd"; do
+  combo_status=0
+  # shellcheck disable=SC2086  # $extra is one or two words on purpose
+  HOME="$WORK/root-home" CLAUDE_HOME="$WORK/root-home/.claude" COCO_MANAGED_ROOT="$WORK/no-managed" \
+    bash "$ROOT/install.sh" --adapter claude-code --workflow-only $extra --dry-run \
+    >"$WORK/root-combo.out" 2>"$WORK/root-combo.err" || combo_status=$?
+  [[ $combo_status -eq 1 ]] || fail "root --workflow-only $extra exited $combo_status, not 1"
+  grep -q "cannot be combined" "$WORK/root-combo.err" || fail "root --workflow-only $extra: no refusal message"
+done
 
 echo "ok   --workflow-only installs and removes only the coco/ pieces, and a killed Remove finishes"

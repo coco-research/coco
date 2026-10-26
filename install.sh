@@ -121,6 +121,10 @@ if [[ -n "$WORKFLOW_ONLY" && "$ADAPTER" != "claude-code" ]]; then
   echo "--workflow-only is only available with --adapter claude-code" >&2
   exit 1
 fi
+if [[ -n "$WORKFLOW_ONLY" && ( -n "$CORE_ONLY" || -n "$SYSTEMS" ) ]]; then
+  echo "--workflow-only cannot be combined with --systems or --core-only" >&2
+  exit 1
+fi
 
 # The default bundle set is offered only to adapters that advertise support for the flag.
 # An adapter that declares no bundles installs the core only, which is what --core-only

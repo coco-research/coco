@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # Replace the Coco-managed rules block in a CLAUDE.md, or append it if absent.
 #
-# Usage: printf '%s\n' "$block" | bash scripts/write-rules-block.sh <target> [--plan]
+# Usage: printf '%s\n' "$block" | bash scripts/write-rules-block.sh <target> [--plan|--remove]
 #
 # --plan writes nothing. If a real run would keep a .coco-bak, the path is printed
 # on stdout; otherwise stdout is empty.
+# --remove drops the marked block and writes the file back through a symlink.
+# Stdin is ignored. An unterminated block is left untouched and exits 3.
 #
 # The block on stdin must start with <!-- coco:rules-start --> and end with
 # <!-- coco:rules-end -->. Shared by the claude-code and hermes adapters, which
@@ -20,22 +22,26 @@
 
 set -euo pipefail
 
-usage="usage: write-rules-block.sh <target> [--plan] < block"
+usage="usage: write-rules-block.sh <target> [--plan|--remove] < block"
 target=${1:?$usage}
-plan=0
+mode=apply
 if [[ $# -gt 1 ]]; then
-  if [[ $# -ne 2 || "$2" != "--plan" ]]; then
+  if [[ $# -ne 2 ]]; then
     echo "$usage" >&2
     exit 2
   fi
-  plan=1
+  case "$2" in
+    --plan) mode=plan ;;
+    --remove) mode=remove ;;
+    *) echo "$usage" >&2; exit 2 ;;
+  esac
 fi
 start="<!-- coco:rules-start -->"
 end="<!-- coco:rules-end -->"
 block=$(cat)
 
 if [[ ! -f "$target" ]]; then
-  [[ $plan -eq 1 ]] && exit 0
+  [[ $mode == plan || $mode == remove ]] && exit 0
   printf '%s\n' "$block" > "$target"
   echo "Wrote rules block to $target"
   exit 0
@@ -60,6 +66,16 @@ if ! awk -v s="$start" -v e="$end" '
   ' "$target" > "$tmp"; then
   echo "WARNING: $target has a Coco rules block with no end marker ($end)." >&2
   echo "         Left it unchanged. Restore the marker, then re-run the installer." >&2
+  [[ $mode == remove ]] && exit 3
+  exit 0
+fi
+
+# Same marker scan as an install, without appending a new block.
+if [[ $mode == remove ]]; then
+  if ! cmp -s "$tmp" "$target"; then
+    cat "$tmp" > "$target"
+  fi
+  echo "Removed rules block from $target"
   exit 0
 fi
 
@@ -69,7 +85,7 @@ else
   printf '%s\n' "$block" > "$tmp"
 fi
 
-if [[ $plan -eq 1 ]]; then
+if [[ $mode == plan ]]; then
   if ! cmp -s "$tmp" "$target"; then
     printf '%s\n' "$target.coco-bak"
   fi

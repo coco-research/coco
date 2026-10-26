@@ -483,4 +483,94 @@ if grep -q '{"summary":' "$WORK/guard.json"; then
 fi
 echo "ok   protected path refused and HOME was not modified"
 
+echo "=== narrower re-install keeps earlier links tracked ==="
+H="$WORK/carry"
+mkdir -p "$H"
+save_tree "$H" carry
+if ! run_at "$H" bash "$ADAPTER" >"$WORK/carry-full.out" 2>"$WORK/carry-full.err"; then
+  tail -30 "$WORK/carry-full.err" >&2
+  fail "carry: default install failed"
+fi
+if ! run_at "$H" bash "$ADAPTER" --core-only >"$WORK/carry-narrow.out" 2>"$WORK/carry-narrow.err"; then
+  tail -30 "$WORK/carry-narrow.err" >&2
+  fail "carry: narrower re-install failed"
+fi
+grep -F -q "from an earlier install" "$WORK/carry-narrow.out" \
+  || fail "carry: no note about the earlier install"
+MAN="$H/.claude/.coco/manifest.jsonl"
+cp "$MAN" "$WORK/carry-manifest-1"
+python3 - "$H/.claude" "$MAN" <<'PY'
+import json, os, sys
+target, man = sys.argv[1:]
+
+def norm(path):
+    return os.path.join(os.path.realpath(os.path.dirname(path)), os.path.basename(path))
+
+listed = {norm(o["path"]) for o in map(json.loads, open(man, encoding="utf-8")) if "path" in o}
+links = set()
+for dirpath, dirnames, filenames in os.walk(target, followlinks=False):
+    for name in dirnames + filenames:
+        path = os.path.join(dirpath, name)
+        if os.path.islink(path):
+            links.add(norm(path))
+missing = sorted(links - listed)
+if missing:
+    sys.exit("links dropped from the manifest:\n" + "\n".join(missing[:20]))
+print("ok   all %s symlinks stay in the manifest" % len(links))
+PY
+if ! run_at "$H" bash "$ADAPTER" --core-only --json >"$WORK/carry-narrow2.json" 2>"$WORK/carry-narrow2.err"; then
+  tail -30 "$WORK/carry-narrow2.err" >&2
+  fail "carry: second narrower re-install failed"
+fi
+python3 - "$WORK/carry-narrow2.json" <<'PY'
+import json, sys
+
+rows = list(map(json.loads, open(sys.argv[1], encoding="utf-8")))
+summary, records = rows[-1]["summary"], rows[:-1]
+carried = [o for o in records if o.get("carried")]
+written = [o for o in records if o["op"] in ("link", "write", "block") and not o.get("carried")]
+if not carried or summary["carried"] != len(carried):
+    sys.exit("summary carried %s != %s carried rows" % (summary["carried"], len(carried)))
+if summary["paths"] != len(written):
+    sys.exit("summary paths %s != %s rows this run wrote" % (summary["paths"], len(written)))
+links = [o for o in written if o["op"] == "link"]
+if summary["link"] != len(links):
+    sys.exit("summary link %s != %s links this run wrote" % (summary["link"], len(links)))
+print("ok   summary counts only this run: %s of %s rows carried" % (len(carried), len(records)))
+PY
+python3 - "$WORK/carry-manifest-1" "$MAN" <<'PY'
+import json, sys
+
+def paths(path):
+    return {o["path"] for o in map(json.loads, open(path, encoding="utf-8")) if "path" in o}
+
+first, second = paths(sys.argv[1]), paths(sys.argv[2])
+if first != second:
+    sys.exit("manifest paths drifted on re-run:\n" + "\n".join(sorted(first ^ second)[:20]))
+print("ok   re-running --core-only keeps the same manifest paths")
+PY
+if ! run_at "$H" bash "$ADAPTER" --uninstall --dry-run --json >"$WORK/carry-un-dry.json" 2>"$WORK/carry-un-dry.err"; then
+  tail -40 "$WORK/carry-un-dry.err" >&2
+  fail "carry: dry-run uninstall failed"
+fi
+python3 - "$WORK/carry-narrow2.json" "$WORK/carry-un-dry.json" <<'PY'
+import json, sys
+
+def rows(path):
+    return list(map(json.loads, open(path, encoding="utf-8")))
+
+carried = {o["path"] for o in rows(sys.argv[1])[:-1] if o.get("carried")}
+removed = {o["path"] for o in rows(sys.argv[2]) if o.get("op") == "remove"}
+missing = sorted(carried - removed)
+if not carried or missing:
+    sys.exit("carried paths the dry run would not remove:\n" + "\n".join(missing[:20]))
+print("ok   dry run removes all %s carried paths" % len(carried))
+PY
+if ! run_at "$H" bash "$ADAPTER" --uninstall >"$WORK/carry-un.out" 2>"$WORK/carry-un.err"; then
+  tail -40 "$WORK/carry-un.err" >&2
+  fail "carry: uninstall failed"
+fi
+same_tree "$H" carry
+echo "ok   narrower re-install still uninstalls cleanly"
+
 echo "PASS: uninstall"

@@ -58,6 +58,7 @@ class Installer(ApplyMixin):
         self.command_count = 0
         self.si_count = None
         self.stale_count = 0
+        self.carried_count = 0
         self.managed = []
         self.planned_new = set()
         self.prior_created = {}
@@ -65,6 +66,7 @@ class Installer(ApplyMixin):
         self.prior_replaced = {}
         self.prior_kind = {}
         self.prior_sha = {}
+        self.prior_records = {}
         self.old_sources = set()
         self.manifest_path = os.path.join(self.home, ".coco", "manifest.jsonl")
         self.summary_ops = ("link", "write", "block", "skip")
@@ -369,6 +371,7 @@ class Installer(ApplyMixin):
                 if rec_path in seen:
                     continue
                 seen.add(rec_path)
+                self.prior_records[rec_path] = obj
                 created = obj.get("created")
                 if created is True or created is False:
                     self.prior_created[rec_path] = created
@@ -644,11 +647,37 @@ class Installer(ApplyMixin):
         self.ensure_dir(os.path.join(self.home, ".coco"))
         self.add_write(self.manifest_path, "manifest", carry=False)
 
+    def plan_carry(self):
+        # Rows an earlier install wrote and this selection no longer plans stay in the
+        # manifest, so --uninstall still undoes them.
+        # ponytail: carry never prunes, so a narrower selection does not shrink what is
+        # installed. The upgrade path is an explicit --prune flag, if users ask for one.
+        for path, row in self.prior_records.items():
+            op = row.get("op")
+            if op not in self.path_ops:
+                continue
+            if path in self.seen_paths or not os.path.lexists(path):
+                continue
+            if op == "link":
+                if not os.path.islink(path) or not self.link_is_ours(path):
+                    continue
+            elif op == "write":
+                if row.get("kind") == "dir":
+                    if os.path.islink(path) or not os.path.isdir(path):
+                        continue
+                elif os.path.islink(path) or not os.path.isfile(path):
+                    continue
+            elif os.path.islink(path) or not os.path.isfile(path):
+                continue
+            self.add_record(dict(row, carried=True))
+            self.carried_count += 1
+
     def plan_all(self):
         self.plan_core()
         for sys in self.systems:
             self.plan_system(sys)
         self.plan_manifest()
+        self.plan_carry()
 
 
 def main(argv):

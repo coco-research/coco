@@ -41,6 +41,7 @@ bash install.sh --systems superintelligence
 | `--help` | Show usage |
 | `--systems gsd,brain` | Install one or more system bundles. Accepted by every adapter, including cursor (`~/.cursor/commands` for generated SI-* files) |
 | `--workflow` | Claude Code only. Also links `bin/coco-gate` and the three `hooks/coco-workflow-*.sh` files, then prints the hook lines to add to a repo's `.claude/settings.local.json`. It never writes that file. |
+| `--workflow-only` | Claude Code only. Installs or removes just the `<target>/coco/` workflow pieces, with no skills, commands, agents or rules. On a full install it keeps the other manifest rows. |
 
 ---
 

@@ -237,6 +237,7 @@ mkdir -p "$H"
 inert_status=0
 HOME="$H" CLAUDE_HOME="$H/.claude" \
   env -u COCO_INSTALL_TEST_HOOKS COCO_INSTALL_FAIL_AT="$H/.claude/.coco/manifest.jsonl" \
+  COCO_INSTALL_KILL_AT="$H/.claude/skills/brainstorming" \
   bash "$ADAPTER" --core-only --json >"$WORK/inert.json" 2>"$WORK/inert.err" || inert_status=$?
 if [[ $inert_status -ne 0 ]]; then
   tail -30 "$WORK/inert.err" >&2
@@ -244,7 +245,8 @@ if [[ $inert_status -ne 0 ]]; then
 fi
 grep -q '{"summary":' "$WORK/inert.json" || fail "inert hooks: no summary line"
 [[ -f "$H/.claude/.coco/manifest.jsonl" ]] || fail "inert hooks: manifest missing"
-echo "ok   COCO_INSTALL_FAIL_AT did nothing with the test switch unset"
+[[ -L "$H/.claude/skills/brainstorming" ]] || fail "inert hooks: the kill path was not installed"
+echo "ok   COCO_INSTALL_FAIL_AT and COCO_INSTALL_KILL_AT did nothing with the test switch unset"
 
 echo "=== a failing SI generator aborts --dry-run --json with no summary ==="
 COPY="$WORK/broken-repo"

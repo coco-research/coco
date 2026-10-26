@@ -77,6 +77,9 @@ jobs:
       - name: coco-workflow gate cases (forgery, happy path, workflow hygiene)
         run: bash tests/check-coco-gate.sh
 
+      - name: coco-workflow hook cases (deny code edits until the plan is signed)
+        run: bash tests/check-coco-workflow-hook.sh
+
       - name: Validate unknown CLI subcommands fail before any clone
         run: bash tests/check-cli-unknown-subcommand.sh
 

@@ -1,8 +1,8 @@
-# CoCo Super Intelligence
+# Coco Super Intelligence
 
 495 personas across 13 departments, **229 skills**[^installed] and **388 commands** in the full catalog (coco 1.9.0, 2026-10-21).
 
-Agent skills, slash commands and subagents for Claude Code, Cursor, Codex and other AI coding agents. One command installs them into the tool you already use, and everything runs locally:
+Agent skills, slash commands and subagents for Claude Code, Cursor, Codex and other AI coding agents. One command installs them into the tool you already use. Coco's files and state stay on your machine. Your coding agent still uses its own model provider.
 
 ```bash
 npx cocosuperintelligence
@@ -278,7 +278,7 @@ Full attributions, including audio ([ende.app](https://ende.app), [Kenney.nl](ht
 
 ## Contributing
 
-CoCo is open-core: the core is MIT-licensed and contributions are welcome. The Super Intelligence System (`systems/superintelligence/`) is proprietary. See [`systems/superintelligence/LICENSE`](systems/superintelligence/LICENSE).
+Coco is open-core: the core is MIT-licensed and contributions are welcome. The Super Intelligence System (`systems/superintelligence/`) is proprietary. See [`systems/superintelligence/LICENSE`](systems/superintelligence/LICENSE).
 
 - Start with [`CONTRIBUTING.md`](CONTRIBUTING.md).
 - Good first issues: [help wanted / good first issue](https://github.com/coco-research/coco/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
@@ -292,3 +292,5 @@ Releases are in [`CHANGELOG.md`](CHANGELOG.md) and on the [GitHub Releases](http
 Open-core. The core of this repository is MIT, in [`LICENSE`](LICENSE). Super Intelligence (`systems/superintelligence/`) is proprietary, in [`systems/superintelligence/LICENSE`](systems/superintelligence/LICENSE). Third-party bundles keep their own licences: HyperFrames is Apache-2.0, and `reverse-skill` documents its upstream licence in its own README.
 
 [^installed]: 191 of the 229 skills install by default on Claude Code, together with all 388 commands and 34 agents. The other 38 are the opt-in `reverse-skill` security pack (33, installed only with `--systems reverse-skill`) and 5 Cursor-only skills. Measured by running the installer, not by counting files: see [`docs/delivered-counts.json`](docs/delivered-counts.json), and [`adapters/INDEX.md`](adapters/INDEX.md) for every other IDE.
+
+Coco Super Intelligence is built by Coco Research.

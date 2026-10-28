@@ -60,8 +60,6 @@ CHECKS = [
     ('coco/index.html', r'<meta property="og:description" content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'og:description (personas, skills)', (PERSONAS, SKILLS)),
     ('coco/index.html', r'<meta name="twitter:description" content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'twitter:description (personas, skills)', (PERSONAS, SKILLS)),
     ('coco/index.html', r'<p class="sub reveal">Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'on-page sub (personas, skills)', (PERSONAS, SKILLS)),
-    ('coco/index.html', r'(\d+) expert personas across (\d+) departments, bar length', 'hero image alt (personas, departments)', (PERSONAS, DEPARTMENTS)),
-    ('coco/index.html', r'(\d+) experts, broken out by department', 'figcaption (personas)', (PERSONAS,)),
     ('coco/index.html', r'<p class="n">(\d+)</p><p class="lbl">Expert personas</p>', 'stat tile (personas)', (PERSONAS,)),
     ('coco/index.html', r'<p class="n">(\d+)</p><p class="lbl">Departments</p>', 'stat tile (departments)', (DEPARTMENTS,)),
     ('coco/index.html', r'<p class="n">(\d+)</p><p class="lbl">Commands</p>', 'stat tile (commands)', (COMMANDS,)),

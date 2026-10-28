@@ -42,7 +42,7 @@ DEPARTMENTS = counts['departments']['total']
 VERSION = counts['version']
 # The released version the counts come from must be the version the homepage names.
 index_text = open('index.html').read()
-for claim in (f'CoCo {VERSION} <span', f'Available now, v{VERSION}, on npm'):
+for claim in (f'Coco {VERSION} <span', f'Available now, v{VERSION}, on npm'):
     if claim in index_text:
         pass_(f'index.html: names release {VERSION} ({claim.split(" <")[0]})')
     else:

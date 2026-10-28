@@ -51,7 +51,7 @@ jobs:
 
       - name: Adapter install.sh syntax check
         run: |
-          for f in adapters/*/install.sh install.sh bin/coco-bootstrap.sh skills/prd-generator/scripts/generate_prd.sh skills/brainstorming/scripts/stop-server.sh tests/check-security-surface.sh tests/check-officecli-install.sh; do
+          for f in adapters/*/install.sh install.sh bin/coco-bootstrap.sh skills/prd-generator/scripts/generate_prd.sh skills/brainstorming/scripts/stop-server.sh tests/check-security-surface.sh tests/check-officecli-install.sh tests/check-install-manifest.sh tests/check-install-safety.sh tests/check-uninstall.sh tests/lib/install-home.sh; do
             bash -n "$f" || { echo "Syntax error in $f"; exit 1; }
           done
           echo "All install scripts pass syntax check."
@@ -64,6 +64,24 @@ jobs:
 
       - name: Validate officecli install instructions
         run: bash tests/check-officecli-install.sh
+
+      - name: Validate the Claude Code install manifest
+        run: bash tests/check-install-manifest.sh
+
+      - name: Validate the Claude Code install safety checks
+        run: bash tests/check-install-safety.sh
+
+      - name: Validate the Claude Code uninstall
+        run: bash tests/check-uninstall.sh
+
+      - name: coco-workflow gate cases (forgery, happy path, workflow hygiene)
+        run: bash tests/check-coco-gate.sh
+
+      - name: coco-workflow hook cases (deny code edits until the plan is signed)
+        run: bash tests/check-coco-workflow-hook.sh
+
+      - name: coco-workflow git-hook cases (pre-commit warning and the H7 show check)
+        run: bash tests/check-coco-workflow-githook.sh
 
       - name: Validate unknown CLI subcommands fail before any clone
         run: bash tests/check-cli-unknown-subcommand.sh

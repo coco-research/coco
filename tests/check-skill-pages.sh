@@ -7,7 +7,10 @@ err=$(mktemp)
 fake=$(mktemp -d)
 fake_out=$(mktemp -d)
 fake_err=$(mktemp)
-trap 'rm -rf "$out" "$fake" "$fake_out"; rm -f "$err" "$fake_err"' EXIT
+desc=$(mktemp -d)
+desc_out=$(mktemp -d)
+desc_err=$(mktemp)
+trap 'rm -rf "$out" "$fake" "$fake_out" "$desc" "$desc_out"; rm -f "$err" "$fake_err" "$desc_err"' EXIT
 
 # Show the generator stderr even when it fails, before set -e ends the script.
 rc=0
@@ -212,6 +215,18 @@ if grep -F -q 'Layout sample' "$measured" || grep -F -q 'SAMPLE' "$measured"; th
   exit 1
 fi
 
+# Copy rules: no weekly promise, and no old CoCo casing in the chrome or on the measured page.
+for stale in 'refreshed every Monday' 'every week' 'CoCo Research' 'CoCo Super Intelligence' '· CoCo skills'; do
+  if grep -R -F -q --include='*.html' "$stale" "$out"; then
+    echo "generated page carries stale copy: $stale" >&2
+    exit 1
+  fi
+done
+if grep -F -q 'CoCo' "$measured"; then
+  echo 'measured page carries the old CoCo casing' >&2
+  exit 1
+fi
+
 # A committed record the generator rejects is a repo bug: name it here, before the row count.
 if grep -F 'bad record' "$err" >&2; then
   echo 'a committed eval record is malformed (see above)' >&2
@@ -260,7 +275,7 @@ for record_path in (sorted(runs.glob('*.json')) if runs.is_dir() else []):
     data = load(record_path) or {}
     run = data.get('run') if isinstance(data.get('run'), dict) else {}
     vs = run.get('vs_keyword') if isinstance(run.get('vs_keyword'), dict) else {}
-    if rate(data.get('top1_accuracy')) and rate(vs.get('baseline_top1')) and count(run.get('n_labelled')):
+    if data.get('split') == 'descriptions' and rate(data.get('top1_accuracy')) and rate(vs.get('baseline_top1')) and count(run.get('n_labelled')):
         rows += 1
         break
 print(rows)
@@ -269,6 +284,10 @@ PY
 actual=$(grep -c 'data-label="Skill"' "$measured" || true)
 if [[ "$actual" -ne "$expected" ]]; then
   echo "measured rows $actual != expected $expected" >&2
+  exit 1
+fi
+if grep -F -q 'Skill router (on descriptions, not names)' "$measured"; then
+  echo 'measured page shows a router row without a descriptions-split record' >&2
   exit 1
 fi
 
@@ -289,6 +308,23 @@ if grep -F -q 'data-label="Skill"' "$fake_out/coco/skills/measured/index.html"; 
   echo 'a fake record became a measured row' >&2
   exit 1
 fi
+
+# Only a descriptions-split routing record produces a router row.
+cp -R evals "$desc/evals"
+python3 - "$desc/evals/routing/runs/2026-10-15-215df3c.json" <<'PY'
+import json, sys
+from pathlib import Path
+source = Path(sys.argv[1])
+record = json.loads(source.read_text(encoding='utf-8'))
+record['split'] = 'descriptions'
+record['top1_accuracy'] = 0.7
+record['run']['vs_keyword']['baseline_top1'] = 0.4
+(source.parent / '9999-01-01-descriptions.json').write_text(json.dumps(record, indent=2) + '\n', encoding='utf-8')
+PY
+python3 scripts/build-skill-pages.py --out "$desc_out" --evals "$desc/evals" 2>"$desc_err"
+desc_measured="$desc_out/coco/skills/measured/index.html"
+[[ -f "$desc_measured" ]]
+grep -F -q '<td class="skill" data-label="Skill">Skill router (on descriptions, not names)</td>' "$desc_measured"
 
 tracked=$(git ls-files coco/skills sitemap.xml)
 if [[ -n "$tracked" ]]; then

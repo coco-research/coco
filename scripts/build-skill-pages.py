@@ -29,7 +29,7 @@ _DANGLING = re.compile(r'(?i)\s+(?:for|to|and|or|with|of|in|on|a|an|the|its|thei
 _PEEL = re.compile(r"^(?:(?:the|a|an)\s+)?(?:user|users|agent|someone|somebody|you)\s+(?:(?:wants|want|asks|ask|needs|need|must|should)\s+)?(?:to\s+)?(?=\S)(.+)$", re.I)
 _MACHINE, _STYLES = ('~/', '/Users/', '/home/', 'C:\\'), {'>', '>-', '>+', '|', '|-', '|+'}
 _ESC = {'n': '\n', 't': '\t', 'r': '\r', '"': '"', '\\': '\\', '/': '/'}
-SLUG_WORD_CASING = {'gsd': 'GSD', 'prd': 'PRD', 'ui': 'UI', 'ux': 'UX', 'uat': 'UAT', 'pr': 'PR', 'api': 'API', 'cli': 'CLI', 'ai': 'AI', 'coco': 'CoCo'}
+SLUG_WORD_CASING = {'gsd': 'GSD', 'prd': 'PRD', 'ui': 'UI', 'ux': 'UX', 'uat': 'UAT', 'pr': 'PR', 'api': 'API', 'cli': 'CLI', 'ai': 'AI', 'coco': 'Coco'}
 TITLE_OVERRIDES = {'officecli': 'OfficeCLI'}
 EXTRA_PERSON_NAMES = ('Karpathy',)  # ponytail: rosters miss these; add as reviews find them.
 
@@ -145,7 +145,7 @@ def summary_source(description, body):
     for candidate in (paragraph, sentence, description, _LEADIN_RE.sub('', one_line(description))):
         fixed = _repair(candidate)
         if fixed and not _leadin(fixed) and not _bad_end(fixed): return fixed
-    return 'This skill ships with CoCo.'
+    return 'This skill ships with Coco.'
 
 def _take_quoted(value, q):
     if not value.startswith(q): return None
@@ -364,7 +364,7 @@ def present(skill, domains):
     summary = summary_source(skill['description'], skill['body'])
     if _bad_summary(summary):
         paragraph = paragraph_sentence(skill['body'])
-        summary = paragraph if paragraph and not _bad_summary(paragraph) else f'{title} skill for CoCo Super Intelligence.'
+        summary = paragraph if paragraph and not _bad_summary(paragraph) else f'{title} skill for Coco Super Intelligence.'
     return {'slug': skill['slug'], 'name': skill['slug'], 'title': title, 'summary': summary,
             'when': when_items(skill['description']), 'domain': domains.get(skill['bundle'], skill['bundle']),
             'install': INSTALL, 'source_url': source_url(skill['rel']), 'rel': skill['rel']}
@@ -433,11 +433,14 @@ def measured_rows(evals, skills, kept):
     return rows
 
 def router_row(evals):
-    """Newest routing record by run.date, then filename. None when none is usable."""
+    """Newest routing record whose top-level split is "descriptions". None when none is usable."""
     runs, best = Path(evals) / 'routing' / 'runs', None
     for path in (sorted(runs.glob('*.json')) if runs.is_dir() else []):
         data = _load(path)
-        run = data.get('run') if isinstance(data, dict) else None
+        if not isinstance(data, dict) or data.get('split') != 'descriptions':
+            _skip('router', f'not a descriptions-split record {_rel(path)}')
+            continue
+        run = data.get('run')
         if not isinstance(run, dict): continue
         vs = run.get('vs_keyword')
         score = _num(data.get('top1_accuracy'))
@@ -446,7 +449,7 @@ def router_row(evals):
         if score is None or baseline is None or tasks is None or date is None: _skip('router', f'bad record {_rel(path)}'); continue
         if best is None or (date, path.name) > best[0]:
             embed = run.get('embed_model')
-            best = ((date, path.name), {'slug': 'skill-router', 'title': 'Skill router', 'href': None, 'score': score,
+            best = ((date, path.name), {'slug': 'skill-router', 'title': 'Skill router (on descriptions, not names)', 'href': None, 'score': score,
                                         'baseline': baseline, 'tasks': tasks, 'date': date, 'model': None,
                                         'executor': None, 'embed_model': embed if isinstance(embed, str) else None})
     return best[1] if best else None
@@ -464,7 +467,7 @@ def _notes(rows):
     models = sorted({(row['model'], row['executor']) for row in rows
                      if isinstance(row.get('model'), str) and isinstance(row.get('executor'), str)})
     embeds = sorted({row['embed_model'] for row in rows if isinstance(row.get('embed_model'), str)})
-    lines = ['      <p class="note">Skill score = mean grader score (0 to 1) on that skill\'s held-out tasks. Baseline = the skill as first measured. Router score = share of held-out requests routed to the right team; its baseline is plain keyword matching. Tasks and graders are committed in evals/.</p>']
+    lines = ['      <p class="note">Skill score = mean grader score (0 to 1) on that skill\'s held-out tasks. Baseline = the skill as first measured. Router score = share of held-out descriptions (prompts that never name the team) routed to the right team, compared with keyword matching on the same prompts. Tasks and graders are committed in evals/.</p>']
     lines += [f'      <p class="note">Skills scored with {esc(model)} ({esc(executor)}).</p>' for model, executor in models]
     lines += [f'      <p class="note">Router scored with {esc(embed)} embeddings.</p>' for embed in embeds]
     return '\n'.join(lines)
@@ -485,7 +488,7 @@ def measured_page(template, rows):
     description = 'Held-out scores for the skills we measure, from the eval runs committed in the repository.'
     page = ('<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="utf-8">\n'
             '  <meta name="viewport" content="width=device-width, initial-scale=1">\n'
-            '  <title>Measured skills · CoCo skills</title>\n'
+            '  <title>Measured skills · Coco skills</title>\n'
             f'  <meta name="description" content="{esc(description)}">\n'
             '  <link rel="canonical" href="https://cocoresearch.org/coco/skills/measured/">\n'
             '  <link rel="stylesheet" href="/coco/skills/skills.css">\n</head>\n<body>\n'
@@ -578,9 +581,9 @@ def index_page(template, skills, bundles, domains):
             rows.append(f'          <li>{line}</li>')
         sections.append(f'      <section class="block">\n        <h2>{esc(label)}</h2>\n        <ul class="when">\n'
                         + '\n'.join(rows) + '\n        </ul>\n      </section>')
-    description, body = 'Agent skills that ship with CoCo.', '\n'.join(sections)
+    description, body = 'Agent skills that ship with Coco.', '\n'.join(sections)
     page = ('<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="utf-8">\n'
-            '  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <title>Skills · CoCo skills</title>\n'
+            '  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <title>Skills · Coco skills</title>\n'
             f'  <meta name="description" content="{esc(description)}">\n'
             '  <link rel="canonical" href="https://cocoresearch.org/coco/skills/">\n'
             '  <link rel="stylesheet" href="/coco/skills/skills.css">\n</head>\n<body>\n'

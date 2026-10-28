@@ -1,6 +1,6 @@
 CoCo Super Intelligence — Proprietary License
 
-Copyright (c) 2026 Coco Inc. All rights reserved.
+Copyright (c) 2026 Coco Research. All rights reserved.
 
 This directory (`systems/superintelligence/` and all of its contents — the
 expert persona registries, research corpora, team definitions, generators,
@@ -11,7 +11,7 @@ this repository.
 No license or right is granted to any person to use, copy, modify, merge,
 publish, distribute, sublicense, sell, or create derivative works of the
 Super Intelligence System, in whole or in part, except as expressly
-authorized in writing by Coco Inc.
+authorized in writing by Coco Research.
 
 The source of the Super Intelligence System is made visible in this
 repository for reference and transparency only. Visibility of the source
@@ -21,7 +21,7 @@ Permitted without separate authorization:
   - Running the Super Intelligence System locally as installed by this
     project's installer for your own use.
 
-Not permitted without prior written authorization from Coco Inc:
+Not permitted without prior written authorization from Coco Research:
   - Redistributing the Super Intelligence System or any substantial portion
     of it, modified or unmodified.
   - Incorporating it, or derivatives of it, into any other product or
@@ -39,4 +39,4 @@ EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES,
 OR OTHER LIABILITY ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SUPER
 INTELLIGENCE SYSTEM OR ITS USE.
 
-For licensing inquiries, contact Coco Inc.
+For licensing inquiries, contact Coco Research.

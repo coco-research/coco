@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  CoCo Super Intelligence — Open Graph / social card (1200x630)
+  Coco Super Intelligence — Open Graph / social card (1200x630)
   One mark, one name, one phrase. Generous space, no stat dump.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
@@ -15,7 +15,7 @@
   <!-- Background: deep midnight, not pure black -->
   <rect x="0" y="0" width="1200" height="630" fill="#0A0F1F"/>
 
-  <!-- Mark on left: the original CoCo two-C arcs, scaled up -->
+  <!-- Mark on left: the original Coco two-C arcs, scaled up -->
   <g transform="translate(120, 150)">
     <path d="M 145 100 A 100 100 0 1 0 145 300"
           stroke="#FFFFFF" stroke-width="22" stroke-linecap="round" fill="none"/>
@@ -26,7 +26,7 @@
   <!-- Right: name + subtitle + one phrase -->
   <text x="470" y="285"
         font-family="-apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif"
-        font-size="128" font-weight="700" fill="#FFFFFF" letter-spacing="-6">CoCo</text>
+        font-size="128" font-weight="700" fill="#FFFFFF" letter-spacing="-6">Coco</text>
 
   <text x="474" y="345"
         font-family="-apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif"
@@ -34,10 +34,10 @@
 
   <text x="472" y="436"
         font-family="-apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif"
-        font-size="34" font-weight="500" fill="#FFFFFF" opacity="0.86">An advisory board of 495 world-class</text>
+        font-size="34" font-weight="500" fill="#FFFFFF" opacity="0.86">An advisory board of AI personas —</text>
   <text x="472" y="482"
         font-family="-apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif"
-        font-size="34" font-weight="500" fill="#FFFFFF" opacity="0.86">minds — inside your coding session.</text>
+        font-size="34" font-weight="500" fill="#FFFFFF" opacity="0.86">inside your coding session.</text>
 
   <!-- Bottom-right URL -->
   <text x="1120" y="596"

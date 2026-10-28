@@ -74,6 +74,9 @@ jobs:
       - name: Validate the Claude Code uninstall
         run: bash tests/check-uninstall.sh
 
+      - name: Codex and generic re-installs make no AGENTS.md backup when nothing changed
+        run: bash tests/check-agents-md-backup.sh
+
       - name: coco-workflow gate cases (forgery, happy path, workflow hygiene)
         run: bash tests/check-coco-gate.sh
 

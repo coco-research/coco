@@ -306,6 +306,9 @@ jobs:
 
       - name: Skill eval harness self-test
         run: python3 evals/skills/score.py --self-test
+
+      - name: Routing description split (offline)
+        run: bash tests/check-routing-descriptions.sh
       - name: Skill improve-round core tests
         run: python3 -m unittest tests/test_skill_improve.py
 
@@ -342,6 +345,9 @@ jobs:
       # No actions/setup-python here: it is broken on this runner (see self-hosted-probe.yml).
       - name: Gate self-test
         run: python3 evals/routing/check_regression.py --self-test
+
+      - name: Routing description split (offline)
+        run: bash tests/check-routing-descriptions.sh
 
       - name: Probe local Ollama
         id: probe

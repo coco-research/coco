@@ -1,0 +1,110 @@
+{"id": "d001", "prompt": "How should we set the pretraining compute budget and scaling-law targets for the next foundation model?", "label": "ai", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d002", "prompt": "Which post-training recipe improves reasoning on hard benchmarks without blowing up inference cost?", "label": "ai", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d003", "prompt": "We need a plan for alignment evals and interpretability probes before the next weights release.", "label": "ai", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d004", "prompt": "Compare transformer serving stacks: kernels, batching, and latency at peak traffic.", "label": "ai", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d005", "prompt": "What multimodal training mix should we use so vision and diffusion do not drown out text quality?", "label": "ai", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d006", "prompt": "How do frontier labs staff research versus applied model work this year?", "label": "ai", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d007", "prompt": "Should the agent harness use reinforcement learning from verifiable rewards or supervised traces?", "label": "ai", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d008", "prompt": "Where is the bottleneck: pretraining throughput, eval coverage, or inference serving?", "label": "ai", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d009", "prompt": "Our checkout API times out under load. How do we cut tail latency and add a proper on-call page?", "label": "engineering", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d010", "prompt": "Sketch a rollback path for the deploy pipeline so a bad release can be reverted in one command.", "label": "engineering", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d011", "prompt": "The primary database is hot. What split of read replicas and caching keeps write latency stable?", "label": "engineering", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d012", "prompt": "We keep missing incidents until customers report them. What observability should page a human?", "label": "engineering", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d013", "prompt": "Which compiler and runtime flags are worth it for this CPU-bound service?", "label": "engineering", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d014", "prompt": "The frontend bundle is huge. How do we split routes without breaking the web app?", "label": "engineering", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d015", "prompt": "Write the threat model for this service: auth boundaries, secrets, and what we log.", "label": "engineering", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d016", "prompt": "The platform group wants a paved path for new services: CI, deploy, and a starter repo. What belongs in it?", "label": "engineering", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d017", "prompt": "People drop off on the signup form. What usability issues should we test with five participants?", "label": "product-design", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d018", "prompt": "We need a component library and interaction patterns so the interface stays consistent across screens.", "label": "product-design", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d019", "prompt": "Run a discovery sprint: interviews, a journey map, and the jobs people hire this for.", "label": "product-design", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d020", "prompt": "The empty state is a dead end. How should the interface invite the first successful action?", "label": "product-design", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d021", "prompt": "Accessibility review: contrast, focus order, and screen-reader labels on the checkout flow.", "label": "product-design", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d022", "prompt": "The copy is vague. Rewrite the labels and help text so people know what happens next.", "label": "product-design", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d023", "prompt": "Which growth loop should the experience reinforce: invite, create, or come back tomorrow?", "label": "product-design", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d024", "prompt": "Visual craft feels generic. Propose a type scale, spacing, and a distinctive color direction.", "label": "product-design", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d025", "prompt": "Build a discounted-cash-flow valuation and show how the WACC assumption moves the number.", "label": "finance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d026", "prompt": "The balance sheet is levered. What capital structure keeps interest coverage above two?", "label": "finance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d027", "prompt": "FP&A needs a quarterly forecast: revenue, gross margin, and the three expenses that swing.", "label": "finance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d028", "prompt": "Walk through the acquisition: purchase price, synergies, and whether it earns its cost of capital.", "label": "finance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d029", "prompt": "Accounting flagged revenue recognition on multi-year contracts. What should the policy say?", "label": "finance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d030", "prompt": "Macro rates jumped. How does that change treasury cash and the debt refinance?", "label": "finance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d031", "prompt": "Is this payments startup a sensible investment, or are the unit economics still a story?", "label": "finance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d032", "prompt": "Investors want an IPO timeline. What has to be true in the statements before we file?", "label": "finance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d033", "prompt": "Implied volatility is rich versus realized. Should we sell the options straddle or wait?", "label": "trading", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d034", "prompt": "The order book is thin at the open. How do we execute a large buy without moving the mid?", "label": "trading", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d035", "prompt": "Rates sold off and credit spreads widened. What hedge belongs on this book?", "label": "trading", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d036", "prompt": "Our systematic factor book is bleeding momentum. Is this a regime change or noise?", "label": "trading", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d037", "prompt": "Futures basis is stretched. Where is the execution problem if we arb it back?", "label": "trading", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d038", "prompt": "Crypto funding flipped negative. How should the book size that carry?", "label": "trading", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d039", "prompt": "A tail move blew through the stop. What drawdown rule should have cut size sooner?", "label": "trading", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d040", "prompt": "Quote fading and adverse selection show up on this name. Do we still provide liquidity?", "label": "trading", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d041", "prompt": "GDPR and CCPA both apply to this launch. What privacy controls have to exist before we ship?", "label": "risk-compliance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d042", "prompt": "Sanctions screening missed a counterparty. How should AML and KYC escalation work?", "label": "risk-compliance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d043", "prompt": "Internal audit wants the three-lines model written down for this control set.", "label": "risk-compliance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d044", "prompt": "The statute on model accountability asks for a validation packet. What evidence do we attach?", "label": "risk-compliance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d045", "prompt": "A breach disclosure clock started. Who signs the notice and what do we tell regulators?", "label": "risk-compliance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d046", "prompt": "A vendor will process personal information in another country. What transfer safeguard do we need?", "label": "risk-compliance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d047", "prompt": "Model validation under the supervisory guidance is stale. What tests should be rerun?", "label": "risk-compliance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d048", "prompt": "Financial-crime monitoring alerts are mostly noise. How do we tune them without missing a real case?", "label": "risk-compliance", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d049", "prompt": "Competitors copied the feature. Where is the durable advantage, and what moat still holds?", "label": "strategy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d050", "prompt": "We are choosing where to play next year: stay in this segment or move to an adjacency.", "label": "strategy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d051", "prompt": "The portfolio has three bets and one cash cow. Which bet do we kill?", "label": "strategy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d052", "prompt": "A platform shift could disrupt the core offer. How early should we place a counter-bet?", "label": "strategy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d053", "prompt": "Network effects are weak. What would have to change for this to become an ecosystem?", "label": "strategy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d054", "prompt": "The plan on the slide is a list of projects. Turn it into a few explicit choices and tradeoffs.", "label": "strategy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d055", "prompt": "Leadership keeps relitigating the same decision. What bias is driving that loop?", "label": "strategy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d056", "prompt": "Two rivals may cooperate on a standard and compete on distribution. How should we play that?", "label": "strategy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d057", "prompt": "The warehouse tables disagree with the dashboard. Where should the metric be defined once?", "label": "data-analytics", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d058", "prompt": "We need a lakehouse layout and an orchestration schedule for the nightly pipeline.", "label": "data-analytics", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d059", "prompt": "dbt models are tangled. How do we cut the lineage so a schema change does not break twelve marts?", "label": "data-analytics", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d060", "prompt": "Stakeholders want a causal read on the pricing test, not another chart of averages.", "label": "data-analytics", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d061", "prompt": "The funnel chart hides the drop. What visualization would make the break obvious?", "label": "data-analytics", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d062", "prompt": "Quality checks never fire until a downstream consumer complains. What contract should fail the job?", "label": "data-analytics", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d063", "prompt": "The metrics layer has three definitions of active user. Which one do we keep, and why?", "label": "data-analytics", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d064", "prompt": "Production models drift and nobody notices. What eval and monitoring belong next to the feature pipeline?", "label": "data-analytics", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d065", "prompt": "We are creating a category, not joining one. How should positioning frame the problem?", "label": "gtm", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d066", "prompt": "Inbound is flat. What demand-generation and SEO bets are worth the next quarter?", "label": "gtm", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d067", "prompt": "Reps discount every deal. Which negotiation practice should enablement actually drill?", "label": "gtm", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d068", "prompt": "Self-serve signup converts, then stalls. How should the freemium path reach a paid moment?", "label": "gtm", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d069", "prompt": "The brand looks like everyone else. What distinctiveness would a buyer remember?", "label": "gtm", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d070", "prompt": "Packaging is three tiers nobody understands. How do we price to willingness-to-pay?", "label": "gtm", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d071", "prompt": "Net revenue retention is slipping after month three. Where does the post-sale motion break?", "label": "gtm", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d072", "prompt": "We need a crossing-the-chasm plan for the pragmatist buyer, not another feature list.", "label": "gtm", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d073", "prompt": "A competitor filed a patent on our core mechanism. What prior art should counsel gather, and which claims do we challenge?", "label": "legal-ip", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d074", "prompt": "The licence for this dependency is copyleft. Can we ship it in the proprietary build?", "label": "legal-ip", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d075", "prompt": "We want to license the software to a partner. What grant, field of use, and termination terms matter?", "label": "legal-ip", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d076", "prompt": "A regulator opened an antitrust inquiry into the bundling. What should we preserve and who speaks?", "label": "legal-ip", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d077", "prompt": "A privacy statute in the new market conflicts with the contract. Which obligation wins?", "label": "legal-ip", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d078", "prompt": "The open-source notice file is incomplete. What attribution do we owe on the next release?", "label": "legal-ip", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d079", "prompt": "A litigation hold just issued. What do staff stop deleting, and where do we collect it?", "label": "legal-ip", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d080", "prompt": "The trademark search came back crowded. Do we rename before the launch campaign?", "label": "legal-ip", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d081", "prompt": "The compound failed the phase-two endpoint. Do we amend the clinical trial or stop?", "label": "healthcare-life-sciences", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d082", "prompt": "We need a drug-discovery plan that gets to a first-in-human study without a fantasy timeline.", "label": "healthcare-life-sciences", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d083", "prompt": "A genomics report will be shown to patients. What precision-medicine claim is actually supported?", "label": "healthcare-life-sciences", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d084", "prompt": "Hospital buyers ask for outcomes evidence. What trial result would move a purchasing committee?", "label": "healthcare-life-sciences", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d085", "prompt": "A medtech device needs a regulatory path. Which claims can we make before clearance?", "label": "healthcare-life-sciences", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d086", "prompt": "Biotech cash lasts six quarters. Which indication do we advance and which do we park?", "label": "healthcare-life-sciences", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d087", "prompt": "Payers denied coverage. How should the economic case for this therapy be rebuilt?", "label": "healthcare-life-sciences", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d088", "prompt": "A digital symptom checker gives advice. What clinical evidence and escalation rules does it need?", "label": "healthcare-life-sciences", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d089", "prompt": "Students forget the lesson by Friday. What retrieval practice should the course build in?", "label": "education-edtech", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d090", "prompt": "The curriculum covers topics but not skills. How do we rewrite objectives so assessment matches?", "label": "education-edtech", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d091", "prompt": "A tutoring bot gives away the answer. How should hints fade as the learner improves?", "label": "education-edtech", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d092", "prompt": "University leadership wants fewer lectures. What classroom format actually changes learning?", "label": "education-edtech", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d093", "prompt": "The workforce program graduates people who still cannot do the job. Where does the syllabus lie?", "label": "education-edtech", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d094", "prompt": "Assessment is multiple choice only. What would show transfer, not recognition?", "label": "education-edtech", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d095", "prompt": "Instructors will not adopt the platform. What has to be true on Monday morning for them to switch?", "label": "education-edtech", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d096", "prompt": "We are choosing between a cohort course and self-paced modules. What does the learning research say?", "label": "education-edtech", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d097", "prompt": "Scope-three emissions dominate the footprint. What do we ask suppliers to report?", "label": "climate-energy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d098", "prompt": "The grid interconnection queue is years long. How do we sequence solar and storage anyway?", "label": "climate-energy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d099", "prompt": "The carbon price doubled. Which abatement projects now clear the hurdle?", "label": "climate-energy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d100", "prompt": "The sustainability report claims net zero with offsets. What would make that claim honest?", "label": "climate-energy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d101", "prompt": "Wind output collapses on still days. What storage duration covers the gap?", "label": "climate-energy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d102", "prompt": "An ESG questionnaire from a customer is mostly checkbox. Which metrics are worth answering seriously?", "label": "climate-energy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d103", "prompt": "A warming scenario shifts flood exposure at the plant. What adaptation is worth funding this year?", "label": "climate-energy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d104", "prompt": "Renewables procurement is stuck on contract length. How should we buy the next ten years of electricity?", "label": "climate-energy", "kind": "positive", "split": "heldout", "draft": true}
+{"id": "d105", "prompt": "Hey, what should I cook for dinner tonight?", "label": "none", "kind": "none", "split": "heldout", "draft": true}
+{"id": "d106", "prompt": "Tell me a joke about a penguin.", "label": "none", "kind": "none", "split": "heldout", "draft": true}
+{"id": "d107", "prompt": "Who won the world series in 1998?", "label": "none", "kind": "none", "split": "heldout", "draft": true}
+{"id": "d108", "prompt": "What is a good playlist for a rainy afternoon?", "label": "none", "kind": "none", "split": "heldout", "draft": true}
+{"id": "d109", "prompt": "How do I get a coffee stain out of a cotton shirt?", "label": "none", "kind": "none", "split": "heldout", "draft": true}
+{"id": "d110", "prompt": "Remind me to water the plants tomorrow morning.", "label": "none", "kind": "none", "split": "heldout", "draft": true}

@@ -317,6 +317,7 @@ from pathlib import Path
 source = Path(sys.argv[1])
 record = json.loads(source.read_text(encoding='utf-8'))
 record['split'] = 'descriptions'
+record['method'] = 'embed'
 record['top1_accuracy'] = 0.7
 record['run']['vs_keyword']['baseline_top1'] = 0.4
 (source.parent / '9999-01-01-descriptions.json').write_text(json.dumps(record, indent=2) + '\n', encoding='utf-8')
@@ -325,6 +326,22 @@ python3 scripts/build-skill-pages.py --out "$desc_out" --evals "$desc/evals" 2>"
 desc_measured="$desc_out/coco/skills/measured/index.html"
 [[ -f "$desc_measured" ]]
 grep -F -q '<td class="skill" data-label="Skill">Skill router (on descriptions, not names)</td>' "$desc_measured"
+
+# The same descriptions record with keyword matching is not a router row.
+python3 - "$desc/evals/routing/runs/9999-01-01-descriptions.json" <<'PY'
+import json, sys
+from pathlib import Path
+path = Path(sys.argv[1])
+record = json.loads(path.read_text(encoding='utf-8'))
+record['method'] = 'keyword'
+path.write_text(json.dumps(record, indent=2) + '\n', encoding='utf-8')
+PY
+python3 scripts/build-skill-pages.py --out "$desc_out" --evals "$desc/evals" 2>"$desc_err"
+if grep -F -q 'Skill router (on descriptions, not names)' "$desc_measured"; then
+  echo 'a keyword routing record became a router row' >&2
+  exit 1
+fi
+grep -F 'measured skip router: not an embedding record ' "$desc_err" | grep -F -q '9999-01-01-descriptions.json'
 
 tracked=$(git ls-files coco/skills sitemap.xml)
 if [[ -n "$tracked" ]]; then

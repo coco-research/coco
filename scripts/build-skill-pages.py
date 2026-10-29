@@ -440,6 +440,9 @@ def router_row(evals):
         if not isinstance(data, dict) or data.get('split') != 'descriptions':
             _skip('router', f'not a descriptions-split record {_rel(path)}')
             continue
+        if data.get('method') != 'embed':
+            _skip('router', f'not an embedding record {_rel(path)}')
+            continue
         run = data.get('run')
         if not isinstance(run, dict): continue
         vs = run.get('vs_keyword')
@@ -467,7 +470,7 @@ def _notes(rows):
     models = sorted({(row['model'], row['executor']) for row in rows
                      if isinstance(row.get('model'), str) and isinstance(row.get('executor'), str)})
     embeds = sorted({row['embed_model'] for row in rows if isinstance(row.get('embed_model'), str)})
-    lines = ['      <p class="note">Skill score = mean grader score (0 to 1) on that skill\'s held-out tasks. Baseline = the skill as first measured. Router score = share of held-out descriptions (prompts that never name the team) routed to the right team, compared with keyword matching on the same prompts. Tasks and graders are committed in evals/.</p>']
+    lines = ['      <p class="note">Skill score = mean grader score (0 to 1) on that skill\'s held-out tasks. Baseline = the skill as first measured. Router score = share of held-out descriptions (prompts that never name the team) routed to the right team, compared with keyword matching on the same prompts. Without a local embedding server, the Coco router falls back to the keyword matching shown beside its score, and says so. Tasks and graders are committed in evals/.</p>']
     lines += [f'      <p class="note">Skills scored with {esc(model)} ({esc(executor)}).</p>' for model, executor in models]
     lines += [f'      <p class="note">Router scored with {esc(embed)} embeddings.</p>' for embed in embeds]
     return '\n'.join(lines)

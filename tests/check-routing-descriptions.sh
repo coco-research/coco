@@ -69,6 +69,8 @@ import json, sys
 report = json.load(open(sys.argv[1]))
 if report.get("split") != "descriptions":
     raise SystemExit(f"split is {report.get('split')!r}, expected 'descriptions'")
+if report.get("method") != "keyword":
+    raise SystemExit(f"method is {report.get('method')!r}, expected 'keyword'")
 top1 = report.get("top1_accuracy")
 if isinstance(top1, bool) or not isinstance(top1, (int, float)) or not 0.0 <= float(top1) <= 1.0:
     raise SystemExit(f"top1_accuracy out of range: {top1!r}")

@@ -152,6 +152,16 @@ def _commit(root):
         return ""
 
 
+def _scored_method(methods):
+    """embed or keyword only when every routed call used that method. Anything else is mixed."""
+    kinds = set(methods)
+    if kinds == {"embed"}:
+        return "embed"
+    if kinds == {"keyword"}:
+        return "keyword"
+    return "mixed"
+
+
 def _run_meta(items, mode, split_name, embed_model, embed_url, commit):
     """Same run fields the held-out record carries: date, commit, task count, model."""
     labelled = sum(1 for item in items if item.get("label") != "none")
@@ -226,8 +236,16 @@ def main():
     else:
         select_fn = meta_select.select
 
+    # Count the scored calls only. The vs_keyword baseline is a separate pass.
+    routed_methods = []
+
+    def select_routed(prompt):
+        res = select_fn(prompt)
+        routed_methods.append(res.get("method") if isinstance(res, dict) else None)
+        return res
+
     try:
-        metrics = evaluate(items, select_fn)
+        metrics = evaluate(items, select_routed)
     except Exception as e:
         if strict_auto:
             print(f"embedding server failed during scoring at {meta_select.EMBED_URL}: "
@@ -235,6 +253,11 @@ def main():
             print("refusing to write a keyword score as the router top-1", file=sys.stderr)
             sys.exit(1)
         raise
+    scored_method = _scored_method(routed_methods)
+    if strict_auto and scored_method != "embed":
+        print(f"routed method was {scored_method}, not embed", file=sys.stderr)
+        print("refusing to write a keyword score as the router top-1", file=sys.stderr)
+        sys.exit(1)
 
     if args.vs_keyword:
         def keyword_fn(prompt):
@@ -251,6 +274,12 @@ def main():
         metrics["run"] = _run_meta(
             items, args.mode, args.split_name or args.split,
             meta_select.EMBED_MODEL, meta_select.EMBED_URL, _commit(root))
+
+    metrics["method"] = scored_method
+    # Keyword mode is the method itself. A fallback is a keyword call while mode is auto.
+    metrics["keyword_fallbacks"] = (
+        sum(1 for method in routed_methods if method == "keyword")
+        if args.mode == "auto" else 0)
 
     if args.json:
         report_json = json.dumps(metrics, indent=2)

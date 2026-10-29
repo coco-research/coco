@@ -445,7 +445,7 @@ def router_row(evals):
             continue
         run = data.get('run')
         if not isinstance(run, dict): continue
-        vs = run.get('vs_keyword')
+        vs = data.get('vs_keyword') if isinstance(data.get('vs_keyword'), dict) else run.get('vs_keyword')
         score = _num(data.get('top1_accuracy'))
         baseline = _num(vs.get('baseline_top1')) if isinstance(vs, dict) else None
         tasks, date = _count(run.get('n_labelled')), _date(run.get('date'))

@@ -10,7 +10,10 @@ fake_err=$(mktemp)
 desc=$(mktemp -d)
 desc_out=$(mktemp -d)
 desc_err=$(mktemp)
-trap 'rm -rf "$out" "$fake" "$fake_out" "$desc" "$desc_out"; rm -f "$err" "$fake_err" "$desc_err"' EXIT
+real=$(mktemp -d)
+real_out=$(mktemp -d)
+real_err=$(mktemp)
+trap 'rm -rf "$out" "$fake" "$fake_out" "$desc" "$desc_out" "$real" "$real_out"; rm -f "$err" "$fake_err" "$desc_err" "$real_err"' EXIT
 
 # Show the generator stderr even when it fails, before set -e ends the script.
 rc=0
@@ -233,13 +236,17 @@ if grep -F 'bad record' "$err" >&2; then
   exit 1
 fi
 
-expected=$(python3 - <<'PY'
-import hashlib, json
+# Prints "<rows> <router>". router is 1 when a usable descriptions-split embed record was counted.
+# Optional argument is the evals directory; skills still come from the repo.
+measured_recount() {
+  python3 - "$1" <<'PY'
+import hashlib, json, sys
 from pathlib import Path
-root = Path('.').resolve()
+repo = Path('.').resolve()
+evals_root = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 and sys.argv[1] else repo / 'evals'
 shas = {}
 for pattern in ('skills/*/SKILL.md', 'systems/*/skills/*/SKILL.md', 'systems/*/*/SKILL.md'):
-    for path in root.glob(pattern):
+    for path in repo.glob(pattern):
         if path.is_file():
             shas[path.parent.name] = hashlib.sha256(path.read_bytes()).hexdigest()
 def rate(value):
@@ -252,7 +259,7 @@ def load(path):
     except (OSError, ValueError):
         return None
     return record if isinstance(record, dict) else None
-evals, rows = root / 'evals' / 'skills', 0
+evals, rows, router = evals_root / 'skills', 0, 0
 for path in sorted(evals.iterdir()):
     baseline_path = path / 'runs' / 'baseline-heldout.json'
     if not path.is_dir() or path.name.startswith('_') or not baseline_path.is_file(): continue
@@ -270,25 +277,35 @@ for path in sorted(evals.iterdir()):
     chosen, baseline = max(shown, key=lambda r: str(r.get('date') or '')), load(baseline_path)
     if baseline and rate(baseline.get('mean')) and count(baseline.get('n')) and rate(chosen.get('mean')) and count(chosen.get('n')):
         rows += 1
-runs = root / 'evals' / 'routing' / 'runs'
+runs = evals_root / 'routing' / 'runs'
 for record_path in (sorted(runs.glob('*.json')) if runs.is_dir() else []):
     data = load(record_path) or {}
     run = data.get('run') if isinstance(data.get('run'), dict) else {}
-    vs = run.get('vs_keyword') if isinstance(run.get('vs_keyword'), dict) else {}
-    if data.get('split') == 'descriptions' and rate(data.get('top1_accuracy')) and rate(vs.get('baseline_top1')) and count(run.get('n_labelled')):
+    vs = data.get('vs_keyword') if isinstance(data.get('vs_keyword'), dict) else run.get('vs_keyword')
+    if not isinstance(vs, dict):
+        vs = {}
+    if data.get('split') == 'descriptions' and data.get('method') == 'embed' and rate(data.get('top1_accuracy')) and rate(vs.get('baseline_top1')) and count(run.get('n_labelled')):
         rows += 1
+        router = 1
         break
-print(rows)
+print(rows, router)
 PY
-)
+}
+recount=$(measured_recount "")
+expected=${recount% *}
+router_found=${recount#* }
 actual=$(grep -c 'data-label="Skill"' "$measured" || true)
 if [[ "$actual" -ne "$expected" ]]; then
   echo "measured rows $actual != expected $expected" >&2
   exit 1
 fi
-if grep -F -q 'Skill router (on descriptions, not names)' "$measured"; then
-  echo 'measured page shows a router row without a descriptions-split record' >&2
-  exit 1
+if [[ "$router_found" == 1 ]]; then
+  grep -F -q 'Skill router (on descriptions, not names)' "$measured"
+else
+  if grep -F -q 'Skill router (on descriptions, not names)' "$measured"; then
+    echo 'measured page shows a router row without a descriptions-split record' >&2
+    exit 1
+  fi
 fi
 
 mkdir -p "$fake/skills/zz-fake/runs" "$fake/skills/c4-architecture/runs"
@@ -342,6 +359,66 @@ if grep -F -q 'Skill router (on descriptions, not names)' "$desc_measured"; then
   exit 1
 fi
 grep -F 'measured skip router: not an embedding record ' "$desc_err" | grep -F -q '9999-01-01-descriptions.json'
+
+# A real descriptions-split record keeps vs_keyword at the top level. The page rounds both figures.
+cp -R evals "$real/evals"
+cat > "$real/evals/routing/runs/2026-10-28-13a15e1-descriptions.json" <<'JSON'
+{
+  "top1_accuracy": 0.5961538461538461,
+  "top4_recall": 0.6634615384615384,
+  "delegate_precision": 0.0,
+  "abstain_rate": 1.0,
+  "per_team_top1": {
+    "ai": 0.25,
+    "engineering": 0.5,
+    "product-design": 0.25,
+    "finance": 0.875,
+    "trading": 0.375,
+    "risk-compliance": 0.875,
+    "strategy": 0.5,
+    "data-analytics": 0.125,
+    "gtm": 0.875,
+    "legal-ip": 0.75,
+    "healthcare-life-sciences": 0.625,
+    "education-edtech": 0.875,
+    "climate-energy": 0.875
+  },
+  "vs_keyword": {
+    "baseline_top1": 0.49038461538461536
+  },
+  "split": "descriptions",
+  "items": "evals/routing/items-descriptions.jsonl",
+  "items_sha256": "e3dd0e3aab4ecaca81311abbec5829b3bfed1e373241475357109c28b9a974fb",
+  "run": {
+    "commit": "13a15e1",
+    "date": "2026-10-28",
+    "mode": "auto",
+    "split": "descriptions",
+    "n_labelled": 104,
+    "n_none": 6,
+    "embed_model": "nomic-embed-text",
+    "embed": {
+      "model": "nomic-embed-text",
+      "url": "http://127.0.0.1:11434/v1/embeddings"
+    }
+  },
+  "method": "embed",
+  "keyword_fallbacks": 0
+}
+JSON
+python3 scripts/build-skill-pages.py --out "$real_out" --evals "$real/evals" 2>"$real_err"
+real_measured="$real_out/coco/skills/measured/index.html"
+[[ -f "$real_measured" ]]
+real_row=$(grep -A 2 -F 'Skill router (on descriptions, not names)' "$real_measured")
+grep -F -q 'data-label="Score">0.60' <<<"$real_row"
+grep -F -q 'data-label="Baseline">0.49' <<<"$real_row"
+real_recount=$(measured_recount "$real/evals")
+real_expected=${real_recount% *}
+real_actual=$(grep -c 'data-label="Skill"' "$real_measured" || true)
+if [[ "$real_actual" -ne "$real_expected" ]]; then
+  echo "descriptions-split rows $real_actual != expected $real_expected" >&2
+  exit 1
+fi
 
 tracked=$(git ls-files coco/skills sitemap.xml)
 if [[ -n "$tracked" ]]; then

@@ -125,6 +125,9 @@ jobs:
           bash install.sh --list
           bash install.sh --dry-run --adapter claude-code | head -5
 
+      - name: End-to-end packed npx install (Claude Code)
+        run: bash tests/e2e-npx-install.sh
+
       - name: Test npm wrapper syntax
         run: |
           node --check bin/coco.js

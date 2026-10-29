@@ -71,6 +71,8 @@ jobs:
       - name: Validate the Claude Code install safety checks
         run: bash tests/check-install-safety.sh
 
+      - name: Install --workflow (links, printed hook lines, no settings write)
+        run: bash tests/check-install-workflow.sh
       - name: Validate the Claude Code uninstall
         run: bash tests/check-uninstall.sh
 

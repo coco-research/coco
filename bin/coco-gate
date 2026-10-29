@@ -1,0 +1,6 @@
+#!/bin/sh
+# coco-gate: run the workflow gate from a checkout. A link to this file works,
+# because the script's own real path locates scripts/coco_gate.py in its checkout.
+self="$(python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$0" 2>/dev/null)" || exit 1
+[ -n "$self" ] || exit 1
+exec python3 "$(dirname "$self")/../scripts/coco_gate.py" "$@"

@@ -74,6 +74,9 @@ jobs:
       - name: Validate the Claude Code uninstall
         run: bash tests/check-uninstall.sh
 
+      - name: Validate generated SI commands resolve
+        run: bash tests/check-si-commands-resolve.sh
+
       - name: coco-workflow gate cases (forgery, happy path, workflow hygiene)
         run: bash tests/check-coco-gate.sh
 

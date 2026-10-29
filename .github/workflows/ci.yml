@@ -318,6 +318,9 @@ jobs:
       - name: Router M0 decision log (opt-in, hash only)
         run: python3 -m unittest tests/test_meta_select_m0.py tests/test_meta_select_embed.py
 
+      - name: Router embedding fallback (LM Studio, then Ollama)
+        run: python3 tests/check-router-embed-fallback.py
+
       - name: Code verification skill grader
         run: python3 -m unittest tests/test_skill_grader_codeverify.py
 

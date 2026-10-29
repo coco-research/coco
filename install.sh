@@ -37,6 +37,7 @@ DRY_RUN=""
 JSON_FLAG=""
 SYSTEMS=""
 CORE_ONLY=""
+WORKFLOW=""
 
 # Human status. --json keeps stdout for the adapter's JSONL only.
 note() {
@@ -83,6 +84,7 @@ while [[ $# -gt 0 ]]; do
     --adapter) shift; ADAPTER=$1 ;;
     --systems) shift; SYSTEMS=$1 ;;
     --core-only) CORE_ONLY=1 ;;
+    --workflow) WORKFLOW=1 ;;
     --dry-run) DRY_RUN="--dry-run" ;;
     --json) JSON_FLAG="--json" ;;
     --list) list_adapters; exit 0 ;;
@@ -106,6 +108,13 @@ if [[ ! -d "$ADAPTER_DIR" ]]; then
   exit 1
 fi
 
+# The workflow wiring only exists in the claude-code adapter; the others have no hook
+# lines and no coco-gate link to make, so the flag is refused rather than dropped.
+if [[ -n "$WORKFLOW" && "$ADAPTER" != "claude-code" ]]; then
+  echo "--workflow is only available with --adapter claude-code" >&2
+  exit 1
+fi
+
 # The default bundle set is offered only to adapters that advertise support for the flag.
 # An adapter that declares no bundles installs the core only, which is what --core-only
 # would ask for anyway; handing it a flag it does not accept would turn a plain install
@@ -125,6 +134,7 @@ adapter_supports_systems() {
 ARGS=()
 [[ -n "$DRY_RUN" ]] && ARGS+=("$DRY_RUN")
 [[ -n "$JSON_FLAG" ]] && ARGS+=("$JSON_FLAG")
+[[ -n "$WORKFLOW" ]] && ARGS+=("--workflow")
 
 if [[ -n "$CORE_ONLY" ]]; then
   # Explicit opt-out: no bundles, and never an error, even alongside --systems.

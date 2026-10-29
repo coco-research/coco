@@ -286,6 +286,10 @@ class ApplyMixin:
             summary["carried"] = self.carried_count
         summary["paths"] = sum(counts[op] for op in self.path_ops)
         summary["managed_settings"] = self.managed
+        # Opt-in fields (--workflow). The uninstaller has none, so its body is unchanged.
+        extra = getattr(self, "summary_extra", None)
+        if extra:
+            summary.update(extra)
         lines.append(dumps({"summary": summary}))
         return "\n".join(lines) + "\n"
 
@@ -310,6 +314,9 @@ class ApplyMixin:
         os.replace(tmp, path)
         self.undo = []
         return body
+
+    def extra_notes(self):
+        """Notes printed after the receipt or the dry-run plan. Nothing by default."""
 
     def receipt(self):
         bundles = ",".join(self.bundles) if self.bundles else "core only"
@@ -368,6 +375,7 @@ class ApplyMixin:
                 sys.stdout.write(body)
             if not self.dry:
                 self.receipt()
+            self.extra_notes()
             self.say("Done.")
         except (KeyboardInterrupt, SystemExit):
             self.replay()

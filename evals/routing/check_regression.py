@@ -40,8 +40,18 @@ def _run_date(p):
     return (datetime.date.min, p.name)
 
 
+def _run_split(p):
+    """The record's split; a file that names none is a heldout run (the older format)."""
+    try:
+        d = json.loads(p.read_text())
+    except Exception:
+        return "heldout"
+    return d.get("split") or (d.get("run") or {}).get("split") or "heldout"
+
+
 def latest_run(runs_dir=RUNS):
-    files = sorted(runs_dir.glob("*.json"), key=_run_date)
+    # Only heldout runs are this gate's baseline; a descriptions run scores a different set.
+    files = sorted((p for p in runs_dir.glob("*.json") if _run_split(p) == "heldout"), key=_run_date)
     return files[-1] if files else None
 
 
@@ -154,6 +164,9 @@ def self_test():
             (d / n).write_text("{}")
         assert latest_run(d).name == "2026-11-01-bbbbbbb.json"
         (d / "zz-misc.json").write_text(json.dumps({"run": {"date": "2026-10-01"}}))
+        assert latest_run(d).name == "2026-11-01-bbbbbbb.json"
+        (d / "2026-12-01-ddddddd-descriptions.json").write_text(
+            json.dumps({"split": "descriptions", "run": {"date": "2026-12-01", "split": "descriptions"}}))
         assert latest_run(d).name == "2026-11-01-bbbbbbb.json"
     _assert_local_http_ignores_proxy()
     print("check_regression self-test passed")

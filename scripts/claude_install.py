@@ -40,7 +40,8 @@ FOOTER_TAIL = 65536
 
 
 class Installer(ApplyMixin):
-    def __init__(self, repo, target, systems, dry, as_json, workflow=False):
+    def __init__(self, repo, target, systems, dry, as_json,
+                 workflow=False, workflow_only=False):
         self.repo = os.path.abspath(repo)
         self.repo_real = os.path.realpath(self.repo)
         self.home = os.path.abspath(target)
@@ -50,7 +51,8 @@ class Installer(ApplyMixin):
         self.systems = [s for s in systems if s]
         self.dry = dry
         self.json = as_json
-        self.workflow = workflow
+        self.workflow = workflow or workflow_only
+        self.workflow_only = workflow_only
         self.applying = False
         self.records = []
         self.seen_paths = set()
@@ -657,6 +659,11 @@ class Installer(ApplyMixin):
     def workflow_path(self, *parts):
         return os.path.join(self.home, "coco", *parts)
 
+    def is_workflow_path(self, path):
+        """True for the target's coco/ tree, the only place the workflow pieces live."""
+        root = os.path.normpath(os.path.join(self.home, "coco"))
+        return os.path.normpath(path) == root or inside(path, root)
+
     def hook_line(self, name):
         """The guarded sh -c line a settings file runs. The default target spells $HOME."""
         if os.path.normpath(self.home) == os.path.normpath(os.path.expanduser("~/.claude")):
@@ -743,6 +750,11 @@ class Installer(ApplyMixin):
             self.carried_count += 1
 
     def plan_all(self):
+        if self.workflow_only:
+            self.plan_workflow()
+            self.plan_manifest()
+            self.plan_carry()
+            return
         self.plan_core()
         for sys in self.systems:
             self.plan_system(sys)
@@ -760,14 +772,16 @@ def main(argv):
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--workflow", action="store_true")
+    parser.add_argument("--workflow-only", action="store_true")
     parser.add_argument("--uninstall", action="store_true")
     args = parser.parse_args(argv)
     if args.uninstall:
         from claude_uninstall import Uninstaller
-        Uninstaller(args.repo, args.target, args.dry_run, args.json).run()
+        Uninstaller(args.repo, args.target, args.dry_run, args.json,
+                    args.workflow_only).run()
         return
     Installer(args.repo, args.target, args.system, args.dry_run, args.json,
-              args.workflow).run()
+              args.workflow, args.workflow_only).run()
 
 
 if __name__ == "__main__":

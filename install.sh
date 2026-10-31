@@ -4,6 +4,7 @@
 # Usage:
 #   bash install.sh                            # auto-detect IDE, install core + all bundles
 #   bash install.sh --adapter claude-code      # install for Claude Code
+#   bash install.sh --adapter claude-code --workflow-only  # only the coco workflow pieces
 #   bash install.sh --adapter cursor           # install for Cursor
 #   bash install.sh --adapter grok             # install for Grok Build / Grok CLI
 #   bash install.sh --adapter pi-desktop       # install for PI-Desktop
@@ -38,6 +39,7 @@ JSON_FLAG=""
 SYSTEMS=""
 CORE_ONLY=""
 WORKFLOW=""
+WORKFLOW_ONLY=""
 
 # Human status. --json keeps stdout for the adapter's JSONL only.
 note() {
@@ -85,6 +87,7 @@ while [[ $# -gt 0 ]]; do
     --systems) shift; SYSTEMS=$1 ;;
     --core-only) CORE_ONLY=1 ;;
     --workflow) WORKFLOW=1 ;;
+    --workflow-only) WORKFLOW_ONLY=1 ;;
     --dry-run) DRY_RUN="--dry-run" ;;
     --json) JSON_FLAG="--json" ;;
     --list) list_adapters; exit 0 ;;
@@ -114,6 +117,14 @@ if [[ -n "$WORKFLOW" && "$ADAPTER" != "claude-code" ]]; then
   echo "--workflow is only available with --adapter claude-code" >&2
   exit 1
 fi
+if [[ -n "$WORKFLOW_ONLY" && "$ADAPTER" != "claude-code" ]]; then
+  echo "--workflow-only is only available with --adapter claude-code" >&2
+  exit 1
+fi
+if [[ -n "$WORKFLOW_ONLY" && ( -n "$CORE_ONLY" || -n "$SYSTEMS" ) ]]; then
+  echo "--workflow-only cannot be combined with --systems or --core-only" >&2
+  exit 1
+fi
 
 # The default bundle set is offered only to adapters that advertise support for the flag.
 # An adapter that declares no bundles installs the core only, which is what --core-only
@@ -135,18 +146,21 @@ ARGS=()
 [[ -n "$DRY_RUN" ]] && ARGS+=("$DRY_RUN")
 [[ -n "$JSON_FLAG" ]] && ARGS+=("$JSON_FLAG")
 [[ -n "$WORKFLOW" ]] && ARGS+=("--workflow")
+[[ -n "$WORKFLOW_ONLY" ]] && ARGS+=("--workflow-only")
 
-if [[ -n "$CORE_ONLY" ]]; then
-  # Explicit opt-out: no bundles, and never an error, even alongside --systems.
-  adapter_supports_systems && ARGS+=("--core-only")
-elif [[ -n "$SYSTEMS" ]]; then
-  ARGS+=("--systems" "$SYSTEMS")
-else
-  # No --systems: install every bundle that ships skills or agents, so a plain run
-  # delivers the advertised totals instead of a silent subset.
-  DEFAULT_SYSTEMS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" 2>/dev/null || true)"
-  if [[ -n "$DEFAULT_SYSTEMS" ]] && adapter_supports_systems; then
-    ARGS+=("--systems" "$DEFAULT_SYSTEMS")
+if [[ -z "$WORKFLOW_ONLY" ]]; then
+  if [[ -n "$CORE_ONLY" ]]; then
+    # Explicit opt-out: no bundles, and never an error, even alongside --systems.
+    adapter_supports_systems && ARGS+=("--core-only")
+  elif [[ -n "$SYSTEMS" ]]; then
+    ARGS+=("--systems" "$SYSTEMS")
+  else
+    # No --systems: install every bundle that ships skills or agents, so a plain run
+    # delivers the advertised totals instead of a silent subset.
+    DEFAULT_SYSTEMS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" 2>/dev/null || true)"
+    if [[ -n "$DEFAULT_SYSTEMS" ]] && adapter_supports_systems; then
+      ARGS+=("--systems" "$DEFAULT_SYSTEMS")
+    fi
   fi
 fi
 

@@ -99,6 +99,9 @@ jobs:
       - name: Validate uninstall removes the update-check cache
         run: bash tests/check-cli-uninstall-cleanup.sh
 
+      - name: Validate the PI-Desktop uninstall removes the generated SI prompts
+        run: bash tests/check-pi-desktop-uninstall-si.sh
+
       - name: Validate CLI refuses a directory that is not the Coco clone
         run: bash tests/check-cli-clone-guard.sh
 

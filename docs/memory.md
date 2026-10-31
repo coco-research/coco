@@ -10,6 +10,24 @@ Newest first within each section. Update this file in the same PR that settles s
 
 ## Decisions
 
+### `coco uninstall` sweeps every adapter home, and names what it cannot finish
+
+**Decided:** 2026-10-31, issue #224. **Reason:** `cmdUninstall` only walked
+`~/.claude`, `~/.cursor`, `~/.grok`, and `~/.copilot`, then deleted the clone and
+printed `Uninstalled.` Hermes, PI-Desktop, and Zed installs stayed behind, and
+their links dangled. Every `adapters/*/install.sh` default home (including
+`~/.hermes`, `~/.pi`, `~/.agents`, `~/.config/zed`, and `~/.coco`) is now swept
+for links whose target is inside this clone. Files are removed only in the
+folders an adapter writes, and only with that adapter's marker: PI-Desktop's
+rule from its own `--uninstall` (a `~/.agents/skills/<id>/` whose `SKILL.md`
+carries the marker comment, and marked `.md` files directly in
+`~/.agents/subagents` and `~/.pi/agent/prompts`), and `SI.md` / `SI-*.md` with
+the generator line directly in an SI commands folder. A first draft deleted any
+`.md` anywhere in a home that mentioned the PI-Desktop marker text, which took
+user memory notes with it; never widen the scope past those folders. Copied
+rules, the rules block in `CLAUDE.md`, and codex's SI commands in `~/.coco` are
+left in place, and each such adapter is named on its own line.
+
 ### The install plan names every path it writes
 
 **Decided:** 2026-10-24, feat/install-manifest. **Reason:** Uninstall has to restore

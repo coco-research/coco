@@ -289,9 +289,7 @@ Releases are in [`CHANGELOG.md`](CHANGELOG.md) and on the [GitHub Releases](http
 
 ## Licence
 
-The MIT licence in [`LICENSE`](LICENSE) covers the Coco core, which is everything in this repository except `systems/superintelligence/`. The Super Intelligence System in `systems/superintelligence/` is not MIT: it is proprietary, licensed separately for your own use under [`systems/superintelligence/LICENSE`](systems/superintelligence/LICENSE), and the MIT grant does not apply to it. Vendored third-party components, such as some skills under `skills/`, keep their upstream licences, which continue to govern them; see [`CREDITS.md`](CREDITS.md).
-
-Some skills carry their own licences; see CREDITS.md and each skill's folder.
+The MIT licence in [`LICENSE`](LICENSE) covers the Coco core, which is everything in this repository except `systems/superintelligence/` and the vendored third-party components below. The Super Intelligence System in `systems/superintelligence/` is not MIT: it is proprietary, licensed separately for your own use under [`systems/superintelligence/LICENSE`](systems/superintelligence/LICENSE), and the MIT grant does not apply to it. Vendored third-party components keep their upstream licences, which continue to govern them. They include HyperFrames in `systems/hyperframes/` (Apache-2.0), `reverse-skill` in `systems/reverse-skill/` (its upstream licence is documented in its README), and some skills under `skills/`. See [`CREDITS.md`](CREDITS.md) and each component's folder.
 
 [^installed]: 191 of the 229 skills install by default on Claude Code, together with all 388 commands and 34 agents. The other 38 are the opt-in `reverse-skill` security pack (33, installed only with `--systems reverse-skill`) and 5 Cursor-only skills. Measured by running the installer, not by counting files: see [`docs/delivered-counts.json`](docs/delivered-counts.json), and [`adapters/INDEX.md`](adapters/INDEX.md) for every other IDE.
 

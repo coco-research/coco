@@ -114,6 +114,9 @@ jobs:
       - name: Validate the CLI help lists every adapter
         run: python3 tests/check-help-adapters.py
 
+      - name: Validate aider AGENTS.md carries skills, commands and rules
+        run: bash tests/check-aider-delivers.sh
+
       - name: Adapter smoke test (dry-run)
         run: |
           for d in adapters/*/; do

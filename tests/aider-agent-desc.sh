@@ -2,7 +2,9 @@
 # Aider AGENTS.md must carry each agent's full description (issue #259): the installer
 # used to cut it at 120 bytes, mid-word and sometimes mid-UTF-8-character.
 # Runs the installer in a temp dir: it writes AGENTS.md into the current directory.
+# Agents are listed as "- **name** — description" by the shared AGENTS.md compiler (#258).
 set -euo pipefail
+unset COCO_HOME COCO_SI_REPO COCO_SI_COMMANDS_DIR COCO_ADAPTER_LABEL
 cd "$(dirname "$0")/.."
 ROOT=$(pwd)
 tmp=$(mktemp -d)
@@ -26,7 +28,7 @@ for d in (sys.argv[1], sys.argv[2]):
             print(f"FAIL: {f.stem} has no description")
             bad += 1
             continue
-        if f"### {f.stem}\n{desc}\n" not in out:
+        if f"- **{f.stem}** — {desc}\n" not in out:
             print(f"FAIL: {f.stem} description is not in AGENTS.md in full")
             bad += 1
 sys.exit(1 if bad else 0)

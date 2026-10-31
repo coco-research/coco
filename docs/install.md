@@ -184,14 +184,18 @@ bash /path/to/coco/install.sh --adapter aider
 bash /path/to/coco/adapters/aider/install.sh --dry-run    # preview, writes nothing
 ```
 
-Writes two files into the current directory and nothing under `~`:
+Writes two files into the current directory. With the `superintelligence` bundle it also generates the Super Intelligence command files under `~/.coco/si-commands`, as the Codex adapter does.
 
 | File | Contents |
 |------|----------|
-| `./AGENTS.md` | Name and one-line description of each agent in `agents/`. With `install.sh` this includes the default bundles' agents (34 in all); running `adapters/aider/install.sh` directly lists the 10 core agents, plus a bundle's agents with `--systems gsd` |
+| `./AGENTS.md` | The same compiled file the [Codex adapter](#codex--generic-agentsmd) writes: Skills, Commands (including `/team` and `/team:*`), Super Intelligence Commands, Agents and Rules, for every bundle that ships something. `--systems <list>` narrows the bundles; `--core-only` keeps the core set only |
 | `./.aider.conf.yml` | `auto-commits: true` and a `read:` list naming `AGENTS.md` and `.aider.conf.yml`, so Aider loads them as read-only context when started from this directory |
 
-Skills, commands and rules are not installed; the config only carries a comment pointing at the clone's `skills/` folder.
+Aider has no custom slash commands, so ask for a workflow by name ("run team:ship"); `AGENTS.md` lists them all. The receipt prints how many skills, commands, Super Intelligence commands, agents and rules the written `AGENTS.md` holds.
+
+Aider sends read-only files with every message and this `AGENTS.md` is large, so `--core-only` gives a smaller one.
+
+Like the Codex adapter, it refuses to write inside the Coco checkout itself; run it from your project directory.
 
 Existing files are protected. A file that is still exactly what Coco last wrote (its first line carries a `coco-generated sha256=` checksum that matches the rest of the file) is overwritten in place. Anything else, such as your own `.aider.conf.yml` or an edited copy, is copied first to `<file>.coco-backup`; that first backup is never overwritten, so later backups get a timestamped name (`<file>.coco-backup-<YYYYMMDD-HHMMSS>`, then `-1`, `-2` if needed). Your settings are not merged into the new file: copy any you want back from the backup.
 
@@ -376,7 +380,7 @@ for f in rules/*.md; do cmp -s "$f" ~/.continue/rules/"$(basename "$f")" && rm ~
 
 The `cmp` guard removes a copied rule only if it is still identical to the one in the clone, and the `find` touches only links that point into the clone. Use `$CONTINUE_HOME` in place of `~/.continue` if you set it. Empty `skills/`, `agents/` and `rules/` folders are left behind; remove them if you like.
 
-Aider (per project; the adapter writes into the project, not your home directory):
+Aider (per project, plus the shared Super Intelligence command files):
 
 ```bash
 cd path/to/your/project
@@ -386,7 +390,7 @@ done
 ls -a | grep 'coco-backup'      # backups from earlier installs; restore or delete by hand
 ```
 
-The loop removes only files that still carry Coco's header, so a `.aider.conf.yml` you replaced is left alone. It checks the header, not the checksum: if you edited a generated file, copy your edits out first. The installer never deletes backups. To restore your own config, move the first backup back: `mv .aider.conf.yml.coco-backup .aider.conf.yml`.
+The Super Intelligence command files in `~/.coco/si-commands` are shared with the `codex` and `generic` adapters; remove that folder only when none of them is in use. The loop removes only files that still carry Coco's header, so a `.aider.conf.yml` you replaced is left alone. It checks the header, not the checksum: if you edited a generated file, copy your edits out first. The installer never deletes backups. To restore your own config, move the first backup back: `mv .aider.conf.yml.coco-backup .aider.conf.yml`.
 
 ---
 

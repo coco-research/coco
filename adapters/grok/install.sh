@@ -246,7 +246,7 @@ link_skills() {
 # other command stays a symlink into the clone. The source files are never edited:
 # the claude-code adapter reads them as they are.
 place_command() {
-  local src=$1 dst=$2 ref body
+  local src=$1 dst=$2 ref body skills='~/.claude/skills/' cmds='~/.claude/commands/'
   if ! grep -qE '~/\.claude/(skills|commands)/' "$src"; then
     # A copy left by an earlier install gives way to the symlink.
     if [[ -f "$dst" && ! -L "$dst" ]] && grep -qxF -- "$REWRITE_MARK" "$dst"; then run rm "$dst"; fi
@@ -267,8 +267,10 @@ place_command() {
   [[ -L "$dst" ]] && rm "$dst"
   mkdir -p "$(dirname "$dst")"
   body=$(cat "$src")
-  body=${body//'~/.claude/skills/'/$ref/skills/}
-  body=${body//'~/.claude/commands/'/$ref/commands/}
+  # Patterns come from variables: bash 3.2 (macOS /bin/bash) splits a quoted literal
+  # pattern at its first '/'.
+  body=${body//"$skills"/"$ref/skills/"}
+  body=${body//"$cmds"/"$ref/commands/"}
   printf '%s\n\n%s\n' "$body" "$REWRITE_MARK" > "$dst"
   echo "Rewrote: $dst <- $src"
   LINKED=$((LINKED + 1))

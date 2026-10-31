@@ -51,7 +51,7 @@ jobs:
 
       - name: Adapter install.sh syntax check
         run: |
-          for f in adapters/*/install.sh install.sh bin/coco-bootstrap.sh skills/prd-generator/scripts/generate_prd.sh skills/brainstorming/scripts/stop-server.sh tests/check-security-surface.sh tests/check-officecli-install.sh tests/check-install-manifest.sh tests/check-install-safety.sh tests/check-uninstall.sh tests/lib/install-home.sh; do
+          for f in adapters/*/install.sh install.sh bin/coco-bootstrap.sh skills/prd-generator/scripts/generate_prd.sh skills/brainstorming/scripts/stop-server.sh tests/check-security-surface.sh tests/check-officecli-install.sh tests/check-install-manifest.sh tests/check-install-safety.sh tests/check-uninstall.sh tests/check-codex-agents-md-paths.sh tests/lib/install-home.sh; do
             bash -n "$f" || { echo "Syntax error in $f"; exit 1; }
           done
           echo "All install scripts pass syntax check."
@@ -71,11 +71,17 @@ jobs:
       - name: Validate the Claude Code install safety checks
         run: bash tests/check-install-safety.sh
 
+      - name: Install --workflow (links, printed hook lines, no settings write)
+        run: bash tests/check-install-workflow.sh
       - name: Validate the Claude Code uninstall
         run: bash tests/check-uninstall.sh
 
       - name: Validate generated SI commands resolve
         run: bash tests/check-si-commands-resolve.sh
+      - name: coco-gate githook (chain or skip, never overwrite)
+        run: bash tests/check-coco-githook-install.sh
+      - name: Validate codex AGENTS.md paths exist
+        run: bash tests/check-codex-agents-md-paths.sh
 
       - name: coco-workflow gate cases (forgery, happy path, workflow hygiene)
         run: bash tests/check-coco-gate.sh
@@ -127,6 +133,9 @@ jobs:
         run: |
           bash install.sh --list
           bash install.sh --dry-run --adapter claude-code | head -5
+
+      - name: End-to-end packed npx install (Claude Code)
+        run: bash tests/e2e-npx-install.sh
 
       - name: Test npm wrapper syntax
         run: |

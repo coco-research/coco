@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Issues #261 and #262. The codex adapter (generic execs it) must not tell the
 # agent to read a file this install does not create and the checkout does not have.
+# It also checks that agents/PROMPT-DEFENSE.md is not listed as an agent.
 # Run from anywhere: bash tests/check-codex-agents-md-paths.sh
 set -euo pipefail
 
@@ -103,6 +104,10 @@ for p in found:
 
 if "team.md" in text:
     missing.append("team.md (no such router; the file is commands/team/_index.md)")
+
+# PROMPT-DEFENSE.md is a shared prompt header the agents include, not an agent.
+if re.search(r"^- \*\*PROMPT-DEFENSE\*\*", text, re.M):
+    missing.append("PROMPT-DEFENSE listed as an agent (it is a shared prompt header)")
 
 team_lines = [ln for ln in text.splitlines() if re.match(r"^- `/team(?::|`)", ln)]
 if not any(re.match(r"^- `/team`(?: —| \()", ln) for ln in team_lines):

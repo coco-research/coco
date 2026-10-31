@@ -40,6 +40,7 @@ bash install.sh --systems superintelligence
 | `--dry-run` | Print what would happen, don't write |
 | `--help` | Show usage |
 | `--systems gsd,brain` | Install one or more system bundles. Accepted by every adapter, including cursor (`~/.cursor/commands` for generated SI-* files) |
+| `--workflow` | Claude Code only. Also links `bin/coco-gate` and the three `hooks/coco-workflow-*.sh` files, then prints the hook lines to add to a repo's `.claude/settings.local.json`. It never writes that file. |
 
 ---
 
@@ -301,6 +302,15 @@ python3 systems/superintelligence/scripts/meta_select.py -- "should we ship an A
 ---
 
 ## Uninstall
+
+Claude Code records the install in `~/.claude/.coco/manifest.jsonl`. This undoes that record and writes nothing in the dry run:
+
+```bash
+bash adapters/claude-code/install.sh --uninstall
+bash adapters/claude-code/install.sh --uninstall --dry-run --json
+```
+
+Files you edited after install stay. The steps below cover adapters that do not write this manifest.
 
 Symlink-based adapters (`claude-code`, `cursor`, `grok`, `vscode`):
 

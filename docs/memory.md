@@ -10,6 +10,39 @@ Newest first within each section. Update this file in the same PR that settles s
 
 ## Decisions
 
+### The install plan names every path it writes
+
+**Decided:** 2026-10-24, feat/install-manifest. **Reason:** Uninstall has to restore
+byte-identical originals and must not touch Claude Code's own files. The claude-code
+installer records every new directory, generated file, pristine backup, and the
+manifest itself as `write` with a `kind` of `generated`, `manifest`, `backup`, or
+`dir`. Ops stay `link`, `write`, `block`, and `skip`. `summary.paths` counts
+link + write + block. `settings.json`, `settings.local.json`, `.credentials.json`,
+and anything under `projects/` are refused. A pre-existing file is copied once to
+`.coco/backup/<relative>` and that copy is never replaced. `CLAUDE.md.coco-bak` is
+still rewritten on every change, because hermes shares `write-rules-block.sh`. A
+symlink is replaced only when its text points into this checkout (dangling or not)
+or exactly matches an older coco checkout path recorded in the previous manifest;
+a dangling link that points elsewhere is a user link and is left in place. A
+user's own link is `skip` with reason `user link, not replaced`. A pre-existing regular
+file at a generated SI command path is coco's own only when the previous manifest
+recorded a generated write there, or the file still ends with the generator footer
+"Made with CoCo Super Intelligence."; anything else is `skip` with reason `user file,
+not overwritten` and is never touched, and a replaced coco file's write record says
+`"replaces":"previous coco file"`. `apply_generated` re-checks the plan when it runs,
+the way `apply_link` always did: a path planned as new that exists by then is refused
+with `appeared after the plan`, and a symlink that is no longer `link_is_ours()` is
+refused with `became a user link after the plan`, so either refusal rolls back.
+`managed_settings` is a sorted list of every org-managed source that exists:
+`managed-settings.json`, `managed-mcp.json` and `managed-settings.d/*.json` in the
+system directory, plus the macOS MDM plists for all users and for the current login.
+Server-managed settings (delivered by the Claude service) can't be detected locally,
+so `managed_settings: []` does not prove a machine is unmanaged.
+A re-install carries `created`, `backup` and `replaced_link` forward from the previous
+manifest, so the first install's facts survive; the pristine backup is what uninstall
+trusts for the original bytes. The manifest record's
+hash stays null, because the line is inside the file it would hash.
+
 ### Uninstall reads the directory's own git dir, and keeps local work
 
 **Decided:** 2026-10-14, PR #342 review. **Reason:** `git -C dir` does not override

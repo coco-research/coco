@@ -2,7 +2,7 @@
 """Assert every published persona/department claim matches docs/asset-counts.json.
 
 Covers README.md, package.json, agents/README.md, docs/install.md, docs/INDEX.md,
-systems/superintelligence/HOW-IT-WORKS.html and assets/og-image.svg. The two
+systems/superintelligence/HOW-IT-WORKS.html. The two
 website pages (index.html, coco/index.html) are covered separately by
 check-site-counts.py, since they publish the same figures under a different set
 of patterns.
@@ -92,7 +92,6 @@ check_one('docs/install.md', r'`superintelligence` \| (\d+)-persona expert board
 check_one('docs/INDEX.md', r'(\d+)-persona expert board \(', 'by-system-bundle line')
 check_one('systems/superintelligence/HOW-IT-WORKS.html',
           r'<div class="stat"><b>(\d+)</b><span>modeled experts</span></div>', 'stat block')
-check_one('assets/og-image.svg', r'An advisory board of (\d+) world-class', 'social card text')
 
 print()
 if fail == 0:

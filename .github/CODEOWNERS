@@ -8,8 +8,10 @@
 
 /.github/                         @cococyracto
 /.githooks/                       @cococyracto
+/hooks/coco-*                     @cococyracto
 /AGENTS.md                        @cococyracto
 /docs/rules.md                    @cococyracto
+/.coco/                           @cococyracto
 /evals/                           @cococyracto
 /tests/                           @cococyracto
 /install.sh                       @cococyracto

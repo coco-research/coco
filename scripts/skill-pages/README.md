@@ -8,7 +8,7 @@ Static pages for public skills on cocoresearch.org. One stylesheet, no JavaScrip
 |---|---|---|
 | `skill.template.html` | `/coco/skills/<name>/` | Slot template. One generated page per skill. |
 | `skill.example.html` | — | Same page, filled by hand from `_sample-SKILL.md`. Measured figures are layout samples. |
-| `measured.html` | `/coco/skills/measured/` | Held-out scores. The rows in this file are layout samples. |
+| `measured.html` | `/coco/skills/measured/` | Test scores. The rows in this file are layout samples. |
 | `skills.css` | — | Shared styles. Dark by default. Light when `prefers-color-scheme` is light. |
 
 ## Slots
@@ -23,8 +23,8 @@ Static pages for public skills on cocoresearch.org. One stylesheet, no JavaScrip
 | `{{#when}}` … `{{/when}}` | Repeated once per "use it when" item. `{{.}}` is that item |
 | `{{source_url}}` | URL of the skill's SKILL.md |
 | `{{#measured}}` … `{{/measured}}` | Optional. Omit the whole block when the skill has no score |
-| `{{score}}` | Held-out pass rate |
-| `{{tasks}}` | Number of held-out tasks |
+| `{{score}}` | Mean grader score (0 to 1) |
+| `{{tasks}}` | Number of test tasks |
 | `{{run_date}}` | Date of that run |
 
 ## How a generator fills them

@@ -152,9 +152,8 @@ emit_commands_from_dir() {
     nsname=$(basename "$ns")
     for cmd in "$ns"*.md; do
       [[ -f "$cmd" ]] || continue
-      local cname desc
+      local cname desc label
       cname=$(basename "$cmd" .md)
-      [[ "$cname" == "_index" ]] && continue
       desc=$(
         awk '
           /^>/ {
@@ -172,10 +171,26 @@ emit_commands_from_dir() {
           }
         ' "$cmd"
       )
-      if [[ -n "$desc" ]]; then
-        echo "- \`/$nsname:$cname\` — $desc"
+      # commands/team/_index.md is the /team router. Skipping it left every
+      # /team:* line pointing at "team.md", a file this adapter does not ship.
+      if [[ "$cname" == "_index" ]]; then
+        [[ "$nsname" == "team" ]] || continue
+        label="/$nsname"
       else
-        echo "- \`/$nsname:$cname\`"
+        label="/$nsname:$cname"
+      fi
+      if [[ "$nsname" == "team" ]]; then
+        local router="$REPO_ROOT/commands/team/_index.md"
+        if [[ -n "$desc" ]]; then
+          desc=${desc//team.md/\`$router\`}
+          echo "- \`$label\` — $desc (\`$cmd\`)"
+        else
+          echo "- \`$label\` (\`$cmd\`)"
+        fi
+      elif [[ -n "$desc" ]]; then
+        echo "- \`$label\` — $desc"
+      else
+        echo "- \`$label\`"
       fi
     done
   done
@@ -298,6 +313,112 @@ emit_si_commands() {
   done < <(printf '%s\n' "${files[@]}" | LC_ALL=C sort)
 }
 
+# The pasted Cursor rules name ~/.cursor/skills and ~/.claude/CLAUDE.md. This
+# adapter creates neither. Keep a reference only when the checkout has the file.
+rewrite_agents_paths() {
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "warning: python3 not found; AGENTS.md keeps the rules' original paths" >&2
+    cat
+    return 0
+  fi
+  # The heredoc is this function's stdin, so the piped rule body arrives on fd 3.
+  python3 - "$REPO_ROOT" 3<&0 <<'PY'
+import os, re, sys
+root = sys.argv[1]
+text = os.fdopen(3).read()
+
+def resolve(raw):
+    if raw == "~/.claude/CLAUDE.md":
+        return os.path.join(root, "templates/memory/global-memory-template.md")
+    if raw in ("./CLAUDE.local.md", "./ProjectName/CLAUDE.local.md"):
+        return os.path.join(root, "templates/memory/project-memory-template.md")
+    if raw.startswith("~/.cursor/skills/"):
+        rel = raw[len("~/.cursor/skills/"):]
+        if rel.startswith("[skill-name]"):
+            return os.path.join(root, "skills") + os.sep
+        if any(c in rel for c in "[]<>{}*") or "..." in rel:
+            return None
+        target = os.path.join(root, "skills", rel)
+        return target if os.path.exists(target) else None
+    if raw.startswith("skills/"):
+        target = os.path.join(root, raw)
+        return target if os.path.exists(target) else None
+    return None
+
+def consume(line, i):
+    prefixes = (
+        "~/.cursor/skills/",
+        "~/.claude/CLAUDE.md",
+        "./ProjectName/CLAUDE.local.md",
+        "./CLAUDE.local.md",
+    )
+    for p in prefixes:
+        if line.startswith(p, i):
+            if p == "~/.cursor/skills/":
+                if i > 0 and line[i - 1] == "`":
+                    j = line.find("`", i)
+                    if j < 0:
+                        j = len(line)
+                    return line[i:j], j
+                # `*` always matches the prefix; trailing sentence punctuation is not part of the path.
+                raw = re.match(r"~/\.cursor/skills/[^\s`]*", line[i:]).group(0).rstrip(".,;:)")
+                return raw, i + len(raw)
+            return p, i + len(p)
+    if line.startswith("skills/", i) and i > 0 and line[i - 1] == "`":
+        j = line.find("`", i)
+        if j < 0:
+            j = len(line)
+        return line[i:j], j
+    return None, i + 1
+
+def fmt(line, start, end, new):
+    whole = start > 0 and line[start - 1] == "`" and end < len(line) and line[end] == "`"
+    if whole or not re.search(r"\s", new):
+        return new
+    return '"' + new + '"'
+
+def rewrite_line(line):
+    spans = []
+    i = 0
+    while i < len(line):
+        raw, j = consume(line, i)
+        if raw is None:
+            i = j
+            continue
+        spans.append((i, j, resolve(raw)))
+        i = j if j > i else i + 1
+    if not spans:
+        return line
+    if any(repl is None for _, _, repl in spans):
+        return None
+    out = line
+    for start, end, repl in reversed(spans):
+        out = out[:start] + fmt(line, start, end, repl) + out[end:]
+    return out
+
+# An opening fence is held until its block keeps a line, so a block whose every line
+# was dropped disappears whole and adjacent blocks are never merged.
+out, pending, in_fence = [], None, False
+for line in text.splitlines(keepends=True):
+    if line.lstrip().startswith("```"):
+        if not in_fence:
+            in_fence, pending = True, line
+        elif pending is not None:
+            in_fence, pending = False, None
+        else:
+            in_fence = False
+            out.append(line)
+        continue
+    rewritten = rewrite_line(line)
+    if rewritten is not None:
+        if pending is not None:
+            out.append(pending)
+            pending = None
+        out.append(rewritten)
+sys.stdout.write("".join(out + ([pending] if pending is not None else [])))
+PY
+}
+
 generate() {
   echo "# AGENTS.md"
   echo ""
@@ -328,7 +449,7 @@ generate() {
   for mdc in "$REPO_ROOT/rules/cursor-mdc"/*.mdc; do
     name=$(basename "$mdc" .mdc)
     echo "### $name"
-    awk '/^---$/{f=!f; next} !f' "$mdc"
+    awk '/^---$/{f=!f; next} !f' "$mdc" | rewrite_agents_paths
     echo ""
   done
 }

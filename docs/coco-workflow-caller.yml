@@ -1,0 +1,11 @@
+# Example caller for another repo. Replace BOTH all-zero SHAs below with the same
+# coco-research/coco commit; as written it fails closed on purpose.
+name: coco-workflow
+on: pull_request
+permissions:
+  contents: read
+jobs:
+  coco-workflow:
+    uses: coco-research/coco/.github/workflows/coco-workflow.yml@0000000000000000000000000000000000000000
+    with:
+      verifier_ref: 0000000000000000000000000000000000000000

@@ -46,12 +46,25 @@ if grep -R -F -q '{{' "$out"; then
   echo 'unfilled {{ in generated output' >&2
   exit 1
 fi
+# Every page links the stylesheet and carries the licence footer word for word.
+footer='<p>Part of Coco Super Intelligence · Open-core: the Coco core is MIT; Super Intelligence and vendored skills keep their own licences. <a href="https://github.com/coco-research/coco#licence">Licence</a></p>'
 while IFS= read -r -d '' html; do
   if ! grep -F -q 'href="/coco/skills/skills.css"' "$html"; then
     echo "missing stylesheet link: ${html#"$out"/}" >&2
     exit 1
   fi
+  if ! grep -F -q "$footer" "$html"; then
+    echo "missing licence footer: ${html#"$out"/}" >&2
+    exit 1
+  fi
 done < <(find "$out" -name '*.html' -print0)
+# Test tasks are public, so no page calls them held-out; the footer names the licence split, not "MIT core".
+for stale in 'held-out' 'Held-out' 'MIT core'; do
+  if grep -R -F -q --include='*.html' "$stale" "$out"; then
+    echo "generated page carries stale copy: $stale" >&2
+    exit 1
+  fi
+done
 
 python3 - "$out" <<'PY'
 import html, importlib.util, re, sys

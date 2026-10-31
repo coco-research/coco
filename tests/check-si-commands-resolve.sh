@@ -36,7 +36,7 @@ placeholder_re = re.compile(r"\{\{[^{}]*\}\}")
 sentinels = {"~/.coco/disabled"}
 url_re = re.compile(r"https?://[^\s`\"')>]+")
 tilde_re = re.compile(r"~/(?:[A-Za-z0-9._+-]+/)*[A-Za-z0-9._+-]+")
-abs_re = re.compile(r"(?<![A-Za-z0-9._+-])(/(?:[A-Za-z0-9._+-]+/)+[A-Za-z0-9._+-]+)")
+abs_re = re.compile(r"(?<![A-Za-z0-9._+~-])(/(?:[A-Za-z0-9._+-]+/)+[A-Za-z0-9._+-]+)")
 rel_re = re.compile(
     r"(?<![A-Za-z0-9._+/-])((?:[A-Za-z0-9._+-]+/)+[A-Za-z0-9._+-]+\.[A-Za-z0-9]+)"
 )

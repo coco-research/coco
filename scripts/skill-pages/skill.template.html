@@ -10,8 +10,8 @@ Slots. A generator replaces these and leaves no braces behind.
 {{/when}}
 {{source_url}}  URL of this skill's SKILL.md.
 {{#measured}}   Optional. Delete the whole block when there is no score.
-  {{score}}     Held-out pass rate.
-  {{tasks}}     Number of held-out tasks.
+  {{score}}     Mean grader score (0 to 1).
+  {{tasks}}     Number of test tasks.
   {{run_date}}  Date of that run.
 {{/measured}}
 Every slot value MUST be HTML-escaped (text and attributes).
@@ -53,12 +53,12 @@ When there are no "use it when" items the generator removes the whole "Use it wh
         </ul>
       </section>
       {{#measured}}
-      <p class="measured">Measured: {{score}} on {{tasks}} held-out tasks · {{run_date}} <a href="/coco/skills/measured/">How we measure →</a></p>
+      <p class="measured">Measured: {{score}} on {{tasks}} test tasks · {{run_date}} <a href="/coco/skills/measured/">How we measure →</a></p>
       {{/measured}}
       <p class="source"><a href="{{source_url}}">Read the full SKILL.md on GitHub →</a></p>
     </main>
     <footer class="foot">
-      <p>Part of CoCo Super Intelligence · MIT core</p>
+      <p>Part of Coco Super Intelligence · Open-core: the Coco core is MIT; Super Intelligence and vendored skills keep their own licences. <a href="https://github.com/coco-research/coco#licence">Licence</a></p>
       <a href="/coco/skills/">All skills</a>
     </footer>
   </div>

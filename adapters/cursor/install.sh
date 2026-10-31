@@ -10,6 +10,7 @@
 # Where things land:
 #   skills/<name>/                   -> ~/.cursor/skills/<name>                      (symlink)
 #   systems/<bundle>/skills/<name>/  -> ~/.cursor/skills/<name>                      (symlink)
+#   systems/<bundle>/<team>/         -> ~/.cursor/skills/<frontmatter name>          (symlink)
 #   adapters/cursor/skills/<name>/   -> ~/.cursor/skills/<name>                      (symlink)
 #   rules/cursor-mdc/*.mdc           -> ~/.cursor/rules/<name>.mdc                   (symlink)
 #   commands/<ns>/<name>.md          -> ~/.cursor/commands/<ns>:<name>.md            (symlink)
@@ -32,6 +33,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/scripts/lib/frontmatter.sh"
 TARGET_HOME="${CURSOR_HOME:-$HOME/.cursor}"
 DRY_RUN=0
 CORE_ONLY=0
@@ -143,6 +146,21 @@ link_system() {
     echo "System $sys: $LINKED skill(s) linked"
     did=1
   fi
+
+  # Team front doors: systems/<bundle>/<team>/SKILL.md. Some bundles keep one front
+  # door per team rather than under skills/ — the 13 Super Intelligence teams do — and
+  # this walked only skills/, so every one of them was missing from the install. The
+  # directory is a short slug (ai, gtm); the frontmatter name is the canonical id
+  # (ai-super-intelligence) that the generated index and the role roster use.
+  local t name
+  for t in "$sys_dir"/*/; do
+    [[ -f "$t/SKILL.md" ]] || continue
+    name=$(frontmatter_name "$t/SKILL.md")
+    [[ -n "$name" ]] || name=$(basename "$t")
+    link_dir "$t" "$TARGET_HOME/skills/$name"
+    skill_count=$((skill_count + 1))
+    did=1
+  done
   if [[ -d "$sys_dir/agents" ]]; then
     # Reported rather than installed: inventing an agent target here would write into a
     # path Cursor does not read, which looks installed and does nothing.

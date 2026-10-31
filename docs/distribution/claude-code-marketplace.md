@@ -25,7 +25,7 @@ Create `.claude-plugin.json` at repo root:
 {
   "name": "coco",
   "displayName": "Coco",
-  "description": "An entire team. Wherever your AI lives. Open-source AI workflow framework with skills, agents, commands, and multi-agent orchestration.",
+  "description": "An entire team. Wherever your AI lives. Open-core AI workflow framework with skills, agents, commands, and multi-agent orchestration.",
   "version": "1.0.0",
   "author": "Coco Inc",
   "license": "MIT",

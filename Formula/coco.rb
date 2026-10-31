@@ -12,7 +12,7 @@
 #   - Users install via: `brew install coco`
 
 class Coco < Formula
-  desc "Open-source AI workflow framework — skills, agents, commands, multi-agent orchestration"
+  desc "Open-core AI workflow framework — skills, agents, commands, multi-agent orchestration"
   homepage "https://github.com/coco-research/coco"
   url "https://github.com/coco-research/coco/archive/refs/tags/v1.10.0.tar.gz"
   sha256 "3316195d5bd117d8ced9063859afa47c3f753baaab72a0f8646e29f58f31f58a"

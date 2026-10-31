@@ -169,6 +169,9 @@ jobs:
           fi
           echo "INDEX files up to date."
 
+      - name: Verify generated skill pages
+        run: bash tests/check-skill-pages.sh
+
       - name: Verify shipped asset counts match generated truth
         run: bash tests/check-asset-counts.sh
 

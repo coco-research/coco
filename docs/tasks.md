@@ -16,7 +16,6 @@ Last updated: 2026-09-19.
 | 2 | Evolution loop task 1: the `skill-evolution` skill tree and its count coupling | in review | PR #200 |
 | 3 | Evolution loop tasks 2 to 15 | next | `.metagpt/plan.md` |
 | 10 | Reject empty dev and held-out scores in skill improvement helpers (#366) | ready for review | `evals/skills/improve.py`, `tests/test_skill_improve.py` |
-| 11 | Document agent-qa in the MCP catalog with project-scoped setup and evidence-based QA guidance | ready for review | `mcps/servers/agent-qa.md` |
 
 Task 3's first four tasks are the working set: `ledger.py`, `lane.py`, `observe.py` and
 `validate.py`, in that order, because `propose.py` needs the lane adapter and the guard.

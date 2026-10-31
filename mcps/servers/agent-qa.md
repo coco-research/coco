@@ -1,11 +1,14 @@
 # MCP Server: agent-qa
 > Natural-language web and mobile testing by vostride, with recorded run evidence, advanced memidex memory, and self-improvement.
 
+**Affiliation:** This listing is submitted on behalf of the agent-qa / vostride maintainers.
+
 ## Installation
+
+**Runtime license:** [FSL-1.1-ALv2](https://github.com/vostride/agent-qa/blob/main/LICENSE.md) (source-available). Each version becomes available under Apache-2.0 two years after its release.
 
 Follow the [agent quickstart](https://vostride.com/docs/agent-qa/agent-quickstart) in the application repository to install agent-qa, initialize the project, and configure its target and model provider.
 The commands below run from the directory containing `agent-qa.config.yaml`.
-The runtime is distributed separately under its [published license](https://github.com/vostride/agent-qa/blob/main/LICENSE.md).
 
 ## Configuration
 

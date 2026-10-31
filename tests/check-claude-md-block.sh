@@ -35,13 +35,14 @@ out=$(printf '<!-- coco:rules-start -->\nnew\n<!-- coco:rules-end -->\n' \
 check "unterminated block: file unchanged"   'cmp -s "$WORK/before" "$H/CLAUDE.md"'
 check "unterminated block: warns"            '[[ "$out" == *WARNING* ]]'
 
-# 3. A symlinked CLAUDE.md stays a symlink, and its target gets the block.
+# 3. A CLAUDE.md that links outside the target home stays a symlink and its target is
+#    untouched: the installer writes only inside the target (it reports a skip instead).
 H="$WORK/h3"; mkdir -p "$H" "$WORK/dotfiles"
 printf 'dotfile content\n' > "$WORK/dotfiles/CLAUDE.md"
 ln -s "$WORK/dotfiles/CLAUDE.md" "$H/CLAUDE.md"
 install_rules "$H"
 check "symlink preserved"                    '[[ -L "$H/CLAUDE.md" ]]'
-check "symlink target updated"               '[[ $(blocks "$WORK/dotfiles/CLAUDE.md") == 1 ]]'
+check "outside symlink target untouched"     '[[ $(cat "$WORK/dotfiles/CLAUDE.md") == "dotfile content" && ! -e "$WORK/dotfiles/CLAUDE.md.coco-bak" ]]'
 
 # 4. CRLF line endings: the old block is still found and replaced, not duplicated.
 H="$WORK/h4"; mkdir -p "$H"
@@ -49,5 +50,14 @@ printf 'win\r\n<!-- coco:rules-start -->\r\nold\r\n<!-- coco:rules-end -->\r\n' 
 install_rules "$H"
 check "CRLF block replaced, not duplicated"  '[[ $(blocks "$H/CLAUDE.md") == 1 ]]'
 check "CRLF user line kept as-is"            'grep -q $'"'"'^win\r$'"'"' "$H/CLAUDE.md"'
+
+# 5. A flag that is not exactly --plan is a usage error and does not write.
+printf 'keep\n' > "$WORK/typo.md"
+cp "$WORK/typo.md" "$WORK/typo-before"
+typo_status=0
+printf '<!-- coco:rules-start -->\nnew\n<!-- coco:rules-end -->\n' \
+  | bash "$ROOT/scripts/write-rules-block.sh" "$WORK/typo.md" --Plan >/dev/null 2>&1 || typo_status=$?
+check "--Plan exits 2 and leaves the target untouched" \
+  '[[ $typo_status -eq 2 ]] && cmp -s "$WORK/typo-before" "$WORK/typo.md"'
 
 exit $fail

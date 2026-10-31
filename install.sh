@@ -14,6 +14,7 @@
 #   bash install.sh --adapter claude-code --systems gsd,brain  # only these bundles
 #   bash install.sh --list                     # list available adapters
 #   bash install.sh --dry-run                  # preview only
+#   bash install.sh --json                     # pass --json through to the adapter
 #
 # Every bundle named in scripts/installable-bundles.sh is installed by default. That
 # file is a reviewed allow-list, not a scan of systems/, so a new bundle needs a
@@ -33,8 +34,19 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ADAPTER=""
 AUTODETECTED=0
 DRY_RUN=""
+JSON_FLAG=""
 SYSTEMS=""
 CORE_ONLY=""
+WORKFLOW=""
+
+# Human status. --json keeps stdout for the adapter's JSONL only.
+note() {
+  if [[ -n "$JSON_FLAG" ]]; then
+    printf '%s\n' "$*" >&2
+  else
+    printf '%s\n' "$*"
+  fi
+}
 
 show_help() {
   bash "$REPO_ROOT/scripts/print-usage.sh" "${BASH_SOURCE[0]}"
@@ -72,7 +84,9 @@ while [[ $# -gt 0 ]]; do
     --adapter) shift; ADAPTER=$1 ;;
     --systems) shift; SYSTEMS=$1 ;;
     --core-only) CORE_ONLY=1 ;;
+    --workflow) WORKFLOW=1 ;;
     --dry-run) DRY_RUN="--dry-run" ;;
+    --json) JSON_FLAG="--json" ;;
     --list) list_adapters; exit 0 ;;
     --help|-h) show_help; exit 0 ;;
     *) echo "Unknown flag: $1" >&2; exit 1 ;;
@@ -83,14 +97,21 @@ done
 if [[ -z "$ADAPTER" ]]; then
   ADAPTER=$(detect_adapter)
   AUTODETECTED=1
-  echo "Auto-detected adapter: $ADAPTER"
-  echo "(override with --adapter <name>)"
+  note "Auto-detected adapter: $ADAPTER"
+  note "(override with --adapter <name>)"
 fi
 
 ADAPTER_DIR="$REPO_ROOT/adapters/$ADAPTER"
 if [[ ! -d "$ADAPTER_DIR" ]]; then
   echo "Unknown adapter: $ADAPTER" >&2
   list_adapters
+  exit 1
+fi
+
+# The workflow wiring only exists in the claude-code adapter; the others have no hook
+# lines and no coco-gate link to make, so the flag is refused rather than dropped.
+if [[ -n "$WORKFLOW" && "$ADAPTER" != "claude-code" ]]; then
+  echo "--workflow is only available with --adapter claude-code" >&2
   exit 1
 fi
 
@@ -112,6 +133,8 @@ adapter_supports_systems() {
 
 ARGS=()
 [[ -n "$DRY_RUN" ]] && ARGS+=("$DRY_RUN")
+[[ -n "$JSON_FLAG" ]] && ARGS+=("$JSON_FLAG")
+[[ -n "$WORKFLOW" ]] && ARGS+=("--workflow")
 
 if [[ -n "$CORE_ONLY" ]]; then
   # Explicit opt-out: no bundles, and never an error, even alongside --systems.
@@ -142,8 +165,8 @@ fi
 # Report installed version + how to stay current (no network call here).
 if [[ -z "$DRY_RUN" ]]; then
   VER="$(python3 -c "import json;print(json.load(open('$REPO_ROOT/package.json'))['version'])" 2>/dev/null || echo "?")"
-  echo
-  echo "Coco v$VER installed. Check for updates anytime:"
-  echo "  bash \"$REPO_ROOT/scripts/check-update.sh\"      # git clones"
-  echo "  node \"$REPO_ROOT/bin/coco.js\" version                 # CLI wrapper"
+  note ""
+  note "Coco v$VER installed. Check for updates anytime:"
+  note "  bash \"$REPO_ROOT/scripts/check-update.sh\"      # git clones"
+  note "  node \"$REPO_ROOT/bin/coco.js\" version                 # CLI wrapper"
 fi

@@ -55,12 +55,25 @@ if grep -R -F -q '{{' "$out"; then
   echo 'unfilled {{ in generated output' >&2
   exit 1
 fi
+# Every page links the stylesheet and carries the licence footer word for word.
+footer='<p>Part of Coco Super Intelligence · Open-core: the Coco core is MIT; Super Intelligence and vendored skills keep their own licences. <a href="https://github.com/coco-research/coco#licence">Licence</a></p>'
 while IFS= read -r -d '' html; do
   if ! grep -F -q 'href="/coco/skills/skills.css"' "$html"; then
     echo "missing stylesheet link: ${html#"$out"/}" >&2
     exit 1
   fi
+  if ! grep -F -q "$footer" "$html"; then
+    echo "missing licence footer: ${html#"$out"/}" >&2
+    exit 1
+  fi
 done < <(find "$out" -name '*.html' -print0)
+# Test tasks are public, so no page calls them held-out; the footer names the licence split, not "MIT core".
+for stale in 'held-out' 'Held-out' 'MIT core'; do
+  if grep -R -F -q --include='*.html' "$stale" "$out"; then
+    echo "generated page carries stale copy: $stale" >&2
+    exit 1
+  fi
+done
 
 python3 - "$out" <<'PY'
 import html, importlib.util, re, sys
@@ -208,7 +221,11 @@ measured="$out/coco/skills/measured/index.html"
 [[ -f "$measured" ]]
 grep -F -q '<link rel="canonical" href="https://cocoresearch.org/coco/skills/measured/">' "$measured"
 grep -F -q 'https://cocoresearch.org/coco/skills/measured/' "$out/sitemap.xml"
-grep -F -q 'Measured: 0.88 on 24 held-out tasks · Oct 21' "$out/coco/skills/c4-architecture/index.html"
+grep -F -q 'Measured: 0.88 on 24 test tasks · Oct 21 <a href="/coco/skills/measured/">How we measure →</a>' "$out/coco/skills/c4-architecture/index.html"
+# The measured page copy, word for word: the lede, the meta description and the first note.
+grep -F -q '<p class="lede">Test scores for the skills we measure, from the eval runs committed in the repository. The test tasks are public, so these are not sealed tests.</p>' "$measured"
+grep -F -q '<meta name="description" content="Test scores for the skills we measure, from the eval runs committed in the repository. The test tasks are public, so these are not sealed tests.">' "$measured"
+grep -F -q '<p class="note">Skill score = mean grader score (0 to 1) on that skill'\''s test tasks, from one run with one local model. Baseline = the skill as first measured. Router score = share of test descriptions (prompts that never name the team) routed to the right team, compared with keyword matching on the same prompts. Without a local embedding server, the Coco router falls back to the keyword matching shown beside its score, and says so. Tasks and graders are committed in evals/.</p>' "$measured"
 if grep -F -q 'noindex' "$measured"; then
   echo 'measured page carries noindex' >&2
   exit 1

@@ -88,6 +88,12 @@ for d in adapters/*/; do
 done
 
 echo ""
+echo "=== Smoke test: windsurf supports_systems (#215) ==="
+bash tests/check-windsurf-systems.sh \
+  && pass "windsurf supports_systems matches the bundles a plain install forwards" \
+  || fail "windsurf supports_systems drifted from the bundles a plain install forwards"
+
+echo ""
 echo "=== Smoke test: CLAUDE.md rules block ==="
 bash tests/check-claude-md-block.sh && pass "rules block never damages CLAUDE.md" || fail "rules block damaged CLAUDE.md"
 

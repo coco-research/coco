@@ -9,6 +9,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/scripts/lib/frontmatter.sh"
 TARGET_HOME="${WINDSURF_HOME:-$HOME/.codeium/windsurf}"
 DRY_RUN=0
 SYSTEMS=()
@@ -98,6 +100,17 @@ for sys in "${SYSTEMS[@]:-}"; do
       link_dir "$s" "$TARGET_HOME/skills/$name"
     done
   fi
+  # Team front doors: systems/<bundle>/<team>/SKILL.md. Some bundles keep one front
+  # door per team rather than under skills/ — the 13 Super Intelligence teams do — and
+  # this walked only skills/, so every one of them was missing from the install. The
+  # directory is a short slug (ai, gtm); the frontmatter name is the canonical id
+  # (ai-super-intelligence) that the generated index and the role roster use.
+  for t in "$sys_dir"/*/; do
+    [[ -f "$t/SKILL.md" ]] || continue
+    name=$(frontmatter_name "$t/SKILL.md")
+    [[ -n "$name" ]] || name=$(basename "$t")
+    link_dir "$t" "$TARGET_HOME/skills/$name"
+  done
   if [[ -d "$sys_dir/agents" ]]; then
     for a in "$sys_dir/agents"/*.md; do
       [[ -f "$a" ]] || continue

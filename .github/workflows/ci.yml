@@ -51,7 +51,7 @@ jobs:
 
       - name: Adapter install.sh syntax check
         run: |
-          for f in adapters/*/install.sh install.sh bin/coco-bootstrap.sh skills/prd-generator/scripts/generate_prd.sh skills/brainstorming/scripts/stop-server.sh tests/check-security-surface.sh tests/check-officecli-install.sh tests/check-install-manifest.sh tests/check-install-safety.sh tests/check-uninstall.sh tests/check-codex-agents-md-paths.sh tests/lib/install-home.sh; do
+          for f in adapters/*/install.sh install.sh bin/coco-bootstrap.sh skills/prd-generator/scripts/generate_prd.sh skills/brainstorming/scripts/stop-server.sh tests/check-security-surface.sh tests/check-officecli-install.sh tests/check-install-manifest.sh tests/check-install-safety.sh tests/check-uninstall.sh tests/check-codex-agents-md-paths.sh tests/lib/install-home.sh tests/check-si-front-doors.sh; do
             bash -n "$f" || { echo "Syntax error in $f"; exit 1; }
           done
           echo "All install scripts pass syntax check."
@@ -80,6 +80,8 @@ jobs:
         run: bash tests/check-coco-githook-install.sh
       - name: Validate codex AGENTS.md paths exist
         run: bash tests/check-codex-agents-md-paths.sh
+      - name: Validate SI team front doors install
+        run: bash tests/check-si-front-doors.sh
 
       - name: coco-workflow gate cases (forgery, happy path, workflow hygiene)
         run: bash tests/check-coco-gate.sh

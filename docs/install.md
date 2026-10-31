@@ -283,19 +283,24 @@ bash install.sh --systems gsd,brain
 
 ## Optional: semantic routing for Super Intelligence
 
-Super Intelligence picks which teams to seat with `systems/superintelligence/scripts/meta_select.py`. It embeds your prompt against each team's profile by calling an OpenAI-compatible embeddings endpoint on this machine:
+Super Intelligence picks which teams to seat with `systems/superintelligence/scripts/meta_select.py`. It embeds your prompt against each team's profile by calling an OpenAI-compatible embeddings endpoint on this machine.
 
-- URL: `http://127.0.0.1:1234/v1/embeddings` (LM Studio's default port)
-- Model name sent: `text-embedding-nomic-embed-text-v1.5`
+The router tries LM Studio on port 1234 first, then Ollama on port 11434:
 
-Both values are hard-coded in the script, so the server must answer on that port and accept that model name.
+- LM Studio: `http://127.0.0.1:1234/v1/embeddings`, model `text-embedding-nomic-embed-text-v1.5`
+- Ollama: `http://127.0.0.1:11434/v1/embeddings`, model `nomic-embed-text` (`ollama pull nomic-embed-text`)
 
-Without the endpoint nothing breaks. The script falls back to keyword overlap, prints `meta_select WARN: keyword fallback active` on stderr, marks its output `"method": "keyword"` and `"degraded": true`, and never auto-delegates to a single team. Routing still works, but team selection is coarser.
+`COCO_EMBED_URL` and `COCO_EMBED_MODEL` pin a single endpoint. That URL is the only one tried, and the model name replaces the default.
 
-To use embeddings: load the nomic-embed-text-v1.5 model in LM Studio, start its local server, then check:
+With neither server running, routing falls back to keyword matching and prints `router: no embedding server, using keyword matching` on stderr. Output is `"method": "keyword"` and `"degraded": true` (`keyword fallback active`): scores are not commensurate with embed cosine, and the script never auto-delegates to a single team. Routing still works, but team selection is coarser.
+
+`python3 systems/superintelligence/scripts/meta_select.py --doctor` shows which endpoint is in use. It prints `router: embedding via <url> (<model>)` and exits 0 when one answers, or the stderr line above and exits 1 when neither does.
+
+To use embeddings, load `text-embedding-nomic-embed-text-v1.5` in LM Studio and start its local server, or run `ollama pull nomic-embed-text`. Then check:
 
 ```bash
-curl -s -m 3 http://127.0.0.1:1234/v1/models   # any JSON reply means the endpoint is up
+curl -s -m 3 http://127.0.0.1:1234/v1/models   # any JSON reply means the LM Studio endpoint is up
+python3 systems/superintelligence/scripts/meta_select.py --doctor
 python3 systems/superintelligence/scripts/meta_select.py -- "should we ship an AI compliance product?"   # "method": "embed" when it is used
 ```
 

@@ -6,9 +6,11 @@ ranks → top 1-4 relevant teams + candidate cells + relevance weights (for prop
 budget). Replaces the keyword-scoring shell. Free/local. The LIGHT layer — never loads
 persona records; /SI-Orchestrate drills into only the selected teams afterward.
 
-When the local embedding endpoint is unavailable, FALL BACK to keyword overlap
-(same shape JSON, method=keyword). Product (Mira): this is a *supported degraded
-production path* — not dogfood-only / unsupported.
+Tries LM Studio (:1234, text-embedding-nomic-embed-text-v1.5), then Ollama
+(:11434, nomic-embed-text), unless COCO_EMBED_URL pins one endpoint. When no
+embedding server answers, FALL BACK to keyword overlap (same shape JSON,
+method=keyword). Product (Mira): this is a *supported degraded production path*
+— not dogfood-only / unsupported.
 
 Honesty bar: surface method=keyword + degraded; never claim keyword ≡ embed cosine;
 NEVER auto-delegate on keyword; warn loudly; if keyword also cannot run, fail closed.
@@ -29,19 +31,34 @@ Option errors (M0 off, unknown outcome, bad --days, no decision) print one line 
 stderr and exit 2, leaving stdout empty. Run with no arguments for the full usage,
 including the 500-row cap on --outcomes-summary.
 """
-import os, sys, json, math, re, hashlib, hmac, urllib.request, urllib.error, pathlib
+import errno, os, socket, sys, json, math, re, hashlib, hmac, urllib.request, urllib.error, pathlib
 from datetime import datetime, timezone
 
 from local_http import local_opener  # sibling module, shared with evals/skills/run.py
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-# Any local OpenAI-compatible endpoint (LM Studio by default; Ollama in CI). Local only.
-# Literal defaults stay greppable for tests/check-si-counts.py; env overrides below.
+# LM Studio first, then Ollama. Literal defaults stay greppable for tests/check-si-counts.py.
+# COCO_EMBED_URL pins one endpoint. COCO_EMBED_ENDPOINTS=url|model,url|model replaces the
+# pair list (tests). The first endpoint that answers is written back to EMBED_URL/EMBED_MODEL.
 EMBED_URL = "http://127.0.0.1:1234/v1/embeddings"
 EMBED_MODEL = "text-embedding-nomic-embed-text-v1.5"
+_DEFAULT_EMBED_URL = EMBED_URL
+_DEFAULT_EMBED_MODEL = EMBED_MODEL
+_EMBED_ENDPOINTS = (
+    (EMBED_URL, EMBED_MODEL),
+    ("http://127.0.0.1:11434/v1/embeddings", "nomic-embed-text"),
+)
 EMBED_URL = os.environ.get("COCO_EMBED_URL", EMBED_URL)
 EMBED_MODEL = os.environ.get("COCO_EMBED_MODEL", EMBED_MODEL)
+_IMPORT_URL = EMBED_URL  # value at import, so a later patch of EMBED_URL is visible
+_pinned = False  # set once an endpoint has answered; further calls skip the probe
+_NO_EMBED = "router: no embedding server, using keyword matching"
+_DOCTOR_PROBE = "ping"  # fixed word; --doctor never sends the user's prompt
 _LOOPBACK = {"127.0.0.1", "localhost", "::1"}
+_CONNECT_ERRNO = {
+    errno.ECONNREFUSED, errno.ETIMEDOUT, errno.EHOSTUNREACH,
+    errno.ENETUNREACH, errno.ENETDOWN, errno.EHOSTDOWN,
+}
 
 
 def _check_embed_host(url):
@@ -59,13 +76,79 @@ MAX_TEAMS = 4
 KEYWORD_MAX_TEAMS = 4
 
 
-def embed(texts):
-    _check_embed_host(EMBED_URL)
-    payload = json.dumps({"model": EMBED_MODEL, "input": texts}).encode()
-    req = urllib.request.Request(EMBED_URL, data=payload, headers={"Content-Type": "application/json"})
+def _endpoint_list():
+    """(url, model) pairs when COCO_EMBED_URL is not pinning a single endpoint."""
+    model_over = os.environ.get("COCO_EMBED_MODEL")
+    raw = os.environ.get("COCO_EMBED_ENDPOINTS")
+    if raw:
+        pairs = []
+        for part in raw.split(","):
+            part = part.strip()
+            if not part:
+                continue
+            url, sep, model = part.partition("|")
+            pairs.append((url.strip(), model_over or (model.strip() if sep else _DEFAULT_EMBED_MODEL)))
+        return pairs
+    return [(url, model_over or model) for url, model in _EMBED_ENDPOINTS]
+
+
+def _is_connect_failure(exc):
+    """Refused, unreachable, or timeout. HTTP and parse errors are not."""
+    if isinstance(exc, urllib.error.HTTPError):
+        return False
+    reason = exc.reason if isinstance(exc, urllib.error.URLError) else exc
+    if isinstance(reason, (TimeoutError, ConnectionRefusedError, socket.gaierror)):
+        return True
+    return isinstance(reason, OSError) and getattr(reason, "errno", None) in _CONNECT_ERRNO
+
+
+def _embed_at(url, model, texts):
+    _check_embed_host(url)
+    payload = json.dumps({"model": model, "input": texts}).encode()
+    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
     with local_opener().open(req, timeout=60) as r:
-        d = json.loads(r.read())
-    return [e["embedding"] for e in d["data"]]
+        data = json.loads(r.read())
+    return [item["embedding"] for item in data["data"]]
+
+
+def _walk(texts):
+    """Try each candidate. Only a connection failure moves on; anything else propagates."""
+    global EMBED_URL, EMBED_MODEL, _pinned
+    last = None
+    endpoints = _endpoint_list()
+    if not endpoints:
+        raise OSError("no embedding endpoint")
+    for url, model in endpoints:
+        try:
+            vecs = _embed_at(url, model, texts)
+        except Exception as exc:
+            if _is_connect_failure(exc):
+                last = exc
+                continue
+            raise
+        EMBED_URL, EMBED_MODEL, _pinned = url, model, True
+        return vecs
+    raise last
+
+
+def embed(texts):
+    """Embed texts. COCO_EMBED_URL, when set, is the only endpoint tried.
+
+    A patched EMBED_URL (the unit tests) is used as-is. Otherwise the built-in
+    list is tried until one answers, and that winner sticks for the process.
+    """
+    global EMBED_URL, EMBED_MODEL, _pinned
+    env_url = os.environ.get("COCO_EMBED_URL")
+    patched = EMBED_URL != _IMPORT_URL and not _pinned
+    if env_url and not patched:
+        EMBED_URL = env_url
+        env_model = os.environ.get("COCO_EMBED_MODEL")
+        if env_model:
+            EMBED_MODEL = env_model
+        return _embed_at(EMBED_URL, EMBED_MODEL, texts)
+    if _pinned or patched or _IMPORT_URL != _DEFAULT_EMBED_URL:
+        return _embed_at(EMBED_URL, EMBED_MODEL, texts)
+    return _walk(texts)
 
 
 def cos(a, b):
@@ -159,6 +242,7 @@ def select_keyword(prompt, profs):
         "scores are not commensurate with embed cosine; auto-delegate disabled; "
         "treat as degraded Stage A — do not trust single-team collapse"
     )
+    print(_NO_EMBED, file=sys.stderr)
     print(f"meta_select WARN: {warn}", file=sys.stderr)
     return {"prompt": prompt,
             "method": "keyword",
@@ -388,9 +472,12 @@ def select(prompt):
 
 
 USAGE = """usage: meta_select.py [--] "<prompt>"
+       meta_select.py --doctor
        meta_select.py --outcome kept|overridden|bad [--decision ID]
        meta_select.py --outcomes-summary [--days N]
 `--` ends options: everything after it is the prompt, even if it starts with --outcome.
+--doctor probes LM Studio then Ollama (or COCO_EMBED_URL) with a fixed word and prints
+which endpoint answered. It does not route a prompt.
 --outcome and --outcomes-summary need COCO_ROUTER_M0=1. Their errors go to stderr, exit 2.
 --outcomes-summary reads the newest 500 router rows only (the store has no cursor). When
 that page is full the JSON adds "truncated": true and "rows_read": 500, and older rows
@@ -461,10 +548,28 @@ def _cli_summary(args):
     print(json.dumps(m0_outcomes_summary(store, days=days)))
 
 
+def _cli_doctor():
+    """Probe the same endpoint order as embed(). One fixed word, never a user prompt."""
+    try:
+        embed([_DOCTOR_PROBE])
+    except PermissionError:
+        raise
+    except (urllib.error.URLError, TimeoutError, ConnectionError, OSError,
+            json.JSONDecodeError, KeyError, IndexError):
+        print(_NO_EMBED, file=sys.stderr)
+        raise SystemExit(1)
+    print(f"router: embedding via {EMBED_URL} ({EMBED_MODEL})")
+
+
 def main(argv=None):
     args = list(sys.argv[1:] if argv is None else argv)
     if args[:1] == ["--"]:  # end of options: the rest is the prompt, whatever it starts with
         args = args[1:]
+    elif args[:1] == ["--doctor"]:
+        if len(args) != 1:
+            _exit2("--doctor takes no arguments")
+        _cli_doctor()
+        return
     elif args[:1] == ["--outcome"]:
         _cli_outcome(args[1:])
         return

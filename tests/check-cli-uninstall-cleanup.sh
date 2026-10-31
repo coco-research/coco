@@ -49,7 +49,7 @@ git -C "$T/clone" remote add origin https://github.com/coco-research/coco.git
 git -C "$T/clone" update-ref refs/remotes/origin/main HEAD
 
 install_adapter() {
-  if ! HOME="$T/home" bash "$T/clone/install.sh" --adapter "$1" >"$T/$1.log" 2>&1; then
+  if ! HOME="$T/home" bash "$T/clone/install.sh" --adapter "$1" >"$T/$1.log" 2>&1 </dev/null; then
     echo "FAIL: $1 install"
     tail -n 40 "$T/$1.log"
     exit 1
@@ -83,6 +83,9 @@ ls "$SI_DIR"/SI-*.md >/dev/null || { echo "FAIL: hermes generated no SI commands
 
 CLONE_LOGICAL=$(cd "$T/clone" && pwd)
 CLONE_PHYS=$(cd "$T/clone" && pwd -P)
+for d in "$H/.hermes" "$H/.config/zed"; do
+  [ -n "$(find "$d" -type l -print -quit)" ] || { echo "FAIL: installer made no links in $d"; exit 1; }
+done
 
 if ! HOME="$H" COCO_NO_UPDATE_CHECK=1 node "$CLI" uninstall "$T/clone" >"$T/out" 2>"$T/err"; then
   echo "FAIL: uninstall of installed clone exited non-zero"

@@ -419,9 +419,11 @@ function siCommandDirs() {
   ];
 }
 
-function hasMarkedSi(dir) {
-  return listDir(dir).some((n) => isSiCommandName(n)
-    && SI_MARKERS.some((m) => readPlain(path.join(dir, n)).includes(m)));
+// SI.md / SI-*.md files directly in dir that carry a generator line.
+function markedSi(dir) {
+  return listDir(dir).filter((n) => isSiCommandName(n)
+    && SI_MARKERS.some((m) => readPlain(path.join(dir, n)).includes(m)))
+    .map((n) => path.join(dir, n));
 }
 
 function sweepGenerated() {
@@ -443,12 +445,7 @@ function sweepGenerated() {
       if (name.endsWith('.md') && readPlain(file).includes(PI_MARKER)) removePath(file);
     }
   }
-  for (const dir of siCommandDirs()) {
-    for (const name of listDir(dir)) {
-      const file = path.join(dir, name);
-      if (isSiCommandName(name) && SI_MARKERS.some((m) => readPlain(file).includes(m))) removePath(file);
-    }
-  }
+  for (const dir of siCommandDirs()) markedSi(dir).forEach((f) => removePath(f));
 }
 
 // Adapters whose install leaves something this uninstall does not remove.
@@ -461,7 +458,7 @@ function leftoverAdapters(dir) {
   const instr = path.join(h, '.copilot', 'instructions');
   if (listDir(instr).some((n) => readPlain(path.join(instr, n)).includes(VSCODE_MARKER))) notes.add('vscode');
   // codex generates SI commands into ~/.coco, which is swept for links only.
-  if (hasMarkedSi(path.join(h, '.coco', 'si-commands'))) notes.add('codex');
+  if (markedSi(path.join(h, '.coco', 'si-commands')).length) notes.add('codex');
   const copied = [
     ['zed', path.join(h, '.config', 'zed', 'rules'), path.join(dir, 'rules')],
     ['vscode-continue', path.join(h, '.continue', 'rules'), path.join(dir, 'rules')],

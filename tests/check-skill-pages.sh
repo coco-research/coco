@@ -4,7 +4,16 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 out=$(mktemp -d)
 err=$(mktemp)
-trap 'rm -rf "$out"; rm -f "$err"' EXIT
+fake=$(mktemp -d)
+fake_out=$(mktemp -d)
+fake_err=$(mktemp)
+desc=$(mktemp -d)
+desc_out=$(mktemp -d)
+desc_err=$(mktemp)
+real=$(mktemp -d)
+real_out=$(mktemp -d)
+real_err=$(mktemp)
+trap 'rm -rf "$out" "$fake" "$fake_out" "$desc" "$desc_out" "$real" "$real_out"; rm -f "$err" "$fake_err" "$desc_err" "$real_err"' EXIT
 
 # Show the generator stderr even when it fails, before set -e ends the script.
 rc=0
@@ -26,7 +35,7 @@ print(n)
 PY
 )
 skipped=$(grep -c '^skip ' "$err" || true)
-pages=$(find "$out/coco/skills" -mindepth 2 -maxdepth 2 -type f -name index.html | wc -l | tr -d ' ')
+pages=$(find "$out/coco/skills" -mindepth 2 -maxdepth 2 -type f -name index.html ! -path '*/measured/*' | wc -l | tr -d ' ')
 echo "discovered $discovered"; echo "skipped $skipped"; echo "$pages skill pages"
 if [[ "$pages" -ne $((discovered - skipped)) ]]; then
   echo "page count $pages != discovered $discovered - skipped $skipped" >&2
@@ -122,6 +131,8 @@ sources = {skill['slug']: skill for skill in mod.discover(mod.installable_bundle
 pages = {}
 for path in sorted((out / 'coco' / 'skills').glob('*/index.html')):
     slug, raw = path.parent.name, path.read_text(encoding='utf-8')
+    if slug == 'measured':
+        continue
     h1 = html.unescape(re.search(r'<h1>(.*?)</h1>', raw, re.S).group(1)).strip()
     lede = html.unescape(re.search(r'<p class="lede">(.*?)</p>', raw, re.S).group(1)).strip()
     meta = re.search(r'<meta name="description" content="([^"]*)"', raw)
@@ -192,6 +203,222 @@ for slug, pair in pages.items():
 if failed:
     sys.exit(1)
 PY
+
+measured="$out/coco/skills/measured/index.html"
+[[ -f "$measured" ]]
+grep -F -q '<link rel="canonical" href="https://cocoresearch.org/coco/skills/measured/">' "$measured"
+grep -F -q 'https://cocoresearch.org/coco/skills/measured/' "$out/sitemap.xml"
+grep -F -q 'Measured: 0.88 on 24 held-out tasks · Oct 21' "$out/coco/skills/c4-architecture/index.html"
+if grep -F -q 'noindex' "$measured"; then
+  echo 'measured page carries noindex' >&2
+  exit 1
+fi
+if grep -F -q 'Layout sample' "$measured" || grep -F -q 'SAMPLE' "$measured"; then
+  echo 'measured page carries sample text' >&2
+  exit 1
+fi
+
+# Copy rules: no weekly promise, and no old CoCo casing in the chrome or on the measured page.
+for stale in 'refreshed every Monday' 'every week' 'CoCo Research' 'CoCo Super Intelligence' '· CoCo skills'; do
+  if grep -R -F -q --include='*.html' "$stale" "$out"; then
+    echo "generated page carries stale copy: $stale" >&2
+    exit 1
+  fi
+done
+if grep -F -q 'CoCo' "$measured"; then
+  echo 'measured page carries the old CoCo casing' >&2
+  exit 1
+fi
+
+# A committed record the generator rejects is a repo bug: name it here, before the row count.
+if grep -F 'bad record' "$err" >&2; then
+  echo 'a committed eval record is malformed (see above)' >&2
+  exit 1
+fi
+
+# Prints "<rows> <router>". router is 1 when a usable descriptions-split embed record was counted.
+# Optional argument is the evals directory; skills still come from the repo.
+measured_recount() {
+  python3 - "$1" <<'PY'
+import hashlib, json, sys
+from pathlib import Path
+repo = Path('.').resolve()
+evals_root = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 and sys.argv[1] else repo / 'evals'
+shas = {}
+for pattern in ('skills/*/SKILL.md', 'systems/*/skills/*/SKILL.md', 'systems/*/*/SKILL.md'):
+    for path in repo.glob(pattern):
+        if path.is_file():
+            shas[path.parent.name] = hashlib.sha256(path.read_bytes()).hexdigest()
+def rate(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and 0 <= value <= 1
+def count(value):
+    return isinstance(value, int) and not isinstance(value, bool) and value > 0
+def load(path):
+    try:
+        record = json.loads(path.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        return None
+    return record if isinstance(record, dict) else None
+evals, rows, router = evals_root / 'skills', 0, 0
+for path in sorted(evals.iterdir()):
+    baseline_path = path / 'runs' / 'baseline-heldout.json'
+    if not path.is_dir() or path.name.startswith('_') or not baseline_path.is_file(): continue
+    sha = shas.get(path.name)
+    if not sha: continue
+    shown = []
+    for record_path in sorted((path / 'runs').glob('*-heldout.json')):
+        stem, record = record_path.name[:-len('-heldout.json')], load(record_path)
+        if not record or record.get('split') != 'heldout' or record.get('skill_sha256') != sha: continue
+        if stem != 'baseline':
+            outcome = (load(evals / '_rounds' / path.name / (stem + '.json')) or {}).get('outcome')
+            if outcome != 'kept': continue
+        shown.append(record)
+    if not shown: continue
+    chosen, baseline = max(shown, key=lambda r: str(r.get('date') or '')), load(baseline_path)
+    if baseline and rate(baseline.get('mean')) and count(baseline.get('n')) and rate(chosen.get('mean')) and count(chosen.get('n')):
+        rows += 1
+runs = evals_root / 'routing' / 'runs'
+for record_path in (sorted(runs.glob('*.json')) if runs.is_dir() else []):
+    data = load(record_path) or {}
+    run = data.get('run') if isinstance(data.get('run'), dict) else {}
+    vs = data.get('vs_keyword') if isinstance(data.get('vs_keyword'), dict) else run.get('vs_keyword')
+    if not isinstance(vs, dict):
+        vs = {}
+    if data.get('split') == 'descriptions' and data.get('method') == 'embed' and rate(data.get('top1_accuracy')) and rate(vs.get('baseline_top1')) and count(run.get('n_labelled')):
+        rows += 1
+        router = 1
+        break
+print(rows, router)
+PY
+}
+recount=$(measured_recount "")
+expected=${recount% *}
+router_found=${recount#* }
+actual=$(grep -c 'data-label="Skill"' "$measured" || true)
+if [[ "$actual" -ne "$expected" ]]; then
+  echo "measured rows $actual != expected $expected" >&2
+  exit 1
+fi
+if [[ "$router_found" == 1 ]]; then
+  grep -F -q 'Skill router (on descriptions, not names)' "$measured"
+else
+  if grep -F -q 'Skill router (on descriptions, not names)' "$measured"; then
+    echo 'measured page shows a router row without a descriptions-split record' >&2
+    exit 1
+  fi
+fi
+
+mkdir -p "$fake/skills/zz-fake/runs" "$fake/skills/c4-architecture/runs"
+zeros=$(python3 -c 'print("0" * 64)')
+sha=$(python3 -c 'import hashlib; print(hashlib.sha256(open("skills/c4-architecture/SKILL.md", "rb").read()).hexdigest())')
+cat > "$fake/skills/zz-fake/runs/baseline-heldout.json" <<JSON
+{"date": "2026-10-21", "split": "heldout", "executor": "ollama", "model": "qwen3:4b-instruct-2507-q4_K_M", "n": 24, "mean": 0.5, "skill_sha256": "$zeros"}
+JSON
+cat > "$fake/skills/c4-architecture/runs/baseline-heldout.json" <<JSON
+{"date": "2026-10-21", "split": "heldout", "executor": "ollama", "model": "qwen3:4b-instruct-2507-q4_K_M", "n": 24, "mean": 2, "skill_sha256": "$sha"}
+JSON
+python3 scripts/build-skill-pages.py --out "$fake_out" --evals "$fake" 2>"$fake_err"
+grep -F -q 'measured skip zz-fake: no run for the current SKILL.md' "$fake_err"
+grep -F -q 'measured skip c4-architecture: bad record ' "$fake_err"
+grep -F -q '<p class="empty">No measured skills yet.</p>' "$fake_out/coco/skills/measured/index.html"
+if grep -F -q 'data-label="Skill"' "$fake_out/coco/skills/measured/index.html"; then
+  echo 'a fake record became a measured row' >&2
+  exit 1
+fi
+
+# Only a descriptions-split routing record produces a router row.
+cp -R evals "$desc/evals"
+python3 - "$desc/evals/routing/runs/2026-10-15-215df3c.json" <<'PY'
+import json, sys
+from pathlib import Path
+source = Path(sys.argv[1])
+record = json.loads(source.read_text(encoding='utf-8'))
+record['split'] = 'descriptions'
+record['method'] = 'embed'
+record['top1_accuracy'] = 0.7
+record['run']['vs_keyword']['baseline_top1'] = 0.4
+(source.parent / '9999-01-01-descriptions.json').write_text(json.dumps(record, indent=2) + '\n', encoding='utf-8')
+PY
+python3 scripts/build-skill-pages.py --out "$desc_out" --evals "$desc/evals" 2>"$desc_err"
+desc_measured="$desc_out/coco/skills/measured/index.html"
+[[ -f "$desc_measured" ]]
+grep -F -q '<td class="skill" data-label="Skill">Skill router (on descriptions, not names)</td>' "$desc_measured"
+
+# The same descriptions record with keyword matching is not a router row.
+python3 - "$desc/evals/routing/runs/9999-01-01-descriptions.json" <<'PY'
+import json, sys
+from pathlib import Path
+path = Path(sys.argv[1])
+record = json.loads(path.read_text(encoding='utf-8'))
+record['method'] = 'keyword'
+path.write_text(json.dumps(record, indent=2) + '\n', encoding='utf-8')
+PY
+python3 scripts/build-skill-pages.py --out "$desc_out" --evals "$desc/evals" 2>"$desc_err"
+if grep -F -q 'Skill router (on descriptions, not names)' "$desc_measured"; then
+  echo 'a keyword routing record became a router row' >&2
+  exit 1
+fi
+grep -F 'measured skip router: not an embedding record ' "$desc_err" | grep -F -q '9999-01-01-descriptions.json'
+
+# A real descriptions-split record keeps vs_keyword at the top level. The page rounds both figures.
+cp -R evals "$real/evals"
+cat > "$real/evals/routing/runs/2026-10-28-13a15e1-descriptions.json" <<'JSON'
+{
+  "top1_accuracy": 0.5961538461538461,
+  "top4_recall": 0.6634615384615384,
+  "delegate_precision": 0.0,
+  "abstain_rate": 1.0,
+  "per_team_top1": {
+    "ai": 0.25,
+    "engineering": 0.5,
+    "product-design": 0.25,
+    "finance": 0.875,
+    "trading": 0.375,
+    "risk-compliance": 0.875,
+    "strategy": 0.5,
+    "data-analytics": 0.125,
+    "gtm": 0.875,
+    "legal-ip": 0.75,
+    "healthcare-life-sciences": 0.625,
+    "education-edtech": 0.875,
+    "climate-energy": 0.875
+  },
+  "vs_keyword": {
+    "baseline_top1": 0.49038461538461536
+  },
+  "split": "descriptions",
+  "items": "evals/routing/items-descriptions.jsonl",
+  "items_sha256": "e3dd0e3aab4ecaca81311abbec5829b3bfed1e373241475357109c28b9a974fb",
+  "run": {
+    "commit": "13a15e1",
+    "date": "2026-10-28",
+    "mode": "auto",
+    "split": "descriptions",
+    "n_labelled": 104,
+    "n_none": 6,
+    "embed_model": "nomic-embed-text",
+    "embed": {
+      "model": "nomic-embed-text",
+      "url": "http://127.0.0.1:11434/v1/embeddings"
+    }
+  },
+  "method": "embed",
+  "keyword_fallbacks": 0
+}
+JSON
+python3 scripts/build-skill-pages.py --out "$real_out" --evals "$real/evals" 2>"$real_err"
+real_measured="$real_out/coco/skills/measured/index.html"
+[[ -f "$real_measured" ]]
+real_row=$(grep -A 2 -F 'Skill router (on descriptions, not names)' "$real_measured")
+grep -F -q 'data-label="Score">0.60' <<<"$real_row"
+grep -F -q 'data-label="Baseline">0.49' <<<"$real_row"
+real_recount=$(measured_recount "$real/evals")
+real_expected=${real_recount% *}
+real_actual=$(grep -c 'data-label="Skill"' "$real_measured" || true)
+if [[ "$real_actual" -ne "$real_expected" ]]; then
+  echo "descriptions-split rows $real_actual != expected $real_expected" >&2
+  exit 1
+fi
 
 tracked=$(git ls-files coco/skills sitemap.xml)
 if [[ -n "$tracked" ]]; then

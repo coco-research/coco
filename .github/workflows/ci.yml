@@ -80,6 +80,8 @@ jobs:
         run: bash tests/check-coco-githook-install.sh
       - name: Validate codex AGENTS.md paths exist
         run: bash tests/check-codex-agents-md-paths.sh
+      - name: Validate grok /team commands find the team-gate scripts
+        run: bash tests/check-grok-team-gate.sh
 
       - name: coco-workflow gate cases (forgery, happy path, workflow hygiene)
         run: bash tests/check-coco-gate.sh

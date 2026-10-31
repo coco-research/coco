@@ -7,6 +7,7 @@
 #                                 <file>.coco-backup-<ts>[-N]; never overwritten
 # Never runs the installer in the repo root: it writes AGENTS.md into cwd.
 set -euo pipefail
+unset COCO_HOME COCO_SI_REPO COCO_SI_COMMANDS_DIR COCO_ADAPTER_LABEL
 cd "$(dirname "$0")/.."
 ROOT=$(pwd)
 
@@ -29,7 +30,9 @@ fail() { echo "FAIL: $*"; exit 1; }
 run_install() { # <proj> <home> [extra args...]
   local proj=$1 home=$2
   shift 2
-  (cd "$proj" && HOME="$home" bash "$ROOT/adapters/aider/install.sh" "$@" >/dev/null)
+  # --core-only: the backup rule does not depend on the bundles, and skipping the SI
+  # generator keeps 15 installs fast. tests/check-aider-delivers.sh covers the default.
+  (cd "$proj" && HOME="$home" bash "$ROOT/adapters/aider/install.sh" --core-only "$@" >/dev/null)
 }
 
 count_dated() { # <dir> <name>  -> count of <name>.coco-backup-<something>

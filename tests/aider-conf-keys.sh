@@ -6,6 +6,7 @@
 # Runs the installer in a temp dir — never the repo root — because the
 # installer writes AGENTS.md and .aider.conf.yml into the current directory.
 set -euo pipefail
+unset COCO_HOME COCO_SI_REPO COCO_SI_COMMANDS_DIR COCO_ADAPTER_LABEL
 cd "$(dirname "$0")/.."
 ROOT=$(pwd)
 

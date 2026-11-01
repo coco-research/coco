@@ -13,7 +13,10 @@ desc_err=$(mktemp)
 real=$(mktemp -d)
 real_out=$(mktemp -d)
 real_err=$(mktemp)
-trap 'rm -rf "$out" "$fake" "$fake_out" "$desc" "$desc_out" "$real" "$real_out"; rm -f "$err" "$fake_err" "$desc_err" "$real_err"' EXIT
+c4=$(mktemp -d)
+c4_out=$(mktemp -d)
+c4_err=$(mktemp)
+trap 'rm -rf "$out" "$fake" "$fake_out" "$desc" "$desc_out" "$real" "$real_out" "$c4" "$c4_out"; rm -f "$err" "$fake_err" "$desc_err" "$real_err" "$c4_err"' EXIT
 
 # Show the generator stderr even when it fails, before set -e ends the script.
 rc=0
@@ -96,7 +99,19 @@ for stale in 'held-out' 'Held-out' 'MIT core'; do
   fi
 done
 
-python3 - "$out" <<'PY'
+# Measured-row checks read a fixture written for the SKILL.md files as they are now, so editing a skill
+# or adding a round never breaks CI. Its values differ from the records in evals/ on purpose.
+sha=$(python3 -c 'import hashlib; print(hashlib.sha256(open("skills/c4-architecture/SKILL.md", "rb").read()).hexdigest())')
+cv_sha=$(python3 -c 'import hashlib; print(hashlib.sha256(open("skills/code-verification/SKILL.md", "rb").read()).hexdigest())')
+mkdir -p "$c4/skills/c4-architecture/runs" "$c4/skills/code-verification/runs"
+cat > "$c4/skills/c4-architecture/runs/baseline-heldout.json" <<JSON
+{"date": "2025-12-03", "split": "heldout", "executor": "ollama", "model": "qwen3:4b-instruct-2507-q4_K_M", "n": 7, "mean": 0.42, "skill_sha256": "$sha"}
+JSON
+cat > "$c4/skills/code-verification/runs/baseline-heldout.json" <<JSON
+{"date": "2025-12-04", "split": "heldout", "executor": "ollama", "model": "qwen3:4b-instruct-2507-q4_K_M", "n": 5, "mean": 0.6, "skill_sha256": "$cv_sha"}
+JSON
+
+python3 - "$out" "$c4" <<'PY'
 import html, importlib.util, re, sys
 from pathlib import Path
 from urllib.parse import unquote
@@ -247,10 +262,10 @@ bundles = mod.installable_bundles()
 domains = mod.bundle_domains(bundles)
 skills = [mod.present(s, domains) for s in mod.discover(bundles)]
 slugs = {s['slug'] for s in skills}
-rows_all = mod.measured_rows(str(mod.EVALS), skills, slugs, compiled)
+rows_all = mod.measured_rows(sys.argv[2], skills, slugs, compiled)
 if 'c4-architecture' not in {row['slug'] for row in rows_all}:
     complain('measured rows dropped a published skill: c4-architecture')
-rows_cut = mod.measured_rows(str(mod.EVALS), skills, slugs - {'c4-architecture'}, compiled)
+rows_cut = mod.measured_rows(sys.argv[2], skills, slugs - {'c4-architecture'}, compiled)
 cut_slugs = {row['slug'] for row in rows_cut}
 c4_title = next((s['title'] for s in skills if s['slug'] == 'c4-architecture'), None)
 if 'c4-architecture' in cut_slugs:
@@ -270,7 +285,9 @@ measured="$out/coco/skills/measured/index.html"
 [[ -f "$measured" ]]
 grep -F -q '<link rel="canonical" href="https://cocoresearch.org/coco/skills/measured/">' "$measured"
 grep -F -q 'https://cocoresearch.org/coco/skills/measured/' "$out/sitemap.xml"
-grep -F -q 'Measured: 0.88 on 24 test tasks · Oct 21 <a href="/coco/skills/measured/">How we measure →</a>' "$out/coco/skills/c4-architecture/index.html"
+python3 scripts/build-skill-pages.py --out "$c4_out" --evals "$c4" 2>"$c4_err"
+grep -F -q 'Measured: 0.42 on 7 test tasks · Dec 3, 2025 <a href="/coco/skills/measured/">How we measure →</a>' "$c4_out/coco/skills/c4-architecture/index.html"
+grep -F -q '<td data-label="Last run">Dec 3, 2025</td>' "$c4_out/coco/skills/measured/index.html"
 # The measured page copy, word for word: the lede, the meta description and the first note.
 grep -F -q '<p class="lede">Test scores for the skills we measure, from the eval runs committed in the repository. The test tasks are public, so these are not sealed tests.</p>' "$measured"
 grep -F -q '<meta name="description" content="Test scores for the skills we measure, from the eval runs committed in the repository. The test tasks are public, so these are not sealed tests.">' "$measured"
@@ -376,7 +393,6 @@ fi
 
 mkdir -p "$fake/skills/zz-fake/runs" "$fake/skills/c4-architecture/runs"
 zeros=$(python3 -c 'print("0" * 64)')
-sha=$(python3 -c 'import hashlib; print(hashlib.sha256(open("skills/c4-architecture/SKILL.md", "rb").read()).hexdigest())')
 cat > "$fake/skills/zz-fake/runs/baseline-heldout.json" <<JSON
 {"date": "2026-10-21", "split": "heldout", "executor": "ollama", "model": "qwen3:4b-instruct-2507-q4_K_M", "n": 24, "mean": 0.5, "skill_sha256": "$zeros"}
 JSON

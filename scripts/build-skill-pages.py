@@ -394,7 +394,7 @@ def _rel(path):
     try: return Path(path).resolve().relative_to(ROOT).as_posix()
     except ValueError: return str(path)
 
-def run_date(iso): return f'{MONTHS[int(iso[5:7]) - 1]} {int(iso[8:10])}'
+def run_date(iso): return f'{MONTHS[int(iso[5:7]) - 1]} {int(iso[8:10])}, {iso[:4]}'
 
 def skill_record(record):
     """(score, tasks, date) from a held-out skill run, else None. Every field is checked."""

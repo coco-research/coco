@@ -79,6 +79,8 @@ jobs:
       - name: Install --workflow-only and Remove round trips (including a killed Remove)
         run: bash tests/check-install-workflow-only.sh
 
+      - name: Validate generated SI commands resolve
+        run: bash tests/check-si-commands-resolve.sh
       - name: coco-gate githook (chain or skip, never overwrite)
         run: bash tests/check-coco-githook-install.sh
       - name: Validate codex AGENTS.md paths exist

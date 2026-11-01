@@ -22,6 +22,8 @@ import os, pathlib
 REPO = os.environ.get("COCO_SI_REPO") or str(pathlib.Path(__file__).resolve().parents[2])
 # Output dir: honor COCO_SI_COMMANDS_DIR (set by the installer/adapter), else ~/.claude/commands.
 OUT = pathlib.Path(os.environ.get("COCO_SI_COMMANDS_DIR") or os.path.expanduser("~/.claude/commands"))
+# Same token as build_commands.py. Installers for hosts that expand $ARGUMENTS set this.
+_ARGUMENTS = os.environ.get("COCO_SI_ARGUMENTS", "{{ARGUMENTS}}")
 META_REGISTRY = f"{REPO}/superintelligence/registry.json"
 
 # verb title -> (one-line desc, verb-specific output shape)
@@ -89,7 +91,7 @@ Convene the approved roster as reacting rounds so positions can actually move, t
 
 Hand the calling verb the converged per-persona positions + a condensed round-by-round transcript. The verb shapes them into its output and reports genuine splits rather than forcing a winner.
 
-ARGUMENTS: {{{{ARGUMENTS}}}}
+ARGUMENTS: {_ARGUMENTS}
 """
 
 DISPATCH = f"""# /SI — the one front door to the expert council
@@ -136,7 +138,7 @@ Invoke `/SI-<Verb> "<prompt>" <dials>`. That verb calls `/SI-Orchestrate`, which
 - Cross-team verbs: {" · ".join("/SI-" + v for v in VERBS)} · `/SI-Orchestrate` (selection only — verbs call it; users rarely should).
 - CoCo's natural-language router may invoke these directly.
 
-ARGUMENTS: {{{{ARGUMENTS}}}}
+ARGUMENTS: {_ARGUMENTS}
 """
 
 # Verbs where a reacting multi-round debate adds value (positions can move through argument).
@@ -195,7 +197,7 @@ Every claim cites **persona + team** — e.g. **Aswath Damodaran persona** (Fina
 ## Conventions
 Registry is source of truth (re-read each run; no cache). Full English prose. Every cited stance traces to the persona's `public_stances`/`recent_signal_12mo`.
 
-ARGUMENTS: {{{{ARGUMENTS}}}}
+ARGUMENTS: {_ARGUMENTS}
 """
 
 # Legal label + report footer. Same file build_commands.py reads. Do not copy the sentences.

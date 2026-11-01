@@ -213,6 +213,34 @@ for slug, pair in pages.items():
         complain(f'{slug}: index row {row!r} != page {pair!r}')
     if row and _LEADIN.match(row[1]):
         complain(f'{slug}: index summary starts with a use-when lead-in')
+# A record string reaches the public page only when it is safe to print there.
+compiled = mod._compiled(mod.persona_names())
+for value in ('qwen3:4b-instruct-2507-q4_K_M', 'nomic-embed-text'):
+    if mod._public(value, compiled) != value:
+        complain(f'_public dropped a model id {value!r}')
+for value in ('/Users/someone/models/x.gguf', '~/models/x', 'Karpathy-build-box', None):
+    if mod._public(value, compiled) is not None:
+        complain(f'_public let through {value!r}')
+# Measured rows cover only the skills the name filter kept.
+bundles = mod.installable_bundles()
+domains = mod.bundle_domains(bundles)
+skills = [mod.present(s, domains) for s in mod.discover(bundles)]
+slugs = {s['slug'] for s in skills}
+rows_all = mod.measured_rows(str(mod.EVALS), skills, slugs, compiled)
+if 'c4-architecture' not in {row['slug'] for row in rows_all}:
+    complain('measured rows dropped a published skill: c4-architecture')
+rows_cut = mod.measured_rows(str(mod.EVALS), skills, slugs - {'c4-architecture'}, compiled)
+cut_slugs = {row['slug'] for row in rows_cut}
+c4_title = next((s['title'] for s in skills if s['slug'] == 'c4-architecture'), None)
+if 'c4-architecture' in cut_slugs:
+    complain('measured rows kept a skill the name filter dropped: c4-architecture')
+if any(row['title'] == c4_title for row in rows_cut):
+    complain('measured rows kept the title of a skill the name filter dropped: c4-architecture')
+if not rows_cut:
+    complain('measured rows measured nothing once c4-architecture was dropped')
+for row in rows_all:
+    if row['href'] is None:
+        complain(f'{row["slug"]}: measured row has no href')
 if failed:
     sys.exit(1)
 PY

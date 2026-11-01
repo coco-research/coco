@@ -266,6 +266,10 @@ def matched_name(text, names):
     compiled = names if isinstance(names, list) else _compiled(names)
     return next((name for name, pattern in compiled if pattern.search(text)), None)
 
+def _public(value, compiled):
+    """A record string fit for the public page: no machine path, no roster name. Else None."""
+    return value if isinstance(value, str) and not _bad_summary(value) and not matched_name(value, compiled) else None
+
 def source_url(rel):
     url = f'{ORIGIN}/blob/main/' + '/'.join(quote(part) for part in rel.split('/'))
     if not url.startswith(SOURCE_PREFIX): raise SystemExit(f'ERROR: source URL must start with {SOURCE_PREFIX}')
@@ -413,7 +417,7 @@ def shown_run(evals, skill_dir, slug, sha):
     _, _, path, record = max(found, key=lambda item: (item[0], item[1]))
     return path, record
 
-def measured_rows(evals, skills, kept):
+def measured_rows(evals, skills, kept, compiled):
     """One row per measured skill, from committed records. Anything unclear drops the row."""
     by_slug, rows = {skill['slug']: skill for skill in skills}, []
     skills_dir = Path(evals) / 'skills'
@@ -422,17 +426,18 @@ def measured_rows(evals, skills, kept):
         if not path.is_dir() or path.name.startswith('_') or not baseline_path.is_file(): continue
         slug, source = path.name, by_slug.get(path.name)
         if source is None: _skip(slug, 'no run for the current SKILL.md'); continue
+        if slug not in kept: _skip(slug, 'left out by the name filter'); continue
         run_path, record = shown_run(evals, path, slug, hashlib.sha256((ROOT / source['rel']).read_bytes()).hexdigest())
         if run_path is None: _skip(slug, 'no run for the current SKILL.md'); continue
         baseline, shown = skill_record(_load(baseline_path)), skill_record(record)
         if baseline is None: _skip(slug, f'bad record {_rel(baseline_path)}'); continue
         if shown is None: _skip(slug, f'bad record {_rel(run_path)}'); continue
         rows.append({'slug': slug, 'title': source['title'], 'score': shown[0], 'baseline': baseline[0],
-                     'tasks': shown[1], 'date': shown[2], 'model': record.get('model'), 'executor': record.get('executor'),
-                     'embed_model': None, 'href': f'/coco/skills/{quote(slug)}/' if slug in kept else None})
+                     'tasks': shown[1], 'date': shown[2], 'model': _public(record.get('model'), compiled), 'executor': _public(record.get('executor'), compiled),
+                     'embed_model': None, 'href': f'/coco/skills/{quote(slug)}/'})
     return rows
 
-def router_row(evals):
+def router_row(evals, compiled):
     """Newest routing record whose top-level split is "descriptions". None when none is usable."""
     runs, best = Path(evals) / 'routing' / 'runs', None
     for path in (sorted(runs.glob('*.json')) if runs.is_dir() else []):
@@ -454,7 +459,7 @@ def router_row(evals):
             embed = run.get('embed_model')
             best = ((date, path.name), {'slug': 'skill-router', 'title': 'Skill router (on descriptions, not names)', 'href': None, 'score': score,
                                         'baseline': baseline, 'tasks': tasks, 'date': date, 'model': None,
-                                        'executor': None, 'embed_model': embed if isinstance(embed, str) else None})
+                                        'executor': None, 'embed_model': _public(embed, compiled)})
     return best[1] if best else None
 
 def _change(score, baseline):
@@ -629,7 +634,7 @@ def main(argv):
         flag = args.pop(0)
         if flag == '--out' and args: out = args.pop(0)
         elif flag == '--evals' and args: evals = args.pop(0)
-        else: out = None; break
+        else: print(f'unknown or incomplete flag: {flag}', file=sys.stderr); out = None; break
     if not out:
         print('usage: python3 scripts/build-skill-pages.py --out DIR [--evals DIR]\n'
               '       python3 scripts/build-skill-pages.py --print-names', file=sys.stderr)
@@ -637,9 +642,11 @@ def main(argv):
     bundles = installable_bundles()
     domains = bundle_domains(bundles)
     skills = [present(skill, domains) for skill in discover(bundles)]
-    kept = select(skills, persona_names())
-    rows = sorted(measured_rows(evals, skills, {skill['slug'] for skill in kept}), key=lambda row: (row['title'].casefold(), row['slug']))
-    router = router_row(evals)
+    names = persona_names()
+    kept = select(skills, names)
+    compiled = _compiled(names)
+    rows = sorted(measured_rows(evals, skills, {skill['slug'] for skill in kept}, compiled), key=lambda row: (row['title'].casefold(), row['slug']))
+    router = router_row(evals, compiled)
     measured = {row['slug']: row for row in rows}
     template = load_template()
     files = {f'coco/skills/{skill["slug"]}/index.html': skill_page(template, skill, measured.get(skill['slug'])) for skill in kept}

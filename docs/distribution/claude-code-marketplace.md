@@ -19,13 +19,13 @@ Anthropic maintains a curated plugin marketplace at https://github.com/anthropic
 
 ## Plugin manifest
 
-Create `.claude-plugin.json` at repo root:
+`.claude-plugin.json` ships at the repo root. Submit that file as shipped; the sample below only shows its fields.
 
 ```json
 {
   "name": "coco",
   "displayName": "Coco",
-  "description": "An entire team. Wherever your AI lives. Open-source AI workflow framework with skills, agents, commands, and multi-agent orchestration.",
+  "description": "An entire team. Wherever your AI lives. Open-core AI workflow framework with skills, agents, commands, and multi-agent orchestration.",
   "version": "1.0.0",
   "author": "Coco Research",
   "license": "SEE LICENSE IN README.md",
@@ -84,7 +84,7 @@ python3 -c "import json; json.load(open('.claude-plugin.json'))"
 **Tagline:** An entire team. Wherever your AI lives.
 
 **Description:**
-> Coco turns your Claude Code session into a multi-agent orchestrator. Install 189 skills, 386 commands, 34 specialized agents, and 6 system bundles in 90 seconds. Run `/team:ship` to spawn a research-to-shipped pipeline. Run `/code-verification` to catch bugs your AI just introduced. Run `/clone-website` to reverse-engineer any site pixel-perfect. Vendor-neutral, open-core (MIT core), no telemetry, no SaaS.
+> Coco turns your Claude Code session into a multi-agent orchestrator. Install 191 skills, 388 commands, 34 specialized agents, and 6 system bundles in about 3 minutes. Run `/team:ship` to spawn a research-to-shipped pipeline. Run `/code-verification` to catch bugs your AI just introduced. Run `/clone-website` to reverse-engineer any site pixel-perfect. Vendor-neutral, open-core (MIT core), no telemetry, no SaaS.
 
 **Screenshot ideas:**
 - Terminal showing `/team:ship` running 7 stages

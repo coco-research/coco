@@ -38,11 +38,32 @@ page="$out/coco/skills/officecli/index.html"
 grep -F -q '<link rel="canonical" href="https://cocoresearch.org/coco/skills/officecli/">' "$page"
 grep -F -q 'https://cocoresearch.org/coco/skills/officecli/' "$out/sitemap.xml"
 [[ -f "$out/coco/skills/skills.css" ]]
+# The fonts ship self-hosted, each beside its OFL licence file, byte for byte.
+for f in archivo-latin-wdth-normal.woff2 martian-mono-latin-wdth-normal.woff2 OFL-archivo.txt OFL-martian-mono.txt; do
+  if ! cmp -s "scripts/skill-pages/fonts/$f" "$out/coco/skills/fonts/$f"; then
+    echo "font file missing or changed in output: $f" >&2
+    exit 1
+  fi
+done
+python3 - "$out/coco/skills" <<'PY'
+import re, sys
+from pathlib import Path
+d = Path(sys.argv[1])
+css = (d / 'skills.css').read_text(encoding='utf-8')
+srcs = re.findall(r'src:([^;]*);', css)
+urls = re.findall(r'url\("(fonts/[^"]+)"\)', css)
+bad = [s.strip() for s in srcs if 'http' in s]
+missing = [u for u in urls if not (d / u).is_file()]
+if not srcs or not urls or bad or missing:
+    print(f'skills.css fonts: src={len(srcs)} local={len(urls)} remote={bad} missing={missing}', file=sys.stderr)
+    sys.exit(1)
+PY
 if grep -R -F --include='*.html' -q '<script' "$out/coco/skills"; then
   echo 'unescaped <script in a generated page' >&2
   exit 1
 fi
-if grep -R -F -q '{{' "$out"; then
+# -I: font binaries can hold the bytes {{ by chance.
+if grep -R -F -I -q '{{' "$out"; then
   echo 'unfilled {{ in generated output' >&2
   exit 1
 fi

@@ -468,6 +468,12 @@ def write_out(out, files):
         path.write_text(content, encoding='utf-8')
     css = root / 'coco' / 'skills' / 'skills.css'
     css.write_bytes((PAGES / 'skills.css').read_bytes())
+    # Each font ships with its OFL licence file beside it, byte for byte.
+    fonts = css.parent / 'fonts'
+    fonts.mkdir(exist_ok=True)
+    for font in sorted((PAGES / 'fonts').iterdir()):
+        if font.is_file():
+            (fonts / font.name).write_bytes(font.read_bytes())
 
 def main(argv):
     if argv == ['--print-names']:

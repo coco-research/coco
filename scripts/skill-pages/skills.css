@@ -1,11 +1,10 @@
-/* CDN faces for now. These switch to self-hosted files later. */
 @font-face {
   font-family: "Archivo";
   font-style: normal;
   font-weight: 100 900;
   font-stretch: 62.5% 125%;
   font-display: swap;
-  src: url("https://cdn.jsdelivr.net/npm/@fontsource-variable/archivo@5.3.0/files/archivo-latin-wdth-normal.woff2") format("woff2");
+  src: url("fonts/archivo-latin-wdth-normal.woff2") format("woff2");
 }
 
 @font-face {
@@ -14,7 +13,7 @@
   font-weight: 100 800;
   font-stretch: 75% 112.5%;
   font-display: swap;
-  src: url("https://cdn.jsdelivr.net/npm/@fontsource-variable/martian-mono@5.3.0/files/martian-mono-latin-wdth-normal.woff2") format("woff2");
+  src: url("fonts/martian-mono-latin-wdth-normal.woff2") format("woff2");
 }
 
 :root {

@@ -1,13 +1,12 @@
 # CoCo skill pages
 
-Static pages for public skills on cocoresearch.org. One stylesheet, no JavaScript. A generator fills `skill.template.html`. This folder also holds a filled skill example and a filled Measured skills page.
+Static pages for public skills on cocoresearch.org. One stylesheet, no JavaScript. A generator fills `skill.template.html`. This folder also holds a filled Measured skills page.
 
 ## Pages
 
 | File | URL | What it is |
 |---|---|---|
 | `skill.template.html` | `/coco/skills/<name>/` | Slot template. One generated page per skill. |
-| `skill.example.html` | — | Same page, filled by hand from `_sample-SKILL.md`. Measured figures are layout samples. |
 | `measured.html` | `/coco/skills/measured/` | Test scores. The rows in this file are layout samples. |
 | `skills.css` | — | Shared styles. Dark by default. Light when `prefers-color-scheme` is light. |
 

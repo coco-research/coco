@@ -348,14 +348,21 @@ function sweepLinks(home, roots) {
 function adapterHomes() {
   const h = os.homedir();
   const homes = [
-    '.claude', '.cursor', '.grok', '.copilot', '.hermes', '.pi', '.agents',
-    '.continue', '.roo-code', '.cline', '.coco',
+    '.claude',              // adapters/claude-code/install.sh (CLAUDE_HOME default)
+    '.cursor',              // adapters/cursor/install.sh (CURSOR_HOME default)
+    '.grok',                // adapters/grok/install.sh (GROK_HOME default)
+    '.copilot',             // adapters/vscode/install.sh (COPILOT_HOME default)
+    '.hermes',              // adapters/hermes/install.sh (HERMES_PROFILES default)
+    '.pi',                  // adapters/pi-desktop/install.sh (PI_AGENT_HOME default)
+    '.agents',              // adapters/pi-desktop/install.sh (AGENTS_HOME default)
+    '.continue',            // adapters/vscode-continue/install.sh (CONTINUE_HOME default)
+    '.roo-code',            // adapters/roo-code/install.sh (ROO_CODE_HOME default)
+    '.cline',               // adapters/cline/install.sh (CLINE_HOME default)
+    '.coco',                // adapters/codex/install.sh (COCO_HOME default; SI commands)
+    '.config/zed',          // adapters/zed/install.sh (ZED_HOME default)
+    '.codeium/windsurf',    // adapters/windsurf/install.sh (WINDSURF_HOME default)
+    '.aws/amazon-q',        // adapters/amazon-q/install.sh (AMAZON_Q_HOME default)
   ].map((rel) => path.join(h, rel));
-  homes.push(
-    path.join(h, '.config', 'zed'),
-    path.join(h, '.codeium', 'windsurf'),
-    path.join(h, '.aws', 'amazon-q'),
-  );
   // vscode/install.sh detect_user_dirs: prompt symlinks land in each editor User dir.
   const apps = ['Code', 'Code - Insiders', 'VSCodium', 'VSCodium - Insiders'];
   const bases = [
@@ -426,17 +433,67 @@ function markedSi(dir) {
     .map((n) => path.join(dir, n));
 }
 
-function sweepGenerated() {
+// Repo-relative folder a marked skill was copied from, from the marker, or null
+// when the marker is missing or the path could leave the clone.
+function piSkillSource(text) {
+  const i = text.indexOf(PI_MARKER);
+  if (i < 0) return null;
+  const rest = text.slice(i + PI_MARKER.length);
+  const end = rest.indexOf('. Remove with:');
+  if (end < 0) return null;
+  const rel = rest.slice(0, end).trim();
+  if (!rel || path.isAbsolute(rel) || rel.split(/[\\/]/).includes('..')) return null;
+  return path.dirname(rel);
+}
+
+// True when file is byte-identical to the clone's copy at the same relative path.
+function sameBytes(file, srcDir, rel) {
+  if (!srcDir) return false;
+  try {
+    const src = path.join(srcDir, rel);
+    if (!fs.lstatSync(src).isFile()) return false;
+    return fs.readFileSync(file).equals(fs.readFileSync(src));
+  } catch (_) { return false; }
+}
+
+// Remove only what is provably Coco's: SKILL.md, and copies that still match the
+// clone. An added file, an edited file, or a symlink is the user's, so it stays
+// and rmdirSync leaves the folder standing.
+function sweepSkillDir(dir, cloneDir) {
+  const rel0 = piSkillSource(readPlain(path.join(dir, 'SKILL.md')));
+  const srcDir = rel0 && cloneDir ? path.join(cloneDir, rel0) : null;
+  const subdirs = [];
+  let kept = 0;
+  const walk = (cur, rel) => {
+    for (const name of listDir(cur)) {
+      const file = path.join(cur, name);
+      const here = rel ? path.join(rel, name) : name;
+      let st;
+      try { st = fs.lstatSync(file); } catch (_) { kept++; continue; }
+      if (st.isDirectory()) { subdirs.push(file); walk(file, here); continue; }
+      if (!st.isFile()) { kept++; continue; }  // a link: never followed, never removed
+      if (rel === '' && name === 'SKILL.md') { removePath(file); continue; }
+      if (sameBytes(file, srcDir, here)) { removePath(file); continue; }
+      kept++;
+    }
+  };
+  walk(dir, '');
+  for (const sub of subdirs.reverse()) { try { fs.rmdirSync(sub); } catch (_) { /* not empty */ } }
+  try { fs.rmdirSync(dir); } catch (_) { /* not empty */ }
+  if (kept) console.log(`Kept ${dir}: ${kept} file(s) Coco did not write or you changed.`);
+}
+
+function sweepGenerated(cloneDir) {
   const h = os.homedir();
   // PI-Desktop's own --uninstall rule: a skill folder whose SKILL.md carries the
-  // marker, and top-level .md files in subagents and prompts that carry it.
+  // marker, swept file by file, and top-level .md files elsewhere that carry it.
   const skills = path.join(h, '.agents', 'skills');
   for (const name of listDir(skills)) {
     const dir = path.join(skills, name);
     let st;
     try { st = fs.lstatSync(dir); } catch (_) { continue; }
     if (st.isDirectory() && readPlain(path.join(dir, 'SKILL.md')).includes(PI_MARKER)) {
-      removePath(dir, { recursive: true, force: true });
+      sweepSkillDir(dir, cloneDir);
     }
   }
   for (const dir of [path.join(h, '.agents', 'subagents'), path.join(h, '.pi', 'agent', 'prompts')]) {
@@ -516,7 +573,7 @@ function cmdUninstall(argv) {
   console.log(`Removing symlinks pointing into ${dir}...`);
   const homes = adapterHomes();
   for (const home of homes) sweepLinks(home, roots);
-  sweepGenerated();
+  sweepGenerated(dir);
   const notes = leftoverAdapters(dir);
   // grok also writes generated files (SI commands, config block, hooks); its installer removes them.
   // Best-effort: an older pinned clone may not know --uninstall; never abort the uninstall over it.

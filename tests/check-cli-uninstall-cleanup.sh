@@ -81,6 +81,32 @@ done
   || { echo "FAIL: pi-desktop wrote no marked skills"; exit 1; }
 ls "$SI_DIR"/SI-*.md >/dev/null || { echo "FAIL: hermes generated no SI commands"; exit 1; }
 
+# A marked skill folder is Coco's only where it still matches the clone. Plant a
+# user file, a user edit, and a symlink that must outlive the uninstall, and keep
+# one untouched folder to prove a clean copy goes completely.
+SKILLS="$H/.agents/skills"
+SURVIVOR="" CLEAN="" LINKED=""
+for d in "$SKILLS"/*/; do
+  d=${d%/}
+  grep -q -F '<!-- Coco PI-Desktop adapter. Source: ' -- "$d/SKILL.md" 2>/dev/null || continue
+  if [ -z "$SURVIVOR" ] && [ -n "$(find "$d" -type f ! -name SKILL.md | sed -n 1p)" ]; then
+    SURVIVOR=$d
+  elif [ -z "$CLEAN" ]; then
+    CLEAN=$d
+  elif [ -z "$LINKED" ]; then
+    LINKED=$d
+  fi
+done
+[ -n "$SURVIVOR" ] && [ -n "$CLEAN" ] && [ -n "$LINKED" ] \
+  || { echo "FAIL: fewer than three marked skill folders installed"; exit 1; }
+
+EDITED=$(find "$SURVIVOR" -type f ! -name SKILL.md | sed -n 1p)
+echo "user notes, added by hand." > "$SURVIVOR/my-notes.md"
+echo "user edit, not what Coco copied." > "$EDITED"
+OUTSIDE="$T/outside-keep.txt"
+echo "outside target." > "$OUTSIDE"
+ln -s "$OUTSIDE" "$LINKED/link-to-outside.txt"
+
 CLONE_LOGICAL=$(cd "$T/clone" && pwd)
 CLONE_PHYS=$(cd "$T/clone" && pwd -P)
 for d in "$H/.hermes" "$H/.config/zed"; do
@@ -130,9 +156,21 @@ for f in "${USER_FILES[@]}"; do
   grep -q '^user file' "$f" 2>/dev/null || { echo "FAIL: user file removed: $f"; exit 1; }
 done
 
+# The unedited folder went completely; the edited one kept only the user's files.
+[ ! -e "$CLEAN" ] || { echo "FAIL: untouched skill folder left behind: $CLEAN"; exit 1; }
+[ -d "$SURVIVOR" ] || { echo "FAIL: skill folder holding user files removed: $SURVIVOR"; exit 1; }
+[ ! -e "$SURVIVOR/SKILL.md" ] || { echo "FAIL: marked SKILL.md left: $SURVIVOR/SKILL.md"; exit 1; }
+grep -q '^user notes' "$SURVIVOR/my-notes.md" 2>/dev/null \
+  || { echo "FAIL: added user file removed: $SURVIVOR/my-notes.md"; exit 1; }
+grep -q '^user edit' "$EDITED" 2>/dev/null || { echo "FAIL: edited copy removed: $EDITED"; exit 1; }
+[ -L "$LINKED/link-to-outside.txt" ] || { echo "FAIL: planted symlink removed: $LINKED/link-to-outside.txt"; exit 1; }
+[ "$(readlink "$LINKED/link-to-outside.txt")" = "$OUTSIDE" ] || { echo "FAIL: planted symlink retargeted"; exit 1; }
+grep -q '^outside target' "$OUTSIDE" || { echo "FAIL: symlink target changed: $OUTSIDE"; exit 1; }
+
 notes=$(grep '^Note: .* install was not fully removed\.$' "$T/out" | sort || true)
 expected=$(printf '%s\n' \
   'Note: hermes install was not fully removed.' \
   'Note: zed install was not fully removed.' | sort)
 [ "$notes" = "$expected" ] || { echo "FAIL: leftover notes:"; printf '%s\n' "$notes"; echo "--- out ---"; cat "$T/out"; exit 1; }
 echo "PASS: uninstall cleans hermes, pi-desktop, and zed links and marker files, and keeps user files"
+echo "PASS: uninstall keeps edited skill files and symlinks, and removes untouched skill folders"

@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Coco: An entire engineering department, inside your editor</title>
+<title>Coco: Agent skills, slash commands and subagents for Claude Code, Cursor, Codex and other AI coding agents</title>
 <meta name="description" content="Each of the 495 requires a live, checkable source. Then 229 skills ship what they decided.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://cocoresearch.org/coco/">
-<meta property="og:title" content="Coco: An entire engineering department, inside your editor">
+<meta property="og:title" content="Coco: Agent skills, slash commands and subagents for Claude Code, Cursor, Codex and other AI coding agents">
 <meta property="og:description" content="Each of the 495 requires a live, checkable source. Then 229 skills ship what they decided.">
 <meta property="og:image" content="https://cocoresearch.org/assets/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Coco: An entire engineering department, inside your editor">
+<meta name="twitter:title" content="Coco: Agent skills, slash commands and subagents for Claude Code, Cursor, Codex and other AI coding agents">
 <meta name="twitter:description" content="Each of the 495 requires a live, checkable source. Then 229 skills ship what they decided.">
 <meta name="twitter:image" content="https://cocoresearch.org/assets/og-image.png">
 <link rel="icon" type="image/svg+xml" href="/assets/site/favicon.svg">
@@ -143,6 +143,7 @@ figure{margin:0}
 
 /* ---- three-step: numbered, restrained ---- */
 .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:34px;margin-top:48px;text-align:left}
+.steps-2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .step .k{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .step code{display:block;background:var(--surface);border-radius:8px;padding:12px 14px;
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;letter-spacing:0;
@@ -183,7 +184,7 @@ video{display:block;width:100%;height:auto}
 }
 @media (max-width:860px){
   h1{font-size:48px} h2{font-size:34px} .sub{font-size:21px}
-  .grid,.steps{grid-template-columns:1fr}
+  .grid,.steps,.steps-2{grid-template-columns:1fr}
   section{padding:64px 0}
   /* Every nav destination stays reachable on mobile — swipeable instead of
      hidden, the same overflow-scroll pattern already used for .tabs. */
@@ -233,7 +234,7 @@ video{display:block;width:100%;height:auto}
         <p class="k">Shipped</p>
         <ul>
           <li><a href="/#shipped"><span class="name">Coco Super Intelligence</span><span class="stage">Available now &middot; v1.10.0</span></a></li>
-          <li><a href="/#shipped"><span class="name">Coco Voice</span><span class="stage">Available now &middot; v0.9.4</span></a></li>
+          <li><a href="/#shipped"><span class="name">Coco Voice</span><span class="stage">Available now</span></a></li>
           <li><a href="/#shipped"><span class="name">Coco Connect</span><span class="stage">Available now &middot; v0.2.1</span></a></li>
         </ul>
       </div>
@@ -244,6 +245,7 @@ video{display:block;width:100%;height:auto}
           <li><a href="https://github.com/coco-research/Mira"><span class="name">Mira</span><span class="stage">Source available &middot; AGPL-3.0, Python, no release</span></a></li>
           <li><a href="https://github.com/coco-research/coco-loops"><span class="name">Coco Loops</span><span class="stage">Source available &middot; no release</span></a></li>
           <li><a href="https://github.com/coco-research/jev-use"><span class="name">jev-use</span><span class="stage">Source available &middot; Apache-2.0, pre-alpha</span></a></li>
+          <li><a href="https://github.com/coco-research/heliopause"><span class="name">Heliopause</span><span class="stage">Source available &middot; MIT, early preview</span></a></li>
         </ul>
       </div>
       <div class="overlay-group">
@@ -254,7 +256,6 @@ video{display:block;width:100%;height:auto}
           <li><a href="/#lab"><span class="name">Coco Code</span><span class="stage">Private</span></a></li>
           <li><a href="/#lab"><span class="name">Coco Teams NG</span><span class="stage">Private</span></a></li>
           <li><a href="/#lab"><span class="name">Status Zero</span><span class="stage">Private</span></a></li>
-          <li><a href="/#lab"><span class="name">Coco Atlas</span><span class="stage">Private</span></a></li>
         </ul>
       </div>
     </div>
@@ -291,7 +292,7 @@ video{display:block;width:100%;height:auto}
               letter-spacing="-.3" font-family="-apple-system,sans-serif">call</text>
       </svg>
     </div>
-    <p class="fine reveal" style="margin-top:22px">100% local. No telemetry.</p>
+    <p class="fine reveal" style="margin-top:22px">Coco's files and state stay on your machine. No telemetry. A version check may contact GitHub once a day.</p>
   </div>
 </section>
 
@@ -328,10 +329,7 @@ video{display:block;width:100%;height:auto}
 <section id="capabilities">
   <div class="wrap center">
     <h2 class="reveal">229 skills. One instruction set each.</h2>
-    <p class="body reveal" style="margin:0 auto 0;text-align:center">
-      Not prompt snippets. Every skill carries state management, verification logic and
-      error handling, so the work survives being handed between sessions and between tools.
-    </p>
+    <p class="body reveal" style="margin:0 auto 0;text-align:center">Not prompt snippets.</p>
 
     <div class="steps" style="margin-top:56px">
       <div class="step reveal"><p class="k">Orchestrate</p><h3>Teams</h3>
@@ -353,10 +351,6 @@ video{display:block;width:100%;height:auto}
 <section id="why" class="tint">
   <div class="wrap center">
     <h2 class="reveal">The same five situations, with a board behind them.</h2>
-    <p class="body reveal" style="margin:0 auto;text-align:center">
-      Nothing here is hypothetical. Every row is a real workflow, compared with and without
-      a routed panel and a build pipeline behind it.
-    </p>
     <figure class="shot reveal" style="margin:44px auto 0;max-width:820px">
       <img src="assets/coco-before-after.png" alt="A five-row comparison of a standard AI assistant versus a Coco-orchestrated workspace, across hard decisions, feature development, code auditing, system debugging, and context resets" width="1200" height="775" loading="lazy">
       <figcaption class="fine" style="margin-top:14px">Before Coco and after, across five real workflows.</figcaption>
@@ -367,25 +361,15 @@ video{display:block;width:100%;height:auto}
 <!-- ================= INSTALL ================= -->
 <section id="install" class="tint">
   <div class="wrap center">
-    <h2 class="reveal">Ninety seconds. Then it's yours.</h2>
-    <p class="body reveal" style="margin:0 auto;text-align:center">
-      Clone the repo, then run this. It installs Superintelligence into the editor you
-      already have: Claude Code, Cursor, or Codex. Your keys never leave your machine.
-    </p>
-    <div class="steps">
+    <h2 class="reveal">About 3 minutes on a fresh machine, including the download.</h2>
+    <p class="body reveal" style="margin:0 auto;text-align:center">npx cocosuperintelligence installs the latest release. It clones the pinned release tag (currently v1.10.0, not floating main) into ./coco of the current directory, then runs install.sh. Run it from your home folder, so the clone is ~/coco and not a folder inside another project. Your model and your keys stay yours.</p>
+    <div class="steps steps-2">
       <div class="step reveal"><p class="k">Step one</p><h3>Run it</h3>
-        <code>bash install.sh --systems superintelligence</code></div>
-      <div class="step reveal"><p class="k">Step two</p><h3>Confirm the bundle</h3>
-        <p class="body">The installer asks before it enables Superintelligence. Nothing big runs until you approve it.</p></div>
-      <div class="step reveal"><p class="k">Step three</p><h3>Convene the board</h3>
+        <code>npx cocosuperintelligence</code></div>
+      <div class="step reveal"><p class="k">Step two</p><h3>Convene the board</h3>
         <code>/SI-Decide "should we migrate to Postgres?"</code></div>
     </div>
 
-    <figure class="shot reveal" style="margin:48px auto 0;max-width:700px">
-      <video src="assets/coco-install-moment.mp4" poster="assets/coco-install-moment.png" width="1200" height="750" muted playsinline preload="metadata" controls aria-label="The install script pausing at an explicit yes or no confirmation before activating the Super Intelligence bundle"></video>
-      <p class="fine" style="margin-top:8px">The install script pauses on an explicit yes or no before activating anything.</p>
-      <figcaption class="fine" style="margin-top:14px">It asks before it does something big. The Super Intelligence bundle needs an explicit yes.</figcaption>
-    </figure>
     <p class="sub reveal">Each of the 495 requires a live, checkable source. Then 229 skills ship what they decided.</p>
 
     <div class="cta reveal"><a class="btn" href="https://github.com/coco-research/coco">Get Coco on GitHub</a>
@@ -404,10 +388,10 @@ video{display:block;width:100%;height:auto}
       <tr><th>Agents</th><td>34. 10 core, plus 24 in the GSD bundle.</td></tr>
       <tr><th>Personas</th><td>495 across 13 departments, each behind an evidence-validation gate.</td></tr>
       <tr><th>Editors</th><td>Claude Code, Cursor, Codex, and any AGENTS.md-compatible tool.</td></tr>
-      <tr><th>Execution</th><td>Entirely local. No telemetry, and no command files transmitted or stored remotely.</td></tr>
-      <tr><th>Install</th><td>Roughly 90 seconds, with a fail-closed commit confirmation before anything runs.</td></tr>
+      <tr><th>Execution</th><td>Coco's files and state stay on your machine. Your coding agent still uses its own model provider. No telemetry and no hosted service; one optional version check against GitHub per day (COCO_NO_UPDATE_CHECK=1 turns it off).</td></tr>
+      <tr><th>Install</th><td>About 3 minutes on a fresh machine, including the download. The remote bootstrap prints the commit and waits for you to type y before it runs install.sh.</td></tr>
       <tr><th>Bundles</th><td>6 system bundles, installed by default: GSD (68 skills, 24 agents), HyperFrames (20 skills), Super Intelligence (13 skills), Brain (6 skills), M0 (4 skills), and Cognee (3 skills). --core-only skips them; the reverse-skill security pack is opt-in with --systems reverse-skill.</td></tr>
-      <tr><th>Licence</th><td>Open core. MIT core, with the Super Intelligence system licensed separately and kept proprietary.</td></tr>
+      <tr><th>Licence</th><td>Open-core — most of the framework is MIT; the Super Intelligence board is proprietary.</td></tr>
     </table>
   </div>
 </section>
@@ -423,10 +407,7 @@ video{display:block;width:100%;height:auto}
       <a href="https://github.com/coco-research/coco/blob/main/CONTRIBUTING.md">Contributing</a>
       <a href="mailto:product@cocoresearch.org">product@cocoresearch.org</a>
     </div>
-    <p class="fine">Coco is open-core. The core is MIT licensed. The Super Intelligence
-      system is licensed separately and kept proprietary. Figures on this page are from the
-      v1.10.0 release.
-      Coco is the flagship product of <a href="/">Coco Research</a>.</p>
+    <p class="fine">Open-core — most of the framework is MIT; the Super Intelligence board is proprietary. Vendored components keep their own licences. Figures on this page are from the v1.10.0 release. Coco is the flagship product of <a href="/">Coco Research</a>.</p>
   </div>
 </footer>
 

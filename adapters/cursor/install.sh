@@ -113,7 +113,9 @@ generate_si_commands() {
 
   local args=(--target "$TARGET_HOME/commands")
   [[ $DRY_RUN -eq 1 ]] && args+=(--dry-run)
-  bash "$script" "${args[@]}" || {
+  # Shipped commands already contain $ARGUMENTS, which Cursor expands. This adapter
+  # symlinks those files and does not rewrite them; generated SI files must use it too.
+  COCO_SI_ARGUMENTS='$ARGUMENTS' bash "$script" "${args[@]}" || {
     echo "WARNING: SI command generation failed; continuing with the core commands." >&2
     return 0
   }

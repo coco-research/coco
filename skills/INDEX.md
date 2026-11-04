@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 229 skills** — 77 core, 152 across 8 bundles.
+**Total: 235 skills** — 83 core, 152 across 8 bundles.
 
 ## Design (15)
 
@@ -110,11 +110,17 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [pmstudio-comms](stakeholder-comms/SKILL.md) | Generate templated stakeholder communications from project context. Use when someone asks to "write a go-live email", "create a status update", "onboard someone |
 | [task-prd-creator](task-prd-creator/SKILL.md) | Use when the user says I want to add X, implement Y, create a task for Z, or plan this feature. Writes a task file plus a PRD under .agent/, links them, and wai |
 
-## Unspecified (1)
+## Unspecified (7)
 
 | Skill | Description |
 |-------|-------------|
 | [officecli](officecli/SKILL.md) | Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check fo |
+| [ponytail](ponytail/SKILL.md) | Forces the laziest solution that actually works, simplest, shortest, most minimal. Channels a senior dev who has seen everything: question whether the task need |
+| [ponytail-audit](ponytail-audit/SKILL.md) | Whole-repo audit for over-engineering. Like ponytail-review, but scans the entire codebase instead of a diff: a ranked list of what to delete, simplify, or repl |
+| [ponytail-debt](ponytail-debt/SKILL.md) | Harvest every `ponytail:` comment in the codebase into a debt ledger, so the deliberate shortcuts and deferrals ponytail leaves behind get tracked instead of ro |
+| [ponytail-gain](ponytail-gain/SKILL.md) | Show ponytail's measured impact as a compact scoreboard: less code, less cost, more speed, from the benchmark medians. One-shot display, not a persistent mode,  |
+| [ponytail-help](ponytail-help/SKILL.md) | Quick-reference card for all ponytail modes, skills, and commands. One-shot display, not a persistent mode. Trigger: /ponytail-help, "ponytail help", "what pony |
+| [ponytail-review](ponytail-review/SKILL.md) | Code review focused exclusively on over-engineering. Finds what to delete: reinvented standard library, unneeded dependencies, speculative abstractions, dead fl |
 
 ## Bundle: brain (6 skills)
 

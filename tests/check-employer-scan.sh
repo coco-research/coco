@@ -28,10 +28,10 @@ out=""
 err=""
 rc=0
 
-run() {  # run [patterns] [allowlist]: capture stdout, stderr and the exit code
-  local p="${1:-$patterns}" a="${2:-$allow}"
+run() {  # run [patterns] [allowlist] [root]: capture stdout, stderr and the exit code
+  local p="${1:-$patterns}" a="${2:-$allow}" r="${3:-$tree}"
   set +e
-  out="$(python3 scripts/employer-scan.py --patterns "$p" --allowlist "$a" "$tree" 2>"$tmp/err.txt")"
+  out="$(python3 scripts/employer-scan.py --patterns "$p" --allowlist "$a" "$r" 2>"$tmp/err.txt")"
   rc=$?
   set -e
   err="$(cat "$tmp/err.txt")"
@@ -87,6 +87,12 @@ printf '%s\n' '# comment only' > "$tmp/empty-patterns.txt"
 chmod 600 "$tmp/empty-patterns.txt"
 run "$tmp/empty-patterns.txt"
 expect 2 "empty patterns file fails closed"
+
+# f2. The scan fails closed when it cannot walk the tree.
+run "$patterns" "$allow" "$tmp/no-such-dir"
+expect 2 "missing root fails closed"
+run "$patterns" "$allow" "$patterns"
+expect 2 "a file as root fails closed"
 
 # g. A malformed allowlist line fails closed and names the line.
 printf '%s\n' 'not an allowlist entry' > "$tmp/bad-allowlist.txt"

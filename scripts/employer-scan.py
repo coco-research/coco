@@ -60,8 +60,12 @@ def load_allowlist(path: Path) -> Counter:
     return allowed
 
 
+def _raise(err):
+    raise err
+
+
 def files(root: Path):
-    for dirpath, dirnames, filenames in os.walk(root):
+    for dirpath, dirnames, filenames in os.walk(root, onerror=_raise):
         dirnames[:] = sorted(d for d in dirnames if d != ".git")
         for name in sorted(filenames):
             yield Path(dirpath) / name
@@ -117,7 +121,15 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, UnicodeDecodeError):
         print(f"employer-scan: FAIL (closed): allowlist unreadable: {args.allowlist}", file=sys.stderr)
         return 2
-    hits, skipped = scan(Path(args.root).resolve(), patterns, allowed)
+    root = Path(args.root).resolve()
+    if not root.is_dir():
+        print(f"employer-scan: FAIL (closed): not a directory: {root}", file=sys.stderr)
+        return 2
+    try:
+        hits, skipped = scan(root, patterns, allowed)
+    except OSError as exc:
+        print(f"employer-scan: FAIL (closed): cannot walk tree: {exc.filename}", file=sys.stderr)
+        return 2
     for hit in hits:
         print(hit)
     print(

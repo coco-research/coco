@@ -512,6 +512,8 @@ class Installer(ApplyMixin):
     def run_generator(self, script, staging):
         env = os.environ.copy()
         env["COCO_SI_COMMANDS_DIR"] = staging
+        # Claude Code expands $ARGUMENTS. The generators keep {{ARGUMENTS}} unless told.
+        env["COCO_SI_ARGUMENTS"] = "$ARGUMENTS"
         proc = subprocess.run(
             [sys.executable, script],
             cwd=self.repo, env=env,

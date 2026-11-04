@@ -536,7 +536,8 @@ if [[ "$UNINSTALL" -eq 0 && "$WANT_SI" -eq 1 ]]; then
   if [[ -f "$SI_SCRIPT" ]]; then
     SI_ARGS=(--target "$PROMPTS_DIR")
     [[ "$DRY_RUN" -eq 1 ]] && SI_ARGS+=(--dry-run)
-    bash "$SI_SCRIPT" "${SI_ARGS[@]}" || {
+    # PI-Desktop expands $ARGUMENTS. The generators keep {{ARGUMENTS}} unless told.
+    COCO_SI_ARGUMENTS='$ARGUMENTS' bash "$SI_SCRIPT" "${SI_ARGS[@]}" || {
       echo "WARNING: SI command generation failed. The core commands are installed;" >&2
       echo "         re-run: bash scripts/generate-si-commands.sh --target \"$PROMPTS_DIR\"" >&2
     }

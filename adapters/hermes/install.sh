@@ -212,9 +212,10 @@ EOF
     fi
     # Superintelligence: SI-* commands are generated from per-team registries, not shipped as files.
     if [[ -f "$sys_dir/ai/scripts/build_commands.py" ]] && command -v python3 >/dev/null 2>&1; then
-      run env COCO_SI_COMMANDS_DIR="$claude_home/commands" python3 "$sys_dir/ai/scripts/build_commands.py"
+      # These land in a Claude-compatible commands directory, which expands $ARGUMENTS.
+      run env COCO_SI_COMMANDS_DIR="$claude_home/commands" COCO_SI_ARGUMENTS='$ARGUMENTS' python3 "$sys_dir/ai/scripts/build_commands.py"
       if [[ -f "$sys_dir/scripts/build_meta_commands.py" ]]; then
-        run env COCO_SI_COMMANDS_DIR="$claude_home/commands" python3 "$sys_dir/scripts/build_meta_commands.py"
+        run env COCO_SI_COMMANDS_DIR="$claude_home/commands" COCO_SI_ARGUMENTS='$ARGUMENTS' python3 "$sys_dir/scripts/build_meta_commands.py"
       fi
       echo "Generated SI-* commands into $claude_home/commands"
     fi

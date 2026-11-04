@@ -76,6 +76,8 @@ jobs:
       - name: Validate the Claude Code uninstall
         run: bash tests/check-uninstall.sh
 
+      - name: Validate generated SI commands resolve
+        run: bash tests/check-si-commands-resolve.sh
       - name: coco-gate githook (chain or skip, never overwrite)
         run: bash tests/check-coco-githook-install.sh
       - name: Validate codex AGENTS.md paths exist

@@ -25,7 +25,7 @@
     {
       "id": "voice",
       "name": "Coco Voice",
-      "tag": "Available now, v0.9.4",
+      "tag": "Available now",
       "description_html": "Speech to text, with the speech model running on your own computer. Built on <a class=\"inline\" href=\"https://github.com/cjpais/Handy\" rel=\"noopener\">Handy by CJ Pais</a>, MIT licensed.",
       "actions": [
         {
@@ -95,6 +95,13 @@
       "href": "https://github.com/coco-research/jev-use",
       "description": "Voice-driven control for macOS.",
       "status": "Source available, Apache-2.0, pre-alpha"
+    },
+    {
+      "id": "heliopause",
+      "name": "Heliopause",
+      "href": "https://github.com/coco-research/heliopause",
+      "description": "It gives your AI tools a Lead and roles, like a small company, on your own machine.",
+      "status": "Source available, MIT, early preview"
     }
   ],
   "lab": [
@@ -127,12 +134,6 @@
       "name": "Status Zero",
       "description": "Compares what a plan says against what the code actually shipped.",
       "status": "Private, in development"
-    },
-    {
-      "id": "atlas",
-      "name": "Coco Atlas",
-      "description": "The live control room of our own lab.",
-      "status": "Private, pre-alpha"
     }
   ]
 }

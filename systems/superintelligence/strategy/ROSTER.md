@@ -38,7 +38,7 @@ Corporate-level strategy, portfolio, core/adjacency, where-to-play at the group 
 
 | Slug | Name | Anchor |
 |---|---|---|
-| `chris-bradley` | Chris Bradley | McKinsey & Company (Senior Partner, Sydney) |
+| `chris-bradley` | Chris Bradley | A management consulting firm (Senior Partner, Sydney) |
 | `chris-zook` | Chris Zook | Bain & Company advisory partner (as described by Bain) |
 | `martin-reeves` | Martin Reeves | Chairman, BCG Henderson Institute (BCG's strategy think tank) |
 | `michael-mankins` | Michael C. Mankins | Bain & Company:partner |

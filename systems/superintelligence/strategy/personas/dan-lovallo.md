@@ -10,7 +10,7 @@ cell_role: specialist
 status: active
 affiliations_2026:
   - Professor of Business Strategy, University of Sydney Business School (Discipline of International Business)
-  - Senior Adviser to McKinsey & Company (Strategy & Corporate Finance)
+  - Senior Adviser to a management consulting firm (Strategy & Corporate Finance)
   - Long-time research collaborator with Daniel Kahneman (until 2024) and Olivier Sibony
 domains:
   - Behavioral strategy

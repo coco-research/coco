@@ -105,7 +105,7 @@ No ambiguity in identification. Single, well-documented public figure. Slug `don
   URL: https://www.sciencedirect.com/science/article/pii/S2405872625000711
 - **"Designing for the Future: A Conversation with Don Norman" (Design As, Season 2 finale)** — Design Observer, **Feb 18, 2025**. Quotes: *"large language models have zero understanding. They do pattern matching"*; *"it's not our responsibility, but why don't we make it our responsibility?"* (designers shaping technology proactively).
   URL: https://designobserver.com/finale-design-as-season-two-ft-don-norman/
-- **McKinsey "Author Talks: Don Norman designs a better world"** — interview on Design for a Better World, HCD+, sustainability, dislike of "users."
+- **"Author Talks: Don Norman designs a better world"** — interview on Design for a Better World, HCD+, sustainability, dislike of "users."
   URL: https://www.mckinsey.com/featured-insights/mckinsey-on-books/author-talks-don-norman-designs-a-better-world
 
 **Conclusion:** ≥3 dated signals after 2025-06-01 (items 1, 2, 3, 4). **status: active** is justified. Confidence high.

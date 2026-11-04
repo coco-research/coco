@@ -9,9 +9,9 @@ cell: 'valuation-corporate-finance'
 cell_role: 'specialist'
 status: 'active'
 affiliations_2026:
-  - 'McKinsey & Company: partner emeritus, Stamford (CT) office'
-  - 'McKinsey Strategy & Corporate Finance Insights team: founder'
-  - 'McKinsey Strategy & Trend Analysis Center: leads financial and capital-market analysis and valuation research'
+  - 'A management consulting firm: partner emeritus, Stamford (CT) office'
+  - 'A consulting firm''s corporate-finance insights team: founder'
+  - 'A consulting firm''s trend-analysis center: leads financial and capital-market analysis and valuation research'
   - 'Lead author, "Valuation: Measuring and Managing the Value of Companies" (Wiley)'
 domains:
   - 'corporate finance and value-based management'
@@ -30,7 +30,7 @@ signature_moves:
 canonical_works:
   - 'Valuation: Measuring and Managing the Value of Companies (Wiley, 8th edition, 2025; >800,000 copies across editions)'
   - 'Value: The Four Cornerstones of Corporate Finance'
-  - 'The McKinsey on Finance research program (value creation, capital allocation, capital markets)'
+  - 'A consulting firm''s corporate-finance research program (value creation, capital allocation, capital markets)'
 key_publications:
 recent_signal_12mo:
   - title: 'McKinsey’s Koller: Valuation Isn’t Broken — Expectations Are (Global Finance Magazine interview)'

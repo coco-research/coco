@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 235 skills** — 83 core, 152 across 8 bundles.
+**Total: 236 skills** — 84 core, 152 across 8 bundles.
 
 ## Design (15)
 
@@ -51,7 +51,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) | Pointer to the upstream skill for React and Next.js performance work (data fetching, bundle size, re-renders), installed from upstream. |
 | [voice-ai](voice-ai/SKILL.md) | Pointer to the upstream skill for building voice agents with speech-to-speech and STT-LLM-TTS pipelines, installed from upstream. |
 
-## Foundational (13)
+## Foundational (14)
 
 | Skill | Description |
 |-------|-------------|
@@ -61,6 +61,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [executing-plans](executing-plans/SKILL.md) | Use when you have a written implementation plan to execute in a separate session with review checkpoints |
 | [humanizer](humanizer/SKILL.md) | Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written. Based on Wikipedia's compreh |
 | [karpathy-guidelines](karpathy-guidelines/SKILL.md) | Pointer to the upstream skill for behavioural guidelines that reduce common LLM coding mistakes, installed from upstream. |
+| [source-fetch](source-fetch/SKILL.md) | Use before writing anything that cites a web source, including persona research, competitive write-ups, and cited summaries. Fetches each public URL to a local  |
 | [subagent-driven-development](subagent-driven-development/SKILL.md) | Use when executing implementation plans with independent tasks in the current session |
 | [systematic-debugging](systematic-debugging/SKILL.md) | Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes |
 | [ultra-think](ultra-think/SKILL.md) | Use when facing architectural decisions, complex trade-offs, strategic technology choices, or scaling and migration questions that deserve more than a quick ans |

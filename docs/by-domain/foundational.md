@@ -2,7 +2,7 @@
 
 Auto-generated view. Filtered to `domain: foundational` skills.
 
-**13 skills.**
+**14 skills.**
 
 | Skill | Description |
 |-------|-------------|
@@ -14,6 +14,7 @@ Auto-generated view. Filtered to `domain: foundational` skills.
 text to make it sound more natural and human-written. Based on Wikipedia's
 comprehensive "Signs of AI writing" guide. Dete |
 | [karpathy-guidelines](../../skills/karpathy-guidelines/SKILL.md) | Pointer to the upstream skill for behavioural guidelines that reduce common LLM coding mistakes, installed from upstream. |
+| [source-fetch](../../skills/source-fetch/SKILL.md) | Use before writing anything that cites a web source, including persona research, competitive write-ups, and cited summaries. Fetches each public URL to a local markdown file and records URL, status, f |
 | [subagent-driven-development](../../skills/subagent-driven-development/SKILL.md) | Use when executing implementation plans with independent tasks in the current session |
 | [systematic-debugging](../../skills/systematic-debugging/SKILL.md) | Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes |
 | [ultra-think](../../skills/ultra-think/SKILL.md) | Use when facing architectural decisions, complex trade-offs, strategic technology choices, or scaling and migration questions that deserve more than a quick answer. Lays out options with trade-offs, t |

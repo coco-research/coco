@@ -15,12 +15,14 @@ import tempfile
 import traceback
 
 from claude_install import Installer
-from claude_install_apply import InstallError, inside, sha256_file
+from claude_install_apply import InstallError, dumps, inside, sha256_file
 
 
 class Uninstaller(Installer):
-    def __init__(self, repo, target, dry, as_json):
+    def __init__(self, repo, target, dry, as_json, workflow_only=False):
         super().__init__(repo, target, [], dry, as_json)
+        # After super(): an uninstall reports no workflow info, it only narrows the rows.
+        self.workflow_only = workflow_only
         self.summary_ops = ("remove", "skip")
         self.path_ops = ("remove",)
         self.content = []
@@ -31,6 +33,7 @@ class Uninstaller(Installer):
         self.gone = set()
         self.owned = set()
         self.backup_paths = set()
+        self.rewrite_rows = None
     def run(self):
         try:
             self.header()
@@ -38,6 +41,9 @@ class Uninstaller(Installer):
             if not self.dry:
                 self.acquire_flock()
             rows = self.read_manifest()
+            if self.workflow_only:
+                self.run_workflow_only(rows)
+                return
             if not rows:
                 self.nothing()
                 return
@@ -47,12 +53,95 @@ class Uninstaller(Installer):
             self.execute_uninstall()
         finally:
             self.cleanup()
-    def nothing(self):
+    def nothing(self, why="no manifest"):
         self.records = []
-        self.say("nothing to uninstall (no manifest)")
+        self.say("nothing to uninstall (%s)" % why)
         if self.json:
             sys.stdout.write(self.body())
         self.say("Done.")
+    def run_workflow_only(self, rows):
+        doomed = [rec for rec in rows if self.is_workflow_path(rec["path"])]
+        if not doomed:
+            self.nothing("no workflow rows")
+            return
+        rest = [rec for rec in rows if not self.is_workflow_path(rec["path"])]
+        if all(self.scaffold_row(rec) for rec in rest):
+            # Only the manifest row and the dirs that hold it would be left, so finish the
+            # job a full --uninstall does: a --workflow-only install then round-trips to nothing.
+            self.guard_rows(rows)
+            self.decide(rows)
+        else:
+            self.guard_rows(doomed)
+            self.decide(doomed, subset=True)
+            self.rewrite_rows = self.remaining_manifest()
+        self.guard_actions()
+        self.execute_uninstall()
+    def scaffold_row(self, rec):
+        """True for the manifest's own row and the directories created to hold it."""
+        if rec["path"] == self.manifest_path:
+            return True
+        return rec.get("op") == "write" and rec.get("kind") == "dir"
+    def line_obj(self, line):
+        try:
+            obj = json.loads(line.decode("utf-8"))
+        except (UnicodeDecodeError, ValueError):
+            return None
+        return obj if isinstance(obj, dict) else None
+    def remaining_manifest(self):
+        """The manifest without its workflow rows: other lines kept, summary recomputed."""
+        lines = []
+        old = {}
+        path = self.manifest_path
+        raw = []
+        if not os.path.islink(path) and os.path.isfile(path):
+            with open(path, "rb") as fh:
+                raw = fh.readlines()
+        for line in raw:
+            obj = self.line_obj(line)
+            if isinstance(obj, dict) and isinstance(obj.get("summary"), dict):
+                old = obj["summary"]
+                continue
+            rec = self.accept(line)
+            if rec is not None and self.is_workflow_path(rec["path"]):
+                continue
+            lines.append(line if line.endswith(b"\n") else line + b"\n")
+        counts = {op: 0 for op in ("link", "write", "block", "skip")}
+        carried = 0
+        for line in lines:
+            rec = self.accept(line)
+            if rec is None:
+                continue
+            if rec.get("carried"):
+                carried += 1
+            else:
+                counts[rec["op"]] = counts.get(rec["op"], 0) + 1
+        summary = dict(old)
+        summary.pop("workflow", None)
+        summary.setdefault("adapter", "claude-code")
+        summary.setdefault("version", self.version)
+        summary.setdefault("commit", self.commit)
+        summary.setdefault("target", self.home)
+        summary.setdefault("managed_settings", self.managed)
+        summary.update(counts)
+        summary["carried"] = carried
+        summary["paths"] = counts["link"] + counts["write"] + counts["block"]
+        return lines, summary
+    def write_manifest(self, lines, summary):
+        """Replace the manifest with the rows that remain. The caller holds the lock."""
+        parent = os.path.dirname(self.manifest_path)
+        fd, tmp = tempfile.mkstemp(prefix=".manifest-", dir=parent)
+        try:
+            with os.fdopen(fd, "wb") as fh:
+                for line in lines:
+                    fh.write(line)
+                fh.write((dumps({"summary": summary}) + "\n").encode("utf-8"))
+            os.replace(tmp, self.manifest_path)
+        except OSError:
+            try:
+                os.remove(tmp)
+            except OSError:
+                pass
+            raise
     def home_spell(self, path):
         """Path under self.home, or None. Does not resolve the final component."""
         if not isinstance(path, str) or not path:
@@ -243,6 +332,12 @@ class Uninstaller(Installer):
             return
         if os.path.lexists(path):
             self.emit_skip(path, "changed since install, kept")
+    def already_restored(self, rec, target):
+        """True when a killed run already put the backup bytes back at target."""
+        backup = rec.get("backup")
+        if not isinstance(backup, str) or not self.backup_file(backup):
+            return False
+        return self.read_regular(target) == self.read_regular(backup)
     def decide_generated(self, rec):
         path = rec["path"]
         if path in self.owned:
@@ -254,6 +349,11 @@ class Uninstaller(Installer):
                 self.emit_skip(path, "changed since install, kept")
             return
         if current != digest:
+            if self.already_restored(rec, path):
+                # A killed run restored the bytes but not removed the backup.
+                self.emit_skip(path, "restored by an earlier run")
+                self.note_consumed(rec["backup"])
+                return
             self.emit_skip(path, "edited since install, kept")
             return
         backup = rec.get("backup")
@@ -299,6 +399,11 @@ class Uninstaller(Installer):
                 self.emit_remove(target, "backup")
             self.consume_block(rec, path)
             return
+        if self.already_restored(rec, target):
+            # A killed run restored the bytes but not removed the backup.
+            self.emit_skip(target, "restored by an earlier run")
+            self.consume_block(rec, path)
+            return
         if self.preview_strip(target) is None:
             self.emit_skip(target, "edited since install, kept")
             return
@@ -335,7 +440,7 @@ class Uninstaller(Installer):
             if path not in seen:
                 seen.add(path)
                 candidates.append(path)
-    def decide_dirs(self, dir_recs):
+    def decide_dirs(self, dir_recs, sweep=True):
         candidates = []
         seen = set()
         for rec in dir_recs:
@@ -343,7 +448,8 @@ class Uninstaller(Installer):
             if path not in seen:
                 seen.add(path)
                 candidates.append(path)
-        self.add_sweep(candidates, seen)
+        if sweep:
+            self.add_sweep(candidates, seen)
         candidates.sort(key=lambda p: (p.count(os.sep), p), reverse=True)
         for path in candidates:
             if not os.path.lexists(path):
@@ -358,7 +464,7 @@ class Uninstaller(Installer):
             self.emit_remove(path)
             bucket = self.dir_late if self.is_late(path) else self.dir_early
             bucket.append(("rmdir", path))
-    def decide(self, rows):
+    def decide(self, rows, subset=False):
         self.records = []
         self.content = []
         self.dir_early = []
@@ -393,6 +499,10 @@ class Uninstaller(Installer):
         for path in sorted(self.consumed):
             self.emit_remove(path)
             self.phase3.append(("delete-file", path, None))
+        if subset:
+            # The manifest stays: only the workflow rows are going.
+            self.decide_dirs(dirs, sweep=False)
+            return
         if os.path.isfile(self.manifest_path) and not os.path.islink(self.manifest_path):
             self.gone.add(self.manifest_path)
             self.emit_remove(self.manifest_path)
@@ -468,6 +578,8 @@ class Uninstaller(Installer):
                     self.do(action)
                 for action in self.dir_late:
                     self.do(action)
+                if self.rewrite_rows is not None:
+                    self.write_manifest(*self.rewrite_rows)
             if self.json:
                 sys.stdout.write(self.body())
             self.say("Done.")

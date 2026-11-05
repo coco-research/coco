@@ -90,7 +90,7 @@ function cmdVersion() {
 }
 
 function help() {
-  console.log(`Coco — open-source AI workflow framework
+  console.log(`Coco — open-core AI workflow framework
 
 Usage:
   npx cocosuperintelligence                   clone + install (auto-detect)

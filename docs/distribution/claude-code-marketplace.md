@@ -9,7 +9,7 @@ Anthropic maintains a curated plugin marketplace at https://github.com/anthropic
 ## Prerequisites
 
 - Coco repo public on GitHub ✓
-- LICENSE (MIT core; Super Intelligence proprietary, see README Licence) ✓
+- LICENSE (Apache-2.0 core; Super Intelligence proprietary, see README Licence) ✓
 - README ✓
 - CONTRIBUTING ✓
 - CODE_OF_CONDUCT ✓
@@ -84,7 +84,7 @@ python3 -c "import json; json.load(open('.claude-plugin.json'))"
 **Tagline:** An entire team. Wherever your AI lives.
 
 **Description:**
-> Coco turns your Claude Code session into a multi-agent orchestrator. Install 191 skills, 388 commands, 34 specialized agents, and 6 system bundles in about 3 minutes. Run `/team:ship` to spawn a research-to-shipped pipeline. Run `/code-verification` to catch bugs your AI just introduced. Run `/clone-website` to reverse-engineer any site pixel-perfect. Vendor-neutral, open-core (MIT core), no telemetry, no SaaS.
+> Coco turns your Claude Code session into a multi-agent orchestrator. Install 191 skills, 388 commands, 34 specialized agents, and 6 system bundles in about 3 minutes. Run `/team:ship` to spawn a research-to-shipped pipeline. Run `/code-verification` to catch bugs your AI just introduced. Run `/clone-website` to reverse-engineer any site pixel-perfect. Vendor-neutral, open-core (Apache-2.0 core), no telemetry, no SaaS.
 
 **Screenshot ideas:**
 - Terminal showing `/team:ship` running 7 stages

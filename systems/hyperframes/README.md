@@ -4,7 +4,7 @@ Vendored skill bundle from HeyGen's [`hyperframes`](https://github.com/heygen-co
 
 ## License
 
-This entire bundle (`systems/hyperframes/`) is vendored third-party code, **not** part of Coco's MIT core. The bundle as a whole is licensed under **Apache License 2.0**, Copyright 2026 HeyGen, Inc. — see [`LICENSE`](LICENSE) in this directory. Upstream: <https://github.com/heygen-com/hyperframes>.
+This entire bundle (`systems/hyperframes/`) is vendored third-party code, **not** part of Coco's Apache-2.0 core. The bundle as a whole is licensed under **Apache License 2.0**, Copyright 2026 HeyGen, Inc. — see [`LICENSE`](LICENSE) in this directory. Upstream: <https://github.com/heygen-com/hyperframes>.
 
 That `LICENSE` does **not** govern every file underneath it, and an earlier version of this section wrongly said it did. Some skills carry material from other parties under other terms, so check for a nearer notice before reusing any individual file:
 

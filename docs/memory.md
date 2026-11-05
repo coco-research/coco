@@ -17,6 +17,7 @@ from MIT to Apache-2.0. The root `LICENSE` is the Apache-2.0 text, `NOTICE` carr
 the brand line, and the previous MIT text stays at `LICENSE-MIT-PRIOR`. Earlier
 releases remain MIT. Vendored third-party licences and the proprietary Super
 Intelligence licence are unchanged.
+
 ### `coco uninstall` sweeps every adapter home, and names what it cannot finish
 
 **Decided:** 2026-10-31, issue #224. **Reason:** `cmdUninstall` only walked

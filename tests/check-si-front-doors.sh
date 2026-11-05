@@ -34,6 +34,15 @@ door_count=$(wc -l <"$DOORS" | tr -d ' ')
 [[ "$door_count" -eq 13 ]] || fail "this checkout has $door_count front doors, expected 13"
 dups=$(cut -f1 "$DOORS" | sort | uniq -d || true)
 [[ -z "$dups" ]] || fail "duplicate front-door names: $dups"
+# Doors and skills share one skills/ folder, and link_dir has no clash check, so a
+# door named like a skill would silently replace that skill's link. Case-folded,
+# because macOS and Windows filesystems treat Foo and foo as one path.
+lower() { tr '[:upper:]' '[:lower:]' | sort -u; }
+shopt -s nullglob
+clash=$(for d in "$ROOT"/skills/*/ "$ROOT"/systems/*/skills/*/; do basename "$d"; done \
+  | lower | comm -12 - <(cut -f1 "$DOORS" | lower))
+shopt -u nullglob
+[[ -z "$clash" ]] || fail "front-door names clash with skill folders: $clash"
 
 # Bytes, symlink targets, and directory modes. Not mtimes: a re-run removes and
 # relinks, which changes mtime and must not count as a change.

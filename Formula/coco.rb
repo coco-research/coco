@@ -16,7 +16,9 @@ class Coco < Formula
   homepage "https://github.com/coco-research/coco"
   url "https://github.com/coco-research/coco/archive/refs/tags/v1.10.0.tar.gz"
   sha256 "3316195d5bd117d8ced9063859afa47c3f753baaab72a0f8646e29f58f31f58a"
-  # Open-core: MIT core (see LICENSE) + proprietary Super Intelligence
+  # This formula still points at the v1.10.0 tarball, which remains under MIT.
+  # Update the formula when the next tag cuts it.
+  # Open-core on that tarball: MIT core + proprietary Super Intelligence
   # (see systems/superintelligence/LICENSE). Not a single SPDX identifier.
   license :cannot_represent
   version "1.10.0"

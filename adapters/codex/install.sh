@@ -506,13 +506,25 @@ if [[ $DRY_RUN -eq 1 ]]; then
   echo "(dry-run; full output would be written to $OUTPUT — $(wc -l < "$TMP") lines)"
   rm -f "$TMP"
 else
-  # Backup any existing AGENTS.md before overwrite (timestamped, never destroys).
-  if [[ -f "$OUTPUT" ]]; then
-    BACKUP="$OUTPUT.backup-$(date +%Y%m%d-%H%M%S)"
-    cp "$OUTPUT" "$BACKUP"
-    echo "Backed up existing $OUTPUT → $BACKUP"
+  # Write to a temp file first, so a re-run that produces identical content is a no-op.
+  # Issue #250: every re-run used to drop a new AGENTS.md.backup-<timestamp> beside an
+  # unchanged file, and those backups piled up.
+  TMP=$(mktemp)
+  generate > "$TMP"
+  if [[ -f "$OUTPUT" ]] && cmp -s "$TMP" "$OUTPUT"; then
+    echo "AGENTS.md unchanged"
+    rm -f "$TMP"
+  else
+    # Backup any existing AGENTS.md before overwrite (timestamped, never destroys).
+    if [[ -f "$OUTPUT" ]]; then
+      BACKUP="$OUTPUT.backup-$(date +%Y%m%d-%H%M%S)"
+      cp "$OUTPUT" "$BACKUP"
+      echo "Backed up existing $OUTPUT → $BACKUP"
+    fi
+    # cat, not mv: keeps the existing file's mode instead of mktemp's 0600.
+    cat "$TMP" > "$OUTPUT"
+    rm -f "$TMP"
   fi
-  generate > "$OUTPUT"
   lines=$(wc -l < "$OUTPUT" | tr -d ' ')
   skills_listed=$(awk '/^## Skills$/{f=1;next} /^## /{f=0} f && /^- \*\*/{n++} END{print n+0}' "$OUTPUT")
   if [[ -n "$SI_COUNT" ]]; then

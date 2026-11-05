@@ -25,8 +25,8 @@ bash install.sh --systems superintelligence
 | `pi-desktop` | marker-tagged copy | `~/.pi/agent/prompts` + `~/.agents/{skills,subagents}` | yes | PI-Desktop |
 | `hermes` | symlink + generated files | `~/.hermes/profiles/<profile>/{skills,home/.claude}` | yes | Hermes Agent |
 | `zed` | symlink + copy | `~/.config/zed/{agents,rules}` | yes | Zed |
-| `codex` | file generation | `./AGENTS.md` (cwd) | overwrites | Codex CLI |
-| `generic` | file generation | `./AGENTS.md` (cwd) | overwrites | Continue, Windsurf, Cline |
+| `codex` | file generation | `./AGENTS.md` (cwd) | yes (unchanged file kept) | Codex CLI |
+| `generic` | file generation | `./AGENTS.md` (cwd) | yes (unchanged file kept) | Continue, Windsurf, Cline |
 | `aider` | file generation | `./AGENTS.md` + `./.aider.conf.yml` (cwd) | backs up edited files first | Aider |
 | `vscode-continue` | symlink + copy | `~/.continue/{skills,agents,rules}` | yes | VS Code with the Continue extension |
 
@@ -206,6 +206,8 @@ bash /path/to/coco/adapters/codex/install.sh
 
 Generates `./AGENTS.md` in the project root. Codex picks it up automatically.
 
+Re-running is safe. If the newly generated content is identical to the `AGENTS.md` already there, the file is left as it is: nothing is written and no backup is made (`AGENTS.md unchanged`). If the content changed, the old file is backed up once as `AGENTS.md.backup-<timestamp>` before the new one is written.
+
 The `generic` adapter is the same script under a different name — for tools that read `AGENTS.md`, such as Continue, Windsurf and Cline.
 
 Aider does **not** load `AGENTS.md` by itself. Use the dedicated adapter, which also writes a `.aider.conf.yml` that loads it:
@@ -366,6 +368,8 @@ File-generation adapters (`codex`, `generic`):
 rm path/to/project/AGENTS.md
 ```
 
+This removes `AGENTS.md` but not the `AGENTS.md.backup-*` files earlier installs created. Delete any you no longer need: `rm path/to/project/AGENTS.md.backup-*`.
+
 VS Code with Continue (links from the clone root, plus the copied rules file):
 
 ```bash
@@ -395,6 +399,6 @@ The loop removes only files that still carry Coco's header, so a `.aider.conf.ym
 Existing target files are handled like this:
 
 - Symlink adapters — non-symlink files are skipped (won't overwrite)
-- File-generation adapters — existing `AGENTS.md` is overwritten (the `aider` adapter backs up a file you edited first; see [Aider](#aider))
+- File-generation adapters — an existing `AGENTS.md` is replaced only when the content changed, and the old one is backed up first as `AGENTS.md.backup-<timestamp>`; a re-run that produces the same content leaves the file untouched (the `aider` adapter backs up a file you edited first; see [Aider](#aider))
 
 Use `--dry-run` to preview before any destructive action.

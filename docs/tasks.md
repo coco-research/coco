@@ -4,7 +4,7 @@ What is being worked on now. Update in **every PR**: move finished work to Done 
 number, re-rank what changes rank, and delete anything that has been "next" for three weeks.
 That last instruction matters more than the others; a board nobody prunes stops being read.
 
-Last updated: 2026-09-19.
+Last updated: 2026-11-05.
 
 ---
 
@@ -12,6 +12,7 @@ Last updated: 2026-09-19.
 
 | # | Task | State | Where |
 | --- | --- | --- | --- |
+| — | Relicense the core from MIT to Apache-2.0. Earlier releases remain MIT. | in review | `LICENSE`, `NOTICE`, `LICENSE-MIT-PRIOR` |
 | 1 | Complete the Repo Standard document set: `docs/rules.md`, `prd.md`, `design.md`, `tasks.md`, `memory.md`, the PR template filename, and `.metagpt/` tracked | in review | PR #199 |
 | 2 | Evolution loop task 1: the `skill-evolution` skill tree and its count coupling | in review | PR #200 |
 | 3 | Evolution loop tasks 2 to 15 | next | `.metagpt/plan.md` |

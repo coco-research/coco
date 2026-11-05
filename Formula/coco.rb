@@ -16,8 +16,9 @@ class Coco < Formula
   homepage "https://github.com/coco-research/coco"
   url "https://github.com/coco-research/coco/archive/refs/tags/v1.10.0.tar.gz"
   sha256 "3316195d5bd117d8ced9063859afa47c3f753baaab72a0f8646e29f58f31f58a"
-  # Open-core: MIT core (see LICENSE) + proprietary Super Intelligence
+  # Open-core: Apache-2.0 core (see LICENSE) + proprietary Super Intelligence
   # (see systems/superintelligence/LICENSE). Not a single SPDX identifier.
+  # Earlier releases remain under MIT (see LICENSE-MIT-PRIOR).
   license :cannot_represent
   version "1.10.0"
 

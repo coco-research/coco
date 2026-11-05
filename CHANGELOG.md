@@ -55,7 +55,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ### Changed
 
-- Relicensed from MIT to Apache-2.0 from this commit. Earlier releases remain under MIT.
+- Relicensed from MIT to Apache-2.0 from 2026-11-05. Earlier releases remain under MIT.
 
 ### Added
 

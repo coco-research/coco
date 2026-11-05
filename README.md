@@ -20,7 +20,7 @@ npx cocosuperintelligence
 [![Personas](https://img.shields.io/badge/personas-495-5F5F58?style=flat-square&color=5F5F58&labelColor=0B0B0B)](systems/superintelligence/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-5F5F58?style=flat-square&labelColor=0B0B0B)](LICENSE)
 
-Open-core: the core is [Apache-2.0](LICENSE), and Super Intelligence is [proprietary](systems/superintelligence/LICENSE). Relicensed from MIT to Apache-2.0 from this commit. Earlier releases remain under MIT. Files stay on your machine. No telemetry. A version check may contact GitHub once a day.
+Open-core: the core is [Apache-2.0](LICENSE), and Super Intelligence is [proprietary](systems/superintelligence/LICENSE). Relicensed from MIT to Apache-2.0 from 2026-11-05. Earlier releases remain under MIT. Files stay on your machine. No telemetry. A version check may contact GitHub once a day.
 
 ## Why it exists
 
@@ -220,7 +220,7 @@ A default Claude Code install delivers **191 skills, 388 commands and 34 agents*
 
 <table>
 <tr><td><strong>Spec Version</strong></td><td><a href="https://github.com/coco-research/coco/releases/latest">latest release</a></td></tr>
-<tr><td><strong>License</strong></td><td>Open-core — <a href="LICENSE">Apache-2.0</a> core; Super Intelligence is <a href="systems/superintelligence/LICENSE">proprietary</a>. Relicensed from MIT to Apache-2.0 from this commit. Earlier releases remain under MIT (<a href="LICENSE-MIT-PRIOR">LICENSE-MIT-PRIOR</a>).</td></tr>
+<tr><td><strong>License</strong></td><td>Open-core — <a href="LICENSE">Apache-2.0</a> core; Super Intelligence is <a href="systems/superintelligence/LICENSE">proprietary</a>. Relicensed from MIT to Apache-2.0 from 2026-11-05. Earlier releases remain under MIT (<a href="LICENSE-MIT-PRIOR">LICENSE-MIT-PRIOR</a>).</td></tr>
 <tr><td><strong>Total Skills</strong></td><td>229 in the repository (77 Core + 152 Bundle); 191 install by default on Claude Code</td></tr>
 <tr><td><strong>Slash Commands</strong></td><td>388 on a default install — 46 Core (shipped) + 342 Super Intelligence (325 per-team + 17 cross-team, generated at install)</td></tr>
 <tr><td><strong>Specialized Agents</strong></td><td>34 (10 Core + 24 Bundle)</td></tr>
@@ -279,7 +279,7 @@ Full attributions, including audio ([ende.app](https://ende.app), [Kenney.nl](ht
 
 ## Contributing
 
-Coco is open-core: the core is Apache-2.0 and contributions are welcome. The Super Intelligence System (`systems/superintelligence/`) is proprietary. See [`systems/superintelligence/LICENSE`](systems/superintelligence/LICENSE). Relicensed from MIT to Apache-2.0 from this commit. Earlier releases remain under MIT.
+Coco is open-core: the core is Apache-2.0 and contributions are welcome. The Super Intelligence System (`systems/superintelligence/`) is proprietary. See [`systems/superintelligence/LICENSE`](systems/superintelligence/LICENSE). Relicensed from MIT to Apache-2.0 from 2026-11-05. Earlier releases remain under MIT.
 
 - Start with [`CONTRIBUTING.md`](CONTRIBUTING.md).
 - Good first issues: [help wanted / good first issue](https://github.com/coco-research/coco/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
@@ -290,7 +290,7 @@ Releases are in [`CHANGELOG.md`](CHANGELOG.md) and on the [GitHub Releases](http
 
 ## Licence
 
-Relicensed from MIT to Apache-2.0 from this commit. Earlier releases remain under MIT.
+Relicensed from MIT to Apache-2.0 from 2026-11-05. Earlier releases remain under MIT.
 
 The Apache-2.0 licence in [`LICENSE`](LICENSE) covers the Coco core, which is everything in this repository except `systems/superintelligence/` and the vendored third-party components below. The Super Intelligence System in `systems/superintelligence/` is proprietary, licensed separately for your own use under [`systems/superintelligence/LICENSE`](systems/superintelligence/LICENSE), and the Apache-2.0 grant does not apply to it. The prior MIT text is kept at [`LICENSE-MIT-PRIOR`](LICENSE-MIT-PRIOR). Vendored third-party components keep their upstream licences, which continue to govern them. They include HyperFrames in `systems/hyperframes/` (Apache-2.0), `reverse-skill` in `systems/reverse-skill/` (its upstream licence is documented in its README), and some skills under `skills/`. See [`CREDITS.md`](CREDITS.md) and each component's folder.
 

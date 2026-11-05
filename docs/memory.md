@@ -10,6 +10,14 @@ Newest first within each section. Update this file in the same PR that settles s
 
 ## Decisions
 
+### Core relicensed from MIT to Apache-2.0
+
+**Decided:** 2026-11-05. **Reason:** Owner decision to relicense the core forward
+from MIT to Apache-2.0. The root `LICENSE` is the Apache-2.0 text, `NOTICE` carries
+the brand line, and the previous MIT text stays at `LICENSE-MIT-PRIOR`. Earlier
+releases remain MIT. Vendored third-party licences and the proprietary Super
+Intelligence licence are unchanged.
+
 ### The install plan names every path it writes
 
 **Decided:** 2026-10-24, feat/install-manifest. **Reason:** Uninstall has to restore

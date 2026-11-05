@@ -824,4 +824,4 @@ Source: Tabler Icons / `file-type-txt` (MIT)
 - **Devicon** — MIT — https://github.com/devicons/devicon
 - **log-z/logos** — MIT — https://github.com/log-z/logos
 
-All libraries' licenses permit redistribution, including in this repository's MIT-licensed source. Brand logos retain their respective trademarks; this set is for documentation and illustrative use only.
+All libraries' licenses permit redistribution, including in this repository's Apache-2.0-licensed source. Brand logos retain their respective trademarks; this set is for documentation and illustrative use only.

@@ -18,7 +18,7 @@ separate from the CoCo-authored agents in `agents/` so that the provenance bound
 
 The upstream MIT licence requires that the copyright notice and permission notice accompany any
 redistribution. That notice is preserved unmodified in [`LICENSE`](LICENSE) alongside these files.
-CoCo's own MIT licence at the repository root covers CoCo-authored material and does not extend to
+CoCo's own Apache-2.0 licence at the repository root covers CoCo-authored material and does not extend to
 the files in this directory.
 
 ## Contents

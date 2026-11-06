@@ -4,6 +4,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [1.11.0](https://github.com/coco-research/coco/compare/v1.10.0...v1.11.0) (2026-11-06)
+
+
+### Features
+
+* **install:** --workflow links coco-gate and the workflow hooks, and prints the hook lines ([#403](https://github.com/coco-research/coco/issues/403)) ([95b3ddc](https://github.com/coco-research/coco/commit/95b3ddceb8ee8e96d9cf81f2e2ce3856ff89a600))
+* **install:** --workflow-only, and --uninstall --workflow-only removes only those pieces ([#410](https://github.com/coco-research/coco/issues/410)) ([6887a18](https://github.com/coco-research/coco/commit/6887a181b164fadf97d19d6db33f408b34f9854f))
+* **workflow:** Claude Code hooks that hold code edits until the plan is signed ([#396](https://github.com/coco-research/coco/issues/396)) ([4f4d8e8](https://github.com/coco-research/coco/commit/4f4d8e83cfaa8b748bc904138bd858342c89809b))
+* **workflow:** coco-gate githook install|remove, the git warning per repo, chain or skip, never overwrite ([#404](https://github.com/coco-research/coco/issues/404)) ([e389259](https://github.com/coco-research/coco/commit/e38925921b0cd97829410926c8db0b87d77797da))
+* **workflow:** warn-only pre-commit hook and the show check ([#397](https://github.com/coco-research/coco/issues/397)) ([4305232](https://github.com/coco-research/coco/commit/43052320c191cf8ca071df3a46751f5faf868a99))
+
+
+### Bug Fixes
+
+* **aider:** AGENTS.md carries the skills, commands, rules and SI front doors ([#258](https://github.com/coco-research/coco/issues/258)) ([#429](https://github.com/coco-research/coco/issues/429)) ([900e31e](https://github.com/coco-research/coco/commit/900e31e3db706023b25de2589b7971870c172e19))
+* **cli:** coco uninstall cleans every adapter home and never deletes unmarked files ([#224](https://github.com/coco-research/coco/issues/224)) ([#425](https://github.com/coco-research/coco/issues/425)) ([1b965e1](https://github.com/coco-research/coco/commit/1b965e171b84d39ee59ef4ce1e3affefad3d399c))
+* **codex:** AGENTS.md cites only files the install has, and keeps the /team router ([#261](https://github.com/coco-research/coco/issues/261), [#262](https://github.com/coco-research/coco/issues/262)) ([#421](https://github.com/coco-research/coco/issues/421)) ([9257e6f](https://github.com/coco-research/coco/commit/9257e6fbb2e391d49a4a55f340a47b3655591dd2))
+* **codex:** AGENTS.md no longer lists PROMPT-DEFENSE as an agent ([#430](https://github.com/coco-research/coco/issues/430)) ([e4ad965](https://github.com/coco-research/coco/commit/e4ad965a63e407e25cc1ed1b856fde81c463f1c3))
+* **cursor:** uninstall removes the generated SI-* commands and keeps user files ([#208](https://github.com/coco-research/coco/issues/208)) ([#418](https://github.com/coco-research/coco/issues/418)) ([883d1b0](https://github.com/coco-research/coco/commit/883d1b01f4dd06a6fbab468e2b3420d19ede3fe1))
+* **grok:** /team commands find the team-gate and arch-index scripts on a grok install ([#266](https://github.com/coco-research/coco/issues/266)) ([#427](https://github.com/coco-research/coco/issues/427)) ([a9d6167](https://github.com/coco-research/coco/commit/a9d616721638d6d855708508d97b7fad4aadb6a7))
+* **pi-desktop:** --uninstall removes the generated SI prompts ([#226](https://github.com/coco-research/coco/issues/226)) ([#428](https://github.com/coco-research/coco/issues/428)) ([0f58da5](https://github.com/coco-research/coco/commit/0f58da55b33ec32f0f635ee8805107cc03ca1343))
+* **release:** 1.11.0 notes start from the 1.10.0 release ([#446](https://github.com/coco-research/coco/issues/446)) ([73acff5](https://github.com/coco-research/coco/commit/73acff55c3b82760957f8e46bfb3918a6ab346ad))
+* **router:** use Ollama when LM Studio isn't running, and never fall back to keyword silently ([#420](https://github.com/coco-research/coco/issues/420)) ([a1630ef](https://github.com/coco-research/coco/commit/a1630ef542eea4b42505370c5eb2aa6bc67e1adc))
+* **si:** generated SI commands pass arguments as $ARGUMENTS where the host expands it ([#211](https://github.com/coco-research/coco/issues/211)) ([#424](https://github.com/coco-research/coco/issues/424)) ([e1cbd5b](https://github.com/coco-research/coco/commit/e1cbd5b55ad0cf9839111877263570e1bffd427f))
+* **site:** Coco casing on cocoresearch.org and the new coco hero subhead ([#412](https://github.com/coco-research/coco/issues/412)) ([fb69a7a](https://github.com/coco-research/coco/commit/fb69a7a797f58d88348af4d3d7438ebd86ba88b8))
+* **site:** correct stale install, licence and product lines on /coco/ and the homepage ([#436](https://github.com/coco-research/coco/issues/436)) ([0dac25d](https://github.com/coco-research/coco/commit/0dac25d8344a151be0c482a6e9e47c0cbe658cd0))
+* **site:** og-image says Coco without a persona count, and the stale 389 board image is gone ([#413](https://github.com/coco-research/coco/issues/413)) ([4dc28ab](https://github.com/coco-research/coco/commit/4dc28abe7c25d98cf6a20686a913933b2e3a5c70))
+* **site:** the counts line sits after the install figure, not inside it ([#415](https://github.com/coco-research/coco/issues/415)) ([0da6701](https://github.com/coco-research/coco/commit/0da6701c9aa84deb211f9b025cf0ba0c309bbd25))
+
 ## [1.10.0](https://github.com/coco-research/coco/compare/v1.9.1...v1.10.0) (2026-10-26)
 
 

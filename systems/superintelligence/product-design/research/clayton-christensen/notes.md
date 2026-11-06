@@ -35,7 +35,7 @@ This mirrors the Steve Jobs archetype handling exactly: `recent_signal_12mo: []`
 - **Pre-academia:** Strategy consultant (BCG), White House Fellow, co-founder and CEO of Ceramics Process Systems Corporation (CPS).
 - **Religion / personal:** Devout member of The Church of Jesus Christ of Latter-day Saints; served a mission in South Korea (1971–1973), fluent Korean speaker. Belmont, MA town council 8 years. Wife Christine; five children.
 - **Health:** Diabetes; suffered a heart attack, a follicular lymphoma cancer diagnosis (2009–2010), and an ischemic stroke (2010) — recovered from all three before leukemia took him in 2020.
-- **Recognition:** Ranked **#1 on the Thinkers50 list in 2011 and 2013** — the only person to top it twice consecutively. McKinsey Award (multiple) for HBR articles. *The Economist* called disruptive innovation "the most influential business idea of the early 21st century."
+- **Recognition:** Ranked **#1 on the Thinkers50 list in 2011 and 2013** — the only person to top it twice consecutively. Business-writing awards (multiple) for HBR articles. *The Economist* called disruptive innovation "the most influential business idea of the early 21st century."
 
 ### Major books (years)
 - *The Innovator's Dilemma: When New Technologies Cause Great Firms to Fail* (1997) — NYT bestseller; Global Business Book Award (1997). The founding text of disruption theory.

@@ -110,6 +110,9 @@ jobs:
       - name: Validate roster front-door frontmatter
         run: bash tests/check-roster-frontmatter.sh
 
+      - name: Employer scan allowlist works and fails closed
+        run: bash tests/check-employer-scan.sh
+
       - name: Validate the CLI closing hint
         run: bash tests/check-cli-closing-hint.sh
 

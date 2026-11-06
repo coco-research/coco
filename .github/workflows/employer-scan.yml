@@ -1,0 +1,39 @@
+# Scan for private employer patterns from the EMPLOYER_PATTERNS secret, which never
+# enters the repo. Fails closed when the secret is missing or empty: forks get no
+# secrets, so fork PRs fail, and a maintainer re-runs them on a branch. Never use
+# pull_request_target here. Output is counts and `pattern N at file:line` only.
+name: employer-scan
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Scan for private employer patterns
+        env:
+          EMPLOYER_PATTERNS: ${{ secrets.EMPLOYER_PATTERNS }}
+        run: |
+          set -euo pipefail
+          f="$(mktemp)"
+          chmod 600 "$f"
+          trap 'rm -f "$f"' EXIT
+          printf '%s\n' "${EMPLOYER_PATTERNS:-}" > "$f"
+          while IFS= read -r line; do
+            line="${line#"${line%%[![:space:]]*}"}"
+            line="${line%"${line##*[![:space:]]}"}"
+            if [ -n "$line" ]; then echo "::add-mask::$line"; fi
+          done < "$f"
+          python3 scripts/employer-scan.py --patterns "$f" .

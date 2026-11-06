@@ -20,7 +20,7 @@ Valuation, corporate finance, intrinsic value, capital structure.
 | `bruce-greenwald` | Bruce C. N. Greenwald | Columbia Business School — Robert Heilbrunn Professor Emeritus of Finance and Asset Manage |
 | `michael-mauboussin` | Michael J. Mauboussin | Head of Consilient Research, Counterpoint Global (Morgan Stanley Investment Management) |
 | `pablo-fernandez` | Pablo Fernández | IESE Business School:Professor of Financial Management |
-| `tim-koller` | Tim Koller | McKinsey & Company: partner emeritus, Stamford (CT) office |
+| `tim-koller` | Tim Koller | A management consulting firm: partner emeritus, Stamford (CT) office |
 
 ### 2. investing-capital-allocation (8)
 Value / discretionary investing and capital allocation.

@@ -47,7 +47,7 @@ Cumulative ~$1.6B raised. IPO speculation throughout 2025-2026.
 ## Major partnerships (2023-2026)
 
 - **Oracle** (June 2023) — Fusion Cloud, NetSuite integration
-- **McKinsey** (July 2023) — enterprise AI integration collaboration
+- **A management consulting firm** (July 2023) — enterprise AI integration collaboration
 - **Fujitsu** (2024) — co-developed Takane (Japanese LLM)
 - **RBC** (January 2025) — North for Banking
 - **LG** (2025) — Korean LLM + customized North

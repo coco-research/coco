@@ -25,6 +25,11 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 OUTPUT="./AGENTS.md"
 # The generic adapter delegates here, so the receipt names the tool the user asked for.
 ADAPTER_LABEL="${COCO_ADAPTER_LABEL:-codex}"
+# The tool AGENTS.md addresses. Generic output is read by Codex-style tools, so it stays "Codex".
+case "$ADAPTER_LABEL" in
+  aider) TOOL_NAME=Aider ;;
+  *) TOOL_NAME=Codex ;;
+esac
 DRY_RUN=0
 CORE_ONLY=0
 SYSTEMS=()
@@ -101,10 +106,10 @@ emit_team_front_door() {
 }
 
 emit_invocation_guide() {
+  printf '## %s Invocation Guide\n\n' "$TOOL_NAME"
+  printf '%s may not render Coco workflows as a visible slash-command palette. ' "$TOOL_NAME"
   cat <<'EOF'
-## Codex Invocation Guide
-
-Codex may not render Coco workflows as a visible slash-command palette. Treat the command and skill names in this file as model-available workflows.
+Treat the command and skill names in this file as model-available workflows.
 
 When the user:
 - types a literal command like `/team:plan` or `/gsd-plan-phase`, treat it as an explicit request to follow that workflow

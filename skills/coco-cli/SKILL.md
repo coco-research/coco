@@ -1,6 +1,6 @@
 ---
 name: coco-cli
-description: Install, update, version-check, or uninstall the Coco open-source AI workflow framework via bin/coco.js. Use when setting up Coco on a machine, checking out the pinned release tag into an existing clone, checking the installed version, or removing it. npx cocosuperintelligence is the published path (clones the pin and installs). Triggers on "install coco", "update coco", "set up coco", "coco cli", "uninstall coco".
+description: Install, update, version-check, or uninstall the Coco open-core AI workflow framework via bin/coco.js. Use when setting up Coco on a machine, checking out the pinned release tag into an existing clone, checking the installed version, or removing it. npx cocosuperintelligence is the published path (clones the pin and installs). Triggers on "install coco", "update coco", "set up coco", "coco cli", "uninstall coco".
 domain: meta
 ---
 

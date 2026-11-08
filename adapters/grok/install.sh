@@ -49,8 +49,12 @@ run() {
   if [[ $DRY_RUN -eq 1 ]]; then echo "DRY: $*"; else "$@"; fi
 }
 
+# Marks the command copies whose ~/.claude paths were rewritten (see place_command).
+REWRITE_MARK='<!-- coco: copied by adapters/grok/install.sh with ~/.claude paths rewritten for grok -->'
+
 # Removes only what this installer wrote: symlinks into this clone, the generated SI-*
 # command files (matched by the generator's marker line, so a user's own SI*.md stays),
+# the rewritten command copies (matched by REWRITE_MARK),
 # the config.toml MCP block between its markers, and the hooks file (matched by the hook
 # binary path it contains). Anything else under the target is left alone.
 uninstall() {
@@ -149,6 +153,12 @@ uninstall() {
         run rm -- "$f"
       fi
     done < <(find -P "$TARGET_HOME/commands" -maxdepth 1 -type f \( -name 'SI.md' -o -name 'SI-*.md' \) -print0)
+    # The rewritten command copies, matched by their marker line.
+    while IFS= read -r -d '' f; do
+      if grep -qxF -- "$REWRITE_MARK" "$f"; then
+        run rm -- "$f"
+      fi
+    done < <(find -P "$TARGET_HOME/commands" -maxdepth 1 -type f -name '*.md' -print0)
   fi
   if [[ -f "$cfg" ]] && grep -q '^# coco:mcp-start$' "$cfg" && grep -q '^# coco:mcp-end$' "$cfg"; then
     if [[ $DRY_RUN -eq 1 ]]; then
@@ -231,6 +241,41 @@ link_skills() {
   done
 }
 
+# A command that cites ~/.claude/skills/ or ~/.claude/commands/ gets a copy with those
+# paths pointed at this install, because a grok-only machine has no ~/.claude. Every
+# other command stays a symlink into the clone. The source files are never edited:
+# the claude-code adapter reads them as they are.
+place_command() {
+  local src=$1 dst=$2 ref body skills='~/.claude/skills/' cmds='~/.claude/commands/'
+  if ! grep -qE '~/\.claude/(skills|commands)/' "$src"; then
+    # A copy left by an earlier install gives way to the symlink.
+    if [[ -f "$dst" && ! -L "$dst" ]] && grep -qxF -- "$REWRITE_MARK" "$dst"; then run rm "$dst"; fi
+    link_dir "$src" "$dst"
+    return
+  fi
+  if [[ -e "$dst" && ! -L "$dst" ]] && ! grep -qxF -- "$REWRITE_MARK" "$dst"; then
+    echo "STALE: $dst is a real file, not a symlink — NOT updated. Remove it to let the installer manage it."
+    STALE_COUNT=$((STALE_COUNT + 1))
+    return
+  fi
+  ref='~/.grok'
+  [[ "$TARGET_HOME" == "$HOME/.grok" ]] || ref=$TARGET_HOME
+  if [[ $DRY_RUN -eq 1 ]]; then
+    echo "DRY: copy $src to $dst with ~/.claude paths rewritten to $ref"
+    return
+  fi
+  [[ -L "$dst" ]] && rm "$dst"
+  mkdir -p "$(dirname "$dst")"
+  body=$(cat "$src")
+  # Patterns come from variables: bash 3.2 (macOS /bin/bash) splits a quoted literal
+  # pattern at its first '/'.
+  body=${body//"$skills"/"$ref/skills/"}
+  body=${body//"$cmds"/"$ref/commands/"}
+  printf '%s\n\n%s\n' "$body" "$REWRITE_MARK" > "$dst"
+  echo "Rewrote: $dst <- $src"
+  LINKED=$((LINKED + 1))
+}
+
 link_commands() {
   # Map commands/<namespace>/<name>.md → ~/.grok/commands/<namespace>:<name>.md
   # Grok discovers user-level commands as flat *.md files; it does not recurse.
@@ -243,9 +288,9 @@ link_commands() {
       cname=$(basename "$cmd" .md)
       [[ "$cname" == "INDEX" ]] && continue
       if [[ "$cname" == "_index" ]]; then
-        link_dir "$cmd" "$TARGET_HOME/commands/$nsname.md"
+        place_command "$cmd" "$TARGET_HOME/commands/$nsname.md"
       else
-        link_dir "$cmd" "$TARGET_HOME/commands/$nsname:$cname.md"
+        place_command "$cmd" "$TARGET_HOME/commands/$nsname:$cname.md"
       fi
     done
   done
@@ -438,6 +483,9 @@ echo "Target: $TARGET_HOME"
 [[ $DRY_RUN -eq 1 ]] && echo "(dry-run mode)"
 
 link_skills "$REPO_ROOT/skills"
+# team-gate ships scripts only (no SKILL.md), so link_skills skips it. The /team
+# pipeline commands run its scripts from ~/.grok/skills/team-gate/scripts/.
+link_dir "$REPO_ROOT/skills/team-gate/" "$TARGET_HOME/skills/team-gate"
 echo "Skills: core linked"
 link_commands
 echo "Commands: core linked"

@@ -74,7 +74,7 @@ The install receipt counts only that run, so after `--systems gsd` it reports a 
 
 ## Optional: semantic routing
 
-Super Intelligence routes a prompt to teams with a local embedding model (`text-embedding-nomic-embed-text-v1.5` at `http://127.0.0.1:1234/v1/embeddings`, LM Studio's default port). It is optional: without it, routing falls back to keyword matching and says so (`keyword fallback active`). Setup and how to verify: [`install.md`](install.md#optional-semantic-routing-for-super-intelligence).
+Super Intelligence routes a prompt to teams with a local embedding model. The router tries LM Studio first (`text-embedding-nomic-embed-text-v1.5` at `http://127.0.0.1:1234/v1/embeddings`, port 1234), then Ollama on port 11434 (`ollama pull nomic-embed-text`). `COCO_EMBED_URL` and `COCO_EMBED_MODEL` pin a single endpoint. With neither server running, routing falls back to keyword matching and prints `router: no embedding server, using keyword matching` on stderr (`keyword fallback active`). `python3 systems/superintelligence/scripts/meta_select.py --doctor` shows which one is in use. Setup: [`install.md`](install.md#optional-semantic-routing-for-super-intelligence).
 
 ---
 

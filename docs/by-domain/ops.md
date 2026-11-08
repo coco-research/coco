@@ -6,7 +6,7 @@ Auto-generated view. Filtered to `domain: ops` skills.
 
 | Skill | Description |
 |-------|-------------|
-| [pmstudio-arb](../../skills/arb-review/SKILL.md) | Generate an Architecture Review Board (ARB) presentation in Coco Inc's standard 11-slide format. Use when someone asks to "create an ARB deck", "architecture review presentation", "prepare for archite |
+| [pmstudio-arb](../../skills/arb-review/SKILL.md) | Generate an Architecture Review Board (ARB) presentation in a standard 11-slide format. Use when someone asks to "create an ARB deck", "architecture review presentation", "prepare for architecture rev |
 | [pmstudio-dr](../../skills/dr-plan/SKILL.md) | Generate a Disaster Recovery plan with RTO/RPO targets. Use when someone asks to "create a DR plan", "disaster recovery", "business continuity", or "RTO RPO". Do NOT use for step-by-step restoration r |
 | [pmstudio-irp](../../skills/irp/SKILL.md) | Use when the user asks for an incident response plan, IRP, escalation matrix or incident playbook. Writes an offline HTML plan with severities, escalation contacts and comms; DR restores service, IRP  |
 | [local-llm](../../skills/local-llm/SKILL.md) | Use when working with this machine's local LLM setup (LM Studio + mlx-dspark) -- checking status, changing context window, diagnosing a reasoning hang or dead request, understanding RAM/speed tradeoff |

@@ -26,9 +26,20 @@ bash install.sh --systems superintelligence
 | `hermes` | symlink + generated files | `~/.hermes/profiles/<profile>/{skills,home/.claude}` | yes | Hermes Agent |
 | `zed` | symlink + copy | `~/.config/zed/{agents,rules}` | yes | Zed |
 | `codex` | file generation | `./AGENTS.md` (cwd) | yes (unchanged file kept) | Codex CLI |
-| `generic` | file generation | `./AGENTS.md` (cwd) | yes (unchanged file kept) | Continue, Windsurf, Cline |
+| `generic` | file generation | `./AGENTS.md` (cwd) | yes (unchanged file kept) | Continue |
+| `windsurf` | symlink + copy | `~/.codeium/windsurf/{skills,rules,agents}` | yes | Windsurf IDE |
+| `cline` | symlink + copy | `~/.cline/{rules,agents}` | yes | Cline (VS Code extension) |
+| `roo-code` | symlink + copy | `~/.roo-code/{rules,agents}` | yes | Roo Code (VS Code extension) |
 | `aider` | file generation | `./AGENTS.md` + `./.aider.conf.yml` (cwd) | backs up edited files first | Aider |
 | `vscode-continue` | symlink + copy | `~/.continue/{skills,agents,rules}` | yes | VS Code with the Continue extension |
+
+Windsurf, Cline and Roo Code install with their own adapter, from the clone root:
+
+```bash
+bash install.sh --adapter windsurf
+bash install.sh --adapter cline
+bash install.sh --adapter roo-code
+```
 
 ---
 
@@ -41,6 +52,7 @@ bash install.sh --systems superintelligence
 | `--help` | Show usage |
 | `--systems gsd,brain` | Install one or more system bundles. Accepted by every adapter, including cursor (`~/.cursor/commands` for generated SI-* files) |
 | `--workflow` | Claude Code only. Also links `bin/coco-gate` and the three `hooks/coco-workflow-*.sh` files, then prints the hook lines to add to a repo's `.claude/settings.local.json`. It never writes that file. |
+| `--workflow-only` | Claude Code only. Installs or removes just the `<target>/coco/` workflow pieces, with no skills, commands, agents or rules. On a full install it keeps the other manifest rows. |
 
 ---
 
@@ -184,14 +196,18 @@ bash /path/to/coco/install.sh --adapter aider
 bash /path/to/coco/adapters/aider/install.sh --dry-run    # preview, writes nothing
 ```
 
-Writes two files into the current directory and nothing under `~`:
+Writes two files into the current directory. With the `superintelligence` bundle it also generates the Super Intelligence command files under `~/.coco/si-commands`, as the Codex adapter does.
 
 | File | Contents |
 |------|----------|
-| `./AGENTS.md` | Name and one-line description of each agent in `agents/`. With `install.sh` this includes the default bundles' agents (34 in all); running `adapters/aider/install.sh` directly lists the 10 core agents, plus a bundle's agents with `--systems gsd` |
+| `./AGENTS.md` | The same compiled file the [Codex adapter](#codex--generic-agentsmd) writes: Skills, Commands (including `/team` and `/team:*`), Super Intelligence Commands, Agents and Rules, for every bundle that ships something. `--systems <list>` narrows the bundles; `--core-only` keeps the core set only |
 | `./.aider.conf.yml` | `auto-commits: true` and a `read:` list naming `AGENTS.md` and `.aider.conf.yml`, so Aider loads them as read-only context when started from this directory |
 
-Skills, commands and rules are not installed; the config only carries a comment pointing at the clone's `skills/` folder.
+Aider has no custom slash commands, so ask for a workflow by name ("run team:ship"); `AGENTS.md` lists them all. The receipt prints how many skills, commands, Super Intelligence commands, agents and rules the written `AGENTS.md` holds.
+
+Aider sends read-only files with every message and this `AGENTS.md` is large, so `--core-only` gives a smaller one.
+
+Like the Codex adapter, it refuses to write inside the Coco checkout itself; run it from your project directory.
 
 Existing files are protected. A file that is still exactly what Coco last wrote (its first line carries a `coco-generated sha256=` checksum that matches the rest of the file) is overwritten in place. Anything else, such as your own `.aider.conf.yml` or an edited copy, is copied first to `<file>.coco-backup`; that first backup is never overwritten, so later backups get a timestamped name (`<file>.coco-backup-<YYYYMMDD-HHMMSS>`, then `-1`, `-2` if needed). Your settings are not merged into the new file: copy any you want back from the backup.
 
@@ -208,7 +224,7 @@ Generates `./AGENTS.md` in the project root. Codex picks it up automatically.
 
 Re-running is safe. If the newly generated content is identical to the `AGENTS.md` already there, the file is left as it is: nothing is written and no backup is made (`AGENTS.md unchanged`). If the content changed, the old file is backed up once as `AGENTS.md.backup-<timestamp>` before the new one is written.
 
-The `generic` adapter is the same script under a different name — for tools that read `AGENTS.md`, such as Continue, Windsurf and Cline.
+The `generic` adapter is the same script under a different name — for tools that read `AGENTS.md`, such as Continue.
 
 Aider does **not** load `AGENTS.md` by itself. Use the dedicated adapter, which also writes a `.aider.conf.yml` that loads it:
 
@@ -285,19 +301,24 @@ bash install.sh --systems gsd,brain
 
 ## Optional: semantic routing for Super Intelligence
 
-Super Intelligence picks which teams to seat with `systems/superintelligence/scripts/meta_select.py`. It embeds your prompt against each team's profile by calling an OpenAI-compatible embeddings endpoint on this machine:
+Super Intelligence picks which teams to seat with `systems/superintelligence/scripts/meta_select.py`. It embeds your prompt against each team's profile by calling an OpenAI-compatible embeddings endpoint on this machine.
 
-- URL: `http://127.0.0.1:1234/v1/embeddings` (LM Studio's default port)
-- Model name sent: `text-embedding-nomic-embed-text-v1.5`
+The router tries LM Studio on port 1234 first, then Ollama on port 11434:
 
-Both values are hard-coded in the script, so the server must answer on that port and accept that model name.
+- LM Studio: `http://127.0.0.1:1234/v1/embeddings`, model `text-embedding-nomic-embed-text-v1.5`
+- Ollama: `http://127.0.0.1:11434/v1/embeddings`, model `nomic-embed-text` (`ollama pull nomic-embed-text`)
 
-Without the endpoint nothing breaks. The script falls back to keyword overlap, prints `meta_select WARN: keyword fallback active` on stderr, marks its output `"method": "keyword"` and `"degraded": true`, and never auto-delegates to a single team. Routing still works, but team selection is coarser.
+`COCO_EMBED_URL` and `COCO_EMBED_MODEL` pin a single endpoint. That URL is the only one tried, and the model name replaces the default.
 
-To use embeddings: load the nomic-embed-text-v1.5 model in LM Studio, start its local server, then check:
+With neither server running, routing falls back to keyword matching and prints `router: no embedding server, using keyword matching` on stderr. Output is `"method": "keyword"` and `"degraded": true` (`keyword fallback active`): scores are not commensurate with embed cosine, and the script never auto-delegates to a single team. Routing still works, but team selection is coarser.
+
+`python3 systems/superintelligence/scripts/meta_select.py --doctor` shows which endpoint is in use. It prints `router: embedding via <url> (<model>)` and exits 0 when one answers, or the stderr line above and exits 1 when neither does.
+
+To use embeddings, load `text-embedding-nomic-embed-text-v1.5` in LM Studio and start its local server, or run `ollama pull nomic-embed-text`. Then check:
 
 ```bash
-curl -s -m 3 http://127.0.0.1:1234/v1/models   # any JSON reply means the endpoint is up
+curl -s -m 3 http://127.0.0.1:1234/v1/models   # any JSON reply means the LM Studio endpoint is up
+python3 systems/superintelligence/scripts/meta_select.py --doctor
 python3 systems/superintelligence/scripts/meta_select.py -- "should we ship an AI compliance product?"   # "method": "embed" when it is used
 ```
 
@@ -321,17 +342,28 @@ Symlink-based adapters (`claude-code`, `cursor`, `grok`, `vscode`):
 # directory named `coco` cannot also delete links into `coco-research`.
 CLONE="$(pwd)"
 find ~/.claude ~/.cursor ~/.grok ~/.copilot -type l -lname "${CLONE}/*" -delete
+bash adapters/cursor/install.sh --uninstall   # generated SI-* commands are regular files; only the generator marker is removed
 bash adapters/grok/install.sh --uninstall   # grok also wrote generated commands, a config block and a hooks file
-for app in "Code" "Code - Insiders" "VSCodium" "VSCodium - Insiders"; do for base in "$HOME/Library/Application Support" "${XDG_CONFIG_HOME:-$HOME/.config}"; do [ -d "$base/$app/User" ] && find "$base/$app/User" -type l -lname "${CLONE}/*" -delete; done; done
+for app in "Code" "Code - Insiders" "VSCodium" "VSCodium - Insiders"; do for base in "$HOME/Library/Application Support" "${XDG_CONFIG_HOME:-$HOME/.config}"; do
+  [ -d "$base/$app/User" ] && find "$base/$app/User" -type l -lname "${CLONE}/*" -delete
+  # prompt files are links into ~/.copilot/coco-generated, so they outlive the clone-path match
+  [ -d "$base/$app/User" ] && find "$base/$app/User" -type l -lname "$HOME/.copilot/coco-generated/*" -delete
+done; done
 grep -rl "Generated by the Coco VS Code adapter" ~/.copilot/instructions | xargs rm -f  # generated rules only
 rm -rf ~/.copilot/coco-generated
-grep -rl "Generated by build_commands.py" ~/.claude/commands/SI*.md 2>/dev/null | xargs rm -f
+grep -rlE 'Generated by `build_(meta_)?commands\.py`' ~/.claude/commands/SI*.md 2>/dev/null | xargs rm -f
 sed -i.bak '/<!-- coco:rules-start -->/,/<!-- coco:rules-end -->/d' ~/.claude/CLAUDE.md 2>/dev/null || true
 rm -f ~/.claude/CLAUDE.md.bak 2>/dev/null || true
 ```
 
 `~/.copilot/instructions` is a VS Code default folder that may also hold your own
 instruction files, so match on the generated-by marker rather than deleting the folder.
+
+The `find` above removes symlinks only. Cursor's SI commands are ordinary files, so
+`adapters/cursor/install.sh --uninstall` deletes `SI.md` and `SI-*.md` in
+`~/.cursor/commands` (or `CURSOR_HOME/commands`) only when the file contains the
+generator marker from `build_commands.py` or `build_meta_commands.py`.
+A command you wrote yourself, including one named `SI-*.md`, stays.
 
 PI-Desktop:
 
@@ -347,10 +379,12 @@ Hermes (links from the clone root; generated files and the rules block by hand):
 ```bash
 CLONE="$(pwd)"
 find ~/.hermes/profiles -type l -lname "${CLONE}/*" -delete
-rm -f ~/.hermes/profiles/<profile>/home/.claude/commands/SI*.md
+grep -rlE 'Generated by `build_(meta_)?commands\.py`' ~/.hermes/profiles/*/home/.claude/commands/SI*.md 2>/dev/null | xargs rm -f
+sed -i.bak '/<!-- coco:rules-start -->/,/<!-- coco:rules-end -->/d' ~/.hermes/profiles/*/home/.claude/CLAUDE.md 2>/dev/null || true
+rm -f ~/.hermes/profiles/*/home/.claude/CLAUDE.md.bak 2>/dev/null || true
 ```
 
-Then delete the block between `<!-- coco:rules-start -->` and `<!-- coco:rules-end -->` in `~/.hermes/profiles/<profile>/home/.claude/CLAUDE.md` (the installer also leaves a `CLAUDE.md.coco-bak` copy beside it).
+The `grep` deletes only SI command files that carry the generator marker, and the `sed` removes only the Coco rules block. The installer also leaves a `CLAUDE.md.coco-bak` copy beside the file it edited.
 
 Zed (agent links, plus the copied rules file):
 
@@ -380,7 +414,7 @@ for f in rules/*.md; do cmp -s "$f" ~/.continue/rules/"$(basename "$f")" && rm ~
 
 The `cmp` guard removes a copied rule only if it is still identical to the one in the clone, and the `find` touches only links that point into the clone. Use `$CONTINUE_HOME` in place of `~/.continue` if you set it. Empty `skills/`, `agents/` and `rules/` folders are left behind; remove them if you like.
 
-Aider (per project; the adapter writes into the project, not your home directory):
+Aider (per project, plus the shared Super Intelligence command files):
 
 ```bash
 cd path/to/your/project
@@ -390,7 +424,7 @@ done
 ls -a | grep 'coco-backup'      # backups from earlier installs; restore or delete by hand
 ```
 
-The loop removes only files that still carry Coco's header, so a `.aider.conf.yml` you replaced is left alone. It checks the header, not the checksum: if you edited a generated file, copy your edits out first. The installer never deletes backups. To restore your own config, move the first backup back: `mv .aider.conf.yml.coco-backup .aider.conf.yml`.
+The Super Intelligence command files in `~/.coco/si-commands` are shared with the `codex` and `generic` adapters; remove that folder only when none of them is in use. The loop removes only files that still carry Coco's header, so a `.aider.conf.yml` you replaced is left alone. It checks the header, not the checksum: if you edited a generated file, copy your edits out first. The installer never deletes backups. To restore your own config, move the first backup back: `mv .aider.conf.yml.coco-backup .aider.conf.yml`.
 
 ---
 

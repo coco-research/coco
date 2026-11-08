@@ -59,9 +59,16 @@ class ApplyMixin:
     def fail_if(self, path):
         if not TEST_HOOKS:
             return
+        self.kill_if(path)
         want = os.environ.get("COCO_INSTALL_FAIL_AT")
         if want and os.path.normpath(want) == os.path.normpath(path):
             raise InstallError("")
+
+    def kill_if(self, path):
+        """Test hook: stop dead where the process would be killed. No rollback, no cleanup."""
+        want = os.environ.get("COCO_INSTALL_KILL_AT")
+        if want and os.path.normpath(want) == os.path.normpath(path):
+            os._exit(137)
 
     def snapshot(self, path):
         if os.path.islink(path):
@@ -319,6 +326,10 @@ class ApplyMixin:
         """Notes printed after the receipt or the dry-run plan. Nothing by default."""
 
     def receipt(self):
+        if self.workflow_only:
+            self.say("")
+            self.say("Installed the coco workflow pieces only: no skills, commands, agents or rules.")
+            return
         bundles = ",".join(self.bundles) if self.bundles else "core only"
         if self.si_count is not None:
             commands = "%s   (%s core + %s Super Intelligence)" % (

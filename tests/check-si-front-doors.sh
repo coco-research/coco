@@ -145,22 +145,23 @@ for adapter in cursor windsurf; do
   fi
   echo "  re-run changed nothing"
 
+  # The documented uninstall (docs/install.md): delete the links into the clone, then run
+  # the adapter's --uninstall when it has one (cursor's removes generated SI command files).
+  find -P "$target" -type l -lname "$ROOT/*" -delete
   if grep -q -- '--uninstall)' "$ROOT/adapters/$adapter/install.sh"; then
     if ! env -u CURSOR_HOME -u WINDSURF_HOME HOME="$home" \
         bash "$ROOT/adapters/$adapter/install.sh" --uninstall >"$WORK/$adapter-uninstall.log" 2>&1; then
       tail -n 40 "$WORK/$adapter-uninstall.log" >&2
       fail "$adapter uninstall exited non-zero"
     fi
-    while IFS=$'\t' read -r name _src; do
-      [[ -n "$name" ]] || continue
-      if [[ -e "$skills/$name" || -L "$skills/$name" ]]; then
-        fail "$adapter uninstall left $skills/$name"
-      fi
-    done <"$DOORS"
-    echo "  uninstall removed the front-door links"
-  else
-    echo "  no uninstall path; not checked"
   fi
+  while IFS=$'\t' read -r name _src; do
+    [[ -n "$name" ]] || continue
+    if [[ -e "$skills/$name" || -L "$skills/$name" ]]; then
+      fail "$adapter documented uninstall left $skills/$name"
+    fi
+  done <"$DOORS"
+  echo "  documented uninstall removed the front-door links"
 
   # A real directory at one front-door name is the user's own skill. The same
   # link_dir the other adapters use must leave it in place and still link the rest.

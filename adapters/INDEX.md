@@ -8,7 +8,7 @@ because most adapters link into the checkout rather than copying.
 
 | Adapter | Commands | of which generated | Skills | Agents | AGENTS.md | Exit |
 |---|---:|---:|---:|---:|:--:|---:|
-| `aider` | 0 | 0 | 0 | 0 | yes | 0 |
+| `aider` | 342 | 342 | 0 | 0 | yes | 0 |
 | `amazon-q` | 0 | 0 | 0 | 34 | — | 0 |
 | `claude-code` | 388 | 342 | 191 | 34 | — | 0 |
 | `cline` | 0 | 0 | 0 | 34 | — | 0 |
@@ -46,10 +46,11 @@ This section is the standing list of who is short and by how much.
 | `vscode-continue` | 0 | 388 | does not invoke the SI generators |
 | `windsurf` | 0 | 388 | does not invoke the SI generators |
 | `zed` | 0 | 388 | does not invoke the SI generators |
+| `aider` | 342 | 46 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
 | `codex` | 342 | 46 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
 | `generic` | 342 | 46 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
 
-Not comparable (AGENTS.md producers rather than tree installers): `aider`, `github-copilot-cli`.
+Not comparable (AGENTS.md producers rather than tree installers): `github-copilot-cli`.
 
 ## Default install against the widest install
 

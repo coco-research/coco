@@ -1,14 +1,16 @@
 {
   "name": "cocosuperintelligence",
   "version": "1.10.0",
-  "description": "CoCo Super Intelligence — summon an advisory board of 495 world-class minds inside your AI coding session. A vendor-neutral orchestration layer for Claude Code, Cursor, and Codex: 235 skills (197 installed by default), 388 commands, 34 agents, and disk-persistent state. 100% local, no telemetry. Open-core: MIT core, proprietary Super Intelligence.",
+  "description": "CoCo Super Intelligence — summon an advisory board of 495 world-class minds inside your AI coding session. A vendor-neutral orchestration layer for Claude Code, Cursor, and Codex: 235 skills (197 installed by default), 388 commands, 34 agents, and disk-persistent state. 100% local, no telemetry. Open-core: Apache-2.0 core, proprietary Super Intelligence.",
   "bin": {
     "coco": "bin/coco.js"
   },
   "files": [
     "bin/",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "LICENSE-MIT-PRIOR",
+    "NOTICE"
   ],
   "scripts": {
     "test": "node bin/coco.js --help"
@@ -33,8 +35,8 @@
     "agentic-coding",
     "prompt-library"
   ],
-  "author": "Coco Inc",
-  "license": "SEE LICENSE IN LICENSE",
+  "author": "Coco Research",
+  "license": "SEE LICENSE IN README.md",
   "homepage": "https://github.com/coco-research/coco",
   "repository": {
     "type": "git",

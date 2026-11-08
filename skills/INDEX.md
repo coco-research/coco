@@ -75,7 +75,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 |-------|-------------|
 | [agent-self-eval](agent-self-eval/SKILL.md) | Post-run self-evaluation system that scores agent output on correctness, clarity, actionability, and conciseness. Use after /team runs, skill executions, or whe |
 | [cli-anything](cli-anything/SKILL.md) | Wrap any command-line tool into a JSON-emitting agent skill. Use when you want to make a CLI reliably callable and parseable by an AI agent — introspect its --h |
-| [coco-cli](coco-cli/SKILL.md) | Install, update, version-check, or uninstall the Coco open-source AI workflow framework via bin/coco.js. Use when setting up Coco on a machine, checking out the |
+| [coco-cli](coco-cli/SKILL.md) | Install, update, version-check, or uninstall the Coco open-core AI workflow framework via bin/coco.js. Use when setting up Coco on a machine, checking out the p |
 | [coco-loop](coco-loop/SKILL.md) | Start a safe, governed autonomous loop from a plain-language goal. Use when the user says /coco-loop, "run an autonomous loop", "keep my build green for N hours |
 | [context-budget](context-budget/SKILL.md) | Audit token consumption across agents, skills, MCP servers, and rules. Identifies bloat, redundant components, and produces prioritized token-savings recommenda |
 | [find-skills](find-skills/SKILL.md) | Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express int |
@@ -88,7 +88,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
 | Skill | Description |
 |-------|-------------|
-| [pmstudio-arb](arb-review/SKILL.md) | Generate an Architecture Review Board (ARB) presentation in Coco Inc's standard 11-slide format. Use when someone asks to "create an ARB deck", "architecture re |
+| [pmstudio-arb](arb-review/SKILL.md) | Generate an Architecture Review Board (ARB) presentation in a standard 11-slide format. Use when someone asks to "create an ARB deck", "architecture review pres |
 | [pmstudio-dr](dr-plan/SKILL.md) | Generate a Disaster Recovery plan with RTO/RPO targets. Use when someone asks to "create a DR plan", "disaster recovery", "business continuity", or "RTO RPO". D |
 | [pmstudio-irp](irp/SKILL.md) | Use when the user asks for an incident response plan, IRP, escalation matrix or incident playbook. Writes an offline HTML plan with severities, escalation conta |
 | [local-llm](local-llm/SKILL.md) | Use when working with this machine's local LLM setup (LM Studio + mlx-dspark) -- checking status, changing context window, diagnosing a reasoning hang or dead r |

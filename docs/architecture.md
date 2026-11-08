@@ -1,6 +1,6 @@
 # Coco Architecture
 
-Coco is an open-source AI workflow framework. This document explains the layout, the artifact model, and how adapters wire artifacts into specific AI coding agents.
+Coco is an open-core AI workflow framework. This document explains the layout, the artifact model, and how adapters wire artifacts into specific AI coding agents.
 
 ## Mental model
 

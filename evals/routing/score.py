@@ -1,7 +1,10 @@
 import sys
 import json
 import argparse
+import datetime
+import hashlib
 import pathlib
+import subprocess
 
 def run_self_test():
     print("Running self-test with synthetic data...")
@@ -120,11 +123,71 @@ def evaluate(items, select_fn):
     }
     return metrics
 
+def _items_path(root, given):
+    if not given:
+        return root / "evals" / "routing" / "items.jsonl"
+    path = pathlib.Path(given)
+    if path.is_absolute():
+        return path
+    from_cwd = pathlib.Path.cwd() / path
+    if from_cwd.exists():
+        return from_cwd
+    return root / path
+
+
+def _rel_items(root, path):
+    resolved = path.resolve()
+    try:
+        return resolved.relative_to(root).as_posix()
+    except ValueError:
+        return resolved.as_posix()
+
+
+def _commit(root):
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=root, text=True, stderr=subprocess.DEVNULL).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return ""
+
+
+def _scored_method(methods):
+    """embed or keyword only when every routed call used that method. Anything else is mixed."""
+    kinds = set(methods)
+    if kinds == {"embed"}:
+        return "embed"
+    if kinds == {"keyword"}:
+        return "keyword"
+    return "mixed"
+
+
+def _run_meta(items, mode, split_name, embed_model, embed_url, commit):
+    """Same run fields the held-out record carries: date, commit, task count, model."""
+    labelled = sum(1 for item in items if item.get("label") != "none")
+    return {
+        "commit": commit,
+        "date": datetime.date.today().isoformat(),
+        "mode": mode,
+        "split": split_name,
+        "n_labelled": labelled,
+        "n_none": sum(1 for item in items if item.get("label") == "none"),
+        "embed_model": embed_model,
+        "embed": {"model": embed_model, "url": embed_url},
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description="T1 routing evaluation")
     parser.add_argument("--split", choices=["train", "heldout"], default="heldout")
     parser.add_argument("--mode", choices=["auto", "keyword"], default="auto")
     parser.add_argument("--json", type=str, metavar="PATH", help="Path to write JSON report")
+    parser.add_argument("--items", default=None,
+                        help="JSONL items (default: evals/routing/items.jsonl)")
+    parser.add_argument("--split-name", default=None,
+                        help="record this split name, the items path, and items_sha256")
+    parser.add_argument("--vs-keyword", action="store_true",
+                        help="add vs_keyword.baseline_top1 from keyword mode on the same items")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
 
@@ -137,7 +200,7 @@ def main():
     
     import meta_select
     
-    items_path = root / "evals" / "routing" / "items.jsonl"
+    items_path = _items_path(root, args.items)
     items = []
     with open(items_path, "r") as f:
         for line in f:
@@ -145,16 +208,78 @@ def main():
             if item["split"] == args.split:
                 items.append(item)
 
+    # A named auto record is a measurement of the embedding router. Keyword
+    # fallback must not be written as that number. COCO_EMBED_URL overrides
+    # the default http://127.0.0.1:1234/v1/embeddings (see meta_select).
+    record = bool(args.split_name or args.vs_keyword)
+    strict_auto = args.mode == "auto" and record
+    if strict_auto:
+        try:
+            meta_select.embed(["."])
+        except Exception as e:
+            print(f"embedding server not reachable at {meta_select.EMBED_URL}: "
+                  f"{type(e).__name__}: {e}", file=sys.stderr)
+            print("refusing to write a keyword score as the router top-1", file=sys.stderr)
+            sys.exit(1)
+
     if args.mode == "keyword":
         # Force keyword mode by wrapping select to catch and fallback, or monkeypatching
         # `meta_select.EMBED_URL` to something invalid, or directly calling `select_keyword`.
         def select_fn(prompt):
             profs = meta_select.team_profiles()
             return meta_select.select_keyword(prompt, profs)
+    elif strict_auto:
+        profs = meta_select.team_profiles()
+
+        def select_fn(prompt):
+            return meta_select.select_embed(prompt, profs)
     else:
         select_fn = meta_select.select
 
-    metrics = evaluate(items, select_fn)
+    # Count the scored calls only. The vs_keyword baseline is a separate pass.
+    routed_methods = []
+
+    def select_routed(prompt):
+        res = select_fn(prompt)
+        routed_methods.append(res.get("method") if isinstance(res, dict) else None)
+        return res
+
+    try:
+        metrics = evaluate(items, select_routed)
+    except Exception as e:
+        if strict_auto:
+            print(f"embedding server failed during scoring at {meta_select.EMBED_URL}: "
+                  f"{type(e).__name__}: {e}", file=sys.stderr)
+            print("refusing to write a keyword score as the router top-1", file=sys.stderr)
+            sys.exit(1)
+        raise
+    scored_method = _scored_method(routed_methods)
+    if strict_auto and scored_method != "embed":
+        print(f"routed method was {scored_method}, not embed", file=sys.stderr)
+        print("refusing to write a keyword score as the router top-1", file=sys.stderr)
+        sys.exit(1)
+
+    if args.vs_keyword:
+        def keyword_fn(prompt):
+            profs = meta_select.team_profiles()
+            return meta_select.select_keyword(prompt, profs)
+        metrics["vs_keyword"] = {"baseline_top1": evaluate(items, keyword_fn)["top1_accuracy"]}
+
+    if args.split_name:
+        metrics["split"] = args.split_name
+        metrics["items"] = _rel_items(root, items_path)
+        metrics["items_sha256"] = hashlib.sha256(items_path.read_bytes()).hexdigest()
+
+    if record:
+        metrics["run"] = _run_meta(
+            items, args.mode, args.split_name or args.split,
+            meta_select.EMBED_MODEL, meta_select.EMBED_URL, _commit(root))
+
+    metrics["method"] = scored_method
+    # Keyword mode is the method itself. A fallback is a keyword call while mode is auto.
+    metrics["keyword_fallbacks"] = (
+        sum(1 for method in routed_methods if method == "keyword")
+        if args.mode == "auto" else 0)
 
     if args.json:
         report_json = json.dumps(metrics, indent=2)

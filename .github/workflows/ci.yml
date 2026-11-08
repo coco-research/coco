@@ -76,12 +76,19 @@ jobs:
       - name: Validate the Claude Code uninstall
         run: bash tests/check-uninstall.sh
 
+      - name: Install --workflow-only and Remove round trips (including a killed Remove)
+        run: bash tests/check-install-workflow-only.sh
+
       - name: Validate generated SI commands resolve
         run: bash tests/check-si-commands-resolve.sh
       - name: coco-gate githook (chain or skip, never overwrite)
         run: bash tests/check-coco-githook-install.sh
       - name: Validate codex AGENTS.md paths exist
         run: bash tests/check-codex-agents-md-paths.sh
+      - name: Validate grok /team commands find the team-gate scripts
+        run: bash tests/check-grok-team-gate.sh
+      - name: Cursor uninstall removes the generated SI commands and keeps user files
+        run: bash tests/check-cursor-uninstall-si.sh
 
       - name: coco-workflow gate cases (forgery, happy path, workflow hygiene)
         run: bash tests/check-coco-gate.sh
@@ -101,6 +108,9 @@ jobs:
       - name: Validate uninstall removes the update-check cache
         run: bash tests/check-cli-uninstall-cleanup.sh
 
+      - name: Validate the PI-Desktop uninstall removes the generated SI prompts
+        run: bash tests/check-pi-desktop-uninstall-si.sh
+
       - name: Validate CLI refuses a directory that is not the Coco clone
         run: bash tests/check-cli-clone-guard.sh
 
@@ -115,6 +125,9 @@ jobs:
 
       - name: Validate the CLI help lists every adapter
         run: python3 tests/check-help-adapters.py
+
+      - name: Validate aider AGENTS.md carries skills, commands and rules
+        run: bash tests/check-aider-delivers.sh
 
       - name: Adapter smoke test (dry-run)
         run: |
@@ -318,6 +331,9 @@ jobs:
 
       - name: Skill eval harness self-test
         run: python3 evals/skills/score.py --self-test
+
+      - name: Routing description split (offline)
+        run: bash tests/check-routing-descriptions.sh
       - name: Skill improve-round core tests
         run: python3 -m unittest tests/test_skill_improve.py
 
@@ -329,6 +345,9 @@ jobs:
 
       - name: Router M0 decision log (opt-in, hash only)
         run: python3 -m unittest tests/test_meta_select_m0.py tests/test_meta_select_embed.py
+
+      - name: Router embedding fallback (LM Studio, then Ollama)
+        run: python3 tests/check-router-embed-fallback.py
 
       - name: Code verification skill grader
         run: python3 -m unittest tests/test_skill_grader_codeverify.py
@@ -354,6 +373,9 @@ jobs:
       # No actions/setup-python here: it is broken on this runner (see self-hosted-probe.yml).
       - name: Gate self-test
         run: python3 evals/routing/check_regression.py --self-test
+
+      - name: Routing description split (offline)
+        run: bash tests/check-routing-descriptions.sh
 
       - name: Probe local Ollama
         id: probe

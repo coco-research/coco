@@ -53,6 +53,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ## [Unreleased]
 
+### Changed
+
+- Relicensed from MIT to Apache-2.0 from 2026-11-05. Earlier releases remain under MIT.
+
 ### Added
 
 - `officecli` skill and `/officecli` command, adapted from OfficeCLI (Apache-2.0) with the install section replaced by a Homebrew check and the update check disabled.

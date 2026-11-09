@@ -23,7 +23,7 @@ Coco auto-detects your AI tool. Override if needed:
 | Windsurf, Cline | `bash install.sh --adapter generic` |
 | Continue (VS Code) | `bash install.sh --adapter vscode-continue` |
 
-That's it. On Claude Code your AI now has 191 skills, 388 commands and 34 agents (measured in [`docs/delivered-counts.json`](delivered-counts.json)).
+That's it. On Claude Code your AI now has 191 skills, 389 commands and 34 agents (measured in [`docs/delivered-counts.json`](delivered-counts.json)).
 
 ---
 

@@ -3,7 +3,7 @@
   "adapter": "claude-code",
   "mode": "default (no flags)",
   "skills": 191,
-  "commands": 388,
+  "commands": 389,
   "generated_commands": 342,
   "agents": 34
 }

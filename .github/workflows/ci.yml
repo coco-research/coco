@@ -336,6 +336,8 @@ jobs:
         run: bash tests/check-routing-descriptions.sh
       - name: Skill improve-round core tests
         run: python3 -m unittest tests/test_skill_improve.py
+      - name: /coco improve keeps a good change and rejects an overfit one
+        run: bash tests/check-coco-improve.sh
 
       - name: Pilot skill graders
         run: python3 -m unittest tests/test_skill_graders_docs.py

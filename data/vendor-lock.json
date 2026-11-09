@@ -1,0 +1,419 @@
+[
+  {
+    "name": "Superpowers",
+    "paths": [
+      "skills/brainstorming/**",
+      "skills/dispatching-parallel-agents/**",
+      "skills/executing-plans/**",
+      "skills/finishing-a-development-branch/**",
+      "skills/receiving-code-review/**",
+      "skills/requesting-code-review/**",
+      "skills/subagent-driven-development/**",
+      "skills/systematic-debugging/**",
+      "skills/test-driven-development/**",
+      "skills/using-git-worktrees/**",
+      "skills/using-superpowers/**",
+      "skills/verification-before-completion/**",
+      "skills/writing-plans/**",
+      "skills/writing-skills/**",
+      "licenses/third-party/superpowers.LICENSE"
+    ],
+    "repo": "https://github.com/obra/superpowers",
+    "pinned_ref": "unknown",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "skills/brainstorming/LICENSE",
+        "sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400"
+      },
+      {
+        "path": "skills/dispatching-parallel-agents/LICENSE",
+        "sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400"
+      },
+      {
+        "path": "skills/executing-plans/LICENSE",
+        "sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400"
+      },
+      {
+        "path": "skills/finishing-a-development-branch/LICENSE",
+        "sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400"
+      },
+      {
+        "path": "skills/receiving-code-review/LICENSE",
+        "sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400"
+      },
+      {
+        "path": "skills/requesting-code-review/LICENSE",
+        "sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400"
+      },
+      {
+        "path": "skills/subagent-driven-development/LICENSE",
+        "sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400"
+      },
+      {
+        "path": "skills/systematic-debugging/LICENSE",
+        "sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400"
+      },
+      {
+        "path": "skills/test-driven-development/LICENSE",
+        "sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400"
+      },
+      {
+        "path": "skills/using-git-worktrees/LICENSE",
+        "sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400"
+      },
+      {
+        "path": "skills/using-superpowers/LICENSE",
+        "sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400"
+      },
+      {
+        "path": "skills/verification-before-completion/LICENSE",
+        "sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400"
+      },
+      {
+        "path": "skills/writing-plans/LICENSE",
+        "sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400"
+      },
+      {
+        "path": "skills/writing-skills/LICENSE",
+        "sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "GSD — Get Shit Done",
+    "paths": [
+      "systems/gsd/**"
+    ],
+    "repo": "https://github.com/gsd-build/get-shit-done",
+    "pinned_ref": "unknown",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "systems/gsd/LICENSE",
+        "sha256": "af0d31f2550b534c14251e14020f3378cf17bd21af7660e7d7b1a2ead4fcdfb4"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "humanizer",
+    "paths": [
+      "skills/humanizer/**"
+    ],
+    "repo": "https://github.com/blader/humanizer",
+    "pinned_ref": "v2.8.0",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "skills/humanizer/LICENSE",
+        "sha256": "c158fb05776ff53d0ba4dddef0d59ab67a0d4e91e6dcbb6269efabd4620566f3"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "visual-explainer",
+    "paths": [
+      "skills/visual-explainer/**"
+    ],
+    "repo": "https://github.com/nicobailon/visual-explainer",
+    "pinned_ref": "unknown",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "skills/visual-explainer/LICENSE",
+        "sha256": "871b3c6c64e030c0647ca33543716bdae9511ae2d6a85d6f4ce63783bab52c8f"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "diagram-design",
+    "paths": [
+      "skills/coco-diagram/**"
+    ],
+    "repo": "https://github.com/cathrynlavery/diagram-design",
+    "pinned_ref": "v2.3.2",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "skills/coco-diagram/LICENSE",
+        "sha256": "bb7e12e91fecef43024111123ff784cec6c485585561d8b552557c0173b3ed29"
+      }
+    ],
+    "mode": "adapted",
+    "patch": null
+  },
+  {
+    "name": "ai-website-cloner-template",
+    "paths": [
+      "skills/clone-website/**"
+    ],
+    "repo": "https://github.com/JCodesMore/ai-website-cloner-template",
+    "pinned_ref": "ee3f5a2f31fd549b9593fa4f7cf6d2955ee593bb",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "skills/clone-website/LICENSE",
+        "sha256": "cfe9368816ead6d3b0a9e0d851dcab796885c72e7b479cff1c7939debea0826d"
+      }
+    ],
+    "mode": "adapted",
+    "patch": null
+  },
+  {
+    "name": "brag",
+    "paths": [
+      "skills/coco-ads/**"
+    ],
+    "repo": "https://github.com/latent-spaces/brag",
+    "pinned_ref": "unknown",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "skills/coco-ads/LICENSE",
+        "sha256": "92d538e0da9abeaafff8ecfc62e142f5053fa92b2c3ef29978742c325c554089"
+      }
+    ],
+    "mode": "adapted",
+    "patch": null
+  },
+  {
+    "name": "HyperFrames",
+    "paths": [
+      "systems/hyperframes/**"
+    ],
+    "repo": "https://github.com/heygen-com/hyperframes",
+    "pinned_ref": "unknown",
+    "licence_spdx": "Apache-2.0",
+    "licence_files": [
+      {
+        "path": "systems/hyperframes/LICENSE",
+        "sha256": "4259155fb06f127687ee7b0a8a3682d45132db0f2da26cbc0b7a2d1e796436b8"
+      },
+      {
+        "path": "systems/hyperframes/skills/talking-head-recut/NOTICE.md",
+        "sha256": "0e0a88d4eb584a1a0805930d30918ceebf0824fbb594731ebaa069eea9849995"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "GSAP",
+    "paths": [
+      "systems/hyperframes/skills/music-to-video/references/motion-primitives/assets/gsap.min.js",
+      "systems/hyperframes/skills/talking-head-recut/assets/vendor/gsap.min.js"
+    ],
+    "repo": "https://gsap.com",
+    "pinned_ref": "3.15.0",
+    "licence_spdx": "LicenseRef-GSAP",
+    "licence_files": [
+      {
+        "path": "systems/hyperframes/skills/music-to-video/references/motion-primitives/assets/gsap.min.js",
+        "sha256": "92bb9a96476f983d212a2bc4f54c889039c1696dd4461d40a736860938570fbb"
+      },
+      {
+        "path": "systems/hyperframes/skills/talking-head-recut/assets/vendor/gsap.min.js",
+        "sha256": "c3a03a345e45bc954cd48c43f11572891f5dca7a5d99348d5bc14753a728618c"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "HyperFrames skill fonts",
+    "paths": [
+      "systems/hyperframes/skills/talking-head-recut/assets/fonts/**",
+      "systems/hyperframes/skills/music-to-video/references/templates/logo-split-lockup-pulse/assets/**"
+    ],
+    "repo": "https://github.com/google/fonts",
+    "pinned_ref": "2eb0b48d5f760f62e286216f0859a8c540dbc1bd",
+    "licence_spdx": "OFL-1.1",
+    "licence_files": [],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "Inter",
+    "paths": [
+      "systems/hyperframes/skills/talking-head-recut/assets/fonts/Inter-*.woff2",
+      "systems/hyperframes/skills/hyperframes-creative/frame-presets/code-editorial/fonts/Inter-*.woff2",
+      "systems/hyperframes/skills/embedded-captions/modes/standard/fonts/files/inter-latin-*.woff2"
+    ],
+    "repo": "https://github.com/rsms/inter",
+    "pinned_ref": "66647c0bb",
+    "licence_spdx": "OFL-1.1",
+    "licence_files": [],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "Anthropic",
+    "paths": [
+      "skills/skill-creator/**",
+      "skills/frontend-design/**"
+    ],
+    "repo": "https://github.com/anthropics/skills",
+    "pinned_ref": "unknown",
+    "licence_spdx": "Apache-2.0",
+    "licence_files": [
+      {
+        "path": "skills/skill-creator/LICENSE.txt",
+        "sha256": "bc6b3af2f331cbc7fb0da1344efb2cbe5877a31498b4d70dbc7000f3405a1362"
+      },
+      {
+        "path": "skills/frontend-design/LICENSE.txt",
+        "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "vtake-skills",
+    "paths": [
+      "systems/hyperframes/skills/talking-head-recut/**"
+    ],
+    "repo": "https://github.com/notedit/vtake-skills",
+    "pinned_ref": "unknown",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "systems/hyperframes/skills/talking-head-recut/NOTICE.md",
+        "sha256": "0e0a88d4eb584a1a0805930d30918ceebf0824fbb594731ebaa069eea9849995"
+      }
+    ],
+    "mode": "adapted",
+    "patch": null
+  },
+  {
+    "name": "scroll-world",
+    "paths": [
+      "skills/scroll-world/**"
+    ],
+    "repo": "https://github.com/oso95/scroll-world",
+    "pinned_ref": "unknown",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "skills/scroll-world/LICENSE",
+        "sha256": "c4b96a7a050b85026eb68ac5b5fee2778384b14371aaeac50891dbadd848d309"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "openai-agents",
+    "paths": [
+      "skills/openai-agents/**"
+    ],
+    "repo": "https://github.com/jezweb",
+    "pinned_ref": "unknown",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "skills/openai-agents/LICENSE",
+        "sha256": "4530f92f44fe545e18773c7bbe0c312b0f04b78c161bdb784ff24f0ace9a5592"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "claude-code-templates",
+    "paths": [
+      "agents/vendor/claude-code-templates/**"
+    ],
+    "repo": "https://github.com/davila7/claude-code-templates",
+    "pinned_ref": "unknown",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "agents/vendor/claude-code-templates/LICENSE",
+        "sha256": "15cc073ffa3a01bb7da145aeae2a842b473860d142c92485536ee9c91195a705"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "reverse-skill",
+    "paths": [
+      "systems/reverse-skill/**"
+    ],
+    "repo": "https://github.com/zhaoxuya520/reverse-skill",
+    "pinned_ref": "unknown",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "systems/reverse-skill/LICENSE",
+        "sha256": "20876806ebaaae11d53fe07e221a4de4e67a017b6c91bb02d62df906213d2f60"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "OfficeCLI",
+    "paths": [
+      "skills/officecli/**"
+    ],
+    "repo": "https://github.com/iOfficeAI/OfficeCLI",
+    "pinned_ref": "unknown",
+    "licence_spdx": "Apache-2.0",
+    "licence_files": [
+      {
+        "path": "skills/officecli/LICENSE",
+        "sha256": "7e282402a5a6db33995fe638bb3fe79013f9884d8f7d15a42e481c1e86aadda1"
+      },
+      {
+        "path": "skills/officecli/NOTICE",
+        "sha256": "3a4715b268e148a8e9566f5e835f766f5c95c3da4d6e5ddd908806a258a2f07b"
+      }
+    ],
+    "mode": "adapted",
+    "patch": null
+  },
+  {
+    "name": "Kenney.nl",
+    "paths": [
+      "skills/coco-ads/assets/sfx/*/*.ogg"
+    ],
+    "repo": "https://kenney.nl",
+    "pinned_ref": "unknown",
+    "licence_spdx": "CC0-1.0",
+    "licence_files": [
+      {
+        "path": "skills/coco-ads/assets/sfx/*/*.ogg",
+        "sha256": "45313a7684037abd5aae0148f88a215beed7bccdfd4c1c48826fc3aa4a146068"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "Solving a Million-Step LLM Task with Zero Errors",
+    "paths": [
+      "skills/maker-mdap/**"
+    ],
+    "repo": "https://arxiv.org/abs/2511.09030",
+    "pinned_ref": "unknown",
+    "licence_spdx": "CC-BY-4.0",
+    "licence_files": [
+      {
+        "path": "skills/maker-mdap/NOTICE.md",
+        "sha256": "1b4a432b739300237ff051ba373b748aec7b6be7403c4a33dd93420df91f0702"
+      }
+    ],
+    "mode": "adapted",
+    "patch": null
+  }
+]

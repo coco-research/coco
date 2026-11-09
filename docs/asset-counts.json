@@ -6,9 +6,9 @@
     "bundle": 152
   },
   "commands": {
-    "shipped": 46,
+    "shipped": 47,
     "generated_si": 342,
-    "customer_facing": 388,
+    "customer_facing": 389,
     "namespaces": 8
   },
   "agents": {

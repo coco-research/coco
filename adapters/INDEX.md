@@ -10,17 +10,17 @@ because most adapters link into the checkout rather than copying.
 |---|---:|---:|---:|---:|:--:|---:|
 | `aider` | 342 | 342 | 0 | 0 | yes | 0 |
 | `amazon-q` | 0 | 0 | 0 | 34 | — | 0 |
-| `claude-code` | 388 | 342 | 191 | 34 | — | 0 |
+| `claude-code` | 389 | 342 | 191 | 34 | — | 0 |
 | `cline` | 0 | 0 | 0 | 34 | — | 0 |
 | `codex` | 342 | 342 | 0 | 0 | yes | 0 |
-| `cursor` | 388 | 342 | 183 | 0 | — | 0 |
+| `cursor` | 389 | 342 | 183 | 0 | — | 0 |
 | `generic` | 342 | 342 | 0 | 0 | yes | 0 |
 | `github-copilot-cli` | 0 | 0 | 0 | 0 | yes | 0 |
-| `grok` | 391 | 342 | 191 | 34 | — | 0 |
-| `hermes` | 388 | 342 | 191 | 34 | — | 0 |
-| `pi-desktop` | 388 | 342 | 194 | 37 | — | 0 |
+| `grok` | 392 | 342 | 191 | 34 | — | 0 |
+| `hermes` | 389 | 342 | 191 | 34 | — | 0 |
+| `pi-desktop` | 389 | 342 | 194 | 37 | — | 0 |
 | `roo-code` | 0 | 0 | 0 | 34 | — | 0 |
-| `vscode` | 388 | 342 | 191 | 34 | — | 0 |
+| `vscode` | 389 | 342 | 191 | 34 | — | 0 |
 | `vscode-continue` | 0 | 0 | 178 | 34 | — | 0 |
 | `windsurf` | 0 | 0 | 178 | 34 | — | 0 |
 | `zed` | 0 | 0 | 0 | 34 | — | 0 |
@@ -29,26 +29,26 @@ because most adapters link into the checkout rather than copying.
 
 | Surface | Best adapter | Advertised |
 |---|---:|---:|
-| Slash commands | 391 | 388 |
+| Slash commands | 392 | 389 |
 | Skills | 194 | 229 |
 
 ## Adapters below the command ceiling
 
 The Super Intelligence family is generated at install time, not committed, so an
-adapter that does not invoke the generators delivers 46 commands instead of 388.
+adapter that does not invoke the generators delivers 47 commands instead of 389.
 This section is the standing list of who is short and by how much.
 
 | Adapter | Commands | Short by | Cause |
 |---|---:|---:|---|
-| `amazon-q` | 0 | 388 | does not invoke the SI generators |
-| `cline` | 0 | 388 | does not invoke the SI generators |
-| `roo-code` | 0 | 388 | does not invoke the SI generators |
-| `vscode-continue` | 0 | 388 | does not invoke the SI generators |
-| `windsurf` | 0 | 388 | does not invoke the SI generators |
-| `zed` | 0 | 388 | does not invoke the SI generators |
-| `aider` | 342 | 46 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
-| `codex` | 342 | 46 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
-| `generic` | 342 | 46 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
+| `amazon-q` | 0 | 389 | does not invoke the SI generators |
+| `cline` | 0 | 389 | does not invoke the SI generators |
+| `roo-code` | 0 | 389 | does not invoke the SI generators |
+| `vscode-continue` | 0 | 389 | does not invoke the SI generators |
+| `windsurf` | 0 | 389 | does not invoke the SI generators |
+| `zed` | 0 | 389 | does not invoke the SI generators |
+| `aider` | 342 | 47 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
+| `codex` | 342 | 47 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
+| `generic` | 342 | 47 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
 
 Not comparable (AGENTS.md producers rather than tree installers): `github-copilot-cli`.
 

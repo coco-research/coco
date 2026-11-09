@@ -193,6 +193,8 @@ jobs:
         run: |
           python3 tests/check-persona-attribution.py
           python3 tests/check-persona-attribution.py --self-test
+      - name: Persona checker fires on every planted defect
+        run: bash tests/check-personas-test.sh
 
       - name: Verify the delivery index matches what the adapters install
         run: |

@@ -32,6 +32,14 @@ CoCo stands on the shoulders of excellent open-source work. This file credits ev
 | **Solving a Million-Step LLM Task with Zero Errors** by Meyerson et al. (Cognizant AI Lab / UT Austin) | The `maker-mdap` knowledge skill — adapted notes on Maximal Agentic Decomposition, first-to-ahead-by-k voting, red-flagging, and scaling laws. | https://arxiv.org/abs/2511.09030 | CC BY 4.0 |
 | **OfficeCLI** by goworm | The `officecli` skill, adapted from upstream SKILL.md with the install section replaced by a Homebrew check and the update check disabled; upstream LICENSE and NOTICE retained at `skills/officecli/` | https://github.com/iOfficeAI/OfficeCLI | Apache-2.0 (Copyright 2026 OfficeCLI) |
 
+## Tools used, not bundled
+
+Tools the project runs but does not redistribute. Each is installed from its own release at the version recorded where it is invoked.
+
+| Tool | What CoCo uses it for | Upstream | License |
+|---|---|---|---|
+| **SkillSpector** by NVIDIA | The static scan in `.github/workflows/skill-scan.yml`: the skill folders a pull request changes in `skills/` and `systems/*/skills/`, static rules only and no model key, failing on a high or critical finding. Installed from the release tag pinned in that workflow. | https://github.com/NVIDIA/skillspector | Apache-2.0 |
+
 ## Feature inspirations
 
 | Project | What CoCo took | Upstream | License |

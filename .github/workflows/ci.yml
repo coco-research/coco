@@ -299,6 +299,12 @@ jobs:
         # from the files it covers.
         run: python3 tests/check-vendor-lock.py
 
+      - name: Vendor-lock gate cases (GSAP notice and pin, CC0 reservation, digests)
+        # Each case breaks a throwaway copy of the tree for one known reason and
+        # requires tests/check-vendor-lock.py to exit 1 with a line naming it, so
+        # a licence rule that stops firing fails CI instead of passing quietly.
+        run: bash tests/check-vendor-lock-cases.sh
+
       - name: Validate the SI team role roster
         run: |
           # The roster is the catalogue a scheduler reads to pick roles and compose their

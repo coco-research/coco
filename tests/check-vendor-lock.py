@@ -12,13 +12,22 @@ Rules, one line per problem:
   (b) every `licence_files[].sha256` equals the sha256 of that file on disk;
   (c) every vendored row in CREDITS.md has a lock row with the same name, and
       no lock row names something CREDITS.md does not vendor;
-  (d) `licence_spdx` is one of ALLOWED_SPDX, and LicenseRef-GSAP belongs to the
-      GSAP row alone.
+  (d) `licence_spdx` is one of ALLOWED_SPDX, and an id in RESERVED_SPDX belongs
+      to its one row alone: LicenseRef-GSAP, CC0-1.0, CC-BY-4.0;
+  (e) GSAP's builds still carry their upstream notice verbatim;
+  (f) GSAP's `pinned_ref` still equals GSAP_REF.
 
 Which CREDITS rows count as vendored. The first table credits every project,
-but three kinds of row ship no code here: a link-only stub, an item that is not
-bundled, and an item whose licence has no id in ALLOWED_SPDX (CC0, CC BY 4.0).
-The last kind cannot be locked at all, so it is not required to have a row.
+but two kinds of row ship no code here: a link-only stub, and an item that is
+not bundled.
+
+A `licence_files` entry is normally a licence or notice file beside the code,
+and its name has to be one of LICENCE_NAMES. When an item ships no licence
+file of its own, the entry may instead name a file the row already vendors,
+because that file carries the notice in its header (both GSAP builds do). An
+entry may also be a glob when one licence covers many files (the Kenney.nl
+sound effects); its digest is the sha256 of the sorted "path NUL sha256"
+lines of every file it matches, so one entry pins the whole set.
 
 Digests are pinned, never guessed. `--update` rewrites every `sha256` from the
 files on disk and you commit the result. Until a file is pinned its digest is
@@ -26,10 +35,16 @@ the empty string, and rule (b) then compares the file with its own committed
 blob instead, so an unpinned entry still catches a local edit; only a committed
 one can slip past. Run `--update` once and the lock stands on its own.
 
+An `--update` that changes a licence-file digest or an SPDX id must cite a
+licence-reviewer ruling in its commit message, because the licence is what
+changed. A ref or digest re-pin with no licence change is the code reviewer's
+call alone.
+
 Run from the repo root:
   python3 tests/check-vendor-lock.py
   python3 tests/check-vendor-lock.py --update
 """
+import fnmatch
 import glob
 import hashlib
 import json
@@ -43,7 +58,18 @@ LOCK_PATH = ROOT / "data" / "vendor-lock.json"
 CREDITS_PATH = ROOT / "CREDITS.md"
 
 ALLOWED_SPDX = ("MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC",
-                "OFL-1.1", "LicenseRef-GSAP")
+                "OFL-1.1", "LicenseRef-GSAP", "CC0-1.0", "CC-BY-4.0")
+# Ids that belong to exactly one row: {id: row name}.
+RESERVED_SPDX = {
+    "LicenseRef-GSAP": "GSAP",
+    "CC0-1.0": "Kenney.nl",
+    "CC-BY-4.0": "Solving a Million-Step LLM Task with Zero Errors",
+}
+# GSAP's two builds carry their licence in the file header, not beside it.
+GSAP_NOTICE = "Subject to the terms at https://gsap.com/standard-license"
+# The GSAP build the licence review covered. Any bump to this pin needs a
+# licence-reviewer ruling before it lands; a code reviewer cannot make it.
+GSAP_REF = "3.15.0"
 FIELDS = ("name", "paths", "repo", "pinned_ref", "licence_spdx",
           "licence_files", "mode", "patch")
 MODES = ("verbatim", "adapted")
@@ -54,13 +80,31 @@ HEADING = "## Bundled / adapted systems"
 STUB = re.compile(r"link-only stub|not bundled|not redistributed", re.I)
 # Rows whose licence we can name with an id from ALLOWED_SPDX.
 NAMED_LICENCE = re.compile(
-    r"\bMIT\b|\bApache[- ]2\.0\b|\bBSD-[23]-Clause\b|\bISC\b|\bOFL\b|\bGSAP\b", re.I)
+    r"\bMIT\b|\bApache[- ]2\.0\b|\bBSD-[23]-Clause\b|\bISC\b|\bOFL\b|\bGSAP\b"
+    r"|\bCC0\b|\bCC[- ]BY[- ]4\.0\b", re.I)
 PARENTHETICAL = re.compile(r"\s*\([^()]*\)\s*$")
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 
 
 def sha256_bytes(data):
     return hashlib.sha256(data).hexdigest()
+
+
+def set_digest(rel):
+    """One digest for every file a glob matches: adds, removals and edits all move it."""
+    files = sorted(Path(m) for m in glob.glob(str(ROOT / rel), recursive=True) if Path(m).is_file())
+    lines = "".join(f"{f.relative_to(ROOT)}\0{sha256_bytes(f.read_bytes())}\n" for f in files)
+    return sha256_bytes(lines.encode("utf-8"))
+
+
+def is_pattern(rel):
+    """True when `rel` is a glob covering many files, not one file."""
+    return any(char in rel for char in "*?[")
+
+
+def in_row_paths(row, rel):
+    """True when `rel` is a file the row's own `paths` declare."""
+    return any(fnmatch.fnmatchcase(rel, pattern) for pattern in row.get("paths") or [])
 
 
 def credits_rows():
@@ -115,8 +159,9 @@ def check_shape(label, row):
     spdx = row.get("licence_spdx")
     if spdx not in ALLOWED_SPDX:
         problems.append(f"{label}: licence_spdx {spdx!r} is not one of {', '.join(ALLOWED_SPDX)}")
-    if spdx == "LicenseRef-GSAP" and row.get("name") != "GSAP":
-        problems.append(f"{label}: LicenseRef-GSAP is reserved for the GSAP row")
+    reserved_to = RESERVED_SPDX.get(spdx) if isinstance(spdx, str) else None
+    if reserved_to and row.get("name") != reserved_to:
+        problems.append(f"{label}: {spdx} is reserved for the {reserved_to} row")
     return problems
 
 
@@ -147,12 +192,19 @@ def check_licences(label, row):
         if Path(rel).is_absolute() or ".." in Path(rel).parts:
             problems.append(f"{label}: licence file {rel!r} is not repo-relative")
             continue
+        if is_pattern(rel):
+            if not glob.glob(str(ROOT / rel), recursive=True):
+                problems.append(f"{label}: licence pattern {rel!r} matches nothing")
+            elif entry.get("sha256") and entry["sha256"] != set_digest(rel):
+                problems.append(f"{label}: files under {rel} changed since they were pinned")
+            continue
         path = ROOT / rel
         if not path.is_file():
             problems.append(f"{label}: licence file {rel} does not exist")
             continue
-        if path.name not in LICENCE_NAMES:
-            problems.append(f"{label}: {rel} is not one of {', '.join(LICENCE_NAMES)}")
+        if path.name not in LICENCE_NAMES and not in_row_paths(row, rel):
+            problems.append(f"{label}: {rel} is neither a licence file "
+                            f"({', '.join(LICENCE_NAMES)}) nor one of the row's vendored files")
             continue
         digest = entry.get("sha256")
         actual = sha256_bytes(path.read_bytes())
@@ -191,22 +243,69 @@ def check_credits(rows):
     return problems
 
 
+def gsap_files(row):
+    """Every file on disk that carries GSAP: its paths and its pinned builds."""
+    found = []
+    for pattern in row.get("paths") or []:
+        found += glob.glob(str(ROOT / pattern), recursive=True)
+    for entry in row.get("licence_files") or []:
+        rel = entry.get("path") if isinstance(entry, dict) else None
+        if rel and not is_pattern(rel):
+            found.append(str(ROOT / rel))
+    return sorted({path for path in found if Path(path).is_file()})
+
+
+def check_gsap(rows):
+    """(e) the GSAP builds keep their notice, and (f) its ref does not move."""
+    problems = []
+    for row in rows:
+        if row.get("name") != "GSAP":
+            continue
+        if row.get("pinned_ref") != GSAP_REF:
+            problems.append(f"GSAP: pinned_ref must stay {GSAP_REF} "
+                            f"(a bump needs a licence-reviewer ruling first), "
+                            f"got {row.get('pinned_ref')!r}")
+        for match in gsap_files(row):
+            path = Path(match)
+            if GSAP_NOTICE.encode("utf-8") not in path.read_bytes():
+                problems.append(f"GSAP: {path.relative_to(ROOT)} no longer "
+                                f"contains {GSAP_NOTICE!r}")
+    return problems
+
+
 def unpinned_count(rows):
     return sum(1 for row in rows for entry in row.get("licence_files") or []
-               if isinstance(entry, dict) and not entry.get("sha256"))
+               if isinstance(entry, dict) and entry.get("path")
+               and not entry.get("sha256"))
 
 
 def pin(rows):
-    """Rewrite every digest from the files on disk."""
+    """Rewrite every digest from the files on disk.
+
+    A glob gets one set digest over every file it matches (see set_digest).
+    """
+    pinned = 0
     for row in rows:
+        entries = []
         for entry in row.get("licence_files") or []:
-            if not isinstance(entry, dict) or not entry.get("path"):
+            rel = entry.get("path") if isinstance(entry, dict) else None
+            if not rel:
+                entries.append(entry)
                 continue
-            path = ROOT / entry["path"]
+            if is_pattern(rel):
+                entry["sha256"] = set_digest(rel)
+                entries.append(entry)
+                pinned += 1
+                continue
+            path = ROOT / rel
             if path.is_file():
                 entry["sha256"] = sha256_bytes(path.read_bytes())
+                pinned += 1
+            entries.append(entry)
+        row["licence_files"] = entries
     LOCK_PATH.write_text(json.dumps(rows, indent=2, ensure_ascii=False) + "\n",
                          encoding="utf-8")
+    return pinned
 
 
 def main(argv):
@@ -232,7 +331,10 @@ def main(argv):
             found, notes = check_licences(label, row)
             problems += found
             notices += notes
-    problems += check_credits(rows)
+    # Non-object rows are reported above; the cross-row checks see objects only.
+    objects = [row for row in rows if isinstance(row, dict)]
+    problems += check_gsap(objects)
+    problems += check_credits(objects)
 
     if problems:
         for problem in problems:
@@ -241,9 +343,8 @@ def main(argv):
     for notice in notices:
         print(notice)
     if update:
-        pin(rows)
-        print(f"Pinned {sum(len(row.get('licence_files') or []) for row in rows)} "
-              f"licence digests in data/vendor-lock.json.")
+        pinned = pin(rows)
+        print(f"Pinned {pinned} licence digests in data/vendor-lock.json.")
         return 0
     print(f"Vendored items locked: {len(rows)} rows checked against CREDITS.md.")
     unpinned = unpinned_count(rows)

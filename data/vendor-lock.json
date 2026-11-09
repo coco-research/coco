@@ -214,7 +214,16 @@
     "repo": "https://gsap.com",
     "pinned_ref": "3.15.0",
     "licence_spdx": "LicenseRef-GSAP",
-    "licence_files": [],
+    "licence_files": [
+      {
+        "path": "systems/hyperframes/skills/music-to-video/references/motion-primitives/assets/gsap.min.js",
+        "sha256": "92bb9a96476f983d212a2bc4f54c889039c1696dd4461d40a736860938570fbb"
+      },
+      {
+        "path": "systems/hyperframes/skills/talking-head-recut/assets/vendor/gsap.min.js",
+        "sha256": "c3a03a345e45bc954cd48c43f11572891f5dca7a5d99348d5bc14753a728618c"
+      }
+    ],
     "mode": "verbatim",
     "patch": null
   },
@@ -368,6 +377,40 @@
       {
         "path": "skills/officecli/NOTICE",
         "sha256": "3a4715b268e148a8e9566f5e835f766f5c95c3da4d6e5ddd908806a258a2f07b"
+      }
+    ],
+    "mode": "adapted",
+    "patch": null
+  },
+  {
+    "name": "Kenney.nl",
+    "paths": [
+      "skills/coco-ads/assets/sfx/*/*.ogg"
+    ],
+    "repo": "https://kenney.nl",
+    "pinned_ref": "unknown",
+    "licence_spdx": "CC0-1.0",
+    "licence_files": [
+      {
+        "path": "skills/coco-ads/assets/sfx/*/*.ogg",
+        "sha256": "45313a7684037abd5aae0148f88a215beed7bccdfd4c1c48826fc3aa4a146068"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "Solving a Million-Step LLM Task with Zero Errors",
+    "paths": [
+      "skills/maker-mdap/**"
+    ],
+    "repo": "https://arxiv.org/abs/2511.09030",
+    "pinned_ref": "unknown",
+    "licence_spdx": "CC-BY-4.0",
+    "licence_files": [
+      {
+        "path": "skills/maker-mdap/NOTICE.md",
+        "sha256": "1b4a432b739300237ff051ba373b748aec7b6be7403c4a33dd93420df91f0702"
       }
     ],
     "mode": "adapted",

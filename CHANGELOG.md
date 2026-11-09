@@ -60,6 +60,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ### Added
 
 - `officecli` skill and `/officecli` command, adapted from OfficeCLI (Apache-2.0) with the install section replaced by a Homebrew check and the update check disabled.
+- Ponytail skills (`ponytail`, `ponytail-review`, `ponytail-audit`, `ponytail-debt`, `ponytail-gain`, `ponytail-help`): the lazy-senior-developer ladder for simpler code, vendored from DietrichGebert/ponytail (MIT).
+- `source-fetch` skill: fetch every public source to a local markdown file with crawl4ai, and record URL, status, fetch time and title in `sources.json`, before anything cites it.
 
 ## [1.8.0](https://github.com/coco-research/coco/compare/v1.7.3...v1.8.0) (2026-10-17)
 

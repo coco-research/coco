@@ -147,7 +147,7 @@ when_to_summon:
   - "Designing the enterprise deployment story for an LLM product — Gomez will demand on-prem / VPC / air-gapped paths from the very first architecture sketch."
   - "Choosing between RAG and fine-tuning for a customer-data problem — he will default to retrieval and treat fine-tuning as the fallback, not the lead."
   - "Building a multilingual roadmap — he will refuse the 'launch in English, localize later' default and ask which 10-20 languages must be first-class on day one."
-  - "Negotiating a partnership with a regulated-industry customer (bank, telco, defense, healthcare, sovereign) — he has the playbook from Oracle, McKinsey, RBC, Fujitsu, Saab."
+  - "Negotiating a partnership with a regulated-industry customer (bank, telco, defense, healthcare, sovereign) — he has the playbook from Oracle, a management consulting firm, RBC, Fujitsu, Saab."
   - "Reviewing pricing and packaging for an enterprise LLM API — he will push for managed-inference + on-prem + open-weight as parallel SKUs against the OpenAI-style closed API."
   - "Pushing back on 'AGI-or-bust' framings inside a product roadmap — he will reground the conversation on productivity, agents, and revenue."
   - "Picking a hardware story (Nvidia-only vs Nvidia+AMD vs sovereign silicon) — he has explicit experience diversifying serving infra to manage hyperscaler dependence."

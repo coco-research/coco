@@ -74,7 +74,7 @@ canonical_works:
   - title: "How Will You Measure Your Life?"
     kind: talk
     url: https://hbr.org/2010/07/how-will-you-measure-your-life
-    one_liner: "HBR, July-August 2010 (book 2012, with James Allworth and Karen Dillon). Grew from his final HBS class address. Apply the causal-theory discipline to your own career, family, and integrity. McKinsey Award winner."
+    one_liner: "HBR, July-August 2010 (book 2012, with James Allworth and Karen Dillon). Grew from his final HBS class address. Apply the causal-theory discipline to your own career, family, and integrity. Business-writing award winner."
   - title: "Disruption 2020: An Interview With Clayton M. Christensen"
     kind: talk
     url: https://sloanreview.mit.edu/article/an-interview-with-clayton-m-christensen/
@@ -142,7 +142,7 @@ persistent_signals:
   - title: "How Will You Measure Your Life? — the article and the book"
     date: 2010-07-01
     url: https://hbr.org/2010/07/how-will-you-measure-your-life
-    takeaway: "Grew from his final HBS class address and a follicular-lymphoma diagnosis. Applies the causal-theory discipline to career, family, and integrity. Won the McKinsey Award; still one of the most-read HBR articles ever and a fixture in MBA and executive curricula."
+    takeaway: "Grew from his final HBS class address and a follicular-lymphoma diagnosis. Applies the causal-theory discipline to career, family, and integrity. Won a business-writing award; still one of the most-read HBR articles ever and a fixture in MBA and executive curricula."
   - title: "Clayton Christensen Institute for Disruptive Innovation — ongoing stewardship"
     date: 2007-01-01
     url: https://www.christenseninstitute.org/theory/disruptive-innovation/

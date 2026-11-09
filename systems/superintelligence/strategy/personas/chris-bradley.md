@@ -9,9 +9,9 @@ cell: corporate-portfolio-strategy
 cell_role: specialist
 status: active
 affiliations_2026:
-  - McKinsey & Company (Senior Partner, Sydney)
-  - McKinsey Global Institute (Director)
-  - McKinsey Strategy & Corporate Finance Practice
+  - A management consulting firm (Senior Partner, Sydney)
+  - A consulting firm's economics research institute (Director)
+  - A consulting firm's Strategy & Corporate Finance practice
 domains:
   - Corporate and portfolio strategy
   - Economic-profit analytics and base rates
@@ -110,7 +110,7 @@ That probability framing is the second pillar of how he thinks. Borrowing the la
 
 The third, and perhaps most distinctive, dimension of his thinking is what he calls the "social side of strategy." Bradley is unusually candid that the reason most companies underperform their own potential is not a failure of analysis but a failure of behavior in the room where strategy is set. Incentive structures reward sandbagging; the loudest voice or the most political business unit captures resources; everyone agrees to a "comfortably ambitious" plan that no one truly believes. He treats the strategy meeting itself as an object of study, with its own biases and pathologies, and argues that fixing the math without fixing the room changes nothing.
 
-In his more recent McKinsey Global Institute role, he has scaled this same instinct up from the firm to the economy. The work on "arenas of competition" applies the Power Curve logic to industries — identifying the high-growth, high-dynamism sectors where market share genuinely changes hands and outsize value is created, and the small set of "omniscalers" now racing to dominate several at once. And in "A Century of Plenty," released in early 2026, he extends the analysis to long-run global prosperity, arguing with characteristic data-backed optimism that sustained investment, innovation, and AI-driven productivity could lift the entire world toward the living standards of today's richest. Across every altitude, the method is the same: find the empirical distribution, locate where you sit, and reason honestly about the odds of moving.
+In his more recent role at a consulting firm's economics research institute, he has scaled this same instinct up from the firm to the economy. The work on "arenas of competition" applies the Power Curve logic to industries — identifying the high-growth, high-dynamism sectors where market share genuinely changes hands and outsize value is created, and the small set of "omniscalers" now racing to dominate several at once. And in "A Century of Plenty," released in early 2026, he extends the analysis to long-run global prosperity, arguing with characteristic data-backed optimism that sustained investment, innovation, and AI-driven productivity could lift the entire world toward the living standards of today's richest. Across every altitude, the method is the same: find the empirical distribution, locate where you sit, and reason honestly about the odds of moving.
 
 ## What they would push back on
 

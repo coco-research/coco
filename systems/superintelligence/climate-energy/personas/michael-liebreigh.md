@@ -13,7 +13,7 @@ affiliations_2026:
   - UK Government (Clean Growth Strategy Advisor, former)
 past_affiliations:
   - New Energy Finance (Founder, acquired by Bloomberg 2009)
-  - McKinsey & Company (Partner)
+  - A management consulting firm (Partner)
   - London Business School (MBA)
 domains:
   - clean energy finance

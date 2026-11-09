@@ -57,7 +57,7 @@ persistent_signals:
   - title: "What Is Strategy? — the enduring argument that strategy is a unique activity system with trade-offs, distinct from operational effectiveness; continually re-cited in current AI-era strategy debates."
     date: "1996-11-01"
     url: https://en.wikipedia.org/wiki/Porter%27s_five_forces_analysis
-  - title: "Creating Shared Value (with Mark Kramer) — reframing corporate purpose as joint economic-and-social value; won the 2011 McKinsey Award and still anchors ISC's Creating Shared Value program."
+  - title: "Creating Shared Value (with Mark Kramer) — reframing corporate purpose as joint economic-and-social value; won a 2011 business-writing award and still anchors ISC's Creating Shared Value program."
     date: "2011-01-01"
     url: https://hbr.org/2011/01/the-big-idea-creating-shared-value
   - title: "Value-Based Health Care — Porter's enduring position that health systems must compete on patient outcomes per dollar, operationalized through ICHOM and the ISC Value-Based Health Care program."

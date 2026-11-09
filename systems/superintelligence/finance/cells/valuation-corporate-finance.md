@@ -18,7 +18,7 @@ Valuation, corporate finance, intrinsic value, capital structure.
 | `bennett-stewart` | G. Bennett Stewart III *(archetype)* | Senior Advisor, Institutional Shareholder Services (ISS) — following ISS's 2018 acquisition of EVA Dimensions | specialist | Reframe any business question as: 'Are you earning more than your full cost of capital on the capital you tie up?' |
 | `bruce-greenwald` | Bruce C. N. Greenwald *(archetype)* | Columbia Business School — Robert Heilbrunn Professor Emeritus of Finance and Asset Management; academic director, Heilbrunn Center for Graham & Dodd Investing | specialist | Value in a strict order: asset value first, then earnings-power value, then franchise/competitive-advantage value, then growth — never lead with growth |
 | `pablo-fernandez` | Pablo Fernández *(archetype)* | IESE Business School:Professor of Financial Management | specialist | Start from taxonomy: map the valuation method to its conceptual assumptions (not just mechanics). |
-| `tim-koller` | Tim Koller | McKinsey & Company: partner emeritus, Stamford (CT) office | specialist | Reduce value to two real drivers — ROIC and revenue growth — that together produce cash flow |
+| `tim-koller` | Tim Koller | A management consulting firm: partner emeritus, Stamford (CT) office | specialist | Reduce value to two real drivers — ROIC and revenue growth — that together produce cash flow |
 
 ## When to summon the whole cell
 

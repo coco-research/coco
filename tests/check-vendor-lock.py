@@ -18,8 +18,10 @@ Rules, one line per problem:
   (f) GSAP's `pinned_ref` still equals GSAP_REF.
 
 Which CREDITS rows count as vendored. The first table credits every project,
-but two kinds of row ship no code here: a link-only stub, and an item that is
-not bundled.
+but some rows ship no code here: a link-only stub, an item that is not
+bundled, and a standard we follow whose licence cell is "—". Every other row
+counts, whatever its licence says: one outside ALLOWED_SPDX is a problem, so a
+vendored item under an unreviewed licence cannot skip the gate.
 
 A `licence_files` entry is normally a licence or notice file beside the code,
 and its name has to be one of LICENCE_NAMES. When an item ships no licence
@@ -38,7 +40,9 @@ one can slip past. Run `--update` once and the lock stands on its own.
 An `--update` that changes a licence-file digest or an SPDX id must cite a
 licence-reviewer ruling in its commit message, because the licence is what
 changed. A ref or digest re-pin with no licence change is the code reviewer's
-call alone.
+call alone. Only maintainers run --update, and only inside a PR whose private
+plan cites the licence reviewer's OK for that exact change; that PR gets the
+code reviewer's review.
 
 Run from the repo root:
   python3 tests/check-vendor-lock.py
@@ -78,6 +82,8 @@ LICENCE_NAMES = ("LICENSE", "LICENSE.txt", "NOTICE", "NOTICE.md")
 HEADING = "## Bundled / adapted systems"
 # Rows that ship no code here.
 STUB = re.compile(r"link-only stub|not bundled|not redistributed", re.I)
+# A licence cell that says the row ships nothing under any licence.
+NO_LICENCE = ("—", "-", "")
 # Rows whose licence we can name with an id from ALLOWED_SPDX.
 NAMED_LICENCE = re.compile(
     r"\bMIT\b|\bApache[- ]2\.0\b|\bBSD-[23]-Clause\b|\bISC\b|\bOFL\b|\bGSAP\b"
@@ -133,7 +139,7 @@ def vendored_rows():
     """CREDITS rows that ship code here: {name: licence cell}."""
     out = {}
     for name, took, licence in credits_rows():
-        if STUB.search(took) or not NAMED_LICENCE.search(licence):
+        if STUB.search(took) or licence.strip() in NO_LICENCE:
             continue
         out[name] = licence
     return out
@@ -230,8 +236,11 @@ def check_credits(rows):
     problems = []
     required = vendored_rows()
     locked = [row.get("name") for row in rows]
-    for name in required:
-        if name not in locked:
+    for name, licence in required.items():
+        if not NAMED_LICENCE.search(licence):
+            problems.append(f"CREDITS.md row {name!r}: licence {licence!r} is not "
+                            f"on the allowlist; it needs a licence review first")
+        elif name not in locked:
             problems.append(f"CREDITS.md row {name!r} is vendored but "
                             f"data/vendor-lock.json has no row for it")
     for name in locked:

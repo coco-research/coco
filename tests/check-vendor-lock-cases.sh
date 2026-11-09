@@ -192,6 +192,29 @@ run_check "$case6" "$out"
 status=$?
 require "case 6 (one Kenney sound effect changed)" "$status" "$out" "Kenney.nl: files under"
 
+case7="$work/case7"
+cp -R "$pristine" "$case7"
+python3 - "$case7/CREDITS.md" <<'PY2'
+import sys
+path = sys.argv[1]
+text = open(path, encoding="utf-8").read()
+anchor = "## Bundled / adapted systems"
+head, rest = text.split(anchor, 1)
+lines = rest.split("\n")
+for i, line in enumerate(lines):
+    if line.startswith("|---") or line.startswith("| ---"):
+        lines.insert(i + 1, "| **CopyleftThing** by Someone | The whole skills/copyleft-thing/ skill, vendored verbatim | https://example.invalid/x | GPL-3.0 |")
+        break
+else:
+    raise SystemExit("case 7: no table separator")
+open(path, "w", encoding="utf-8").write(head + anchor + "\n".join(lines))
+PY2
+out="$work/case7.out"
+run_check "$case7" "$out"
+status=$?
+require "case 7 (a vendored CREDITS row under GPL-3.0)" "$status" "$out" \
+  "CopyleftThing" "GPL-3.0" "not on the allowlist"
+
 if [ "$fails" -ne 0 ]; then
   echo "$fails vendor-lock case(s) failed."
   exit 1

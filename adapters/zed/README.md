@@ -20,7 +20,7 @@ Flags: `--dry-run`, `--systems <list>`, `--core-only`. Run directly, the adapter
 Target root: `~/.config/zed/` (override with `ZED_HOME`).
 
 - `rules/*.md` → `~/.config/zed/rules/` (copied). The only markdown file directly under `rules/` is `README.md`, so that is all that is copied. The Cursor rules in `rules/cursor-mdc/*.mdc` are not.
-- `agents/*.md` → `~/.config/zed/agents/` (symlinks into the clone). This includes the `README.md`, `INDEX.md` and `PROMPT-DEFENSE.md` files that sit beside the agents: 16 links from a direct run, 40 through `install.sh`.
+- `agents/*.md` → `~/.config/zed/agents/` (symlinks into the clone). This includes the `README.md`, `INDEX.md` and `PROMPT-DEFENSE.md` files that sit beside the agents: 21 links from a direct run, 45 through `install.sh`.
 - `--systems <list>` adds each listed bundle's `agents/*.md` the same way. It links no skills or commands.
 
 An existing real file at an agent path is skipped, not overwritten. Re-runs replace the symlinks.

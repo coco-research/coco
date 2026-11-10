@@ -2,19 +2,24 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 36 agents** — 12 core, 24 across 1 bundles.
+**Total: 41 agents** — 17 core, 24 across 1 bundles.
 
-## Core agents (12)
+## Core agents (17)
 
 | Agent | Description |
 |-------|-------------|
 | [ai-engineer](ai-engineer.md) | Senior AI engineer for architecting, implementing, and optimizing end-to-end AI systems — from model selection and training pipelines to production deployment,  |
+| [chaos-engineer](chaos-engineer.md) | Use this agent when you need to design and execute controlled failure experiments, validate system resilience before incidents occur, or conduct game day exerci |
 | [code-reviewer](code-reviewer.md) | Senior code and architecture reviewer for comprehensive quality, security, performance, and architectural integrity analysis. Use proactively after writing or m |
+| [data-engineer](data-engineer.md) | Use this agent when you need to design, build, or optimize data pipelines, ETL/ELT processes, and data infrastructure. Invoke when designing data platforms, imp |
 | [data-specialist](data-specialist.md) | Senior data specialist covering exploratory analysis, statistical modeling, machine learning, experimentation, SQL optimization, query design, and performance t |
 | [database-architect](database-architect.md) | Database architecture and design specialist. Use PROACTIVELY for database design decisions, data modeling, scalability planning, microservices data patterns, da |
+| [documentation-engineer](documentation-engineer.md) | Use this agent when you need to create, architect, or overhaul comprehensive documentation systems including API docs, tutorials, guides, and developer-friendly |
+| [llm-architect](llm-architect.md) | Use when designing LLM systems for production, implementing fine-tuning or RAG architectures, optimizing inference serving infrastructure, or managing multi-mod |
 | [mcp-specialist](mcp-specialist.md) | MCP (Model Context Protocol) specialist covering server/client development, configuration, troubleshooting, tool setup, architecture, transport layers, and prot |
 | [pm-advisor](pm-advisor.md) | Product management advisor for feature planning, issue creation, prioritization, and data-driven product decisions. Use proactively when planning features, writ |
 | [refactoring-specialist](refactoring-specialist.md) | Senior refactoring specialist for transforming complex, poorly structured code into clean, maintainable systems. Use proactively when code quality metrics show  |
+| [sre-engineer](sre-engineer.md) | Use this agent when you need to establish or improve system reliability through SLO definition, error budget management, and automation. Invoke when implementin |
 | [test-engineer](test-engineer.md) | QA engineer specialized in test strategy, test writing, and coverage analysis. Use for designing test suites, writing tests for existing code, or evaluating tes |
 | [test-guardian](test-guardian.md) | Ensures tests actually test what they claim. Catches tautological assertions, mock leakage, tests that pass for wrong reasons, missing edge cases. Run after wri |
 | [typescript-pro](typescript-pro.md) | Advanced TypeScript specialist for type-level programming, complex generics, end-to-end type safety, monorepo architecture, and large-scale migrations. Use when |

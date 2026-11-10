@@ -53,6 +53,11 @@ Worth knowing, because they are easy to confuse and none is a subset of another:
 | refactoring-specialist | Code Refactoring | Code smell detection, complexity reduction, incremental transformation |
 | test-engineer | Test Strategy | Test suite design, writing tests for existing code, coverage analysis (vendored) |
 | web-performance-auditor | Web Performance | Core Web Vitals, loading, rendering and network audits (vendored) |
+| chaos-engineer | Chaos Engineering | Controlled failure experiments and resilience checks (vendored) |
+| data-engineer | Data Engineering | Data pipelines, ETL/ELT and data infrastructure (vendored) |
+| sre-engineer | Site Reliability | SLOs, error budgets and reliability practice (vendored) |
+| documentation-engineer | Documentation | Documentation systems: API docs, tutorials, guides (vendored) |
+| llm-architect | LLM Systems | Production LLM systems: RAG, fine-tuning, inference serving (vendored) |
 
 ## Consolidation Notes
 

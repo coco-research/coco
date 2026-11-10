@@ -3,9 +3,9 @@ name: Skill scan
 # Static scan of the skill folders a pull request changes.
 #
 # The scanner is SkillSpector (NVIDIA, Apache-2.0, https://github.com/NVIDIA/skillspector),
-# pinned to release tag v2.13.4 and installed from that tag at run time. It is not
-# vendored: no upstream code lives in this repository, and CREDITS.md records it under
-# "Tools used, not bundled".
+# pinned to commit 54824463814a0be01360792523ec7245a69190fc (release tag v2.13.4) and
+# installed at that commit at run time. It is not vendored: no upstream code lives in
+# this repository, and CREDITS.md records it under "Tools used, not bundled".
 #
 # Static rules only. Every scan runs with --no-llm and the job is given no model
 # provider key, so the LLM-backed checks cannot run and no skill content is sent to a
@@ -16,6 +16,10 @@ name: Skill scan
 # Exit codes, from the upstream README: 0 = SAFE or CAUTION, 1 = risk score above 50
 # (or a --fail-on-findings hit), 2 = usage. The scan step gates on that default exit
 # code, and the report step adds an explicit high/critical severity check on top.
+
+env:
+  # The commit tagged v2.13.4, not the tag itself: a tag can be moved, a commit cannot.
+  SKILLSPECTOR_SHA: 54824463814a0be01360792523ec7245a69190fc   # v2.13.4
 
 on:
   pull_request:
@@ -45,6 +49,7 @@ jobs:
         with:
           # Full history: `origin/<base>...HEAD` needs a merge base to diff from.
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Find the skill folders this pull request changes
         id: changed
@@ -103,18 +108,22 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install SkillSpector at the pinned tag
+      - name: Install SkillSpector at the pinned commit
         if: steps.changed.outputs.count != '0'
-        # Installed, never vendored. uv is only the installer for that pinned tag, so
-        # it is not pinned to a release of its own; the version that ran is logged.
+        # Installed, never vendored. uv and every dependency are pinned: uv by version,
+        # SkillSpector by commit, and its dependencies by the upstream uv.lock at that
+        # commit.
         run: |
           set -euo pipefail
-          python3 -m pip install --disable-pip-version-check --quiet uv
+          python3 -m pip install --disable-pip-version-check --quiet 'uv==0.13.7'
           uv --version
-          uv tool install 'git+https://github.com/NVIDIA/skillspector.git@v2.13.4'
-          # uv installs console scripts into ~/.local/bin, which is not on PATH on
-          # every runner.
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          dir="$RUNNER_TEMP/skillspector"
+          git init -q "$dir"
+          git -C "$dir" fetch -q --depth 1 https://github.com/NVIDIA/skillspector.git "$SKILLSPECTOR_SHA"
+          git -C "$dir" checkout -q FETCH_HEAD
+          test "$(git -C "$dir" rev-parse HEAD)" = "$SKILLSPECTOR_SHA"
+          (cd "$dir" && uv sync --frozen --no-dev)
+          echo "$dir/.venv/bin" >> "$GITHUB_PATH"
 
       - name: Scan the changed skill folders (static rules only)
         if: steps.changed.outputs.count != '0'
@@ -208,19 +217,26 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.11'
 
-      - name: Install SkillSpector at the pinned tag
+      - name: Install SkillSpector at the pinned commit
         run: |
           set -euo pipefail
-          python3 -m pip install --disable-pip-version-check --quiet uv
+          python3 -m pip install --disable-pip-version-check --quiet 'uv==0.13.7'
           uv --version
-          uv tool install 'git+https://github.com/NVIDIA/skillspector.git@v2.13.4'
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          dir="$RUNNER_TEMP/skillspector"
+          git init -q "$dir"
+          git -C "$dir" fetch -q --depth 1 https://github.com/NVIDIA/skillspector.git "$SKILLSPECTOR_SHA"
+          git -C "$dir" checkout -q FETCH_HEAD
+          test "$(git -C "$dir" rev-parse HEAD)" = "$SKILLSPECTOR_SHA"
+          (cd "$dir" && uv sync --frozen --no-dev)
+          echo "$dir/.venv/bin" >> "$GITHUB_PATH"
 
       - name: The planted finding fails the scan and the clean skill passes
         run: |

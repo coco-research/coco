@@ -38,7 +38,7 @@ Tools the project runs but does not redistribute. Each is installed from its own
 
 | Tool | What CoCo uses it for | Upstream | License |
 |---|---|---|---|
-| **SkillSpector** by NVIDIA | The static scan in `.github/workflows/skill-scan.yml`: the skill folders a pull request changes in `skills/` and `systems/*/skills/`, static rules only and no model key, failing on a high or critical finding. Installed from the release tag pinned in that workflow. | https://github.com/NVIDIA/skillspector | Apache-2.0 |
+| **SkillSpector** by NVIDIA | The static scan in `.github/workflows/skill-scan.yml`: the skill folders a pull request changes in `skills/` and `systems/*/skills/`, static rules only and no model key, failing on a high or critical finding. Installed at commit `54824463814a0be01360792523ec7245a69190fc` (release tag v2.13.4) as pinned in that workflow. | https://github.com/NVIDIA/skillspector | Apache-2.0 |
 
 ## Feature inspirations
 

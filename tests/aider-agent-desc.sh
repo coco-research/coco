@@ -19,7 +19,7 @@ out = pathlib.Path(sys.argv[3]).read_text(encoding="utf-8")
 bad = 0
 for d in (sys.argv[1], sys.argv[2]):
     for f in sorted(pathlib.Path(d).glob("*.md")):
-        if f.stem in ("INDEX", "README", "PROMPT-DEFENSE"):
+        if f.stem in ("INDEX", "README", "PROMPT-DEFENSE", "THIRD-PARTY"):
             continue
         qf = shlex.quote(str(f))
         cmd = f"grep -m1 '^description:' {qf} 2>/dev/null | sed 's/^description: *\"*//;s/\"*$//' || true"

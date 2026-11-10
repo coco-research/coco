@@ -102,11 +102,13 @@ def count_md(root, segments):
         if not (set(dirpath.parts) & segments):
             continue
         for name in filenames:
-            # INDEX.md and README.md are catalogs sitting in the same directory, and
-            # PROMPT-DEFENSE.md is the preamble every agent includes: none of them is
-            # a delivered command or agent.
+            # INDEX.md and README.md are catalogs sitting in the same directory,
+            # PROMPT-DEFENSE.md is the preamble every agent includes, and
+            # THIRD-PARTY.md is the vendored-agent provenance table: none of them
+            # is a delivered command or agent.
             if name.endswith('.md') and name not in ('INDEX.md', 'README.md',
-                                                     'PROMPT-DEFENSE.md'):
+                                                     'PROMPT-DEFENSE.md',
+                                                     'THIRD-PARTY.md'):
                 seen.add(str((dirpath / name).resolve()))
     return len(seen)
 

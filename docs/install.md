@@ -135,7 +135,7 @@ bash install.sh --adapter vscode-continue
 bash adapters/vscode-continue/install.sh --dry-run    # preview, writes nothing
 ```
 
-Writes into `~/.continue/` (override the root with `CONTINUE_HOME`). Skills and agents are symlinked into the clone; the markdown files directly under `rules/` are copied. Skills come with the default bundles (176 skills and 34 agents on a plain run; `--core-only` installs the core set alone, `--systems gsd,brain` an explicit subset).
+Writes into `~/.continue/` (override the root with `CONTINUE_HOME`). Skills and agents are symlinked into the clone; the markdown files directly under `rules/` are copied. Skills come with the default bundles (176 skills and 36 agents on a plain run; `--core-only` installs the core set alone, `--systems gsd,brain` an explicit subset).
 
 | Coco source | Destination |
 |-------------|-------------|

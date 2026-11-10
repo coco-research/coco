@@ -9,21 +9,21 @@ because most adapters link into the checkout rather than copying.
 | Adapter | Commands | of which generated | Skills | Agents | AGENTS.md | Exit |
 |---|---:|---:|---:|---:|:--:|---:|
 | `aider` | 342 | 342 | 0 | 0 | yes | 0 |
-| `amazon-q` | 0 | 0 | 0 | 36 | — | 0 |
-| `claude-code` | 388 | 342 | 191 | 36 | — | 0 |
-| `cline` | 0 | 0 | 0 | 36 | — | 0 |
+| `amazon-q` | 0 | 0 | 0 | 41 | — | 0 |
+| `claude-code` | 388 | 342 | 191 | 41 | — | 0 |
+| `cline` | 0 | 0 | 0 | 41 | — | 0 |
 | `codex` | 342 | 342 | 0 | 0 | yes | 0 |
 | `cursor` | 388 | 342 | 183 | 0 | — | 0 |
 | `generic` | 342 | 342 | 0 | 0 | yes | 0 |
 | `github-copilot-cli` | 0 | 0 | 0 | 0 | yes | 0 |
-| `grok` | 391 | 342 | 191 | 36 | — | 0 |
-| `hermes` | 388 | 342 | 191 | 36 | — | 0 |
-| `pi-desktop` | 388 | 342 | 194 | 39 | — | 0 |
-| `roo-code` | 0 | 0 | 0 | 36 | — | 0 |
-| `vscode` | 388 | 342 | 191 | 36 | — | 0 |
-| `vscode-continue` | 0 | 0 | 178 | 36 | — | 0 |
-| `windsurf` | 0 | 0 | 178 | 36 | — | 0 |
-| `zed` | 0 | 0 | 0 | 36 | — | 0 |
+| `grok` | 391 | 342 | 191 | 41 | — | 0 |
+| `hermes` | 388 | 342 | 191 | 41 | — | 0 |
+| `pi-desktop` | 388 | 342 | 194 | 44 | — | 0 |
+| `roo-code` | 0 | 0 | 0 | 41 | — | 0 |
+| `vscode` | 388 | 342 | 191 | 41 | — | 0 |
+| `vscode-continue` | 0 | 0 | 178 | 41 | — | 0 |
+| `windsurf` | 0 | 0 | 178 | 41 | — | 0 |
+| `zed` | 0 | 0 | 0 | 41 | — | 0 |
 
 ## Widest install, against the published totals
 

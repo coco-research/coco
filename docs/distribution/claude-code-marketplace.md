@@ -84,7 +84,7 @@ python3 -c "import json; json.load(open('.claude-plugin.json'))"
 **Tagline:** An entire team. Wherever your AI lives.
 
 **Description:**
-> Coco turns your Claude Code session into a multi-agent orchestrator. Install 191 skills, 388 commands, 34 specialized agents, and 6 system bundles in about 3 minutes. Run `/team:ship` to spawn a research-to-shipped pipeline. Run `/code-verification` to catch bugs your AI just introduced. Run `/clone-website` to rebuild a site's layout you have the rights to. Vendor-neutral, open-core (Apache-2.0 core), no telemetry, no SaaS.
+> Coco turns your Claude Code session into a multi-agent orchestrator. Install 191 skills, 388 commands, 36 specialized agents, and 6 system bundles in about 3 minutes. Run `/team:ship` to spawn a research-to-shipped pipeline. Run `/code-verification` to catch bugs your AI just introduced. Run `/clone-website` to rebuild a site's layout you have the rights to. Vendor-neutral, open-core (Apache-2.0 core), no telemetry, no SaaS.
 
 **Screenshot ideas:**
 - Terminal showing `/team:ship` running 7 stages

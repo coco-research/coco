@@ -217,7 +217,7 @@ emit_agents_from_dir() {
     [[ -f "$agent" ]] || continue
     local name desc
     name=$(basename "$agent" .md)
-    [[ "$name" == "README" || "$name" == "INDEX" || "$name" == "PROMPT-DEFENSE" ]] && continue
+    [[ "$name" == "README" || "$name" == "INDEX" || "$name" == "PROMPT-DEFENSE" || "$name" == "THIRD-PARTY" ]] && continue
     desc=$(awk -F': ' '/^description:/ {sub(/^description: */,""); gsub(/^"|"$/,""); print; exit}' "$agent")
     if [[ -n "$desc" ]]; then
       echo "- **$name** — $desc"

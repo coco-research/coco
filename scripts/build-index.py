@@ -249,7 +249,8 @@ def collect_agents():
             continue
         # PROMPT-DEFENSE.md is the preamble every agent includes, not a subagent:
         # counting it made the published total 35 where Claude Code loads 34.
-        if p.name in ('README.md', 'INDEX.md', 'PROMPT-DEFENSE.md'):
+        # THIRD-PARTY.md is the provenance table for vendored agents.
+        if p.name in ('README.md', 'INDEX.md', 'PROMPT-DEFENSE.md', 'THIRD-PARTY.md'):
             continue
         agents.append({'name': p.stem, 'desc': _first_prose_line(p),
                        'path': p.relative_to(ROOT)})

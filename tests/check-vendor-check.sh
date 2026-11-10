@@ -8,7 +8,9 @@
 # covers the states a reviewer acts on: the pin is current; a new commit is
 # drift and the count names the one file that moved; a licence edit is
 # flagged; a curl line is counted as risky; and a lock row whose repo does
-# not exist is unreachable rather than silently healthy.
+# not exist is unreachable rather than silently healthy. Two more cases guard
+# the loader: a repo value shaped like a git option is refused, and file://
+# needs the offline switch this test sets.
 #
 # Written for bash 3.2 (the system bash on macOS) as well as bash 5: no
 # associative arrays, no mapfile, and mktemp -d gets an explicit template.
@@ -31,6 +33,9 @@ trap 'rm -rf "$tmp"' EXIT
 export HOME="$tmp/home"
 export GIT_CONFIG_NOSYSTEM=1
 export GIT_TERMINAL_PROMPT=0
+# The checker reaches a file:// upstream only when this is set. It is the
+# offline test's switch, and nothing else sets it.
+export COCO_VENDOR_CHECK_ALLOW_FILE=1
 unset GIT_DIR GIT_WORK_TREE
 mkdir -p "$HOME"
 
@@ -95,6 +100,27 @@ with open(lock, "w", encoding="utf-8") as fh:
 PY
 }
 
+# A lock with one row, for cases that must be refused or resolved alone.
+write_one_lock() {  # $1 = file, $2 = name, $3 = repo, $4 = pinned_ref
+  python3 - "$1" "$2" "$3" "$4" <<'PY'
+import json, sys
+path, name, repo, pin = sys.argv[1:5]
+row = {
+    "name": name,
+    "paths": ["skills/demo/**"],
+    "repo": repo,
+    "pinned_ref": pin,
+    "licence_spdx": "MIT",
+    "licence_files": [],
+    "mode": "verbatim",
+    "patch": None,
+}
+with open(path, "w", encoding="utf-8") as fh:
+    json.dump([row], fh, indent=2)
+    fh.write("\n")
+PY
+}
+
 # Commit one edit in the fake upstream and publish it to the bare repo.
 publish() {  # $1 = message
   git -C "$work" add -A
@@ -103,8 +129,8 @@ publish() {  # $1 = message
   git -C "$work" push -q "$upstream" main
 }
 
-run() {
-  if ! python3 scripts/vendor-check.py --lock "$lock" --json \
+run() {  # $1 = lock file (default: $lock)
+  if ! python3 scripts/vendor-check.py --lock "${1:-$lock}" --json \
       > "$out" 2> "$err"; then
     echo "  FAIL: vendor-check must exit 0, it exited non-zero: $(cat "$err")"
     exit 1
@@ -135,6 +161,29 @@ PY
     pass "$5"
   else
     fail_ "$5"
+  fi
+}
+
+# rejected LOCK WORD LABEL [noallow]
+# The lock is invalid: the checker must exit 2, name WORD in its problem line,
+# and print no report. "noallow" unsets the offline file:// switch.
+rejected() {
+  local lock_file=$1 word=$2 label=$3 code
+  set +e
+  if [ "${4:-}" = noallow ]; then
+    ( unset COCO_VENDOR_CHECK_ALLOW_FILE
+      python3 scripts/vendor-check.py --lock "$lock_file" --json ) \
+      > "$out" 2> "$err"
+  else
+    python3 scripts/vendor-check.py --lock "$lock_file" --json \
+      > "$out" 2> "$err"
+  fi
+  code=$?
+  set -e
+  if [ "$code" -eq 2 ] && [ ! -s "$out" ] && grep -q -- "$word" "$err"; then
+    pass "$label"
+  else
+    fail_ "$label: exit $code, stderr: $(cat "$err")"
   fi
 }
 
@@ -194,6 +243,38 @@ echo "=== (e) a lock row whose repo does not exist ==="
 assert ghost status eq unreachable "(e) missing repo is unreachable"
 assert ghost changed_files eq 0 "(e) unreachable rows carry no counts"
 assert loose status eq unknown-pin "(e) an unknown pin is named as one"
+
+echo ""
+echo "=== (f) a repo value cannot smuggle a git option ==="
+evil_lock="$tmp/evil.json"
+write_one_lock "$evil_lock" evil \
+  "--upload-pack=touch PWNED; git-upload-pack" "$pin"
+rejected "$evil_lock" evil "(f) an option-shaped repo is a problem"
+if [ -e "$tmp/PWNED" ] || [ -e PWNED ]; then
+  fail_ "(f) the injected --upload-pack left a PWNED file behind"
+else
+  pass "(f) the injection wrote no PWNED file"
+fi
+
+echo ""
+echo "=== (g) file:// is refused without the offline switch ==="
+file_lock="$tmp/file.json"
+write_one_lock "$file_lock" localrepo "file://$upstream" "$pin"
+rejected "$file_lock" localrepo \
+  "(g) file:// is refused when COCO_VENDOR_CHECK_ALLOW_FILE is unset" noallow
+
+echo ""
+echo "=== (h) a tag pin is measured against the newest tag, not HEAD ==="
+git -C "$work" -c user.name=Test -c user.email=test@example.invalid \
+  tag -a v1.0.0 -m "release v1.0.0"
+git -C "$work" push -q "$upstream" refs/tags/v1.0.0
+printf 'work after the v1.0.0 release\n' >> "$work/skills/demo/SKILL.md"
+publish "after the release"
+tag_lock="$tmp/tag.json"
+write_one_lock "$tag_lock" tagged "file://$upstream" v1.0.0
+run "$tag_lock"
+assert tagged status eq current "(h) the release pin is current"
+assert tagged changed_files eq 0 "(h) HEAD moving past the tag is not drift"
 
 echo ""
 echo "=== Summary ==="

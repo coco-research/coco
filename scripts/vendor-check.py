@@ -8,7 +8,14 @@ next question: has upstream moved since?
 For every row it reads `git ls-remote` (30 s timeout) for the default-branch
 HEAD and the newest tag. When either differs from `pinned_ref`, it fetches that
 ref and the pin into a throwaway directory under mktemp and diffs the files
-under the row's `paths`. Nothing is written to the repository.
+under the row's `paths`. Nothing is written to the repository. A pin that
+resolves through `refs/tags/` is a release pin, so it is compared only with the
+newest tag: later commits on the default branch are not drift.
+
+This is a manual or maintainer tool, not a per-pull-request CI job. A pin to a
+commit sha that no ref advertises makes it fetch every branch and tag with full
+history, capped only by the fetch timeout, and paying that on every pull request
+buys nothing when the report gates nothing.
 
 One status per row:
   current      nothing upstream advertises is newer than the pin;
@@ -67,23 +74,51 @@ RISKY = re.compile(r"curl|wget|pip install|npm i|api[_-]?key|cookie", re.I)
 ALL_REFS = ["+refs/heads/*:refs/remotes/vendor/heads/*",
             "+refs/tags/*:refs/tags/*"]
 
-ENV = dict(os.environ, GIT_TERMINAL_PROMPT="0")
+# file:// exists for tests/check-vendor-check.sh only, which builds its fake
+# upstream in mktemp. A real run speaks https and nothing else, so a lock row
+# cannot point git at a local path.
+ALLOW_FILE = os.environ.get("COCO_VENDOR_CHECK_ALLOW_FILE") == "1"
+
+# The caller's config is not part of the question this script asks, and
+# `protocol.allow=never` stops a repo value from selecting any transport that
+# is not allowed right after it.
+GIT_CONFIG = ["-c", "protocol.allow=never",
+              "-c", "protocol.https.allow=always"]
+if ALLOW_FILE:
+    GIT_CONFIG += ["-c", "protocol.file.allow=always"]
+
+ENV = dict(os.environ,
+           GIT_TERMINAL_PROMPT="0",
+           GIT_CONFIG_NOSYSTEM="1",
+           GIT_CONFIG_GLOBAL="/dev/null")
 
 HEX = re.compile(r"[0-9a-fA-F]{7,40}")
 
 
 def git(args, cwd=None, timeout=FETCH_TIMEOUT, binary=False):
-    """Run git; None when it cannot be started or it times out."""
+    """Run git isolated from local config; None when it cannot run at all.
+
+    Every git call goes through here, so every one gets the same `-c` policy
+    and the same environment. A repo argument is always passed after `--`.
+    """
     try:
-        return subprocess.run(["git", *args], cwd=cwd, env=ENV, timeout=timeout,
-                              capture_output=True, text=not binary)
+        return subprocess.run(["git", *GIT_CONFIG, *args], cwd=cwd, env=ENV,
+                              timeout=timeout, capture_output=True,
+                              text=not binary)
     except (OSError, subprocess.TimeoutExpired, UnicodeError):
         return None
 
 
 def remote_refs(repo):
-    """({ref name: sha}, default branch ref) from ls-remote, or (None, None)."""
-    done = git(["ls-remote", "--symref", repo], timeout=LS_REMOTE_TIMEOUT)
+    """({ref name: sha}, default branch ref) from ls-remote, or (None, None).
+
+    Runs in a throwaway directory rather than the caller's checkout: a repo
+    value must not be able to resolve against, or run inside, the working tree
+    this script was started from.
+    """
+    with tempfile.TemporaryDirectory(prefix="vendor-check-ls-") as cwd:
+        done = git(["ls-remote", "--symref", "--", repo], cwd=cwd,
+                   timeout=LS_REMOTE_TIMEOUT)
     if done is None or done.returncode != 0:
         return None, None
     refs, default = {}, None
@@ -162,7 +197,7 @@ def fetch(dest, repo, refspecs, depth=True):
     args = ["fetch", "--quiet"]
     if depth:
         args += ["--depth", "1"]
-    args += [repo, *refspecs]
+    args += ["--", repo, *refspecs]
     done = git(args, cwd=dest)
     return done is not None and done.returncode == 0
 
@@ -312,13 +347,19 @@ def check_row(row):
         return result
 
     candidates = []
-    head_sha = refs.get("HEAD")
-    if head_sha:
-        label = default.rsplit("/", 1)[-1] if default else "HEAD"
-        candidates.append((label, head_sha, default or "HEAD"))
     tag = newest_tag(refs)
-    if tag:
-        candidates.append((tag[0], tag[1], "refs/tags/" + tag[0]))
+    if "refs/tags/" + pinned in refs:
+        # A tag pin tracks releases. The default branch moving past the pin is
+        # what the next release will contain, not a change to what is pinned.
+        if tag:
+            candidates.append((tag[0], tag[1], "refs/tags/" + tag[0]))
+    else:
+        head_sha = refs.get("HEAD")
+        if head_sha:
+            label = default.rsplit("/", 1)[-1] if default else "HEAD"
+            candidates.append((label, head_sha, default or "HEAD"))
+        if tag:
+            candidates.append((tag[0], tag[1], "refs/tags/" + tag[0]))
 
     if not candidates:
         # ls-remote answered, but with no ref at all: an empty or unborn
@@ -390,6 +431,16 @@ def load(path):
         if not isinstance(row.get("repo"), str) or not row["repo"].strip():
             print(f"vendor-check: row {row['name']!r} has no repo",
                   file=sys.stderr)
+            return None
+        repo = row["repo"].strip()
+        if repo.startswith("-"):
+            print(f"vendor-check: row {row['name']!r} has a repo starting with "
+                  f"'-': {repo!r}", file=sys.stderr)
+            return None
+        if not repo.startswith("https://") and not (
+                ALLOW_FILE and repo.startswith("file://")):
+            print(f"vendor-check: row {row['name']!r} has a repo that is not "
+                  f"https://: {repo!r}", file=sys.stderr)
             return None
         paths = row.get("paths")
         if (not isinstance(paths, list) or not paths

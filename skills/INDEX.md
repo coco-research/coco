@@ -51,7 +51,7 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) | Pointer to the upstream skill for React and Next.js performance work (data fetching, bundle size, re-renders), installed from upstream. |
 | [voice-ai](voice-ai/SKILL.md) | Pointer to the upstream skill for building voice agents with speech-to-speech and STT-LLM-TTS pipelines, installed from upstream. |
 
-## Foundational (13)
+## Foundational (12)
 
 | Skill | Description |
 |-------|-------------|
@@ -59,7 +59,6 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [coco](coco/SKILL.md) | Use when the user invokes /coco or /coco!, says catch me up, or asks what needs attention, a project status, their todos, decisions or people. Renders the PM da |
 | [dispatching-parallel-agents](dispatching-parallel-agents/SKILL.md) | Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies |
 | [executing-plans](executing-plans/SKILL.md) | Use when you have a written implementation plan to execute in a separate session with review checkpoints |
-| [humanizer](humanizer/SKILL.md) | Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written. Based on Wikipedia's compreh |
 | [karpathy-guidelines](karpathy-guidelines/SKILL.md) | Pointer to the upstream skill for behavioural guidelines that reduce common LLM coding mistakes, installed from upstream. |
 | [subagent-driven-development](subagent-driven-development/SKILL.md) | Use when executing implementation plans with independent tasks in the current session |
 | [systematic-debugging](systematic-debugging/SKILL.md) | Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes |
@@ -110,10 +109,11 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [pmstudio-comms](stakeholder-comms/SKILL.md) | Generate templated stakeholder communications from project context. Use when someone asks to "write a go-live email", "create a status update", "onboard someone |
 | [task-prd-creator](task-prd-creator/SKILL.md) | Use when the user says I want to add X, implement Y, create a task for Z, or plan this feature. Writes a task file plus a PRD under .agent/, links them, and wai |
 
-## Unspecified (1)
+## Unspecified (2)
 
 | Skill | Description |
 |-------|-------------|
+| [humanizer](humanizer/SKILL.md) | Rewrite AI-sounding text so it reads like the writer without changing what it says. Use when editing or reviewing prose for AI tells: not-X-but-Y contrasts, one |
 | [officecli](officecli/SKILL.md) | Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check fo |
 
 ## Bundle: brain (6 skills)

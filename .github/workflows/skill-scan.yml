@@ -1,0 +1,303 @@
+name: Skill scan
+
+# Static scan of the skill folders a pull request changes.
+#
+# The scanner is SkillSpector (NVIDIA, Apache-2.0, https://github.com/NVIDIA/skillspector),
+# pinned to commit 54824463814a0be01360792523ec7245a69190fc (release tag v2.13.4) and
+# installed at that commit at run time. It is not vendored: no upstream code lives in
+# this repository, and CREDITS.md records it under "Tools used, not bundled".
+#
+# Static rules only. Every scan runs with --no-llm and the job is given no model
+# provider key, so the LLM-backed checks cannot run and no skill content is sent to a
+# model. The one network call the static rules make is the OSV lookup for known
+# vulnerabilities, against public data; the scanner falls back to offline when that
+# call fails.
+#
+# Exit codes, from the upstream README: 0 = SAFE or CAUTION, 1 = risk score above 50
+# (or a --fail-on-findings hit), 2 = usage. The scan step gates on that default exit
+# code, and the report step adds an explicit high/critical severity check on top.
+
+env:
+  # The commit tagged v2.13.4, not the tag itself: a tag can be moved, a commit cannot.
+  SKILLSPECTOR_SHA: 54824463814a0be01360792523ec7245a69190fc   # v2.13.4
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'skills/**'
+      - 'systems/**/skills/**'
+      - '.github/workflows/skill-scan.yml'
+      - 'tests/fixtures/skillspector/**'
+
+permissions:
+  contents: read
+
+# One run per pull request: a newer push cancels the older run, so a stale scan cannot
+# report on a tree that no longer exists.
+concurrency:
+  group: skill-scan-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    name: Scan the changed skill folders
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Full history: `origin/<base>...HEAD` needs a merge base to diff from.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Find the skill folders this pull request changes
+        id: changed
+        env:
+          # Through the environment, never interpolated into the script: a branch name
+          # may contain characters a shell would act on.
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "+refs/heads/$BASE_REF:refs/remotes/origin/$BASE_REF"
+          git diff --name-only --diff-filter=ACMR "origin/$BASE_REF...HEAD" > "$RUNNER_TEMP/changed.txt"
+          python3 - "$RUNNER_TEMP/changed.txt" > "$RUNNER_TEMP/skill-dirs.txt" <<'PY'
+          import pathlib
+          import sys
+
+          dirs = set()
+          for line in pathlib.Path(sys.argv[1]).read_text(encoding="utf-8").splitlines():
+              parts = pathlib.PurePosixPath(line.strip()).parts
+              if not parts:
+                  continue
+              if parts[0] == "skills":
+                  base, rest = pathlib.Path("skills"), parts[1:]
+              elif parts[0] == "systems" and "skills" in parts[1:]:
+                  cut = parts.index("skills", 1) + 1
+                  base, rest = pathlib.Path(*parts[:cut]), parts[cut:]
+              else:
+                  continue
+              if not rest[:-1]:
+                  continue
+              # The folder that owns a SKILL.md is the scanned unit, so walk up from the
+              # changed file to the nearest ancestor holding one. A file with no such
+              # ancestor (a generated index, a licence, a bundle README) is not part of
+              # a skill and is skipped rather than scanned as one.
+              start = base.joinpath(*rest[:-1])
+              for candidate in (start, *start.parents):
+                  if candidate == base.parent:
+                      break
+                  if (candidate / "SKILL.md").is_file():
+                      dirs.add(candidate.as_posix())
+                      break
+
+          for directory in sorted(dirs):
+              print(directory)
+          PY
+          count=$(grep -c . "$RUNNER_TEMP/skill-dirs.txt" || true)
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          if [ "$count" -eq 0 ]; then
+            echo "::notice::No changed file belongs to a skill folder; nothing to scan."
+          else
+            echo "Scanning $count skill folder(s):"
+            sed 's/^/  /' "$RUNNER_TEMP/skill-dirs.txt"
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.11'
+
+      - name: Install SkillSpector at the pinned commit
+        if: steps.changed.outputs.count != '0'
+        # Installed, never vendored. uv and every dependency are pinned: uv by version,
+        # SkillSpector by commit, and its dependencies by the upstream uv.lock at that
+        # commit.
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check --quiet 'uv==0.13.7'
+          uv --version
+          dir="$RUNNER_TEMP/skillspector"
+          git init -q "$dir"
+          git -C "$dir" fetch -q --depth 1 https://github.com/NVIDIA/skillspector.git "$SKILLSPECTOR_SHA"
+          git -C "$dir" checkout -q FETCH_HEAD
+          test "$(git -C "$dir" rev-parse HEAD)" = "$SKILLSPECTOR_SHA"
+          (cd "$dir" && uv sync --frozen --no-dev)
+          echo "$dir/.venv/bin" >> "$GITHUB_PATH"
+
+      - name: Scan the changed skill folders (static rules only)
+        if: steps.changed.outputs.count != '0'
+        run: |
+          set -uo pipefail
+          out="$RUNNER_TEMP/skill-scan"
+          mkdir -p "$out"
+          : > "$out/exit-codes.txt"
+          command -v skillspector
+          while IFS= read -r dir; do
+            [ -n "$dir" ] || continue
+            report="$out/$(printf '%s' "$dir" | tr '/' '_').json"
+            echo "--- $dir"
+            # 0 and 1 both leave a report to read. Anything else is a broken run and
+            # fails here rather than being read as a clean scan.
+            rc=0
+            skillspector scan "$dir" --no-llm --format json --output "$report" || rc=$?
+            case "$rc" in
+              0|1) printf '%s\t%s\n' "$rc" "$dir" >> "$out/exit-codes.txt" ;;
+              *) echo "::error::skillspector exited $rc for $dir"; exit 1 ;;
+            esac
+          done < "$RUNNER_TEMP/skill-dirs.txt"
+
+      - name: Fail on a high or critical finding
+        if: steps.changed.outputs.count != '0'
+        run: |
+          python3 - "$RUNNER_TEMP/skill-scan" <<'PY'
+          import json
+          import pathlib
+          import sys
+
+          SEVERE = {"high", "critical"}
+          root = pathlib.Path(sys.argv[1])
+          problems = []
+
+          def severity(node):
+              for key in ("severity", "level"):
+                  value = node.get(key)
+                  if isinstance(value, str) and value.strip():
+                      return value.strip().lower()
+              return None
+
+          def walk(node, where):
+              if isinstance(node, dict):
+                  level = severity(node)
+                  if level in SEVERE:
+                      label = next((node[key] for key in ("title", "message", "rule", "rule_id", "id")
+                                    if isinstance(node.get(key), str)), "unnamed finding")
+                      problems.append(f"{where}: [{level}] {label}")
+                  for value in node.values():
+                      walk(value, where)
+              elif isinstance(node, list):
+                  for value in node:
+                      walk(value, where)
+
+          codes = root / "exit-codes.txt"
+          lines = codes.read_text(encoding="utf-8").splitlines() if codes.is_file() else []
+          for line in lines:
+              code, _, where = line.partition("\t")
+              if code.strip() == "1":
+                  problems.append(f"{where}: skillspector exited 1, so the folder is above "
+                                  "the default risk threshold")
+
+          reports = sorted(root.glob("*.json"))
+          if not reports:
+              problems.append("no report was written for any changed skill folder")
+          elif len(reports) != len(lines):
+              problems.append(f"{len(lines)} skill folder(s) scanned but {len(reports)} "
+                              "report(s) written")
+          for report in reports:
+              try:
+                  data = json.loads(report.read_text(encoding="utf-8"))
+              except (OSError, ValueError) as error:
+                  problems.append(f"{report.name}: not a readable JSON report ({error})")
+                  continue
+              walk(data, report.name)
+
+          for problem in problems:
+              print(f"::error::{problem}")
+          print(f"{len(reports)} report(s) checked, {len(problems)} problem(s)")
+          sys.exit(1 if problems else 0)
+          PY
+
+  fixtures:
+    name: Fixture assertion
+    # A scanner nobody has watched fail is not a gate. This job plants a download piped
+    # into a shell in tests/fixtures/skillspector/bad/ and asserts the scan reports it,
+    # then asserts a clean skill in good/ reports nothing. It runs independently of the
+    # scan job, on every trigger of this workflow.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.11'
+
+      - name: Install SkillSpector at the pinned commit
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check --quiet 'uv==0.13.7'
+          uv --version
+          dir="$RUNNER_TEMP/skillspector"
+          git init -q "$dir"
+          git -C "$dir" fetch -q --depth 1 https://github.com/NVIDIA/skillspector.git "$SKILLSPECTOR_SHA"
+          git -C "$dir" checkout -q FETCH_HEAD
+          test "$(git -C "$dir" rev-parse HEAD)" = "$SKILLSPECTOR_SHA"
+          (cd "$dir" && uv sync --frozen --no-dev)
+          echo "$dir/.venv/bin" >> "$GITHUB_PATH"
+
+      - name: The planted finding fails the scan and the clean skill passes
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/skill-fixtures"
+          mkdir -p "$out"
+
+          bad_rc=0
+          skillspector scan tests/fixtures/skillspector/bad --no-llm --format json \
+            --output "$out/bad.json" --fail-on-findings || bad_rc=$?
+          good_rc=0
+          skillspector scan tests/fixtures/skillspector/good --no-llm --format json \
+            --output "$out/good.json" --fail-on-findings || good_rc=$?
+
+          echo "bad/ exit $bad_rc (want 1), good/ exit $good_rc (want 0)"
+          # With --fail-on-findings, exit 1 is the upstream contract for "at least one
+          # finding", so these two exit codes are the >=1 and ==0 assertions.
+          test "$bad_rc" -eq 1 || { echo "::error::bad/ must exit 1, got $bad_rc"; exit 1; }
+          test "$good_rc" -eq 0 || { echo "::error::good/ must exit 0, got $good_rc"; exit 1; }
+
+          # The reports must agree with the exit codes: read them back, and fail on a
+          # report that cannot be parsed or that calls good/ high or critical.
+          python3 - "$out" <<'PY'
+          import json
+          import pathlib
+          import sys
+
+          SEVERE = {"high", "critical"}
+          out = pathlib.Path(sys.argv[1])
+
+          def severities(node):
+              if isinstance(node, dict):
+                  for key in ("severity", "level"):
+                      value = node.get(key)
+                      if isinstance(value, str) and value.strip():
+                          yield value.strip().lower()
+                  for value in node.values():
+                      yield from severities(value)
+              elif isinstance(node, list):
+                  for value in node:
+                      yield from severities(value)
+
+          def read(name):
+              try:
+                  return json.loads((out / name).read_text(encoding="utf-8"))
+              except (OSError, ValueError) as error:
+                  sys.exit(f"::error::{name}: no readable report ({error})")
+
+          bad = sorted(severities(read("bad.json")))
+          good = sorted(severities(read("good.json")))
+          print(f"bad/ severities: {bad or 'none reported'}")
+          print(f"good/ severities: {good or 'none reported'}")
+
+          # bad/ must carry a severity, or the high/critical gate in the scan job has
+          # nothing to read and would pass every folder as clean.
+          problems = []
+          if not bad:
+              problems.append("bad/ reported no severity, so the high/critical gate would "
+                              "never fire")
+          problems += [f"good/ reported a {level} severity" for level in good if level in SEVERE]
+          for problem in problems:
+              print(f"::error::{problem}")
+          sys.exit(1 if problems else 0)
+          PY

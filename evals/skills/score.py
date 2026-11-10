@@ -5,6 +5,10 @@ Held-out records carry ids and scores only: no model outputs and no grader notes
 Held-out model output is not written to the executor cache.
 The executor is local. COCO_SKILL_EXEC_URL must be a loopback host, the same
 rule as the router regression gate. Proxies are ignored and redirects are refused.
+COCO_SKILL_EXEC_API picks the wire shape, ollama (default) or openai; records carry
+it as executor_api, and a record written without that field reads as ollama.
+A bearer token for the openai path comes from COCO_SKILL_EXEC_TOKEN and is never
+recorded.
 
 Directory names starting with "_" are fixtures for this harness, not pilots.
 
@@ -30,7 +34,7 @@ SEED = 0
 # Directory names starting with "_" are fixtures for this harness, not pilots.
 _NAME = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_-]*")
 _META = {
-    "commit", "date", "skill", "split", "executor", "model", "seed",
+    "commit", "date", "skill", "split", "executor", "executor_api", "model", "seed",
     "items_sha256", "grader_sha256", "skill_sha256", "n", "mean", "per_item",
 }
 
@@ -125,12 +129,15 @@ def _check_result(item_id, result):
     return float(score), notes
 
 
-def score_run(name, split, executor, items_path, grader_path, skill_md_path, *, model, seed, url):
+def score_run(name, split, executor, items_path, grader_path, skill_md_path, *,
+              model, seed, url, executor_api=run.API_OLLAMA):
     """Score one split. Held-out records omit outputs and notes."""
     if split not in ("dev", "heldout"):
         die(f"unknown split {split!r}")
     if executor not in ("ollama", "stub"):
         die(f"unknown executor {executor!r}")
+    if executor_api not in run.EXECUTOR_APIS:
+        die(f"unknown executor api {executor_api!r}")
     items_path, grader_path, skill_md_path = map(pathlib.Path, (items_path, grader_path, skill_md_path))
     for path in (items_path, grader_path, skill_md_path):
         if not path.is_file():
@@ -147,7 +154,8 @@ def score_run(name, split, executor, items_path, grader_path, skill_md_path, *, 
             output = run.stub(skill_md, user_input, model=model or "", url=url, seed=seed)
         else:
             output = run.generate(
-                skill_md, user_input, model=model, url=url, seed=seed, cache=split != "heldout",
+                skill_md, user_input, model=model, url=url, seed=seed,
+                cache=split != "heldout", api=executor_api,
             )
         score, note_list = _check_result(item_id, grade(item, output))
         per_item[item_id] = score
@@ -159,6 +167,7 @@ def score_run(name, split, executor, items_path, grader_path, skill_md_path, *, 
         "skill": name,
         "split": split,
         "executor": executor,
+        "executor_api": executor_api,
         "model": model,
         "seed": seed,
         "items_sha256": sha256_file(items_path),
@@ -179,16 +188,21 @@ def record_json(record):
     return json.dumps(record, indent=2) + "\n"
 
 
+def record_executor_api(record):
+    """The wire shape a record was written by. Records from before the field read as ollama."""
+    return record.get("executor_api") or run.API_OLLAMA
+
+
 def _py(script, env=None):
     return subprocess.run(
         [sys.executable, "-c", script], cwd=HERE, env=env, capture_output=True, text=True,
     )
 
 
-def _cli(*args):
+def _cli(*args, env=None):
     return subprocess.run(
         [sys.executable, str(HERE / "score.py"), *args],
-        cwd=ROOT, capture_output=True, text=True,
+        cwd=ROOT, capture_output=True, text=True, env=env,
     )
 
 
@@ -285,6 +299,9 @@ def _assert_cache_key():
     assert base != run.cache_digest("m", 1, run.chat_options(1), "skill", "input")
     assert base != run.cache_digest("other", 0, opts, "skill", "input")
     assert base != run.cache_digest("m", 0, opts, "other", "input")
+    # The two wire shapes never share a cache key, even for the same model and seed.
+    assert run.openai_options(0) != opts
+    assert base != run.cache_digest("m", 0, run.openai_options(0), "skill", "input")
 
 
 def _start_server(handler):
@@ -361,6 +378,37 @@ def _chat_handler(content, hits, delay=0.0):
 
         def do_GET(self):
             hits.append(("GET", self.path))
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, fmt, *args):
+            return
+
+    return Handler
+
+
+def _openai_handler(content, hits):
+    import http.server
+    body = json.dumps({"choices": [
+        {"index": 0, "message": {"role": "assistant", "content": content}},
+    ]}).encode()
+
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def do_POST(self):
+            n = int(self.headers.get("Content-Length", "0") or "0")
+            raw = self.rfile.read(n) if n else b"{}"
+            try:
+                sent = json.loads(raw)
+            except json.JSONDecodeError:
+                sent = None
+            hits.append({
+                "path": self.path,
+                "authorization": self.headers.get("Authorization"),
+                "body": sent,
+            })
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
@@ -531,6 +579,113 @@ def _assert_heldout_not_on_disk():
         _stop_server(httpd, thread)
 
 
+def _assert_openai_executor():
+    import os
+    import tempfile
+    import uuid
+    token = "tok-" + uuid.uuid4().hex
+    marker = "openai-" + uuid.uuid4().hex
+    hits = []
+    httpd, thread = _start_server(_openai_handler(marker, hits))
+    url = f"http://127.0.0.1:{httpd.server_address[1]}"
+    fix = HERE / "_selftest"
+    old = {k: os.environ.get(k) for k in
+           ("COCO_SKILL_EXEC_URL", "COCO_SKILL_EXEC_API", "COCO_SKILL_EXEC_TOKEN")}
+    os.environ["COCO_SKILL_EXEC_URL"] = url
+    os.environ["COCO_SKILL_EXEC_API"] = "openai"
+    os.environ["COCO_SKILL_EXEC_TOKEN"] = token
+    try:
+        assert run.executor_api() == "openai"
+        got = run.generate("skill", "openai-probe", model="m", seed=SEED, url=url, cache=False,
+                           api=run.API_OPENAI)
+        assert got == marker, got
+
+        # (a) the request path and body, and the token on the wire
+        assert len(hits) == 1, hits
+        hit = hits[0]
+        assert hit["path"] == "/v1/chat/completions", hit["path"]
+        assert hit["authorization"] == "Bearer " + token, hit["authorization"]
+        body = hit["body"]
+        assert body["model"] == "m" and body["stream"] is False
+        assert body["temperature"] == 0 and body["seed"] == SEED
+        assert body["max_tokens"] == run.executor_max_tokens()
+        assert [m["role"] for m in body["messages"]] == ["system", "user"]
+        assert "options" not in body and "num_ctx" not in body
+
+        # (b) a non-loopback host is refused before anything is sent
+        try:
+            run.generate("skill", "nonlocal-probe", model="m", url="http://example.com:8080",
+                         cache=False, api=run.API_OPENAI)
+        except SystemExit as e:
+            assert "example.com" in str(e), e
+        else:
+            raise AssertionError("non-loopback openai host was accepted")
+        assert len(hits) == 1, hits
+
+        # The openai path keeps the proxy and redirect guards.
+        sock = _reserve_port()
+        dead = _push_dead_proxy(sock.getsockname()[1])
+        try:
+            got = run.generate("skill", "openai-proxy-probe", model="m", url=url, cache=False,
+                               api=run.API_OPENAI)
+        finally:
+            _pop_env(dead)
+            sock.close()
+        assert got == marker, got
+        assert hits[-1]["path"] == "/v1/chat/completions", hits[-1]["path"]
+
+        sink_hits = []
+        sink, sink_thread = _start_server(_openai_handler("leaked", sink_hits))
+        location = f"http://127.0.0.1:{sink.server_address[1]}/v1/chat/completions"
+        redirect, redirect_thread = _start_server(_redirect_handler(location))
+        try:
+            try:
+                run.generate("skill", "openai-redirect-probe", model="m", cache=False,
+                             url=f"http://127.0.0.1:{redirect.server_address[1]}",
+                             api=run.API_OPENAI)
+            except SystemExit as e:
+                assert "302" in str(e), e
+            else:
+                raise AssertionError("openai redirect was not refused")
+            assert sink_hits == [], sink_hits
+        finally:
+            _stop_server(redirect, redirect_thread)
+            _stop_server(sink, sink_thread)
+
+        # (c) the token is in no record and no log; the record names the api
+        with tempfile.TemporaryDirectory() as td:
+            skill = pathlib.Path(td) / "SKILL.md"
+            skill.write_text((fix / "SKILL.md").read_text() + "\n" + uuid.uuid4().hex + "\n")
+            r = _cli("--skill", "_selftest", "--split", "dev", "--skill-md", str(skill),
+                     env=os.environ.copy())
+        assert r.returncode == 0, r.stderr
+        rec = json.loads(r.stdout)
+        assert rec["executor"] == "ollama", rec["executor"]
+        assert rec["executor_api"] == "openai", rec["executor_api"]
+        assert rec["model"] == run.executor_model()
+        assert marker in rec["outputs"]["d1"], rec["outputs"]["d1"]
+        assert token not in r.stdout and token not in r.stderr
+        assert _files_containing(token) == [], _files_containing(token)
+        assert record_executor_api(rec) == "openai"
+        legacy = {k: v for k, v in rec.items() if k != "executor_api"}
+        assert record_executor_api(legacy) == "ollama"
+        assert record_executor_api({}) == "ollama"
+
+        os.environ["COCO_SKILL_EXEC_API"] = "grpc"
+        try:
+            run.executor_api()
+        except SystemExit as e:
+            assert "COCO_SKILL_EXEC_API" in str(e), e
+        else:
+            raise AssertionError("COCO_SKILL_EXEC_API=grpc was accepted")
+    finally:
+        _pop_env(old)
+        for path in _files_containing(marker):
+            if path.parent == run.CACHE:
+                path.unlink(missing_ok=True)
+        _stop_server(httpd, thread)
+
+
 def _assert_cache_gitignored():
     import shutil
     if shutil.which("git") is None:
@@ -567,6 +722,7 @@ def self_test():
     assert dev["split"] == "dev" and held["split"] == "heldout"
     assert dev["skill"] == "_selftest" and held["skill"] == "_selftest"
     assert dev["executor"] == "stub" and held["executor"] == "stub"
+    assert dev["executor_api"] == "ollama" and held["executor_api"] == "ollama"
     assert dev["model"] is None and held["model"] is None
     assert dev["seed"] == 0 and held["seed"] == 0
     assert dev["date"] == datetime.date.today().isoformat()
@@ -591,6 +747,7 @@ def self_test():
     _assert_redirect_refused()
     _assert_slow_executor_times_out()
     _assert_heldout_not_on_disk()
+    _assert_openai_executor()
     _assert_cache_gitignored()
 
     good = 'def grade(item, output):\n    return {"score": 1.0, "notes": []}\n'
@@ -632,12 +789,12 @@ def main():
     grader_path = HERE / a.skill / "grader.py"
     skill_md_path = pathlib.Path(a.skill_md) if a.skill_md else ROOT / "skills" / a.skill / "SKILL.md"
     if a.executor == "ollama":
-        url, model = run.executor_url(), run.executor_model()
+        url, model, api = run.executor_url(), run.executor_model(), run.executor_api()
     else:
-        url, model = run.DEFAULT_URL, None
+        url, model, api = run.DEFAULT_URL, None, run.API_OLLAMA
     record = score_run(
         a.skill, a.split, a.executor, items_path, grader_path, skill_md_path,
-        model=model, seed=SEED, url=url,
+        model=model, seed=SEED, url=url, executor_api=api,
     )
     text = record_json(record)
     if a.out:

@@ -569,6 +569,8 @@ def _baseline_ok(rec, cfg, hashes, n_heldout):
     want = {"split": "heldout", "skill": cfg.skill, "skill_sha256": hashes["skill"],
             "items_sha256": hashes["items"], "grader_sha256": hashes["grader"],
             "executor": cfg.executor, "model": cfg.model, "seed": score.SEED, "n": n_heldout}
+    if score.record_executor_api(rec) != cfg.executor_api:
+        return False
     return all(rec.get(k) == v for k, v in want.items())
 
 
@@ -650,7 +652,7 @@ def router_gate(root):
 def score_split(cfg, split, skill_md_path):
     return score.score_run(
         cfg.skill, split, cfg.executor, cfg.items_path, cfg.grader_path, skill_md_path,
-        model=cfg.model, seed=score.SEED, url=cfg.url)
+        model=cfg.model, seed=score.SEED, url=cfg.url, executor_api=cfg.executor_api)
 
 
 def write_branch(out, skill, round_id, cand_text, dev_record, held_record, rec, base_text):
@@ -701,6 +703,8 @@ def _peeked_in(rounds_dir, sha, this_round, items_hash):
 def _same_heldout(held, base):
     keys = ("items_sha256", "grader_sha256", "executor", "model", "seed", "n")
     if any(held.get(k) != base.get(k) for k in keys):
+        return False
+    if score.record_executor_api(held) != score.record_executor_api(base):
         return False
     return set(held.get("per_item") or {}) == set(base.get("per_item") or {})
 
@@ -1000,6 +1004,7 @@ def main(argv=None):
         rounds_dir=root / "evals" / "skills" / ROUNDS_DIR / args.skill,
         runs_dir=root / "evals" / "skills" / args.skill / RUNS_DIR,
         executor=args.executor, model=model, url=url, k=args.max_proposals, margin=args.dev_margin,
+        executor_api=score.run.executor_api() if args.executor == "ollama" else score.run.API_OLLAMA,
         max_changed=args.max_changed_lines,
         out=pathlib.Path(args.out) if args.out else pathlib.Path(tempfile.mkdtemp(prefix="skill-improve-")),
         base_ref=args.base_ref,

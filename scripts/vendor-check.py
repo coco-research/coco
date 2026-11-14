@@ -348,7 +348,8 @@ def check_row(row):
 
     candidates = []
     tag = newest_tag(refs)
-    if "refs/tags/" + pinned in refs:
+    tag_pin = pinned if pinned.startswith("refs/tags/") else "refs/tags/" + pinned
+    if tag_pin in refs:
         # A tag pin tracks releases. The default branch moving past the pin is
         # what the next release will contain, not a change to what is pinned.
         if tag:
@@ -358,7 +359,9 @@ def check_row(row):
         if head_sha:
             label = default.rsplit("/", 1)[-1] if default else "HEAD"
             candidates.append((label, head_sha, default or "HEAD"))
-        if tag:
+        elif tag:
+            # Only without a HEAD: a pin that matches HEAD is current even
+            # when the newest tag sits on an older commit.
             candidates.append((tag[0], tag[1], "refs/tags/" + tag[0]))
 
     if not candidates:
@@ -479,7 +482,7 @@ def main(argv):
     parser.add_argument("--lock", default=str(DEFAULT_LOCK),
                         help="vendor lock JSON (default: data/vendor-lock.json)")
     parser.add_argument("--json", action="store_true",
-                        help="print one JSON object per row")
+                        help="print a JSON array, one object per row")
     args = parser.parse_args(argv)
 
     rows = load(Path(args.lock))

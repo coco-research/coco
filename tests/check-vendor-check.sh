@@ -277,6 +277,23 @@ assert tagged status eq current "(h) the release pin is current"
 assert tagged changed_files eq 0 "(h) HEAD moving past the tag is not drift"
 
 echo ""
+echo "=== (i) a sha pin equal to HEAD is current even when the newest tag is older ==="
+head_pin=$(git -C "$work" rev-parse HEAD)
+head_lock="$tmp/head.json"
+write_one_lock "$head_lock" headpin "file://$upstream" "$head_pin"
+run "$head_lock"
+assert headpin status eq current "(i) pin at HEAD is current"
+assert headpin new_ref eq "" "(i) an older tag is not reported as drift"
+
+echo ""
+echo "=== (j) a fully qualified tag pin is treated as a release pin ==="
+fulltag_lock="$tmp/fulltag.json"
+write_one_lock "$fulltag_lock" fulltag "file://$upstream" refs/tags/v1.0.0
+run "$fulltag_lock"
+assert fulltag status eq current "(j) refs/tags/v1.0.0 pin is current"
+assert fulltag changed_files eq 0 "(j) HEAD moving past the tag is not drift"
+
+echo ""
 echo "=== Summary ==="
 if [ "$fail" -eq 0 ]; then
   echo "  vendor-check separates current, drift, licence, risky and unreachable"

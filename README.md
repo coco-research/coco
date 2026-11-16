@@ -89,6 +89,21 @@ How the router scores teams: [`systems/superintelligence/README.md`](systems/sup
 
 Released on npm: `npx cocosuperintelligence` installs the latest release ([CHANGELOG](CHANGELOG.md)).
 
+### MCP server (`coco mcp`)
+
+Any MCP client can connect to Coco over stdio without extra dependencies (see [`docs/mcp.md`](docs/mcp.md)):
+
+```json
+{
+  "mcpServers": {
+    "coco": {
+      "command": "npx",
+      "args": ["-y", "cocosuperintelligence", "mcp"]
+    }
+  }
+}
+```
+
 Measured on main, a default Claude Code install delivers 191 of the 229 skills (the rest are the opt-in security pack and Cursor-only skills), 388 commands and 34 agents ([`docs/delivered-counts.json`](docs/delivered-counts.json)).
 
 Known gap: most GSD skills need the upstream GSD toolkit at `~/.claude/get-shit-done` (see [`systems/gsd/README.md`](systems/gsd/README.md)).

@@ -23,6 +23,14 @@ Or run directly from a local checkout:
 node bin/coco.js mcp
 ```
 
+Or generate / merge configuration automatically for your harness:
+
+```bash
+node bin/coco.js connect --list
+node bin/coco.js connect codex --write
+node bin/coco.js connect claude-code --write
+```
+
 ## Content Checkout Resolution
 
 At startup, `coco mcp` resolves the read-only Coco content root in order:

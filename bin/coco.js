@@ -97,6 +97,7 @@ Usage:
   npx cocosuperintelligence update [dir]      checkout the pinned release tag
   npx cocosuperintelligence uninstall [dir]   remove symlinks + clone
   npx cocosuperintelligence mcp               run read-only stdio MCP server
+  npx cocosuperintelligence connect [tool]    print or write MCP harness config
   npx cocosuperintelligence version           show version + check for updates
   npx cocosuperintelligence --help            this message
 
@@ -639,6 +640,9 @@ function main() {
       break;
     case 'mcp':
       require('./coco-mcp').runMcp(rest);
+      break;
+    case 'connect':
+      require('./coco-connect').runConnect(rest);
       break;
     default:
       // Flags pass through to install (e.g., npx cocosuperintelligence --adapter cursor).

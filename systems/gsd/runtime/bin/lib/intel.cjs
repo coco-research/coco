@@ -506,3 +506,138 @@ function intelPatchMeta(filePath) {
  */
 function intelExtractExports(filePath) {
   const content = platformReadSync(filePath);
+  if (content === null) {
+    return { file: filePath, exports: [], method: 'none' };
+  }
+  let exports = [];
+  let method = 'none';
+
+  // Try module.exports = { ... } pattern (handle multi-line)
+  // Find the LAST module.exports assignment (the actual one, not references in code)
+  const allMatches = [...content.matchAll(/module\.exports\s*=\s*\{/g)];
+  if (allMatches.length > 0) {
+    const lastMatch = allMatches[allMatches.length - 1];
+    const startIdx = lastMatch.index + lastMatch[0].length;
+    // Find matching closing brace by counting braces
+    let depth = 1;
+    let endIdx = startIdx;
+    while (endIdx < content.length && depth > 0) {
+      if (content[endIdx] === '{') depth++;
+      else if (content[endIdx] === '}') depth--;
+      if (depth > 0) endIdx++;
+    }
+    const block = content.substring(startIdx, endIdx);
+    method = 'module.exports';
+    // Extract key names from lines like "  keyName," or "  keyName: value,"
+    const lines = block.split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      // Skip comments and empty lines
+      if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('*')) continue;
+      // Match identifier at start of line (before comma, colon, end of line)
+      const keyMatch = trimmed.match(/^(\w+)\s*[,}:]/) || trimmed.match(/^(\w+)$/);
+      if (keyMatch) {
+        exports.push(keyMatch[1]);
+      }
+    }
+  }
+
+  // Also try individual exports.X = patterns (only at start of line, not inside strings/regex)
+  const individualPattern = /^exports\.(\w+)\s*=/gm;
+  let im;
+  while ((im = individualPattern.exec(content)) !== null) {
+    if (!exports.includes(im[1])) {
+      exports.push(im[1]);
+      if (method === 'none') method = 'exports.X';
+    }
+  }
+
+  const hadCjs = exports.length > 0;
+
+  // ESM patterns
+  const esmExports = [];
+
+  // export default function X / export default class X
+  const defaultNamedPattern = /^export\s+default\s+(?:function|class)\s+(\w+)/gm;
+  let em;
+  while ((em = defaultNamedPattern.exec(content)) !== null) {
+    if (!esmExports.includes(em[1])) esmExports.push(em[1]);
+  }
+
+  // export default (without named function/class)
+  const defaultAnonPattern = /^export\s+default\s+(?!function\s|class\s)/gm;
+  if (defaultAnonPattern.test(content) && esmExports.length === 0) {
+    if (!esmExports.includes('default')) esmExports.push('default');
+  }
+
+  // export function X( / export async function X(
+  const exportFnPattern = /^export\s+(?:async\s+)?function\s+(\w+)\s*\(/gm;
+  while ((em = exportFnPattern.exec(content)) !== null) {
+    if (!esmExports.includes(em[1])) esmExports.push(em[1]);
+  }
+
+  // export const X = / export let X = / export var X =
+  const exportVarPattern = /^export\s+(?:const|let|var)\s+(\w+)\s*=/gm;
+  while ((em = exportVarPattern.exec(content)) !== null) {
+    if (!esmExports.includes(em[1])) esmExports.push(em[1]);
+  }
+
+  // export class X
+  const exportClassPattern = /^export\s+class\s+(\w+)/gm;
+  while ((em = exportClassPattern.exec(content)) !== null) {
+    if (!esmExports.includes(em[1])) esmExports.push(em[1]);
+  }
+
+  // export { X, Y, Z } — strip "as alias" parts
+  const exportBlockPattern = /^export\s*\{([^}]+)\}/gm;
+  while ((em = exportBlockPattern.exec(content)) !== null) {
+    const items = em[1].split(',');
+    for (const item of items) {
+      const trimmed = item.trim();
+      if (!trimmed) continue;
+      // "foo as bar" -> extract "foo"
+      const name = trimmed.split(/\s+as\s+/)[0].trim();
+      if (name && !esmExports.includes(name)) esmExports.push(name);
+    }
+  }
+
+  // Merge ESM exports into the result
+  for (const e of esmExports) {
+    if (!exports.includes(e)) exports.push(e);
+  }
+
+  // Determine method
+  const hadEsm = esmExports.length > 0;
+  if (hadCjs && hadEsm) {
+    method = 'mixed';
+  } else if (hadEsm && !hadCjs) {
+    method = 'esm';
+  }
+
+  return { file: filePath, exports, method };
+}
+
+// ─── Exports ─────────────────────────────────────────────────────────────────
+
+module.exports = {
+  // Public API
+  intelQuery,
+  intelUpdate,
+  intelStatus,
+  intelDiff,
+  saveRefreshSnapshot,
+
+  // CLI subcommands
+  intelSnapshot,
+  intelValidate,
+  intelExtractExports,
+  intelPatchMeta,
+
+  // Utilities
+  ensureIntelDir,
+  isIntelEnabled,
+
+  // Constants
+  INTEL_FILES,
+  INTEL_DIR
+};

@@ -604,3 +604,46 @@ git status --porcelain 2>/dev/null | grep -v "^??" | grep -v "^.planning\/" | gr
 
 If output is non-empty (modified/staged files outside `.planning/`), flag as uncommitted code.
 
+Emit:
+- ✓ `Working tree clean` — if no modified files outside `.planning/`
+- ⚠ `Uncommitted changes in source files` — list up to 10 file paths
+
+---
+
+After all 6 checks, display the verdict:
+
+**If all 6 checks passed:**
+```
+### Verdict: CLEAN
+
+The standard progress report is trustworthy — proceed with the routing suggestion above.
+```
+
+**If 1 or more checks failed:**
+```
+### Verdict: N INTEGRITY ISSUE(S) FOUND
+
+The standard progress report may not reflect true project state.
+Review the flagged items above before acting on the routing suggestion.
+```
+
+Then for each failed check, add a concrete next action:
+- Check 2 (orphaned handoff): `Read the handoff file(s) and resume from where work was paused: /gsd:resume-work ${GSD_WS}`
+- Check 3 (deferred scope): `Add the missing phases to ROADMAP.md or update the deferred references`
+- Check 4 (memory pending): `Review the flagged memory entries and resolve or clear them`
+- Check 5 (blocking todos): `Complete the operational steps in .planning/todos/pending/ before continuing`
+- Check 6 (uncommitted code): `Commit or stash the uncommitted changes before advancing`
+- Check 1 (STATE inconsistency): `Run /gsd:verify-work ${PHASE} ${GSD_WS} to reconcile state`
+</step>
+
+</process>
+
+<success_criteria>
+
+- [ ] Rich context provided (recent work, decisions, issues)
+- [ ] Current position clear with visual progress
+- [ ] What's next clearly explained
+- [ ] Smart routing: /gsd:execute-phase if plans exist, /gsd:plan-phase if not
+- [ ] User confirms before any action
+- [ ] Seamless handoff to appropriate gsd command
+      </success_criteria>

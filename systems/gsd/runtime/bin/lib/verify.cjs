@@ -831,3 +831,353 @@ function cmdValidateHealth(cwd, options, raw) {
   } catch { /* intentionally empty — agent check is non-blocking */ }
 
   // ─── Check 8: Run existing consistency checks ─────────────────────────────
+  // Inline subset of cmdValidateConsistency. Note: unlike Check 4 (W002),
+  // this check intentionally filters ROADMAP.md through extractCurrentMilestone
+  // first — shipped milestones (whether collapsed in <details> or not) are
+  // stripped before the heading scan, so archived phase numbers never reach
+  // `roadmapPhases` and W006/W007 cannot fire for them. That is why the
+  // #3652 archive-union added to Check 4 is NOT mirrored here.
+  if (fs.existsSync(roadmapPath)) {
+    const roadmapContentRaw = fs.readFileSync(roadmapPath, 'utf-8');
+    const roadmapContent = extractCurrentMilestone(roadmapContentRaw, cwd);
+    const roadmapPhases = new Set();
+    const phasePattern = /#{2,4}\s*Phase\s+(\d+[A-Z]?(?:\.\d+)*)\s*:/gi;
+    let m;
+    while ((m = phasePattern.exec(roadmapContent)) !== null) {
+      roadmapPhases.add(m[1]);
+    }
+
+    const diskPhases = collectDiskPhases(planBase);
+
+    // Build a set of phases explicitly marked not-yet-started in the ROADMAP
+    // summary list (- [ ] **Phase N:**). These phases are intentionally absent
+    // from disk -- W006 must not fire for them (#2009).
+    const notStartedPhases = new Set();
+    const uncheckedPattern = /-\s*\[\s\]\s*\*{0,2}Phase\s+(\d+[A-Z]?(?:\.\d+)*)[:\s*]/gi;
+    let um;
+    while ((um = uncheckedPattern.exec(roadmapContent)) !== null) {
+      notStartedPhases.add(um[1]);
+      // Also add zero-padded variant so 1 and 01 both match
+      notStartedPhases.add(String(parseInt(um[1], 10)).padStart(2, '0'));
+    }
+
+    // Phases in ROADMAP but not on disk
+    for (const p of roadmapPhases) {
+      const padded = String(parseInt(p, 10)).padStart(2, '0');
+      if (!diskPhases.has(p) && !diskPhases.has(padded)) {
+        // Skip phases explicitly flagged as not-yet-started in the summary list
+        if (notStartedPhases.has(p) || notStartedPhases.has(padded)) continue;
+        addIssue('warning', 'W006', `Phase ${p} in ROADMAP.md but no directory on disk`, 'Create phase directory or remove from roadmap');
+      }
+    }
+
+    // Phases on disk but not in ROADMAP
+    for (const p of diskPhases) {
+      const unpadded = String(parseInt(p, 10));
+      if (!roadmapPhases.has(p) && !roadmapPhases.has(unpadded)) {
+        addIssue('warning', 'W007', `Phase ${p} exists on disk but not in ROADMAP.md`, 'Add to roadmap or remove directory');
+      }
+    }
+  }
+
+  // ─── Check 9: STATE.md / ROADMAP.md cross-validation ─────────────────────
+  if (fs.existsSync(statePath) && fs.existsSync(roadmapPath)) {
+    try {
+      const stateContent = fs.readFileSync(statePath, 'utf-8');
+      const roadmapContentFull = fs.readFileSync(roadmapPath, 'utf-8');
+
+      // Extract current phase from STATE.md
+      const currentPhaseMatch = stateContent.match(/\*\*Current Phase:\*\*\s*(\S+)/i) ||
+                                 stateContent.match(/Current Phase:\s*(\S+)/i);
+      if (currentPhaseMatch) {
+        const statePhase = currentPhaseMatch[1].replace(/^0+/, '');
+        // Check if ROADMAP shows this phase as already complete
+        const phaseCheckboxRe = new RegExp(`-\\s*\\[x\\].*Phase\\s+0*${escapeRegex(statePhase)}[:\\s]`, 'i');
+        if (phaseCheckboxRe.test(roadmapContentFull)) {
+          // STATE says "current" but ROADMAP says "complete" — divergence
+          const stateStatus = stateContent.match(/\*\*Status:\*\*\s*(.+)/i);
+          const statusVal = stateStatus ? stateStatus[1].trim().toLowerCase() : '';
+          if (statusVal !== 'complete' && statusVal !== 'done') {
+            addIssue('warning', 'W011',
+              `STATE.md says current phase is ${statePhase} (status: ${statusVal || 'unknown'}) but ROADMAP.md shows it as [x] complete — state files may be out of sync`,
+              `Run ${slash('progress')} to re-derive current position, or manually update STATE.md`);
+          }
+        }
+      }
+    } catch { /* intentionally empty — cross-validation is advisory */ }
+  }
+
+  // ─── Check 10: Config field validation ────────────────────────────────────
+  if (fs.existsSync(configPath)) {
+    try {
+      const configRaw = fs.readFileSync(configPath, 'utf-8');
+      const configParsed = JSON.parse(configRaw);
+
+      // Validate branching_strategy
+      const validStrategies = ['none', 'phase', 'milestone'];
+      if (configParsed.branching_strategy && !validStrategies.includes(configParsed.branching_strategy)) {
+        addIssue('warning', 'W012',
+          `config.json: invalid branching_strategy "${configParsed.branching_strategy}"`,
+          `Valid values: ${validStrategies.join(', ')}`);
+      }
+
+      // Validate context_window is a positive integer
+      if (configParsed.context_window !== undefined) {
+        const cw = configParsed.context_window;
+        if (typeof cw !== 'number' || cw <= 0 || !Number.isInteger(cw)) {
+          addIssue('warning', 'W013',
+            `config.json: context_window should be a positive integer, got "${cw}"`,
+            'Set to 200000 (default) or 1000000 (for 1M models)');
+        }
+      }
+
+      // Validate branch templates have required placeholders
+      if (configParsed.phase_branch_template && !configParsed.phase_branch_template.includes('{phase}')) {
+        addIssue('warning', 'W014',
+          'config.json: phase_branch_template missing {phase} placeholder',
+          'Template must include {phase} for phase number substitution');
+      }
+      if (configParsed.milestone_branch_template && !configParsed.milestone_branch_template.includes('{milestone}')) {
+        addIssue('warning', 'W015',
+          'config.json: milestone_branch_template missing {milestone} placeholder',
+          'Template must include {milestone} for version substitution');
+      }
+    } catch { /* parse error already caught in Check 5 */ }
+  }
+
+  // ─── Check 11: Stale / orphan git worktrees (#2167) ────────────────────────
+  try {
+    const worktreeHealth = inspectWorktreeHealth(
+      cwd,
+      { staleAfterMs: 60 * 60 * 1000 },
+      { execGit, existsSync: fs.existsSync, statSync: fs.statSync }
+    );
+    if (!worktreeHealth.ok) {
+      // AC2 / AC3: surface degraded-git state as a structured warning instead
+      // of silently suppressing it (PRED.k302 — error-swallowing-empty-sentinel).
+      if (worktreeHealth.reason === 'git_timed_out') {
+        addIssue('warning', 'W020',
+          'Worktree health check degraded: git worktree list timed out after 10s — orphan/stale worktrees could not be inspected',
+          'Run: git worktree list --porcelain to diagnose; check for .git/index.lock or a hung git process');
+      }
+      if (worktreeHealth.reason === 'git_list_failed') {
+        addIssue('warning', 'W020',
+          'Worktree health check degraded: git worktree list failed — orphan/stale worktrees could not be inspected',
+          'Run: git worktree list --porcelain to diagnose; check git repository state and permissions');
+      }
+      // Other non-ok reasons (not_a_git_repo) are silent — not meaningful for
+      // users who have no git repo.
+    } else {
+      for (const finding of worktreeHealth.findings) {
+        if (finding.kind === 'orphan') {
+          addIssue('warning', 'W017',
+            `Orphan git worktree: ${finding.path} (path no longer exists on disk)`,
+            'Run: git worktree prune');
+          continue;
+        }
+
+        if (finding.kind === 'stale') {
+          addIssue('warning', 'W017',
+            `Stale git worktree: ${finding.path} (last modified ${finding.ageMinutes} minutes ago)`,
+            `Run: git worktree remove ${finding.path} --force`);
+        }
+      }
+    }
+  } catch { /* git worktree not available or not a git repo — skip silently */ }
+
+  // ─── Check 12: MILESTONES.md / archive snapshot drift (#2446) ─────────────
+  const milestonesPath = path.join(planBase, 'MILESTONES.md');
+  const milestonesArchiveDir = path.join(planBase, 'milestones');
+  const missingFromRegistry = [];
+  try {
+    if (fs.existsSync(milestonesArchiveDir)) {
+      const archiveFiles = fs.readdirSync(milestonesArchiveDir);
+      const archivedVersions = archiveFiles
+        .map(f => f.match(/^(v\d+\.\d+(?:\.\d+)?)-ROADMAP\.md$/))
+        .filter(Boolean)
+        .map(m => m[1]);
+
+      if (archivedVersions.length > 0) {
+        const registryContent = fs.existsSync(milestonesPath)
+          ? fs.readFileSync(milestonesPath, 'utf-8')
+          : '';
+        for (const ver of archivedVersions) {
+          if (!registryContent.includes(`## ${ver}`)) {
+            missingFromRegistry.push(ver);
+          }
+        }
+        if (missingFromRegistry.length > 0) {
+          addIssue('warning', 'W018',
+            `MILESTONES.md missing ${missingFromRegistry.length} archived milestone(s): ${missingFromRegistry.join(', ')}`,
+            `Run ${slash('health')} --backfill to synthesize missing entries from archive snapshots`,
+            true);
+          repairs.push('backfillMilestones');
+        }
+      }
+    }
+  } catch { /* intentionally empty — milestone sync check is advisory */ }
+
+  // ─── Check 13: Unrecognized .planning/ root files (W019) ──────────────────
+  try {
+    const { isCanonicalPlanningFile } = require('./artifacts.cjs');
+    const entries = fs.readdirSync(planBase, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isFile()) continue;
+      if (!entry.name.endsWith('.md')) continue;
+      if (!isCanonicalPlanningFile(entry.name)) {
+        addIssue('warning', 'W019',
+          `Unrecognized .planning/ file: ${entry.name} — not a canonical GSD artifact`,
+          'Move to .planning/milestones/ archive subdir or delete if stale. See templates/README.md for the canonical artifact list.',
+          false);
+      }
+    }
+  } catch { /* artifact check is advisory — skip on error */ }
+
+  // ─── Perform repairs if requested ─────────────────────────────────────────
+  const repairActions = [];
+  if (options.repair && repairs.length > 0) {
+    for (const repair of repairs) {
+      try {
+        switch (repair) {
+          case 'createConfig':
+          case 'resetConfig': {
+            const defaults = {
+              model_profile: CONFIG_DEFAULTS.model_profile,
+              commit_docs: CONFIG_DEFAULTS.commit_docs,
+              search_gitignored: CONFIG_DEFAULTS.search_gitignored,
+              branching_strategy: CONFIG_DEFAULTS.branching_strategy,
+              phase_branch_template: CONFIG_DEFAULTS.phase_branch_template,
+              milestone_branch_template: CONFIG_DEFAULTS.milestone_branch_template,
+              quick_branch_template: CONFIG_DEFAULTS.quick_branch_template,
+              workflow: {
+                research: CONFIG_DEFAULTS.research,
+                plan_check: CONFIG_DEFAULTS.plan_checker,
+                verifier: CONFIG_DEFAULTS.verifier,
+                nyquist_validation: CONFIG_DEFAULTS.nyquist_validation,
+              },
+              parallelization: CONFIG_DEFAULTS.parallelization,
+              brave_search: CONFIG_DEFAULTS.brave_search,
+            };
+            platformWriteSync(configPath, JSON.stringify(defaults, null, 2));
+            repairActions.push({ action: repair, success: true, path: 'config.json' });
+            break;
+          }
+          case 'regenerateState': {
+            // Create timestamped backup before overwriting
+            if (fs.existsSync(statePath)) {
+              const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+              const backupPath = `${statePath}.bak-${timestamp}`;
+              fs.copyFileSync(statePath, backupPath);
+              repairActions.push({ action: 'backupState', success: true, path: backupPath });
+            }
+            // Generate minimal STATE.md from ROADMAP.md structure
+            const milestone = getMilestoneInfo(cwd);
+            const projectRef = path
+              .relative(cwd, path.join(planningDir(cwd), 'PROJECT.md'))
+              .split(path.sep).join('/');
+            let stateContent = `# Session State\n\n`;
+            stateContent += `## Project Reference\n\n`;
+            stateContent += `See: ${projectRef}\n\n`;
+            stateContent += `## Position\n\n`;
+            stateContent += `**Milestone:** ${milestone.version} ${milestone.name}\n`;
+            stateContent += `**Current phase:** (determining...)\n`;
+            stateContent += `**Status:** Resuming\n\n`;
+            stateContent += `## Session Log\n\n`;
+            stateContent += `- ${new Date().toISOString().split('T')[0]}: STATE.md regenerated by ${slash('health')} --repair\n`;
+            writeStateMd(statePath, stateContent, cwd);
+            repairActions.push({ action: repair, success: true, path: 'STATE.md' });
+            break;
+          }
+          case 'addNyquistKey': {
+            if (fs.existsSync(configPath)) {
+              try {
+                const configRaw = fs.readFileSync(configPath, 'utf-8');
+                const configParsed = JSON.parse(configRaw);
+                if (!configParsed.workflow) configParsed.workflow = {};
+                if (configParsed.workflow.nyquist_validation === undefined) {
+                  configParsed.workflow.nyquist_validation = true;
+                  platformWriteSync(configPath, JSON.stringify(configParsed, null, 2));
+                }
+                repairActions.push({ action: repair, success: true, path: 'config.json' });
+              } catch (err) {
+                repairActions.push({ action: repair, success: false, error: err.message });
+              }
+            }
+            break;
+          }
+          case 'addAiIntegrationPhaseKey': {
+            if (fs.existsSync(configPath)) {
+              try {
+                const configRaw = fs.readFileSync(configPath, 'utf-8');
+                const configParsed = JSON.parse(configRaw);
+                if (!configParsed.workflow) configParsed.workflow = {};
+                if (configParsed.workflow.ai_integration_phase === undefined) {
+                  configParsed.workflow.ai_integration_phase = true;
+                  platformWriteSync(configPath, JSON.stringify(configParsed, null, 2));
+                }
+                repairActions.push({ action: repair, success: true, path: 'config.json' });
+              } catch (err) {
+                repairActions.push({ action: repair, success: false, error: err.message });
+              }
+            }
+            break;
+          }
+          case 'backfillMilestones': {
+            if (!options.backfill && !options.repair) break;
+            const today = new Date().toISOString().split('T')[0];
+            let backfilled = 0;
+            for (const ver of missingFromRegistry) {
+              try {
+                const snapshotPath = path.join(milestonesArchiveDir, `${ver}-ROADMAP.md`);
+                const snapshot = safeReadFile(snapshotPath);
+                // Build minimal entry from snapshot title or version
+                const titleMatch = snapshot && snapshot.match(/^#\s+(.+)$/m);
+                const milestoneName = titleMatch ? titleMatch[1].replace(/^Milestone\s+/i, '').replace(/^v[\d.]+\s*/, '').trim() : ver;
+                const entry = `## ${ver}${milestoneName && milestoneName !== ver ? ` ${milestoneName}` : ''} (Backfilled: ${today})\n\n**Note:** Synthesized from archive snapshot by \`${slash('health')} --backfill\`. Original completion date unknown.\n\n---\n\n`;
+                const milestonesContent = fs.existsSync(milestonesPath)
+                  ? fs.readFileSync(milestonesPath, 'utf-8')
+                  : '';
+                if (!milestonesContent.trim()) {
+                  platformWriteSync(milestonesPath, `# Milestones\n\n${entry}`);
+                } else {
+                  const headerMatch = milestonesContent.match(/^(#{1,3}\s+[^\n]*\n\n?)/);
+                  if (headerMatch) {
+                    const header = headerMatch[1];
+                    const rest = milestonesContent.slice(header.length);
+                    platformWriteSync(milestonesPath, header + entry + rest);
+                  } else {
+                    platformWriteSync(milestonesPath, entry + milestonesContent);
+                  }
+                }
+                backfilled++;
+              } catch { /* intentionally empty — partial backfill is acceptable */ }
+            }
+            repairActions.push({ action: repair, success: true, detail: `Backfilled ${backfilled} milestone(s) into MILESTONES.md` });
+            break;
+          }
+        }
+      } catch (err) {
+        repairActions.push({ action: repair, success: false, error: err.message });
+      }
+    }
+  }
+
+  // ─── Determine overall status ─────────────────────────────────────────────
+  let status;
+  if (errors.length > 0) {
+    status = 'broken';
+  } else if (warnings.length > 0) {
+    status = 'degraded';
+  } else {
+    status = 'healthy';
+  }
+
+  const repairableCount = errors.filter(e => e.repairable).length +
+                         warnings.filter(w => w.repairable).length;
+
+  const result = {
+    status,
+    errors,
+    warnings,
+    info,
+    repairable_count: repairableCount,

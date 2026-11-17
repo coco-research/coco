@@ -268,3 +268,353 @@ function cmdConfigNewProject(cwd, choicesJson, raw) {
   // Parse user choices
   let userChoices = {};
   if (choicesJson && choicesJson.trim() !== '') {
+    try {
+      userChoices = JSON.parse(choicesJson);
+    } catch (err) {
+      error('Invalid JSON for config-new-project: ' + err.message);
+    }
+  }
+
+  // Ensure .planning directory exists
+  try {
+    platformEnsureDir(planningBase);
+  } catch (err) {
+    error('Failed to create .planning directory: ' + err.message);
+  }
+
+  const config = buildNewProjectConfig(userChoices);
+
+  try {
+    platformWriteSync(configPath, JSON.stringify(config, null, 2));
+    output({ created: true, path: '.planning/config.json' }, raw, 'created');
+  } catch (err) {
+    error('Failed to write config.json: ' + err.message);
+  }
+}
+
+/**
+ * Ensures the config file exists (creates it if needed).
+ *
+ * Does not call `output()`, so can be used as one step in a command without triggering `exit(0)` in
+ * the happy path. But note that `error()` will still `exit(1)` out of the process.
+ */
+function ensureConfigFile(cwd) {
+  const planningBase = planningDir(cwd);
+  const configPath = path.join(planningBase, 'config.json');
+
+  // Ensure .planning directory exists
+  try {
+    platformEnsureDir(planningBase);
+  } catch (err) {
+    error('Failed to create .planning directory: ' + err.message);
+  }
+
+  // Check if config already exists
+  if (fs.existsSync(configPath)) {
+    return { created: false, reason: 'already_exists' };
+  }
+
+  const config = buildNewProjectConfig({});
+
+  try {
+    platformWriteSync(configPath, JSON.stringify(config, null, 2));
+    return { created: true, path: '.planning/config.json' };
+  } catch (err) {
+    error('Failed to create config.json: ' + err.message);
+  }
+}
+
+/**
+ * Command to ensure the config file exists (creates it if needed).
+ *
+ * Note that this exits the process (via `output()`) even in the happy path; use
+ * `ensureConfigFile()` directly if you need to avoid this.
+ */
+function cmdConfigEnsureSection(cwd, raw) {
+  const ensureConfigFileResult = ensureConfigFile(cwd);
+  if (ensureConfigFileResult.created) {
+    output(ensureConfigFileResult, raw, 'created');
+  } else {
+    output(ensureConfigFileResult, raw, 'exists');
+  }
+}
+
+/**
+ * Sets a value in the config file, allowing nested values via dot notation (e.g.,
+ * "workflow.research").
+ *
+ * Does not call `output()`, so can be used as one step in a command without triggering `exit(0)` in
+ * the happy path. But note that `error()` will still `exit(1)` out of the process.
+ */
+function setConfigValue(cwd, keyPath, parsedValue) {
+  const configPath = path.join(planningDir(cwd), 'config.json');
+
+  return withPlanningLock(cwd, () => {
+    // Load existing config or start with empty object
+    let config = {};
+    try {
+      if (fs.existsSync(configPath)) {
+        config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      }
+    } catch (err) {
+      error('Failed to read config.json: ' + err.message, ERROR_REASON.CONFIG_PARSE_FAILED);
+    }
+
+    // Set nested value using dot notation (e.g., "workflow.research")
+    const keys = keyPath.split('.');
+    let current = config;
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+      if (current[key] === undefined || typeof current[key] !== 'object') {
+        current[key] = {};
+      }
+      current = current[key];
+    }
+    const previousValue = current[keys[keys.length - 1]]; // Capture previous value before overwriting
+    current[keys[keys.length - 1]] = parsedValue;
+
+    // Write back
+    try {
+      platformWriteSync(configPath, JSON.stringify(config, null, 2));
+      return { updated: true, key: keyPath, value: parsedValue, previousValue };
+    } catch (err) {
+      error('Failed to write config.json: ' + err.message);
+    }
+  });
+}
+
+/**
+ * Command to set a value in the config file, allowing nested values via dot notation (e.g.,
+ * "workflow.research").
+ *
+ * Note that this exits the process (via `output()`) even in the happy path; use `setConfigValue()`
+ * directly if you need to avoid this.
+ */
+function cmdConfigSet(cwd, keyPath, value, raw) {
+  if (!keyPath) {
+    error('Usage: config-set <key.path> <value>', ERROR_REASON.USAGE);
+  }
+  // #3593: reject the "key without value" form (e.g. `config-set
+  // model_profile` with args[2] === undefined). Without this guard the
+  // value passes through as undefined, the number/boolean/json branches
+  // all fall through, and the write either silently strips the key
+  // (JSON.stringify drops undefined values) or writes a corrupt entry.
+  // Typed reason so the negative-matrix test can assert on it instead
+  // of greppinng prose.
+  if (value === undefined) {
+    error('Usage: config-set <key.path> <value>', ERROR_REASON.USAGE);
+  }
+
+  validateKnownConfigKeyPath(keyPath);
+
+  if (!isValidConfigKey(keyPath)) {
+    error(`Unknown config key: "${keyPath}". Valid keys: ${[...VALID_CONFIG_KEYS].sort().join(', ')}, agent_skills.<agent-type>, features.<feature_name>`, ERROR_REASON.CONFIG_INVALID_KEY);
+  }
+
+  // Parse value (handle booleans, numbers, and JSON arrays/objects)
+  let parsedValue = value;
+  if (value === 'true') parsedValue = true;
+  else if (value === 'false') parsedValue = false;
+  else if (!isNaN(value) && value !== '') parsedValue = Number(value);
+  else if (typeof value === 'string' && (value.startsWith('[') || value.startsWith('{'))) {
+    try { parsedValue = JSON.parse(value); } catch { /* keep as string */ }
+  }
+
+  const VALID_CONTEXT_VALUES = ['dev', 'research', 'review'];
+  if (keyPath === 'context' && !VALID_CONTEXT_VALUES.includes(String(parsedValue))) {
+    error(`Invalid context value '${value}'. Valid values: ${VALID_CONTEXT_VALUES.join(', ')}`);
+  }
+
+  // Codebase drift detector (#2003)
+  const VALID_DRIFT_ACTIONS = ['warn', 'auto-remap'];
+  if (keyPath === 'workflow.drift_action' && !VALID_DRIFT_ACTIONS.includes(String(parsedValue))) {
+    error(`Invalid workflow.drift_action '${value}'. Valid values: ${VALID_DRIFT_ACTIONS.join(', ')}`);
+  }
+  if (keyPath === 'workflow.drift_threshold') {
+    if (typeof parsedValue !== 'number' || !Number.isInteger(parsedValue) || parsedValue < 1) {
+      error(`Invalid workflow.drift_threshold '${value}'. Must be a positive integer.`);
+    }
+  }
+
+  // Post-planning gap checker (#2493)
+  if (keyPath === 'workflow.post_planning_gaps') {
+    if (typeof parsedValue !== 'boolean') {
+      error(`Invalid workflow.post_planning_gaps '${value}'. Must be a boolean (true or false).`);
+    }
+  }
+
+  // #3086 — git.create_tag: boolean only
+  if (keyPath === 'git.create_tag') {
+    if (typeof parsedValue !== 'boolean') {
+      error(`Invalid git.create_tag '${value}'. Must be a boolean (true or false).`);
+    }
+  }
+
+  if (keyPath === 'ship.pr_body_sections') {
+    validateShipPrBodySections(parsedValue);
+  }
+
+  // Human verification checkpoint mode (#3309)
+  const VALID_HUMAN_VERIFY_MODES = ['mid-flight', 'end-of-phase'];
+  if (keyPath === 'workflow.human_verify_mode' && !VALID_HUMAN_VERIFY_MODES.includes(String(parsedValue))) {
+    error(`Invalid workflow.human_verify_mode '${value}'. Valid values: ${VALID_HUMAN_VERIFY_MODES.join(', ')}`);
+  }
+
+  // Context position enum validation (#2937)
+  const VALID_CONTEXT_POSITIONS = ['front', 'end'];
+  if (keyPath === 'statusline.context_position' && !VALID_CONTEXT_POSITIONS.includes(String(parsedValue))) {
+    error(`Invalid statusline.context_position '${value}'. Valid values: ${VALID_CONTEXT_POSITIONS.join(', ')}`);
+  }
+
+  // Fallow scope + profile enum validation (#3424)
+  const VALID_FALLOW_SCOPES = ['phase', 'repo'];
+  if (keyPath === 'code_quality.fallow.scope' && !VALID_FALLOW_SCOPES.includes(String(parsedValue))) {
+    error(`Invalid code_quality.fallow.scope '${value}'. Valid values: ${VALID_FALLOW_SCOPES.join(', ')}`);
+  }
+  const VALID_FALLOW_PROFILES = ['minimal', 'standard', 'strict'];
+  if (keyPath === 'code_quality.fallow.profile' && !VALID_FALLOW_PROFILES.includes(String(parsedValue))) {
+    error(`Invalid code_quality.fallow.profile '${value}'. Valid values: ${VALID_FALLOW_PROFILES.join(', ')}`);
+  }
+
+  if (keyPath === 'review.default_reviewers') {
+    const normalized = normalizeConfiguredDefaultReviewers(parsedValue);
+    if (normalized.errors.length > 0) {
+      error(normalized.errors[0]);
+    }
+    parsedValue = normalized.values;
+  }
+
+  const setConfigValueResult = setConfigValue(cwd, keyPath, parsedValue);
+
+  // Mask secrets in both JSON and text output. The plaintext is written
+  // to config.json (that's where secrets live on disk); the CLI output
+  // must never echo it. See lib/secrets.cjs.
+  if (isSecretKey(keyPath)) {
+    const masked = maskSecret(parsedValue);
+    const maskedPrev = setConfigValueResult.previousValue === undefined
+      ? undefined
+      : maskSecret(setConfigValueResult.previousValue);
+    const maskedResult = {
+      ...setConfigValueResult,
+      value: masked,
+      previousValue: maskedPrev,
+      masked: true,
+    };
+    output(maskedResult, raw, `${keyPath}=${masked}`);
+    return;
+  }
+
+  output(setConfigValueResult, raw, `${keyPath}=${parsedValue}`);
+}
+
+/**
+ * Schema-level defaults for well-known config keys.
+ * When a key is absent from config.json and no --default flag was supplied,
+ * cmdConfigGet checks here before emitting "Key not found".
+ */
+const SCHEMA_DEFAULTS = {
+  'context_window': 200000,
+  'executor.stall_detect_interval_minutes': 5,
+  'executor.stall_threshold_minutes': 10,
+  'git.create_tag': true,
+};
+
+function cmdConfigGet(cwd, keyPath, raw, defaultValue) {
+  const configPath = path.join(planningDir(cwd), 'config.json');
+  const hasDefault = defaultValue !== undefined;
+
+  if (!keyPath) {
+    error('Usage: config-get <key.path> [--default <value>]');
+  }
+
+  let config = {};
+  try {
+    if (fs.existsSync(configPath)) {
+      config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    } else if (hasDefault) {
+      output(defaultValue, raw, String(defaultValue));
+      return;
+    } else if (Object.prototype.hasOwnProperty.call(SCHEMA_DEFAULTS, keyPath)) {
+      const def = SCHEMA_DEFAULTS[keyPath];
+      output(def, raw, String(def));
+      return;
+    } else {
+      error('No config.json found at ' + configPath, ERROR_REASON.CONFIG_NO_FILE);
+    }
+  } catch (err) {
+    if (err.message.startsWith('No config.json')) throw err;
+    error('Failed to read config.json: ' + err.message, ERROR_REASON.CONFIG_PARSE_FAILED);
+  }
+
+  // Traverse dot-notation path (e.g., "workflow.auto_advance")
+  const keys = keyPath.split('.');
+  let current = config;
+  for (const key of keys) {
+    if (current === undefined || current === null || typeof current !== 'object') {
+      if (hasDefault) { output(defaultValue, raw, String(defaultValue)); return; }
+      if (Object.prototype.hasOwnProperty.call(SCHEMA_DEFAULTS, keyPath)) {
+        const def = SCHEMA_DEFAULTS[keyPath];
+        output(def, raw, String(def));
+        return;
+      }
+      error(`Key not found: ${keyPath}`, ERROR_REASON.CONFIG_KEY_NOT_FOUND);
+    }
+    current = current[key];
+  }
+
+  if (current === undefined) {
+    if (hasDefault) { output(defaultValue, raw, String(defaultValue)); return; }
+    if (Object.prototype.hasOwnProperty.call(SCHEMA_DEFAULTS, keyPath)) {
+      const def = SCHEMA_DEFAULTS[keyPath];
+      output(def, raw, String(def));
+      return;
+    }
+    error(`Key not found: ${keyPath}`, ERROR_REASON.CONFIG_KEY_NOT_FOUND);
+  }
+
+  // Never echo plaintext for sensitive keys via config-get. Plaintext lives
+  // in config.json on disk; the CLI surface always shows the masked form.
+  if (isSecretKey(keyPath)) {
+    const masked = maskSecret(current);
+    output(masked, raw, masked);
+    return;
+  }
+
+  output(current, raw, String(current));
+}
+
+/**
+ * Command to set the model profile in the config file.
+ *
+ * Note that this exits the process (via `output()`) even in the happy path.
+ */
+function cmdConfigSetModelProfile(cwd, profile, raw) {
+  if (!profile) {
+    error(`Usage: config-set-model-profile <${VALID_PROFILES.join('|')}>`);
+  }
+
+  const normalizedProfile = profile.toLowerCase().trim();
+  if (!VALID_PROFILES.includes(normalizedProfile)) {
+    error(`Invalid profile '${profile}'. Valid profiles: ${VALID_PROFILES.join(', ')}`);
+  }
+
+  // Ensure config exists (create if needed)
+  ensureConfigFile(cwd);
+
+  // Set the model profile in the config
+  const { previousValue } = setConfigValue(cwd, 'model_profile', normalizedProfile, raw);
+  const previousProfile = previousValue || 'balanced';
+
+  // Build result value / message and return
+  const agentToModelMap = getAgentToModelMapForProfile(normalizedProfile);
+  const result = {
+    updated: true,
+    profile: normalizedProfile,
+    previousProfile,
+    agentToModelMap,
+  };
+  const rawValue = getCmdConfigSetModelProfileResultMessage(
+    normalizedProfile,
+    previousProfile,
+    agentToModelMap
+  );

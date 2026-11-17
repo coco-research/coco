@@ -1,0 +1,350 @@
+{
+  "repository": "https://github.com/gsd-build/get-shit-done",
+  "commit": "bdcaab2c752d9a33a1a1ca9acf3a3c81fb991815",
+  "files": [
+    {
+      "path": "bin/check-latest-version.cjs",
+      "git_blob": "78b3e109f8b79ec34ab69fe81bf94315fa75b314"
+    },
+    {
+      "path": "bin/gsd-tools.cjs",
+      "git_blob": "7c8289d2f0a3110e71fdf9822b00f093c075aa1a"
+    },
+    {
+      "path": "bin/lib/active-workstream-store.cjs",
+      "git_blob": "bf5a99a15b4cb22b35621139cb28be3c2564fab6"
+    },
+    {
+      "path": "bin/lib/adr-parser.cjs",
+      "git_blob": "af48c7077a1b6da79b84caa92adde7ac3bcfd2e4"
+    },
+    {
+      "path": "bin/lib/artifacts.cjs",
+      "git_blob": "f90c0659ffcb8c79bf364dc7b98e653370741a40"
+    },
+    {
+      "path": "bin/lib/audit.cjs",
+      "git_blob": "47d3386e3cf8eb944fbb4a58848b5524ea079578"
+    },
+    {
+      "path": "bin/lib/cjs-command-router-adapter.cjs",
+      "git_blob": "1598b40e2826dc28974ac0dde2b6a066c6736e6c"
+    },
+    {
+      "path": "bin/lib/cjs-sdk-bridge.cjs",
+      "git_blob": "0e9ef003f3f351df1807f72559fe80c6adab6952"
+    },
+    {
+      "path": "bin/lib/clusters.cjs",
+      "git_blob": "90b10e234919de6ce16a9126853ca08965eee54e"
+    },
+    {
+      "path": "bin/lib/code-review-flags.cjs",
+      "git_blob": "a0bba0167a3b69572818620d71cb2da2cdbd56f8"
+    },
+    {
+      "path": "bin/lib/command-aliases.generated.cjs",
+      "git_blob": "7c48ef1346b3530c3ea8f1b04af2667f9b3e7549"
+    },
+    {
+      "path": "bin/lib/command-routing-hub.cjs",
+      "git_blob": "0cdab02c3d400fe5af9a59f7aa3e9d3e723484d3"
+    },
+    {
+      "path": "bin/lib/commands.cjs",
+      "git_blob": "85e4850d505a268ebc468c86ea0ff29d020c8937"
+    },
+    {
+      "path": "bin/lib/config-schema.cjs",
+      "git_blob": "16641d0300feb9f8479522264adcd59b7f54c3ed"
+    },
+    {
+      "path": "bin/lib/config.cjs",
+      "git_blob": "2b6e48fa85985a84c0f6e0b3dd433ece4d2feba7"
+    },
+    {
+      "path": "bin/lib/configuration.generated.cjs",
+      "git_blob": "9872fb4ccc291aba7ad1a6f8d52d6e74a3055dcc"
+    },
+    {
+      "path": "bin/lib/context-utilization.cjs",
+      "git_blob": "ba3ac3975381dc6b9e7706112d706401231f18ad"
+    },
+    {
+      "path": "bin/lib/core.cjs",
+      "git_blob": "305ac8bd647fbd52aca86287366e6b5525bef632"
+    },
+    {
+      "path": "bin/lib/decisions.cjs",
+      "git_blob": "68e3ee95977d90e95ad5fa68dfda795713366d45"
+    },
+    {
+      "path": "bin/lib/decisions.generated.cjs",
+      "git_blob": "efb2c3f138aa2b847c3baa58a489a3f642a95c13"
+    },
+    {
+      "path": "bin/lib/docs.cjs",
+      "git_blob": "545c79f68f7b965fde7484bea38a9b2e30d11994"
+    },
+    {
+      "path": "bin/lib/drift.cjs",
+      "git_blob": "ef6213ba2e4895cb3ed1bf8159ed29f3aa55d54c"
+    },
+    {
+      "path": "bin/lib/fallow-runner.cjs",
+      "git_blob": "5454c14e95895dc90a47691e6b3fd9d692bbe29c"
+    },
+    {
+      "path": "bin/lib/frontmatter.cjs",
+      "git_blob": "2bac4150188f5593369d1148da644ff4754bbcf0"
+    },
+    {
+      "path": "bin/lib/gap-checker.cjs",
+      "git_blob": "cd8e35054cf895883988207f31506f98c4dce5e1"
+    },
+    {
+      "path": "bin/lib/graphify.cjs",
+      "git_blob": "600adc67b9e0c165016bafa5db8da9020918a104"
+    },
+    {
+      "path": "bin/lib/gsd2-import.cjs",
+      "git_blob": "f00220dfe4563799a2e2ce3f482ccf581a4142a3"
+    },
+    {
+      "path": "bin/lib/init-command-router.cjs",
+      "git_blob": "ec21ebfd3549fedce2bfc8b1795cb00728bb08bb"
+    },
+    {
+      "path": "bin/lib/init.cjs",
+      "git_blob": "04fc77cbd7c68fb4acf91daf9a819efe4104919b"
+    },
+    {
+      "path": "bin/lib/install-profiles.cjs",
+      "git_blob": "24769c786ed52bc37ea2d431c75892781130f6a9"
+    },
+    {
+      "path": "bin/lib/installer-migration-authoring.cjs",
+      "git_blob": "d6fb5c500cf3f9cedf1bd09864119ceb37bf7f27"
+    },
+    {
+      "path": "bin/lib/installer-migration-report.cjs",
+      "git_blob": "b7a4e894f96cd563b16b60ad29ecd7e9754e8707"
+    },
+    {
+      "path": "bin/lib/installer-migrations.cjs",
+      "git_blob": "c1039034d0332ec233a9fcc82a332d3d17e00ef9"
+    },
+    {
+      "path": "bin/lib/installer-migrations/000-first-time-baseline.cjs",
+      "git_blob": "cbc31d6c4eb7ead07d1d4df0b1e2ba5ae0f8326b"
+    },
+    {
+      "path": "bin/lib/installer-migrations/001-legacy-orphan-files.cjs",
+      "git_blob": "26d26319870a27d0b5cb4f4d9d2f50852d9e2ddd"
+    },
+    {
+      "path": "bin/lib/intel.cjs",
+      "git_blob": "b4e52e9e50c4dcca9d78b423936e49187bf8459b"
+    },
+    {
+      "path": "bin/lib/learnings.cjs",
+      "git_blob": "dc99db3c4dfcb5b338bb2005d98df00ad387ea45"
+    },
+    {
+      "path": "bin/lib/milestone.cjs",
+      "git_blob": "00d72aaab49e85aad8159b0b70e3adc7e9dbc312"
+    },
+    {
+      "path": "bin/lib/model-catalog.cjs",
+      "git_blob": "65a35d35fb3467ca6d8941b9f4d02317d0a12e38"
+    },
+    {
+      "path": "bin/lib/model-profiles.cjs",
+      "git_blob": "af05b75f7e16d9ea59cc1a974053160c48a670b3"
+    },
+    {
+      "path": "bin/lib/phase-command-router.cjs",
+      "git_blob": "ac972f52383497feb9b028cbe5f091e03ebaf055"
+    },
+    {
+      "path": "bin/lib/phase.cjs",
+      "git_blob": "0afd100c604ce0327ec001e131fb044ee5ba02f7"
+    },
+    {
+      "path": "bin/lib/phases-command-router.cjs",
+      "git_blob": "84407869b270d879322afe170fe7e4cebf6fb6f4"
+    },
+    {
+      "path": "bin/lib/plan-scan.cjs",
+      "git_blob": "ece997d85e524b136c83e4a1d79b2a6535a4aa85"
+    },
+    {
+      "path": "bin/lib/plan-scan.generated.cjs",
+      "git_blob": "e58004a82a12049eabf6bb411a57239dc22a0d82"
+    },
+    {
+      "path": "bin/lib/planning-workspace.cjs",
+      "git_blob": "bb195bb392a97bc20cf5dc4b012af4428800f6ce"
+    },
+    {
+      "path": "bin/lib/profile-output.cjs",
+      "git_blob": "d6918c5d0674554b0f6f6e7050357005f5bc6e74"
+    },
+    {
+      "path": "bin/lib/profile-pipeline.cjs",
+      "git_blob": "1377069475a3a07b77a431e4c95dfa221471d4eb"
+    },
+    {
+      "path": "bin/lib/project-root.generated.cjs",
+      "git_blob": "bb85c50d35204db699ec5b6df920d19a910ed8e9"
+    },
+    {
+      "path": "bin/lib/prompt-budget.cjs",
+      "git_blob": "2f37a7322d2a369b07441db7c13ac9f157c9674e"
+    },
+    {
+      "path": "bin/lib/review-reviewer-selection.cjs",
+      "git_blob": "7d8d3225f24c751d8614d96091ddf90c764b78f6"
+    },
+    {
+      "path": "bin/lib/roadmap-command-router.cjs",
+      "git_blob": "7f8427f3c383c260a02b3caeed5c1414cd1e2005"
+    },
+    {
+      "path": "bin/lib/roadmap.cjs",
+      "git_blob": "901b0d3a9f63f0235c4a5f4b6c782e01015d4b9b"
+    },
+    {
+      "path": "bin/lib/runtime-artifact-layout.cjs",
+      "git_blob": "f87eb4cdd47b72224dc7e0698f164f51fa7730f9"
+    },
+    {
+      "path": "bin/lib/runtime-homes.cjs",
+      "git_blob": "4909a4ce5d618efcedab50e56af2f422b713e783"
+    },
+    {
+      "path": "bin/lib/runtime-slash.cjs",
+      "git_blob": "30cda98f6205aa2fb02eaccab75651a3a7a31a13"
+    },
+    {
+      "path": "bin/lib/schema-detect.cjs",
+      "git_blob": "27cca4b16b6cae5f79a8e83cfbe392f454d9c71a"
+    },
+    {
+      "path": "bin/lib/schema-detect.generated.cjs",
+      "git_blob": "b1652a6c90d7753deb256a8f90351a02f3882bba"
+    },
+    {
+      "path": "bin/lib/security.cjs",
+      "git_blob": "48b0f0c6c94d3a611069313ed5a911a8373431b1"
+    },
+    {
+      "path": "bin/lib/shell-command-projection.cjs",
+      "git_blob": "36c3c4a9b5565bb474440227480dd9b7d7018786"
+    },
+    {
+      "path": "bin/lib/state-command-router.cjs",
+      "git_blob": "caca7376dcfa81bea0258d981046fb14a104e529"
+    },
+    {
+      "path": "bin/lib/state-document.cjs",
+      "git_blob": "53b7b2974157bfec78aa0e1e2f2fe96cdd5d98c4"
+    },
+    {
+      "path": "bin/lib/state-document.generated.cjs",
+      "git_blob": "81ab3101760913f1904461584d4a346aa505680a"
+    },
+    {
+      "path": "bin/lib/state.cjs",
+      "git_blob": "df6d0118b80b7227f1679bb398dc74908fefb6d6"
+    },
+    {
+      "path": "bin/lib/surface.cjs",
+      "git_blob": "83fb8ab21497d478f6c4c4fa09e3cd8d6cd9f844"
+    },
+    {
+      "path": "bin/lib/template.cjs",
+      "git_blob": "daaf8581f851b3ee5f9700c3f0771c4bff17a461"
+    },
+    {
+      "path": "bin/lib/uat.cjs",
+      "git_blob": "5c989bf2c05b0de583b2daf621515e3e27cf6713"
+    },
+    {
+      "path": "bin/lib/validate-command-router.cjs",
+      "git_blob": "e38bd8333bd99874dd3e60426accdaca7873f88f"
+    },
+    {
+      "path": "bin/lib/verify-command-router.cjs",
+      "git_blob": "e42809f547a62ddd30fced4f9c06e51bf040ff01"
+    },
+    {
+      "path": "bin/lib/verify.cjs",
+      "git_blob": "218ad857a7cae5fa6268e3718a1ba15a00338f41"
+    },
+    {
+      "path": "bin/lib/workstream-inventory-builder.generated.cjs",
+      "git_blob": "c7c4eca16a9a6db677b3c17e3cd1a04199f50b4d"
+    },
+    {
+      "path": "bin/lib/workstream-inventory.cjs",
+      "git_blob": "8e84424ab1e0311a9718d80595f54f7ea953d745"
+    },
+    {
+      "path": "bin/lib/workstream-name-policy.cjs",
+      "git_blob": "61c58e7e86b743c75ed8c5b58e6e5bbd14752418"
+    },
+    {
+      "path": "bin/lib/workstream-name-policy.generated.cjs",
+      "git_blob": "27f1ec23e0c1a8cdd1fdd390d5f60920913b0ecc"
+    },
+    {
+      "path": "bin/lib/workstream.cjs",
+      "git_blob": "b538b4052549c7d041adc46274e9c16e08183780"
+    },
+    {
+      "path": "bin/lib/worktree-safety.cjs",
+      "git_blob": "f24828c1fefbec71543e80b4d46fc9fef21c3cfd"
+    },
+    {
+      "path": "bin/verify-reapply-patches.cjs",
+      "git_blob": "76bef6429526f14156b6c8bb492074e4f1d5feba"
+    },
+    {
+      "path": "contexts/dev.md",
+      "git_blob": "7a9a9a2739e9ff4b6054b8efc59a31d2a2cb8f6b"
+    },
+    {
+      "path": "contexts/research.md",
+      "git_blob": "d358858385cd431a5df07b4bf382cff74ecb67f2"
+    },
+    {
+      "path": "contexts/review.md",
+      "git_blob": "68dec8f92974ef8574c21365fb06d92341c10f29"
+    },
+    {
+      "path": "references/agent-contracts.md",
+      "git_blob": "777cef2082fc6daea3cf6825a1371199ccc6ef2d"
+    },
+    {
+      "path": "references/ai-evals.md",
+      "git_blob": "4e148d7de7087af310d3ddcd5bc6f4b5adbee442"
+    },
+    {
+      "path": "references/ai-frameworks.md",
+      "git_blob": "e13b8462cba650ae86d8f7f8a7f4d74e20bf1aca"
+    },
+    {
+      "path": "references/artifact-types.md",
+      "git_blob": "8cfa121f9e50dfe98e1b951160465508ad65551d"
+    },
+    {
+      "path": "references/autonomous-smart-discuss.md",
+      "git_blob": "62156d278b9766e7842af2866b296433902ad3dc"
+    },
+    {
+      "path": "references/checkpoints.md",
+      "git_blob": "10b2cb90b1909f21e2daaa5a27c4e82c39003e4f"
+    },
+    {
+      "path": "references/common-bug-patterns.md",

@@ -393,3 +393,289 @@ Frustration triggers tend to be consistent across projects (personality-driven, 
 **Detection heuristics:**
 
 1. If developer references reading code directly AND asks specific targeted questions AND demonstrates independent investigation --> `self-directed`
+2. If developer asks Claude to explain concepts AND requests walkthroughs AND prefers Claude-mediated understanding --> `guided`
+3. If developer cites documentation AND asks for doc links AND mentions reading tutorials or official guides --> `documentation-first`
+4. If developer requests examples AND modifies provided examples AND learns by pattern matching --> `example-driven`
+
+**Confidence scoring:**
+
+- **HIGH:** 10+ learning interactions showing consistent preference, same preference across 2+ projects
+- **MEDIUM:** 5-9 learning interactions, OR consistent within 1 project only
+- **LOW:** < 5 learning interactions, OR preference varies by topic familiarity
+- **UNSCORED:** 0 messages with learning-relevant signals
+
+**Example quotes:**
+
+- **self-directed:** "I read through the middleware code. The issue is that the token check happens after the rate limiter. Should those be swapped?"
+- **guided:** "Can you walk me through how the auth flow works in this codebase? Start from the login request."
+- **documentation-first:** "I read the Prisma docs on relations. Can you help me apply the many-to-many pattern from their guide to our schema?"
+- **example-driven:** "Show me a working example of a protected API route with JWT validation. I'll adapt it for our endpoints."
+
+**Context-dependent patterns:**
+
+Learning style often varies with domain expertise. A developer may be self-directed in familiar domains but guided or example-driven in new ones. Report the split if detected: "context-dependent: self-directed for TypeScript/Node, example-driven for Rust/systems programming."
+
+---
+
+## Evidence Curation
+
+### Evidence Format
+
+Use the combined format for each evidence entry:
+
+**Signal:** [pattern interpretation -- what the quote demonstrates] / **Example:** "[trimmed quote, ~100 characters]" -- project: [project name]
+
+### Evidence Targets
+
+- **3 evidence quotes per dimension** (24 total across all 8 dimensions)
+- Select quotes that best illustrate the rated pattern
+- Prefer quotes from different projects to demonstrate cross-project consistency
+- When fewer than 3 relevant quotes exist, include what is available and note the evidence count
+
+### Quote Truncation
+
+- Trim quotes to the behavioral signal -- the part that demonstrates the pattern
+- Target approximately 100 characters per quote
+- Preserve the meaningful fragment, not the full message
+- If the signal is in the middle of a long message, use "..." to indicate trimming
+- Never include the full 500-character message when 50 characters capture the signal
+
+### Project Attribution
+
+- Every evidence quote must include the project name
+- Project attribution enables verification and shows cross-project patterns
+- Format: `-- project: [name]`
+
+### Sensitive Content Exclusion (Layer 1)
+
+The profiler agent must never select quotes containing any of the following patterns:
+
+- `sk-` (API key prefixes)
+- `Bearer ` (auth tokens)
+- `password` (credentials)
+- `secret` (secrets)
+- `token` (when used as a credential value, not a concept discussion)
+- `api_key` or `API_KEY` (API key references)
+- Full absolute file paths containing usernames (e.g., `/Users/john/...`, `/home/john/...`)
+
+**When sensitive content is found and excluded**, report as metadata in the analysis output:
+
+```json
+{
+  "sensitive_excluded": [
+    { "type": "api_key_pattern", "count": 2 },
+    { "type": "file_path_with_username", "count": 1 }
+  ]
+}
+```
+
+This metadata enables defense-in-depth auditing. Layer 2 (regex filter in the write-profile step) provides a second pass, but the profiler should still avoid selecting sensitive quotes.
+
+### Natural Language Priority
+
+Weight natural language messages higher than:
+- Pasted log output (detected by timestamps, repeated format strings, `[DEBUG]`, `[INFO]`, `[ERROR]`)
+- Session context dumps (messages starting with "This session is being continued from a previous conversation")
+- Large code pastes (messages where > 80% of content is inside code fences)
+
+These message types are genuine but carry less behavioral signal. Deprioritize them when selecting evidence quotes.
+
+---
+
+## Recency Weighting
+
+### Guideline
+
+Recent sessions (last 30 days) should be weighted approximately 3x compared to older sessions when analyzing patterns.
+
+### Rationale
+
+Developer styles evolve. A developer who was terse six months ago may now provide detailed structured context. Recent behavior is a more accurate reflection of current working style.
+
+### Application
+
+1. When counting signals for confidence scoring, recent signals count 3x (e.g., 4 recent signals = 12 weighted signals)
+2. When selecting evidence quotes, prefer recent quotes over older ones when both demonstrate the same pattern
+3. When patterns conflict between recent and older sessions, the recent pattern takes precedence for the rating, but note the evolution: "recently shifted from terse-direct to conversational"
+4. The 30-day window is relative to the analysis date, not a fixed date
+
+### Edge Cases
+
+- If ALL sessions are older than 30 days, apply no weighting (all sessions are equally stale)
+- If ALL sessions are within the last 30 days, apply no weighting (all sessions are equally recent)
+- The 3x weight is a guideline, not a hard multiplier -- use judgment when the weighted count changes a confidence threshold
+
+---
+
+## Thin Data Handling
+
+### Message Thresholds
+
+| Total Genuine Messages | Mode | Behavior |
+|------------------------|------|----------|
+| > 50 | `full` | Full analysis across all 8 dimensions. Questionnaire optional (user can choose to supplement). |
+| 20-50 | `hybrid` | Analyze available messages. Score each dimension with confidence. Supplement with questionnaire for LOW/UNSCORED dimensions. |
+| < 20 | `insufficient` | All dimensions scored LOW or UNSCORED. Recommend questionnaire fallback as primary profile source. Note: "insufficient session data for behavioral analysis." |
+
+### Handling Insufficient Dimensions
+
+When a specific dimension has insufficient data (even if total messages exceed thresholds):
+
+- Set confidence to `UNSCORED`
+- Set summary to: "Insufficient data -- no clear signals detected for this dimension."
+- Set claude_instruction to a neutral fallback: "No strong preference detected. Ask the developer when this dimension is relevant."
+- Set evidence_quotes to empty array `[]`
+- Set evidence_count to `0`
+
+### Questionnaire Supplement
+
+When operating in `hybrid` mode, the questionnaire fills gaps for dimensions where session analysis produced LOW or UNSCORED confidence. The questionnaire-derived ratings use:
+- **MEDIUM** confidence for strong, definitive picks
+- **LOW** confidence for "it varies" or ambiguous selections
+
+If session analysis and questionnaire agree on a dimension, confidence can be elevated (e.g., session LOW + questionnaire MEDIUM agreement = MEDIUM).
+
+---
+
+## Output Schema
+
+The profiler agent must return JSON matching this exact schema, wrapped in `<analysis>` tags.
+
+```json
+{
+  "profile_version": "1.0",
+  "analyzed_at": "ISO-8601 timestamp",
+  "data_source": "session_analysis",
+  "projects_analyzed": ["project-name-1", "project-name-2"],
+  "messages_analyzed": 0,
+  "message_threshold": "full|hybrid|insufficient",
+  "sensitive_excluded": [
+    { "type": "string", "count": 0 }
+  ],
+  "dimensions": {
+    "communication_style": {
+      "rating": "terse-direct|conversational|detailed-structured|mixed",
+      "confidence": "HIGH|MEDIUM|LOW|UNSCORED",
+      "evidence_count": 0,
+      "cross_project_consistent": true,
+      "evidence_quotes": [
+        {
+          "signal": "Pattern interpretation describing what the quote demonstrates",
+          "quote": "Trimmed quote, approximately 100 characters",
+          "project": "project-name"
+        }
+      ],
+      "summary": "One to two sentence description of the observed pattern",
+      "claude_instruction": "Imperative directive for Claude: 'Match structured communication style' not 'You tend to provide structured context'"
+    },
+    "decision_speed": {
+      "rating": "fast-intuitive|deliberate-informed|research-first|delegator",
+      "confidence": "HIGH|MEDIUM|LOW|UNSCORED",
+      "evidence_count": 0,
+      "cross_project_consistent": true,
+      "evidence_quotes": [],
+      "summary": "string",
+      "claude_instruction": "string"
+    },
+    "explanation_depth": {
+      "rating": "code-only|concise|detailed|educational",
+      "confidence": "HIGH|MEDIUM|LOW|UNSCORED",
+      "evidence_count": 0,
+      "cross_project_consistent": true,
+      "evidence_quotes": [],
+      "summary": "string",
+      "claude_instruction": "string"
+    },
+    "debugging_approach": {
+      "rating": "fix-first|diagnostic|hypothesis-driven|collaborative",
+      "confidence": "HIGH|MEDIUM|LOW|UNSCORED",
+      "evidence_count": 0,
+      "cross_project_consistent": true,
+      "evidence_quotes": [],
+      "summary": "string",
+      "claude_instruction": "string"
+    },
+    "ux_philosophy": {
+      "rating": "function-first|pragmatic|design-conscious|backend-focused",
+      "confidence": "HIGH|MEDIUM|LOW|UNSCORED",
+      "evidence_count": 0,
+      "cross_project_consistent": true,
+      "evidence_quotes": [],
+      "summary": "string",
+      "claude_instruction": "string"
+    },
+    "vendor_philosophy": {
+      "rating": "pragmatic-fast|conservative|thorough-evaluator|opinionated",
+      "confidence": "HIGH|MEDIUM|LOW|UNSCORED",
+      "evidence_count": 0,
+      "cross_project_consistent": true,
+      "evidence_quotes": [],
+      "summary": "string",
+      "claude_instruction": "string"
+    },
+    "frustration_triggers": {
+      "rating": "scope-creep|instruction-adherence|verbosity|regression",
+      "confidence": "HIGH|MEDIUM|LOW|UNSCORED",
+      "evidence_count": 0,
+      "cross_project_consistent": true,
+      "evidence_quotes": [],
+      "summary": "string",
+      "claude_instruction": "string"
+    },
+    "learning_style": {
+      "rating": "self-directed|guided|documentation-first|example-driven",
+      "confidence": "HIGH|MEDIUM|LOW|UNSCORED",
+      "evidence_count": 0,
+      "cross_project_consistent": true,
+      "evidence_quotes": [],
+      "summary": "string",
+      "claude_instruction": "string"
+    }
+  }
+}
+```
+
+### Schema Notes
+
+- **`profile_version`**: Always `"1.0"` for this schema version
+- **`analyzed_at`**: ISO-8601 timestamp of when the analysis was performed
+- **`data_source`**: `"session_analysis"` for session-based profiling, `"questionnaire"` for questionnaire-only, `"hybrid"` for combined
+- **`projects_analyzed`**: List of project names that contributed messages
+- **`messages_analyzed`**: Total number of genuine user messages processed
+- **`message_threshold`**: Which threshold mode was triggered (`full`, `hybrid`, `insufficient`)
+- **`sensitive_excluded`**: Array of excluded sensitive content types with counts (empty array if none found)
+- **`claude_instruction`**: Must be written in imperative form directed at Claude. This field is how the profile becomes actionable.
+  - Good: "Provide structured responses with headers and numbered lists to match this developer's communication style."
+  - Bad: "You tend to like structured responses."
+  - Good: "Ask before making changes beyond the stated request -- this developer values bounded execution."
+  - Bad: "The developer gets frustrated when you do extra work."
+
+---
+
+## Cross-Project Consistency
+
+### Assessment
+
+For each dimension, assess whether the observed pattern is consistent across the projects analyzed:
+
+- **`cross_project_consistent: true`** -- Same rating would apply regardless of which project is analyzed. Evidence from 2+ projects shows the same pattern.
+- **`cross_project_consistent: false`** -- Pattern varies by project. Include a context-dependent note in the summary.
+
+### Reporting Splits
+
+When `cross_project_consistent` is false, the summary must describe the split:
+
+- "Context-dependent: terse-direct for CLI/backend projects (gsd-tools, api-server), detailed-structured for frontend projects (dashboard, landing-page)."
+- "Context-dependent: fast-intuitive for familiar tech (React, Node), research-first for new domains (Rust, ML)."
+
+The rating field should reflect the **dominant** pattern (most evidence). The summary describes the nuance.
+
+### Phase 3 Resolution
+
+Context-dependent splits are resolved during Phase 3 orchestration. The orchestrator presents the split to the developer and asks which pattern represents their general preference. Until resolved, Claude uses the dominant pattern with awareness of the context-dependent variation.
+
+---
+
+*Reference document version: 1.0*
+*Dimensions: 8*
+*Schema: profile_version 1.0*

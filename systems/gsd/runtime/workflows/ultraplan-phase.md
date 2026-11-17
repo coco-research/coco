@@ -192,3 +192,7 @@ Trigger ultraplan with the constructed prompt:
 /ultraplan {constructed prompt from build_prompt step}
 ```
 
+Your terminal will show a `◇ ultraplan` status indicator while the remote session works.
+Use `/tasks` to open the detail view with the session link, agent activity, and a stop action.
+
+</step>

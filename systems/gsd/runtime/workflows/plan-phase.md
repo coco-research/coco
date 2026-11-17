@@ -1460,3 +1460,330 @@ For each REQ-ID in `phase_req_ids`:
 - If REQ-ID appears in `PLAN_REQS` → covered ✓
 - If REQ-ID does NOT appear in any plan → uncovered ✗
 
+**Step 3: Check CONTEXT.md features against plan objectives**
+
+Read CONTEXT.md `<decisions>` section. Extract feature/capability names. Check each against plan `<objective>` blocks. Features not mentioned in any plan objective → potentially dropped.
+
+**Step 4: Report**
+
+If all requirements covered and no dropped features:
+```
+✓ Requirements coverage: {N}/{N} REQ-IDs covered by plans
+```
+→ Proceed to step 14.
+
+If gaps found:
+```
+## ⚠ Requirements Coverage Gap
+
+{M} of {N} phase requirements are not assigned to any plan:
+
+| REQ-ID | Description | Plans |
+|--------|-------------|-------|
+| {id} | {from REQUIREMENTS.md} | None |
+
+{K} CONTEXT.md features not found in plan objectives:
+- {feature_name} — described in CONTEXT.md but no plan covers it
+
+Options:
+1. Re-plan to include missing requirements (recommended)
+2. Move uncovered requirements to next phase
+3. Proceed anyway — accept coverage gaps
+```
+
+If `TEXT_MODE` is true, present as a plain-text numbered list (options already shown in the block above). Otherwise use AskUserQuestion to present the options.
+
+## 13a. Decision Coverage Gate
+
+After the requirements coverage gate passes, verify that every trackable
+decision captured by discuss-phase in CONTEXT.md `<decisions>` is referenced
+by at least one plan. This is the **translation gate** from issue #2492 —
+its job is to refuse to mark a phase planned when a discuss-phase decision
+silently dropped on the way into the plans.
+
+**Skip if** `workflow.context_coverage_gate` is explicitly set to `false`
+(absent key = enabled). Also skip if no CONTEXT.md exists for this phase
+(nothing to translate) or if its `<decisions>` block is empty.
+
+```bash
+GATE_CFG=$(gsd-sdk query config-get workflow.context_coverage_gate 2>/dev/null || echo "true")
+if [ "$GATE_CFG" != "false" ]; then
+  GATE_RESULT=$(gsd-sdk query check.decision-coverage-plan "${PHASE_DIR}" "${CONTEXT_PATH}")
+  # BLOCKING: refuse to mark phase planned when a trackable decision is uncovered.
+  # `passed: true` covers both real-pass and skipped cases (gate disabled / no CONTEXT.md /
+  # no trackable decisions). Verify-phase counterpart deliberately omits this exit-1 — that
+  # gate is non-blocking by design (review finding F15).
+  echo "$GATE_RESULT" | jq -e '.data.passed == true' >/dev/null || {
+    echo "$GATE_RESULT" | jq -r '.data.message'
+    exit 1
+  }
+fi
+```
+
+The handler returns JSON:
+```json
+{
+  "passed": true,
+  "skipped": false,
+  "total":  2,
+  "covered": 2,
+  "uncovered": [ { "id": "D-01", "text": "...", "category": "..." } ],
+  "message": "..."
+}
+```
+
+**If `passed` is true (or `skipped` is true):** Display
+`✓ Decision coverage: {M}/{N} CONTEXT.md decisions covered by plans` (or
+`(skipped — gate disabled)` / `(skipped — no decisions)`) and proceed to
+step 13b.
+
+**If `passed` is false:** Display the handler's `message` block. It already
+names each uncovered decision (`D-NN | category | text`) and tells the user
+what to do — cite the id in a relevant plan's `must_haves` / `truths`, or
+move the decision under `### Claude's Discretion` / tag it `[informational]`
+if it should not be tracked. Then offer:
+
+```text
+Options:
+1. Re-plan to cover missing decisions (recommended)
+2. Edit CONTEXT.md to mark dropped decisions as [informational] / Discretion
+3. Proceed anyway — accept the coverage gap
+```
+
+If `TEXT_MODE` is true, present as a plain-text numbered list. Otherwise use
+AskUserQuestion. Selecting "Proceed anyway" continues to step 13b but
+records the override in STATE.md so verify-phase can re-surface it.
+
+**Why this gate blocks:** failing here is cheap. The plans are the contract
+between discuss-phase and execute-phase; if a decision isn't visible in any
+plan, no executor will implement it. Catching that now beats discovering it
+after thousands of dollars of execution.
+
+## 13b. Record Planning Completion in STATE.md
+
+After plans pass all gates, record that planning is complete so STATE.md reflects the new phase status:
+
+```bash
+gsd-sdk query state.planned-phase --phase "${PHASE_NUMBER}" --name "${PHASE_NAME}" --plans "${PLAN_COUNT}"
+```
+
+This updates STATUS to "Ready to execute", sets the correct plan count, and timestamps Last Activity.
+
+## 13c. Annotate ROADMAP with Wave Dependencies and Cross-cutting Constraints
+
+After plans are finalized, annotate the ROADMAP.md plan list for this phase with:
+- **Wave dependency notes** — a bold header before each wave group ("Wave 2 *(blocked on Wave 1 completion)*")
+- **Cross-cutting constraints** — a "Cross-cutting constraints:" subsection listing `must_haves.truths` entries that appear in 2 or more plans
+
+This step is derived entirely from existing PLAN frontmatter — no extra LLM pass is required.
+
+```bash
+gsd-sdk query roadmap.annotate-dependencies "${PHASE_NUMBER}"
+```
+
+This operation is idempotent: if wave headers or cross-cutting constraints already exist in the ROADMAP phase section, the command returns without modifying the file. Skip this step if `plan_count` is 0.
+
+## 13d. Commit Plans if commit_docs is true
+
+If `commit_docs` is true (from the init JSON parsed in step 1), commit the generated plan artifacts (including any ROADMAP.md annotations from step 13c):
+
+```bash
+gsd-sdk query commit "docs(${PADDED_PHASE}): create phase plan" --files "${PHASE_DIR}"/*-PLAN.md .planning/STATE.md .planning/ROADMAP.md
+```
+
+This commits all PLAN.md files for the phase plus the updated STATE.md and ROADMAP.md to version-control the planning artifacts. Skip this step if `commit_docs` is false.
+
+## 13e. Post-Planning Gap Analysis
+
+After all plans are generated, committed, and the Requirements Coverage Gate (§13)
+has run, emit a single unified gap report covering both REQUIREMENTS.md and the
+CONTEXT.md `<decisions>` section. This is a **proactive, post-hoc report** — it
+does not block phase advancement and does not re-plan. It exists so that any
+requirement or decision that slipped through the per-plan checks is surfaced in
+one place before execution begins.
+
+**Skip if:** `workflow.post_planning_gaps` is `false`. Default is `true`.
+
+```bash
+POST_PLANNING_GAPS=$(gsd-sdk query config-get workflow.post_planning_gaps --default true 2>/dev/null || echo true)
+if [ "$POST_PLANNING_GAPS" = "true" ]; then
+  node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" gap-analysis --phase-dir "${PHASE_DIR}"
+fi
+```
+
+(`gsd-tools.cjs gap-analysis` reads `.planning/REQUIREMENTS.md`, `${PHASE_DIR}/CONTEXT.md`,
+and `${PHASE_DIR}/*-PLAN.md`, then prints a markdown table with one row per
+REQ-ID and D-ID. Word-boundary matching prevents `REQ-1` from being mistaken for
+`REQ-10`.)
+
+**Output format (deterministic; sorted REQUIREMENTS.md → CONTEXT.md, then natural
+sort within source):**
+
+```
+## Post-Planning Gap Analysis
+
+| Source | Item | Status |
+|--------|------|--------|
+| REQUIREMENTS.md | REQ-01 | ✓ Covered |
+| REQUIREMENTS.md | REQ-02 | ✗ Not covered |
+| CONTEXT.md | D-01 | ✓ Covered |
+| CONTEXT.md | D-02 | ✗ Not covered |
+
+⚠ N items not covered by any plan
+```
+
+**Skip-gracefully behavior:**
+- REQUIREMENTS.md missing → CONTEXT-only report.
+- CONTEXT.md missing → REQUIREMENTS-only report.
+- Both missing or `<decisions>` block missing → "No requirements or decisions to check" line, no error.
+
+This step is non-blocking. If items are reported as not covered, the user may
+re-run `/gsd:plan-phase --gaps` to add plans, or proceed to execute-phase as-is.
+
+## 14. Present Final Status
+
+Route to `<offer_next>` OR `auto_advance` depending on flags/config.
+
+## 15. Auto-Advance Check
+
+Check for auto-advance trigger using values already loaded in step 1:
+
+1. Parse `--auto` and `--chain` flags from $ARGUMENTS
+2. Use `auto_chain_active` and `auto_advance` from the INIT JSON parsed in step 1 — **do not issue additional `config-get` calls for these values** (they are already present in the init output). Issuing redundant `config-get` calls for values already in INIT can cause infinite read loops on some runtimes.
+3. **Sync chain flag with intent** — if user invoked manually (no `--auto` and no `--chain`), clear the ephemeral chain flag from any previous interrupted `--auto` chain. This does NOT touch `workflow.auto_advance` (the user's persistent settings preference):
+   ```bash
+   if [[ ! "$ARGUMENTS" =~ --auto ]] && [[ ! "$ARGUMENTS" =~ --chain ]]; then
+     gsd-sdk query config-set workflow._auto_chain_active false || true
+   fi
+   ```
+
+Set local variables from INIT (parsed once in step 1):
+- `AUTO_CHAIN` = `auto_chain_active` from INIT JSON (boolean, default false)
+- `AUTO_CFG` = `auto_advance` from INIT JSON (boolean, default false)
+
+**If `--auto` or `--chain` flag present AND `AUTO_CHAIN` is not true:** Persist chain flag to config (handles direct invocation without prior discuss-phase):
+```bash
+if ([[ "$ARGUMENTS" =~ --auto ]] || [[ "$ARGUMENTS" =~ --chain ]]) && [[ "$AUTO_CHAIN" != "true" ]]; then
+  gsd-sdk query config-set workflow._auto_chain_active true
+fi
+```
+
+**If `--auto` or `--chain` flag present OR `AUTO_CHAIN` is true OR `AUTO_CFG` is true:**
+
+Display banner:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► AUTO-ADVANCING TO EXECUTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Plans ready. Launching execute-phase...
+```
+
+Launch execute-phase using the Skill tool to avoid nested Task sessions (which cause runtime freezes due to deep agent nesting):
+```
+Skill(skill="gsd-execute-phase", args="${PHASE} --auto --no-transition ${GSD_WS}")
+```
+
+The `--no-transition` flag tells execute-phase to return status after verification instead of chaining further. This keeps the auto-advance chain flat — each phase runs at the same nesting level rather than spawning deeper Task agents.
+
+**Handle execute-phase return:**
+- **PHASE COMPLETE** → Display final summary:
+  ```
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   GSD ► PHASE ${PHASE} COMPLETE ✓
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Auto-advance pipeline finished.
+
+  Next: /gsd:discuss-phase ${NEXT_PHASE} --auto ${GSD_WS}
+  ```
+- **GAPS FOUND / VERIFICATION FAILED** → Display result, stop chain:
+  ```
+  Auto-advance stopped: Execution needs review.
+
+  Review the output above and continue manually:
+  /gsd:execute-phase ${PHASE} ${GSD_WS}
+  ```
+
+**If neither `--auto` nor config enabled:**
+Route to `<offer_next>` (existing behavior).
+
+</process>
+
+<offer_next>
+Output this markdown directly (not as a code block):
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► PHASE {X} PLANNED ✓
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Phase {X}: {Name}** — {N} plan(s) in {M} wave(s)
+
+| Wave | Plans | What it builds |
+|------|-------|----------------|
+| 1    | 01, 02 | [objectives] |
+| 2    | 03     | [objective]  |
+
+Research: {Completed | Used existing | Skipped}
+Verification: {Passed | Passed with override | Skipped}
+
+───────────────────────────────────────────────────────────────
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Execute Phase {X}** — run all {N} plans
+
+/clear then:
+
+/gsd:execute-phase {X} ${GSD_WS}
+
+───────────────────────────────────────────────────────────────
+
+**Also available:**
+- cat .planning/phases/{phase-dir}/*-PLAN.md — review plans
+- /gsd:plan-phase {X} --research — re-research first
+- /gsd:review --phase {X} --all — peer review plans with external AIs
+- /gsd:plan-phase {X} --reviews — replan incorporating review feedback
+
+───────────────────────────────────────────────────────────────
+</offer_next>
+
+<windows_troubleshooting>
+**Windows users:** If plan-phase freezes during agent spawning (common on Windows due to
+stdio deadlocks with MCP servers — see Claude Code issue anthropics/claude-code#28126):
+
+1. **Force-kill:** Close the terminal (Ctrl+C may not work)
+2. **Clean up orphaned processes:**
+   ```powershell
+   # Kill orphaned node processes from stale MCP servers
+   Get-Process node -ErrorAction SilentlyContinue | Where-Object {$_.StartTime -lt (Get-Date).AddHours(-1)} | Stop-Process -Force
+   ```
+3. **Clean up stale task directories:**
+   ```powershell
+   # Remove stale subagent task dirs (Claude Code never cleans these on crash)
+   Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\tasks\*" -ErrorAction SilentlyContinue
+   ```
+4. **Reduce MCP server count:** Temporarily disable non-essential MCP servers in settings.json
+5. **Retry:** Restart Claude Code and run `/gsd:plan-phase` again
+
+If freezes persist, try `--skip-research` to reduce the agent chain from 3 to 2 agents:
+```
+/gsd:plan-phase N --skip-research
+```
+</windows_troubleshooting>
+
+<success_criteria>
+- [ ] .planning/ directory validated
+- [ ] Phase validated against roadmap
+- [ ] Phase directory created if needed
+- [ ] CONTEXT.md loaded early (step 4) and passed to ALL agents
+- [ ] Research completed (unless --skip-research or --gaps or exists)
+- [ ] gsd-phase-researcher spawned with CONTEXT.md
+- [ ] Existing plans checked
+- [ ] gsd-planner spawned with CONTEXT.md + RESEARCH.md
+- [ ] Plans created (PLANNING COMPLETE or CHECKPOINT handled)
+- [ ] gsd-plan-checker spawned with CONTEXT.md
+- [ ] Verification passed OR user override OR max iterations with user decision
+- [ ] User sees status between agent spawns
+- [ ] User knows next steps
+</success_criteria>

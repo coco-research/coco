@@ -127,3 +127,353 @@ grep -E "export (async )?(function|const) (GET|POST|PUT|PATCH|DELETE)" "$route_p
 
 # Or Express-style handlers
 grep -E "\.(get|post|put|patch|delete)\(" "$route_path"
+```
+
+**Substantive check:**
+```bash
+# Has actual logic, not just return statement
+wc -l "$route_path"  # More than 10-15 lines suggests real implementation
+
+# Interacts with data source
+grep -E "prisma\.|db\.|mongoose\.|sql|query|find|create|update|delete" "$route_path" -i
+
+# Has error handling
+grep -E "try|catch|throw|error|Error" "$route_path"
+
+# Returns meaningful response
+grep -E "Response\.json|res\.json|res\.send|return.*\{" "$route_path" | grep -v "message.*not implemented" -i
+```
+
+**Stub patterns specific to API routes:**
+```typescript
+// RED FLAGS - These are stubs:
+export async function POST() {
+  return Response.json({ message: "Not implemented" })
+}
+
+export async function GET() {
+  return Response.json([])  // Empty array with no DB query
+}
+
+export async function PUT() {
+  return new Response()  // Empty response
+}
+
+// Console log only:
+export async function POST(req) {
+  console.log(await req.json())
+  return Response.json({ ok: true })
+}
+```
+
+**Wiring check:**
+```bash
+# Imports database/service clients
+grep -E "^import.*prisma|^import.*db|^import.*client" "$route_path"
+
+# Actually uses request body (for POST/PUT)
+grep -E "req\.json\(\)|req\.body|request\.json\(\)" "$route_path"
+
+# Validates input (not just trusting request)
+grep -E "schema\.parse|validate|zod|yup|joi" "$route_path"
+```
+
+**Functional verification (human or automated):**
+- Does GET return real data from database?
+- Does POST actually create a record?
+- Does error response have correct status code?
+- Are auth checks actually enforced?
+
+</api_routes>
+
+<database_schema>
+
+## Database Schema (Prisma / Drizzle / SQL)
+
+**Existence check:**
+```bash
+# Schema file exists
+[ -f "prisma/schema.prisma" ] || [ -f "drizzle/schema.ts" ] || [ -f "src/db/schema.sql" ]
+
+# Model/table is defined
+grep -E "^model $model_name|CREATE TABLE $table_name|export const $table_name" "$schema_path"
+```
+
+**Substantive check:**
+```bash
+# Has expected fields (not just id)
+grep -A 20 "model $model_name" "$schema_path" | grep -E "^\s+\w+\s+\w+"
+
+# Has relationships if expected
+grep -E "@relation|REFERENCES|FOREIGN KEY" "$schema_path"
+
+# Has appropriate field types (not all String)
+grep -A 20 "model $model_name" "$schema_path" | grep -E "Int|DateTime|Boolean|Float|Decimal|Json"
+```
+
+**Stub patterns specific to schemas:**
+```prisma
+// RED FLAGS - These are stubs:
+model User {
+  id String @id
+  // TODO: add fields
+}
+
+model Message {
+  id        String @id
+  content   String  // Only one real field
+}
+
+// Missing critical fields:
+model Order {
+  id     String @id
+  // No: userId, items, total, status, createdAt
+}
+```
+
+**Wiring check:**
+```bash
+# Migrations exist and are applied
+ls prisma/migrations/ 2>/dev/null | wc -l  # Should be > 0
+npx prisma migrate status 2>/dev/null | grep -v "pending"
+
+# Client is generated
+[ -d "node_modules/.prisma/client" ]
+```
+
+**Functional verification:**
+```bash
+# Can query the table (automated)
+npx prisma db execute --stdin <<< "SELECT COUNT(*) FROM $table_name"
+```
+
+</database_schema>
+
+<hooks_utilities>
+
+## Custom Hooks and Utilities
+
+**Existence check:**
+```bash
+# File exists and exports function
+[ -f "$hook_path" ] && grep -E "export (default )?(function|const)" "$hook_path"
+```
+
+**Substantive check:**
+```bash
+# Hook uses React hooks (for custom hooks)
+grep -E "useState|useEffect|useCallback|useMemo|useRef|useContext" "$hook_path"
+
+# Has meaningful return value
+grep -E "return \{|return \[" "$hook_path"
+
+# More than trivial length
+[ $(wc -l < "$hook_path") -gt 10 ]
+```
+
+**Stub patterns specific to hooks:**
+```typescript
+// RED FLAGS - These are stubs:
+export function useAuth() {
+  return { user: null, login: () => {}, logout: () => {} }
+}
+
+export function useCart() {
+  const [items, setItems] = useState([])
+  return { items, addItem: () => console.log('add'), removeItem: () => {} }
+}
+
+// Hardcoded return:
+export function useUser() {
+  return { name: "Test User", email: "test@example.com" }
+}
+```
+
+**Wiring check:**
+```bash
+# Hook is actually imported somewhere
+grep -r "import.*$hook_name" src/ --include="*.tsx" --include="*.ts" | grep -v "$hook_path"
+
+# Hook is actually called
+grep -r "$hook_name()" src/ --include="*.tsx" --include="*.ts" | grep -v "$hook_path"
+```
+
+</hooks_utilities>
+
+<environment_config>
+
+## Environment Variables and Configuration
+
+**Existence check:**
+```bash
+# .env file exists
+[ -f ".env" ] || [ -f ".env.local" ]
+
+# Required variable is defined
+grep -E "^$VAR_NAME=" .env .env.local 2>/dev/null
+```
+
+**Substantive check:**
+```bash
+# Variable has actual value (not placeholder)
+grep -E "^$VAR_NAME=.+" .env .env.local 2>/dev/null | grep -v "your-.*-here|xxx|placeholder|TODO" -i
+
+# Value looks valid for type:
+# - URLs should start with http
+# - Keys should be long enough
+# - Booleans should be true/false
+```
+
+**Stub patterns specific to env:**
+```bash
+# RED FLAGS - These are stubs:
+DATABASE_URL=your-database-url-here
+STRIPE_SECRET_KEY=sk_test_xxx
+API_KEY=placeholder
+NEXT_PUBLIC_API_URL=http://localhost:3000  # Still pointing to localhost in prod
+```
+
+**Wiring check:**
+```bash
+# Variable is actually used in code
+grep -r "process\.env\.$VAR_NAME|env\.$VAR_NAME" src/ --include="*.ts" --include="*.tsx"
+
+# Variable is in validation schema (if using zod/etc for env)
+grep -E "$VAR_NAME" src/env.ts src/env.mjs 2>/dev/null
+```
+
+</environment_config>
+
+<wiring_verification>
+
+## Wiring Verification Patterns
+
+Wiring verification checks that components actually communicate. This is where most stubs hide.
+
+### Pattern: Component → API
+
+**Check:** Does the component actually call the API?
+
+```bash
+# Find the fetch/axios call
+grep -E "fetch\(['\"].*$api_path|axios\.(get|post).*$api_path" "$component_path"
+
+# Verify it's not commented out
+grep -E "fetch\(|axios\." "$component_path" | grep -v "^.*//.*fetch"
+
+# Check the response is used
+grep -E "await.*fetch|\.then\(|setData|setState" "$component_path"
+```
+
+**Red flags:**
+```typescript
+// Fetch exists but response ignored:
+fetch('/api/messages')  // No await, no .then, no assignment
+
+// Fetch in comment:
+// fetch('/api/messages').then(r => r.json()).then(setMessages)
+
+// Fetch to wrong endpoint:
+fetch('/api/message')  // Typo - should be /api/messages
+```
+
+### Pattern: API → Database
+
+**Check:** Does the API route actually query the database?
+
+```bash
+# Find the database call
+grep -E "prisma\.$model|db\.query|Model\.find" "$route_path"
+
+# Verify it's awaited
+grep -E "await.*prisma|await.*db\." "$route_path"
+
+# Check result is returned
+grep -E "return.*json.*data|res\.json.*result" "$route_path"
+```
+
+**Red flags:**
+```typescript
+// Query exists but result not returned:
+await prisma.message.findMany()
+return Response.json({ ok: true })  // Returns static, not query result
+
+// Query not awaited:
+const messages = prisma.message.findMany()  // Missing await
+return Response.json(messages)  // Returns Promise, not data
+```
+
+### Pattern: Form → Handler
+
+**Check:** Does the form submission actually do something?
+
+```bash
+# Find onSubmit handler
+grep -E "onSubmit=\{|handleSubmit" "$component_path"
+
+# Check handler has content
+grep -A 10 "onSubmit.*=" "$component_path" | grep -E "fetch|axios|mutate|dispatch"
+
+# Verify not just preventDefault
+grep -A 5 "onSubmit" "$component_path" | grep -v "only.*preventDefault" -i
+```
+
+**Red flags:**
+```typescript
+// Handler only prevents default:
+onSubmit={(e) => e.preventDefault()}
+
+// Handler only logs:
+const handleSubmit = (data) => {
+  console.log(data)
+}
+
+// Handler is empty:
+onSubmit={() => {}}
+```
+
+### Pattern: State → Render
+
+**Check:** Does the component render state, not hardcoded content?
+
+```bash
+# Find state usage in JSX
+grep -E "\{.*messages.*\}|\{.*data.*\}|\{.*items.*\}" "$component_path"
+
+# Check map/render of state
+grep -E "\.map\(|\.filter\(|\.reduce\(" "$component_path"
+
+# Verify dynamic content
+grep -E "\{[a-zA-Z_]+\." "$component_path"  # Variable interpolation
+```
+
+**Red flags:**
+```tsx
+// Hardcoded instead of state:
+return <div>
+  <p>Message 1</p>
+  <p>Message 2</p>
+</div>
+
+// State exists but not rendered:
+const [messages, setMessages] = useState([])
+return <div>No messages</div>  // Always shows "no messages"
+
+// Wrong state rendered:
+const [messages, setMessages] = useState([])
+return <div>{otherData.map(...)}</div>  // Uses different data
+```
+
+</wiring_verification>
+
+<verification_checklist>
+
+## Quick Verification Checklist
+
+For each artifact type, run through this checklist:
+
+### Component Checklist
+- [ ] File exists at expected path
+- [ ] Exports a function/const component
+- [ ] Returns JSX (not null/empty)
+- [ ] No placeholder text in render

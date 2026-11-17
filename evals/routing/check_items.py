@@ -13,10 +13,6 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "systems" / "superintelligence" / "scripts"))
-
-import meta_select  # noqa: E402
-
 _IRREGULAR_PLURAL = {"life": "lives"}
 
 
@@ -36,13 +32,10 @@ def forms(word):
 
 
 def team_names():
-    """team_key -> team_name, same teams team_profiles() will route."""
+    """Validate data from shipped registries without importing router integrations."""
     names = {}
-    for key, t in meta_select.META["teams"].items():
-        tdir = meta_select.ROOT / pathlib.Path(t["dir"]).name
-        reg = tdir / "registry.json"
-        if not reg.exists():
-            continue
+    for reg in sorted((ROOT / "systems" / "superintelligence").glob("*/registry.json")):
+        key = reg.parent.name
         record = json.loads(reg.read_text())
         names[key] = record.get("team_name", key)
     return names
@@ -84,6 +77,7 @@ def check(items):
         if label in counts:
             counts[label] += 1
         if label not in bans:
+            failures.append(f"{item_id}: unknown positive label {label!r}")
             continue
         hit = prompt_tokens(item.get("prompt", "")) & bans[label]
         if hit:

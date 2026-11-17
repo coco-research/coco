@@ -1911,3 +1911,184 @@ function buildSkillManifest(cwd, skillsDir = null) {
       path: getGlobalSkillsBase('claude'),
       scope: 'global',
       kind: 'skills',
+    },
+    {
+      root: '~/.codex/skills',
+      path: getGlobalSkillsBase('codex'),
+      scope: 'global',
+      kind: 'skills',
+    },
+    {
+      root: '.claude/get-shit-done/skills',
+      path: path.join(os.homedir(), '.claude', 'get-shit-done', 'skills'),
+      scope: 'import-only',
+      kind: 'skills',
+      deprecated: true,
+    },
+    {
+      root: '.claude/commands/gsd',
+      path: path.join(os.homedir(), '.claude', 'commands', 'gsd'),
+      scope: 'legacy-commands',
+      kind: 'commands',
+      deprecated: true,
+    },
+  ];
+
+  const skills = [];
+  const roots = [];
+  let legacyClaudeCommandsInstalled = false;
+  for (const rootInfo of canonicalRoots) {
+    const rootPath = rootInfo.path;
+    const rootSummary = {
+      root: rootInfo.root,
+      path: rootPath,
+      scope: rootInfo.scope,
+      present: fs.existsSync(rootPath),
+      deprecated: !!rootInfo.deprecated,
+    };
+
+    if (!rootSummary.present) {
+      roots.push(rootSummary);
+      continue;
+    }
+
+    if (rootInfo.kind === 'commands') {
+      let entries = [];
+      try {
+        entries = fs.readdirSync(rootPath, { withFileTypes: true });
+      } catch {
+        roots.push(rootSummary);
+        continue;
+      }
+
+      const commandFiles = entries.filter(entry => entry.isFile() && entry.name.endsWith('.md'));
+      rootSummary.command_count = commandFiles.length;
+      if (rootSummary.command_count > 0) legacyClaudeCommandsInstalled = true;
+      roots.push(rootSummary);
+      continue;
+    }
+
+    let entries;
+    try {
+      entries = fs.readdirSync(rootPath, { withFileTypes: true });
+    } catch {
+      roots.push(rootSummary);
+      continue;
+    }
+
+    let skillCount = 0;
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+
+      const skillMdPath = path.join(rootPath, entry.name, 'SKILL.md');
+      const content = platformReadSync(skillMdPath);
+      if (content === null) continue;
+
+      const frontmatter = extractFrontmatter(content);
+      const name = frontmatter.name || entry.name;
+      const description = frontmatter.description || '';
+
+      // Extract trigger lines from body text (after frontmatter)
+      const triggers = [];
+      const bodyMatch = content.match(/^---[\s\S]*?---\s*\n([\s\S]*)$/);
+      if (bodyMatch) {
+        const body = bodyMatch[1];
+        const triggerLines = body.match(/^TRIGGER\s+when:\s*(.+)$/gmi);
+        if (triggerLines) {
+          for (const line of triggerLines) {
+            const m = line.match(/^TRIGGER\s+when:\s*(.+)$/i);
+            if (m) triggers.push(m[1].trim());
+          }
+        }
+      }
+
+      skills.push({
+        name,
+        description,
+        triggers,
+        path: entry.name,
+        file_path: `${entry.name}/SKILL.md`,
+        root: rootInfo.root,
+        scope: rootInfo.scope,
+        installed: rootInfo.scope !== 'import-only',
+        deprecated: !!rootInfo.deprecated,
+      });
+      skillCount++;
+    }
+
+    rootSummary.skill_count = skillCount;
+    roots.push(rootSummary);
+  }
+
+  skills.sort((a, b) => {
+    const rootCmp = a.root.localeCompare(b.root);
+    return rootCmp !== 0 ? rootCmp : a.name.localeCompare(b.name);
+  });
+
+  const gsdSkillsInstalled = skills.some(skill => skill.name.startsWith('gsd-'));
+
+  return {
+    skills,
+    roots,
+    installation: {
+      gsd_skills_installed: gsdSkillsInstalled,
+      legacy_claude_commands_installed: legacyClaudeCommandsInstalled,
+    },
+    counts: {
+      skills: skills.length,
+      roots: roots.length,
+    },
+  };
+}
+
+/**
+ * Command: generate skill manifest JSON.
+ *
+ * Options:
+ *   --skills-dir <path>  Optional absolute path to a single skills directory
+ *   --write              Also write to .planning/skill-manifest.json
+ */
+function cmdSkillManifest(cwd, args, raw) {
+  const skillsDirIdx = args.indexOf('--skills-dir');
+  const skillsDir = skillsDirIdx >= 0 && args[skillsDirIdx + 1]
+    ? args[skillsDirIdx + 1]
+    : null;
+
+  const manifest = buildSkillManifest(cwd, skillsDir);
+
+  // Optionally write to .planning/skill-manifest.json
+  if (args.includes('--write')) {
+    const planningDir = path.join(cwd, '.planning');
+    if (fs.existsSync(planningDir)) {
+      const manifestPath = path.join(planningDir, 'skill-manifest.json');
+      platformWriteSync(manifestPath, JSON.stringify(manifest, null, 2));
+    }
+  }
+
+  output(manifest, raw);
+}
+
+module.exports = {
+  cmdInitExecutePhase,
+  cmdInitPlanPhase,
+  cmdInitNewProject,
+  cmdInitNewMilestone,
+  cmdInitQuick,
+  cmdInitIngestDocs,
+  cmdInitResume,
+  cmdInitVerifyWork,
+  cmdInitPhaseOp,
+  cmdInitTodos,
+  cmdInitMilestoneOp,
+  cmdInitMapCodebase,
+  cmdInitProgress,
+  cmdInitManager,
+  cmdInitNewWorkspace,
+  cmdInitListWorkspaces,
+  cmdInitRemoveWorkspace,
+  detectChildRepos,
+  buildAgentSkillsBlock,
+  cmdAgentSkills,
+  buildSkillManifest,
+  cmdSkillManifest,
+};

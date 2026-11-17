@@ -100,3 +100,6 @@ No next-step suggestions. No workflow routing. Just done.
 <success_criteria>
 - [ ] Task completed in current context (no subagents)
 - [ ] Atomic git commit with conventional message
+- [ ] STATE.md updated if it exists
+- [ ] Total operation under 2 minutes wall time
+</success_criteria>

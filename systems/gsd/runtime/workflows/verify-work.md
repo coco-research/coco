@@ -765,3 +765,16 @@ Default to **major** if unclear. User can correct if needed.
 **Never ask "how severe is this?"** - just infer and move on.
 </severity_inference>
 
+<success_criteria>
+- [ ] UAT file created with all tests from SUMMARY.md
+- [ ] Tests presented one at a time with expected behavior
+- [ ] User responses processed as pass/issue/skip
+- [ ] Severity inferred from description (never asked)
+- [ ] Batched writes: on issue, every 5 passes, or completion
+- [ ] Committed on completion
+- [ ] If issues: parallel debug agents diagnose root causes
+- [ ] If issues: gsd-planner creates fix plans (gap_closure mode)
+- [ ] If issues: gsd-plan-checker verifies fix plans
+- [ ] If issues: revision loop until plans pass (max 3 iterations)
+- [ ] Ready for `/gsd:execute-phase --gaps-only` when complete
+</success_criteria>

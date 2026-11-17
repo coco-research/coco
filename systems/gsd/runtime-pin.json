@@ -1048,3 +1048,136 @@
     },
     {
       "path": "workflows/plan-review-convergence.md",
+      "git_blob": "c953f14c3c97d81521b00df27064fa07bd507e70"
+    },
+    {
+      "path": "workflows/plant-seed.md",
+      "git_blob": "d153ff90fb9f066250937ddd6c893261648aabdd"
+    },
+    {
+      "path": "workflows/pr-branch.md",
+      "git_blob": "e8582d324765adc1e50d76b6de4efc053adcf76e"
+    },
+    {
+      "path": "workflows/profile-user.md",
+      "git_blob": "bd0415f7555958b1c4c3f02f07692b97a4cacac3"
+    },
+    {
+      "path": "workflows/progress.md",
+      "git_blob": "c01237460b1177a642f40f331770c61a66ba1ca7"
+    },
+    {
+      "path": "workflows/quick.md",
+      "git_blob": "7f9fb1ecdd3ea4d0bda1db4be7a5d0d61e057547"
+    },
+    {
+      "path": "workflows/reapply-patches.md",
+      "git_blob": "b46eefe67528ff27fc968e130e73efdd7a203787"
+    },
+    {
+      "path": "workflows/remove-phase.md",
+      "git_blob": "7d34bdc6228f248738afa1beea5023cb15929a0a"
+    },
+    {
+      "path": "workflows/remove-workspace.md",
+      "git_blob": "68f2c54c9527ccd1b2a64fc4bf65be2feb7a729c"
+    },
+    {
+      "path": "workflows/resume-project.md",
+      "git_blob": "6d4bcc0195cbdadb69dcdf9992e367e9f2feefc8"
+    },
+    {
+      "path": "workflows/review.md",
+      "git_blob": "2b0647bed3b390dccc8ecb9832bd969ef9a75289"
+    },
+    {
+      "path": "workflows/scan.md",
+      "git_blob": "fd50852d9abec7cea5aff60a8e2f84b45c25d452"
+    },
+    {
+      "path": "workflows/secure-phase.md",
+      "git_blob": "42d71ae9eb1bc0f1994abbf24ec1c0bd4360ffa9"
+    },
+    {
+      "path": "workflows/session-report.md",
+      "git_blob": "29d6d7724c1e1e1b622d72edd0a761035bd12764"
+    },
+    {
+      "path": "workflows/settings.md",
+      "git_blob": "851627bfe44224321d49ab250418322806bd7473"
+    },
+    {
+      "path": "workflows/ship.md",
+      "git_blob": "52481eb7bf05a4e7bfae83cf06c018add332eed3"
+    },
+    {
+      "path": "workflows/sketch-wrap-up.md",
+      "git_blob": "6b231881c2ffaa240656647826e0b19ea82b34fe"
+    },
+    {
+      "path": "workflows/sketch.md",
+      "git_blob": "8108f6bb9739177166c505d18738724217b54b88"
+    },
+    {
+      "path": "workflows/spec-phase.md",
+      "git_blob": "6a713a8664805d00c002fc7374f4f6e633c79d2e"
+    },
+    {
+      "path": "workflows/spike-wrap-up.md",
+      "git_blob": "676a749418ff4d856a295704d8b8e330f578c237"
+    },
+    {
+      "path": "workflows/spike.md",
+      "git_blob": "307706676bb77a2c7d605a8f7ff1950c7044afb1"
+    },
+    {
+      "path": "workflows/stats.md",
+      "git_blob": "237cca862cddd61dca1836de45b1678a5c434b1d"
+    },
+    {
+      "path": "workflows/sync-skills.md",
+      "git_blob": "a828b67e84cad42bc01f0ac320736affded5a18c"
+    },
+    {
+      "path": "workflows/thread.md",
+      "git_blob": "05b1a043aa63bacc4ae8d90c7673fc71a3197c35"
+    },
+    {
+      "path": "workflows/transition.md",
+      "git_blob": "625ea3966eeff704c5dba046f4244ba3a747bd3f"
+    },
+    {
+      "path": "workflows/ui-phase.md",
+      "git_blob": "21f98dc06f2608efe795857677c4c663fb64ae51"
+    },
+    {
+      "path": "workflows/ui-review.md",
+      "git_blob": "08aee528ad10cd0cbd6021a8d9b76a1ef7ee1300"
+    },
+    {
+      "path": "workflows/ultraplan-phase.md",
+      "git_blob": "d8c12db7994388bd8298a7661455495073a84850"
+    },
+    {
+      "path": "workflows/undo.md",
+      "git_blob": "fac14de0b71bdc7c0d1321ef0ef9ea7c6c0b981b"
+    },
+    {
+      "path": "workflows/update.md",
+      "git_blob": "554ecf103dd43e2ad64fc27c2aa8d1213a612038"
+    },
+    {
+      "path": "workflows/validate-phase.md",
+      "git_blob": "3aa80de9c5ccf1feb553d25c5f0dcf1b5c21839b"
+    },
+    {
+      "path": "workflows/verify-phase.md",
+      "git_blob": "fe2ae3a8805c2d4c2a77739debde7e1361a83e66"
+    },
+    {
+      "path": "workflows/verify-work.md",
+      "git_blob": "cd88268790ebeb6d12d6d79079392ec648ad8b6b"
+    }
+  ],
+  "license_sha256": "af0d31f2550b534c14251e14020f3378cf17bd21af7660e7d7b1a2ead4fcdfb4"
+}

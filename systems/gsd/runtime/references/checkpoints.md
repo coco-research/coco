@@ -478,3 +478,337 @@ timeout 30 bash -c 'until node -e "fetch(\"http://localhost:3000\").then(r=>{pro
 | gh (GitHub) | Yes | `brew install gh` (macOS) or `apt install gh` (Linux) |
 | stripe | Yes | `npm i -g stripe` |
 | supabase | Yes | `npm i -g supabase` |
+| convex | No - use npx | `npx convex` (no install needed) |
+| fly | Yes | `brew install flyctl` or curl installer |
+| railway | Yes | `npm i -g @railway/cli` |
+
+**Protocol:** Try command → "command not found" → auto-installable? → yes: install silently, retry → no: checkpoint asking user to install.
+
+## Pre-Checkpoint Automation Failures
+
+| Failure | Response |
+|---------|----------|
+| Server won't start | Check error, fix issue, retry (don't proceed to checkpoint) |
+| Port in use | Kill stale process or use alternate port |
+| Missing dependency | Run `npm install`, retry |
+| Build error | Fix the error first (bug, not checkpoint issue) |
+| Auth error | Create auth gate checkpoint |
+| Network timeout | Retry with backoff, then checkpoint if persistent |
+
+**Never present a checkpoint with broken verification environment.** If the local server isn't responding, don't ask user to "visit localhost:3000".
+
+> **Cross-platform note:** Use `node -e "fetch('http://localhost:3000').then(r=>console.log(r.status))"` instead of `curl` for health checks. `curl` is broken on Windows MSYS/Git Bash due to SSL/path mangling issues.
+
+```xml
+<!-- WRONG: Checkpoint with broken environment -->
+<task type="checkpoint:human-verify">
+  <what-built>Dashboard (server failed to start)</what-built>
+  <how-to-verify>Visit http://localhost:3000...</how-to-verify>
+</task>
+
+<!-- RIGHT: Fix first, then checkpoint -->
+<task type="auto">
+  <name>Fix server startup issue</name>
+  <action>Investigate error, fix root cause, restart server</action>
+  <verify>fetch http://localhost:3000 returns 200</verify>
+</task>
+
+<task type="checkpoint:human-verify">
+  <what-built>Dashboard - server running at http://localhost:3000</what-built>
+  <how-to-verify>Visit http://localhost:3000/dashboard...</how-to-verify>
+</task>
+```
+
+## Automatable Quick Reference
+
+| Action | Automatable? | Claude does it? |
+|--------|--------------|-----------------|
+| Deploy to Vercel | Yes (`vercel`) | YES |
+| Create Stripe webhook | Yes (API) | YES |
+| Write .env file | Yes (Write tool) | YES |
+| Create Upstash DB | Yes (`upstash`) | YES |
+| Run tests | Yes (`npm test`) | YES |
+| Start dev server | Yes (`npm run dev`) | YES |
+| Add env vars to Convex | Yes (`npx convex env set`) | YES |
+| Add env vars to Vercel | Yes (`vercel env add`) | YES |
+| Seed database | Yes (CLI/API) | YES |
+| Click email verification link | No | NO |
+| Enter credit card with 3DS | No | NO |
+| Complete OAuth in browser | No | NO |
+| Visually verify UI looks correct | No | NO |
+| Test interactive user flows | No | NO |
+
+</automation_reference>
+
+<writing_guidelines>
+
+**DO:**
+- Automate everything with CLI/API before checkpoint
+- Be specific: "Visit https://myapp.vercel.app" not "check deployment"
+- Number verification steps
+- State expected outcomes: "You should see X"
+- Provide context: why this checkpoint exists
+
+**DON'T:**
+- Ask human to do work Claude can automate ❌
+- Assume knowledge: "Configure the usual settings" ❌
+- Skip steps: "Set up database" (too vague) ❌
+- Mix multiple verifications in one checkpoint ❌
+
+**Placement:**
+- **After automation completes** - not before Claude does the work
+- **After UI buildout** - before declaring phase complete
+- **Before dependent work** - decisions before implementation
+- **At integration points** - after configuring external services
+
+**Bad placement:** Before automation ❌ | Too frequent ❌ | Too late (dependent tasks already needed the result) ❌
+</writing_guidelines>
+
+<examples>
+
+### Example 1: Database Setup (No Checkpoint Needed)
+
+```xml
+<task type="auto">
+  <name>Create Upstash Redis database</name>
+  <files>.env</files>
+  <action>
+    1. Run `upstash redis create myapp-cache --region us-east-1`
+    2. Capture connection URL from output
+    3. Write to .env: UPSTASH_REDIS_URL={url}
+    4. Verify connection with test command
+  </action>
+  <verify>
+    - upstash redis list shows database
+    - .env contains UPSTASH_REDIS_URL
+    - Test connection succeeds
+  </verify>
+  <done>Redis database created and configured</done>
+</task>
+
+<!-- NO CHECKPOINT NEEDED - Claude automated everything and verified programmatically -->
+```
+
+### Example 2: Full Auth Flow (Single checkpoint at end)
+
+```xml
+<task type="auto">
+  <name>Create user schema</name>
+  <files>src/db/schema.ts</files>
+  <action>Define User, Session, Account tables with Drizzle ORM</action>
+  <verify>npm run db:generate succeeds</verify>
+</task>
+
+<task type="auto">
+  <name>Create auth API routes</name>
+  <files>src/app/api/auth/[...nextauth]/route.ts</files>
+  <action>Set up NextAuth with GitHub provider, JWT strategy</action>
+  <verify>TypeScript compiles, no errors</verify>
+</task>
+
+<task type="auto">
+  <name>Create login UI</name>
+  <files>src/app/login/page.tsx, src/components/LoginButton.tsx</files>
+  <action>Create login page with GitHub OAuth button</action>
+  <verify>npm run build succeeds</verify>
+</task>
+
+<task type="auto">
+  <name>Start dev server for auth testing</name>
+  <action>Run `npm run dev` in background, wait for ready signal</action>
+  <verify>fetch http://localhost:3000 returns 200</verify>
+  <done>Dev server running at http://localhost:3000</done>
+</task>
+
+<!-- ONE checkpoint at end verifies the complete flow -->
+<task type="checkpoint:human-verify" gate="blocking">
+  <what-built>Complete authentication flow - dev server running at http://localhost:3000</what-built>
+  <how-to-verify>
+    1. Visit: http://localhost:3000/login
+    2. Click "Sign in with GitHub"
+    3. Complete GitHub OAuth flow
+    4. Verify: Redirected to /dashboard, user name displayed
+    5. Refresh page: Session persists
+    6. Click logout: Session cleared
+  </how-to-verify>
+  <resume-signal>Type "approved" or describe issues</resume-signal>
+</task>
+```
+</examples>
+
+<anti_patterns>
+
+### ❌ BAD: Asking user to start dev server
+
+```xml
+<task type="checkpoint:human-verify" gate="blocking">
+  <what-built>Dashboard component</what-built>
+  <how-to-verify>
+    1. Run: npm run dev
+    2. Visit: http://localhost:3000/dashboard
+    3. Check layout is correct
+  </how-to-verify>
+</task>
+```
+
+**Why bad:** Claude can run `npm run dev`. User should only visit URLs, not execute commands.
+
+### ✅ GOOD: Claude starts server, user visits
+
+```xml
+<task type="auto">
+  <name>Start dev server</name>
+  <action>Run `npm run dev` in background</action>
+  <verify>fetch http://localhost:3000 returns 200</verify>
+</task>
+
+<task type="checkpoint:human-verify" gate="blocking">
+  <what-built>Dashboard at http://localhost:3000/dashboard (server running)</what-built>
+  <how-to-verify>
+    Visit http://localhost:3000/dashboard and verify:
+    1. Layout matches design
+    2. No console errors
+  </how-to-verify>
+</task>
+```
+
+### ❌ BAD: Asking human to deploy / ✅ GOOD: Claude automates
+
+```xml
+<!-- BAD: Asking user to deploy via dashboard -->
+<task type="checkpoint:human-action" gate="blocking">
+  <action>Deploy to Vercel</action>
+  <instructions>Visit vercel.com/new → Import repo → Click Deploy → Copy URL</instructions>
+</task>
+
+<!-- GOOD: Claude deploys, user verifies -->
+<task type="auto">
+  <name>Deploy to Vercel</name>
+  <action>Run `vercel --yes`. Capture URL.</action>
+  <verify>vercel ls shows deployment, fetch returns 200</verify>
+</task>
+
+<task type="checkpoint:human-verify">
+  <what-built>Deployed to {url}</what-built>
+  <how-to-verify>Visit {url}, check homepage loads</how-to-verify>
+  <resume-signal>Type "approved"</resume-signal>
+</task>
+```
+
+### ❌ BAD: Too many checkpoints / ✅ GOOD: Single checkpoint
+
+```xml
+<!-- BAD: Checkpoint after every task -->
+<task type="auto">Create schema</task>
+<task type="checkpoint:human-verify">Check schema</task>
+<task type="auto">Create API route</task>
+<task type="checkpoint:human-verify">Check API</task>
+<task type="auto">Create UI form</task>
+<task type="checkpoint:human-verify">Check form</task>
+
+<!-- GOOD: One checkpoint at end -->
+<task type="auto">Create schema</task>
+<task type="auto">Create API route</task>
+<task type="auto">Create UI form</task>
+
+<task type="checkpoint:human-verify">
+  <what-built>Complete auth flow (schema + API + UI)</what-built>
+  <how-to-verify>Test full flow: register, login, access protected page</how-to-verify>
+  <resume-signal>Type "approved"</resume-signal>
+</task>
+```
+
+### ❌ BAD: Vague verification / ✅ GOOD: Specific steps
+
+```xml
+<!-- BAD -->
+<task type="checkpoint:human-verify">
+  <what-built>Dashboard</what-built>
+  <how-to-verify>Check it works</how-to-verify>
+</task>
+
+<!-- GOOD -->
+<task type="checkpoint:human-verify">
+  <what-built>Responsive dashboard - server running at http://localhost:3000</what-built>
+  <how-to-verify>
+    Visit http://localhost:3000/dashboard and verify:
+    1. Desktop (>1024px): Sidebar visible, content area fills remaining space
+    2. Tablet (768px): Sidebar collapses to icons
+    3. Mobile (375px): Sidebar hidden, hamburger menu in header
+    4. No horizontal scroll at any size
+  </how-to-verify>
+  <resume-signal>Type "approved" or describe layout issues</resume-signal>
+</task>
+```
+
+### ❌ BAD: Asking user to run CLI commands
+
+```xml
+<task type="checkpoint:human-action">
+  <action>Run database migrations</action>
+  <instructions>Run: npx prisma migrate deploy && npx prisma db seed</instructions>
+</task>
+```
+
+**Why bad:** Claude can run these commands. User should never execute CLI commands.
+
+### ❌ BAD: Asking user to copy values between services
+
+```xml
+<task type="checkpoint:human-action">
+  <action>Configure webhook URL in Stripe</action>
+  <instructions>Copy deployment URL → Stripe Dashboard → Webhooks → Add endpoint → Copy secret → Add to .env</instructions>
+</task>
+```
+
+**Why bad:** Stripe has an API. Claude should create the webhook via API and write to .env directly.
+
+</anti_patterns>
+
+<type name="tdd-review">
+## checkpoint:tdd-review (TDD Mode Only)
+
+**When:** All waves in a phase complete and `workflow.tdd_mode` is enabled. Inserted by the execute-phase orchestrator after `aggregate_results`.
+
+**Purpose:** Collaborative review of TDD gate compliance across all `type: tdd` plans in the phase. Advisory — does not block execution.
+
+**Use for:**
+- Verifying RED/GREEN/REFACTOR commit sequence for each TDD plan
+- Surfacing gate violations (missing RED or GREEN commits)
+- Reviewing test quality (tests fail for the right reason)
+- Confirming minimal GREEN implementations
+
+**Structure:**
+```xml
+<task type="checkpoint:tdd-review" gate="advisory">
+  <what-checked>TDD gate compliance for {count} plans in Phase {X}</what-checked>
+  <gate-results>
+    | Plan | RED | GREEN | REFACTOR | Status |
+    |------|-----|-------|----------|--------|
+    | {id} |  ✓  |   ✓   |    ✓     | Pass   |
+  </gate-results>
+  <violations>[List of gate violations, or "None"]</violations>
+  <resume-signal>Review complete — proceed to phase verification</resume-signal>
+</task>
+```
+
+**Auto-mode behavior:** When `workflow._auto_chain_active` or `workflow.auto_advance` is true, the TDD review checkpoint auto-approves (advisory gate — never blocks).
+</type>
+
+<summary>
+
+Checkpoints formalize human-in-the-loop points for verification and decisions, not manual work.
+
+**The golden rule:** If Claude CAN automate it, Claude MUST automate it.
+
+**Checkpoint priority:**
+1. **checkpoint:human-verify** (90%) - Claude automated everything, human confirms visual/functional correctness
+2. **checkpoint:decision** (9%) - Human makes architectural/technology choices
+3. **checkpoint:human-action** (1%) - Truly unavoidable manual steps with no API/CLI
+
+**When NOT to use checkpoints:**
+- Things Claude can verify programmatically (tests, builds)
+- File operations (Claude can read files)
+- Code correctness (tests and static analysis)
+- Anything automatable via CLI/API
+</summary>

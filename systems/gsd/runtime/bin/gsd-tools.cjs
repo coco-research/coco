@@ -1140,3 +1140,353 @@ async function runCommand(command, args, cwd, raw, defaultValue, originalCommand
 
     case 'profile-questionnaire': {
       const answersIdx = args.indexOf('--answers');
+      const answers = answersIdx !== -1 ? args[answersIdx + 1] : null;
+      profileOutput.cmdProfileQuestionnaire({ answers }, raw);
+      break;
+    }
+
+    case 'generate-dev-preferences': {
+      const analysisIdx = args.indexOf('--analysis');
+      const analysisPath = analysisIdx !== -1 ? args[analysisIdx + 1] : null;
+      const outputIdx = args.indexOf('--output');
+      const outputPath = outputIdx !== -1 ? args[outputIdx + 1] : null;
+      const stackIdx = args.indexOf('--stack');
+      const stack = stackIdx !== -1 ? args[stackIdx + 1] : null;
+      profileOutput.cmdGenerateDevPreferences(cwd, { analysis: analysisPath, output: outputPath, stack }, raw);
+      break;
+    }
+
+    case 'generate-claude-profile': {
+      const analysisIdx = args.indexOf('--analysis');
+      const analysisPath = analysisIdx !== -1 ? args[analysisIdx + 1] : null;
+      const outputIdx = args.indexOf('--output');
+      const outputPath = outputIdx !== -1 ? args[outputIdx + 1] : null;
+      const globalFlag = args.includes('--global');
+      profileOutput.cmdGenerateClaudeProfile(cwd, { analysis: analysisPath, output: outputPath, global: globalFlag }, raw);
+      break;
+    }
+
+    case 'generate-claude-md': {
+      const outputIdx = args.indexOf('--output');
+      const outputPath = outputIdx !== -1 ? args[outputIdx + 1] : null;
+      const autoFlag = args.includes('--auto');
+      const forceFlag = args.includes('--force');
+      profileOutput.cmdGenerateClaudeMd(cwd, { output: outputPath, auto: autoFlag, force: forceFlag }, raw);
+      break;
+    }
+
+    case 'workstream': {
+      const subcommand = args[1];
+      if (subcommand === 'create') {
+        const migrateNameIdx = args.indexOf('--migrate-name');
+        const noMigrate = args.includes('--no-migrate');
+        workstream.cmdWorkstreamCreate(cwd, args[2], {
+          migrate: !noMigrate,
+          migrateName: migrateNameIdx !== -1 ? args[migrateNameIdx + 1] : null,
+        }, raw);
+      } else if (subcommand === 'list') {
+        workstream.cmdWorkstreamList(cwd, raw);
+      } else if (subcommand === 'status') {
+        workstream.cmdWorkstreamStatus(cwd, args[2], raw);
+      } else if (subcommand === 'complete') {
+        workstream.cmdWorkstreamComplete(cwd, args[2], {}, raw);
+      } else if (subcommand === 'set') {
+        workstream.cmdWorkstreamSet(cwd, args[2], raw);
+      } else if (subcommand === 'get') {
+        workstream.cmdWorkstreamGet(cwd, raw);
+      } else if (subcommand === 'progress') {
+        workstream.cmdWorkstreamProgress(cwd, raw);
+      } else {
+        error('Unknown workstream subcommand. Available: create, list, status, complete, set, get, progress', ERROR_REASON.SDK_UNKNOWN_COMMAND);
+      }
+      break;
+    }
+
+    case 'worktree': {
+      const subcommand = args[1];
+      const worktreeSafety = require('./lib/worktree-safety.cjs');
+      if (subcommand === 'cleanup-wave') {
+        worktreeSafety.cmdWorktreeCleanupWave(cwd, args.slice(2));
+      } else if (subcommand === 'reap-orphans') {
+        worktreeSafety.cmdWorktreeReapOrphans(cwd);
+      } else {
+        error('Unknown worktree subcommand. Available: cleanup-wave, reap-orphans', ERROR_REASON.SDK_UNKNOWN_COMMAND);
+      }
+      break;
+    }
+
+    // ─── Intel ────────────────────────────────────────────────────────────
+
+    case 'intel': {
+      const intel = require('./lib/intel.cjs');
+      const subcommand = args[1];
+      if (subcommand === 'query') {
+        const term = args[2];
+        if (!term) error('Usage: gsd-tools intel query <term>', ERROR_REASON.USAGE);
+        const planningDir = path.join(cwd, '.planning');
+        core.output(intel.intelQuery(term, planningDir), raw);
+      } else if (subcommand === 'status') {
+        const planningDir = path.join(cwd, '.planning');
+        const status = intel.intelStatus(planningDir);
+        if (!raw && status.files) {
+          for (const file of Object.values(status.files)) {
+            if (file.updated_at) {
+              file.updated_at = core.timeAgo(new Date(file.updated_at));
+            }
+          }
+        }
+        core.output(status, raw);
+      } else if (subcommand === 'diff') {
+        const planningDir = path.join(cwd, '.planning');
+        core.output(intel.intelDiff(planningDir), raw);
+      } else if (subcommand === 'snapshot') {
+        const planningDir = path.join(cwd, '.planning');
+        core.output(intel.intelSnapshot(planningDir), raw);
+      } else if (subcommand === 'patch-meta') {
+        const filePath = args[2];
+        if (!filePath) error('Usage: gsd-tools intel patch-meta <file-path>', ERROR_REASON.USAGE);
+        core.output(intel.intelPatchMeta(path.resolve(cwd, filePath)), raw);
+      } else if (subcommand === 'validate') {
+        const planningDir = path.join(cwd, '.planning');
+        core.output(intel.intelValidate(planningDir), raw);
+      } else if (subcommand === 'extract-exports') {
+        const filePath = args[2];
+        if (!filePath) error('Usage: gsd-tools intel extract-exports <file-path>', ERROR_REASON.USAGE);
+        core.output(intel.intelExtractExports(path.resolve(cwd, filePath)), raw);
+      } else if (subcommand === 'update') {
+        const planningDir = path.join(cwd, '.planning');
+        core.output(intel.intelUpdate(planningDir), raw);
+      } else {
+        error('Unknown intel subcommand. Available: query, status, update, diff, snapshot, patch-meta, validate, extract-exports', ERROR_REASON.SDK_UNKNOWN_COMMAND);
+      }
+      break;
+    }
+
+    // ─── Graphify ──────────────────────────────────────────────────────────
+
+    case 'graphify': {
+      const graphify = require('./lib/graphify.cjs');
+      const subcommand = args[1];
+      if (subcommand === 'query') {
+        const term = args[2];
+        if (!term) error('Usage: gsd-tools graphify query <term>', ERROR_REASON.USAGE);
+        const budgetIdx = args.indexOf('--budget');
+        const budget = budgetIdx !== -1 ? parseInt(args[budgetIdx + 1], 10) : null;
+        core.output(graphify.graphifyQuery(cwd, term, { budget }), raw);
+      } else if (subcommand === 'status') {
+        core.output(graphify.graphifyStatus(cwd), raw);
+      } else if (subcommand === 'diff') {
+        core.output(graphify.graphifyDiff(cwd), raw);
+      } else if (subcommand === 'build') {
+        if (args[2] === 'snapshot') {
+          core.output(graphify.writeSnapshot(cwd), raw);
+        } else {
+          core.output(graphify.graphifyBuild(cwd), raw);
+        }
+      } else {
+        error('Unknown graphify subcommand. Available: build, query, status, diff', ERROR_REASON.SDK_UNKNOWN_COMMAND);
+      }
+      break;
+    }
+
+    // ─── Documentation ────────────────────────────────────────────────────
+
+    case 'docs-init': {
+      // Phase 6 (#3575): dispatch via SDK executeForCjs when available.
+      // SDK handler: docsInit in sdk/src/query/docs-init.ts.
+      const handled = _dispatchNonFamily({
+        registryCommand: 'docs-init',
+        registryArgs: args.slice(1),
+        legacyCommand: 'docs-init',
+        legacyArgs: args.slice(1),
+        cwd,
+        raw,
+        error,
+        output: core.output,
+      });
+      if (!handled) docs.cmdDocsInit(cwd, raw);
+      break;
+    }
+
+    // ─── Learnings ─────────────────────────────────────────────────────────
+
+    case 'learnings': {
+      const subcommand = args[1];
+      if (subcommand === 'list') {
+        learnings.cmdLearningsList(raw);
+      } else if (subcommand === 'query') {
+        const tagIdx = args.indexOf('--tag');
+        const tag = tagIdx !== -1 ? args[tagIdx + 1] : null;
+        if (!tag) error('Usage: gsd-tools learnings query --tag <tag>', ERROR_REASON.USAGE);
+        learnings.cmdLearningsQuery(tag, raw);
+      } else if (subcommand === 'copy') {
+        learnings.cmdLearningsCopy(cwd, raw);
+      } else if (subcommand === 'prune') {
+        const olderIdx = args.indexOf('--older-than');
+        const olderThan = olderIdx !== -1 ? args[olderIdx + 1] : null;
+        if (!olderThan) error('Usage: gsd-tools learnings prune --older-than <duration>', ERROR_REASON.USAGE);
+        learnings.cmdLearningsPrune(olderThan, raw);
+      } else if (subcommand === 'delete') {
+        const id = args[2];
+        if (!id) error('Usage: gsd-tools learnings delete <id>', ERROR_REASON.USAGE);
+        learnings.cmdLearningsDelete(id, raw);
+      } else {
+        error('Unknown learnings subcommand. Available: list, query, copy, prune, delete', ERROR_REASON.SDK_UNKNOWN_COMMAND);
+      }
+      break;
+    }
+
+    // ─── detect-custom-files ───────────────────────────────────────────────
+    // CJS-native: no SDK counterpart exists in the command registry.
+    // detect-custom-files reads a gsd-file-manifest.json against the
+    // live filesystem to identify user-added files. It is installer-specific
+    // logic that has no async query equivalent in the SDK.
+    //
+    // Detect user-added files inside GSD-managed directories that are not
+    // tracked in gsd-file-manifest.json. Used by the update workflow to back
+    // up custom files before the installer wipes those directories.
+    //
+    // This replaces the fragile bash pattern:
+    //   MANIFEST_FILES=$(node -e "require('$RUNTIME_DIR/...')" 2>/dev/null)
+    //   ${filepath#$RUNTIME_DIR/}   # unreliable path stripping
+    // which silently returns CUSTOM_COUNT=0 when $RUNTIME_DIR is unset or
+    // when the stripped path does not match the manifest key format (#1997).
+
+    case 'detect-custom-files': {
+      const configDirIdx = args.indexOf('--config-dir');
+      const configDir = configDirIdx !== -1 ? args[configDirIdx + 1] : null;
+      if (!configDir) {
+        error('Usage: gsd-tools detect-custom-files --config-dir <path>', ERROR_REASON.USAGE);
+      }
+      const resolvedConfigDir = path.resolve(configDir);
+      if (!fs.existsSync(resolvedConfigDir)) {
+        error(`Config directory not found: ${resolvedConfigDir}`, ERROR_REASON.USAGE);
+      }
+
+      const manifestPath = path.join(resolvedConfigDir, 'gsd-file-manifest.json');
+      if (!fs.existsSync(manifestPath)) {
+        // No manifest — cannot determine what is custom. Return empty list
+        // (same behaviour as saveLocalPatches in install.js when no manifest).
+        const out = { custom_files: [], custom_count: 0, manifest_found: false };
+        process.stdout.write(JSON.stringify(out, null, 2));
+        break;
+      }
+
+      let manifest;
+      try {
+        manifest = JSON.parse(await fs.promises.readFile(manifestPath, 'utf8'));
+      } catch {
+        const out = { custom_files: [], custom_count: 0, manifest_found: false, error: 'manifest parse error' };
+        process.stdout.write(JSON.stringify(out, null, 2));
+        break;
+      }
+
+      const manifestKeys = new Set(Object.keys(manifest.files || {}));
+
+      // GSD-managed directories to scan for user-added files.
+      // These are the directories the installer wipes on update.
+      const GSD_MANAGED_DIRS = [
+        'get-shit-done',
+        'agents',
+        path.join('commands', 'gsd'),
+        'hooks',
+        'skills',
+      ];
+
+      function collectCustomFiles(dir, baseDir, manifestKeys, out) {
+        if (!fs.existsSync(dir)) return;
+        for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+          const fullPath = path.join(dir, entry.name);
+          if (entry.isDirectory()) {
+            collectCustomFiles(fullPath, baseDir, manifestKeys, out);
+            continue;
+          }
+          // Use forward slashes for cross-platform manifest key compatibility
+          const relPath = path.relative(baseDir, fullPath).replace(/\\/g, '/');
+          if (!manifestKeys.has(relPath)) {
+            out.push(relPath);
+          }
+        }
+      }
+
+      const customFiles = [];
+      for (const managedDir of GSD_MANAGED_DIRS) {
+        const absDir = path.join(resolvedConfigDir, managedDir);
+        if (!fs.existsSync(absDir)) continue;
+        collectCustomFiles(absDir, resolvedConfigDir, manifestKeys, customFiles);
+      }
+
+      const out = {
+        custom_files: customFiles,
+        custom_count: customFiles.length,
+        manifest_found: true,
+        manifest_version: manifest.version || null,
+      };
+      process.stdout.write(JSON.stringify(out, null, 2));
+      break;
+    }
+
+    // ─── GSD-2 Reverse Migration ───────────────────────────────────────────
+
+    case 'from-gsd2': {
+      const gsd2Import = require('./lib/gsd2-import.cjs');
+      gsd2Import.cmdFromGsd2(args.slice(1), cwd, raw);
+      break;
+    }
+
+    // ─── Prompt Budget ────────────────────────────────────────────────────
+    //
+    // Assemble and deterministically trim review prompt sections to fit a
+    // token budget. Used by the /gsd-review workflow before dispatching to
+    // small-context local model servers (Ollama, llama.cpp, LM Studio).
+    //
+    // Required flags:
+    //   --budget <N>            Token budget (integer > 0)
+    //   --instructions-file <path>  Review instructions
+    //   --roadmap-file <path>   Roadmap section
+    //   --plan-file <path>      Plan file (may be repeated)
+    //   --output-prompt <path>  Write trimmed prompt here
+    //   --output-metadata <path> Write metadata JSON here
+    //
+    // Optional flags:
+    //   --safety-margin-pct <N>     Default 10
+    //   --project-md-head-lines <N> Default 40
+    //   --project-file <path>
+    //   --context-file <path>
+    //   --research-file <path>
+    //   --requirements-file <path>
+    //
+    // Exit codes:
+    //   0  success (trim or no-trim)
+    //   1  invocation error (missing required arg, missing file, invalid budget)
+    //   2  hardFailed: prompt cannot fit effective budget after trim policy
+
+    case 'prompt-budget': {
+      const promptBudget = require('./lib/prompt-budget.cjs');
+
+      // ── Collect multi-value --plan-file flags ──────────────────────────
+      const planFiles = [];
+      for (let i = 1; i < args.length; i++) {
+        if (args[i] === '--plan-file' && args[i + 1] && !args[i + 1].startsWith('--')) {
+          planFiles.push(args[i + 1]);
+          i++;
+        }
+      }
+
+      // ── Parse single-value flags ───────────────────────────────────────
+      const flagMap = new Map();
+      for (let i = 1; i < args.length; i++) {
+        const current = args[i];
+        const next = args[i + 1];
+        if (!current.startsWith('--')) continue;
+        if (!next || next.startsWith('--')) {
+          if (!flagMap.has(current)) flagMap.set(current, null);
+          continue;
+        }
+        if (!flagMap.has(current)) flagMap.set(current, next);
+        i++;
+      }
+      const getFlag = (flag) => flagMap.get(flag) ?? null;
+
+      const budgetStr = getFlag('--budget');
+      const instructionsFile = getFlag('--instructions-file');

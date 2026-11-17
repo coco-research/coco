@@ -115,3 +115,56 @@ Phases with standard patterns (skip research-phase):
 
 [Any areas where research was inconclusive or needs validation during implementation]
 
+- [Gap]: [how to handle during planning/execution]
+- [Gap]: [how to handle during planning/execution]
+
+## Sources
+
+### Primary (HIGH confidence)
+- [Context7 library ID] — [topics]
+- [Official docs URL] — [what was checked]
+
+### Secondary (MEDIUM confidence)
+- [Source] — [finding]
+
+### Tertiary (LOW confidence)
+- [Source] — [finding, needs validation]
+
+---
+*Research completed: [date]*
+*Ready for roadmap: yes*
+```
+
+</template>
+
+<guidelines>
+
+**Executive Summary:**
+- Write for someone who will only read this section
+- Include the key recommendation and main risk
+- 2-3 paragraphs maximum
+
+**Key Findings:**
+- Summarize, don't duplicate full documents
+- Link to detailed docs (STACK.md, FEATURES.md, etc.)
+- Focus on what matters for roadmap decisions
+
+**Implications for Roadmap:**
+- This is the most important section
+- Directly informs roadmap creation
+- Be explicit about phase suggestions and rationale
+- Include research flags for each suggested phase
+
+**Confidence Assessment:**
+- Be honest about uncertainty
+- Note gaps that need resolution during planning
+- HIGH = verified with official sources
+- MEDIUM = community consensus, multiple sources agree
+- LOW = single source or inference
+
+**Integration with roadmap creation:**
+- This file is loaded as context during roadmap creation
+- Phase suggestions here become starting point for roadmap
+- Research flags inform phase planning
+
+</guidelines>

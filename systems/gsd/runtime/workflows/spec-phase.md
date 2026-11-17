@@ -106,3 +106,157 @@ If "Update": Load existing SPEC.md, continue to Step 3.
 - Prior phase artifacts (SUMMARY.md, VERIFICATION.md) that inform current state
 
 **Synthesize current state** — the grounded baseline for the interview:
+- What exists today related to this phase
+- The gap between current state and the phase goal
+- The primary deliverable: what file/behavior/capability does NOT exist yet?
+
+Confirm your current state synthesis internally. Do not present it to the user yet — you'll use it to ask precise, grounded questions.
+
+## Step 3: First Ambiguity Assessment
+
+Before questioning begins, score the phase's current ambiguity based only on what ROADMAP.md and REQUIREMENTS.md say:
+
+```
+Goal Clarity:       [score 0.0–1.0]
+Boundary Clarity:   [score 0.0–1.0]
+Constraint Clarity: [score 0.0–1.0]
+Acceptance Criteria:[score 0.0–1.0]
+
+Ambiguity: [score] ([calculate])
+```
+
+**If `--auto` and initial ambiguity already ≤ 0.20 with all minimums met:** Skip interview — derive SPEC.md directly from roadmap + requirements. Log: `[auto] Phase requirements are already sufficiently clear — generating SPEC.md from existing context.` Jump to Step 6.
+
+**Otherwise:** Continue to Step 4.
+
+## Step 4: Socratic Interview Loop
+
+**Max 6 rounds.** Each round: 2–3 questions max. End round after user responds.
+
+**Round selection by perspective:**
+- Round 1: Researcher
+- Round 2: Researcher + Simplifier
+- Round 3: Boundary Keeper
+- Round 4: Failure Analyst
+- Rounds 5–6: Seed Closer (focus on lowest-scoring dimensions)
+
+**After each round:**
+1. Update all 4 dimension scores from the user's answers
+2. Calculate new ambiguity score
+3. Display the updated scoring:
+
+```
+After round [N]:
+  Goal Clarity:       [score] (min 0.75) [✓ or ↑ needed]
+  Boundary Clarity:   [score] (min 0.70) [✓ or ↑ needed]
+  Constraint Clarity: [score] (min 0.65) [✓ or ↑ needed]
+  Acceptance Criteria:[score] (min 0.70) [✓ or ↑ needed]
+  Ambiguity: [score] (gate: ≤ 0.20)
+```
+
+**Gate check after each round:**
+
+If gate passes (ambiguity ≤ 0.20 AND all minimums met):
+
+**If `--auto`:** Jump to Step 6.
+
+**Otherwise:** AskUserQuestion:
+- header: "Spec Gate Passed"
+- question: "Ambiguity is [score] — requirements are clear enough to write SPEC.md. Proceed?"
+- options:
+  - "Yes — write SPEC.md" → Jump to Step 6
+  - "One more round" → Continue interview
+  - "Done talking — write it" → Jump to Step 6
+
+**If max rounds reached (6) and gate not passed:**
+
+**If `--auto`:** Write SPEC.md anyway — flag unresolved dimensions. Log: `[auto] Max rounds reached. Writing SPEC.md with [N] dimensions below minimum. Planner will need to treat these as assumptions.`
+
+**Otherwise:** AskUserQuestion:
+- header: "Max Rounds"
+- question: "After 6 rounds, ambiguity is [score]. [List dimensions still below minimum.] What would you like to do?"
+- options:
+  - "Write SPEC.md anyway — flag gaps" → Write SPEC.md, mark unresolved dimensions in Ambiguity Report
+  - "Keep talking" → Continue (no round limit from here)
+  - "Abandon" → Exit without writing
+
+**If `--auto` mode throughout:** Replace all AskUserQuestion calls above with Claude's recommended choice. Log decisions inline. Apply the same logic as `--auto` in discuss-phase.
+
+**Text mode (`workflow.text_mode: true` or `--text` flag):** Use plain-text numbered lists instead of AskUserQuestion TUI menus.
+
+## Step 5: (covered inline — ambiguity scoring is per-round)
+
+## Step 6: Generate SPEC.md
+
+Use the SPEC.md template from @~/.claude/get-shit-done/templates/spec.md.
+
+**Requirements for every requirement entry:**
+- One specific, testable statement
+- Current state (what exists now)
+- Target state (what it should become)
+- Acceptance criterion (how to verify it was met)
+
+**Vague requirements are rejected:**
+- ✗ "The system should be fast"
+- ✗ "Improve user experience"
+- ✓ "API endpoint responds in < 200ms at p95 under 100 concurrent requests"
+- ✓ "CLI command exits with code 1 and prints to stderr on invalid input"
+
+**Count requirements.** The display in discuss-phase reads: "Found SPEC.md — {N} requirements locked."
+
+**Boundaries must be explicit lists:**
+- "In scope" — what this phase produces
+- "Out of scope" — what it explicitly does NOT do (with brief reasoning)
+
+**Acceptance criteria must be pass/fail checkboxes** — no "should feel good" or "looks reasonable."
+
+**If any dimensions are below minimum**, mark them in the Ambiguity Report with: `⚠ Below minimum — planner must treat as assumption`.
+
+Write to: `{phase_dir}/{padded_phase}-SPEC.md`
+
+## Step 7: Commit
+
+```bash
+git add "${phase_dir}/${padded_phase}-SPEC.md"
+git commit -m "spec(phase-${phase_number}): add SPEC.md for ${phase_name} — ${requirement_count} requirements (#2213)"
+```
+
+If `commit_docs` is false: Skip commit. Note that SPEC.md was written but not committed.
+
+## Step 8: Wrap Up
+
+Display:
+
+```
+SPEC.md written — {N} requirements locked.
+
+  Phase {X}: {name}
+  Ambiguity: {final_score} (gate: ≤ 0.20)
+
+Next: /gsd:discuss-phase {X}
+  discuss-phase will detect SPEC.md and focus on implementation decisions only.
+```
+
+</process>
+
+<critical_rules>
+- Every requirement MUST have current state, target state, and acceptance criterion
+- Boundaries section is MANDATORY — cannot be empty
+- "In scope" and "Out of scope" must be explicit lists, not narrative prose
+- Acceptance criteria must be pass/fail — no subjective criteria
+- SPEC.md is NEVER written if the user selects "Abandon"
+- Do NOT ask about HOW to implement — that is discuss-phase territory
+- Scout the codebase BEFORE the first question — grounded questions only
+- Max 2–3 questions per round — do not frontload all questions at once
+</critical_rules>
+
+<success_criteria>
+- Codebase scouted and current state understood before questioning
+- All 4 dimensions scored after every round
+- Gate passed OR user explicitly chose to write despite gaps
+- SPEC.md contains only falsifiable requirements
+- Boundaries are explicit (in scope / out of scope with reasoning)
+- Acceptance criteria are pass/fail checkboxes
+- SPEC.md committed atomically (when commit_docs is true)
+- User directed to /gsd:discuss-phase as next step
+</success_criteria>

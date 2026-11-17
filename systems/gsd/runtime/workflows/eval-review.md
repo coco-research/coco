@@ -108,3 +108,48 @@ Spawn as Task with model `AUDITOR_MODEL`.
 
 Read the written EVAL-REVIEW.md. Extract:
 - `overall_score`
+- `verdict` (PRODUCTION READY | NEEDS WORK | SIGNIFICANT GAPS | NOT IMPLEMENTED)
+- `critical_gap_count`
+
+## 5. Display Summary
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► EVAL AUDIT COMPLETE — PHASE {N}: {name}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+◆ Score: {overall_score}/100
+◆ Verdict: {verdict}
+◆ Critical Gaps: {critical_gap_count}
+◆ Output: {eval_review_path}
+
+{If PRODUCTION READY:}
+  Next step: /gsd:plan-phase (next phase) or deploy
+
+{If NEEDS WORK:}
+  Address critical gaps in EVAL-REVIEW.md, then re-run /gsd:eval-review {N}
+
+{If SIGNIFICANT GAPS or NOT IMPLEMENTED:}
+  Review AI-SPEC.md evaluation plan. Critical eval dimensions are not implemented.
+  Do not deploy until gaps are addressed.
+```
+
+## 6. Commit
+
+**If `commit_docs` is true:**
+```bash
+git add "${EVAL_REVIEW_FILE}"
+git commit -m "docs({phase_slug}): add EVAL-REVIEW.md — score {overall_score}/100 ({verdict})"
+```
+
+</process>
+
+<success_criteria>
+- [ ] Phase execution state detected correctly
+- [ ] AI-SPEC.md presence handled (with or without)
+- [ ] gsd-eval-auditor spawned with correct context
+- [ ] EVAL-REVIEW.md written (by auditor)
+- [ ] Score and verdict displayed to user
+- [ ] Appropriate next steps surfaced based on verdict
+- [ ] Committed if commit_docs enabled
+</success_criteria>

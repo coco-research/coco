@@ -135,3 +135,9 @@ Continue exploring with `/gsd:explore` or start working with `/gsd:progress --ne
 <success_criteria>
 - [ ] Socratic conversation follows questioning.md principles
 - [ ] Questions asked one at a time, not in batches
+- [ ] Research offered contextually (not forced)
+- [ ] Up to 4 outputs proposed from conversation
+- [ ] User explicitly selects which outputs to create
+- [ ] Files written to correct destinations
+- [ ] Commit respects commit_docs config
+</success_criteria>

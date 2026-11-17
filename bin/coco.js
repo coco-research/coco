@@ -17,8 +17,6 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
-const https = require('https');
-
 const REPO = 'https://github.com/coco-research/coco.git';
 const DEFAULT_DIR = path.join(process.cwd(), 'coco');
 
@@ -53,6 +51,7 @@ function fetchLatestVersion(cb) {
   let done = false;
   const finish = (v) => { if (!done) { done = true; cb(v); } };
   try {
+    const https = require('https');
     const req = https.get(LATEST_URL, { headers: { 'User-Agent': 'coco-cli' } }, (res) => {
       if (res.statusCode !== 200) { res.resume(); return finish(null); }
       let body = '';
@@ -97,6 +96,7 @@ Usage:
   npx cocosuperintelligence install [flags]   clone + install with flags
   npx cocosuperintelligence update [dir]      checkout the pinned release tag
   npx cocosuperintelligence uninstall [dir]   remove symlinks + clone
+  npx cocosuperintelligence mcp               run read-only stdio MCP server
   npx cocosuperintelligence version           show version + check for updates
   npx cocosuperintelligence --help            this message
 
@@ -636,6 +636,9 @@ function main() {
       break;
     case 'uninstall':
       cmdUninstall(rest);
+      break;
+    case 'mcp':
+      require('./coco-mcp').runMcp(rest);
       break;
     default:
       // Flags pass through to install (e.g., npx cocosuperintelligence --adapter cursor).

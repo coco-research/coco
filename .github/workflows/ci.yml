@@ -159,6 +159,9 @@ jobs:
           node --check bin/coco.js
           node bin/coco.js --help | head -5
 
+      - name: Validate stdio MCP server
+        run: bash tests/check-coco-mcp.sh
+
       - name: Hyperframes telemetry is opt-in (no network call unless COCO_HYPERFRAMES_TELEMETRY=1)
         run: node --test systems/hyperframes/skills/media-use/scripts/lib/telemetry.test.mjs
 

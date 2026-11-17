@@ -1490,3 +1490,141 @@ async function runCommand(command, args, cwd, raw, defaultValue, originalCommand
 
       const budgetStr = getFlag('--budget');
       const instructionsFile = getFlag('--instructions-file');
+      const roadmapFile = getFlag('--roadmap-file');
+      const outputPromptFile = getFlag('--output-prompt');
+      const outputMetadataFile = getFlag('--output-metadata');
+      const safetyMarginStr = getFlag('--safety-margin-pct');
+      const projectMdHeadLinesStr = getFlag('--project-md-head-lines');
+      const projectFile = getFlag('--project-file');
+      const contextFile = getFlag('--context-file');
+      const researchFile = getFlag('--research-file');
+      const requirementsFile = getFlag('--requirements-file');
+
+      // ── Validate required args ─────────────────────────────────────────
+      if (!budgetStr) {
+        process.stderr.write('Error: --budget <N> is required\n');
+        process.exit(1);
+      }
+      const budget = parseInt(budgetStr, 10);
+      if (!Number.isFinite(budget) || budget <= 0) {
+        process.stderr.write('Error: --budget must be a positive integer\n');
+        process.exit(1);
+      }
+      if (!instructionsFile) {
+        process.stderr.write('Error: --instructions-file <path> is required\n');
+        process.exit(1);
+      }
+      if (!roadmapFile) {
+        process.stderr.write('Error: --roadmap-file <path> is required\n');
+        process.exit(1);
+      }
+      if (planFiles.length === 0) {
+        process.stderr.write('Error: at least one --plan-file <path> is required\n');
+        process.exit(1);
+      }
+      if (!outputPromptFile) {
+        process.stderr.write('Error: --output-prompt <path> is required\n');
+        process.exit(1);
+      }
+      if (!outputMetadataFile) {
+        process.stderr.write('Error: --output-metadata <path> is required\n');
+        process.exit(1);
+      }
+
+      // ── Validate and read required files ──────────────────────────────
+      async function readRequired(filePath, flagName) {
+        const resolved = path.resolve(filePath);
+        try {
+          return await fs.promises.readFile(resolved, 'utf8');
+        } catch (err) {
+          if (err && err.code === 'ENOENT') {
+            process.stderr.write(`Error: file not found for ${flagName}: ${resolved}\n`);
+            process.exit(1);
+          }
+          process.stderr.write(`Error: cannot read file for ${flagName}: ${resolved}\n`);
+          process.exit(1);
+        }
+      }
+
+      async function readOptional(filePath) {
+        if (!filePath) return null;
+        const resolved = path.resolve(filePath);
+        try {
+          return await fs.promises.readFile(resolved, 'utf8');
+        } catch (err) {
+          if (err && err.code === 'ENOENT') return null;
+          process.stderr.write(`Error: cannot read optional file: ${resolved}\n`);
+          process.exit(1);
+        }
+      }
+
+      const instructions = await readRequired(instructionsFile, '--instructions-file');
+      const roadmap = await readRequired(roadmapFile, '--roadmap-file');
+      const plans = await Promise.all(planFiles.map(async (p) => {
+        const resolved = path.resolve(p);
+        try {
+          const content = await fs.promises.readFile(resolved, 'utf8');
+          return { file: path.basename(p), content };
+        } catch (err) {
+          if (err && err.code === 'ENOENT') {
+            process.stderr.write(`Error: plan file not found: ${resolved}\n`);
+            process.exit(1);
+          }
+          process.stderr.write(`Error: cannot read plan file: ${resolved}\n`);
+          process.exit(1);
+        }
+      }));
+
+      const projectMd = await readOptional(projectFile);
+      const context = await readOptional(contextFile);
+      const research = await readOptional(researchFile);
+      const requirements = await readOptional(requirementsFile);
+
+      // ── Build options ─────────────────────────────────────────────────
+      const options = {};
+      if (safetyMarginStr !== null) {
+        const pct = parseInt(safetyMarginStr, 10);
+        if (Number.isFinite(pct)) options.safetyMarginPct = pct;
+      }
+      if (projectMdHeadLinesStr !== null) {
+        const lines = parseInt(projectMdHeadLinesStr, 10);
+        if (Number.isFinite(lines)) options.projectMdHeadLines = lines;
+      }
+
+      // ── Call applyBudget ──────────────────────────────────────────────
+      const sections = { instructions, roadmap, plans, projectMd, context, research, requirements };
+      const { prompt, metadata } = promptBudget.applyBudget({ sections, budget, options });
+
+      // ── Write outputs ─────────────────────────────────────────────────
+      await fs.promises.writeFile(path.resolve(outputMetadataFile), JSON.stringify(metadata, null, 2));
+      await fs.promises.writeFile(path.resolve(outputPromptFile), prompt);
+
+      if (metadata.hardFailed) {
+        process.exit(2);
+      }
+      break;
+    }
+
+    default: {
+      // #3243: if the caller passed a dotted form (e.g. "foo.bar"), the shim
+      // above split it so `command` here is the head ("foo"). Use
+      // originalCommand to reconstruct the original dotted form and suggest
+      // the spaced equivalent — surfacing a useful diagnostic instead of just
+      // "Unknown command: foo".
+      const wasDotted =
+        typeof originalCommand === 'string' &&
+        originalCommand !== command &&
+        originalCommand.includes('.');
+      let suggestion = '';
+      if (wasDotted) {
+        const dotIdx = originalCommand.indexOf('.');
+        const head = originalCommand.slice(0, dotIdx);
+        const rest = originalCommand.slice(dotIdx + 1);
+        suggestion = ` — did you mean: "${head} ${rest}"?`;
+      }
+      error(`Unknown command: ${command}${suggestion}`, ERROR_REASON.SDK_UNKNOWN_COMMAND);
+    }
+  }
+}
+
+main();

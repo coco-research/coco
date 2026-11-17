@@ -559,3 +559,64 @@ trimmed_reviewers:        # only present if at least one reviewer was trimmed
 
 ## LM Studio Review
 
+{lm_studio review content}
+
+---
+
+## llama.cpp Review
+
+{llama_cpp review content}
+
+---
+
+## Consensus Summary
+
+{synthesize common concerns across all reviewers}
+
+### Agreed Strengths
+{strengths mentioned by 2+ reviewers}
+
+### Agreed Concerns
+{concerns raised by 2+ reviewers — highest priority}
+
+### Divergent Views
+{where reviewers disagreed — worth investigating}
+```
+
+Commit:
+```bash
+gsd-sdk query commit "docs: cross-AI review for phase {N}" --files {phase_dir}/{padded_phase}-REVIEWS.md
+```
+</step>
+
+<step name="present_results">
+Display summary:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► REVIEW COMPLETE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Phase {N} reviewed by {count} AI systems.
+
+Consensus concerns:
+{top 3 shared concerns}
+
+Full review: {padded_phase}-REVIEWS.md
+
+To incorporate feedback into planning:
+  /gsd:plan-phase {N} --reviews
+```
+
+Clean up temp files.
+</step>
+
+</process>
+
+<success_criteria>
+- [ ] At least one external CLI invoked successfully
+- [ ] REVIEWS.md written with structured feedback
+- [ ] Consensus summary synthesized from multiple reviewers
+- [ ] Temp files cleaned up
+- [ ] User knows how to use feedback (/gsd:plan-phase --reviews)
+</success_criteria>

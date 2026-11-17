@@ -1211,3 +1211,353 @@ function cmdInitManager(cwd, raw) {
         // Activity detection: check most recent file mtime
         const now = Date.now();
         let newestMtime = 0;
+        for (const f of phaseFiles) {
+          try {
+            const stat = fs.statSync(path.join(fullDir, f));
+            if (stat.mtimeMs > newestMtime) newestMtime = stat.mtimeMs;
+          } catch { /* intentionally empty */ }
+        }
+        if (newestMtime > 0) {
+          lastActivity = new Date(newestMtime).toISOString();
+          isActive = (now - newestMtime) < 300000; // 5 minutes
+        }
+      }
+    } catch { /* intentionally empty */ }
+
+    // Check ROADMAP checkbox status (pre-extracted above the loop)
+    const roadmapComplete = _checkboxStates.get(phaseNum) || false;
+    if (roadmapComplete && diskStatus !== 'complete') {
+      diskStatus = 'complete';
+    }
+
+    phases.push({
+      number: phaseNum,
+      name: phaseName,
+      goal,
+      depends_on,
+      disk_status: diskStatus,
+      has_context: hasContext,
+      has_research: hasResearch,
+      plan_count: planCount,
+      summary_count: summaryCount,
+      roadmap_complete: roadmapComplete,
+      last_activity: lastActivity,
+      is_active: isActive,
+    });
+  }
+
+  // Compute display names: truncate to keep table aligned
+  const MAX_NAME_WIDTH = 20;
+  for (const phase of phases) {
+    if (phase.name.length > MAX_NAME_WIDTH) {
+      phase.display_name = phase.name.slice(0, MAX_NAME_WIDTH - 1) + '…';
+    } else {
+      phase.display_name = phase.name;
+    }
+  }
+
+  // Dependency satisfaction: check if all depends_on phases are complete
+  const completedNums = new Set(phases.filter(p => p.disk_status === 'complete').map(p => p.number));
+
+  // Also include phases from previously shipped milestones — they are all
+  // complete by definition (a milestone only ships when all phases are done).
+  // rawContent is the full ROADMAP.md (including <details>-wrapped shipped
+  // milestone sections that extractCurrentMilestone strips out).
+  const _allCompletedPattern = /-\s*\[x\]\s*.*Phase\s+(\d+[A-Z]?(?:\.\d+)*)[:\s]/gi;
+  let _allMatch;
+  while ((_allMatch = _allCompletedPattern.exec(rawContent)) !== null) {
+    completedNums.add(_allMatch[1]);
+  }
+
+  for (const phase of phases) {
+    if (!phase.depends_on || /^none$/i.test(phase.depends_on.trim())) {
+      phase.deps_satisfied = true;
+    } else {
+      // Parse "Phase 1, Phase 3" or "1, 3" formats
+      const depNums = phase.depends_on.match(/\d+(?:\.\d+)*/g) || [];
+      phase.deps_satisfied = depNums.every(n => completedNums.has(n));
+      phase.dep_phases = depNums;
+    }
+  }
+
+  // Compact dependency display for dashboard
+  for (const phase of phases) {
+    phase.deps_display = (phase.dep_phases && phase.dep_phases.length > 0)
+      ? phase.dep_phases.join(',')
+      : '—';
+  }
+
+  for (const phase of phases) {
+    phase.is_next_to_discuss =
+      (phase.disk_status === 'empty' || phase.disk_status === 'no_directory') &&
+      phase.deps_satisfied;
+  }
+
+  // Check for WAITING.json signal
+  let waitingSignal = null;
+  try {
+    const waitingPath = path.join(cwd, '.planning', 'WAITING.json');
+    const waitingRaw = platformReadSync(waitingPath);
+    if (waitingRaw !== null) {
+      waitingSignal = JSON.parse(waitingRaw);
+    }
+  } catch { /* intentionally empty */ }
+
+  // Compute recommended actions (execute > plan > discuss)
+  // Skip BACKLOG phases (999.x numbering) — they are parked ideas, not active work
+  const recommendedActions = [];
+  for (const phase of phases) {
+    if (phase.disk_status === 'complete') continue;
+    if (/^999(?:\.|$)/.test(phase.number)) continue;
+
+    if (phase.disk_status === 'planned' && phase.deps_satisfied) {
+      recommendedActions.push({
+        phase: phase.number,
+        phase_name: phase.name,
+        action: 'execute',
+        reason: `${phase.plan_count} plans ready, dependencies met`,
+        command: `${formatGsdSlash('execute-phase', _slashRuntime)} ${phase.number}`,
+      });
+    } else if (phase.disk_status === 'discussed' || phase.disk_status === 'researched') {
+      recommendedActions.push({
+        phase: phase.number,
+        phase_name: phase.name,
+        action: 'plan',
+        reason: 'Context gathered, ready for planning',
+        command: `${formatGsdSlash('plan-phase', _slashRuntime)} ${phase.number}`,
+      });
+    } else if ((phase.disk_status === 'empty' || phase.disk_status === 'no_directory') && phase.is_next_to_discuss) {
+      recommendedActions.push({
+        phase: phase.number,
+        phase_name: phase.name,
+        action: 'discuss',
+        reason: 'Unblocked, ready to gather context',
+        command: `${formatGsdSlash('discuss-phase', _slashRuntime)} ${phase.number}`,
+      });
+    }
+  }
+
+  // Filter recommendations: no parallel execute/plan unless phases are independent
+  // Two phases are "independent" if neither depends on the other (directly or transitively)
+  const phaseMap = new Map(phases.map(p => [p.number, p]));
+
+  function reaches(from, to, visited = new Set()) {
+    if (visited.has(from)) return false;
+    visited.add(from);
+    const p = phaseMap.get(from);
+    if (!p || !p.dep_phases || p.dep_phases.length === 0) return false;
+    if (p.dep_phases.includes(to)) return true;
+    return p.dep_phases.some(dep => reaches(dep, to, visited));
+  }
+
+  function hasDepRelationship(numA, numB) {
+    return reaches(numA, numB) || reaches(numB, numA);
+  }
+
+  // Detect phases with active work (file modified in last 5 min)
+  const activeExecuting = phases.filter(p =>
+    p.disk_status === 'partial' ||
+    (p.disk_status === 'planned' && p.is_active)
+  );
+  const activePlanning = phases.filter(p =>
+    p.is_active && (p.disk_status === 'discussed' || p.disk_status === 'researched')
+  );
+
+  const filteredActions = recommendedActions.filter(action => {
+    if (action.action === 'execute' && activeExecuting.length > 0) {
+      // Only allow if independent of ALL actively-executing phases
+      return activeExecuting.every(active => !hasDepRelationship(action.phase, active.number));
+    }
+    if (action.action === 'plan' && activePlanning.length > 0) {
+      // Only allow if independent of ALL actively-planning phases
+      return activePlanning.every(active => !hasDepRelationship(action.phase, active.number));
+    }
+    return true;
+  });
+
+  // Exclude backlog phases (999.x) from completion accounting (#2129)
+  const nonBacklogPhases = phases.filter(p => !/^999(?:\.|$)/.test(p.number));
+  const completedCount = nonBacklogPhases.filter(p => p.disk_status === 'complete').length;
+
+  // Read manager flags from config (passthrough flags for each step)
+  // Validate: flags must be CLI-safe (only --flags, alphanumeric, hyphens, spaces)
+  const sanitizeFlags = (raw) => {
+    const val = typeof raw === 'string' ? raw : '';
+    if (!val) return '';
+    // Allow only --flag patterns with alphanumeric/hyphen values separated by spaces
+    const tokens = val.split(/\s+/).filter(Boolean);
+    const safe = tokens.every(t => /^--[a-zA-Z0-9][-a-zA-Z0-9]*$/.test(t) || /^[a-zA-Z0-9][-a-zA-Z0-9_.]*$/.test(t));
+    if (!safe) {
+      process.stderr.write(`gsd-tools: warning: manager.flags contains invalid tokens, ignoring: ${val}\n`);
+      return '';
+    }
+    return val;
+  };
+  const managerFlags = {
+    discuss: sanitizeFlags(config.manager && config.manager.flags && config.manager.flags.discuss),
+    plan: sanitizeFlags(config.manager && config.manager.flags && config.manager.flags.plan),
+    execute: sanitizeFlags(config.manager && config.manager.flags && config.manager.flags.execute),
+  };
+
+  const result = {
+    milestone_version: milestone.version,
+    milestone_name: milestone.name,
+    phases,
+    phase_count: phases.length,
+    completed_count: completedCount,
+    in_progress_count: phases.filter(p => ['partial', 'planned', 'discussed', 'researched'].includes(p.disk_status)).length,
+    recommended_actions: filteredActions,
+    waiting_signal: waitingSignal,
+    all_complete: completedCount === nonBacklogPhases.length && nonBacklogPhases.length > 0,
+    project_exists: pathExistsInternal(cwd, '.planning/PROJECT.md'),
+    roadmap_exists: true,
+    state_exists: true,
+    manager_flags: managerFlags,
+  };
+
+  output(withProjectRoot(cwd, result), raw);
+}
+
+function cmdInitProgress(cwd, raw) {
+  try {
+    const { pruneOrphanedWorktrees } = require('./core.cjs');
+    pruneOrphanedWorktrees(cwd);
+  } catch (_) {}
+  const config = loadConfig(cwd);
+  const milestone = getMilestoneInfo(cwd);
+
+  // Analyze phases — filter to current milestone and include ROADMAP-only phases
+  const phasesDir = path.join(planningDir(cwd), 'phases');
+  const phases = [];
+  let currentPhase = null;
+  let nextPhase = null;
+
+  // Build set of phases defined in ROADMAP for the current milestone
+  const roadmapPhaseNums = new Set();
+  const roadmapPhaseNames = new Map();
+  const roadmapCheckboxStates = new Map();
+  try {
+    const roadmapContent = extractCurrentMilestone(
+      fs.readFileSync(path.join(planningDir(cwd), 'ROADMAP.md'), 'utf-8'), cwd
+    );
+    const headingPattern = /#{2,4}\s*Phase\s+(\d+[A-Z]?(?:\.\d+)*)\s*:\s*([^\n]+)/gi;
+    let hm;
+    while ((hm = headingPattern.exec(roadmapContent)) !== null) {
+      roadmapPhaseNums.add(hm[1]);
+      roadmapPhaseNames.set(hm[1], hm[2].replace(/\(INSERTED\)/i, '').trim());
+    }
+    // #2646: parse `- [x] Phase N` checkbox states so ROADMAP-only phases
+    // inherit completion from the ROADMAP when no phase directory exists.
+    const cbPattern = /-\s*\[(x| )\]\s*.*Phase\s+(\d+[A-Z]?(?:\.\d+)*)[:\s]/gi;
+    let cbm;
+    while ((cbm = cbPattern.exec(roadmapContent)) !== null) {
+      roadmapCheckboxStates.set(cbm[2], cbm[1].toLowerCase() === 'x');
+    }
+  } catch { /* intentionally empty */ }
+
+  const isDirInMilestone = getMilestonePhaseFilter(cwd);
+  const seenPhaseNums = new Set();
+
+  try {
+    const entries = fs.readdirSync(phasesDir, { withFileTypes: true });
+    const dirs = entries.filter(e => e.isDirectory()).map(e => e.name)
+      .filter(isDirInMilestone)
+      .sort((a, b) => {
+        const pa = a.match(/^(\d+[A-Z]?(?:\.\d+)*)/i);
+        const pb = b.match(/^(\d+[A-Z]?(?:\.\d+)*)/i);
+        if (!pa || !pb) return a.localeCompare(b);
+        return parseInt(pa[1], 10) - parseInt(pb[1], 10);
+      });
+
+    for (const dir of dirs) {
+      const match = dir.match(/^(\d+[A-Z]?(?:\.\d+)*)-?(.*)/i);
+      const phaseNumber = match ? match[1] : dir;
+      const phaseName = match && match[2] ? match[2] : null;
+      seenPhaseNums.add(phaseNumber.replace(/^0+/, '') || '0');
+
+      const phasePath = path.join(phasesDir, dir);
+      const phaseFiles = fs.readdirSync(phasePath);
+
+      const plans = listPhasePlanFiles(phasePath);
+      const summaries = listPhaseSummaryFiles(phasePath);
+      const hasResearch = phaseFiles.some(f => f.endsWith('-RESEARCH.md') || f === 'RESEARCH.md');
+
+      const status = summaries.length >= plans.length && plans.length > 0 ? 'complete' :
+                     plans.length > 0 ? 'in_progress' :
+                     hasResearch ? 'researched' : 'pending';
+
+      const phaseInfo = {
+        number: phaseNumber,
+        name: phaseName,
+        directory: toPosixPath(path.relative(cwd, path.join(planningDir(cwd), 'phases', dir))),
+        status,
+        plan_count: plans.length,
+        summary_count: summaries.length,
+        has_research: hasResearch,
+      };
+
+      phases.push(phaseInfo);
+
+      // Find current (first incomplete with plans) and next (first pending)
+      if (!currentPhase && (status === 'in_progress' || status === 'researched')) {
+        currentPhase = phaseInfo;
+      }
+      if (!nextPhase && status === 'pending') {
+        nextPhase = phaseInfo;
+      }
+    }
+  } catch { /* intentionally empty */ }
+
+  // Add phases defined in ROADMAP but not yet scaffolded to disk. When the
+  // ROADMAP has a `- [x] Phase N` checkbox, honor it as 'complete' so
+  // completed_count and status reflect the ROADMAP source of truth (#2646).
+  for (const [num, name] of roadmapPhaseNames) {
+    const stripped = num.replace(/^0+/, '') || '0';
+    if (!seenPhaseNums.has(stripped)) {
+      const checkboxComplete =
+        roadmapCheckboxStates.get(num) === true ||
+        roadmapCheckboxStates.get(stripped) === true;
+      const status = checkboxComplete ? 'complete' : 'not_started';
+      const phaseInfo = {
+        number: num,
+        name: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+        directory: null,
+        status,
+        plan_count: 0,
+        summary_count: 0,
+        has_research: false,
+      };
+      phases.push(phaseInfo);
+      if (!nextPhase && !currentPhase && status !== 'complete') {
+        nextPhase = phaseInfo;
+      }
+    }
+  }
+
+  // Re-sort phases by number after adding ROADMAP-only phases
+  phases.sort((a, b) => parseInt(a.number, 10) - parseInt(b.number, 10));
+
+  // Check for paused work
+  let pausedAt = null;
+  const state = platformReadSync(path.join(planningDir(cwd), 'STATE.md'));
+  if (state !== null) {
+    const pauseMatch = state.match(/\*\*Paused At:\*\*\s*(.+)/);
+    if (pauseMatch) pausedAt = pauseMatch[1].trim();
+  }
+
+  const result = {
+    // Models
+    executor_model: resolveModelInternal(cwd, 'gsd-executor'),
+    planner_model: resolveModelInternal(cwd, 'gsd-planner'),
+
+    // Config
+    commit_docs: config.commit_docs,
+
+    // Milestone
+    milestone_version: milestone.version,
+    milestone_name: milestone.name,
+
+    // Phase overview
+    phases,
+    phase_count: phases.length,
+    completed_count: phases.filter(p => p.status === 'complete').length,

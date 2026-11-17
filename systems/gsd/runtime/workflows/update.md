@@ -380,3 +380,265 @@ Exit.
 ## GSD Update Available
 
 **Installed:** 1.5.10
+**Latest:** 1.5.15
+
+### What's New
+────────────────────────────────────────────────────────────
+
+## [1.5.15] - 2026-01-20
+
+### Added
+- Feature X
+
+## [1.5.14] - 2026-01-18
+
+### Fixed
+- Bug fix Y
+
+────────────────────────────────────────────────────────────
+
+⚠️  **Note:** The installer performs a clean install of GSD folders:
+- `commands/gsd/` will be wiped and replaced
+- `get-shit-done/` will be wiped and replaced
+- `agents/gsd-*` files will be replaced
+
+(Paths are relative to detected runtime install location:
+global: `~/.claude/`, `~/.config/opencode/`, `~/.opencode/`, `~/.gemini/`, `~/.config/kilo/`, or `~/.codex/`
+local: `./.claude/`, `./.config/opencode/`, `./.opencode/`, `./.gemini/`, `./.kilo/`, or `./.codex/`)
+
+Your custom files in other locations are preserved:
+- Custom commands not in `commands/gsd/` ✓
+- Custom agents not prefixed with `gsd-` ✓
+- Custom hooks ✓
+- Your CLAUDE.md files ✓
+
+If you've modified any GSD files directly, they'll be automatically backed up to `gsd-local-patches/` and can be reapplied with `/gsd:update --reapply` after the update.
+```
+
+
+**Text mode (`workflow.text_mode: true` in config or `--text` flag):** Set `TEXT_MODE=true` if `--text` is present in `$ARGUMENTS` OR `text_mode` from init JSON is `true`. When TEXT_MODE is active, replace every `AskUserQuestion` call with a plain-text numbered list and ask the user to type their choice number. This is required for non-Claude runtimes (OpenAI Codex, Gemini CLI, etc.) where `AskUserQuestion` is not available.
+Use AskUserQuestion:
+- Question: "Proceed with update?"
+- Options:
+  - "Yes, update now"
+  - "No, cancel"
+
+**If user cancels:** Exit.
+</step>
+
+<step name="backup_custom_files">
+Before running the installer, detect and back up any user-added files inside
+GSD-managed directories. These are files that exist on disk but are NOT listed
+in `gsd-file-manifest.json` — i.e., files the user added themselves that the
+installer does not know about and will delete during the wipe.
+
+**Do not use bash path-stripping (`${filepath#$RUNTIME_DIR/}`) or `node -e require()`
+inline** — those patterns fail when `$RUNTIME_DIR` is unset and the stripped
+relative path may not match manifest key format, which causes CUSTOM_COUNT=0
+even when custom files exist (bug #1997). Use `gsd-sdk query detect-custom-files`
+when `gsd-sdk` is on `PATH`, or the bundled `gsd-tools.cjs detect-custom-files`
+otherwise — both resolve paths reliably with Node.js `path.relative()`.
+
+First, resolve the config directory (`RUNTIME_DIR`) from the install scope
+detected in `get_installed_version`:
+
+```bash
+# RUNTIME_DIR is the resolved config directory (e.g. ~/.config/opencode, ~/.gemini)
+# It should already be set from get_installed_version as GLOBAL_DIR or LOCAL_DIR.
+# Use the appropriate variable based on INSTALL_SCOPE.
+if [ "$INSTALL_SCOPE" = "LOCAL" ]; then
+  RUNTIME_DIR="$LOCAL_DIR"
+elif [ "$INSTALL_SCOPE" = "GLOBAL" ]; then
+  RUNTIME_DIR="$GLOBAL_DIR"
+else
+  RUNTIME_DIR=""
+fi
+```
+
+If `RUNTIME_DIR` is empty or does not exist, skip this step (no config dir to
+inspect).
+
+Otherwise run `detect-custom-files` (prefer SDK when available):
+
+```bash
+GSD_TOOLS="$RUNTIME_DIR/get-shit-done/bin/gsd-tools.cjs"
+CUSTOM_JSON=''
+if [ -n "$RUNTIME_DIR" ] && command -v gsd-sdk >/dev/null 2>&1; then
+  CUSTOM_JSON=$(gsd-sdk query detect-custom-files --config-dir "$RUNTIME_DIR" 2>/dev/null)
+elif [ -f "$GSD_TOOLS" ] && [ -n "$RUNTIME_DIR" ]; then
+  CUSTOM_JSON=$(node "$GSD_TOOLS" detect-custom-files --config-dir "$RUNTIME_DIR" 2>/dev/null)
+fi
+if [ -z "$CUSTOM_JSON" ]; then
+  CUSTOM_JSON='{"custom_files":[],"custom_count":0}'
+fi
+CUSTOM_COUNT=$(echo "$CUSTOM_JSON" | node -e "process.stdin.resume();let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.parse(d).custom_count);}catch{console.log(0);}})" 2>/dev/null || echo "0")
+```
+
+**If `CUSTOM_COUNT` > 0:**
+
+Back up each custom file to `$RUNTIME_DIR/gsd-user-files-backup/` before the
+installer wipes the directories:
+
+```bash
+BACKUP_DIR="$RUNTIME_DIR/gsd-user-files-backup"
+mkdir -p "$BACKUP_DIR"
+
+# Parse custom_files array from CUSTOM_JSON and copy each file
+node - "$RUNTIME_DIR" "$BACKUP_DIR" "$CUSTOM_JSON" <<'JSEOF'
+const [,, runtimeDir, backupDir, customJson] = process.argv;
+const { custom_files } = JSON.parse(customJson);
+const fs = require('fs');
+const path = require('path');
+for (const relPath of custom_files) {
+  const src = path.join(runtimeDir, relPath);
+  const dst = path.join(backupDir, relPath);
+  if (!fs.existsSync(src)) continue;
+
+  try {
+    fs.mkdirSync(path.dirname(dst), { recursive: true });
+    fs.copyFileSync(src, dst);
+    console.log('  Backed up: ' + relPath);
+  } catch (err) {
+    const code = err && err.code ? String(err.code) : 'ERROR';
+    console.log('  Skipped (non-fatal): ' + relPath + ' [' + code + ']');
+  }
+}
+JSEOF
+```
+
+Then inform the user:
+
+```
+⚠️  Found N custom file(s) inside GSD-managed directories.
+    These have been backed up to gsd-user-files-backup/ before the update.
+    Restore them after the update if needed.
+```
+
+**If `CUSTOM_COUNT` == 0:** No user-added files detected. Continue to install.
+</step>
+
+<step name="run_update">
+Run the update using the install type detected in step 1:
+
+Build runtime flag from step 1:
+```bash
+RUNTIME_FLAG="--$TARGET_RUNTIME"
+```
+
+**If LOCAL install:**
+```bash
+npx -y --package=get-shit-done-cc@latest -- get-shit-done-cc "$RUNTIME_FLAG" --local
+```
+
+**If GLOBAL install:**
+```bash
+npx -y --package=get-shit-done-cc@latest -- get-shit-done-cc "$RUNTIME_FLAG" --global
+```
+
+**If UNKNOWN install:**
+```bash
+npx -y --package=get-shit-done-cc@latest -- get-shit-done-cc --claude --global
+```
+
+Capture output. If install fails, show error and exit.
+
+Clear the update cache so statusline indicator disappears:
+
+```bash
+expand_home() {
+  case "$1" in
+    "~/"*) printf '%s/%s\n' "$HOME" "${1#~/}" ;;
+    *) printf '%s\n' "$1" ;;
+  esac
+}
+
+# Clear update cache across preferred, env-derived, and default runtime directories
+CACHE_DIRS=()
+if [ -n "$PREFERRED_CONFIG_DIR" ]; then
+  CACHE_DIRS+=( "$(expand_home "$PREFERRED_CONFIG_DIR")" )
+fi
+if [ -n "$CLAUDE_CONFIG_DIR" ]; then
+  CACHE_DIRS+=( "$(expand_home "$CLAUDE_CONFIG_DIR")" )
+fi
+if [ -n "$GEMINI_CONFIG_DIR" ]; then
+  CACHE_DIRS+=( "$(expand_home "$GEMINI_CONFIG_DIR")" )
+fi
+if [ -n "$KILO_CONFIG_DIR" ]; then
+  CACHE_DIRS+=( "$(expand_home "$KILO_CONFIG_DIR")" )
+elif [ -n "$KILO_CONFIG" ]; then
+  CACHE_DIRS+=( "$(dirname "$(expand_home "$KILO_CONFIG")")" )
+elif [ -n "$XDG_CONFIG_HOME" ]; then
+  CACHE_DIRS+=( "$(expand_home "$XDG_CONFIG_HOME")/kilo" )
+fi
+if [ -n "$OPENCODE_CONFIG_DIR" ]; then
+  CACHE_DIRS+=( "$(expand_home "$OPENCODE_CONFIG_DIR")" )
+elif [ -n "$OPENCODE_CONFIG" ]; then
+  CACHE_DIRS+=( "$(dirname "$(expand_home "$OPENCODE_CONFIG")")" )
+elif [ -n "$XDG_CONFIG_HOME" ]; then
+  CACHE_DIRS+=( "$(expand_home "$XDG_CONFIG_HOME")/opencode" )
+fi
+if [ -n "$CODEX_HOME" ]; then
+  CACHE_DIRS+=( "$(expand_home "$CODEX_HOME")" )
+fi
+
+for dir in "${CACHE_DIRS[@]}"; do
+  if [ -n "$dir" ]; then
+    rm -f "$dir/cache/gsd-update-check.json"
+  fi
+done
+
+for dir in .claude .config/opencode .opencode .gemini/antigravity .gemini .config/kilo .kilo .codex; do
+  rm -f "./$dir/cache/gsd-update-check.json"
+  rm -f "$HOME/$dir/cache/gsd-update-check.json"
+done
+
+# Clear the shared tool-agnostic cache written by gsd-check-update.js hook (#2784).
+# The hook uses ~/.cache/gsd/gsd-update-check.json regardless of runtime; clear it
+# so the statusline stops showing the stale "⬆ /gsd:update" indicator after update.
+rm -f "$HOME/.cache/gsd/gsd-update-check.json"
+```
+
+The SessionStart hook (`gsd-check-update.js`) writes to the detected runtime's cache directory, so preferred/env-derived paths and default paths must all be cleared to prevent stale update indicators.
+</step>
+
+<step name="display_result">
+Format completion message (changelog was already shown in confirmation step):
+
+```
+╔═══════════════════════════════════════════════════════════╗
+║  GSD Updated: v1.5.10 → v1.5.15                           ║
+╚═══════════════════════════════════════════════════════════╝
+
+⚠️  Restart your runtime to pick up the new commands.
+
+[View full changelog](https://github.com/gsd-build/get-shit-done/blob/main/CHANGELOG.md)
+```
+</step>
+
+
+<step name="check_local_patches">
+After update completes, check if the installer detected and backed up any locally modified files:
+
+Check for gsd-local-patches/backup-meta.json in the config directory.
+
+**If patches found:**
+
+```
+Local patches were backed up before the update.
+Run `/gsd:update --reapply` to merge your modifications into the new version.
+```
+
+**If no patches:** Continue normally.
+</step>
+</process>
+
+<success_criteria>
+- [ ] Installed version read correctly
+- [ ] Latest version checked via npm
+- [ ] Update skipped if already current
+- [ ] Changelog fetched and displayed BEFORE update
+- [ ] Clean install warning shown
+- [ ] User confirmation obtained
+- [ ] Update executed successfully
+- [ ] Restart reminder shown
+</success_criteria>

@@ -477,3 +477,136 @@ For each artifact type, run through this checklist:
 - [ ] Exports a function/const component
 - [ ] Returns JSX (not null/empty)
 - [ ] No placeholder text in render
+- [ ] Uses props or state (not static)
+- [ ] Event handlers have real implementations
+- [ ] Imports resolve correctly
+- [ ] Used somewhere in the app
+
+### API Route Checklist
+- [ ] File exists at expected path
+- [ ] Exports HTTP method handlers
+- [ ] Handlers have more than 5 lines
+- [ ] Queries database or service
+- [ ] Returns meaningful response (not empty/placeholder)
+- [ ] Has error handling
+- [ ] Validates input
+- [ ] Called from frontend
+
+### Schema Checklist
+- [ ] Model/table defined
+- [ ] Has all expected fields
+- [ ] Fields have appropriate types
+- [ ] Relationships defined if needed
+- [ ] Migrations exist and applied
+- [ ] Client generated
+
+### Hook/Utility Checklist
+- [ ] File exists at expected path
+- [ ] Exports function
+- [ ] Has meaningful implementation (not empty returns)
+- [ ] Used somewhere in the app
+- [ ] Return values consumed
+
+### Wiring Checklist
+- [ ] Component → API: fetch/axios call exists and uses response
+- [ ] API → Database: query exists and result returned
+- [ ] Form → Handler: onSubmit calls API/mutation
+- [ ] State → Render: state variables appear in JSX
+
+</verification_checklist>
+
+<automated_verification_script>
+
+## Automated Verification Approach
+
+For the verification subagent, use this pattern:
+
+```bash
+# 1. Check existence
+check_exists() {
+  [ -f "$1" ] && echo "EXISTS: $1" || echo "MISSING: $1"
+}
+
+# 2. Check for stub patterns
+check_stubs() {
+  local file="$1"
+  local stubs=$(grep -c -E "TODO|FIXME|placeholder|not implemented" "$file" 2>/dev/null || echo 0)
+  [ "$stubs" -gt 0 ] && echo "STUB_PATTERNS: $stubs in $file"
+}
+
+# 3. Check wiring (component calls API)
+check_wiring() {
+  local component="$1"
+  local api_path="$2"
+  grep -q "$api_path" "$component" && echo "WIRED: $component → $api_path" || echo "NOT_WIRED: $component → $api_path"
+}
+
+# 4. Check substantive (more than N lines, has expected patterns)
+check_substantive() {
+  local file="$1"
+  local min_lines="$2"
+  local pattern="$3"
+  local lines=$(wc -l < "$file" 2>/dev/null || echo 0)
+  local has_pattern=$(grep -c -E "$pattern" "$file" 2>/dev/null || echo 0)
+  [ "$lines" -ge "$min_lines" ] && [ "$has_pattern" -gt 0 ] && echo "SUBSTANTIVE: $file" || echo "THIN: $file ($lines lines, $has_pattern matches)"
+}
+```
+
+Run these checks against each must-have artifact. Aggregate results into VERIFICATION.md.
+
+</automated_verification_script>
+
+<human_verification_triggers>
+
+## When to Require Human Verification
+
+Some things can't be verified programmatically. Flag these for human testing:
+
+**Always human:**
+- Visual appearance (does it look right?)
+- User flow completion (can you actually do the thing?)
+- Real-time behavior (WebSocket, SSE)
+- External service integration (Stripe, email sending)
+- Error message clarity (is the message helpful?)
+- Performance feel (does it feel fast?)
+
+**Human if uncertain:**
+- Complex wiring that grep can't trace
+- Dynamic behavior depending on state
+- Edge cases and error states
+- Mobile responsiveness
+- Accessibility
+
+**Format for human verification request:**
+```markdown
+## Human Verification Required
+
+### 1. Chat message sending
+**Test:** Type a message and click Send
+**Expected:** Message appears in list, input clears
+**Check:** Does message persist after refresh?
+
+### 2. Error handling
+**Test:** Disconnect network, try to send
+**Expected:** Error message appears, message not lost
+**Check:** Can retry after reconnect?
+```
+
+</human_verification_triggers>
+
+<checkpoint_automation_reference>
+
+## Pre-Checkpoint Automation
+
+For automation-first checkpoint patterns, server lifecycle management, CLI installation handling, and error recovery protocols, see:
+
+**@~/.claude/get-shit-done/references/checkpoints.md** → `<automation_reference>` section
+
+Key principles:
+- Claude sets up verification environment BEFORE presenting checkpoints
+- Users never run CLI commands (visit URLs only)
+- Server lifecycle: start before checkpoint, handle port conflicts, keep running for duration
+- CLI installation: auto-install where safe, checkpoint for user choice otherwise
+- Error handling: fix broken environment before checkpoint, never present checkpoint with failed setup
+
+</checkpoint_automation_reference>

@@ -440,3 +440,353 @@ async function main() {
   // CR feedback: the command list must enumerate every top-level command
   // supported by the dispatcher so `--help` is actually useful for
   // discovery; previously it was a partial subset that didn't include
+  // phase / roadmap / milestone / progress / etc.
+  const TOP_LEVEL_USAGE = 'Usage: gsd-tools <command> [args] [--raw] [--pick <field>] [--cwd <path>] [--ws <name>] [--json-errors]\n' +
+    'Commands: agent-skills, audit-open, audit-uat, check-commit, commit, commit-to-subrepo, ' +
+    'config-ensure-section, config-get, config-new-project, config-path, config-set, migrate-config, ' +
+    'current-timestamp, detect-custom-files, docs-init, extract-messages, find-phase, ' +
+    'from-gsd2, frontmatter, gap-analysis, generate-claude-md, generate-claude-profile, ' +
+    'generate-dev-preferences, generate-slug, graphify, history-digest, init, intel, ' +
+    'learnings, list-todos, milestone, phase, phase-plan-index, phases, profile-questionnaire, ' +
+    'profile-sample, progress, prompt-budget, requirements, resolve-model, roadmap, scaffold, state, ' +
+    'template, validate, verify, verify-path-exists, verify-summary, workstream, worktree\n\n' +
+    'Global flags:\n' +
+    '  --raw              Emit raw output without post-processing\n' +
+    '  --pick <field>     Extract a single field from JSON output (dot/bracket notation)\n' +
+    '  --cwd <path>       Override working directory for project-root resolution\n' +
+    '  --ws <name>        Override active workstream (or set GSD_WORKSTREAM)\n' +
+    '  --json-errors      Emit structured JSON error objects on stderr (or set GSD_JSON_ERRORS=1)\n\n' +
+    'For command-specific argument requirements, invoke the command without args ' +
+    '(e.g. `gsd-tools phase add`) — the resulting error lists what is required.';
+
+  if (!command) {
+    error(TOP_LEVEL_USAGE);
+  }
+
+  // #3019: a `--help` / `-h` flag in argv must render the top-level usage
+  // and exit 0 — not error out with "Unknown flag". The previous shape
+  // erred on agent-hallucinated flags, but it also blocked humans from
+  // discovering the command surface via subcommand help requests routed
+  // here from the SDK CLI's query dispatcher (after the cli.ts fix that
+  // stops harvesting --help as a global flag). Rendering top-level usage
+  // on --help is strictly better UX than the old short-circuit, which
+  // printed the SDK-level usage that doesn't mention any of these
+  // subcommands.
+  const HELP_FLAGS = new Set(['-h', '--help', '-?', '--h', '--usage']);
+  if (args.some((a) => HELP_FLAGS.has(a))) {
+    process.stdout.write(TOP_LEVEL_USAGE + '\n');
+    return;
+  }
+
+  // Reject version flags. AI agents sometimes hallucinate --version on tool
+  // invocations; silently ignoring it can cause destructive operations to
+  // proceed unchecked. (Help flags are handled above.)
+  const NEVER_VALID_FLAGS = new Set(['--version', '-v']);
+  for (const arg of args) {
+    if (NEVER_VALID_FLAGS.has(arg)) {
+      error(`Unknown flag: ${arg}\ngsd-tools does not accept version flags. Run "gsd-tools" with no arguments for usage.`, ERROR_REASON.USAGE);
+    }
+  }
+
+  // Multi-repo guard: resolve project root for commands that read/write .planning/.
+  // Skip for pure-utility commands that don't touch .planning/ to avoid unnecessary
+  // filesystem traversal on every invocation.
+  const SKIP_ROOT_RESOLUTION = new Set([
+    'generate-slug', 'current-timestamp', 'verify-path-exists',
+    'verify-summary', 'template', 'frontmatter', 'detect-custom-files',
+    'worktree', 'prompt-budget',
+  ]);
+  if (!SKIP_ROOT_RESOLUTION.has(command)) {
+    cwd = findProjectRoot(cwd);
+  }
+
+  // When --pick is active, intercept stdout to extract the requested field.
+  if (pickField) {
+    const origWriteSync = fs.writeSync;
+    let captured = '';
+    fs.writeSync = function (fd, data, ...rest) {
+      if (fd === 1) {
+        captured += String(data);
+        return;
+      }
+      return origWriteSync.call(fs, fd, data, ...rest);
+    };
+    const cleanup = () => {
+      fs.writeSync = origWriteSync;
+      let jsonStr = captured;
+      if (jsonStr.startsWith('@file:')) {
+        jsonStr = fs.readFileSync(jsonStr.slice(6), 'utf-8');
+      }
+      try {
+        const obj = JSON.parse(jsonStr);
+        const value = extractField(obj, pickField);
+        const result = value === null || value === undefined ? '' : String(value);
+        origWriteSync.call(fs, 1, result);
+      } catch {
+        origWriteSync.call(fs, 1, captured);
+      }
+    };
+    try {
+      await runCommand(command, args, cwd, raw, defaultValue, originalCommand);
+      cleanup();
+    } catch (e) {
+      fs.writeSync = origWriteSync;
+      throw e;
+    }
+    return;
+  }
+
+  // Intercept stdout to transparently resolve @file: references (#1891).
+  // core.cjs output() writes @file:<path> when JSON > 50KB. The --pick path
+  // already resolves this, but the normal path wrote @file: to stdout, forcing
+  // every workflow to have a bash-specific `if [[ "$INIT" == @file:* ]]` check
+  // that breaks on PowerShell and other non-bash shells.
+  const origWriteSync2 = fs.writeSync;
+  let captured = '';
+  fs.writeSync = function (fd, data, ...rest) {
+    if (fd === 1) {
+      captured += String(data);
+      return;
+    }
+    return origWriteSync2.call(fs, fd, data, ...rest);
+  };
+  try {
+    await runCommand(command, args, cwd, raw, defaultValue, originalCommand);
+  } finally {
+    fs.writeSync = origWriteSync2;
+  }
+  if (captured.startsWith('@file:')) {
+    captured = fs.readFileSync(captured.slice(6), 'utf-8');
+  }
+  origWriteSync2.call(fs, 1, captured);
+}
+
+/**
+ * Extract a field from an object using dot-notation and bracket syntax.
+ * Supports: 'field', 'parent.child', 'arr[-1]', 'arr[0]'
+ */
+function extractField(obj, fieldPath) {
+  const parts = fieldPath.split('.');
+  let current = obj;
+  for (const part of parts) {
+    if (current === null || current === undefined) return undefined;
+    const bracketMatch = part.match(/^(.+?)\[(-?\d+)]$/);
+    if (bracketMatch) {
+      const key = bracketMatch[1];
+      const index = parseInt(bracketMatch[2], 10);
+      current = current[key];
+      if (!Array.isArray(current)) return undefined;
+      current = index < 0 ? current[current.length + index] : current[index];
+    } else {
+      current = current[part];
+    }
+  }
+  return current;
+}
+
+async function runCommand(command, args, cwd, raw, defaultValue, originalCommand) {
+  switch (command) {
+    case 'state': {
+      routeStateCommand({
+        state,
+        args,
+        cwd,
+        raw,
+        parseNamedArgs,
+        error,
+      });
+      break;
+    }
+
+    case 'resolve-model': {
+      commands.cmdResolveModel(cwd, args[1], raw);
+      break;
+    }
+
+    case 'find-phase': {
+      // Phase 6 (#3575): dispatch via SDK executeForCjs when available.
+      // SDK handler: findPhase in sdk/src/query/phase.ts.
+      const handled = _dispatchNonFamily({
+        registryCommand: 'find-phase',
+        registryArgs: args.slice(1),
+        legacyCommand: 'find-phase',
+        legacyArgs: args.slice(1),
+        cwd,
+        raw,
+        error,
+        output: core.output,
+      });
+      if (!handled) phase.cmdFindPhase(cwd, args[1], raw);
+      break;
+    }
+
+    case 'commit': {
+      const amend = args.includes('--amend');
+      const noVerify = args.includes('--no-verify');
+      const filesIndex = args.indexOf('--files');
+      // Collect all positional args between command name and first flag,
+      // then join them — handles both quoted ("multi word msg") and
+      // unquoted (multi word msg) invocations from different shells
+      const endIndex = filesIndex !== -1 ? filesIndex : args.length;
+      const messageArgs = args.slice(1, endIndex).filter(a => !a.startsWith('--'));
+      const message = messageArgs.join(' ') || undefined;
+      const files = filesIndex !== -1 ? args.slice(filesIndex + 1).filter(a => !a.startsWith('--')) : [];
+      commands.cmdCommit(cwd, message, files, raw, amend, noVerify);
+      break;
+    }
+
+    case 'check-commit': {
+      commands.cmdCheckCommit(cwd, raw);
+      break;
+    }
+
+    case 'commit-to-subrepo': {
+      const message = args[1];
+      const filesIndex = args.indexOf('--files');
+      const files = filesIndex !== -1 ? args.slice(filesIndex + 1).filter(a => !a.startsWith('--')) : [];
+      commands.cmdCommitToSubrepo(cwd, message, files, raw);
+      break;
+    }
+
+    case 'verify-summary': {
+      const summaryPath = args[1];
+      const countIndex = args.indexOf('--check-count');
+      const checkCount = countIndex !== -1 ? parseInt(args[countIndex + 1], 10) : 2;
+      verify.cmdVerifySummary(cwd, summaryPath, checkCount, raw);
+      break;
+    }
+
+    case 'template': {
+      const subcommand = args[1];
+      if (subcommand === 'select') {
+        template.cmdTemplateSelect(cwd, args[2], raw);
+      } else if (subcommand === 'fill') {
+        const templateType = args[2];
+        const { phase, plan, name, type, wave, fields: fieldsRaw } = parseNamedArgs(args, ['phase', 'plan', 'name', 'type', 'wave', 'fields']);
+        let fields = {};
+        if (fieldsRaw) {
+          const { safeJsonParse } = require('./lib/security.cjs');
+          const result = safeJsonParse(fieldsRaw, { label: '--fields' });
+          if (!result.ok) error(result.error);
+          fields = result.value;
+        }
+        template.cmdTemplateFill(cwd, templateType, {
+          phase, plan, name, fields,
+          type: type || 'execute',
+          wave: wave || '1',
+        }, raw);
+      } else {
+        error('Unknown template subcommand. Available: select, fill', ERROR_REASON.SDK_UNKNOWN_COMMAND);
+      }
+      break;
+    }
+
+    case 'frontmatter': {
+      // Phase 6 (#3575): dispatch via SDK executeForCjs when available.
+      // SDK handler: sdk/src/query/frontmatter.ts + frontmatter-mutation.ts.
+      // CJS fallback: frontmatter.cjs (cooperating sibling).
+      const subcommand = args[1];
+      const file = args[2];
+      const FRONTMATTER_SDK_MAP = {
+        get: 'frontmatter.get',
+        set: 'frontmatter.set',
+        merge: 'frontmatter.merge',
+        validate: 'frontmatter.validate',
+      };
+      if (subcommand in FRONTMATTER_SDK_MAP) {
+        const handled = _dispatchNonFamily({
+          registryCommand: FRONTMATTER_SDK_MAP[subcommand],
+          registryArgs: args.slice(2),
+          legacyCommand: 'frontmatter',
+          legacyArgs: args.slice(1),
+          cwd,
+          raw,
+          error,
+          output: core.output,
+        });
+        if (handled) break;
+      }
+      // CJS fallback (SDK unavailable or unknown subcommand)
+      if (subcommand === 'get') {
+        frontmatter.cmdFrontmatterGet(cwd, file, parseNamedArgs(args, ['field']).field, raw);
+      } else if (subcommand === 'set') {
+        const { field, value } = parseNamedArgs(args, ['field', 'value']);
+        frontmatter.cmdFrontmatterSet(cwd, file, field, value !== null ? value : undefined, raw);
+      } else if (subcommand === 'merge') {
+        frontmatter.cmdFrontmatterMerge(cwd, file, parseNamedArgs(args, ['data']).data, raw);
+      } else if (subcommand === 'validate') {
+        frontmatter.cmdFrontmatterValidate(cwd, file, parseNamedArgs(args, ['schema']).schema, raw);
+      } else {
+        error('Unknown frontmatter subcommand. Available: get, set, merge, validate', ERROR_REASON.SDK_UNKNOWN_COMMAND);
+      }
+      break;
+    }
+
+    case 'verify': {
+      routeVerifyCommand({
+        verify,
+        args,
+        cwd,
+        raw,
+        error,
+      });
+      break;
+    }
+
+    case 'generate-slug': {
+      // Phase 6 (#3575): dispatch via SDK executeForCjs when available.
+      // SDK handler: generateSlug in sdk/src/query/utils.ts.
+      const handled = _dispatchNonFamily({
+        registryCommand: 'generate-slug',
+        registryArgs: args.slice(1),
+        legacyCommand: 'generate-slug',
+        legacyArgs: args.slice(1),
+        cwd,
+        raw,
+        error,
+        output: core.output,
+      });
+      if (!handled) commands.cmdGenerateSlug(args[1], raw);
+      break;
+    }
+
+    case 'current-timestamp': {
+      // Phase 6 (#3575): dispatch via SDK executeForCjs when available.
+      // SDK handler: currentTimestamp in sdk/src/query/utils.ts.
+      const handled = _dispatchNonFamily({
+        registryCommand: 'current-timestamp',
+        registryArgs: args.slice(1),
+        legacyCommand: 'current-timestamp',
+        legacyArgs: args.slice(1),
+        cwd,
+        raw,
+        error,
+        output: core.output,
+      });
+      if (!handled) commands.cmdCurrentTimestamp(args[1] || 'full', raw);
+      break;
+    }
+
+    case 'list-todos': {
+      commands.cmdListTodos(cwd, args[1], raw);
+      break;
+    }
+
+    case 'verify-path-exists': {
+      commands.cmdVerifyPathExists(cwd, args[1], raw);
+      break;
+    }
+
+    case 'config-ensure-section': {
+      // Phase 6 (#3575): dispatch via SDK executeForCjs. The catalog rebinds
+      // 'config-ensure-section' to configNewProject in
+      // sdk/src/query/command-static-catalog-foundation.ts, restoring the
+      // legacy "no-arg full default init" contract on the SDK path
+      // (configEnsureSection itself stays available as an unbound single-
+      // section helper for future SDK callers).
+      const handled = _dispatchNonFamily({
+        registryCommand: 'config-ensure-section',
+        registryArgs: args.slice(1),
+        legacyCommand: 'config-ensure-section',
+        legacyArgs: args.slice(1),
+        cwd,

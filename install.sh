@@ -12,6 +12,10 @@
 #   bash install.sh --adapter codex            # generate AGENTS.md (Codex)
 #   bash install.sh --adapter generic          # generate AGENTS.md (any tool)
 #   bash install.sh --core-only                # core only, no bundles
+#   bash install.sh --packs gsd,si             # core + only these packs (skips picker)
+#   bash install.sh --all                      # core + all packs including reverse-skill
+#   bash install.sh --yes                      # default packs, no prompt
+#   bash install.sh --uninstall --packs gsd    # print removal list and remove pack(s)
 #   bash install.sh --adapter claude-code --systems gsd,brain  # only these bundles
 #   bash install.sh --list                     # list available adapters
 #   bash install.sh --dry-run                  # preview only
@@ -37,6 +41,10 @@ AUTODETECTED=0
 DRY_RUN=""
 JSON_FLAG=""
 SYSTEMS=""
+PACKS=""
+ALL_PACKS=""
+YES_FLAG=""
+UNINSTALL=""
 CORE_ONLY=""
 WORKFLOW=""
 WORKFLOW_ONLY=""
@@ -64,7 +72,7 @@ list_adapters() {
 }
 
 detect_adapter() {
-  if [[ -n "${CLAUDECODE:-}" || -d "$HOME/.claude/skills" ]]; then
+  if [[ -n "${CLAUDECODE:-}" || -d "${CLAUDE_HOME:-$HOME/.claude}/skills" || -f "${CLAUDE_HOME:-$HOME/.claude}/.coco/manifest.jsonl" ]]; then
     echo "claude-code"
   elif [[ -d "$HOME/.pi/agent" || -d "$HOME/.agents" ]]; then
     echo "pi-desktop"
@@ -85,6 +93,11 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --adapter) shift; ADAPTER=$1 ;;
     --systems) shift; SYSTEMS=$1 ;;
+    --packs) shift; PACKS="${1:-}"; [[ -n "$PACKS" ]] || { echo "--packs requires a value" >&2; exit 1; } ;;
+    --packs=*) PACKS="${1#--packs=}" ;;
+    --all) ALL_PACKS=1 ;;
+    --yes|-y) YES_FLAG=1 ;;
+    --uninstall) UNINSTALL=1 ;;
     --core-only) CORE_ONLY=1 ;;
     --workflow) WORKFLOW=1 ;;
     --workflow-only) WORKFLOW_ONLY=1 ;;
@@ -121,9 +134,34 @@ if [[ -n "$WORKFLOW_ONLY" && "$ADAPTER" != "claude-code" ]]; then
   echo "--workflow-only is only available with --adapter claude-code" >&2
   exit 1
 fi
-if [[ -n "$WORKFLOW_ONLY" && ( -n "$CORE_ONLY" || -n "$SYSTEMS" ) ]]; then
-  echo "--workflow-only cannot be combined with --systems or --core-only" >&2
+if [[ -n "$WORKFLOW_ONLY" && ( -n "$CORE_ONLY" || -n "$SYSTEMS" || -n "$PACKS" || -n "$ALL_PACKS" ) ]]; then
+  echo "--workflow-only cannot be combined with --systems, --packs, --all or --core-only" >&2
   exit 1
+fi
+
+if [[ -n "$UNINSTALL" ]]; then
+  UARGS=(--uninstall)
+  [[ -n "$DRY_RUN" ]] && UARGS+=("$DRY_RUN")
+  [[ -n "$JSON_FLAG" ]] && UARGS+=("$JSON_FLAG")
+  [[ -n "$WORKFLOW_ONLY" ]] && UARGS+=(--workflow-only)
+  [[ -n "$PACKS" ]] && UARGS+=(--packs "$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --resolve-uninstall "$PACKS")")
+  exec bash "$ADAPTER_DIR/install.sh" "${UARGS[@]}"
+fi
+
+if [[ -z "$WORKFLOW_ONLY" ]]; then
+  if [[ -n "$PACKS" ]]; then
+    RESOLVED_PACKS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --resolve-install "$PACKS")"
+    if [[ "$RESOLVED_PACKS" == "--core-only" ]]; then CORE_ONLY=1; else SYSTEMS="$RESOLVED_PACKS"; fi
+  elif [[ -n "$ALL_PACKS" ]]; then
+    SYSTEMS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --all-bundles)"
+  elif [[ -z "$CORE_ONLY" && -z "$SYSTEMS" && -z "$YES_FLAG" && -z "$JSON_FLAG" && -t 0 && -t 1 ]]; then
+    printf '%s' "$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --picker-line)"
+    IFS= read -r PICKER_REPLY || { echo "" >&2; echo "Cancelled." >&2; exit 1; }
+    case "${PICKER_REPLY%$'\r'}" in
+      ""|[yY]|[yY][eE][sS]) ;;
+      *) echo "Cancelled." >&2; exit 1 ;;
+    esac
+  fi
 fi
 
 # The default bundle set is offered only to adapters that advertise support for the flag.

@@ -19,10 +19,11 @@ from claude_install_apply import InstallError, dumps, inside, sha256_file
 
 
 class Uninstaller(Installer):
-    def __init__(self, repo, target, dry, as_json, workflow_only=False):
+    def __init__(self, repo, target, dry, as_json, workflow_only=False, packs=None):
         super().__init__(repo, target, [], dry, as_json)
         # After super(): an uninstall reports no workflow info, it only narrows the rows.
         self.workflow_only = workflow_only
+        self.packs = [p for p in (packs or ()) if p]
         self.summary_ops = ("remove", "skip")
         self.path_ops = ("remove",)
         self.content = []
@@ -44,6 +45,9 @@ class Uninstaller(Installer):
             if self.workflow_only:
                 self.run_workflow_only(rows)
                 return
+            if self.packs:
+                self.run_packs(rows)
+                return
             if not rows:
                 self.nothing()
                 return
@@ -53,6 +57,58 @@ class Uninstaller(Installer):
             self.execute_uninstall()
         finally:
             self.cleanup()
+    def pack_of_row(self, rec):
+        path = rec.get("path", "")
+        if self.is_workflow_path(path) or self.scaffold_row(rec):
+            return None
+        op = rec.get("op")
+        if op == "link":
+            src = os.path.normpath(rec.get("source") or "")
+            for root in (self.repo, self.repo_real):
+                sys_root = os.path.join(root, "systems")
+                if inside(src, sys_root) and src != sys_root:
+                    return os.path.relpath(src, sys_root).split(os.sep)[0]
+            parts = src.split(os.sep)
+            for i in range(len(parts) - 2, 0, -1):
+                if parts[i] == "systems":
+                    return parts[i + 1]
+            return "core"
+        if op == "write" and rec.get("kind") == "generated":
+            base = os.path.basename(path)
+            if os.path.dirname(path) == os.path.join(self.home, "commands") and (
+                base == "SI.md" or (base.startswith("SI-") and base.endswith(".md"))
+            ):
+                return "superintelligence"
+            return "core"
+        if op == "block":
+            return "core"
+        return None
+    def run_packs(self, rows):
+        want = set(self.packs)
+        doomed = [rec for rec in rows if self.pack_of_row(rec) in want]
+        if not doomed:
+            self.nothing("pack not installed")
+            return
+        doomed_paths = {rec["path"] for rec in doomed}
+        baks = {rec["backup"] for rec in doomed if isinstance(rec.get("backup"), str)}
+        for rec in rows:
+            if rec["path"] in baks and rec["path"] not in doomed_paths:
+                doomed.append(rec)
+                doomed_paths.add(rec["path"])
+        rest = [rec for rec in rows if rec["path"] not in doomed_paths]
+        if all(self.scaffold_row(rec) for rec in rest):
+            self.guard_rows(rows)
+            self.decide(rows)
+        else:
+            dirs = [rec for rec in rows if rec.get("op") == "write"
+                    and rec.get("kind") == "dir" and not self.is_late(rec["path"])]
+            self.guard_rows(doomed + dirs)
+            self.decide(doomed + dirs, subset=True)
+            self.rewrite_rows = self.remaining_manifest(doomed_paths | self.gone)
+        self.guard_actions()
+        for path in sorted(self.gone):
+            self.say("Remove: %s" % path)
+        self.execute_uninstall()
     def nothing(self, why="no manifest"):
         self.records = []
         self.say("nothing to uninstall (%s)" % why)
@@ -87,8 +143,8 @@ class Uninstaller(Installer):
         except (UnicodeDecodeError, ValueError):
             return None
         return obj if isinstance(obj, dict) else None
-    def remaining_manifest(self):
-        """The manifest without its workflow rows: other lines kept, summary recomputed."""
+    def remaining_manifest(self, drop_paths=None):
+        """The manifest without dropped rows: other lines kept, summary recomputed."""
         lines = []
         old = {}
         path = self.manifest_path
@@ -102,7 +158,9 @@ class Uninstaller(Installer):
                 old = obj["summary"]
                 continue
             rec = self.accept(line)
-            if rec is not None and self.is_workflow_path(rec["path"]):
+            if rec is not None and (
+                rec["path"] in drop_paths if drop_paths is not None else self.is_workflow_path(rec["path"])
+            ):
                 continue
             lines.append(line if line.endswith(b"\n") else line + b"\n")
         counts = {op: 0 for op in ("link", "write", "block", "skip")}
@@ -116,7 +174,8 @@ class Uninstaller(Installer):
             else:
                 counts[rec["op"]] = counts.get(rec["op"], 0) + 1
         summary = dict(old)
-        summary.pop("workflow", None)
+        if drop_paths is None:
+            summary.pop("workflow", None)
         summary.setdefault("adapter", "claude-code")
         summary.setdefault("version", self.version)
         summary.setdefault("commit", self.commit)

@@ -253,3 +253,33 @@ get-shit-done/
 - Naming conventions
 - Where to add new code (by type)
 - Special/generated directories
+
+**What does NOT belong here:**
+- Conceptual architecture (that's ARCHITECTURE.md)
+- Technology stack (that's STACK.md)
+- Code implementation details (defer to code reading)
+- Every single file (focus on directories and key files)
+
+**When filling this template:**
+- Use `tree -L 2` or similar to visualize structure
+- Identify top-level directories and their purposes
+- Note naming patterns by observing existing files
+- Locate entry points, configs, and main logic areas
+- Keep directory tree concise (max 2-3 levels)
+
+**Tree format (ASCII box-drawing characters for structure only):**
+```
+root/
+├── dir1/           # Purpose
+│   ├── subdir/    # Purpose
+│   └── file.ts    # Purpose
+├── dir2/          # Purpose
+└── file.ts        # Purpose
+```
+
+**Useful for phase planning when:**
+- Adding new features (where should files go?)
+- Understanding project organization
+- Finding where specific logic lives
+- Following existing conventions
+</guidelines>

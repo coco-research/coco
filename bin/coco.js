@@ -98,6 +98,7 @@ Usage:
   npx cocosuperintelligence uninstall [dir]   remove symlinks + clone
   npx cocosuperintelligence mcp               run read-only stdio MCP server
   npx cocosuperintelligence version           show version + check for updates
+  npx cocosuperintelligence suggest-skills    suggest repeated local workflows
   npx cocosuperintelligence --help            this message
 
 Update checks contact only github.com (no telemetry); disable with COCO_NO_UPDATE_CHECK=1.
@@ -616,6 +617,13 @@ function main() {
   const rest = argv.slice(1);
 
   switch (sub) {
+    case 'suggest-skills': {
+      const result = spawnSync('python3', ['-B', path.join(__dirname, '..',
+        'systems', 'learning', 'scripts', 'suggest_skills.py'), ...rest], { stdio: 'inherit' });
+      if (result.error) console.error(`Cannot run skill suggestions: ${result.error.message}`);
+      process.exitCode = result.status === null ? 1 : result.status;
+      break;
+    }
     case '--help':
     case '-h':
     case 'help':

@@ -75,3 +75,49 @@ This creates `MyApp.xcodeproj` in the project root. Commit `project.yml` but add
 ```
 MyApp/
 ├── project.yml              # XcodeGen spec — commit this
+├── .gitignore               # includes *.xcodeproj
+├── Sources/
+│   └── MyApp/
+│       ├── MyAppApp.swift   # @main entry point
+│       ├── ContentView.swift
+│       └── Info.plist
+└── Tests/
+    └── MyAppTests/
+        └── MyAppTests.swift
+```
+
+---
+
+## iOS Deployment Target Compatibility
+
+Always verify SwiftUI API availability against the project's `IPHONEOS_DEPLOYMENT_TARGET` before using any SwiftUI component.
+
+| API | Minimum iOS |
+|-----|-------------|
+| `NavigationView` | iOS 13 |
+| `NavigationStack` | iOS 16 |
+| `NavigationSplitView` | iOS 16 |
+| `List(selection:)` with multi-select | iOS 17 |
+| `ScrollView` scroll position APIs | iOS 17 |
+| `Observable` macro (`@Observable`) | iOS 17 |
+| `SwiftData` | iOS 17 |
+| `@Bindable` | iOS 17 |
+| `TipKit` | iOS 17 |
+
+**Rule:** If a plan requires a SwiftUI API that exceeds the project's deployment target, either:
+1. Raise the deployment target in `project.yml` (and document the decision), or
+2. Wrap the call in `if #available(iOS NN, *) { ... }` with a fallback implementation.
+
+Do NOT silently use an API that requires a higher iOS version than the declared deployment target — the app will crash at runtime on older devices.
+
+---
+
+## Verification
+
+After running `xcodegen generate`, verify the project builds:
+
+```bash
+xcodebuild -project MyApp.xcodeproj -scheme MyApp -destination 'platform=iOS Simulator,name=iPhone 16' build
+```
+
+A successful build (exit code 0) confirms the scaffold is valid for iOS.

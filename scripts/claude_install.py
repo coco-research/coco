@@ -632,6 +632,17 @@ class Installer(ApplyMixin):
         if not os.path.isdir(sys_dir):
             self.die("Unknown system: %s" % sys)
         self.bundles.append(sys)
+        if sys == "gsd":
+            runtime = os.path.join(sys_dir, "runtime")
+            if not os.path.isdir(runtime):
+                self.die("GSD runtime is missing from this checkout")
+            dst = os.path.join(self.home, "get-shit-done")
+            if os.path.lexists(dst) and not (os.path.islink(dst) and self.link_is_ours(dst)):
+                message = "kept your get-shit-done; Coco's copy not linked"
+                self.add_skip(dst, message)
+                self.ops.append(("skip", dst, message))
+            else:
+                self.plan_link(runtime + os.sep, dst)
         self.plan_skills(os.path.join(sys_dir, "skills"), "skills", "skill-always")
         for name in self.child_dirs(sys_dir):
             team = os.path.join(sys_dir, name)

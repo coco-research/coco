@@ -65,6 +65,11 @@ git clone https://github.com/coco-research/coco.git ~/coco && bash ~/coco/instal
 
 Adapter flags and bundle selection: [`docs/install.md`](docs/install.md).
 
+After installation, `coco suggest-skills` reads repeated workflows from the local
+learning store and prints up to three suggestions from the past week. Use
+`coco suggest-skills --draft` to write reviewable `SKILL.md` stubs in a new temporary
+folder. It makes no network or model calls and does not install the suggestions.
+
 ## What it does
 
 - Get one clear pick on a hard call, with the disagreement named and each stance cited.
@@ -106,7 +111,7 @@ Any MCP client can connect to Coco over stdio without extra dependencies (see [`
 
 Measured on main, a default Claude Code install delivers 191 of the 229 skills (the rest are the opt-in security pack and Cursor-only skills), 388 commands and 34 agents ([`docs/delivered-counts.json`](docs/delivered-counts.json)).
 
-Known gap: most GSD skills need the upstream GSD toolkit at `~/.claude/get-shit-done` (see [`systems/gsd/README.md`](systems/gsd/README.md)).
+GSD ships its pinned upstream toolkit. The Claude Code installer links it at `~/.claude/get-shit-done` and preserves an existing user installation (see [`systems/gsd/README.md`](systems/gsd/README.md)).
 
 <details>
 <summary><strong>Other install paths, updates, uninstall</strong></summary>
@@ -204,7 +209,7 @@ CoCo ships **229 skills** (77 core + 152 across bundles)[^installed]. Each one i
 
 Six bundles install by default. `--core-only` skips them. `--systems <list>` installs an explicit subset. `reverse-skill` is not one of the six: it vendors reverse-engineering and penetration-testing methodology under [`systems/reverse-skill/`](systems/reverse-skill/) and installs only with `--systems reverse-skill`. See [`systems/reverse-skill/README.md`](systems/reverse-skill/README.md).
 
-1. **GSD.** An orchestration engine of **68 skills and 24 agents** for phased work on a large codebase. Most GSD skills also need the upstream GSD toolkit at `~/.claude/get-shit-done/`, which this installer does not yet provide; see [`systems/gsd/README.md`](systems/gsd/README.md). Phase state lives in `.planning/`. Workstreams are isolated git checkouts.
+1. **GSD.** An orchestration engine of **68 skills and 24 agents** for phased work on a large codebase. The pinned upstream toolkit is bundled and linked by the Claude Code installer without replacing a user installation; see [`systems/gsd/README.md`](systems/gsd/README.md). Phase state lives in `.planning/`. Workstreams are isolated git checkouts.
 2. **Brain.** A local knowledge-graph engine of **6 skills**. SQLite indexes code entities, decisions, and project terms. The wiki generator writes a page per entity.
 3. **Super Intelligence.** The **495-persona advisory board** and its **342 generated `/SI-*` commands** across 13 teams. This is the board [above](#the-board).
 4. **HyperFrames.** **20 skills** for video and motion, vendored from HeyGen's `hyperframes` under Apache-2.0.

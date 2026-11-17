@@ -1181,3 +1181,257 @@ function cmdValidateHealth(cwd, options, raw) {
     warnings,
     info,
     repairable_count: repairableCount,
+    repairs_performed: repairActions.length > 0 ? repairActions : undefined,
+  };
+  output(result, raw);
+  return result;
+}
+
+/**
+ * Validate agent installation status (#1371).
+ * Returns detailed information about which agents are installed and which are missing.
+ */
+function cmdValidateAgents(cwd, raw) {
+  const { MODEL_PROFILES } = require('./model-profiles.cjs');
+  const agentStatus = checkAgentsInstalled();
+  const expected = Object.keys(MODEL_PROFILES);
+
+  output({
+    agents_dir: agentStatus.agents_dir,
+    agents_found: agentStatus.agents_installed,
+    installed: agentStatus.installed_agents,
+    missing: agentStatus.missing_agents,
+    expected,
+  }, raw);
+}
+
+// ─── Schema Drift Detection ──────────────────────────────────────────────────
+
+function cmdVerifySchemaDrift(cwd, phaseArg, skipFlag, raw) {
+  const { detectSchemaFiles, checkSchemaDrift } = require('./schema-detect.cjs');
+
+  if (!phaseArg) {
+    error('Usage: verify schema-drift <phase> [--skip]');
+    return;
+  }
+
+  // Find phase directory
+  const pDir = planningDir(cwd);
+  const phasesDir = path.join(pDir, 'phases');
+  if (!fs.existsSync(phasesDir)) {
+    output({ drift_detected: false, blocking: false, message: 'No phases directory' }, raw);
+    return;
+  }
+
+  // Find matching phase directory
+  let phaseDir = null;
+  const entries = fs.readdirSync(phasesDir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.isDirectory() && entry.name.includes(phaseArg)) {
+      phaseDir = path.join(phasesDir, entry.name);
+      break;
+    }
+  }
+
+  // Also try exact match
+  if (!phaseDir) {
+    const exact = path.join(phasesDir, phaseArg);
+    if (fs.existsSync(exact)) phaseDir = exact;
+  }
+
+  if (!phaseDir) {
+    output({ drift_detected: false, blocking: false, message: `Phase directory not found: ${phaseArg}` }, raw);
+    return;
+  }
+
+  // Collect files_modified from all PLAN.md files in the phase
+  const allFiles = [];
+  const planFiles = fs.readdirSync(phaseDir).filter(f => f.endsWith('-PLAN.md'));
+  for (const pf of planFiles) {
+    const content = fs.readFileSync(path.join(phaseDir, pf), 'utf-8');
+    // Extract files_modified from frontmatter
+    const fmMatch = content.match(/files_modified:\s*\[([^\]]*)\]/);
+    if (fmMatch) {
+      const files = fmMatch[1].split(',').map(f => f.trim()).filter(Boolean);
+      allFiles.push(...files);
+    }
+  }
+
+  // Collect execution log from SUMMARY.md files
+  let executionLog = '';
+  const summaryFiles = fs.readdirSync(phaseDir).filter(f => f.endsWith('-SUMMARY.md'));
+  for (const sf of summaryFiles) {
+    executionLog += fs.readFileSync(path.join(phaseDir, sf), 'utf-8') + '\n';
+  }
+
+  // Also check git commit messages for push evidence
+  const gitLog = execGit(['log', '--oneline', '--all', '-50'], { cwd });
+  if (gitLog.exitCode === 0) {
+    executionLog += '\n' + gitLog.stdout;
+  }
+
+  const result = checkSchemaDrift(allFiles, executionLog, { skipCheck: !!skipFlag });
+
+  output({
+    drift_detected: result.driftDetected,
+    blocking: result.blocking,
+    schema_files: result.schemaFiles,
+    orms: result.orms,
+    unpushed_orms: result.unpushedOrms,
+    message: result.message,
+    skipped: result.skipped || false,
+  }, raw);
+}
+
+// ─── Codebase Drift Detection (#2003) ────────────────────────────────────────
+
+/**
+ * Detect structural drift between the committed tree and
+ * `.planning/codebase/STRUCTURE.md`. Non-blocking: any failure returns a
+ * `{ skipped: true }` JSON result with a reason; the command never exits
+ * non-zero so `execute-phase`'s drift gate cannot fail the phase.
+ */
+function cmdVerifyCodebaseDrift(cwd, raw) {
+  const drift = require('./drift.cjs');
+
+  const emit = (payload) => output(payload, raw);
+
+  try {
+    const codebaseDir = path.join(planningDir(cwd), 'codebase');
+    const structurePath = path.join(codebaseDir, 'STRUCTURE.md');
+    if (!fs.existsSync(structurePath)) {
+      emit({
+        skipped: true,
+        reason: 'no-structure-md',
+        action_required: false,
+        directive: 'none',
+        elements: [],
+      });
+      return;
+    }
+
+    let structureMd;
+    try {
+      structureMd = fs.readFileSync(structurePath, 'utf-8');
+    } catch (err) {
+      emit({
+        skipped: true,
+        reason: 'cannot-read-structure-md: ' + err.message,
+        action_required: false,
+        directive: 'none',
+        elements: [],
+      });
+      return;
+    }
+
+    const lastMapped = drift.readMappedCommit(structurePath);
+
+    // Verify we're inside a git repo and resolve the diff range.
+    const revProbe = execGit(['rev-parse', 'HEAD'], { cwd });
+    if (revProbe.exitCode !== 0) {
+      emit({
+        skipped: true,
+        reason: 'not-a-git-repo',
+        action_required: false,
+        directive: 'none',
+        elements: [],
+      });
+      return;
+    }
+
+    // Empty-tree SHA is a stable fallback when no mapping commit is recorded.
+    const EMPTY_TREE = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
+    let base = lastMapped;
+    if (!base) {
+      base = EMPTY_TREE;
+    } else {
+      // Verify the commit is reachable; if not, fall back to EMPTY_TREE.
+      const verify = execGit(['cat-file', '-t', base], { cwd });
+      if (verify.exitCode !== 0) base = EMPTY_TREE;
+    }
+
+    const diff = execGit(['diff', '--name-status', base, 'HEAD'], { cwd });
+    if (diff.exitCode !== 0) {
+      emit({
+        skipped: true,
+        reason: 'git-diff-failed',
+        action_required: false,
+        directive: 'none',
+        elements: [],
+      });
+      return;
+    }
+
+    const added = [];
+    const modified = [];
+    const deleted = [];
+    for (const line of diff.stdout.split(/\r?\n/)) {
+      if (!line.trim()) continue;
+      const m = line.match(/^([A-Z])\d*\t(.+?)(?:\t(.+))?$/);
+      if (!m) continue;
+      const status = m[1];
+      // For renames (R), use the new path (m[3] if present, else m[2]).
+      const file = m[3] || m[2];
+      if (status === 'A' || status === 'R' || status === 'C') added.push(file);
+      else if (status === 'M') modified.push(file);
+      else if (status === 'D') deleted.push(file);
+    }
+
+    // Threshold and action read from config, with defaults.
+    const config = loadConfig(cwd);
+    const threshold = Number.isInteger(config?.workflow?.drift_threshold) && config.workflow.drift_threshold >= 1
+      ? config.workflow.drift_threshold
+      : 3;
+    const action = config?.workflow?.drift_action === 'auto-remap' ? 'auto-remap' : 'warn';
+
+    const result = drift.detectDrift({
+      addedFiles: added,
+      modifiedFiles: modified,
+      deletedFiles: deleted,
+      structureMd,
+      threshold,
+      action,
+      // #3584: keep drift.cjs a pure library — resolve the runtime here and
+      // pass the literal name in so drift never touches env/config itself.
+      runtime: resolveRuntime(cwd),
+    });
+
+    emit({
+      skipped: !!result.skipped,
+      reason: result.reason || null,
+      action_required: !!result.actionRequired,
+      directive: result.directive,
+      spawn_mapper: !!result.spawnMapper,
+      affected_paths: result.affectedPaths || [],
+      elements: result.elements || [],
+      threshold,
+      action,
+      last_mapped_commit: lastMapped,
+      message: result.message || '',
+    });
+  } catch (err) {
+    // Non-blocking: never bubble up an exception.
+    emit({
+      skipped: true,
+      reason: 'exception: ' + (err && err.message ? err.message : String(err)),
+      action_required: false,
+      directive: 'none',
+      elements: [],
+    });
+  }
+}
+
+module.exports = {
+  cmdVerifySummary,
+  cmdVerifyPlanStructure,
+  cmdVerifyPhaseCompleteness,
+  cmdVerifyReferences,
+  cmdVerifyCommits,
+  cmdVerifyArtifacts,
+  cmdVerifyKeyLinks,
+  cmdValidateConsistency,
+  cmdValidateHealth,
+  cmdValidateAgents,
+  cmdVerifySchemaDrift,
+  cmdVerifyCodebaseDrift,
+};

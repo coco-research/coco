@@ -3,13 +3,13 @@
   "generated_at": "2026-09-04",
   "team_id": "education-edtech-super-intelligence",
   "team_name": "Education & EdTech Super Intelligence Team",
-  "description": "Your education and edtech brain trust. 25 named personas across 7 cells covering learning science, curriculum design, AI tutoring, higher-ed strategy, edtech platforms, assessment, and workforce development.",
+  "description": "Learning science, cognitive psychology of memory, spaced retrieval and long-term retention, classroom pedagogy, curriculum design, student quizzes and mastery rubrics, adaptive tutoring software, learner accessibility, school pilots, higher-education strategy, and workforce upskilling.",
   "personas_count": 25,
   "cells_count": 7,
   "cells": {
     "ai-tutoring-adaptive": {
       "id": "ai-tutoring-adaptive",
-      "description": "Education & EdTech Super Intelligence Team cell: Ai Tutoring Adaptive",
+      "description": "Adaptive tutoring software, personalized practice schedules, scaffolding, and formative feedback.",
       "personas_count": 2,
       "personas": [
         "rose-luckin",
@@ -19,7 +19,7 @@
     },
     "assessment-evaluation": {
       "id": "assessment-evaluation",
-      "description": "Education & EdTech Super Intelligence Team cell: Assessment Evaluation",
+      "description": "Quizzes, exams, conceptual understanding versus memorization, mastery rubrics, and fair student assessment.",
       "personas_count": 3,
       "personas": [
         "dylan-wiliam",
@@ -30,7 +30,7 @@
     },
     "curriculum-instructional-design": {
       "id": "curriculum-instructional-design",
-      "description": "Education & EdTech Super Intelligence Team cell: Curriculum Instructional Design",
+      "description": "Curriculum architecture, conceptual transfer, backwards design, and project-based learning.",
       "personas_count": 3,
       "personas": [
         "grant-wiggins",
@@ -41,7 +41,7 @@
     },
     "edtech-product-platform": {
       "id": "edtech-product-platform",
-      "description": "Education & EdTech Super Intelligence Team cell: Edtech Product Platform",
+      "description": "Digital learning platforms, classroom pilots, teacher workload, and accessible assistive tools.",
       "personas_count": 4,
       "personas": [
         "andrew-ng",
@@ -53,7 +53,7 @@
     },
     "institutional-higher-ed-strategy": {
       "id": "institutional-higher-ed-strategy",
-      "description": "Education & EdTech Super Intelligence Team cell: Institutional Higher Ed Strategy",
+      "description": "School and university strategy, institutional adoption, educational equity, and academic reform.",
       "personas_count": 5,
       "personas": [
         "bryan-alexander",
@@ -66,7 +66,7 @@
     },
     "learning-science-pedagogy": {
       "id": "learning-science-pedagogy",
-      "description": "Education & EdTech Super Intelligence Team cell: Learning Science Pedagogy",
+      "description": "Cognitive load, spaced retrieval practice, memory retention, study strategies, and instructional science.",
       "personas_count": 5,
       "personas": [
         "david-perkins",
@@ -79,7 +79,7 @@
     },
     "workforce-development-skills": {
       "id": "workforce-development-skills",
-      "description": "Education & EdTech Super Intelligence Team cell: Workforce Development Skills",
+      "description": "Career pathways, competency credentials, and workforce reskilling.",
       "personas_count": 3,
       "personas": [
         "anthony-carnevale",

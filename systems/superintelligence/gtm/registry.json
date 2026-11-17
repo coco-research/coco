@@ -3,7 +3,7 @@
   "generated_at": "2026-09-03",
   "team_id": "gtm-super-intelligence",
   "team_name": "Sales, GTM & Marketing Super Intelligence Team",
-  "description": "Sales, GTM & Marketing Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md.",
+  "description": "Go-to-market execution, demand generation, launch campaigns, ICP definition, inbound lead qualification, outbound sales discovery calls, buyer messaging and positioning statements, lifecycle email sequences, paid versus referral acquisition, reseller enablement, SaaS pricing, and customer retention.",
   "native_personas_count": 23,
   "cross_listed_count": 3,
   "personas_count": 26,
@@ -11,7 +11,7 @@
   "cells": {
     "category-design-positioning": {
       "id": "category-design-positioning",
-      "description": "Category creation, positioning, market framing, crossing the chasm.",
+      "description": "Category design, positioning statements, differentiation messaging, and buyer-outcome framing.",
       "personas_count": 4,
       "personas": [
         "al-ramadan",
@@ -23,7 +23,7 @@
     },
     "demand-gen-content-marketing": {
       "id": "demand-gen-content-marketing",
-      "description": "Demand generation, content, SEO, audience building, inbound.",
+      "description": "Launch campaigns, SEO, content marketing, inbound lead qualification, and acquisition channels.",
       "personas_count": 4,
       "personas": [
         "ann-handley",
@@ -35,7 +35,7 @@
     },
     "sales-methodology-negotiation": {
       "id": "sales-methodology-negotiation",
-      "description": "Sales process, methodology, enablement, negotiation.",
+      "description": "Outbound sales, discovery calls, buyer qualification, enterprise deals, and reseller partner enablement.",
       "personas_count": 6,
       "personas": [
         "aaron-ross",
@@ -49,7 +49,7 @@
     },
     "product-led-growth": {
       "id": "product-led-growth",
-      "description": "PLG, self-serve, freemium, product-as-the-go-to-market.",
+      "description": "Free-trial activation, lifecycle email sequences, referral incentives, and self-serve conversion.",
       "personas_count": 3,
       "personas": [
         "blake-bartlett",
@@ -60,7 +60,7 @@
     },
     "brand-strategy": {
       "id": "brand-strategy",
-      "description": "Brand building, distinctiveness, marketing effectiveness science.",
+      "description": "Brand salience, distinctive assets, creative campaigns, and market reach.",
       "personas_count": 4,
       "personas": [
         "bob-hoffman",
@@ -72,7 +72,7 @@
     },
     "pricing-monetization": {
       "id": "pricing-monetization",
-      "description": "Pricing strategy, packaging, monetization, willingness-to-pay.",
+      "description": "SaaS packaging, price tiers, willingness-to-pay, and monetization.",
       "personas_count": 3,
       "personas": [
         "hermann-simon",
@@ -83,7 +83,7 @@
     },
     "customer-success-retention": {
       "id": "customer-success-retention",
-      "description": "Post-sale expansion, retention, net revenue retention, CS as a discipline.",
+      "description": "Customer onboarding, account expansion, net revenue retention, and renewal playbooks.",
       "personas_count": 2,
       "personas": [
         "lincoln-murphy",

@@ -3,13 +3,13 @@
   "generated_at": "2026-09-03",
   "team_id": "product-design-super-intelligence",
   "team_name": "Product & Design Super Intelligence Team",
-  "description": "Your product + design brain trust and decision partner. Named personas across 8 cells spanning product strategy, discovery/research, growth/metrics, design foundations/usability, design leadership/craft, UX/content, design systems, and a product×design bridge. One merged team that convenes both lenses; pure-discipline input via /SI-PD-Huddle or --cells. Invoked by /SI-PD slash commands.",
+  "description": "User interface and UX design, signup and checkout usability, interaction hierarchy, information architecture, typography and layout spacing, color contrast and keyboard accessibility, accessible interactions, user prototypes, usability studies, onboarding UX, error microcopy, and design-system UI states.",
   "personas_count": 56,
   "cells_count": 8,
   "cells": {
     "product-strategy": {
       "id": "product-strategy",
-      "description": "Product Strategy — product vision, strategy, positioning, business model.",
+      "description": "Product vision, user problem framing, and interface prioritization.",
       "personas_count": 7,
       "personas": [
         "april-dunford",
@@ -25,7 +25,7 @@
     },
     "product-discovery-research": {
       "id": "product-discovery-research",
-      "description": "Product Discovery and Research — continuous discovery, JTBD, user research, lean.",
+      "description": "Usability studies, operator interviews, interactive prototype validation, and user research.",
       "personas_count": 8,
       "personas": [
         "bob-moesta",
@@ -42,7 +42,7 @@
     },
     "growth-metrics": {
       "id": "growth-metrics",
-      "description": "Growth and Metrics — growth loops, metrics, experimentation, PLG, analytics.",
+      "description": "Signup UX, checkout flows, and onboarding friction reduction.",
       "personas_count": 8,
       "personas": [
         "andrew-chen",
@@ -59,7 +59,7 @@
     },
     "design-foundations-usability": {
       "id": "design-foundations-usability",
-      "description": "Design Foundations and Usability — HCI, usability, interaction design, accessibility.",
+      "description": "Interaction hierarchy, WCAG contrast, keyboard navigation, accessible interactions, and usability heuristics.",
       "personas_count": 7,
       "personas": [
         "alan-cooper",
@@ -75,7 +75,7 @@
     },
     "design-leadership-craft": {
       "id": "design-leadership-craft",
-      "description": "Design Leadership and Craft — design leadership, visual/industrial craft, culture.",
+      "description": "Visual design, typography, layout spacing, iconography clarity, and dense UI craft.",
       "personas_count": 8,
       "personas": [
         "aarron-walter",
@@ -92,7 +92,7 @@
     },
     "ux-content-research": {
       "id": "ux-content-research",
-      "description": "UX, Content, and Research — content strategy, content design, information architecture.",
+      "description": "UX microcopy, error and transactional messaging, navigation labels, and information architecture.",
       "personas_count": 5,
       "personas": [
         "abby-covert",
@@ -106,7 +106,7 @@
     },
     "design-systems-interaction": {
       "id": "design-systems-interaction",
-      "description": "Design Systems and Interaction — design systems, component architecture, patterns.",
+      "description": "Design systems, UI component patterns, empty/loading/error/success states, and interface specs.",
       "personas_count": 5,
       "personas": [
         "alla-kholmatova",
@@ -122,7 +122,7 @@
     },
     "sprints-behavior-bridge": {
       "id": "sprints-behavior-bridge",
-      "description": "Sprints, Behavior, and Bridge — product×design: sprints, behavioral design, ethics.",
+      "description": "Design sprints, rapid prototyping, behavioral UX, and humane interfaces.",
       "personas_count": 8,
       "personas": [
         "bj-fogg",

@@ -3,7 +3,7 @@
   "generated_at": "2026-09-03",
   "team_id": "strategy-super-intelligence",
   "team_name": "Strategy Super Intelligence Team",
-  "description": "Strategy Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md.",
+  "description": "Corporate and competitive strategy, low-cost versus niche positioning, defensible competitive advantage, geographic expansion versus core focus, direct versus partner distribution channels, competitor pricing reactions, service bundling and retention, portfolio resource allocation across core and adjacent investments, M&A focus, and two-sided marketplace network effects.",
   "native_personas_count": 29,
   "cross_listed_count": 2,
   "personas_count": 31,
@@ -11,7 +11,7 @@
   "cells": {
     "competitive-strategy-advantage": {
       "id": "competitive-strategy-advantage",
-      "description": "Competitive strategy, sources of durable advantage, positioning, industry structure.",
+      "description": "Cost leadership versus specialized niche positioning, incumbent defense, and durable competitive advantage.",
       "personas_count": 6,
       "personas": [
         "hamilton-helmer",
@@ -25,7 +25,7 @@
     },
     "growth-innovation": {
       "id": "growth-innovation",
-      "description": "Growth strategy, disruption, new-market creation, innovation frameworks.",
+      "description": "Geographic expansion, market entry, service bundling, and disruptive innovation.",
       "personas_count": 6,
       "personas": [
         "chan-kim",
@@ -39,7 +39,7 @@
     },
     "corporate-portfolio-strategy": {
       "id": "corporate-portfolio-strategy",
-      "description": "Corporate-level strategy, portfolio, core/adjacency, where-to-play at the group level.",
+      "description": "Portfolio resource allocation, core and adjacent investments, acquisition strategy, and strategic focus.",
       "personas_count": 4,
       "personas": [
         "chris-bradley",
@@ -51,7 +51,7 @@
     },
     "strategy-execution-org": {
       "id": "strategy-execution-org",
-      "description": "Turning strategy into action: choices, simple rules, execution, org alignment.",
+      "description": "Where-to-play and how-to-win choices, direct versus distributor channel strategy, and organizational alignment.",
       "personas_count": 4,
       "personas": [
         "ag-lafley",
@@ -63,7 +63,7 @@
     },
     "game-theory-decision": {
       "id": "game-theory-decision",
-      "description": "Game theory, competitive dynamics, co-opetition, strategic decision structure.",
+      "description": "Game theory, co-opetition, competitor responses, and strategic pricing-model dynamics.",
       "personas_count": 4,
       "personas": [
         "adam-brandenburger",
@@ -75,7 +75,7 @@
     },
     "behavioral-strategy-bias": {
       "id": "behavioral-strategy-bias",
-      "description": "Behavioral strategy, debiasing big decisions, narrative/halo traps.",
+      "description": "Strategic decision debiasing, outside-view forecasting, and executive judgment.",
       "personas_count": 3,
       "personas": [
         "dan-lovallo",
@@ -86,7 +86,7 @@
     },
     "platform-ecosystem-strategy": {
       "id": "platform-ecosystem-strategy",
-      "description": "Platform, network-effect, ecosystem, and aggregation strategy.",
+      "description": "Two-sided marketplaces, network effects, multi-homing, and ecosystem strategy.",
       "personas_count": 4,
       "personas": [
         "andrei-hagiu",

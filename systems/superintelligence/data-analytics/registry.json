@@ -3,7 +3,7 @@
   "generated_at": "2026-09-03",
   "team_id": "data-analytics-super-intelligence",
   "team_name": "Data & Analytics Super Intelligence Team",
-  "description": "Data & Analytics Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md.",
+  "description": "Statistical analysis, A/B experimentation, causal inference, quasi-experimental methods, selection bias, uncertainty estimation, KPI and metric definitions, churn and predictive modeling, offline-to-online model evaluation, missing-data imputation, SQL transformations, event-stream data pipelines, warehouses, data quality monitoring, and analytical visualization.",
   "native_personas_count": 29,
   "cross_listed_count": 0,
   "personas_count": 29,
@@ -11,7 +11,7 @@
   "cells": {
     "data-engineering-architecture": {
       "id": "data-engineering-architecture",
-      "description": "Pipelines, warehouses, lakehouse, data mesh, modeling, orchestration.",
+      "description": "Reproducible ETL/ELT pipelines, event-stream integration, data warehouses, lakehouses, and dimensional modeling.",
       "personas_count": 5,
       "personas": [
         "bill-inmon",
@@ -24,7 +24,7 @@
     },
     "analytics-engineering-modern-stack": {
       "id": "analytics-engineering-modern-stack",
-      "description": "dbt-era analytics engineering, the modern data stack, metrics layers.",
+      "description": "SQL analytics, dbt, semantic metrics layers, active-account KPIs, conversion funnels, and BI reporting.",
       "personas_count": 3,
       "personas": [
         "benn-stancil",
@@ -35,7 +35,7 @@
     },
     "mlops-ml-systems": {
       "id": "mlops-ml-systems",
-      "description": "Productionizing ML, ML system design, applied-ML engineering, eval.",
+      "description": "Predictive model deployment, offline-to-online skew, feature drift, and production ML evaluation.",
       "personas_count": 4,
       "personas": [
         "chip-huyen",
@@ -47,7 +47,7 @@
     },
     "data-science-statistics": {
       "id": "data-science-statistics",
-      "description": "Statistical practice, data-science tooling, decision intelligence.",
+      "description": "Applied statistics, Bayesian inference, uncertainty estimation, missing-value imputation, churn modeling, and exploratory analysis.",
       "personas_count": 5,
       "personas": [
         "allen-downey",
@@ -60,7 +60,7 @@
     },
     "data-visualization": {
       "id": "data-visualization",
-      "description": "Visualization theory, dataviz craft, communicating with data.",
+      "description": "Analytical charts, statistical graphics, visual integrity, and quantitative storytelling.",
       "personas_count": 4,
       "personas": [
         "alberto-cairo",
@@ -72,7 +72,7 @@
     },
     "data-governance-quality": {
       "id": "data-governance-quality",
-      "description": "Data quality, observability, governance, contracts, leadership.",
+      "description": "Data quality testing, schema contracts, metric anomaly triage, lineage, and dataset reliability.",
       "personas_count": 4,
       "personas": [
         "barr-moses",
@@ -84,7 +84,7 @@
     },
     "experimentation-causal-inference": {
       "id": "experimentation-causal-inference",
-      "description": "A/B testing, controlled experiments, causal inference.",
+      "description": "Randomized experiments, cluster randomization, statistical significance, causal inference, and selection bias.",
       "personas_count": 4,
       "personas": [
         "judea-pearl",

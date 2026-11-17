@@ -603,3 +603,182 @@ The commands above cover the most common day-to-day flows. Every command listed 
 - **`/gsd:extract-learnings <phase>`** — Extract decisions, lessons, patterns, and surprises from completed phase artifacts.
 
 ### Knowledge & Context
+
+- **`/gsd:graphify [build|query <term>|status|diff]`** — Build, query, and inspect the project knowledge graph in `.planning/graphs/`.
+- **`/gsd:thread [list [--open|--resolved] | close <slug> | status <slug> | name | description]`** — Manage persistent context threads for cross-session work.
+- **`/gsd:profile-user [--questionnaire] [--refresh]`** — Generate developer behavioral profile and create Claude-discoverable artifacts.
+- **`/gsd:stats`** — Display project statistics: phases, plans, requirements, git metrics, and timeline.
+
+### Workflow & Orchestration
+
+- **`/gsd:manager [--analyze-deps]`** — Interactive command center for managing multiple phases from one terminal. `--analyze-deps` scans ROADMAP phases for dependency relationships before parallel execution.
+- **`/gsd:workspace [--new | --list | --remove] [name]`** — Manage GSD workspaces: create, list, or remove isolated workspace environments.
+- **`/gsd:workstreams`** — Manage parallel workstreams: list, create, switch, status, progress, complete, and resume.
+- **`/gsd:review-backlog`** — Review and promote backlog items to active milestone.
+- **`/gsd:milestone-summary [version]`** — Generate a comprehensive project summary from milestone artifacts for team onboarding and review.
+
+### Repository Integration
+
+- **`/gsd:inbox [--issues] [--prs] [--label] [--close-incomplete] [--repo owner/repo]`** — Triage and review open GitHub issues and PRs against project templates and contribution guidelines.
+
+### Namespace Routers (model-facing meta-skills)
+
+These six skills exist primarily for the model to perform two-stage hierarchical routing across 60+ skills. You can invoke them directly when you want to browse a category interactively.
+
+- **`/gsd-context`** — Codebase intelligence routing (map, graphify, docs, learnings).
+- **`/gsd-ideate`** — Exploration / capture routing (explore, sketch, spike, spec, capture).
+- **`/gsd-manage`** — Configuration and workspace routing (workstreams, thread, update, ship, inbox).
+- **`/gsd-project`** — Project-lifecycle routing (milestones, audits, summary).
+- **`/gsd-quality`** — Quality-gate routing (code review, debug, audit, security, eval, ui).
+- **`/gsd-workflow`** — Phase-pipeline routing (discuss, plan, execute, verify, phase, progress).
+
+## Files & Structure
+
+```text
+.planning/
+├── PROJECT.md            # Project vision
+├── ROADMAP.md            # Current phase breakdown
+├── STATE.md              # Project memory & context
+├── RETROSPECTIVE.md      # Living retrospective (updated per milestone)
+├── config.json           # Workflow mode & gates
+├── todos/                # Captured ideas and tasks
+│   ├── pending/          # Todos waiting to be worked on
+│   └── done/             # Completed todos
+├── spikes/               # Spike experiments (/gsd:spike)
+│   ├── MANIFEST.md       # Spike inventory and verdicts
+│   └── NNN-name/         # Individual spike directories
+├── sketches/             # Design sketches (/gsd:sketch)
+│   ├── MANIFEST.md       # Sketch inventory and winners
+│   ├── themes/           # Shared CSS theme files
+│   └── NNN-name/         # Individual sketch directories (HTML + README)
+├── debug/                # Active debug sessions
+│   └── resolved/         # Archived resolved issues
+├── milestones/
+│   ├── v1.0-ROADMAP.md       # Archived roadmap snapshot
+│   ├── v1.0-REQUIREMENTS.md  # Archived requirements
+│   └── v1.0-phases/          # Archived phase dirs (via /gsd:cleanup or --archive-phases)
+│       ├── 01-foundation/
+│       └── 02-core-features/
+├── codebase/             # Codebase map (brownfield projects)
+│   ├── STACK.md          # Languages, frameworks, dependencies
+│   ├── ARCHITECTURE.md   # Patterns, layers, data flow
+│   ├── STRUCTURE.md      # Directory layout, key files
+│   ├── CONVENTIONS.md    # Coding standards, naming
+│   ├── TESTING.md        # Test setup, patterns
+│   ├── INTEGRATIONS.md   # External services, APIs
+│   └── CONCERNS.md       # Tech debt, known issues
+└── phases/
+    ├── 01-foundation/
+    │   ├── 01-01-PLAN.md
+    │   └── 01-01-SUMMARY.md
+    └── 02-core-features/
+        ├── 02-01-PLAN.md
+        └── 02-01-SUMMARY.md
+```
+
+## Workflow Modes
+
+Set during `/gsd:new-project`:
+
+**Interactive Mode**
+
+- Confirms each major decision
+- Pauses at checkpoints for approval
+- More guidance throughout
+
+**YOLO Mode**
+
+- Auto-approves most decisions
+- Executes plans without confirmation
+- Only stops for critical checkpoints
+
+Change anytime by editing `.planning/config.json`
+
+## Planning Configuration
+
+Configure how planning artifacts are managed in `.planning/config.json`:
+
+**`planning.commit_docs`** (default: `true`)
+- `true`: Planning artifacts committed to git (standard workflow)
+- `false`: Planning artifacts kept local-only, not committed
+
+When `commit_docs: false`:
+- Add `.planning/` to your `.gitignore`
+- Useful for OSS contributions, client projects, or keeping planning private
+- All planning files still work normally, just not tracked in git
+
+**`planning.search_gitignored`** (default: `false`)
+- `true`: Add `--no-ignore` to broad ripgrep searches
+- Only needed when `.planning/` is gitignored and you want project-wide searches to include it
+
+Example config:
+```json
+{
+  "planning": {
+    "commit_docs": false,
+    "search_gitignored": true
+  }
+}
+```
+
+## Common Workflows
+
+**Starting a new project:**
+
+```text
+/gsd:new-project        # Unified flow: questioning → research → requirements → roadmap
+/clear
+/gsd:plan-phase 1       # Create plans for first phase
+/clear
+/gsd:execute-phase 1    # Execute all plans in phase
+```
+
+**Resuming work after a break:**
+
+```text
+/gsd:progress  # See where you left off and continue
+```
+
+**Adding urgent mid-milestone work:**
+
+```text
+/gsd:phase --insert 5 "Critical security fix"
+/gsd:plan-phase 5.1
+/gsd:execute-phase 5.1
+```
+
+**Completing a milestone:**
+
+```text
+/gsd:complete-milestone 1.0.0
+/clear
+/gsd:new-milestone  # Start next milestone (questioning → research → requirements → roadmap)
+```
+
+**Capturing ideas during work:**
+
+```text
+/gsd:capture                                  # Capture from conversation context
+/gsd:capture Fix modal z-index                # Capture with explicit description
+/gsd:capture --note refactor auth system      # Quick friction-free note
+/gsd:capture --seed "real-time notifications" # Forward-looking idea with triggers
+/gsd:capture --list                           # Review and work on todos
+/gsd:capture --list api                       # Filter by area
+```
+
+**Debugging an issue:**
+
+```text
+/gsd:debug "form submission fails silently"  # Start debug session
+# ... investigation happens, context fills up ...
+/clear
+/gsd:debug                                    # Resume from where you left off
+```
+
+## Getting Help
+
+- Read `.planning/PROJECT.md` for project vision
+- Read `.planning/STATE.md` for current context
+- Check `.planning/ROADMAP.md` for phase status
+- Run `/gsd:progress` to check where you're up to
+</reference>

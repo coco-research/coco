@@ -318,3 +318,353 @@ If spike/sketch findings skills exist, read their SKILL.md files to inform the q
 **If auto mode:** Skip (already handled in Step 2a). Extract project context from provided document instead and proceed to Step 4.
 
 **Display stage banner:**
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► QUESTIONING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Open the conversation:**
+
+Ask inline (freeform, NOT AskUserQuestion):
+
+"What do you want to build?"
+
+Wait for their response. This gives you the context needed to ask intelligent follow-up questions.
+
+**Research-before-questions mode:** Check if `workflow.research_before_questions` is enabled in `.planning/config.json` (or the config from init context). When enabled, before asking follow-up questions about a topic area:
+
+1. Do a brief web search for best practices related to what the user described
+2. Mention key findings naturally as you ask questions (e.g., "Most projects like this use X — is that what you're thinking, or something different?")
+3. This makes questions more informed without changing the conversational flow
+
+When disabled (default), ask questions directly as before.
+
+**Follow the thread:**
+
+Based on what they said, ask follow-up questions that dig into their response. Use AskUserQuestion with options that probe what they mentioned — interpretations, clarifications, concrete examples.
+
+Keep following threads. Each answer opens new threads to explore. Ask about:
+
+- What excited them
+- What problem sparked this
+- What they mean by vague terms
+- What it would actually look like
+- What's already decided
+
+Consult `questioning.md` for techniques:
+
+- Challenge vagueness
+- Make abstract concrete
+- Surface assumptions
+- Find edges
+- Reveal motivation
+
+**Check context (background, not out loud):**
+
+As you go, mentally check the context checklist from `questioning.md`. If gaps remain, weave questions naturally. Don't suddenly switch to checklist mode.
+
+**Decision gate:**
+
+When you could write a clear PROJECT.md, use AskUserQuestion:
+
+- header: "Ready?"
+- question: "I think I understand what you're after. Ready to create PROJECT.md?"
+- options:
+  - "Create PROJECT.md" — Let's move forward
+  - "Keep exploring" — I want to share more / ask me more
+
+If "Keep exploring" — ask what they want to add, or identify gaps and probe naturally.
+
+Loop until "Create PROJECT.md" selected.
+
+## 4. Write PROJECT.md
+
+**If auto mode:** Synthesize from provided document. No "Ready?" gate was shown — proceed directly to commit.
+
+Synthesize all context into `.planning/PROJECT.md` using the template from `templates/project.md`.
+
+**For greenfield projects:**
+
+Initialize requirements as hypotheses:
+
+```markdown
+## Requirements
+
+### Validated
+
+(None yet — ship to validate)
+
+### Active
+
+- [ ] [Requirement 1]
+- [ ] [Requirement 2]
+- [ ] [Requirement 3]
+
+### Out of Scope
+
+- [Exclusion 1] — [why]
+- [Exclusion 2] — [why]
+```
+
+All Active requirements are hypotheses until shipped and validated.
+
+**For brownfield projects (codebase map exists):**
+
+Infer Validated requirements from existing code:
+
+1. Read `.planning/codebase/ARCHITECTURE.md` and `STACK.md`
+2. Identify what the codebase already does
+3. These become the initial Validated set
+
+```markdown
+## Requirements
+
+### Validated
+
+- ✓ [Existing capability 1] — existing
+- ✓ [Existing capability 2] — existing
+- ✓ [Existing capability 3] — existing
+
+### Active
+
+- [ ] [New requirement 1]
+- [ ] [New requirement 2]
+
+### Out of Scope
+
+- [Exclusion 1] — [why]
+```
+
+**Key Decisions:**
+
+Initialize with any decisions made during questioning:
+
+```markdown
+## Key Decisions
+
+| Decision | Rationale | Outcome |
+|----------|-----------|---------|
+| [Choice from questioning] | [Why] | — Pending |
+```
+
+**Last updated footer:**
+
+```markdown
+---
+*Last updated: [date] after initialization*
+```
+
+**Evolution section** (include at the end of PROJECT.md, before the footer):
+
+```markdown
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd:complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+```
+
+Do not compress. Capture everything gathered.
+
+**Commit PROJECT.md:**
+
+```bash
+mkdir -p .planning
+gsd-sdk query commit "docs: initialize project" --files .planning/PROJECT.md
+```
+
+## 5. Workflow Preferences
+
+**If auto mode:** Skip — config was collected in Step 2a. Proceed to Step 5.5.
+
+**Check for global defaults** at `~/.gsd/defaults.json`. If the file exists, read and display its contents before asking:
+
+```bash
+DEFAULTS_RAW=$(cat ~/.gsd/defaults.json 2>/dev/null)
+```
+
+Format the JSON into human-readable bullets using these label mappings:
+- `mode` → "Mode"
+- `granularity` → "Granularity"
+- `parallelization` → "Execution" (`true` → "Parallel", `false` → "Sequential")
+- `commit_docs` → "Git Tracking" (`true` → "Yes", `false` → "No")
+- `model_profile` → "AI Models"
+- `workflow.research` → "Research" (`true` → "Yes", `false` → "No")
+- `workflow.plan_check` → "Plan Check" (`true` → "Yes", `false` → "No")
+- `workflow.verifier` → "Verifier" (`true` → "Yes", `false` → "No")
+
+Display above the prompt:
+
+```text
+Your saved defaults (~/.gsd/defaults.json):
+  • Mode: [value]
+  • Granularity: [value]
+  • Execution: [Parallel|Sequential]
+  • Git Tracking: [Yes|No]
+  • AI Models: [value]
+  • Research: [Yes|No]
+  • Plan Check: [Yes|No]
+  • Verifier: [Yes|No]
+```
+
+Then ask:
+
+```text
+AskUserQuestion([
+  {
+    question: "Use these saved defaults?",
+    header: "Defaults",
+    multiSelect: false,
+    options: [
+      { label: "Use as-is (Recommended)", description: "Proceed with the defaults shown above" },
+      { label: "Modify some settings", description: "Keep defaults, change a few" },
+      { label: "Configure fresh", description: "Walk through all questions from scratch" }
+    ]
+  }
+])
+```
+
+**If "Use as-is":** use the defaults values for config.json and skip directly to **Commit config.json** below.
+
+**If "Modify some settings":** present a selection of every setting with its current saved value.
+
+**If TEXT_MODE is active** (non-Claude runtimes): display a numbered list and ask the user to type the numbers of settings they want to change (comma-separated). Parse the response and proceed.
+
+```text
+Which settings do you want to change? (enter numbers, comma-separated)
+
+  1. Mode — Currently: [value]
+  2. Granularity — Currently: [value]
+  3. Execution — Currently: [Parallel|Sequential]
+  4. Git Tracking — Currently: [Yes|No]
+  5. AI Models — Currently: [value]
+  6. Research — Currently: [Yes|No]
+  7. Plan Check — Currently: [Yes|No]
+  8. Verifier — Currently: [Yes|No]
+```
+
+**Otherwise** (Claude runtime with AskUserQuestion): use multiSelect:
+
+```text
+AskUserQuestion([
+  {
+    question: "Which settings do you want to change?",
+    header: "Change Settings",
+    multiSelect: true,
+    options: [
+      { label: "Mode", description: "Currently: [value]" },
+      { label: "Granularity", description: "Currently: [value]" },
+      { label: "Execution", description: "Currently: [Parallel|Sequential]" },
+      { label: "Git Tracking", description: "Currently: [Yes|No]" },
+      { label: "AI Models", description: "Currently: [value]" },
+      { label: "Research", description: "Currently: [Yes|No]" },
+      { label: "Plan Check", description: "Currently: [Yes|No]" },
+      { label: "Verifier", description: "Currently: [Yes|No]" }
+    ]
+  }
+])
+```
+
+For each selected setting, ask only that question using the option set from Round 1 / Round 2 below. Merge user answers over the saved defaults — unchanged settings retain their saved values. Then skip to **Commit config.json**.
+
+**If "Configure fresh" or `~/.gsd/defaults.json` doesn't exist:** proceed with the questions below.
+
+**Round 1 — Core workflow settings (4 questions):**
+
+```
+questions: [
+  {
+    header: "Mode",
+    question: "How do you want to work?",
+    multiSelect: false,
+    options: [
+      { label: "YOLO (Recommended)", description: "Auto-approve, just execute" },
+      { label: "Interactive", description: "Confirm at each step" }
+    ]
+  },
+  {
+    header: "Granularity",
+    question: "How finely should scope be sliced into phases?",
+    multiSelect: false,
+    options: [
+      { label: "Coarse", description: "Fewer, broader phases (3-5 phases, 1-3 plans each)" },
+      { label: "Standard", description: "Balanced phase size (5-8 phases, 3-5 plans each)" },
+      { label: "Fine", description: "Many focused phases (8-12 phases, 5-10 plans each)" }
+    ]
+  },
+  {
+    header: "Execution",
+    question: "Run plans in parallel?",
+    multiSelect: false,
+    options: [
+      { label: "Parallel (Recommended)", description: "Independent plans run simultaneously" },
+      { label: "Sequential", description: "One plan at a time" }
+    ]
+  },
+  {
+    header: "Git Tracking",
+    question: "Commit planning docs to git?",
+    multiSelect: false,
+    options: [
+      { label: "Yes (Recommended)", description: "Planning docs tracked in version control" },
+      { label: "No", description: "Keep .planning/ local-only (add to .gitignore)" }
+    ]
+  }
+]
+```
+
+**Round 2 — Workflow agents:**
+
+These spawn additional agents during planning/execution. They add tokens and time but improve quality.
+
+| Agent | When it runs | What it does |
+|-------|--------------|--------------|
+| **Researcher** | Before planning each phase | Investigates domain, finds patterns, surfaces gotchas |
+| **Plan Checker** | After plan is created | Verifies plan actually achieves the phase goal |
+| **Verifier** | After phase execution | Confirms must-haves were delivered |
+
+All recommended for important projects. Skip for quick experiments.
+
+```
+questions: [
+  {
+    header: "Research",
+    question: "Research before planning each phase? (adds tokens/time)",
+    multiSelect: false,
+    options: [
+      { label: "Yes (Recommended)", description: "Investigate domain, find patterns, surface gotchas" },
+      { label: "No", description: "Plan directly from requirements" }
+    ]
+  },
+  {
+    header: "Plan Check",
+    question: "Verify plans will achieve their goals? (adds tokens/time)",
+    multiSelect: false,
+    options: [
+      { label: "Yes (Recommended)", description: "Catch gaps before execution starts" },
+      { label: "No", description: "Execute plans without verification" }
+    ]
+  },
+  {
+    header: "Verifier",
+    question: "Verify work satisfies requirements after each phase? (adds tokens/time)",
+    multiSelect: false,
+    options: [
+      { label: "Yes (Recommended)", description: "Confirm deliverables match phase goals" },
+      { label: "No", description: "Trust execution, skip verification" }
+    ]
+  },
+  {

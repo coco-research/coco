@@ -1714,3 +1714,209 @@ function getMilestonePhaseFilter(cwd, versionOverride) {
         const restContent = roadmapContent.slice(sectionStart + sectionMatch[0].length);
         const nextMilestonePattern = new RegExp(`^#{1,${headingLevel}}\\s+(?!Phase\\s+\\S)(?:.*v\\d+\\.\\d+|✅|📋|🚧)`, 'i');
 
+        let sectionEnd = roadmapContent.length;
+        let fenceChar = null;
+        let fenceLen = 0;
+        let charOffset = 0;
+        for (const line of restContent.split('\n')) {
+          const fenceMatch = line.match(/^\s{0,3}((?:`{3,}|~{3,}))(.*)/);
+          if (fenceMatch) {
+            const char = fenceMatch[1][0];
+            const len = fenceMatch[1].length;
+            const trailing = fenceMatch[2] || '';
+            if (!fenceChar) {
+              fenceChar = char;
+              fenceLen = len;
+            } else if (char === fenceChar && len >= fenceLen && /^\s*$/.test(trailing)) {
+              fenceChar = null;
+              fenceLen = 0;
+            }
+          } else if (!fenceChar && nextMilestonePattern.test(line)) {
+            sectionEnd = sectionStart + sectionMatch[0].length + charOffset;
+            break;
+          }
+          charOffset += line.length + 1;
+        }
+
+        const currentSection = roadmapContent.slice(sectionStart, sectionEnd);
+        roadmap = currentSection;
+      }
+    }
+
+    // Match both numeric phases (Phase 1:) and custom IDs (Phase PROJ-42:)
+    const phasePattern = /#{2,4}\s*Phase\s+([\w][\w.-]*)\s*:/gi;
+    let m;
+    while ((m = phasePattern.exec(roadmap)) !== null) {
+      milestonePhaseNums.add(m[1]);
+    }
+  } catch { /* intentionally empty */ }
+
+  if (milestonePhaseNums.size === 0) {
+    const passAll = () => true;
+    passAll.phaseCount = 0;
+    passAll.missingExplicitVersion = missingExplicitVersion;
+    return passAll;
+  }
+
+  const normalized = new Set(
+    [...milestonePhaseNums].map(n => (n.replace(/^0+(?=\d)/, '') || '0').toLowerCase())
+  );
+
+  function isDirInMilestone(dirName) {
+    // Try numeric match first
+    const m = dirName.match(/^0*(\d+[A-Za-z]?(?:\.\d+)*)/);
+    if (m && normalized.has(m[1].toLowerCase())) return true;
+    // Try custom ID match (e.g. PROJ-42-description → PROJ-42)
+    const customMatch = dirName.match(/^([A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*)/);
+    if (customMatch && normalized.has(customMatch[1].toLowerCase())) return true;
+    // #3600: project-code-prefixed directory (`CK-01-name`) against a
+    // numeric ROADMAP heading (`### Phase 1:`). Strip the same prefix
+    // shape `normalizePhaseName` recognises (`^[A-Z]{1,6}-(?=\d)`) and
+    // retry the numeric match. This runs AFTER the custom-ID match so
+    // a roadmap that uses `Phase PROJ-42:` continues to win via the
+    // existing custom-ID path; the strip-and-retry only fires when the
+    // milestone is keyed on the bare numeric form.
+    const stripped = dirName.replace(/^[A-Z]{1,6}-(?=\d)/i, '');
+    if (stripped !== dirName) {
+      const sm = stripped.match(/^0*(\d+[A-Za-z]?(?:\.\d+)*)/);
+      if (sm && normalized.has(sm[1].toLowerCase())) return true;
+    }
+    return false;
+  }
+  isDirInMilestone.phaseCount = milestonePhaseNums.size;
+  isDirInMilestone.missingExplicitVersion = missingExplicitVersion;
+  return isDirInMilestone;
+}
+
+// ─── Phase file helpers ──────────────────────────────────────────────────────
+
+/** Filter a file list to just PLAN.md / *-PLAN.md entries. */
+function filterPlanFiles(files) {
+  return files.filter(f => f.endsWith('-PLAN.md') || f === 'PLAN.md');
+}
+
+/** Filter a file list to just SUMMARY.md / *-SUMMARY.md entries. */
+function filterSummaryFiles(files) {
+  return files.filter(f => f.endsWith('-SUMMARY.md') || f === 'SUMMARY.md');
+}
+
+/**
+ * Read a phase directory and return counts/flags for common file types.
+ * Returns an object with plans[], summaries[], and boolean flags for
+ * research/context/verification files.
+ */
+function getPhaseFileStats(phaseDir) {
+  const files = fs.readdirSync(phaseDir);
+  return {
+    plans: filterPlanFiles(files),
+    summaries: filterSummaryFiles(files),
+    hasResearch: files.some(f => f.endsWith('-RESEARCH.md') || f === 'RESEARCH.md'),
+    hasContext: findContextMdIn(files) !== null,
+    hasVerification: files.some(f => f.endsWith('-VERIFICATION.md') || f === 'VERIFICATION.md'),
+    hasReviews: files.some(f => f.endsWith('-REVIEWS.md') || f === 'REVIEWS.md'),
+  };
+}
+
+/**
+ * Read immediate child directories from a path.
+ * Returns [] if the path doesn't exist or can't be read.
+ * Pass sort=true to apply comparePhaseNum ordering.
+ */
+function readSubdirectories(dirPath, sort = false) {
+  try {
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+    const dirs = entries.filter(e => e.isDirectory()).map(e => e.name);
+    return sort ? dirs.sort((a, b) => comparePhaseNum(a, b)) : dirs;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Format a Date as a fuzzy relative time string (e.g. "5 minutes ago").
+ * @param {Date} date
+ * @returns {string}
+ */
+function timeAgo(date) {
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 5) return 'just now';
+  if (seconds < 60) return `${seconds} seconds ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes === 1) return '1 minute ago';
+  if (minutes < 60) return `${minutes} minutes ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours === 1) return '1 hour ago';
+  if (hours < 24) return `${hours} hours ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return '1 day ago';
+  if (days < 30) return `${days} days ago`;
+  const months = Math.floor(days / 30);
+  if (months === 1) return '1 month ago';
+  if (months < 12) return `${months} months ago`;
+  const years = Math.floor(days / 365);
+  if (years === 1) return '1 year ago';
+  return `${years} years ago`;
+}
+
+module.exports = {
+  output,
+  error,
+  ERROR_REASON,
+  setJsonErrorMode,
+  getJsonErrorMode,
+  loadConfig,
+  isGitIgnored,
+  escapeRegex,
+  normalizePhaseName,
+  phaseMarkdownRegexSource,
+  phaseMarkdownRegexSourceExact,
+  comparePhaseNum,
+  searchPhaseInDir,
+  extractPhaseToken,
+  phaseTokenMatches,
+  findPhaseInternal,
+  getArchivedPhaseDirs,
+  getRoadmapPhaseInternal,
+  resolveModelInternal,
+  resolveModelForTier,
+  resolveReasoningEffortInternal,
+  RUNTIME_PROFILE_MAP,
+  RUNTIMES_WITH_REASONING_EFFORT,
+  KNOWN_RUNTIMES,
+  RUNTIME_OVERRIDE_TIERS,
+  resolveTierEntry,
+  _resetRuntimeWarningCacheForTests,
+  pathExistsInternal,
+  gitWorktreeInfoInternal,
+  generateSlugInternal,
+  getMilestoneInfo,
+  getMilestonePhaseFilter,
+  stripShippedMilestones,
+  extractCurrentMilestone,
+  replaceInCurrentMilestone,
+  toPosixPath,
+  extractOneLinerFromBody,
+  resolveWorktreeRoot,
+  // Deprecated re-exports — prefer direct import from planning-workspace.cjs
+  withPlanningLock,
+  findProjectRoot,
+  detectSubRepos,
+  reapStaleTempFiles,
+  GSD_TEMP_DIR,
+  MODEL_ALIAS_MAP,
+  CONFIG_DEFAULTS,
+  planningDir,
+  planningRoot,
+  planningPaths,
+  getActiveWorkstream,
+  setActiveWorkstream,
+  filterPlanFiles,
+  filterSummaryFiles,
+  getPhaseFileStats,
+  readSubdirectories,
+  getAgentsDir,
+  checkAgentsInstalled,
+  timeAgo,
+  pruneOrphanedWorktrees,
+  inspectWorktreeHealth,
+};

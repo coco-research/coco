@@ -1869,3 +1869,72 @@ function cmdStateCompletePhase(cwd, raw, overridePhase) {
     result = stateReplaceField(content, 'Last Activity Description', activityDesc);
     if (result) { content = result; updated.push('Last Activity Description'); }
 
+    // Update ## Current Position section
+    const positionPattern = /(##\s*Current Position\s*\n)([\s\S]*?)(?=\n##|$)/i;
+    const positionMatch = content.match(positionPattern);
+    if (positionMatch) {
+      const header = positionMatch[1];
+      let posBody = positionMatch[2];
+
+      // Update Phase line to show COMPLETE
+      const newPhase = `Phase: ${currentPhase} — COMPLETE`;
+      if (/^Phase:/m.test(posBody)) {
+        posBody = posBody.replace(/^Phase:.*$/m, newPhase);
+      }
+
+      // Update Status line if present
+      const newStatus = `Status: Phase ${currentPhase} complete`;
+      if (/^Status:/m.test(posBody)) {
+        posBody = posBody.replace(/^Status:.*$/m, newStatus);
+      }
+
+      // Update Last activity line if present
+      const newActivity = `Last activity: ${today} -- Phase ${currentPhase} marked complete`;
+      if (/^Last activity:/im.test(posBody)) {
+        posBody = posBody.replace(/^Last activity:.*$/im, newActivity);
+      }
+
+      content = content.replace(positionPattern, () => `${header}${posBody}`);
+      updated.push('Current Position');
+    }
+
+    return content;
+  }, cwd);
+
+  output(
+    { updated, phase: resolvedPhase },
+    raw,
+    updated.length > 0 ? 'true' : 'false',
+  );
+}
+
+module.exports = {
+  stateExtractField,
+  stateReplaceField,
+  stateReplaceFieldWithFallback,
+  writeStateMd,
+  readModifyWriteStateMd,
+  updatePerformanceMetricsSection,
+  cmdStateLoad,
+  cmdStateGet,
+  cmdStatePatch,
+  cmdStateUpdate,
+  cmdStateAdvancePlan,
+  cmdStateRecordMetric,
+  cmdStateUpdateProgress,
+  cmdStateAddDecision,
+  cmdStateAddBlocker,
+  cmdStateResolveBlocker,
+  cmdStateRecordSession,
+  cmdStateSnapshot,
+  cmdStateJson,
+  cmdStateBeginPhase,
+  cmdStatePlannedPhase,
+  cmdStateCompletePhase,
+  cmdStateValidate,
+  cmdStateSync,
+  cmdStatePrune,
+  cmdStateMilestoneSwitch,
+  cmdSignalWaiting,
+  cmdSignalResume,
+};

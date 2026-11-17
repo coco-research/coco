@@ -284,3 +284,353 @@ function cmdCommit(cwd, message, files, raw, amend, noVerify) {
 
   // Ensure branching strategy branch exists before first commit (#1278).
   // Pre-execution workflows (discuss, plan, research) commit artifacts but the branch
+  // was previously only created during execute-phase — too late.
+  if (config.branching_strategy && config.branching_strategy !== 'none') {
+    let branchName = null;
+    if (config.branching_strategy === 'phase') {
+      // Determine which phase we're committing for from the file paths
+      const phaseMatch = (files || []).join(' ').match(/(\d+(?:\.\d+)*)-/);
+      if (phaseMatch) {
+        const phaseNum = phaseMatch[1];
+        const phaseInfo = findPhaseInternal(cwd, phaseNum);
+        if (phaseInfo) {
+          branchName = config.phase_branch_template
+            .replace('{phase}', phaseInfo.phase_number)
+            .replace('{slug}', phaseInfo.phase_slug || 'phase');
+        }
+      }
+    } else if (config.branching_strategy === 'milestone') {
+      const milestone = getMilestoneInfo(cwd);
+      if (milestone && milestone.version) {
+        branchName = config.milestone_branch_template
+          .replace('{milestone}', milestone.version)
+          .replace('{slug}', generateSlugInternal(milestone.name) || 'milestone');
+      }
+    }
+    if (branchName) {
+      const currentBranch = execGit(['rev-parse', '--abbrev-ref', 'HEAD'], { cwd });
+      if (currentBranch.exitCode === 0 && currentBranch.stdout.trim() !== branchName) {
+        // Create branch if it doesn't exist, or switch to it if it does
+        const create = execGit(['checkout', '-b', branchName], { cwd });
+        if (create.exitCode !== 0) {
+          execGit(['checkout', branchName], { cwd });
+        }
+      }
+    }
+  }
+
+  // Stage files
+  const explicitFiles = files && files.length > 0;
+  const filesToStage = explicitFiles ? files : ['.planning/'];
+  for (const file of filesToStage) {
+    const fullPath = path.join(cwd, file);
+    if (!fs.existsSync(fullPath)) {
+      if (explicitFiles) {
+        // Caller passed an explicit --files list: missing files are skipped.
+        // Staging a deletion here would silently remove tracked planning files
+        // (e.g. STATE.md, ROADMAP.md) when they are temporarily absent (#2014).
+        continue;
+      }
+      // Default mode (staging all of .planning/): stage the deletion so
+      // removed planning files are not left dangling in the index.
+      execGit(['rm', '--cached', '--ignore-unmatch', file], { cwd });
+    } else {
+      execGit(['add', file], { cwd });
+    }
+  }
+
+  // Commit (--no-verify skips pre-commit hooks, used by parallel executor agents)
+  const commitArgs = amend ? ['commit', '--amend', '--no-edit'] : ['commit', '-m', message];
+  if (noVerify) commitArgs.push('--no-verify');
+  const commitResult = execGit(commitArgs, { cwd });
+  if (commitResult.exitCode !== 0) {
+    if (commitResult.stdout.includes('nothing to commit') || commitResult.stderr.includes('nothing to commit')) {
+      const result = { committed: false, hash: null, reason: 'nothing_to_commit' };
+      output(result, raw, 'nothing');
+      return;
+    }
+    const result = {
+      committed: false,
+      hash: null,
+      reason: 'commit_failed',
+      error: commitResult.stderr || commitResult.stdout,
+    };
+    output(result, raw, 'failed');
+    return;
+  }
+
+  // Get short hash
+  const hashResult = execGit(['rev-parse', '--short', 'HEAD'], { cwd });
+  const hash = hashResult.exitCode === 0 ? hashResult.stdout : null;
+  const result = { committed: true, hash, reason: 'committed' };
+  output(result, raw, hash || 'committed');
+}
+
+function cmdCommitToSubrepo(cwd, message, files, raw) {
+  if (!message) {
+    error('commit message required');
+  }
+
+  const config = loadConfig(cwd);
+  const subRepos = config.sub_repos;
+
+  if (!subRepos || subRepos.length === 0) {
+    error('no sub_repos configured in .planning/config.json');
+  }
+
+  if (!files || files.length === 0) {
+    error('--files required for commit-to-subrepo');
+  }
+
+  // Group files by sub-repo prefix
+  const grouped = {};
+  const unmatched = [];
+  for (const file of files) {
+    const match = subRepos.find(repo => file.startsWith(repo + '/'));
+    if (match) {
+      if (!grouped[match]) grouped[match] = [];
+      grouped[match].push(file);
+    } else {
+      unmatched.push(file);
+    }
+  }
+
+  if (unmatched.length > 0) {
+    process.stderr.write(`Warning: ${unmatched.length} file(s) did not match any sub-repo prefix: ${unmatched.join(', ')}\n`);
+  }
+
+  const repos = {};
+  for (const [repo, repoFiles] of Object.entries(grouped)) {
+    const repoCwd = path.join(cwd, repo);
+
+    // Stage files (strip sub-repo prefix for paths relative to that repo)
+    for (const file of repoFiles) {
+      const relativePath = file.slice(repo.length + 1);
+      execGit(['add', relativePath], { cwd: repoCwd });
+    }
+
+    // Commit
+    const commitResult = execGit(['commit', '-m', message], { cwd: repoCwd });
+    if (commitResult.exitCode !== 0) {
+      if (commitResult.stdout.includes('nothing to commit') || commitResult.stderr.includes('nothing to commit')) {
+        repos[repo] = { committed: false, hash: null, files: repoFiles, reason: 'nothing_to_commit' };
+        continue;
+      }
+      repos[repo] = { committed: false, hash: null, files: repoFiles, reason: 'error', error: commitResult.stderr };
+      continue;
+    }
+
+    // Get hash
+    const hashResult = execGit(['rev-parse', '--short', 'HEAD'], { cwd: repoCwd });
+    const hash = hashResult.exitCode === 0 ? hashResult.stdout : null;
+    repos[repo] = { committed: true, hash, files: repoFiles };
+  }
+
+  const result = {
+    committed: Object.values(repos).some(r => r.committed),
+    repos,
+    unmatched: unmatched.length > 0 ? unmatched : undefined,
+  };
+  output(result, raw, Object.entries(repos).map(([r, v]) => `${r}:${v.hash || 'skip'}`).join(' '));
+}
+
+function cmdSummaryExtract(cwd, summaryPath, fields, raw) {
+  if (!summaryPath) {
+    error('summary-path required for summary-extract');
+  }
+
+  const fullPath = path.join(cwd, summaryPath);
+
+  if (!fs.existsSync(fullPath)) {
+    output({ error: 'File not found', path: summaryPath }, raw);
+    return;
+  }
+
+  const content = fs.readFileSync(fullPath, 'utf-8');
+  const fm = extractFrontmatter(content);
+
+  // Parse key-decisions into structured format
+  const parseDecisions = (decisionsList) => {
+    if (!decisionsList || !Array.isArray(decisionsList)) return [];
+    return decisionsList.map(d => {
+      const colonIdx = d.indexOf(':');
+      if (colonIdx > 0) {
+        return {
+          summary: d.substring(0, colonIdx).trim(),
+          rationale: d.substring(colonIdx + 1).trim(),
+        };
+      }
+      return { summary: d, rationale: null };
+    });
+  };
+
+  // Build full result
+  const fullResult = {
+    path: summaryPath,
+    one_liner: fm['one-liner'] || extractOneLinerFromBody(content) || null,
+    key_files: fm['key-files'] || [],
+    tech_added: (fm['tech-stack'] && fm['tech-stack'].added) || [],
+    patterns: fm['patterns-established'] || [],
+    decisions: parseDecisions(fm['key-decisions']),
+    requirements_completed: fm['requirements-completed'] || [],
+  };
+
+  // If fields specified, filter to only those fields
+  if (fields && fields.length > 0) {
+    const filtered = { path: summaryPath };
+    for (const field of fields) {
+      if (fullResult[field] !== undefined) {
+        filtered[field] = fullResult[field];
+      }
+    }
+    output(filtered, raw);
+    return;
+  }
+
+  output(fullResult, raw);
+}
+
+async function cmdWebsearch(query, options, raw) {
+  const apiKey = process.env.BRAVE_API_KEY;
+
+  if (!apiKey) {
+    // No key = silent skip, agent falls back to built-in WebSearch
+    output({ available: false, reason: 'BRAVE_API_KEY not set' }, raw, '');
+    return;
+  }
+
+  if (!query) {
+    output({ available: false, error: 'Query required' }, raw, '');
+    return;
+  }
+
+  const params = new URLSearchParams({
+    q: query,
+    count: String(options.limit || 10),
+    country: 'us',
+    search_lang: 'en',
+    text_decorations: 'false'
+  });
+
+  if (options.freshness) {
+    params.set('freshness', options.freshness);
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.search.brave.com/res/v1/web/search?${params}`,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'X-Subscription-Token': apiKey
+        }
+      }
+    );
+
+    if (!response.ok) {
+      output({ available: false, error: `API error: ${response.status}` }, raw, '');
+      return;
+    }
+
+    const data = await response.json();
+
+    const results = (data.web?.results || []).map(r => ({
+      title: r.title,
+      url: r.url,
+      description: r.description,
+      age: r.age || null
+    }));
+
+    output({
+      available: true,
+      query,
+      count: results.length,
+      results
+    }, raw, results.map(r => `${r.title}\n${r.url}\n${r.description}`).join('\n\n'));
+  } catch (err) {
+    output({ available: false, error: err.message }, raw, '');
+  }
+}
+
+function cmdProgressRender(cwd, format, raw) {
+  const phasesDir = planningPaths(cwd).phases;
+  const roadmapPath = planningPaths(cwd).roadmap;
+  const milestone = getMilestoneInfo(cwd);
+
+  const phases = [];
+  let totalPlans = 0;
+  let totalSummaries = 0;
+
+  try {
+    const entries = fs.readdirSync(phasesDir, { withFileTypes: true });
+    const dirs = entries.filter(e => e.isDirectory()).map(e => e.name).sort((a, b) => comparePhaseNum(a, b));
+
+    for (const dir of dirs) {
+      const dm = dir.match(/^(\d+(?:\.\d+)*)-?(.*)/);
+      const phaseNum = dm ? dm[1] : dir;
+      const phaseName = dm && dm[2] ? dm[2].replace(/-/g, ' ') : '';
+      const phaseFiles = fs.readdirSync(path.join(phasesDir, dir));
+      const plans = phaseFiles.filter(f => f.endsWith('-PLAN.md') || f === 'PLAN.md').length;
+      const summaries = phaseFiles.filter(f => f.endsWith('-SUMMARY.md') || f === 'SUMMARY.md').length;
+
+      totalPlans += plans;
+      totalSummaries += summaries;
+
+      const status = determinePhaseStatus(plans, summaries, path.join(phasesDir, dir), 'Pending');
+
+      phases.push({ number: phaseNum, name: phaseName, plans, summaries, status });
+    }
+  } catch { /* intentionally empty */ }
+
+  const percent = totalPlans > 0 ? Math.min(100, Math.round((totalSummaries / totalPlans) * 100)) : 0;
+
+  if (format === 'table') {
+    // Render markdown table
+    const barWidth = 10;
+    const filled = Math.round((percent / 100) * barWidth);
+    const bar = '\u2588'.repeat(filled) + '\u2591'.repeat(barWidth - filled);
+    let out = `# ${milestone.version} ${milestone.name}\n\n`;
+    out += `**Progress:** [${bar}] ${totalSummaries}/${totalPlans} plans (${percent}%)\n\n`;
+    out += `| Phase | Name | Plans | Status |\n`;
+    out += `|-------|------|-------|--------|\n`;
+    for (const p of phases) {
+      out += `| ${p.number} | ${p.name} | ${p.summaries}/${p.plans} | ${p.status} |\n`;
+    }
+    output({ rendered: out }, raw, out);
+  } else if (format === 'bar') {
+    const barWidth = 20;
+    const filled = Math.round((percent / 100) * barWidth);
+    const bar = '\u2588'.repeat(filled) + '\u2591'.repeat(barWidth - filled);
+    const text = `[${bar}] ${totalSummaries}/${totalPlans} plans (${percent}%)`;
+    output({ bar: text, percent, completed: totalSummaries, total: totalPlans }, raw, text);
+  } else {
+    // JSON format
+    output({
+      milestone_version: milestone.version,
+      milestone_name: milestone.name,
+      phases,
+      total_plans: totalPlans,
+      total_summaries: totalSummaries,
+      percent,
+    }, raw);
+  }
+}
+
+/**
+ * Match pending todos against a phase's goal/name/requirements.
+ * Returns todos with relevance scores based on keyword, area, and file overlap.
+ * Used by discuss-phase to surface relevant todos before scope-setting.
+ */
+function cmdTodoMatchPhase(cwd, phase, raw) {
+  if (!phase) { error('phase required for todo match-phase'); }
+
+  const pendingDir = path.join(planningDir(cwd), 'todos', 'pending');
+  const todos = [];
+
+  // Load pending todos
+  try {
+    const files = fs.readdirSync(pendingDir).filter(f => f.endsWith('.md'));
+    for (const file of files) {
+      const content = platformReadSync(path.join(pendingDir, file));
+      if (content === null) continue;
+      const titleMatch = content.match(/^title:\s*(.+)$/m);

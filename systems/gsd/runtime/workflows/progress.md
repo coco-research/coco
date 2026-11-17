@@ -254,3 +254,353 @@ Read its `<objective>` section.
 
 ---
 
+**Route B: Phase needs planning**
+
+Check if `{phase_num}-CONTEXT.md` exists in phase directory.
+
+Check if current phase has UI indicators:
+
+```bash
+PHASE_SECTION=$(gsd-sdk query roadmap.get-phase "${CURRENT_PHASE}" 2>/dev/null)
+PHASE_HAS_UI=$(echo "$PHASE_SECTION" | grep -qi "UI hint.*yes" && echo "true" || echo "false")
+```
+
+**If CONTEXT.md exists:**
+
+```
+---
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Phase {N}: {Name}** — {Goal from ROADMAP.md}
+<sub>✓ Context gathered, ready to plan</sub>
+
+`/clear` then:
+
+`/gsd:plan-phase {phase-number} ${GSD_WS}`
+
+---
+```
+
+**If CONTEXT.md does NOT exist AND phase has UI (`PHASE_HAS_UI` is `true`):**
+
+```
+---
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Phase {N}: {Name}** — {Goal from ROADMAP.md}
+
+`/clear` then:
+
+`/gsd:discuss-phase {phase}` — gather context and clarify approach
+
+---
+
+**Also available:**
+- `/gsd:ui-phase {phase}` — generate UI design contract (recommended for frontend phases)
+- `/gsd:plan-phase {phase}` — skip discussion, plan directly
+- `/gsd:discuss-phase {phase}` — include assumptions check before planning
+
+---
+```
+
+**If CONTEXT.md does NOT exist AND phase has no UI:**
+
+```
+---
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Phase {N}: {Name}** — {Goal from ROADMAP.md}
+
+`/clear` then:
+
+`/gsd:discuss-phase {phase} ${GSD_WS}` — gather context and clarify approach
+
+---
+
+**Also available:**
+- `/gsd:plan-phase {phase} ${GSD_WS}` — skip discussion, plan directly
+- `/gsd:discuss-phase {phase} ${GSD_WS}` — include assumptions check before planning
+
+---
+```
+
+---
+
+**Route E: UAT gaps need fix plans**
+
+UAT.md exists with gaps (diagnosed issues). User needs to plan fixes.
+
+```
+---
+
+## ⚠ UAT Gaps Found
+
+**{phase_num}-UAT.md** has {N} gaps requiring fixes.
+
+`/clear` then:
+
+`/gsd:plan-phase {phase} --gaps ${GSD_WS}`
+
+---
+
+**Also available:**
+- `/gsd:execute-phase {phase} ${GSD_WS}` — execute phase plans
+- `/gsd:verify-work {phase} ${GSD_WS}` — run more UAT testing
+
+---
+```
+
+---
+
+**Route E.2: UAT testing incomplete (partial)**
+
+UAT.md exists with `status: partial` — testing session ended before all items resolved.
+
+```
+---
+
+## Incomplete UAT Testing
+
+**{phase_num}-UAT.md** has {N} unresolved tests (pending, blocked, or skipped).
+
+`/clear` then:
+
+`/gsd:verify-work {phase} ${GSD_WS}` — resume testing from where you left off
+
+---
+
+**Also available:**
+- `/gsd:audit-uat ${GSD_WS}` — full cross-phase UAT audit
+- `/gsd:execute-phase {phase} ${GSD_WS}` — execute phase plans
+
+---
+```
+
+---
+
+**Step 3: Check milestone status (only when phase complete)**
+
+Read ROADMAP.md and identify:
+1. Current phase number
+2. All phase numbers in the current milestone section
+
+Count total phases and identify the highest phase number.
+
+State: "Current phase is {X}. Milestone has {N} phases (highest: {Y})."
+
+**Route based on milestone status:**
+
+| Condition | Meaning | Action |
+|-----------|---------|--------|
+| current phase < highest phase | More phases remain | Go to **Route C** |
+| current phase = highest phase | Milestone complete | Go to **Route D** |
+
+---
+
+**Route C: Phase complete, more phases remain**
+
+Read ROADMAP.md to get the next phase's name and goal.
+
+Check if next phase has UI indicators:
+
+```bash
+NEXT_PHASE_SECTION=$(gsd-sdk query roadmap.get-phase "$((Z+1))" 2>/dev/null)
+NEXT_HAS_UI=$(echo "$NEXT_PHASE_SECTION" | grep -qi "UI hint.*yes" && echo "true" || echo "false")
+```
+
+**If next phase has UI (`NEXT_HAS_UI` is `true`):**
+
+```
+---
+
+## ✓ Phase {Z} Complete
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Phase {Z+1}: {Name}** — {Goal from ROADMAP.md}
+
+`/clear` then:
+
+`/gsd:discuss-phase {Z+1}` — gather context and clarify approach
+
+---
+
+**Also available:**
+- `/gsd:ui-phase {Z+1}` — generate UI design contract (recommended for frontend phases)
+- `/gsd:plan-phase {Z+1}` — skip discussion, plan directly
+- `/gsd:verify-work {Z}` — user acceptance test before continuing
+
+---
+```
+
+**If next phase has no UI:**
+
+```
+---
+
+## ✓ Phase {Z} Complete
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Phase {Z+1}: {Name}** — {Goal from ROADMAP.md}
+
+`/clear` then:
+
+`/gsd:discuss-phase {Z+1} ${GSD_WS}` — gather context and clarify approach
+
+---
+
+**Also available:**
+- `/gsd:plan-phase {Z+1} ${GSD_WS}` — skip discussion, plan directly
+- `/gsd:verify-work {Z} ${GSD_WS}` — user acceptance test before continuing
+
+---
+```
+
+---
+
+**Route D: Milestone complete**
+
+```
+---
+
+## 🎉 Milestone Complete
+
+All {N} phases finished!
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Complete Milestone** — archive and prepare for next
+
+`/clear` then:
+
+`/gsd:complete-milestone ${GSD_WS}`
+
+---
+
+**Also available:**
+- `/gsd:verify-work ${GSD_WS}` — user acceptance test before completing milestone
+
+---
+```
+
+---
+
+**Route F: Between milestones (ROADMAP.md missing, PROJECT.md exists)**
+
+A milestone was completed and archived. Ready to start the next milestone cycle.
+
+Read MILESTONES.md to find the last completed milestone version.
+
+```
+---
+
+## ✓ Milestone v{X.Y} Complete
+
+Ready to plan the next milestone.
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Start Next Milestone** — questioning → research → requirements → roadmap
+
+`/clear` then:
+
+`/gsd:new-milestone ${GSD_WS}`
+
+---
+```
+
+</step>
+
+<step name="edge_cases">
+**Handle edge cases:**
+
+- Phase complete but next phase not planned → offer `/gsd:plan-phase [next] ${GSD_WS}`
+- All work complete → offer milestone completion
+- Blockers present → highlight before offering to continue
+- Handoff file exists → mention it, offer `/gsd:resume-work ${GSD_WS}`
+</step>
+
+<step name="forensic_audit">
+**Forensic Integrity Audit** — only runs when `--forensic` is present in ARGUMENTS.
+
+If `--forensic` is NOT present in ARGUMENTS: skip this step entirely. Default progress behavior (standard report + routing) is unchanged.
+
+If `--forensic` IS present: after the standard report and routing suggestion have been displayed, append the following audit section.
+
+---
+
+## Forensic Integrity Audit
+
+Running 6 deep checks against project state...
+
+Run each check in order. For each check, emit ✓ (pass) or ⚠ (warning) with concrete evidence when a problem is found.
+
+**Check 1 — STATE vs artifact consistency**
+
+Read STATE.md `status` / `stopped_at` fields (from the STATE snapshot already loaded). Compare against the artifact count from the roadmap analysis. If STATE.md claims the current phase is pending/mid-flight but the artifact count shows it as complete (all PLAN.md files have matching SUMMARY.md files), flag inconsistency. Emit:
+- ✓ `STATE.md consistent with artifact count` — if both agree
+- ⚠ `STATE.md claims [status] but artifact count shows phase complete` — with the specific values
+
+**Check 2 — Orphaned handoff files**
+
+Check for existence of:
+```bash
+ls .planning/HANDOFF.json .planning/phases/*/.continue-here.md .planning/phases/*/*HANDOFF*.md 2>/dev/null || true
+```
+Also check `.planning/continue-here.md`.
+
+Emit:
+- ✓ `No orphaned handoff files` — if none found
+- ⚠ `Orphaned handoff files found` — list each file path, add: `→ Work was paused mid-flight. Read the handoff before continuing.`
+
+**Check 3 — Deferred scope drift**
+
+Search phase artifacts (CONTEXT.md, DISCUSSION-LOG.md, BUG-BRIEF.md, VERIFICATION.md, SUMMARY.md, HANDOFF.md files under `.planning/phases/`) for patterns:
+```bash
+grep -rl "defer to Phase\|future phase\|out of scope Phase\|deferred to Phase" .planning/phases/ 2>/dev/null || true
+```
+
+For each match, extract the referenced phase number. Cross-reference against ROADMAP.md phase list. If the referenced phase number is NOT in ROADMAP.md, flag as deferred scope not captured.
+
+Emit:
+- ✓ `All deferred scope captured in ROADMAP` — if no mismatches
+- ⚠ `Deferred scope references phase(s) not in ROADMAP` — list: file, reference text, missing phase number
+
+**Check 4 — Memory-flagged pending work**
+
+Check if `.planning/MEMORY.md` or `.planning/memory/` exists:
+```bash
+ls .planning/MEMORY.md .planning/memory/*.md 2>/dev/null || true
+```
+
+If found, grep for entries containing: `pending`, `status`, `deferred`, `not yet run`, `backfill`, `blocking`.
+
+Emit:
+- ✓ `No memory entries flagging pending work` — if none found or no MEMORY.md
+- ⚠ `Memory entries flag pending/deferred work` — list the matching lines (max 5, truncated at 80 chars)
+
+**Check 5 — Blocking operational todos**
+
+Check for pending todos:
+```bash
+ls .planning/todos/pending/*.md 2>/dev/null || true
+```
+
+For files found, scan for keywords indicating operational blockers: `script`, `credential`, `API key`, `manual`, `verification`, `setup`, `configure`, `run `.
+
+Emit:
+- ✓ `No blocking operational todos` — if no pending todos or none match operational keywords
+- ⚠ `Blocking operational todos found` — list the file names and matching keywords (max 5)
+
+**Check 6 — Uncommitted code**
+
+```bash
+git status --porcelain 2>/dev/null | grep -v "^??" | grep -v "^.planning\/" | grep -v "^\.\." | head -10
+```
+
+If output is non-empty (modified/staged files outside `.planning/`), flag as uncommitted code.
+

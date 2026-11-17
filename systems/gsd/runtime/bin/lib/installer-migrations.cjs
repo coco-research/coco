@@ -143,3 +143,353 @@ function appliedMigrationIds(state) {
       .filter((entry) => entry && typeof entry.id === 'string')
       .map((entry) => entry.id)
   );
+}
+
+function appliedMigrationEntries(state) {
+  const entries = new Map();
+  for (const entry of state.appliedMigrations) {
+    if (entry && typeof entry.id === 'string' && !entries.has(entry.id)) {
+      entries.set(entry.id, entry);
+    }
+  }
+  return entries;
+}
+
+function migrationChecksum(migration) {
+  const checksum = migration.checksum;
+  if (typeof checksum === 'string' && checksum) return checksum;
+  const serializable = {
+    id: migration.id,
+    title: migration.title || null,
+    description: migration.description || null,
+    introducedIn: migration.introducedIn || null,
+    runtimes: migration.runtimes || null,
+    scopes: migration.scopes || null,
+    destructive: migration.destructive === true,
+    runtimeContract: migration.runtimeContract || null,
+    plan: typeof migration.plan === 'function' ? migration.plan.toString() : null,
+  };
+  return `sha256:${sha256Text(JSON.stringify(serializable))}`;
+}
+
+function assertAppliedMigrationChecksums(applied, migrations) {
+  for (const migration of migrations) {
+    const entry = applied.get(migration.id);
+    if (!entry || !entry.checksum) continue;
+    const checksum = migrationChecksum(migration);
+    if (entry.checksum !== checksum) {
+      throw new Error(
+        `applied migration checksum changed for ${migration.id}; create a new fix-forward migration id`
+      );
+    }
+  }
+}
+
+function migrationMatchesContext(migration, { runtime, scope }) {
+  if (Array.isArray(migration.runtimes) && migration.runtimes.length > 0) {
+    if (!runtime || !migration.runtimes.includes(runtime)) return false;
+  }
+  if (Array.isArray(migration.scopes) && migration.scopes.length > 0) {
+    if (!scope || !migration.scopes.includes(scope)) return false;
+  }
+  return true;
+}
+
+function discoverInstallerMigrations({ migrationsDir }) {
+  if (!migrationsDir || !fs.existsSync(migrationsDir)) return [];
+  return fs.readdirSync(migrationsDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.cjs'))
+    .map((entry) => entry.name)
+    .sort()
+    .flatMap((fileName) => {
+      const source = path.join(migrationsDir, fileName);
+      delete require.cache[require.resolve(source)];
+      const exported = require(source);
+      const records = Array.isArray(exported) ? exported : [exported];
+      return records.map((record) => validateInstallerMigrationRecord(record, source));
+    });
+}
+
+function journalTimestamp(now) {
+  return now().replace(/[:.]/g, '-');
+}
+
+function migrationRunId(appliedAt) {
+  return `${journalTimestamp(() => appliedAt)}-${crypto.randomBytes(8).toString('hex')}`;
+}
+
+function sleepSync(ms) {
+  const buffer = new SharedArrayBuffer(4);
+  Atomics.wait(new Int32Array(buffer), 0, 0, ms);
+}
+
+/**
+ * Check whether a given PID is alive on the current host.
+ * Uses process.kill(pid, 0) which works on POSIX and Windows (Node's
+ * implementation maps it to OpenProcess + GetExitCodeProcess on win32).
+ * Returns true if alive or permission-denied (live but not ours),
+ * false if ESRCH (no such process).
+ */
+function isPidAlive(pid) {
+  if (typeof pid !== 'number' || !Number.isFinite(pid) || pid <= 0) return false;
+  try {
+    process.kill(pid, 0);
+    return true; // alive (or permission denied — treat as live)
+  } catch (err) {
+    return err.code !== 'ESRCH';
+  }
+}
+
+/**
+ * Try to read and parse the lock file JSON. Returns null on any error
+ * (missing, invalid JSON, I/O failure).
+ */
+function readLockFile(lockPath) {
+  try {
+    const raw = fs.readFileSync(lockPath, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object' && typeof parsed.pid === 'number') {
+      return parsed;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function acquireInstallMigrationLock(configDir, { timeoutMs = DEFAULT_LOCK_TIMEOUT_MS } = {}) {
+  fs.mkdirSync(configDir, { recursive: true });
+  const lockPath = path.join(configDir, INSTALL_MIGRATION_LOCK_NAME);
+  const started = Date.now();
+
+  while (true) {
+    let fd = null;
+    let lockCreatedByUs = false;
+    try {
+      fd = fs.openSync(lockPath, 'wx');
+      // Close the open descriptor before writing so the file handle is
+      // released on Windows before the release closure unlinks it.
+      // Write payload via writeFileSync with the path (not the fd) so we
+      // don't hold an open fd across the lifetime of the lock.
+      fs.closeSync(fd);
+      fd = null;
+      lockCreatedByUs = true; // we own the file; clean it up on any subsequent error
+      fs.writeFileSync(lockPath, JSON.stringify({
+        pid: process.pid,
+        acquiredAt: new Date().toISOString(),
+      }) + '\n');
+      lockCreatedByUs = false; // release closure owns cleanup from here
+      return () => {
+        const failures = [];
+        // Use unlinkSync (not rmSync with { force: true }) so EPERM errors
+        // are NOT silently swallowed. On Windows, if the unlink fails
+        // transiently, the error surfaces via releaseError so the caller
+        // can observe and surface it rather than leaving a stale lock.
+        try { fs.unlinkSync(lockPath); } catch (error) { failures.push(error); }
+        if (failures.length > 0) {
+          const releaseError = new Error(`failed to release installer migration lock: ${lockPath}`);
+          releaseError.failures = failures;
+          throw releaseError;
+        }
+      };
+    } catch (error) {
+      if (fd !== null) {
+        try { fs.closeSync(fd); } catch { /* best-effort */ }
+        try { fs.unlinkSync(lockPath); } catch { /* best-effort */ }
+        fd = null;
+      } else if (lockCreatedByUs) {
+        // fd was closed but writeFileSync threw before we returned the release
+        // closure — the empty lock file is still on disk and must be removed
+        // so it does not orphan as an unreadable (empty/invalid JSON) stale lock.
+        try { fs.unlinkSync(lockPath); } catch { /* best-effort */ }
+      }
+      if (error && error.code === 'EEXIST') {
+        // Stale-lock reclamation: read the on-disk PID and check liveness.
+        // If the PID is dead (ESRCH) or is our own process (same-process
+        // re-entry caused by rmSync silently swallowing an unlink error on
+        // a previous call in the same invocation — the root cause of #3670),
+        // reclaim the lock by removing the stale file and retrying.
+        const lockData = readLockFile(lockPath);
+        if (lockData !== null) {
+          const holderPid = lockData.pid;
+          const isSameProcess = holderPid === process.pid;
+          const isDeadProcess = !isPidAlive(holderPid);
+          if (isSameProcess || isDeadProcess) {
+            // Reclaim: remove the stale lock and loop back to openSync.
+            // Only continue (retry) when unlink actually succeeds — a silent
+            // continue on reclaim failure recreates the original deadlock:
+            // the lock stays on disk and we spin indefinitely.
+            let reclaimed = false;
+            try { fs.unlinkSync(lockPath); reclaimed = true; } catch { /* unlink failed — fall through to timeout path */ }
+            if (reclaimed) continue;
+          }
+        }
+        if (Date.now() - started >= timeoutMs) {
+          const holderInfo = lockData ? ` (held by pid ${lockData.pid} since ${lockData.acquiredAt})` : '';
+          throw new Error(`installer migration lock is held: ${lockPath}${holderInfo}`);
+        }
+        sleepSync(Math.min(50, Math.max(1, timeoutMs - (Date.now() - started))));
+        continue;
+      }
+      throw error;
+    }
+  }
+}
+
+function ensureInsideConfig(configDir, relPath) {
+  const normalized = normalizeRelPath(relPath);
+  const fullPath = path.resolve(configDir, normalized);
+  const root = path.resolve(configDir);
+  if (fullPath !== root && !fullPath.startsWith(root + path.sep)) {
+    throw new Error(`migration path escapes configDir: ${relPath}`);
+  }
+  return { normalized, fullPath };
+}
+
+function isStructurallyEmpty(value) {
+  if (value === null || value === undefined) return true;
+  if (Array.isArray(value)) return value.length === 0;
+  return typeof value === 'object' && Object.keys(value).length === 0;
+}
+
+
+function journalAction(action, status, extras = {}) {
+  const { value, ...safeAction } = action;
+  return { ...safeAction, ...extras, status };
+}
+
+function planInstallerMigrations({
+  configDir,
+  runtime = null,
+  scope = null,
+  migrations,
+  baselineScan = false,
+  now = () => new Date().toISOString(),
+}) {
+  if (!configDir) throw new Error('configDir is required');
+  if (!Array.isArray(migrations)) throw new Error('migrations must be an array');
+
+  const manifest = readInstallManifest(configDir);
+  const state = readInstallState(configDir);
+  const validatedMigrations = migrations.map((migration) =>
+    validateInstallerMigrationRecord(migration)
+  );
+  const scopedMigrations = validatedMigrations.filter((migration) =>
+    migrationMatchesContext(migration, { runtime, scope })
+  );
+  const applied = appliedMigrationEntries(state);
+  assertAppliedMigrationChecksums(applied, scopedMigrations);
+  const pending = scopedMigrations.filter((migration) => !applied.has(migration.id));
+  const actions = [];
+  const blocked = [];
+  const classifications = new Map();
+  const classify = (relPath) => {
+    const normalized = normalizeRelPath(relPath);
+    if (!classifications.has(normalized)) {
+      classifications.set(normalized, classifyArtifact(configDir, normalized, manifest));
+    }
+    return classifications.get(normalized);
+  };
+
+  for (const migration of pending) {
+    const plannedActions = migration.plan({
+      configDir,
+      runtime,
+      scope,
+      manifest,
+      state,
+      baselineScan,
+      now,
+      classifyArtifact: classify,
+      readJson: (relPath) => readJson(configDir, relPath),
+    });
+    validateInstallerMigrationActions(plannedActions, migration);
+    const checksum = migrationChecksum(migration);
+    for (const rawAction of plannedActions) {
+      const relPath = normalizeRelPath(rawAction.relPath);
+      const classification = rawAction.classification
+        ? {
+            classification: rawAction.classification,
+            originalHash: rawAction.originalHash || null,
+            currentHash: rawAction.currentHash || null,
+          }
+        : classify(relPath);
+      let protectedType = rawAction.type;
+      if (rawAction.type === 'remove-managed' && classification.classification === 'managed-modified') {
+        protectedType = 'backup-and-remove';
+      }
+      if (rawAction.type === 'remove-managed' && classification.classification === 'unknown') {
+        protectedType = 'preserve-user';
+      }
+      const action = {
+        migrationId: migration.id,
+        migrationChecksum: checksum,
+        type: protectedType,
+        relPath,
+        reason: rawAction.reason || migration.description || '',
+        classification: classification.classification,
+        originalHash: classification.originalHash,
+        currentHash: classification.currentHash,
+      };
+      if (action.type !== rawAction.type) {
+        action.requestedType = rawAction.type;
+      }
+      if (action.type === 'backup-and-remove') {
+        action.backupRelPath = null;
+      }
+      if (action.type === 'rewrite-json') {
+        action.value = rawAction.value;
+        action.deleteIfEmpty = rawAction.deleteIfEmpty === true;
+      }
+      if (rawAction.prompt) action.prompt = rawAction.prompt;
+      if (Array.isArray(rawAction.choices)) action.choices = rawAction.choices;
+      if (action.type === 'prompt-user') {
+        blocked.push(action);
+      } else if (
+        action.classification === 'unknown' &&
+        action.type !== 'rewrite-json' &&
+        action.type !== 'record-baseline' &&
+        action.type !== 'baseline-preserve-user'
+      ) {
+        blocked.push(action);
+      }
+      actions.push(action);
+    }
+  }
+
+  return {
+    generatedAt: now(),
+    manifest,
+    state,
+    pendingMigrationIds: pending.map((migration) => migration.id),
+    pendingMigrations: pending,
+    actions,
+    blocked,
+  };
+}
+
+function uniqueActionMigrationIds(actions) {
+  return [...new Set(actions.map((action) => action.migrationId).filter(Boolean))];
+}
+
+function rollbackAppliedMigrationResult({ configDir, journal, journalPath, rollbackRoot, backupRoot, previousInstallStateBytes }) {
+  const failures = [];
+  for (const action of [...journal.actions].reverse()) {
+    if (!action.rollbackRelPath) continue;
+    const rollbackPath = path.join(configDir, action.rollbackRelPath);
+    const dest = path.join(configDir, action.relPath);
+    try {
+      if (fs.existsSync(rollbackPath)) {
+        fs.mkdirSync(path.dirname(dest), { recursive: true });
+        fs.copyFileSync(rollbackPath, dest);
+      }
+    } catch (error) {
+      failures.push({ relPath: action.relPath, error: error.message });
+    }
+    if (action.backupRelPath) {
+      try {
+        fs.rmSync(path.join(configDir, action.backupRelPath), { force: true });
+      } catch {
+        // backup cleanup is best-effort; preserve restore failures above
+      }
+    }

@@ -147,3 +147,208 @@ function classifyPromptUserAction(action) {
   // retired hooks from prior versions) fall through to the block-or-prompt
   // flow so the user retains control. On a first-time-baseline scan the
   // installer can safely remove whitelisted hooks because it is about to
+  // write the fresh bundled versions in their place.
+  if (BUNDLED_GSD_HOOK_FILES.has(relPath)) {
+    return { category: 'bundled-gsd-hook', choice: 'remove' };
+  }
+  return null;
+}
+
+// Convert a blocked prompt-user action into a concrete plan action.
+// `keep` → baseline-preserve-user (idempotent — already on disk).
+// `remove` → backup-and-remove (safe: keeps a rollback copy in the
+// migration journal under gsd-migration-journal/<runId>-backups/).
+function materializeResolution(action, choice) {
+  const base = {
+    migrationId: action.migrationId,
+    migrationChecksum: action.migrationChecksum,
+    relPath: action.relPath,
+    reason: action.reason,
+    classification: action.classification,
+    originalHash: action.originalHash || null,
+    currentHash: action.currentHash || null,
+    requestedType: 'prompt-user',
+  };
+  if (choice === 'keep') {
+    return { ...base, type: 'baseline-preserve-user' };
+  }
+  // 'remove'
+  return { ...base, type: 'backup-and-remove', backupRelPath: null };
+}
+
+function normalizeResolutionChoice(rawValue) {
+  if (typeof rawValue !== 'string') return null;
+  const normalized = rawValue.trim().toLowerCase();
+  return VALID_CHOICES.includes(normalized) ? normalized : null;
+}
+
+function actionSupportsChoice(action, choice) {
+  if (!action || !choice) return false;
+  if (!Array.isArray(action.choices) || action.choices.length === 0) {
+    return VALID_CHOICES.includes(choice);
+  }
+  return action.choices.includes(choice);
+}
+
+// Resolve prompt-user actions when stdin is not a TTY. Mutates the
+// passed result so:
+//   - resolved actions are appended to plan.actions in their concrete
+//     form (baseline-preserve-user / backup-and-remove);
+//   - result.blocked and plan.blocked are filtered to actions that
+//     could NOT be safely defaulted (caller must still handle those).
+// Returns { result, resolutions } where `resolutions` is the structured
+// log of every defaulted resolution.
+function resolveInstallerMigrationPromptsForNonTty(result, options = {}) {
+  if (!result || typeof result !== 'object') {
+    return { result, resolutions: [] };
+  }
+  const blocked = blockedInstallerMigrationActions(result);
+  if (blocked.length === 0) {
+    return { result, resolutions: [] };
+  }
+  const isTty = options.isTty === true;
+  if (isTty) {
+    // Honour interactive prompting paths (not implemented yet — the
+    // hard throw is still the right behaviour for TTY runs); resolver
+    // only fires when the installer cannot interactively ask.
+    return { result, resolutions: [] };
+  }
+
+  const env =
+    options && options.env && typeof options.env === 'object'
+      ? options.env
+      : process.env;
+  const envChoice = normalizeResolutionChoice(env && env[RESOLUTION_ENV_VAR]);
+  const resolutions = [];
+  const unresolved = [];
+
+  for (const action of blocked) {
+    if (action && action.type === 'prompt-user') {
+      let category = null;
+      let choice = null;
+      let source = null;
+      if (envChoice && actionSupportsChoice(action, envChoice)) {
+        category = 'operator-override';
+        choice = envChoice;
+        source = RESOLUTION_ENV_VAR;
+      } else {
+        const classification = classifyPromptUserAction(action);
+        if (classification) {
+          category = classification.category;
+          choice = classification.choice;
+          source = 'non-tty-default';
+        }
+      }
+
+      if (choice) {
+        const resolved = materializeResolution(action, choice);
+        // Replace the original prompt-user action in-place when present so
+        // applyInstallerMigrationPlan never sees an unsupported action type.
+        // Fallback to append only when the blocked action did not originate
+        // from plan.actions (defensive).
+        if (result.plan && Array.isArray(result.plan.actions)) {
+          const idx = result.plan.actions.indexOf(action);
+          if (idx >= 0) {
+            result.plan.actions[idx] = resolved;
+          } else {
+            result.plan.actions.push(resolved);
+          }
+        }
+        resolutions.push({
+          relPath: action.relPath,
+          category,
+          choice,
+          reason: action.reason,
+          resolvedActionType: resolved.type,
+          source,
+        });
+        continue;
+      }
+    }
+    unresolved.push(action);
+  }
+
+  // Mutate both the top-level and plan.blocked surfaces so downstream
+  // callers (assertInstallerMigrationsUnblocked, summarizers) see the
+  // post-resolution state.
+  if (Array.isArray(result.blocked)) {
+    result.blocked = unresolved;
+  }
+  if (result.plan && Array.isArray(result.plan.blocked)) {
+    result.plan.blocked = unresolved;
+  }
+
+  return { result, resolutions };
+}
+
+// Group blocked prompt-user actions by their `reason` so the operator
+// sees one summary line per cause instead of N path lines for the
+// same underlying issue.
+function groupBlockedByReason(blocked) {
+  const byReason = new Map();
+  for (const action of blocked) {
+    const reason = (action && action.reason) || 'no reason given';
+    if (!byReason.has(reason)) byReason.set(reason, []);
+    byReason.get(reason).push(action);
+  }
+  return byReason;
+}
+
+function describeChoicesForActions(blocked) {
+  const choiceSet = new Set();
+  for (const action of blocked) {
+    if (action && Array.isArray(action.choices)) {
+      for (const choice of action.choices) choiceSet.add(choice);
+    }
+  }
+  if (choiceSet.size === 0) {
+    for (const fallback of VALID_CHOICES) choiceSet.add(fallback);
+  }
+  return [...choiceSet];
+}
+
+function buildBlockedErrorMessage(blocked) {
+  const byReason = groupBlockedByReason(blocked);
+  const totalFiles = blocked.length;
+  const choices = describeChoicesForActions(blocked);
+
+  const lines = [
+    `installer migration blocked pending user choice: ${totalFiles} file${totalFiles === 1 ? '' : 's'} need a decision`,
+    `  choices: [${choices.join(', ')}]`,
+  ];
+  for (const [reason, actions] of byReason) {
+    lines.push(`  - ${actions.length} file${actions.length === 1 ? '' : 's'}: ${reason}`);
+    // Show up to 3 sample paths so operators can spot which files are
+    // affected without dumping a thousand-line wall when SDK build
+    // artifacts leak.
+    const sample = actions.slice(0, 3).map((a) => a.relPath);
+    if (sample.length > 0) {
+      lines.push(`      e.g. ${sample.join(', ')}${actions.length > sample.length ? `, ... (+${actions.length - sample.length} more)` : ''}`);
+    }
+  }
+  lines.push(
+    `  resolve non-interactively by setting ${RESOLUTION_ENV_VAR}=<choice> ` +
+    `(or run the installer in a TTY to be prompted per file).`
+  );
+  return lines.join('\n');
+}
+
+function assertInstallerMigrationsUnblocked(result) {
+  const blocked = blockedInstallerMigrationActions(result);
+  if (blocked.length === 0) return;
+  const message = buildBlockedErrorMessage(blocked);
+  const error = new Error(message);
+  error.blocked = blocked;
+  error.blockedByReason = Object.fromEntries(groupBlockedByReason(blocked));
+  error.resolutionEnvVar = RESOLUTION_ENV_VAR;
+  throw error;
+}
+
+module.exports = {
+  RESOLUTION_ENV_VAR,
+  BUNDLED_GSD_HOOK_FILES,
+  assertInstallerMigrationsUnblocked,
+  classifyPromptUserAction,
+  resolveInstallerMigrationPromptsForNonTty,
+  summarizeInstallerMigrationResult,
+};

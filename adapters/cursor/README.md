@@ -11,6 +11,7 @@ bash adapters/cursor/install.sh
 ## What it does
 
 - `skills/<name>/` → `~/.cursor/skills/<name>/` (symlink)
+- `systems/<bundle>/<team>/` → `~/.cursor/skills/<frontmatter name>/` (symlink; team front doors)
 - `rules/cursor-mdc/*.mdc` → `~/.cursor/rules/*.mdc` (symlink)
 - `adapters/cursor/skills/<name>/` → `~/.cursor/skills/<name>/` (Cursor-specific helpers)
 - `commands/<ns>/<name>.md` → `~/.cursor/commands/<ns>:<name>.md` (symlink, flattened)

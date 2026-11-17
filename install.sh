@@ -183,4 +183,5 @@ if [[ -z "$DRY_RUN" ]]; then
   note "Coco v$VER installed. Check for updates anytime:"
   note "  bash \"$REPO_ROOT/scripts/check-update.sh\"      # git clones"
   note "  node \"$REPO_ROOT/bin/coco.js\" version                 # CLI wrapper"
+  note "Suggest skills from repeated local workflows: node \"$REPO_ROOT/bin/coco.js\" suggest-skills"
 fi

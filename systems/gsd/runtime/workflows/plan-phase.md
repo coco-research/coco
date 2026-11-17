@@ -1110,3 +1110,353 @@ to step 9.
 - **Empty / truncated / no recognized marker:** → Filesystem fallback (step 9a).
 
 ## 9a. Filesystem Fallback (Planner)
+
+**Triggered when:** Agent() returns but the return contains no recognized marker (`## PLANNING COMPLETE`, `## PHASE SPLIT RECOMMENDED`, `## ⚠ Source Audit`, `## CHECKPOINT REACHED`, `## PLANNING INCONCLUSIVE`).
+
+```bash
+DISK_PLANS=$(ls "${PHASE_DIR}"/*-PLAN.md 2>/dev/null | wc -l | tr -d ' ')
+```
+
+**If `DISK_PLANS` > 0:** The planner wrote plans to disk but the Agent() return was empty or
+truncated (the Windows stdio hang pattern — the subagent finished but the return never
+arrived). Display:
+
+```text
+◆ Planner wrote {DISK_PLANS} plan(s) to disk but did not emit a PLANNING COMPLETE marker.
+  This is a known Windows stdio hang pattern — work is likely recoverable.
+
+  Plans found on disk:
+  {ls output of *-PLAN.md}
+```
+
+Offer 3 options:
+1. **Accept plans** — treat as `## PLANNING COMPLETE` and continue through step 9 `## PLANNING COMPLETE` handling (so `--skip-verify` / `plan_checker_enabled=false` are honored — may skip to step 13 rather than step 10)
+2. **Retry planner** — re-spawn the planner with the same prompt (return to step 8)
+3. **Stop** — exit; user can re-run `/gsd:plan-phase {N}` to resume
+
+**If `DISK_PLANS` is 0 and no marker:** The planner produced no output. Treat as
+`## PLANNING INCONCLUSIVE` and handle accordingly.
+
+## 9b. Handle Phase Split Recommendation
+
+When the planner returns `## PHASE SPLIT RECOMMENDED`, it means the phase's source items exceed the context budget for full-fidelity implementation. The planner proposes groupings.
+
+**Extract from planner return:**
+- Proposed sub-phases (e.g., "17a: processing core (D-01 to D-19)", "17b: billing + config UX (D-20 to D-27)")
+- Which source items (REQ-IDs, D-XX decisions, RESEARCH items) go in each sub-phase
+- Why the split is necessary (context cost estimate, file count)
+
+**Present to user:**
+```
+## Phase {X} exceeds context budget for full-fidelity implementation
+
+The planner found {N} source items that exceed the context budget when
+planned at full fidelity. Instead of reducing scope, we recommend splitting:
+
+**Option 1: Split into sub-phases**
+- Phase {X}a: {name} — {items} ({N} source items, ~{P}% context)
+- Phase {X}b: {name} — {items} ({M} source items, ~{Q}% context)
+
+**Option 2: Proceed anyway** (planner will attempt all, quality may degrade past 50% context)
+
+**Option 3: Prioritize** — you choose which items to implement now,
+rest become a follow-up phase
+```
+
+Use AskUserQuestion with these 3 options.
+
+**If "Split":** Use `/gsd:phase --insert` to create the sub-phases, then replan each.
+**If "Proceed":** Return to planner with instruction to attempt all items at full fidelity, accepting more plans/tasks.
+**If "Prioritize":** Use AskUserQuestion (multiSelect) to let user pick which items are "now" vs "later". Create CONTEXT.md for each sub-phase with the selected items.
+
+## 9c. Handle Source Audit Gaps
+
+When the planner returns `## ⚠ Source Audit: Unplanned Items Found`, it means items from REQUIREMENTS.md, RESEARCH.md, ROADMAP goal, or CONTEXT.md decisions have no corresponding plan.
+
+**Extract from planner return:**
+- Each unplanned item with its source artifact and section
+- The planner's suggested options (A: add plan, B: split phase, C: defer with confirmation)
+
+**Present each gap to user.** For each unplanned item:
+
+```
+## ⚠ Unplanned: {item description}
+
+Source: {RESEARCH.md / REQUIREMENTS.md / ROADMAP goal / CONTEXT.md}
+Details: {why the planner flagged this}
+
+Options:
+1. Add a plan to cover this item (recommended)
+2. Split phase — move to a sub-phase with related items
+3. Defer — add to backlog (developer confirms this is intentional)
+```
+
+Use AskUserQuestion for each gap (or batch if multiple gaps).
+
+**If "Add plan":** Return to planner (step 8) with instruction to add plans covering the missing items, preserving existing plans.
+**If "Split":** Use `/gsd:phase --insert` for overflow items, then replan.
+**If "Defer":** Record in CONTEXT.md `## Deferred Ideas` with developer's confirmation. Proceed to step 10.
+
+## 10. Spawn gsd-plan-checker Agent
+
+Display banner:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► VERIFYING PLANS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+◆ Spawning plan checker...
+```
+
+Checker prompt:
+
+```markdown
+<verification_context>
+**Phase:** {phase_number}
+**Phase Goal:** {goal from ROADMAP}
+
+<files_to_read>
+- {PHASE_DIR}/*-PLAN.md (Plans to verify)
+- {roadmap_path} (Roadmap)
+- {requirements_path} (Requirements)
+- {context_path} (USER DECISIONS from /gsd:discuss-phase)
+- {research_path} (Technical Research — includes Validation Architecture)
+</files_to_read>
+
+${AGENT_SKILLS_CHECKER}
+
+**Phase requirement IDs (MUST ALL be covered):** {phase_req_ids}
+
+**Project instructions:** Read ./CLAUDE.md if exists — verify plans honor project guidelines
+**Project skills:** Check .claude/skills/ or .agents/skills/ directory (if either exists) — verify plans account for project skill rules
+</verification_context>
+
+<expected_output>
+- ## VERIFICATION PASSED — all checks pass
+- ## ISSUES FOUND — structured issue list
+</expected_output>
+```
+
+```
+Agent(
+  prompt=checker_prompt,
+  subagent_type="gsd-plan-checker",
+  model="{checker_model}",
+  description="Verify Phase {phase} plans"
+)
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+## 11. Handle Checker Return
+
+- **`## VERIFICATION PASSED`:** Display confirmation, proceed to step 13.
+- **`## ISSUES FOUND`:** Display issues, check iteration count, proceed to step 12.
+- **Empty / truncated / no recognized marker:** → Filesystem fallback (step 11a).
+
+**Thinking partner for architectural tradeoffs (conditional):**
+If `features.thinking_partner` is enabled, scan the checker's issues for architectural tradeoff keywords
+("architecture", "approach", "strategy", "pattern", "vs", "alternative"). If found:
+
+```
+The plan-checker flagged an architectural decision point:
+{issue description}
+
+Brief analysis:
+- Option A: {approach_from_plan} — {pros/cons}
+- Option B: {alternative_approach} — {pros/cons}
+- Recommendation: {choice} aligned with {phase_goal}
+
+Apply this to the revision? [Yes] / [No, I'll decide]
+```
+
+If yes: include the recommendation in the revision prompt. If no: proceed to revision loop as normal.
+If thinking_partner disabled: skip this block entirely.
+
+## 11a. Filesystem Fallback (Checker)
+
+**Triggered when:** Checker Agent() returns but the return contains neither `## VERIFICATION PASSED` nor `## ISSUES FOUND`.
+
+```bash
+DISK_PLANS=$(ls "${PHASE_DIR}"/*-PLAN.md 2>/dev/null | wc -l | tr -d ' ')
+```
+
+**If `DISK_PLANS` > 0:** Plans exist on disk; the checker return was empty or truncated (the
+Windows stdio hang pattern — the subagent finished but the return never arrived). Display:
+
+```text
+◆ Checker return was empty or truncated. {DISK_PLANS} plan(s) exist on disk.
+  This is a known Windows stdio hang pattern — checker may have completed without returning.
+```
+
+Offer 3 options:
+1. **Accept verification** — treat as `## VERIFICATION PASSED` and continue to step 13
+2. **Retry checker** — re-spawn the checker with the same prompt (return to step 10)
+3. **Stop** — exit; user can re-run `/gsd:plan-phase {N}` to resume
+
+**If `DISK_PLANS` is 0:** No plans on disk — something is seriously wrong. Display error and stop.
+
+## 12. Revision Loop (Max 3 Iterations)
+
+Track `iteration_count` (starts at 1 after initial plan + check).
+Track `prev_issue_count` (initialized to `Infinity` before the loop begins).
+Track `stall_reentry_count` (starts at 0; incremented each time "Adjust approach" re-enters step 8).
+
+**If iteration_count < 3:**
+
+Parse issue count from checker return: count BLOCKER + WARNING entries in the YAML issues block (structured output from gsd-plan-checker). If the checker's return contains no YAML issues block (i.e., the plan was approved with no issues), treat `issue_count` as 0 and skip the stall check — the plan passed. Proceed to step 13.
+
+Display: `Revision iteration {N}/3 -- {blocker_count} blockers, {warning_count} warnings`
+
+**Stall detection:** If `issue_count >= prev_issue_count`:
+  Display: `Revision loop stalled — issue count not decreasing ({issue_count} issues remain after {N} iterations)`
+
+  **If `stall_reentry_count < 2`:**
+    Ask user:
+      Question: "Issues remain after {N} revision attempts with no progress. Proceed with current output?"
+      Options: "Proceed anyway" | "Adjust approach"
+    If "Proceed anyway": accept current plans and continue to step 13.
+    If "Adjust approach": increment `stall_reentry_count`, open freeform discussion, then re-enter step 8 (full replanning). Note: re-entry resets `iteration_count` and `prev_issue_count` but `stall_reentry_count` persists across re-entries and is capped at 2.
+
+  **If `stall_reentry_count >= 2`:**
+    Display: `Stall persists after 2 re-planning attempts. The following issues could not be resolved automatically:`
+    List the remaining issues from the checker.
+    Suggest: "Consider resolving these issues manually or running `/gsd:debug` to investigate root causes."
+    Options: "Proceed anyway" | "Abandon"
+    If "Proceed anyway": accept current plans and continue to step 13.
+    If "Abandon": stop workflow.
+
+Set `prev_issue_count = issue_count`.
+
+Revision prompt:
+
+```markdown
+<revision_context>
+**Phase:** {phase_number}
+**Mode:** revision
+
+<files_to_read>
+- {PHASE_DIR}/*-PLAN.md (Existing plans)
+- {context_path} (USER DECISIONS from /gsd:discuss-phase)
+</files_to_read>
+
+${AGENT_SKILLS_PLANNER}
+
+**Checker issues:** {structured_issues_from_checker}
+</revision_context>
+
+<instructions>
+Make targeted updates to address checker issues.
+Do NOT replan from scratch unless issues are fundamental.
+Return what changed.
+</instructions>
+```
+
+```
+Agent(
+  prompt=revision_prompt,
+  subagent_type="gsd-planner",
+  model="{planner_model}",
+  description="Revise Phase {phase} plans"
+)
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+After planner returns -> spawn checker again (step 10), increment iteration_count.
+
+**If iteration_count >= 3:**
+
+Display: `Max iterations reached. {N} issues remain:` + issue list
+
+Offer: 1) Force proceed, 2) Provide guidance and retry, 3) Abandon
+
+## 12.5. Plan Bounce (Optional External Refinement)
+
+**Skip if:** `--skip-bounce` flag, `--gaps` flag, or bounce is not activated.
+
+**Activation:** Bounce runs when `--bounce` flag is present OR `workflow.plan_bounce` config is `true`. The `--skip-bounce` flag always wins (disables bounce even if config enables it). The `--gaps` flag also disables bounce (gap-closure mode should not modify plans externally).
+
+**Prerequisites:** `workflow.plan_bounce_script` must be set to a valid script path. If bounce is activated but no script is configured, display warning and skip:
+```
+⚠ Plan bounce activated but no script configured.
+Set workflow.plan_bounce_script to the path of your refinement script.
+Skipping bounce step.
+```
+
+**Read pass count:**
+```bash
+BOUNCE_PASSES=$(gsd-sdk query config-get workflow.plan_bounce_passes 2>/dev/null || echo "2")
+BOUNCE_SCRIPT=$(gsd-sdk query config-get workflow.plan_bounce_script 2>/dev/null | jq -r '.' 2>/dev/null || true)
+```
+
+Display banner:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► BOUNCING PLANS (External Refinement)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Script: ${BOUNCE_SCRIPT}
+Max passes: ${BOUNCE_PASSES}
+```
+
+**For each PLAN.md file in the phase directory:**
+
+1. **Backup:** Copy `*-PLAN.md` to `*-PLAN.pre-bounce.md`
+```bash
+cp "${PLAN_FILE}" "${PLAN_FILE%.md}.pre-bounce.md"
+```
+
+2. **Invoke bounce script:**
+```bash
+"${BOUNCE_SCRIPT}" "${PLAN_FILE}" "${BOUNCE_PASSES}"
+```
+
+3. **Validate bounced plan — YAML frontmatter integrity:**
+After the script returns, check that the bounced file still has valid YAML frontmatter (opening and closing `---` delimiters with parseable content between them). If the bounced plan breaks YAML frontmatter validation, restore the original from the pre-bounce.md backup and continue to the next plan:
+```
+⚠ Bounced plan ${PLAN_FILE} has broken YAML frontmatter — restoring original from pre-bounce backup.
+```
+
+4. **Handle script failure:** If the bounce script exits non-zero, restore the original plan from the pre-bounce.md backup and continue to the next plan:
+```
+⚠ Bounce script failed for ${PLAN_FILE} (exit code ${EXIT_CODE}) — restoring original from pre-bounce backup.
+```
+
+**After all plans are bounced:**
+
+5. **Re-run plan checker on bounced plans:** Spawn gsd-plan-checker (same as step 10) on all modified plans. If a bounced plan fails the checker, restore original from its pre-bounce.md backup:
+```
+⚠ Bounced plan ${PLAN_FILE} failed checker validation — restoring original from pre-bounce backup.
+```
+
+6. **Commit surviving bounced plans:** If at least one plan survived both the frontmatter validation and the checker re-run, commit the changes:
+```bash
+gsd-sdk query commit "refactor(${padded_phase}): bounce plans through external refinement" --files "${PHASE_DIR}/*-PLAN.md"
+```
+
+Display summary:
+```
+Plan bounce complete: {survived}/{total} plans refined
+```
+
+**Clean up:** Remove all `*-PLAN.pre-bounce.md` backup files after the bounce step completes (whether plans survived or were restored).
+
+## 13. Requirements Coverage Gate
+
+After plans pass the checker (or checker is skipped), verify that all phase requirements are covered by at least one plan.
+
+**Skip if:** `phase_req_ids` is null or TBD (no requirements mapped to this phase).
+
+**Step 1: Extract requirement IDs claimed by plans**
+```bash
+# Collect all requirement IDs from plan frontmatter
+PLAN_REQS=$(grep -h "requirements_addressed\|requirements:" ${PHASE_DIR}/*-PLAN.md 2>/dev/null | tr -d '[]' | tr ',' '\n' | sed 's/^[[:space:]]*//' | sort -u)
+```
+
+**Step 2: Compare against phase requirements from ROADMAP**
+
+For each REQ-ID in `phase_req_ids`:
+- If REQ-ID appears in `PLAN_REQS` → covered ✓
+- If REQ-ID does NOT appear in any plan → uncovered ✗
+

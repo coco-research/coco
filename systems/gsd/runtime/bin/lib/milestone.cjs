@@ -184,3 +184,131 @@ function cmdMilestoneComplete(cwd, version, options, raw) {
     const existing = fs.readFileSync(milestonesPath, 'utf-8');
     if (!existing.trim()) {
       // Empty file — treat like new
+      platformWriteSync(milestonesPath, `# Milestones\n\n${milestoneEntry}`);
+    } else {
+      // Insert after the header line(s) for reverse chronological order (newest first)
+      const headerMatch = existing.match(/^(#{1,3}\s+[^\n]*\n\n?)/);
+      if (headerMatch) {
+        const header = headerMatch[1];
+        const rest = existing.slice(header.length);
+        platformWriteSync(milestonesPath, header + milestoneEntry + rest);
+      } else {
+        // No recognizable header — prepend the entry
+        platformWriteSync(milestonesPath, milestoneEntry + existing);
+      }
+    }
+  } else {
+    platformWriteSync(milestonesPath, `# Milestones\n\n${milestoneEntry}`);
+  }
+
+  // Update STATE.md — keep frontmatter/body semantically aligned after closure
+  if (fs.existsSync(statePath)) {
+    let stateContent = fs.readFileSync(statePath, 'utf-8');
+
+    stateContent = stateReplaceFieldWithFallback(stateContent, 'Status', null, `${version} milestone complete`);
+    stateContent = stateReplaceFieldWithFallback(stateContent, 'Last Activity', 'Last activity', today);
+    stateContent = stateReplaceFieldWithFallback(stateContent, 'Last Activity Description', null,
+      `${version} milestone completed and archived`);
+
+    // Reset Current Position narrative so resume/progress flows do not keep
+    // pointing at closed-phase execution instructions.
+    const positionPattern = /(##\s*Current Position\s*\n)([\s\S]*?)(?=\n##|$)/i;
+    const closedPositionBody =
+      `\nPhase: Milestone ${version} complete\n` +
+      `Plan: —\n` +
+      `Status: Awaiting next milestone\n` +
+      `Last activity: ${today} — Milestone ${version} completed and archived\n\n`;
+    if (positionPattern.test(stateContent)) {
+      stateContent = stateContent.replace(positionPattern, (_m, header) => `${header}${closedPositionBody}`);
+    } else {
+      stateContent = `${stateContent.trimEnd()}\n\n## Current Position\n${closedPositionBody}`;
+    }
+
+    // Normalize operator-next-step tails that can become stale after close.
+    const operatorPattern = /(##\s*Operator Next Steps\s*\n)([\s\S]*?)(?=\n##|$)/i;
+    if (operatorPattern.test(stateContent)) {
+      stateContent = stateContent.replace(
+        operatorPattern,
+        `$1\n- Start the next milestone with ${formatGsdSlash('new-milestone', resolveRuntime(cwd))}\n\n`,
+      );
+    } else {
+      stateContent = `${stateContent.trimEnd()}\n\n## Operator Next Steps\n\n- Start the next milestone with ${formatGsdSlash('new-milestone', resolveRuntime(cwd))}\n`;
+    }
+
+    writeStateMd(statePath, stateContent, cwd);
+  }
+
+  // Archive phase directories if requested
+  let phasesArchived = false;
+  if (options.archivePhases) {
+    try {
+      const phaseArchiveDir = path.join(archiveDir, `${version}-phases`);
+      platformEnsureDir(phaseArchiveDir);
+
+      const phaseEntries = fs.readdirSync(phasesDir, { withFileTypes: true });
+      const phaseDirNames = phaseEntries.filter(e => e.isDirectory()).map(e => e.name);
+      let archivedCount = 0;
+      for (const dir of phaseDirNames) {
+        if (!isDirInMilestone(dir)) continue;
+        fs.renameSync(path.join(phasesDir, dir), path.join(phaseArchiveDir, dir));
+        archivedCount++;
+      }
+      phasesArchived = archivedCount > 0;
+    } catch { /* intentionally empty */ }
+  }
+
+  const result = {
+    version,
+    name: milestoneName,
+    date: today,
+    phases: phaseCount,
+    plans: totalPlans,
+    tasks: totalTasks,
+    accomplishments,
+    archived: {
+      roadmap: fs.existsSync(path.join(archiveDir, `${version}-ROADMAP.md`)),
+      requirements: fs.existsSync(path.join(archiveDir, `${version}-REQUIREMENTS.md`)),
+      audit: fs.existsSync(path.join(archiveDir, `${version}-MILESTONE-AUDIT.md`)),
+      phases: phasesArchived,
+    },
+    milestones_updated: true,
+    state_updated: fs.existsSync(statePath),
+  };
+
+  output(result, raw);
+}
+
+function cmdPhasesClear(cwd, raw, args) {
+  const phasesDir = planningPaths(cwd).phases;
+  const confirm = Array.isArray(args) && args.includes('--confirm');
+  let cleared = 0;
+
+  if (fs.existsSync(phasesDir)) {
+    const entries = fs.readdirSync(phasesDir, { withFileTypes: true });
+    const dirs = entries.filter(e => e.isDirectory() && !/^999(?:\.|$)/.test(e.name));
+
+    if (dirs.length > 0 && !confirm) {
+      error(
+        `phases clear would delete ${dirs.length} phase director${dirs.length === 1 ? 'y' : 'ies'}. ` +
+        `Pass --confirm to proceed.`
+      );
+    }
+
+    try {
+      for (const entry of dirs) {
+        fs.rmSync(path.join(phasesDir, entry.name), { recursive: true, force: true });
+        cleared++;
+      }
+    } catch (e) {
+      error('Failed to clear phases directory: ' + e.message);
+    }
+  }
+
+  output({ cleared }, raw, `${cleared} phase director${cleared === 1 ? 'y' : 'ies'} cleared`);
+}
+
+module.exports = {
+  cmdRequirementsMarkComplete,
+  cmdMilestoneComplete,
+  cmdPhasesClear,
+};

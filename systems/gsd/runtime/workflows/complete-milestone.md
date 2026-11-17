@@ -749,3 +749,106 @@ See .planning/MILESTONES.md for full details."
 Confirm: "Tagged: v[X.Y]"
 
 Ask: "Push tag to remote? (y/n)"
+
+If yes:
+```bash
+git push origin v[X.Y]
+```
+
+</step>
+
+<step name="git_commit_milestone">
+
+Commit the REQUIREMENTS.md deletion (archive files and ROADMAP.md were already committed in the safety commit in `reorganize_roadmap_and_delete_originals`).
+
+```bash
+git commit -m "chore: remove REQUIREMENTS.md for v[X.Y] milestone"
+```
+
+Confirm: "Committed: chore: remove REQUIREMENTS.md for v[X.Y] milestone"
+
+</step>
+
+<step name="offer_next">
+
+```
+✅ Milestone v[X.Y] [Name] complete
+
+Shipped:
+- [N] phases ([M] plans, [P] tasks)
+- [One sentence of what shipped]
+
+Archived:
+- milestones/v[X.Y]-ROADMAP.md
+- milestones/v[X.Y]-REQUIREMENTS.md
+
+Summary: .planning/MILESTONES.md
+Tag: v[X.Y]
+
+---
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Start Next Milestone** — questioning → research → requirements → roadmap
+
+`/clear` then:
+
+`/gsd:new-milestone`
+
+---
+```
+
+</step>
+
+</process>
+
+<milestone_naming>
+
+**Version conventions:**
+- **v1.0** — Initial MVP
+- **v1.1, v1.2** — Minor updates, new features, fixes
+- **v2.0, v3.0** — Major rewrites, breaking changes, new direction
+
+**Names:** Short 1-2 words (v1.0 MVP, v1.1 Security, v1.2 Performance, v2.0 Redesign).
+
+</milestone_naming>
+
+<what_qualifies>
+
+**Create milestones for:** Initial release, public releases, major feature sets shipped, before archiving planning.
+
+**Don't create milestones for:** Every phase completion (too granular), work in progress, internal dev iterations (unless truly shipped).
+
+Heuristic: "Is this deployed/usable/shipped?" If yes → milestone. If no → keep working.
+
+</what_qualifies>
+
+<success_criteria>
+
+Milestone completion is successful when:
+
+- [ ] Pre-close artifact audit run and output shown to user
+- [ ] Deferred items recorded in STATE.md if user acknowledged
+- [ ] Known deferred items count noted in MILESTONES.md entry
+
+- [ ] MILESTONES.md entry created with stats and accomplishments
+- [ ] PROJECT.md full evolution review completed
+- [ ] All shipped requirements moved to Validated in PROJECT.md
+- [ ] Key Decisions updated with outcomes
+- [ ] ROADMAP.md Backlog section extracted before rewrite, re-appended after (skipped if absent)
+- [ ] ROADMAP.md reorganized with milestone grouping (overwritten in place, not deleted)
+- [ ] Roadmap archive created (milestones/v[X.Y]-ROADMAP.md)
+- [ ] Requirements archive created (milestones/v[X.Y]-REQUIREMENTS.md)
+- [ ] Safety commit made (archive files + updated ROADMAP.md) BEFORE deleting REQUIREMENTS.md
+- [ ] REQUIREMENTS.md removed via `git rm` (fresh for next milestone, history preserved)
+- [ ] STATE.md updated with fresh project reference
+- [ ] Git tag created (v[X.Y]) (if `git.create_tag` enabled)
+- [ ] Milestone commit made (includes archive files and deletion)
+- [ ] Requirements completion checked against REQUIREMENTS.md traceability table
+- [ ] Incomplete requirements surfaced with proceed/audit/abort options
+- [ ] Known gaps recorded in MILESTONES.md if user proceeded with incomplete requirements
+- [ ] RETROSPECTIVE.md updated with milestone section
+- [ ] Cross-milestone trends updated
+- [ ] User knows next step (/gsd:new-milestone)
+
+</success_criteria>

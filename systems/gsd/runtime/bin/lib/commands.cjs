@@ -634,3 +634,353 @@ function cmdTodoMatchPhase(cwd, phase, raw) {
       const content = platformReadSync(path.join(pendingDir, file));
       if (content === null) continue;
       const titleMatch = content.match(/^title:\s*(.+)$/m);
+      const areaMatch = content.match(/^area:\s*(.+)$/m);
+      const filesMatch = content.match(/^files:\s*(.+)$/m);
+      const body = content.replace(/^(title|area|files|created|priority):.*$/gm, '').trim();
+
+      todos.push({
+        file,
+        title: titleMatch ? titleMatch[1].trim() : 'Untitled',
+        area: areaMatch ? areaMatch[1].trim() : 'general',
+        files: filesMatch ? filesMatch[1].trim().split(/[,\s]+/).filter(Boolean) : [],
+        body: body.slice(0, 200), // first 200 chars for context
+      });
+    }
+  } catch {}
+
+  if (todos.length === 0) {
+    output({ phase, matches: [], todo_count: 0 }, raw);
+    return;
+  }
+
+  // Load phase goal/name from ROADMAP
+  const phaseInfo = getRoadmapPhaseInternal(cwd, phase);
+  const phaseName = phaseInfo ? (phaseInfo.phase_name || '') : '';
+  const phaseGoal = phaseInfo ? (phaseInfo.goal || '') : '';
+  const phaseSection = phaseInfo ? (phaseInfo.section || '') : '';
+
+  // Build keyword set from phase name + goal + section text
+  const phaseText = `${phaseName} ${phaseGoal} ${phaseSection}`.toLowerCase();
+  const stopWords = new Set(['the', 'and', 'for', 'with', 'from', 'that', 'this', 'will', 'are', 'was', 'has', 'have', 'been', 'not', 'but', 'all', 'can', 'into', 'each', 'when', 'any', 'use', 'new']);
+  const phaseKeywords = new Set(
+    phaseText.split(/[\s\-_/.,;:()\[\]{}|]+/)
+      .map(w => w.replace(/[^a-z0-9]/g, ''))
+      .filter(w => w.length > 2 && !stopWords.has(w))
+  );
+
+  // Find phase directory to get expected file paths
+  const phaseInfoDisk = findPhaseInternal(cwd, phase);
+  const phasePlans = [];
+  if (phaseInfoDisk && phaseInfoDisk.found) {
+    try {
+      const phaseDir = path.join(cwd, phaseInfoDisk.directory);
+      const planFiles = fs.readdirSync(phaseDir).filter(f => f.endsWith('-PLAN.md'));
+      for (const pf of planFiles) {
+        const planContent = platformReadSync(path.join(phaseDir, pf));
+        if (planContent === null) continue;
+        const fmFiles = planContent.match(/files_modified:\s*\[([^\]]*)\]/);
+        if (fmFiles) {
+          phasePlans.push(...fmFiles[1].split(',').map(s => s.trim().replace(/['"]/g, '')).filter(Boolean));
+        }
+      }
+    } catch {}
+  }
+
+  // Score each todo for relevance
+  const matches = [];
+  for (const todo of todos) {
+    let score = 0;
+    const reasons = [];
+
+    // Keyword match: todo title/body terms in phase text
+    const todoWords = `${todo.title} ${todo.body}`.toLowerCase()
+      .split(/[\s\-_/.,;:()\[\]{}|]+/)
+      .map(w => w.replace(/[^a-z0-9]/g, ''))
+      .filter(w => w.length > 2 && !stopWords.has(w));
+
+    const matchedKeywords = todoWords.filter(w => phaseKeywords.has(w));
+    if (matchedKeywords.length > 0) {
+      score += Math.min(matchedKeywords.length * 0.2, 0.6);
+      reasons.push(`keywords: ${[...new Set(matchedKeywords)].slice(0, 5).join(', ')}`);
+    }
+
+    // Area match: todo area appears in phase text
+    if (todo.area !== 'general' && phaseText.includes(todo.area.toLowerCase())) {
+      score += 0.3;
+      reasons.push(`area: ${todo.area}`);
+    }
+
+    // File match: todo files overlap with phase plan files
+    if (todo.files.length > 0 && phasePlans.length > 0) {
+      const fileOverlap = todo.files.filter(f =>
+        phasePlans.some(pf => pf.includes(f) || f.includes(pf))
+      );
+      if (fileOverlap.length > 0) {
+        score += 0.4;
+        reasons.push(`files: ${fileOverlap.slice(0, 3).join(', ')}`);
+      }
+    }
+
+    if (score > 0) {
+      matches.push({
+        file: todo.file,
+        title: todo.title,
+        area: todo.area,
+        score: Math.round(score * 100) / 100,
+        reasons,
+      });
+    }
+  }
+
+  // Sort by score descending
+  matches.sort((a, b) => b.score - a.score);
+
+  output({ phase, matches, todo_count: todos.length }, raw);
+}
+
+function cmdTodoComplete(cwd, filename, raw) {
+  if (!filename) {
+    error('filename required for todo complete');
+  }
+
+  const pendingDir = path.join(planningDir(cwd), 'todos', 'pending');
+  const completedDir = path.join(planningDir(cwd), 'todos', 'completed');
+  const sourcePath = path.join(pendingDir, filename);
+
+  if (!fs.existsSync(sourcePath)) {
+    error(`Todo not found: ${filename}`);
+  }
+
+  // Ensure completed directory exists
+  platformEnsureDir(completedDir);
+
+  // Read, add completion timestamp, move
+  let content = fs.readFileSync(sourcePath, 'utf-8');
+  const today = new Date().toISOString().split('T')[0];
+  content = `completed: ${today}\n` + content;
+
+  platformWriteSync(path.join(completedDir, filename), content);
+  fs.unlinkSync(sourcePath);
+
+  output({ completed: true, file: filename, date: today }, raw, 'completed');
+}
+
+function cmdScaffold(cwd, type, options, raw) {
+  const { phase, name } = options;
+  const padded = phase ? normalizePhaseName(phase) : '00';
+  const today = new Date().toISOString().split('T')[0];
+
+  // Find phase directory
+  const phaseInfo = phase ? findPhaseInternal(cwd, phase) : null;
+  const phaseDir = phaseInfo ? path.join(cwd, phaseInfo.directory) : null;
+
+  if (phase && !phaseDir && type !== 'phase-dir') {
+    error(`Phase ${phase} directory not found`);
+  }
+
+  let filePath, content;
+
+  switch (type) {
+    case 'context': {
+      filePath = path.join(phaseDir, `${padded}-CONTEXT.md`);
+      content = `---\nphase: "${padded}"\nname: "${name || phaseInfo?.phase_name || 'Unnamed'}"\ncreated: ${today}\n---\n\n# Phase ${phase}: ${name || phaseInfo?.phase_name || 'Unnamed'} — Context\n\n## Decisions\n\n_Decisions will be captured during ${formatGsdSlash('discuss-phase', resolveRuntime(cwd))} ${phase}_\n\n## Discretion Areas\n\n_Areas where the executor can use judgment_\n\n## Deferred Ideas\n\n_Ideas to consider later_\n`;
+      break;
+    }
+    case 'uat': {
+      filePath = path.join(phaseDir, `${padded}-UAT.md`);
+      content = `---\nphase: "${padded}"\nname: "${name || phaseInfo?.phase_name || 'Unnamed'}"\ncreated: ${today}\nstatus: pending\n---\n\n# Phase ${phase}: ${name || phaseInfo?.phase_name || 'Unnamed'} — User Acceptance Testing\n\n## Test Results\n\n| # | Test | Status | Notes |\n|---|------|--------|-------|\n\n## Summary\n\n_Pending UAT_\n`;
+      break;
+    }
+    case 'verification': {
+      filePath = path.join(phaseDir, `${padded}-VERIFICATION.md`);
+      content = `---\nphase: "${padded}"\nname: "${name || phaseInfo?.phase_name || 'Unnamed'}"\ncreated: ${today}\nstatus: pending\n---\n\n# Phase ${phase}: ${name || phaseInfo?.phase_name || 'Unnamed'} — Verification\n\n## Goal-Backward Verification\n\n**Phase Goal:** [From ROADMAP.md]\n\n## Checks\n\n| # | Requirement | Status | Evidence |\n|---|------------|--------|----------|\n\n## Result\n\n_Pending verification_\n`;
+      break;
+    }
+    case 'phase-dir': {
+      if (!phase || !name) {
+        error('phase and name required for phase-dir scaffold');
+      }
+      const slug = generateSlugInternal(name);
+      // #3287: apply project_code prefix to stay consistent with phase.add/phase.insert
+      const scaffoldConfig = loadConfig(cwd);
+      const scaffoldProjectCode = scaffoldConfig.project_code || '';
+      const scaffoldPrefix = scaffoldProjectCode ? `${scaffoldProjectCode}-` : '';
+      const dirName = `${scaffoldPrefix}${padded}-${slug}`;
+      const phasesParent = planningPaths(cwd).phases;
+      platformEnsureDir(phasesParent);
+      const dirPath = path.join(phasesParent, dirName);
+      platformEnsureDir(dirPath);
+      output({ created: true, directory: toPosixPath(path.relative(cwd, dirPath)), path: dirPath }, raw, dirPath);
+      return;
+    }
+    default:
+      error(`Unknown scaffold type: ${type}. Available: context, uat, verification, phase-dir`);
+  }
+
+  if (fs.existsSync(filePath)) {
+    output({ created: false, reason: 'already_exists', path: filePath }, raw, 'exists');
+    return;
+  }
+
+  platformWriteSync(filePath, content);
+  const relPath = toPosixPath(path.relative(cwd, filePath));
+  output({ created: true, path: relPath }, raw, relPath);
+}
+
+function cmdStats(cwd, format, raw) {
+  const phasesDir = planningPaths(cwd).phases;
+  const roadmapPath = planningPaths(cwd).roadmap;
+  const reqPath = planningPaths(cwd).requirements;
+  const statePath = planningPaths(cwd).state;
+  const milestone = getMilestoneInfo(cwd);
+  const isDirInMilestone = getMilestonePhaseFilter(cwd);
+
+  // Phase & plan stats (reuse progress pattern)
+  const phasesByNumber = new Map();
+  let totalPlans = 0;
+  let totalSummaries = 0;
+
+  try {
+    const roadmapRaw = platformReadSync(roadmapPath);
+    if (roadmapRaw === null) throw new Error('roadmap missing');
+    const roadmapContent = extractCurrentMilestone(roadmapRaw, cwd);
+    const headingPattern = /#{2,4}\s*Phase\s+(\d+[A-Z]?(?:\.\d+)*)\s*:\s*([^\n]+)/gi;
+    let match;
+    while ((match = headingPattern.exec(roadmapContent)) !== null) {
+      const key = normalizePhaseName(match[1]);
+      phasesByNumber.set(key, {
+        number: key,
+        name: match[2].replace(/\(INSERTED\)/i, '').trim(),
+        plans: 0,
+        summaries: 0,
+        status: 'Not Started',
+      });
+    }
+  } catch { /* intentionally empty */ }
+
+  try {
+    const entries = fs.readdirSync(phasesDir, { withFileTypes: true });
+    const dirs = entries
+      .filter(e => e.isDirectory())
+      .map(e => e.name)
+      .filter(isDirInMilestone)
+      .sort((a, b) => comparePhaseNum(a, b));
+
+    for (const dir of dirs) {
+      const dm = dir.match(/^(\d+[A-Z]?(?:\.\d+)*)-?(.*)/i);
+      const phaseNum = dm ? dm[1] : dir;
+      const phaseName = dm && dm[2] ? dm[2].replace(/-/g, ' ') : '';
+      const phaseFiles = fs.readdirSync(path.join(phasesDir, dir));
+      const plans = phaseFiles.filter(f => f.endsWith('-PLAN.md') || f === 'PLAN.md').length;
+      const summaries = phaseFiles.filter(f => f.endsWith('-SUMMARY.md') || f === 'SUMMARY.md').length;
+
+      totalPlans += plans;
+      totalSummaries += summaries;
+
+      const status = determinePhaseStatus(plans, summaries, path.join(phasesDir, dir), 'Not Started');
+
+      const normalizedNum = normalizePhaseName(phaseNum);
+      const existing = phasesByNumber.get(normalizedNum);
+      phasesByNumber.set(normalizedNum, {
+        number: normalizedNum,
+        name: existing?.name || phaseName,
+        plans: (existing?.plans || 0) + plans,
+        summaries: (existing?.summaries || 0) + summaries,
+        status,
+      });
+    }
+  } catch { /* intentionally empty */ }
+
+  const phases = [...phasesByNumber.values()].sort((a, b) => comparePhaseNum(a.number, b.number));
+  const completedPhases = phases.filter(p => p.status === 'Complete').length;
+  const planPercent = totalPlans > 0 ? Math.min(100, Math.round((totalSummaries / totalPlans) * 100)) : 0;
+  const percent = phases.length > 0 ? Math.min(100, Math.round((completedPhases / phases.length) * 100)) : 0;
+
+  // Requirements stats
+  let requirementsTotal = 0;
+  let requirementsComplete = 0;
+  const reqContent = platformReadSync(reqPath);
+  if (reqContent !== null) {
+    const checked = reqContent.match(/^- \[x\] \*\*/gm);
+    const unchecked = reqContent.match(/^- \[ \] \*\*/gm);
+    requirementsComplete = checked ? checked.length : 0;
+    requirementsTotal = requirementsComplete + (unchecked ? unchecked.length : 0);
+  }
+
+  // Last activity from STATE.md
+  let lastActivity = null;
+  const stateContent = platformReadSync(statePath);
+  if (stateContent !== null) {
+    const activityMatch = stateContent.match(/^last_activity:\s*(.+)$/im)
+      || stateContent.match(/\*\*Last Activity:\*\*\s*(.+)/i)
+      || stateContent.match(/^Last Activity:\s*(.+)$/im)
+      || stateContent.match(/^Last activity:\s*(.+)$/im);
+    if (activityMatch) lastActivity = activityMatch[1].trim();
+  }
+
+  // Git stats
+  let gitCommits = 0;
+  let gitFirstCommitDate = null;
+  const commitCount = execGit(['rev-list', '--count', 'HEAD'], { cwd });
+  if (commitCount.exitCode === 0) {
+    gitCommits = parseInt(commitCount.stdout, 10) || 0;
+  }
+  const rootHash = execGit(['rev-list', '--max-parents=0', 'HEAD'], { cwd });
+  if (rootHash.exitCode === 0 && rootHash.stdout) {
+    const firstCommit = rootHash.stdout.split('\n')[0].trim();
+    const firstDate = execGit(['show', '-s', '--format=%as', firstCommit], { cwd });
+    if (firstDate.exitCode === 0) {
+      gitFirstCommitDate = firstDate.stdout || null;
+    }
+  }
+
+  const result = {
+    milestone_version: milestone.version,
+    milestone_name: milestone.name,
+    phases,
+    phases_completed: completedPhases,
+    phases_total: phases.length,
+    total_plans: totalPlans,
+    total_summaries: totalSummaries,
+    percent,
+    plan_percent: planPercent,
+    requirements_total: requirementsTotal,
+    requirements_complete: requirementsComplete,
+    git_commits: gitCommits,
+    git_first_commit_date: gitFirstCommitDate,
+    last_activity: lastActivity,
+  };
+
+  if (format === 'table') {
+    const barWidth = 10;
+    const filled = Math.round((percent / 100) * barWidth);
+    const bar = '\u2588'.repeat(filled) + '\u2591'.repeat(barWidth - filled);
+    let out = `# ${milestone.version} ${milestone.name} \u2014 Statistics\n\n`;
+    out += `**Progress:** [${bar}] ${completedPhases}/${phases.length} phases (${percent}%)\n`;
+    if (totalPlans > 0) {
+      out += `**Plans:** ${totalSummaries}/${totalPlans} complete (${planPercent}%)\n`;
+    }
+    out += `**Phases:** ${completedPhases}/${phases.length} complete\n`;
+    if (requirementsTotal > 0) {
+      out += `**Requirements:** ${requirementsComplete}/${requirementsTotal} complete\n`;
+    }
+    out += '\n';
+    out += `| Phase | Name | Plans | Completed | Status |\n`;
+    out += `|-------|------|-------|-----------|--------|\n`;
+    for (const p of phases) {
+      out += `| ${p.number} | ${p.name} | ${p.plans} | ${p.summaries} | ${p.status} |\n`;
+    }
+    if (gitCommits > 0) {
+      out += `\n**Git:** ${gitCommits} commits`;
+      if (gitFirstCommitDate) out += ` (since ${gitFirstCommitDate})`;
+      out += '\n';
+    }
+    if (lastActivity) out += `**Last activity:** ${lastActivity}\n`;
+    output({ rendered: out }, raw, out);
+  } else {
+    output(result, raw);
+  }
+}
+
+/**
+ * Check whether a commit should be allowed based on commit_docs config.

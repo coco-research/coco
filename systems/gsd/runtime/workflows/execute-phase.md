@@ -1003,3 +1003,353 @@ increases monotonically across waves. `{status}` is `complete` (success),
    {What was built — from SUMMARY.md}
    {Notable deviations, if any}
 
+   {If more waves: what this enables for next wave}
+   ---
+   ```
+
+7. **Handle failures:**
+   **Step 7.0 — classify before branching (#3095):**
+   ```bash
+   CLASS_JSON=$(gsd-sdk query agent.classify-failure -- "$AGENT_RETURN_BODY")
+   CLASS=$(echo "$CLASS_JSON" | jq -r '.class')
+   SENTINEL=$(echo "$CLASS_JSON" | jq -r '.sentinel // empty')
+   RETRY_AFTER=$(echo "$CLASS_JSON" | jq -r '.retryAfterSeconds // empty')
+   if [ -n "$RETRY_AFTER" ]; then RETRY_HINT="  Provider hinted retry-after: ${RETRY_AFTER}s"; else RETRY_HINT=""; fi
+   ```
+   One classifier branch handles sentinels across Claude/Copilot/Codex/Gemini. Reference: `docs/research/provider-rate-limit-signals.md`.
+   **Step 7.1 — `class == "quota-exceeded"`:**
+   Do not offer "retry now". Run step-5 spot-check first; if SUMMARY.md is missing but commits exist, route to safe-resume (`state.verify-against-disk`) instead of immediate redispatch.
+   ```text
+   ⚠ Plan {plan_id} terminated by provider quota / rate limit
+     Runtime sentinel: {SENTINEL}
+     {RETRY_HINT}
+     Partial commits on worktree branch: {N}
+     SUMMARY.md present: {yes|no}
+     1. Wait for quota reset, then resume (recommended)
+   2. Switch to a different runtime / model and resume
+   3. Abort phase and report partial state
+   ```
+   Re-run `/gsd:execute-phase` after quota reset for Option 1.
+   **Step 7.2 — `class == "classify-handoff-bug"`:**
+   If error contains `classifyHandoffIfNeeded is not defined`, treat as Claude runtime bug. Run the same step-5 spot-checks; PASS => treat as success, FAIL => fall through.
+   **Step 7.3 — `class == "unknown-failure"`:**
+   Report failed plan and ask Continue/Stop; continuing may cascade into dependent plan failures.
+
+7b. **Pre-wave dependency check (waves 2+ only):**
+    Before wave N+1, run `gsd-sdk query verify.key-links {phase_dir}/{plan}-PLAN.md` for each upcoming plan.
+    If any PRIOR-wave artifact link fails, present:
+    - `## Cross-Plan Wiring Gap` with plan/link/from/pattern rows
+    - Options: investigate+fix before continue, or continue with cascade risk
+    Skip key-links that reference files in the CURRENT (upcoming) wave.
+8. **Execute checkpoint plans between waves** — see `<checkpoint_handling>`.
+9. **Proceed to next wave.**
+</step>
+<step name="checkpoint_handling">
+Plans with `autonomous: false` require user interaction.
+**Auto-mode checkpoint handling:**
+Read auto-advance config (chain flag OR user preference — same boolean as `check.auto-mode`):
+```bash
+AUTO_MODE=$(gsd-sdk query check auto-mode --pick active 2>/dev/null || echo "false")
+```
+
+When executor returns a checkpoint AND `AUTO_MODE` is `true`:
+- **human-verify** → Auto-spawn continuation agent with `{user_response}` = `"approved"`. Log `⚡ Auto-approved checkpoint`.
+- **decision** → Auto-spawn continuation agent with `{user_response}` = first option from checkpoint details. Log `⚡ Auto-selected: [option]`.
+- **human-action** → Present to user (existing behavior below). Auth gates cannot be automated.
+
+**Standard flow (not auto-mode, or human-action type):**
+
+1. Spawn agent for checkpoint plan
+2. Agent runs until checkpoint task or auth gate → returns structured state
+3. Agent return includes: completed tasks table, current task + blocker, checkpoint type/details, what's awaited
+4. **Present to user:**
+   ```
+   ## Checkpoint: [Type]
+
+   **Plan:** 03-03 Dashboard Layout
+   **Progress:** 2/3 tasks complete
+
+   [Checkpoint Details from agent return]
+   [Awaiting section from agent return]
+   ```
+5. User responds: "approved"/"done" | issue description | decision selection
+6. **Spawn continuation agent (NOT resume)** using continuation-prompt.md template:
+   - `{completed_tasks_table}`: From checkpoint return
+   - `{resume_task_number}` + `{resume_task_name}`: Current task
+   - `{user_response}`: What user provided
+   - `{resume_instructions}`: Based on checkpoint type
+7. Continuation agent verifies previous commits, continues from resume point
+8. Repeat until plan completes or user stops
+
+**Why fresh agent, not resume:** Resume relies on internal serialization that breaks with parallel tool calls. Fresh agents with explicit state are more reliable.
+
+**Checkpoints in parallel waves:** Agent pauses and returns while other parallel agents may complete. Present checkpoint, spawn continuation, wait for all before next wave.
+</step>
+
+<step name="aggregate_results">
+After all waves:
+
+```markdown
+## Phase {X}: {Name} Execution Complete
+
+**Waves:** {N} | **Plans:** {M}/{total} complete
+
+| Wave | Plans | Status |
+|------|-------|--------|
+| 1 | plan-01, plan-02 | ✓ Complete |
+| CP | plan-03 | ✓ Verified |
+| 2 | plan-04 | ✓ Complete |
+
+### Plan Details
+1. **03-01**: [one-liner from SUMMARY.md]
+2. **03-02**: [one-liner from SUMMARY.md]
+
+### Issues Encountered
+[Aggregate from SUMMARYs, or "None"]
+```
+
+**Security gate check:**
+```bash
+SECURITY_CFG=$(gsd-sdk query config-get workflow.security_enforcement --raw 2>/dev/null || echo "true")
+SECURITY_FILE=$(ls "${PHASE_DIR}"/*-SECURITY.md 2>/dev/null | head -1)
+```
+
+If `SECURITY_CFG` is `false`: skip.
+
+If `SECURITY_CFG` is `true` AND `SECURITY_FILE` is empty (no SECURITY.md yet):
+Include in the next-steps routing output:
+```
+⚠ Security enforcement enabled — run before advancing:
+  /gsd:secure-phase {PHASE} ${GSD_WS}
+```
+
+If `SECURITY_CFG` is `true` AND SECURITY.md exists: check frontmatter `threats_open`. If > 0:
+```
+⚠ Security gate: {threats_open} threats open
+  /gsd:secure-phase {PHASE} — resolve before advancing
+```
+</step>
+
+<step name="tdd_review_checkpoint">
+**Optional step — TDD collaborative review.**
+
+```bash
+TDD_MODE=$(gsd-sdk query config-get workflow.tdd_mode 2>/dev/null || echo "false")
+```
+
+**Skip if `TDD_MODE` is `false`.**
+
+When `TDD_MODE` is `true`, check whether any completed plans in this phase have `type: tdd` in their frontmatter:
+
+```bash
+TDD_PLANS=$(grep -rl "^type: tdd" "${PHASE_DIR}"/*-PLAN.md 2>/dev/null | wc -l | tr -d ' ')
+```
+
+**If `TDD_PLANS` > 0:** Insert end-of-phase collaborative review checkpoint.
+
+1. Collect all SUMMARY.md files for TDD plans
+2. For each TDD plan summary, verify the RED/GREEN/REFACTOR gate sequence:
+   - RED gate: A failing test commit exists (`test(...)` commit with MUST-fail evidence)
+   - GREEN gate: An implementation commit exists (`feat(...)` commit making tests pass)
+   - REFACTOR gate: Optional cleanup commit (`refactor(...)` commit, tests still pass)
+3. If any TDD plan is missing the RED or GREEN gate commits, flag it:
+   ```
+   ⚠ TDD gate violation: Plan {plan_id} missing {RED|GREEN} phase commit.
+     Expected commit pattern: test({phase}-{plan}): ... → feat({phase}-{plan}): ...
+   ```
+4. Present collaborative review summary:
+   ```
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    TDD REVIEW — Phase {X}
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   TDD Plans: {TDD_PLANS} | Gate violations: {count}
+
+   | Plan | RED | GREEN | REFACTOR | Status |
+   |------|-----|-------|----------|--------|
+   | {id} |  ✓  |   ✓   |    ✓     | Pass   |
+   | {id} |  ✓  |   ✗   |    —     | FAIL   |
+   ```
+
+**Escalation under MVP+TDD.** When `MVP_MODE=true` AND `TDD_MODE=true`, the review verdict escalates from advisory to **blocking**: missing RED or GREEN gate commits prevent marking the phase complete.
+```text
+Phase blocked: {N} TDD plan(s) violate the RED→GREEN gate sequence under MVP+TDD.
+Resolve and re-run /gsd execute-phase, or override with
+/gsd execute-phase {phase} --force-mvp-gate to ship anyway.
+```
+`--force-mvp-gate` is the escape hatch (documented, not yet implemented). Policy is:
+- `MVP_MODE=true` AND `TDD_MODE=true`: violations are **blocking** unless explicitly overridden.
+- otherwise: violations are advisory/non-blocking and are surfaced for review.
+The verifier agent (step `verify_phase_goal`) still checks TDD discipline in both cases.
+</step>
+
+<step name="handle_partial_wave_execution">
+If `WAVE_FILTER` was used, re-run plan discovery after execution:
+
+```bash
+POST_PLAN_INDEX=$(gsd-sdk query phase-plan-index "${PHASE_NUMBER}")
+```
+
+Apply the same "incomplete" filtering rules as earlier:
+- ignore plans with `has_summary: true`
+- if `--gaps-only`, only consider `gap_closure: true` plans
+
+**If incomplete plans still remain anywhere in the phase:**
+- STOP here
+- Do NOT run phase verification
+- Do NOT mark the phase complete in ROADMAP/STATE
+- Present:
+
+```markdown
+## Wave {WAVE_FILTER} Complete
+
+Selected wave finished successfully. This phase still has incomplete plans, so phase-level verification and completion were intentionally skipped.
+
+/gsd:execute-phase {phase} ${GSD_WS}                # Continue remaining waves
+/gsd:execute-phase {phase} --wave {next} ${GSD_WS}  # Run the next wave explicitly
+```
+
+**If no incomplete plans remain after the selected wave finishes:**
+- continue with the normal phase-level verification and completion flow below
+- this means the selected wave happened to be the last remaining work in the phase
+</step>
+
+<step name="code_review_gate" required="true">
+**This step is REQUIRED and must not be skipped.** Auto-invoke code review on the phase's source changes. Advisory only — never blocks execution flow.
+
+**Config gate:**
+```bash
+CODE_REVIEW_ENABLED=$(gsd-sdk query config-get workflow.code_review 2>/dev/null || echo "true")
+```
+
+If `CODE_REVIEW_ENABLED` is `"false"`: display "Code review skipped (workflow.code_review=false)" and proceed to next step.
+
+**Invoke review:**
+```
+Skill(skill="gsd-code-review", args="${PHASE_NUMBER}")
+```
+
+**Check results using deterministic path (not glob):**
+```bash
+PADDED=$(printf "%02d" "${PHASE_NUMBER}")
+REVIEW_FILE="${PHASE_DIR}/${PADDED}-REVIEW.md"
+REVIEW_STATUS=$(sed -n '/^---$/,/^---$/p' "$REVIEW_FILE" | grep "^status:" | head -1 | cut -d: -f2 | tr -d ' ')
+```
+
+If REVIEW_STATUS is not "clean" and not "skipped" and not empty, display:
+```
+Code review found issues. Consider running:
+/gsd:code-review ${PHASE_NUMBER} --fix
+```
+
+**Error handling:** If the Skill invocation fails or throws, catch the error, display "Code review encountered an error (non-blocking): {error}" and proceed to next step. Review failures must never block execution.
+
+Regardless of review result, ALWAYS proceed to close_parent_artifacts → regression_gate → verify_phase_goal.
+</step>
+
+<step name="close_parent_artifacts">
+**For decimal/polish phases only (X.Y pattern):** Close the feedback loop by resolving parent UAT and debug artifacts.
+
+**Skip if** phase number has no decimal (e.g., `3`, `04`) — only applies to gap-closure phases like `4.1`, `03.1`.
+
+**1. Detect decimal phase and derive parent:**
+```bash
+# Check if phase_number contains a decimal
+if [[ "$PHASE_NUMBER" == *.* ]]; then
+  PARENT_PHASE="${PHASE_NUMBER%%.*}"
+fi
+```
+
+**2. Find parent UAT file:**
+```bash
+PARENT_INFO=$(gsd-sdk query find-phase "${PARENT_PHASE}" --raw)
+# Extract directory from PARENT_INFO JSON, then find UAT file in that directory
+```
+
+**If no parent UAT found:** Skip this step (gap-closure may have been triggered by VERIFICATION.md instead).
+
+**3. Update UAT gap statuses:**
+
+Read the parent UAT file's `## Gaps` section. For each gap entry with `status: failed`:
+- Update to `status: resolved`
+
+**4. Update UAT frontmatter:**
+
+If all gaps now have `status: resolved`:
+- Update frontmatter `status: diagnosed` → `status: resolved`
+- Update frontmatter `updated:` timestamp
+
+**5. Resolve referenced debug sessions:**
+
+For each gap that has a `debug_session:` field:
+- Read the debug session file
+- Update frontmatter `status:` → `resolved`
+- Update frontmatter `updated:` timestamp
+- Move to resolved directory:
+```bash
+mkdir -p .planning/debug/resolved
+mv .planning/debug/{slug}.md .planning/debug/resolved/
+```
+
+**6. Commit updated artifacts:**
+```bash
+gsd-sdk query commit "docs(phase-${PARENT_PHASE}): resolve UAT gaps and debug sessions after ${PHASE_NUMBER} gap closure" --files .planning/phases/*${PARENT_PHASE}*/*-UAT.md .planning/debug/resolved/*.md
+```
+</step>
+
+<step name="regression_gate">
+Run prior phases' test suites to catch cross-phase regressions BEFORE verification.
+
+**Skip if:** This is the first phase (no prior phases), or no prior VERIFICATION.md files exist.
+
+**Step 1: Discover prior phases' test files**
+```bash
+# Find all VERIFICATION.md files from prior phases in current milestone
+PRIOR_VERIFICATIONS=$(find .planning/phases/ -name "*-VERIFICATION.md" ! -path "*${PHASE_NUMBER}*" 2>/dev/null)
+```
+
+**Step 2: Extract test file lists from prior verifications**
+
+For each VERIFICATION.md found, look for test file references:
+- Lines containing `test`, `spec`, or `__tests__` paths
+- The "Test Suite" or "Automated Checks" section
+- File patterns from `key-files.created` in corresponding SUMMARY.md files that match `*.test.*` or `*.spec.*`
+
+Collect all unique test file paths into `REGRESSION_FILES`.
+
+**Step 3: Run regression tests (if any found)**
+
+```bash
+# Resolve test command: project config > Makefile > language sniff
+REG_TEST_CMD=$(gsd-sdk query config-get workflow.test_command --default "" 2>/dev/null || true)
+if [ -z "$REG_TEST_CMD" ]; then
+  if [ -f "Makefile" ] && grep -q "^test:" Makefile; then
+    REG_TEST_CMD="make test"
+  elif [ -f "Justfile" ] || [ -f "justfile" ]; then
+    REG_TEST_CMD="just test"
+  elif [ -f "package.json" ]; then
+    REG_TEST_CMD="npm test"
+  elif [ -f "Cargo.toml" ]; then
+    REG_TEST_CMD="cargo test"
+  elif [ -f "go.mod" ]; then
+    REG_TEST_CMD="go test ./..."
+  elif [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+    REG_TEST_CMD="python -m pytest ${REGRESSION_FILES} -q --tb=short"
+  else
+    REG_TEST_CMD="true"
+  fi
+fi
+# Detect test runner and run prior phase tests
+eval "$REG_TEST_CMD" 2>&1
+```
+
+**Step 4: Report results**
+
+If all tests pass:
+```
+✓ Regression gate: {N} prior-phase test files passed — no regressions detected
+```
+→ Proceed to verify_phase_goal
+
+If any tests fail:
+```

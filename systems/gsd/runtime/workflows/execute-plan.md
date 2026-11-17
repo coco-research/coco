@@ -310,3 +310,216 @@ Orchestrator parses → presents to user → spawns fresh continuation with your
 If verification fails:
 
 **Check if node repair is enabled** (default: on):
+```bash
+NODE_REPAIR=$(gsd-sdk query config-get workflow.node_repair 2>/dev/null || echo "true")
+```
+
+If `NODE_REPAIR` is `true`: invoke `@./.claude/get-shit-done/workflows/node-repair.md` with:
+- FAILED_TASK: task number, name, done-criteria
+- ERROR: expected vs actual result
+- PLAN_CONTEXT: adjacent task names + phase goal
+- REPAIR_BUDGET: `workflow.node_repair_budget` from config (default: 2)
+
+Node repair will attempt RETRY, DECOMPOSE, or PRUNE autonomously. Only reaches this gate again if repair budget is exhausted (ESCALATE).
+
+If `NODE_REPAIR` is `false` OR repair returns ESCALATE: STOP. Present: "Verification failed for Task [X]: [name]. Expected: [criteria]. Actual: [result]. Repair attempted: [summary of what was tried]." Options: Retry | Skip (mark incomplete) | Stop (investigate). If skipped → SUMMARY "Issues Encountered".
+</step>
+
+<step name="record_completion_time">
+```bash
+PLAN_END_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+PLAN_END_EPOCH=$(date +%s)
+
+DURATION_SEC=$(( PLAN_END_EPOCH - PLAN_START_EPOCH ))
+DURATION_MIN=$(( DURATION_SEC / 60 ))
+
+if [[ $DURATION_MIN -ge 60 ]]; then
+  HRS=$(( DURATION_MIN / 60 ))
+  MIN=$(( DURATION_MIN % 60 ))
+  DURATION="${HRS}h ${MIN}m"
+else
+  DURATION="${DURATION_MIN} min"
+fi
+```
+</step>
+
+<step name="generate_user_setup">
+```bash
+grep -A 50 "^user_setup:" .planning/phases/XX-name/{phase}-{plan}-PLAN.md | head -50
+```
+
+If user_setup exists: create `{phase}-USER-SETUP.md` using template `~/.claude/get-shit-done/templates/user-setup.md`. Per service: env vars table, account setup checklist, dashboard config, local dev notes, verification commands. Status "Incomplete". Set `USER_SETUP_CREATED=true`. If empty/missing: skip.
+</step>
+
+<step name="create_summary">
+**Critical ordering — write and commit SUMMARY.md as one atomic block.** Do NOT
+emit narrative output between the Write tool call and the commit tool call.
+Truncation at this boundary is a known failure mode (see #2070 rescue logic in
+execute-phase.md step 5.5).
+
+Create `{phase}-{plan}-SUMMARY.md` at `.planning/phases/XX-name/`. Use `~/.claude/get-shit-done/templates/summary.md`.
+
+**Frontmatter:** phase, plan, subsystem, tags | requires/provides/affects | tech-stack.added/patterns | key-files.created/modified | key-decisions | requirements-completed (**MUST** copy `requirements` array from PLAN.md frontmatter verbatim) | duration ($DURATION), completed ($PLAN_END_TIME date).
+
+Title: `# Phase [X] Plan [Y]: [Name] Summary`
+
+One-liner SUBSTANTIVE: "JWT auth with refresh rotation using jose library" not "Authentication implemented"
+
+Include: duration, start/end times, task count, file count.
+
+Next: more plans → "Ready for {next-plan}" | last → "Phase complete, ready for next step".
+</step>
+
+<step name="update_current_position">
+**Skip this step if running in parallel mode** (the orchestrator in execute-phase.md
+handles STATE.md/ROADMAP.md updates centrally after merging worktrees to avoid
+merge conflicts).
+
+Update STATE.md using gsd-sdk query (or legacy gsd-tools) state mutations:
+
+```bash
+# Auto-detect parallel mode: .git is a file in worktrees, a directory in main repo
+IS_WORKTREE=$([ -f .git ] && echo "true" || echo "false")
+
+# Skip in parallel mode — orchestrator handles STATE.md centrally
+if [ "$IS_WORKTREE" != "true" ]; then
+  # Advance plan counter (handles last-plan edge case)
+  gsd-sdk query state.advance-plan
+
+  # Recalculate progress bar from disk state
+  gsd-sdk query state.update-progress
+
+  # Record execution metrics
+  gsd-sdk query state.record-metric \
+    --phase "${PHASE}" --plan "${PLAN}" --duration "${DURATION}" \
+    --tasks "${TASK_COUNT}" --files "${FILE_COUNT}"
+fi
+```
+</step>
+
+<step name="extract_decisions_and_issues">
+From SUMMARY: Extract decisions and add to STATE.md:
+
+```bash
+# Add each decision from SUMMARY key-decisions
+# Prefer file inputs for shell-safe text (preserves `$`, `*`, etc. exactly)
+gsd-sdk query state.add-decision \
+  --phase "${PHASE}" --summary-file "${DECISION_TEXT_FILE}" --rationale-file "${RATIONALE_FILE}"
+
+# Add blockers if any found
+gsd-sdk query state.add-blocker --text-file "${BLOCKER_TEXT_FILE}"
+```
+</step>
+
+<step name="update_session_continuity">
+Update session info using gsd-sdk query (or legacy gsd-tools):
+
+```bash
+gsd-sdk query state.record-session \
+  --stopped-at "Completed ${PHASE}-${PLAN}-PLAN.md" \
+  --resume-file "None"
+```
+
+Keep STATE.md under 150 lines.
+</step>
+
+<step name="issues_review_gate">
+If SUMMARY "Issues Encountered" ≠ "None": yolo → log and continue. Interactive → present issues, wait for acknowledgment.
+</step>
+
+<step name="update_roadmap">
+Run this step only when NOT executing inside a git worktree (i.e.
+`use_worktrees: false`, the bug #2661 reproducer). In worktree mode each
+worktree has its own ROADMAP.md, so per-plan writes here would diverge
+across siblings; the orchestrator owns the post-merge sync centrally
+(see execute-phase.md §5.7, single-writer contract from #1486 / dcb50396).
+
+```bash
+# Auto-detect worktree mode: .git is a file in worktrees, a directory in main repo.
+# This mirrors the use_worktrees config flag for the executing handler.
+IS_WORKTREE=$([ -f .git ] && echo "true" || echo "false")
+
+if [ "$IS_WORKTREE" != "true" ]; then
+  # use_worktrees: false → this handler is the sole post-plan sync point (#2661)
+  gsd-sdk query roadmap.update-plan-progress "${PHASE}"
+fi
+```
+Counts PLAN vs SUMMARY files on disk. Updates progress table row with correct count and status (`In Progress` or `Complete` with date).
+</step>
+
+<step name="update_requirements">
+Mark completed requirements from the PLAN.md frontmatter `requirements:` field:
+
+```bash
+gsd-sdk query requirements.mark-complete ${REQ_IDS}
+```
+
+Extract requirement IDs from the plan's frontmatter (e.g., `requirements: [AUTH-01, AUTH-02]`). If no requirements field, skip.
+</step>
+
+<step name="git_commit_metadata">
+**Critical ordering — write and commit SUMMARY.md as one atomic block.** Do NOT
+emit narrative output between the Write tool call and the commit tool call.
+Truncation at this boundary is a known failure mode (see #2070 rescue logic in
+execute-phase.md step 5.5).
+
+Task code already committed per-task. Commit plan metadata:
+
+```bash
+# Auto-detect parallel mode: .git is a file in worktrees, a directory in main repo
+IS_WORKTREE=$([ -f .git ] && echo "true" || echo "false")
+
+# In parallel mode: exclude STATE.md and ROADMAP.md (orchestrator commits these)
+if [ "$IS_WORKTREE" = "true" ]; then
+  gsd-sdk query commit "docs({phase}-{plan}): complete [plan-name] plan" --files .planning/phases/XX-name/{phase}-{plan}-SUMMARY.md .planning/REQUIREMENTS.md
+else
+  gsd-sdk query commit "docs({phase}-{plan}): complete [plan-name] plan" --files .planning/phases/XX-name/{phase}-{plan}-SUMMARY.md .planning/STATE.md .planning/ROADMAP.md .planning/REQUIREMENTS.md
+fi
+```
+</step>
+
+<step name="update_codebase_map">
+If .planning/codebase/ doesn't exist: skip.
+
+```bash
+FIRST_TASK=$(git log --oneline --grep="feat({phase}-{plan}):" --grep="fix({phase}-{plan}):" --grep="test({phase}-{plan}):" --reverse | head -1 | cut -d' ' -f1)
+git diff --name-only ${FIRST_TASK}^..HEAD 2>/dev/null || true
+```
+
+Update only structural changes: new src/ dir → STRUCTURE.md | deps → STACK.md | file pattern → CONVENTIONS.md | API client → INTEGRATIONS.md | config → STACK.md | renamed → update paths. Skip code-only/bugfix/content changes.
+
+```bash
+gsd-sdk query commit "" --files .planning/codebase/*.md --amend
+```
+</step>
+
+<step name="offer_next">
+If `USER_SETUP_CREATED=true`: display `⚠️ USER SETUP REQUIRED` with path + env/config tasks at TOP.
+
+```bash
+(ls -1 .planning/phases/[current-phase-dir]/*-PLAN.md 2>/dev/null || true) | wc -l
+(ls -1 .planning/phases/[current-phase-dir]/*-SUMMARY.md 2>/dev/null || true) | wc -l
+```
+
+| Condition | Route | Action |
+|-----------|-------|--------|
+| summaries < plans | **A: More plans** | Find next PLAN without SUMMARY. Yolo: auto-continue. Interactive: show next plan, suggest `/gsd:execute-phase {phase}` + `/gsd:verify-work`. STOP here. |
+| summaries = plans, current < highest phase | **B: Phase done** | Show completion, suggest `/gsd:plan-phase {Z+1}` + `/gsd:verify-work {Z}` + `/gsd:discuss-phase {Z+1}` |
+| summaries = plans, current = highest phase | **C: Milestone done** | Show banner, suggest `/gsd:complete-milestone` + `/gsd:verify-work` + `/gsd-add-phase` |
+
+All routes: `/clear` first for fresh context.
+</step>
+
+</process>
+
+<success_criteria>
+
+- All tasks from PLAN.md completed
+- All verifications pass
+- USER-SETUP.md generated if user_setup in frontmatter
+- SUMMARY.md created with substantive content
+- STATE.md updated (position, decisions, issues, session) — unless parallel mode (orchestrator handles)
+- ROADMAP.md updated — unless parallel mode (orchestrator handles)
+- If codebase map exists: map updated with execution changes (or skipped if no significant changes)
+- If USER-SETUP.md created: prominently surfaced in completion output
+</success_criteria>

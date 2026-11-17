@@ -1703,3 +1703,100 @@ Execute-phase was spawned by plan-phase's auto-advance. Do NOT run transition.md
 After verification passes and roadmap is updated, return completion status to parent:
 
 ```
+## PHASE COMPLETE
+
+Phase: ${PHASE_NUMBER} - ${PHASE_NAME}
+Plans: ${completed_count}/${total_count}
+Verification: {Passed | Gaps Found}
+
+[Include aggregate_results output]
+```
+
+STOP. Do not proceed to auto-advance or transition.
+
+**If `--no-transition` flag is NOT present:**
+
+**Auto-advance detection:**
+
+1. Parse `--auto` flag from $ARGUMENTS
+2. Read consolidated auto-mode (`active` = chain flag OR user preference; chain flag already synced in init step):
+   ```bash
+   AUTO_MODE=$(gsd-sdk query check auto-mode --pick active 2>/dev/null || echo "false")
+   ```
+
+**If `--auto` flag present OR `AUTO_MODE` is true (AND verification passed with no gaps):**
+
+```
+╔══════════════════════════════════════════╗
+║  AUTO-ADVANCING → TRANSITION             ║
+║  Phase {X} verified, continuing chain    ║
+╚══════════════════════════════════════════╝
+```
+
+Execute the transition workflow inline (do NOT use Agent — orchestrator context is ~10-15%, transition needs phase completion data already in context):
+
+Read and follow `~/.claude/get-shit-done/workflows/transition.md`, passing through the `--auto` flag so it propagates to the next phase invocation.
+
+**If neither `--auto` nor `AUTO_MODE` is true:**
+
+**STOP. Do not auto-advance. Do not execute transition. Do not plan next phase. Present options to the user and wait.**
+
+**IMPORTANT: There is NO `/gsd-transition` command. Never suggest it. The transition workflow is internal only.**
+
+Check whether CONTEXT.md already exists for the next phase:
+
+```bash
+ls .planning/phases/*{next}*/{next}-CONTEXT.md 2>/dev/null || echo "no-context"
+```
+
+If CONTEXT.md does **not** exist for the next phase, present:
+
+```
+## ✓ Phase {X}: {Name} Complete
+
+/gsd:progress ${GSD_WS} — see updated roadmap
+/gsd:discuss-phase {next} ${GSD_WS} — start here: discuss next phase before planning  ← recommended
+/gsd:plan-phase {next} ${GSD_WS} — plan next phase (skip discuss)
+/gsd:execute-phase {next} ${GSD_WS} — execute next phase (skip discuss and plan)
+```
+
+If CONTEXT.md **exists** for the next phase, present:
+
+```
+## ✓ Phase {X}: {Name} Complete
+
+/gsd:progress ${GSD_WS} — see updated roadmap
+/gsd:plan-phase {next} ${GSD_WS} — start here: plan next phase (CONTEXT.md already present)  ← recommended
+/gsd:discuss-phase {next} ${GSD_WS} — re-discuss next phase
+/gsd:execute-phase {next} ${GSD_WS} — execute next phase (skip planning)
+```
+
+Only suggest the commands listed above. Do not invent or hallucinate command names.
+</step>
+
+</process>
+
+<context_efficiency>
+Orchestrator: ~10-15% context for 200k windows, can use more for 1M+ windows.
+Subagents: fresh context each (200k-1M depending on model). No polling (Agent blocks). No context bleed.
+
+For 1M+ context models, consider:
+- Passing richer context (code snippets, dependency outputs) directly to executors instead of just file paths
+- Running small phases (≤3 plans, no dependencies) inline without subagent spawning overhead
+- Relaxing /clear recommendations — context rot onset is much further out with 5x window
+</context_efficiency>
+
+<failure_handling>
+- **Quota / rate-limit (any runtime — #3095):** Agent return body contains a sentinel like `usage limit`, `rate limit`, `429`, `too many requests`, `RESOURCE_EXHAUSTED`, `usage_limit_reached`. Route via `gsd-sdk query agent.classify-failure` → `class: "quota-exceeded"`. Do not offer retry-now; the right action is wait-for-reset and resume.
+- **classifyHandoffIfNeeded false failure:** Agent reports "failed" but error is `classifyHandoffIfNeeded is not defined` → Claude Code bug, not GSD. Spot-check (SUMMARY exists, commits present) → if pass, treat as success
+- **Agent fails mid-plan:** Missing SUMMARY.md → report, ask user how to proceed
+- **Dependency chain breaks:** Wave 1 fails → Wave 2 dependents likely fail → user chooses attempt or skip
+- **All agents in wave fail:** Systemic issue → stop, report for investigation
+- **Checkpoint unresolvable:** "Skip this plan?" or "Abort phase execution?" → record partial progress in STATE.md
+</failure_handling>
+
+<resumption>
+Re-run `/gsd:execute-phase {phase}` → discover_plans finds completed SUMMARYs → skips them → resumes from first incomplete plan → continues wave execution.
+
+STATE.md tracks: last completed plan, current wave, pending checkpoints.
+</resumption>

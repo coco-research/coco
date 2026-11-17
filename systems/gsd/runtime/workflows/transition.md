@@ -354,3 +354,340 @@ Before:
 ```markdown
 ### Blockers/Concerns
 
+- ⚠️ [Phase 1] Database schema not indexed for common queries
+- ⚠️ [Phase 2] WebSocket reconnection behavior on flaky networks unknown
+```
+
+After (if database indexing was addressed in Phase 2):
+
+```markdown
+### Blockers/Concerns
+
+- ⚠️ [Phase 2] WebSocket reconnection behavior on flaky networks unknown
+```
+
+**Step complete when:**
+
+- [ ] Recent decisions noted (full log in PROJECT.md)
+- [ ] Resolved blockers removed from list
+- [ ] Unresolved blockers kept with phase prefix
+- [ ] New concerns from completed phase added
+
+</step>
+
+<step name="update_session_continuity_after_transition">
+
+Update Session Continuity section in STATE.md to reflect transition completion.
+
+**Format:**
+
+```markdown
+Last session: [today]
+Stopped at: Phase [X] complete, ready to plan Phase [X+1]
+Resume file: None
+```
+
+**Step complete when:**
+
+- [ ] Last session timestamp updated to current date and time
+- [ ] Stopped at describes phase completion and next phase
+- [ ] Resume file confirmed as None (transitions don't use resume files)
+
+</step>
+
+<step name="offer_next_phase">
+
+**MANDATORY: Verify milestone status before presenting next steps.**
+
+**Use the transition result from `gsd-sdk query phase.complete`:**
+
+The `is_last_phase` field from the phase complete result tells you directly:
+- `is_last_phase: false` → More phases remain → Go to **Route A**
+- `is_last_phase: true` → Last phase done → **Check for workstream collisions first**
+
+The `next_phase` and `next_phase_name` fields give you the next phase details.
+
+If you need additional context, use:
+```bash
+ROADMAP=$(gsd-sdk query roadmap.analyze)
+```
+
+This returns all phases with goals, disk status, and completion info.
+
+---
+
+**Workstream collision check (when `is_last_phase: true`):**
+
+Before routing to Route B, check whether other workstreams are still active.
+This prevents one workstream from advancing or completing the milestone while
+other workstreams are still working on their phases.
+
+**Skip this check if NOT in workstream mode** (i.e., `GSD_WORKSTREAM` is not set / flat mode).
+In flat mode, go directly to **Route B**.
+
+```bash
+# Only check if we're in workstream mode
+if [ -n "$GSD_WORKSTREAM" ]; then
+  WS_LIST=$(gsd-sdk query workstream.list --raw)
+fi
+```
+
+Parse the JSON result. The output has `{ mode, workstreams: [...] }`.
+Each workstream entry has: `name`, `status`, `current_phase`, `phase_count`, `completed_phases`.
+
+Filter out the current workstream (`$GSD_WORKSTREAM`) and any workstreams with
+status containing "milestone complete" or "archived" (case-insensitive).
+The remaining entries are **other active workstreams**.
+
+- **If other active workstreams exist** → Go to **Route B1**
+- **If NO other active workstreams** (or flat mode) → Go to **Route B**
+
+---
+
+**Route A: More phases remain in milestone**
+
+Read ROADMAP.md to get the next phase's name and goal.
+
+**Check if next phase has CONTEXT.md:**
+
+```bash
+ls .planning/phases/*[X+1]*/*-CONTEXT.md 2>/dev/null || true
+```
+
+**If next phase exists:**
+
+<if mode="yolo">
+
+**If CONTEXT.md exists:**
+
+```
+Phase [X] marked complete.
+
+Next: Phase [X+1] — [Name]
+
+⚡ Auto-continuing: Plan Phase [X+1] in detail
+```
+
+Exit skill and invoke SlashCommand("/gsd:plan-phase [X+1] --auto ${GSD_WS}")
+
+**If CONTEXT.md does NOT exist:**
+
+```
+Phase [X] marked complete.
+
+Next: Phase [X+1] — [Name]
+
+⚡ Auto-continuing: Discuss Phase [X+1] first
+```
+
+Exit skill and invoke SlashCommand("/gsd:discuss-phase [X+1] --auto ${GSD_WS}")
+
+</if>
+
+<if mode="interactive" OR="custom with gates.confirm_transition true">
+
+**If CONTEXT.md does NOT exist:**
+
+```
+## ✓ Phase [X] Complete
+
+---
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Phase [X+1]: [Name]** — [Goal from ROADMAP.md]
+
+`/clear` then:
+
+`/gsd:discuss-phase [X+1] ${GSD_WS}` — gather context and clarify approach
+
+---
+
+**Also available:**
+- `/gsd:plan-phase [X+1] ${GSD_WS}` — skip discussion, plan directly
+- `/gsd:plan-phase --research-phase [X+1] ${GSD_WS}` — investigate unknowns
+
+---
+```
+
+**If CONTEXT.md exists:**
+
+```
+## ✓ Phase [X] Complete
+
+---
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Phase [X+1]: [Name]** — [Goal from ROADMAP.md]
+<sub>✓ Context gathered, ready to plan</sub>
+
+`/clear` then:
+
+`/gsd:plan-phase [X+1] ${GSD_WS}`
+
+---
+
+**Also available:**
+- `/gsd:discuss-phase [X+1] ${GSD_WS}` — revisit context
+- `/gsd:plan-phase --research-phase [X+1] ${GSD_WS}` — investigate unknowns
+
+---
+```
+
+</if>
+
+---
+
+**Route B1: Workstream done, other workstreams still active**
+
+This route is reached when `is_last_phase: true` AND the collision check found
+other active workstreams. Do NOT suggest completing the milestone or advancing
+to the next milestone — other workstreams are still working.
+
+**Clear auto-advance chain flag** — workstream boundary is the natural stopping point:
+
+```bash
+gsd-sdk query config-set workflow._auto_chain_active false
+```
+
+<if mode="yolo">
+
+Override auto-advance: do NOT auto-continue to milestone completion.
+Present the blocking information and stop.
+
+</if>
+
+Present (all modes):
+
+```
+## ✓ Phase {X}: {Phase Name} Complete
+
+This workstream's phases are complete. Other workstreams are still active:
+
+| Workstream | Status | Phase | Progress |
+|------------|--------|-------|----------|
+| {name}     | {status} | {current_phase} | {completed_phases}/{phase_count} |
+| ...        | ...    | ...   | ...      |
+
+---
+
+## Next Steps
+
+Archive this workstream:
+
+`/gsd:workstreams complete {current_ws_name} ${GSD_WS}`
+
+See overall milestone progress:
+
+`/gsd:workstreams progress ${GSD_WS}`
+
+<sub>Milestone completion will be available once all workstreams finish.</sub>
+
+---
+```
+
+Do NOT suggest `/gsd:complete-milestone` or `/gsd:new-milestone`.
+Do NOT auto-invoke any further slash commands.
+
+**Stop here.** The user must explicitly decide what to do next.
+
+---
+
+**Route B: Milestone complete (all phases done)**
+
+**This route is only reached when:**
+- `is_last_phase: true` AND no other active workstreams exist (or flat mode)
+
+**Clear auto-advance chain flag** — milestone boundary is the natural stopping point:
+
+```bash
+gsd-sdk query config-set workflow._auto_chain_active false
+```
+
+<if mode="yolo">
+
+```
+Phase {X} marked complete.
+
+🎉 Milestone {version} is 100% complete — all {N} phases finished!
+
+⚡ Auto-continuing: Complete milestone and archive
+```
+
+Exit skill and invoke SlashCommand("/gsd:complete-milestone {version} ${GSD_WS}")
+
+</if>
+
+<if mode="interactive" OR="custom with gates.confirm_transition true">
+
+```
+## ✓ Phase {X}: {Phase Name} Complete
+
+🎉 Milestone {version} is 100% complete — all {N} phases finished!
+
+---
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Complete Milestone {version}** — archive and prepare for next
+
+`/clear` then:
+
+`/gsd:complete-milestone {version} ${GSD_WS}`
+
+---
+
+**Also available:**
+- Review accomplishments before archiving
+
+---
+```
+
+</if>
+
+</step>
+
+</process>
+
+<implicit_tracking>
+Progress tracking is IMPLICIT: planning phase N implies phases 1-(N-1) complete. No separate progress step—forward motion IS progress.
+</implicit_tracking>
+
+<partial_completion>
+
+If user wants to move on but phase isn't fully complete:
+
+```
+Phase [X] has incomplete plans:
+- {phase}-02-PLAN.md (not executed)
+- {phase}-03-PLAN.md (not executed)
+
+Options:
+1. Mark complete anyway (plans weren't needed)
+2. Defer work to later phase
+3. Stay and finish current phase
+```
+
+Respect user judgment — they know if work matters.
+
+**If marking complete with incomplete plans:**
+
+- Update ROADMAP: "2/3 plans complete" (not "3/3")
+- Note in transition message which plans were skipped
+
+</partial_completion>
+
+<success_criteria>
+
+Transition is complete when:
+
+- [ ] Current phase plan summaries verified (all exist or user chose to skip)
+- [ ] Any stale handoffs deleted
+- [ ] ROADMAP.md updated with completion status and plan count
+- [ ] PROJECT.md evolved (requirements, decisions, description if needed)
+- [ ] STATE.md updated (position, project reference, context, session)
+- [ ] Progress table updated
+- [ ] User knows next steps
+
+</success_criteria>

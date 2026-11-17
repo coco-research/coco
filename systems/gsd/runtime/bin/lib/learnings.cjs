@@ -213,3 +213,167 @@ function learningsDelete(id, opts) {
  *
  *   ## Another Section
  *   More content...
+ *
+ * @param {string} planningDir - Path to .planning/ directory (or directory containing LEARNINGS.md)
+ * @param {object} [opts]
+ * @param {string} [opts.storeDir] - Override store directory
+ * @param {string} [opts.sourceProject] - Project name (defaults to directory basename)
+ * @returns {{ total: number, created: number, skipped: number }}
+ */
+function learningsCopyFromProject(planningDir, opts) {
+  const learningsPath = path.join(planningDir, 'LEARNINGS.md');
+  if (!fs.existsSync(learningsPath)) {
+    return { total: 0, created: 0, skipped: 0 };
+  }
+
+  const content = fs.readFileSync(learningsPath, 'utf-8');
+  const sourceProject = (opts && opts.sourceProject) || path.basename(path.resolve(planningDir, '..'));
+
+  // Parse markdown: split on ## headings
+  const sections = content.split(/^## /m).slice(1); // skip preamble before first ##
+  let created = 0;
+  let skipped = 0;
+
+  for (const section of sections) {
+    const lines = section.trim().split('\n');
+    const title = lines[0].trim();
+    const body = lines.slice(1).join('\n').trim();
+    if (!body) continue;
+
+    // Extract tags from title (simple: use words as tags)
+    const tags = title.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+
+    const result = learningsWrite({
+      source_project: sourceProject,
+      learning: body,
+      context: title,
+      tags,
+    }, opts);
+
+    if (result.created) {
+      created++;
+    } else {
+      skipped++;
+    }
+  }
+
+  return { total: created + skipped, created, skipped };
+}
+
+/**
+ * Prune learnings older than a given threshold.
+ *
+ * @param {string} olderThan - Duration string like "90d", "30d", "7d"
+ * @param {object} [opts]
+ * @param {string} [opts.storeDir] - Override store directory
+ * @returns {{ removed: number, kept: number }}
+ */
+function learningsPrune(olderThan, opts) {
+  const match = /^(\d+)d$/.exec(olderThan);
+  if (!match) {
+    throw new Error(`Invalid duration format: "${olderThan}" — expected format like "90d"`);
+  }
+
+  const days = parseInt(match[1], 10);
+  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const dir = getStoreDir(opts);
+
+  if (!fs.existsSync(dir)) return { removed: 0, kept: 0 };
+
+  const files = fs.readdirSync(dir).filter(f => f.endsWith('.json'));
+  let removed = 0;
+  let kept = 0;
+
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    const record = readLearningFile(filePath);
+    if (!record) continue;
+
+    const recordDate = new Date(record.date);
+    if (recordDate < cutoff) {
+      fs.unlinkSync(filePath);
+      removed++;
+    } else {
+      kept++;
+    }
+  }
+
+  return { removed, kept };
+}
+
+// ─── CLI Command Handlers ────────────────────────────────────────────────────
+
+/**
+ * Handle `gsd-tools learnings list`
+ * @param {boolean} raw - Raw output flag
+ */
+function cmdLearningsList(raw) {
+  const results = learningsList();
+  output({ learnings: results, count: results.length }, raw);
+}
+
+/**
+ * Handle `gsd-tools learnings query --tag <tag>`
+ * @param {string} tag
+ * @param {boolean} raw - Raw output flag
+ */
+function cmdLearningsQuery(tag, raw) {
+  const results = learningsQuery({ tag });
+  output({ learnings: results, count: results.length, tag }, raw);
+}
+
+/**
+ * Handle `gsd-tools learnings copy`
+ * @param {string} cwd - Current working directory
+ * @param {boolean} raw - Raw output flag
+ */
+function cmdLearningsCopy(cwd, raw) {
+  const planningDir = path.join(cwd, '.planning');
+  const result = learningsCopyFromProject(planningDir);
+  output(result, raw);
+}
+
+/**
+ * Handle `gsd-tools learnings prune --older-than <duration>`
+ * @param {string} olderThan - Duration string like "90d"
+ * @param {boolean} raw - Raw output flag
+ */
+function cmdLearningsPrune(olderThan, raw) {
+  try {
+    const result = learningsPrune(olderThan);
+    output(result, raw);
+  } catch (err) {
+    coreError(err.message);
+  }
+}
+
+/**
+ * Handle `gsd-tools learnings delete <id>`
+ * @param {string} id
+ * @param {boolean} raw - Raw output flag
+ */
+function cmdLearningsDelete(id, raw) {
+  if (!/^[a-z0-9]+-[a-f0-9]+$/.test(id)) {
+    coreError(`Invalid learning ID: "${id}"`);
+  }
+  const deleted = learningsDelete(id);
+  output({ id, deleted }, raw);
+}
+
+// ─── Exports ─────────────────────────────────────────────────────────────────
+
+module.exports = {
+  learningsWrite,
+  learningsRead,
+  learningsList,
+  learningsQuery,
+  learningsDelete,
+  learningsCopyFromProject,
+  learningsPrune,
+  cmdLearningsList,
+  cmdLearningsQuery,
+  cmdLearningsCopy,
+  cmdLearningsPrune,
+  cmdLearningsDelete,
+  DEFAULT_STORE_DIR,
+};

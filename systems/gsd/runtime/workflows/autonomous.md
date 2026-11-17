@@ -232,3 +232,353 @@ Codebase context will be gathered during plan-phase research.
 </code_context>
 
 <specifics>
+## Specific Ideas
+
+No specific requirements — discuss phase skipped. Refer to ROADMAP phase description and success criteria.
+
+</specifics>
+
+<deferred>
+## Deferred Ideas
+
+None — discuss phase skipped.
+
+</deferred>
+```
+
+Commit the minimal context:
+
+```bash
+gsd-sdk query commit "docs(${PADDED_PHASE}): auto-generated context (discuss skipped)" --files "${phase_dir}/${padded_phase}-CONTEXT.md"
+```
+
+Proceed to 3b.
+
+**If SKIP_DISCUSS is `false` (or unset):**
+
+**IMPORTANT — Discuss must be single-pass in autonomous mode.**
+The discuss step in `--auto` mode MUST NOT loop. If CONTEXT.md already exists after discuss completes, do NOT re-invoke discuss for the same phase. The `has_context` check below is authoritative — once true, discuss is done for this phase regardless of perceived "gaps" in the context file.
+
+**If `INTERACTIVE` is set:** Run the standard discuss-phase skill inline (asks interactive questions, waits for user answers). This preserves user input on all design decisions while keeping plan+execute out of the main context:
+
+```
+Skill(skill="gsd-discuss-phase", args="${PHASE_NUM}")
+```
+
+**If `INTERACTIVE` is NOT set:** Execute the smart_discuss step for this phase (batch table proposals, auto-optimized).
+
+After discuss completes (either mode), verify context was written:
+
+```bash
+PHASE_STATE=$(gsd-sdk query init.phase-op ${PHASE_NUM})
+```
+
+Check `has_context`. If false → go to handle_blocker: "Discuss for phase ${PHASE_NUM} did not produce CONTEXT.md."
+
+**3a.5. UI Design Contract (Frontend Phases)**
+
+Check if this phase has frontend indicators and whether a UI-SPEC already exists:
+
+```bash
+PHASE_SECTION=$(gsd-sdk query roadmap.get-phase ${PHASE_NUM} 2>/dev/null)
+# Shell-free word-boundary gate (#3718): Node.js helper — no locale env-var dependency.
+# Reads via stdin to avoid OS ARG_MAX limits on large phase text.
+# Path anchored to repo root; falls back to CWD if git is unavailable
+# Exit codes mirror grep: 0 = UI tokens found, 1 = not found.
+GSD_REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ".")
+printf '%s' "$PHASE_SECTION" | node "${GSD_REPO_ROOT}/bin/lib/ui-safety-gate.cjs" > /dev/null 2>&1
+HAS_UI=$?
+UI_SPEC_FILE=$(ls "${PHASE_DIR}"/*-UI-SPEC.md 2>/dev/null | head -1)
+```
+
+Check if UI phase workflow is enabled:
+
+```bash
+UI_PHASE_CFG=$(gsd-sdk query config-get workflow.ui_phase 2>/dev/null || echo "true")
+```
+
+**If `HAS_UI` is 0 (frontend indicators found) AND `UI_SPEC_FILE` is empty (no UI-SPEC exists) AND `UI_PHASE_CFG` is not `false`:**
+
+Display:
+
+```
+Phase ${PHASE_NUM}: Frontend phase detected — generating UI design contract...
+```
+
+```
+Skill(skill="gsd-ui-phase", args="${PHASE_NUM}")
+```
+
+Verify UI-SPEC was created:
+
+```bash
+UI_SPEC_FILE=$(ls "${PHASE_DIR}"/*-UI-SPEC.md 2>/dev/null | head -1)
+```
+
+**If `UI_SPEC_FILE` is still empty after ui-phase:** Display warning `Phase ${PHASE_NUM}: UI-SPEC generation did not produce output — continuing without design contract.` and proceed to 3b.
+
+**If `HAS_UI` is 1 (no frontend indicators) OR `UI_SPEC_FILE` is not empty (UI-SPEC already exists) OR `UI_PHASE_CFG` is `false`:** Skip silently to 3b.
+
+**3b. Plan**
+
+**If `INTERACTIVE` is set:** Dispatch plan as a background agent to keep the main context lean. While plan runs, the workflow can immediately start discussing the next phase (see step 4).
+
+```
+Agent(
+  description="Plan phase ${PHASE_NUM}: ${PHASE_NAME}",
+  run_in_background=true,
+  prompt="Run plan-phase for phase ${PHASE_NUM}: Skill(skill=\"gsd-plan-phase\", args=\"${PHASE_NUM}\")"
+)
+```
+
+Store the agent task_id. After discuss for the next phase completes (or if no next phase), wait for the plan agent to finish before proceeding to execute.
+
+**If `INTERACTIVE` is NOT set (default):** Run plan inline as before.
+
+```
+Skill(skill="gsd-plan-phase", args="${PHASE_NUM}")
+```
+
+Verify plan produced output — re-run `init phase-op` and check `has_plans`. If false → go to handle_blocker: "Plan phase ${PHASE_NUM} did not produce any plans."
+
+**3c. Execute**
+
+**If `INTERACTIVE` is set:** Wait for the plan agent to complete (if not already), verify plans exist, then dispatch execute as a background agent:
+
+```
+Agent(
+  description="Execute phase ${PHASE_NUM}: ${PHASE_NAME}",
+  run_in_background=true,
+  prompt="Run execute-phase for phase ${PHASE_NUM}: Skill(skill=\"gsd-execute-phase\", args=\"${PHASE_NUM} --no-transition\")"
+)
+```
+
+Store the agent task_id. The workflow can now start discussing the next phase while this phase executes in the background. Before starting post-execution routing for this phase, wait for the execute agent to complete.
+
+**If `INTERACTIVE` is NOT set (default):** Run execute inline as before.
+
+```
+Skill(skill="gsd-execute-phase", args="${PHASE_NUM} --no-transition")
+```
+
+**3c.5. Code Review and Fix**
+
+Auto-invoke code review and fix chain. Autonomous mode chains both review and fix (unlike execute-phase/quick which only suggest fix).
+
+**Config gate:**
+```bash
+CODE_REVIEW_ENABLED=$(gsd-sdk query config-get workflow.code_review 2>/dev/null || echo "true")
+```
+If `"false"`: display "Code review skipped (workflow.code_review=false)" and proceed to 3d.
+
+```
+Skill(skill="gsd-code-review", args="${PHASE_NUM}")
+```
+
+Parse status from REVIEW.md frontmatter. If "clean" or "skipped": proceed to 3d. If findings found: auto-invoke:
+```
+Skill(skill="gsd-code-review", args="${PHASE_NUM} --fix --auto")
+```
+
+**Error handling:** If either Skill fails, catch the error, display as non-blocking, and proceed to 3d.
+
+**3d. Post-Execution Routing**
+
+**If `INTERACTIVE` is set:** Wait for the execute agent to complete before reading verification results.
+
+After execute-phase returns (or the execute agent completes), read the verification result:
+
+```bash
+VERIFY_STATUS=$(grep "^status:" "${PHASE_DIR}"/*-VERIFICATION.md 2>/dev/null | head -1 | cut -d: -f2 | tr -d ' ')
+```
+
+Where `PHASE_DIR` comes from the `init phase-op` call already made in step 3a. If the variable is not in scope, re-fetch:
+
+```bash
+PHASE_STATE=$(gsd-sdk query init.phase-op ${PHASE_NUM})
+```
+
+Parse `phase_dir` from the JSON.
+
+**If VERIFY_STATUS is empty** (no VERIFICATION.md or no status field):
+
+Go to handle_blocker: "Execute phase ${PHASE_NUM} did not produce verification results."
+
+**If `passed`:**
+
+Display:
+```
+Phase ${PHASE_NUM} ✅ ${PHASE_NAME} — Verification passed
+```
+
+Proceed to iterate step.
+
+**If `human_needed`:**
+
+Read the human_verification section from VERIFICATION.md to get the count and items requiring manual testing.
+
+
+**Text mode (`workflow.text_mode: true` in config or `--text` flag):** Set `TEXT_MODE=true` if `--text` is present in `$ARGUMENTS` OR `text_mode` from init JSON is `true`. When TEXT_MODE is active, replace every `AskUserQuestion` call with a plain-text numbered list and ask the user to type their choice number. This is required for non-Claude runtimes (OpenAI Codex, Gemini CLI, etc.) where `AskUserQuestion` is not available.
+Display the items, then ask user via AskUserQuestion:
+- **question:** "Phase ${PHASE_NUM} has items needing manual verification. Validate now or continue to next phase?"
+- **options:** "Validate now" / "Continue without validation"
+
+On **"Validate now"**: Present the specific items from VERIFICATION.md's human_verification section. After user reviews, ask:
+- **question:** "Validation result?"
+- **options:** "All good — continue" / "Found issues"
+
+On "All good — continue": Display `Phase ${PHASE_NUM} ✅ Human validation passed` and proceed to iterate step.
+
+On "Found issues": Go to handle_blocker with the user's reported issues as the description.
+
+On **"Continue without validation"**: Display `Phase ${PHASE_NUM} ⏭ Human validation deferred` and proceed to iterate step.
+
+**If `gaps_found`:**
+
+Read gap summary from VERIFICATION.md (score and missing items). Display:
+```
+⚠ Phase ${PHASE_NUM}: ${PHASE_NAME} — Gaps Found
+Score: {N}/{M} must-haves verified
+```
+
+Ask user via AskUserQuestion:
+- **question:** "Gaps found in phase ${PHASE_NUM}. How to proceed?"
+- **options:** "Run gap closure" / "Continue without fixing" / "Stop autonomous mode"
+
+On **"Run gap closure"**: Execute gap closure cycle (limit: 1 attempt):
+
+```
+Skill(skill="gsd-plan-phase", args="${PHASE_NUM} --gaps")
+```
+
+Verify gap plans were created — re-run `init phase-op ${PHASE_NUM}` and check `has_plans`. If no new gap plans → go to handle_blocker: "Gap closure planning for phase ${PHASE_NUM} did not produce plans."
+
+Re-execute:
+```
+Skill(skill="gsd-execute-phase", args="${PHASE_NUM} --no-transition")
+```
+
+Re-read verification status:
+```bash
+VERIFY_STATUS=$(grep "^status:" "${PHASE_DIR}"/*-VERIFICATION.md 2>/dev/null | head -1 | cut -d: -f2 | tr -d ' ')
+```
+
+If `passed` or `human_needed`: Route normally (continue or ask user as above).
+
+If still `gaps_found` after this retry: Display "Gaps persist after closure attempt." and ask via AskUserQuestion:
+- **question:** "Gap closure did not fully resolve issues. How to proceed?"
+- **options:** "Continue anyway" / "Stop autonomous mode"
+
+On "Continue anyway": Proceed to iterate step.
+On "Stop autonomous mode": Go to handle_blocker.
+
+This limits gap closure to 1 automatic retry to prevent infinite loops.
+
+On **"Continue without fixing"**: Display `Phase ${PHASE_NUM} ⏭ Gaps deferred` and proceed to iterate step.
+
+On **"Stop autonomous mode"**: Go to handle_blocker with "User stopped — gaps remain in phase ${PHASE_NUM}".
+
+**3d.5. UI Review (Frontend Phases)**
+
+> Run after any successful execution routing (passed, human_needed accepted, or gaps deferred/accepted) — before proceeding to the iterate step.
+
+Check if this phase had a UI-SPEC (created in step 3a.5 or pre-existing):
+
+```bash
+UI_SPEC_FILE=$(ls "${PHASE_DIR}"/*-UI-SPEC.md 2>/dev/null | head -1)
+```
+
+Check if UI review is enabled:
+
+```bash
+UI_REVIEW_CFG=$(gsd-sdk query config-get workflow.ui_review 2>/dev/null || echo "true")
+```
+
+**If `UI_SPEC_FILE` is not empty AND `UI_REVIEW_CFG` is not `false`:**
+
+Display:
+
+```
+Phase ${PHASE_NUM}: Frontend phase with UI-SPEC — running UI review audit...
+```
+
+```
+Skill(skill="gsd-ui-review", args="${PHASE_NUM}")
+```
+
+Display the review result summary (score from UI-REVIEW.md if produced). Continue to iterate step regardless of score — UI review is advisory, not blocking.
+
+**If `UI_SPEC_FILE` is empty OR `UI_REVIEW_CFG` is `false`:** Skip silently to iterate step.
+
+</step>
+
+<step name="smart_discuss">
+
+## Smart Discuss
+
+> Full instructions are in `get-shit-done/references/autonomous-smart-discuss.md`. Read that file now and follow it exactly.
+
+Smart discuss is an autonomous-optimized variant of `gsd-discuss-phase`. It proposes grey area answers in batch tables — the user accepts or overrides per area — and writes an identical CONTEXT.md to what discuss-phase produces.
+
+**Inputs:** `PHASE_NUM` from execute_phase.
+
+Read and execute: `$HOME/.claude/get-shit-done/references/autonomous-smart-discuss.md`
+
+</step>
+
+<step name="iterate">
+
+## 4. Iterate
+
+**If `ONLY_PHASE` is set:** Do not iterate. Proceed directly to lifecycle step (which exits cleanly per single-phase mode).
+
+**If `TO_PHASE` is set and current phase number >= `TO_PHASE`:** The target phase has been reached. Do not iterate further. Display:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► AUTONOMOUS ▸ --to ${TO_PHASE} REACHED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ Completed through phase ${TO_PHASE} as requested.
+ Remaining phases were not executed.
+
+ Resume with: /gsd:autonomous --from ${next_incomplete_phase}
+```
+
+Proceed directly to lifecycle step (which handles partial completion — skips audit/complete/cleanup since not all phases are done). Exit cleanly.
+
+**Otherwise:** After each phase completes, re-read ROADMAP.md to catch phases inserted mid-execution (decimal phases like 5.1):
+
+```bash
+ROADMAP=$(gsd-sdk query roadmap.analyze)
+```
+
+Re-filter incomplete phases using the same logic as discover_phases:
+- Keep phases where `disk_status !== "complete"` OR `roadmap_complete === false`
+- Apply `--from N` filter if originally provided
+- Apply `--to N` filter if originally provided
+- Sort by number ascending
+
+Read STATE.md fresh:
+
+```bash
+cat .planning/STATE.md
+```
+
+Check for blockers in the Blockers/Concerns section. If blockers are found, go to handle_blocker with the blocker description.
+
+If incomplete phases remain: proceed to next phase, loop back to execute_phase.
+
+**Interactive mode overlap:** When `INTERACTIVE` is set, the iterate step enables pipeline parallelism:
+1. After discuss completes for Phase N, dispatch plan+execute as background agents
+2. Immediately start discuss for Phase N+1 (the next incomplete phase) while Phase N builds
+3. Before starting plan for Phase N+1, wait for Phase N's execute agent to complete and handle its post-execution routing (verification, gap closure, etc.)
+
+This means the user is always answering discuss questions (lightweight, interactive) while the heavy work (planning, code generation) runs in the background. The main context only accumulates discuss conversations — plan and execute contexts are isolated in their agents.
+
+If all phases complete, proceed to lifecycle step.
+
+</step>
+
+<step name="lifecycle">
+

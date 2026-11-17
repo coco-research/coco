@@ -191,3 +191,65 @@ Template for `.planning/codebase/ARCHITECTURE.md` - captures conceptual code org
 ## Error Handling
 
 **Strategy:** Throw exceptions, catch at command level, log and exit
+
+**Patterns:**
+- Services throw Error with descriptive messages
+- Command handlers catch, log error to stderr, exit(1)
+- Validation errors shown before execution (fail fast)
+
+## Cross-Cutting Concerns
+
+**Logging:**
+- Console.log for normal output
+- Console.error for errors
+- Chalk for colored output
+
+**Validation:**
+- Zod schemas for config file parsing
+- Manual validation in command handlers
+- Fail fast on invalid input
+
+**File Operations:**
+- FileService abstraction over fs-extra
+- All paths validated before operations
+- Atomic writes (temp file + rename)
+
+---
+
+*Architecture analysis: 2025-01-20*
+*Update when major patterns change*
+```
+</good_examples>
+
+<guidelines>
+**What belongs in ARCHITECTURE.md:**
+- Overall architectural pattern (monolith, microservices, layered, etc.)
+- Conceptual layers and their relationships
+- Data flow / request lifecycle
+- Key abstractions and patterns
+- Entry points
+- Error handling strategy
+- Cross-cutting concerns (logging, auth, validation)
+
+**What does NOT belong here:**
+- Exhaustive file listings (that's STRUCTURE.md)
+- Technology choices (that's STACK.md)
+- Line-by-line code walkthrough (defer to code reading)
+- Implementation details of specific features
+
+**File paths ARE welcome:**
+Include file paths as concrete examples of abstractions. Use backtick formatting: `src/services/user.ts`. This makes the architecture document actionable for Claude when planning.
+
+**When filling this template:**
+- Read main entry points (index, server, main)
+- Identify layers by reading imports/dependencies
+- Trace a typical request/command execution
+- Note recurring patterns (services, controllers, repositories)
+- Keep descriptions conceptual, not mechanical
+
+**Useful for phase planning when:**
+- Adding new features (where does it fit in the layers?)
+- Refactoring (understanding current patterns)
+- Identifying where to add code (which layer handles X?)
+- Understanding dependencies between components
+</guidelines>

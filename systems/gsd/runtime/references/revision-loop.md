@@ -79,3 +79,19 @@ If issues persist after 3 revision cycles:
 3. If "Proceed anyway": accept current output and continue
 4. If "Adjust approach" or "Other": discuss with user, then re-enter the producing step with updated context
 
+### Workflow-Specific Variations
+
+| Workflow | Producer Agent | Checker Agent | Notes |
+|----------|---------------|---------------|-------|
+| plan-phase | gsd-planner | gsd-plan-checker | Revision prompt via planner-revision.md |
+| execute-phase | gsd-executor | gsd-verifier | Post-execution verification |
+| discuss-phase | orchestrator | gsd-plan-checker | Inline revision by orchestrator |
+
+---
+
+## Important Notes
+
+- **INFO-level issues are always acceptable** -- they don't trigger revision
+- **Each iteration gets a fresh agent spawn** -- don't try to continue in the same context
+- **Checker feedback must be inlined** -- the revision agent needs to see exactly what failed
+- **Don't silently swallow issues** -- always present the final state to the user after exiting the loop

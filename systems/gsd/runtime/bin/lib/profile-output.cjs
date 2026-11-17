@@ -926,3 +926,205 @@ function cmdGenerateClaudeProfile(cwd, options, raw) {
   }
 
   let action;
+
+  let existingContent = safeReadFile(targetPath);
+  if (existingContent !== null) {
+    const startMarker = '<!-- GSD:profile-start -->';
+    const endMarker = '<!-- GSD:profile-end -->';
+    const startIdx = existingContent.indexOf(startMarker);
+    const endIdx = existingContent.indexOf(endMarker);
+
+    if (startIdx !== -1 && endIdx !== -1) {
+      const before = existingContent.substring(0, startIdx);
+      const after = existingContent.substring(endIdx + endMarker.length);
+      existingContent = before + sectionContent + after;
+      action = 'updated';
+    } else {
+      existingContent = existingContent.trimEnd() + '\n\n' + sectionContent + '\n';
+      action = 'appended';
+    }
+    platformWriteSync(targetPath, existingContent);
+  } else {
+    platformEnsureDir(path.dirname(targetPath));
+    platformWriteSync(targetPath, sectionContent + '\n');
+    action = 'created';
+  }
+
+  const result = {
+    claude_md_path: targetPath,
+    action,
+    dimensions_included: dimensionsIncluded,
+    is_global: !!options.global,
+  };
+
+  output(result, raw);
+}
+
+function cmdGenerateClaudeMd(cwd, options, raw) {
+  const MANAGED_SECTIONS = ['project', 'stack', 'conventions', 'architecture', 'skills', 'workflow'];
+  const generators = {
+    project: generateProjectSection,
+    stack: generateStackSection,
+    conventions: generateConventionsSection,
+    architecture: generateArchitectureSection,
+    skills: generateSkillsSection,
+    workflow: generateWorkflowSection,
+  };
+  const sectionHeadings = {
+    project: '## Project',
+    stack: '## Technology Stack',
+    conventions: '## Conventions',
+    architecture: '## Architecture',
+    skills: '## Project Skills',
+    workflow: '## GSD Workflow Enforcement',
+  };
+
+  const generated = {};
+  const sectionsGenerated = [];
+  const sectionsFallback = [];
+  const sectionsSkipped = [];
+
+  for (const name of MANAGED_SECTIONS) {
+    const gen = generators[name](cwd);
+    generated[name] = gen;
+    if (gen.hasFallback) {
+      sectionsFallback.push(name);
+    } else {
+      sectionsGenerated.push(name);
+    }
+  }
+
+  let assemblyConfig = {};
+  let configClaudeMdPath = './CLAUDE.md';
+  try {
+    const config = loadConfig(cwd);
+    if (config.claude_md_path) configClaudeMdPath = config.claude_md_path;
+    if (config.claude_md_assembly) assemblyConfig = config.claude_md_assembly;
+    // #3163: When runtime is codex, override the output target to AGENTS.md
+    // regardless of claude_md_path, so Codex projects never write to CLAUDE.md.
+    // GSD_RUNTIME env var takes precedence over config.runtime, mirroring detectRuntime().
+    const effectiveRuntime = process.env.GSD_RUNTIME || config.runtime || null;
+    if (!options.output && effectiveRuntime === 'codex') {
+      configClaudeMdPath = './AGENTS.md';
+    }
+  } catch { /* use default */ }
+
+  let outputPath = options.output;
+  if (!outputPath) {
+    outputPath = path.isAbsolute(configClaudeMdPath) ? configClaudeMdPath : path.join(cwd, configClaudeMdPath);
+  } else if (!path.isAbsolute(outputPath)) {
+    outputPath = path.join(cwd, outputPath);
+  }
+
+  const globalAssemblyMode = assemblyConfig.mode || 'embed';
+  const blockModes = assemblyConfig.blocks || {};
+
+  // Return the assembled content for a section, respecting link vs embed mode.
+  // "link" mode writes `@<linkPath>` when the generator has a real source file.
+  // Falls back to "embed" for sections without a linkable source (workflow, fallbacks).
+  function buildSectionContent(name, gen, heading) {
+    const effectiveMode = blockModes[name] || globalAssemblyMode;
+    if (effectiveMode === 'link' && gen.linkPath && !gen.hasFallback) {
+      return buildSection(name, gen.source, `${heading}\n\n@${gen.linkPath}`);
+    }
+    return buildSection(name, gen.source, `${heading}\n\n${gen.content}`);
+  }
+
+  let existingContent = safeReadFile(outputPath);
+  let action;
+
+  if (existingContent === null) {
+    const sections = [];
+    for (const name of MANAGED_SECTIONS) {
+      const gen = generated[name];
+      const heading = sectionHeadings[name];
+      sections.push(buildSectionContent(name, gen, heading));
+    }
+    sections.push('');
+    sections.push(buildClaudeMdProfilePlaceholder(resolveRuntime(cwd)));
+    existingContent = sections.join('\n\n') + '\n';
+    action = 'created';
+    platformEnsureDir(path.dirname(outputPath));
+    platformWriteSync(outputPath, existingContent);
+  } else {
+    action = 'updated';
+    let fileContent = existingContent;
+
+    for (const name of MANAGED_SECTIONS) {
+      const gen = generated[name];
+      const heading = sectionHeadings[name];
+      const fullSection = buildSectionContent(name, gen, heading);
+      const hasMarkers = fileContent.indexOf(`<!-- GSD:${name}-start`) !== -1;
+
+      if (hasMarkers) {
+        if (options.auto) {
+          const effectiveMode = blockModes[name] || globalAssemblyMode;
+          const expectedBody = (effectiveMode === 'link' && gen.linkPath && !gen.hasFallback)
+            ? `${heading}\n\n@${gen.linkPath}`
+            : `${heading}\n\n${gen.content}`;
+          if (detectManualEdit(fileContent, name, expectedBody)) {
+            sectionsSkipped.push(name);
+            const genIdx = sectionsGenerated.indexOf(name);
+            if (genIdx !== -1) sectionsGenerated.splice(genIdx, 1);
+            const fbIdx = sectionsFallback.indexOf(name);
+            if (fbIdx !== -1) sectionsFallback.splice(fbIdx, 1);
+            continue;
+          }
+        }
+        const result = updateSection(fileContent, name, fullSection);
+        fileContent = result.content;
+      } else {
+        const result = updateSection(fileContent, name, fullSection);
+        fileContent = result.content;
+      }
+    }
+
+    if (!options.auto && fileContent.indexOf('<!-- GSD:profile-start') === -1) {
+      fileContent = fileContent.trimEnd() + '\n\n' + buildClaudeMdProfilePlaceholder(resolveRuntime(cwd)) + '\n';
+    }
+
+    platformWriteSync(outputPath, fileContent);
+  }
+
+  const finalContent = safeReadFile(outputPath);
+  let profileStatus;
+  if (finalContent && finalContent.indexOf('<!-- GSD:profile-start') !== -1) {
+    if (action === 'created' || existingContent.indexOf('<!-- GSD:profile-start') === -1) {
+      profileStatus = 'placeholder_added';
+    } else {
+      profileStatus = 'exists';
+    }
+  } else {
+    profileStatus = 'already_present';
+  }
+
+  const genCount = sectionsGenerated.length;
+  const totalManaged = MANAGED_SECTIONS.length;
+  let message = `Generated ${genCount}/${totalManaged} sections.`;
+  if (sectionsFallback.length > 0) message += ` Fallback: ${sectionsFallback.join(', ')}.`;
+  if (sectionsSkipped.length > 0) message += ` Skipped (manually edited): ${sectionsSkipped.join(', ')}.`;
+  if (profileStatus === 'placeholder_added') message += ` Run ${formatGsdSlash('profile-user', resolveRuntime(cwd))} to unlock Developer Profile.`;
+
+  const result = {
+    claude_md_path: outputPath,
+    action,
+    sections_generated: sectionsGenerated,
+    sections_fallback: sectionsFallback,
+    sections_skipped: sectionsSkipped,
+    sections_total: totalManaged,
+    profile_status: profileStatus,
+    message,
+  };
+
+  output(result, raw);
+}
+
+module.exports = {
+  cmdWriteProfile,
+  cmdProfileQuestionnaire,
+  cmdGenerateDevPreferences,
+  cmdGenerateClaudeProfile,
+  cmdGenerateClaudeMd,
+  PROFILING_QUESTIONS,
+  CLAUDE_INSTRUCTIONS,
+};

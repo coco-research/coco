@@ -1,0 +1,1219 @@
+{
+  "repository": "https://github.com/gsd-build/get-shit-done",
+  "commit": "bdcaab2c752d9a33a1a1ca9acf3a3c81fb991815",
+  "files": [
+    {
+      "path": "bin/check-latest-version.cjs",
+      "git_blob": "78b3e109f8b79ec34ab69fe81bf94315fa75b314"
+    },
+    {
+      "path": "bin/gsd-tools.cjs",
+      "git_blob": "7c8289d2f0a3110e71fdf9822b00f093c075aa1a"
+    },
+    {
+      "path": "bin/lib/active-workstream-store.cjs",
+      "git_blob": "bf5a99a15b4cb22b35621139cb28be3c2564fab6"
+    },
+    {
+      "path": "bin/lib/adr-parser.cjs",
+      "git_blob": "af48c7077a1b6da79b84caa92adde7ac3bcfd2e4"
+    },
+    {
+      "path": "bin/lib/artifacts.cjs",
+      "git_blob": "f90c0659ffcb8c79bf364dc7b98e653370741a40"
+    },
+    {
+      "path": "bin/lib/audit.cjs",
+      "git_blob": "47d3386e3cf8eb944fbb4a58848b5524ea079578"
+    },
+    {
+      "path": "bin/lib/cjs-command-router-adapter.cjs",
+      "git_blob": "1598b40e2826dc28974ac0dde2b6a066c6736e6c"
+    },
+    {
+      "path": "bin/lib/cjs-sdk-bridge.cjs",
+      "git_blob": "0e9ef003f3f351df1807f72559fe80c6adab6952"
+    },
+    {
+      "path": "bin/lib/clusters.cjs",
+      "git_blob": "90b10e234919de6ce16a9126853ca08965eee54e"
+    },
+    {
+      "path": "bin/lib/code-review-flags.cjs",
+      "git_blob": "a0bba0167a3b69572818620d71cb2da2cdbd56f8"
+    },
+    {
+      "path": "bin/lib/command-aliases.generated.cjs",
+      "git_blob": "7c48ef1346b3530c3ea8f1b04af2667f9b3e7549"
+    },
+    {
+      "path": "bin/lib/command-routing-hub.cjs",
+      "git_blob": "0cdab02c3d400fe5af9a59f7aa3e9d3e723484d3"
+    },
+    {
+      "path": "bin/lib/commands.cjs",
+      "git_blob": "85e4850d505a268ebc468c86ea0ff29d020c8937"
+    },
+    {
+      "path": "bin/lib/config-schema.cjs",
+      "git_blob": "16641d0300feb9f8479522264adcd59b7f54c3ed"
+    },
+    {
+      "path": "bin/lib/config.cjs",
+      "git_blob": "2b6e48fa85985a84c0f6e0b3dd433ece4d2feba7"
+    },
+    {
+      "path": "bin/lib/configuration.generated.cjs",
+      "git_blob": "9872fb4ccc291aba7ad1a6f8d52d6e74a3055dcc"
+    },
+    {
+      "path": "bin/lib/context-utilization.cjs",
+      "git_blob": "ba3ac3975381dc6b9e7706112d706401231f18ad"
+    },
+    {
+      "path": "bin/lib/core.cjs",
+      "git_blob": "305ac8bd647fbd52aca86287366e6b5525bef632"
+    },
+    {
+      "path": "bin/lib/decisions.cjs",
+      "git_blob": "68e3ee95977d90e95ad5fa68dfda795713366d45"
+    },
+    {
+      "path": "bin/lib/decisions.generated.cjs",
+      "git_blob": "efb2c3f138aa2b847c3baa58a489a3f642a95c13"
+    },
+    {
+      "path": "bin/lib/docs.cjs",
+      "git_blob": "545c79f68f7b965fde7484bea38a9b2e30d11994"
+    },
+    {
+      "path": "bin/lib/drift.cjs",
+      "git_blob": "ef6213ba2e4895cb3ed1bf8159ed29f3aa55d54c"
+    },
+    {
+      "path": "bin/lib/fallow-runner.cjs",
+      "git_blob": "5454c14e95895dc90a47691e6b3fd9d692bbe29c"
+    },
+    {
+      "path": "bin/lib/frontmatter.cjs",
+      "git_blob": "2bac4150188f5593369d1148da644ff4754bbcf0"
+    },
+    {
+      "path": "bin/lib/gap-checker.cjs",
+      "git_blob": "cd8e35054cf895883988207f31506f98c4dce5e1"
+    },
+    {
+      "path": "bin/lib/graphify.cjs",
+      "git_blob": "600adc67b9e0c165016bafa5db8da9020918a104"
+    },
+    {
+      "path": "bin/lib/gsd2-import.cjs",
+      "git_blob": "f00220dfe4563799a2e2ce3f482ccf581a4142a3"
+    },
+    {
+      "path": "bin/lib/init-command-router.cjs",
+      "git_blob": "ec21ebfd3549fedce2bfc8b1795cb00728bb08bb"
+    },
+    {
+      "path": "bin/lib/init.cjs",
+      "git_blob": "04fc77cbd7c68fb4acf91daf9a819efe4104919b"
+    },
+    {
+      "path": "bin/lib/install-profiles.cjs",
+      "git_blob": "24769c786ed52bc37ea2d431c75892781130f6a9"
+    },
+    {
+      "path": "bin/lib/installer-migration-authoring.cjs",
+      "git_blob": "d6fb5c500cf3f9cedf1bd09864119ceb37bf7f27"
+    },
+    {
+      "path": "bin/lib/installer-migration-report.cjs",
+      "git_blob": "b7a4e894f96cd563b16b60ad29ecd7e9754e8707"
+    },
+    {
+      "path": "bin/lib/installer-migrations.cjs",
+      "git_blob": "c1039034d0332ec233a9fcc82a332d3d17e00ef9"
+    },
+    {
+      "path": "bin/lib/installer-migrations/000-first-time-baseline.cjs",
+      "git_blob": "cbc31d6c4eb7ead07d1d4df0b1e2ba5ae0f8326b"
+    },
+    {
+      "path": "bin/lib/installer-migrations/001-legacy-orphan-files.cjs",
+      "git_blob": "26d26319870a27d0b5cb4f4d9d2f50852d9e2ddd"
+    },
+    {
+      "path": "bin/lib/installer-migrations/002-codex-legacy-hooks-json.cjs",
+      "git_blob": "36c2c134789627c840708b335ba15c60d6d45cb7"
+    },
+    {
+      "path": "bin/lib/intel.cjs",
+      "git_blob": "b4e52e9e50c4dcca9d78b423936e49187bf8459b"
+    },
+    {
+      "path": "bin/lib/learnings.cjs",
+      "git_blob": "dc99db3c4dfcb5b338bb2005d98df00ad387ea45"
+    },
+    {
+      "path": "bin/lib/milestone.cjs",
+      "git_blob": "00d72aaab49e85aad8159b0b70e3adc7e9dbc312"
+    },
+    {
+      "path": "bin/lib/model-catalog.cjs",
+      "git_blob": "65a35d35fb3467ca6d8941b9f4d02317d0a12e38"
+    },
+    {
+      "path": "bin/lib/model-profiles.cjs",
+      "git_blob": "af05b75f7e16d9ea59cc1a974053160c48a670b3"
+    },
+    {
+      "path": "bin/lib/phase-command-router.cjs",
+      "git_blob": "ac972f52383497feb9b028cbe5f091e03ebaf055"
+    },
+    {
+      "path": "bin/lib/phase.cjs",
+      "git_blob": "0afd100c604ce0327ec001e131fb044ee5ba02f7"
+    },
+    {
+      "path": "bin/lib/phases-command-router.cjs",
+      "git_blob": "84407869b270d879322afe170fe7e4cebf6fb6f4"
+    },
+    {
+      "path": "bin/lib/plan-scan.cjs",
+      "git_blob": "ece997d85e524b136c83e4a1d79b2a6535a4aa85"
+    },
+    {
+      "path": "bin/lib/plan-scan.generated.cjs",
+      "git_blob": "e58004a82a12049eabf6bb411a57239dc22a0d82"
+    },
+    {
+      "path": "bin/lib/planning-workspace.cjs",
+      "git_blob": "bb195bb392a97bc20cf5dc4b012af4428800f6ce"
+    },
+    {
+      "path": "bin/lib/profile-output.cjs",
+      "git_blob": "d6918c5d0674554b0f6f6e7050357005f5bc6e74"
+    },
+    {
+      "path": "bin/lib/profile-pipeline.cjs",
+      "git_blob": "1377069475a3a07b77a431e4c95dfa221471d4eb"
+    },
+    {
+      "path": "bin/lib/project-root.generated.cjs",
+      "git_blob": "bb85c50d35204db699ec5b6df920d19a910ed8e9"
+    },
+    {
+      "path": "bin/lib/prompt-budget.cjs",
+      "git_blob": "2f37a7322d2a369b07441db7c13ac9f157c9674e"
+    },
+    {
+      "path": "bin/lib/review-reviewer-selection.cjs",
+      "git_blob": "7d8d3225f24c751d8614d96091ddf90c764b78f6"
+    },
+    {
+      "path": "bin/lib/roadmap-command-router.cjs",
+      "git_blob": "7f8427f3c383c260a02b3caeed5c1414cd1e2005"
+    },
+    {
+      "path": "bin/lib/roadmap.cjs",
+      "git_blob": "901b0d3a9f63f0235c4a5f4b6c782e01015d4b9b"
+    },
+    {
+      "path": "bin/lib/runtime-artifact-layout.cjs",
+      "git_blob": "f87eb4cdd47b72224dc7e0698f164f51fa7730f9"
+    },
+    {
+      "path": "bin/lib/runtime-homes.cjs",
+      "git_blob": "4909a4ce5d618efcedab50e56af2f422b713e783"
+    },
+    {
+      "path": "bin/lib/runtime-slash.cjs",
+      "git_blob": "30cda98f6205aa2fb02eaccab75651a3a7a31a13"
+    },
+    {
+      "path": "bin/lib/schema-detect.cjs",
+      "git_blob": "27cca4b16b6cae5f79a8e83cfbe392f454d9c71a"
+    },
+    {
+      "path": "bin/lib/schema-detect.generated.cjs",
+      "git_blob": "b1652a6c90d7753deb256a8f90351a02f3882bba"
+    },
+    {
+      "path": "bin/lib/secrets.cjs",
+      "git_blob": "7e28d4bc358317f0af5ce44a006256a87c1cc891"
+    },
+    {
+      "path": "bin/lib/secrets.generated.cjs",
+      "git_blob": "af6ed35c22f20a5a28bc75f474e57d3ce6a5796a"
+    },
+    {
+      "path": "bin/lib/security.cjs",
+      "git_blob": "48b0f0c6c94d3a611069313ed5a911a8373431b1"
+    },
+    {
+      "path": "bin/lib/shell-command-projection.cjs",
+      "git_blob": "36c3c4a9b5565bb474440227480dd9b7d7018786"
+    },
+    {
+      "path": "bin/lib/state-command-router.cjs",
+      "git_blob": "caca7376dcfa81bea0258d981046fb14a104e529"
+    },
+    {
+      "path": "bin/lib/state-document.cjs",
+      "git_blob": "53b7b2974157bfec78aa0e1e2f2fe96cdd5d98c4"
+    },
+    {
+      "path": "bin/lib/state-document.generated.cjs",
+      "git_blob": "81ab3101760913f1904461584d4a346aa505680a"
+    },
+    {
+      "path": "bin/lib/state.cjs",
+      "git_blob": "df6d0118b80b7227f1679bb398dc74908fefb6d6"
+    },
+    {
+      "path": "bin/lib/surface.cjs",
+      "git_blob": "83fb8ab21497d478f6c4c4fa09e3cd8d6cd9f844"
+    },
+    {
+      "path": "bin/lib/template.cjs",
+      "git_blob": "daaf8581f851b3ee5f9700c3f0771c4bff17a461"
+    },
+    {
+      "path": "bin/lib/uat.cjs",
+      "git_blob": "5c989bf2c05b0de583b2daf621515e3e27cf6713"
+    },
+    {
+      "path": "bin/lib/validate-command-router.cjs",
+      "git_blob": "e38bd8333bd99874dd3e60426accdaca7873f88f"
+    },
+    {
+      "path": "bin/lib/verify-command-router.cjs",
+      "git_blob": "e42809f547a62ddd30fced4f9c06e51bf040ff01"
+    },
+    {
+      "path": "bin/lib/verify.cjs",
+      "git_blob": "218ad857a7cae5fa6268e3718a1ba15a00338f41"
+    },
+    {
+      "path": "bin/lib/workstream-inventory-builder.generated.cjs",
+      "git_blob": "c7c4eca16a9a6db677b3c17e3cd1a04199f50b4d"
+    },
+    {
+      "path": "bin/lib/workstream-inventory.cjs",
+      "git_blob": "8e84424ab1e0311a9718d80595f54f7ea953d745"
+    },
+    {
+      "path": "bin/lib/workstream-name-policy.cjs",
+      "git_blob": "61c58e7e86b743c75ed8c5b58e6e5bbd14752418"
+    },
+    {
+      "path": "bin/lib/workstream-name-policy.generated.cjs",
+      "git_blob": "27f1ec23e0c1a8cdd1fdd390d5f60920913b0ecc"
+    },
+    {
+      "path": "bin/lib/workstream.cjs",
+      "git_blob": "b538b4052549c7d041adc46274e9c16e08183780"
+    },
+    {
+      "path": "bin/lib/worktree-safety.cjs",
+      "git_blob": "f24828c1fefbec71543e80b4d46fc9fef21c3cfd"
+    },
+    {
+      "path": "bin/shared/config-defaults.manifest.json",
+      "upstream_path": "sdk/shared/config-defaults.manifest.json",
+      "git_blob": "b7cacb9e56f17815995f7f6c80b10c407ec3c285"
+    },
+    {
+      "path": "bin/shared/config-schema.manifest.json",
+      "upstream_path": "sdk/shared/config-schema.manifest.json",
+      "git_blob": "4d13c8661f4d93e2ea1e5068fe0639b68f3b7772"
+    },
+    {
+      "path": "bin/shared/model-catalog.json",
+      "upstream_path": "sdk/shared/model-catalog.json",
+      "git_blob": "5ceda6009788cfdbe15744ed010ab79ff4e23cb3"
+    },
+    {
+      "path": "bin/verify-reapply-patches.cjs",
+      "git_blob": "76bef6429526f14156b6c8bb492074e4f1d5feba"
+    },
+    {
+      "path": "contexts/dev.md",
+      "git_blob": "7a9a9a2739e9ff4b6054b8efc59a31d2a2cb8f6b"
+    },
+    {
+      "path": "contexts/research.md",
+      "git_blob": "d358858385cd431a5df07b4bf382cff74ecb67f2"
+    },
+    {
+      "path": "contexts/review.md",
+      "git_blob": "68dec8f92974ef8574c21365fb06d92341c10f29"
+    },
+    {
+      "path": "references/agent-contracts.md",
+      "git_blob": "777cef2082fc6daea3cf6825a1371199ccc6ef2d"
+    },
+    {
+      "path": "references/ai-evals.md",
+      "git_blob": "4e148d7de7087af310d3ddcd5bc6f4b5adbee442"
+    },
+    {
+      "path": "references/ai-frameworks.md",
+      "git_blob": "e13b8462cba650ae86d8f7f8a7f4d74e20bf1aca"
+    },
+    {
+      "path": "references/artifact-types.md",
+      "git_blob": "8cfa121f9e50dfe98e1b951160465508ad65551d"
+    },
+    {
+      "path": "references/autonomous-smart-discuss.md",
+      "git_blob": "62156d278b9766e7842af2866b296433902ad3dc"
+    },
+    {
+      "path": "references/checkpoints.md",
+      "git_blob": "10b2cb90b1909f21e2daaa5a27c4e82c39003e4f"
+    },
+    {
+      "path": "references/common-bug-patterns.md",
+      "git_blob": "91850263b09da560883f392531efe1b6d29e1d7c"
+    },
+    {
+      "path": "references/context-budget.md",
+      "git_blob": "b078f62716c37675ee0f1b27b29f0a15621b2e1e"
+    },
+    {
+      "path": "references/continuation-format.md",
+      "git_blob": "01921b26a2ecc264d99a9446e4e14167d4d040d6"
+    },
+    {
+      "path": "references/debugger-philosophy.md",
+      "git_blob": "23ee967b839fd64a65c1be3b6504714761c3d815"
+    },
+    {
+      "path": "references/decimal-phase-calculation.md",
+      "git_blob": "44f88f74855896e7bfe88b916199c2ce7dd4d921"
+    },
+    {
+      "path": "references/doc-conflict-engine.md",
+      "git_blob": "5e8a338b67cbf1fd10de2abbe5852c9cd0f1cc7b"
+    },
+    {
+      "path": "references/domain-probes.md",
+      "git_blob": "1c24806a2a8fd0dacfade17c42f1bad6528ebcf3"
+    },
+    {
+      "path": "references/execute-mvp-tdd.md",
+      "git_blob": "6acaacc3c13d39083244d1252e7de01f31081d21"
+    },
+    {
+      "path": "references/executor-examples.md",
+      "git_blob": "4b39539560d131e97e85af0440baf16102680673"
+    },
+    {
+      "path": "references/few-shot-examples/plan-checker.md",
+      "git_blob": "0eccf838aab0b99e8733bbb15dc8011adda8d973"
+    },
+    {
+      "path": "references/few-shot-examples/verifier.md",
+      "git_blob": "3cd0f44eb8f8205364b6e7882786e5ec888d806a"
+    },
+    {
+      "path": "references/gate-prompts.md",
+      "git_blob": "930d0636b385f22c041939fd477ce5f81ad2b917"
+    },
+    {
+      "path": "references/gates.md",
+      "git_blob": "df43cf80af19703bb75f2fbb335efd0fae2d6539"
+    },
+    {
+      "path": "references/git-integration.md",
+      "git_blob": "628f24f127a2ca05659d9e1e50e4188665900b32"
+    },
+    {
+      "path": "references/git-planning-commit.md",
+      "git_blob": "7082bfedeca2d42f8f9d19caef66144ec38eb491"
+    },
+    {
+      "path": "references/ios-scaffold.md",
+      "git_blob": "ebf7d537a40d47af66553dd84c75df9c8997562d"
+    },
+    {
+      "path": "references/mandatory-initial-read.md",
+      "git_blob": "23dece92a532ce4e05de63e06abbde1a5a743e17"
+    },
+    {
+      "path": "references/model-profile-resolution.md",
+      "git_blob": "d465f7264538bdef2fe2005ec261dc762cc3dd5c"
+    },
+    {
+      "path": "references/model-profiles.md",
+      "git_blob": "4a581b27a4b030298988c2f96217168066d0b1bb"
+    },
+    {
+      "path": "references/mvp-concepts.md",
+      "git_blob": "b3f673617100325c33ada569882821a04e893aff"
+    },
+    {
+      "path": "references/phase-argument-parsing.md",
+      "git_blob": "d0081ed5f32ecb78d96b2b937f773ec876cafe76"
+    },
+    {
+      "path": "references/planner-antipatterns.md",
+      "git_blob": "db203fbcd82ca3d1643e4c0517e2f96684b7f045"
+    },
+    {
+      "path": "references/planner-chunked.md",
+      "git_blob": "1b227a3b5c5365d5f89e11c30b806b4bdc464c32"
+    },
+    {
+      "path": "references/planner-gap-closure.md",
+      "git_blob": "b1f9f2432b5c23fc8e14133c604ee086e1fe8f62"
+    },
+    {
+      "path": "references/planner-graphify-auto-update.md",
+      "git_blob": "9eff93169512a225db7f38e1e4280fd44438c081"
+    },
+    {
+      "path": "references/planner-human-verify-mode.md",
+      "git_blob": "466e0a7f981f65d78f188e9e5a43b71a0aed13d6"
+    },
+    {
+      "path": "references/planner-mvp-mode.md",
+      "git_blob": "ea203fc448f30d9dfe6cee6d24c27d1afa868375"
+    },
+    {
+      "path": "references/planner-reviews.md",
+      "git_blob": "da9f9ce0fa1a7616ec98013ae8996f0db6297b53"
+    },
+    {
+      "path": "references/planner-revision.md",
+      "git_blob": "c37ea3663514a72e3bed22fc2ae0f0aae4112cc1"
+    },
+    {
+      "path": "references/planner-source-audit.md",
+      "git_blob": "11d59acc72cf23b7ede43680e5d40e1b285712a9"
+    },
+    {
+      "path": "references/planning-config.md",
+      "git_blob": "d58d29bd4d3af5f43292b62a0537b18d8657f1e4"
+    },
+    {
+      "path": "references/project-skills-discovery.md",
+      "git_blob": "78fc16e447c3f504e6b9c6e18da83ad424a74c99"
+    },
+    {
+      "path": "references/questioning.md",
+      "git_blob": "14a03db3873a70ea48655154eba8974dde13fce4"
+    },
+    {
+      "path": "references/revision-loop.md",
+      "git_blob": "4072cfa5e454613c2c5dae39c843e571006ed529"
+    },
+    {
+      "path": "references/scout-codebase.md",
+      "git_blob": "d01a386a29a8a8e932561aa4c8c7e0b1894fa088"
+    },
+    {
+      "path": "references/skeleton-template.md",
+      "git_blob": "95188921a456dc1bba3969e50439d84791884696"
+    },
+    {
+      "path": "references/sketch-interactivity.md",
+      "git_blob": "8063464b57499e07683117aba34762f57bd21776"
+    },
+    {
+      "path": "references/sketch-theme-system.md",
+      "git_blob": "57cb97082510cf7da0daf5e57f4573f814844e24"
+    },
+    {
+      "path": "references/sketch-tooling.md",
+      "git_blob": "05959eefdf55dc177dd15f23f32f7ea0371bbec0"
+    },
+    {
+      "path": "references/sketch-variant-patterns.md",
+      "git_blob": "a89fc826fdd4c75d584c0848c4bd10c81abf06a8"
+    },
+    {
+      "path": "references/spidr-splitting.md",
+      "git_blob": "f0777c8fb2f231531f1e6b1cf3c3ab804ebdbe5b"
+    },
+    {
+      "path": "references/tdd.md",
+      "git_blob": "92a367240464e090d2363f81a5f3167a2b3929ee"
+    },
+    {
+      "path": "references/thinking-models-debug.md",
+      "git_blob": "b200d3eb76e61a6cf4ebe08a5f6e23e1603f9e47"
+    },
+    {
+      "path": "references/thinking-models-execution.md",
+      "git_blob": "149e2b8ec944c1b46fe0d5cd25d4c586f50e599d"
+    },
+    {
+      "path": "references/thinking-models-planning.md",
+      "git_blob": "c9b6aa987c15686f606c9443ba233007230c65df"
+    },
+    {
+      "path": "references/thinking-models-research.md",
+      "git_blob": "b29e7332e16ef1c56012a465669998ef36a46b8b"
+    },
+    {
+      "path": "references/thinking-models-verification.md",
+      "git_blob": "13ce3c8f6ae260a8f5c09b70ab5d961853a713e6"
+    },
+    {
+      "path": "references/thinking-partner.md",
+      "git_blob": "c2be6ba2b76d52e345a5ae96a49e6451817636f9"
+    },
+    {
+      "path": "references/ui-brand.md",
+      "git_blob": "47e6f741c129f5cdf195b2dc8a39d1245967f487"
+    },
+    {
+      "path": "references/universal-anti-patterns.md",
+      "git_blob": "dfa4fb161e4cd53c26bf720c14c6c0b726158a34"
+    },
+    {
+      "path": "references/user-profiling.md",
+      "git_blob": "8969323bfbbaef70862d3c6705a79054fcca442a"
+    },
+    {
+      "path": "references/user-story-template.md",
+      "git_blob": "55eec4c122fceb0f640f2d87950f65fbaf968f7c"
+    },
+    {
+      "path": "references/verification-overrides.md",
+      "git_blob": "ab884a240da10fd98e4d8fe0e01c91092705b9e2"
+    },
+    {
+      "path": "references/verification-patterns.md",
+      "git_blob": "0afb5e63aedad8958558785c20382636f1dd4768"
+    },
+    {
+      "path": "references/verify-mvp-mode.md",
+      "git_blob": "32999bdf29dadd09fa137c334c40b5fd49e0f592"
+    },
+    {
+      "path": "references/workstream-flag.md",
+      "git_blob": "99524423dd476f330b49225fc2dc8ba02face119"
+    },
+    {
+      "path": "references/worktree-path-safety.md",
+      "git_blob": "8febe96293734e23dc3b4138ec0a0ebd2040a136"
+    },
+    {
+      "path": "templates/AI-SPEC.md",
+      "git_blob": "46b3d8ccc1ce4673999464cde23f1b40dc01dbe1"
+    },
+    {
+      "path": "templates/DEBUG.md",
+      "git_blob": "a23ea25e8f13b7128f8bb33a92e835519db99ea0"
+    },
+    {
+      "path": "templates/README.md",
+      "git_blob": "323b1f4d790473646c697724033c28491fa2e49a"
+    },
+    {
+      "path": "templates/SECURITY.md",
+      "git_blob": "77f5c4da536eb1851ba2ed3dc82b6ddea6f603ed"
+    },
+    {
+      "path": "templates/UAT.md",
+      "git_blob": "fd2345a98bb3af16bf8fd98a34cfcdc0f83a3d18"
+    },
+    {
+      "path": "templates/UI-SPEC.md",
+      "git_blob": "be2c6e1426bffa67cf8e96ebbf636ef888a61f04"
+    },
+    {
+      "path": "templates/VALIDATION.md",
+      "git_blob": "6adaf46d6b0e823a94c7e7f7cd0adc9d400eb6ac"
+    },
+    {
+      "path": "templates/claude-md.md",
+      "git_blob": "4c96fd4880e7c01a43680ad136c0fe3adc361e9f"
+    },
+    {
+      "path": "templates/codebase/architecture.md",
+      "git_blob": "3e64b5360c8c2995382c8ae890b974759ce8cb04"
+    },
+    {
+      "path": "templates/codebase/concerns.md",
+      "git_blob": "c1ffcb4202a1da91c74d5ad4d7cd5bdc39188930"
+    },
+    {
+      "path": "templates/codebase/conventions.md",
+      "git_blob": "361283beaff8bd04459229425e50979aa16abce4"
+    },
+    {
+      "path": "templates/codebase/integrations.md",
+      "git_blob": "9f8a10034771eb703c739c5e95e90837405be621"
+    },
+    {
+      "path": "templates/codebase/stack.md",
+      "git_blob": "2006c5714643c832f9e8d98c546fe2539587e0f3"
+    },
+    {
+      "path": "templates/codebase/structure.md",
+      "git_blob": "5f12006cfa7d7d0894cd0e80007fb60c4041a362"
+    },
+    {
+      "path": "templates/codebase/testing.md",
+      "git_blob": "95e53902a25218acfad1a012c425cffee34014a7"
+    },
+    {
+      "path": "templates/config.json",
+      "git_blob": "4f4e0091b26d61aaf46cde34e07e5d901148321e"
+    },
+    {
+      "path": "templates/context.md",
+      "git_blob": "36673346d1d282a766ef384368f261317133741f"
+    },
+    {
+      "path": "templates/continue-here.md",
+      "git_blob": "1c3711d57bfa0884adbda52408dda12186b1557d"
+    },
+    {
+      "path": "templates/copilot-instructions.md",
+      "git_blob": "c52d0cbb2137c42ebc177decf33c6355844045d8"
+    },
+    {
+      "path": "templates/debug-subagent-prompt.md",
+      "git_blob": "c90c7ce45f3df219017cfa52680ececaa8895096"
+    },
+    {
+      "path": "templates/dev-preferences.md",
+      "git_blob": "428b5c5b5b90a141a836407d4272259f4b939236"
+    },
+    {
+      "path": "templates/discovery.md",
+      "git_blob": "0c707e40181697df7ee2e26d94735a5b911a29d5"
+    },
+    {
+      "path": "templates/discussion-log.md",
+      "git_blob": "37cd866924b387e5aebbb71a85662efa1c474c61"
+    },
+    {
+      "path": "templates/milestone-archive.md",
+      "git_blob": "bd1997c8c819b8fa619e1aed77eb88787f87094f"
+    },
+    {
+      "path": "templates/milestone.md",
+      "git_blob": "107e246d834a3c1422c9a9e0b0fa24dbd15e2a93"
+    },
+    {
+      "path": "templates/phase-prompt.md",
+      "git_blob": "b242dc15e2625cab2f3f42bc7b804bcea4e53e45"
+    },
+    {
+      "path": "templates/planner-subagent-prompt.md",
+      "git_blob": "bcaa68d2752f1eca8241437377e91c2ac6bd6173"
+    },
+    {
+      "path": "templates/project.md",
+      "git_blob": "37a986c70e0594526b667da837741d6567b9917f"
+    },
+    {
+      "path": "templates/requirements.md",
+      "git_blob": "d55313480fcabe858cf065a2bfbcf91522cce6ac"
+    },
+    {
+      "path": "templates/research-project/ARCHITECTURE.md",
+      "git_blob": "0d0329761f98ec196d47466f2350cf0f45605950"
+    },
+    {
+      "path": "templates/research-project/FEATURES.md",
+      "git_blob": "431c52ba50a77342ee69328798ec0eeed0be02a1"
+    },
+    {
+      "path": "templates/research-project/PITFALLS.md",
+      "git_blob": "9d66e6a6c783e7bf78e6b339b1c0842d3f192a4e"
+    },
+    {
+      "path": "templates/research-project/STACK.md",
+      "git_blob": "cdd663ba23f970b27b6f267dbab815a8d94cc648"
+    },
+    {
+      "path": "templates/research-project/SUMMARY.md",
+      "git_blob": "edd67ddf0c359c596dcb40fa05f36f89b4bd5064"
+    },
+    {
+      "path": "templates/research.md",
+      "git_blob": "bed3e1d522aca4a7ff520e389bb217a9d42efe84"
+    },
+    {
+      "path": "templates/retrospective.md",
+      "git_blob": "e804ca9769e3629f55b11a4a974513705f9a4b5d"
+    },
+    {
+      "path": "templates/roadmap.md",
+      "git_blob": "9d6749bf5e7ed4e2161379342671021819a989bc"
+    },
+    {
+      "path": "templates/spec.md",
+      "git_blob": "18b8ce6e1068a3e5363a5711c3e7a5cda193bb1a"
+    },
+    {
+      "path": "templates/state.md",
+      "git_blob": "05c6aa117755d536087e6b6ede59a7e49e6e722e"
+    },
+    {
+      "path": "templates/summary-complex.md",
+      "git_blob": "ccc8aac2d5628439fd8b4f661c571192ece2db53"
+    },
+    {
+      "path": "templates/summary-minimal.md",
+      "git_blob": "3dc1ba9e86a2a79cd4fbf721e801b4443e9ffbd6"
+    },
+    {
+      "path": "templates/summary-standard.md",
+      "git_blob": "674f146586b97959d242af971df6f8418a921ad1"
+    },
+    {
+      "path": "templates/summary.md",
+      "git_blob": "c66799b86a862d72f2f796c93f3b7debafd97e57"
+    },
+    {
+      "path": "templates/user-profile.md",
+      "git_blob": "7af2d01ec0d30bcb183bbc2fbb7898bac4b2705c"
+    },
+    {
+      "path": "templates/user-setup.md",
+      "git_blob": "260a8552b6121f5e95e22b2f6839c37503f60eda"
+    },
+    {
+      "path": "templates/verification-report.md",
+      "git_blob": "8684fe2c47a6689bcf802e364720ffb5a993f40c"
+    },
+    {
+      "path": "workflows/add-backlog.md",
+      "git_blob": "88e8fdee19e694e4b7bd0d49b56fcbd47e23a03d"
+    },
+    {
+      "path": "workflows/add-phase.md",
+      "git_blob": "098e19fd8c5fe0eb043053d3983288c17a653519"
+    },
+    {
+      "path": "workflows/add-tests.md",
+      "git_blob": "31b1f1deb45a7a61a0d3b235370e9e080903f70d"
+    },
+    {
+      "path": "workflows/add-todo.md",
+      "git_blob": "b889bed84a57f34323383312aa638fa95c944d67"
+    },
+    {
+      "path": "workflows/ai-integration-phase.md",
+      "git_blob": "1d764112a9c256a93d1e71d679d5e1abcadc494a"
+    },
+    {
+      "path": "workflows/analyze-dependencies.md",
+      "git_blob": "376e31c9e4eb557fd34c4d5da6c5a29d345c2a1b"
+    },
+    {
+      "path": "workflows/audit-fix.md",
+      "git_blob": "86c6447f94cb465dbb6248aa3096f01188143c93"
+    },
+    {
+      "path": "workflows/audit-milestone.md",
+      "git_blob": "df5293039d492684f745bd73475dbd193314b49b"
+    },
+    {
+      "path": "workflows/audit-uat.md",
+      "git_blob": "83650d62aa05e1b788ad94ec6609f72ef3bf6f0b"
+    },
+    {
+      "path": "workflows/autonomous.md",
+      "git_blob": "9ea6854e063334b64d6bd59de84ebc159ae628fa"
+    },
+    {
+      "path": "workflows/check-todos.md",
+      "git_blob": "6259ba163f9a23982bec3d0aef0d0b7c8e6ee32c"
+    },
+    {
+      "path": "workflows/cleanup.md",
+      "git_blob": "d476e82b4bd9c2c47f911ee44c71a64fa3c5cc91"
+    },
+    {
+      "path": "workflows/code-review-fix.md",
+      "git_blob": "798a3a572b74c7777a9ff27bad661b425e0d74c2"
+    },
+    {
+      "path": "workflows/code-review.md",
+      "git_blob": "010c57b66004055d4098efbd4abfe4e6009a7777"
+    },
+    {
+      "path": "workflows/complete-milestone.md",
+      "git_blob": "d8ab50c0dd427e55efad52f5a11869ca915f0dc8"
+    },
+    {
+      "path": "workflows/debug.md",
+      "git_blob": "20b763e9e0eea04b62b38a0c7ad3088ba41fcb81"
+    },
+    {
+      "path": "workflows/diagnose-issues.md",
+      "git_blob": "e819f9047f81d8d700f37699851141473f156f23"
+    },
+    {
+      "path": "workflows/discovery-phase.md",
+      "git_blob": "011d13c8556c852f7ff09ccf0ef6c8eb7888d779"
+    },
+    {
+      "path": "workflows/discuss-phase-assumptions.md",
+      "git_blob": "cdc1a96fbf78a8a9ded23f7306850a988d964a2f"
+    },
+    {
+      "path": "workflows/discuss-phase-power.md",
+      "git_blob": "0877ee6e3aac4d451d3a1b5dfefb7cb2a1446c1c"
+    },
+    {
+      "path": "workflows/discuss-phase.md",
+      "git_blob": "c3329ba599d254e6704440135ad8a74e863aaa8e"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/advisor.md",
+      "git_blob": "961256dcd48ce72ae4f3a4583ee9c221a6186bae"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/all.md",
+      "git_blob": "50fa9d0660eb0a557a659bb3f4a9838ba3a4675b"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/analyze.md",
+      "git_blob": "b373da11622f93b457e854d54704806b08fcf6ca"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/auto.md",
+      "git_blob": "977ae49cfbbdcfcd8bbd290a9bc2847f8a1a6394"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/batch.md",
+      "git_blob": "c62b25d551e0873c2444884561568e865895fe18"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/chain.md",
+      "git_blob": "c30c06bebc4bfb670c3eda270234a1713cbf090e"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/default.md",
+      "git_blob": "fb54e71e49bac0d3576f74fdc2f0fa0c94923ffe"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/power.md",
+      "git_blob": "9277ad6de5d4cdde3a724ad0069fe48bc48a9423"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/text.md",
+      "git_blob": "cfc7ea1973de0eec670424c0cf87c2828878b362"
+    },
+    {
+      "path": "workflows/discuss-phase/templates/checkpoint.json",
+      "git_blob": "ac28aa3439680ef0cf6681fadf006d7418b71cfa"
+    },
+    {
+      "path": "workflows/discuss-phase/templates/context.md",
+      "git_blob": "019b05aa9a596d38fbdcbd60ad3c2055790b9d75"
+    },
+    {
+      "path": "workflows/discuss-phase/templates/discussion-log.md",
+      "git_blob": "62a68684e49e2e2576ffd33a3375f5ed10bf598a"
+    },
+    {
+      "path": "workflows/do.md",
+      "git_blob": "2fdf772444023fd9464f661d4e7569b3106e52c7"
+    },
+    {
+      "path": "workflows/docs-update.md",
+      "git_blob": "1fc7c8ea0b12336d31396212516a17efe2f516f1"
+    },
+    {
+      "path": "workflows/edit-phase.md",
+      "git_blob": "d2483cda396d35f4dfd8c61e6cd6f511bee7bd19"
+    },
+    {
+      "path": "workflows/eval-review.md",
+      "git_blob": "f80bdc1ca0bf44586deda30cf7826246fe461b52"
+    },
+    {
+      "path": "workflows/execute-phase.md",
+      "git_blob": "6a9bd074eabfba58f96f4a0b129f73526d791e8b"
+    },
+    {
+      "path": "workflows/execute-phase/steps/codebase-drift-gate.md",
+      "git_blob": "bb4066e018b0bfff7059d9b33968eef9054602c3"
+    },
+    {
+      "path": "workflows/execute-phase/steps/per-plan-worktree-gate.md",
+      "git_blob": "d5c93ca9c1fd7e51f1c85dabd52fda544c738340"
+    },
+    {
+      "path": "workflows/execute-phase/steps/post-merge-gate.md",
+      "git_blob": "af64b839060d63dabdc932d0427589186922170b"
+    },
+    {
+      "path": "workflows/execute-plan.md",
+      "git_blob": "995dd2ac3d9a77087374770a98910b826b7e476f"
+    },
+    {
+      "path": "workflows/explore.md",
+      "git_blob": "d3ccdbb08d9e2c57f015454d08e45197e8bdae27"
+    },
+    {
+      "path": "workflows/extract-learnings.md",
+      "git_blob": "5c0c1c44802540070a6cc87b9480005123b22629"
+    },
+    {
+      "path": "workflows/fast.md",
+      "git_blob": "729bcc32ec840c89089c76df3c7d31f607f7a602"
+    },
+    {
+      "path": "workflows/forensics.md",
+      "git_blob": "928af1832782f28a675c84d882fec0e31dd8442f"
+    },
+    {
+      "path": "workflows/graduation.md",
+      "git_blob": "0a75bd0a7ceb367ec36f905316ddd2b51dd4cf44"
+    },
+    {
+      "path": "workflows/health.md",
+      "git_blob": "8ced59b5873b8f57c3c6c1399f57f2c30d2f7f8c"
+    },
+    {
+      "path": "workflows/help.md",
+      "git_blob": "b5bf35c2a1dc52591e4d14a673c7f50d5727a382"
+    },
+    {
+      "path": "workflows/help/modes/brief.md",
+      "git_blob": "359c32f1a29bafeaa9bd8360fdfd056294cce4bc"
+    },
+    {
+      "path": "workflows/help/modes/default.md",
+      "git_blob": "ad7df4d76d8f2801f627908af49d694c989c36fb"
+    },
+    {
+      "path": "workflows/help/modes/full.md",
+      "git_blob": "eff95754fdc2c767f8a64c70481f468a3dada071"
+    },
+    {
+      "path": "workflows/help/modes/topic.md",
+      "git_blob": "4e8d163123e25388a9419c9c53a87e06cb8396ec"
+    },
+    {
+      "path": "workflows/import.md",
+      "git_blob": "b78d6c58613f0a64bc55793a4be35debed64e9ac"
+    },
+    {
+      "path": "workflows/inbox.md",
+      "git_blob": "353e00e08c2274ada550138bdc79f139dba8896f"
+    },
+    {
+      "path": "workflows/ingest-docs.md",
+      "git_blob": "f19cc558b734e19fe992def5185e50dd55a2c84c"
+    },
+    {
+      "path": "workflows/insert-phase.md",
+      "git_blob": "beda085ae6b88251169729c65b2587abdd7e3de1"
+    },
+    {
+      "path": "workflows/list-phase-assumptions.md",
+      "git_blob": "4970faa7c6a013c41295cc4c86129cd8a394aa31"
+    },
+    {
+      "path": "workflows/list-workspaces.md",
+      "git_blob": "aa3aefb65dabc44f14d321ddaa340db4152760b4"
+    },
+    {
+      "path": "workflows/manager.md",
+      "git_blob": "6e40f86d6d11a7451b4599119db068c341868ffe"
+    },
+    {
+      "path": "workflows/map-codebase.md",
+      "git_blob": "03a3c112c387eac183935cba662d92450272ffd7"
+    },
+    {
+      "path": "workflows/milestone-summary.md",
+      "git_blob": "11b1578299218edffc910eccc1432d85dcf21003"
+    },
+    {
+      "path": "workflows/mvp-phase.md",
+      "git_blob": "216f467c602b0f242f7f05262d640f3451992cee"
+    },
+    {
+      "path": "workflows/new-milestone.md",
+      "git_blob": "d0f6bc2d86c408bbeba86defc776ad862f2d28c4"
+    },
+    {
+      "path": "workflows/new-project.md",
+      "git_blob": "e3fbaed57ba1568f665e1be388b3d8c665e8b9e8"
+    },
+    {
+      "path": "workflows/new-workspace.md",
+      "git_blob": "205d5a38007362a45d96ca44fe4e418b159fbeb8"
+    },
+    {
+      "path": "workflows/next.md",
+      "git_blob": "2a0e81fff04e8bb4285657a2f332af3beb06e085"
+    },
+    {
+      "path": "workflows/node-repair.md",
+      "git_blob": "7be3dbbcc708d30d8890f5134f154fc774701bd2"
+    },
+    {
+      "path": "workflows/note.md",
+      "git_blob": "8e701cd0c6e6e0f51226843415e77ed371172598"
+    },
+    {
+      "path": "workflows/pause-work.md",
+      "git_blob": "218e5dd0cc0b49d819dc61937bb2bf0fcf1f3a8d"
+    },
+    {
+      "path": "workflows/plan-milestone-gaps.md",
+      "git_blob": "14463ef743f96034c5bc0f0cf77a0a76ad362c74"
+    },
+    {
+      "path": "workflows/plan-phase.md",
+      "git_blob": "629ae138f96c4e1d2a448ce2db2e0504e34cd5a3"
+    },
+    {
+      "path": "workflows/plan-review-convergence.md",
+      "git_blob": "c953f14c3c97d81521b00df27064fa07bd507e70"
+    },
+    {
+      "path": "workflows/plant-seed.md",
+      "git_blob": "d153ff90fb9f066250937ddd6c893261648aabdd"
+    },
+    {
+      "path": "workflows/pr-branch.md",
+      "git_blob": "e8582d324765adc1e50d76b6de4efc053adcf76e"
+    },
+    {
+      "path": "workflows/profile-user.md",
+      "git_blob": "bd0415f7555958b1c4c3f02f07692b97a4cacac3"
+    },
+    {
+      "path": "workflows/progress.md",
+      "git_blob": "c01237460b1177a642f40f331770c61a66ba1ca7"
+    },
+    {
+      "path": "workflows/quick.md",
+      "git_blob": "7f9fb1ecdd3ea4d0bda1db4be7a5d0d61e057547"
+    },
+    {
+      "path": "workflows/reapply-patches.md",
+      "git_blob": "b46eefe67528ff27fc968e130e73efdd7a203787"
+    },
+    {
+      "path": "workflows/remove-phase.md",
+      "git_blob": "7d34bdc6228f248738afa1beea5023cb15929a0a"
+    },
+    {
+      "path": "workflows/remove-workspace.md",
+      "git_blob": "68f2c54c9527ccd1b2a64fc4bf65be2feb7a729c"
+    },
+    {
+      "path": "workflows/resume-project.md",
+      "git_blob": "6d4bcc0195cbdadb69dcdf9992e367e9f2feefc8"
+    },
+    {
+      "path": "workflows/review.md",
+      "git_blob": "2b0647bed3b390dccc8ecb9832bd969ef9a75289"
+    },
+    {
+      "path": "workflows/scan.md",
+      "git_blob": "fd50852d9abec7cea5aff60a8e2f84b45c25d452"
+    },
+    {
+      "path": "workflows/secure-phase.md",
+      "git_blob": "42d71ae9eb1bc0f1994abbf24ec1c0bd4360ffa9"
+    },
+    {
+      "path": "workflows/session-report.md",
+      "git_blob": "29d6d7724c1e1e1b622d72edd0a761035bd12764"
+    },
+    {
+      "path": "workflows/settings-advanced.md",
+      "git_blob": "20a1309ad2247a3e6fe286080eaffa0eaaa439e8"
+    },
+    {
+      "path": "workflows/settings-integrations.md",
+      "git_blob": "76de746ae339bb4968f9b58ccea2e2fe8ad7d30e"
+    },
+    {
+      "path": "workflows/settings.md",
+      "git_blob": "851627bfe44224321d49ab250418322806bd7473"
+    },
+    {
+      "path": "workflows/ship.md",
+      "git_blob": "52481eb7bf05a4e7bfae83cf06c018add332eed3"
+    },
+    {
+      "path": "workflows/sketch-wrap-up.md",
+      "git_blob": "6b231881c2ffaa240656647826e0b19ea82b34fe"
+    },
+    {
+      "path": "workflows/sketch.md",
+      "git_blob": "8108f6bb9739177166c505d18738724217b54b88"
+    },
+    {
+      "path": "workflows/spec-phase.md",
+      "git_blob": "6a713a8664805d00c002fc7374f4f6e633c79d2e"
+    },
+    {
+      "path": "workflows/spike-wrap-up.md",
+      "git_blob": "676a749418ff4d856a295704d8b8e330f578c237"
+    },
+    {
+      "path": "workflows/spike.md",
+      "git_blob": "307706676bb77a2c7d605a8f7ff1950c7044afb1"
+    },
+    {
+      "path": "workflows/stats.md",
+      "git_blob": "237cca862cddd61dca1836de45b1678a5c434b1d"
+    },
+    {
+      "path": "workflows/sync-skills.md",
+      "git_blob": "a828b67e84cad42bc01f0ac320736affded5a18c"
+    },
+    {
+      "path": "workflows/thread.md",
+      "git_blob": "05b1a043aa63bacc4ae8d90c7673fc71a3197c35"
+    },
+    {
+      "path": "workflows/transition.md",
+      "git_blob": "625ea3966eeff704c5dba046f4244ba3a747bd3f"
+    },
+    {
+      "path": "workflows/ui-phase.md",
+      "git_blob": "21f98dc06f2608efe795857677c4c663fb64ae51"
+    },
+    {
+      "path": "workflows/ui-review.md",
+      "git_blob": "08aee528ad10cd0cbd6021a8d9b76a1ef7ee1300"
+    },
+    {
+      "path": "workflows/ultraplan-phase.md",
+      "git_blob": "d8c12db7994388bd8298a7661455495073a84850"
+    },
+    {
+      "path": "workflows/undo.md",
+      "git_blob": "fac14de0b71bdc7c0d1321ef0ef9ea7c6c0b981b"
+    },
+    {
+      "path": "workflows/update.md",
+      "git_blob": "554ecf103dd43e2ad64fc27c2aa8d1213a612038"
+    },
+    {
+      "path": "workflows/validate-phase.md",
+      "git_blob": "3aa80de9c5ccf1feb553d25c5f0dcf1b5c21839b"
+    },
+    {
+      "path": "workflows/verify-phase.md",
+      "git_blob": "fe2ae3a8805c2d4c2a77739debde7e1361a83e66"
+    },
+    {
+      "path": "workflows/verify-work.md",
+      "git_blob": "cd88268790ebeb6d12d6d79079392ec648ad8b6b"
+    }
+  ],
+  "license_sha256": "af0d31f2550b534c14251e14020f3378cf17bd21af7660e7d7b1a2ead4fcdfb4",
+  "upstream_get_shit_done_count": 299
+}

@@ -590,12 +590,14 @@ class Installer(ApplyMixin):
         self.ops.append(("si_done", written, commands))
         self.si_count = (self.si_count or 0) + written
 
-    def plan_skills(self, directory, prefix, count):
+    def plan_skills(self, directory, prefix, count, bundle=None):
         if not os.path.isdir(directory):
             return
         for name in self.child_dirs(directory):
             src = os.path.join(directory, name) + os.sep
             dst = os.path.join(self.home, prefix, name)
+            if bundle and self.check_contained(dst) in self.seen_paths:
+                dst = os.path.join(self.home, prefix, "%s-%s" % (bundle, name))
             self.plan_link(src, dst, count=count)
 
     def plan_md_files(self, directory, dest_dir, count, skip_names):
@@ -632,7 +634,18 @@ class Installer(ApplyMixin):
         if not os.path.isdir(sys_dir):
             self.die("Unknown system: %s" % sys)
         self.bundles.append(sys)
-        self.plan_skills(os.path.join(sys_dir, "skills"), "skills", "skill-always")
+        if sys == "gsd":
+            runtime = os.path.join(sys_dir, "runtime")
+            if not os.path.isdir(runtime):
+                self.die("GSD runtime is missing from this checkout")
+            dst = os.path.join(self.home, "get-shit-done")
+            if os.path.lexists(dst) and not (os.path.islink(dst) and self.link_is_ours(dst)):
+                message = "kept your get-shit-done; Coco's copy not linked"
+                self.add_skip(dst, message)
+                self.ops.append(("skip", dst, message))
+            else:
+                self.plan_link(runtime + os.sep, dst)
+        self.plan_skills(os.path.join(sys_dir, "skills"), "skills", "skill-always", bundle=sys)
         for name in self.child_dirs(sys_dir):
             team = os.path.join(sys_dir, name)
             skill_md = os.path.join(team, "SKILL.md")
@@ -771,6 +784,7 @@ def main(argv):
     parser.add_argument("--repo", required=True)
     parser.add_argument("--target", required=True)
     parser.add_argument("--system", action="append", default=[])
+    parser.add_argument("--pack", action="append", default=[])
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--workflow", action="store_true")
@@ -780,7 +794,7 @@ def main(argv):
     if args.uninstall:
         from claude_uninstall import Uninstaller
         Uninstaller(args.repo, args.target, args.dry_run, args.json,
-                    args.workflow_only).run()
+                    args.workflow_only, args.pack).run()
         return
     Installer(args.repo, args.target, args.system, args.dry_run, args.json,
               args.workflow, args.workflow_only).run()

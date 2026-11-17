@@ -65,6 +65,11 @@ git clone https://github.com/coco-research/coco.git ~/coco && bash ~/coco/instal
 
 Adapter flags and bundle selection: [`docs/install.md`](docs/install.md).
 
+After installation, `coco suggest-skills` reads repeated workflows from the local
+learning store and prints up to three suggestions from the past week. Use
+`coco suggest-skills --draft` to write reviewable `SKILL.md` stubs in a new temporary
+folder. It makes no network or model calls and does not install the suggestions.
+
 ## What it does
 
 - Get one clear pick on a hard call, with the disagreement named and each stance cited.
@@ -106,10 +111,14 @@ Any MCP client can connect to Coco over stdio without extra dependencies (see [`
 
 Measured on main, a default Claude Code install delivers 191 of the 229 skills (the rest are the opt-in security pack and Cursor-only skills), 388 commands and 34 agents ([`docs/delivered-counts.json`](docs/delivered-counts.json)).
 
-Known gap: most GSD skills need the upstream GSD toolkit at `~/.claude/get-shit-done` (see [`systems/gsd/README.md`](systems/gsd/README.md)).
+Routing, measured once on the held-out descriptions split (104 labelled prompts, `nomic-embed-text`): top-1 accuracy went from 0.596 to 0.712 (62 to 74 of 104), top-4 recall from 0.663 to 0.798, and keyword matching from 0.490 to 0.510 (paired: 14 fixed, 2 broken; one-sided bootstrap `p = 0.0008` over 10,000 resamples with seed 0; sign test `p = 0.0021`); the 0.75 target is not met yet. On the 120-prompt development split (12 of the 13 departments, written without the department names, where team and cell descriptions were tuned), `nomic-embed-text` top-1 went from 0.642 to 0.917 (77 to 110 of 120) and keyword matching from 0.142 to 0.750 (17 to 90 of 120) ([`evals/routing/runs/`](evals/routing/runs/)).
+
+GSD ships its pinned upstream toolkit. The Claude Code installer links it at `~/.claude/get-shit-done` and preserves an existing user installation (see [`systems/gsd/README.md`](systems/gsd/README.md)).
 
 <details>
 <summary><strong>Other install paths, updates, uninstall</strong></summary>
+
+`npx cocosuperintelligence` in a terminal lists the packs (core, gsd, brain, cognee, hyperframes, si and m0 ticked; `reverse-skill` unticked), asks one `[Y/n]`, then installs. `--packs gsd,brain` picks packs, `--all` takes every pack, and `--yes` or a non-interactive shell takes the defaults without a question. `--uninstall --packs gsd` prints the files it will remove first.
 
 From a checkout you already have, `bash install.sh` auto-detects the editor. Narrow it with `--adapter cursor` or `--systems gsd,brain`. `--core-only` skips bundles. `reverse-skill` stays opt-in: `--systems reverse-skill`.
 
@@ -139,7 +148,7 @@ Super Intelligence summons a panel inside the session you already have open. Eve
 
 ```bash
 /SI-Decide "Should we migrate our database to pgvector?"
-/SI-AI-Decide "Which embedding model gives the best cost/performance?"
+/SI-AI-Decide "Which embedding model should we use for semantic search over our documents?"
 /SI-Eng-Pre-Mortem "Review our zero-downtime cache migration strategy"
 /SI-GRC-Review "Check this customer onboarding flow for GDPR compliance"
 ```
@@ -204,7 +213,7 @@ CoCo ships **229 skills** (77 core + 152 across bundles)[^installed]. Each one i
 
 Six bundles install by default. `--core-only` skips them. `--systems <list>` installs an explicit subset. `reverse-skill` is not one of the six: it vendors reverse-engineering and penetration-testing methodology under [`systems/reverse-skill/`](systems/reverse-skill/) and installs only with `--systems reverse-skill`. See [`systems/reverse-skill/README.md`](systems/reverse-skill/README.md).
 
-1. **GSD.** An orchestration engine of **68 skills and 24 agents** for phased work on a large codebase. Most GSD skills also need the upstream GSD toolkit at `~/.claude/get-shit-done/`, which this installer does not yet provide; see [`systems/gsd/README.md`](systems/gsd/README.md). Phase state lives in `.planning/`. Workstreams are isolated git checkouts.
+1. **GSD.** An orchestration engine of **68 skills and 24 agents** for phased work on a large codebase. The pinned upstream toolkit is bundled and linked by the Claude Code installer without replacing a user installation; see [`systems/gsd/README.md`](systems/gsd/README.md). Phase state lives in `.planning/`. Workstreams are isolated git checkouts.
 2. **Brain.** A local knowledge-graph engine of **6 skills**. SQLite indexes code entities, decisions, and project terms. The wiki generator writes a page per entity.
 3. **Super Intelligence.** The **495-persona advisory board** and its **342 generated `/SI-*` commands** across 13 teams. This is the board [above](#the-board).
 4. **HyperFrames.** **20 skills** for video and motion, vendored from HeyGen's `hyperframes` under Apache-2.0.

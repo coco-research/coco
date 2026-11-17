@@ -1,0 +1,126 @@
+{
+  "top1_accuracy": 0.9166666666666666,
+  "top4_recall": 0.9583333333333334,
+  "delegate_precision": 1.0,
+  "abstain_rate": 0.0,
+  "per_team_top1": {
+    "ai": 0.9,
+    "engineering": 0.9,
+    "product-design": 0.8,
+    "finance": 1.0,
+    "risk-compliance": 0.9,
+    "strategy": 0.7,
+    "data-analytics": 0.8,
+    "gtm": 1.0,
+    "climate-energy": 1.0,
+    "education-edtech": 1.0,
+    "healthcare-life-sciences": 1.0,
+    "legal-ip": 1.0
+  },
+  "vs_keyword": {
+    "baseline_top1": 0.75
+  },
+  "split": "descriptions-dev",
+  "items": "evals/routing/items-descriptions-dev.jsonl",
+  "items_sha256": "ca9f3d60d52c7a80de76c8effa8659f48677e3dabadfc39a30b607732fa92a4d",
+  "heldout_peek_count": 0,
+  "before": {
+    "embed": {
+      "top1_accuracy": 0.6416666666666667,
+      "top4_recall": 0.6666666666666666,
+      "delegate_precision": 0.0,
+      "abstain_rate": 0.0,
+      "per_team_top1": {
+        "ai": 0.2,
+        "engineering": 0.9,
+        "product-design": 0.6,
+        "finance": 0.5,
+        "risk-compliance": 0.8,
+        "strategy": 0.2,
+        "data-analytics": 0.1,
+        "gtm": 0.9,
+        "climate-energy": 0.9,
+        "education-edtech": 0.9,
+        "healthcare-life-sciences": 1.0,
+        "legal-ip": 0.7
+      }
+    },
+    "keyword": {
+      "top1_accuracy": 0.14166666666666666,
+      "top4_recall": 0.43333333333333335,
+      "delegate_precision": 0.0,
+      "abstain_rate": 0.0,
+      "per_team_top1": {
+        "ai": 0.1,
+        "engineering": 0.0,
+        "product-design": 0.3,
+        "finance": 0.3,
+        "risk-compliance": 0.1,
+        "strategy": 0.0,
+        "data-analytics": 0.3,
+        "gtm": 0.2,
+        "climate-energy": 0.2,
+        "education-edtech": 0.2,
+        "healthcare-life-sciences": 0.0,
+        "legal-ip": 0.0
+      }
+    }
+  },
+  "after": {
+    "embed": {
+      "top1_accuracy": 0.9166666666666666,
+      "top4_recall": 0.9583333333333334,
+      "delegate_precision": 1.0,
+      "abstain_rate": 0.0,
+      "per_team_top1": {
+        "ai": 0.9,
+        "engineering": 0.9,
+        "product-design": 0.8,
+        "finance": 1.0,
+        "risk-compliance": 0.9,
+        "strategy": 0.7,
+        "data-analytics": 0.8,
+        "gtm": 1.0,
+        "climate-energy": 1.0,
+        "education-edtech": 1.0,
+        "healthcare-life-sciences": 1.0,
+        "legal-ip": 1.0
+      }
+    },
+    "keyword": {
+      "top1_accuracy": 0.75,
+      "top4_recall": 0.9166666666666666,
+      "delegate_precision": 0.0,
+      "abstain_rate": 0.0,
+      "per_team_top1": {
+        "ai": 0.5,
+        "engineering": 0.5,
+        "product-design": 0.7,
+        "finance": 0.9,
+        "risk-compliance": 1.0,
+        "strategy": 0.9,
+        "data-analytics": 0.8,
+        "gtm": 0.7,
+        "climate-energy": 0.9,
+        "education-edtech": 0.9,
+        "healthcare-life-sciences": 0.6,
+        "legal-ip": 0.6
+      }
+    }
+  },
+  "run": {
+    "commit": "927736a",
+    "date": "2026-11-16",
+    "mode": "auto",
+    "split": "descriptions-dev",
+    "n_labelled": 120,
+    "n_none": 0,
+    "embed_model": "nomic-embed-text",
+    "embed": {
+      "model": "nomic-embed-text",
+      "url": "http://127.0.0.1:11434/v1/embeddings"
+    }
+  },
+  "method": "embed",
+  "keyword_fallbacks": 0
+}

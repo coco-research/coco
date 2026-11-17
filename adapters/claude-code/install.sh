@@ -29,6 +29,7 @@ DRY_RUN=0
 JSON=0
 UNINSTALL=0
 SYSTEMS=()
+PACKS_CSV=""
 CORE_ONLY=0
 EXPLICIT=0
 WORKFLOW=0
@@ -47,6 +48,8 @@ while [[ $# -gt 0 ]]; do
       EXPLICIT=1
       IFS=',' read -ra SYSTEMS <<< "${1:-}"
       ;;
+    --packs) shift; PACKS_CSV="${1:-}" ;;
+    --packs=*) PACKS_CSV="${1#--packs=}" ;;
     --help|-h)
       bash "$REPO_ROOT/scripts/print-usage.sh" "$0"
       exit 0 ;;
@@ -70,6 +73,11 @@ if [[ $UNINSTALL -eq 1 ]]; then
   if [[ $DRY_RUN -eq 1 ]]; then args+=(--dry-run); fi
   if [[ $JSON -eq 1 ]]; then args+=(--json); fi
   if [[ $WORKFLOW_ONLY -eq 1 ]]; then args+=(--workflow-only); fi
+  if [[ -n "$PACKS_CSV" ]]; then
+    RESOLVED_PACKS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --resolve-uninstall "$PACKS_CSV")"
+    IFS=',' read -ra PACK_LIST <<< "$RESOLVED_PACKS"
+    for p in "${PACK_LIST[@]:-}"; do [[ -n "$p" ]] && args+=(--pack "$p"); done
+  fi
   exec python3 "$REPO_ROOT/scripts/claude_install.py" \
     --repo "$REPO_ROOT" --target "$TARGET_HOME" "${args[@]}"
 fi

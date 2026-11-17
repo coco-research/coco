@@ -57,10 +57,20 @@ The repo's own `.planning/` is included as a dogfood example.
 
 GSD has its own conventions, state spec, and agent pipelines that don't apply to plain skill use. Bundling under `systems/` keeps the core framework lightweight while letting GSD users opt in.
 
-## External dependency: this bundle is not self-contained
+## Bundled runtime
 
-This directory vendors the skill and agent definitions only: `README.md`, `agents/*.md` (24 files), `skills/*/SKILL.md` (68 files), and one workflow file, `workflows/autonomous.md`, per the scope named in the repository's `CREDITS.md` ("68 skills + 24 agents"). It does not vendor the upstream GSD framework's workflow documents, reference documents, templates, or its `gsd-tools.cjs` command-line tool.
+Coco ships the upstream toolkit in `runtime/`, byte-identical at commit
+`bdcaab2c752d9a33a1a1ca9acf3a3c81fb991815` of
+[gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done).
+The MIT licence and copyright are in `runtime/LICENSE`; `runtime-pin.json`
+records every upstream Git blob. No upstream runtime text is patched.
 
-Most skill files load the rest of their instructions, and some agent files load their reference material, from a separate GSD installation expected at `~/.claude/get-shit-done/`. That path is referenced directly in this bundle's `SKILL.md` and agent files, for example `@$HOME/.claude/get-shit-done/workflows/add-phase.md` or `node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" ...`. For those skills and agents to function, a user needs a working GSD installation at that path, providing at least its `bin/`, `references/`, `templates/`, and `workflows/` directories.
+The Claude Code installer links `~/.claude/get-shit-done` to this copy when
+that path is absent or is already Coco's link. It preserves an existing user
+directory or foreign link and prints `kept your get-shit-done; Coco's copy not linked`.
+Other adapters retain their existing behavior; for them, an upstream GSD
+installation may still be needed at the path referenced by the skill files.
 
-Installing that separate GSD toolkit is outside the scope of this bundle and this repository; consult the upstream project named in `CREDITS.md` for its own installation instructions. Only `workflows/autonomous.md` is vendored here directly, so `/gsd-autonomous` is the one command in this bundle that works without any external installation.
+`bash tests/check-gsd-refs.sh` verifies all pinned bytes, all 89 literal file
+references used by the shipped skills and agents, repeat installation into a
+synthetic target, and preservation of a planted user directory. It uses no network.

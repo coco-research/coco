@@ -1169,3 +1169,353 @@ function cmdStateBeginPhase(cwd, phaseNumber, phaseName, planCount, raw) {
         // Update or insert Phase line
         const newPhase = `Phase: ${phaseNumber}${phaseName ? ` (${phaseName})` : ''} — EXECUTING`;
         if (/^Phase:/m.test(posBody)) {
+          posBody = posBody.replace(/^Phase:.*$/m, newPhase);
+        } else {
+          posBody = newPhase + '\n' + posBody;
+        }
+
+        // Update or insert Plan line
+        const newPlan = `Plan: 1 of ${planCount || '?'}`;
+        if (/^Plan:/m.test(posBody)) {
+          posBody = posBody.replace(/^Plan:.*$/m, newPlan);
+        } else {
+          posBody = posBody.replace(/^(Phase:.*$)/m, `$1\n${newPlan}`);
+        }
+
+        // Update Status line if present
+        const newStatus = `Status: Executing Phase ${phaseNumber}`;
+        if (/^Status:/m.test(posBody)) {
+          posBody = posBody.replace(/^Status:.*$/m, newStatus);
+        }
+
+        // Update Last activity line if present
+        const newActivity = `Last activity: ${today} -- Phase ${phaseNumber} execution started`;
+        if (/^Last activity:/im.test(posBody)) {
+          posBody = posBody.replace(/^Last activity:.*$/im, newActivity);
+        }
+
+        content = content.replace(positionPattern, () => `${header}${posBody}`);
+        updated.push('Current Position');
+      }
+    } else {
+      // Resume path: only update Last activity timestamp in Current Position
+      // (do not touch Plan:, stopped_at, progress.percent, or plan counter)
+      const positionPattern = /(##\s*Current Position\s*\n)([\s\S]*?)(?=\n##|$)/i;
+      const positionMatch = content.match(positionPattern);
+      if (positionMatch) {
+        const header = positionMatch[1];
+        let posBody = positionMatch[2];
+        const resumeActivity = `Last activity: ${today} -- Phase ${phaseNumber} execution resumed (wave continue)`;
+        if (/^Last activity:/im.test(posBody)) {
+          posBody = posBody.replace(/^Last activity:.*$/im, resumeActivity);
+          content = content.replace(positionPattern, () => `${header}${posBody}`);
+          updated.push('Last activity (resume)');
+        }
+      }
+    }
+
+    return content;
+  }, cwd);
+
+  output({ updated, phase: phaseNumber, phase_name: phaseName || null, plan_count: planCount || null }, raw, updated.length > 0 ? 'true' : 'false');
+}
+
+/**
+ * Write a WAITING.json signal file when GSD hits a decision point.
+ * External watchers (fswatch, polling, orchestrators) can detect this.
+ * File is written to .planning/WAITING.json (or .gsd/WAITING.json if .gsd exists).
+ * Fixes #1034.
+ */
+function cmdSignalWaiting(cwd, type, question, options, phase, raw) {
+  const gsdDir = fs.existsSync(path.join(cwd, '.gsd')) ? path.join(cwd, '.gsd') : planningDir(cwd);
+  const waitingPath = path.join(gsdDir, 'WAITING.json');
+
+  const signal = {
+    status: 'waiting',
+    type: type || 'decision_point',
+    question: question || null,
+    options: options ? options.split('|').map(o => o.trim()) : [],
+    since: new Date().toISOString(),
+    phase: phase || null,
+  };
+
+  try {
+    platformEnsureDir(gsdDir);
+    platformWriteSync(waitingPath, JSON.stringify(signal, null, 2));
+    output({ signaled: true, path: waitingPath }, raw, 'true');
+  } catch (e) {
+    output({ signaled: false, error: e.message }, raw, 'false');
+  }
+}
+
+/**
+ * Remove the WAITING.json signal file when user answers and agent resumes.
+ */
+function cmdSignalResume(cwd, raw) {
+  const paths = [
+    path.join(cwd, '.gsd', 'WAITING.json'),
+    path.join(planningDir(cwd), 'WAITING.json'),
+  ];
+
+  let removed = false;
+  for (const p of paths) {
+    if (fs.existsSync(p)) {
+      try { fs.unlinkSync(p); removed = true; } catch {}
+    }
+  }
+
+  output({ resumed: true, removed }, raw, removed ? 'true' : 'false');
+}
+
+// ─── Gate Functions (STATE.md consistency enforcement) ────────────────────────
+
+/**
+ * Update the ## Performance Metrics section in STATE.md content.
+ * Increments Velocity totals and upserts a By Phase table row.
+ * Returns modified content string.
+ */
+function updatePerformanceMetricsSection(content, cwd, phaseNum, planCount, summaryCount) {
+  // Update Velocity: Total plans completed
+  const totalMatch = content.match(/Total plans completed:\s*(\d+|\[N\])/);
+  const prevTotal = totalMatch && totalMatch[1] !== '[N]' ? parseInt(totalMatch[1], 10) : 0;
+  const newTotal = prevTotal + summaryCount;
+  content = content.replace(
+    /Total plans completed:\s*(\d+|\[N\])/,
+    `Total plans completed: ${newTotal}`
+  );
+
+  // Update By Phase table — upsert row for this phase
+  const byPhaseTablePattern = /(\|\s*Phase\s*\|\s*Plans\s*\|\s*Total\s*\|\s*Avg\/Plan\s*\|[ \t]*\n\|(?:[- :\t]+\|)+[ \t]*\n)((?:[ \t]*\|[^\n]*\n)*)(?=\n|$)/i;
+  const byPhaseMatch = content.match(byPhaseTablePattern);
+  if (byPhaseMatch) {
+    let tableBody = byPhaseMatch[2].trim();
+    const phaseRowPattern = new RegExp(`^\\|\\s*${escapeRegex(String(phaseNum))}\\s*\\|.*$`, 'm');
+    const newRow = `| ${phaseNum} | ${summaryCount} | - | - |`;
+
+    if (phaseRowPattern.test(tableBody)) {
+      // Update existing row
+      tableBody = tableBody.replace(phaseRowPattern, newRow);
+    } else {
+      // Remove placeholder row and add new row
+      tableBody = tableBody.replace(/^\|\s*-\s*\|\s*-\s*\|\s*-\s*\|\s*-\s*\|$/m, '').trim();
+      tableBody = tableBody ? tableBody + '\n' + newRow : newRow;
+    }
+
+    content = content.replace(byPhaseTablePattern, (_match, tableHeader) => `${tableHeader}${tableBody}\n`);
+  }
+
+  return content;
+}
+
+/**
+ * Gate 3a: Record state after plan-phase completes.
+ * Updates Status to "Ready to execute", Total Plans, Last Activity.
+ */
+function cmdStatePlannedPhase(cwd, phaseNumber, planCount, raw) {
+  const statePath = planningPaths(cwd).state;
+  if (!fs.existsSync(statePath)) {
+    output({ error: 'STATE.md not found' }, raw);
+    return;
+  }
+
+  let content = fs.readFileSync(statePath, 'utf-8');
+  const today = new Date().toISOString().split('T')[0];
+  const updated = [];
+
+  // Update Status
+  let result = stateReplaceField(content, 'Status', 'Ready to execute');
+  if (result) { content = result; updated.push('Status'); }
+
+  // Update Total Plans in Phase
+  if (planCount !== null && planCount !== undefined) {
+    result = stateReplaceField(content, 'Total Plans in Phase', String(planCount));
+    if (result) { content = result; updated.push('Total Plans in Phase'); }
+  }
+
+  // Update Last Activity
+  result = stateReplaceField(content, 'Last Activity', today);
+  if (result) { content = result; updated.push('Last Activity'); }
+
+  // Update Last Activity Description
+  result = stateReplaceField(content, 'Last Activity Description', `Phase ${phaseNumber} planning complete — ${planCount || '?'} plans ready`);
+  if (result) { content = result; updated.push('Last Activity Description'); }
+
+  // Update Current Position section
+  content = updateCurrentPositionFields(content, {
+    status: 'Ready to execute',
+    lastActivity: `${today} -- Phase ${phaseNumber} planning complete`,
+  });
+
+  if (updated.length > 0) {
+    writeStateMd(statePath, content, cwd);
+  }
+
+  output({ updated, phase: phaseNumber, plan_count: planCount }, raw, updated.length > 0 ? 'true' : 'false');
+}
+
+/**
+ * Bug #2630: reset STATE.md for a new milestone cycle.
+ * Stomps frontmatter milestone/milestone_name/status/progress AND rewrites
+ * the Current Position body. Preserves Accumulated Context.
+ * Symmetric with the SDK `stateMilestoneSwitch` handler.
+ */
+function cmdStateMilestoneSwitch(cwd, version, name, raw) {
+  if (!version || !String(version).trim()) {
+    output({ error: 'milestone required (--milestone <vX.Y>)' }, raw);
+    return;
+  }
+  const resolvedName = (name && String(name).trim()) || 'milestone';
+  const statePath = planningPaths(cwd).state;
+  const today = new Date().toISOString().split('T')[0];
+
+  const lockPath = acquireStateLock(statePath);
+  try {
+    const content = platformReadSync(statePath) || '';
+    const existingFm = extractFrontmatter(content);
+    const body = stripFrontmatter(content);
+
+    const positionPattern = /(##\s*Current Position\s*\n)([\s\S]*?)(?=\n##|$)/i;
+    const resetPositionBody =
+      `\nPhase: Not started (defining requirements)\n` +
+      `Plan: —\n` +
+      `Status: Defining requirements\n` +
+      `Last activity: ${today} — Milestone ${version} started\n\n`;
+    let newBody;
+    if (positionPattern.test(body)) {
+      newBody = body.replace(positionPattern, (_m, header) => `${header}${resetPositionBody}`);
+    } else {
+      const preface = body.trim().length > 0 ? body : '# Project State\n';
+      newBody = `${preface.trimEnd()}\n\n## Current Position\n${resetPositionBody}`;
+    }
+
+    const fm = {
+      gsd_state_version: existingFm.gsd_state_version || '1.0',
+      milestone: version,
+      milestone_name: resolvedName,
+      status: 'planning',
+      last_updated: new Date().toISOString(),
+      last_activity: today,
+      progress: {
+        total_phases: 0,
+        completed_phases: 0,
+        total_plans: 0,
+        completed_plans: 0,
+        percent: 0,
+      },
+    };
+
+    const yamlStr = reconstructFrontmatter(fm);
+    const assembled = `---\n${yamlStr}\n---\n\n${newBody.replace(/^\n+/, '')}`;
+    platformWriteSync(statePath, assembled);
+    output(
+      { switched: true, version, name: resolvedName, status: 'planning' },
+      raw,
+      'true',
+    );
+  } finally {
+    releaseStateLock(lockPath);
+  }
+}
+
+/**
+ * Gate 1: Validate STATE.md against filesystem.
+ * Returns { valid, warnings, drift } JSON.
+ */
+function cmdStateValidate(cwd, raw) {
+  const statePath = planningPaths(cwd).state;
+  if (!fs.existsSync(statePath)) {
+    output({ error: 'STATE.md not found' }, raw);
+    return;
+  }
+
+  const content = fs.readFileSync(statePath, 'utf-8');
+  const warnings = [];
+  const drift = {};
+
+  const status = stateExtractField(content, 'Status') || '';
+  const currentPhase = stateExtractField(content, 'Current Phase');
+  const totalPlansRaw = stateExtractField(content, 'Total Plans in Phase');
+  const totalPlansInPhase = totalPlansRaw ? parseInt(totalPlansRaw, 10) : null;
+
+  const phasesDir = planningPaths(cwd).phases;
+
+  // Scan disk for current phase
+  if (currentPhase && fs.existsSync(phasesDir)) {
+    const normalized = currentPhase.replace(/\s+of\s+\d+.*/, '').trim();
+    try {
+      const entries = fs.readdirSync(phasesDir, { withFileTypes: true });
+      const phaseDir = entries.find(e => e.isDirectory() && e.name.startsWith(normalized.replace(/^0+/, '').padStart(2, '0')));
+      if (phaseDir) {
+        const phaseDirPath = path.join(phasesDir, phaseDir.name);
+        const { planCount: diskPlans, summaryCount: diskSummaries } = scanPhasePlans(phaseDirPath);
+
+        // Check plan count mismatch
+        if (totalPlansInPhase !== null && diskPlans !== totalPlansInPhase) {
+          warnings.push(`Plan count mismatch: STATE.md says ${totalPlansInPhase} plans, disk has ${diskPlans}`);
+          drift.plan_count = { state: totalPlansInPhase, disk: diskPlans };
+        }
+
+        // Check for VERIFICATION.md
+        const files = fs.readdirSync(phaseDirPath);
+        const verificationFiles = files.filter(f => f.includes('VERIFICATION') && f.endsWith('.md'));
+        for (const vf of verificationFiles) {
+          try {
+            const vContent = fs.readFileSync(path.join(phaseDirPath, vf), 'utf-8');
+            if (/status:\s*passed/i.test(vContent) && /executing/i.test(status)) {
+              warnings.push(`Status drift: STATE.md says "${status}" but ${vf} shows verification passed — phase may be complete`);
+              drift.verification_status = { state_status: status, verification: 'passed' };
+            }
+          } catch { /* intentionally empty */ }
+        }
+
+        // Check if all plans have summaries but status still says executing
+        if (diskPlans > 0 && diskSummaries >= diskPlans && /executing/i.test(status)) {
+          // Only warn if no verification exists (if verification passed, the above warning covers it)
+          if (verificationFiles.length === 0) {
+            warnings.push(`All ${diskPlans} plans have summaries but status is still "${status}" — phase may be ready for verification`);
+          }
+        }
+      }
+    } catch { /* intentionally empty */ }
+  }
+
+  const valid = warnings.length === 0;
+  output({ valid, warnings, drift }, raw);
+}
+
+/**
+ * Gate 2: Sync STATE.md from filesystem ground truth.
+ * Scans phase dirs, reconstructs counters, progress, metrics.
+ * Supports --verify for dry-run mode.
+ */
+function cmdStateSync(cwd, options, raw) {
+  const statePath = planningPaths(cwd).state;
+  if (!fs.existsSync(statePath)) {
+    output({ error: 'STATE.md not found' }, raw);
+    return;
+  }
+
+  const verify = options && options.verify;
+  const content = fs.readFileSync(statePath, 'utf-8');
+  const changes = [];
+  let modified = content;
+  const today = new Date().toISOString().split('T')[0];
+
+  const phasesDir = planningPaths(cwd).phases;
+  if (!fs.existsSync(phasesDir)) {
+    output({ synced: true, changes: [], dry_run: !!verify }, raw);
+    return;
+  }
+
+  // Scan all phases
+  let entries;
+  try {
+    entries = fs.readdirSync(phasesDir, { withFileTypes: true })
+      .filter(e => e.isDirectory())
+      .map(e => e.name)
+      .sort();
+  } catch {
+    output({ synced: true, changes: [], dry_run: !!verify }, raw);
+    return;
+  }
+

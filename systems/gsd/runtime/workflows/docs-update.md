@@ -863,3 +863,299 @@ Verification results:
 
 Canonical docs (generated):
 
+| Doc                    | Claims | Passed | Failed |
+|------------------------|--------|--------|--------|
+| README.md              | 12     | 10     | 2      |
+| docs/architecture/overview.md | 8 | 8   | 0      |
+
+Existing docs (reviewed):
+
+| Doc                    | Claims | Passed | Failed |
+|------------------------|--------|--------|--------|
+| docs/frontend/components/button.md | 5 | 4 | 1   |
+| docs/services/api.md   | 8      | 8      | 0      |
+
+Total: {total_checked} claims checked, {total_failed} failures
+```
+
+Write the updated manifest back to disk.
+
+If all docs have `claims_failed === 0`: skip fix_loop, continue to scan_for_secrets.
+If any doc (canonical OR non-canonical) has `claims_failed > 0`: continue to fix_loop.
+</step>
+
+<step name="fix_loop">
+**Read the work manifest first:** `Read .planning/tmp/docs-work-manifest.json` — identify ALL docs (canonical AND non-canonical) with `claims_failed > 0` from the verification results in `.planning/tmp/verify-*.json`. Both queues are eligible for fixes.
+
+Correct flagged inaccuracies by re-sending failing docs to the doc-writer in fix mode. Per D-06, max 2 iterations. Per D-05, halt immediately on regression.
+
+**Skip condition:** If all docs passed verification (no failures), skip this step.
+
+**Iteration tracking:**
+- `MAX_FIX_ITERATIONS = 2`
+- `iteration = 0`
+- `previous_passed_docs` = set of doc_paths where claims_failed === 0 after initial verification
+
+**For each iteration (while iteration < MAX_FIX_ITERATIONS and there are docs with failures):**
+
+1. For each doc with `claims_failed > 0` in the latest verification_results:
+   a. Read the current file content from disk.
+   b. Spawn `gsd-doc-writer` agent (or invoke sequentially) with a fix assignment:
+      ```xml
+      <doc_assignment>
+      type: {original doc type from the queue, e.g. readme}
+      mode: fix
+      doc_path: {relative path}
+      project_context: {INIT JSON}
+      existing_content: {current file content read from disk}
+      failures:
+        - line: {line}
+          claim: "{claim}"
+          expected: "{expected}"
+          actual: "{actual}"
+      </doc_assignment>
+      ```
+   c. One agent spawn per doc with failures. Do not batch multiple docs into one spawn.
+
+2. After all fix agents complete, re-verify ALL docs (not just the ones that were fixed):
+   - Re-run the same verification process as verify_docs step.
+   - Read updated result JSONs from `.planning/tmp/verify-{doc_filename}.json`.
+
+3. **Regression detection (D-05):**
+   For each doc in the new verification_results:
+   - If this doc was in `previous_passed_docs` (passed in the prior round) AND now has `claims_failed > 0`, this is a REGRESSION.
+   - If regression detected: HALT the loop immediately. Present:
+     ```
+     REGRESSION DETECTED -- halting fix loop.
+
+     {doc_path} previously passed verification but now has {claims_failed} failures after fix iteration {iteration + 1}.
+
+     This means the fix introduced new errors. Remaining failures require manual review.
+     ```
+     Continue to scan_for_secrets (do not attempt further fixes).
+
+4. Update `previous_passed_docs` with docs that now pass.
+5. Increment `iteration`.
+
+**After loop exhaustion (iteration === MAX_FIX_ITERATIONS and failures remain):**
+
+Present remaining failures:
+```
+Fix loop completed ({MAX_FIX_ITERATIONS} iterations). Remaining failures:
+
+| Doc               | Failed Claims |
+|-------------------|---------------|
+| {doc_path}        | {count}       |
+
+These failures require manual correction. Review the verification output in .planning/tmp/verify-*.json for details.
+```
+
+Continue to scan_for_secrets.
+</step>
+
+<step name="verify_only_report">
+**Reached when `--verify-only` is present in `$ARGUMENTS`.** This is an early-exit step — do not proceed to dispatch, generation, commit, or report steps after this step.
+
+Invoke the gsd-doc-verifier agent in read-only mode for each file in `existing_docs` from the init JSON:
+
+1. For each doc in `existing_docs`:
+   a. Spawn `gsd-doc-verifier` (or invoke sequentially if Task tool is unavailable) with:
+      ```xml
+      <verify_assignment>
+      doc_path: {doc.path}
+      project_root: {project_root from init JSON}
+      </verify_assignment>
+      ```
+   b. Read the result JSON from `.planning/tmp/verify-{doc_filename}.json`.
+
+2. Also count VERIFY markers in each doc: grep for `<!-- VERIFY:` in the file content.
+
+Present a combined summary table:
+
+```
+--verify-only audit:
+
+| File                     | Claims Checked | Passed | Failed | VERIFY Markers |
+|--------------------------|----------------|--------|--------|----------------|
+| README.md                | 12             | 10     | 2      | 0              |
+| docs/ARCHITECTURE.md     | 8              | 8      | 0      | 0              |
+| docs/CONFIGURATION.md    | 5              | 3      | 2      | 5              |
+| ...                 | ...            | ...    | ...    | ...            |
+
+Total: {total_checked} claims checked, {total_failed} failures, {total_markers} VERIFY markers requiring manual review
+```
+
+If any failures exist, show details:
+```
+Failed claims:
+  README.md:34 - "src/cli/index.ts" (expected: file exists, actual: file not found)
+  docs/CONFIGURATION.md:12 - "npm run deploy" (expected: script in package.json, actual: script not found)
+```
+
+Display note:
+```
+To fix failures automatically: /gsd:docs-update (runs generation + fix loop)
+To regenerate all docs from scratch: /gsd:docs-update --force
+```
+
+Clean up temp files: remove `.planning/tmp/verify-*.json` files.
+
+End workflow — do not proceed to any dispatch, commit, or report steps.
+</step>
+
+<step name="scan_for_secrets">
+CRITICAL SECURITY CHECK: Scan all generated/updated doc files for accidentally leaked secrets before committing. Per D-07, this runs once after the fix loop completes, before commit_docs.
+
+Build the file list from the generation queue -- include all docs that were written to disk (created, updated, supplemented, or fixed). Do not hardcode a static list; use the actual list of files that were generated or modified.
+
+Run secret pattern detection:
+
+```bash
+# Check for common API key patterns in generated docs
+grep -E '(sk-[a-zA-Z0-9]{20,}|sk_live_[a-zA-Z0-9]+|sk_test_[a-zA-Z0-9]+|ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|glpat-[a-zA-Z0-9_-]+|AKIA[A-Z0-9]{16}|xox[baprs]-[a-zA-Z0-9-]+|-----BEGIN.*PRIVATE KEY|eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.)' \
+  {space-separated list of generated doc files} 2>/dev/null \
+  && SECRETS_FOUND=true || SECRETS_FOUND=false
+```
+
+**If SECRETS_FOUND=true:**
+
+```
+SECURITY ALERT: Potential secrets detected in generated documentation!
+
+Found patterns that look like API keys or tokens in:
+{show grep output}
+
+This would expose credentials if committed.
+
+Action required:
+1. Review the flagged lines above
+2. Remove any real secrets from the doc files
+3. Re-run /gsd:docs-update to regenerate clean docs
+```
+
+Then confirm with AskUserQuestion:
+
+```
+AskUserQuestion([{
+  question: "Potential secrets detected in generated docs. How would you like to proceed?",
+  header: "Security",
+  multiSelect: false,
+  options: [
+    { label: "Safe to proceed", description: "I've reviewed the flagged lines — no real secrets, commit the docs" },
+    { label: "Abort commit", description: "Skip committing — I'll clean up the docs first" }
+  ]
+}])
+```
+
+If the user selects "Abort commit": skip commit_docs and continue to report. If "Safe to proceed": continue to commit_docs.
+
+**If SECRETS_FOUND=false:**
+
+Continue to commit_docs.
+</step>
+
+<step name="commit_docs">
+Only run this step if `commit_docs` is `true` from the init JSON. If `commit_docs` is false, skip to report.
+
+Assemble the list of files that were actually generated (do not include files that failed or were skipped):
+
+```bash
+gsd-sdk query commit "docs: generate project documentation" \
+  --files README.md docs/ARCHITECTURE.md docs/CONFIGURATION.md docs/GETTING-STARTED.md docs/DEVELOPMENT.md docs/TESTING.md
+# Append any conditional docs that were generated:
+# --files ... docs/API.md docs/DEPLOYMENT.md CONTRIBUTING.md
+# Append per-package READMEs if monorepo dispatch ran:
+# --files ... packages/core/README.md packages/cli/README.md
+```
+
+Only include files that were successfully written to disk. Do not include failed or skipped docs.
+
+Continue to report.
+</step>
+
+<step name="report">
+**Read the work manifest first:** `Read .planning/tmp/docs-work-manifest.json` — use the manifest to compile the complete report covering all canonical docs, review_queue results, and gap_queue results. The manifest is the source of truth for what was processed.
+
+Present a completion summary to the user.
+
+**Summary format:**
+
+```
+Documentation generation complete.
+
+Project type: {primary_type}
+
+Generated docs:
+| File                     | Mode   | Lines |
+|--------------------------|--------|-------|
+| README.md                | create | 87    |
+| docs/ARCHITECTURE.md     | update | 124   |
+| docs/GETTING-STARTED.md  | create | 63    |
+| docs/DEVELOPMENT.md      | create | 71    |
+| docs/TESTING.md          | create | 58    |
+| docs/CONFIGURATION.md    | create | 45    |
+[conditional docs if generated]
+
+{If monorepo per-package READMEs were generated:}
+Per-package READMEs:
+| Package             | Mode   | Lines |
+|---------------------|--------|-------|
+| packages/core       | create | 42    |
+| packages/cli        | create | 38    |
+
+{If any docs failed or were skipped:}
+Skipped / failed:
+  - docs/API.md: agent did not complete
+
+{If preservation_check ran:}
+Preservation decisions:
+  - {filename}: {preserve|supplement|regenerate}
+
+{If docs/DEPLOYMENT.md or docs/CONFIGURATION.md were generated:}
+VERIFY markers: {N} markers placed in docs/DEPLOYMENT.md and/or docs/CONFIGURATION.md for infrastructure claims that require manual verification.
+
+{If review_queue was non-empty:}
+
+Existing doc accuracy review:
+
+| Doc | Claims Checked | Passed | Failed | Fixed |
+|-----|----------------|--------|--------|-------|
+| docs/api/endpoint-map.md | 5 | 4 | 1 | 1 |
+
+{For any remaining unfixed failures after fix_loop:}
+Remaining inaccuracies could not be auto-corrected — manual review recommended for flagged items above.
+
+{If commit_docs was true:}
+All generated files committed.
+```
+
+Remind the user they can fact-check generated docs:
+
+```
+Run `/gsd:docs-update --verify-only` to fact-check generated docs against the codebase.
+```
+
+End workflow.
+</step>
+
+</process>
+
+<success_criteria>
+- [ ] docs-init JSON loaded and all fields extracted
+- [ ] Project type correctly classified from project_type signals
+- [ ] Doc queue contains all always-on docs plus only the conditional docs matching project signals
+- [ ] CHANGELOG.md was NOT generated or queued
+- [ ] Each doc was generated in correct mode (create for new, update for existing)
+- [ ] Wave 1 docs (README, ARCHITECTURE, CONFIGURATION) completed before Wave 2 started
+- [ ] Generated docs contain zero GSD methodology content
+- [ ] docs/DEPLOYMENT.md and docs/CONFIGURATION.md use VERIFY markers for undiscoverable claims (if generated)
+- [ ] All generated files committed (if commit_docs is true)
+- [ ] Hand-written docs (no GSD marker) prompted for preserve/supplement/regenerate before dispatch (unless --force)
+- [ ] --force flag skipped preservation prompts and regenerated all docs
+- [ ] --verify-only flag reported doc status without generating files
+- [ ] Per-package READMEs generated for monorepo workspaces (if applicable)
+- [ ] verify_docs step checked all generated docs against the live codebase
+- [ ] fix_loop ran at most 2 iterations and halted on regression
+- [ ] scan_for_secrets ran before commit and blocked on detected patterns
+- [ ] --verify-only invokes gsd-doc-verifier for full fact-checking (not just VERIFY marker count)
+</success_criteria>

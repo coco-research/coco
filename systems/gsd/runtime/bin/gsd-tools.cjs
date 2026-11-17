@@ -790,3 +790,353 @@ async function runCommand(command, args, cwd, raw, defaultValue, originalCommand
         legacyCommand: 'config-ensure-section',
         legacyArgs: args.slice(1),
         cwd,
+        raw,
+        error,
+        output: core.output,
+      });
+      if (!handled) config.cmdConfigEnsureSection(cwd, raw);
+      break;
+    }
+
+    case 'config-set': {
+      // Phase 6 (#3575): dispatch via SDK executeForCjs when available.
+      const handled = _dispatchNonFamily({
+        registryCommand: 'config-set',
+        registryArgs: args.slice(1),
+        legacyCommand: 'config-set',
+        legacyArgs: args.slice(1),
+        cwd,
+        raw,
+        error,
+        output: core.output,
+      });
+      if (!handled) config.cmdConfigSet(cwd, args[1], args[2], raw);
+      break;
+    }
+
+    case "config-set-model-profile": {
+      // Phase 6 (#3575): dispatch via SDK executeForCjs when available.
+      const handled = _dispatchNonFamily({
+        registryCommand: 'config-set-model-profile',
+        registryArgs: args.slice(1),
+        legacyCommand: 'config-set-model-profile',
+        legacyArgs: args.slice(1),
+        cwd,
+        raw,
+        error,
+        output: core.output,
+      });
+      if (!handled) config.cmdConfigSetModelProfile(cwd, args[1], raw);
+      break;
+    }
+
+    case 'config-get': {
+      // Phase 6 (#3575): dispatch via SDK executeForCjs when available.
+      // The SDK handler supports --default via the registry args (args.slice(1)
+      // contains the key; defaultValue is handled by the SDK via the --default
+      // flag which was already stripped from args and held in defaultValue).
+      // Pass the full original args.slice(1) so the SDK sees the key; the
+      // defaultValue from the flag is in the global defaultValue variable above.
+      // Since the SDK handler reads --default from registryArgs, re-inject it.
+      const configGetSdkArgs = defaultValue !== undefined
+        ? [args[1], '--default', defaultValue]
+        : args.slice(1);
+      const handled = _dispatchNonFamily({
+        registryCommand: 'config-get',
+        registryArgs: configGetSdkArgs,
+        legacyCommand: 'config-get',
+        legacyArgs: args.slice(1),
+        cwd,
+        raw,
+        error,
+        output: core.output,
+      });
+      if (!handled) config.cmdConfigGet(cwd, args[1], raw, defaultValue);
+      break;
+    }
+
+    case 'config-new-project': {
+      // Phase 6 (#3575): dispatch via SDK executeForCjs when available.
+      const handled = _dispatchNonFamily({
+        registryCommand: 'config-new-project',
+        registryArgs: args.slice(1),
+        legacyCommand: 'config-new-project',
+        legacyArgs: args.slice(1),
+        cwd,
+        raw,
+        error,
+        output: core.output,
+      });
+      if (!handled) config.cmdConfigNewProject(cwd, args[1], raw);
+      break;
+    }
+
+    case 'config-path': {
+      // CJS-native: config-path returns the filesystem path to config.json.
+      // The SDK handler (configPath) also exists but requires a projectDir that
+      // is already resolved. Both produce identical output; keeping CJS here is
+      // simpler and avoids sync-bridge overhead for a trivial path lookup.
+      config.cmdConfigPath(cwd, raw);
+      break;
+    }
+
+    case 'migrate-config': {
+      // CJS-native: migrate-config wraps the Configuration Module migrateOnDisk()
+      // which is async and mutates the filesystem. No SDK counterpart exists in
+      // the command registry (it's a one-shot migration utility). Must await.
+      await config.cmdMigrateConfig(cwd, raw);
+      break;
+    }
+
+    case 'agent-skills': {
+      init.cmdAgentSkills(cwd, args[1], raw);
+      break;
+    }
+
+    case 'skill-manifest': {
+      init.cmdSkillManifest(cwd, args, raw);
+      break;
+    }
+
+    case 'history-digest': {
+      commands.cmdHistoryDigest(cwd, raw);
+      break;
+    }
+
+    case 'phases': {
+      routePhasesCommand({
+        phase,
+        milestone,
+        args,
+        cwd,
+        raw,
+        error,
+      });
+      break;
+    }
+
+    case 'roadmap': {
+      routeRoadmapCommand({
+        roadmap,
+        args,
+        cwd,
+        raw,
+        error,
+      });
+      break;
+    }
+
+    case 'requirements': {
+      const subcommand = args[1];
+      if (subcommand === 'mark-complete') {
+        milestone.cmdRequirementsMarkComplete(cwd, args.slice(2), raw);
+      } else {
+        error('Unknown requirements subcommand. Available: mark-complete', ERROR_REASON.SDK_UNKNOWN_COMMAND);
+      }
+      break;
+    }
+
+    case 'gap-analysis': {
+      // Post-planning gap checker (#2493) — unified REQUIREMENTS.md +
+      // CONTEXT.md <decisions> coverage report against PLAN.md files.
+      gapChecker.cmdGapAnalysis(cwd, args.slice(1), raw);
+      break;
+    }
+
+    case 'phase': {
+      routePhaseCommand({
+        phase,
+        args,
+        cwd,
+        raw,
+        error,
+      });
+      break;
+    }
+
+    case 'milestone': {
+      const subcommand = args[1];
+      if (subcommand === 'complete') {
+        const milestoneName = parseMultiwordArg(args, 'name');
+        const archivePhases = args.includes('--archive-phases');
+        milestone.cmdMilestoneComplete(cwd, args[2], { name: milestoneName, archivePhases }, raw);
+      } else {
+        error('Unknown milestone subcommand. Available: complete', ERROR_REASON.SDK_UNKNOWN_COMMAND);
+      }
+      break;
+    }
+
+    case 'validate': {
+      routeValidateCommand({
+        verify,
+        args,
+        cwd,
+        raw,
+        parseNamedArgs,
+        output: core.output,
+        error,
+      });
+      break;
+    }
+
+    case 'progress': {
+      const subcommand = args[1] || 'json';
+      commands.cmdProgressRender(cwd, subcommand, raw);
+      break;
+    }
+
+    case 'audit-uat': {
+      const uat = require('./lib/uat.cjs');
+      uat.cmdAuditUat(cwd, raw);
+      break;
+    }
+
+    case 'audit-open': {
+      const { auditOpenArtifacts, formatAuditReport } = require('./lib/audit.cjs');
+      const wantJson = args.includes('--json');
+      const result = auditOpenArtifacts(cwd);
+      if (wantJson) {
+        // core.output JSON-stringifies its first arg; pass the object directly.
+        core.output(result, raw);
+      } else {
+        // Human-readable report must bypass JSON encoding — use the rawValue
+        // form (third arg) which core.output emits verbatim.
+        core.output(null, true, formatAuditReport(result));
+      }
+      break;
+    }
+
+    case 'uat': {
+      const subcommand = args[1];
+      const uat = require('./lib/uat.cjs');
+      if (subcommand === 'render-checkpoint') {
+        const options = parseNamedArgs(args, ['file']);
+        uat.cmdRenderCheckpoint(cwd, options, raw);
+      } else {
+        error('Unknown uat subcommand. Available: render-checkpoint', ERROR_REASON.SDK_UNKNOWN_COMMAND);
+      }
+      break;
+    }
+
+    case 'stats': {
+      const subcommand = args[1] || 'json';
+      commands.cmdStats(cwd, subcommand, raw);
+      break;
+    }
+
+    case 'todo': {
+      const subcommand = args[1];
+      if (subcommand === 'complete') {
+        commands.cmdTodoComplete(cwd, args[2], raw);
+      } else if (subcommand === 'match-phase') {
+        commands.cmdTodoMatchPhase(cwd, args[2], raw);
+      } else {
+        error('Unknown todo subcommand. Available: complete, match-phase', ERROR_REASON.SDK_UNKNOWN_COMMAND);
+      }
+      break;
+    }
+
+    case 'scaffold': {
+      const scaffoldType = args[1];
+      const scaffoldOptions = {
+        phase: parseNamedArgs(args, ['phase']).phase,
+        name: parseMultiwordArg(args, 'name'),
+      };
+      commands.cmdScaffold(cwd, scaffoldType, scaffoldOptions, raw);
+      break;
+    }
+
+    case 'init': {
+      routeInitCommand({
+        init,
+        args,
+        cwd,
+        raw,
+        parseNamedArgs,
+        error,
+      });
+      break;
+    }
+
+    case 'phase-plan-index': {
+      phase.cmdPhasePlanIndex(cwd, args[1], raw);
+      break;
+    }
+
+    case 'state-snapshot': {
+      state.cmdStateSnapshot(cwd, raw);
+      break;
+    }
+
+    case 'summary-extract': {
+      const summaryPath = args[1];
+      const fieldsIndex = args.indexOf('--fields');
+      const fields = fieldsIndex !== -1 ? args[fieldsIndex + 1].split(',') : null;
+      commands.cmdSummaryExtract(cwd, summaryPath, fields, raw);
+      break;
+    }
+
+    case 'websearch': {
+      const query = args[1];
+      const limitIdx = args.indexOf('--limit');
+      const freshnessIdx = args.indexOf('--freshness');
+      await commands.cmdWebsearch(query, {
+        limit: limitIdx !== -1 ? parseInt(args[limitIdx + 1], 10) : 10,
+        freshness: freshnessIdx !== -1 ? args[freshnessIdx + 1] : null,
+      }, raw);
+      break;
+    }
+
+    // ─── Profiling Pipeline ────────────────────────────────────────────────
+
+    case 'scan-sessions': {
+      const pathIdx = args.indexOf('--path');
+      const sessionsPath = pathIdx !== -1 ? args[pathIdx + 1] : null;
+      const verboseFlag = args.includes('--verbose');
+      const jsonFlag = args.includes('--json');
+      await profilePipeline.cmdScanSessions(sessionsPath, { verbose: verboseFlag, json: jsonFlag }, raw);
+      break;
+    }
+
+    case 'extract-messages': {
+      const sessionIdx = args.indexOf('--session');
+      const sessionId = sessionIdx !== -1 ? args[sessionIdx + 1] : null;
+      const limitIdx = args.indexOf('--limit');
+      const limit = limitIdx !== -1 ? parseInt(args[limitIdx + 1], 10) : null;
+      const pathIdx = args.indexOf('--path');
+      const sessionsPath = pathIdx !== -1 ? args[pathIdx + 1] : null;
+      const projectArg = args[1];
+      if (!projectArg || projectArg.startsWith('--')) {
+        error('Usage: gsd-tools extract-messages <project> [--session <id>] [--limit N] [--path <dir>]\nRun scan-sessions first to see available projects.', ERROR_REASON.USAGE);
+      }
+      await profilePipeline.cmdExtractMessages(projectArg, { sessionId, limit }, raw, sessionsPath);
+      break;
+    }
+
+    case 'profile-sample': {
+      const pathIdx = args.indexOf('--path');
+      const sessionsPath = pathIdx !== -1 ? args[pathIdx + 1] : null;
+      const limitIdx = args.indexOf('--limit');
+      const limit = limitIdx !== -1 ? parseInt(args[limitIdx + 1], 10) : 150;
+      const maxPerIdx = args.indexOf('--max-per-project');
+      const maxPerProject = maxPerIdx !== -1 ? parseInt(args[maxPerIdx + 1], 10) : null;
+      const maxCharsIdx = args.indexOf('--max-chars');
+      const maxChars = maxCharsIdx !== -1 ? parseInt(args[maxCharsIdx + 1], 10) : 500;
+      await profilePipeline.cmdProfileSample(sessionsPath, { limit, maxPerProject, maxChars }, raw);
+      break;
+    }
+
+    // ─── Profile Output ──────────────────────────────────────────────────
+
+    case 'write-profile': {
+      const inputIdx = args.indexOf('--input');
+      const inputPath = inputIdx !== -1 ? args[inputIdx + 1] : null;
+      if (!inputPath) error('--input <analysis-json-path> is required', ERROR_REASON.USAGE);
+      const outputIdx = args.indexOf('--output');
+      const outputPath = outputIdx !== -1 ? args[outputIdx + 1] : null;
+      profileOutput.cmdWriteProfile(cwd, { input: inputPath, output: outputPath }, raw);
+      break;
+    }
+
+    case 'profile-questionnaire': {
+      const answersIdx = args.indexOf('--answers');

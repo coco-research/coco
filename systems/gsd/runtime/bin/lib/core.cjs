@@ -1014,3 +1014,353 @@ function extractCurrentMilestone(content, cwd) {
     charOffset += line.length + 1;
   }
 
+  // Return everything before the current milestone section (non-milestone content
+  // like title, overview) plus the current milestone section
+  const beforeMilestones = content.slice(0, sectionStart);
+  const currentSection = content.slice(sectionStart, sectionEnd);
+
+  // Also include any content before the first milestone heading (title, overview, etc.)
+  // but strip any <details> blocks in it (these are definitely shipped)
+  const preamble = beforeMilestones.replace(/<details>[\s\S]*?<\/details>/gi, '');
+
+  return preamble + currentSection;
+}
+
+/**
+ * Replace a pattern only in the current milestone section of ROADMAP.md
+ * (everything after the last </details> close tag). Used for write operations
+ * that must not accidentally modify archived milestone checkboxes/tables.
+ */
+function replaceInCurrentMilestone(content, pattern, replacement) {
+  const lastDetailsClose = content.lastIndexOf('</details>');
+  if (lastDetailsClose === -1) {
+    return content.replace(pattern, replacement);
+  }
+  const offset = lastDetailsClose + '</details>'.length;
+  const before = content.slice(0, offset);
+  const after = content.slice(offset);
+  return before + after.replace(pattern, replacement);
+}
+
+// ─── Roadmap & model utilities ────────────────────────────────────────────────
+
+function getRoadmapPhaseInternal(cwd, phaseNum) {
+  if (!phaseNum) return null;
+  const roadmapPath = path.join(planningDir(cwd), 'ROADMAP.md');
+  if (!fs.existsSync(roadmapPath)) return null;
+
+  try {
+    const roadmapRaw = platformReadSync(roadmapPath);
+    if (roadmapRaw === null) throw new Error('missing');
+    const content = extractCurrentMilestone(roadmapRaw, cwd);
+    // #3537: route through canonical padding-tolerant fragment. The prior
+    // hand-rolled `isNumeric` branch only stripped padding on integer-only
+    // ids and missed decimal padding (`02.7` against `Phase 2.7:` headings).
+    const phasePattern = new RegExp(
+      `#{2,4}\\s*Phase\\s+${phaseMarkdownRegexSource(phaseNum)}:\\s*([^\\n]+)`,
+      'i'
+    );
+    const headerMatch = content.match(phasePattern);
+    if (!headerMatch) return null;
+
+    const phaseName = headerMatch[1].trim();
+    const headerIndex = headerMatch.index;
+    const restOfContent = content.slice(headerIndex);
+    const nextHeaderMatch = restOfContent.match(/\n#{2,4}\s+Phase\s+[\w]/i);
+    const sectionEnd = nextHeaderMatch ? headerIndex + nextHeaderMatch.index : content.length;
+    const section = content.slice(headerIndex, sectionEnd).trim();
+
+    const goalMatch = section.match(/\*\*Goal(?:\*\*:|\*?\*?:\*\*)\s*([^\n]+)/i);
+    const goal = goalMatch ? goalMatch[1].trim() : null;
+
+    return {
+      found: true,
+      phase_number: phaseNum.toString(),
+      phase_name: phaseName,
+      goal,
+      section,
+    };
+  } catch {
+    return null;
+  }
+}
+
+// ─── Agent installation validation (#1371) ───────────────────────────────────
+
+/**
+ * Resolve the agents directory from the GSD install location.
+ * gsd-tools.cjs lives at <configDir>/get-shit-done/bin/gsd-tools.cjs,
+ * so agents/ is at <configDir>/agents/.
+ *
+ * GSD_AGENTS_DIR env var overrides the default path. Used in tests and for
+ * installs where the agents directory is not co-located with gsd-tools.cjs.
+ *
+ * @returns {string} Absolute path to the agents directory
+ */
+function getAgentsDir() {
+  if (process.env.GSD_AGENTS_DIR) {
+    return process.env.GSD_AGENTS_DIR;
+  }
+  // __dirname is get-shit-done/bin/lib/ → go up 3 levels to configDir
+  return path.join(__dirname, '..', '..', '..', 'agents');
+}
+
+/**
+ * Check which GSD agents are installed on disk.
+ * Returns an object with installation status and details.
+ *
+ * Recognises both standard format (gsd-planner.md) and Copilot format
+ * (gsd-planner.agent.md). Copilot renames agent files during install (#1512).
+ *
+ * @returns {{ agents_installed: boolean, missing_agents: string[], installed_agents: string[], agents_dir: string }}
+ */
+function checkAgentsInstalled() {
+  const agentsDir = getAgentsDir();
+  const expectedAgents = Object.keys(MODEL_PROFILES);
+  const installed = [];
+  const missing = [];
+
+  if (!fs.existsSync(agentsDir)) {
+    return {
+      agents_installed: false,
+      missing_agents: expectedAgents,
+      installed_agents: [],
+      agents_dir: agentsDir,
+    };
+  }
+
+  for (const agent of expectedAgents) {
+    // Check both .md (standard) and .agent.md (Copilot) file formats.
+    const agentFile = path.join(agentsDir, `${agent}.md`);
+    const agentFileCopilot = path.join(agentsDir, `${agent}.agent.md`);
+    if (fs.existsSync(agentFile) || fs.existsSync(agentFileCopilot)) {
+      installed.push(agent);
+    } else {
+      missing.push(agent);
+    }
+  }
+
+  return {
+    agents_installed: installed.length > 0 && missing.length === 0,
+    missing_agents: missing,
+    installed_agents: installed,
+    agents_dir: agentsDir,
+  };
+}
+
+// ─── Model alias resolution ───────────────────────────────────────────────────
+
+const RUNTIME_OVERRIDE_TIERS = new Set(['opus', 'sonnet', 'haiku']);
+const _warnedConfigKeys = new Set();
+
+function _warnUnknownProfileOverrides(parsed, configLabel) {
+  if (!parsed || typeof parsed !== 'object') return;
+
+  const runtime = parsed.runtime;
+  if (runtime && typeof runtime === 'string' && !KNOWN_RUNTIMES.has(runtime)) {
+    const key = `${configLabel}::runtime::${runtime}`;
+    if (!_warnedConfigKeys.has(key)) {
+      _warnedConfigKeys.add(key);
+      try {
+        process.stderr.write(
+          `gsd: warning — config key "runtime" has unknown value "${runtime}". ` +
+          `Known runtimes: ${[...KNOWN_RUNTIMES].sort().join(', ')}. ` +
+          `Resolution will fall back to safe defaults. (#2517)\n`
+        );
+      } catch { /* stderr might be closed in some test harnesses */ }
+    }
+  }
+
+  const overrides = parsed.model_profile_overrides;
+  if (!overrides || typeof overrides !== 'object') return;
+  for (const [overrideRuntime, tierMap] of Object.entries(overrides)) {
+    if (!KNOWN_RUNTIMES.has(overrideRuntime)) {
+      const key = `${configLabel}::override-runtime::${overrideRuntime}`;
+      if (!_warnedConfigKeys.has(key)) {
+        _warnedConfigKeys.add(key);
+        try {
+          process.stderr.write(
+            `gsd: warning — model_profile_overrides.${overrideRuntime}.* uses ` +
+            `unknown runtime "${overrideRuntime}". Known runtimes: ` +
+            `${[...KNOWN_RUNTIMES].sort().join(', ')}. (#2517)\n`
+          );
+        } catch { /* ok */ }
+      }
+    }
+    if (!tierMap || typeof tierMap !== 'object') continue;
+    for (const tierName of Object.keys(tierMap)) {
+      if (!RUNTIME_OVERRIDE_TIERS.has(tierName)) {
+        const key = `${configLabel}::override-tier::${overrideRuntime}.${tierName}`;
+        if (!_warnedConfigKeys.has(key)) {
+          _warnedConfigKeys.add(key);
+          try {
+            process.stderr.write(
+              `gsd: warning — model_profile_overrides.${overrideRuntime}.${tierName} ` +
+              `uses unknown tier "${tierName}". Allowed tiers: opus, sonnet, haiku. (#2517)\n`
+            );
+          } catch { /* ok */ }
+        }
+      }
+    }
+  }
+}
+
+// Internal helper exposed for tests so per-process warning state can be reset
+// between cases that intentionally exercise the warning path repeatedly.
+function _resetRuntimeWarningCacheForTests() {
+  _warnedConfigKeys.clear();
+}
+
+/**
+ * #2517 — Resolve the runtime-aware tier entry for (runtime, tier).
+ *
+ * Single source of truth shared by core.cjs (resolveModelInternal /
+ * resolveReasoningEffortInternal) and bin/install.js (Codex/OpenCode TOML emit
+ * paths). Always merges built-in defaults with user overrides at the field
+ * level so partial overrides keep the unspecified fields:
+ *
+ *   `{ codex: { opus: "gpt-5-pro" } }`           keeps reasoning_effort: 'xhigh'
+ *   `{ codex: { opus: { reasoning_effort: 'low' } } }` keeps model: 'gpt-5.4'
+ *
+ * Without this field-merge, the documented string-shorthand example silently
+ * dropped reasoning_effort and a partial-object override silently dropped the
+ * model — both reported as critical findings in the #2609 review.
+ *
+ * Inputs:
+ *   - runtime: string (e.g. 'codex', 'claude', 'opencode')
+ *   - tier:    'opus' | 'sonnet' | 'haiku'
+ *   - overrides: optional `model_profile_overrides` blob (may be null/undefined)
+ *
+ * Returns `{ model: string, reasoning_effort?: string } | null`.
+ */
+function resolveTierEntry({ runtime, tier, overrides }) {
+  if (!runtime || !tier) return null;
+
+  const builtin = RUNTIME_PROFILE_MAP[runtime]?.[tier] || null;
+  const userRaw = overrides?.[runtime]?.[tier];
+
+  // String shorthand from CONFIGURATION.md examples — `{ codex: { opus: "gpt-5-pro" } }`.
+  // Treat as `{ model: "gpt-5-pro" }` so the field-merge below still preserves
+  // reasoning_effort from the built-in defaults.
+  let userEntry = null;
+  if (userRaw) {
+    userEntry = typeof userRaw === 'string' ? { model: userRaw } : userRaw;
+  }
+
+  if (!builtin && !userEntry) return null;
+  // Field-merge: user fields win, built-in fills the gaps.
+  return { ...(builtin || {}), ...(userEntry || {}) };
+}
+
+/**
+ * Convenience wrapper used by resolveModelInternal / resolveReasoningEffortInternal.
+ * Pulls runtime + overrides out of a loaded config and delegates to resolveTierEntry.
+ */
+function _resolveRuntimeTier(config, tier) {
+  return resolveTierEntry({
+    runtime: config.runtime,
+    tier,
+    overrides: config.model_profile_overrides,
+  });
+}
+
+function resolveModelInternal(cwd, agentType) {
+  const config = loadConfig(cwd);
+
+  // 1. Per-agent override — always respected; highest precedence.
+  // Users who set fully-qualified model IDs (e.g., "openai/gpt-5.4") get exactly that.
+  const override = config.model_overrides?.[agentType];
+  if (override) {
+    return override;
+  }
+
+  // 2. Compute the tier (opus/sonnet/haiku/inherit) for this agent.
+  //
+  // #3023: phase-type slot can override the profile-derived tier.
+  // Precedence: per-agent override (above) > phase-type slot > profile.
+  // Phase-type values are tier aliases (opus/sonnet/haiku/inherit) — same
+  // shape as model_profile output — so the runtime-resolution chain
+  // (step 3), resolve_model_ids handling (step 4), and profile lookup
+  // (step 5) all stay correct without further branching.
+  const profile = String(config.model_profile || 'balanced').toLowerCase();
+  const agentModels = MODEL_PROFILES[agentType];
+  const phaseType = AGENT_TO_PHASE_TYPE[agentType];
+  const phaseTypeTier = (phaseType && config.models && typeof config.models === 'object')
+    ? config.models[phaseType]
+    : undefined;
+  // Only honor phase-type tier if it's one of the recognized aliases.
+  // Anything else falls through to profile lookup so a typo doesn't
+  // silently break tier resolution.
+  const VALID_TIERS = new Set(['opus', 'sonnet', 'haiku', 'inherit']);
+  // Resolve tier: phase-type wins when valid; else profile-derived; else
+  // (when profile === 'inherit') propagate inherit so the later short-
+  // circuit fires. CR Major (#3030): a config like
+  //   { model_profile: 'inherit', models: { execution: 'opus' } }
+  // must honor the phase-type opus, not return 'inherit'. Synthesizing
+  // tier='inherit' only when there's no phase-type override keeps the
+  // original inherit semantics intact while letting a valid phase-type
+  // tier win.
+  const tier = (phaseTypeTier && VALID_TIERS.has(phaseTypeTier))
+    ? phaseTypeTier
+    : (profile === 'inherit'
+      ? 'inherit'
+      : (agentModels ? (agentModels[profile] || agentModels['balanced']) : null));
+
+  // 3. Runtime-aware resolution (#2517) — only when `runtime` is explicitly set
+  // to a non-Claude runtime. `runtime: "claude"` is the implicit default and is
+  // treated as a no-op here so it does not silently override `resolve_model_ids:
+  // "omit"` (review finding #4). Deliberate ordering for non-Claude runtimes:
+  // explicit opt-in beats `resolve_model_ids: "omit"` so users on Codex installs
+  // that auto-set "omit" can still flip on tiered behavior by setting runtime
+  // alone. Gate on tier !== 'inherit' (not profile !== 'inherit') so a
+  // valid phase-type tier flips runtime resolution on even when the
+  // profile is inherit.
+  if (config.runtime && config.runtime !== 'claude' && tier && tier !== 'inherit') {
+    const entry = _resolveRuntimeTier(config, tier);
+    if (entry?.model) return entry.model;
+    // Unknown runtime with no user-supplied overrides — fall through to Claude-safe
+    // default rather than emit an ID the runtime can't accept.
+  }
+
+  // 4. resolve_model_ids: "omit" — return empty string so the runtime uses its
+  // configured default model. For non-Claude runtimes (OpenCode, Codex, etc.) that
+  // don't recognize Claude aliases. Set automatically during install. See #1156.
+  if (config.resolve_model_ids === 'omit') {
+    return '';
+  }
+
+  // 5. Profile lookup (Claude-native default).
+  if (!agentModels) {
+    return profile === 'quality' ? 'opus'
+      : profile === 'budget' ? 'haiku'
+      : profile === 'inherit' ? 'inherit'
+      : 'sonnet';
+  }
+  // Gate on tier (not profile) so a valid phase-type override beats
+  // profile=inherit (#3030 CR Major).
+  if (tier === 'inherit') return 'inherit';
+  // `tier` is guaranteed truthy here: agentModels exists, and MODEL_PROFILES
+  // entries always define `balanced`, so `agentModels[profile] || agentModels.balanced`
+  // resolves to a string. Keep the local for readability — no defensive fallback.
+  const alias = tier;
+
+  // resolve_model_ids: true — map alias to full Claude model ID.
+  // Prevents 404s when the Task tool passes aliases directly to the API.
+  if (config.resolve_model_ids) {
+    return MODEL_ALIAS_MAP[alias] || alias;
+  }
+
+  return alias;
+}
+
+/**
+ * #3024 — Resolve a model for a specific dynamic-routing attempt.
+ *
+ * The orchestrator (workflow agent) tracks the attempt counter. On
+ * the first spawn, it calls with attempt=0. If the orchestrator detects
+ * a soft failure (verification inconclusive, plan-check FLAG, etc.),
+ * it re-spawns with attempt=1, which escalates the agent's tier one
+ * step up. `max_escalations` caps how many escalations are allowed.
+ *
+ * Resolution precedence (highest → lowest):
+ *   1. config.model_overrides[agent]              (full IDs accepted)

@@ -80,3 +80,91 @@ function detectSchemaFiles(files) {
     };
 }
 
+function detectSchemaOrm(ormName) {
+  return ORM_INFO[ormName] || null;
+}
+
+function checkSchemaDrift(changedFiles, executionLog, options = {}) {
+    const { skipCheck = false } = options;
+    const detection = detectSchemaFiles(changedFiles);
+    if (!detection.detected) {
+        return {
+            driftDetected: false,
+            blocking: false,
+            schemaFiles: [],
+            orms: [],
+            unpushedOrms: [],
+            message: '',
+        };
+    }
+    const pushedOrms = new Set();
+    const unpushedOrms = [];
+    for (const orm of detection.orms) {
+        const info = ORM_INFO[orm];
+        if (!info)
+            continue;
+        const hasPushEvidence = info.evidencePatterns.some(p => p.test(executionLog));
+        if (hasPushEvidence) {
+            pushedOrms.add(orm);
+        }
+        else {
+            unpushedOrms.push(orm);
+        }
+    }
+    const driftDetected = unpushedOrms.length > 0;
+    if (!driftDetected) {
+        return {
+            driftDetected: false,
+            blocking: false,
+            schemaFiles: detection.matches,
+            orms: detection.orms,
+            unpushedOrms: [],
+            message: '',
+        };
+    }
+    const pushCommands = unpushedOrms
+        .map(orm => {
+        const info = ORM_INFO[orm];
+        return info ? `  ${orm}: ${info.envHint || info.pushCommand}` : null;
+    })
+        .filter(Boolean)
+        .join('\n');
+    const message = [
+        'Schema drift detected: schema-relevant files changed but no database push was executed.',
+        '',
+        `Schema files changed: ${detection.matches.join(', ')}`,
+        `ORMs requiring push: ${unpushedOrms.join(', ')}`,
+        '',
+        'Required push commands:',
+        pushCommands,
+        '',
+        'Run the appropriate push command, or set GSD_SKIP_SCHEMA_CHECK=true to bypass this gate.',
+    ].join('\n');
+    if (skipCheck) {
+        return {
+            driftDetected: true,
+            blocking: false,
+            skipped: true,
+            schemaFiles: detection.matches,
+            orms: detection.orms,
+            unpushedOrms,
+            message: 'Schema drift detected but check was skipped (GSD_SKIP_SCHEMA_CHECK=true).',
+        };
+    }
+    return {
+        driftDetected: true,
+        blocking: true,
+        schemaFiles: detection.matches,
+        orms: detection.orms,
+        unpushedOrms,
+        message,
+    };
+}
+
+module.exports = {
+  SCHEMA_PATTERNS,
+  ORM_INFO,
+  detectSchemaFiles,
+  detectSchemaOrm,
+  checkSchemaDrift,
+};

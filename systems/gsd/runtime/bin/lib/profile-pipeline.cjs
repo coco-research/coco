@@ -496,3 +496,44 @@ async function cmdProfileSample(overridePath, options, raw) {
 
           projectMessages++;
           sessionUsed = true;
+        }
+        if (sessionUsed) projectSessionsUsed++;
+      } catch {
+        continue;
+      }
+    }
+
+    if (projectMessages > 0) {
+      projectBreakdown.push({
+        project: proj.projectName,
+        messages: projectMessages,
+        sessions: projectSessionsUsed,
+      });
+    }
+  }
+
+  reapStaleTempFiles('gsd-profile-', { dirsOnly: true });
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-profile-'));
+  const outputPath = path.join(tmpDir, 'profile-sample.jsonl');
+  for (const msg of allMessages) {
+    fs.appendFileSync(outputPath, JSON.stringify(msg) + '\n');
+  }
+
+  const result = {
+    output_file: outputPath,
+    projects_sampled: projectBreakdown.length,
+    messages_sampled: allMessages.length,
+    per_project_cap: perProjectCap,
+    message_char_limit: maxChars,
+    skipped_context_dumps: skippedContextDumps,
+    project_breakdown: projectBreakdown,
+  };
+
+  output(result, raw);
+}
+
+module.exports = {
+  cmdScanSessions,
+  cmdExtractMessages,
+  cmdProfileSample,
+};

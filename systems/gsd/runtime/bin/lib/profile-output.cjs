@@ -576,3 +576,353 @@ function cmdWriteProfile(cwd, options, raw) {
     vendor_philosophy: 'Vendor Philosophy',
     frustration_triggers: 'Frustration Triggers',
     learning_style: 'Learning Style',
+  };
+
+  const summaryLines = [];
+  let highCount = 0, mediumCount = 0, lowCount = 0, dimensionsScored = 0;
+
+  for (const dimKey of DIMENSION_KEYS) {
+    const dim = analysis.dimensions[dimKey];
+    if (!dim) continue;
+    const conf = (dim.confidence || '').toUpperCase();
+    if (conf === 'HIGH' || conf === 'MEDIUM' || conf === 'LOW') dimensionsScored++;
+    if (conf === 'HIGH') {
+      highCount++;
+      if (dim.claude_instruction) summaryLines.push(`- **${dimensionLabels[dimKey] || dimKey}:** ${dim.claude_instruction} (HIGH)`);
+    } else if (conf === 'MEDIUM') {
+      mediumCount++;
+      if (dim.claude_instruction) summaryLines.push(`- **${dimensionLabels[dimKey] || dimKey}:** ${dim.claude_instruction} (MEDIUM)`);
+    } else if (conf === 'LOW') {
+      lowCount++;
+    }
+  }
+
+  const summaryInstructions = summaryLines.length > 0
+    ? summaryLines.join('\n')
+    : '- No high or medium confidence dimensions scored yet.';
+
+  template = template.replace(/\{\{generated_at\}\}/g, new Date().toISOString());
+  template = template.replace(/\{\{data_source\}\}/g, analysis.data_source || 'session_analysis');
+  template = template.replace(/\{\{projects_list\}\}/g, (analysis.projects_list || analysis.projects_analyzed || []).join(', '));
+  template = template.replace(/\{\{message_count\}\}/g, String(analysis.message_count || analysis.messages_analyzed || 0));
+  template = template.replace(/\{\{summary_instructions\}\}/g, summaryInstructions);
+  template = template.replace(/\{\{profile_version\}\}/g, analysis.profile_version);
+  template = template.replace(/\{\{projects_count\}\}/g, String((analysis.projects_list || analysis.projects_analyzed || []).length));
+  template = template.replace(/\{\{dimensions_scored\}\}/g, String(dimensionsScored));
+  template = template.replace(/\{\{high_confidence_count\}\}/g, String(highCount));
+  template = template.replace(/\{\{medium_confidence_count\}\}/g, String(mediumCount));
+  template = template.replace(/\{\{low_confidence_count\}\}/g, String(lowCount));
+  template = template.replace(/\{\{sensitive_excluded_summary\}\}/g,
+    redactedCount > 0 ? `${redactedCount} pattern(s) redacted` : 'None detected');
+
+  for (const dimKey of DIMENSION_KEYS) {
+    const dim = analysis.dimensions[dimKey] || {};
+    const rating = dim.rating || 'UNSCORED';
+    const confidence = dim.confidence || 'UNSCORED';
+    const instruction = dim.claude_instruction || 'No strong preference detected. Ask the developer when this dimension is relevant.';
+    const summary = dim.summary || '';
+
+    let evidenceBlock = '';
+    const evidenceArr = dim.evidence_quotes || dim.evidence;
+    if (evidenceArr && Array.isArray(evidenceArr) && evidenceArr.length > 0) {
+      const evidenceLines = evidenceArr.map(ev => {
+        const signal = ev.signal || ev.pattern || '';
+        const quote = ev.quote || ev.example || '';
+        const project = ev.project || 'unknown';
+        return `- **Signal:** ${signal} / **Example:** "${quote}" -- project: ${project}`;
+      });
+      evidenceBlock = evidenceLines.join('\n');
+    } else {
+      evidenceBlock = '- No evidence collected for this dimension.';
+    }
+
+    template = template.replace(new RegExp(`\\{\\{${dimKey}\\.rating\\}\\}`, 'g'), rating);
+    template = template.replace(new RegExp(`\\{\\{${dimKey}\\.confidence\\}\\}`, 'g'), confidence);
+    template = template.replace(new RegExp(`\\{\\{${dimKey}\\.claude_instruction\\}\\}`, 'g'), instruction);
+    template = template.replace(new RegExp(`\\{\\{${dimKey}\\.summary\\}\\}`, 'g'), summary);
+    template = template.replace(new RegExp(`\\{\\{${dimKey}\\.evidence\\}\\}`, 'g'), evidenceBlock);
+  }
+
+  let outputPath = options.output;
+  if (!outputPath) {
+    outputPath = path.join(os.homedir(), '.claude', 'get-shit-done', 'USER-PROFILE.md');
+  } else if (!path.isAbsolute(outputPath)) {
+    outputPath = path.join(cwd, outputPath);
+  }
+
+  platformEnsureDir(path.dirname(outputPath));
+  platformWriteSync(outputPath, template);
+
+  const result = {
+    profile_path: outputPath,
+    dimensions_scored: dimensionsScored,
+    high_confidence: highCount,
+    medium_confidence: mediumCount,
+    low_confidence: lowCount,
+    sensitive_redacted: redactedCount,
+    source: analysis.data_source || 'session_analysis',
+  };
+
+  output(result, raw);
+}
+
+function cmdProfileQuestionnaire(options, raw) {
+  if (!options.answers) {
+    const questionsOutput = {
+      mode: 'interactive',
+      questions: PROFILING_QUESTIONS.map(q => ({
+        dimension: q.dimension,
+        header: q.header,
+        context: q.context,
+        question: q.question,
+        options: q.options.map(o => ({ label: o.label, value: o.value })),
+      })),
+    };
+    output(questionsOutput, raw);
+    return;
+  }
+
+  const answerValues = options.answers.split(',').map(a => a.trim());
+  if (answerValues.length !== PROFILING_QUESTIONS.length) {
+    error(`Expected ${PROFILING_QUESTIONS.length} answers (comma-separated), got ${answerValues.length}`);
+  }
+
+  const analysis = {
+    profile_version: '1.0',
+    analyzed_at: new Date().toISOString(),
+    data_source: 'questionnaire',
+    projects_analyzed: [],
+    messages_analyzed: 0,
+    message_threshold: 'questionnaire',
+    sensitive_excluded: [],
+    dimensions: {},
+  };
+
+  for (let i = 0; i < PROFILING_QUESTIONS.length; i++) {
+    const question = PROFILING_QUESTIONS[i];
+    const answerValue = answerValues[i];
+    const selectedOption = question.options.find(o => o.value === answerValue);
+
+    if (!selectedOption) {
+      error(`Invalid answer "${answerValue}" for ${question.dimension}. Valid values: ${question.options.map(o => o.value).join(', ')}`);
+    }
+
+    const ambiguous = isAmbiguousAnswer(question.dimension, answerValue);
+
+    analysis.dimensions[question.dimension] = {
+      rating: selectedOption.rating,
+      confidence: ambiguous ? 'LOW' : 'MEDIUM',
+      evidence_count: 1,
+      cross_project_consistent: null,
+      evidence: [{
+        signal: 'Self-reported via questionnaire',
+        quote: selectedOption.label,
+        project: 'N/A (questionnaire)',
+      }],
+      summary: `Developer self-reported as ${selectedOption.rating} for ${question.header.toLowerCase()}.`,
+      claude_instruction: generateClaudeInstruction(question.dimension, selectedOption.rating),
+    };
+  }
+
+  output(analysis, raw);
+}
+
+function cmdGenerateDevPreferences(cwd, options, raw) {
+  if (!options.analysis) error('--analysis <path> is required');
+
+  let analysisPath = options.analysis;
+  if (!path.isAbsolute(analysisPath)) analysisPath = path.join(cwd, analysisPath);
+  if (!fs.existsSync(analysisPath)) error(`Analysis file not found: ${analysisPath}`);
+
+  let analysis;
+  const analysisRaw = safeReadFile(analysisPath);
+  try {
+    if (analysisRaw === null) throw new Error(`analysis file not found: ${analysisPath}`);
+    analysis = JSON.parse(analysisRaw);
+  } catch (err) {
+    error(`Failed to parse analysis JSON: ${err.message}`);
+  }
+
+  if (!analysis.dimensions || typeof analysis.dimensions !== 'object') {
+    error('Analysis JSON must contain a "dimensions" object');
+  }
+
+  const devPrefLabels = {
+    communication_style: 'Communication',
+    decision_speed: 'Decision Support',
+    explanation_depth: 'Explanations',
+    debugging_approach: 'Debugging',
+    ux_philosophy: 'UX Approach',
+    vendor_philosophy: 'Library & Tool Choices',
+    frustration_triggers: 'Boundaries',
+    learning_style: 'Learning Support',
+  };
+
+  const templatePath = path.join(__dirname, '..', '..', 'templates', 'dev-preferences.md');
+  if (!fs.existsSync(templatePath)) error(`Template not found: ${templatePath}`);
+  let template = fs.readFileSync(templatePath, 'utf-8');
+
+  const directiveLines = [];
+  const dimensionsIncluded = [];
+
+  for (const dimKey of DIMENSION_KEYS) {
+    const dim = analysis.dimensions[dimKey];
+    if (!dim) continue;
+    const label = devPrefLabels[dimKey] || dimKey;
+    const confidence = dim.confidence || 'UNSCORED';
+    let instruction = dim.claude_instruction;
+    if (!instruction) {
+      const lookup = CLAUDE_INSTRUCTIONS[dimKey];
+      if (lookup && dim.rating && lookup[dim.rating]) {
+        instruction = lookup[dim.rating];
+      } else {
+        instruction = `Adapt to this developer's ${dimKey.replace(/_/g, ' ')} preference.`;
+      }
+    }
+    directiveLines.push(`### ${label}\n${instruction} (${confidence} confidence)\n`);
+    dimensionsIncluded.push(dimKey);
+  }
+
+  const directivesBlock = directiveLines.join('\n').trim();
+  template = template.replace(/\{\{behavioral_directives\}\}/g, directivesBlock);
+  template = template.replace(/\{\{generated_at\}\}/g, new Date().toISOString());
+  template = template.replace(/\{\{data_source\}\}/g, analysis.data_source || 'session_analysis');
+
+  let stackBlock;
+  if (analysis.data_source === 'questionnaire') {
+    stackBlock = `Stack preferences not available (questionnaire-only profile). Run \`${formatGsdSlash('profile-user', resolveRuntime(cwd))} --refresh\` with session data to populate.`;
+  } else if (options.stack) {
+    stackBlock = options.stack;
+  } else {
+    stackBlock = 'Stack preferences will be populated from session analysis.';
+  }
+  template = template.replace(/\{\{stack_preferences\}\}/g, stackBlock);
+
+  // #2973: v1.39.0's skills-only migration removed the legacy
+  // commands/gsd subdirectory in favor of skills/<skill>/SKILL.md under
+  // the runtime config dir. This writer was missed in the migration
+  // (PR #1540 targeted GSD-shipped command files; dev-preferences is a
+  // runtime-generated user artifact). Default now points at the skills/
+  // location so /gsd:profile-user --refresh stops re-creating the legacy
+  // directory. The path is constructed via path.join (not a literal
+  // string) so the cline-install leaked-path lint does not flag it.
+  let outputPath = options.output;
+  if (!outputPath) {
+    let effectiveRuntime = 'claude';
+    try {
+      const config = loadConfig(cwd);
+      effectiveRuntime = process.env.GSD_RUNTIME || config.runtime || 'claude';
+    } catch {
+      effectiveRuntime = process.env.GSD_RUNTIME || 'claude';
+    }
+    const skillDir = getGlobalSkillDir(effectiveRuntime, 'gsd-dev-preferences');
+    if (!skillDir) {
+      error(`Runtime "${effectiveRuntime}" does not use a skills directory; pass --output to choose a path explicitly.`);
+    }
+    outputPath = path.join(skillDir, 'SKILL.md');
+  } else if (!path.isAbsolute(outputPath)) {
+    outputPath = path.join(cwd, outputPath);
+  }
+
+  platformEnsureDir(path.dirname(outputPath));
+  platformWriteSync(outputPath, template);
+
+  const result = {
+    command_path: outputPath,
+    command_name: formatGsdSlash('dev-preferences', resolveRuntime(cwd)),
+    dimensions_included: dimensionsIncluded,
+    source: analysis.data_source || 'session_analysis',
+  };
+
+  output(result, raw);
+}
+
+function cmdGenerateClaudeProfile(cwd, options, raw) {
+  if (!options.analysis) error('--analysis <path> is required');
+
+  let analysisPath = options.analysis;
+  if (!path.isAbsolute(analysisPath)) analysisPath = path.join(cwd, analysisPath);
+  if (!fs.existsSync(analysisPath)) error(`Analysis file not found: ${analysisPath}`);
+
+  let analysis;
+  const analysisRaw = safeReadFile(analysisPath);
+  try {
+    if (analysisRaw === null) throw new Error(`analysis file not found: ${analysisPath}`);
+    analysis = JSON.parse(analysisRaw);
+  } catch (err) {
+    error(`Failed to parse analysis JSON: ${err.message}`);
+  }
+
+  if (!analysis.dimensions || typeof analysis.dimensions !== 'object') {
+    error('Analysis JSON must contain a "dimensions" object');
+  }
+
+  const profileLabels = {
+    communication_style: 'Communication',
+    decision_speed: 'Decisions',
+    explanation_depth: 'Explanations',
+    debugging_approach: 'Debugging',
+    ux_philosophy: 'UX Philosophy',
+    vendor_philosophy: 'Vendor Choices',
+    frustration_triggers: 'Frustrations',
+    learning_style: 'Learning',
+  };
+
+  const dataSource = analysis.data_source || 'session_analysis';
+  const tableRows = [];
+  const directiveLines = [];
+  const dimensionsIncluded = [];
+
+  for (const dimKey of DIMENSION_KEYS) {
+    const dim = analysis.dimensions[dimKey];
+    if (!dim) continue;
+    const label = profileLabels[dimKey] || dimKey;
+    const rating = dim.rating || 'UNSCORED';
+    const confidence = dim.confidence || 'UNSCORED';
+    tableRows.push(`| ${label} | ${rating} | ${confidence} |`);
+    let instruction = dim.claude_instruction;
+    if (!instruction) {
+      const lookup = CLAUDE_INSTRUCTIONS[dimKey];
+      if (lookup && dim.rating && lookup[dim.rating]) {
+        instruction = lookup[dim.rating];
+      } else {
+        instruction = `Adapt to this developer's ${dimKey.replace(/_/g, ' ')} preference.`;
+      }
+    }
+    directiveLines.push(`- **${label}:** ${instruction}`);
+    dimensionsIncluded.push(dimKey);
+  }
+
+  const sectionLines = [
+    '<!-- GSD:profile-start -->',
+    '## Developer Profile',
+    '',
+    `> Generated by GSD from ${dataSource}. Run \`${formatGsdSlash('profile-user', resolveRuntime(cwd))} --refresh\` to update.`,
+    '',
+    '| Dimension | Rating | Confidence |',
+    '|-----------|--------|------------|',
+    ...tableRows,
+    '',
+    '**Directives:**',
+    ...directiveLines,
+    '<!-- GSD:profile-end -->',
+  ];
+
+  const sectionContent = sectionLines.join('\n');
+
+  let targetPath;
+  if (options.global) {
+    targetPath = path.join(os.homedir(), '.claude', 'CLAUDE.md');
+  } else if (options.output) {
+    targetPath = path.isAbsolute(options.output) ? options.output : path.join(cwd, options.output);
+  } else {
+    // Read claude_md_path from config, default to ./CLAUDE.md
+    let configClaudeMdPath = './CLAUDE.md';
+    try {
+      const config = loadConfig(cwd);
+      if (config.claude_md_path) configClaudeMdPath = config.claude_md_path;
+    } catch { /* use default */ }
+    targetPath = path.isAbsolute(configClaudeMdPath) ? configClaudeMdPath : path.join(cwd, configClaudeMdPath);
+  }
+
+  let action;

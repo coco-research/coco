@@ -399,3 +399,353 @@ Update `.planning/ROADMAP.md` — group completed milestone phases:
 | ----------------- | --------- | -------------- | ----------- | ---------- |
 | 1. Foundation     | v1.0      | 2/2            | Complete    | YYYY-MM-DD |
 | 2. Authentication | v1.0      | 2/2            | Complete    | YYYY-MM-DD |
+| 3. Core Features  | v1.0      | 3/3            | Complete    | YYYY-MM-DD |
+| 4. Polish         | v1.0      | 1/1            | Complete    | YYYY-MM-DD |
+| 5. Security Audit | v1.1      | 0/1            | Not started | -          |
+| 6. Hardening      | v1.1      | 0/2            | Not started | -          |
+```
+
+</step>
+
+<step name="archive_milestone">
+
+**Delegate archival to `gsd-sdk query milestone.complete`:**
+
+```bash
+ARCHIVE=$(gsd-sdk query milestone.complete "v[X.Y]" --name "[Milestone Name]")
+```
+
+The CLI handles:
+- Creating `.planning/milestones/` directory
+- Archiving ROADMAP.md to `milestones/v[X.Y]-ROADMAP.md`
+- Archiving REQUIREMENTS.md to `milestones/v[X.Y]-REQUIREMENTS.md` with archive header
+- Moving audit file to milestones if it exists
+- Creating/appending MILESTONES.md entry with accomplishments from SUMMARY.md files
+- Updating STATE.md (status, last activity)
+
+Extract from result: `version`, `date`, `phases`, `plans`, `tasks`, `accomplishments`, `archived`.
+
+Verify: `✅ Milestone archived to .planning/milestones/`
+
+**Phase archival (optional):** After archival completes, ask the user:
+
+
+**Text mode (`workflow.text_mode: true` in config or `--text` flag):** Set `TEXT_MODE=true` if `--text` is present in `$ARGUMENTS` OR `text_mode` from init JSON is `true`. When TEXT_MODE is active, replace every `AskUserQuestion` call with a plain-text numbered list and ask the user to type their choice number. This is required for non-Claude runtimes (OpenAI Codex, Gemini CLI, etc.) where `AskUserQuestion` is not available.
+AskUserQuestion(header="Archive Phases", question="Archive phase directories to milestones/?", options: "Yes — move to milestones/v[X.Y]-phases/" | "Skip — keep phases in place")
+
+If "Yes": move phase directories to the milestone archive:
+```bash
+mkdir -p .planning/milestones/v[X.Y]-phases
+# For each phase directory in .planning/phases/:
+mv .planning/phases/{phase-dir} .planning/milestones/v[X.Y]-phases/
+```
+Verify: `✅ Phase directories archived to .planning/milestones/v[X.Y]-phases/`
+
+If "Skip": Phase directories remain in `.planning/phases/` as raw execution history. Use `/gsd:cleanup` later to archive retroactively.
+
+After archival, the AI still handles:
+- Reorganizing ROADMAP.md with milestone grouping (requires judgment) — overwrite in place after extracting Backlog section
+- Full PROJECT.md evolution review (requires understanding)
+- Safety commit of archive files + updated ROADMAP.md, then `git rm .planning/REQUIREMENTS.md`
+- These are NOT fully delegated because they require AI interpretation of content
+
+</step>
+
+<step name="reorganize_roadmap_and_delete_originals">
+
+After `milestone complete` has archived, reorganize ROADMAP.md with milestone groupings, then commit archives as a safety checkpoint before removing originals.
+
+**Backlog preservation — do this FIRST before rewriting ROADMAP.md:**
+
+Extract the Backlog section from the current ROADMAP.md before making any changes:
+
+```bash
+# Extract lines under ## Backlog through end of file (or next ## section)
+BACKLOG_SECTION=$(awk '/^## Backlog/{found=1} found{print}' .planning/ROADMAP.md)
+```
+
+If `$BACKLOG_SECTION` is empty, there is no Backlog section — skip silently.
+
+**Reorganize ROADMAP.md** — overwrite in place (do NOT delete first) with milestone groupings:
+
+```markdown
+# Roadmap: [Project Name]
+
+## Milestones
+
+- ✅ **v1.0 MVP** — Phases 1-4 (shipped YYYY-MM-DD)
+- 🚧 **v1.1 Security** — Phases 5-6 (in progress)
+
+## Phases
+
+<details>
+<summary>✅ v1.0 MVP (Phases 1-4) — SHIPPED YYYY-MM-DD</summary>
+
+- [x] Phase 1: Foundation (2/2 plans) — completed YYYY-MM-DD
+- [x] Phase 2: Authentication (2/2 plans) — completed YYYY-MM-DD
+
+</details>
+```
+
+**Re-append Backlog section after the rewrite** (only if `$BACKLOG_SECTION` was non-empty):
+
+Append the extracted Backlog content verbatim to the end of the newly written ROADMAP.md. This ensures 999.x backlog items are never silently dropped during milestone reorganization.
+
+**Safety commit — commit archive files BEFORE deleting any originals:**
+
+```bash
+gsd-sdk query commit "chore: archive v[X.Y] milestone files" --files .planning/milestones/v[X.Y]-ROADMAP.md .planning/milestones/v[X.Y]-REQUIREMENTS.md .planning/milestones/v[X.Y]-MILESTONE-AUDIT.md .planning/MILESTONES.md .planning/PROJECT.md .planning/STATE.md .planning/ROADMAP.md
+```
+
+This creates a durable checkpoint in git history. If anything fails after this point, the working tree can be reconstructed from git.
+
+**Remove REQUIREMENTS.md via git rm** (preserves history, stages deletion atomically):
+
+```bash
+git rm .planning/REQUIREMENTS.md
+```
+
+</step>
+
+<step name="write_retrospective">
+
+**Append to living retrospective:**
+
+Check for existing retrospective:
+```bash
+ls .planning/RETROSPECTIVE.md 2>/dev/null || true
+```
+
+**If exists:** Read the file, append new milestone section before the "## Cross-Milestone Trends" section.
+
+**If doesn't exist:** Create from template at `~/.claude/get-shit-done/templates/retrospective.md`.
+
+**Gather retrospective data:**
+
+1. From SUMMARY.md files: Extract key deliverables, one-liners, tech decisions
+2. From VERIFICATION.md files: Extract verification scores, gaps found
+3. From UAT.md files: Extract test results, issues found
+4. From git log: Count commits, calculate timeline
+5. From the milestone work: Reflect on what worked and what didn't
+
+**Write the milestone section:**
+
+```markdown
+## Milestone: v{version} — {name}
+
+**Shipped:** {date}
+**Phases:** {phase_count} | **Plans:** {plan_count}
+
+### What Was Built
+{Extract from SUMMARY.md one-liners}
+
+### What Worked
+{Patterns that led to smooth execution}
+
+### What Was Inefficient
+{Missed opportunities, rework, bottlenecks}
+
+### Patterns Established
+{New conventions discovered during this milestone}
+
+### Key Lessons
+{Specific, actionable takeaways}
+
+### Cost Observations
+- Model mix: {X}% opus, {Y}% sonnet, {Z}% haiku
+- Sessions: {count}
+- Notable: {efficiency observation}
+```
+
+**Update cross-milestone trends:**
+
+If the "## Cross-Milestone Trends" section exists, update the tables with new data from this milestone.
+
+**Commit:**
+```bash
+gsd-sdk query commit "docs: update retrospective for v${VERSION}" --files .planning/RETROSPECTIVE.md
+```
+
+</step>
+
+<step name="update_state">
+
+Most STATE.md updates were handled by `milestone complete`, but verify and update remaining fields:
+
+**Project Reference:**
+
+```markdown
+## Project Reference
+
+See: .planning/PROJECT.md (updated [today])
+
+**Core value:** [Current core value from PROJECT.md]
+**Current focus:** [Next milestone or "Planning next milestone"]
+```
+
+**Accumulated Context:**
+- Clear decisions summary (full log in PROJECT.md)
+- Clear resolved blockers
+- Keep open blockers for next milestone
+
+</step>
+
+<step name="handle_branches">
+
+Check branching strategy and offer merge options.
+
+Use `init milestone-op` for context, or load config directly:
+
+```bash
+INIT=$(gsd-sdk query init.execute-phase "1")
+if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
+```
+
+Extract `branching_strategy`, `phase_branch_template`, `milestone_branch_template`, and `commit_docs` from init JSON.
+
+Detect base branch:
+```bash
+BASE_BRANCH=$(gsd-sdk query config-get git.base_branch 2>/dev/null || echo "")
+if [ -z "$BASE_BRANCH" ] || [ "$BASE_BRANCH" = "null" ]; then
+  BASE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|^refs/remotes/origin/||')
+  BASE_BRANCH="${BASE_BRANCH:-main}"
+fi
+```
+
+**If "none":** Skip to git_tag.
+
+**For "phase" strategy:**
+
+```bash
+BRANCH_PREFIX=$(echo "$PHASE_BRANCH_TEMPLATE" | sed 's/{.*//')
+PHASE_BRANCHES=$(git branch --list "${BRANCH_PREFIX}*" 2>/dev/null | sed 's/^\*//' | tr -d ' ')
+```
+
+**For "milestone" strategy:**
+
+```bash
+BRANCH_PREFIX=$(echo "$MILESTONE_BRANCH_TEMPLATE" | sed 's/{.*//')
+MILESTONE_BRANCH=$(git branch --list "${BRANCH_PREFIX}*" 2>/dev/null | sed 's/^\*//' | tr -d ' ' | head -1)
+```
+
+**If no branches found:** Skip to git_tag.
+
+**If branches exist:**
+
+```
+## Git Branches Detected
+
+Branching strategy: {phase/milestone}
+Branches: {list}
+
+Options:
+1. **Merge to main** — Merge branch(es) to main
+2. **Delete without merging** — Already merged or not needed
+3. **Keep branches** — Leave for manual handling
+```
+
+AskUserQuestion with options: Squash merge (Recommended), Merge with history, Delete without merging, Keep branches.
+
+**Squash merge:**
+
+```bash
+CURRENT_BRANCH=$(git branch --show-current)
+git checkout ${BASE_BRANCH}
+
+if [ "$BRANCHING_STRATEGY" = "phase" ]; then
+  for branch in $PHASE_BRANCHES; do
+    git merge --squash "$branch"
+    # Strip .planning/ from staging if commit_docs is false
+    if [ "$COMMIT_DOCS" = "false" ]; then
+      git reset HEAD .planning/ 2>/dev/null || true
+    fi
+    git commit -m "feat: $branch for v[X.Y]"
+  done
+fi
+
+if [ "$BRANCHING_STRATEGY" = "milestone" ]; then
+  git merge --squash "$MILESTONE_BRANCH"
+  # Strip .planning/ from staging if commit_docs is false
+  if [ "$COMMIT_DOCS" = "false" ]; then
+    git reset HEAD .planning/ 2>/dev/null || true
+  fi
+  git commit -m "feat: $MILESTONE_BRANCH for v[X.Y]"
+fi
+
+git checkout "$CURRENT_BRANCH"
+```
+
+**Merge with history:**
+
+```bash
+CURRENT_BRANCH=$(git branch --show-current)
+git checkout ${BASE_BRANCH}
+
+if [ "$BRANCHING_STRATEGY" = "phase" ]; then
+  for branch in $PHASE_BRANCHES; do
+    git merge --no-ff --no-commit "$branch"
+    # Strip .planning/ from staging if commit_docs is false
+    if [ "$COMMIT_DOCS" = "false" ]; then
+      git reset HEAD .planning/ 2>/dev/null || true
+    fi
+    git commit -m "Merge branch '$branch' for v[X.Y]"
+  done
+fi
+
+if [ "$BRANCHING_STRATEGY" = "milestone" ]; then
+  git merge --no-ff --no-commit "$MILESTONE_BRANCH"
+  # Strip .planning/ from staging if commit_docs is false
+  if [ "$COMMIT_DOCS" = "false" ]; then
+    git reset HEAD .planning/ 2>/dev/null || true
+  fi
+  git commit -m "Merge branch '$MILESTONE_BRANCH' for v[X.Y]"
+fi
+
+git checkout "$CURRENT_BRANCH"
+```
+
+**Delete without merging:**
+
+```bash
+if [ "$BRANCHING_STRATEGY" = "phase" ]; then
+  for branch in $PHASE_BRANCHES; do
+    git branch -d "$branch" 2>/dev/null || git branch -D "$branch"
+  done
+fi
+
+if [ "$BRANCHING_STRATEGY" = "milestone" ]; then
+  git branch -d "$MILESTONE_BRANCH" 2>/dev/null || git branch -D "$MILESTONE_BRANCH"
+fi
+```
+
+**Keep branches:** Report "Branches preserved for manual handling"
+
+</step>
+
+<step name="git_tag">
+
+<config-check>
+Read `git.create_tag` via `gsd-sdk query config-get git.create_tag 2>/dev/null || echo "true"`.
+If the result is `false` → skip this step entirely and proceed to `git_commit_milestone`.
+</config-check>
+
+Create git tag:
+
+```bash
+# Pre-check: skip if tag already exists (prevents silent failure on retry)
+if git rev-parse "v[X.Y]" >/dev/null 2>&1; then echo "Tag v[X.Y] already exists, skipping"; exit 0; fi
+git tag -a v[X.Y] -m "v[X.Y] [Name]
+
+Delivered: [One sentence]
+
+Key accomplishments:
+- [Item 1]
+- [Item 2]
+- [Item 3]
+
+See .planning/MILESTONES.md for full details."
+```
+
+Confirm: "Tagged: v[X.Y]"
+
+Ask: "Push tag to remote? (y/n)"

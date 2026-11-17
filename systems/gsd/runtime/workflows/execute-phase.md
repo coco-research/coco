@@ -653,3 +653,353 @@ increases monotonically across waves. `{status}` is `complete` (success),
 
    ```
        <sequential_execution>
+       You are running as a SEQUENTIAL executor agent on the main working tree.
+       Use normal git commits (with hooks). Do NOT use --no-verify.
+       REQUIRED ORDER: Write SUMMARY.md → commit → only then any narration. No text between Write and commit (truncation risk; #2070 rescue is not primary defense).
+       </sequential_execution>
+   ```
+
+   The sequential mode Agent prompt uses the same structure as worktree mode but with these differences in success_criteria — since there is only one agent writing at a time, there are no shared-file conflicts:
+
+   ```
+       <success_criteria>
+       - [ ] All tasks executed
+       - [ ] Each task committed individually
+       - [ ] SUMMARY.md created in plan directory
+       - [ ] STATE.md updated with position and decisions
+       - [ ] ROADMAP.md updated with plan progress (via `roadmap update-plan-progress`)
+       </success_criteria>
+   ```
+
+   When worktrees are disabled for a plan (per-plan or project-level), that plan's executor runs on the main working tree. If **any** plan in the current wave dropped to sequential mode, execute the affected plan(s) **one at a time** to avoid concurrent writes to the main working tree — plans in the same wave that retained worktree isolation can still run in parallel alongside the sequential ones, but two non-worktree plans in the same wave must serialize. When the project-level `USE_WORKTREES=false`, all plans in the wave serialize regardless of the `PARALLELIZATION` setting.
+
+4. **Wait for all agents in wave to complete.**
+
+   **Plan-complete heartbeat (#2410):** as each executor returns (or is verified
+   via spot-check below), emit one line — `complete` advances `{P}`, `failed`
+   and `checkpoint` do not but still warm the stream:
+
+   ```
+   [checkpoint] phase {PHASE_NUMBER} wave {N}/{M} plan {plan_id} complete ({P}/{Q} plans done)
+   [checkpoint] phase {PHASE_NUMBER} wave {N}/{M} plan {plan_id} failed ({P}/{Q} plans done)
+   [checkpoint] phase {PHASE_NUMBER} wave {N}/{M} plan {plan_id} checkpoint ({P}/{Q} plans done)
+   ```
+
+   **Completion signal fallback (Copilot and runtimes where Agent() may not return):**
+
+   If a spawned agent does not return a completion signal but appears to have finished
+   its work, do NOT block indefinitely. Instead, verify completion via spot-checks:
+
+   ```bash
+   # For each plan in this wave, check if the executor finished:
+   SUMMARY_EXISTS=$(test -f "{phase_dir}/{plan_number}-{plan_padded}-SUMMARY.md" && echo "true" || echo "false")
+   COMMITS_FOUND=$(git log --oneline --all --grep="{phase_number}-{plan_padded}" --since="1 hour ago" | head -1)
+   COMMITS_SINCE_DISPATCH=$(git log "${EXPECTED_BRANCH}" --since="${DISPATCH_TS}" --oneline | head -1)
+   ```
+
+   **If SUMMARY.md exists AND commits are found:** The agent completed successfully —
+   treat as done and proceed to step 5. Log: `"✓ {Plan ID} completed (verified via spot-check — completion signal not received)"`
+
+   **If SUMMARY.md does NOT exist after a reasonable wait:** The agent may still be
+   running or may have failed silently. Check `git log --oneline -5` for recent
+   activity. If commits are still appearing, wait longer. If no activity, report
+   the plan as failed and route to the failure handler in step 6.
+
+   **Configurable stall surveillance (#3212):** Every `${EXECUTOR_STALL_INTERVAL_MINUTES}`
+   minutes while waiting, inspect `git log "${EXPECTED_BRANCH}" --since="${DISPATCH_TS}"`
+   for activity. If no completion signal, no SUMMARY.md, and no expected-branch
+   commits appear for `${EXECUTOR_STALL_THRESHOLD_MINUTES}` minutes, pause and
+   ask for one recovery path: `continue waiting`, `kill and retry`, or
+   `kill and switch to inline execution`.
+
+   **This fallback applies automatically to all runtimes.** Claude Code's Agent() normally
+   returns synchronously, but the fallback ensures resilience if it doesn't.
+
+5. **Post-wave hook validation (parallel mode only):** Hooks run on every executor commit by default (#2924); this post-wave run only fires when `workflow.worktree_skip_hooks=true` opted out of per-commit hooks:
+   ```bash
+   SKIP_HOOKS=$(gsd-sdk query config-get workflow.worktree_skip_hooks 2>/dev/null || echo "false")
+   if [ "$SKIP_HOOKS" = "true" ]; then
+     # Stash uncommitted changes under a named ref so we always pop (bare `git stash` strands them on hook/script failure). #3542: `refs/stash` is shared across worktrees, so this helper runs ONLY in the orchestrator's main checkout after all wave worktrees have been merged + removed; executors are forbidden from running any `git stash` subcommand (see `<destructive_git_prohibition>` in `agents/gsd-executor.md`).
+     STASHED=false
+     if (! git diff --quiet || ! git diff --cached --quiet) && git stash push -u -m "gsd-post-wave-hook-$$" >/dev/null 2>&1; then STASHED=true; fi
+     git hook run pre-commit 2>&1 || echo "⚠ Pre-commit hooks failed — review before continuing"
+     [ "$STASHED" = "true" ] && (git stash pop >/dev/null 2>&1 || echo "⚠ Could not pop gsd-post-wave-hook stash — recover manually")
+   fi
+   ```
+   If hooks fail: report the failure and ask "Fix hook issues now?" or "Continue to next wave?"
+
+5.5. **Worktree cleanup (when `isolation="worktree"` was used):**
+
+   **Standard wave contract:** Each wave's worktrees merge to main via the templated path below before the next wave's worktrees fork. The cleanup loop runs once per wave at the end of the wave lifecycle. Worktrees created in wave N must be fully removed before wave N+1 forks new ones.
+
+   **Cross-wave dependency deviation (supported execution mode):** When the orchestrator legitimately deviates from the standard wave model — for example, a phase with cross-wave plan dependencies that requires custom inter-worktree base-update merges (e.g., `merge: bring 09-01 + 09-02 into 09-03 base`) — the cleanup loop below is NOT automatically re-entered for those custom merges. The deviation path produces correct final history but bypasses this loop, leaving `worktree-agent-*` directories in place. Use the **cleanup-tail snippet** below to remove any residual worktrees after such a deviation.
+
+   When executor agents ran in worktree isolation, their commits land on temporary branches in separate working trees. After the wave completes, merge these changes back and clean up:
+
+   **Manifest source of truth (#3384):** Cleanup consumes the `WAVE_WORKTREE_MANIFEST` created and populated during executor dispatch in step 3. Do not recreate or truncate it here.
+
+   Prefer the bounded helper, which validates branch identity, expected base, deletion
+   diffs, merge result, and worktree removal before deleting the temporary branch.
+   If the helper reports a blocked cleanup, resolve the reported manifest entry and
+   rerun the same command. Do not fall back to broad worktree discovery.
+
+   ```bash
+   [ -n "${WAVE_WORKTREE_MANIFEST:-}" ] && [ -f "$WAVE_WORKTREE_MANIFEST" ] || {
+     echo "BLOCKED: missing WAVE_WORKTREE_MANIFEST; refusing broad worktree cleanup (#3384)." >&2
+     exit 1
+   }
+
+   # Guard: pin cleanup back to the primary worktree and fail on branch drift (#3174).
+   PRIMARY_WT=$(git worktree list --porcelain | awk '/^worktree /{print substr($0,10); exit}')
+   if [ -z "$PRIMARY_WT" ]; then
+     echo "FATAL: could not resolve primary worktree before cleanup" >&2
+     exit 1
+   fi
+   if [ -n "$PRIMARY_WT" ] && [ "$(pwd -P 2>/dev/null)" != "$(cd "$PRIMARY_WT" 2>/dev/null && pwd -P)" ]; then echo "⚠ Orchestrator CWD drifted to $(pwd) — pinning to $PRIMARY_WT before worktree cleanup (#3174)"; cd "$PRIMARY_WT" || { echo "FATAL: cannot cd to primary worktree $PRIMARY_WT" >&2; exit 1; }; fi
+   ORCH_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+   [ -z "${EXPECTED_BRANCH:-}" ] || [ "$ORCH_BRANCH" = "$EXPECTED_BRANCH" ] || { echo "FATAL: orchestrator on '$ORCH_BRANCH' but expected '$EXPECTED_BRANCH' before worktree cleanup — refusing to merge (#3174-class drift)" >&2; exit 1; }
+
+   if command -v gsd-sdk >/dev/null 2>&1; then
+     gsd-sdk query worktree.cleanup-wave --manifest "$WAVE_WORKTREE_MANIFEST" || exit 1
+   else
+     echo "WARN: gsd-sdk unavailable; using manifest-scoped shell fallback (#3384)." >&2
+   WT_PATHS_FILE=$(mktemp "${TMPDIR:-/tmp}/gsd-worktree-paths-XXXXXX")
+   node -e 'const fs=require("fs");const p=process.env.WAVE_WORKTREE_MANIFEST;try{if(!p)throw new Error("WAVE_WORKTREE_MANIFEST is unset");if(!fs.existsSync(p))throw new Error("manifest does not exist");const s=fs.readFileSync(p,"utf8");if(!s.trim())throw new Error("manifest is empty");const j=JSON.parse(s);for(const w of j.worktrees||[])if(w.worktree_path)console.log(w.worktree_path)}catch(e){console.error(`ERROR: cannot read worktree manifest ${p||"(unset)"}: ${e.message}`);process.exit(1)}' > "$WT_PATHS_FILE" || { echo "BLOCKED: cannot read WAVE_WORKTREE_MANIFEST; refusing cleanup (#3384)." >&2; exit 1; }
+   while IFS= read -r WT; do
+     [ -z "$WT" ] && continue
+     WT_BRANCH=$(git -C "$WT" rev-parse --abbrev-ref HEAD 2>/dev/null)
+     if [ -n "$WT_BRANCH" ] && [ "$WT_BRANCH" != "HEAD" ]; then
+       CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+       STATE_BACKUP=$(mktemp)
+       ROADMAP_BACKUP=$(mktemp)
+       [ -f .planning/STATE.md ] && cp .planning/STATE.md "$STATE_BACKUP" || true
+       [ -f .planning/ROADMAP.md ] && cp .planning/ROADMAP.md "$ROADMAP_BACKUP" || true
+       DELETIONS=$(git diff --diff-filter=D --name-only HEAD..."$WT_BRANCH" 2>/dev/null || true)
+       if [ -n "$DELETIONS" ]; then
+         echo "BLOCKED: Worktree branch $WT_BRANCH contains file deletions: $DELETIONS"
+         echo "Review these deletions before merging. If intentional, remove this guard and re-run."
+         rm -f "$STATE_BACKUP" "$ROADMAP_BACKUP"
+         continue
+       fi
+       git merge "$WT_BRANCH" --no-ff --no-edit -m "chore: merge executor worktree ($WT_BRANCH)" 2>&1 || {
+         echo "⚠ Merge conflict from worktree $WT_BRANCH — resolve manually"
+         echo "  STATE.md backup:   $STATE_BACKUP"
+         echo "  ROADMAP.md backup: $ROADMAP_BACKUP"
+         echo "  Restore with: cp \$STATE_BACKUP .planning/STATE.md && cp \$ROADMAP_BACKUP .planning/ROADMAP.md"
+         break
+       }
+       MERGE_DEL_COUNT=$(git diff --diff-filter=D --name-only HEAD~1 HEAD 2>/dev/null | grep -vc '^\.planning/' || true)
+       if [ "$MERGE_DEL_COUNT" -gt 5 ] && [ "${ALLOW_BULK_DELETE:-0}" != "1" ]; then
+         MERGE_DELETIONS=$(git diff --diff-filter=D --name-only HEAD~1 HEAD 2>/dev/null | grep -v '^\.planning/' || true)
+         echo "⚠ BLOCKED: Merge of $WT_BRANCH deleted $MERGE_DEL_COUNT files outside .planning/ — reverting to protect repository integrity (#2384)"
+         echo "$MERGE_DELETIONS"
+         echo "  If these deletions are intentional, re-run with ALLOW_BULK_DELETE=1"
+         git reset --hard HEAD~1 2>/dev/null || true
+         rm -f "$STATE_BACKUP" "$ROADMAP_BACKUP"
+         continue
+       fi
+       if [ -s "$STATE_BACKUP" ]; then
+         cp "$STATE_BACKUP" .planning/STATE.md
+       fi
+       if [ -s "$ROADMAP_BACKUP" ]; then
+         cp "$ROADMAP_BACKUP" .planning/ROADMAP.md
+       fi
+       rm -f "$STATE_BACKUP" "$ROADMAP_BACKUP"
+       # Detect files deleted on main but re-added by worktree merge (#2501).
+       DELETED_FILES=$(git diff --diff-filter=A --name-only HEAD~1 -- .planning/ 2>/dev/null || true)
+       for RESURRECTED in $DELETED_FILES; do
+         WAS_DELETED=$(git log --follow --diff-filter=D --name-only --format="" HEAD~1 -- "$RESURRECTED" 2>/dev/null | grep -c . || true)
+         if [ "${WAS_DELETED:-0}" -gt 0 ]; then
+           git rm -f "$RESURRECTED" 2>/dev/null || true
+         fi
+       done
+       if ! git diff --quiet .planning/STATE.md .planning/ROADMAP.md 2>/dev/null || \
+          [ -n "$DELETED_FILES" ]; then
+         COMMIT_DOCS=$(gsd-sdk query config-get commit_docs 2>/dev/null || echo "true")
+         if [ "$COMMIT_DOCS" != "false" ]; then
+           git add .planning/STATE.md .planning/ROADMAP.md 2>/dev/null || true
+           git commit --amend --no-edit 2>/dev/null || true
+         fi
+       fi
+       # Safety net: rescue uncommitted SUMMARY.md before worktree removal (#2070, #2838).
+       while IFS= read -r SUMMARY; do
+         [ -z "$SUMMARY" ] && continue
+         REL_PATH="${SUMMARY#$WT/}"
+         if [ ! -f "$REL_PATH" ] || ! cmp -s "$SUMMARY" "$REL_PATH"; then
+           mkdir -p "$(dirname "$REL_PATH")"
+           cp "$SUMMARY" "$REL_PATH"
+           echo "⚠ Rescued $REL_PATH from worktree before removal"
+         fi
+       done < <(find "$WT/.planning" -name "*SUMMARY.md" 2>/dev/null)
+       REMOVE_OK=false
+       if git worktree remove "$WT" --force; then
+         REMOVE_OK=true
+       else
+         WT_NAME=$(basename "$WT")
+         if [ -f ".git/worktrees/${WT_NAME}/locked" ]; then
+           echo "⚠ Worktree $WT is locked — attempting to unlock and retry"
+           git worktree unlock "$WT" 2>/dev/null || true
+           if git worktree remove "$WT" --force; then
+             REMOVE_OK=true
+           else
+             echo "⚠ Residual worktree at $WT — manual cleanup required after session exits:"
+             echo "    git worktree unlock \"$WT\" && git worktree remove \"$WT\" --force && git branch -D \"$WT_BRANCH\""
+           fi
+         else
+           echo "⚠ Residual worktree at $WT (remove failed) — investigate manually"
+         fi
+       fi
+       if [ "$REMOVE_OK" = "true" ]; then
+         git branch -D "$WT_BRANCH" 2>/dev/null || true
+       else
+         echo "⚠ Keeping branch $WT_BRANCH because worktree removal failed (#3384)"
+       fi
+     fi
+   done < "$WT_PATHS_FILE"
+   fi
+   ```
+
+   **Cleanup-tail snippet (use after any wave whose merges did not flow through the templated path above):**
+
+   If the orchestrator deviated from the standard wave merge path (e.g., custom inter-worktree base-update merges with `merge: bring …` style messages), run this snippet after the custom merges are complete. It reads only `WAVE_WORKTREE_MANIFEST`; do not discover unrelated `worktree-agent-*` worktrees.
+
+   ```bash
+   # Cleanup-tail: pin orchestrator CWD to primary worktree before cleanup-tail (#3174).
+   PRIMARY_WT=$(git worktree list --porcelain | awk '/^worktree /{print substr($0,10); exit}')
+   if [ -n "$PRIMARY_WT" ] && [ "$(pwd -P 2>/dev/null)" != "$(cd "$PRIMARY_WT" 2>/dev/null && pwd -P)" ]; then echo "⚠ Orchestrator CWD drifted to $(pwd) — pinning to $PRIMARY_WT before cleanup-tail (#3174)"; cd "$PRIMARY_WT" || { echo "FATAL: cannot cd to primary worktree $PRIMARY_WT" >&2; exit 1; }; fi
+   # Cleanup-tail: remove residual agent worktrees after a cross-wave-dependency deviation.
+   # Uses only the current wave manifest to avoid touching unrelated active agents (#3384).
+   WT_PATHS_FILE=$(mktemp "${TMPDIR:-/tmp}/gsd-worktree-paths-XXXXXX")
+   node -e 'const fs=require("fs");const p=process.env.WAVE_WORKTREE_MANIFEST;try{if(!p)throw new Error("WAVE_WORKTREE_MANIFEST is unset");if(!fs.existsSync(p))throw new Error("manifest does not exist");const s=fs.readFileSync(p,"utf8");if(!s.trim())throw new Error("manifest is empty");const j=JSON.parse(s);for(const w of j.worktrees||[])if(w.worktree_path)console.log(w.worktree_path)}catch(e){console.error(`ERROR: cannot read worktree manifest ${p||"(unset)"}: ${e.message}`);process.exit(1)}' > "$WT_PATHS_FILE" || { echo "BLOCKED: cannot read WAVE_WORKTREE_MANIFEST; refusing cleanup (#3384)." >&2; exit 1; }
+   while IFS= read -r WT; do
+     [ -z "$WT" ] && continue
+     WT_BRANCH=$(git -C "$WT" rev-parse --abbrev-ref HEAD 2>/dev/null)
+     [ -z "$WT_BRANCH" ] || [ "$WT_BRANCH" = "HEAD" ] && continue
+     echo "Cleaning up residual worktree: $WT (branch: $WT_BRANCH)"
+     git worktree unlock "$WT" 2>/dev/null || true
+     if ! git worktree remove "$WT" --force; then
+       WT_NAME=$(basename "$WT")
+       if [ -f ".git/worktrees/${WT_NAME}/locked" ]; then
+         echo "⚠ Worktree $WT is locked — unlock failed; manual cleanup required:"
+         echo "    git worktree unlock \"$WT\" && git worktree remove \"$WT\" --force && git branch -D \"$WT_BRANCH\""
+       else
+         echo "⚠ Residual worktree at $WT — remove failed; manual cleanup required"
+       fi
+     else
+       git branch -D "$WT_BRANCH" 2>/dev/null || true
+     fi
+   done < "$WT_PATHS_FILE"
+   git worktree prune
+   ```
+
+   **When to skip step 5.5:**
+
+   **If no plan in this wave used worktree isolation** (project-level `USE_WORKTREES=false` OR every plan in the wave had `USE_WORKTREES_FOR_PLAN=false` — i.e. `WAVE_WORKTREE_PLANS` from step 2.5 is empty): all agents ran on the main working tree — skip this step entirely.
+
+   **If the orchestrator merged via custom messages (cross-wave-dependency deviation):** the templated cleanup loop above was not triggered for those merges. Run the cleanup-tail snippet above instead. After the snippet completes, proceed to step 5.6.
+
+   **If at least one plan used worktrees but others did not:** still run this cleanup — it iterates over actual `git worktree list` output and only merges back the worktrees that were created, leaving sequential plans' commits on the main tree untouched.
+
+   **If no worktrees found at runtime:** Skip silently — agents may have been spawned without worktree isolation, or the orchestrator already cleaned them up.
+
+5.6. **Post-merge build & test gate:**
+
+   After merging all worktrees in a wave (parallel mode), or after the last plan completes
+   (serial mode), run a build and then the project's test suite to catch cross-plan
+   integration issues that individual worktree self-checks cannot detect (e.g., conflicting
+   type definitions, removed exports, import changes, link errors).
+
+   This addresses the Generator self-evaluation blind spot identified in Anthropic's
+   harness engineering research: agents reliably report Self-Check: PASSED even when
+   merging their work creates failures.
+
+   Read and execute `get-shit-done/workflows/execute-phase/steps/post-merge-gate.md`.
+
+5.7. **Post-wave shared artifact update (when at least one plan used worktrees, skip if tests failed):**
+
+   When **any** executor agent in this wave ran with `isolation="worktree"`, that agent skipped STATE.md and ROADMAP.md updates to avoid last-merge-wins overwrites. The orchestrator is the single writer for these files. After worktrees are merged back, update shared artifacts once for every completed plan in the wave (worktree-mode plans **and** sequential plans that ran on the main tree but deferred to the orchestrator for tracking writes).
+
+   **Only update tracking when tests passed (TEST_EXIT=0).**
+   If tests failed or timed out, skip the tracking update — plans should
+   not be marked as complete when integration tests are failing or inconclusive.
+
+   ```bash
+   # Guard: only update tracking if post-merge tests passed
+   # Timeout (124) is treated as inconclusive — do NOT mark plans complete
+   if [ "${TEST_EXIT}" -eq 0 ]; then
+     # Update ROADMAP plan progress for each completed plan in this wave
+     for plan_id in {completed_plan_ids}; do
+       gsd-sdk query roadmap.update-plan-progress "${PHASE_NUMBER}" "${plan_id}" "complete"
+     done
+
+     # Only commit tracking files if they actually changed
+     if ! git diff --quiet .planning/ROADMAP.md .planning/STATE.md 2>/dev/null; then
+       gsd-sdk query commit "docs(phase-${PHASE_NUMBER}): update tracking after wave ${N}" --files .planning/ROADMAP.md .planning/STATE.md
+     fi
+   elif [ "${TEST_EXIT}" -eq 124 ]; then
+     echo "⚠ Skipping tracking update — test suite timed out. Plans remain in-progress. Run tests manually to confirm."
+   else
+     echo "⚠ Skipping tracking update — post-merge tests failed (exit ${TEST_EXIT}). Plans remain in-progress until tests pass."
+   fi
+   ```
+
+   Where `WAVE_PLAN_IDS` is the space-separated list of plan IDs that completed in this wave.
+
+   **If no plan in this wave used worktrees** (project-level `USE_WORKTREES=false` OR `WAVE_WORKTREE_PLANS` is empty): sequential agents already updated STATE.md and ROADMAP.md themselves — skip this step.
+
+5.8. **Handle test gate failures (when `WAVE_FAILURE_COUNT > 0`):**
+
+   ```
+   ## ⚠ Post-Merge Test Failure (cumulative failures: ${WAVE_FAILURE_COUNT})
+
+   Wave {N} worktrees merged successfully, but {M} tests fail after merge.
+   This typically indicates conflicting changes across parallel plans
+   (e.g., type definitions, shared imports, API contracts).
+
+   Failed tests:
+   {first 10 lines of failure output}
+
+   Options:
+   1. Fix now (recommended) — resolve conflicts before next wave
+   2. Continue — failures may compound in subsequent waves
+   ```
+
+   Note: If `WAVE_FAILURE_COUNT > 1`, strongly recommend "Fix now" — compounding
+   failures across multiple waves become exponentially harder to diagnose.
+
+   If "Fix now": diagnose failures (typically import conflicts, missing types,
+   or changed function signatures from parallel plans modifying the same module).
+   Fix, commit as `fix: resolve post-merge conflicts from wave {N}`, re-run tests.
+
+   **Why this matters:** Worktree isolation means each agent's Self-Check passes
+   in isolation. But when merged, add/add conflicts in shared files (models, registries,
+   CLI entry points) can silently drop code. The post-merge gate catches this before
+   the next wave builds on a broken foundation.
+
+6. **Report completion — spot-check claims first:**
+
+   **Wave-close heartbeat (#2410):** after spot-checks finish (pass or fail),
+   before the `## Wave {N} Complete` summary, emit as a literal line:
+
+   ```
+   [checkpoint] phase {PHASE_NUMBER} wave {N}/{M} complete, {P}/{Q} plans done ({wave_success}/{wave_plan_count} ok)
+   ```
+
+
+
+   For each SUMMARY.md:
+   - Verify first 2 files from `key-files.created` exist on disk
+   - Check `git log --oneline --all --grep="{phase}-{plan}"` returns ≥1 commit
+   - Check for `## Self-Check: FAILED` marker
+
+   If ANY spot-check fails: report which plan failed, route to failure handler — ask "Retry plan?" or "Continue with remaining waves?"
+
+   If pass:
+   ```
+   ---
+   ## Wave {N} Complete
+
+   **{Plan ID}: {Plan Name}**
+   {What was built — from SUMMARY.md}
+   {Notable deviations, if any}
+

@@ -192,3 +192,196 @@ For each classified PR, review against its template requirements.
 - [ ] Full checklist completed
 - [ ] Breaking changes section filled
 - **CI check:** All status checks passing?
+
+**Fix PR Review Checklist:**
+- [ ] Uses fix PR template (not default)
+- [ ] Issue linked with `Fixes #NNN`
+- [ ] Linked issue exists and has `confirmed-bug` label
+- [ ] What was broken described
+- [ ] What the fix does described
+- [ ] Root cause explained
+- [ ] Verification method described
+- [ ] Regression test added (or explained why not)
+- [ ] Platforms tested checked
+- [ ] Runtimes tested checked
+- [ ] Full checklist completed
+- [ ] Breaking changes section filled
+- **CI check:** All status checks passing?
+
+**Cross-cutting PR Checks (all types):**
+- [ ] PR title is descriptive (not just "fix" or "update")
+- [ ] One concern per PR (not mixing fix + enhancement)
+- [ ] No unrelated formatting changes visible in diff
+- [ ] `.changeset/*.md` fragment added for user-facing changes (or `no-changelog` label applied)
+- [ ] Not using `--no-verify` or skipping hooks
+
+**Scoring:** Same as issues — completeness percentage per PR.
+</step>
+
+<step name="check_gates">
+Cross-reference issues and PRs to enforce the issue-first rule:
+
+For each open PR:
+1. Extract linked issue number from body
+2. If no linked issue: **GATE VIOLATION** — PR has no issue
+3. If linked issue exists, check its labels:
+   - Feature PR → issue must have `approved-feature`
+   - Enhancement PR → issue must have `approved-enhancement`
+   - Fix PR → issue must have `confirmed-bug`
+4. If label is missing: **GATE VIOLATION** — PR opened before approval
+
+Report gate violations prominently — these are the most important findings because
+the project auto-closes PRs without proper approval gates.
+</step>
+
+<step name="generate_report">
+Produce a structured triage report:
+
+```
+===================================================================
+  GSD INBOX TRIAGE — {repo} — {date}
+===================================================================
+
+SUMMARY
+-------
+Open issues: {count}    Open PRs: {count}
+  Features:    {n}        Feature PRs:      {n}
+  Enhancements:{n}        Enhancement PRs:  {n}
+  Bugs:        {n}        Fix PRs:          {n}
+  Chores:      {n}        Wrong template:   {n}
+  Unclassified:{n}        No linked issue:  {n}
+
+GATE VIOLATIONS (action required)
+---------------------------------
+{For each violation:}
+  PR #{number}: {title}
+    Problem: {description — e.g., "No approved-feature label on linked issue #45"}
+    Action:  {what to do — e.g., "Close PR or approve issue #45 first"}
+
+ISSUES NEEDING ATTENTION
+------------------------
+{For each issue sorted by completeness score, lowest first:}
+  #{number} [{type}] {title}
+    Score: {percentage}% complete
+    Missing: {list of missing required fields}
+    Labels: {current labels} → Suggested: {recommended labels}
+    Age: {days since created}
+
+PRS NEEDING ATTENTION
+---------------------
+{For each PR sorted by completeness score, lowest first:}
+  #{number} [{type}] {title}
+    Score: {percentage}% complete
+    Missing: {list of missing checklist items}
+    CI: {passing/failing/pending}
+    Review: {approved/changes_requested/none}
+    Linked issue: #{issue_number} ({issue_status})
+    Age: {days since created}
+
+READY TO MERGE
+--------------
+{PRs that are 100% complete, CI passing, approved:}
+  #{number} {title} — ready
+
+STALE ITEMS (>30 days, no activity)
+------------------------------------
+{Issues and PRs with no updates in 30+ days}
+
+===================================================================
+```
+
+Write this report to `.planning/INBOX-TRIAGE.md` if a `.planning/` directory exists,
+otherwise print to console only.
+</step>
+
+<step name="auto_actions">
+Only execute if `--label` or `--close-incomplete` flags were set.
+
+**If --label:**
+For each issue/PR where labels are missing or incorrect:
+```bash
+gh issue edit {number} --add-label "{label}"
+```
+Or:
+```bash
+gh pr edit {number} --add-label "{label}"
+```
+
+Label recommendations:
+- Unclassified issues → add `needs-triage`
+- Feature issues without review → add `needs-review`
+- Enhancement issues without review → add `needs-review`
+- Bug reports without triage → add `needs-triage`
+- PRs with gate violations → add `gate-violation`
+
+**If --close-incomplete:**
+For issues scoring below 50% completeness:
+```bash
+gh issue close {number} --comment "Closed by GSD inbox triage: this issue is missing required fields per the issue template. Missing: {list}. Please reopen with a complete submission. See CONTRIBUTING.md for requirements."
+```
+
+For PRs with gate violations:
+```bash
+gh pr close {number} --comment "Closed by GSD inbox triage: this PR does not meet the issue-first requirement. {specific violation}. See CONTRIBUTING.md for the correct process."
+```
+
+Always confirm with the user before closing anything:
+
+**Text mode (`workflow.text_mode: true` in config or `--text` flag):** Set `TEXT_MODE=true` if `--text` is present in `$ARGUMENTS` OR `text_mode` from init JSON is `true`. When TEXT_MODE is active, replace every `AskUserQuestion` call with a plain-text numbered list and ask the user to type their choice number. This is required for non-Claude runtimes (OpenAI Codex, Gemini CLI, etc.) where `AskUserQuestion` is not available.
+
+```
+AskUserQuestion:
+  question: "Found {N} items to close. Review the list above — proceed with closing?"
+  options:
+    - label: "Close all"
+      description: "Close all {N} non-compliant items with explanation comments"
+    - label: "Let me pick"
+      description: "I'll choose which ones to close"
+    - label: "Skip"
+      description: "Don't close anything — report only"
+```
+</step>
+
+<step name="report">
+```
+───────────────────────────────────────────────────────────────
+
+## Inbox Triage Complete
+
+Reviewed: {issue_count} issues, {pr_count} PRs
+Gate violations: {violation_count}
+Ready to merge: {ready_count}
+Needing attention: {attention_count}
+Stale (30+ days): {stale_count}
+{If report saved: "Report saved to .planning/INBOX-TRIAGE.md"}
+
+Next steps:
+- Review gate violations first — these block the contribution pipeline
+- Address incomplete submissions (comment or close)
+- Merge ready PRs
+- Triage unclassified issues
+
+───────────────────────────────────────────────────────────────
+```
+</step>
+
+</process>
+
+<offer_next>
+After triage:
+
+- /gsd:review — Run cross-AI peer review on a specific phase plan
+- /gsd:ship — Create a PR from completed work
+- /gsd:progress — See overall project state
+- /gsd:inbox --label — Re-run with auto-labeling enabled
+</offer_next>
+
+<success_criteria>
+- [ ] All open issues fetched and classified by type
+- [ ] Each issue reviewed against its template requirements
+- [ ] All open PRs fetched and classified by type
+- [ ] Each PR reviewed against its template checklist
+- [ ] Issue-first gate violations identified
+- [ ] Structured report generated with scores and action items
+- [ ] Auto-actions executed only when flagged and user-confirmed
+</success_criteria>

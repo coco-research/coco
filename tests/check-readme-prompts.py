@@ -40,7 +40,7 @@ def top_team(select, prompt, profs):
     return teams[0]["team_key"] if teams else None
 
 
-BREW = "brew install coco-research/coco/coco"  # the tap is a 404 (issue 252)
+BREW = "brew install " + "coco-research/coco/coco"  # the tap is a 404 (issue 252); split so this file does not match itself
 
 
 def brew_hits():

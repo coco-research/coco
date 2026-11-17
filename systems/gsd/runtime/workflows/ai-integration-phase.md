@@ -215,3 +215,80 @@ Display:
 ```
 
 Spawn `gsd-eval-planner` with:
+```markdown
+Read ~/.claude/agents/gsd-eval-planner.md for instructions.
+
+<objective>
+Design evaluation strategy for Phase {phase_number}: {phase_name}
+Write Sections 5, 6, and 7 of AI-SPEC.md
+AI-SPEC.md now contains domain context (Section 1b) — use it as your rubric starting point.
+</objective>
+
+<files_to_read>
+{ai_spec_path}
+{context_path if exists}
+{requirements_path if exists}
+</files_to_read>
+
+<input>
+system_type: {system_type}
+framework: {primary_framework}
+model_provider: {model_provider}
+phase_name: {phase_name}
+phase_goal: {phase_goal}
+ai_spec_path: {ai_spec_path}
+</input>
+```
+
+## 10. Validate AI-SPEC Completeness
+
+Read the completed AI-SPEC.md. Check that:
+- Section 2 has a framework name (not placeholder)
+- Section 1b has at least one domain rubric ingredient (Good/Bad/Stakes)
+- Section 3 has a non-empty code block (entry point pattern)
+- Section 4b has a Pydantic example
+- Section 5 has at least one row in the dimensions table
+- Section 6 has at least one guardrail or explicit "N/A for internal tool" note
+- Checklist section at end has 3+ items checked
+
+**If validation fails:** Display specific missing sections. Ask user if they want to re-run the specific step or continue anyway.
+
+## 11. Commit
+
+**If `commit_docs` is true:**
+```bash
+git add "${AI_SPEC_FILE}"
+git commit -m "docs({phase_slug}): generate AI-SPEC.md — {primary_framework} + domain context + eval strategy"
+```
+
+## 12. Display Completion
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► AI-SPEC COMPLETE — PHASE {N}: {name}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+◆ Framework: {primary_framework}
+◆ System Type: {system_type}
+◆ Domain: {domain_vertical from Section 1b}
+◆ Eval Dimensions: {eval_concerns}
+◆ Tracing Default: Arize Phoenix (or detected existing tool)
+◆ Output: {ai_spec_path}
+
+Next step:
+  /gsd:plan-phase {N}   — planner will consume AI-SPEC.md
+```
+
+</process>
+
+<success_criteria>
+- [ ] Framework selected with rationale (Section 2)
+- [ ] AI-SPEC.md created from template
+- [ ] Framework docs + AI best practices researched (Sections 3, 4, 4b populated)
+- [ ] Domain context + expert rubric ingredients researched (Section 1b populated)
+- [ ] Eval strategy grounded in domain context (Sections 5-7 populated)
+- [ ] Arize Phoenix (or detected tool) set as tracing default in Section 7
+- [ ] AI-SPEC.md validated (Sections 1b, 2, 3, 4b, 5, 6 all non-empty)
+- [ ] Committed if commit_docs enabled
+- [ ] Next step surfaced to user
+</success_criteria>

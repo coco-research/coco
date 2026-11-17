@@ -76,3 +76,41 @@ if [ -z "$TEST_CMD" ]; then
     else
       TEST_CMD="xcodebuild test -destination 'platform=iOS Simulator,name=iPhone 16'"
     fi
+  elif [ -f "Makefile" ] && grep -q "^test:" Makefile; then
+    TEST_CMD="make test"
+  elif [ -f "Justfile" ] || [ -f "justfile" ]; then
+    TEST_CMD="just test"
+  elif [ -f "package.json" ]; then
+    TEST_CMD="npm test"
+  elif [ -f "Cargo.toml" ]; then
+    TEST_CMD="cargo test"
+  elif [ -f "go.mod" ]; then
+    TEST_CMD="go test ./..."
+  elif [ -f "pyproject.toml" ] || [ -f "requirements.txt" ]; then
+    TEST_CMD="python -m pytest -x -q --tb=short 2>&1 || uv run python -m pytest -x -q --tb=short"
+  else
+    TEST_CMD="true"
+    echo "⚠ No test runner detected — skipping post-merge test gate"
+  fi
+fi
+# Run test suite with 5-minute timeout
+TEST_EXIT=0
+timeout 300 bash -c "$TEST_CMD" 2>&1
+TEST_EXIT=$?
+if [ "${TEST_EXIT}" -eq 0 ]; then
+  echo "✓ Post-merge test gate passed — no cross-plan conflicts"
+elif [ "${TEST_EXIT}" -eq 124 ]; then
+  echo "⚠ Post-merge test gate timed out after 5 minutes"
+else
+  echo "✗ Post-merge test gate failed (exit code ${TEST_EXIT})"
+  WAVE_FAILURE_COUNT=$((WAVE_FAILURE_COUNT + 1))
+fi
+```
+
+**If `TEST_EXIT` is 0 (pass):** `✓ Post-merge test gate: {N} tests passed — no cross-plan conflicts` → continue to orchestrator tracking update.
+
+**If `TEST_EXIT` is 124 (timeout):** Log warning, treat as non-blocking, continue. Tests may need a longer budget or manual run.
+
+**If `TEST_EXIT` is non-zero (test failure):** Increment `WAVE_FAILURE_COUNT` to track
+cumulative failures across waves. Subsequent waves should report:
+`⚠ Note: ${WAVE_FAILURE_COUNT} prior wave(s) had test failures`

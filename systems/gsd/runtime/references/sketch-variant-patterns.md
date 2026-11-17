@@ -53,3 +53,29 @@ When comparing small elements (button styles, card layouts, icon treatments), re
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;padding:24px;">
   <div>
     <h3>A: Rounded</h3>
+    <!-- variant content -->
+  </div>
+  <div>
+    <h3>B: Sharp</h3>
+    <!-- variant content -->
+  </div>
+  <div>
+    <h3>C: Pill</h3>
+    <!-- variant content -->
+  </div>
+</div>
+```
+
+## Variant Count
+
+- **First round (dramatic):** 2-3 meaningfully different approaches
+- **Refinement rounds:** 2-3 subtle variations within the chosen direction
+- **Never more than 4** — more than that overwhelms. If there are 5+ options, narrow before showing.
+
+## Synthesis Variants
+
+When the user cherry-picks elements across variants, create a new variant tab labeled descriptively:
+
+```html
+<button class="variant-tab" onclick="showVariant('synth1')">Synthesis: A's layout + C's palette</button>
+```

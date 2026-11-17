@@ -123,3 +123,99 @@ a) Restate the story to the user:
 > "Your story: «${USER_STORY}»
 >
 > This story has [signal description, e.g., 'two compound capabilities joined by and']. Splitting it into multiple phases will produce a cleaner Walking Skeleton and reduce the risk of mid-phase scope creep.
+>
+> Want to walk through SPIDR splitting?"
+
+Use `AskUserQuestion` with options [Yes, walk through SPIDR / No, proceed with the story as-is].
+
+If "No": skip SPIDR, go to step 5.
+
+If "Yes": continue to (b).
+
+b) Ask which SPIDR axis fits best:
+
+> "Which axis best fits how to split this story?"
+
+Use `AskUserQuestion` with the five options from `spidr-splitting.md` (Spike / Paths / Interfaces / Data / Rules). Each option includes its targeted question as the description so the user can pick by understanding what each axis means.
+
+c) Walk through the chosen axis with **one** targeted question (not all five). For example, if the user picked "Paths":
+
+> "Does this feature have a happy path and one or more error/edge paths?"
+
+Free-text response. Workflow parses to identify the split.
+
+d) Produce a split proposal. Example:
+
+> "Proposed split (Paths axis):
+> - **Phase ${PHASE} (this one):** Happy path — ${HAPPY_STORY}
+> - **Phase ${PHASE+1} (new):** Edge case — ${EDGE_STORY}
+>
+> Accept this split?"
+
+Use `AskUserQuestion` [Accept / Modify / Reject].
+
+- **Accept**: `USER_STORY` becomes the first split's story (`${HAPPY_STORY}` in the example). Surface the remaining splits as a list of `/gsd add-phase` invocations the user can run after this command completes — do NOT auto-create the new phases (preserve user control over numbering).
+- **Modify**: re-prompt the splits one more time, then accept or reject.
+- **Reject**: revert `USER_STORY` to the original, proceed without splitting.
+
+## 5. Update ROADMAP.md
+
+Read `ROADMAP.md`. Find the section for `Phase ${PHASE}`. Apply two edits:
+
+**Edit 1 — Update Goal line.**
+
+Find: `**Goal:** ${OLD_GOAL_TEXT}`
+Replace with: `**Goal:** ${USER_STORY}`
+
+**Edit 2 — Insert Mode line.**
+
+If `**Mode:**` already exists in the section (replacing or re-running), update it to `**Mode:** mvp`.
+If `**Mode:**` does not exist, insert `**Mode:** mvp` on the line immediately after `**Goal:**`.
+
+Show the user a unified diff (lines being changed) and ask:
+
+> "Apply these changes to ROADMAP.md?"
+
+Use `AskUserQuestion` [Apply / Cancel]. On Cancel, exit without writing.
+
+On Apply, write the updated `ROADMAP.md` atomically (read-edit-write).
+
+## 6. Verify the write
+
+```bash
+NEW_MODE=$(gsd-sdk query roadmap.get-phase "${PHASE}" --pick mode)
+NEW_GOAL=$(gsd-sdk query roadmap.get-phase "${PHASE}" --pick goal)
+```
+
+Assert:
+- `NEW_MODE` equals `mvp`
+- `NEW_GOAL` equals the assembled user story
+
+If either assertion fails, surface the discrepancy to the user and exit. Do not proceed to plan-phase delegation with a half-applied write.
+
+## 7. Delegate to /gsd plan-phase
+
+Invoke `/gsd plan-phase ${PHASE}` (no flags). Phase 1's MVP_MODE resolution chain (CLI flag → roadmap mode → config → false) will detect the new `**Mode:** mvp` line and run plan-phase in vertical-slice mode automatically.
+
+The Walking Skeleton gate (also from Phase 1) will fire automatically if `${PHASE} == "01"` and there are zero prior phase summaries.
+
+## 8. Surface deferred phase splits (if any)
+
+If SPIDR produced a split in step 4, append a final user-facing message:
+
+> "**SPIDR split deferred phases.**
+>
+> Your original story was split. The first slice is now planned via plan-phase.
+> To create the remaining slice(s) as new phases, run:
+>
+> - `/gsd add-phase` — for the next slice: «${SPLIT_2_STORY}»
+> - `/gsd add-phase` — for the next slice: «${SPLIT_3_STORY}»
+>
+> Each will be added to the end of the current milestone. You can then run
+> `/gsd mvp-phase <new-phase-number>` on each to plan them as MVP slices."
+
+## 9. Exit
+
+Workflow ends. The phase is now in MVP mode with a planned PLAN.md, optionally with deferred follow-up phases surfaced for the user.
+
+</process>

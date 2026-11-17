@@ -88,7 +88,7 @@ emit_skill() {
   local skill=$1
   local name desc
   name=$(basename "$(dirname "$skill")")
-  desc=$(awk -F': ' '/^description:/ {sub(/^description: */,""); gsub(/^"|"$/,""); print; exit}' "$skill")
+  desc=$(python3 "$REPO_ROOT/scripts/frontmatter-description.py" "$skill")
   echo "- **$name** — $desc"
 }
 
@@ -101,7 +101,7 @@ emit_team_front_door() {
   local name desc
   name=$(sed -n 's/^name: *//p' "$skill" | head -1 | tr -d '"')
   [[ -n "$name" ]] || name=$(basename "$(dirname "$skill")")
-  desc=$(awk -F': ' '/^description:/ {sub(/^description: */,""); gsub(/^"|"$/,""); print; exit}' "$skill")
+  desc=$(python3 "$REPO_ROOT/scripts/frontmatter-description.py" "$skill")
   echo "- **$name** — $desc"
 }
 
@@ -218,7 +218,7 @@ emit_agents_from_dir() {
     local name desc
     name=$(basename "$agent" .md)
     [[ "$name" == "README" || "$name" == "INDEX" || "$name" == "PROMPT-DEFENSE" ]] && continue
-    desc=$(awk -F': ' '/^description:/ {sub(/^description: */,""); gsub(/^"|"$/,""); print; exit}' "$agent")
+    desc=$(python3 "$REPO_ROOT/scripts/frontmatter-description.py" "$agent")
     if [[ -n "$desc" ]]; then
       echo "- **$name** — $desc"
     else

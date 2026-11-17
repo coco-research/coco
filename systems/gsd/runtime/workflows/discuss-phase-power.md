@@ -209,3 +209,83 @@ Refreshed. Updated state:
   {phase_dir}/{padded_phase}-QUESTIONS.html updated.
 
 Answer more questions, then say "refresh" again, or say "finalize" when done.
+```
+
+---
+
+**"finalize"** (or "done", "generate context", "write context"):
+
+Proceed to the **finalize** step.
+
+---
+
+**"explain Q-{N}"** (or "more info on Q-{N}", "elaborate Q-{N}"):
+
+1. Find the question by ID in the JSON
+2. Provide a detailed explanation: why this decision matters, how it affects the downstream plan, what additional context from the codebase is relevant
+3. Return to wait mode
+
+---
+
+**"exit power mode"** (or "switch to interactive"):
+
+1. Read all currently answered questions from JSON
+2. Load answers into the internal accumulator as if they were answered interactively
+3. Continue with standard `discuss_areas` step from discuss-phase.md for any unanswered questions
+4. Generate CONTEXT.md as normal
+
+---
+
+**Any other message:**
+Respond helpfully, then remind the user of available commands:
+```
+(Power mode active — say "refresh", "finalize", "explain Q-N", or "exit power mode")
+```
+</step>
+
+<step name="finalize">
+Process all answered questions from the JSON file and generate CONTEXT.md.
+
+1. Read `{phase_dir}/{padded_phase}-QUESTIONS.json`
+2. Filter to questions where `answer` is not null/empty
+3. Group decisions by section
+4. For each answered question, format as a decision entry:
+   - Decision: the selected option label (or custom text if free-form answer)
+   - Rationale: the option description, plus `chat_more` content if present
+   - Status: "Decided" if fully answered, "Needs clarification" if only chat_more with no option selected
+
+5. Write CONTEXT.md using the standard context template format:
+   - `<decisions>` section with all answered questions grouped by section
+   - `<deferred_ideas>` section for unanswered questions (carry forward for future discussion)
+   - `<specifics>` section for any chat_more content that adds nuance
+   - `<code_context>` section with reusable assets found during analysis
+   - `<canonical_refs>` section (MANDATORY — paths to relevant specs/docs)
+
+6. If fewer than 50% of questions were answered, warn the user:
+```
+Warning: Only {answered}/{total} questions answered ({pct}%).
+CONTEXT.md generated with available decisions. Unanswered questions listed as deferred.
+Consider running /gsd:discuss-phase {N} again to refine before planning.
+```
+
+7. Print completion message:
+```
+CONTEXT.md written: {phase_dir}/{padded_phase}-CONTEXT.md
+
+  Decisions captured: {answered}
+  Deferred:          {remaining}
+
+Next step: /gsd:plan-phase {N}
+```
+</step>
+
+<success_criteria>
+- Questions generated into well-structured JSON covering all identified gray areas
+- HTML companion file is self-contained and usable without a server
+- Stats bar accurately reflects answered/remaining counts after each refresh
+- Answered questions highlighted green in HTML
+- CONTEXT.md generated in the same format as standard discuss-phase output
+- Unanswered questions preserved as deferred items (not silently dropped)
+- `canonical_refs` section always present in CONTEXT.md (MANDATORY)
+- User knows how to refresh, finalize, explain, or exit power mode
+</success_criteria>

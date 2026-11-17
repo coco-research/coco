@@ -44,3 +44,66 @@ function findInNodeModules(cwd) {
   return null;
 }
 
+function resolveFallowBinary({ cwd, envPath = process.env.PATH || '' }) {
+  return findInNodeModules(cwd) || findInPath(envPath) || null;
+}
+
+function requireFallowBinary({ cwd, envPath = process.env.PATH || '' }) {
+  const binary = resolveFallowBinary({ cwd, envPath });
+  if (binary) return binary;
+  throw new Error(
+    'Fallow is enabled but no binary was found. Please install fallow via `npm install -D fallow` or `cargo install fallow`.',
+  );
+}
+
+function normalizeFallowReport(report) {
+  const unused = Array.isArray(report?.unusedExports) ? report.unusedExports : [];
+  const duplicates = Array.isArray(report?.duplicates) ? report.duplicates : [];
+  const circular = Array.isArray(report?.circularDependencies) ? report.circularDependencies : [];
+
+  const findings = [];
+
+  for (const item of unused) {
+    findings.push({
+      type: 'unused_export',
+      message: `Unused export ${item.symbol || '<unknown>'}`,
+      file: item.file || '',
+      line: item.line ?? null,
+    });
+  }
+
+  for (const item of duplicates) {
+    findings.push({
+      type: 'duplicate_block',
+      message: `Duplicate block (${Math.round((item.similarity || 0) * 100)}% similarity)`,
+      file: item.left?.file || '',
+      line: item.left?.start ?? null,
+      related_file: item.right?.file || '',
+    });
+  }
+
+  for (const item of circular) {
+    findings.push({
+      type: 'circular_dependency',
+      message: `Circular dependency: ${(item.cycle || []).join(' -> ')}`,
+      file: Array.isArray(item.cycle) && item.cycle.length > 0 ? item.cycle[0] : '',
+      line: null,
+    });
+  }
+
+  return {
+    summary: {
+      unused_exports: unused.length,
+      duplicates: duplicates.length,
+      circular_dependencies: circular.length,
+      total: findings.length,
+    },
+    findings,
+  };
+}
+
+module.exports = {
+  normalizeFallowReport,
+  requireFallowBinary,
+  resolveFallowBinary,
+};

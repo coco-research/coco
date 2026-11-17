@@ -285,3 +285,105 @@ function parseMustHavesBlock(content, blockName) {
         if (kvMatch) {
           const val = kvMatch[2];
           // Try to parse as number
+          current[kvMatch[1]] = /^\d+$/.test(val) ? parseInt(val, 10) : val;
+        }
+      }
+    }
+  }
+  if (current) items.push(current);
+
+  // Warn when must_haves block exists but parsed as empty -- likely YAML formatting issue.
+  // This is a critical diagnostic: empty must_haves causes verification to silently degrade
+  // to Option C (LLM-derived truths) instead of checking documented contracts.
+  if (items.length === 0 && blockLines.length > 0) {
+    const nonEmptyLines = blockLines.filter(l => l.trim() !== '').length;
+    if (nonEmptyLines > 0) {
+      process.stderr.write(
+        `[gsd-tools] WARNING: must_haves.${blockName} block has ${nonEmptyLines} content lines but parsed 0 items. ` +
+        `Possible YAML formatting issue — verification will fall back to LLM-derived truths.\n`
+      );
+    }
+  }
+
+  return items;
+}
+
+// ─── Frontmatter CRUD commands ────────────────────────────────────────────────
+
+const FRONTMATTER_SCHEMAS = {
+  plan: { required: ['phase', 'plan', 'type', 'wave', 'depends_on', 'files_modified', 'autonomous', 'must_haves'] },
+  summary: { required: ['phase', 'plan', 'subsystem', 'tags', 'duration', 'completed'] },
+  verification: { required: ['phase', 'verified', 'status', 'score'] },
+};
+
+function cmdFrontmatterGet(cwd, filePath, field, raw) {
+  if (!filePath) { error('file path required'); }
+  // Path traversal guard: reject null bytes
+  if (filePath.includes('\0')) { error('file path contains null bytes'); }
+  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(cwd, filePath);
+  const content = safeReadFile(fullPath);
+  if (!content) { output({ error: 'File not found', path: filePath }, raw); return; }
+  const fm = extractFrontmatter(content);
+  if (field) {
+    const value = fm[field];
+    if (value === undefined) { output({ error: 'Field not found', field }, raw); return; }
+    output({ [field]: value }, raw, JSON.stringify(value));
+  } else {
+    output(fm, raw);
+  }
+}
+
+function cmdFrontmatterSet(cwd, filePath, field, value, raw) {
+  if (!filePath || !field || value === undefined) { error('file, field, and value required'); }
+  // Path traversal guard: reject null bytes
+  if (filePath.includes('\0')) { error('file path contains null bytes'); }
+  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(cwd, filePath);
+  if (!fs.existsSync(fullPath)) { output({ error: 'File not found', path: filePath }, raw); return; }
+  const content = fs.readFileSync(fullPath, 'utf-8');
+  const fm = extractFrontmatter(content);
+  let parsedValue;
+  try { parsedValue = JSON.parse(value); } catch { parsedValue = value; }
+  fm[field] = parsedValue;
+  const newContent = spliceFrontmatter(content, fm);
+  platformWriteSync(fullPath, newContent);
+  output({ updated: true, field, value: parsedValue }, raw, 'true');
+}
+
+function cmdFrontmatterMerge(cwd, filePath, data, raw) {
+  if (!filePath || !data) { error('file and data required'); }
+  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(cwd, filePath);
+  if (!fs.existsSync(fullPath)) { output({ error: 'File not found', path: filePath }, raw); return; }
+  const content = fs.readFileSync(fullPath, 'utf-8');
+  const fm = extractFrontmatter(content);
+  let mergeData;
+  try { mergeData = JSON.parse(data); } catch { error('Invalid JSON for --data'); return; }
+  Object.assign(fm, mergeData);
+  const newContent = spliceFrontmatter(content, fm);
+  platformWriteSync(fullPath, newContent);
+  output({ merged: true, fields: Object.keys(mergeData) }, raw, 'true');
+}
+
+function cmdFrontmatterValidate(cwd, filePath, schemaName, raw) {
+  if (!filePath || !schemaName) { error('file and schema required'); }
+  const schema = FRONTMATTER_SCHEMAS[schemaName];
+  if (!schema) { error(`Unknown schema: ${schemaName}. Available: ${Object.keys(FRONTMATTER_SCHEMAS).join(', ')}`); }
+  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(cwd, filePath);
+  const content = safeReadFile(fullPath);
+  if (!content) { output({ error: 'File not found', path: filePath }, raw); return; }
+  const fm = extractFrontmatter(content);
+  const missing = schema.required.filter(f => fm[f] === undefined);
+  const present = schema.required.filter(f => fm[f] !== undefined);
+  output({ valid: missing.length === 0, missing, present, schema: schemaName }, raw, missing.length === 0 ? 'valid' : 'invalid');
+}
+
+module.exports = {
+  extractFrontmatter,
+  reconstructFrontmatter,
+  spliceFrontmatter,
+  parseMustHavesBlock,
+  FRONTMATTER_SCHEMAS,
+  cmdFrontmatterGet,
+  cmdFrontmatterSet,
+  cmdFrontmatterMerge,
+  cmdFrontmatterValidate,
+};

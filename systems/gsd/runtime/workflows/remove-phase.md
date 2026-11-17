@@ -102,3 +102,54 @@ Extract from result: `removed`, `directory_deleted`, `renamed_directories`, `ren
 <step name="commit">
 Stage and commit the removal:
 
+```bash
+gsd-sdk query commit "chore: remove phase {target} ({original-phase-name})" --files .planning/
+```
+
+The commit message preserves the historical record of what was removed.
+</step>
+
+<step name="completion">
+Present completion summary:
+
+```
+Phase {target} ({original-name}) removed.
+
+Changes:
+- Deleted: .planning/phases/{target}-{slug}/
+- Renumbered: {N} directories and {M} files
+- Updated: ROADMAP.md, STATE.md
+- Committed: chore: remove phase {target} ({original-name})
+
+---
+
+## What's Next
+
+Would you like to:
+- `/gsd:progress` — see updated roadmap status
+- Continue with current phase
+- Review roadmap
+
+---
+```
+</step>
+
+</process>
+
+<anti_patterns>
+
+- Don't remove completed phases (have SUMMARY.md files) without --force
+- Don't remove current or past phases
+- Don't manually renumber — use `gsd-sdk query phase.remove` which handles all renumbering
+- Don't add "removed phase" notes to STATE.md — git commit is the record
+- Don't modify completed phase directories
+</anti_patterns>
+
+<success_criteria>
+Phase removal is complete when:
+
+- [ ] Target phase validated as future/unstarted
+- [ ] `gsd-sdk query phase.remove` executed successfully
+- [ ] Changes committed with descriptive message
+- [ ] User informed of changes
+</success_criteria>

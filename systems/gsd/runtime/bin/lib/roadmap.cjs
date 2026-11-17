@@ -617,3 +617,5 @@ module.exports = {
   cmdRoadmapGetPhase,
   cmdRoadmapAnalyze,
   cmdRoadmapUpdatePlanProgress,
+  cmdRoadmapAnnotateDependencies,
+};

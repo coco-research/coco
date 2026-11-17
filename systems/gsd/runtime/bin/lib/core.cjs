@@ -1364,3 +1364,353 @@ function resolveModelInternal(cwd, agentType) {
  *
  * Resolution precedence (highest → lowest):
  *   1. config.model_overrides[agent]              (full IDs accepted)
+ *   2. dynamic_routing.tier_models[escalated_tier] (when enabled)
+ *   3. models[phase_type] / model_profile          (existing chain via
+ *                                                    resolveModelInternal)
+ *
+ * When dynamic_routing is null/disabled, this function is identical
+ * to resolveModelInternal — orchestrators can call it unconditionally
+ * without breaking back-compat.
+ *
+ * @param {string} cwd - Project directory.
+ * @param {string} agentType - Agent name (e.g. 'gsd-verifier').
+ * @param {number} [attempt=0] - 0 for first spawn; 1+ for escalation.
+ *                               Capped internally at max_escalations.
+ * @returns {string} Model alias (opus/sonnet/haiku) or full ID.
+ */
+function resolveModelForTier(cwd, agentType, attempt) {
+  const config = loadConfig(cwd);
+  const attemptN = Number.isInteger(attempt) && attempt > 0 ? attempt : 0;
+
+  // Per-agent override always wins — same as resolveModelInternal step 1.
+  // User-supplied full IDs bypass the entire tier mechanism.
+  const override = config.model_overrides?.[agentType];
+  if (override) return override;
+
+  const dr = config.dynamic_routing;
+  // Disabled / missing / non-object → fall back to the existing resolver.
+  if (!dr || typeof dr !== 'object' || dr.enabled !== true) {
+    return resolveModelInternal(cwd, agentType);
+  }
+
+  const tierModels = dr.tier_models;
+  if (!tierModels || typeof tierModels !== 'object') {
+    // tier_models missing — can't dynamic-route; fall back.
+    return resolveModelInternal(cwd, agentType);
+  }
+
+  const defaultTier = AGENT_DEFAULT_TIERS[agentType];
+  if (!defaultTier || !VALID_AGENT_TIERS.has(defaultTier)) {
+    // Unmapped agent — no default tier; fall back so we don't silently
+    // pick the wrong model.
+    return resolveModelInternal(cwd, agentType);
+  }
+
+  // Cap effective escalation at max_escalations (default 1). Beyond
+  // the cap, the resolver returns the model for the cap level so the
+  // orchestrator can log "max escalations reached" without burning
+  // further budget.
+  //
+  // CR Major (#3031): `escalate_on_failure: false` is the kill-switch
+  // for escalation — when false, every attempt resolves to the default
+  // tier regardless of the attempt counter. Without this guard, an
+  // orchestrator that blindly bumps the counter on retry would silently
+  // escalate even though the user opted out.
+  const maxEscalations = Number.isInteger(dr.max_escalations) && dr.max_escalations >= 0
+    ? dr.max_escalations
+    : 1;
+  const escalationEnabled = dr.escalate_on_failure !== false;
+  const effectiveAttempt = escalationEnabled
+    ? Math.min(attemptN, maxEscalations)
+    : 0;
+
+  // Walk the escalation chain N times from the default tier.
+  let tier = defaultTier;
+  for (let i = 0; i < effectiveAttempt; i += 1) {
+    const next = nextTier(tier);
+    if (!next || next === tier) break; // already at top
+    tier = next;
+  }
+
+  const alias = tierModels[tier];
+  if (typeof alias !== 'string' || alias.length === 0) {
+    // Misconfigured tier_models — missing slot. Fall back rather
+    // than emit an empty model id.
+    return resolveModelInternal(cwd, agentType);
+  }
+  return alias;
+}
+
+/**
+ * #2517 — Resolve runtime-specific reasoning_effort for an agent.
+ * Returns null unless:
+ *   - `runtime` is explicitly set in config,
+ *   - the runtime supports reasoning_effort (currently: codex),
+ *   - profile is not 'inherit',
+ *   - the resolved tier entry has a `reasoning_effort` value.
+ *
+ * Never returns a value for Claude — keeps reasoning_effort out of Claude spawn paths.
+ */
+function resolveReasoningEffortInternal(cwd, agentType) {
+  const config = loadConfig(cwd);
+  if (!config.runtime) return null;
+  // Strict allowlist: reasoning_effort only propagates for runtimes whose
+  // install path actually accepts it. Adding a new runtime here is the only
+  // way to enable effort propagation — overrides cannot bypass the gate.
+  // Without this, a typo in `runtime` (e.g. `"codx"`) plus a user override
+  // for that typo would leak `xhigh` into a Claude or unknown install
+  // (review finding #3).
+  if (!RUNTIMES_WITH_REASONING_EFFORT.has(config.runtime)) return null;
+  // Per-agent override means user supplied a fully-qualified ID; reasoning_effort
+  // for that case must be set via per-agent mechanism, not tier inference.
+  if (config.model_overrides?.[agentType]) return null;
+
+  const profile = String(config.model_profile || 'balanced').toLowerCase();
+  const agentModels = MODEL_PROFILES[agentType];
+  if (!agentModels) return null;
+
+  // #3023 (CR Major): mirror the phase-type tier lookup from
+  // resolveModelInternal. Without this, `model` and `reasoning_effort`
+  // derive from different tier sources on Codex when models.<phase_type>
+  // overrides the profile.
+  //
+  // #3030 CR follow-up: do NOT short-circuit on profile === 'inherit'
+  // before reading the phase-type tier. A config like
+  //   { model_profile: 'inherit', models: { execution: 'opus' } }
+  // must produce the opus runtime effort, not null. Compute tier from
+  // phase-type first; only fall back to profile when there's no valid
+  // phase-type override; only return null when the resolved tier is
+  // 'inherit' or unknown.
+  const phaseType = AGENT_TO_PHASE_TYPE[agentType];
+  const phaseTypeTier = (phaseType && config.models && typeof config.models === 'object')
+    ? config.models[phaseType]
+    : undefined;
+  // Explicit phase-type 'inherit' is the user opting out of tier-based
+  // effort for this phase — return null instead of falling through to
+  // profile (which would silently emit the profile's effort and
+  // contradict the user's choice).
+  if (phaseTypeTier === 'inherit') return null;
+  const VALID_TIERS = new Set(['opus', 'sonnet', 'haiku']);
+  const tier = (phaseTypeTier && VALID_TIERS.has(phaseTypeTier))
+    ? phaseTypeTier
+    : (profile === 'inherit'
+      ? 'inherit'
+      : (agentModels[profile] || agentModels['balanced']));
+  // 'inherit' (from profile fallback) yields no runtime effort.
+  if (!tier || tier === 'inherit') return null;
+
+  const entry = _resolveRuntimeTier(config, tier);
+  return entry?.reasoning_effort || null;
+}
+
+// ─── Summary body helpers ─────────────────────────────────────────────────
+
+/**
+ * Extract a one-liner from the summary body when it's not in frontmatter.
+ * The summary template defines one-liner as a bold markdown line after the heading:
+ *   # Phase X: Name Summary
+ *   **[substantive one-liner text]**
+ */
+function extractOneLinerFromBody(content) {
+  if (!content) return null;
+  // Normalize EOLs so matching works for LF and CRLF files.
+  const normalized = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  // Strip frontmatter first
+  const body = normalized.replace(/^---\n[\s\S]*?\n---\n*/, '');
+  // Find the first **...** span on a line after a # heading.
+  // Two supported template forms:
+  //   1) Labeled:  **One-liner:** Real prose here.   (bug #2660 — new template)
+  //   2) Bare:     **Real prose here.**              (legacy template)
+  // For (1), the first bold span ends in a colon and the prose that follows
+  // on the same line is the one-liner. For (2), the bold span itself is the
+  // one-liner.
+  const match = body.match(/^#[^\n]*\n+\*\*([^*\n]+)\*\*([^\n]*)/m);
+  if (!match) return null;
+  const boldInner = match[1].trim();
+  const afterBold = match[2];
+  // Labeled form: bold span is a "Label:" prefix — capture prose after it.
+  if (/:\s*$/.test(boldInner)) {
+    const prose = afterBold.trim();
+    return prose.length > 0 ? prose : null;
+  }
+  // Bare form: the bold content itself is the one-liner.
+  return boldInner.length > 0 ? boldInner : null;
+}
+
+// ─── Misc utilities ───────────────────────────────────────────────────────────
+
+function pathExistsInternal(cwd, targetPath) {
+  const fullPath = path.isAbsolute(targetPath) ? targetPath : path.join(cwd, targetPath);
+  try {
+    fs.statSync(fullPath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Detect whether `cwd` sits inside a git worktree, and if so, return the
+ * absolute path of the worktree root.
+ *
+ * Bug #3491: the previous shallow `pathExistsInternal(cwd, '.git')` check
+ * only saw a `.git` entry directly in cwd, so subdirectories of an existing
+ * repo reported `has_git: false` and the new-project workflow then ran
+ * `git init` — creating a nested `.git` inside the outer repo's worktree.
+ *
+ * Mirrors `git rev-parse --is-inside-work-tree` semantics. Uses the existing
+ * `execGit` seam so behaviour is consistent with the rest of the toolchain
+ * (non-interactive env, 10s timeout, mockable in tests).
+ *
+ * Returns: { inside: boolean, worktreeRoot: string | null }
+ *   - inside=true  → cwd is somewhere inside a git worktree
+ *   - inside=false → cwd is not inside any git worktree (or git is unavailable)
+ *
+ * Failure modes (git not installed, command times out, non-zero exit) all
+ * collapse to `{ inside: false, worktreeRoot: null }` — the conservative
+ * default that preserves pre-fix behaviour for environments without git.
+ */
+function gitWorktreeInfoInternal(cwd) {
+  try {
+    const insideResult = execGit(['rev-parse', '--is-inside-work-tree'], { cwd, timeout: 5000 });
+    if (insideResult.exitCode !== 0) {
+      return { inside: false, worktreeRoot: null };
+    }
+    const insideStdout = String(insideResult.stdout || '').trim();
+    if (insideStdout !== 'true') {
+      return { inside: false, worktreeRoot: null };
+    }
+    const rootResult = execGit(['rev-parse', '--show-toplevel'], { cwd, timeout: 5000 });
+    if (rootResult.exitCode !== 0) {
+      return { inside: true, worktreeRoot: null };
+    }
+    const root = String(rootResult.stdout || '').trim();
+    return { inside: true, worktreeRoot: root || null };
+  } catch {
+    return { inside: false, worktreeRoot: null };
+  }
+}
+
+function generateSlugInternal(text) {
+  if (!text) return null;
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 60);
+}
+
+function getMilestoneInfo(cwd) {
+  try {
+    const roadmap = platformReadSync(path.join(planningDir(cwd), 'ROADMAP.md'));
+    if (roadmap === null) throw new Error('missing');
+
+    // 0. Prefer STATE.md milestone: frontmatter as the authoritative source.
+    // This prevents falling through to a regex that may match an old heading
+    // when the active milestone's 🚧 marker is inside a <summary> tag without
+    // **bold** formatting (bug #2409).
+    let stateVersion = null;
+    if (cwd) {
+      try {
+        const statePath = path.join(planningDir(cwd), 'STATE.md');
+        const stateRaw = platformReadSync(statePath);
+        if (stateRaw !== null) {
+          const m = stateRaw.match(/^milestone:\s*(.+)/m);
+          if (m) stateVersion = m[1].trim();
+        }
+      } catch { /* intentionally empty */ }
+    }
+
+    if (stateVersion) {
+      // Look up the name for this version in ROADMAP.md
+      const escapedVer = escapeRegex(stateVersion);
+      // Match heading-format: ## Roadmap v2.9: Name  or  ## v2.9 Name
+      const headingMatch = roadmap.match(
+        new RegExp(`##[^\\n]*${escapedVer}[:\\s]+([^\\n(]+)`, 'i')
+      );
+      if (headingMatch) {
+        // If the heading line contains ✅ the milestone is already shipped.
+        // Fall through to normal detection so the NEW active milestone is returned
+        // instead of the stale shipped one still recorded in STATE.md.
+        if (!headingMatch[0].includes('✅')) {
+          return { version: stateVersion, name: headingMatch[1].trim() };
+        }
+        // Shipped milestone — do not early-return; fall through to normal detection below.
+      } else {
+        // Match list-format: 🚧 **v2.9 Name** or 🚧 v2.9 Name
+        const listMatch = roadmap.match(
+          new RegExp(`🚧\\s*\\*?\\*?${escapedVer}\\s+([^*\\n]+)`, 'i')
+        );
+        if (listMatch) {
+          return { version: stateVersion, name: listMatch[1].trim() };
+        }
+        // Version found in STATE.md but no name match in ROADMAP — return bare version
+        return { version: stateVersion, name: 'milestone' };
+      }
+    }
+
+    // First: check for list-format roadmaps using 🚧 (in-progress) marker
+    // e.g. "- 🚧 **v2.1 Belgium** — Phases 24-28 (in progress)"
+    // e.g. "- 🚧 **v1.2.1 Tech Debt** — Phases 1-8 (in progress)"
+    const inProgressMatch = roadmap.match(/🚧\s*\*\*v(\d+(?:\.\d+)+)\s+([^*]+)\*\*/);
+    if (inProgressMatch) {
+      return {
+        version: 'v' + inProgressMatch[1],
+        name: inProgressMatch[2].trim(),
+      };
+    }
+
+    // Second: heading-format roadmaps — strip shipped milestones.
+    // <details> blocks are stripped by stripShippedMilestones; heading-format ✅ markers
+    // are excluded by the negative lookahead below so a stale STATE.md version (or any
+    // shipped ✅ heading) never wins over the first non-shipped milestone heading.
+    const cleaned = stripShippedMilestones(roadmap);
+    // Negative lookahead skips headings that contain ✅ (shipped milestone marker).
+    // Supports 2+ segment versions: v1.2, v1.2.1, v2.0.1, etc.
+    const headingMatch = cleaned.match(/## (?!.*✅).*v(\d+(?:\.\d+)+)[:\s]+([^\n(]+)/);
+    if (headingMatch) {
+      return {
+        version: 'v' + headingMatch[1],
+        name: headingMatch[2].trim(),
+      };
+    }
+    // Fallback: try bare version match (greedy — capture longest version string)
+    const versionMatch = cleaned.match(/v(\d+(?:\.\d+)+)/);
+    return {
+      version: versionMatch ? versionMatch[0] : 'v1.0',
+      name: 'milestone',
+    };
+  } catch {
+    return { version: 'v1.0', name: 'milestone' };
+  }
+}
+
+/**
+ * Returns a filter function that checks whether a phase directory belongs
+ * to the current milestone based on ROADMAP.md phase headings.
+ * If no ROADMAP exists or no phases are listed, returns a pass-all filter.
+ */
+function getMilestonePhaseFilter(cwd, versionOverride) {
+  const milestonePhaseNums = new Set();
+  let missingExplicitVersion = false;
+  try {
+    const roadmapPath = path.join(planningDir(cwd), 'ROADMAP.md');
+    const roadmapContent = platformReadSync(roadmapPath);
+    if (roadmapContent === null) throw new Error('missing');
+    let roadmap = extractCurrentMilestone(roadmapContent, cwd);
+
+    if (versionOverride) {
+      const escapedVersion = escapeRegex(versionOverride);
+      const sectionPattern = new RegExp(`(^#{1,3}\\s+.*${escapedVersion}[^\\n]*)`, 'mi');
+      const sectionMatch = roadmapContent.match(sectionPattern);
+      if (!sectionMatch) {
+        // Only treat this as an error case when the roadmap is milestone-versioned.
+        // Older/flat roadmap formats without vX.Y milestone headings should keep
+        // legacy pass-through behavior for milestone.complete.
+        const hasVersionedMilestones = /^#{1,3}\s+.*v\d+\.\d+/mi.test(roadmapContent);
+        if (hasVersionedMilestones) {
+          roadmap = '';
+          missingExplicitVersion = true;
+        }
+      } else {
+        const sectionStart = sectionMatch.index;
+        const headingLevel = sectionMatch[1].match(/^(#{1,3})\s/)[1].length;
+        const restContent = roadmapContent.slice(sectionStart + sectionMatch[0].length);
+        const nextMilestonePattern = new RegExp(`^#{1,${headingLevel}}\\s+(?!Phase\\s+\\S)(?:.*v\\d+\\.\\d+|✅|📋|🚧)`, 'i');
+

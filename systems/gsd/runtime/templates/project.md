@@ -153,3 +153,34 @@ For existing codebases:
 
 2. **Infer Validated requirements** from existing code:
    - What does the codebase actually do?
+   - What patterns are established?
+   - What's clearly working and relied upon?
+
+3. **Gather Active requirements** from user:
+   - Present inferred current state
+   - Ask what they want to build next
+
+4. **Initialize:**
+   - Validated = inferred from existing code
+   - Active = user's goals for this work
+   - Out of Scope = boundaries user specifies
+   - Context = includes current codebase state
+
+</brownfield>
+
+<state_reference>
+
+STATE.md references PROJECT.md:
+
+```markdown
+## Project Reference
+
+See: .planning/PROJECT.md (updated [date])
+
+**Core value:** [One-liner from Core Value section]
+**Current focus:** [Current phase name]
+```
+
+This ensures Claude reads current PROJECT.md context.
+
+</state_reference>

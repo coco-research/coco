@@ -111,6 +111,11 @@ Install flags (passed to install.sh):
                                         windsurf | zed
   --systems <list>                      gsd | brain | cognee | hyperframes | m0 |
                                         superintelligence   (comma-separated)
+  --packs <list>                        core | gsd | brain | cognee | hyperframes |
+                                        si | m0 | reverse-skill (skips picker)
+  --all                                 install core + all packs (skips picker)
+  --yes, -y                             accept default packs with no prompt
+  --uninstall --packs <list>            print removal list and uninstall pack(s)
   --dry-run                             preview, no writes
 
 Examples:
@@ -551,7 +556,30 @@ function copiedRulesRemain(destDir, srcDir) {
   return false;
 }
 
+function hasPacksFlag(argv) {
+  return argv.some((a) => a === '--packs' || a.startsWith('--packs='));
+}
+
+function cmdUninstallPacks(argv) {
+  const pass = ['--uninstall'];
+  let dirArg = null;
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '--uninstall') continue;
+    if (a === '--packs' || a === '--adapter' || a === '--systems') {
+      pass.push(a, ...(i + 1 < argv.length ? [argv[++i]] : []));
+    } else if (a.startsWith('-')) pass.push(a);
+    else if (!dirArg) dirArg = a;
+  }
+  const repo = dirArg ? path.resolve(dirArg)
+    : (fs.existsSync(path.join(DEFAULT_DIR, 'install.sh')) ? DEFAULT_DIR : path.resolve(__dirname, '..'));
+  const installScript = path.join(repo, 'install.sh');
+  if (!fs.existsSync(installScript)) { console.error(`Error: ${installScript} not found.`); process.exit(1); }
+  run('bash', [installScript, ...pass]);
+}
+
 function cmdUninstall(argv) {
+  if (hasPacksFlag(argv)) return cmdUninstallPacks(argv);
   const force = argv.includes('--force');
   const dirArg = argv.find((a) => !a.startsWith('--'));
   const dir = path.resolve(dirArg || DEFAULT_DIR);
@@ -636,6 +664,10 @@ function main() {
       cmdVersion();
       break;
     case 'install':
+      if (rest.includes('--uninstall')) {
+        cmdUninstallPacks(rest);
+        break;
+      }
       cmdInstall(rest);
       checkForUpdate(false);
       break;
@@ -654,6 +686,10 @@ function main() {
       if (!sub.startsWith('-')) {
         console.error(`Error: unknown command '${sub}'. Run with --help to see the commands.`);
         process.exit(2);
+      }
+      if (argv.includes('--uninstall')) {
+        cmdUninstallPacks(argv);
+        break;
       }
       cmdInstall(argv);
       checkForUpdate(false);

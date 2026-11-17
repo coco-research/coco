@@ -173,3 +173,67 @@ function createHub({ mode, sdkLoader, cjsRegistry, manifest }) {
     if (!result || !result.ok) {
       const message = (result && result.errorDetails && result.errorDetails.message)
         ? result.errorDetails.message
+        : `${family}${subcommand ? ' ' + subcommand : ''} failed (${result && result.errorKind})`;
+      return {
+        ok: false,
+        errorKind: ERROR_KINDS.SdkDispatchFailed,
+        message,
+        details: result || {},
+      };
+    }
+
+    return { ok: true, data: result.data };
+  }
+
+  function _dispatchCjs({ family, subcommand, args, cwd, raw }) {
+    if (!_cjsRegistry) {
+      return {
+        ok: false,
+        errorKind: ERROR_KINDS.UnknownCommand,
+        message: `No CJS registry provided for family: ${family}`,
+      };
+    }
+
+    const familyHandlers = _cjsRegistry[family];
+    if (!familyHandlers) {
+      return {
+        ok: false,
+        errorKind: ERROR_KINDS.UnknownCommand,
+        message: `Unknown command family: ${family}`,
+      };
+    }
+
+    const handler = subcommand ? familyHandlers[subcommand] : familyHandlers[''];
+    if (typeof handler !== 'function') {
+      return {
+        ok: false,
+        errorKind: ERROR_KINDS.UnknownCommand,
+        message: `Unknown subcommand: ${family} ${subcommand}`,
+      };
+    }
+
+    // Invoke the handler. It must return a HubResult or throw.
+    // If it throws, the outer try/catch in dispatch() catches it.
+    const result = handler({ family, subcommand, args, cwd, raw });
+
+    // If the handler returned a well-formed HubResult, pass it through.
+    if (result && typeof result === 'object' && 'ok' in result) {
+      return result;
+    }
+
+    // If the handler returned nothing (undefined), treat as success with no data.
+    if (result === undefined || result === null) {
+      return { ok: true, data: null };
+    }
+
+    // Any other return value is treated as the data payload.
+    return { ok: true, data: result };
+  }
+
+  return { dispatch };
+}
+
+module.exports = {
+  createHub,
+  ERROR_KINDS,
+};

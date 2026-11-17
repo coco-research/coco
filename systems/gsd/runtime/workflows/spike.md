@@ -238,3 +238,215 @@ Before starting each spike (not just the first), re-read `.planning/spikes/MANIF
 ## Build Each Spike Sequentially
 
 **Depth over speed.** The goal is genuine understanding, not a quick verdict. Never declare VALIDATED after a single happy-path test. Follow surprising findings. Test edge cases. Document the investigation trail, not just the conclusion.
+
+**Comparison spikes** use shared number with letter suffix: `NNN-a-name` / `NNN-b-name`. Build back-to-back, then head-to-head comparison.
+
+### For Each Spike:
+
+**a.** Create `.planning/spikes/NNN-descriptive-name/`
+
+**b.** Default to giving the user something they can experience. The bias should be toward building a simple UI or interactive demo, not toward stdout that only Claude reads. The user wants to *feel* the spike working, not just be told it works.
+
+**The default is: build something the user can interact with.** This could be:
+- A simple HTML page that shows the result visually
+- A web UI with a button that triggers the action and shows the response
+- A page that displays data flowing through a pipeline
+- A minimal interface where the user can try different inputs and see outputs
+
+**Only fall back to stdout/CLI verification when the spike is genuinely about a fact, not a feeling:**
+- Pure data transformation where the answer is "yes it parses correctly"
+- Binary yes/no questions (does this API authenticate? does this library exist?)
+- Benchmark numbers (how fast is X? how much memory does Y use?)
+
+When in doubt, build the UI. It takes a few extra minutes but produces a spike the user can actually demo and feel confident about.
+
+**If the spike needs runtime observability,** build a forensic log layer:
+1. Event log array with ISO timestamps and category tags
+2. Export mechanism (server: GET endpoint, CLI: JSON file, browser: Export button)
+3. Log summary (event counts, duration, errors, metadata)
+4. Analysis helpers if volume warrants it
+
+**c.** Build the code. Start with simplest version, then deepen.
+
+**d.** Iterate when findings warrant it:
+- **Surprising surface?** Write a follow-up test that isolates and explores it.
+- **Answer feels shallow?** Probe edge cases — large inputs, concurrent requests, malformed data, network failures.
+- **Assumption wrong?** Adjust. Note the pivot in the README.
+
+Multiple files per spike are expected for complex questions (e.g., `test-basic.js`, `test-edge-cases.js`, `benchmark.js`).
+
+**e.** Write `README.md` with YAML frontmatter:
+
+```markdown
+---
+spike: NNN
+name: descriptive-name
+type: standard
+validates: "Given [precondition], when [action], then [expected outcome]"
+verdict: PENDING
+related: []
+tags: [tag1, tag2]
+---
+
+# Spike NNN: Descriptive Name
+
+## What This Validates
+[Given/When/Then]
+
+## Research
+[Docs checked, approach comparison table, chosen approach, gotchas. Omit if no external deps.]
+
+## How to Run
+[Command(s)]
+
+## What to Expect
+[Concrete observable outcomes]
+
+## Observability
+[If forensic log layer exists. Omit otherwise.]
+
+## Investigation Trail
+[Updated as spike progresses. Document each iteration: what tried, what revealed, what tried next.]
+
+## Results
+[Verdict, evidence, surprises, log analysis findings.]
+```
+
+**f.** Auto-link related spikes silently.
+
+**g.** Run and verify:
+- Self-verifiable: run, iterate if findings warrant deeper investigation, update verdict
+- Needs human judgment: present checkpoint box:
+
+╔══════════════════════════════════════════════════════════════╗
+║  CHECKPOINT: Verification Required                           ║
+╚══════════════════════════════════════════════════════════════╝
+
+**Spike {NNN}: {name}**
+**How to run:** {command}
+**What to expect:** {concrete outcomes}
+
+──────────────────────────────────────────────────────────────
+→ Does this match what you expected? Describe what you see.
+──────────────────────────────────────────────────────────────
+
+**h.** Update `.planning/spikes/MANIFEST.md` with the spike's row.
+
+**i.** Commit (if `COMMIT_DOCS` is true):
+```bash
+gsd-sdk query commit "docs(spike-NNN): [VERDICT] — [key finding]" --files .planning/spikes/NNN-descriptive-name/ .planning/spikes/MANIFEST.md
+```
+
+**j.** Report:
+```
+◆ Spike NNN: {name}
+  Verdict: {VALIDATED ✓ / INVALIDATED ✗ / PARTIAL ⚠}
+  Key findings: {not just verdict — investigation trail, surprises, edge cases explored}
+  Impact: {effect on remaining spikes}
+```
+
+Do not rush to a verdict. A spike that says "VALIDATED — it works" with no nuance is almost always incomplete.
+
+**k.** If core assumption invalidated:
+
+╔══════════════════════════════════════════════════════════════╗
+║  CHECKPOINT: Decision Required                               ║
+╚══════════════════════════════════════════════════════════════╝
+
+Core assumption invalidated by Spike {NNN}.
+{what was invalidated and why}
+
+──────────────────────────────────────────────────────────────
+→ Continue with remaining spikes / Pivot approach / Abandon
+──────────────────────────────────────────────────────────────
+</step>
+
+<step name="update_conventions">
+## Update Conventions
+
+After all spikes in this session are built, update `.planning/spikes/CONVENTIONS.md` with patterns that emerged or solidified.
+
+```markdown
+# Spike Conventions
+
+Patterns and stack choices established across spike sessions. New spikes follow these unless the question requires otherwise.
+
+## Stack
+[What we use for frontend, backend, scripts, and why]
+
+## Structure
+[Common file layouts, port assignments, naming patterns]
+
+## Patterns
+[Recurring approaches: how we handle auth, how we style, how we serve]
+
+## Tools & Libraries
+[Preferred packages with versions that worked, and any to avoid]
+```
+
+Only include patterns that repeated across 2+ spikes or were explicitly chosen by the user. If `CONVENTIONS.md` already exists, update sections with new patterns from this session.
+
+Commit (if `COMMIT_DOCS` is true):
+```bash
+gsd-sdk query commit "docs(spikes): update conventions" --files .planning/spikes/CONVENTIONS.md
+```
+</step>
+
+<step name="report">
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► SPIKE COMPLETE ✓
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+## Verdicts
+
+| # | Name | Type | Verdict |
+|---|------|------|---------|
+| 001 | {name} | standard | ✓ VALIDATED |
+| 002a | {name} | comparison | ✓ WINNER |
+
+## Key Discoveries
+{surprises, gotchas, investigation trail highlights}
+
+## Feasibility Assessment
+{overall viability}
+
+## Signal for the Build
+{what to use, avoid, watch out for}
+```
+
+───────────────────────────────────────────────────────────────
+
+## ▶ Next Up
+
+**Package findings** — wrap spike knowledge into an implementation blueprint
+
+`/gsd:spike --wrap-up`
+
+───────────────────────────────────────────────────────────────
+
+**Also available:**
+- `/gsd:spike` — spike more ideas (or run with no argument for frontier mode)
+- `/gsd:plan-phase` — start planning the real implementation
+- `/gsd:explore` — continue exploring the idea
+
+───────────────────────────────────────────────────────────────
+</step>
+
+</process>
+
+<success_criteria>
+- [ ] `.planning/spikes/` created (auto-creates if needed, no project init required)
+- [ ] Prior spikes and findings skills consulted before building
+- [ ] Conventions followed (or deviation documented)
+- [ ] Research grounded each spike in current docs before coding
+- [ ] Depth over speed — edge cases tested, surprising findings followed, investigation trail documented
+- [ ] Comparison spikes built back-to-back with head-to-head verdict
+- [ ] Spikes needing human interaction have forensic log layer
+- [ ] Requirements tracked in MANIFEST.md as they emerge from user choices
+- [ ] CONVENTIONS.md created or updated with patterns that emerged
+- [ ] Each spike README has complete frontmatter, Investigation Trail, and Results
+- [ ] MANIFEST.md is current (with Type column and Requirements section)
+- [ ] Commits use `docs(spike-NNN): [VERDICT]` format
+- [ ] Consolidated report presented with next-step routing
+</success_criteria>

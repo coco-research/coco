@@ -760,3 +760,353 @@ _gsd_field() { node -e "const o=JSON.parse(process.argv[1]); const v=o[process.a
 STATE_PATH=$(_gsd_field "$INIT" state_path)
 ROADMAP_PATH=$(_gsd_field "$INIT" roadmap_path)
 REQUIREMENTS_PATH=$(_gsd_field "$INIT" requirements_path)
+RESEARCH_PATH=$(_gsd_field "$INIT" research_path)
+VERIFICATION_PATH=$(_gsd_field "$INIT" verification_path)
+UAT_PATH=$(_gsd_field "$INIT" uat_path)
+CONTEXT_PATH=$(_gsd_field "$INIT" context_path)
+REVIEWS_PATH=$(_gsd_field "$INIT" reviews_path)
+PATTERNS_PATH=$(_gsd_field "$INIT" patterns_path)
+
+# Detect spike/sketch findings skills (project-local)
+SPIKE_FINDINGS_PATH=$(ls ./.claude/skills/spike-findings-*/SKILL.md 2>/dev/null | head -1 || true)
+SKETCH_FINDINGS_PATH=$(ls ./.claude/skills/sketch-findings-*/SKILL.md 2>/dev/null | head -1 || true)
+```
+
+## 7.5. Verify Nyquist Artifacts
+
+Skip if `nyquist_validation_enabled` is false OR `research_enabled` is false.
+
+Also skip if all of the following are true:
+- `research_enabled` is false
+- `has_research` is false
+- no `--research` flag was provided
+
+In that no-research path, Nyquist artifacts are **not required** for this run.
+
+```bash
+VALIDATION_EXISTS=$(ls "${PHASE_DIR}"/*-VALIDATION.md 2>/dev/null | head -1)
+```
+
+If missing and Nyquist is still enabled/applicable — ask user:
+1. Re-run: `/gsd:plan-phase {PHASE} --research ${GSD_WS}`
+2. Disable Nyquist with the exact command:
+   `gsd-sdk query config-set workflow.nyquist_validation false`
+3. Continue anyway (plans fail Dimension 8)
+
+Proceed to Step 7.8 (or Step 8 if pattern mapper is disabled) only if user selects 2 or 3.
+
+## 7.8. Spawn gsd-pattern-mapper Agent (Optional)
+
+**Skip if** `workflow.pattern_mapper` is explicitly set to `false` in config.json (absent key = enabled). Also skip if no CONTEXT.md and no RESEARCH.md exist for this phase (nothing to extract file lists from).
+
+Check config:
+```bash
+PATTERN_MAPPER_CFG=$(gsd-sdk query config-get workflow.pattern_mapper 2>/dev/null || echo "true")
+```
+
+**If `PATTERN_MAPPER_CFG` is `false`:** Skip to step 8.
+
+**If PATTERNS.md already exists** (`PATTERNS_PATH` is non-empty from step 7): Skip to step 8 (use existing).
+
+Display banner:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► PATTERN MAPPING PHASE {X}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+◆ Spawning pattern mapper...
+```
+
+Pattern mapper prompt:
+
+```markdown
+<pattern_mapping_context>
+**Phase:** {phase_number} - {phase_name}
+**Phase directory:** {phase_dir}
+**Padded phase:** {padded_phase}
+
+<files_to_read>
+- {context_path} (USER DECISIONS from /gsd:discuss-phase)
+- {research_path} (Technical Research)
+</files_to_read>
+
+**Output file:** {phase_dir}/{padded_phase}-PATTERNS.md
+
+Extract the list of files to be created/modified from CONTEXT.md and RESEARCH.md. For each file, classify by role and data flow, find the closest existing analog in the codebase, extract concrete code excerpts, and produce PATTERNS.md.
+</pattern_mapping_context>
+```
+
+Spawn with:
+```
+Agent(
+  prompt="{above}",
+  subagent_type="gsd-pattern-mapper",
+  model="{researcher_model}",
+)
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+**Handle return:**
+- **`## PATTERN MAPPING COMPLETE`:** Update `PATTERNS_PATH` to the created file path, continue to step 8.
+- **Any error or empty return:** Log warning, continue to step 8 without patterns (non-blocking).
+
+After pattern mapper completes, update the path variable:
+```bash
+PATTERNS_PATH="${PHASE_DIR}/${PADDED_PHASE}-PATTERNS.md"
+```
+
+## 8. Spawn gsd-planner Agent
+
+Display banner:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► PLANNING PHASE {X}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+◆ Spawning planner...
+```
+
+Planner prompt:
+
+```markdown
+<planning_context>
+**Phase:** {phase_number}
+**Mode:** {standard | gap_closure | reviews}
+
+<files_to_read>
+- {state_path} (Project State)
+- {roadmap_path} (Roadmap)
+- {requirements_path} (Requirements)
+- {context_path} (USER DECISIONS from /gsd:discuss-phase)
+- {research_path} (Technical Research)
+- {PATTERNS_PATH} (Pattern Map — analog files and code excerpts, if exists)
+- {verification_path} (Verification Gaps - if --gaps)
+- {uat_path} (UAT Gaps - if --gaps)
+- {reviews_path} (Cross-AI Review Feedback - if --reviews)
+- {UI_SPEC_PATH} (UI Design Contract — visual/interaction specs, if exists)
+- {SPIKE_FINDINGS_PATH} (Spike Findings — validated patterns, constraints, landmines from experiments, if exists)
+- {SKETCH_FINDINGS_PATH} (Sketch Findings — validated design decisions, CSS patterns, visual direction, if exists)
+${CONTEXT_WINDOW >= 500000 ? `
+**Cross-phase context (1M model enrichment):**
+- CONTEXT.md files from the 3 most recent completed phases (locked decisions — maintain consistency)
+- SUMMARY.md files from the 3 most recent completed phases (what was built — reuse patterns, avoid duplication)
+- LEARNINGS.md files from the 3 most recent completed phases (structured decisions, patterns, lessons, surprises — skip silently if a phase has no LEARNINGS.md; prefix each block with \`[from Phase N LEARNINGS]\` for source attribution; if total size exceeds 15% of context budget, drop oldest first)
+- CONTEXT.md, SUMMARY.md, and LEARNINGS.md from any phases listed in the current phase's "Depends on:" field in ROADMAP.md (regardless of recency — explicit dependencies always load, deduplicated against the 3 most recent)
+- Skip all other prior phases to stay within context budget
+` : ''}
+</files_to_read>
+
+${AGENT_SKILLS_PLANNER}
+
+**Phase requirement IDs (every ID MUST appear in a plan's `requirements` field):** {phase_req_ids}
+
+**Project instructions:** Read ./CLAUDE.md if exists — follow project-specific guidelines
+**Project skills:** Check .claude/skills/ or .agents/skills/ directory (if either exists) — read SKILL.md files, plans should account for project skill rules
+
+${TDD_MODE === 'true' ? `
+<tdd_mode_active>
+**TDD Mode is ENABLED.** Apply TDD heuristics from @~/.claude/get-shit-done/references/tdd.md to all eligible tasks:
+- Business logic with defined I/O → type: tdd
+- API endpoints with request/response contracts → type: tdd
+- Data transformations, validation, algorithms → type: tdd
+- UI, config, glue code, CRUD → standard plan (type: execute)
+Each TDD plan gets one feature with RED/GREEN/REFACTOR gate sequence.
+</tdd_mode_active>
+` : ''}
+
+**MVP_MODE:** ${MVP_MODE} (when true, follow vertical-slice rules from `@~/.claude/get-shit-done/references/planner-mvp-mode.md`; when false, ignore MVP guidance entirely.)
+**WALKING_SKELETON:** ${WALKING_SKELETON} (when true, the first deliverable must be a Walking Skeleton — produce SKELETON.md alongside PLAN.md.)
+
+${MVP_MODE === 'true' ? `
+<mvp_mode_active>
+**MVP Mode is ENABLED.** Follow vertical-slice planning rules from @~/.claude/get-shit-done/references/planner-mvp-mode.md. Each plan must deliver a complete vertical slice — thin end-to-end functionality rather than horizontal layers.
+</mvp_mode_active>
+` : ''}
+</planning_context>
+
+<downstream_consumer>
+Output consumed by /gsd:execute-phase. Plans need:
+- Frontmatter (wave, depends_on, files_modified, autonomous)
+- Tasks in XML format with read_first and acceptance_criteria fields (MANDATORY on every task)
+- Verification criteria
+- must_haves for goal-backward verification
+</downstream_consumer>
+
+<deep_work_rules>
+## Anti-Shallow Execution Rules (MANDATORY)
+
+Every task MUST include these fields — they are NOT optional:
+
+1. **`<read_first>`** — Files the executor MUST read before touching anything. Always include:
+   - The file being modified (so executor sees current state, not assumptions)
+   - Any "source of truth" file referenced in CONTEXT.md (reference implementations, existing patterns, config files, schemas)
+   - Any file whose patterns, signatures, types, or conventions must be replicated or respected
+
+2. **`<acceptance_criteria>`** — Verifiable conditions that prove the task was done correctly. Rules:
+   - Every criterion must be checkable as a source assertion, behavior assertion, test command, or CLI output
+   - NEVER use subjective language ("looks correct", "properly configured", "consistent with")
+   - Include exact strings, patterns, values, command outputs, or observable behavior where that is the right proof
+   - Examples:
+     - Code: `auth.py contains def verify_token(` / `test_auth.py exits 0`
+     - Behavior: `POST /api/auth/login returns 200 + httpOnly JWT cookie for valid credentials`
+     - Config: `.env.example contains DATABASE_URL=` / `Dockerfile contains HEALTHCHECK`
+     - Docs: `README.md contains '## Installation'` / `API.md lists all endpoints`
+     - Infra: `deploy.yml has rollback step` / `docker-compose.yml has healthcheck for db`
+
+3. **`<action>`** — Must include CONCRETE values, not references. Rules:
+   - NEVER say "align X with Y", "match X to Y", "update to be consistent" without specifying the exact target state
+   - Include concrete identifiers and reference values: config keys, function signatures, SQL table names, class names, import paths, env vars, endpoint paths, etc.
+   - If CONTEXT.md has a comparison table or expected values, copy only the target identifiers/values needed to remove ambiguity
+   - Do not include full file contents, fenced code blocks, or complete implementations in `<action>`
+   - The executor should understand the intended target state from `<action>` and use `<read_first>` files for current implementation details, patterns, and source-of-truth context
+
+**Why this matters:** Executor agents work from the plan text. Vague instructions like "update the config to match production" produce shallow one-line changes. Concrete instructions like "add DATABASE_URL, set POOL_SIZE=20, add REDIS_URL, and read config/runtime.ts before editing" produce complete work without turning the planner into the executor.
+</deep_work_rules>
+
+<quality_gate>
+- [ ] PLAN.md files created in phase directory
+- [ ] Each plan has valid frontmatter
+- [ ] Tasks are specific and actionable
+- [ ] Every task has `<read_first>` with at least the file being modified
+- [ ] Every task has `<acceptance_criteria>` with behavior, test-command, CLI, or source assertions
+- [ ] Every `<action>` contains concrete identifiers without fenced code blocks or full implementations
+- [ ] Dependencies correctly identified
+- [ ] Waves assigned for parallel execution
+- [ ] must_haves derived from phase goal
+</quality_gate>
+```
+
+**If `CHUNKED_MODE` is `false` (default):** Spawn the planner as a single long-lived Agent:
+
+```text
+Agent(
+  prompt=filled_prompt,
+  subagent_type="gsd-planner",
+  model="{planner_model}",
+  description="Plan Phase {phase}"
+)
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+**If `CHUNKED_MODE` is `true`:** Skip the Agent() call above — proceed to step 8.5 instead.
+
+## 8.5. Chunked Planning Mode
+
+**Skip if `CHUNKED_MODE` is `false`.**
+
+Chunked mode splits the single long-lived planner Agent run into a short outline Agent run followed by
+N short per-plan Agent runs. Each run is bounded to ~3–5 min; each plan is committed individually
+for crash resilience. If any run hangs and the terminal is force-killed, rerunning
+`/gsd:plan-phase {N} --chunked` resumes from the last successfully committed plan.
+
+**Intended for new or in-progress chunked runs.** To recover plans already written by a prior
+*non-chunked* run, use step 6's "Add more plans" or proceed directly to `/gsd:execute-phase`
+— don't start a fresh chunked run over existing non-chunked plans.
+
+### 8.5.1 Outline Phase (outline-only mode, ~2 min)
+
+**Resume detection:** If `${PHASE_DIR}/${PADDED_PHASE}-PLAN-OUTLINE.md` already exists **and
+is valid** (contains the `## OUTLINE COMPLETE` marker), skip this sub-step — the outline
+already exists from a previous run. Proceed directly to 8.5.2.
+
+```bash
+OUTLINE_FILE="${PHASE_DIR}/${PADDED_PHASE}-PLAN-OUTLINE.md"
+if [[ -f "$OUTLINE_FILE" ]] && grep -q "^## OUTLINE COMPLETE" "$OUTLINE_FILE"; then
+  # reuse existing outline — skip to 8.5.2
+fi
+```
+
+Display:
+```text
+◆ Chunked mode: spawning outline planner...
+```
+
+Spawn the planner in **outline-only** mode — it must write only the outline manifest, not any
+PLAN.md files:
+
+```javascript
+Agent(
+  prompt="{same planning_context as step 8, plus:}
+
+  **Chunked mode: outline-only.**
+  Do NOT write any PLAN.md files in this Task.
+  Write only: {PHASE_DIR}/{PADDED_PHASE}-PLAN-OUTLINE.md
+
+  The outline must be a markdown table with columns:
+  Plan ID | Objective | Wave | Depends On | Requirements
+
+  Return: ## OUTLINE COMPLETE with plan count.",
+  subagent_type="gsd-planner",
+  model="{planner_model}",
+  description="Outline Phase {phase} (chunked)"
+)
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+Handle return:
+- **`## OUTLINE COMPLETE`:** Read `PLAN-OUTLINE.md`, extract plan list. Continue to 8.5.2.
+- **Any other return or empty:** Display error. Offer: 1) Retry outline, 2) Stop.
+
+### 8.5.2 Per-Plan Tasks (single-plan mode, ~3-5 min each)
+
+For each plan entry extracted from `PLAN-OUTLINE.md`:
+
+1. **Resume check:** If `${PHASE_DIR}/{plan_id}-PLAN.md` already exists on disk **and has
+   valid YAML frontmatter** (opening `---` delimiter present), skip this plan (do not
+   overwrite completed work — resume safety).
+
+   ```bash
+   PLAN_FILE="${PHASE_DIR}/${plan_id}-PLAN.md"
+   if [[ -f "$PLAN_FILE" ]] && head -1 "$PLAN_FILE" | grep -q '^---'; then
+     continue  # plan already written, skip
+   fi
+   ```
+
+2. Display:
+   ```text
+   ◆ Chunked mode: planning {plan_id} ({k}/{N})...
+   ```
+
+3. Spawn the planner in **single-plan** mode — it must write exactly one PLAN.md file:
+   ```javascript
+   Agent(
+     prompt="{same planning_context as step 8, plus:}
+
+     **Chunked mode: single-plan.**
+     Write exactly ONE plan file: {PHASE_DIR}/{plan_id}-PLAN.md
+     Plan to write: {plan_id} — {objective}
+     Wave: {wave} | Depends on: {depends_on}
+     Phase requirement IDs to cover in this plan: {plan_requirements}
+
+     Return: ## PLAN COMPLETE with the plan ID.",
+     subagent_type="gsd-planner",
+     model="{planner_model}",
+     description="Plan {plan_id} (chunked {k}/{N})"
+   )
+   ```
+
+   > **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+4. **Verify disk:** Check `${PHASE_DIR}/{plan_id}-PLAN.md` exists. If missing: offer 1) Retry, 2) Stop.
+
+5. **Commit per-plan:**
+   ```bash
+   gsd-sdk query commit "docs(${PADDED_PHASE}): plan ${plan_id} (chunked)" --files "${PHASE_DIR}/${plan_id}-PLAN.md"
+   ```
+
+After all N plans are written and committed, treat this as `## PLANNING COMPLETE` and continue
+to step 9.
+
+## 9. Handle Planner Return
+
+- **`## PLANNING COMPLETE`:** Display plan count. If `--skip-verify` or `plan_checker_enabled` is false (from init): skip to step 13. Otherwise: step 10.
+- **`## PHASE SPLIT RECOMMENDED`:** The planner determined the phase exceeds the context budget for full-fidelity implementation of all source items. Handle in step 9b.
+- **`## ⚠ Source Audit: Unplanned Items Found`:** The planner's multi-source coverage audit found items from REQUIREMENTS.md, RESEARCH.md, ROADMAP goal, or CONTEXT.md decisions that are not covered by any plan. Handle in step 9c.
+- **`## CHECKPOINT REACHED`:** Present to user, get response, spawn continuation (step 12)
+- **`## PLANNING INCONCLUSIVE`:** Show attempts, offer: Add context / Retry / Manual
+- **Empty / truncated / no recognized marker:** → Filesystem fallback (step 9a).
+
+## 9a. Filesystem Fallback (Planner)

@@ -1561,3 +1561,353 @@ function cmdInitProgress(cwd, raw) {
     phases,
     phase_count: phases.length,
     completed_count: phases.filter(p => p.status === 'complete').length,
+    in_progress_count: phases.filter(p => p.status === 'in_progress').length,
+
+    // Current state
+    current_phase: currentPhase,
+    next_phase: nextPhase,
+    paused_at: pausedAt,
+    has_work_in_progress: !!currentPhase,
+
+    // File existence
+    project_exists: pathExistsInternal(cwd, '.planning/PROJECT.md'),
+    roadmap_exists: fs.existsSync(path.join(planningDir(cwd), 'ROADMAP.md')),
+    state_exists: fs.existsSync(path.join(planningDir(cwd), 'STATE.md')),
+    // File paths
+    state_path: toPosixPath(path.relative(cwd, path.join(planningDir(cwd), 'STATE.md'))),
+    roadmap_path: toPosixPath(path.relative(cwd, path.join(planningDir(cwd), 'ROADMAP.md'))),
+    project_path: '.planning/PROJECT.md',
+    config_path: toPosixPath(path.relative(cwd, path.join(planningDir(cwd), 'config.json'))),
+  };
+
+  output(withProjectRoot(cwd, result), raw);
+}
+
+/**
+ * Detect child git repos in a directory (one level deep).
+ * Returns array of { name, path, has_uncommitted } objects.
+ */
+function detectChildRepos(dir) {
+  const repos = [];
+  let entries;
+  try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return repos; }
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    if (entry.name.startsWith('.')) continue;
+    const fullPath = path.join(dir, entry.name);
+    const gitDir = path.join(fullPath, '.git');
+    if (fs.existsSync(gitDir)) {
+      const statusResult = execGit(['status', '--porcelain'], { cwd: fullPath, timeout: 5000 });
+      const hasUncommitted = statusResult.exitCode === 0 && statusResult.stdout.length > 0;
+      repos.push({ name: entry.name, path: fullPath, has_uncommitted: hasUncommitted });
+    }
+  }
+  return repos;
+}
+
+function cmdInitNewWorkspace(cwd, raw) {
+  const homedir = process.env.HOME || require('os').homedir();
+  const defaultBase = path.join(homedir, 'gsd-workspaces');
+
+  // Detect child git repos for interactive selection
+  const childRepos = detectChildRepos(cwd);
+
+  // Check if git worktree is available
+  const gitVersion = execGit(['--version'], { timeout: 5000 });
+  const worktreeAvailable = gitVersion.exitCode === 0;
+
+  const result = {
+    default_workspace_base: defaultBase,
+    child_repos: childRepos,
+    child_repo_count: childRepos.length,
+    worktree_available: worktreeAvailable,
+    is_git_repo: pathExistsInternal(cwd, '.git'),
+    cwd_repo_name: path.basename(cwd),
+  };
+
+  output(withProjectRoot(cwd, result), raw);
+}
+
+function cmdInitListWorkspaces(cwd, raw) {
+  const homedir = process.env.HOME || require('os').homedir();
+  const defaultBase = path.join(homedir, 'gsd-workspaces');
+
+  const workspaces = [];
+  if (fs.existsSync(defaultBase)) {
+    let entries;
+    try { entries = fs.readdirSync(defaultBase, { withFileTypes: true }); } catch { entries = []; }
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const wsPath = path.join(defaultBase, entry.name);
+      const manifestPath = path.join(wsPath, 'WORKSPACE.md');
+      if (!fs.existsSync(manifestPath)) continue;
+
+      let repoCount = 0;
+      let hasProject = false;
+      let strategy = 'unknown';
+      const manifest = platformReadSync(manifestPath);
+      if (manifest !== null) {
+        const strategyMatch = manifest.match(/^Strategy:\s*(.+)$/m);
+        if (strategyMatch) strategy = strategyMatch[1].trim();
+        // Count table rows (lines starting with |, excluding header and separator)
+        const tableRows = manifest.split('\n').filter(l => l.match(/^\|\s*\w/) && !l.includes('Repo') && !l.includes('---'));
+        repoCount = tableRows.length;
+      }
+      hasProject = fs.existsSync(path.join(wsPath, '.planning', 'PROJECT.md'));
+
+      workspaces.push({
+        name: entry.name,
+        path: wsPath,
+        repo_count: repoCount,
+        strategy,
+        has_project: hasProject,
+      });
+    }
+  }
+
+  const result = {
+    workspace_base: defaultBase,
+    workspaces,
+    workspace_count: workspaces.length,
+  };
+
+  output(result, raw);
+}
+
+function cmdInitRemoveWorkspace(cwd, name, raw) {
+  const homedir = process.env.HOME || require('os').homedir();
+  const defaultBase = path.join(homedir, 'gsd-workspaces');
+
+  if (!name) {
+    error('workspace name required for init remove-workspace');
+  }
+
+  const wsPath = path.join(defaultBase, name);
+  const manifestPath = path.join(wsPath, 'WORKSPACE.md');
+
+  if (!fs.existsSync(wsPath)) {
+    error(`Workspace not found: ${wsPath}`);
+  }
+
+  // Parse manifest for repo info
+  const repos = [];
+  let strategy = 'unknown';
+  const manifestContent = platformReadSync(manifestPath);
+  if (manifestContent !== null) {
+    try {
+      const manifest = manifestContent;
+      const strategyMatch = manifest.match(/^Strategy:\s*(.+)$/m);
+      if (strategyMatch) strategy = strategyMatch[1].trim();
+
+      // Parse table rows for repo names and source paths
+      const lines = manifest.split('\n');
+      for (const line of lines) {
+        const match = line.match(/^\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|$/);
+        if (match && match[1] !== 'Repo' && !match[1].includes('---')) {
+          repos.push({ name: match[1], source: match[2], branch: match[3], strategy: match[4] });
+        }
+      }
+    } catch { /* best-effort */ }
+  }
+
+  // Check for uncommitted changes in workspace repos
+  const dirtyRepos = [];
+  for (const repo of repos) {
+    const repoPath = path.join(wsPath, repo.name);
+    if (!fs.existsSync(repoPath)) continue;
+    const statusResult = execGit(['status', '--porcelain'], { cwd: repoPath, timeout: 5000 });
+    if (statusResult.exitCode === 0 && statusResult.stdout.length > 0) {
+      dirtyRepos.push(repo.name);
+    }
+  }
+
+  const result = {
+    workspace_name: name,
+    workspace_path: wsPath,
+    has_manifest: fs.existsSync(manifestPath),
+    strategy,
+    repos,
+    repo_count: repos.length,
+    dirty_repos: dirtyRepos,
+    has_dirty_repos: dirtyRepos.length > 0,
+  };
+
+  output(result, raw);
+}
+
+/**
+ * Build a formatted agent skills block for injection into Task() prompts.
+ *
+ * Reads `config.agent_skills[agentType]` and validates each skill path exists
+ * within the project root. Returns a formatted `<agent_skills>` block or empty
+ * string if no skills are configured.
+ *
+ * @param {object} config - Loaded project config
+ * @param {string} agentType - The agent type (e.g., 'gsd-executor', 'gsd-planner')
+ * @param {string} projectRoot - Absolute path to project root (for path validation)
+ * @returns {string} Formatted skills block or empty string
+ */
+function buildAgentSkillsBlock(config, agentType, projectRoot) {
+  const { validatePath } = require('./security.cjs');
+  const os = require('os');
+  const { getGlobalSkillDir, getGlobalSkillDisplayPath } = require('./runtime-homes.cjs');
+  const runtime = (config && config.runtime) || 'claude';
+  const globalSkillsBase = require('./runtime-homes.cjs').getGlobalSkillsBase(runtime);
+
+  if (!config || !config.agent_skills || !agentType) return '';
+
+  let skillPaths = config.agent_skills[agentType];
+  if (!skillPaths) return '';
+
+  // Normalize single string to array
+  if (typeof skillPaths === 'string') skillPaths = [skillPaths];
+  if (!Array.isArray(skillPaths) || skillPaths.length === 0) return '';
+
+  const validPaths = [];
+  for (const skillPath of skillPaths) {
+    if (typeof skillPath !== 'string') continue;
+
+    // Support global: prefix for skills installed at the runtime's global skills directory (#1992, #3126)
+    if (skillPath.startsWith('global:')) {
+      const skillName = skillPath.slice(7);
+      // Explicit empty-name guard before regex for clearer error message
+      if (!skillName) {
+        process.stderr.write(`[agent-skills] WARNING: "global:" prefix with empty skill name — skipping\n`);
+        continue;
+      }
+      // Sanitize: skill name must be alphanumeric, hyphens, or underscores only
+      if (!/^[a-zA-Z0-9_-]+$/.test(skillName)) {
+        process.stderr.write(`[agent-skills] WARNING: Invalid global skill name "${skillName}" — skipping\n`);
+        continue;
+      }
+      // Cline is rules-based and has no global skills directory
+      if (globalSkillsBase === null) {
+        process.stderr.write(`[agent-skills] WARNING: Runtime "${runtime}" does not use a skills directory — "global:${skillName}" is not supported on this runtime\n`);
+        continue;
+      }
+      const globalSkillDir = getGlobalSkillDir(runtime, skillName);
+      const globalSkillMd = path.join(globalSkillDir, 'SKILL.md');
+      const displayPath = getGlobalSkillDisplayPath(runtime, skillName);
+      if (!fs.existsSync(globalSkillMd)) {
+        process.stderr.write(`[agent-skills] WARNING: Global skill not found at "${displayPath}/SKILL.md" — skipping\n`);
+        continue;
+      }
+      // Symlink escape guard: validatePath resolves symlinks and enforces
+      // containment within globalSkillsBase. Prevents a skill directory
+      // symlinked to an arbitrary location from being injected (#1992).
+      const pathCheck = validatePath(globalSkillMd, globalSkillsBase, { allowAbsolute: true });
+      if (!pathCheck.safe) {
+        process.stderr.write(`[agent-skills] WARNING: Global skill "${skillName}" failed path check (symlink escape?) — skipping\n`);
+        continue;
+      }
+      validPaths.push({ ref: `${globalSkillDir}/SKILL.md`, display: displayPath });
+      continue;
+    }
+
+    // Validate path safety — must resolve within project root
+    const pathCheck = validatePath(skillPath, projectRoot);
+    if (!pathCheck.safe) {
+      process.stderr.write(`[agent-skills] WARNING: Skipping unsafe path "${skillPath}": ${pathCheck.error}\n`);
+      continue;
+    }
+
+    // Check that the skill directory and SKILL.md exist
+    const skillMdPath = path.join(projectRoot, skillPath, 'SKILL.md');
+    if (!fs.existsSync(skillMdPath)) {
+      process.stderr.write(`[agent-skills] WARNING: Skill not found at "${skillPath}/SKILL.md" — skipping\n`);
+      continue;
+    }
+
+    validPaths.push({ ref: `${skillPath}/SKILL.md`, display: skillPath });
+  }
+
+  if (validPaths.length === 0) return '';
+
+  const lines = validPaths.map(p => `- @${p.ref}`).join('\n');
+  return `<agent_skills>\nRead these user-configured skills:\n${lines}\n</agent_skills>`;
+}
+
+/**
+ * Command: output the agent skills block for a given agent type.
+ * Used by workflows: SKILLS=$(node "$TOOLS" agent-skills gsd-executor 2>/dev/null)
+ */
+function cmdAgentSkills(cwd, agentType, raw) {
+  if (!agentType) {
+    // No agent type — output empty string silently
+    output('', raw, '');
+    return;
+  }
+
+  const config = loadConfig(cwd);
+  const block = buildAgentSkillsBlock(config, agentType, cwd);
+  // Output raw text (not JSON) so workflows can embed it directly
+  if (block) {
+    process.stdout.write(block);
+  }
+  process.exit(0);
+}
+
+/**
+ * Generate a skill manifest from a skills directory.
+ *
+ * Scans the canonical skill discovery roots and returns a normalized
+ * inventory object with discovered skills, root metadata, and installation
+ * summary flags. A legacy `skillsDir` override is still accepted for focused
+ * scans, but the default mode is multi-root discovery.
+ *
+ * @param {string} cwd - Project root directory
+ * @param {string|null} [skillsDir] - Optional absolute path to a specific skills directory
+ * @returns {{
+ *   skills: Array<{name: string, description: string, triggers: string[], path: string, file_path: string, root: string, scope: string, installed: boolean, deprecated: boolean}>,
+ *   roots: Array<{root: string, path: string, scope: string, present: boolean, skill_count?: number, command_count?: number, deprecated?: boolean}>,
+ *   installation: { gsd_skills_installed: boolean, legacy_claude_commands_installed: boolean },
+ *   counts: { skills: number, roots: number }
+ * }}
+ */
+function buildSkillManifest(cwd, skillsDir = null) {
+  const { extractFrontmatter } = require('./frontmatter.cjs');
+  const { getGlobalSkillsBase } = require('./runtime-homes.cjs');
+  const os = require('os');
+
+  const canonicalRoots = skillsDir ? [{
+    root: path.resolve(skillsDir),
+    path: path.resolve(skillsDir),
+    scope: 'custom',
+    present: fs.existsSync(skillsDir),
+    kind: 'skills',
+  }] : [
+    {
+      root: '.claude/skills',
+      path: path.join(cwd, '.claude', 'skills'),
+      scope: 'project',
+      kind: 'skills',
+    },
+    {
+      root: '.agents/skills',
+      path: path.join(cwd, '.agents', 'skills'),
+      scope: 'project',
+      kind: 'skills',
+    },
+    {
+      root: '.cursor/skills',
+      path: path.join(cwd, '.cursor', 'skills'),
+      scope: 'project',
+      kind: 'skills',
+    },
+    {
+      root: '.github/skills',
+      path: path.join(cwd, '.github', 'skills'),
+      scope: 'project',
+      kind: 'skills',
+    },
+    {
+      root: '.codex/skills',
+      path: path.join(cwd, '.codex', 'skills'),
+      scope: 'project',
+      kind: 'skills',
+    },
+    {
+      root: '~/.claude/skills',
+      path: getGlobalSkillsBase('claude'),
+      scope: 'global',
+      kind: 'skills',

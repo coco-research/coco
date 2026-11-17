@@ -268,3 +268,232 @@ Check pending todos for matches with this phase's scope.
 TODO_MATCHES=$(gsd-sdk query todo.match-phase "${PHASE_NUMBER}")
 ```
 
+Parse JSON for: `todo_count`, `matches[]` (each with `file`, `title`, `area`, `score`, `reasons`).
+
+**If `todo_count` is 0 or `matches` is empty:** Skip silently.
+
+**If matches found:** Present each match (title, area, why it matched). AskUserQuestion (multiSelect) asking which to fold. Folded → `<folded_todos>` for CONTEXT.md `<decisions>`. Reviewed but not folded → `<reviewed_todos>` for CONTEXT.md `<deferred>`.
+
+**Auto mode (`--auto`):** Fold all todos with score >= 0.4 automatically. Log the selection.
+</step>
+
+<step name="scout_codebase">
+Lightweight scan of existing code to inform gray area identification (~10% context).
+
+Read `@~/.claude/get-shit-done/references/scout-codebase.md` — it contains the phase-type→map selection table, single-read rule, no-maps fallback, and `<codebase_context>` output schema. Then execute:
+1. `ls .planning/codebase/*.md` to find existing maps
+2. Select 2–3 maps via the reference's table; or grep fallback if none exist
+3. Build internal `<codebase_context>` per the reference's output schema
+</step>
+
+<step name="analyze_phase">
+Analyze the phase to identify gray areas. Use both `prior_decisions` and `codebase_context` to ground the analysis.
+
+1. **Domain boundary** — What capability is this phase delivering? State it clearly.
+
+1b. **Initialize canonical refs accumulator** — Start building `<canonical_refs>` for CONTEXT.md. Sources:
+   - **Now:** Copy `Canonical refs:` from ROADMAP.md for this phase. Expand each to a full relative path. Check REQUIREMENTS.md and PROJECT.md for specs/ADRs referenced.
+   - **`scout_codebase`:** If existing code references docs (e.g., comments citing ADRs), add those.
+   - **`discuss_areas`:** When the user says "read X", "check Y", or references any doc/spec/ADR — add it immediately. These are often the MOST important refs.
+
+   This list is MANDATORY in CONTEXT.md. Every ref must have a full relative path. If no external docs exist, note that explicitly.
+
+2. **Check prior decisions** — Scan `<prior_decisions>` for already-decided gray areas; mark them pre-answered.
+
+2b. **SPEC.md awareness** — If `spec_loaded = true`: `<locked_requirements>` are pre-answered (Goal, Boundaries, Constraints, Acceptance Criteria). Do NOT generate gray areas about WHAT to build or WHY. Only generate gray areas about HOW to implement. When presenting, include: "Requirements are locked by SPEC.md — discussing implementation decisions only."
+
+3. **Gray areas** — For each relevant category, identify 1-2 specific ambiguities that would change implementation. Annotate with code context where relevant.
+
+4. **Skip assessment** — If no meaningful gray areas exist (pure infrastructure, clear-cut implementation, all already decided), the phase may not need discussion.
+
+**Advisor mode hand-off:** If `ADVISOR_MODE` is true, follow `workflows/discuss-phase/modes/advisor.md` for the rest of analyze/discuss flow (it adds an `advisor_research` substep and replaces the standard `discuss_areas` with table-first selection). The detection block (USER-PROFILE.md existence + non-technical-owner signals + calibration tier resolution) lives in that file — read it once when ADVISOR_MODE is true and follow its rules.
+</step>
+
+<step name="present_gray_areas">
+Present the domain boundary, prior decisions, and gray areas to the user.
+
+```
+Phase [X]: [Name]
+Domain: [What this phase delivers — from your analysis]
+
+We'll clarify HOW to implement this. (New capabilities belong in other phases.)
+
+[If prior decisions apply:]
+**Carrying forward from earlier phases:**
+- [Decision from Phase N that applies here]
+```
+
+**If `--auto` or `--all`** (per `modes/auto.md` or `modes/all.md`): Auto-select ALL gray areas. Log: `[--auto/--all] Selected all gray areas: [list area names].` Skip the AskUserQuestion below and continue directly to `discuss_areas` with all areas selected.
+
+**Otherwise, use AskUserQuestion (multiSelect: true):**
+- header: "Discuss"
+- question: "Which areas do you want to discuss for [phase name]?"
+- options: 3-4 phase-specific gray areas, each with a concrete label (not generic), 1-2 questions in description, and code-context / prior-decision annotations:
+  ```
+  ☐ Layout style — Cards vs list vs timeline?
+    (You already have a Card component with shadow/rounded variants. Reusing it keeps the app consistent.)
+
+  ☐ Loading behavior — Infinite scroll or pagination?
+    (You chose infinite scroll in Phase 4. useInfiniteQuery hook already set up.)
+  ```
+
+**Do NOT include a "skip" or "you decide" option.** User ran this command to discuss — give real choices.
+
+Continue to `discuss_areas` with selected areas (or to `advisor_research` per `modes/advisor.md` if `ADVISOR_MODE` is true).
+</step>
+
+<step name="discuss_areas">
+Discussion behavior is defined by the active mode file(s):
+
+- **Advisor mode (ADVISOR_MODE = true):** follow `workflows/discuss-phase/modes/advisor.md` — research-backed comparison tables, table-first selection.
+- **--auto:** follow `workflows/discuss-phase/modes/auto.md` — Claude picks recommended option for every question; no AskUserQuestion. Single-pass cap enforced.
+- **Default (no flags):** follow `workflows/discuss-phase/modes/default.md` — 4 single-question turns per area, then check whether to continue.
+
+Overlays (combine with the active mode):
+- `--text` → `workflows/discuss-phase/modes/text.md` (replace AskUserQuestion with plain-text numbered lists)
+- `--batch` → `workflows/discuss-phase/modes/batch.md` (group 2–5 questions per turn)
+- `--analyze` → `workflows/discuss-phase/modes/analyze.md` (trade-off table before each question)
+
+**Overlay stacking:** overlays combine and apply outer→inner in fixed order `--analyze` → `--batch` → `--text` (e.g., `--batch --analyze` = trade-off table per question group; add `--text` for plain-text rendering). Mode-specific precedence (e.g., `--auto --power`) is documented in each overlay file's "Combination rules" section.
+
+All modes preserve the universal rules below.
+
+**Universal rules (apply to every mode):**
+
+- **Canonical ref accumulation** — when the user references a doc/spec/ADR during any answer, immediately Read it (or confirm it exists) and add it to the canonical refs accumulator with full relative path. Use what you learned to inform subsequent questions. These docs are often MORE important than ROADMAP.md refs because the user specifically wants downstream agents to follow them.
+- **Scope creep** — if user mentions something outside the phase domain, capture as deferred idea and redirect.
+- **Incremental checkpoint** — after each area completes, write `${phase_dir}/${padded_phase}-DISCUSS-CHECKPOINT.json`. Read `workflows/discuss-phase/templates/checkpoint.json` for the schema. The checkpoint is structured state, not the canonical CONTEXT.md (`write_context` produces the canonical output). On session resume, the parent's `check_existing` step detects the checkpoint and offers to resume.
+- **Discussion log accumulation** — for each question asked, accumulate area name, options presented, user's selection, follow-up notes. Used by `git_commit` to write DISCUSSION-LOG.md.
+</step>
+
+<step name="write_context">
+Create CONTEXT.md and DISCUSSION-LOG.md.
+
+DISCUSSION-LOG.md is for human reference only (audits, retrospectives) and is NOT consumed by downstream agents (researcher, planner, executor).
+
+**Find or create phase directory:**
+
+Use values from init: `phase_dir`, `expected_phase_dir`, `phase_slug`, `padded_phase`. If `phase_dir` is null:
+```bash
+mkdir -p "${expected_phase_dir}"
+```
+
+Set `phase_dir="${expected_phase_dir}"` after creation.
+
+**File location:** `${phase_dir}/${padded_phase}-CONTEXT.md`
+
+**Read the CONTEXT.md template now (lazy-loaded):**
+```
+Read(workflows/discuss-phase/templates/context.md)
+```
+
+The template documents variable substitutions and conditional sections. Substitute live values for `[X]`, `[Name]`, `[date]`, `${padded_phase}`, `{N}`. Include `<spec_lock>` only when `spec_loaded = true`. Include "Folded Todos" / "Reviewed Todos" subsections only when the `cross_reference_todos` step folded or reviewed todos.
+
+**SPEC.md integration** — If `spec_loaded = true`:
+- Add the `<spec_lock>` section immediately after `<domain>`.
+- Add the SPEC.md file to `<canonical_refs>` with note "Locked requirements — MUST read before planning".
+- Do NOT duplicate requirements text from SPEC.md into `<decisions>` — agents read SPEC.md directly.
+- The `<decisions>` section contains only implementation decisions from this discussion.
+
+Write the file.
+</step>
+
+<step name="confirm_creation">
+Present summary and next steps:
+
+```
+Created: .planning/phases/${PADDED_PHASE}-${SLUG}/${PADDED_PHASE}-CONTEXT.md
+
+## Decisions Captured
+### [Category]
+- [Key decision]
+
+[If deferred ideas exist:]
+## Noted for Later
+- [Deferred idea] — future phase
+
+---
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Phase ${PHASE}: [Name]** — [Goal from ROADMAP.md]
+
+`/clear` then:
+
+`/gsd:plan-phase ${PHASE} ${GSD_WS}`
+
+---
+
+**Also available:** `--chain` for auto plan+execute after; `/gsd:plan-phase ${PHASE} --skip-research ${GSD_WS}` to plan without research; `/gsd:ui-phase ${PHASE} ${GSD_WS}` for UI design contracts; review/edit CONTEXT.md before continuing.
+```
+</step>
+
+<step name="git_commit">
+**Write DISCUSSION-LOG.md before committing.**
+
+**File location:** `${phase_dir}/${padded_phase}-DISCUSSION-LOG.md`
+
+**Read the DISCUSSION-LOG.md template now (lazy-loaded):**
+```
+Read(workflows/discuss-phase/templates/discussion-log.md)
+```
+
+Substitute live values from the discussion log accumulator (area names, options presented, user selections, notes, deferred ideas, Claude's discretion items). Write the file.
+
+**Clean up checkpoint file** — CONTEXT.md is now the canonical record:
+```bash
+rm -f "${phase_dir}/${padded_phase}-DISCUSS-CHECKPOINT.json"
+```
+
+Commit phase context and discussion log:
+```bash
+gsd-sdk query commit "docs(${padded_phase}): capture phase context" --files "${phase_dir}/${padded_phase}-CONTEXT.md" "${phase_dir}/${padded_phase}-DISCUSSION-LOG.md"
+```
+
+Confirm: "Committed: docs(${padded_phase}): capture phase context"
+</step>
+
+<step name="update_state">
+Update STATE.md with session info:
+
+```bash
+gsd-sdk query state.record-session \
+  --stopped-at "Phase ${PHASE} context gathered" \
+  --resume-file "${phase_dir}/${padded_phase}-CONTEXT.md"
+
+gsd-sdk query commit "docs(state): record phase ${PHASE} context session" --files .planning/STATE.md
+```
+</step>
+
+<step name="auto_advance">
+Auto-advance behavior is defined in `workflows/discuss-phase/modes/chain.md`.
+
+If `--auto`, `--chain`, or `workflow.auto_advance` is enabled, Read that file now and execute its `auto_advance` step (which handles flag-syncing, banner display, plan-phase Skill dispatch, and return-status branching).
+
+Otherwise, route to `confirm_creation` (manual next steps).
+</step>
+
+</process>
+
+<success_criteria>
+- Phase validated against roadmap
+- Prior context loaded (PROJECT.md, REQUIREMENTS.md, STATE.md, prior CONTEXT.md files)
+- Already-decided questions not re-asked (carried forward from prior phases)
+- Codebase scouted for reusable assets, patterns, and integration points
+- Gray areas identified with code and prior-decision annotations
+- User selected which areas to discuss (or `--all`/`--auto` auto-selected)
+- Each selected area explored under the active mode's rules until satisfied
+- Scope creep redirected to deferred ideas
+- CONTEXT.md captures actual decisions, not vague vision
+- CONTEXT.md includes canonical_refs section with full file paths to every spec/ADR/doc downstream agents need (MANDATORY)
+- CONTEXT.md includes code_context section with reusable assets and patterns
+- Deferred ideas preserved for future phases
+- STATE.md updated with session info
+- User knows next steps
+- Checkpoint file written after each area completes (incremental save)
+- Interrupted sessions can be resumed from checkpoint
+- Checkpoint file cleaned up after successful CONTEXT.md write
+- `--chain` triggers interactive discuss followed by auto plan+execute (no auto-answering)
+- `--chain` and `--auto` both persist chain flag and auto-advance to plan-phase
+- Per-mode bodies, templates, and advisor flow are lazy-loaded — parent stays under the workflow size budget enforced by `tests/workflow-size-budget.test.cjs`
+</success_criteria>

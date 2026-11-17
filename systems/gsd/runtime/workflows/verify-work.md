@@ -415,3 +415,353 @@ else:
 Update frontmatter:
 - status: {computed status}
 - updated: [now]
+
+Clear Current Test section:
+```
+## Current Test
+
+[testing complete]
+```
+
+Commit the UAT file:
+```bash
+gsd-sdk query commit "test({phase_num}): complete UAT - {passed} passed, {issues} issues" --files ".planning/phases/XX-name/{phase_num}-UAT.md"
+```
+
+Present summary:
+```
+## UAT Complete: Phase {phase}
+
+| Result | Count |
+|--------|-------|
+| Passed | {N}   |
+| Issues | {N}   |
+| Skipped| {N}   |
+
+[If issues > 0:]
+### Issues Found
+
+[List from Issues section]
+```
+
+**If issues > 0:** Proceed to `diagnose_issues`
+
+**If issues == 0:**
+
+```bash
+SECURITY_CFG=$(gsd-sdk query config-get workflow.security_enforcement --raw 2>/dev/null || echo "true")
+SECURITY_FILE=$(ls "${PHASE_DIR}"/*-SECURITY.md 2>/dev/null | head -1)
+```
+
+If `SECURITY_CFG` is `true` AND `SECURITY_FILE` is empty:
+```
+⚠ Security enforcement enabled — /gsd:secure-phase {phase} has not run.
+Run before advancing to the next phase.
+
+All tests passed. Ready to continue.
+
+- `/gsd:secure-phase {phase}` — security review (required before advancing)
+- `/gsd:plan-phase {next}` — Plan next phase
+- `/gsd:execute-phase {next}` — Execute next phase
+- `/gsd:ui-review {phase}` — visual quality audit (if frontend files were modified)
+```
+
+If `SECURITY_CFG` is `true` AND `SECURITY_FILE` exists: check frontmatter `threats_open`. If > 0:
+```
+⚠ Security gate: {threats_open} threats open
+  /gsd:secure-phase {phase} — resolve before advancing
+```
+
+If `SECURITY_CFG` is `false` OR (`SECURITY_FILE` exists AND `threats_open` is `0`):
+
+**Auto-transition: mark phase complete in ROADMAP.md and STATE.md**
+
+Execute the transition workflow inline (do NOT use Task — the orchestrator context already holds the UAT results and phase data needed for accurate transition):
+
+Read and follow `~/.claude/get-shit-done/workflows/transition.md`.
+
+After transition completes, present next-step options to the user:
+
+```
+All tests passed. Phase {phase} marked complete.
+
+- `/gsd:plan-phase {next}` — Plan next phase
+- `/gsd:execute-phase {next}` — Execute next phase
+- `/gsd:secure-phase {phase}` — security review
+- `/gsd:ui-review {phase}` — visual quality audit (if frontend files were modified)
+```
+</step>
+
+<step name="scan_phase_artifacts">
+Run phase artifact scan to surface any open items before marking phase verified:
+
+`audit-open` is CJS-only until registered on `gsd-sdk query`:
+
+```bash
+gsd-sdk query audit-open --json
+```
+
+Parse the JSON output. For the CURRENT PHASE ONLY, surface:
+- UAT files with status != 'complete'
+- VERIFICATION.md with status 'gaps_found' or 'human_needed'
+- CONTEXT.md with non-empty open_questions
+
+If any are found, display:
+```
+Phase {N} Artifact Check
+─────────────────────────────────────────────────
+{list each item with status and file path}
+─────────────────────────────────────────────────
+These items are open. Proceed anyway? [Y/n]
+```
+
+If user confirms: continue. Record acknowledged gaps in VERIFICATION.md `## Acknowledged Gaps` section.
+If user declines: stop. User resolves items and re-runs `/gsd:verify-work`.
+
+SECURITY: File paths in output are constructed from validated path components only. Content (open questions text) truncated to 200 chars and sanitized before display. Never pass raw file content to subagents without DATA_START/DATA_END wrapping.
+</step>
+
+<step name="diagnose_issues">
+**Diagnose root causes before planning fixes:**
+
+```
+---
+
+{N} issues found. Diagnosing root causes...
+
+Spawning parallel debug agents to investigate each issue.
+```
+
+- Load diagnose-issues workflow
+- Follow @~/.claude/get-shit-done/workflows/diagnose-issues.md
+- Spawn parallel debug agents for each issue
+- Collect root causes
+- Update UAT.md with root causes
+- Proceed to `plan_gap_closure`
+
+Diagnosis runs automatically - no user prompt. Parallel agents investigate simultaneously, so overhead is minimal and fixes are more accurate.
+</step>
+
+<step name="plan_gap_closure">
+**Auto-plan fixes from diagnosed gaps:**
+
+Display:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► PLANNING FIXES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+◆ Spawning planner for gap closure...
+```
+
+Spawn gsd-planner in --gaps mode:
+
+```
+Agent(
+  prompt="""
+<planning_context>
+
+**Phase:** {phase_number}
+**Mode:** gap_closure
+
+<files_to_read>
+- {phase_dir}/{phase_num}-UAT.md (UAT with diagnoses)
+- .planning/STATE.md (Project State)
+- .planning/ROADMAP.md (Roadmap)
+</files_to_read>
+
+${AGENT_SKILLS_PLANNER}
+
+</planning_context>
+
+<downstream_consumer>
+Output consumed by /gsd:execute-phase
+Plans must be executable prompts.
+</downstream_consumer>
+""",
+  subagent_type="gsd-planner",
+  model="{planner_model}",
+  description="Plan gap fixes for Phase {phase}"
+)
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+On return:
+- **PLANNING COMPLETE:** Proceed to `verify_gap_plans`
+- **PLANNING INCONCLUSIVE:** Report and offer manual intervention
+</step>
+
+<step name="verify_gap_plans">
+**Verify fix plans with checker:**
+
+Display:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► VERIFYING FIX PLANS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+◆ Spawning plan checker...
+```
+
+Initialize: `iteration_count = 1`
+
+Spawn gsd-plan-checker:
+
+```
+Agent(
+  prompt="""
+<verification_context>
+
+**Phase:** {phase_number}
+**Phase Goal:** Close diagnosed gaps from UAT
+
+<files_to_read>
+- {phase_dir}/*-PLAN.md (Plans to verify)
+</files_to_read>
+
+${AGENT_SKILLS_CHECKER}
+
+</verification_context>
+
+<expected_output>
+Return one of:
+- ## VERIFICATION PASSED — all checks pass
+- ## ISSUES FOUND — structured issue list
+</expected_output>
+""",
+  subagent_type="gsd-plan-checker",
+  model="{checker_model}",
+  description="Verify Phase {phase} fix plans"
+)
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+On return:
+- **VERIFICATION PASSED:** Proceed to `present_ready`
+- **ISSUES FOUND:** Proceed to `revision_loop`
+</step>
+
+<step name="revision_loop">
+**Iterate planner ↔ checker until plans pass (max 3):**
+
+**If iteration_count < 3:**
+
+Display: `Sending back to planner for revision... (iteration {N}/3)`
+
+Spawn gsd-planner with revision context:
+
+```
+Agent(
+  prompt="""
+<revision_context>
+
+**Phase:** {phase_number}
+**Mode:** revision
+
+<files_to_read>
+- {phase_dir}/*-PLAN.md (Existing plans)
+</files_to_read>
+
+${AGENT_SKILLS_PLANNER}
+
+**Checker issues:**
+{structured_issues_from_checker}
+
+</revision_context>
+
+<instructions>
+Read existing PLAN.md files. Make targeted updates to address checker issues.
+Do NOT replan from scratch unless issues are fundamental.
+</instructions>
+""",
+  subagent_type="gsd-planner",
+  model="{planner_model}",
+  description="Revise Phase {phase} plans"
+)
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+After planner returns → spawn checker again (verify_gap_plans logic)
+Increment iteration_count
+
+**If iteration_count >= 3:**
+
+Display: `Max iterations reached. {N} issues remain.`
+
+Offer options:
+1. Force proceed (execute despite issues)
+2. Provide guidance (user gives direction, retry)
+3. Abandon (exit, user runs /gsd:plan-phase manually)
+
+Wait for user response.
+</step>
+
+<step name="present_ready">
+**Present completion and next steps:**
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► FIXES READY ✓
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Phase {X}: {Name}** — {N} gap(s) diagnosed, {M} fix plan(s) created
+
+| Gap | Root Cause | Fix Plan |
+|-----|------------|----------|
+| {truth 1} | {root_cause} | {phase}-04 |
+| {truth 2} | {root_cause} | {phase}-04 |
+
+Plans verified and ready for execution.
+
+───────────────────────────────────────────────────────────────
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Execute fixes** — run fix plans
+
+`/clear` then `/gsd:execute-phase {phase} --gaps-only`
+
+───────────────────────────────────────────────────────────────
+```
+</step>
+
+</process>
+
+<update_rules>
+**Batched writes for efficiency:**
+
+Keep results in memory. Write to file only when:
+1. **Issue found** — Preserve the problem immediately
+2. **Session complete** — Final write before commit
+3. **Checkpoint** — Every 5 passed tests (safety net)
+
+| Section | Rule | When Written |
+|---------|------|--------------|
+| Frontmatter.status | OVERWRITE | Start, complete |
+| Frontmatter.updated | OVERWRITE | On any file write |
+| Current Test | OVERWRITE | On any file write |
+| Tests.{N}.result | OVERWRITE | On any file write |
+| Summary | OVERWRITE | On any file write |
+| Gaps | APPEND | When issue found |
+
+On context reset: File shows last checkpoint. Resume from there.
+</update_rules>
+
+<severity_inference>
+**Infer severity from user's natural language:**
+
+| User says | Infer |
+|-----------|-------|
+| "crashes", "error", "exception", "fails completely" | blocker |
+| "doesn't work", "nothing happens", "wrong behavior" | major |
+| "works but...", "slow", "weird", "minor issue" | minor |
+| "color", "spacing", "alignment", "looks off" | cosmetic |
+
+Default to **major** if unclear. User can correct if needed.
+
+**Never ask "how severe is this?"** - just infer and move on.
+</severity_inference>
+

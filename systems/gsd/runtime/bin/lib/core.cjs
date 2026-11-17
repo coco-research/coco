@@ -664,3 +664,353 @@ function normalizePhaseName(phase) {
   return str;
 }
 
+/**
+ * Render a regex source fragment matching a phase number against ROADMAP/STATE
+ * prose regardless of zero-padding on either side. Skills pass the resolved
+ * padded form (`02.7`), but human-authored ROADMAP prose is conventionally
+ * un-padded (`### Phase 2.7:`); a naive `escapeRegex(phaseNum)` fragment never
+ * matches when the two diverge. Strips leading zeros from the integer part
+ * before re-emitting with a `0*` prefix, so the fragment matches both `2.7`
+ * and `02.7` (and `002.7`).
+ *
+ * Falls back to `escapeRegex(phaseNum)` for non-numeric IDs (custom project
+ * codes like `PROJ-42`) so callers can substitute it unconditionally.
+ *
+ * See #3537 — wired into every ROADMAP-prose regex builder.
+ */
+function phaseMarkdownRegexSource(phaseNum) {
+  const stripped = String(phaseNum).replace(/^[A-Z]{1,6}-(?=\d)/i, '');
+  const match = stripped.match(/^0*(\d+)([A-Z])?((?:\.\d+)*)$/i);
+  if (!match) return escapeRegex(phaseNum);
+
+  const integer = match[1].replace(/^0+/, '') || '0';
+  const letter = match[2] ? escapeRegex(match[2]) : '';
+  const decimal = match[3] ? escapeRegex(match[3]) : '';
+  return `0*${escapeRegex(integer)}${letter}${decimal}`;
+}
+
+/**
+ * #3599: when the caller passed a project-code-prefixed ID like `PROJ-42`,
+ * return the exact-escaped form so the caller can search the ROADMAP for
+ * `### Phase PROJ-42:` BEFORE falling back to the padding-tolerant numeric
+ * form. Returns null when the input has no project-code prefix — in that
+ * case the numeric form (`phaseMarkdownRegexSource`) is the only thing the
+ * caller needs.
+ *
+ * Two-pass at the call site preserves the #3537 contract (`CK-01` directory
+ * names mapping to `Phase 1:` prose) while letting `PROJ-42` resolve to its
+ * own prefixed heading without cross-matching a bare `### Phase 42:` that
+ * happens to share the trailing integer.
+ */
+function phaseMarkdownRegexSourceExact(phaseNum) {
+  const raw = String(phaseNum);
+  if (!/^[A-Z]{1,6}-(?=\d)/i.test(raw)) return null;
+  return escapeRegex(raw);
+}
+
+function comparePhaseNum(a, b) {
+  // Strip optional project_code prefix before comparing (e.g., 'CK-01-name' → '01-name')
+  const sa = String(a).replace(/^[A-Z]{1,6}-/, '');
+  const sb = String(b).replace(/^[A-Z]{1,6}-/, '');
+  const pa = sa.match(/^(\d+)([A-Z])?((?:\.\d+)*)/i);
+  const pb = sb.match(/^(\d+)([A-Z])?((?:\.\d+)*)/i);
+  // If either is non-numeric (custom ID), fall back to string comparison
+  if (!pa || !pb) return String(a).localeCompare(String(b));
+  const intDiff = parseInt(pa[1], 10) - parseInt(pb[1], 10);
+  if (intDiff !== 0) return intDiff;
+  // No letter sorts before letter: 12 < 12A < 12B
+  const la = (pa[2] || '').toUpperCase();
+  const lb = (pb[2] || '').toUpperCase();
+  if (la !== lb) {
+    if (!la) return -1;
+    if (!lb) return 1;
+    return la < lb ? -1 : 1;
+  }
+  // Segment-by-segment decimal comparison: 12A < 12A.1 < 12A.1.2 < 12A.2
+  const aDecParts = pa[3] ? pa[3].slice(1).split('.').map(p => parseInt(p, 10)) : [];
+  const bDecParts = pb[3] ? pb[3].slice(1).split('.').map(p => parseInt(p, 10)) : [];
+  const maxLen = Math.max(aDecParts.length, bDecParts.length);
+  if (aDecParts.length === 0 && bDecParts.length > 0) return -1;
+  if (bDecParts.length === 0 && aDecParts.length > 0) return 1;
+  for (let i = 0; i < maxLen; i++) {
+    const av = Number.isFinite(aDecParts[i]) ? aDecParts[i] : 0;
+    const bv = Number.isFinite(bDecParts[i]) ? bDecParts[i] : 0;
+    if (av !== bv) return av - bv;
+  }
+  return 0;
+}
+
+/**
+ * Extract the phase token from a directory name.
+ * Supports: '01-name', '1009A-name', '999.6-name', 'CK-01-name', 'PROJ-42-name'.
+ * Returns the token portion (e.g. '01', '1009A', '999.6', 'PROJ-42') or the full name if no separator.
+ */
+function extractPhaseToken(dirName) {
+  // Try project-code-prefixed numeric: CK-01-name → CK-01, CK-01A.2-name → CK-01A.2
+  const codePrefixed = dirName.match(/^([A-Z]{1,6}-\d+[A-Z]?(?:\.\d+)*)(?:-|$)/i);
+  if (codePrefixed) return codePrefixed[1];
+  // Try plain numeric: 01-name, 1009A-name, 999.6-name
+  const numeric = dirName.match(/^(\d+[A-Z]?(?:\.\d+)*)(?:-|$)/i);
+  if (numeric) return numeric[1];
+  // Custom IDs: PROJ-42-name → everything before the last segment that looks like a name
+  const custom = dirName.match(/^([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*)(?:-[a-z]|$)/i);
+  if (custom) return custom[1];
+  return dirName;
+}
+
+/**
+ * Check if a directory name's phase token matches the normalized phase exactly.
+ * Case-insensitive comparison for the token portion.
+ */
+function phaseTokenMatches(dirName, normalized) {
+  const token = extractPhaseToken(dirName);
+  if (token.toUpperCase() === normalized.toUpperCase()) return true;
+  // Strip optional project_code prefix from dir and retry
+  const stripped = dirName.replace(/^[A-Z]{1,6}-(?=\d)/i, '');
+  if (stripped !== dirName) {
+    const strippedToken = extractPhaseToken(stripped);
+    if (strippedToken.toUpperCase() === normalized.toUpperCase()) return true;
+  }
+  return false;
+}
+
+function extractCanonicalPlanId(filename) {
+  const base = filename.replace(/-PLAN\.md$/i, '').replace(/-SUMMARY\.md$/i, '').replace(/\.md$/i, '');
+  const parts = base.split('-').filter(Boolean);
+  const tokenRe = /^\d+[A-Z]?(?:\.\d+)*$/i;
+  const phaseIdx = parts.findIndex(p => tokenRe.test(p));
+  if (phaseIdx >= 0 && phaseIdx + 1 < parts.length && tokenRe.test(parts[phaseIdx + 1])) {
+    return `${parts[phaseIdx]}-${parts[phaseIdx + 1]}`;
+  }
+  return base;
+}
+
+function searchPhaseInDir(baseDir, relBase, normalized) {
+  try {
+    const dirs = readSubdirectories(baseDir, true);
+    // Match: exact phase token comparison (not prefix matching)
+    const match = dirs.find(d => phaseTokenMatches(d, normalized));
+    if (!match) return null;
+
+    // Extract phase number and name — supports numeric (01-name), project-code-prefixed (CK-01-name), and custom (PROJ-42-name)
+    const dirMatch = match.match(/^(?:[A-Z]{1,6}-)(\d+[A-Z]?(?:\.\d+)*)-?(.*)/i)
+      || match.match(/^(\d+[A-Z]?(?:\.\d+)*)-?(.*)/i)
+      || match.match(/^([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*)-(.+)/i)
+      || [null, match, null];
+    const phaseNumber = dirMatch ? dirMatch[1] : normalized;
+    const phaseName = dirMatch && dirMatch[2] ? dirMatch[2] : null;
+    const phaseDir = path.join(baseDir, match);
+    const { plans: unsortedPlans, summaries: unsortedSummaries, hasResearch, hasContext, hasVerification, hasReviews } = getPhaseFileStats(phaseDir);
+    const plans = unsortedPlans.sort();
+    const summaries = unsortedSummaries.sort();
+
+    const completedPlanIds = new Set(
+      summaries.flatMap(s => {
+        const exact = s.replace('-SUMMARY.md', '').replace('SUMMARY.md', '');
+        const canonical = extractCanonicalPlanId(s);
+        return canonical === exact ? [exact] : [exact, canonical];
+      })
+    );
+    const incompletePlans = plans.filter(p => {
+      const planId = p.replace('-PLAN.md', '').replace('PLAN.md', '');
+      const canonical = extractCanonicalPlanId(p);
+      return !completedPlanIds.has(planId) && !completedPlanIds.has(canonical);
+    });
+
+    return {
+      found: true,
+      directory: toPosixPath(path.join(relBase, match)),
+      phase_number: phaseNumber,
+      phase_name: phaseName,
+      phase_slug: phaseName ? phaseName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') : null,
+      plans,
+      summaries,
+      incomplete_plans: incompletePlans,
+      has_research: hasResearch,
+      has_context: hasContext,
+      has_verification: hasVerification,
+      has_reviews: hasReviews,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function findPhaseInternal(cwd, phase) {
+  if (!phase) return null;
+
+  const phasesDir = path.join(planningDir(cwd), 'phases');
+  const normalized = normalizePhaseName(phase);
+
+  // Search current phases first
+  const relPhasesDir = toPosixPath(path.relative(cwd, phasesDir));
+  const current = searchPhaseInDir(phasesDir, relPhasesDir, normalized);
+  if (current) return current;
+
+  // Search archived milestone phases (newest first)
+  const milestonesDir = path.join(cwd, '.planning', 'milestones');
+  if (!fs.existsSync(milestonesDir)) return null;
+
+  try {
+    const milestoneEntries = fs.readdirSync(milestonesDir, { withFileTypes: true });
+    const archiveDirs = milestoneEntries
+      .filter(e => e.isDirectory() && /^v[\d.]+-phases$/.test(e.name))
+      .map(e => e.name)
+      .sort()
+      .reverse();
+
+    for (const archiveName of archiveDirs) {
+      const version = archiveName.match(/^(v[\d.]+)-phases$/)[1];
+      const archivePath = path.join(milestonesDir, archiveName);
+      const relBase = '.planning/milestones/' + archiveName;
+      const result = searchPhaseInDir(archivePath, relBase, normalized);
+      if (result) {
+        result.archived = version;
+        return result;
+      }
+    }
+  } catch { /* intentionally empty */ }
+
+  return null;
+}
+
+function getArchivedPhaseDirs(cwd) {
+  const milestonesDir = path.join(cwd, '.planning', 'milestones');
+  const results = [];
+
+  if (!fs.existsSync(milestonesDir)) return results;
+
+  try {
+    const milestoneEntries = fs.readdirSync(milestonesDir, { withFileTypes: true });
+    // Find v*-phases directories, sort newest first
+    const phaseDirs = milestoneEntries
+      .filter(e => e.isDirectory() && /^v[\d.]+-phases$/.test(e.name))
+      .map(e => e.name)
+      .sort()
+      .reverse();
+
+    for (const archiveName of phaseDirs) {
+      const version = archiveName.match(/^(v[\d.]+)-phases$/)[1];
+      const archivePath = path.join(milestonesDir, archiveName);
+      const dirs = readSubdirectories(archivePath, true);
+
+      for (const dir of dirs) {
+        results.push({
+          name: dir,
+          milestone: version,
+          basePath: path.join('.planning', 'milestones', archiveName),
+          fullPath: path.join(archivePath, dir),
+        });
+      }
+    }
+  } catch { /* intentionally empty */ }
+
+  return results;
+}
+
+// ─── Roadmap milestone scoping ───────────────────────────────────────────────
+
+/**
+ * Strip shipped milestone content wrapped in <details> blocks.
+ * Used to isolate current milestone phases when searching ROADMAP.md
+ * for phase headings or checkboxes — prevents matching archived milestone
+ * phases that share the same numbers as current milestone phases.
+ */
+function stripShippedMilestones(content) {
+  return content.replace(/<details>[\s\S]*?<\/details>/gi, '');
+}
+
+/**
+ * Extract the current milestone section from ROADMAP.md by positive lookup.
+ *
+ * Instead of stripping <details> blocks (negative heuristic that breaks if
+ * agents wrap the current milestone in <details>), this finds the section
+ * matching the current milestone version and returns only that content.
+ *
+ * Falls back to stripShippedMilestones() if:
+ * - cwd is not provided
+ * - STATE.md doesn't exist or has no milestone field
+ * - Version can't be found in ROADMAP.md
+ *
+ * @param {string} content - Full ROADMAP.md content
+ * @param {string} [cwd] - Working directory for reading STATE.md
+ * @returns {string} Content scoped to current milestone
+ */
+function extractCurrentMilestone(content, cwd) {
+  if (!cwd) return stripShippedMilestones(content);
+
+  // 1. Get current milestone version from STATE.md frontmatter
+  let version = null;
+  try {
+    const statePath = path.join(planningDir(cwd), 'STATE.md');
+    const stateRaw = platformReadSync(statePath);
+    if (stateRaw !== null) {
+      const milestoneMatch = stateRaw.match(/^milestone:\s*(.+)/m);
+      if (milestoneMatch) {
+        version = milestoneMatch[1].trim();
+      }
+    }
+  } catch {}
+
+  // 2. Fallback: derive version from getMilestoneInfo pattern in ROADMAP.md itself
+  if (!version) {
+    // Check for 🚧 in-progress marker
+    const inProgressMatch = content.match(/🚧\s*\*\*v(\d+\.\d+)\s/);
+    if (inProgressMatch) {
+      version = 'v' + inProgressMatch[1];
+    }
+  }
+
+  if (!version) return stripShippedMilestones(content);
+
+  // 3. Find the section matching this version
+  // Match headings like: ## Roadmap v3.0: Name, ## v3.0 Name, etc.
+  const escapedVersion = escapeRegex(version);
+  const sectionPattern = new RegExp(
+    `(^#{1,3}\\s+.*${escapedVersion}[^\\n]*)`,
+    'mi'
+  );
+  const sectionMatch = content.match(sectionPattern);
+
+  if (!sectionMatch) return stripShippedMilestones(content);
+
+  const sectionStart = sectionMatch.index;
+
+  // Find the end: next milestone heading at same or higher level, or EOF.
+  // Milestone headings look like: ## v2.0, ## Roadmap v2.0, ## ✅ v1.0, etc.
+  // Scan line-by-line so that heading-like lines inside fenced code blocks
+  // (``` or ~~~) are not mistaken for milestone boundaries. See #2787.
+  const headingLevel = sectionMatch[1].match(/^(#{1,3})\s/)[1].length;
+  const restContent = content.slice(sectionStart + sectionMatch[0].length);
+  // Exclude phase headings (e.g. "### Phase 12: v1.0 Tech-Debt Closure") from
+  // being treated as milestone boundaries just because they mention vX.Y in
+  // the title. Phase headings always start with the literal `Phase `. See #2619.
+  const nextMilestonePattern = new RegExp(
+    `^#{1,${headingLevel}}\\s+(?!Phase\\s+\\S)(?:.*v\\d+\\.\\d+|✅|📋|🚧)`,
+    'i'
+  );
+
+  let sectionEnd = content.length;
+  let fenceChar = null;
+  let fenceLen = 0;
+  let charOffset = 0;
+  for (const line of restContent.split('\n')) {
+    const fenceMatch = line.match(/^\s{0,3}((?:`{3,}|~{3,}))(.*)/);
+    if (fenceMatch) {
+      const char = fenceMatch[1][0];
+      const len = fenceMatch[1].length;
+      const trailing = fenceMatch[2] || '';
+      if (!fenceChar) {
+        fenceChar = char;
+        fenceLen = len;
+      } else if (char === fenceChar && len >= fenceLen && /^\s*$/.test(trailing)) {
+        fenceChar = null;
+        fenceLen = 0;
+      }
+    } else if (!fenceChar && nextMilestonePattern.test(line)) {
+      sectionEnd = sectionStart + sectionMatch[0].length + charOffset;
+      break;
+    }
+    charOffset += line.length + 1;
+  }
+

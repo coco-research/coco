@@ -208,3 +208,295 @@ AskUserQuestion([
     options: [
       { label: "Yes (Recommended)", description: "Research automated test coverage during plan-phase. Adds validation requirements to plans. Blocks approval if tasks lack automated verify." },
       { label: "No", description: "Skip validation research. Good for rapid prototyping or no-test phases." }
+    ]
+  },
+  // Note: Nyquist validation depends on research output. If research is disabled,
+  // plan-phase automatically skips Nyquist steps (no RESEARCH.md to extract from).
+  {
+    question: "Enable UI Phase? (generates UI-SPEC.md design contracts for frontend phases)",
+    header: "UI Phase",
+    multiSelect: false,
+    options: [
+      { label: "Yes (Recommended)", description: "Generate UI design contracts before planning frontend phases. Locks spacing, typography, color, and copywriting." },
+      { label: "No", description: "Skip UI-SPEC generation. Good for backend-only projects or API phases." }
+    ]
+  },
+  {
+    question: "Enable UI Safety Gate? (prompts to run /gsd:ui-phase before planning frontend phases)",
+    header: "UI Gate",
+    multiSelect: false,
+    options: [
+      { label: "Yes (Recommended)", description: "plan-phase asks to run /gsd:ui-phase first when frontend indicators detected." },
+      { label: "No", description: "No prompt — plan-phase proceeds without UI-SPEC check." }
+    ]
+  },
+  {
+    question: "Enable AI Phase? (framework selection + eval strategy for AI phases)",
+    header: "AI Phase",
+    multiSelect: false,
+    options: [
+      { label: "Yes (Recommended)", description: "Run /gsd:ai-integration-phase before planning AI system phases. Surfaces the right framework, researches its docs, and designs the evaluation strategy." },
+      { label: "No", description: "Skip AI design contract. Good for non-AI phases or when framework is already decided." }
+    ]
+  },
+  {
+    question: "Git branching strategy?",
+    header: "Branching",
+    multiSelect: false,
+    options: [
+      { label: "None (Recommended)", description: "Commit directly to current branch" },
+      { label: "Per Phase", description: "Create branch for each phase (gsd/phase-{N}-{name})" },
+      { label: "Per Milestone", description: "Create branch for entire milestone (gsd/{version}-{name})" }
+    ]
+  },
+  {
+    question: "Create git tags on milestone completion?",
+    header: "Git Tagging",
+    multiSelect: false,
+    options: [
+      { label: "Yes (Recommended)", description: "Tag releases with version (e.g., v1.0) on milestone completion" },
+      { label: "No", description: "Skip git tagging — use if your project doesn't use tags or uses a different release convention" }
+    ]
+  },
+  {
+    question: "Enable context window warnings? (injects advisory messages when context is getting full)",
+    header: "Ctx Warnings",
+    multiSelect: false,
+    options: [
+      { label: "Yes (Recommended)", description: "Warn when context usage exceeds 65%. Helps avoid losing work." },
+      { label: "No", description: "Disable warnings. Allows Claude to reach auto-compact naturally. Good for long unattended runs." }
+    ]
+  },
+  {
+    question: "Research best practices before asking questions? (web search during new-project and discuss-phase)",
+    header: "Research Qs",
+    multiSelect: false,
+    options: [
+      { label: "No (Recommended)", description: "Ask questions directly. Faster, uses fewer tokens." },
+      { label: "Yes", description: "Search web for best practices before each question group. More informed questions but uses more tokens." }
+    ]
+  },
+  {
+    question: "Commit .planning/ files to git? (controls whether plans/artifacts are tracked in your repo)",
+    header: "Commit Docs",
+    multiSelect: false,
+    options: [
+      { label: "Yes (Recommended)", description: "Commit .planning/ to git. Plans, research, and phase artifacts travel with the repo." },
+      { label: "No", description: "Do not commit .planning/. Keep planning local only. Automatic when .planning/ is in .gitignore." }
+    ]
+  },
+  {
+    question: "Skip discuss-phase in autonomous mode? (use ROADMAP phase goals as spec)",
+    header: "Skip Discuss",
+    multiSelect: false,
+    options: [
+      { label: "No (Recommended)", description: "Run smart discuss before each phase — surfaces gray areas and captures decisions." },
+      { label: "Yes", description: "Skip discuss in /gsd:autonomous — chain directly to plan. Best for backend/pipeline work where phase descriptions are the spec." }
+    ]
+  },
+  {
+    question: "Use git worktrees for parallel agent isolation?",
+    header: "Worktrees",
+    multiSelect: false,
+    options: [
+      { label: "Yes (Recommended)", description: "Each parallel executor runs in its own worktree branch — no conflicts between agents." },
+      { label: "No", description: "Disable worktree isolation. Agents run sequentially on the main working tree. Use if EnterWorktree creates branches from wrong base (known cross-platform issue)." }
+    ]
+  },
+  {
+    question: "Enable Intel? (queryable codebase intelligence via /gsd:map-codebase --query — builds a JSON index in .planning/intel/)",
+    header: "Intel",
+    multiSelect: false,
+    options: [
+      { label: "No (Recommended)", description: "Skip intel indexing. Use when codebase is small or intel queries are not needed." },
+      { label: "Yes", description: "Enable /gsd:map-codebase --query commands. Builds and queries a JSON index of the codebase." }
+    ]
+  },
+  {
+    question: "Enable Graphify? (project knowledge graph via /gsd:graphify — builds a graph in .planning/graphs/)",
+    header: "Graphify",
+    multiSelect: false,
+    options: [
+      { label: "No (Recommended)", description: "Skip knowledge graph. Use when dependency graphs are not needed." },
+      { label: "Yes", description: "Enable /gsd:graphify commands. Builds and queries a project knowledge graph." }
+    ]
+  },
+  {
+    question: "Auto-rebuild graph after main HEAD advances? (only effective if Graphify is enabled — #3347)",
+    header: "Graph auto-update",
+    multiSelect: false,
+    options: [
+      { label: "No (Recommended)", description: "Manual /gsd:graphify build only. Conservative default — opt in if you want fresh context on every /gsd:quick or /gsd:plan-phase." },
+      { label: "Yes", description: "Auto-rebuild the graph in a detached background process after git commit/merge/pull/rebase --continue/cherry-pick on the default branch. Hook returns instantly; rebuild runs out-of-band. No-op if Graphify is disabled." }
+    ]
+  }
+])
+```
+</step>
+
+<step name="update_config">
+Merge new settings into existing config.json:
+
+```json
+{
+  ...existing_config,
+  "model_profile": "quality" | "balanced" | "budget" | "adaptive" | "inherit",
+  "commit_docs": true/false,
+  "workflow": {
+    "research": true/false,
+    "plan_check": true/false,
+    "verifier": true/false,
+    "auto_advance": true/false,
+    "nyquist_validation": true/false,
+    "pattern_mapper": true/false,
+    "ui_phase": true/false,
+    "ui_safety_gate": true/false,
+    "ai_integration_phase": true/false,
+    "tdd_mode": true/false,
+    "code_review": true/false,
+    "code_review_depth": "quick" | "standard" | "deep",
+    "ui_review": true/false,
+    "text_mode": true/false,
+    "research_before_questions": true/false,
+    "discuss_mode": "discuss" | "assumptions",
+    "skip_discuss": true/false,
+    "use_worktrees": true/false
+  },
+  "intel": {
+    "enabled": true/false
+  },
+  "graphify": {
+    "enabled": true/false,
+    "auto_update": true/false
+  },
+  "git": {
+    "branching_strategy": "none" | "phase" | "milestone",
+    "quick_branch_template": <string|null>,
+    "create_tag": true/false
+  },
+  "hooks": {
+    "context_warnings": true/false,
+    "workflow_guard": true/false
+  }
+}
+```
+
+**Safe merge:** Apply each chosen value via `gsd-sdk query config-set <key.path> <value>` so unrelated keys are never clobbered. `code_review_depth` is written only if the code_review question was answered `on`; otherwise leave the existing value in place.
+
+Write updated config to `$GSD_CONFIG_PATH` (the workstream-aware path resolved in `ensure_and_load_config`). Never hardcode `.planning/config.json` — workstream installs route to `.planning/workstreams/<slug>/config.json`.
+</step>
+
+<step name="save_as_defaults">
+Ask whether to save these settings as global defaults for future projects:
+
+```
+AskUserQuestion([
+  {
+    question: "Save these as default settings for all new projects?",
+    header: "Defaults",
+    multiSelect: false,
+    options: [
+      { label: "Yes", description: "New projects start with these settings (saved to ~/.gsd/defaults.json)" },
+      { label: "No", description: "Only apply to this project" }
+    ]
+  }
+])
+```
+
+If "Yes": write the same config object (minus project-specific fields like `brave_search`) to `~/.gsd/defaults.json`:
+
+```bash
+mkdir -p ~/.gsd
+```
+
+Write `~/.gsd/defaults.json` with:
+```json
+{
+  "mode": <current>,
+  "granularity": <current>,
+  "model_profile": <current>,
+  "commit_docs": <current>,
+  "parallelization": <current>,
+  "branching_strategy": <current>,
+  "quick_branch_template": <current>,
+  "workflow": {
+    "research": <current>,
+    "plan_check": <current>,
+    "verifier": <current>,
+    "auto_advance": <current>,
+    "nyquist_validation": <current>,
+    "pattern_mapper": <current>,
+    "ui_phase": <current>,
+    "ui_safety_gate": <current>,
+    "ai_integration_phase": <current>,
+    "tdd_mode": <current>,
+    "code_review": <current>,
+    "code_review_depth": <current>,
+    "ui_review": <current>,
+    "skip_discuss": <current>
+  },
+  "intel": {
+    "enabled": <current>
+  },
+  "graphify": {
+    "enabled": <current>,
+    "auto_update": <current>
+  }
+}
+```
+</step>
+
+<step name="confirm">
+Display:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► SETTINGS UPDATED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+| Setting              | Value |
+|----------------------|-------|
+| Model Profile        | {quality/balanced/budget/inherit} |
+| Plan Researcher      | {On/Off} |
+| Plan Checker         | {On/Off} |
+| Pattern Mapper       | {On/Off} |
+| Execution Verifier   | {On/Off} |
+| TDD Mode             | {On/Off} |
+| Code Review          | {On/Off} |
+| Code Review Depth    | {quick/standard/deep} |
+| UI Review            | {On/Off} |
+| Commit Docs          | {On/Off} |
+| Intel                | {On/Off} |
+| Graphify             | {On/Off} |
+| Auto-Advance         | {On/Off} |
+| Nyquist Validation   | {On/Off} |
+| UI Phase             | {On/Off} |
+| UI Safety Gate       | {On/Off} |
+| AI Integration Phase | {On/Off} |
+| Git Branching        | {None/Per Phase/Per Milestone} |
+| Git Tagging          | {On/Off} |
+| Skip Discuss         | {On/Off} |
+| Context Warnings     | {On/Off} |
+| Saved as Defaults    | {Yes/No} |
+
+These settings apply to future /gsd:plan-phase and /gsd:execute-phase runs.
+
+Quick commands:
+- /gsd:config --integrations — configure API keys (Brave/Firecrawl/Exa), review.models CLI routing, and agent_skills injection
+- /gsd:config --profile <profile> — switch model profile
+- /gsd:plan-phase --research — force research
+- /gsd:plan-phase --skip-research — skip research
+- /gsd:plan-phase --skip-verify — skip plan check
+- /gsd:config --advanced — power-user tuning (plan bounce, timeouts, branch templates, cross-AI, context window)
+```
+</step>
+
+</process>
+
+<success_criteria>
+- [ ] Current config read
+- [ ] User presented with 23 settings (profile + workflow toggles + features + git branching + git tagging + ctx warnings), grouped into six sections: Planning, Execution, Docs & Output, Features, Model & Pipeline, Misc. `code_review_depth` is conditional on `code_review=on`.
+- [ ] Config updated with model_profile, workflow, and git sections
+- [ ] User offered to save as global defaults (~/.gsd/defaults.json)
+- [ ] Changes confirmed to user
+</success_criteria>

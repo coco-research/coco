@@ -6,7 +6,9 @@ name: case-insensitive, whole words, plus plurals and hyphenated forms.
 Also fails when a router team has fewer than 8 positives, or an id repeats.
 
     python3 evals/routing/check_items.py [ITEMS]
+    python3 evals/routing/check_items.py DEV_ITEMS --teams ai engineering
 """
+import argparse
 import json
 import pathlib
 import re
@@ -31,10 +33,16 @@ def forms(word):
     return {word, plural(word)}
 
 
-def team_names():
+def team_names(teams=None):
     """Validate data from shipped registries without importing router integrations."""
     names = {}
-    for reg in sorted((ROOT / "systems" / "superintelligence").glob("*/registry.json")):
+    root = ROOT / "systems" / "superintelligence"
+    registries = (sorted(root.glob("*/registry.json")) if teams is None else
+                  [root / key / "registry.json" for key in sorted(set(teams))
+                   if re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", key)])
+    for reg in registries:
+        if not reg.is_file():
+            continue
         key = reg.parent.name
         record = json.loads(reg.read_text())
         names[key] = record.get("team_name", key)
@@ -59,13 +67,15 @@ def prompt_tokens(prompt):
     return found
 
 
-def check(items):
+def check(items, teams=None):
     """Return failure strings. Empty means the file is clean."""
-    names = team_names()
+    names = team_names(teams)
+    requested = set(teams) if teams is not None else set(names)
+    failures = [f"{key}: unknown requested team" for key in sorted(requested - set(names))]
+    names = {key: name for key, name in names.items() if key in requested}
     bans = {key: banned_words(key, name) for key, name in names.items()}
     counts = {key: 0 for key in names}
     seen = {}
-    failures = []
     for item in items:
         item_id = item.get("id", "?")
         if item_id in seen:
@@ -90,8 +100,12 @@ def check(items):
 
 
 def main(argv):
-    path = pathlib.Path(argv[1]) if len(argv) > 1 else (
-        pathlib.Path(__file__).resolve().parent / "items-descriptions.jsonl")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("items", nargs="?", type=pathlib.Path, default=(
+        pathlib.Path(__file__).resolve().parent / "items-descriptions.jsonl"))
+    parser.add_argument("--teams", nargs="+", help="validate an explicit development subset")
+    args = parser.parse_args(argv[1:])
+    path = args.items
     try:
         lines = path.read_text().splitlines()
     except OSError as e:
@@ -106,7 +120,7 @@ def main(argv):
         except json.JSONDecodeError as e:
             print(f"{path}:{n}: {e}", file=sys.stderr)
             return 1
-    failures = check(items)
+    failures = check(items, teams=args.teams)
     if failures:
         for failure in failures:
             print(failure, file=sys.stderr)

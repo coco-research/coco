@@ -199,3 +199,30 @@ function cmdTemplateFill(cwd, templateType, options, raw) {
         '## Requirements Coverage',
         '| Requirement | Status | Blocking Issue |',
         '|-------------|--------|----------------|',
+        '| [req] | pending | |',
+        '',
+        '## Result',
+        '[Pending verification]',
+      ].join('\n');
+      fileName = `${padded}-VERIFICATION.md`;
+      break;
+    }
+    default:
+      error(`Unknown template type: ${templateType}. Available: summary, plan, verification`);
+      return;
+  }
+
+  const fullContent = `---\n${reconstructFrontmatter(frontmatter)}\n---\n\n${body}\n`;
+  const outPath = path.join(cwd, phaseInfo.directory, fileName);
+
+  if (fs.existsSync(outPath)) {
+    output({ error: 'File already exists', path: toPosixPath(path.relative(cwd, outPath)) }, raw);
+    return;
+  }
+
+  platformWriteSync(outPath, fullContent);
+  const relPath = toPosixPath(path.relative(cwd, outPath));
+  output({ created: true, path: relPath, template: templateType }, raw, relPath);
+}
+
+module.exports = { cmdTemplateSelect, cmdTemplateFill };

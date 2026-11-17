@@ -164,3 +164,148 @@ For local webhook testing:
 ```bash
 stripe listen --forward-to localhost:3000/api/webhooks/stripe
 ```
+Use the webhook signing secret from CLI output (starts with `whsec_`).
+
+## Verification
+
+After completing setup:
+
+```bash
+# Check env vars are set
+grep STRIPE .env.local
+
+# Verify build passes
+npm run build
+
+# Test webhook endpoint (should return 400 bad signature, not 500 crash)
+curl -X POST http://localhost:3000/api/webhooks/stripe \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+Expected: Build passes, webhook returns 400 (signature validation working).
+
+---
+
+**Once all items complete:** Mark status as "Complete" at top of file.
+```
+</stripe_example>
+
+<supabase_example>
+```markdown
+# Phase 2: User Setup Required
+
+**Generated:** 2025-01-14
+**Phase:** 02-authentication
+**Status:** Incomplete
+
+Complete these items for Supabase Auth to function.
+
+## Environment Variables
+
+| Status | Variable | Source | Add to |
+|--------|----------|--------|--------|
+| [ ] | `NEXT_PUBLIC_SUPABASE_URL` | Supabase Dashboard → Settings → API → Project URL | `.env.local` |
+| [ ] | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard → Settings → API → anon public | `.env.local` |
+| [ ] | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API → service_role | `.env.local` |
+
+## Account Setup
+
+- [ ] **Create Supabase project**
+  - URL: https://supabase.com/dashboard/new
+  - Skip if: Already have project for this app
+
+## Dashboard Configuration
+
+- [ ] **Enable Email Auth**
+  - Location: Supabase Dashboard → Authentication → Providers
+  - Enable: Email provider
+  - Configure: Confirm email (on/off based on preference)
+
+- [ ] **Configure OAuth providers** (if using social login)
+  - Location: Supabase Dashboard → Authentication → Providers
+  - For Google: Add Client ID and Secret from Google Cloud Console
+  - For GitHub: Add Client ID and Secret from GitHub OAuth Apps
+
+## Verification
+
+After completing setup:
+
+```bash
+# Check env vars
+grep SUPABASE .env.local
+
+# Verify connection (run in project directory)
+npx supabase status
+```
+
+---
+
+**Once all items complete:** Mark status as "Complete" at top of file.
+```
+</supabase_example>
+
+<sendgrid_example>
+```markdown
+# Phase 5: User Setup Required
+
+**Generated:** 2025-01-14
+**Phase:** 05-notifications
+**Status:** Incomplete
+
+Complete these items for SendGrid email to function.
+
+## Environment Variables
+
+| Status | Variable | Source | Add to |
+|--------|----------|--------|--------|
+| [ ] | `SENDGRID_API_KEY` | SendGrid Dashboard → Settings → API Keys → Create API Key | `.env.local` |
+| [ ] | `SENDGRID_FROM_EMAIL` | Your verified sender email address | `.env.local` |
+
+## Account Setup
+
+- [ ] **Create SendGrid account**
+  - URL: https://signup.sendgrid.com/
+  - Skip if: Already have account
+
+## Dashboard Configuration
+
+- [ ] **Verify sender identity**
+  - Location: SendGrid Dashboard → Settings → Sender Authentication
+  - Option 1: Single Sender Verification (quick, for dev)
+  - Option 2: Domain Authentication (production)
+
+- [ ] **Create API Key**
+  - Location: SendGrid Dashboard → Settings → API Keys → Create API Key
+  - Permission: Restricted Access → Mail Send (Full Access)
+  - Copy key immediately (shown only once)
+
+## Verification
+
+After completing setup:
+
+```bash
+# Check env var
+grep SENDGRID .env.local
+
+# Test email sending (replace with your test email)
+curl -X POST http://localhost:3000/api/test-email \
+  -H "Content-Type: application/json" \
+  -d '{"to": "your@email.com"}'
+```
+
+---
+
+**Once all items complete:** Mark status as "Complete" at top of file.
+```
+</sendgrid_example>
+
+---
+
+## Guidelines
+
+**Never include:** Actual secret values. Steps Claude can automate (package installs, code changes).
+
+**Naming:** `{phase}-USER-SETUP.md` matches the phase number pattern.
+**Status tracking:** User marks checkboxes and updates status line when complete.
+**Searchability:** `grep -r "USER-SETUP" .planning/` finds all phases with user requirements.

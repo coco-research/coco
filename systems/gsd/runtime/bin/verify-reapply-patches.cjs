@@ -309,3 +309,28 @@ function main() {
     );
   } else {
     process.stdout.write(`# Hunk Verification Gate (#2969)\n\n`);
+    process.stdout.write(`Checked: ${results.length} file(s)\n`);
+    process.stdout.write(`Failures: ${failures.length}\n\n`);
+    if (failures.length > 0) {
+      process.stdout.write(`## Files with missing user-added content\n\n`);
+      for (const r of failures) {
+        process.stdout.write(`- ${r.file}\n`);
+        if (r.reason) process.stdout.write(`  reason: ${r.reason}\n`);
+        for (const line of r.missing.slice(0, 5)) {
+          process.stdout.write(`  missing: ${line}\n`);
+        }
+        if (r.missing.length > 5) {
+          process.stdout.write(`  …and ${r.missing.length - 5} more line(s)\n`);
+        }
+      }
+    }
+  }
+
+  process.exit(failures.length > 0 ? 1 : 0);
+}
+
+if (require.main === module) {
+  main();
+}
+
+module.exports = { computeUserAddedLines, isSignificantLine, verifyFile, walk, REASON, readPristineHashes, sha256 };

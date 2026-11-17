@@ -119,3 +119,57 @@ research agents.
    c. Verify option count matches calibration tier:
       - `full_maturity`: 3-5 options acceptable
       - `standard`: 2-4 options acceptable
+      - `minimal_decisive`: 1-2 options acceptable
+      If agent returned too many, trim least viable. If too few, accept as-is.
+   d. Rewrite rationale paragraph to weave in project context and ongoing discussion context that the agent did not have access to
+   e. If agent returned only 1 option, convert from table format to direct recommendation: "Standard approach for {area}: {option}. {rationale}"
+   f. **If `NON_TECHNICAL_OWNER` is true:** apply a plain language rewrite to the rationale paragraph. Replace implementation-level terms with outcome descriptions the user can reason about without technical context. The Recommendation column value and the table structure remain intact. Do not remove detail; translate it. Example: "SWR uses stale-while-revalidate to serve cached responses immediately" → "This approach shows you something right away, then quietly updates in the background — users see data instantly."
+
+4. Store synthesized tables for use in `discuss_areas` (table-first flow).
+
+## discuss_areas (advisor table-first flow)
+
+For each selected area:
+
+1. **Present the synthesized comparison table + rationale paragraph** (from
+   `advisor_research`)
+
+2. **Use AskUserQuestion** (or text-mode equivalent if `--text` overlay):
+   - header: `{area_name}`
+   - question: `Which approach for {area_name}?`
+   - options: extract from the table's Option column (AskUserQuestion adds
+     "Other" automatically)
+
+3. **Record the user's selection:**
+   - If user picks from table options → record as locked decision for that
+     area
+   - If user picks "Other" → receive their input, reflect it back for
+     confirmation, record
+
+4. **Thinking partner (conditional):** same rule as default mode — if
+   `features.thinking_partner` is enabled and tradeoff signals are
+   detected, offer a 3-5 bullet analysis before locking in.
+
+5. **After recording pick, decide whether follow-up questions are needed:**
+   - If the pick has ambiguity that would affect downstream planning →
+     ask 1-2 targeted follow-up questions using AskUserQuestion
+   - If the pick is clear and self-contained → move to next area
+   - Do NOT ask the standard 4 questions — the table already provided the
+     context
+
+6. **After all areas processed:**
+   - header: "Done"
+   - question: "That covers [list areas]. Ready to create context?"
+   - options: "Create context" / "Revisit an area"
+
+## Scope creep handling (advisor mode)
+
+If user mentions something outside the phase domain:
+```
+"[Feature] sounds like a new capability — that belongs in its own phase.
+I'll note it as a deferred idea.
+
+Back to [current area]: [return to current question]"
+```
+
+Track deferred ideas internally.

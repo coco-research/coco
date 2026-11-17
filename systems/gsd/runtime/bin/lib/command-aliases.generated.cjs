@@ -639,3 +639,178 @@ const NON_FAMILY_COMMAND_ALIASES = [
     "mutation": true
   },
   {
+    "canonical": "generate-dev-preferences",
+    "aliases": [],
+    "mutation": true
+  },
+  {
+    "canonical": "learnings.copy",
+    "aliases": [
+      "learnings copy"
+    ],
+    "mutation": true
+  },
+  {
+    "canonical": "learnings.delete",
+    "aliases": [
+      "learnings delete"
+    ],
+    "mutation": true
+  },
+  {
+    "canonical": "learnings.prune",
+    "aliases": [
+      "learnings prune"
+    ],
+    "mutation": true
+  },
+  {
+    "canonical": "milestone.complete",
+    "aliases": [
+      "milestone complete"
+    ],
+    "mutation": true
+  },
+  {
+    "canonical": "phase.mvp-mode",
+    "aliases": [
+      "phase mvp-mode"
+    ],
+    "mutation": false
+  },
+  {
+    "canonical": "progress.bar",
+    "aliases": [
+      "progress bar"
+    ],
+    "mutation": false
+  },
+  {
+    "canonical": "requirements.mark-complete",
+    "aliases": [
+      "requirements mark-complete"
+    ],
+    "mutation": true
+  },
+  {
+    "canonical": "stats.json",
+    "aliases": [
+      "stats json"
+    ],
+    "mutation": false
+  },
+  {
+    "canonical": "task.is-behavior-adding",
+    "aliases": [
+      "task is-behavior-adding"
+    ],
+    "mutation": false
+  },
+  {
+    "canonical": "template.fill",
+    "aliases": [],
+    "mutation": true
+  },
+  {
+    "canonical": "template.select",
+    "aliases": [
+      "template select"
+    ],
+    "mutation": true
+  },
+  {
+    "canonical": "todo.complete",
+    "aliases": [
+      "todo complete"
+    ],
+    "mutation": true
+  },
+  {
+    "canonical": "todo.match-phase",
+    "aliases": [
+      "todo match-phase"
+    ],
+    "mutation": false
+  },
+  {
+    "canonical": "uat.render-checkpoint",
+    "aliases": [
+      "uat render-checkpoint"
+    ],
+    "mutation": false
+  },
+  {
+    "canonical": "verify-summary",
+    "aliases": [
+      "verify.summary",
+      "verify summary"
+    ],
+    "mutation": false
+  },
+  {
+    "canonical": "workstream.complete",
+    "aliases": [
+      "workstream complete"
+    ],
+    "mutation": true
+  },
+  {
+    "canonical": "workstream.create",
+    "aliases": [
+      "workstream create"
+    ],
+    "mutation": true
+  },
+  {
+    "canonical": "workstream.list",
+    "aliases": [
+      "workstream list"
+    ],
+    "mutation": false
+  },
+  {
+    "canonical": "workstream.progress",
+    "aliases": [
+      "workstream progress"
+    ],
+    "mutation": true
+  },
+  {
+    "canonical": "workstream.set",
+    "aliases": [
+      "workstream set"
+    ],
+    "mutation": true
+  },
+  {
+    "canonical": "write-profile",
+    "aliases": [],
+    "mutation": true
+  }
+];
+
+const STATE_SUBCOMMANDS = STATE_COMMAND_ALIASES.map((entry) => entry.subcommand);
+const VERIFY_SUBCOMMANDS = VERIFY_COMMAND_ALIASES.map((entry) => entry.subcommand);
+const INIT_SUBCOMMANDS = INIT_COMMAND_ALIASES.map((entry) => entry.subcommand);
+const PHASE_SUBCOMMANDS = PHASE_COMMAND_ALIASES.map((entry) => entry.subcommand);
+const PHASES_SUBCOMMANDS = PHASES_COMMAND_ALIASES.map((entry) => entry.subcommand);
+const VALIDATE_SUBCOMMANDS = VALIDATE_COMMAND_ALIASES.map((entry) => entry.subcommand);
+const ROADMAP_SUBCOMMANDS = ROADMAP_COMMAND_ALIASES.map((entry) => entry.subcommand);
+
+module.exports = {
+  STATE_COMMAND_ALIASES,
+  VERIFY_COMMAND_ALIASES,
+  INIT_COMMAND_ALIASES,
+  PHASE_COMMAND_ALIASES,
+  PHASES_COMMAND_ALIASES,
+  VALIDATE_COMMAND_ALIASES,
+  ROADMAP_COMMAND_ALIASES,
+  NON_FAMILY_COMMAND_ALIASES,
+  STATE_SUBCOMMANDS,
+  VERIFY_SUBCOMMANDS,
+  INIT_SUBCOMMANDS,
+  PHASE_SUBCOMMANDS,
+  PHASES_SUBCOMMANDS,
+  VALIDATE_SUBCOMMANDS,
+  ROADMAP_SUBCOMMANDS,
+};

@@ -481,3 +481,353 @@ function collectDiskPhases(planBase) {
   };
 
   for (const root of phaseRoots) scanDir(root);
+
+  return diskPhases;
+}
+
+function cmdValidateConsistency(cwd, raw) {
+  const planBase = planningDir(cwd);
+  const roadmapPath = path.join(planBase, 'ROADMAP.md');
+  const errors = [];
+  const warnings = [];
+
+  // Check for ROADMAP
+  if (!fs.existsSync(roadmapPath)) {
+    errors.push('ROADMAP.md not found');
+    output({ passed: false, errors, warnings }, raw, 'failed');
+    return;
+  }
+
+  const roadmapContentRaw = fs.readFileSync(roadmapPath, 'utf-8');
+  const roadmapContent = extractCurrentMilestone(roadmapContentRaw, cwd);
+
+  // Extract phases from ROADMAP (archived milestones already stripped)
+  const roadmapPhases = new Set();
+  const phasePattern = /#{2,4}\s*Phase\s+(\d+[A-Z]?(?:\.\d+)*)\s*:/gi;
+  let m;
+  while ((m = phasePattern.exec(roadmapContent)) !== null) {
+    roadmapPhases.add(m[1]);
+  }
+
+  // Get phases on disk (flat layout + milestone-archive layout)
+  const diskPhases = collectDiskPhases(planBase);
+
+  // Check: phases in ROADMAP but not on disk
+  for (const p of roadmapPhases) {
+    if (!diskPhases.has(p) && !diskPhases.has(normalizePhaseName(p))) {
+      warnings.push(`Phase ${p} in ROADMAP.md but no directory on disk`);
+    }
+  }
+
+  // Check: phases on disk but not in ROADMAP
+  for (const p of diskPhases) {
+    const unpadded = String(parseInt(p, 10));
+    if (!roadmapPhases.has(p) && !roadmapPhases.has(unpadded)) {
+      warnings.push(`Phase ${p} exists on disk but not in ROADMAP.md`);
+    }
+  }
+
+  // Check: sequential phase numbers (integers only, skip in custom naming mode)
+  const config = loadConfig(cwd);
+  if (config.phase_naming !== 'custom') {
+    const integerPhases = [...diskPhases]
+      .filter(p => !p.includes('.'))
+      .map(p => parseInt(p, 10))
+      .sort((a, b) => a - b);
+
+    for (let i = 1; i < integerPhases.length; i++) {
+      if (integerPhases[i] !== integerPhases[i - 1] + 1) {
+        warnings.push(`Gap in phase numbering: ${integerPhases[i - 1]} → ${integerPhases[i]}`);
+      }
+    }
+  }
+
+  const phaseRoots = collectPhaseRoots(planBase);
+  for (const phaseRoot of phaseRoots) {
+    try {
+      const entries = fs.readdirSync(phaseRoot, { withFileTypes: true });
+      const dirs = entries.filter(e => e.isDirectory()).map(e => e.name).sort();
+
+      for (const dir of dirs) {
+        const phasePath = path.join(phaseRoot, dir);
+        const phaseLabel = path.relative(planBase, phasePath).replace(/\\/g, '/');
+        const phaseFiles = fs.readdirSync(phasePath);
+        const plans = phaseFiles.filter(f => f.endsWith('-PLAN.md')).sort();
+
+        // Extract plan numbers
+        const planNums = plans.map(p => {
+          const pm = p.match(/-(\d{2})-PLAN\.md$/);
+          return pm ? parseInt(pm[1], 10) : null;
+        }).filter(n => n !== null);
+
+        for (let i = 1; i < planNums.length; i++) {
+          if (planNums[i] !== planNums[i - 1] + 1) {
+            warnings.push(`Gap in plan numbering in ${phaseLabel}: plan ${planNums[i - 1]} → ${planNums[i]}`);
+          }
+        }
+
+        // Check: plans without summaries (completed plans)
+        const summaries = phaseFiles.filter(f => f.endsWith('-SUMMARY.md'));
+        const planIds = new Set(plans.map(p => p.replace('-PLAN.md', '')));
+        const summaryIds = new Set(summaries.map(s => s.replace('-SUMMARY.md', '')));
+
+        // Summary without matching plan is suspicious
+        for (const sid of summaryIds) {
+          if (!planIds.has(sid)) {
+            warnings.push(`Summary ${sid}-SUMMARY.md in ${phaseLabel} has no matching PLAN.md`);
+          }
+        }
+
+        // Check: frontmatter in plans has required fields
+        for (const plan of plans) {
+          const content = fs.readFileSync(path.join(phasePath, plan), 'utf-8');
+          const fm = extractFrontmatter(content);
+          if (!fm.wave) {
+            warnings.push(`${phaseLabel}/${plan}: missing 'wave' in frontmatter`);
+          }
+        }
+      }
+    } catch { /* intentionally empty */ }
+  }
+
+  const passed = errors.length === 0;
+  output({ passed, errors, warnings, warning_count: warnings.length }, raw, passed ? 'passed' : 'failed');
+}
+
+function cmdValidateHealth(cwd, options, raw) {
+  // Guard: detect if CWD is the home directory (likely accidental)
+  const resolved = path.resolve(cwd);
+  if (resolved === os.homedir()) {
+    output({
+      status: 'error',
+      errors: [{ code: 'E010', message: `CWD is home directory (${resolved}) — health check would read the wrong .planning/ directory. Run from your project root instead.`, fix: 'cd into your project directory and retry' }],
+      warnings: [],
+      info: [{ code: 'I010', message: `Resolved CWD: ${resolved}` }],
+      repairable_count: 0,
+    }, raw);
+    return;
+  }
+
+  const planBase = planningDir(cwd);
+  const projectPath = path.join(planBase, 'PROJECT.md');
+  const roadmapPath = path.join(planBase, 'ROADMAP.md');
+  const statePath = path.join(planBase, 'STATE.md');
+  const configPath = path.join(planBase, 'config.json');
+  const phasesDir = path.join(planBase, 'phases');
+  // Resolve runtime once so every emitted fix hint uses the routable slash
+  // form for this install (#3584).
+  const _slashRuntime = resolveRuntime(cwd);
+  const slash = (name) => formatGsdSlash(name, _slashRuntime);
+
+  const errors = [];
+  const warnings = [];
+  const info = [];
+  const repairs = [];
+
+  // Helper to add issue
+  const addIssue = (severity, code, message, fix, repairable = false) => {
+    const issue = { code, message, fix, repairable };
+    if (severity === 'error') errors.push(issue);
+    else if (severity === 'warning') warnings.push(issue);
+    else info.push(issue);
+  };
+
+  // ─── Check 1: .planning/ exists ───────────────────────────────────────────
+  if (!fs.existsSync(planBase)) {
+    addIssue('error', 'E001', '.planning/ directory not found', `Run ${slash('new-project')} to initialize`);
+    output({
+      status: 'broken',
+      errors,
+      warnings,
+      info,
+      repairable_count: 0,
+    }, raw);
+    return;
+  }
+
+  // ─── Check 2: PROJECT.md exists and has required sections ─────────────────
+  if (!fs.existsSync(projectPath)) {
+    addIssue('error', 'E002', 'PROJECT.md not found', `Run ${slash('new-project')} to create`);
+  } else {
+    const content = fs.readFileSync(projectPath, 'utf-8');
+    const requiredSections = ['## What This Is', '## Core Value', '## Requirements'];
+    for (const section of requiredSections) {
+      if (!content.includes(section)) {
+        addIssue('warning', 'W001', `PROJECT.md missing section: ${section}`, 'Add section manually');
+      }
+    }
+  }
+
+  // ─── Check 3: ROADMAP.md exists ───────────────────────────────────────────
+  if (!fs.existsSync(roadmapPath)) {
+    addIssue('error', 'E003', 'ROADMAP.md not found', `Run ${slash('new-milestone')} to create roadmap`);
+  }
+
+  // ─── Check 4: STATE.md exists and references valid phases ─────────────────
+  if (!fs.existsSync(statePath)) {
+    addIssue('error', 'E004', 'STATE.md not found', `Run ${slash('health')} --repair to regenerate`, true);
+    repairs.push('regenerateState');
+  } else {
+    const stateContent = fs.readFileSync(statePath, 'utf-8');
+    // Extract phase references from STATE.md
+    const phaseRefs = [...stateContent.matchAll(/[Pp]hase\s+(\d+[A-Z]?(?:\.\d+)*)/g)].map(m => m[1]);
+    // Bug #2633 — ROADMAP.md is the authority for which phases are valid.
+    // STATE.md may legitimately reference current-milestone future phases
+    // (not yet materialized on disk) and shipped-milestone history phases
+    // (archived / cleared off disk). Matching only against on-disk dirs
+    // produces false W002 warnings in both cases.
+    const validPhases = collectDiskPhases(planBase);
+    // Union in every phase declared anywhere in ROADMAP.md (current + shipped + backlog).
+    try {
+      if (fs.existsSync(roadmapPath)) {
+        const roadmapRaw = fs.readFileSync(roadmapPath, 'utf-8');
+        const all = [...roadmapRaw.matchAll(/#{2,4}\s*Phase\s+(\d+[A-Z]?(?:\.\d+)*)/gi)];
+        for (const m of all) validPhases.add(m[1]);
+      }
+    } catch { /* intentionally empty */ }
+    // Bug #3652 — also union phases from every milestone archive, not only
+    // the active one. After /gsd:complete-milestone, historical phase dirs
+    // live under milestones/vX.Y-phases/ and their `#### Phase N:` headings
+    // get collapsed inside <details> blocks (which the heading regex above
+    // misses). collectDiskPhases() only scans the active archive, so
+    // without this step STATE.md's narrative references to older shipped
+    // phases fire false W002.
+    forEachArchivedPhaseToken(planBase, (token) => validPhases.add(token));
+    // Compare canonical full phase tokens. Also accept a leading-zero variant
+    // on the integer prefix only (e.g. "03" matching "3", "03.1" matching
+    // "3.1") so historic STATE.md formatting still validates. Suffix tokens
+    // like "3A" must match exactly — never collapsed to "3".
+    const normalizedValid = new Set();
+    for (const p of validPhases) {
+      normalizedValid.add(p);
+      const dotIdx = p.indexOf('.');
+      const head = dotIdx === -1 ? p : p.slice(0, dotIdx);
+      const tail = dotIdx === -1 ? '' : p.slice(dotIdx);
+      if (/^\d+$/.test(head)) {
+        normalizedValid.add(head.padStart(2, '0') + tail);
+      }
+    }
+    // Check for invalid references
+    for (const ref of phaseRefs) {
+      const dotIdx = ref.indexOf('.');
+      const head = dotIdx === -1 ? ref : ref.slice(0, dotIdx);
+      const tail = dotIdx === -1 ? '' : ref.slice(dotIdx);
+      const padded = /^\d+$/.test(head) ? head.padStart(2, '0') + tail : ref;
+      if (!normalizedValid.has(ref) && !normalizedValid.has(padded)) {
+        // Only warn if we know any valid phases (not just an empty project)
+        if (normalizedValid.size > 0) {
+          addIssue(
+            'warning',
+            'W002',
+            `STATE.md references phase ${ref}, but only phases ${[...validPhases].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).join(', ')} are declared`,
+            `Review STATE.md manually before changing it; ${slash('health')} --repair will not overwrite an existing STATE.md for phase mismatches`
+          );
+        }
+      }
+    }
+  }
+
+  // ─── Check 5: config.json valid JSON + valid schema ───────────────────────
+  if (!fs.existsSync(configPath)) {
+    addIssue('warning', 'W003', 'config.json not found', `Run ${slash('health')} --repair to create with defaults`, true);
+    repairs.push('createConfig');
+  } else {
+    try {
+      const raw = fs.readFileSync(configPath, 'utf-8');
+      const parsed = JSON.parse(raw);
+      // Validate known fields
+      const validProfiles = ['quality', 'balanced', 'budget', 'inherit'];
+      if (parsed.model_profile && !validProfiles.includes(parsed.model_profile)) {
+        addIssue('warning', 'W004', `config.json: invalid model_profile "${parsed.model_profile}"`, `Valid values: ${validProfiles.join(', ')}`);
+      }
+    } catch (err) {
+      addIssue('error', 'E005', `config.json: JSON parse error - ${err.message}`, `Run ${slash('health')} --repair to reset to defaults`, true);
+      repairs.push('resetConfig');
+    }
+  }
+
+  // ─── Check 5b: Nyquist validation key presence ──────────────────────────
+  if (fs.existsSync(configPath)) {
+    try {
+      const configRaw = fs.readFileSync(configPath, 'utf-8');
+      const configParsed = JSON.parse(configRaw);
+      if (configParsed.workflow && configParsed.workflow.nyquist_validation === undefined) {
+        addIssue('warning', 'W008', 'config.json: workflow.nyquist_validation absent (defaults to enabled but agents may skip)', `Run ${slash('health')} --repair to add key`, true);
+        if (!repairs.includes('addNyquistKey')) repairs.push('addNyquistKey');
+      }
+      if (configParsed.workflow && configParsed.workflow.ai_integration_phase === undefined) {
+        addIssue('warning', 'W016', `config.json: workflow.ai_integration_phase absent (defaults to enabled — run ${slash('ai-integration-phase')} before planning AI system phases)`, `Run ${slash('health')} --repair to add key`, true);
+        if (!repairs.includes('addAiIntegrationPhaseKey')) repairs.push('addAiIntegrationPhaseKey');
+      }
+    } catch { /* intentionally empty */ }
+  }
+
+  // ─── Read phase directories once for checks 6, 7, 7b, and 8 (#1973) ──────
+  let phaseDirEntries = [];
+  const phaseDirFiles = new Map(); // phase dir name → file list
+  try {
+    phaseDirEntries = fs.readdirSync(phasesDir, { withFileTypes: true }).filter(e => e.isDirectory());
+    for (const e of phaseDirEntries) {
+      try {
+        phaseDirFiles.set(e.name, fs.readdirSync(path.join(phasesDir, e.name)));
+      } catch { phaseDirFiles.set(e.name, []); }
+    }
+  } catch { /* intentionally empty */ }
+
+  // ─── Check 6: Phase directory naming (NN-name format) ─────────────────────
+  for (const e of phaseDirEntries) {
+    if (!e.name.match(/^\d{2}(?:\.\d+)*-[\w-]+$/)) {
+      addIssue('warning', 'W005', `Phase directory "${e.name}" doesn't follow NN-name format`, 'Rename to match pattern (e.g., 01-setup)');
+    }
+  }
+
+  // ─── Check 7: Orphaned plans (PLAN without SUMMARY) ───────────────────────
+  for (const e of phaseDirEntries) {
+    const phaseFiles = phaseDirFiles.get(e.name) || [];
+    const plans = phaseFiles.filter(f => f.endsWith('-PLAN.md') || f === 'PLAN.md');
+    const summaries = phaseFiles.filter(f => f.endsWith('-SUMMARY.md') || f === 'SUMMARY.md');
+    const summaryBases = new Set(summaries.map(s => s.replace('-SUMMARY.md', '').replace('SUMMARY.md', '')));
+
+    for (const plan of plans) {
+      const planBase = plan.replace('-PLAN.md', '').replace('PLAN.md', '');
+      if (!summaryBases.has(planBase)) {
+        addIssue('info', 'I001', `${e.name}/${plan} has no SUMMARY.md`, 'May be in progress');
+      }
+    }
+  }
+
+  // ─── Check 7b: Nyquist VALIDATION.md consistency ────────────────────────
+  for (const e of phaseDirEntries) {
+    const phaseFiles = phaseDirFiles.get(e.name) || [];
+    const hasResearch = phaseFiles.some(f => f.endsWith('-RESEARCH.md'));
+    const hasValidation = phaseFiles.some(f => f.endsWith('-VALIDATION.md'));
+    if (hasResearch && !hasValidation) {
+      const researchFile = phaseFiles.find(f => f.endsWith('-RESEARCH.md'));
+      try {
+        const researchContent = fs.readFileSync(path.join(phasesDir, e.name, researchFile), 'utf-8');
+        if (researchContent.includes('## Validation Architecture')) {
+          addIssue('warning', 'W009', `Phase ${e.name}: has Validation Architecture in RESEARCH.md but no VALIDATION.md`, `Re-run ${slash('plan-phase')} with --research to regenerate`);
+        }
+      } catch { /* intentionally empty */ }
+    }
+  }
+
+  // ─── Check 7c: Agent installation (#1371) ──────────────────────────────────
+  // Verify GSD agents are installed. Missing agents cause Task(subagent_type=...)
+  // to silently fall back to general-purpose, losing specialized instructions.
+  try {
+    const agentStatus = checkAgentsInstalled();
+    if (!agentStatus.agents_installed) {
+      if (agentStatus.installed_agents.length === 0) {
+        addIssue('warning', 'W010',
+          `No GSD agents found in ${agentStatus.agents_dir} — Task(subagent_type="gsd-*") will fall back to general-purpose`,
+          'Run the GSD installer: npx get-shit-done-cc@latest');
+      } else {
+        addIssue('warning', 'W010',
+          `Missing ${agentStatus.missing_agents.length} GSD agents: ${agentStatus.missing_agents.join(', ')} — affected workflows will fall back to general-purpose`,
+          'Run the GSD installer: npx get-shit-done-cc@latest');
+      }
+    }
+  } catch { /* intentionally empty — agent check is non-blocking */ }
+
+  // ─── Check 8: Run existing consistency checks ─────────────────────────────

@@ -439,3 +439,5 @@ End workflow.
 - All 7 codebase documents exist
 - No empty documents (each should have >20 lines)
 - Clear completion summary with line counts
+- User offered clear next steps in GSD style
+</success_criteria>

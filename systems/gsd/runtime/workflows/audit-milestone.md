@@ -348,3 +348,10 @@ Insert a closure phase using the standard chain:
 - [ ] 3-source cross-reference completed (VERIFICATION + SUMMARY + traceability)
 - [ ] Orphaned requirements detected (in traceability but absent from all VERIFICATIONs)
 - [ ] Tech debt and deferred gaps aggregated
+- [ ] Integration checker spawned with milestone requirement IDs
+- [ ] v{version}-MILESTONE-AUDIT.md created with structured requirement gap objects
+- [ ] FAIL gate enforced — any unsatisfied requirement forces gaps_found status
+- [ ] Nyquist compliance scanned for all milestone phases (if enabled)
+- [ ] Missing VALIDATION.md phases flagged with validate-phase suggestion
+- [ ] Results presented with actionable next steps
+</success_criteria>

@@ -253,3 +253,353 @@ Check project status and intelligently route to next action.
 - Offers to execute next plan or create it if missing
 - Detects 100% milestone completion
 
+Modes:
+- **default** — progress report + intelligent routing
+- **`--next`** — auto-advance to the next logical step (use `--next --force` to bypass safety gates)
+- **`--forensic`** — append a 6-check integrity audit after the progress report
+- **`--do "<text>"`** — smart router: dispatch freeform intent to the matching `/gsd-*` command (see *Smart Router* above)
+
+Usage: `/gsd:progress`
+Usage: `/gsd:progress --next`
+Usage: `/gsd:progress --forensic`
+
+### Session Management
+
+**`/gsd:resume-work`**
+Resume work from previous session with full context restoration.
+
+- Reads STATE.md for project context
+- Shows current position and recent progress
+- Offers next actions based on project state
+
+Usage: `/gsd:resume-work`
+
+**`/gsd:pause-work [--report]`**
+Create context handoff when pausing work mid-phase.
+
+- `--report` — generate a post-session summary in `.planning/reports/` capturing commits, file changes, and phase progress
+- Creates .continue-here file with current state
+- Updates STATE.md session continuity section
+- Captures in-progress work context
+
+Usage: `/gsd:pause-work`
+
+### Debugging
+
+**`/gsd:debug [issue description] [--diagnose]`**
+Systematic debugging with persistent state across context resets.
+
+- `--diagnose` — run a one-shot diagnostic pass without opening a persistent debug session
+
+- Gathers symptoms through adaptive questioning
+- Creates `.planning/debug/[slug].md` to track investigation
+- Investigates using scientific method (evidence → hypothesis → test)
+- Survives `/clear` — run `/gsd:debug` with no args to resume
+- Archives resolved issues to `.planning/debug/resolved/`
+
+Usage: `/gsd:debug "login button doesn't work"`
+Usage: `/gsd:debug` (resume active session)
+
+### Spiking & Sketching
+
+**`/gsd:spike [idea] [--quick]`**
+Rapidly spike an idea with throwaway experiments to validate feasibility.
+
+- Decomposes idea into 2-5 focused experiments (risk-ordered)
+- Each spike answers one specific Given/When/Then question
+- Builds minimum code, runs it, captures verdict (VALIDATED/INVALIDATED/PARTIAL)
+- Saves to `.planning/spikes/` with MANIFEST.md tracking
+- Does not require `/gsd:new-project` — works in any repo
+- `--quick` skips decomposition, builds immediately
+
+Usage: `/gsd:spike "can we stream LLM output over WebSockets?"`
+Usage: `/gsd:spike --quick "test if pdfjs extracts tables"`
+
+**`/gsd:sketch [idea] [--quick]`**
+Rapidly sketch UI/design ideas using throwaway HTML mockups with multi-variant exploration.
+
+- Conversational mood/direction intake before building
+- Each sketch produces 2-3 variants as tabbed HTML pages
+- User compares variants, cherry-picks elements, iterates
+- Shared CSS theme system compounds across sketches
+- Saves to `.planning/sketches/` with MANIFEST.md tracking
+- Does not require `/gsd:new-project` — works in any repo
+- `--quick` skips mood intake, jumps to building
+
+Usage: `/gsd:sketch "dashboard layout for the admin panel"`
+Usage: `/gsd:sketch --quick "form card grouping"`
+
+**`/gsd:spike --wrap-up`**
+Package spike findings into a persistent project skill.
+
+- Curates each spike one-at-a-time (include/exclude/partial/UAT)
+- Groups findings by feature area
+- Generates `./.claude/skills/spike-findings-[project]/` with references and sources
+- Writes summary to `.planning/spikes/WRAP-UP-SUMMARY.md`
+- Adds auto-load routing line to project CLAUDE.md
+
+Usage: `/gsd:spike --wrap-up`
+
+**`/gsd:sketch --wrap-up`**
+Package sketch design findings into a persistent project skill.
+
+- Curates each sketch one-at-a-time (include/exclude/partial/revisit)
+- Groups findings by design area
+- Generates `./.claude/skills/sketch-findings-[project]/` with design decisions, CSS patterns, HTML structures
+- Writes summary to `.planning/sketches/WRAP-UP-SUMMARY.md`
+- Adds auto-load routing line to project CLAUDE.md
+
+Usage: `/gsd:sketch --wrap-up`
+
+### Capturing Ideas, Notes, and Todos
+
+**`/gsd:capture [description]`**
+Capture an idea or task as a structured todo from current conversation.
+
+- Extracts context from conversation (or uses provided description)
+- Creates structured todo file in `.planning/todos/pending/`
+- Infers area from file paths for grouping
+- Checks for duplicates before creating
+- Updates STATE.md todo count
+
+Usage: `/gsd:capture` (infers from conversation)
+Usage: `/gsd:capture Add auth token refresh`
+
+**`/gsd:capture --note <text>`**
+Zero-friction note capture — one command, instant save, no questions.
+
+- Saves timestamped note to `.planning/notes/` (or `~/.claude/notes/` globally)
+- Three subcommands: append (default), list, promote
+- Promote converts a note into a structured todo
+- Works without a project (falls back to global scope)
+
+Usage: `/gsd:capture --note refactor the hook system`
+Usage: `/gsd:capture --note list`
+Usage: `/gsd:capture --note promote 3`
+Usage: `/gsd:capture --note --global cross-project idea`
+
+**`/gsd:capture --list [area]`**
+List pending todos and select one to work on.
+
+- Lists all pending todos with title, area, age
+- Optional area filter (e.g., `/gsd:capture --list api`)
+- Loads full context for selected todo
+- Routes to appropriate action (work now, add to phase, brainstorm)
+- Moves todo to done/ when work begins
+
+Usage: `/gsd:capture --list`
+Usage: `/gsd:capture --list api`
+
+### User Acceptance Testing
+
+**`/gsd:verify-work [phase]`**
+Validate built features through conversational UAT.
+
+- Extracts testable deliverables from SUMMARY.md files
+- Presents tests one at a time (yes/no responses)
+- Automatically diagnoses failures and creates fix plans
+- Ready for re-execution if issues found
+
+Usage: `/gsd:verify-work 3`
+
+### Ship Work
+
+**`/gsd:ship [phase]`**
+Create a PR from completed phase work with an auto-generated body.
+
+- Pushes branch to remote
+- Creates PR with summary from SUMMARY.md, VERIFICATION.md, REQUIREMENTS.md
+- Optionally requests code review
+- Updates STATE.md with shipping status
+
+Prerequisites: Phase verified, `gh` CLI installed and authenticated.
+
+Usage: `/gsd:ship 4` or `/gsd:ship 4 --draft`
+
+---
+
+**`/gsd:review --phase N [--gemini] [--claude] [--codex] [--coderabbit] [--opencode] [--qwen] [--cursor] [--all]`**
+Cross-AI peer review — invoke external AI CLIs to independently review phase plans.
+
+- Detects available CLIs (gemini, claude, codex, coderabbit)
+- Each CLI reviews plans independently with the same structured prompt
+- CodeRabbit reviews the current git diff (not a prompt) — may take up to 5 minutes
+- Produces REVIEWS.md with per-reviewer feedback and consensus summary
+- Feed reviews back into planning: `/gsd:plan-phase N --reviews`
+
+Usage: `/gsd:review --phase 3 --all`
+
+---
+
+**`/gsd:pr-branch [target]`**
+Create a clean branch for pull requests by filtering out .planning/ commits.
+
+- Classifies commits: code-only (include), planning-only (exclude), mixed (include sans .planning/)
+- Cherry-picks code commits onto a clean branch
+- Reviewers see only code changes, no GSD artifacts
+
+Usage: `/gsd:pr-branch` or `/gsd:pr-branch main`
+
+---
+
+**`/gsd:capture --seed [idea]`**
+Capture a forward-looking idea with trigger conditions for automatic surfacing.
+
+- Seeds preserve WHY, WHEN to surface, and breadcrumbs to related code
+- Auto-surfaces during `/gsd:new-milestone` when trigger conditions match
+- Better than deferred items — triggers are checked, not forgotten
+
+Usage: `/gsd:capture --seed "add real-time notifications when we build the events system"`
+
+**`/gsd:capture --backlog [description]`**
+Add an idea to the backlog parking lot for future milestones.
+
+- Creates a backlog item under 999.x numbering in ROADMAP.md
+- Reserves ideas without committing to the current milestone
+- Surface and promote later via `/gsd:review-backlog`
+
+Usage: `/gsd:capture --backlog "real-time notifications when events ship"`
+
+---
+
+**`/gsd:audit-uat`**
+Cross-phase audit of all outstanding UAT and verification items.
+- Scans every phase for pending, skipped, blocked, and human_needed items
+- Cross-references against codebase to detect stale documentation
+- Produces prioritized human test plan grouped by testability
+- Use before starting a new milestone to clear verification debt
+
+Usage: `/gsd:audit-uat`
+
+### Milestone Auditing
+
+**`/gsd:audit-milestone [version]`**
+Audit milestone completion against original intent.
+
+- Reads all phase VERIFICATION.md files
+- Checks requirements coverage
+- Spawns integration checker for cross-phase wiring
+- Creates MILESTONE-AUDIT.md with gaps and tech debt
+
+Usage: `/gsd:audit-milestone`
+
+### Configuration
+
+**`/gsd:settings`**
+Configure workflow toggles and model profile interactively.
+
+- Toggle researcher, plan checker, verifier agents
+- Select model profile (quality/balanced/budget/inherit)
+- Updates `.planning/config.json`
+
+Usage: `/gsd:settings`
+
+**`/gsd:config [--profile <profile> | --advanced | --integrations]`**
+Configure GSD beyond the basic settings: model profile, advanced tuning, and third-party integrations.
+
+- `--profile <profile>` — quick switch model profile (`quality | balanced | budget | inherit`)
+- `--advanced` — power-user tuning: plan bounce, timeouts, branch templates, cross-AI execution (replaces the former `gsd-settings-advanced`)
+- `--integrations` — third-party API keys, code-review CLI routing, agent-skill injection (replaces the former `gsd-settings-integrations`)
+
+- `quality` — Opus everywhere except verification
+- `balanced` — Opus for planning, Sonnet for execution (default)
+- `budget` — Sonnet for writing, Haiku for research/verification
+- `inherit` — Use current session model for all agents (OpenCode `/model`)
+
+Usage: `/gsd:config --profile budget`
+
+**`/gsd:surface [list|status|profile <name>|disable <cluster>|enable <cluster>|reset]`**
+Toggle which skills are surfaced — apply a profile, list, or disable a cluster without reinstall.
+
+- `list` / `status` — Show enabled and disabled clusters and skills with token cost
+- `profile <name>` — Switch to a named base profile (`core`, `standard`, `full`)
+- `disable <cluster>` — Remove a cluster from the active surface
+- `enable <cluster>` — Add a cluster back to the active surface
+- `reset` — Delete the surface delta and return to the install-time profile
+
+Usage: `/gsd:surface list`
+Usage: `/gsd:surface profile standard`
+Usage: `/gsd:surface disable utility`
+
+### Utility Commands
+
+**`/gsd:cleanup`**
+Archive accumulated phase directories from completed milestones.
+
+- Identifies phases from completed milestones still in `.planning/phases/`
+- Shows dry-run summary before moving anything
+- Moves phase dirs to `.planning/milestones/v{X.Y}-phases/`
+- Use after multiple milestones to reduce `.planning/phases/` clutter
+
+Usage: `/gsd:cleanup`
+
+**`/gsd:help [--brief | --full | <topic> | --brief <topic>]`**
+Show GSD command help at the tier you ask for.
+
+- `--brief` — one-liner refresher of the top commands (~10 lines)
+- *(no flag)* — one-page newcomer tour (default)
+- `--full` — the complete reference you are reading now
+- `<topic>` — emit only the matching section (e.g. `/gsd:help debug`, `/gsd:help workflow`)
+- `--brief <topic>` — compact scoped lookup: signature + one-line summary of the matched section
+
+Every topic output starts with a `**Topic:** \`<alias>\` → \`<heading>\` *(scope: full | compact)*` preamble so resolved routing is visible. See `get-shit-done/workflows/help/modes/topic.md` for the full alias table. Unknown topics print the recognized list.
+
+Usage: `/gsd:help`
+Usage: `/gsd:help --brief`
+Usage: `/gsd:help --full`
+Usage: `/gsd:help debug`
+Usage: `/gsd:help --brief debug`
+
+**`/gsd:update [--sync] [--reapply]`**
+Update GSD to latest version with changelog preview.
+
+- `--sync` — sync managed GSD skills across runtime roots (replaces the former `gsd-sync-skills`)
+- `--reapply` — reapply local modifications after an update (replaces the former `gsd-reapply-patches`)
+
+- Shows installed vs latest version comparison
+- Displays changelog entries for versions you've missed
+- Highlights breaking changes
+- Confirms before running install
+- Better than raw `npx get-shit-done-cc`
+
+Usage: `/gsd:update`
+
+## Additional Commands
+
+The commands above cover the most common day-to-day flows. Every command listed here is also a live `/gsd-*` slash command and is grouped by purpose.
+
+### Discovery & Specification
+
+- **`/gsd:explore`** — Socratic ideation and idea routing. Think through ideas before committing to plans.
+- **`/gsd:spec-phase <phase> [--auto] [--text]`** — Clarify WHAT a phase delivers with ambiguity scoring; produces a SPEC.md before discuss-phase.
+- **`/gsd:ai-integration-phase [phase]`** — Generate an AI-SPEC.md design contract for phases that involve building AI systems.
+- **`/gsd:ui-phase [phase]`** — Generate UI design contract (UI-SPEC.md) for frontend phases.
+- **`/gsd:import --from <filepath> | --from-gsd2`** — Ingest external plans with conflict detection, or reverse-migrate a GSD-2 (`.gsd/`) project back to GSD v1 (`.planning/`) format.
+- **`/gsd:ingest-docs [path] [--mode new|merge] [--manifest <file>] [--resolve auto|interactive]`** — Bootstrap or merge a `.planning/` setup from existing ADRs, PRDs, SPECs, and docs in a repo.
+
+### Planning & Execution
+
+- **`/gsd:mvp-phase <phase-number>`** — Plan a phase as a vertical MVP slice (user story + SPIDR splitting) before handing off to plan-phase. Same end-state as `/gsd:plan-phase --mvp`, with a guided MVP-shaping intro.
+- **`/gsd:ultraplan-phase [phase]`** — [BETA] Offload plan phase to Claude Code's ultraplan cloud; review in browser and import back.
+- **`/gsd:plan-review-convergence <phase> [--codex] [--gemini] [--claude] [--opencode] [--ollama] [--lm-studio] [--llama-cpp] [--all] [--text] [--ws <name>] [--max-cycles N]`** — Cross-AI plan convergence loop — replan with review feedback until no HIGH concerns remain. Supports both cloud reviewers (Codex/Gemini/Claude/OpenCode) and local model runtimes (Ollama, LM Studio, llama.cpp).
+- **`/gsd:autonomous [--from N] [--to N] [--only N] [--interactive]`** — Run all remaining phases autonomously: discuss → plan → execute per phase.
+
+### Quality, Review & Verification
+
+- **`/gsd:code-review <phase> [--depth=quick|standard|deep] [--files file1,file2,...] [--fix [--all] [--auto]]`** — Review source files changed during a phase for bugs, security issues, and code quality problems.
+- **`/gsd:secure-phase [phase]`** — Retroactively verify threat mitigations for a completed phase.
+- **`/gsd:validate-phase [phase]`** — Retroactively audit and fill Nyquist validation gaps for a completed phase.
+- **`/gsd:ui-review [phase]`** — Retroactive 6-pillar visual audit of implemented frontend code.
+- **`/gsd:eval-review [phase]`** — Audit an executed AI phase's evaluation coverage and produce an EVAL-REVIEW.md remediation plan.
+- **`/gsd:audit-fix --source <audit-uat> [--severity medium|high|all] [--max N] [--dry-run]`** — Autonomous audit-to-fix pipeline: find issues, classify, fix, test, commit.
+- **`/gsd:add-tests <phase> [additional instructions]`** — Generate tests for a completed phase based on UAT criteria and implementation.
+
+### Diagnostics & Maintenance
+
+- **`/gsd:health [--repair] [--context]`** — Diagnose planning directory health and optionally repair issues.
+- **`/gsd:forensics [problem description]`** — Post-mortem investigation for failed GSD workflows; diagnoses what went wrong.
+- **`/gsd:undo --last N | --phase NN | --plan NN-MM`** — Safe git revert. Roll back phase or plan commits using the phase manifest with dependency checks.
+- **`/gsd:docs-update [--force] [--verify-only]`** — Generate or update project documentation verified against the codebase.
+- **`/gsd:extract-learnings <phase>`** — Extract decisions, lessons, patterns, and surprises from completed phase artifacts.
+
+### Knowledge & Context

@@ -698,3 +698,353 @@
       "path": "templates/research-project/FEATURES.md",
       "git_blob": "431c52ba50a77342ee69328798ec0eeed0be02a1"
     },
+    {
+      "path": "templates/research-project/PITFALLS.md",
+      "git_blob": "9d66e6a6c783e7bf78e6b339b1c0842d3f192a4e"
+    },
+    {
+      "path": "templates/research-project/STACK.md",
+      "git_blob": "cdd663ba23f970b27b6f267dbab815a8d94cc648"
+    },
+    {
+      "path": "templates/research-project/SUMMARY.md",
+      "git_blob": "edd67ddf0c359c596dcb40fa05f36f89b4bd5064"
+    },
+    {
+      "path": "templates/research.md",
+      "git_blob": "bed3e1d522aca4a7ff520e389bb217a9d42efe84"
+    },
+    {
+      "path": "templates/retrospective.md",
+      "git_blob": "e804ca9769e3629f55b11a4a974513705f9a4b5d"
+    },
+    {
+      "path": "templates/roadmap.md",
+      "git_blob": "9d6749bf5e7ed4e2161379342671021819a989bc"
+    },
+    {
+      "path": "templates/spec.md",
+      "git_blob": "18b8ce6e1068a3e5363a5711c3e7a5cda193bb1a"
+    },
+    {
+      "path": "templates/state.md",
+      "git_blob": "05c6aa117755d536087e6b6ede59a7e49e6e722e"
+    },
+    {
+      "path": "templates/summary-complex.md",
+      "git_blob": "ccc8aac2d5628439fd8b4f661c571192ece2db53"
+    },
+    {
+      "path": "templates/summary-minimal.md",
+      "git_blob": "3dc1ba9e86a2a79cd4fbf721e801b4443e9ffbd6"
+    },
+    {
+      "path": "templates/summary-standard.md",
+      "git_blob": "674f146586b97959d242af971df6f8418a921ad1"
+    },
+    {
+      "path": "templates/summary.md",
+      "git_blob": "c66799b86a862d72f2f796c93f3b7debafd97e57"
+    },
+    {
+      "path": "templates/user-profile.md",
+      "git_blob": "7af2d01ec0d30bcb183bbc2fbb7898bac4b2705c"
+    },
+    {
+      "path": "templates/user-setup.md",
+      "git_blob": "260a8552b6121f5e95e22b2f6839c37503f60eda"
+    },
+    {
+      "path": "templates/verification-report.md",
+      "git_blob": "8684fe2c47a6689bcf802e364720ffb5a993f40c"
+    },
+    {
+      "path": "workflows/add-backlog.md",
+      "git_blob": "88e8fdee19e694e4b7bd0d49b56fcbd47e23a03d"
+    },
+    {
+      "path": "workflows/add-phase.md",
+      "git_blob": "098e19fd8c5fe0eb043053d3983288c17a653519"
+    },
+    {
+      "path": "workflows/add-tests.md",
+      "git_blob": "31b1f1deb45a7a61a0d3b235370e9e080903f70d"
+    },
+    {
+      "path": "workflows/add-todo.md",
+      "git_blob": "b889bed84a57f34323383312aa638fa95c944d67"
+    },
+    {
+      "path": "workflows/ai-integration-phase.md",
+      "git_blob": "1d764112a9c256a93d1e71d679d5e1abcadc494a"
+    },
+    {
+      "path": "workflows/analyze-dependencies.md",
+      "git_blob": "376e31c9e4eb557fd34c4d5da6c5a29d345c2a1b"
+    },
+    {
+      "path": "workflows/audit-fix.md",
+      "git_blob": "86c6447f94cb465dbb6248aa3096f01188143c93"
+    },
+    {
+      "path": "workflows/audit-milestone.md",
+      "git_blob": "df5293039d492684f745bd73475dbd193314b49b"
+    },
+    {
+      "path": "workflows/audit-uat.md",
+      "git_blob": "83650d62aa05e1b788ad94ec6609f72ef3bf6f0b"
+    },
+    {
+      "path": "workflows/autonomous.md",
+      "git_blob": "9ea6854e063334b64d6bd59de84ebc159ae628fa"
+    },
+    {
+      "path": "workflows/check-todos.md",
+      "git_blob": "6259ba163f9a23982bec3d0aef0d0b7c8e6ee32c"
+    },
+    {
+      "path": "workflows/cleanup.md",
+      "git_blob": "d476e82b4bd9c2c47f911ee44c71a64fa3c5cc91"
+    },
+    {
+      "path": "workflows/code-review-fix.md",
+      "git_blob": "798a3a572b74c7777a9ff27bad661b425e0d74c2"
+    },
+    {
+      "path": "workflows/code-review.md",
+      "git_blob": "010c57b66004055d4098efbd4abfe4e6009a7777"
+    },
+    {
+      "path": "workflows/complete-milestone.md",
+      "git_blob": "d8ab50c0dd427e55efad52f5a11869ca915f0dc8"
+    },
+    {
+      "path": "workflows/debug.md",
+      "git_blob": "20b763e9e0eea04b62b38a0c7ad3088ba41fcb81"
+    },
+    {
+      "path": "workflows/diagnose-issues.md",
+      "git_blob": "e819f9047f81d8d700f37699851141473f156f23"
+    },
+    {
+      "path": "workflows/discovery-phase.md",
+      "git_blob": "011d13c8556c852f7ff09ccf0ef6c8eb7888d779"
+    },
+    {
+      "path": "workflows/discuss-phase-assumptions.md",
+      "git_blob": "cdc1a96fbf78a8a9ded23f7306850a988d964a2f"
+    },
+    {
+      "path": "workflows/discuss-phase-power.md",
+      "git_blob": "0877ee6e3aac4d451d3a1b5dfefb7cb2a1446c1c"
+    },
+    {
+      "path": "workflows/discuss-phase.md",
+      "git_blob": "c3329ba599d254e6704440135ad8a74e863aaa8e"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/advisor.md",
+      "git_blob": "961256dcd48ce72ae4f3a4583ee9c221a6186bae"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/all.md",
+      "git_blob": "50fa9d0660eb0a557a659bb3f4a9838ba3a4675b"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/analyze.md",
+      "git_blob": "b373da11622f93b457e854d54704806b08fcf6ca"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/auto.md",
+      "git_blob": "977ae49cfbbdcfcd8bbd290a9bc2847f8a1a6394"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/batch.md",
+      "git_blob": "c62b25d551e0873c2444884561568e865895fe18"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/chain.md",
+      "git_blob": "c30c06bebc4bfb670c3eda270234a1713cbf090e"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/default.md",
+      "git_blob": "fb54e71e49bac0d3576f74fdc2f0fa0c94923ffe"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/power.md",
+      "git_blob": "9277ad6de5d4cdde3a724ad0069fe48bc48a9423"
+    },
+    {
+      "path": "workflows/discuss-phase/modes/text.md",
+      "git_blob": "cfc7ea1973de0eec670424c0cf87c2828878b362"
+    },
+    {
+      "path": "workflows/discuss-phase/templates/checkpoint.json",
+      "git_blob": "ac28aa3439680ef0cf6681fadf006d7418b71cfa"
+    },
+    {
+      "path": "workflows/discuss-phase/templates/context.md",
+      "git_blob": "019b05aa9a596d38fbdcbd60ad3c2055790b9d75"
+    },
+    {
+      "path": "workflows/discuss-phase/templates/discussion-log.md",
+      "git_blob": "62a68684e49e2e2576ffd33a3375f5ed10bf598a"
+    },
+    {
+      "path": "workflows/do.md",
+      "git_blob": "2fdf772444023fd9464f661d4e7569b3106e52c7"
+    },
+    {
+      "path": "workflows/docs-update.md",
+      "git_blob": "1fc7c8ea0b12336d31396212516a17efe2f516f1"
+    },
+    {
+      "path": "workflows/edit-phase.md",
+      "git_blob": "d2483cda396d35f4dfd8c61e6cd6f511bee7bd19"
+    },
+    {
+      "path": "workflows/eval-review.md",
+      "git_blob": "f80bdc1ca0bf44586deda30cf7826246fe461b52"
+    },
+    {
+      "path": "workflows/execute-phase.md",
+      "git_blob": "6a9bd074eabfba58f96f4a0b129f73526d791e8b"
+    },
+    {
+      "path": "workflows/execute-phase/steps/codebase-drift-gate.md",
+      "git_blob": "bb4066e018b0bfff7059d9b33968eef9054602c3"
+    },
+    {
+      "path": "workflows/execute-phase/steps/per-plan-worktree-gate.md",
+      "git_blob": "d5c93ca9c1fd7e51f1c85dabd52fda544c738340"
+    },
+    {
+      "path": "workflows/execute-phase/steps/post-merge-gate.md",
+      "git_blob": "af64b839060d63dabdc932d0427589186922170b"
+    },
+    {
+      "path": "workflows/execute-plan.md",
+      "git_blob": "995dd2ac3d9a77087374770a98910b826b7e476f"
+    },
+    {
+      "path": "workflows/explore.md",
+      "git_blob": "d3ccdbb08d9e2c57f015454d08e45197e8bdae27"
+    },
+    {
+      "path": "workflows/extract-learnings.md",
+      "git_blob": "5c0c1c44802540070a6cc87b9480005123b22629"
+    },
+    {
+      "path": "workflows/fast.md",
+      "git_blob": "729bcc32ec840c89089c76df3c7d31f607f7a602"
+    },
+    {
+      "path": "workflows/forensics.md",
+      "git_blob": "928af1832782f28a675c84d882fec0e31dd8442f"
+    },
+    {
+      "path": "workflows/graduation.md",
+      "git_blob": "0a75bd0a7ceb367ec36f905316ddd2b51dd4cf44"
+    },
+    {
+      "path": "workflows/health.md",
+      "git_blob": "8ced59b5873b8f57c3c6c1399f57f2c30d2f7f8c"
+    },
+    {
+      "path": "workflows/help.md",
+      "git_blob": "b5bf35c2a1dc52591e4d14a673c7f50d5727a382"
+    },
+    {
+      "path": "workflows/help/modes/brief.md",
+      "git_blob": "359c32f1a29bafeaa9bd8360fdfd056294cce4bc"
+    },
+    {
+      "path": "workflows/help/modes/default.md",
+      "git_blob": "ad7df4d76d8f2801f627908af49d694c989c36fb"
+    },
+    {
+      "path": "workflows/help/modes/full.md",
+      "git_blob": "eff95754fdc2c767f8a64c70481f468a3dada071"
+    },
+    {
+      "path": "workflows/help/modes/topic.md",
+      "git_blob": "4e8d163123e25388a9419c9c53a87e06cb8396ec"
+    },
+    {
+      "path": "workflows/import.md",
+      "git_blob": "b78d6c58613f0a64bc55793a4be35debed64e9ac"
+    },
+    {
+      "path": "workflows/inbox.md",
+      "git_blob": "353e00e08c2274ada550138bdc79f139dba8896f"
+    },
+    {
+      "path": "workflows/ingest-docs.md",
+      "git_blob": "f19cc558b734e19fe992def5185e50dd55a2c84c"
+    },
+    {
+      "path": "workflows/insert-phase.md",
+      "git_blob": "beda085ae6b88251169729c65b2587abdd7e3de1"
+    },
+    {
+      "path": "workflows/list-phase-assumptions.md",
+      "git_blob": "4970faa7c6a013c41295cc4c86129cd8a394aa31"
+    },
+    {
+      "path": "workflows/list-workspaces.md",
+      "git_blob": "aa3aefb65dabc44f14d321ddaa340db4152760b4"
+    },
+    {
+      "path": "workflows/manager.md",
+      "git_blob": "6e40f86d6d11a7451b4599119db068c341868ffe"
+    },
+    {
+      "path": "workflows/map-codebase.md",
+      "git_blob": "03a3c112c387eac183935cba662d92450272ffd7"
+    },
+    {
+      "path": "workflows/milestone-summary.md",
+      "git_blob": "11b1578299218edffc910eccc1432d85dcf21003"
+    },
+    {
+      "path": "workflows/mvp-phase.md",
+      "git_blob": "216f467c602b0f242f7f05262d640f3451992cee"
+    },
+    {
+      "path": "workflows/new-milestone.md",
+      "git_blob": "d0f6bc2d86c408bbeba86defc776ad862f2d28c4"
+    },
+    {
+      "path": "workflows/new-project.md",
+      "git_blob": "e3fbaed57ba1568f665e1be388b3d8c665e8b9e8"
+    },
+    {
+      "path": "workflows/new-workspace.md",
+      "git_blob": "205d5a38007362a45d96ca44fe4e418b159fbeb8"
+    },
+    {
+      "path": "workflows/next.md",
+      "git_blob": "2a0e81fff04e8bb4285657a2f332af3beb06e085"
+    },
+    {
+      "path": "workflows/node-repair.md",
+      "git_blob": "7be3dbbcc708d30d8890f5134f154fc774701bd2"
+    },
+    {
+      "path": "workflows/note.md",
+      "git_blob": "8e701cd0c6e6e0f51226843415e77ed371172598"
+    },
+    {
+      "path": "workflows/pause-work.md",
+      "git_blob": "218e5dd0cc0b49d819dc61937bb2bf0fcf1f3a8d"
+    },
+    {
+      "path": "workflows/plan-milestone-gaps.md",
+      "git_blob": "14463ef743f96034c5bc0f0cf77a0a76ad362c74"
+    },
+    {
+      "path": "workflows/plan-phase.md",
+      "git_blob": "629ae138f96c4e1d2a448ce2db2e0504e34cd5a3"
+    },
+    {
+      "path": "workflows/plan-review-convergence.md",

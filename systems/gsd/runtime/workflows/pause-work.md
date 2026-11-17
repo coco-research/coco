@@ -233,3 +233,11 @@ To resume: /gsd:resume-work
 
 </process>
 
+<success_criteria>
+- [ ] Context detected (phase/spike/deliberation/research/default)
+- [ ] .continue-here.md created at correct path for detected context
+- [ ] Required Reading, Anti-Patterns, and Infrastructure State sections filled
+- [ ] Pre-Execution Critique section filled if pausing between design and execution
+- [ ] Committed as WIP
+- [ ] User knows location and how to resume
+</success_criteria>

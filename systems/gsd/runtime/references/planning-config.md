@@ -381,3 +381,91 @@ Several config fields affect each other or trigger special behavior:
 
 6. **`planning.*` and top-level equivalence** -- `planning.commit_docs` and `commit_docs` are equivalent; `planning.search_gitignored` and `search_gitignored` are equivalent. If both are set, the top-level value takes precedence.
 
+7. **`depth` to `granularity` migration** -- The deprecated `depth` key (`quick`/`standard`/`comprehensive`) is automatically migrated to `granularity` (`coarse`/`standard`/`fine`) on config load and persisted back to disk.
+
+8. **`sub_repos` auto-sync** -- On every config load, GSD scans for child directories with `.git` and updates the `sub_repos` array if the filesystem has changed. Legacy `multiRepo: true` is automatically migrated to a detected `sub_repos` array.
+
+---
+
+## Example Configurations
+
+### Minimal -- Solo Developer
+
+```json
+{
+  "model_profile": "balanced",
+  "commit_docs": true,
+  "workflow": {
+    "research": true,
+    "plan_check": true,
+    "verifier": true,
+    "use_worktrees": false
+  }
+}
+```
+
+### Team Project with Branching
+
+```json
+{
+  "model_profile": "quality",
+  "commit_docs": true,
+  "project_code": "APP",
+  "git": {
+    "branching_strategy": "phase",
+    "base_branch": "develop",
+    "phase_branch_template": "gsd/phase-{phase}-{slug}"
+  },
+  "workflow": {
+    "research": true,
+    "plan_check": true,
+    "verifier": true,
+    "nyquist_validation": true,
+    "use_worktrees": true,
+    "discuss_mode": "discuss"
+  },
+  "manager": {
+    "flags": {
+      "discuss": "",
+      "plan": "",
+      "execute": ""
+    }
+  },
+  "response_language": "English"
+}
+```
+
+### Large Codebase -- 1M Context with Extended Timeouts
+
+```json
+{
+  "model_profile": "quality",
+  "context_window": 1000000,
+  "commit_docs": true,
+  "project_code": "MEGA",
+  "phase_naming": "sequential",
+  "git": {
+    "branching_strategy": "milestone",
+    "milestone_branch_template": "gsd/{milestone}-{slug}"
+  },
+  "workflow": {
+    "research": true,
+    "plan_check": true,
+    "verifier": true,
+    "nyquist_validation": true,
+    "subagent_timeout": 600000,
+    "use_worktrees": true,
+    "node_repair": true,
+    "node_repair_budget": 3,
+    "auto_advance": true
+  },
+  "brave_search": true,
+  "hooks": {
+    "context_warnings": true
+  }
+}
+```
+
+</complete_field_reference>
+
+</planning_config>

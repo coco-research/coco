@@ -165,3 +165,89 @@ When there's no clear primary action:
 ```
 ---
 
+## 🎉 Milestone v1.0 Complete
+
+All 4 phases shipped
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Start v1.1** — questioning → research → requirements → roadmap
+
+`/clear` then:
+
+`/gsd:new-milestone`
+
+---
+```
+
+## Pulling Context
+
+### For phases (from ROADMAP.md):
+
+```markdown
+### Phase 2: Authentication
+**Goal**: JWT login flow with refresh tokens
+```
+
+Extract: `**Phase 2: Authentication** — JWT login flow with refresh tokens`
+
+### For plans (from ROADMAP.md):
+
+```markdown
+Plans:
+- [ ] 02-03: Add refresh token rotation
+```
+
+Or from PLAN.md `<objective>`:
+
+```xml
+<objective>
+Add refresh token rotation with sliding expiry window.
+
+Purpose: Extend session lifetime without compromising security.
+</objective>
+```
+
+Extract: `**02-03: Refresh Token Rotation** — Add /api/auth/refresh with sliding expiry`
+
+## Anti-Patterns
+
+### Don't: Command-only (no context)
+
+```
+## To Continue
+
+Run `/clear`, then paste:
+/gsd:execute-phase 2
+```
+
+User has no idea what 02-03 is about.
+
+### Don't: Missing /clear explanation
+
+```
+`/gsd:plan-phase 3`
+
+Run /clear first.
+```
+
+Doesn't explain why. User might skip it.
+
+### Don't: "Other options" language
+
+```
+Other options:
+- Review roadmap
+```
+
+Sounds like an afterthought. Use "Also available:" instead.
+
+### Don't: Fenced code blocks for commands
+
+```
+```
+/gsd:plan-phase 3
+```
+```
+
+Fenced blocks inside templates create nesting ambiguity. Use inline backticks instead.

@@ -469,3 +469,353 @@ function cmdStateAddDecision(cwd, options, raw) {
     const sectionPattern = /(###?\s*(?:Decisions|Decisions Made|Accumulated.*Decisions)\s*\n)([\s\S]*?)(?=\n###?|\n##[^#]|$)/i;
     const match = content.match(sectionPattern);
 
+    if (match) {
+      let sectionBody = match[2];
+      // Remove placeholders
+      sectionBody = sectionBody.replace(/None yet\.?\s*\n?/gi, '').replace(/No decisions yet\.?\s*\n?/gi, '');
+      sectionBody = sectionBody.trimEnd() + '\n' + entry + '\n';
+      added = true;
+      return content.replace(sectionPattern, (_match, header) => `${header}${sectionBody}`);
+    }
+
+    // Section absent — DWIM: auto-create canonical ## Decisions scaffold,
+    // then append the entry. Matches state begin-phase / advance-plan DWIM behavior.
+    const scaffold = [
+      '',
+      '## Decisions',
+      '',
+      entry,
+      '',
+    ].join('\n');
+    added = true;
+    created = true;
+    return content.trimEnd() + '\n' + scaffold;
+  }, cwd);
+
+  // Auto-create fallback guarantees added === true; no else branch needed.
+  const result = { added: true, decision: entry };
+  if (created) result.created = true;
+  output(result, raw, 'true');
+}
+
+function cmdStateAddBlocker(cwd, text, raw) {
+  const statePath = planningPaths(cwd).state;
+  if (!fs.existsSync(statePath)) { output({ error: 'STATE.md not found' }, raw); return; }
+  const blockerOptions = typeof text === 'object' && text !== null ? text : { text };
+  let blockerText = null;
+
+  try {
+    blockerText = readTextArgOrFile(cwd, blockerOptions.text, blockerOptions.text_file, 'blocker');
+  } catch (err) {
+    output({ added: false, reason: err.message }, raw, 'false');
+    return;
+  }
+
+  if (!blockerText) { output({ error: 'text required' }, raw); return; }
+
+  const entry = `- ${blockerText}`;
+  let added = false;
+  let created = false;
+
+  readModifyWriteStateMd(statePath, (content) => {
+    const sectionPattern = /(###?\s*(?:Blockers|Blockers\/Concerns|Concerns)\s*\n)([\s\S]*?)(?=\n###?|\n##[^#]|$)/i;
+    const match = content.match(sectionPattern);
+
+    if (match) {
+      let sectionBody = match[2];
+      sectionBody = sectionBody.replace(/None\.?\s*\n?/gi, '').replace(/None yet\.?\s*\n?/gi, '');
+      sectionBody = sectionBody.trimEnd() + '\n' + entry + '\n';
+      added = true;
+      return content.replace(sectionPattern, (_match, header) => `${header}${sectionBody}`);
+    }
+
+    // Section absent — DWIM: auto-create canonical ### Blockers scaffold.
+    const scaffold = [
+      '',
+      '### Blockers',
+      '',
+      entry,
+      '',
+    ].join('\n');
+    added = true;
+    created = true;
+    return content.trimEnd() + '\n' + scaffold;
+  }, cwd);
+
+  // Auto-create fallback guarantees added === true; no else branch needed.
+  const result = { added: true, blocker: blockerText };
+  if (created) result.created = true;
+  output(result, raw, 'true');
+}
+
+function cmdStateResolveBlocker(cwd, text, raw) {
+  const statePath = planningPaths(cwd).state;
+  if (!fs.existsSync(statePath)) { output({ error: 'STATE.md not found' }, raw); return; }
+  if (!text) { output({ error: 'text required' }, raw); return; }
+
+  let resolved = false;
+
+  readModifyWriteStateMd(statePath, (content) => {
+    const sectionPattern = /(###?\s*(?:Blockers|Blockers\/Concerns|Concerns)\s*\n)([\s\S]*?)(?=\n###?|\n##[^#]|$)/i;
+    const match = content.match(sectionPattern);
+
+    if (match) {
+      const sectionBody = match[2];
+      const lines = sectionBody.split('\n');
+      const filtered = lines.filter(line => {
+        if (!line.startsWith('- ')) return true;
+        return !line.toLowerCase().includes(text.toLowerCase());
+      });
+
+      let newBody = filtered.join('\n');
+      // If section is now empty, add placeholder
+      if (!newBody.trim() || !newBody.includes('- ')) {
+        newBody = 'None\n';
+      }
+
+      resolved = true;
+      return content.replace(sectionPattern, (_match, header) => `${header}${newBody}`);
+    }
+    return content;
+  }, cwd);
+
+  if (resolved) {
+    output({ resolved: true, blocker: text }, raw, 'true');
+  } else {
+    output({ resolved: false, reason: 'Blockers section not found in STATE.md' }, raw, 'false');
+  }
+}
+
+function cmdStateRecordSession(cwd, options, raw) {
+  const statePath = planningPaths(cwd).state;
+  if (!fs.existsSync(statePath)) { output({ error: 'STATE.md not found' }, raw); return; }
+
+  const now = new Date().toISOString();
+  const updated = [];
+
+  readModifyWriteStateMd(statePath, (content) => {
+    // Update Last session / Last Date
+    let result = stateReplaceField(content, 'Last session', now);
+    if (result) { content = result; updated.push('Last session'); }
+    result = stateReplaceField(content, 'Last Date', now);
+    if (result) { content = result; updated.push('Last Date'); }
+
+    // Update Stopped at
+    if (options.stopped_at) {
+      result = stateReplaceField(content, 'Stopped At', options.stopped_at);
+      if (!result) result = stateReplaceField(content, 'Stopped at', options.stopped_at);
+      if (result) { content = result; updated.push('Stopped At'); }
+    }
+
+    // Update Resume file
+    const resumeFile = options.resume_file || 'None';
+    result = stateReplaceField(content, 'Resume File', resumeFile);
+    if (!result) result = stateReplaceField(content, 'Resume file', resumeFile);
+    if (result) { content = result; updated.push('Resume File'); }
+
+    return content;
+  }, cwd);
+
+  if (updated.length > 0) {
+    output({ recorded: true, updated }, raw, 'true');
+  } else {
+    output({ recorded: false, reason: 'No session fields found in STATE.md' }, raw, 'false');
+  }
+}
+
+function cmdStateSnapshot(cwd, raw) {
+  const statePath = planningPaths(cwd).state;
+
+  if (!fs.existsSync(statePath)) {
+    output({ error: 'STATE.md not found' }, raw);
+    return;
+  }
+
+  const content = fs.readFileSync(statePath, 'utf-8');
+
+  // Bug #3265: prefer YAML frontmatter for canonical scalar fields so that a
+  // body table cell containing **Status:** Y cannot shadow the authoritative
+  // frontmatter value.  Mirrors the fix in sdk/src/query/state.ts.
+  const fm = extractFrontmatter(content);
+  const body = stripFrontmatter(content);
+
+  // Helper: return frontmatter scalar value when present and non-empty.
+  // Accepts strings, numbers, and booleans — coercing non-string primitives to
+  // their string representation so callers always receive string | null.
+  // Returns null for missing, null/undefined, or empty-after-trim values so
+  // the caller falls back to body extraction.
+  const fmScalar = (key) => {
+    const v = fm[key];
+    if (v === null || v === undefined) return null;
+    if (typeof v === 'string') return v.trim() || null;
+    if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+    return null;
+  };
+
+  // Extract basic fields — frontmatter keys take precedence over body
+  const currentPhase = fmScalar('current_phase') ?? stateExtractField(body, 'Current Phase');
+  const currentPhaseName = fmScalar('current_phase_name') ?? stateExtractField(body, 'Current Phase Name');
+  const totalPhasesRaw = fmScalar('total_phases') ?? stateExtractField(body, 'Total Phases');
+  const currentPlan = fmScalar('current_plan') ?? stateExtractField(body, 'Current Plan');
+  const totalPlansRaw = fmScalar('total_plans_in_phase') ?? stateExtractField(body, 'Total Plans in Phase');
+  const status = fmScalar('status') ?? stateExtractField(body, 'Status');
+  const progressRaw = fmScalar('progress') ?? stateExtractField(body, 'Progress');
+  const lastActivity = fmScalar('last_activity') ?? stateExtractField(body, 'Last Activity');
+  const lastActivityDesc = fmScalar('last_activity_desc') ?? stateExtractField(body, 'Last Activity Description');
+  const pausedAt = fmScalar('paused_at') ?? stateExtractField(body, 'Paused At');
+
+  // Parse numeric fields
+  const totalPhases = totalPhasesRaw ? parseInt(totalPhasesRaw, 10) : null;
+  const totalPlansInPhase = totalPlansRaw ? parseInt(totalPlansRaw, 10) : null;
+  const progressPercent = progressRaw ? parseInt(progressRaw.replace('%', ''), 10) : null;
+
+  // Extract decisions table
+  const decisions = [];
+  const decisionsMatch = body.match(/##\s*Decisions Made[\s\S]*?\n\|[^\n]+\n\|[-|\s]+\n([\s\S]*?)(?=\n##|\n$|$)/i);
+  if (decisionsMatch) {
+    const tableBody = decisionsMatch[1];
+    const rows = tableBody.trim().split('\n').filter(r => r.includes('|'));
+    for (const row of rows) {
+      const cells = row.split('|').map(c => c.trim()).filter(Boolean);
+      if (cells.length >= 3) {
+        decisions.push({
+          phase: cells[0],
+          summary: cells[1],
+          rationale: cells[2],
+        });
+      }
+    }
+  }
+
+  // Extract blockers list
+  const blockers = [];
+  const blockersMatch = body.match(/##\s*Blockers\s*\n([\s\S]*?)(?=\n##|$)/i);
+  if (blockersMatch) {
+    const blockersSection = blockersMatch[1];
+    const items = blockersSection.match(/^-\s+(.+)$/gm) || [];
+    for (const item of items) {
+      blockers.push(item.replace(/^-\s+/, '').trim());
+    }
+  }
+
+  // Extract session info
+  const session = {
+    last_date: null,
+    stopped_at: null,
+    resume_file: null,
+  };
+
+  const sessionMatch = body.match(/##\s*Session\s*\n([\s\S]*?)(?=\n##|$)/i);
+  if (sessionMatch) {
+    const sessionSection = sessionMatch[1];
+    const lastDateMatch = sessionSection.match(/\*\*Last Date:\*\*\s*(.+)/i)
+      || sessionSection.match(/^Last Date:\s*(.+)/im);
+    const stoppedAtMatch = sessionSection.match(/\*\*Stopped At:\*\*\s*(.+)/i)
+      || sessionSection.match(/^Stopped At:\s*(.+)/im);
+    const resumeFileMatch = sessionSection.match(/\*\*Resume File:\*\*\s*(.+)/i)
+      || sessionSection.match(/^Resume File:\s*(.+)/im);
+
+    if (lastDateMatch) session.last_date = lastDateMatch[1].trim();
+    if (stoppedAtMatch) session.stopped_at = stoppedAtMatch[1].trim();
+    if (resumeFileMatch) session.resume_file = resumeFileMatch[1].trim();
+  }
+
+  const result = {
+    current_phase: currentPhase,
+    current_phase_name: currentPhaseName,
+    total_phases: totalPhases,
+    current_plan: currentPlan,
+    total_plans_in_phase: totalPlansInPhase,
+    status,
+    progress_percent: progressPercent,
+    last_activity: lastActivity,
+    last_activity_desc: lastActivityDesc,
+    decisions,
+    blockers,
+    paused_at: pausedAt,
+    session,
+  };
+
+  output(result, raw);
+}
+
+// ─── State Frontmatter Sync ──────────────────────────────────────────────────
+
+/**
+ * Extract machine-readable fields from STATE.md markdown body and build
+ * a YAML frontmatter object. Allows hooks and scripts to read state
+ * reliably via `state json` instead of fragile regex parsing.
+ */
+function buildStateFrontmatter(bodyContent, cwd) {
+  const currentPhase = stateExtractField(bodyContent, 'Current Phase');
+  const currentPhaseName = stateExtractField(bodyContent, 'Current Phase Name');
+  const currentPlan = stateExtractField(bodyContent, 'Current Plan');
+  const totalPhasesRaw = stateExtractField(bodyContent, 'Total Phases');
+  const totalPlansRaw = stateExtractField(bodyContent, 'Total Plans in Phase');
+  const status = stateExtractField(bodyContent, 'Status');
+  const progressRaw = stateExtractField(bodyContent, 'Progress');
+  const lastActivity = stateExtractField(bodyContent, 'Last Activity');
+  // Bug #2444: scope Stopped At extraction to the ## Session section so that
+  // historical "Stopped at:" prose elsewhere in the body (e.g. in a
+  // Session Continuity Archive section) never overwrites the current value.
+  // Fall back to full-body search only when no ## Session section exists.
+  const sessionSectionMatch = bodyContent.match(/##\s*Session\s*\n([\s\S]*?)(?=\n##|$)/i);
+  const sessionBodyScope = sessionSectionMatch ? sessionSectionMatch[1] : bodyContent;
+  const stoppedAt = stateExtractField(sessionBodyScope, 'Stopped At') || stateExtractField(sessionBodyScope, 'Stopped at');
+  const pausedAt = stateExtractField(bodyContent, 'Paused At');
+
+  let milestone = null;
+  let milestoneName = null;
+  if (cwd) {
+    try {
+      const info = getMilestoneInfo(cwd);
+      milestone = info.version;
+      milestoneName = info.name;
+    } catch { /* intentionally empty */ }
+  }
+
+  let totalPhases = totalPhasesRaw ? parseInt(totalPhasesRaw, 10) : null;
+  let completedPhases = null;
+  let totalPlans = totalPlansRaw ? parseInt(totalPlansRaw, 10) : null;
+  let completedPlans = null;
+
+  if (cwd) {
+    try {
+      const phasesDir = planningPaths(cwd).phases;
+      if (fs.existsSync(phasesDir)) {
+        // Use cached disk scan when available — avoids N+1 readdirSync calls
+        // on repeated buildStateFrontmatter invocations within the same process (#1967)
+        let cached = _diskScanCache.get(cwd);
+        if (!cached) {
+          const isDirInMilestone = getMilestonePhaseFilter(cwd);
+          const allMatchingDirs = fs.readdirSync(phasesDir, { withFileTypes: true })
+            .filter(e => e.isDirectory()).map(e => e.name)
+            .filter(isDirInMilestone);
+
+          // Bug #2445: when stale phase dirs from a prior milestone remain in
+          // .planning/phases/ alongside new dirs with the same phase number,
+          // de-duplicate by normalized phase number keeping the most recently
+          // modified dir. This prevents double-counting (e.g. two "Phase 1" dirs).
+          const seenPhaseNums = new Map(); // normalizedNum -> dirName
+          for (const dir of allMatchingDirs) {
+            const m = dir.match(/^0*(\d+[A-Za-z]?(?:\.\d+)*)/);
+            const key = m ? m[1].toLowerCase() : dir;
+            if (!seenPhaseNums.has(key)) {
+              seenPhaseNums.set(key, dir);
+            } else {
+              // Keep the dir that is newer on disk (more likely current milestone)
+              try {
+                const existing = path.join(phasesDir, seenPhaseNums.get(key));
+                const candidate = path.join(phasesDir, dir);
+                if (fs.statSync(candidate).mtimeMs > fs.statSync(existing).mtimeMs) {
+                  seenPhaseNums.set(key, dir);
+                }
+              } catch { /* keep existing on stat error */ }
+            }
+          }
+          const phaseDirs = [...seenPhaseNums.values()];
+
+          let diskTotalPlans = 0;
+          let diskTotalSummaries = 0;
+          let diskCompletedPhases = 0;
+

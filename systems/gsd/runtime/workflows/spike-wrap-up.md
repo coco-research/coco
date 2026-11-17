@@ -194,3 +194,113 @@ Write `.planning/spikes/WRAP-UP-SUMMARY.md` for project history:
 ```
 </step>
 
+<step name="update_claude_md">
+## Update Project CLAUDE.md
+
+Add an auto-load routing line to the project's CLAUDE.md (create the file if it doesn't exist):
+
+```
+- **Spike findings for [project]** (implementation patterns, constraints, gotchas) → `Skill("spike-findings-[project-dir-name]")`
+```
+
+If this routing line already exists (append mode), leave it as-is.
+</step>
+
+<step name="generate_conventions">
+## Generate or Update CONVENTIONS.md
+
+Analyze all processed spikes for recurring patterns and write `.planning/spikes/CONVENTIONS.md`. This file tells future spike sessions *how we spike* — the stack, structure, and patterns that have been established.
+
+1. Read all spike source code and READMEs looking for:
+   - **Stack choices** — What language/framework/runtime appears across multiple spikes?
+   - **Structure patterns** — Common file layouts, port numbers, naming schemes
+   - **Recurring approaches** — How auth is handled, how styling is done, how data is served
+   - **Tools & libraries** — Packages that showed up repeatedly with versions that worked
+
+2. Write or update `.planning/spikes/CONVENTIONS.md`:
+
+```markdown
+# Spike Conventions
+
+Patterns and stack choices established across spike sessions. New spikes follow these unless the question requires otherwise.
+
+## Stack
+[What we use for frontend, backend, scripts, and why — derived from what repeated across spikes]
+
+## Structure
+[Common file layouts, port assignments, naming patterns]
+
+## Patterns
+[Recurring approaches: how we handle auth, how we style, how we serve, etc.]
+
+## Tools & Libraries
+[Preferred packages with versions that worked, and any to avoid]
+```
+
+3. Only include patterns that appeared in 2+ spikes or were explicitly chosen by the user.
+
+4. If `CONVENTIONS.md` already exists (append mode), update sections with new patterns. Remove entries contradicted by newer spikes.
+</step>
+
+<step name="commit">
+Commit all artifacts (if `COMMIT_DOCS` is true):
+
+```bash
+gsd-sdk query commit "docs(spike-wrap-up): package [N] spike findings into project skill" --files .planning/spikes/WRAP-UP-SUMMARY.md .planning/spikes/CONVENTIONS.md
+```
+</step>
+
+<step name="report">
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► SPIKE WRAP-UP COMPLETE ✓
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Processed:** {N} spikes
+**Feature areas:** {list}
+**Skill:** `./.claude/skills/spike-findings-[project]/`
+**Conventions:** `.planning/spikes/CONVENTIONS.md`
+**Summary:** `.planning/spikes/WRAP-UP-SUMMARY.md`
+**CLAUDE.md:** routing line added
+
+The spike-findings skill will auto-load in future build conversations.
+```
+</step>
+
+<step name="whats_next">
+## What's Next
+
+After the summary, present next-step options:
+
+───────────────────────────────────────────────────────────────
+
+## ▶ Next Up
+
+**Explore frontier spikes** — see what else is worth spiking based on what we've learned
+
+`/gsd:spike` (run with no argument — its frontier mode analyzes the spike landscape and proposes integration and frontier spikes)
+
+───────────────────────────────────────────────────────────────
+
+**Also available:**
+- `/gsd:plan-phase` — start planning the real implementation
+- `/gsd:spike [idea]` — spike a specific new idea
+- `/gsd:explore` — continue exploring
+- Other
+
+───────────────────────────────────────────────────────────────
+</step>
+
+</process>
+
+<success_criteria>
+- [ ] All unprocessed spikes auto-included and processed
+- [ ] Spikes grouped by feature area
+- [ ] Spike-findings skill exists at `./.claude/skills/` with SKILL.md (including requirements), references/, sources/
+- [ ] Reference files are implementation blueprints with Requirements, How to Build It, What to Avoid, Constraints
+- [ ] `.planning/spikes/CONVENTIONS.md` created or updated with recurring stack/structure/pattern choices
+- [ ] `.planning/spikes/WRAP-UP-SUMMARY.md` written for project history
+- [ ] Project CLAUDE.md has auto-load routing line
+- [ ] Summary presented
+- [ ] Next-step options presented (including frontier spike exploration via `/gsd:spike`)
+</success_criteria>

@@ -106,3 +106,353 @@ const MANAGED_HOOK_BASENAMES_BY_SURFACE = {
   ]),
 };
 
+const MANAGED_HOOK_COMMAND_BASENAMES_BY_SURFACE = {
+  'settings-json': new Set([
+    'gsd-check-update.js',
+    'gsd-statusline.js',
+    'gsd-context-monitor.js',
+    'gsd-prompt-guard.js',
+    'gsd-read-guard.js',
+    'gsd-read-injection-scanner.js',
+    'gsd-update-banner.js',
+    'gsd-workflow-guard.js',
+    'gsd-session-state.sh',
+    'gsd-validate-commit.sh',
+    'gsd-phase-boundary.sh',
+  ]),
+  'codex-toml': new Set([
+    'gsd-check-update.js',
+  ]),
+  'codex-hooks-json': new Set([
+    'gsd-check-update.js',
+    // #3426: Windows .cmd shim for Codex hook — must be treated as managed so
+    // reconcileCodexHooksJsonSessionStart can replace stale node-runner commands
+    // with the .cmd shim on reinstall (and vice-versa on cross-platform moves).
+    'gsd-check-update.cmd',
+  ]),
+};
+
+const LEGACY_MANAGED_HOOK_ALIASES_BY_SURFACE = {
+  'codex-toml': new Set([
+    'gsd-update-check.js',
+  ]),
+  'codex-hooks-json': new Set([
+    'gsd-update-check.js',
+  ]),
+};
+
+function managedHookSurfaceSet(surface = 'settings-json') {
+  return MANAGED_HOOK_BASENAMES_BY_SURFACE[surface] || MANAGED_HOOK_BASENAMES_BY_SURFACE['settings-json'];
+}
+
+function isManagedHookBasename(scriptPathOrBasename, opts = {}) {
+  if (!scriptPathOrBasename) return false;
+  const surface = opts.surface || 'settings-json';
+  const basename = String(scriptPathOrBasename).split(/[\\/]/).pop() || '';
+  return managedHookSurfaceSet(surface).has(basename);
+}
+
+function managedHookCommandSurfaceSet(surface = 'settings-json', includeLegacyAliases = false) {
+  const base = MANAGED_HOOK_COMMAND_BASENAMES_BY_SURFACE[surface]
+    || MANAGED_HOOK_COMMAND_BASENAMES_BY_SURFACE['settings-json'];
+  if (!includeLegacyAliases) return base;
+  const aliases = LEGACY_MANAGED_HOOK_ALIASES_BY_SURFACE[surface];
+  if (!aliases || aliases.size === 0) return base;
+  return new Set([...base, ...aliases]);
+}
+
+function isManagedHookCommand(commandText, opts = {}) {
+  if (typeof commandText !== 'string') return false;
+  const surface = opts.surface || 'settings-json';
+  const includeLegacyAliases = opts.includeLegacyAliases === true;
+  const managedBasenames = managedHookCommandSurfaceSet(surface, includeLegacyAliases);
+  if (!managedBasenames || managedBasenames.size === 0) return false;
+  const normalizedCommand = commandText.replace(/\\/g, '/');
+
+  if (typeof opts.configDir === 'string' && opts.configDir.length > 0) {
+    const normalizedHooksDir = `${path.join(opts.configDir, 'hooks').replace(/\\/g, '/')}/`;
+    if (!normalizedCommand.includes(normalizedHooksDir)) return false;
+  }
+
+  for (const basename of managedBasenames) {
+    const escapedBasename = basename.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(`(^|[\\\\/\\s"'` + '`' + `])${escapedBasename}(?=$|[\\s"'` + '`' + `])`);
+    if (pattern.test(normalizedCommand)) return true;
+  }
+  return false;
+}
+
+/**
+ * Projection helper for legacy settings.json hook rewrites.
+ *
+ * Non-Windows keeps the original script token shape when provided (single
+ * quote / bareword / quoted), while Windows normalizes to double-quoted
+ * forward-slash path tokens for stable cross-shell behavior.
+ */
+function projectLegacySettingsHookCommand({
+  absoluteRunner,
+  scriptPath,
+  scriptToken,
+  runtime = 'generic',
+  platform = process.platform,
+}) {
+  if (!absoluteRunner || !scriptPath) return null;
+  const normalizedScriptPath = platform === 'win32' ? scriptPath.replace(/\\/g, '/') : scriptPath;
+  const commandScriptToken = platform === 'win32'
+    ? JSON.stringify(normalizedScriptPath)
+    : (scriptToken || JSON.stringify(normalizedScriptPath));
+  return projectShellCommandText({
+    runnerToken: absoluteRunner,
+    argTokens: [commandScriptToken],
+    runtime,
+    platform,
+  });
+}
+
+function escapeTomlDoubleQuotedString(value) {
+  return String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+function projectCodexHookTomlCommand({ absoluteRunner, scriptPath, platform = process.platform }) {
+  const command = projectManagedHookCommand({
+    absoluteRunner,
+    scriptPath,
+    runtime: 'codex',
+    platform,
+  });
+  return command === null ? null : escapeTomlDoubleQuotedString(command);
+}
+
+function escapePowerShellSingleQuoted(value) {
+  return String(value).replace(/'/g, "''");
+}
+
+function escapePosixDoubleQuoted(value) {
+  return String(value).replace(/[\\$"`]/g, '\\$&');
+}
+function escapeSingleQuotedShellLiteral(value) {
+  return String(value).replace(/'/g, "'\\''");
+}
+function renderShellActionLines(shellActions = []) {
+  return shellActions.map((action) => {
+    if (!action || !action.command) return '';
+    return action.label ? `${action.label}: ${action.command}` : action.command;
+  }).filter(Boolean);
+}
+
+function projectPathActionProjection({
+  mode = 'repair',
+  targetDir,
+  platform = process.platform,
+}) {
+  if (!targetDir) return { shellActions: [], actionLines: [] };
+
+  const isWin32 = platform === 'win32';
+
+  let shellActions;
+  if (isWin32) {
+    const psTargetDir = escapePowerShellSingleQuoted(targetDir);
+    const bashTargetDir = escapeSingleQuotedShellLiteral(String(targetDir).replace(/\\/g, '/'));
+    shellActions = [
+      {
+        label: 'PowerShell',
+        shell: 'powershell',
+        command: `[Environment]::SetEnvironmentVariable('PATH', '${psTargetDir};' + [Environment]::GetEnvironmentVariable('PATH', 'User'), 'User')`,
+      },
+      {
+        label: 'cmd.exe',
+        shell: 'cmd',
+        command: `powershell -Command "[Environment]::SetEnvironmentVariable('PATH', '${psTargetDir};' + [Environment]::GetEnvironmentVariable('PATH', 'User'), 'User')"`,
+      },
+      {
+        label: 'Git Bash',
+        shell: 'bash',
+        command: `echo 'export PATH="${bashTargetDir}:$PATH"' >> ~/.bashrc`,
+      },
+    ];
+  } else if (mode === 'persist') {
+    const bashTargetDir = escapeSingleQuotedShellLiteral(String(targetDir));
+    shellActions = [
+      {
+        label: 'zsh',
+        shell: 'zsh',
+        command: `echo 'export PATH="${bashTargetDir}:$PATH"' >> ~/.zshrc`,
+      },
+      {
+        label: 'bash',
+        shell: 'bash',
+        command: `echo 'export PATH="${bashTargetDir}:$PATH"' >> ~/.bashrc`,
+      },
+    ];
+  } else {
+    const posixTargetDir = escapePosixDoubleQuoted(targetDir);
+    shellActions = [
+      {
+        label: null,
+        shell: 'posix',
+        command: `export PATH="${posixTargetDir}:$PATH"`,
+      },
+    ];
+  }
+
+  return {
+    shellActions,
+    actionLines: renderShellActionLines(shellActions),
+  };
+}
+
+function projectPersistentPathExportActions({ targetDir, platform = process.platform }) {
+  const projected = projectPathActionProjection({
+    mode: 'persist',
+    targetDir,
+    platform,
+  });
+  return { shellActions: projected.shellActions };
+}
+
+function buildWindowsShimTriple(shimSrc) {
+  const shimAbs = path.resolve(shimSrc);
+  const shimQuoted = JSON.stringify(shimAbs);
+  const invocation = {
+    interpreter: 'node',
+    target: shimAbs,
+  };
+  const renderCmd = () =>
+    '@ECHO OFF\r\n@SETLOCAL\r\n@node ' + shimQuoted + ' %*\r\n';
+  const renderPs1 = () =>
+    '#!/usr/bin/env pwsh\n& node ' + shimQuoted + ' $args\nexit $LASTEXITCODE\n';
+  const renderSh = () =>
+    '#!/usr/bin/env sh\nexec node ' + shimQuoted + ' "$@"\n';
+  return {
+    invocation,
+    eol: { cmd: '\r\n', ps1: '\n', sh: '\n' },
+    fileNames: { cmd: 'gsd-sdk.cmd', ps1: 'gsd-sdk.ps1', sh: 'gsd-sdk' },
+    render: { cmd: renderCmd, ps1: renderPs1, sh: renderSh },
+  };
+}
+
+function formatSdkPathDiagnostic({ shimDir, platform, runDir }) {
+  const isWin32 = platform === 'win32';
+  const isNpx = typeof runDir === 'string' &&
+    (runDir.includes('/_npx/') || runDir.includes('\\_npx\\'));
+  const shimLocationLine = shimDir ? `Shim written to: ${shimDir}` : '';
+  const actionLines = [];
+  let shellActions = [];
+  if (shimDir) {
+    const projected = projectPathActionProjection({
+      mode: 'repair',
+      targetDir: shimDir,
+      platform,
+    });
+    shellActions = projected.shellActions;
+    actionLines.push('Add that directory to your PATH and restart your shell.');
+    actionLines.push(...projected.actionLines);
+  } else {
+    actionLines.push('Could not locate a writable PATH directory to install the shim.');
+    actionLines.push('Install globally to materialize the bin symlink:');
+    actionLines.push('npm install -g get-shit-done-cc');
+  }
+  const npxNoteLines = isNpx
+    ? [
+        "Note: you're running via npx. For a persistent shim,",
+        'install globally instead: npm install -g get-shit-done-cc',
+      ]
+    : [];
+  return { shimLocationLine, actionLines, shellActions, npxNoteLines, isNpx, isWin32 };
+}
+
+// ─── Subprocess dispatch ──────────────────────────────────────────────────────
+
+function _spawnResult(result, program) {
+  if (result.error && result.error.code === 'ENOENT') {
+    return { exitCode: 127, stdout: '', stderr: `${program}: not found`, signal: null, error: result.error };
+  }
+  return {
+    exitCode: result.status ?? 1,
+    stdout: (result.stdout ?? '').toString().trim(),
+    stderr: (result.stderr ?? '').toString().trim(),
+    signal: result.signal ?? null,
+    error: result.error ?? null,
+  };
+}
+
+function execGit(args, opts = {}) {
+  // Non-interactive defaults: a hung credential prompt or terminal-input
+  // probe must surface as a timeout, not block the tool forever. Callers
+  // can override via opts.env.
+  const env = {
+    ...process.env,
+    GIT_TERMINAL_PROMPT: '0',
+    GCM_INTERACTIVE: 'never',
+    ...(opts.env || {}),
+  };
+  const result = childProcess.spawnSync('git', args, {
+    cwd: opts.cwd,
+    env,
+    encoding: 'utf-8',
+    stdio: 'pipe',
+    timeout: opts.timeout ?? 10_000,
+  });
+  return _spawnResult(result, 'git');
+}
+
+function execNpm(args, opts = {}) {
+  const result = childProcess.spawnSync('npm', args, {
+    cwd: opts.cwd,
+    shell: process.platform === 'win32',
+    encoding: 'utf-8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+    timeout: opts.timeout ?? 15_000,
+  });
+  return _spawnResult(result, 'npm');
+}
+
+function execTool(program, args, opts = {}) {
+  const result = childProcess.spawnSync(program, args, {
+    cwd: opts.cwd,
+    env: opts.env ? { ...process.env, ...opts.env } : undefined,
+    encoding: 'utf-8',
+    stdio: 'pipe',
+    timeout: opts.timeout ?? 30_000,
+  });
+  return _spawnResult(result, program);
+}
+
+function probeTty(opts = {}) {
+  const platform = opts.platform ?? process.platform;
+  if (platform === 'win32') return null;
+  try {
+    const ttyPath = childProcess.execFileSync('tty', [], {
+      encoding: 'utf-8',
+      stdio: ['inherit', 'pipe', 'ignore'],
+    }).trim();
+    if (!ttyPath || ttyPath === 'not a tty') return null;
+    return ttyPath;
+  } catch {
+    return null;
+  }
+}
+
+// ─── Platform file I/O ────────────────────────────────────────────────────────
+
+function _normalizeMd(content) {
+  if (!content || typeof content !== 'string') return content;
+  let text = content.replace(/\r\n/g, '\n');
+  const lines = text.split('\n');
+  const result = [];
+  const fenceRegex = /^```/;
+  const insideFence = new Array(lines.length);
+  let fenceOpen = false;
+  for (let i = 0; i < lines.length; i++) {
+    if (fenceRegex.test(lines[i].trimEnd())) {
+      if (fenceOpen) {
+        insideFence[i] = false;
+        fenceOpen = false;
+      } else {
+        insideFence[i] = false;
+        fenceOpen = true;
+      }
+    } else {
+      insideFence[i] = fenceOpen;
+    }
+  }

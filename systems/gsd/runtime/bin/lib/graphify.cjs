@@ -391,3 +391,202 @@ function graphifyStatus(cwd) {
     return { exists: false, message: 'No graph built yet. Run graphify build to create one.' };
   }
 
+  const stat = fs.statSync(graphPath);
+  const graph = safeReadJson(graphPath);
+  if (!graph) {
+    return { error: 'Failed to parse graph.json' };
+  }
+
+  const STALE_MS = 24 * 60 * 60 * 1000; // 24 hours
+  const age = Date.now() - stat.mtimeMs;
+
+  // Commit-staleness signal (#3170). Validate before passing to git.
+  const rawBuilt = (graph.built_at_commit || '').toString().trim();
+  const builtAt = COMMIT_HASH_RE.test(rawBuilt) ? rawBuilt : null;
+  const head = readGitHead(cwd);
+  let commitsBehind = null;
+  let commitStale = null;
+  if (builtAt && head) {
+    commitsBehind = countCommitsBetween(cwd, builtAt, head);
+    if (commitsBehind !== null) commitStale = commitsBehind > 0;
+  }
+
+  // Auto-update status (#3347). Read .last-build-status.json written by the
+  // hooks/gsd-graphify-update.sh PostToolUse hook (opt-in via graphify.auto_update,
+  // default false). When the most recent auto-build is "failed" or still "running",
+  // fold that into the existing `stale: true` signal so consumers (gsd-planner,
+  // gsd-phase-researcher) surface the standard "treat semantic relationships as
+  // approximate" annotation without per-consumer prompt changes. The full state
+  // (running/failed/exit_code/duration_ms/head_at_build) is exposed under
+  // `last_build` for callers that want richer context.
+  const statusPath = path.join(planningDir, 'graphs', '.last-build-status.json');
+  const lastBuildAutoUpdate = fs.existsSync(statusPath) ? safeReadJson(statusPath) : null;
+  const autoUpdateStale =
+    lastBuildAutoUpdate &&
+    (lastBuildAutoUpdate.status === 'failed' || lastBuildAutoUpdate.status === 'running');
+
+  return {
+    exists: true,
+    last_build: stat.mtime.toISOString(),
+    node_count: (graph.nodes || []).length,
+    edge_count: (graph.edges || graph.links || []).length,
+    hyperedge_count: (graph.hyperedges || []).length,
+    stale: age > STALE_MS || Boolean(autoUpdateStale),
+    age_hours: Math.round(age / (60 * 60 * 1000)),
+    built_at_commit: builtAt ? builtAt.slice(0, 7) : null,
+    current_commit: head ? head.slice(0, 7) : null,
+    commits_behind: commitsBehind,
+    commit_stale: commitStale,
+    last_build_auto_update: lastBuildAutoUpdate || null,
+  };
+}
+
+/**
+ * Compute topology-level diff between current graph and last build snapshot (D-07, D-08, D-09).
+ *
+ * @param {string} cwd - Working directory
+ * @returns {object}
+ */
+function graphifyDiff(cwd) {
+  const planningDir = path.join(cwd, '.planning');
+  if (!isGraphifyEnabled(planningDir)) return disabledResponse();
+
+  const snapshotPath = path.join(planningDir, 'graphs', '.last-build-snapshot.json');
+  const graphPath = path.join(planningDir, 'graphs', 'graph.json');
+
+  if (!fs.existsSync(snapshotPath)) {
+    return { no_baseline: true, message: 'No previous snapshot. Run graphify build first, then build again to generate a diff baseline.' };
+  }
+
+  if (!fs.existsSync(graphPath)) {
+    return { error: 'No current graph. Run graphify build first.' };
+  }
+
+  const current = safeReadJson(graphPath);
+  const snapshot = safeReadJson(snapshotPath);
+
+  if (!current || !snapshot) {
+    return { error: 'Failed to parse graph or snapshot file' };
+  }
+
+  // Diff nodes
+  const currentNodeMap = Object.fromEntries((current.nodes || []).map(n => [n.id, n]));
+  const snapshotNodeMap = Object.fromEntries((snapshot.nodes || []).map(n => [n.id, n]));
+
+  const nodesAdded = Object.keys(currentNodeMap).filter(id => !snapshotNodeMap[id]);
+  const nodesRemoved = Object.keys(snapshotNodeMap).filter(id => !currentNodeMap[id]);
+  const nodesChanged = Object.keys(currentNodeMap).filter(id =>
+    snapshotNodeMap[id] && JSON.stringify(currentNodeMap[id]) !== JSON.stringify(snapshotNodeMap[id])
+  );
+
+  // Diff edges (keyed by source+target+relation)
+  const edgeKey = (e) => `${e.source}::${e.target}::${e.relation || e.label || ''}`;
+  const currentEdgeMap = Object.fromEntries((current.edges || current.links || []).map(e => [edgeKey(e), e]));
+  const snapshotEdgeMap = Object.fromEntries((snapshot.edges || snapshot.links || []).map(e => [edgeKey(e), e]));
+
+  const edgesAdded = Object.keys(currentEdgeMap).filter(k => !snapshotEdgeMap[k]);
+  const edgesRemoved = Object.keys(snapshotEdgeMap).filter(k => !currentEdgeMap[k]);
+  const edgesChanged = Object.keys(currentEdgeMap).filter(k =>
+    snapshotEdgeMap[k] && JSON.stringify(currentEdgeMap[k]) !== JSON.stringify(snapshotEdgeMap[k])
+  );
+
+  return {
+    nodes: { added: nodesAdded.length, removed: nodesRemoved.length, changed: nodesChanged.length },
+    edges: { added: edgesAdded.length, removed: edgesRemoved.length, changed: edgesChanged.length },
+    timestamp: snapshot.timestamp || null,
+  };
+}
+
+// ─── Build Pipeline (Phase 3) ───────────────────────────────────────────────
+
+/**
+ * Pre-flight checks for graphify build (BUILD-01, BUILD-02, D-09).
+ * Does NOT invoke graphify -- returns structured JSON for the builder agent.
+ *
+ * @param {string} cwd - Working directory
+ * @returns {object}
+ */
+function graphifyBuild(cwd) {
+  const planningDir = path.join(cwd, '.planning');
+  if (!isGraphifyEnabled(planningDir)) return disabledResponse();
+
+  const installed = checkGraphifyInstalled();
+  if (!installed.installed) return { error: installed.message };
+
+  const version = checkGraphifyVersion();
+
+  // Ensure output directory exists (D-05)
+  const graphsDir = path.join(planningDir, 'graphs');
+  fs.mkdirSync(graphsDir, { recursive: true });
+
+  // Read build timeout from config -- default 300s per D-02
+  const config = safeReadJson(path.join(planningDir, 'config.json')) || {};
+  const timeoutSec = (config.graphify && config.graphify.build_timeout) || 300;
+
+  return {
+    action: 'spawn_agent',
+    graphs_dir: graphsDir,
+    graphify_out: path.join(cwd, 'graphify-out'),
+    timeout_seconds: timeoutSec,
+    version: version.version,
+    version_warning: version.warning,
+    artifacts: ['graph.json', 'graph.html', 'GRAPH_REPORT.md'],
+  };
+}
+
+/**
+ * Write a diff snapshot after successful build (D-06).
+ * Reads graph.json from .planning/graphs/ and writes .last-build-snapshot.json
+ * using platformWriteSync for crash safety.
+ *
+ * @param {string} cwd - Working directory
+ * @returns {object}
+ */
+function writeSnapshot(cwd) {
+  const graphPath = path.join(cwd, '.planning', 'graphs', 'graph.json');
+  const graph = safeReadJson(graphPath);
+  if (!graph) return { error: 'Cannot write snapshot: graph.json not parseable' };
+
+  const snapshot = {
+    version: 1,
+    timestamp: new Date().toISOString(),
+    nodes: graph.nodes || [],
+    edges: graph.edges || graph.links || [],
+  };
+
+  const snapshotPath = path.join(cwd, '.planning', 'graphs', '.last-build-snapshot.json');
+  platformWriteSync(snapshotPath, JSON.stringify(snapshot, null, 2));
+  return {
+    saved: true,
+    timestamp: snapshot.timestamp,
+    node_count: snapshot.nodes.length,
+    edge_count: snapshot.edges.length,
+  };
+}
+
+// ─── Exports ─────────────────────────────────────────────────────────────────
+
+module.exports = {
+  // Config gate
+  isGraphifyEnabled,
+  disabledResponse,
+  // Subprocess
+  execGraphify,
+  GRAPHIFY_REASON,
+  // Presence and version
+  checkGraphifyInstalled,
+  checkGraphifyVersion,
+  // Query (Phase 2)
+  graphifyQuery,
+  safeReadJson,
+  buildAdjacencyMap,
+  seedAndExpand,
+  applyBudget,
+  // Status (Phase 2)
+  graphifyStatus,
+  // Diff (Phase 2)
+  graphifyDiff,
+  // Build (Phase 3)
+  graphifyBuild,
+  writeSnapshot,
+};

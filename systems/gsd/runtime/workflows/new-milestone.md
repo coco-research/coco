@@ -252,3 +252,353 @@ If `phase_dir_count > 0` and `phase_archive_path` is available:
 
 ```bash
 mkdir -p "${phase_archive_path}"
+find .planning/phases -mindepth 1 -maxdepth 1 -type d -exec mv {} "${phase_archive_path}/" \;
+```
+
+Then verify `.planning/phases/` no longer contains old milestone directories before continuing.
+
+If `phase_dir_count > 0` but `phase_archive_path` is missing:
+- Stop and explain that reset numbering is unsafe without a completed milestone archive target.
+- Tell the user to complete/archive the previous milestone first, then rerun `/gsd:new-milestone --reset-phase-numbers ${GSD_WS}`.
+
+## 8. Research Decision
+
+Check `research_enabled` from init JSON (loaded from config).
+
+**If `research_enabled` is `true`:**
+
+AskUserQuestion: "Research the domain ecosystem for new features before defining requirements?"
+- "Research first (Recommended)" — Discover patterns, features, architecture for NEW capabilities
+- "Skip research for this milestone" — Go straight to requirements (does not change your default)
+
+**If `research_enabled` is `false`:**
+
+AskUserQuestion: "Research the domain ecosystem for new features before defining requirements?"
+- "Skip research (current default)" — Go straight to requirements
+- "Research first" — Discover patterns, features, architecture for NEW capabilities
+
+**IMPORTANT:** Do NOT persist this choice to config.json. The `workflow.research` setting is a persistent user preference that controls plan-phase behavior across the project. Changing it here would silently alter future `/gsd:plan-phase` behavior. To change the default, use `/gsd:settings`.
+
+**If user chose "Research first":**
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► RESEARCHING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+◆ Spawning 4 researchers in parallel...
+  → Stack, Features, Architecture, Pitfalls
+```
+
+```bash
+mkdir -p .planning/research
+```
+
+Spawn 4 parallel gsd-project-researcher agents. Each uses this template with dimension-specific fields:
+
+**Common structure for all 4 researchers:**
+```text
+Agent(prompt="
+<research_type>Project Research — {DIMENSION} for [new features].</research_type>
+
+<milestone_context>
+SUBSEQUENT MILESTONE — Adding [target features] to existing app.
+{EXISTING_CONTEXT}
+Focus ONLY on what's needed for the NEW features.
+</milestone_context>
+
+<question>{QUESTION}</question>
+
+<files_to_read>
+- .planning/PROJECT.md (Project context)
+</files_to_read>
+
+${AGENT_SKILLS_RESEARCHER}
+
+<downstream_consumer>{CONSUMER}</downstream_consumer>
+
+<quality_gate>{GATES}</quality_gate>
+
+<output>
+Write to: .planning/research/{FILE}
+Use template: ~/.claude/get-shit-done/templates/research-project/{FILE}
+</output>
+", subagent_type="gsd-project-researcher", model="{researcher_model}", description="{DIMENSION} research")
+```
+
+**Dimension-specific fields:**
+
+| Field | Stack | Features | Architecture | Pitfalls |
+|-------|-------|----------|-------------|----------|
+| EXISTING_CONTEXT | Existing validated capabilities (DO NOT re-research): [from PROJECT.md] | Existing features (already built): [from PROJECT.md] | Existing architecture: [from PROJECT.md or codebase map] | Focus on common mistakes when ADDING these features to existing system |
+| QUESTION | What stack additions/changes are needed for [new features]? | How do [target features] typically work? Expected behavior? | How do [target features] integrate with existing architecture? | Common mistakes when adding [target features] to [domain]? |
+| CONSUMER | Specific libraries with versions for NEW capabilities, integration points, what NOT to add | Table stakes vs differentiators vs anti-features, complexity noted, dependencies on existing | Integration points, new components, data flow changes, suggested build order | Warning signs, prevention strategy, which phase should address it |
+| GATES | Versions current (verify with Context7), rationale explains WHY, integration considered | Categories clear, complexity noted, dependencies identified | Integration points identified, new vs modified explicit, build order considers deps | Pitfalls specific to adding these features, integration pitfalls covered, prevention actionable |
+| FILE | STACK.md | FEATURES.md | ARCHITECTURE.md | PITFALLS.md |
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling all 4 researcher Agent() calls above, do NOT read research files or synthesize content independently while the subagents are active. Wait for all 4 researchers to complete before spawning the synthesizer. This prevents duplicate work and wasted context.
+
+After all 4 complete, spawn synthesizer:
+
+```text
+Agent(prompt="
+Synthesize research outputs into SUMMARY.md.
+
+<files_to_read>
+- .planning/research/STACK.md
+- .planning/research/FEATURES.md
+- .planning/research/ARCHITECTURE.md
+- .planning/research/PITFALLS.md
+</files_to_read>
+
+${AGENT_SKILLS_SYNTHESIZER}
+
+Write to: .planning/research/SUMMARY.md
+Use template: ~/.claude/get-shit-done/templates/research-project/SUMMARY.md
+Commit after writing.
+", subagent_type="gsd-research-synthesizer", model="{synthesizer_model}", description="Synthesize research")
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+Display key findings from SUMMARY.md:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► RESEARCH COMPLETE ✓
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Stack additions:** [from SUMMARY.md]
+**Feature table stakes:** [from SUMMARY.md]
+**Watch Out For:** [from SUMMARY.md]
+```
+
+**If "Skip research":** Continue to Step 9.
+
+## 9. Define Requirements
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► DEFINING REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Read PROJECT.md: core value, current milestone goals, validated requirements (what exists).
+
+**If `$SELECTED_SEEDS` is non-empty (from step 2.5):** Include selected seed ideas and their "Why This Matters" sections as additional input when defining requirements. Seeds provide user-validated feature ideas that should be incorporated into the requirement categories alongside research findings or conversation-gathered features.
+
+**If research exists:** Read FEATURES.md, extract feature categories.
+
+Present features by category:
+```
+## [Category 1]
+**Table stakes:** Feature A, Feature B
+**Differentiators:** Feature C, Feature D
+**Research notes:** [any relevant notes]
+```
+
+**If no research:** Gather requirements through conversation. Ask: "What are the main things users need to do with [new features]?" Clarify, probe for related capabilities, group into categories.
+
+**Scope each category** via AskUserQuestion (multiSelect: true, header max 12 chars):
+- "[Feature 1]" — [brief description]
+- "[Feature 2]" — [brief description]
+- "None for this milestone" — Defer entire category
+
+Track: Selected → this milestone. Unselected table stakes → future. Unselected differentiators → out of scope.
+
+**Identify gaps** via AskUserQuestion:
+- "No, research covered it" — Proceed
+- "Yes, let me add some" — Capture additions
+
+**Generate REQUIREMENTS.md:**
+- v1 Requirements grouped by category (checkboxes, REQ-IDs)
+- Future Requirements (deferred)
+- Out of Scope (explicit exclusions with reasoning)
+- Traceability section (empty, filled by roadmap)
+
+**REQ-ID format:** `[CATEGORY]-[NUMBER]` (AUTH-01, NOTIF-02). Continue numbering from existing.
+
+**Requirement quality criteria:**
+
+Good requirements are:
+- **Specific and testable:** "User can reset password via email link" (not "Handle password reset")
+- **User-centric:** "User can X" (not "System does Y")
+- **Atomic:** One capability per requirement (not "User can login and manage profile")
+- **Independent:** Minimal dependencies on other requirements
+
+Present FULL requirements list for confirmation:
+
+```
+## Milestone v[X.Y] Requirements
+
+### [Category 1]
+- [ ] **CAT1-01**: User can do X
+- [ ] **CAT1-02**: User can do Y
+
+### [Category 2]
+- [ ] **CAT2-01**: User can do Z
+
+Does this capture what you're building? (yes / adjust)
+```
+
+If "adjust": Return to scoping.
+
+**Commit requirements:**
+```bash
+gsd-sdk query commit "docs: define milestone v[X.Y] requirements" --files .planning/REQUIREMENTS.md
+```
+
+## 10. Create Roadmap
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► CREATING ROADMAP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+◆ Spawning roadmapper...
+```
+
+**Starting phase number:**
+- If `--reset-phase-numbers` is active, start at **Phase 1**
+- Otherwise, continue from the previous milestone's last phase number (v1.0 ended at phase 5 → v1.1 starts at phase 6)
+
+```text
+Agent(prompt="
+<planning_context>
+<files_to_read>
+- .planning/PROJECT.md
+- .planning/REQUIREMENTS.md
+- .planning/research/SUMMARY.md (if exists)
+- .planning/config.json
+- .planning/MILESTONES.md
+</files_to_read>
+
+${AGENT_SKILLS_ROADMAPPER}
+
+</planning_context>
+
+<instructions>
+Create roadmap for milestone v[X.Y]:
+1. Respect the selected numbering mode:
+   - `--reset-phase-numbers` → start at Phase 1
+   - default behavior → continue from the previous milestone's last phase number
+2. Derive phases from THIS MILESTONE's requirements only
+3. Map every requirement to exactly one phase
+4. Derive 2-5 success criteria per phase (observable user behaviors)
+5. Validate 100% coverage
+6. Write files immediately (ROADMAP.md, STATE.md, update REQUIREMENTS.md traceability)
+7. Return ROADMAP CREATED with summary
+
+Write files first, then return.
+</instructions>
+", subagent_type="gsd-roadmapper", model="{roadmapper_model}", description="Create roadmap")
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+**Handle return:**
+
+**If `## ROADMAP BLOCKED`:** Present blocker, work with user, re-spawn.
+
+**If `## ROADMAP CREATED`:** Read ROADMAP.md, present inline:
+
+```
+## Proposed Roadmap
+
+**[N] phases** | **[X] requirements mapped** | All covered ✓
+
+| # | Phase | Goal | Requirements | Success Criteria |
+|---|-------|------|--------------|------------------|
+| [N] | [Name] | [Goal] | [REQ-IDs] | [count] |
+
+### Phase Details
+
+**Phase [N]: [Name]**
+Goal: [goal]
+Requirements: [REQ-IDs]
+Success criteria:
+1. [criterion]
+2. [criterion]
+```
+
+**Ask for approval** via AskUserQuestion:
+- "Approve" — Commit and continue
+- "Adjust phases" — Tell me what to change
+- "Review full file" — Show raw ROADMAP.md
+
+**If "Adjust":** Get notes, re-spawn roadmapper with revision context, loop until approved.
+**If "Review":** Display raw ROADMAP.md, re-ask.
+
+**Commit roadmap** (after approval):
+```bash
+gsd-sdk query commit "docs: create milestone v[X.Y] roadmap ([N] phases)" --files .planning/ROADMAP.md .planning/STATE.md .planning/REQUIREMENTS.md
+```
+
+## 10.5. Link Pending Todos to Roadmap Phases
+
+After roadmap approval, scan pending todos against the newly approved phases. For each todo whose scope matches a phase, tag it with `resolves_phase: N` in its YAML frontmatter.
+
+**Check for pending todos:**
+```bash
+PENDING_TODOS=$(ls .planning/todos/pending/*.md 2>/dev/null | head -50)
+```
+
+**If no pending todos exist:** Skip this step silently.
+
+**If pending todos exist:**
+
+Read the approved ROADMAP.md and extract the phase list: phase number, phase name, goal, and requirement IDs.
+
+For each pending todo, compare:
+- The todo's `title` and `area` frontmatter fields
+- The todo body (Problem and Solution sections)
+
+Against each phase's:
+- Phase goal
+- Requirement IDs and descriptions
+
+**Match criteria (best-effort — do not over-match):** A todo is considered resolved by a phase if the phase's goal or requirements directly describe implementing the same feature, area, or capability as the todo. Narrow, specific todos with concrete scopes are the best candidates. Vague or cross-cutting todos should be left unlinked.
+
+**For each matched todo**, add `resolves_phase: [N]` to the YAML frontmatter block (after the existing fields):
+```yaml
+---
+created: [existing]
+title: [existing]
+area: [existing]
+resolves_phase: [N]
+files: [existing]
+---
+```
+
+**Only modify todos that have a clear, confident match.** Leave unmatched todos unmodified.
+
+**If any todos were linked:**
+```bash
+gsd-sdk query commit "docs: tag [count] pending todos with resolves_phase after milestone v[X.Y] roadmap" --files .planning/todos/pending/*.md
+```
+
+Print a summary:
+```
+◆ Linked [N] pending todos to roadmap phases:
+  → [todo title] → Phase [N]: [Phase Name]
+  (Leave [M] unmatched todos in pending/)
+```
+
+## 11. Done
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► MILESTONE INITIALIZED ✓
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Milestone v[X.Y]: [Name]**
+
+| Artifact       | Location                    |
+|----------------|-----------------------------|
+| Project        | `.planning/PROJECT.md`      |
+| Research       | `.planning/research/`       |
+| Requirements   | `.planning/REQUIREMENTS.md` |
+| Roadmap        | `.planning/ROADMAP.md`      |
+
+**[N] phases** | **[X] requirements** | Ready to build ✓
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}

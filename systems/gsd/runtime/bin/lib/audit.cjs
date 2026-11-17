@@ -378,3 +378,353 @@ function scanUatGaps(planDir) {
     try {
       files = fs.readdirSync(phaseDir);
     } catch {
+      continue;
+    }
+
+    for (const file of files.filter(f => f.includes('-UAT') && f.endsWith('.md'))) {
+      const filePath = path.join(phaseDir, file);
+
+      let safeFilePath;
+      try {
+        safeFilePath = requireSafePath(filePath, planDir, 'UAT file', { allowAbsolute: true });
+      } catch {
+        continue;
+      }
+
+      const content = platformReadSync(safeFilePath);
+      if (content === null) continue;
+
+      const fm = extractFrontmatter(content);
+      const status = (fm.status || 'unknown').toLowerCase();
+      const result = (fm.result || '').toString().toLowerCase();
+
+      // Also accept `result: all_pass` as a fallback when status is absent
+      // — covers UATs that omit `status:`.
+      if (TERMINAL_UAT_STATUSES.has(status)) continue;
+      if (status === 'unknown' && result === 'all_pass') continue;
+
+      // Count open scenarios
+      const pendingMatches = (content.match(/result:\s*(?:pending|\[pending\])/gi) || []).length;
+
+      results.push({
+        phase: sanitizeForDisplay(phaseNum),
+        file: sanitizeForDisplay(file),
+        status: sanitizeForDisplay(status),
+        open_scenario_count: pendingMatches,
+      });
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Scan .planning/phases for VERIFICATION gaps.
+ */
+function scanVerificationGaps(planDir) {
+  const phasesDir = path.join(planDir, 'phases');
+  if (!fs.existsSync(phasesDir)) return [];
+
+  let dirs;
+  try {
+    dirs = fs.readdirSync(phasesDir, { withFileTypes: true })
+      .filter(e => e.isDirectory())
+      .map(e => e.name)
+      .sort();
+  } catch {
+    return [{ scan_error: true }];
+  }
+
+  const results = [];
+
+  for (const dir of dirs) {
+    const phaseDir = path.join(phasesDir, dir);
+    const phaseMatch = dir.match(/^(\d+[A-Z]?(?:\.\d+)*)/i);
+    const phaseNum = phaseMatch ? phaseMatch[1] : dir;
+
+    let files;
+    try {
+      files = fs.readdirSync(phaseDir);
+    } catch {
+      continue;
+    }
+
+    for (const file of files.filter(f => f.includes('-VERIFICATION') && f.endsWith('.md'))) {
+      const filePath = path.join(phaseDir, file);
+
+      let safeFilePath;
+      try {
+        safeFilePath = requireSafePath(filePath, planDir, 'VERIFICATION file', { allowAbsolute: true });
+      } catch {
+        continue;
+      }
+
+      const content = platformReadSync(safeFilePath);
+      if (content === null) continue;
+
+      const fm = extractFrontmatter(content);
+      const status = (fm.status || 'unknown').toLowerCase();
+
+      if (status !== 'gaps_found' && status !== 'human_needed') continue;
+
+      results.push({
+        phase: sanitizeForDisplay(phaseNum),
+        file: sanitizeForDisplay(file),
+        status: sanitizeForDisplay(status),
+      });
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Scan .planning/phases for CONTEXT files with open_questions.
+ */
+function scanContextQuestions(planDir) {
+  const phasesDir = path.join(planDir, 'phases');
+  if (!fs.existsSync(phasesDir)) return [];
+
+  let dirs;
+  try {
+    dirs = fs.readdirSync(phasesDir, { withFileTypes: true })
+      .filter(e => e.isDirectory())
+      .map(e => e.name)
+      .sort();
+  } catch {
+    return [{ scan_error: true }];
+  }
+
+  const results = [];
+
+  for (const dir of dirs) {
+    const phaseDir = path.join(phasesDir, dir);
+    const phaseMatch = dir.match(/^(\d+[A-Z]?(?:\.\d+)*)/i);
+    const phaseNum = phaseMatch ? phaseMatch[1] : dir;
+
+    let files;
+    try {
+      files = fs.readdirSync(phaseDir);
+    } catch {
+      continue;
+    }
+
+    for (const file of files.filter(f => f.includes('-CONTEXT') && f.endsWith('.md'))) {
+      const filePath = path.join(phaseDir, file);
+
+      let safeFilePath;
+      try {
+        safeFilePath = requireSafePath(filePath, planDir, 'CONTEXT file', { allowAbsolute: true });
+      } catch {
+        continue;
+      }
+
+      const content = platformReadSync(safeFilePath);
+      if (content === null) continue;
+
+      const fm = extractFrontmatter(content);
+
+      // Check frontmatter open_questions field
+      let questions = [];
+      if (fm.open_questions) {
+        if (Array.isArray(fm.open_questions) && fm.open_questions.length > 0) {
+          questions = fm.open_questions.map(q => sanitizeForDisplay(String(q).slice(0, 200)));
+        }
+      }
+
+      // Also check for ## Open Questions section in body
+      if (questions.length === 0) {
+        const oqMatch = content.match(/##\s*Open Questions[^\n]*\n([\s\S]*?)(?=\n##\s|$)/i);
+        if (oqMatch) {
+          const oqBody = oqMatch[1].trim();
+          if (oqBody && oqBody.length > 0 && !/^\s*none\s*$/i.test(oqBody)) {
+            const items = oqBody.split('\n')
+              .map(l => l.trim())
+              .filter(l => l && l !== '-' && l !== '*')
+              .filter(l => /^[-*\d]/.test(l) || l.includes('?'));
+            questions = items.slice(0, 3).map(q => sanitizeForDisplay(q.slice(0, 200)));
+          }
+        }
+      }
+
+      if (questions.length === 0) continue;
+
+      results.push({
+        phase: sanitizeForDisplay(phaseNum),
+        file: sanitizeForDisplay(file),
+        question_count: questions.length,
+        questions: questions.slice(0, 3),
+      });
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Main audit function. Scans all .planning/ artifact categories.
+ *
+ * @param {string} cwd - Project root directory
+ * @returns {object} Structured audit result
+ */
+function auditOpenArtifacts(cwd) {
+  const planDir = planningDir(cwd);
+
+  const debugSessions = (() => {
+    try { return scanDebugSessions(planDir); } catch { return [{ scan_error: true }]; }
+  })();
+
+  const quickTasks = (() => {
+    try { return scanQuickTasks(planDir); } catch { return [{ scan_error: true }]; }
+  })();
+
+  const threads = (() => {
+    try { return scanThreads(planDir); } catch { return [{ scan_error: true }]; }
+  })();
+
+  const todos = (() => {
+    try { return scanTodos(planDir); } catch { return [{ scan_error: true }]; }
+  })();
+
+  const seeds = (() => {
+    try { return scanSeeds(planDir); } catch { return [{ scan_error: true }]; }
+  })();
+
+  const uatGaps = (() => {
+    try { return scanUatGaps(planDir); } catch { return [{ scan_error: true }]; }
+  })();
+
+  const verificationGaps = (() => {
+    try { return scanVerificationGaps(planDir); } catch { return [{ scan_error: true }]; }
+  })();
+
+  const contextQuestions = (() => {
+    try { return scanContextQuestions(planDir); } catch { return [{ scan_error: true }]; }
+  })();
+
+  // Count real items (not scan_error sentinels)
+  const countReal = arr => arr.filter(i => !i.scan_error && !i._remainder_count).length;
+
+  const counts = {
+    debug_sessions: countReal(debugSessions),
+    quick_tasks: countReal(quickTasks),
+    threads: countReal(threads),
+    todos: countReal(todos),
+    seeds: countReal(seeds),
+    uat_gaps: countReal(uatGaps),
+    verification_gaps: countReal(verificationGaps),
+    context_questions: countReal(contextQuestions),
+  };
+  counts.total = Object.values(counts).reduce((s, n) => s + n, 0);
+
+  return {
+    scanned_at: new Date().toISOString(),
+    has_open_items: counts.total > 0,
+    counts,
+    items: {
+      debug_sessions: debugSessions,
+      quick_tasks: quickTasks,
+      threads,
+      todos,
+      seeds,
+      uat_gaps: uatGaps,
+      verification_gaps: verificationGaps,
+      context_questions: contextQuestions,
+    },
+  };
+}
+
+/**
+ * Format the audit result as a human-readable report.
+ *
+ * @param {object} auditResult - Result from auditOpenArtifacts()
+ * @returns {string} Formatted report
+ */
+function formatAuditReport(auditResult) {
+  const { counts, items, has_open_items } = auditResult;
+  const lines = [];
+  const hr = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+
+  lines.push(hr);
+  lines.push('  Milestone Close: Open Artifact Audit');
+  lines.push(hr);
+
+  if (!has_open_items) {
+    lines.push('');
+    lines.push('  All artifact types clear. Safe to proceed.');
+    lines.push('');
+    lines.push(hr);
+    return lines.join('\n');
+  }
+
+  // Debug sessions (blocking quality — red)
+  if (counts.debug_sessions > 0) {
+    lines.push('');
+    lines.push(`🔴 Debug Sessions (${counts.debug_sessions} open)`);
+    for (const item of items.debug_sessions.filter(i => !i.scan_error)) {
+      const hyp = item.hypothesis ? ` — ${item.hypothesis}` : '';
+      lines.push(`   • ${item.slug} [${item.status}]${hyp}`);
+    }
+  }
+
+  // UAT gaps (blocking quality — red)
+  if (counts.uat_gaps > 0) {
+    lines.push('');
+    lines.push(`🔴 UAT Gaps (${counts.uat_gaps} phases with incomplete UAT)`);
+    for (const item of items.uat_gaps.filter(i => !i.scan_error)) {
+      lines.push(`   • Phase ${item.phase}: ${item.file} [${item.status}] — ${item.open_scenario_count} pending scenarios`);
+    }
+  }
+
+  // Verification gaps (blocking quality — red)
+  if (counts.verification_gaps > 0) {
+    lines.push('');
+    lines.push(`🔴 Verification Gaps (${counts.verification_gaps} unresolved)`);
+    for (const item of items.verification_gaps.filter(i => !i.scan_error)) {
+      lines.push(`   • Phase ${item.phase}: ${item.file} [${item.status}]`);
+    }
+  }
+
+  // Quick tasks (incomplete work — yellow)
+  if (counts.quick_tasks > 0) {
+    lines.push('');
+    lines.push(`🟡 Quick Tasks (${counts.quick_tasks} incomplete)`);
+    for (const item of items.quick_tasks.filter(i => !i.scan_error)) {
+      const d = item.date ? ` (${item.date})` : '';
+      lines.push(`   • ${item.slug}${d} [${item.status}]`);
+    }
+  }
+
+  // Todos (incomplete work — yellow)
+  if (counts.todos > 0) {
+    const realTodos = items.todos.filter(i => !i.scan_error && !i._remainder_count);
+    const remainder = items.todos.find(i => i._remainder_count);
+    lines.push('');
+    lines.push(`🟡 Pending Todos (${counts.todos} pending)`);
+    for (const item of realTodos) {
+      const area = item.area ? ` [${item.area}]` : '';
+      const pri = item.priority ? ` (${item.priority})` : '';
+      lines.push(`   • ${item.filename}${area}${pri}`);
+      if (item.summary) lines.push(`     ${item.summary}`);
+    }
+    if (remainder) {
+      lines.push(`   ... and ${remainder._remainder_count} more`);
+    }
+  }
+
+  // Threads (deferred decisions — blue)
+  if (counts.threads > 0) {
+    lines.push('');
+    lines.push(`🔵 Open Threads (${counts.threads} active)`);
+    for (const item of items.threads.filter(i => !i.scan_error)) {
+      const title = item.title ? ` — ${item.title}` : '';
+      lines.push(`   • ${item.slug} [${item.status}]${title}`);
+    }
+  }
+
+  // Seeds (deferred decisions — blue)
+  if (counts.seeds > 0) {
+    lines.push('');
+    lines.push(`🔵 Unimplemented Seeds (${counts.seeds} pending)`);
+    for (const item of items.seeds.filter(i => !i.scan_error)) {
+      const title = item.title ? ` — ${item.title}` : '';

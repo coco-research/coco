@@ -1,0 +1,120 @@
+{"id": "dev-ai-01", "prompt": "Compare a small language model with retrieval versus a larger one for answering support tickets.", "label": "ai", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-ai-02", "prompt": "How can we detect fabricated citations in generated answers before showing them to customers?", "label": "ai", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-ai-03", "prompt": "Choose a method to compress a transformer for on-device summarization.", "label": "ai", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-ai-04", "prompt": "Design a benchmark for an assistant that must cite the right source passage.", "label": "ai", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-ai-05", "prompt": "When should we fine-tune an open model instead of improving its prompt?", "label": "ai", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-ai-06", "prompt": "Our vector search misses paraphrases; suggest a better representation and evaluation loop.", "label": "ai", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-ai-07", "prompt": "Explain why reinforcement learning from preferences changes chatbot behavior.", "label": "ai", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-ai-08", "prompt": "Assess whether a document-answering assistant should call tools or answer directly.", "label": "ai", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-ai-09", "prompt": "Find a safe way to deploy a multimodal classifier with uncertain predictions.", "label": "ai", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-ai-10", "prompt": "How should we measure prompt injection resistance in a retrieval assistant?", "label": "ai", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-engineering-01", "prompt": "Design a zero-downtime database schema migration for our public API.", "label": "engineering", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-engineering-02", "prompt": "Our service crashes during traffic spikes; propose a resilient queue and retry architecture.", "label": "engineering", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-engineering-03", "prompt": "Choose between a monolith and independently deployed services for a small startup.", "label": "engineering", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-engineering-04", "prompt": "Investigate a memory leak in a long-running worker process.", "label": "engineering", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-engineering-05", "prompt": "Create a rollback plan for a failing container deployment.", "label": "engineering", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-engineering-06", "prompt": "How should we test a distributed lock under network partitions?", "label": "engineering", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-engineering-07", "prompt": "Reduce latency in a backend that performs redundant database round trips.", "label": "engineering", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-engineering-08", "prompt": "Review a compiler optimization that changes the order of floating point operations.", "label": "engineering", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-engineering-09", "prompt": "Plan an observability stack that traces requests across services.", "label": "engineering", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-engineering-10", "prompt": "Choose a concurrency model for a server handling many slow connections.", "label": "engineering", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-product-design-01", "prompt": "Customers abandon our signup screen; simplify its hierarchy and interaction flow.", "label": "product-design", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-product-design-02", "prompt": "How should a mobile checkout explain a declined payment without alarming the buyer?", "label": "product-design", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-product-design-03", "prompt": "Improve the contrast and keyboard navigation of a settings panel.", "label": "product-design", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-product-design-04", "prompt": "Plan a usability study for a dashboard used by first-time operators.", "label": "product-design", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-product-design-05", "prompt": "Choose typography and spacing for a dense analytics table.", "label": "product-design", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-product-design-06", "prompt": "Explain a confusing navigation structure using a clearer information hierarchy.", "label": "product-design", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-product-design-07", "prompt": "Draft an accessible interaction for dragging items between columns.", "label": "product-design", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-product-design-08", "prompt": "How can a prototype validate whether users understand a new onboarding step?", "label": "product-design", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-product-design-09", "prompt": "Create a coherent set of empty, loading, error, and success states.", "label": "product-design", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-product-design-10", "prompt": "Assess whether an icon-only toolbar is understandable to new users.", "label": "product-design", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-finance-01", "prompt": "Forecast our cash runway after hiring three people and raising hosting costs.", "label": "finance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-finance-02", "prompt": "Build a monthly budget that separates fixed costs from usage-based costs.", "label": "finance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-finance-03", "prompt": "Compare leasing equipment with buying it using discounted cash flows.", "label": "finance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-finance-04", "prompt": "Estimate the break-even point for a subscription with high support costs.", "label": "finance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-finance-05", "prompt": "Explain why reported revenue differs from cash received this quarter.", "label": "finance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-finance-06", "prompt": "Assess whether our working capital can support slower customer payments.", "label": "finance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-finance-07", "prompt": "What assumptions matter most in a five-year company valuation?", "label": "finance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-finance-08", "prompt": "Prepare a sensitivity analysis for margin and customer acquisition cost.", "label": "finance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-finance-09", "prompt": "Compare debt funding and new equity for a small business expansion.", "label": "finance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-finance-10", "prompt": "Reconcile operating expenses with the monthly cash flow statement.", "label": "finance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-risk-compliance-01", "prompt": "Define evidence that proves access permissions are reviewed each quarter.", "label": "risk-compliance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-risk-compliance-02", "prompt": "Prepare an audit-ready control matrix for handling customer personal records.", "label": "risk-compliance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-risk-compliance-03", "prompt": "How should we document exceptions to a required vendor due diligence policy?", "label": "risk-compliance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-risk-compliance-04", "prompt": "Evaluate whether a privacy impact assessment covers our new data collection flow.", "label": "risk-compliance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-risk-compliance-05", "prompt": "Create an incident escalation and reporting policy for a regulated organization.", "label": "risk-compliance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-risk-compliance-06", "prompt": "Map approval responsibilities for conflicts of interest in procurement.", "label": "risk-compliance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-risk-compliance-07", "prompt": "Design a third-party assurance questionnaire that tests actual controls.", "label": "risk-compliance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-risk-compliance-08", "prompt": "Identify gaps in retention, deletion, and access controls before an external audit.", "label": "risk-compliance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-risk-compliance-09", "prompt": "How can an internal audit verify staff followed the required training policy?", "label": "risk-compliance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-risk-compliance-10", "prompt": "Create a governance process for tracking remediation of overdue findings.", "label": "risk-compliance", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-strategy-01", "prompt": "Choose whether a startup should compete on low cost or a specialized niche.", "label": "strategy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-strategy-02", "prompt": "Assess how network effects could strengthen a two-sided marketplace.", "label": "strategy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-strategy-03", "prompt": "Should our company enter a new country before expanding its existing customer base?", "label": "strategy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-strategy-04", "prompt": "Compare partnering with a distributor against building a direct sales channel.", "label": "strategy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-strategy-05", "prompt": "Explain which competitor responses could undermine a new pricing model.", "label": "strategy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-strategy-06", "prompt": "Prioritize business capabilities that create a defensible advantage.", "label": "strategy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-strategy-07", "prompt": "Consider whether bundling two services improves customer retention.", "label": "strategy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-strategy-08", "prompt": "How should a company allocate resources between its core business and a new venture?", "label": "strategy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-strategy-09", "prompt": "Evaluate an acquisition that would expand our distribution but dilute focus.", "label": "strategy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-strategy-10", "prompt": "Define a competitive position for a startup facing a much larger incumbent.", "label": "strategy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-data-analytics-01", "prompt": "Our dashboard shows a sudden conversion drop; distinguish a measurement bug from a real change.", "label": "data-analytics", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-data-analytics-02", "prompt": "Design a randomized experiment that accounts for users appearing on multiple devices.", "label": "data-analytics", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-data-analytics-03", "prompt": "Choose a causal inference method for a promotion with no randomized control group.", "label": "data-analytics", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-data-analytics-04", "prompt": "How should we handle missing values before estimating churn?", "label": "data-analytics", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-data-analytics-05", "prompt": "Create a trustworthy metric definition for weekly active accounts.", "label": "data-analytics", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-data-analytics-06", "prompt": "Explain why a predictive model performs well offline but fails after deployment.", "label": "data-analytics", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-data-analytics-07", "prompt": "Investigate selection bias in a survey sent only to paying customers.", "label": "data-analytics", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-data-analytics-08", "prompt": "Estimate uncertainty around a small experiment with few purchases.", "label": "data-analytics", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-data-analytics-09", "prompt": "Build a reproducible pipeline for joining event logs to customer records.", "label": "data-analytics", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-data-analytics-10", "prompt": "Determine whether a funnel change is statistically meaningful or random noise.", "label": "data-analytics", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-gtm-01", "prompt": "Plan a launch campaign for a new subscription targeting independent consultants.", "label": "gtm", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-gtm-02", "prompt": "Write a positioning statement that distinguishes our service from generic competitors.", "label": "gtm", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-gtm-03", "prompt": "Choose channels for reaching enterprise buyers with a limited outreach budget.", "label": "gtm", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-gtm-04", "prompt": "Improve a discovery call to uncover urgency and purchase authority.", "label": "gtm", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-gtm-05", "prompt": "Create a lifecycle email sequence for people who stopped using a free trial.", "label": "gtm", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-gtm-06", "prompt": "How should we define an ideal customer profile before hiring salespeople?", "label": "gtm", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-gtm-07", "prompt": "Diagnose why inbound leads rarely become qualified opportunities.", "label": "gtm", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-gtm-08", "prompt": "Compare referral incentives with paid acquisition for a new application.", "label": "gtm", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-gtm-09", "prompt": "Build a partner enablement plan for a reseller channel.", "label": "gtm", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-gtm-10", "prompt": "Identify messaging that connects a technical feature to a buyer outcome.", "label": "gtm", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-climate-energy-01", "prompt": "Compare rooftop solar and grid electricity for reducing a factory footprint.", "label": "climate-energy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-climate-energy-02", "prompt": "Estimate how a heat pump changes household emissions and operating costs.", "label": "climate-energy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-climate-energy-03", "prompt": "Prioritize investments that reduce methane leakage in an industrial facility.", "label": "climate-energy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-climate-energy-04", "prompt": "How can a city electrify its bus fleet without overwhelming charging infrastructure?", "label": "climate-energy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-climate-energy-05", "prompt": "Evaluate the lifecycle emissions of two battery chemistries.", "label": "climate-energy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-climate-energy-06", "prompt": "Assess whether a carbon removal project can demonstrate durable storage.", "label": "climate-energy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-climate-energy-07", "prompt": "Choose a decarbonization pathway for producing industrial process heat.", "label": "climate-energy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-climate-energy-08", "prompt": "Compare the water and land impacts of alternative power generation technologies.", "label": "climate-energy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-climate-energy-09", "prompt": "Plan a circular materials program that reduces waste from manufacturing.", "label": "climate-energy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-climate-energy-10", "prompt": "Explain how a utility could balance intermittent wind output with demand.", "label": "climate-energy", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-education-edtech-01", "prompt": "Design a lesson that helps students transfer fractions knowledge to unfamiliar problems.", "label": "education-edtech", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-education-edtech-02", "prompt": "How can a teacher tell whether a quiz measures understanding or memorization?", "label": "education-edtech", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-education-edtech-03", "prompt": "Choose an adaptive practice schedule for a learner struggling with algebra.", "label": "education-edtech", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-education-edtech-04", "prompt": "Improve feedback so a student knows what to try after an incorrect answer.", "label": "education-edtech", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-education-edtech-05", "prompt": "Plan a classroom trial of a tutoring app without increasing teacher workload.", "label": "education-edtech", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-education-edtech-06", "prompt": "Assess whether a digital course supports learners with reading difficulties.", "label": "education-edtech", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-education-edtech-07", "prompt": "Create a mastery rubric for a project-based science lesson.", "label": "education-edtech", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-education-edtech-08", "prompt": "Compare spaced retrieval with repeated rereading for long-term retention.", "label": "education-edtech", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-education-edtech-09", "prompt": "Help a school evaluate whether a new learning platform improves outcomes.", "label": "education-edtech", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-education-edtech-10", "prompt": "Design a fair assessment for students with different prior knowledge.", "label": "education-edtech", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-healthcare-life-sciences-01", "prompt": "Design a clinical trial endpoint that patients would consider meaningful.", "label": "healthcare-life-sciences", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-healthcare-life-sciences-02", "prompt": "Compare evidence from a randomized trial with an observational patient cohort.", "label": "healthcare-life-sciences", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-healthcare-life-sciences-03", "prompt": "How can a hospital reduce preventable infections without increasing staff burnout?", "label": "healthcare-life-sciences", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-healthcare-life-sciences-04", "prompt": "Assess the uncertainty in a diagnostic test with low disease prevalence.", "label": "healthcare-life-sciences", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-healthcare-life-sciences-05", "prompt": "Plan a protocol for safely introducing a new medical device to a clinic.", "label": "healthcare-life-sciences", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-healthcare-life-sciences-06", "prompt": "Explain how genomic variants could influence a drug response study.", "label": "healthcare-life-sciences", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-healthcare-life-sciences-07", "prompt": "Evaluate the strength of evidence supporting a public vaccination intervention.", "label": "healthcare-life-sciences", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-healthcare-life-sciences-08", "prompt": "Choose measures for monitoring adverse events during a treatment study.", "label": "healthcare-life-sciences", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-healthcare-life-sciences-09", "prompt": "Improve a patient discharge process to reduce avoidable readmissions.", "label": "healthcare-life-sciences", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-healthcare-life-sciences-10", "prompt": "Design a reproducible experiment for testing a candidate therapeutic compound.", "label": "healthcare-life-sciences", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-legal-ip-01", "prompt": "Assess which rights a software contributor must grant before their code is redistributed.", "label": "legal-ip", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-legal-ip-02", "prompt": "Compare a patent filing with keeping a manufacturing process confidential.", "label": "legal-ip", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-legal-ip-03", "prompt": "Review whether a brand name could conflict with an existing trademark.", "label": "legal-ip", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-legal-ip-04", "prompt": "Explain the obligations attached to redistributing a third-party software dependency.", "label": "legal-ip", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-legal-ip-05", "prompt": "Identify ambiguous liability and termination clauses in a vendor contract.", "label": "legal-ip", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-legal-ip-06", "prompt": "How can an author document ownership when several collaborators create a work?", "label": "legal-ip", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-legal-ip-07", "prompt": "Choose contract terms that protect a confidential prototype shared with a supplier.", "label": "legal-ip", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-legal-ip-08", "prompt": "Evaluate whether a proposed use of an image requires permission from its creator.", "label": "legal-ip", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-legal-ip-09", "prompt": "Outline the questions to ask before assigning an invention to a company.", "label": "legal-ip", "kind": "positive", "split": "dev", "draft": true}
+{"id": "dev-legal-ip-10", "prompt": "Explain the difference between granting an exclusive licence and transferring ownership.", "label": "legal-ip", "kind": "positive", "split": "dev", "draft": true}

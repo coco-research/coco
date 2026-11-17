@@ -517,3 +517,87 @@ const MINIMAL_ALLOWLIST_SET = new Set(MINIMAL_SKILL_ALLOWLIST);
 /**
  * @deprecated Use resolveProfile({ modes: ['core'] }) instead.
  */
+function isMinimalMode(mode) {
+  return mode === 'minimal' || mode === 'core-only';
+}
+
+/**
+ * Overloaded for back-compat.
+ * - If resolvedProfileOrMode is a string: legacy mode check (full/minimal)
+ * - If resolvedProfileOrMode is an object with .skills: new profile API
+ *
+ * @deprecated String-mode form; use resolvedProfile object form instead.
+ */
+function shouldInstallSkill(skillBaseName, resolvedProfileOrMode) {
+  if (typeof resolvedProfileOrMode === 'object' && resolvedProfileOrMode !== null) {
+    const { skills } = resolvedProfileOrMode;
+    if (skills === '*') return true;
+    return skills instanceof Set && skills.has(skillBaseName);
+  }
+  // Legacy string mode
+  const mode = resolvedProfileOrMode;
+  if (!isMinimalMode(mode)) return true;
+  return MINIMAL_ALLOWLIST_SET.has(skillBaseName);
+}
+
+/**
+ * Stage a filtered copy of the source commands/gsd directory.
+ * Back-compat wrapper: maps 'minimal' → core profile, 'full' → full.
+ *
+ * @deprecated Use stageSkillsForProfile with a resolved profile instead.
+ * @param {string} srcDir absolute path to commands/gsd
+ * @param {string} mode 'full' | 'minimal'
+ * @returns {string} path to use (original or staged tmp)
+ */
+function stageSkillsForMode(srcDir, mode) {
+  if (!isMinimalMode(mode)) return srcDir;
+  if (!fs.existsSync(srcDir)) return srcDir;
+
+  const stageDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-minimal-skills-'));
+  try {
+    const entries = fs.readdirSync(srcDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isFile()) continue;
+      if (!entry.name.endsWith('.md')) continue;
+      const baseName = entry.name.replace(/\.md$/, '');
+      if (!shouldInstallSkill(baseName, mode)) continue;
+      fs.copyFileSync(
+        path.join(srcDir, entry.name),
+        path.join(stageDir, entry.name),
+      );
+    }
+  } catch (err) {
+    try { fs.rmSync(stageDir, { recursive: true, force: true }); } catch {}
+    throw err;
+  }
+  STAGED_DIRS.add(stageDir);
+  ensureExitCleanup();
+  return stageDir;
+}
+
+// ---------------------------------------------------------------------------
+// Exports
+// ---------------------------------------------------------------------------
+
+module.exports = {
+  // New profile API (ADR-0011)
+  PROFILES,
+  PROFILE_RANK,
+  loadSkillsManifest,
+  resolveProfile,
+  resolveEffectiveProfile,
+  mostRestrictiveProfile,
+  stageSkillsForProfile,
+  stageAgentsForProfile,
+  stageSkillsForRuntimeAsSkills,
+  STAGED_DIRS,
+  readActiveProfile,
+  writeActiveProfile,
+  // Shared internals
+  cleanupStagedSkills,
+  // Back-compat / deprecated
+  MINIMAL_SKILL_ALLOWLIST,
+  isMinimalMode,
+  shouldInstallSkill,
+  stageSkillsForMode,
+};

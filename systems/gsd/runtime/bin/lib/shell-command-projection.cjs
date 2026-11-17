@@ -456,3 +456,97 @@ function _normalizeMd(content) {
       insideFence[i] = fenceOpen;
     }
   }
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const prev = i > 0 ? lines[i - 1] : '';
+    const prevTrimmed = prev.trimEnd();
+    const trimmed = line.trimEnd();
+    const isFenceLine = fenceRegex.test(trimmed);
+    if (/^#{1,6}\s/.test(trimmed) && i > 0 && prevTrimmed !== '' && prevTrimmed !== '---') result.push('');
+    if (isFenceLine && i > 0 && prevTrimmed !== '' && !insideFence[i] && (i === 0 || !insideFence[i - 1] || isFenceLine)) {
+      if (i === 0 || !insideFence[i - 1]) result.push('');
+    }
+    if (/^(\s*[-*+]\s|\s*\d+\.\s)/.test(line) && i > 0 && prevTrimmed !== '' && !/^(\s*[-*+]\s|\s*\d+\.\s)/.test(prev) && prevTrimmed !== '---') result.push('');
+    result.push(line);
+    if (/^#{1,6}\s/.test(trimmed) && i < lines.length - 1 && (lines[i + 1] ?? '').trimEnd() !== '') result.push('');
+    if (/^```\s*$/.test(trimmed) && i > 0 && insideFence[i - 1] && i < lines.length - 1 && (lines[i + 1] ?? '').trimEnd() !== '') result.push('');
+    if (/^(\s*[-*+]\s|\s*\d+\.\s)/.test(line) && i < lines.length - 1) {
+      const next = lines[i + 1];
+      if (next !== undefined && next.trimEnd() !== '' && !/^(\s*[-*+]\s|\s*\d+\.\s)/.test(next) && !/^\s/.test(next)) result.push('');
+    }
+  }
+  text = result.join('\n');
+  text = text.replace(/\n{3,}/g, '\n\n');
+  text = text.replace(/\n*$/, '\n');
+  return text;
+}
+
+function normalizeContent(filePath, content, opts = {}) {
+  const encoding = opts.encoding ?? 'utf-8';
+  const isMd = path.extname(filePath).toLowerCase() === '.md';
+  let normalized;
+  if (isMd) {
+    normalized = _normalizeMd(content);
+  } else {
+    normalized = (content ?? '').replace(/\r\n/g, '\n').replace(/\n*$/, '\n');
+  }
+  return { content: normalized, encoding };
+}
+
+function platformWriteSync(filePath, content, opts = {}) {
+  const { content: normalized, encoding } = normalizeContent(filePath, content, opts);
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  const tmpPath = filePath + '.tmp.' + process.pid;
+  try {
+    fs.writeFileSync(tmpPath, normalized, encoding);
+    fs.renameSync(tmpPath, filePath);
+  } catch {
+    try { fs.unlinkSync(tmpPath); } catch { /* already gone */ }
+    fs.writeFileSync(filePath, normalized, encoding);
+  }
+}
+
+function platformReadSync(filePath, opts = {}) {
+  const encoding = opts.encoding ?? 'utf-8';
+  try {
+    return fs.readFileSync(filePath, encoding);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      if (opts.required) throw err;
+      return null;
+    }
+    throw err;
+  }
+}
+
+function platformEnsureDir(dirPath) {
+  fs.mkdirSync(dirPath, { recursive: true });
+}
+
+module.exports = {
+  hookCommandNeedsPowerShellCallOperator,
+  formatHookCommandForRuntime,
+  formatManagedHookScriptToken,
+  projectLocalHookPrefix,
+  projectPortableHookBaseDir,
+  projectShellCommandText,
+  projectManagedHookCommand,
+  isManagedHookBasename,
+  isManagedHookCommand,
+  projectLegacySettingsHookCommand,
+  escapeTomlDoubleQuotedString,
+  projectCodexHookTomlCommand,
+  projectPathActionProjection,
+  renderShellActionLines,
+  projectPersistentPathExportActions,
+  buildWindowsShimTriple,
+  formatSdkPathDiagnostic,
+  execGit,
+  execNpm,
+  execTool,
+  probeTty,
+  normalizeContent,
+  platformWriteSync,
+  platformReadSync,
+  platformEnsureDir,
+};

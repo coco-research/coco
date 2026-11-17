@@ -1233,3 +1233,190 @@ function cmdPhaseComplete(cwd, phaseNum, raw) {
         }
 
         // Collect REQ-IDs present in the Traceability section only, to avoid
+        // picking up IDs from other tables in the document.
+        const traceabilityHeadingMatch = reqContent.match(/^#{1,6}\s+Traceability\b/im);
+        const traceabilitySection = traceabilityHeadingMatch
+          ? reqContent.slice(traceabilityHeadingMatch.index)
+          : '';
+        const tableReqIds = new Set();
+        const tableRowPattern = /^\|\s*([A-Z][A-Z0-9]*-\d+)\s*\|/gm;
+        let tableMatch;
+        while ((tableMatch = tableRowPattern.exec(traceabilitySection)) !== null) {
+          tableReqIds.add(tableMatch[1]);
+        }
+
+        const unregistered = bodyReqIds.filter(id => !tableReqIds.has(id));
+        if (unregistered.length > 0) {
+          warnings.push(
+            `REQUIREMENTS.md: ${unregistered.length} REQ-ID(s) found in body but missing from Traceability table: ${unregistered.join(', ')} — add them manually to keep traceability in sync`
+          );
+        }
+
+        platformWriteSync(reqPath, reqContent);
+        requirementsUpdated = true;
+      }
+    });
+  }
+
+  // Find next phase — check both filesystem AND roadmap
+  // Phases may be defined in ROADMAP.md but not yet scaffolded to disk,
+  // so a filesystem-only scan would incorrectly report is_last_phase:true
+  let nextPhaseNum = null;
+  let nextPhaseName = null;
+  let isLastPhase = true;
+
+  try {
+    const isDirInMilestone = getMilestonePhaseFilter(cwd);
+    const entries = fs.readdirSync(phasesDir, { withFileTypes: true });
+    const dirs = entries.filter(e => e.isDirectory()).map(e => e.name)
+      .filter(isDirInMilestone)
+      .sort((a, b) => comparePhaseNum(a, b));
+
+    // Find the next phase directory after current
+    // Skip backlog phases (999.x) — they are parked ideas, not sequential work (#2129)
+    for (const dir of dirs) {
+      const dm = dir.match(/^(\d+[A-Z]?(?:\.\d+)*)-?(.*)/i);
+      if (dm) {
+        if (/^999(?:\.|$)/.test(dm[1])) continue;
+        if (comparePhaseNum(dm[1], phaseNum) > 0) {
+          nextPhaseNum = dm[1];
+          nextPhaseName = dm[2] || null;
+          isLastPhase = false;
+          break;
+        }
+      }
+    }
+  } catch { /* intentionally empty */ }
+
+  // Fallback: if filesystem found no next phase, check ROADMAP.md
+  // for phases that are defined but not yet planned (no directory on disk)
+  if (isLastPhase && fs.existsSync(roadmapPath)) {
+    try {
+      const roadmapForPhases = extractCurrentMilestone(fs.readFileSync(roadmapPath, 'utf-8'), cwd);
+      const phasePattern = /#{2,4}\s*Phase\s+(\d+[A-Z]?(?:\.\d+)*)\s*:\s*([^\n]+)/gi;
+      let pm;
+      while ((pm = phasePattern.exec(roadmapForPhases)) !== null) {
+        if (comparePhaseNum(pm[1], phaseNum) > 0) {
+          nextPhaseNum = pm[1];
+          nextPhaseName = pm[2].replace(/\(INSERTED\)/i, '').trim().toLowerCase().replace(/\s+/g, '-');
+          isLastPhase = false;
+          break;
+        }
+      }
+    } catch { /* intentionally empty */ }
+  }
+
+  // Update STATE.md atomically — hold lock across read-modify-write (#P4.4).
+  // Previously read outside the lock; a crash between the ROADMAP update
+  // (locked above) and this write left ROADMAP/STATE inconsistent.
+  if (fs.existsSync(statePath)) {
+    readModifyWriteStateMd(statePath, (stateContent) => {
+      // Update Current Phase — preserve "X of Y (Name)" compound format
+      const phaseValue = nextPhaseNum || phaseNum;
+      const existingPhaseField = stateExtractField(stateContent, 'Current Phase')
+        || stateExtractField(stateContent, 'Phase');
+      let newPhaseValue = String(phaseValue);
+      if (existingPhaseField) {
+        const totalMatch = existingPhaseField.match(/of\s+(\d+)/);
+        const nameMatch = existingPhaseField.match(/\(([^)]+)\)/);
+        if (totalMatch) {
+          const total = totalMatch[1];
+          const nameStr = nextPhaseName ? ` (${nextPhaseName.replace(/-/g, ' ')})` : (nameMatch ? ` (${nameMatch[1]})` : '');
+          newPhaseValue = `${phaseValue} of ${total}${nameStr}`;
+        }
+      }
+      stateContent = stateReplaceFieldWithFallback(stateContent, 'Current Phase', 'Phase', newPhaseValue);
+
+      // Update Current Phase Name
+      if (nextPhaseName) {
+        stateContent = stateReplaceFieldWithFallback(stateContent, 'Current Phase Name', null, nextPhaseName.replace(/-/g, ' '));
+      }
+
+      // Update Status
+      stateContent = stateReplaceFieldWithFallback(stateContent, 'Status', null,
+        isLastPhase ? 'Milestone complete' : 'Ready to plan');
+
+      // Update Current Plan
+      stateContent = stateReplaceFieldWithFallback(stateContent, 'Current Plan', 'Plan', 'Not started');
+
+      // Update Last Activity
+      stateContent = stateReplaceFieldWithFallback(stateContent, 'Last Activity', 'Last activity', today);
+
+      // Update Last Activity Description
+      stateContent = stateReplaceFieldWithFallback(stateContent, 'Last Activity Description', null,
+        `Phase ${phaseNum} complete${nextPhaseNum ? `, transitioned to Phase ${nextPhaseNum}` : ''}`);
+
+      // Increment Completed Phases counter (#956)
+      const completedRaw = stateExtractField(stateContent, 'Completed Phases');
+      if (completedRaw) {
+        const newCompleted = parseInt(completedRaw, 10) + 1;
+        stateContent = stateReplaceField(stateContent, 'Completed Phases', String(newCompleted)) || stateContent;
+
+        // Recalculate percent based on completed / total (#956)
+        const totalRaw = stateExtractField(stateContent, 'Total Phases');
+        if (totalRaw) {
+          const totalPhases = parseInt(totalRaw, 10);
+          if (totalPhases > 0) {
+            const newPercent = Math.round((newCompleted / totalPhases) * 100);
+            stateContent = stateReplaceField(stateContent, 'Progress', `${newPercent}%`) || stateContent;
+            stateContent = stateContent.replace(
+              /(percent:\s*)\d+/,
+              `$1${newPercent}`
+            );
+          }
+        }
+      }
+
+      // Gate 4: Update Performance Metrics section (#1627)
+      stateContent = updatePerformanceMetricsSection(stateContent, cwd, phaseNum, planCount, summaryCount);
+
+      return stateContent;
+    }, cwd);
+  }
+
+  // Auto-prune STATE.md on phase boundary when configured (#2087)
+  let autoPruned = false;
+  try {
+    const configPath = path.join(planningDir(cwd), 'config.json');
+    if (fs.existsSync(configPath)) {
+      const rawConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      const autoPruneEnabled = rawConfig.workflow && rawConfig.workflow.auto_prune_state === true;
+      if (autoPruneEnabled && fs.existsSync(statePath)) {
+        const { cmdStatePrune } = require('./state.cjs');
+        cmdStatePrune(cwd, { keepRecent: '3', dryRun: false, silent: true }, true);
+        autoPruned = true;
+      }
+    }
+  } catch { /* intentionally empty — auto-prune is best-effort */ }
+
+  const result = {
+    completed_phase: phaseNum,
+    phase_name: phaseInfo.phase_name,
+    plans_executed: `${summaryCount}/${planCount}`,
+    next_phase: nextPhaseNum,
+    next_phase_name: nextPhaseName,
+    is_last_phase: isLastPhase,
+    date: today,
+    roadmap_updated: fs.existsSync(roadmapPath),
+    state_updated: fs.existsSync(statePath),
+    requirements_updated: requirementsUpdated,
+    auto_pruned: autoPruned,
+    warnings,
+    has_warnings: warnings.length > 0,
+  };
+
+  output(result, raw);
+}
+
+module.exports = {
+  cmdPhasesList,
+  cmdPhaseNextDecimal,
+  cmdFindPhase,
+  cmdPhasePlanIndex,
+  cmdPhaseAdd,
+  cmdPhaseAddBatch,
+  cmdPhaseMvpMode,
+  cmdPhaseInsert,
+  cmdPhaseRemove,
+  cmdPhaseComplete,
+};

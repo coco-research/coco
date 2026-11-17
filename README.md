@@ -96,10 +96,14 @@ Released on npm: `npx cocosuperintelligence` installs the latest release ([CHANG
 
 Measured on main, a default Claude Code install delivers 191 of the 229 skills (the rest are the opt-in security pack and Cursor-only skills), 388 commands and 34 agents ([`docs/delivered-counts.json`](docs/delivered-counts.json)).
 
+Routing, measured on the development split of the router test (120 prompts, 12 of the 13 departments, written without the department names): the router picks the right team first for 110 of 120 prompts (91.7%) with the local `nomic-embed-text` embedder and for 90 of 120 (75.0%) with keyword matching, up from 77 (64.2%) and 17 (14.2%) before the team and cell descriptions were tuned on that split. The held-out split is scored separately and is not part of these numbers ([`evals/routing/runs/`](evals/routing/runs/)).
+
 GSD ships its pinned upstream toolkit. The Claude Code installer links it at `~/.claude/get-shit-done` and preserves an existing user installation (see [`systems/gsd/README.md`](systems/gsd/README.md)).
 
 <details>
 <summary><strong>Other install paths, updates, uninstall</strong></summary>
+
+`npx cocosuperintelligence` in a terminal lists the packs (core, gsd, brain, cognee, hyperframes, si and m0 ticked; `reverse-skill` unticked), asks one `[Y/n]`, then installs. `--packs gsd,brain` picks packs, `--all` takes every pack, and `--yes` or a non-interactive shell takes the defaults without a question. `--uninstall --packs gsd` prints the files it will remove first.
 
 From a checkout you already have, `bash install.sh` auto-detects the editor. Narrow it with `--adapter cursor` or `--systems gsd,brain`. `--core-only` skips bundles. `reverse-skill` stays opt-in: `--systems reverse-skill`.
 

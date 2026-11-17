@@ -356,3 +356,97 @@ gsd-sdk query generate-dev-preferences --analysis "$ANALYSIS_PATH" --json
 Display: "✓ Generated /gsd-dev-preferences at $HOME/.claude/skills/gsd-dev-preferences/SKILL.md"
 
 **For CLAUDE.md profile section (if selected):**
+
+```bash
+gsd-sdk query generate-claude-profile --analysis "$ANALYSIS_PATH" --json
+```
+
+Display: "✓ Added profile section to CLAUDE.md"
+
+**For Global CLAUDE.md (if selected):**
+
+```bash
+gsd-sdk query generate-claude-profile --analysis "$ANALYSIS_PATH" --global --json
+```
+
+Display: "✓ Added profile section to $HOME/.claude/CLAUDE.md"
+
+**Error handling:** If any `gsd-sdk query` or gsd-tools.cjs call fails, display the error message and use AskUserQuestion to offer "Retry" or "Skip this artifact". On retry, re-run the command. On skip, continue to next artifact.
+
+---
+
+## 10. Summary & Refresh Diff
+
+**If --refresh path:**
+
+Read both old backup and new analysis to compare dimension ratings/confidence.
+
+Read the backed-up profile:
+```bash
+BACKUP_PATH="$HOME/.claude/USER-PROFILE.backup.md"
+```
+
+Compare each dimension's rating and confidence between old and new. Display diff table showing only changed dimensions:
+
+```
+## Changes
+
+| Dimension       | Before                      | After                        |
+|-----------------|-----------------------------|-----------------------------|
+| Communication   | terse-direct (LOW)          | detailed-structured (HIGH)  |
+| Debugging       | fix-first (MEDIUM)          | hypothesis-driven (MEDIUM)  |
+```
+
+If nothing changed: Display "No changes detected -- your profile is already up to date."
+
+**Display final summary:**
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD > PROFILE COMPLETE ✓
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Your profile:    $HOME/.claude/get-shit-done/USER-PROFILE.md
+```
+
+Then list paths for each generated artifact:
+```
+Artifacts:
+  ✓ /gsd-dev-preferences   $HOME/.claude/skills/gsd-dev-preferences/SKILL.md
+  ✓ CLAUDE.md section       ./CLAUDE.md
+  ✓ Global CLAUDE.md        $HOME/.claude/CLAUDE.md
+```
+
+(Only show artifacts that were actually generated.)
+
+**Clean up temp files:**
+
+Remove the temp directory created by profile-sample (contains sample JSONL and analysis JSON):
+```bash
+rm -rf "$TEMP_DIR"
+```
+
+Also remove any standalone temp files created for questionnaire answers:
+```bash
+rm -f "$ANSWERS_PATH" 2>/dev/null
+rm -f "$ANALYSIS_PATH" 2>/dev/null
+```
+
+(Only clean up temp paths that were actually created during this workflow run.)
+
+</process>
+
+<success_criteria>
+- [ ] Initialization detects existing profile and handles all three responses (view/refresh/cancel)
+- [ ] Consent gate shown for session analysis path, skipped for questionnaire path
+- [ ] Session scan discovers sessions and reports statistics
+- [ ] Session analysis path: samples messages, spawns profiler agent, extracts analysis JSON
+- [ ] Questionnaire path: presents 8 questions, collects answers, converts to analysis JSON
+- [ ] Split resolution presents context-dependent splits with user resolution options
+- [ ] Profile written to USER-PROFILE.md via write-profile subcommand
+- [ ] Result display shows report card table and highlight reel with evidence
+- [ ] Artifact selection uses multiSelect with all options pre-selected
+- [ ] Artifacts generated sequentially via gsd-sdk query (or gsd-tools.cjs) subcommands
+- [ ] Refresh diff shows changed dimensions when --refresh was used
+- [ ] Temp files cleaned up on completion
+</success_criteria>

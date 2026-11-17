@@ -728,3 +728,28 @@ function formatAuditReport(auditResult) {
     lines.push(`🔵 Unimplemented Seeds (${counts.seeds} pending)`);
     for (const item of items.seeds.filter(i => !i.scan_error)) {
       const title = item.title ? ` — ${item.title}` : '';
+      lines.push(`   • ${item.seed_id} [${item.status}]${title}`);
+    }
+  }
+
+  // Context questions (deferred decisions — blue)
+  if (counts.context_questions > 0) {
+    lines.push('');
+    lines.push(`🔵 CONTEXT Open Questions (${counts.context_questions} phases with open questions)`);
+    for (const item of items.context_questions.filter(i => !i.scan_error)) {
+      lines.push(`   • Phase ${item.phase}: ${item.file} (${item.question_count} question${item.question_count !== 1 ? 's' : ''})`);
+      for (const q of item.questions) {
+        lines.push(`     - ${q}`);
+      }
+    }
+  }
+
+  lines.push('');
+  lines.push(hr);
+  lines.push(`  ${counts.total} item${counts.total !== 1 ? 's' : ''} require decisions before close.`);
+  lines.push(hr);
+
+  return lines.join('\n');
+}
+
+module.exports = { auditOpenArtifacts, formatAuditReport };

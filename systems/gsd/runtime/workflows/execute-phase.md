@@ -303,3 +303,353 @@ All subsequent commits go to this branch. User handles merging.
 From init JSON: `phase_dir`, `plan_count`, `incomplete_count`.
 
 Report: "Found {plan_count} plans in {phase_dir} ({incomplete_count} incomplete)"
+
+**Update STATE.md for phase start:**
+```bash
+gsd-sdk query state.begin-phase --phase "${PHASE_NUMBER}" --name "${PHASE_NAME}" --plans "${PLAN_COUNT}"
+```
+This updates Status, Last Activity, Current focus, Current Position, and plan counts in STATE.md so frontmatter and body text reflect the active phase immediately.
+</step>
+
+<step name="discover_and_group_plans">
+Load plan inventory with wave grouping in one call:
+
+```bash
+PLAN_INDEX=$(gsd-sdk query phase-plan-index "${PHASE_NUMBER}")
+```
+
+Parse JSON for: `phase`, `plans[]` (each with `id`, `wave`, `autonomous`, `objective`, `files_modified`, `task_count`, `has_summary`), `waves` (map of wave number → plan IDs), `incomplete`, `has_checkpoints`.
+
+**Filtering:** Skip plans where `has_summary: true`. If `--gaps-only`: also skip non-gap_closure plans. If `WAVE_FILTER` is set: also skip plans whose `wave` does not equal `WAVE_FILTER`.
+
+**Wave safety check:** If `WAVE_FILTER` is set and there are still incomplete plans in any lower wave that match the current execution mode, STOP and tell the user to finish earlier waves first. Do not let Wave 2+ execute while prerequisite earlier-wave plans remain incomplete.
+
+If all filtered: "No matching incomplete plans" → exit.
+
+Report:
+```
+## Execution Plan
+
+**Phase {X}: {Name}** — {total_plans} matching plans across {wave_count} wave(s)
+
+{If WAVE_FILTER is set: `Wave filter active: executing only Wave {WAVE_FILTER}`.}
+
+| Wave | Plans | What it builds |
+|------|-------|----------------|
+| 1 | 01-01, 01-02 | {from plan objectives, 3-8 words} |
+| 2 | 01-03 | ... |
+```
+</step>
+
+<step name="cross_ai_delegation">
+**Optional step 2.5 — Delegate plans to an external AI runtime.**
+
+This step runs after plan discovery and before normal wave execution. It identifies plans
+that should be delegated to an external AI command and executes them via stdin-based prompt
+delivery. Plans handled here are removed from the execute_waves plan list so the normal
+executor skips them.
+
+**Activation logic:**
+
+1. If `CROSS_AI_DISABLED` is true (`--no-cross-ai` flag): skip this step entirely.
+2. If `CROSS_AI_FORCE` is true (`--cross-ai` flag): mark ALL incomplete plans for cross-AI execution.
+3. Otherwise: check each plan's frontmatter for `cross_ai: true` AND verify config
+   `workflow.cross_ai_execution` is `true`. Plans matching both conditions are marked for cross-AI.
+
+```bash
+CROSS_AI_ENABLED=$(gsd-sdk query config-get workflow.cross_ai_execution 2>/dev/null || echo "false")
+CROSS_AI_CMD=$(gsd-sdk query config-get workflow.cross_ai_command 2>/dev/null || echo "")
+CROSS_AI_TIMEOUT=$(gsd-sdk query config-get workflow.cross_ai_timeout 2>/dev/null || echo "300")
+```
+
+**If no plans are marked for cross-AI:** Skip to execute_waves.
+
+**If plans are marked but `cross_ai_command` is empty:** Error — tell user to set
+`workflow.cross_ai_command` via `gsd-sdk query config-set workflow.cross_ai_command "<command>"`.
+
+**For each cross-AI plan (sequentially):**
+
+1. **Construct the task prompt** from the plan file:
+   - Extract `<objective>` and `<tasks>` sections from the PLAN.md
+   - Append PROJECT.md context (project name, description, tech stack)
+   - Format as a self-contained execution prompt
+
+2. **Check for dirty working tree before execution:**
+   ```bash
+   if ! git diff --quiet HEAD 2>/dev/null; then
+     echo "WARNING: dirty working tree detected — the external AI command may produce uncommitted changes that conflict with existing modifications"
+   fi
+   ```
+
+3. **Run the external command** from the project root, writing the prompt to stdin.
+   Never shell-interpolate the prompt — always pipe via stdin to prevent injection:
+   ```bash
+   echo "$TASK_PROMPT" | timeout "${CROSS_AI_TIMEOUT}s" ${CROSS_AI_CMD} > "$CANDIDATE_SUMMARY" 2>"$ERROR_LOG"
+   EXIT_CODE=$?
+   ```
+
+4. **Evaluate the result:**
+
+   **Success (exit 0 + valid summary):**
+   - Read `$CANDIDATE_SUMMARY` and validate it contains meaningful content
+     (not empty, has at least a heading and description — a valid SUMMARY.md structure)
+   - Write it as the plan's SUMMARY.md file
+   - Update STATE.md plan status to complete
+   - Update ROADMAP.md progress
+   - Mark plan as handled — skip it in execute_waves
+
+   **Failure (non-zero exit or invalid summary):**
+   - Display the error output and exit code
+   - Warn: "The external command may have left uncommitted changes or partial edits
+     in the working tree. Review `git status` and `git diff` before proceeding."
+   - Offer three choices:
+     - **retry** — run the same plan through cross-AI again
+     - **skip** — fall back to normal executor for this plan (re-add to execute_waves list)
+     - **abort** — stop execution entirely, preserve state for resume
+
+5. **After all cross-AI plans processed:** Remove successfully handled plans from the
+   incomplete plan list so execute_waves skips them. Any skipped-to-fallback plans remain
+   in the list for normal executor processing.
+</step>
+
+<step name="execute_waves">
+Execute each selected wave in sequence. Within a wave: parallel if `PARALLELIZATION=true`, sequential if `false`.
+
+**Stream-idle-timeout prevention — checkpoint heartbeats (#2410):**
+
+Multi-plan phases can accumulate enough subagent context that the Claude API
+SSE layer terminates with `Stream idle timeout - partial response received`
+between a large tool_result and the next assistant turn (seen on Claude Code
++ Opus 4.7 at ~200K+ cache_read). To keep the stream warm, emit short
+assistant-text heartbeats — **no tool call, just a literal line** — at every
+wave and plan boundary. Each heartbeat MUST start with `[checkpoint]` so
+tooling and `/gsd:manager`'s background-completion handler can grep partial
+transcripts. `{P}/{Q}` is the phase-wide completed/total plans counter and
+increases monotonically across waves. `{status}` is `complete` (success),
+`failed` (executor error), or `checkpoint` (human-gate returned).
+
+```
+[checkpoint] phase {PHASE_NUMBER} wave {N}/{M} starting, {wave_plan_count} plan(s), {P}/{Q} plans done
+[checkpoint] phase {PHASE_NUMBER} wave {N}/{M} plan {plan_id} starting ({P}/{Q} plans done)
+[checkpoint] phase {PHASE_NUMBER} wave {N}/{M} plan {plan_id} {status} ({P}/{Q} plans done)
+[checkpoint] phase {PHASE_NUMBER} wave {N}/{M} complete, {P}/{Q} plans done ({wave_success}/{wave_plan_count} ok)
+```
+
+**For each wave:**
+
+1. **Intra-wave files_modified overlap check (BEFORE spawning):**
+
+   Before spawning any agents for this wave, inspect the `files_modified` list of all plans
+   in the wave. Check every pair of plans in the wave — if any two plans share even one file
+   in their `files_modified` lists, those plans have an implicit dependency and MUST NOT run
+   in parallel.
+
+   **Detection algorithm (pseudocode):**
+   ```
+   seen_files = {}
+   overlapping_plans = []
+   for each plan in wave_plans:
+     for each file in plan.files_modified:
+       if file in seen_files:
+         overlapping_plans.add(plan, seen_files[file])  # both plans overlap on this file
+       else:
+         seen_files[file] = plan
+   ```
+
+   **If overlap is detected:**
+   - Warn the user:
+     ```
+     ⚠ Intra-wave files_modified overlap detected in Wave {N}:
+       Plan {A} and Plan {B} both modify {file}
+       Running these plans sequentially to avoid parallel worktree conflicts.
+     ```
+   - Override `PARALLELIZATION` to `false` for this wave only — run all plans in the wave
+     sequentially regardless of the global parallelization setting.
+   - This is a safety net for plans that were incorrectly assigned to the same wave.
+     The planner should have caught this; flag it as a planning defect so the user can
+     replan the phase if desired.
+
+   **If no overlap:** proceed normally (parallel if `PARALLELIZATION=true`).
+
+2. **Describe what's being built (BEFORE spawning):**
+
+   **First, emit the wave-start checkpoint heartbeat as a literal assistant-text
+   line — no tool call (#2410). Do NOT skip this even for single-plan waves; it
+   is required before any further reasoning or spawning:**
+
+   ```
+   [checkpoint] phase {PHASE_NUMBER} wave {N}/{M} starting, {wave_plan_count} plan(s), {P}/{Q} plans done
+   ```
+
+   Then read each plan's `<objective>`. Extract what's being built and why.
+
+   ```
+   ---
+   ## Wave {N}
+
+   **{Plan ID}: {Plan Name}**
+   {2-3 sentences: what this builds, technical approach, why it matters}
+
+   Spawning {count} agent(s)...
+   ---
+   ```
+
+   - Bad: "Executing terrain generation plan"
+   - Good: "Procedural terrain generator using Perlin noise — creates height maps, biome zones, and collision meshes. Required before vehicle physics can interact with ground."
+
+2.5. **Per-plan worktree decision (run for each plan in this wave BEFORE its dispatch):**
+
+   Read and execute `get-shit-done/workflows/execute-phase/steps/per-plan-worktree-gate.md` for each plan. It extracts `PLAN_FILES` from the plan's JSON, intersects against `SUBMODULE_PATHS` (with normalization, bidirectional matching, and glob-prefix handling), and sets `USE_WORKTREES_FOR_PLAN` to `false` when the plan touches a submodule path. Append `plan_id` to a `WAVE_WORKTREE_PLANS` accumulator when `USE_WORKTREES_FOR_PLAN != false`.
+
+   The dispatch branches in step 3 below MUST gate on `USE_WORKTREES_FOR_PLAN` for the current plan, not on the project-level `USE_WORKTREES`.
+
+3. **Spawn executor agents:**
+
+   **Emit a plan-start heartbeat (literal line, no tool call) immediately before
+   each `Agent()` dispatch (#2410):**
+
+   `[checkpoint] phase {PHASE_NUMBER} wave {N}/{M} plan {plan_id} starting ({P}/{Q} plans done)`
+
+   Pass paths only — executors read files themselves with their fresh context window.
+   For 200k models, this keeps orchestrator context lean (~10-15%).
+   For 1M+ models (Opus 4.6, Sonnet 4.6), richer context can be passed directly.
+
+   **Worktree mode** (`USE_WORKTREES_FOR_PLAN` is not `false` — evaluated per-plan in step 2.5):
+
+   Before spawning, capture the current HEAD:
+   ```bash
+   EXPECTED_BASE=$(git rev-parse HEAD)
+   DISPATCH_TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+   EXPECTED_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+   if [ "${USE_WORKTREES_FOR_PLAN:-true}" != "false" ] && [ -z "${WAVE_WORKTREE_MANIFEST:-}" ]; then
+     WAVE_WORKTREE_MANIFEST=$(mktemp "${TMPDIR:-/tmp}/gsd-worktree-wave-XXXXXX.json")
+     printf '{"worktrees":[]}\n' > "$WAVE_WORKTREE_MANIFEST"
+     export WAVE_WORKTREE_MANIFEST
+   fi
+   ```
+
+   **Sequential dispatch for parallel execution (waves with 2+ agents):**
+   Dispatch each `Agent()` call **one at a time with `run_in_background: true`**. Do NOT
+   send all Agent calls in a single message: simultaneous `git worktree add` calls race
+   on `.git/config.lock`. Agents still run in parallel once their worktrees are created.
+
+   ```text
+   # CORRECT: one Agent() per message with run_in_background: true
+   # WRONG: multiple Agent() calls in one message -> .git/config.lock contention
+   ```
+
+   ```text
+   Agent(
+     subagent_type="gsd-executor",
+     description="Execute plan {plan_number} of phase {phase_number}",
+     # Only include model= when executor_model is an explicit model name.
+     # When executor_model is "inherit", omit this parameter entirely so
+     # Claude Code inherits the orchestrator model automatically.
+     model="{executor_model}",  # omit this line when executor_model == "inherit"
+     isolation="worktree",
+     prompt="
+       <objective>
+       Execute plan {plan_number} of phase {phase_number}-{phase_name}.
+       Commit each task atomically. Create SUMMARY.md.
+       Do NOT update STATE.md or ROADMAP.md — the orchestrator owns those writes after all worktree agents in the wave complete.
+       </objective>
+
+       <worktree_branch_check>
+       FIRST ACTION: HEAD assertion MUST run before any reset/checkout. Worktrees
+       spawned by Claude Code's `isolation="worktree"` use the `worktree-agent-<id>`
+       namespace. If HEAD is on a protected ref (main/master/develop/trunk/release/*)
+       or detached, HALT — do NOT self-recover by force-rewinding via `git update-ref`,
+       that destroys concurrent commits in multi-active scenarios (#2924). Only after
+       Step 1 passes is `git reset --hard` safe (#2015 — affects all platforms).
+       ```bash
+       HEAD_REF=$(git symbolic-ref --quiet HEAD || echo "DETACHED")
+       ACTUAL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+       if [ "$HEAD_REF" = "DETACHED" ] || echo "$ACTUAL_BRANCH" | grep -Eq '^(main|master|develop|trunk|release/.*)$'; then
+         echo "FATAL: worktree HEAD on '$ACTUAL_BRANCH' (expected worktree-agent-*); refusing to self-recover via 'git update-ref' (#2924)." >&2
+         exit 1
+       fi
+       if ! echo "$ACTUAL_BRANCH" | grep -Eq '^worktree-agent-[A-Za-z0-9._/-]+$'; then
+         echo "FATAL: worktree HEAD '$ACTUAL_BRANCH' is not in the worktree-agent-* namespace; refusing to commit (#2924)." >&2
+         exit 1
+       fi
+       ACTUAL_BASE=$(git merge-base HEAD {EXPECTED_BASE})
+       if [ "$ACTUAL_BASE" != "{EXPECTED_BASE}" ]; then
+         git reset --hard {EXPECTED_BASE}
+         [ "$(git rev-parse HEAD)" != "{EXPECTED_BASE}" ] && { echo "ERROR: could not correct worktree base"; exit 1; }
+       fi
+       ```
+       Per-commit HEAD/cwd-drift/path-guard: `agents/gsd-executor.md` steps 0/0a/0b + `references/worktree-path-safety.md` (in <execution_context>).
+       </worktree_branch_check>
+
+       <parallel_execution>
+       You are running as a PARALLEL executor agent in a git worktree. Worktree path safety (cwd-drift, absolute-path guards) is in `worktree-path-safety.md` (loaded below).
+       Run `git commit` normally — hooks run by default. Do NOT pass `--no-verify`
+       unless the orchestrator surfaces `workflow.worktree_skip_hooks=true` in this
+       prompt; silent bypass violates project CLAUDE.md guidance (#2924).
+
+       IMPORTANT: Do NOT modify STATE.md or ROADMAP.md. execute-plan.md
+       auto-detects worktree mode (`.git` is a file, not a directory) and skips
+       shared file updates automatically. The orchestrator updates them centrally
+       after merge.
+
+       REQUIRED: SUMMARY.md MUST be committed before you return. In worktree mode the
+       git_commit_metadata step in execute-plan.md commits SUMMARY.md and REQUIREMENTS.md
+       only (STATE.md and ROADMAP.md are excluded automatically). Do NOT skip or defer
+       this commit — the orchestrator force-removes the worktree after you return, and
+       any uncommitted SUMMARY.md will be permanently lost (#2070).
+       REQUIRED ORDER: Write SUMMARY.md → commit → only then any narration. No text between Write and commit (truncation risk; #2070 rescue is not primary defense).
+       </parallel_execution>
+
+       <execution_context>
+       @~/.claude/get-shit-done/workflows/execute-plan.md
+       @~/.claude/get-shit-done/templates/summary.md
+       @~/.claude/get-shit-done/references/checkpoints.md
+       @~/.claude/get-shit-done/references/tdd.md
+       @~/.claude/get-shit-done/references/worktree-path-safety.md
+       ${CONTEXT_WINDOW < 200000 ? '' : '@~/.claude/get-shit-done/references/executor-examples.md'}
+       </execution_context>
+
+       <files_to_read>
+       Read these files at execution start using the Read tool:
+       - {phase_dir}/{plan_file} (Plan)
+       - .planning/PROJECT.md (Project context — core value, requirements, evolution rules)
+       - .planning/STATE.md (State)
+       - .planning/config.json (Config, if exists)
+       ${CONTEXT_WINDOW >= 500000 ? `
+       - ${phase_dir}/*-CONTEXT.md (User decisions from discuss-phase — honors locked choices)
+       - ${phase_dir}/*-RESEARCH.md (Technical research — pitfalls and patterns to follow)
+       - ${prior_wave_summaries} (SUMMARY.md files from earlier waves in this phase — what was already built)
+       ` : ''}
+       - ./CLAUDE.md (Project instructions, if exists — follow project-specific guidelines and coding conventions)
+       - .claude/skills/ or .agents/skills/ (Project skills, if either exists — list skills, read SKILL.md for each, follow relevant rules during implementation)
+       </files_to_read>
+
+       ${AGENT_SKILLS}
+
+       <mcp_tools>
+       If CLAUDE.md or project instructions reference MCP tools (e.g. jCodeMunch, context7,
+       or other MCP servers), prefer those tools over Grep/Glob for code navigation when available.
+       MCP tools often save significant tokens by providing structured code indexes.
+       Check tool availability first — if MCP tools are not accessible, fall back to Grep/Glob.
+       </mcp_tools>
+
+       <success_criteria>
+       - [ ] All tasks executed
+       - [ ] Each task committed individually
+       - [ ] SUMMARY.md created in plan directory
+       - [ ] No modifications to shared orchestrator artifacts (the orchestrator handles all post-wave shared-file writes)
+       </success_criteria>
+     "
+   )
+   ```
+
+   Immediately after each worktree `Agent()` spawn returns metadata, atomically append `{agent_id, worktree_path, branch, expected_base}` to `WAVE_WORKTREE_MANIFEST`. If any field is missing, stop and ask for recovery instead of scanning all agent worktrees.
+
+   > **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above to spawn executor agent(s), stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+   **Sequential mode** (`USE_WORKTREES_FOR_PLAN` is `false` — either project-level `USE_WORKTREES=false`, or per-plan submodule intersection forced it false in step 2.5):
+
+   Omit `isolation="worktree"` from the Agent call. Replace the `<parallel_execution>` block with:
+
+   ```
+       <sequential_execution>

@@ -109,3 +109,28 @@ Every entry needs a full relative path — not just a name.]
 ## Specific Ideas
 
 [Any particular references, examples, or "I want it like X" moments from discussion]
+
+[If none: "No specific requirements — open to standard approaches"]
+
+</specifics>
+
+<deferred>
+## Deferred Ideas
+
+[Ideas that came up but belong in other phases. Don't lose them.]
+
+### Reviewed Todos (not folded)
+[If any todos were reviewed in cross_reference_todos but not folded into scope,
+list them here so future phases know they were considered.
+Each entry: todo title + reason it was deferred (out of scope, belongs in Phase Y, etc.)
+If no reviewed-but-deferred todos: omit this subsection entirely.]
+
+[If none: "None — discussion stayed within phase scope"]
+
+</deferred>
+
+---
+
+*Phase: [X]-[Name]*
+*Context gathered: [date]*
+```

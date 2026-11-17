@@ -354,3 +354,302 @@ if [ -z \"$FALLOW_BIN\" ]; then
   # Exit workflow
 fi
 ```
+
+3) Execute structural pass and persist JSON (bounded at 120s; on timeout, behaves as a fallow crash):
+```bash
+FALLOW_JSON_PATH="${PHASE_DIR}/FALLOW.json"
+FALLOW_STDERR_TMP=$(mktemp)
+if [ \"$FALLOW_SCOPE\" = \"repo\" ]; then
+  timeout 120 \"$FALLOW_BIN\" audit --json --profile \"$FALLOW_PROFILE\" > \"${FALLOW_JSON_PATH}.tmp\" 2>\"$FALLOW_STDERR_TMP\"
+  FALLOW_EXIT=$?
+else
+  # phase scope: pass the already-computed review file set
+  printf '%s\n' \"${REVIEW_FILES[@]}\" | timeout 120 \"$FALLOW_BIN\" audit --json --profile \"$FALLOW_PROFILE\" --stdin-files > \"${FALLOW_JSON_PATH}.tmp\" 2>\"$FALLOW_STDERR_TMP\"
+  FALLOW_EXIT=$?
+fi
+if [ $FALLOW_EXIT -ne 0 ]; then
+  FALLOW_STDERR_SUMMARY=$(head -5 \"$FALLOW_STDERR_TMP\")
+  rm -f \"${FALLOW_JSON_PATH}.tmp\" \"$FALLOW_STDERR_TMP\"
+  echo \"WARNING: fallow structural pre-pass failed: ${FALLOW_STDERR_SUMMARY}\"
+  FALLOW_JSON_PATH=""
+else
+  mv \"${FALLOW_JSON_PATH}.tmp\" \"$FALLOW_JSON_PATH\"
+  rm -f \"$FALLOW_STDERR_TMP\"
+fi
+```
+
+On any failure of the structural pre-pass (binary missing, non-zero exit, timeout, or JSON parse error), the workflow continues with no `<structural_findings>` injection; the reviewer agent receives a normal review request.
+
+4) Optional MCP bridge path (runtime-dependent):
+- If `FALLOW_MCP=true`, set reviewer input mode to MCP-backed structural findings.
+- Otherwise pass static JSON findings from `FALLOW.json`.
+
+When disabled, set:
+```bash
+FALLOW_JSON_PATH=""
+```
+</step>
+
+<step name="spawn_reviewer">
+Compute the review output path:
+```bash
+REVIEW_PATH="${PHASE_DIR}/${PADDED_PHASE}-REVIEW.md"
+```
+
+Compute DIFF_BASE for agent context (in case agent needs it):
+```bash
+PHASE_COMMITS=$(git log --oneline --all --grep="${PADDED_PHASE}" --format="%H" 2>/dev/null)
+if [ -n "$PHASE_COMMITS" ]; then
+  DIFF_BASE=$(echo "$PHASE_COMMITS" | tail -1)^
+else
+  DIFF_BASE=""
+fi
+```
+
+Build files_to_read block for agent:
+```bash
+FILES_TO_READ=""
+for file in "${REVIEW_FILES[@]}"; do
+  FILES_TO_READ+="- ${file}\n"
+done
+```
+
+Build config block for agent:
+```bash
+CONFIG_FILES=""
+for file in "${REVIEW_FILES[@]}"; do
+  CONFIG_FILES+="  - ${file}\n"
+done
+```
+
+Build structural findings block for agent:
+```bash
+STRUCTURAL_FINDINGS_BLOCK=""
+MAX_FINDINGS_SIZE=50000
+if [ -n "$FALLOW_JSON_PATH" ] && [ -f "$FALLOW_JSON_PATH" ]; then
+  FALLOW_JSON_SIZE=$(wc -c < "$FALLOW_JSON_PATH" | tr -d '[:space:]')
+  if [ "$FALLOW_JSON_SIZE" -le "$MAX_FINDINGS_SIZE" ]; then
+    # Escape any literal closing tag before embedding; the closing tag literal is escaped to prevent prompt-structure breakage if a fallow finding's file path or message contains the sequence.
+    SAFE_FALLOW_JSON=$(sed 's#</structural_findings>#<\/structural_findings>#g' "$FALLOW_JSON_PATH")
+    STRUCTURAL_FINDINGS_BLOCK=$(printf '<structural_findings>\n%s\n</structural_findings>\n' "$SAFE_FALLOW_JSON")
+  else
+    echo "Warning: skipping structural findings embed (${FALLOW_JSON_SIZE} bytes > ${MAX_FINDINGS_SIZE} bytes). Re-run with narrower scope/profile if needed."
+  fi
+fi
+```
+
+Spawn the gsd-code-reviewer agent:
+
+```
+Agent(subagent_type="gsd-code-reviewer", prompt="
+<files_to_read>
+${FILES_TO_READ}
+</files_to_read>
+
+${STRUCTURAL_FINDINGS_BLOCK}
+
+<config>
+depth: ${REVIEW_DEPTH}
+phase_dir: ${PHASE_DIR}
+review_path: ${REVIEW_PATH}
+${DIFF_BASE:+diff_base: ${DIFF_BASE}}
+files:
+${CONFIG_FILES}
+</config>
+
+Review the listed source files at ${REVIEW_DEPTH} depth. Write findings to ${REVIEW_PATH}.
+Do NOT commit the output — the orchestrator handles that.
+")
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+**Agent failure handling:**
+
+If the Agent() call fails (agent error, timeout, or exception):
+```
+Error: Code review agent failed: ${error_message}
+
+No REVIEW.md created. You can retry with /gsd:code-review ${PHASE_ARG} or check agent logs.
+```
+
+Do NOT proceed to commit_review step. Do NOT create a partial or empty REVIEW.md. Exit workflow.
+</step>
+
+<step name="commit_review">
+After agent completes successfully, verify REVIEW.md was created and has valid structure:
+
+```bash
+if [ -f "${REVIEW_PATH}" ]; then
+  # Validate REVIEW.md has valid YAML frontmatter with status field
+  HAS_STATUS=$(REVIEW_PATH="${REVIEW_PATH}" node -e "
+    const fs = require('fs');
+    const content = fs.readFileSync(process.env.REVIEW_PATH, 'utf-8');
+    const match = content.match(/^---\n([\s\S]*?)\n---/);
+    if (match && /status:/.test(match[1])) { console.log('valid'); } else { console.log('invalid'); }
+  " 2>/dev/null)
+  
+  if [ "$HAS_STATUS" = "valid" ]; then
+    echo "REVIEW.md created at ${REVIEW_PATH}"
+    
+    if [ "$COMMIT_DOCS" = "true" ]; then
+      gsd-sdk query commit \
+        "docs(${PADDED_PHASE}): add code review report" \
+        --files "${REVIEW_PATH}"
+    fi
+  else
+    echo "Warning: REVIEW.md exists but has invalid or missing frontmatter (no status field)."
+    echo "Agent may have produced malformed output. Not committing. Review manually: ${REVIEW_PATH}"
+  fi
+else
+  echo "Warning: Agent completed but REVIEW.md not found at ${REVIEW_PATH}. This may indicate an agent issue."
+  echo "No REVIEW.md to commit. Please retry with /gsd:code-review ${PHASE_ARG}"
+fi
+```
+</step>
+
+<step name="dispatch_fix">
+If the `--fix` flag was passed (`FIX_FLAG=true`), delegate to the `code-review-fix.md` workflow
+to auto-apply findings from the REVIEW.md that was just written (or that already existed).
+
+This step runs AFTER `commit_review` so REVIEW.md is guaranteed to be on disk before the fixer
+is invoked. If REVIEW.md was not created (agent failed, scope was empty, etc.), the `code-review-fix.md`
+workflow handles the missing-review error and exits cleanly.
+
+```bash
+if [ "$FIX_FLAG" = "true" ]; then
+  echo ""
+  echo "─────────────────────────────────────────────────────────────────"
+  echo "  --fix: delegating to code-review-fix.md"
+  echo "─────────────────────────────────────────────────────────────────"
+  echo ""
+
+  # Build the fix sub-arguments: pass phase arg plus any --all/--auto flags
+  FIX_ARGS="${PHASE_ARG}"
+  if [ "$FIX_ALL" = "true" ]; then
+    FIX_ARGS="${FIX_ARGS} --all"
+  fi
+  if [ "$FIX_AUTO" = "true" ]; then
+    FIX_ARGS="${FIX_ARGS} --auto"
+  fi
+
+  # Load and execute the code-review-fix workflow.
+  # The fix workflow is the canonical implementation for all fix logic:
+  # gsd-code-fixer agent dispatch, --auto iteration loop, REVIEW-FIX.md commit,
+  # and result presentation. Do not duplicate that logic here.
+  Workflow(workflow="get-shit-done/workflows/code-review-fix.md", args="${FIX_ARGS}")
+
+  # Exit after fix workflow completes — present_results is for review-only output.
+  # The fix workflow has its own present_results step.
+  # Exit workflow.
+fi
+```
+
+If `FIX_FLAG` is false, skip this step entirely and proceed to `present_results`.
+</step>
+
+<step name="present_results">
+Read the REVIEW.md YAML frontmatter to extract finding counts.
+
+Extract frontmatter between `---` delimiters first to avoid matching values in the review body:
+
+```bash
+# Extract only the YAML frontmatter block (between first two --- lines)
+FRONTMATTER=$(REVIEW_PATH="${REVIEW_PATH}" node -e "
+  const fs = require('fs');
+  const content = fs.readFileSync(process.env.REVIEW_PATH, 'utf-8');
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (match) process.stdout.write(match[1]);
+" 2>/dev/null)
+
+# Parse fields from frontmatter only (not full file)
+STATUS=$(echo "$FRONTMATTER" | grep "^status:" | cut -d: -f2 | xargs)
+FILES_REVIEWED=$(echo "$FRONTMATTER" | grep "^files_reviewed:" | cut -d: -f2 | xargs)
+CRITICAL=$(echo "$FRONTMATTER" | grep -E "^[[:space:]]*(critical|blocker):" | head -1 | cut -d: -f2 | xargs)
+WARNING=$(echo "$FRONTMATTER" | grep "warning:" | head -1 | cut -d: -f2 | xargs)
+INFO=$(echo "$FRONTMATTER" | grep "info:" | head -1 | cut -d: -f2 | xargs)
+TOTAL=$(echo "$FRONTMATTER" | grep "total:" | head -1 | cut -d: -f2 | xargs)
+```
+
+Display inline summary to user:
+
+```
+═══════════════════════════════════════════════════════════════
+
+  Code Review Complete: Phase ${PHASE_NUMBER} (${PHASE_NAME})
+
+───────────────────────────────────────────────────────────────
+
+  Depth:           ${REVIEW_DEPTH}
+  Files Reviewed:  ${FILES_REVIEWED}
+  
+  Findings:
+    Critical:  ${CRITICAL}
+    Warning:   ${WARNING}
+    Info:      ${INFO}
+    ──────────
+    Total:     ${TOTAL}
+
+───────────────────────────────────────────────────────────────
+```
+
+If status is "clean":
+```
+✓ No issues found. All ${FILES_REVIEWED} files pass review at ${REVIEW_DEPTH} depth.
+
+Full report: ${REVIEW_PATH}
+```
+
+If total findings > 0:
+```
+⚠ Issues found. Review the report for details.
+
+Full report: ${REVIEW_PATH}
+
+Next steps:
+  /gsd:code-review ${PHASE_NUMBER} --fix  — Auto-fix issues
+  cat ${REVIEW_PATH}                     — View full report
+```
+
+If critical > 0 or warning > 0, list top 3 issues inline:
+```bash
+echo "Top issues:"
+grep -A 3 "^### CR-\|^### BL-\|^### WR-" "${REVIEW_PATH}" | head -n 12
+```
+
+**Note on tests:** Automated tests for this command and workflow are planned for Phase 4 (Pipeline Integration & Testing, requirement INFR-03). Phase 2 focuses on correct implementation; Phase 4 adds regression coverage across platforms.
+
+═══════════════════════════════════════════════════════════════
+</step>
+
+</process>
+
+<platform_notes>
+**Windows:** This workflow uses bash features (arrays, process substitution). On Windows, it requires
+Git Bash or WSL. Native PowerShell is not supported. The CI matrix (Ubuntu/macOS/Windows)
+runs under Git Bash on Windows runners, which provides bash compatibility.
+
+**macOS:** macOS ships with bash 3.2 (GPL licensing). This workflow does NOT use `mapfile` (bash 4+
+only) — all array construction uses portable `while IFS= read -r` loops compatible with bash 3.2.
+The `--files` path validation uses `realpath -m` which requires GNU coreutils (install via
+`brew install coreutils`). Without coreutils, the path guard falls back to fail-closed behavior
+(rejects paths it cannot verify), so security is maintained but valid relative paths may be rejected.
+If `--files` validation fails unexpectedly on macOS, install coreutils or use absolute paths.
+</platform_notes>
+
+<success_criteria>
+- [ ] Phase validated before config gate check
+- [ ] Config gate checked (workflow.code_review)
+- [ ] --fix/--all/--auto flags parsed via code-review-flags.cjs typed IR (not ad-hoc bash)
+- [ ] Depth resolved with validation (quick|standard|deep)
+- [ ] File scope computed with 3 tiers: --files > SUMMARY.md > git diff
+- [ ] Malformed/missing SUMMARY.md handled gracefully with fallback
+- [ ] Deleted files filtered from scope
+- [ ] Files deduplicated and sorted
+- [ ] Empty scope results in skip (no agent spawn)
+- [ ] Agent spawned with explicit file list, depth, review_path, diff_base
+- [ ] Agent failure handled without partial commits
+- [ ] REVIEW.md committed if created
+- [ ] When --fix: dispatch_fix step delegates to code-review-fix.md with --all/--auto forwarded
+- [ ] Results presented inline with next step suggestion (review-only path)
+</success_criteria>

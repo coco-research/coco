@@ -348,3 +348,353 @@
     },
     {
       "path": "references/common-bug-patterns.md",
+      "git_blob": "91850263b09da560883f392531efe1b6d29e1d7c"
+    },
+    {
+      "path": "references/context-budget.md",
+      "git_blob": "b078f62716c37675ee0f1b27b29f0a15621b2e1e"
+    },
+    {
+      "path": "references/continuation-format.md",
+      "git_blob": "01921b26a2ecc264d99a9446e4e14167d4d040d6"
+    },
+    {
+      "path": "references/debugger-philosophy.md",
+      "git_blob": "23ee967b839fd64a65c1be3b6504714761c3d815"
+    },
+    {
+      "path": "references/decimal-phase-calculation.md",
+      "git_blob": "44f88f74855896e7bfe88b916199c2ce7dd4d921"
+    },
+    {
+      "path": "references/doc-conflict-engine.md",
+      "git_blob": "5e8a338b67cbf1fd10de2abbe5852c9cd0f1cc7b"
+    },
+    {
+      "path": "references/domain-probes.md",
+      "git_blob": "1c24806a2a8fd0dacfade17c42f1bad6528ebcf3"
+    },
+    {
+      "path": "references/execute-mvp-tdd.md",
+      "git_blob": "6acaacc3c13d39083244d1252e7de01f31081d21"
+    },
+    {
+      "path": "references/executor-examples.md",
+      "git_blob": "4b39539560d131e97e85af0440baf16102680673"
+    },
+    {
+      "path": "references/few-shot-examples/plan-checker.md",
+      "git_blob": "0eccf838aab0b99e8733bbb15dc8011adda8d973"
+    },
+    {
+      "path": "references/few-shot-examples/verifier.md",
+      "git_blob": "3cd0f44eb8f8205364b6e7882786e5ec888d806a"
+    },
+    {
+      "path": "references/gate-prompts.md",
+      "git_blob": "930d0636b385f22c041939fd477ce5f81ad2b917"
+    },
+    {
+      "path": "references/gates.md",
+      "git_blob": "df43cf80af19703bb75f2fbb335efd0fae2d6539"
+    },
+    {
+      "path": "references/git-integration.md",
+      "git_blob": "628f24f127a2ca05659d9e1e50e4188665900b32"
+    },
+    {
+      "path": "references/git-planning-commit.md",
+      "git_blob": "7082bfedeca2d42f8f9d19caef66144ec38eb491"
+    },
+    {
+      "path": "references/ios-scaffold.md",
+      "git_blob": "ebf7d537a40d47af66553dd84c75df9c8997562d"
+    },
+    {
+      "path": "references/mandatory-initial-read.md",
+      "git_blob": "23dece92a532ce4e05de63e06abbde1a5a743e17"
+    },
+    {
+      "path": "references/model-profile-resolution.md",
+      "git_blob": "d465f7264538bdef2fe2005ec261dc762cc3dd5c"
+    },
+    {
+      "path": "references/model-profiles.md",
+      "git_blob": "4a581b27a4b030298988c2f96217168066d0b1bb"
+    },
+    {
+      "path": "references/mvp-concepts.md",
+      "git_blob": "b3f673617100325c33ada569882821a04e893aff"
+    },
+    {
+      "path": "references/phase-argument-parsing.md",
+      "git_blob": "d0081ed5f32ecb78d96b2b937f773ec876cafe76"
+    },
+    {
+      "path": "references/planner-antipatterns.md",
+      "git_blob": "db203fbcd82ca3d1643e4c0517e2f96684b7f045"
+    },
+    {
+      "path": "references/planner-chunked.md",
+      "git_blob": "1b227a3b5c5365d5f89e11c30b806b4bdc464c32"
+    },
+    {
+      "path": "references/planner-gap-closure.md",
+      "git_blob": "b1f9f2432b5c23fc8e14133c604ee086e1fe8f62"
+    },
+    {
+      "path": "references/planner-graphify-auto-update.md",
+      "git_blob": "9eff93169512a225db7f38e1e4280fd44438c081"
+    },
+    {
+      "path": "references/planner-human-verify-mode.md",
+      "git_blob": "466e0a7f981f65d78f188e9e5a43b71a0aed13d6"
+    },
+    {
+      "path": "references/planner-mvp-mode.md",
+      "git_blob": "ea203fc448f30d9dfe6cee6d24c27d1afa868375"
+    },
+    {
+      "path": "references/planner-reviews.md",
+      "git_blob": "da9f9ce0fa1a7616ec98013ae8996f0db6297b53"
+    },
+    {
+      "path": "references/planner-revision.md",
+      "git_blob": "c37ea3663514a72e3bed22fc2ae0f0aae4112cc1"
+    },
+    {
+      "path": "references/planner-source-audit.md",
+      "git_blob": "11d59acc72cf23b7ede43680e5d40e1b285712a9"
+    },
+    {
+      "path": "references/planning-config.md",
+      "git_blob": "d58d29bd4d3af5f43292b62a0537b18d8657f1e4"
+    },
+    {
+      "path": "references/project-skills-discovery.md",
+      "git_blob": "78fc16e447c3f504e6b9c6e18da83ad424a74c99"
+    },
+    {
+      "path": "references/questioning.md",
+      "git_blob": "14a03db3873a70ea48655154eba8974dde13fce4"
+    },
+    {
+      "path": "references/revision-loop.md",
+      "git_blob": "4072cfa5e454613c2c5dae39c843e571006ed529"
+    },
+    {
+      "path": "references/scout-codebase.md",
+      "git_blob": "d01a386a29a8a8e932561aa4c8c7e0b1894fa088"
+    },
+    {
+      "path": "references/skeleton-template.md",
+      "git_blob": "95188921a456dc1bba3969e50439d84791884696"
+    },
+    {
+      "path": "references/sketch-interactivity.md",
+      "git_blob": "8063464b57499e07683117aba34762f57bd21776"
+    },
+    {
+      "path": "references/sketch-theme-system.md",
+      "git_blob": "57cb97082510cf7da0daf5e57f4573f814844e24"
+    },
+    {
+      "path": "references/sketch-tooling.md",
+      "git_blob": "05959eefdf55dc177dd15f23f32f7ea0371bbec0"
+    },
+    {
+      "path": "references/sketch-variant-patterns.md",
+      "git_blob": "a89fc826fdd4c75d584c0848c4bd10c81abf06a8"
+    },
+    {
+      "path": "references/spidr-splitting.md",
+      "git_blob": "f0777c8fb2f231531f1e6b1cf3c3ab804ebdbe5b"
+    },
+    {
+      "path": "references/tdd.md",
+      "git_blob": "92a367240464e090d2363f81a5f3167a2b3929ee"
+    },
+    {
+      "path": "references/thinking-models-debug.md",
+      "git_blob": "b200d3eb76e61a6cf4ebe08a5f6e23e1603f9e47"
+    },
+    {
+      "path": "references/thinking-models-execution.md",
+      "git_blob": "149e2b8ec944c1b46fe0d5cd25d4c586f50e599d"
+    },
+    {
+      "path": "references/thinking-models-planning.md",
+      "git_blob": "c9b6aa987c15686f606c9443ba233007230c65df"
+    },
+    {
+      "path": "references/thinking-models-research.md",
+      "git_blob": "b29e7332e16ef1c56012a465669998ef36a46b8b"
+    },
+    {
+      "path": "references/thinking-models-verification.md",
+      "git_blob": "13ce3c8f6ae260a8f5c09b70ab5d961853a713e6"
+    },
+    {
+      "path": "references/thinking-partner.md",
+      "git_blob": "c2be6ba2b76d52e345a5ae96a49e6451817636f9"
+    },
+    {
+      "path": "references/ui-brand.md",
+      "git_blob": "47e6f741c129f5cdf195b2dc8a39d1245967f487"
+    },
+    {
+      "path": "references/universal-anti-patterns.md",
+      "git_blob": "dfa4fb161e4cd53c26bf720c14c6c0b726158a34"
+    },
+    {
+      "path": "references/user-profiling.md",
+      "git_blob": "8969323bfbbaef70862d3c6705a79054fcca442a"
+    },
+    {
+      "path": "references/user-story-template.md",
+      "git_blob": "55eec4c122fceb0f640f2d87950f65fbaf968f7c"
+    },
+    {
+      "path": "references/verification-overrides.md",
+      "git_blob": "ab884a240da10fd98e4d8fe0e01c91092705b9e2"
+    },
+    {
+      "path": "references/verification-patterns.md",
+      "git_blob": "0afb5e63aedad8958558785c20382636f1dd4768"
+    },
+    {
+      "path": "references/verify-mvp-mode.md",
+      "git_blob": "32999bdf29dadd09fa137c334c40b5fd49e0f592"
+    },
+    {
+      "path": "references/workstream-flag.md",
+      "git_blob": "99524423dd476f330b49225fc2dc8ba02face119"
+    },
+    {
+      "path": "references/worktree-path-safety.md",
+      "git_blob": "8febe96293734e23dc3b4138ec0a0ebd2040a136"
+    },
+    {
+      "path": "templates/AI-SPEC.md",
+      "git_blob": "46b3d8ccc1ce4673999464cde23f1b40dc01dbe1"
+    },
+    {
+      "path": "templates/DEBUG.md",
+      "git_blob": "a23ea25e8f13b7128f8bb33a92e835519db99ea0"
+    },
+    {
+      "path": "templates/README.md",
+      "git_blob": "323b1f4d790473646c697724033c28491fa2e49a"
+    },
+    {
+      "path": "templates/SECURITY.md",
+      "git_blob": "77f5c4da536eb1851ba2ed3dc82b6ddea6f603ed"
+    },
+    {
+      "path": "templates/UAT.md",
+      "git_blob": "fd2345a98bb3af16bf8fd98a34cfcdc0f83a3d18"
+    },
+    {
+      "path": "templates/UI-SPEC.md",
+      "git_blob": "be2c6e1426bffa67cf8e96ebbf636ef888a61f04"
+    },
+    {
+      "path": "templates/VALIDATION.md",
+      "git_blob": "6adaf46d6b0e823a94c7e7f7cd0adc9d400eb6ac"
+    },
+    {
+      "path": "templates/claude-md.md",
+      "git_blob": "4c96fd4880e7c01a43680ad136c0fe3adc361e9f"
+    },
+    {
+      "path": "templates/codebase/architecture.md",
+      "git_blob": "3e64b5360c8c2995382c8ae890b974759ce8cb04"
+    },
+    {
+      "path": "templates/codebase/concerns.md",
+      "git_blob": "c1ffcb4202a1da91c74d5ad4d7cd5bdc39188930"
+    },
+    {
+      "path": "templates/codebase/conventions.md",
+      "git_blob": "361283beaff8bd04459229425e50979aa16abce4"
+    },
+    {
+      "path": "templates/codebase/integrations.md",
+      "git_blob": "9f8a10034771eb703c739c5e95e90837405be621"
+    },
+    {
+      "path": "templates/codebase/stack.md",
+      "git_blob": "2006c5714643c832f9e8d98c546fe2539587e0f3"
+    },
+    {
+      "path": "templates/codebase/structure.md",
+      "git_blob": "5f12006cfa7d7d0894cd0e80007fb60c4041a362"
+    },
+    {
+      "path": "templates/codebase/testing.md",
+      "git_blob": "95e53902a25218acfad1a012c425cffee34014a7"
+    },
+    {
+      "path": "templates/config.json",
+      "git_blob": "4f4e0091b26d61aaf46cde34e07e5d901148321e"
+    },
+    {
+      "path": "templates/context.md",
+      "git_blob": "36673346d1d282a766ef384368f261317133741f"
+    },
+    {
+      "path": "templates/continue-here.md",
+      "git_blob": "1c3711d57bfa0884adbda52408dda12186b1557d"
+    },
+    {
+      "path": "templates/copilot-instructions.md",
+      "git_blob": "c52d0cbb2137c42ebc177decf33c6355844045d8"
+    },
+    {
+      "path": "templates/debug-subagent-prompt.md",
+      "git_blob": "c90c7ce45f3df219017cfa52680ececaa8895096"
+    },
+    {
+      "path": "templates/dev-preferences.md",
+      "git_blob": "428b5c5b5b90a141a836407d4272259f4b939236"
+    },
+    {
+      "path": "templates/discovery.md",
+      "git_blob": "0c707e40181697df7ee2e26d94735a5b911a29d5"
+    },
+    {
+      "path": "templates/discussion-log.md",
+      "git_blob": "37cd866924b387e5aebbb71a85662efa1c474c61"
+    },
+    {
+      "path": "templates/milestone-archive.md",
+      "git_blob": "bd1997c8c819b8fa619e1aed77eb88787f87094f"
+    },
+    {
+      "path": "templates/milestone.md",
+      "git_blob": "107e246d834a3c1422c9a9e0b0fa24dbd15e2a93"
+    },
+    {
+      "path": "templates/phase-prompt.md",
+      "git_blob": "b242dc15e2625cab2f3f42bc7b804bcea4e53e45"
+    },
+    {
+      "path": "templates/planner-subagent-prompt.md",
+      "git_blob": "bcaa68d2752f1eca8241437377e91c2ac6bd6173"
+    },
+    {
+      "path": "templates/project.md",
+      "git_blob": "37a986c70e0594526b667da837741d6567b9917f"
+    },
+    {
+      "path": "templates/requirements.md",
+      "git_blob": "d55313480fcabe858cf065a2bfbcf91522cce6ac"
+    },
+    {
+      "path": "templates/research-project/ARCHITECTURE.md",
+      "git_blob": "0d0329761f98ec196d47466f2350cf0f45605950"
+    },
+    {
+      "path": "templates/research-project/FEATURES.md",
+      "git_blob": "431c52ba50a77342ee69328798ec0eeed0be02a1"
+    },

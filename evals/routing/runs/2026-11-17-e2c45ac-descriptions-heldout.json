@@ -1,0 +1,54 @@
+{
+  "top1_accuracy": 0.712,
+  "top4_recall": 0.798,
+  "vs_keyword": {
+    "baseline_top1": 0.51
+  },
+  "split": "descriptions",
+  "items": "evals/routing/items-descriptions.jsonl",
+  "items_sha256": "e3dd0e3aab4ecaca81311abbec5829b3bfed1e373241475357109c28b9a974fb",
+  "target_top1": 0.75,
+  "target_met": false,
+  "before": {
+    "embed": {
+      "top1_accuracy": 0.596,
+      "top1_correct": 62,
+      "top4_recall": 0.663
+    },
+    "keyword": {
+      "top1_accuracy": 0.49
+    }
+  },
+  "after": {
+    "embed": {
+      "top1_accuracy": 0.712,
+      "top1_correct": 74,
+      "top4_recall": 0.798
+    },
+    "keyword": {
+      "top1_accuracy": 0.51
+    }
+  },
+  "paired": {
+    "fixed": 14,
+    "broken": 2,
+    "p_bootstrap_one_sided": 0.0008,
+    "n_boot": 10000,
+    "seed": 0,
+    "p_sign_test": 0.0021
+  },
+  "run": {
+    "commit": "e2c45ac6d6d72f2cb2ec91878d4da10f67114238",
+    "date": "2026-11-17",
+    "mode": "auto",
+    "split": "descriptions",
+    "n_labelled": 104,
+    "embed_model": "nomic-embed-text",
+    "embed": {
+      "model": "nomic-embed-text",
+      "url": "http://127.0.0.1:11434/v1/embeddings"
+    }
+  },
+  "method": "embed",
+  "keyword_fallbacks": 0
+}

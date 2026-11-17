@@ -111,7 +111,7 @@ Any MCP client can connect to Coco over stdio without extra dependencies (see [`
 
 Measured on main, a default Claude Code install delivers 191 of the 229 skills (the rest are the opt-in security pack and Cursor-only skills), 388 commands and 34 agents ([`docs/delivered-counts.json`](docs/delivered-counts.json)).
 
-Routing, measured on the development split of the router test (120 prompts, 12 of the 13 departments, written without the department names): the router picks the right team first for 110 of 120 prompts (91.7%) with the local `nomic-embed-text` embedder and for 90 of 120 (75.0%) with keyword matching, up from 77 (64.2%) and 17 (14.2%) before the team and cell descriptions were tuned on that split. The held-out split is scored separately and is not part of these numbers ([`evals/routing/runs/`](evals/routing/runs/)).
+Routing, measured once on the held-out descriptions split (104 labelled prompts, `nomic-embed-text`): top-1 accuracy went from 0.596 to 0.712 (62 to 74 of 104), top-4 recall from 0.663 to 0.798, and keyword matching from 0.490 to 0.510 (paired: 14 fixed, 2 broken; one-sided bootstrap `p = 0.0008` over 10,000 resamples with seed 0; sign test `p = 0.0021`); the 0.75 target is not met yet. On the 120-prompt development split (12 of the 13 departments, written without the department names, where team and cell descriptions were tuned), `nomic-embed-text` top-1 went from 0.642 to 0.917 (77 to 110 of 120) and keyword matching from 0.142 to 0.750 (17 to 90 of 120) ([`evals/routing/runs/`](evals/routing/runs/)).
 
 GSD ships its pinned upstream toolkit. The Claude Code installer links it at `~/.claude/get-shit-done` and preserves an existing user installation (see [`systems/gsd/README.md`](systems/gsd/README.md)).
 

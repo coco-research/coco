@@ -305,3 +305,353 @@ AskUserQuestion(
     { label: "${area_3}", description: "${why_it_matters_3}" },
     { label: "All clear", description: "Skip discussion — I know what I want" }
   ],
+  multiSelect: true
+)
+```
+
+If user selects "All clear" → skip to Step 5 (no CONTEXT.md written).
+
+**4.5c. Discuss selected areas**
+
+For each selected area, ask 1-2 focused questions via AskUserQuestion:
+
+```
+AskUserQuestion(
+  header: "${area_name}",
+  question: "${specific_question_about_this_area}",
+  options: [
+    { label: "${concrete_choice_1}", description: "${what_this_means}" },
+    { label: "${concrete_choice_2}", description: "${what_this_means}" },
+    { label: "${concrete_choice_3}", description: "${what_this_means}" },
+    { label: "You decide", description: "Claude's discretion" }
+  ],
+  multiSelect: false
+)
+```
+
+Rules:
+- Options must be concrete choices, not abstract categories
+- Highlight recommended choice where you have a clear opinion
+- If user selects "Other" with freeform text, switch to plain text follow-up (per questioning.md freeform rule)
+- If user selects "You decide", capture as Claude's Discretion in CONTEXT.md
+- Max 2 questions per area — this is lightweight, not a deep dive
+
+Collect all decisions into `$DECISIONS`.
+
+**4.5d. Write CONTEXT.md**
+
+Write `${QUICK_DIR}/${quick_id}-CONTEXT.md` using the standard context template structure:
+
+```markdown
+# Quick Task ${quick_id}: ${DESCRIPTION} - Context
+
+**Gathered:** ${date}
+**Status:** Ready for planning
+
+<domain>
+## Task Boundary
+
+${DESCRIPTION}
+
+</domain>
+
+<decisions>
+## Implementation Decisions
+
+### ${area_1_name}
+- ${decision_from_discussion}
+
+### ${area_2_name}
+- ${decision_from_discussion}
+
+### Claude's Discretion
+${areas_where_user_said_you_decide_or_areas_not_discussed}
+
+</decisions>
+
+<specifics>
+## Specific Ideas
+
+${any_specific_references_or_examples_from_discussion}
+
+[If none: "No specific requirements — open to standard approaches"]
+
+</specifics>
+
+<canonical_refs>
+## Canonical References
+
+${any_specs_adrs_or_docs_referenced_during_discussion}
+
+[If none: "No external specs — requirements fully captured in decisions above"]
+
+</canonical_refs>
+```
+
+Note: Quick task CONTEXT.md omits `<code_context>` and `<deferred>` sections (no codebase scouting, no phase scope to defer to). Keep it lean. The `<canonical_refs>` section is included when external docs were referenced — omit it only if no external docs apply.
+
+Report: `Context captured: ${QUICK_DIR}/${quick_id}-CONTEXT.md`
+
+---
+
+**Step 4.75: Research phase (only when `$RESEARCH_MODE`)**
+
+Skip this step entirely if NOT `$RESEARCH_MODE`.
+
+Display banner:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► RESEARCHING QUICK TASK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+◆ Investigating approaches for: ${DESCRIPTION}
+```
+
+Spawn a single focused researcher (not 4 parallel researchers like full phases — quick tasks need targeted research, not broad domain surveys):
+
+```
+Agent(
+  prompt="
+<research_context>
+
+**Mode:** quick-task
+**Task:** ${DESCRIPTION}
+**Output:** ${QUICK_DIR}/${quick_id}-RESEARCH.md
+
+<files_to_read>
+- .planning/STATE.md (Project state — what's already built)
+- .planning/PROJECT.md (Project context)
+- ./CLAUDE.md (if exists — project-specific guidelines)
+${DISCUSS_MODE ? '- ' + QUICK_DIR + '/' + quick_id + '-CONTEXT.md (User decisions — research should align with these)' : ''}
+</files_to_read>
+
+${AGENT_SKILLS_PLANNER}
+
+</research_context>
+
+<focus>
+This is a quick task, not a full phase. Research should be concise and targeted:
+1. Best libraries/patterns for this specific task
+2. Common pitfalls and how to avoid them
+3. Integration points with existing codebase
+4. Any constraints or gotchas worth knowing before planning
+
+Do NOT produce a full domain survey. Target 1-2 pages of actionable findings.
+</focus>
+
+<output>
+Write research to: ${QUICK_DIR}/${quick_id}-RESEARCH.md
+Use standard research format but keep it lean — skip sections that don't apply.
+Return: ## RESEARCH COMPLETE with file path
+</output>
+",
+  subagent_type="gsd-phase-researcher",
+  model="{planner_model}",
+  description="Research: ${DESCRIPTION}"
+)
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+After researcher returns:
+1. Verify research exists at `${QUICK_DIR}/${quick_id}-RESEARCH.md`
+2. Report: "Research complete: ${QUICK_DIR}/${quick_id}-RESEARCH.md"
+
+If research file not found, warn but continue: "Research agent did not produce output — proceeding to planning without research."
+
+---
+
+**Step 5: Spawn planner (quick mode)**
+
+**If `$VALIDATE_MODE`:** Use `quick-full` mode with stricter constraints.
+
+**If NOT `$VALIDATE_MODE`:** Use standard `quick` mode.
+
+```
+Agent(
+  prompt="
+<planning_context>
+
+**Mode:** ${VALIDATE_MODE ? 'quick-full' : 'quick'}
+**Directory:** ${QUICK_DIR}
+**Description:** ${DESCRIPTION}
+
+<files_to_read>
+- .planning/STATE.md (Project State)
+- ./CLAUDE.md (if exists — follow project-specific guidelines)
+${DISCUSS_MODE ? '- ' + QUICK_DIR + '/' + quick_id + '-CONTEXT.md (User decisions — locked, do not revisit)' : ''}
+${RESEARCH_MODE ? '- ' + QUICK_DIR + '/' + quick_id + '-RESEARCH.md (Research findings — use to inform implementation choices)' : ''}
+</files_to_read>
+
+${AGENT_SKILLS_PLANNER}
+
+**Project skills:** Check .claude/skills/ or .agents/skills/ directory (if either exists) — read SKILL.md files, plans should account for project skill rules
+
+</planning_context>
+
+<constraints>
+- Create a SINGLE plan with 1-3 focused tasks
+- Quick tasks should be atomic and self-contained
+${RESEARCH_MODE ? '- Research findings are available — use them to inform library/pattern choices' : '- No research phase'}
+${VALIDATE_MODE ? '- Target ~40% context usage (structured for verification)' : '- Target ~30% context usage (simple, focused)'}
+${VALIDATE_MODE ? '- MUST generate `must_haves` in plan frontmatter (truths, artifacts, key_links)' : ''}
+${VALIDATE_MODE ? '- Each task MUST have `files`, `action`, `verify`, `done` fields' : ''}
+</constraints>
+
+<output>
+Write plan to: ${QUICK_DIR}/${quick_id}-PLAN.md
+Return: ## PLANNING COMPLETE with plan path
+</output>
+",
+  subagent_type="gsd-planner",
+  model="{planner_model}",
+  description="Quick plan: ${DESCRIPTION}"
+)
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+After planner returns:
+1. Verify plan exists at `${QUICK_DIR}/${quick_id}-PLAN.md`
+2. Extract plan count (typically 1 for quick tasks)
+3. Report: "Plan created: ${QUICK_DIR}/${quick_id}-PLAN.md"
+
+If plan not found, error: "Planner failed to create ${quick_id}-PLAN.md"
+
+---
+
+**Step 5.5: Plan-checker loop (only when `$VALIDATE_MODE`)**
+
+Skip this step entirely if NOT `$VALIDATE_MODE`.
+
+Display banner:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► CHECKING PLAN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+◆ Spawning plan checker...
+```
+
+Checker prompt:
+
+```markdown
+<verification_context>
+**Mode:** quick-full
+**Task Description:** ${DESCRIPTION}
+
+<files_to_read>
+- ${QUICK_DIR}/${quick_id}-PLAN.md (Plan to verify)
+</files_to_read>
+
+${AGENT_SKILLS_CHECKER}
+
+**Scope:** This is a quick task, not a full phase. Skip checks that require a ROADMAP phase goal.
+</verification_context>
+
+<check_dimensions>
+- Requirement coverage: Does the plan address the task description?
+- Task completeness: Do tasks have files, action, verify, done fields?
+- Key links: Are referenced files real?
+- Scope sanity: Is this appropriately sized for a quick task (1-3 tasks)?
+- must_haves derivation: Are must_haves traceable to the task description?
+
+Skip: cross-plan deps (single plan), ROADMAP alignment
+${DISCUSS_MODE ? '- Context compliance: Does the plan honor locked decisions from CONTEXT.md?' : '- Skip: context compliance (no CONTEXT.md)'}
+</check_dimensions>
+
+<expected_output>
+- ## VERIFICATION PASSED — all checks pass
+- ## ISSUES FOUND — structured issue list
+</expected_output>
+```
+
+```
+Agent(
+  prompt=checker_prompt,
+  subagent_type="gsd-plan-checker",
+  model="{checker_model}",
+  description="Check quick plan: ${DESCRIPTION}"
+)
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+**Handle checker return:**
+
+- **`## VERIFICATION PASSED`:** Display confirmation, proceed to step 6.
+- **`## ISSUES FOUND`:** Display issues, check iteration count, enter revision loop.
+
+**Revision loop (max 2 iterations):**
+
+Track `iteration_count` (starts at 1 after initial plan + check).
+
+**If iteration_count < 2:**
+
+Display: `Sending back to planner for revision... (iteration ${N}/2)`
+
+Revision prompt:
+
+```markdown
+<revision_context>
+**Mode:** quick-full (revision)
+
+<files_to_read>
+- ${QUICK_DIR}/${quick_id}-PLAN.md (Existing plan)
+</files_to_read>
+
+${AGENT_SKILLS_PLANNER}
+
+**Checker issues:** ${structured_issues_from_checker}
+
+</revision_context>
+
+<instructions>
+Make targeted updates to address checker issues.
+Do NOT replan from scratch unless issues are fundamental.
+Return what changed.
+</instructions>
+```
+
+```
+Agent(
+  prompt=revision_prompt,
+  subagent_type="gsd-planner",
+  model="{planner_model}",
+  description="Revise quick plan: ${DESCRIPTION}"
+)
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+After planner returns → spawn checker again, increment iteration_count.
+
+**If iteration_count >= 2:**
+
+Display: `Max iterations reached. ${N} issues remain:` + issue list
+
+Offer: 1) Force proceed, 2) Abort
+
+---
+
+**Step 5.6: Pre-dispatch plan commit (worktree mode only)**
+
+When `USE_WORKTREES !== "false"`, commit PLAN.md to the current branch **before** spawning the executor. This ensures the worktree inherits PLAN.md at its branch HEAD so the executor can read it via a worktree-rooted path — avoiding the main-repo path priming that triggers CC #36182 path-resolution drift.
+
+Skip this step entirely if `USE_WORKTREES === "false"` (non-worktree mode: PLAN.md is committed in Step 8 as usual).
+
+```bash
+if [ "${USE_WORKTREES}" != "false" ]; then
+  COMMIT_DOCS=$(gsd-sdk query config-get commit_docs 2>/dev/null || echo "true")
+  if [ "$COMMIT_DOCS" != "false" ]; then
+    git add "${QUICK_DIR}/${quick_id}-PLAN.md"
+    # No-op skip if nothing actually staged (idempotent re-runs).
+    if git diff --cached --quiet -- "${QUICK_DIR}/${quick_id}-PLAN.md"; then
+      echo "ℹ Pre-dispatch PLAN.md commit skipped (no staged changes)"
+    else
+      # Run hooks normally (#2924). If a project opts out via
+      # workflow.worktree_skip_hooks=true, honor that opt-in only.
+      SKIP_HOOKS=$(gsd-sdk query config-get workflow.worktree_skip_hooks 2>/dev/null || echo "false")
+      if [ "$SKIP_HOOKS" = "true" ]; then
+        git commit --no-verify -m "docs(${quick_id}): pre-dispatch plan for ${DESCRIPTION}" -- "${QUICK_DIR}/${quick_id}-PLAN.md" \
+          || { echo "ERROR: pre-dispatch PLAN.md commit failed (--no-verify path). Aborting before executor dispatch." >&2; exit 1; }

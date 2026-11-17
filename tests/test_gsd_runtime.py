@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import re
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -21,6 +22,22 @@ class RuntimeTest(unittest.TestCase):
         manifest = json.loads((bundle / 'runtime-pin.json').read_text())
         self.assertEqual(manifest['commit'], 'bdcaab2c752d9a33a1a1ca9acf3a3c81fb991815')
         runtime = bundle / 'runtime'
+        gsd_tracked = [r for r in manifest['files'] if not r.get('upstream_path')]
+        self.assertEqual(len(gsd_tracked), manifest.get('upstream_get_shit_done_count', 299))
+        self.assertEqual(len(gsd_tracked), 299)
+        actual_files = sorted(
+            str(p.relative_to(runtime))
+            for p in runtime.rglob('*')
+            if p.is_file() and p.name != 'LICENSE'
+        )
+        pinned_paths = sorted(r['path'] for r in manifest['files'])
+        self.assertEqual(actual_files, pinned_paths)
+        self.assertIn('bin/lib/secrets.cjs', actual_files)
+        self.assertIn('bin/lib/secrets.generated.cjs', actual_files)
+        self.assertIn('bin/lib/installer-migrations/002-codex-legacy-hooks-json.cjs', actual_files)
+        self.assertIn('workflows/settings-advanced.md', actual_files)
+        self.assertIn('workflows/settings-integrations.md', actual_files)
+        self.assertIn('bin/shared/model-catalog.json', actual_files)
         for row in manifest['files']:
             data = (runtime / row['path']).read_bytes()
             self.assertEqual(hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest(),
@@ -33,6 +50,17 @@ class RuntimeTest(unittest.TestCase):
         self.assertGreaterEqual(len(refs), 89)
         for ref in refs:
             self.assertTrue((runtime / ref).is_file(), ref)
+
+    def test_gsd_tools_init_new_project_runs_in_temp_dir(self):
+        tool = ROOT / 'systems/gsd/runtime/bin/gsd-tools.cjs'
+        with tempfile.TemporaryDirectory(prefix='gsd-init-') as temp:
+            proc = subprocess.run(
+                ['node', str(tool), 'init', 'new-project'],
+                cwd=temp,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr or proc.stdout)
 
     def test_absent_owned_and_user_paths(self):
         with tempfile.TemporaryDirectory(prefix='gsd-runtime-') as temp:

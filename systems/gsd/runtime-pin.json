@@ -143,6 +143,10 @@
       "git_blob": "26d26319870a27d0b5cb4f4d9d2f50852d9e2ddd"
     },
     {
+      "path": "bin/lib/installer-migrations/002-codex-legacy-hooks-json.cjs",
+      "git_blob": "36c2c134789627c840708b335ba15c60d6d45cb7"
+    },
+    {
       "path": "bin/lib/intel.cjs",
       "git_blob": "b4e52e9e50c4dcca9d78b423936e49187bf8459b"
     },
@@ -235,6 +239,14 @@
       "git_blob": "b1652a6c90d7753deb256a8f90351a02f3882bba"
     },
     {
+      "path": "bin/lib/secrets.cjs",
+      "git_blob": "7e28d4bc358317f0af5ce44a006256a87c1cc891"
+    },
+    {
+      "path": "bin/lib/secrets.generated.cjs",
+      "git_blob": "af6ed35c22f20a5a28bc75f474e57d3ce6a5796a"
+    },
+    {
       "path": "bin/lib/security.cjs",
       "git_blob": "48b0f0c6c94d3a611069313ed5a911a8373431b1"
     },
@@ -305,6 +317,21 @@
     {
       "path": "bin/lib/worktree-safety.cjs",
       "git_blob": "f24828c1fefbec71543e80b4d46fc9fef21c3cfd"
+    },
+    {
+      "path": "bin/shared/config-defaults.manifest.json",
+      "upstream_path": "sdk/shared/config-defaults.manifest.json",
+      "git_blob": "b7cacb9e56f17815995f7f6c80b10c407ec3c285"
+    },
+    {
+      "path": "bin/shared/config-schema.manifest.json",
+      "upstream_path": "sdk/shared/config-schema.manifest.json",
+      "git_blob": "4d13c8661f4d93e2ea1e5068fe0639b68f3b7772"
+    },
+    {
+      "path": "bin/shared/model-catalog.json",
+      "upstream_path": "sdk/shared/model-catalog.json",
+      "git_blob": "5ceda6009788cfdbe15744ed010ab79ff4e23cb3"
     },
     {
       "path": "bin/verify-reapply-patches.cjs",
@@ -1103,6 +1130,14 @@
       "git_blob": "29d6d7724c1e1e1b622d72edd0a761035bd12764"
     },
     {
+      "path": "workflows/settings-advanced.md",
+      "git_blob": "20a1309ad2247a3e6fe286080eaffa0eaaa439e8"
+    },
+    {
+      "path": "workflows/settings-integrations.md",
+      "git_blob": "76de746ae339bb4968f9b58ccea2e2fe8ad7d30e"
+    },
+    {
       "path": "workflows/settings.md",
       "git_blob": "851627bfe44224321d49ab250418322806bd7473"
     },
@@ -1179,5 +1214,6 @@
       "git_blob": "cd88268790ebeb6d12d6d79079392ec648ad8b6b"
     }
   ],
-  "license_sha256": "af0d31f2550b534c14251e14020f3378cf17bd21af7660e7d7b1a2ead4fcdfb4"
+  "license_sha256": "af0d31f2550b534c14251e14020f3378cf17bd21af7660e7d7b1a2ead4fcdfb4",
+  "upstream_get_shit_done_count": 299
 }

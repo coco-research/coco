@@ -668,3 +668,353 @@ questions: [
     ]
   },
   {
+    header: "AI Models",
+    question: "Which AI models for planning agents?",
+    multiSelect: false,
+    options: [
+      { label: "Balanced (Recommended)", description: "Sonnet for most agents — good quality/cost ratio" },
+      { label: "Quality", description: "Opus for research/roadmap — higher cost, deeper analysis" },
+      { label: "Budget", description: "Haiku where possible — fastest, lowest cost" },
+      { label: "Inherit", description: "Use the current session model for all agents (OpenCode /model)" }
+    ]
+  }
+]
+```
+
+**PR body onboarding:** Ask which optional PRD-style sections `/gsd:ship` should append to generated PR bodies. Use the same `ship.pr_body_sections` mapping as Step 2a: selected sections get `enabled: true`, seeded-but-unselected sections get `enabled: false`, and selecting none writes an empty list. Prefer lean/agile PRD sections that make user value, acceptance criteria, Definition of Done, and stakeholder traceability explicit.
+
+Recommended options:
+
+- `User Stories & Acceptance Criteria`
+- `Risks & Dependencies`
+- `Success Metrics & Release Criteria`
+- `Stakeholder Review & Approval`
+
+Create `.planning/config.json` with all settings (CLI fills in remaining defaults automatically):
+
+```bash
+mkdir -p .planning
+gsd-sdk query config-new-project '{"mode":"[yolo|interactive]","granularity":"[selected]","parallelization":true|false,"commit_docs":true|false,"model_profile":"quality|balanced|budget|inherit","workflow":{"research":true|false,"plan_check":true|false,"verifier":true|false,"nyquist_validation":[false if granularity=coarse, true otherwise]},"ship":{"pr_body_sections":[{"heading":"User Stories & Acceptance Criteria","enabled":true|false,"source":"REQUIREMENTS.md ## User Stories || REQUIREMENTS.md ## Acceptance Criteria","fallback":"- Acceptance criteria are covered by the linked requirements and verification evidence."},{"heading":"Risks & Dependencies","enabled":true|false,"source":"PLAN.md ## Risks || PLAN.md ## Dependencies","fallback":"- No known high-risk rollout dependencies."},{"heading":"Success Metrics & Release Criteria","enabled":true|false,"source":"REQUIREMENTS.md ## Definition of Done || VERIFICATION.md ## Release Criteria","fallback":"- Release when automated verification and required manual checks pass."},{"heading":"Stakeholder Review & Approval","enabled":true|false,"template":"- Product owner approval pending for {phase_name}."}]}}'
+```
+
+**Note:** Run `/gsd:settings` anytime to update model profile, workflow agents, branching strategy, and other preferences.
+
+**If commit_docs = No:**
+
+- Set `commit_docs: false` in config.json
+- Add `.planning/` to `.gitignore` (create if needed)
+
+**If commit_docs = Yes:**
+
+- No additional gitignore entries needed
+
+**Commit config.json:**
+
+```bash
+gsd-sdk query commit "chore: add project config" --files .planning/config.json
+```
+
+## 5.1. Sub-Repo Detection
+
+**Detect multi-repo workspace:**
+
+Check for directories with their own `.git` folders (separate repos within the workspace):
+
+```bash
+find . -maxdepth 1 -type d -not -name ".*" -not -name "node_modules" -exec test -d "{}/.git" \; -print
+```
+
+**If sub-repos found:**
+
+Strip the `./` prefix to get directory names (e.g., `./backend` → `backend`).
+
+Use AskUserQuestion:
+
+- header: "Multi-Repo Workspace"
+- question: "I detected separate git repos in this workspace. Which directories contain code that GSD should commit to?"
+- multiSelect: true
+- options: one option per detected directory
+  - "[directory name]" — Separate git repo
+
+**If user selects one or more directories:**
+
+- Set `planning.sub_repos` in config.json to the selected directory names array (e.g., `["backend", "frontend"]`)
+- Auto-set `planning.commit_docs` to `false` (planning docs stay local in multi-repo workspaces)
+- Add `.planning/` to `.gitignore` if not already present
+
+Config changes are saved locally — no commit needed since `commit_docs` is `false` in multi-repo mode.
+
+**If no sub-repos found or user selects none:** Continue with no changes to config.
+
+## 5.5. Resolve Model Profile
+
+Use models from init: `researcher_model`, `synthesizer_model`, `roadmapper_model`.
+
+## 6. Research Decision
+
+**If auto mode:** Default to "Research first" without asking.
+
+Use AskUserQuestion:
+
+- header: "Research"
+- question: "Research the domain ecosystem before defining requirements?"
+- options:
+  - "Research first (Recommended)" — Discover standard stacks, expected features, architecture patterns
+  - "Skip research" — I know this domain well, go straight to requirements
+
+**If "Research first":**
+
+Display stage banner:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► RESEARCHING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Researching [domain] ecosystem...
+```
+
+Create research directory:
+
+```bash
+mkdir -p .planning/research
+```
+
+**Determine milestone context:**
+
+Check if this is greenfield or subsequent milestone:
+
+- If no "Validated" requirements in PROJECT.md → Greenfield (building from scratch)
+- If "Validated" requirements exist → Subsequent milestone (adding to existing app)
+
+Display spawning indicator:
+
+```
+◆ Spawning 4 researchers in parallel...
+  → Stack research
+  → Features research
+  → Architecture research
+  → Pitfalls research
+```
+
+Spawn 4 parallel gsd-project-researcher agents with path references:
+
+```text
+Agent(prompt="<research_type>
+Project Research — Stack dimension for [domain].
+</research_type>
+
+<milestone_context>
+[greenfield OR subsequent]
+
+Greenfield: Research the standard stack for building [domain] from scratch.
+Subsequent: Research what's needed to add [target features] to an existing [domain] app. Don't re-research the existing system.
+</milestone_context>
+
+<question>
+What's the standard 2025 stack for [domain]?
+</question>
+
+<files_to_read>
+- {project_path} (Project context and goals)
+</files_to_read>
+
+${AGENT_SKILLS_RESEARCHER}
+
+<downstream_consumer>
+Your STACK.md feeds into roadmap creation. Be prescriptive:
+- Specific libraries with versions
+- Clear rationale for each choice
+- What NOT to use and why
+</downstream_consumer>
+
+<quality_gate>
+- [ ] Versions are current (verify with Context7/official docs, not training data)
+- [ ] Rationale explains WHY, not just WHAT
+- [ ] Confidence levels assigned to each recommendation
+</quality_gate>
+
+<output>
+Write to: .planning/research/STACK.md
+Use template: ~/.claude/get-shit-done/templates/research-project/STACK.md
+</output>
+", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Stack research")
+
+Agent(prompt="<research_type>
+Project Research — Features dimension for [domain].
+</research_type>
+
+<milestone_context>
+[greenfield OR subsequent]
+
+Greenfield: What features do [domain] products have? What's table stakes vs differentiating?
+Subsequent: How do [target features] typically work? What's expected behavior?
+</milestone_context>
+
+<question>
+What features do [domain] products have? What's table stakes vs differentiating?
+</question>
+
+<files_to_read>
+- {project_path} (Project context)
+</files_to_read>
+
+${AGENT_SKILLS_RESEARCHER}
+
+<downstream_consumer>
+Your FEATURES.md feeds into requirements definition. Categorize clearly:
+- Table stakes (must have or users leave)
+- Differentiators (competitive advantage)
+- Anti-features (things to deliberately NOT build)
+</downstream_consumer>
+
+<quality_gate>
+- [ ] Categories are clear (table stakes vs differentiators vs anti-features)
+- [ ] Complexity noted for each feature
+- [ ] Dependencies between features identified
+</quality_gate>
+
+<output>
+Write to: .planning/research/FEATURES.md
+Use template: ~/.claude/get-shit-done/templates/research-project/FEATURES.md
+</output>
+", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Features research")
+
+Agent(prompt="<research_type>
+Project Research — Architecture dimension for [domain].
+</research_type>
+
+<milestone_context>
+[greenfield OR subsequent]
+
+Greenfield: How are [domain] systems typically structured? What are major components?
+Subsequent: How do [target features] integrate with existing [domain] architecture?
+</milestone_context>
+
+<question>
+How are [domain] systems typically structured? What are major components?
+</question>
+
+<files_to_read>
+- {project_path} (Project context)
+</files_to_read>
+
+${AGENT_SKILLS_RESEARCHER}
+
+<downstream_consumer>
+Your ARCHITECTURE.md informs phase structure in roadmap. Include:
+- Component boundaries (what talks to what)
+- Data flow (how information moves)
+- Suggested build order (dependencies between components)
+</downstream_consumer>
+
+<quality_gate>
+- [ ] Components clearly defined with boundaries
+- [ ] Data flow direction explicit
+- [ ] Build order implications noted
+</quality_gate>
+
+<output>
+Write to: .planning/research/ARCHITECTURE.md
+Use template: ~/.claude/get-shit-done/templates/research-project/ARCHITECTURE.md
+</output>
+", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Architecture research")
+
+Agent(prompt="<research_type>
+Project Research — Pitfalls dimension for [domain].
+</research_type>
+
+<milestone_context>
+[greenfield OR subsequent]
+
+Greenfield: What do [domain] projects commonly get wrong? Critical mistakes?
+Subsequent: What are common mistakes when adding [target features] to [domain]?
+</milestone_context>
+
+<question>
+What do [domain] projects commonly get wrong? Critical mistakes?
+</question>
+
+<files_to_read>
+- {project_path} (Project context)
+</files_to_read>
+
+${AGENT_SKILLS_RESEARCHER}
+
+<downstream_consumer>
+Your PITFALLS.md prevents mistakes in roadmap/planning. For each pitfall:
+- Warning signs (how to detect early)
+- Prevention strategy (how to avoid)
+- Which phase should address it
+</downstream_consumer>
+
+<quality_gate>
+- [ ] Pitfalls are specific to this domain (not generic advice)
+- [ ] Prevention strategies are actionable
+- [ ] Phase mapping included where relevant
+</quality_gate>
+
+<output>
+Write to: .planning/research/PITFALLS.md
+Use template: ~/.claude/get-shit-done/templates/research-project/PITFALLS.md
+</output>
+", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Pitfalls research")
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling all 4 researcher Agent() calls above, do NOT read research files or synthesize content independently while the subagents are active. Wait for all 4 researchers to complete before spawning the synthesizer. This prevents duplicate work and wasted context.
+
+After all 4 agents complete, spawn synthesizer to create SUMMARY.md:
+
+```text
+Agent(prompt="
+<task>
+Synthesize research outputs into SUMMARY.md.
+</task>
+
+<files_to_read>
+- .planning/research/STACK.md
+- .planning/research/FEATURES.md
+- .planning/research/ARCHITECTURE.md
+- .planning/research/PITFALLS.md
+</files_to_read>
+
+${AGENT_SKILLS_SYNTHESIZER}
+
+<output>
+Write to: .planning/research/SUMMARY.md
+Use template: ~/.claude/get-shit-done/templates/research-project/SUMMARY.md
+Commit after writing.
+</output>
+", subagent_type="gsd-research-synthesizer", model="{synthesizer_model}", description="Synthesize research")
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+Display research complete banner and key findings:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► RESEARCH COMPLETE ✓
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+## Key Findings
+
+**Stack:** [from SUMMARY.md]
+**Table Stakes:** [from SUMMARY.md]
+**Watch Out For:** [from SUMMARY.md]
+
+Files: `.planning/research/`
+```
+
+**If "Skip research":** Continue to Step 7.
+
+## 7. Define Requirements
+
+Display stage banner:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► DEFINING REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+

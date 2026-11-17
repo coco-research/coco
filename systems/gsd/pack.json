@@ -6,5 +6,49 @@
   "licence": "MIT",
   "upstream": "https://github.com/gsd-build/get-shit-done@unknown",
   "attribution": "GSD (Get Shit Done) by TÂCHES (Lex Christopherson), MIT. Vendored from the archived gsd-build/get-shit-done. CREDITS.md also lists open-gsd/gsd-core.",
-  "review": "pending"
+  "review": "pending",
+  "content_exceptions": [
+    {
+      "path": "runtime/bin/lib/runtime-slash.cjs",
+      "rule": "machine-path",
+      "contains": "C:\\\\Users\\\\Me",
+      "reason": "upstream comment illustrating Windows CLI argument quoting"
+    },
+    {
+      "path": "runtime/references/user-profiling.md",
+      "rule": "machine-path",
+      "contains": "/Users/john/",
+      "reason": "upstream documentation listing placeholder path patterns to redact"
+    },
+    {
+      "path": "runtime/references/verification-patterns.md",
+      "rule": "env-file-read",
+      "contains": ".env.local",
+      "reason": "upstream verification reference example showing user project env existence check"
+    },
+    {
+      "path": "runtime/templates/user-setup.md",
+      "rule": "env-file-read",
+      "contains": ".env.local",
+      "reason": "upstream user-setup template example showing user-run grep verification"
+    },
+    {
+      "path": "runtime/workflows/reapply-patches.md",
+      "rule": "machine-path",
+      "contains": "/Users/xxx/.claude/",
+      "reason": "upstream workflow prose illustrating path substitution to $HOME/.claude/"
+    },
+    {
+      "path": "runtime/workflows/update.md",
+      "rule": "machine-path",
+      "contains": "C:/Users/",
+      "reason": "upstream comment explaining Windows/POSIX path normalization"
+    },
+    {
+      "path": "runtime/workflows/update.md",
+      "rule": "machine-path",
+      "contains": "/Users/me/",
+      "reason": "upstream workflow prose illustrating placeholder resolved config directory"
+    }
+  ]
 }

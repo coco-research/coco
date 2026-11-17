@@ -493,3 +493,284 @@ function rollbackAppliedMigrationResult({ configDir, journal, journalPath, rollb
         // backup cleanup is best-effort; preserve restore failures above
       }
     }
+  }
+
+  try {
+    if (previousInstallStateBytes === null) {
+      fs.rmSync(path.join(configDir, INSTALL_STATE_NAME), { force: true });
+    } else {
+      atomicWriteInstallState(configDir, previousInstallStateBytes);
+    }
+  } catch (error) {
+    failures.push({ relPath: INSTALL_STATE_NAME, error: error.message });
+  }
+
+  try {
+    fs.rmSync(journalPath, { force: true });
+    fs.rmSync(rollbackRoot, { recursive: true, force: true });
+    fs.rmSync(backupRoot, { recursive: true, force: true });
+  } catch {
+    // journal cleanup is best-effort; the rollback above is the safety-critical part
+  }
+
+  if (failures.length > 0) {
+    const error = new Error('migration rollback incomplete');
+    error.rollbackFailures = failures;
+    throw error;
+  }
+}
+
+function cleanupMigrationRunArtifacts(journalPath, rollbackRoot, backupRoot) {
+  try { fs.rmSync(journalPath, { force: true }); } catch { /* best-effort */ }
+  try { fs.rmSync(rollbackRoot, { recursive: true, force: true }); } catch { /* best-effort */ }
+  try { fs.rmSync(backupRoot, { recursive: true, force: true }); } catch { /* best-effort */ }
+}
+
+function applyInstallerMigrationPlan({ configDir, plan, now = () => new Date().toISOString() }) {
+  if (!configDir) throw new Error('configDir is required');
+  if (!plan || !Array.isArray(plan.actions)) throw new Error('plan with actions is required');
+  if (Array.isArray(plan.blocked) && plan.blocked.length > 0) {
+    throw new Error(`migration plan has ${plan.blocked.length} blocked action(s)`);
+  }
+
+  const appliedAt = now();
+  const runId = migrationRunId(appliedAt);
+  const journalRelPath = path.posix.join('gsd-migration-journal', `${runId}.json`);
+  const journalPath = path.join(configDir, journalRelPath);
+  const rollbackRootRelPath = path.posix.join('gsd-migration-journal', `${runId}-rollback`);
+  const rollbackRoot = path.join(configDir, rollbackRootRelPath);
+  const backupRootRelPath = path.posix.join('gsd-migration-journal', `${runId}-backups`);
+  const backupRoot = path.join(configDir, backupRootRelPath);
+  const journal = {
+    schemaVersion: 1,
+    appliedAt,
+    appliedMigrationIds: uniqueActionMigrationIds(plan.actions),
+    actions: [],
+  };
+  const rollback = [];
+  const installStatePath = path.join(configDir, INSTALL_STATE_NAME);
+  const previousInstallStateBytes = fs.existsSync(installStatePath)
+    ? fs.readFileSync(installStatePath, 'utf8')
+    : null;
+
+  try {
+    fs.mkdirSync(path.dirname(journalPath), { recursive: true });
+    platformWriteSync(journalPath, JSON.stringify(journal, null, 2) + '\n');
+
+    for (const action of plan.actions) {
+      if (
+        action.type !== 'remove-managed' &&
+        action.type !== 'backup-and-remove' &&
+        action.type !== 'rewrite-json' &&
+        action.type !== 'record-baseline' &&
+        action.type !== 'baseline-preserve-user'
+      ) {
+        throw new Error(`unsupported migration action type: ${action.type}`);
+      }
+
+      const { normalized, fullPath } = ensureInsideConfig(configDir, action.relPath);
+      if (!fs.existsSync(fullPath)) {
+        journal.actions.push(journalAction(action, 'missing'));
+        continue;
+      }
+
+      if (action.type === 'record-baseline' || action.type === 'baseline-preserve-user') {
+        journal.actions.push(journalAction(action, action.type === 'record-baseline' ? 'recorded' : 'preserved'));
+        continue;
+      }
+
+      const rollbackPath = path.join(rollbackRoot, normalized);
+      fs.mkdirSync(path.dirname(rollbackPath), { recursive: true });
+      fs.copyFileSync(fullPath, rollbackPath);
+      rollback.push({ relPath: normalized, rollbackPath });
+
+      if (action.type === 'rewrite-json') {
+        if (action.deleteIfEmpty && isStructurallyEmpty(action.value)) {
+          fs.rmSync(fullPath, { force: true });
+          journal.actions.push(journalAction(action, 'removed', {
+            rollbackRelPath: path.posix.join(rollbackRootRelPath, normalized),
+          }));
+        } else {
+          platformWriteSync(fullPath, JSON.stringify(action.value, null, 2) + '\n');
+          journal.actions.push(journalAction(action, 'rewritten', {
+            rollbackRelPath: path.posix.join(rollbackRootRelPath, normalized),
+          }));
+        }
+        continue;
+      }
+
+      if (action.type === 'backup-and-remove') {
+        const backupRelPath = action.backupRelPath || path.posix.join(backupRootRelPath, normalized);
+        const backupPath = path.join(configDir, backupRelPath);
+        fs.mkdirSync(path.dirname(backupPath), { recursive: true });
+        fs.copyFileSync(fullPath, backupPath);
+        journal.actions.push(journalAction(action, 'removed', {
+          backupRelPath,
+          rollbackRelPath: path.posix.join(rollbackRootRelPath, normalized),
+        }));
+      } else {
+        journal.actions.push(journalAction(action, 'removed', {
+          rollbackRelPath: path.posix.join(rollbackRootRelPath, normalized),
+        }));
+      }
+      fs.rmSync(fullPath, { force: true });
+    }
+
+    platformWriteSync(journalPath, JSON.stringify(journal, null, 2) + '\n');
+
+    const state = readInstallState(configDir);
+    const applied = appliedMigrationIds(state);
+    const nextApplied = [...state.appliedMigrations];
+    const actionsByMigrationId = new Map();
+    for (const action of plan.actions) {
+      if (action.migrationId && !actionsByMigrationId.has(action.migrationId)) {
+        actionsByMigrationId.set(action.migrationId, action);
+      }
+    }
+    for (const id of journal.appliedMigrationIds) {
+      if (!applied.has(id)) {
+        const action = actionsByMigrationId.get(id);
+        nextApplied.push({
+          id,
+          appliedAt,
+          journal: journalRelPath,
+          checksum: action && action.migrationChecksum ? action.migrationChecksum : null,
+        });
+      }
+    }
+    writeInstallState(configDir, {
+      schemaVersion: 1,
+      appliedMigrations: nextApplied,
+    });
+
+    return {
+      appliedMigrationIds: journal.appliedMigrationIds,
+      journalRelPath,
+      rollback: () => rollbackAppliedMigrationResult({ configDir, journal, journalPath, rollbackRoot, backupRoot, previousInstallStateBytes }),
+    };
+  } catch (error) {
+    const rollbackFailures = [];
+    for (const entry of rollback.reverse()) {
+      const dest = path.join(configDir, entry.relPath);
+      try {
+        fs.mkdirSync(path.dirname(dest), { recursive: true });
+        fs.copyFileSync(entry.rollbackPath, dest);
+      } catch (rollbackError) {
+        rollbackFailures.push({
+          relPath: entry.relPath,
+          rollbackPath: entry.rollbackPath,
+          error: rollbackError.message,
+        });
+      }
+    }
+    if (rollbackFailures.length > 0) {
+      const rollbackError = new Error(`migration apply failed and rollback incomplete: ${error.message}`);
+      rollbackError.cause = error;
+      rollbackError.rollbackFailures = rollbackFailures;
+      throw rollbackError;
+    }
+    cleanupMigrationRunArtifacts(journalPath, rollbackRoot, backupRoot);
+    throw error;
+  }
+}
+
+function markPendingMigrationsApplied({ configDir, plan, now = () => new Date().toISOString() }) {
+  if (!plan || !Array.isArray(plan.pendingMigrationIds) || plan.pendingMigrationIds.length === 0) {
+    return [];
+  }
+  const appliedAt = now();
+  const state = readInstallState(configDir);
+  const applied = appliedMigrationIds(state);
+  const checksumsByMigrationId = new Map();
+  for (const migration of plan.pendingMigrations || []) {
+    checksumsByMigrationId.set(migration.id, migrationChecksum(migration));
+  }
+  const nextApplied = [...state.appliedMigrations];
+  const newlyApplied = [];
+  for (const id of plan.pendingMigrationIds) {
+    if (applied.has(id)) continue;
+    nextApplied.push({
+      id,
+      appliedAt,
+      journal: null,
+      checksum: checksumsByMigrationId.get(id) || null,
+    });
+    newlyApplied.push(id);
+  }
+  if (newlyApplied.length > 0) {
+    writeInstallState(configDir, {
+      schemaVersion: 1,
+      appliedMigrations: nextApplied,
+    });
+  }
+  return newlyApplied;
+}
+
+function runInstallerMigrations({
+  configDir,
+  runtime = null,
+  scope = null,
+  migrationsDir = DEFAULT_MIGRATIONS_DIR,
+  migrations = discoverInstallerMigrations({ migrationsDir }),
+  baselineScan = false,
+  now = () => new Date().toISOString(),
+  lockTimeoutMs = DEFAULT_LOCK_TIMEOUT_MS,
+} = {}) {
+  const releaseLock = acquireInstallMigrationLock(configDir, { timeoutMs: lockTimeoutMs });
+  let primaryError = null;
+  let completed = false;
+  try {
+    const plan = planInstallerMigrations({ configDir, runtime, scope, migrations, baselineScan, now });
+    if (plan.actions.length === 0) {
+      const appliedMigrationIds = markPendingMigrationsApplied({ configDir, plan, now });
+      completed = true;
+      return {
+        appliedMigrationIds,
+        journalRelPath: null,
+        plan,
+      };
+    }
+    if (plan.blocked.length > 0) {
+      completed = true;
+      return {
+        appliedMigrationIds: [],
+        journalRelPath: null,
+        plan,
+        blocked: plan.blocked,
+      };
+    }
+    const result = applyInstallerMigrationPlan({ configDir, plan, now });
+    completed = true;
+    return { ...result, plan };
+  } catch (error) {
+    primaryError = error;
+    throw error;
+  } finally {
+    try {
+      releaseLock();
+    } catch (releaseError) {
+      if (primaryError) {
+        primaryError.suppressed = [...(primaryError.suppressed || []), releaseError];
+      } else if (completed) {
+        throw releaseError;
+      } else {
+        throw releaseError;
+      }
+    }
+  }
+}
+
+module.exports = {
+  DEFAULT_MIGRATIONS_DIR,
+  INSTALL_MIGRATION_LOCK_NAME,
+  INSTALL_STATE_NAME,
+  MANIFEST_NAME,
+  applyInstallerMigrationPlan,
+  classifyArtifact,
+  discoverInstallerMigrations,
+  planInstallerMigrations,
+  readInstallManifest,
+  readInstallState,
+  runInstallerMigrations,
+  writeInstallState,
+};

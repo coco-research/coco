@@ -3,7 +3,7 @@
   "generated_at": "2026-09-03",
   "team_id": "risk-compliance-super-intelligence",
   "team_name": "Risk & Compliance (GRC) Super Intelligence Team",
-  "description": "Risk & Compliance (GRC) Super Intelligence Team. Named real-world personas across 7 cells. Built local-first (LM Studio) and validator-gated. Illustrative composites; see DISCLAIMER.md.",
+  "description": "Governance, risk, and compliance (GRC), internal and external audit readiness, access-control review evidence, personal-data control matrices, retention and deletion controls, privacy impact assessments, vendor risk due-diligence exceptions, third-party assurance, incident escalation, procurement conflicts of interest, remediation tracking, and AML/KYC.",
   "native_personas_count": 30,
   "cross_listed_count": 12,
   "personas_count": 42,
@@ -11,7 +11,7 @@
   "cells": {
     "privacy-data-protection": {
       "id": "privacy-data-protection",
-      "description": "Privacy law, data protection, GDPR/CCPA, privacy-by-design.",
+      "description": "Privacy impact assessments, customer-record control matrices, GDPR/CCPA, and retention and deletion controls.",
       "personas_count": 7,
       "personas": [
         "ann-cavoukian",
@@ -26,7 +26,7 @@
     },
     "ai-governance-responsible-ai": {
       "id": "ai-governance-responsible-ai",
-      "description": "AI governance, responsible AI, algorithmic accountability, EU AI Act / NIST RMF.",
+      "description": "AI governance, algorithmic risk controls, EU AI Act and NIST AI RMF compliance.",
       "personas_count": 8,
       "personas": [
         "cathy-oneil",
@@ -42,7 +42,7 @@
     },
     "regulatory-tech-policy": {
       "id": "regulatory-tech-policy",
-      "description": "Tech regulation, antitrust, platform policy, algorithmic-accountability journalism/law.",
+      "description": "Regulatory reporting, incident escalation policies, and statutory compliance.",
       "personas_count": 6,
       "personas": [
         "frank-pasquale",
@@ -56,7 +56,7 @@
     },
     "security-governance": {
       "id": "security-governance",
-      "description": "Security governance, disclosure, threat policy (cross-listed from Engineering).",
+      "description": "Access-control review evidence, SOC 2 and ISO 27001 controls, and third-party vendor assurance questionnaires.",
       "personas_count": 5,
       "personas": [
         "bruce-schneier",
@@ -69,7 +69,7 @@
     },
     "erm-grc-leadership": {
       "id": "erm-grc-leadership",
-      "description": "Enterprise risk management, GRC frameworks, internal audit, three-lines model.",
+      "description": "Enterprise risk management, internal audit, policy exceptions, training compliance, procurement conflicts of interest, and remediation tracking.",
       "personas_count": 6,
       "personas": [
         "carol-williams",
@@ -83,7 +83,7 @@
     },
     "financial-crime-aml": {
       "id": "financial-crime-aml",
-      "description": "AML/KYC, sanctions, financial-crime compliance.",
+      "description": "Anti-money laundering, KYC due diligence, sanctions screening, and financial-crime compliance.",
       "personas_count": 5,
       "personas": [
         "graham-barrow",
@@ -96,7 +96,7 @@
     },
     "model-systemic-risk": {
       "id": "model-systemic-risk",
-      "description": "Model risk, validation (SR 11-7), systemic/financial-stability risk (cross-listed from Trading).",
+      "description": "Model risk management, SR 11-7 validation, and operational risk.",
       "personas_count": 5,
       "personas": [
         "jon-danielsson",

@@ -3,13 +3,13 @@
   "generated_at": "2026-09-03",
   "team_id": "finance-super-intelligence",
   "team_name": "Finance Super Intelligence Team",
-  "description": "Your finance brain trust and decision partner. Named personas across 7 cells: valuation/corporate finance, investing, accounting/FP&A, macro, fintech, behavioral, and capital markets/M&A/private. Markets/quant/derivatives are reserved for the Trading team. Built local-first (LM Studio) and validator-gated. Invoked by /SI-Fin commands.",
+  "description": "Corporate finance, FP&A budgeting, cash runway and burn forecasting, fixed versus usage-based cost modeling, subscription unit economics, break-even analysis, margin and CAC sensitivity, accrual revenue versus cash flow, working capital, debt versus equity financing, DCF company valuation, forensic accounting, macroeconomics, and fintech.",
   "personas_count": 47,
   "cells_count": 7,
   "cells": {
     "valuation-corporate-finance": {
       "id": "valuation-corporate-finance",
-      "description": "Valuation, corporate finance, intrinsic value, capital structure.",
+      "description": "DCF company valuation, discount rates, lease-versus-buy analysis, capital budgeting, and debt versus equity structure.",
       "personas_count": 7,
       "personas": [
         "alfred-rappaport",
@@ -24,7 +24,7 @@
     },
     "investing-capital-allocation": {
       "id": "investing-capital-allocation",
-      "description": "Value / discretionary investing and capital allocation.",
+      "description": "Fundamental equity investing, intrinsic value, moats, and long-term capital allocation.",
       "personas_count": 8,
       "personas": [
         "bill-ackman",
@@ -40,7 +40,7 @@
     },
     "accounting-fpa-reporting": {
       "id": "accounting-fpa-reporting",
-      "description": "Forensic accounting, financial reporting, and FP&A practice.",
+      "description": "Monthly budgets, fixed and usage costs, cash runway, break-even analysis, working capital, revenue-cash reconciliation, and operating expenses.",
       "personas_count": 6,
       "personas": [
         "baruch-lev",
@@ -54,7 +54,7 @@
     },
     "macro-economics": {
       "id": "macro-economics",
-      "description": "Macro economists and policy / markets framing.",
+      "description": "Monetary policy, interest rates, inflation, labor cycles, and fiscal policy.",
       "personas_count": 8,
       "personas": [
         "adam-tooze",
@@ -70,7 +70,7 @@
     },
     "fintech-payments": {
       "id": "fintech-payments",
-      "description": "Fintech, payments, banking-as-a-service, fintech investing.",
+      "description": "Payment rails, digital banking, embedded finance, and financial infrastructure.",
       "personas_count": 7,
       "personas": [
         "angela-strange",
@@ -85,7 +85,7 @@
     },
     "behavioral-decision-science": {
       "id": "behavioral-decision-science",
-      "description": "Behavioral finance and decision-making under uncertainty.",
+      "description": "Behavioral finance, cognitive biases, and investment decision hygiene.",
       "personas_count": 6,
       "personas": [
         "annie-duke",
@@ -99,7 +99,7 @@
     },
     "capital-markets-ma-private": {
       "id": "capital-markets-ma-private",
-      "description": "IPOs, M&A, private equity / VC finance, distress and restructuring.",
+      "description": "IPOs, mergers and acquisitions, private equity, venture financing, and corporate distress.",
       "personas_count": 5,
       "personas": [
         "dan-rasmussen",

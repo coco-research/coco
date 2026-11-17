@@ -3,13 +3,13 @@
   "generated_at": "2026-09-04",
   "team_id": "legal-ip-super-intelligence",
   "team_name": "Legal & IP Super Intelligence Team",
-  "description": "Your legal, IP, and regulatory brain trust. 31 named personas across 7 cells covering patent strategy, tech licensing, regulatory litigation, AI governance, open-source compliance, privacy law, and antitrust.",
+  "description": "Intellectual property law, patents versus trade secrets, trademarks, copyright permissions, open-source software licenses and dependency redistribution, contributor grants, commercial vendor contracts, indemnity, liability, and termination terms, confidentiality and NDAs, invention assignment, exclusive licensing, privacy law, and antitrust.",
   "personas_count": 31,
   "cells_count": 7,
   "cells": {
     "ai-ip-governance": {
       "id": "ai-ip-governance",
-      "description": "Legal & IP Super Intelligence Team cell: Ai Ip Governance",
+      "description": "AI copyright, training-data rights, algorithmic liability, and IP governance.",
       "personas_count": 3,
       "personas": [
         "frank-pasquale",
@@ -20,7 +20,7 @@
     },
     "antitrust-competition": {
       "id": "antitrust-competition",
-      "description": "Legal & IP Super Intelligence Team cell: Antitrust Competition",
+      "description": "Antitrust law, competition enforcement, merger scrutiny, and market dominance.",
       "personas_count": 4,
       "personas": [
         "fiona-scott-morton",
@@ -32,7 +32,7 @@
     },
     "ip-patent-strategy": {
       "id": "ip-patent-strategy",
-      "description": "Legal & IP Super Intelligence Team cell: Ip Patent Strategy",
+      "description": "Patents versus trade secrets, invention assignment, joint authorship, trademark clearance, and copyright licensing.",
       "personas_count": 9,
       "personas": [
         "dan-burk",
@@ -49,7 +49,7 @@
     },
     "open-source-compliance": {
       "id": "open-source-compliance",
-      "description": "Legal & IP Super Intelligence Team cell: Open Source Compliance",
+      "description": "Open-source software licenses, third-party dependency redistribution, and contributor license grants.",
       "personas_count": 3,
       "personas": [
         "eben-moglen",
@@ -60,7 +60,7 @@
     },
     "privacy-international-law": {
       "id": "privacy-international-law",
-      "description": "Legal & IP Super Intelligence Team cell: Privacy International Law",
+      "description": "Statutory privacy law, data protection treaties, and cross-border legal compliance.",
       "personas_count": 5,
       "personas": [
         "ann-cavoukian",
@@ -73,7 +73,7 @@
     },
     "regulatory-litigation": {
       "id": "regulatory-litigation",
-      "description": "Legal & IP Super Intelligence Team cell: Regulatory Litigation",
+      "description": "Contract disputes, statutory interpretation, liability defense, and regulatory litigation.",
       "personas_count": 3,
       "personas": [
         "danielle-citron",
@@ -84,7 +84,7 @@
     },
     "tech-licensing-contracts": {
       "id": "tech-licensing-contracts",
-      "description": "Legal & IP Super Intelligence Team cell: Tech Licensing Contracts",
+      "description": "Vendor contracts, indemnity, liability, and termination terms, confidentiality and NDAs, software licensing, and exclusive IP transfers.",
       "personas_count": 4,
       "personas": [
         "corynne-cohen",

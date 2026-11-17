@@ -3,13 +3,13 @@
   "generated_at": "2026-09-04",
   "team_id": "healthcare-life-sciences-super-intelligence",
   "team_name": "Healthcare & Life Sciences Super Intelligence Team",
-  "description": "Your healthcare and life sciences brain trust. 25 named personas across 7 cells covering drug discovery, medtech, biotech strategy, health policy, genomics, clinical trials, and healthcare economics.",
+  "description": "Hospital care, patient safety, randomized clinical trials and observational cohorts, diagnostic accuracy and prevalence, pharmacovigilance, genomics, therapeutic drug discovery, medical devices, infection prevention, care transitions and readmissions, vaccination programs, and health economics.",
   "personas_count": 25,
   "cells_count": 7,
   "cells": {
     "biotech-strategy": {
       "id": "biotech-strategy",
-      "description": "Healthcare & Life Sciences Super Intelligence Team cell: Biotech Strategy",
+      "description": "Biotech R&D, gene therapy, biomaterials, translational medicine, and venture commercialization.",
       "personas_count": 4,
       "personas": [
         "jennifer-doudna",
@@ -21,7 +21,7 @@
     },
     "clinical-trials-evidence": {
       "id": "clinical-trials-evidence",
-      "description": "Healthcare & Life Sciences Super Intelligence Team cell: Clinical Trials Evidence",
+      "description": "Randomized clinical trials, patient-centered endpoints, observational cohort evidence, systematic reviews, vaccination effectiveness, and adverse-event monitoring.",
       "personas_count": 3,
       "personas": [
         "ben-goldacre",
@@ -32,7 +32,7 @@
     },
     "drug-discovery-clinical-ai": {
       "id": "drug-discovery-clinical-ai",
-      "description": "Healthcare & Life Sciences Super Intelligence Team cell: Drug Discovery Clinical Ai",
+      "description": "Therapeutic compounds, preclinical assays, protein design, drug screening, and reproducible lab experiments.",
       "personas_count": 4,
       "personas": [
         "david-baker",
@@ -44,7 +44,7 @@
     },
     "genomics-precision-medicine": {
       "id": "genomics-precision-medicine",
-      "description": "Healthcare & Life Sciences Super Intelligence Team cell: Genomics Precision Medicine",
+      "description": "Genomic variants, drug response genetics, sequencing pipelines, and precision medicine.",
       "personas_count": 5,
       "personas": [
         "carlos-bustamante",
@@ -57,7 +57,7 @@
     },
     "health-policy-regulatory": {
       "id": "health-policy-regulatory",
-      "description": "Healthcare & Life Sciences Super Intelligence Team cell: Health Policy Regulatory",
+      "description": "Hospital infection prevention, patient discharge quality, readmission reduction, medical device protocols, and health policy.",
       "personas_count": 3,
       "personas": [
         "atul-gawande",
@@ -68,7 +68,7 @@
     },
     "healthcare-economics": {
       "id": "healthcare-economics",
-      "description": "Healthcare & Life Sciences Super Intelligence Team cell: Healthcare Economics",
+      "description": "Healthcare costs, clinician staffing sustainability, hospital operations, reimbursement, and value-based care.",
       "personas_count": 3,
       "personas": [
         "amitabh-chandra",
@@ -79,7 +79,7 @@
     },
     "medtech-digital-health": {
       "id": "medtech-digital-health",
-      "description": "Healthcare & Life Sciences Super Intelligence Team cell: Medtech Digital Health",
+      "description": "Diagnostic test uncertainty, predictive value and prevalence, clinical decision support, and medical devices.",
       "personas_count": 3,
       "personas": [
         "bertalan-mesko",

@@ -3,13 +3,13 @@
   "generated_at": "2026-09-03",
   "team_id": "ai-super-intelligence",
   "team_name": "AI Super Intelligence Team",
-  "description": "Your AI research and engineering brain trust. 59 named personas across 8 cells covering frontier labs, applied product, model architecture, reasoning/RL/agents, alignment and interpretability, theory and science of DL, multimodal and embodied, and systems/kernels/serving. Reusable across all CoCo-routed work — invoked by /superintelligenceTeam slash commands.",
+  "description": "Large and small language models, chatbots, AI assistants, transformers, dense embeddings, semantic vector search, retrieval-augmented generation (RAG), grounding and citation checks, hallucination detection, fine-tuning versus prompting, model compression, quantization, distillation, tool calling, RLHF and preference alignment, prompt-injection defense, evaluation benchmarks, multimodal models, and inference serving.",
   "personas_count": 59,
   "cells_count": 8,
   "cells": {
     "frontier-labs-research": {
       "id": "frontier-labs-research",
-      "description": "Frontier Labs Research \u2014 CEO/CSO tier at frontier model labs.",
+      "description": "Frontier foundation models, compute scaling, pretraining economics, and capability strategy.",
       "personas_count": 6,
       "personas": [
         "arthur-mensch",
@@ -23,7 +23,7 @@
     },
     "applied-ai-leadership": {
       "id": "applied-ai-leadership",
-      "description": "Applied AI Leadership \u2014 product/strategy founders building real AI products.",
+      "description": "Language-model assistants, chatbots, document QA, semantic vector search, RAG, and citation grounding.",
       "personas_count": 7,
       "personas": [
         "aidan-gomez",
@@ -38,7 +38,7 @@
     },
     "model-architects": {
       "id": "model-architects",
-      "description": "Model Architects \u2014 pretraining, scaling laws, and model design.",
+      "description": "Transformer architectures, model compression, quantization, knowledge distillation, pruning, tokenization, fine-tuning, and prompting.",
       "personas_count": 7,
       "personas": [
         "andrej-karpathy",
@@ -53,7 +53,7 @@
     },
     "reasoning-rl-agents": {
       "id": "reasoning-rl-agents",
-      "description": "Reasoning, RL, and Agents \u2014 post-training and agentic systems.",
+      "description": "Post-training, RLHF, preference optimization, reward modeling, reasoning, tool calling, and agentic workflows.",
       "personas_count": 7,
       "personas": [
         "barret-zoph",
@@ -68,7 +68,7 @@
     },
     "alignment-interp-safety": {
       "id": "alignment-interp-safety",
-      "description": "Alignment, Interpretability, and Safety.",
+      "description": "Safety alignment, mechanistic interpretability, prompt-injection defense, hallucination detection, and evaluation benchmarks.",
       "personas_count": 9,
       "personas": [
         "beth-barnes",
@@ -85,7 +85,7 @@
     },
     "theory-science": {
       "id": "theory-science",
-      "description": "Theory and Science of Deep Learning \u2014 foundational researchers.",
+      "description": "Deep learning theory, dense representations, semantic similarity, uncertainty calibration, and natural language processing.",
       "personas_count": 9,
       "personas": [
         "aleksander-madry",
@@ -102,7 +102,7 @@
     },
     "multimodal-embodied": {
       "id": "multimodal-embodied",
-      "description": "Multimodal, Vision, and Embodied AI \u2014 robotics + diffusion + spatial.",
+      "description": "Multimodal vision-language models, image and video diffusion, world models, speech, and robotics.",
       "personas_count": 7,
       "personas": [
         "aditya-ramesh",
@@ -117,7 +117,7 @@
     },
     "systems-kernels-serving": {
       "id": "systems-kernels-serving",
-      "description": "Systems, Kernels, and Serving \u2014 training infrastructure + inference.",
+      "description": "Distributed training, GPU kernels, edge and on-device inference, batching, and low-latency model serving.",
       "personas_count": 7,
       "personas": [
         "albert-gu",

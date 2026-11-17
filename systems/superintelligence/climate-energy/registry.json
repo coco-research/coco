@@ -3,13 +3,13 @@
   "generated_at": "2026-09-04",
   "team_id": "climate-energy-super-intelligence",
   "team_name": "Climate & Energy Super Intelligence Team",
-  "description": "Your climate and energy brain trust. 25 named personas across 7 cells covering energy transition, carbon markets, climate modeling, sustainability, grid infrastructure, environmental policy, and ESG.",
+  "description": "Climate science, clean energy transition, electric power grids, battery storage, heat pumps and electrification, industrial decarbonization, methane and emissions mitigation, carbon removal and carbon markets, lifecycle assessment, circular materials and waste reduction, ESG reporting, and environmental regulation.",
   "personas_count": 25,
   "cells_count": 7,
   "cells": {
     "carbon-markets-climate-finance": {
       "id": "carbon-markets-climate-finance",
-      "description": "Climate & Energy Super Intelligence Team cell: Carbon Markets Climate Finance",
+      "description": "Carbon markets, offset integrity, durable carbon removal, and climate transition finance.",
       "personas_count": 3,
       "personas": [
         "charlotte-streck",
@@ -20,7 +20,7 @@
     },
     "climate-modeling-science": {
       "id": "climate-modeling-science",
-      "description": "Climate & Energy Super Intelligence Team cell: Climate Modeling Science",
+      "description": "Climate modeling, atmospheric physics, emissions pathways, and warming attribution.",
       "personas_count": 4,
       "personas": [
         "gavin-schmidt",
@@ -32,7 +32,7 @@
     },
     "energy-transition-renewables": {
       "id": "energy-transition-renewables",
-      "description": "Climate & Energy Super Intelligence Team cell: Energy Transition Renewables",
+      "description": "Solar, wind, heat pumps, electrification, industrial process heat, and renewable economics.",
       "personas_count": 5,
       "personas": [
         "amory-lovins",
@@ -45,7 +45,7 @@
     },
     "environmental-policy-regulation": {
       "id": "environmental-policy-regulation",
-      "description": "Climate & Energy Super Intelligence Team cell: Environmental Policy Regulation",
+      "description": "Environmental regulation, methane abatement, water and land use, and emissions standards.",
       "personas_count": 3,
       "personas": [
         "gina-mccarthy",
@@ -56,7 +56,7 @@
     },
     "esg-corporate-sustainability": {
       "id": "esg-corporate-sustainability",
-      "description": "Climate & Energy Super Intelligence Team cell: Esg Corporate Sustainability",
+      "description": "Corporate sustainability reporting, greenhouse gas inventories, Scope 1-3 accounting, and ESG materiality.",
       "personas_count": 3,
       "personas": [
         "george-serafeim",
@@ -67,7 +67,7 @@
     },
     "grid-infrastructure-storage": {
       "id": "grid-infrastructure-storage",
-      "description": "Climate & Energy Super Intelligence Team cell: Grid Infrastructure Storage",
+      "description": "Electric power grids, renewable balancing, battery chemistries, utility storage, and fleet charging infrastructure.",
       "personas_count": 4,
       "personas": [
         "jesse-jenkins",
@@ -79,7 +79,7 @@
     },
     "sustainability-tech-circularity": {
       "id": "sustainability-tech-circularity",
-      "description": "Climate & Energy Super Intelligence Team cell: Sustainability Tech Circularity",
+      "description": "Circular economy, sustainable materials, industrial recycling, waste reduction, and lifecycle impact.",
       "personas_count": 3,
       "personas": [
         "ellen-macarthur",

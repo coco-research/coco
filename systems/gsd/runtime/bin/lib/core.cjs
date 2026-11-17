@@ -314,3 +314,353 @@ function loadConfig(cwd, options = {}) {
         rootParsed = rootNormalized;
       }
     } catch {
+      // Root config missing or unparseable — workstream config stands alone
+    }
+  }
+
+  const configPath = path.join(planningDir(cwd, ws), 'config.json');
+  const defaults = CONFIG_DEFAULTS;
+
+  try {
+    const raw = platformReadSync(configPath);
+    if (raw === null) throw new Error('missing');
+    // `fileData` is the parsed content of the config.json file on disk — used
+    // for migrations and writes so we never persist merged values back to disk.
+    const fileData = JSON.parse(raw);
+
+    // Cycle 4: Single normalizeLegacyKeys call replaces all four inline migration
+    // blocks (depth→granularity, multiRepo→planning.sub_repos, sub_repos→planning.sub_repos,
+    // branching_strategy→git.branching_strategy). The Module is pure (no I/O); disk
+    // writeback is handled below with the existing platformWriteSync pattern.
+    // Note: migrateOnDisk from the Module is async; loadConfig is sync — so we
+    // call normalizeLegacyKeys inline and do the writeback at the call site.
+    // Per brief §4.3: "use normalizeLegacyKeys directly and do writeback inline."
+    let configDirty = false;
+    {
+      const { parsed: normalized, normalizations } = normalizeLegacyKeys(fileData);
+      if (normalizations.length > 0) {
+        // Merge normalized values back into fileData (mutation-in-place for legacy code below)
+        Object.keys(fileData).forEach(k => delete fileData[k]);
+        Object.assign(fileData, normalized);
+        configDirty = true;
+        // Resolve filesystem-dependent normalizations (multiRepo → planning.sub_repos).
+        // Guard: only populate sub_repos from filesystem if not already set by normalization
+        // AND the original file didn't have sub_repos already (preserve existing intent).
+        for (const norm of normalizations) {
+          if (norm.requiresFilesystem && !fileData.planning?.sub_repos) {
+            const detected = detectSubRepos(cwd);
+            if (detected.length > 0) {
+              if (!fileData.planning) fileData.planning = {};
+              fileData.planning.sub_repos = detected;
+              fileData.planning.commit_docs = false;
+            }
+          }
+        }
+      }
+    }
+
+    // Keep planning.sub_repos in sync with actual filesystem
+    const currentSubRepos = fileData.planning?.sub_repos || [];
+    if (Array.isArray(currentSubRepos) && currentSubRepos.length > 0) {
+      const detected = detectSubRepos(cwd);
+      if (detected.length > 0) {
+        const sorted = [...currentSubRepos].sort();
+        if (JSON.stringify(sorted) !== JSON.stringify(detected)) {
+          if (!fileData.planning) fileData.planning = {};
+          fileData.planning.sub_repos = detected;
+          configDirty = true;
+        }
+      }
+    }
+
+    // Persist sub_repos changes (migration or sync) — write only the on-disk
+    // file contents, never the merged result, to avoid polluting workstream configs.
+    if (configDirty) {
+      try { platformWriteSync(configPath, JSON.stringify(fileData, null, 2)); } catch {}
+    }
+
+    // Now apply root→workstream inheritance. `parsed` is the effective config
+    // used for value extraction below; fileData is kept for disk writes only.
+    const parsed = rootParsed ? _deepMergeConfig(rootParsed, fileData) : fileData;
+
+    // Warn about unrecognized top-level keys so users don't silently lose config.
+    // Derived from config-set's VALID_CONFIG_KEYS (canonical source) plus internal-only
+    // keys that loadConfig handles but config-set doesn't expose. This avoids maintaining
+    // a hardcoded duplicate that drifts when new config keys are added.
+    // DYNAMIC_KEY_PATTERNS supplies topLevel for each pattern so adding a new
+    // dynamic-pattern namespace to config-schema.cjs automatically updates this set
+    // — no more drift between the read side and the write side (#2687).
+    const { VALID_CONFIG_KEYS, DYNAMIC_KEY_PATTERNS } = require('./config-schema.cjs');
+    const KNOWN_TOP_LEVEL = new Set([
+      // Extract top-level key names from dot-notation paths (e.g., 'workflow.research' → 'workflow')
+      ...[...VALID_CONFIG_KEYS].map(k => k.split('.')[0]),
+      // Dynamic-pattern top-level containers (e.g. review, model_profile_overrides)
+      ...DYNAMIC_KEY_PATTERNS.map(p => p.topLevel),
+      // Internal keys loadConfig reads but config-set doesn't expose
+      'model_overrides', 'context_window', 'resolve_model_ids', 'claude_md_path',
+      // Deprecated keys (still accepted for migration, not in config-set)
+      // 'branching_strategy' is kept here as a safety net: it is migrated to
+      // git.branching_strategy above (#3523), but on the first read of a root
+      // config that feeds into a workstream merge, `parsed` may still surface it.
+      'depth', 'multiRepo', 'branching_strategy',
+    ]);
+    const unknownKeys = Object.keys(parsed).filter(k => !KNOWN_TOP_LEVEL.has(k));
+    if (unknownKeys.length > 0) {
+      // Deduplicate: a single `init phase-op N` invocation calls loadConfig twice
+      // (once for the sub-command setup, once for git-config resolution). Guard with
+      // a module-level Set so the same message never fires more than once per process.
+      const warnKey = unknownKeys.join(',');
+      if (!_warnedUnknownConfigKeys.has(warnKey)) {
+        _warnedUnknownConfigKeys.add(warnKey);
+        process.stderr.write(
+          `gsd-tools: warning: unknown config key(s) in .planning/config.json: ${unknownKeys.join(', ')} — these will be ignored\n`
+        );
+      }
+    }
+
+    // #2517 — Validate runtime/tier values for keys that loadConfig handles but
+    // can be edited directly into config.json (bypassing config-set's enum check).
+    // This catches typos like `runtime: "codx"` and `model_profile_overrides.codex.banana`
+    // at read time without rejecting back-compat values from new runtimes
+    // (review findings #10, #13).
+    _warnUnknownProfileOverrides(parsed, '.planning/config.json');
+
+    const get = (key, nested) => {
+      if (parsed[key] !== undefined) return parsed[key];
+      if (nested && parsed[nested.section] && parsed[nested.section][nested.field] !== undefined) {
+        return parsed[nested.section][nested.field];
+      }
+      return undefined;
+    };
+
+    const parallelization = (() => {
+      const val = get('parallelization');
+      if (typeof val === 'boolean') return val;
+      if (typeof val === 'object' && val !== null && 'enabled' in val) return val.enabled;
+      return defaults.parallelization;
+    })();
+
+    return {
+      model_profile: get('model_profile') ?? defaults.model_profile,
+      commit_docs: (() => {
+        const explicit = get('commit_docs', { section: 'planning', field: 'commit_docs' });
+        // If explicitly set in config, respect the user's choice
+        if (explicit !== undefined) return explicit;
+        // Auto-detection: when no explicit value and .planning/ is gitignored,
+        // default to false instead of true
+        if (isGitIgnored(cwd, '.planning/')) return false;
+        return defaults.commit_docs;
+      })(),
+      search_gitignored: get('search_gitignored', { section: 'planning', field: 'search_gitignored' }) ?? defaults.search_gitignored,
+      branching_strategy: get('branching_strategy', { section: 'git', field: 'branching_strategy' }) ?? defaults.branching_strategy,
+      phase_branch_template: get('phase_branch_template', { section: 'git', field: 'phase_branch_template' }) ?? defaults.phase_branch_template,
+      milestone_branch_template: get('milestone_branch_template', { section: 'git', field: 'milestone_branch_template' }) ?? defaults.milestone_branch_template,
+      quick_branch_template: get('quick_branch_template', { section: 'git', field: 'quick_branch_template' }) ?? defaults.quick_branch_template,
+      research: get('research', { section: 'workflow', field: 'research' }) ?? defaults.research,
+      plan_checker: get('plan_checker', { section: 'workflow', field: 'plan_check' }) ?? defaults.plan_checker,
+      verifier: get('verifier', { section: 'workflow', field: 'verifier' }) ?? defaults.verifier,
+      nyquist_validation: get('nyquist_validation', { section: 'workflow', field: 'nyquist_validation' }) ?? defaults.nyquist_validation,
+      post_planning_gaps: get('post_planning_gaps', { section: 'workflow', field: 'post_planning_gaps' }) ?? defaults.post_planning_gaps,
+      parallelization,
+      brave_search: get('brave_search') ?? defaults.brave_search,
+      firecrawl: get('firecrawl') ?? defaults.firecrawl,
+      exa_search: get('exa_search') ?? defaults.exa_search,
+      tdd_mode: get('tdd_mode', { section: 'workflow', field: 'tdd_mode' }) ?? false,
+      mvp_mode: get('mvp_mode', { section: 'workflow', field: 'mvp_mode' }) ?? false,
+      text_mode: get('text_mode', { section: 'workflow', field: 'text_mode' }) ?? defaults.text_mode,
+      auto_advance: get('auto_advance', { section: 'workflow', field: 'auto_advance' }) ?? false,
+      _auto_chain_active: get('_auto_chain_active', { section: 'workflow', field: '_auto_chain_active' }) ?? false,
+      mode: get('mode') ?? 'interactive',
+      sub_repos: get('sub_repos', { section: 'planning', field: 'sub_repos' }) ?? defaults.sub_repos,
+      resolve_model_ids: get('resolve_model_ids') ?? defaults.resolve_model_ids,
+      context_window: get('context_window') ?? defaults.context_window,
+      phase_naming: get('phase_naming') ?? defaults.phase_naming,
+      project_code: get('project_code') ?? defaults.project_code,
+      subagent_timeout: get('subagent_timeout', { section: 'workflow', field: 'subagent_timeout' }) ?? defaults.subagent_timeout,
+      model_overrides: parsed.model_overrides || null,
+      // #3023 — per-phase-type model map. Six named slots
+      // (planning/discuss/research/execution/verification/completion).
+      // Resolves between per-agent override and profile-derived tier in
+      // resolveModelInternal. Defaults to null so configs without it
+      // behave exactly as today.
+      models: parsed.models || null,
+      // #3024 — dynamic routing block. When `enabled: true`, the
+      // resolveModelForTier() resolver picks tier_models[default_tier]
+      // for the agent and escalates one tier per attempt up to
+      // max_escalations. Disabled by default for backward compat.
+      dynamic_routing: parsed.dynamic_routing || null,
+      // #2517 — runtime-aware profiles. `runtime` defaults to null (back-compat).
+      // When null, resolveModelInternal preserves today's Claude-native behavior.
+      // NOTE: `runtime` and `model_profile_overrides` are intentionally read
+      // flat-only (not via `get()` with a workflow.X fallback) — they are
+      // top-level keys per docs/CONFIGURATION.md. The lighter-touch decision
+      // here was to document the constraint rather than introduce nested
+      // resolution edge cases for two new keys (review finding #9). The
+      // schema validation in `_warnUnknownProfileOverrides` runs against the
+      // raw `parsed` blob, so direct `.planning/config.json` edits surface
+      // unknown runtime/tier names at load time, not silently (review finding #10).
+      runtime: parsed.runtime || null,
+      model_profile_overrides: parsed.model_profile_overrides || null,
+      agent_skills: parsed.agent_skills || {},
+      manager: parsed.manager || {},
+      response_language: get('response_language') || null,
+      claude_md_path: get('claude_md_path') || null,
+      claude_md_assembly: parsed.claude_md_assembly || null,
+    };
+  } catch {
+    // Fall back to ~/.gsd/defaults.json only for truly pre-project contexts (#1683)
+    // If .planning/ exists, the project is initialized — just missing config.json.
+    // When GSD_WORKSTREAM is set and root config was loaded, the workstream config
+    // doesn't exist — treat root config as the effective config for this workstream.
+    if (fs.existsSync(planningDir(cwd, ws))) {
+      if (rootParsed) {
+        // Workstream has no config.json: re-parse using root config as the sole source.
+        // Keep env immutable by explicitly reloading with workstream context cleared.
+        return loadConfig(cwd, { workstream: null });
+      }
+      return defaults;
+    }
+    try {
+      const home = process.env.GSD_HOME || os.homedir();
+      const globalDefaultsPath = path.join(home, '.gsd', 'defaults.json');
+      const raw = platformReadSync(globalDefaultsPath);
+      if (raw === null) throw new Error('missing');
+      const globalDefaults = JSON.parse(raw);
+      return {
+        ...defaults,
+        model_profile: globalDefaults.model_profile ?? defaults.model_profile,
+        commit_docs: globalDefaults.commit_docs ?? defaults.commit_docs,
+        research: globalDefaults.research ?? defaults.research,
+        plan_checker: globalDefaults.plan_checker ?? defaults.plan_checker,
+        verifier: globalDefaults.verifier ?? defaults.verifier,
+        nyquist_validation: globalDefaults.nyquist_validation ?? defaults.nyquist_validation,
+        post_planning_gaps: globalDefaults.post_planning_gaps
+          ?? globalDefaults.workflow?.post_planning_gaps
+          ?? defaults.post_planning_gaps,
+        parallelization: globalDefaults.parallelization ?? defaults.parallelization,
+        text_mode: globalDefaults.text_mode ?? defaults.text_mode,
+        resolve_model_ids: globalDefaults.resolve_model_ids ?? defaults.resolve_model_ids,
+        context_window: globalDefaults.context_window ?? defaults.context_window,
+        subagent_timeout: globalDefaults.subagent_timeout ?? defaults.subagent_timeout,
+        model_overrides: globalDefaults.model_overrides || null,
+        models: globalDefaults.models || null,
+        dynamic_routing: globalDefaults.dynamic_routing || null,
+        agent_skills: globalDefaults.agent_skills || {},
+        response_language: globalDefaults.response_language || null,
+      };
+    } catch {
+      return defaults;
+    }
+  }
+}
+
+// ─── Git utilities ────────────────────────────────────────────────────────────
+
+// Module-level deduplication for unknown-key warnings (#3523).
+// A single `init phase-op N` call invokes loadConfig more than once; this Set
+// prevents the same warning from being echoed on each invocation.
+const _warnedUnknownConfigKeys = new Set();
+
+const _gitIgnoredCache = new Map();
+
+function isGitIgnored(cwd, targetPath) {
+  const key = cwd + '::' + targetPath;
+  if (_gitIgnoredCache.has(key)) return _gitIgnoredCache.get(key);
+  // --no-index checks .gitignore rules regardless of whether the file is tracked.
+  // Without it, git check-ignore returns "not ignored" for tracked files even when
+  // .gitignore explicitly lists them — a common source of confusion when .planning/
+  // was committed before being added to .gitignore.
+  // Array args (via the seam) prevent shell interpretation of special characters in
+  // file paths — avoids command injection via crafted path names.
+  const result = execGit(['check-ignore', '-q', '--no-index', '--', targetPath], { cwd });
+  const ignored = result.exitCode === 0;
+  _gitIgnoredCache.set(key, ignored);
+  return ignored;
+}
+
+// ─── Common path helpers ──────────────────────────────────────────────────────
+
+/**
+ * Resolve the main worktree root when running inside a git worktree.
+ * In a linked worktree, .planning/ lives in the main worktree, not in the linked one.
+ * Returns the main worktree path, or cwd if not in a worktree.
+ */
+function resolveWorktreeRoot(cwd) {
+  // Omit execGit so worktree-safety uses its own execGitDefault — that wrapper
+  // delegates to the seam and derives the `timedOut` field that pruneResult
+  // branches on below.
+  const context = resolveWorktreeContext(cwd, {
+    existsSync: fs.existsSync,
+  });
+  return context.effectiveRoot;
+}
+
+/**
+ * Parse `git worktree list --porcelain` output into an array of
+ * { path, branch } objects.  Entries with a detached HEAD (no branch line)
+ * are skipped because we cannot safely reason about their merge status.
+ *
+ * @param {string} porcelain - raw output from git worktree list --porcelain
+ * @returns {{ path: string, branch: string }[]}
+ */
+function parseWorktreePorcelain(porcelain) {
+  return parseWorktreePorcelainPolicy(porcelain);
+}
+
+/**
+ * Clear stale worktree metadata references via `git worktree prune`.
+ *
+ * Destructive linked-worktree removal is disabled by default for safety.
+ *
+ * @param {string} repoRoot - absolute path to the main (or any) worktree of
+ *   the repository; used as `cwd` for git commands.
+ * @returns {string[]} list of worktree paths that were removed (always empty)
+ */
+function pruneOrphanedWorktrees(repoRoot) {
+  try {
+    const plan = planWorktreePrune(
+      repoRoot,
+      { allowDestructive: false },
+      { parseWorktreePorcelain }
+    );
+    const pruneResult = executeWorktreePrunePlan(plan);
+    if (pruneResult && pruneResult.timedOut) {
+      // AC2: surface structured warning instead of silently swallowing the timeout.
+      // Uses process.stderr.write to match the [gsd-tools] WARNING prefix style.
+      process.stderr.write(
+        '[gsd-tools] WARNING: worktree health check degraded' +
+        ' — git worktree prune timed out after 10s.' +
+        ' Orphaned worktree metadata may remain until the next successful run.\n'
+      );
+    }
+  } catch { /* never crash the caller */ }
+  return [];
+}
+
+// ─── Planning workspace (pathing + active workstream + lock) moved to planning-workspace.cjs ───
+
+// ─── Phase utilities ──────────────────────────────────────────────────────────
+
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function normalizePhaseName(phase) {
+  const str = String(phase);
+  // Strip optional project_code prefix (e.g., 'CK-01' → '01')
+  const stripped = str.replace(/^[A-Z]{1,6}-(?=\d)/, '');
+  // Standard numeric phases: 1, 01, 12A, 12.1
+  const match = stripped.match(/^(\d+)([A-Z])?((?:\.\d+)*)/i);
+  if (match) {
+    const padded = match[1].padStart(2, '0');
+    // Preserve original case of letter suffix (#1962).
+    // Uppercasing causes directory/roadmap mismatches on case-sensitive filesystems
+    // (e.g., "16c" in ROADMAP.md → directory "16C-name" → progress can't match).
+    const letter = match[2] || '';
+    const decimal = match[3] || '';
+    return padded + letter + decimal;
+  }
+  // Custom phase IDs (e.g. PROJ-42, AUTH-101): return as-is
+  return str;
+}
+

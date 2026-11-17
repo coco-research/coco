@@ -190,3 +190,142 @@ Based on project state, determine the most logical next action:
   → Primary: Discuss phase vision (how user imagines it working)
   → Secondary: Plan directly (skip context gathering)
 - If CONTEXT.md exists:
+  → Primary: Plan the phase
+  → Option: Review roadmap
+
+**If phase ready to execute:**
+→ Primary: Execute next plan
+→ Option: Review the plan first
+</step>
+
+<step name="offer_options">
+Present contextual options based on project state:
+
+```
+What would you like to do?
+
+[Primary action based on state - e.g.:]
+1. Resume interrupted agent [if interrupted agent found]
+   OR
+1. Execute phase (/gsd:execute-phase {phase} ${GSD_WS})
+   OR
+1. Discuss Phase 3 context (/gsd:discuss-phase 3 ${GSD_WS}) [if CONTEXT.md missing]
+   OR
+1. Plan Phase 3 (/gsd:plan-phase 3 ${GSD_WS}) [if CONTEXT.md exists or discuss option declined]
+
+[Secondary options:]
+2. Review current phase status
+3. Check pending todos ([N] pending)
+4. Review brief alignment
+5. Something else
+```
+
+**Note:** When offering phase planning, check for CONTEXT.md existence first:
+
+```bash
+ls .planning/phases/XX-name/*-CONTEXT.md 2>/dev/null || true
+```
+
+If missing, suggest discuss-phase before plan. If exists, offer plan directly.
+
+Wait for user selection.
+</step>
+
+<step name="route_to_workflow">
+Based on user selection, route to appropriate workflow.
+
+Resume-specific exception: do **not** emit `/clear then:` here. Resume is already a session-entry flow, so the next command should be shown directly.
+
+- **Execute plan** → Show direct next command:
+  ```
+  ---
+
+  ## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+  **{phase}-{plan}: [Plan Name]** — [objective from PLAN.md]
+
+  `/gsd:execute-phase {phase} ${GSD_WS}`
+
+  ---
+  ```
+- **Plan phase** → Show direct next command:
+  ```
+  ---
+
+  ## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+  **Phase [N]: [Name]** — [Goal from ROADMAP.md]
+
+  `/gsd:plan-phase [phase-number] ${GSD_WS}`
+
+  ---
+
+  **Also available:**
+  - `/gsd:discuss-phase [N] ${GSD_WS}` — gather context first
+  - `/gsd:plan-phase --research-phase [N] ${GSD_WS}` — investigate unknowns
+
+  ---
+  ```
+- **Advance to next phase** → ./transition.md (internal workflow, invoked inline — NOT a user command)
+- **Check todos** → Read .planning/todos/pending/, present summary
+- **Review alignment** → Read PROJECT.md, compare to current state
+- **Something else** → Ask what they need
+</step>
+
+<step name="update_session">
+Before proceeding to routed workflow, update session continuity:
+
+Update STATE.md:
+
+```markdown
+## Session Continuity
+
+Last session: [now]
+Stopped at: Session resumed, proceeding to [action]
+Resume file: [updated if applicable]
+```
+
+This ensures if session ends unexpectedly, next resume knows the state.
+</step>
+
+</process>
+
+<reconstruction>
+If STATE.md is missing but other artifacts exist:
+
+"STATE.md missing. Reconstructing from artifacts..."
+
+1. Read PROJECT.md → Extract "What This Is" and Core Value
+2. Read ROADMAP.md → Determine phases, find current position
+3. Scan \*-SUMMARY.md files → Extract decisions, concerns
+4. Count pending todos in .planning/todos/pending/
+5. Check for .continue-here files → Session continuity
+
+Reconstruct and write STATE.md, then proceed normally.
+
+This handles cases where:
+
+- Project predates STATE.md introduction
+- File was accidentally deleted
+- Cloning repo without full .planning/ state
+  </reconstruction>
+
+<quick_resume>
+If user says "continue" or "go":
+- Load state silently
+- Determine primary action
+- Execute immediately without presenting options
+
+"Continuing from [state]... [action]"
+</quick_resume>
+
+<success_criteria>
+Resume is complete when:
+
+- [ ] STATE.md loaded (or reconstructed)
+- [ ] Incomplete work detected and flagged
+- [ ] Clear status presented to user
+- [ ] Contextual next actions offered
+- [ ] User knows exactly where project stands
+- [ ] Session continuity updated
+      </success_criteria>

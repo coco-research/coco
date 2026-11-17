@@ -533,3 +533,142 @@ Write audit trail of assumptions and corrections.
 ## Auto-Resolved
 
 {If --auto and Unclear items existed:}
+- {Assumption}: auto-selected {recommended option}
+
+{If not applicable: omit this section}
+
+## External Research
+
+{If research was performed:}
+- {Topic}: {Finding} (Source: {URL})
+
+{If no research: omit this section}
+```
+
+Write file.
+</step>
+
+<step name="git_commit">
+Commit phase context and discussion log:
+
+```bash
+gsd-sdk query commit "docs(${padded_phase}): capture phase context (assumptions mode)" --files "${phase_dir}/${padded_phase}-CONTEXT.md" "${phase_dir}/${padded_phase}-DISCUSSION-LOG.md"
+```
+
+Confirm: "Committed: docs(${padded_phase}): capture phase context (assumptions mode)"
+</step>
+
+<step name="update_state">
+Update STATE.md with session info:
+
+```bash
+gsd-sdk query state.record-session \
+  --stopped-at "Phase ${PHASE} context gathered (assumptions mode)" \
+  --resume-file "${phase_dir}/${padded_phase}-CONTEXT.md"
+```
+
+Commit STATE.md:
+
+```bash
+gsd-sdk query commit "docs(state): record phase ${PHASE} context session" --files .planning/STATE.md
+```
+</step>
+
+<step name="confirm_creation">
+Present summary and next steps:
+
+```
+Created: .planning/phases/${PADDED_PHASE}-${SLUG}/${PADDED_PHASE}-CONTEXT.md
+
+## Decisions Captured (Assumptions Mode)
+
+### {Area Name}
+- {Key decision} (from assumption / corrected)
+
+{Repeat per area}
+
+[If corrections were made:]
+## Corrections Applied
+- {Area}: {original} → {corrected}
+
+[If deferred ideas exist:]
+## Noted for Later
+- {Deferred idea} — future phase
+
+---
+
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Phase ${PHASE}: {phase_name}** — {Goal from ROADMAP.md}
+
+`/clear` then:
+
+`/gsd:plan-phase ${PHASE}`
+
+---
+
+**Also available:**
+- `/gsd:plan-phase ${PHASE} --skip-research` — plan without research
+- `/gsd:ui-phase ${PHASE}` — generate UI design contract (if frontend work)
+- Review/edit CONTEXT.md before continuing
+
+---
+```
+</step>
+
+<step name="auto_advance">
+Check for auto-advance trigger:
+
+1. Parse `--auto` flag from $ARGUMENTS
+2. Sync chain flag:
+   ```bash
+   if [[ ! "$ARGUMENTS" =~ --auto ]]; then
+     gsd-sdk query config-set workflow._auto_chain_active false || true
+   fi
+   ```
+3. Read consolidated auto-mode (`active` = chain flag OR user preference):
+   ```bash
+   AUTO_MODE=$(gsd-sdk query check auto-mode --pick active 2>/dev/null || echo "false")
+   ```
+
+**If `--auto` flag present AND `AUTO_MODE` is not true:**
+```bash
+gsd-sdk query config-set workflow._auto_chain_active true
+```
+
+**If `--auto` flag present OR `AUTO_MODE` is true:**
+
+Display banner:
+```text
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► AUTO-ADVANCING TO PLAN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Context captured (assumptions mode). Launching plan-phase...
+```
+
+Launch: `Skill(skill="gsd-plan-phase", args="${PHASE} --auto")`
+
+Handle return: PHASE COMPLETE / PLANNING COMPLETE / INCONCLUSIVE / GAPS FOUND
+(identical handling to discuss-phase.md auto_advance step)
+
+**If neither `--auto` nor config enabled:**
+Route to confirm_creation step.
+</step>
+
+</process>
+
+<success_criteria>
+- Phase validated against roadmap
+- Prior context loaded (no re-asking decided questions)
+- Codebase deeply analyzed via Explore subagent (5-15 files read)
+- Assumptions surfaced with evidence and confidence levels
+- User confirmed or corrected assumptions (~2-4 interactions max)
+- Scope creep redirected to deferred ideas
+- CONTEXT.md captures actual decisions (identical format to discuss mode)
+- CONTEXT.md includes canonical_refs with full file paths (MANDATORY)
+- CONTEXT.md includes code_context from codebase analysis
+- DISCUSSION-LOG.md records assumptions and corrections as audit trail
+- STATE.md updated with session info
+- User knows next steps
+</success_criteria>

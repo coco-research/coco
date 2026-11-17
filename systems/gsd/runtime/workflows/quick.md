@@ -1005,3 +1005,173 @@ Task goal: ${DESCRIPTION}
 <files_to_read>
 - ${QUICK_DIR}/${quick_id}-PLAN.md (Plan)
 </files_to_read>
+
+${AGENT_SKILLS_VERIFIER}
+
+Check must_haves against actual codebase. Create VERIFICATION.md at ${QUICK_DIR}/${quick_id}-VERIFICATION.md.",
+  subagent_type="gsd-verifier",
+  model="{verifier_model}",
+  description="Verify: ${DESCRIPTION}"
+)
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+Read verification status:
+```bash
+grep "^status:" "${QUICK_DIR}/${quick_id}-VERIFICATION.md" | cut -d: -f2 | tr -d ' '
+```
+
+Store as `$VERIFICATION_STATUS`.
+
+| Status | Action |
+|--------|--------|
+| `passed` | Store `$VERIFICATION_STATUS = "Verified"`, continue to step 7 |
+| `human_needed` | Display items needing manual check, store `$VERIFICATION_STATUS = "Needs Review"`, continue |
+| `gaps_found` | Display gap summary, offer: 1) Re-run executor to fix gaps, 2) Accept as-is. Store `$VERIFICATION_STATUS = "Gaps"` |
+
+---
+
+**Step 7: Update STATE.md**
+
+Update STATE.md with quick task completion record.
+
+**7a. Check if "Quick Tasks Completed" section exists:**
+
+Read STATE.md and check for `### Quick Tasks Completed` section.
+
+**7b. If section doesn't exist, create it:**
+
+Insert after `### Blockers/Concerns` section:
+
+**If `$VALIDATE_MODE`:**
+```markdown
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Status | Directory |
+|---|-------------|------|--------|--------|-----------|
+```
+
+**If NOT `$VALIDATE_MODE`:**
+```markdown
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+```
+
+**Note:** If the table already exists, match its existing column format. If adding `--validate` (or `--full`) to a project that already has quick tasks without a Status column, add the Status column to the header and separator rows, and leave Status empty for the new row's predecessors.
+
+**7c. Append new row to table:**
+
+Use `date` from init:
+
+**If `$VALIDATE_MODE` (or table has Status column):**
+```markdown
+| ${quick_id} | ${DESCRIPTION} | ${date} | ${commit_hash} | ${VERIFICATION_STATUS} | [${quick_id}-${slug}](./quick/${quick_id}-${slug}/) |
+```
+
+**If NOT `$VALIDATE_MODE` (and table has no Status column):**
+```markdown
+| ${quick_id} | ${DESCRIPTION} | ${date} | ${commit_hash} | [${quick_id}-${slug}](./quick/${quick_id}-${slug}/) |
+```
+
+**7d. Update "Last activity" line:**
+
+Use `date` from init:
+```
+Last activity: ${date} - Completed quick task ${quick_id}: ${DESCRIPTION}
+```
+
+Use Edit tool to make these changes atomically
+
+---
+
+**Step 8: Final commit and completion**
+
+Stage and commit quick task artifacts. This step MUST always run — even if the executor already committed some files (e.g. when running without worktree isolation). The `gsd-sdk query commit` command (or legacy `gsd-tools.cjs` commit) handles already-committed files gracefully.
+
+Build file list:
+- `${QUICK_DIR}/${quick_id}-PLAN.md`
+- `${QUICK_DIR}/${quick_id}-SUMMARY.md`
+- `.planning/STATE.md`
+- If `$DISCUSS_MODE` and context file exists: `${QUICK_DIR}/${quick_id}-CONTEXT.md`
+- If `$RESEARCH_MODE` and research file exists: `${QUICK_DIR}/${quick_id}-RESEARCH.md`
+- If `$VALIDATE_MODE` and verification file exists: `${QUICK_DIR}/${quick_id}-VERIFICATION.md`
+- If `${QUICK_DIR}/${quick_id}-deferred-items.md` exists: `${QUICK_DIR}/${quick_id}-deferred-items.md`
+
+```bash
+# Explicitly stage all artifacts before commit — PLAN.md may be untracked
+# if the executor ran without worktree isolation and committed docs early
+# Filter .planning/ files from staging if commit_docs is disabled (#1783)
+COMMIT_DOCS=$(gsd-sdk query config-get commit_docs 2>/dev/null || echo "true")
+if [ "$COMMIT_DOCS" = "false" ]; then
+  file_list_filtered=$(echo "${file_list}" | tr ' ' '\n' | grep -v '^\.planning/' | tr '\n' ' ')
+  git add ${file_list_filtered} 2>/dev/null
+else
+  git add ${file_list} 2>/dev/null
+fi
+gsd-sdk query commit "docs(quick-${quick_id}): ${DESCRIPTION}" --files ${file_list}
+```
+
+Get final commit hash:
+```bash
+commit_hash=$(git rev-parse --short HEAD)
+```
+
+Display completion output:
+
+**If `$VALIDATE_MODE`:**
+```
+---
+
+GSD > QUICK TASK COMPLETE (VALIDATED)
+
+Quick Task ${quick_id}: ${DESCRIPTION}
+
+${RESEARCH_MODE ? 'Research: ' + QUICK_DIR + '/' + quick_id + '-RESEARCH.md' : ''}
+Summary: ${QUICK_DIR}/${quick_id}-SUMMARY.md
+Verification: ${QUICK_DIR}/${quick_id}-VERIFICATION.md (${VERIFICATION_STATUS})
+Commit: ${commit_hash}
+
+---
+
+Ready for next task: /gsd:quick ${GSD_WS}
+```
+
+**If NOT `$VALIDATE_MODE`:**
+```
+---
+
+GSD > QUICK TASK COMPLETE
+
+Quick Task ${quick_id}: ${DESCRIPTION}
+
+${RESEARCH_MODE ? 'Research: ' + QUICK_DIR + '/' + quick_id + '-RESEARCH.md' : ''}
+Summary: ${QUICK_DIR}/${quick_id}-SUMMARY.md
+Commit: ${commit_hash}
+
+---
+
+Ready for next task: /gsd:quick ${GSD_WS}
+```
+
+</process>
+
+<success_criteria>
+- [ ] ROADMAP.md validation passes
+- [ ] User provides task description
+- [ ] `--full`, `--validate`, `--discuss`, and `--research` flags parsed from arguments when present
+- [ ] `--full` sets all booleans (`$FULL_MODE`, `$DISCUSS_MODE`, `$RESEARCH_MODE`, `$VALIDATE_MODE`)
+- [ ] Slug generated (lowercase, hyphens, max 40 chars)
+- [ ] Quick ID generated (YYMMDD-xxx format, 2s Base36 precision)
+- [ ] Directory created at `.planning/quick/YYMMDD-xxx-slug/`
+- [ ] (--discuss) Gray areas identified and presented, decisions captured in `${quick_id}-CONTEXT.md`
+- [ ] (--research) Research agent spawned, `${quick_id}-RESEARCH.md` created
+- [ ] `${quick_id}-PLAN.md` created by planner (honors CONTEXT.md decisions when --discuss, uses RESEARCH.md findings when --research)
+- [ ] (--validate) Plan checker validates plan, revision loop capped at 2
+- [ ] `${quick_id}-SUMMARY.md` created by executor
+- [ ] (--validate) `${quick_id}-VERIFICATION.md` created by verifier
+- [ ] STATE.md updated with quick task row (Status column when --validate)
+- [ ] Artifacts committed
+</success_criteria>

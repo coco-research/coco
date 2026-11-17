@@ -190,3 +190,210 @@ function applyBudget({ sections, budget, options = {} }) {
       metadata: {
         budget,
         effectiveBudget,
+        estimatedTokens: 0,
+        omitted: [],
+        projectMdShrunk: false,
+        planTruncationPct: 0,
+        hardFailed: true,
+        noteInjected: false,
+      },
+    };
+  }
+
+  // ── Budget accounting ──────────────────────────────────────────────────────
+  const TOKENS_ROADMAP_HEADER = estimateTokens('## Roadmap\n\n');
+  const TOKENS_PROJECT_HEADER = estimateTokens('## Project\n\n');
+  const TOKENS_PLANS_HEADER = estimateTokens('## Plans\n\n');
+  const TOKENS_CONTEXT_HEADER = estimateTokens('## Context\n\n');
+  const TOKENS_RESEARCH_HEADER = estimateTokens('## Research\n\n');
+  const TOKENS_REQUIREMENTS_HEADER = estimateTokens('## Requirements\n\n');
+  const TOKENS_PLAN_ITEM_HEADERS = workingPlans.reduce(
+    (sum, p) => sum + estimateTokens('### ' + p.file + '\n\n'),
+    0
+  );
+
+  const staticBaseTokens =
+    estimateTokens(instructions) +
+    TOKENS_ROADMAP_HEADER +
+    estimateTokens(roadmap) +
+    TOKENS_PLANS_HEADER +
+    TOKENS_PLAN_ITEM_HEADERS;
+
+  let projectTokens = projectMd
+    ? TOKENS_PROJECT_HEADER + estimateTokens(projectMd)
+    : 0;
+  let contextTokens = context
+    ? TOKENS_CONTEXT_HEADER + estimateTokens(context)
+    : 0;
+  let researchTokens = research
+    ? TOKENS_RESEARCH_HEADER + estimateTokens(research)
+    : 0;
+  let requirementsTokens = requirements
+    ? TOKENS_REQUIREMENTS_HEADER + estimateTokens(requirements)
+    : 0;
+  let planContentTokens = workingPlans.reduce(
+    (sum, p) => sum + estimateTokens(p.content),
+    0
+  );
+
+  const getCurrentBaseTokens = () =>
+    staticBaseTokens +
+    projectTokens +
+    planContentTokens +
+    contextTokens +
+    researchTokens +
+    requirementsTokens;
+
+  let currentBaseTokens = getCurrentBaseTokens();
+
+  // Detect budget pressure: is ANY trim needed?
+  // Pressure exists when the current base tokens already exceed the effective
+  // budget. Only when pressure is real do we reserve NOTE_RESERVE_TOKENS so
+  // the note itself fits after trimming. Checking against
+  // effectiveBudget - NOTE_RESERVE_TOKENS (the old threshold) would cause
+  // spurious pressure 80 tokens early, dropping sections that fit fine.
+  const baseTokens = currentBaseTokens;
+  const budgetUnderPressure = baseTokens > effectiveBudget;
+
+  // Available for content (reserve note slot when under pressure)
+  let contentBudget = budgetUnderPressure
+    ? effectiveBudget - NOTE_RESERVE_TOKENS
+    : effectiveBudget;
+
+  // ── Trim step 1: head-shrink PROJECT.md ───────────────────────────────────
+  if (currentBaseTokens > contentBudget && projectMd) {
+    const shrunk = headShrink(projectMd, projectMdHeadLines);
+    if (shrunk !== projectMd) {
+      projectMd = shrunk;
+      projectMdShrunk = true;
+      projectTokens = TOKENS_PROJECT_HEADER + estimateTokens(projectMd);
+      currentBaseTokens = getCurrentBaseTokens();
+    }
+  }
+
+  // ── Trim step 2: proportional plan truncation ─────────────────────────────
+  if (currentBaseTokens > contentBudget) {
+    // Compute tokens available for plan content only
+    const overhead =
+      staticBaseTokens +
+      projectTokens +
+      contextTokens +
+      researchTokens +
+      requirementsTokens;
+    const planBudgetTokens = contentBudget - overhead;
+    const totalPlanTokens = planContentTokens;
+
+    if (planBudgetTokens > 0 && planBudgetTokens < totalPlanTokens) {
+      // Proportional share per plan (at least 1KB per plan)
+      const totalOriginalChars = plans.reduce(
+        (sum, p) => sum + p.content.length,
+        0
+      );
+
+      const totalPlanCharsBudget = planBudgetTokens * 4;
+      workingPlans = workingPlans.map((p) => {
+        const proportionalShare =
+          totalOriginalChars > 0
+            ? Math.floor((p.content.length / totalOriginalChars) * totalPlanCharsBudget)
+            : 0;
+        const maxChars = Math.max(proportionalShare, MIN_PLAN_BYTES);
+        return { file: p.file, content: tailTruncate(p.content, maxChars) };
+      });
+
+      const newTotalChars = workingPlans.reduce(
+        (sum, p) => sum + p.content.length,
+        0
+      );
+      if (totalOriginalChars > 0) {
+        planTruncationPct =
+          ((totalOriginalChars - newTotalChars) / totalOriginalChars) * 100;
+      }
+      planContentTokens = workingPlans.reduce(
+        (sum, p) => sum + estimateTokens(p.content),
+        0
+      );
+      currentBaseTokens = getCurrentBaseTokens();
+    }
+  }
+
+  // ── Trim step 3: drop context ─────────────────────────────────────────────
+  if (currentBaseTokens > contentBudget && context) {
+    context = null;
+    omitted.push('context');
+    contextTokens = 0;
+    currentBaseTokens = getCurrentBaseTokens();
+  }
+
+  // ── Trim step 4: drop research ────────────────────────────────────────────
+  if (currentBaseTokens > contentBudget && research) {
+    research = null;
+    omitted.push('research');
+    researchTokens = 0;
+    currentBaseTokens = getCurrentBaseTokens();
+  }
+
+  // ── Trim step 5: drop requirements (last resort) ──────────────────────────
+  if (currentBaseTokens > contentBudget && requirements) {
+    requirements = null;
+    omitted.push('requirements');
+    requirementsTokens = 0;
+    currentBaseTokens = getCurrentBaseTokens();
+  }
+
+  // ── Decide whether note is actually needed ────────────────────────────────
+  const anyTrimOccurred =
+    omitted.length > 0 || projectMdShrunk || planTruncationPct > 0;
+
+  let note = null;
+  if (anyTrimOccurred) {
+    note = renderNote(noteTemplate, budget, omitted, planTruncationPct);
+    noteInjected = true;
+  }
+
+  // ── Assemble ──────────────────────────────────────────────────────────────
+  const prompt = assemblePrompt({
+    instructions,
+    note,
+    roadmap,
+    projectMd,
+    plans: workingPlans,
+    context,
+    research,
+    requirements,
+  });
+
+  const estimatedTokens = estimateTokens(prompt);
+
+  if (estimatedTokens > effectiveBudget) {
+    hardFailed = true;
+    return {
+      prompt: '',
+      metadata: {
+        budget,
+        effectiveBudget,
+        estimatedTokens,
+        omitted,
+        projectMdShrunk,
+        planTruncationPct,
+        hardFailed,
+        noteInjected,
+      },
+    };
+  }
+
+  return {
+    prompt,
+    metadata: {
+      budget,
+      effectiveBudget,
+      estimatedTokens,
+      omitted,
+      projectMdShrunk,
+      planTruncationPct,
+      hardFailed,
+      noteInjected,
+    },
+  };
+}
+
+module.exports = { estimateTokens, applyBudget };

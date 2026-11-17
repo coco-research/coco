@@ -602,3 +602,33 @@ Print a summary:
 **[N] phases** | **[X] requirements** | Ready to build ✓
 
 ## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+**Phase [N]: [Phase Name]** — [Goal]
+
+`/clear` then:
+
+`/gsd:discuss-phase [N] ${GSD_WS}` — gather context and clarify approach
+
+Also: `/gsd:plan-phase [N] ${GSD_WS}` — skip discussion, plan directly
+```
+
+</process>
+
+<success_criteria>
+- [ ] PROJECT.md updated with Current Milestone section
+- [ ] STATE.md reset for new milestone
+- [ ] MILESTONE-CONTEXT.md consumed and deleted (if existed)
+- [ ] Research completed (if selected) — 4 parallel agents, milestone-aware
+- [ ] Requirements gathered and scoped per category
+- [ ] REQUIREMENTS.md created with REQ-IDs
+- [ ] gsd-roadmapper spawned with phase numbering context
+- [ ] Roadmap files written immediately (not draft)
+- [ ] User feedback incorporated (if any)
+- [ ] Phase numbering mode respected (continued or reset)
+- [ ] All commits made (if planning docs committed)
+- [ ] Pending todos scanned for phase matches; matched todos tagged with `resolves_phase: N`
+- [ ] User knows next step: `/gsd:discuss-phase [N] ${GSD_WS}`
+
+**Atomic commits:** Each phase commits its artifacts immediately.
+</success_criteria>
+</output>

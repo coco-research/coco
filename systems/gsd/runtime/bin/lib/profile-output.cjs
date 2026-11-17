@@ -226,3 +226,353 @@ function isAmbiguousAnswer(dimension, value) {
   if (!option) return false;
   return option.rating === 'mixed';
 }
+
+function generateClaudeInstruction(dimension, rating) {
+  const dimInstructions = CLAUDE_INSTRUCTIONS[dimension];
+  if (dimInstructions && dimInstructions[rating]) {
+    return dimInstructions[rating];
+  }
+  return `Adapt to this developer's ${dimension.replace(/_/g, ' ')} preference: ${rating}.`;
+}
+
+function extractSectionContent(fileContent, sectionName) {
+  const startMarker = `<!-- GSD:${sectionName}-start`;
+  const endMarker = `<!-- GSD:${sectionName}-end -->`;
+  const startIdx = fileContent.indexOf(startMarker);
+  const endIdx = fileContent.indexOf(endMarker);
+  if (startIdx === -1 || endIdx === -1) return null;
+  const startTagEnd = fileContent.indexOf('-->', startIdx);
+  if (startTagEnd === -1) return null;
+  return fileContent.substring(startTagEnd + 3, endIdx);
+}
+
+function buildSection(sectionName, sourceFile, content) {
+  return [
+    `<!-- GSD:${sectionName}-start source:${sourceFile} -->`,
+    content,
+    `<!-- GSD:${sectionName}-end -->`,
+  ].join('\n');
+}
+
+function updateSection(fileContent, sectionName, newContent) {
+  const startMarker = `<!-- GSD:${sectionName}-start`;
+  const endMarker = `<!-- GSD:${sectionName}-end -->`;
+  const startIdx = fileContent.indexOf(startMarker);
+  const endIdx = fileContent.indexOf(endMarker);
+  if (startIdx !== -1 && endIdx !== -1) {
+    const before = fileContent.substring(0, startIdx);
+    const after = fileContent.substring(endIdx + endMarker.length);
+    return { content: before + newContent + after, action: 'replaced' };
+  }
+  return { content: fileContent.trimEnd() + '\n\n' + newContent + '\n', action: 'appended' };
+}
+
+function detectManualEdit(fileContent, sectionName, expectedContent) {
+  const currentContent = extractSectionContent(fileContent, sectionName);
+  if (currentContent === null) return false;
+  const normalize = (s) => s.trim().replace(/\n{3,}/g, '\n\n');
+  return normalize(currentContent) !== normalize(expectedContent);
+}
+
+function extractMarkdownSection(content, sectionName) {
+  if (!content) return null;
+  const lines = content.split('\n');
+  let capturing = false;
+  const result = [];
+  const headingPattern = new RegExp(`^## ${sectionName}\\s*$`);
+  for (const line of lines) {
+    if (headingPattern.test(line)) {
+      capturing = true;
+      result.push(line);
+      continue;
+    }
+    if (capturing && /^## /.test(line)) break;
+    if (capturing) result.push(line);
+  }
+  return result.length > 0 ? result.join('\n').trim() : null;
+}
+
+// ─── CLAUDE.md Section Generators ─────────────────────────────────────────────
+
+function generateProjectSection(cwd) {
+  const fallbacks = buildClaudeMdFallbacks(resolveRuntime(cwd));
+  const projectPath = path.join(cwd, '.planning', 'PROJECT.md');
+  const content = safeReadFile(projectPath);
+  if (!content) {
+    return { content: fallbacks.project, source: 'PROJECT.md', linkPath: null, hasFallback: true };
+  }
+  const parts = [];
+  const h1Match = content.match(/^# (.+)$/m);
+  if (h1Match) parts.push(`**${h1Match[1]}**`);
+  const whatThisIs = extractMarkdownSection(content, 'What This Is');
+  if (whatThisIs) {
+    const body = whatThisIs.replace(/^## What This Is\s*/i, '').trim();
+    if (body) parts.push(body);
+  }
+  const coreValue = extractMarkdownSection(content, 'Core Value');
+  if (coreValue) {
+    const body = coreValue.replace(/^## Core Value\s*/i, '').trim();
+    if (body) parts.push(`**Core Value:** ${body}`);
+  }
+  const constraints = extractMarkdownSection(content, 'Constraints');
+  if (constraints) {
+    const body = constraints.replace(/^## Constraints\s*/i, '').trim();
+    if (body) parts.push(`### Constraints\n\n${body}`);
+  }
+  if (parts.length === 0) {
+    return { content: fallbacks.project, source: 'PROJECT.md', linkPath: null, hasFallback: true };
+  }
+  return { content: parts.join('\n\n'), source: 'PROJECT.md', linkPath: '.planning/PROJECT.md', hasFallback: false };
+}
+
+function generateStackSection(cwd) {
+  const fallbacks = buildClaudeMdFallbacks(resolveRuntime(cwd));
+  const codebasePath = path.join(cwd, '.planning', 'codebase', 'STACK.md');
+  const researchPath = path.join(cwd, '.planning', 'research', 'STACK.md');
+  let content = safeReadFile(codebasePath);
+  let source = 'codebase/STACK.md';
+  let linkPath = '.planning/codebase/STACK.md';
+  if (!content) {
+    content = safeReadFile(researchPath);
+    source = 'research/STACK.md';
+    linkPath = '.planning/research/STACK.md';
+  }
+  if (!content) {
+    return { content: fallbacks.stack, source: 'STACK.md', linkPath: null, hasFallback: true };
+  }
+  const lines = content.split('\n');
+  const summaryLines = [];
+  let inTable = false;
+  for (const line of lines) {
+    if (line.startsWith('#')) {
+      if (!line.startsWith('# ') || summaryLines.length > 0) summaryLines.push(line);
+      continue;
+    }
+    if (line.startsWith('|')) { inTable = true; summaryLines.push(line); continue; }
+    if (inTable && line.trim() === '') inTable = false;
+    if (line.startsWith('- ') || line.startsWith('* ')) summaryLines.push(line);
+  }
+  const summary = summaryLines.length > 0 ? summaryLines.join('\n') : content.trim();
+  return { content: summary, source, linkPath, hasFallback: false };
+}
+
+function generateConventionsSection(cwd) {
+  const fallbacks = buildClaudeMdFallbacks(resolveRuntime(cwd));
+  const conventionsPath = path.join(cwd, '.planning', 'codebase', 'CONVENTIONS.md');
+  const content = safeReadFile(conventionsPath);
+  if (!content) {
+    return { content: fallbacks.conventions, source: 'CONVENTIONS.md', linkPath: null, hasFallback: true };
+  }
+  const lines = content.split('\n');
+  const summaryLines = [];
+  for (const line of lines) {
+    if (line.startsWith('#')) { if (!line.startsWith('# ')) summaryLines.push(line); continue; }
+    if (line.startsWith('- ') || line.startsWith('* ') || line.startsWith('|')) summaryLines.push(line);
+  }
+  const summary = summaryLines.length > 0 ? summaryLines.join('\n') : content.trim();
+  return { content: summary, source: 'CONVENTIONS.md', linkPath: '.planning/codebase/CONVENTIONS.md', hasFallback: false };
+}
+
+function generateArchitectureSection(cwd) {
+  const fallbacks = buildClaudeMdFallbacks(resolveRuntime(cwd));
+  const architecturePath = path.join(cwd, '.planning', 'codebase', 'ARCHITECTURE.md');
+  const content = safeReadFile(architecturePath);
+  if (!content) {
+    return { content: fallbacks.architecture, source: 'ARCHITECTURE.md', linkPath: null, hasFallback: true };
+  }
+  const lines = content.split('\n');
+  const summaryLines = [];
+  for (const line of lines) {
+    if (line.startsWith('#')) { if (!line.startsWith('# ')) summaryLines.push(line); continue; }
+    if (line.startsWith('- ') || line.startsWith('* ') || line.startsWith('|') || line.startsWith('```')) summaryLines.push(line);
+  }
+  const summary = summaryLines.length > 0 ? summaryLines.join('\n') : content.trim();
+  return { content: summary, source: 'ARCHITECTURE.md', linkPath: '.planning/codebase/ARCHITECTURE.md', hasFallback: false };
+}
+
+function generateWorkflowSection(cwd) {
+  return {
+    content: buildClaudeMdWorkflowEnforcement(resolveRuntime(cwd)),
+    source: 'GSD defaults',
+    linkPath: null,
+    hasFallback: false,
+  };
+}
+
+/**
+ * Discover project skills from standard directories and extract frontmatter
+ * (name + description) for each. Returns a table summary for CLAUDE.md so
+ * agents know which skills are available at session startup (Layer 1 discovery).
+ */
+function generateSkillsSection(cwd) {
+  const fallbacks = buildClaudeMdFallbacks(resolveRuntime(cwd));
+  const discovered = [];
+
+  for (const dir of SKILL_SEARCH_DIRS) {
+    const absDir = path.join(cwd, dir);
+    if (!fs.existsSync(absDir)) continue;
+
+    let entries;
+    try {
+      entries = fs.readdirSync(absDir, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      // Skip GSD's own installed skills — only surface project-specific skills
+      if (entry.name.startsWith('gsd-')) continue;
+
+      const skillMdPath = path.join(absDir, entry.name, 'SKILL.md');
+      if (!fs.existsSync(skillMdPath)) continue;
+
+      const content = safeReadFile(skillMdPath);
+      if (!content) continue;
+
+      const frontmatter = extractSkillFrontmatter(content);
+      const name = frontmatter.name || entry.name;
+      const description = frontmatter.description || '';
+
+      // Avoid duplicates when same skill dir is symlinked from multiple locations
+      if (discovered.some(s => s.name === name)) continue;
+
+      discovered.push({ name, description, path: `${dir}/${entry.name}` });
+    }
+  }
+
+  if (discovered.length === 0) {
+    return { content: fallbacks.skills, source: 'skills/', hasFallback: true };
+  }
+
+  const lines = ['| Skill | Description | Path |', '|-------|-------------|------|'];
+  for (const skill of discovered) {
+    // Sanitize table cell content (escape pipes)
+    const desc = skill.description.replace(/\|/g, '\\|').replace(/\n/g, ' ').trim();
+    const safeName = skill.name.replace(/\|/g, '\\|');
+    lines.push(`| ${safeName} | ${desc} | \`${skill.path}/SKILL.md\` |`);
+  }
+
+  return { content: lines.join('\n'), source: 'skills/', hasFallback: false };
+}
+
+/**
+ * Extract name and description from YAML-like frontmatter in a SKILL.md file.
+ * Handles multi-line description values (continuation lines indented with spaces).
+ */
+function extractSkillFrontmatter(content) {
+  const result = { name: '', description: '' };
+  const fmMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
+  if (!fmMatch) return result;
+
+  const fmBlock = fmMatch[1];
+  const lines = fmBlock.split('\n');
+
+  let currentKey = '';
+  for (const line of lines) {
+    // Top-level key: value
+    const kvMatch = line.match(/^(\w[\w-]*):\s*(.*)/);
+    if (kvMatch) {
+      currentKey = kvMatch[1];
+      const value = kvMatch[2].trim();
+      if (currentKey === 'name') result.name = value;
+      if (currentKey === 'description') result.description = value;
+      continue;
+    }
+    // Continuation line (indented) for multi-line values
+    if (currentKey === 'description' && /^\s+/.test(line)) {
+      result.description += ' ' + line.trim();
+    } else {
+      currentKey = '';
+    }
+  }
+
+  return result;
+}
+
+// ─── Commands ─────────────────────────────────────────────────────────────────
+
+function cmdWriteProfile(cwd, options, raw) {
+  if (!options.input) {
+    error('--input <analysis-json-path> is required');
+  }
+
+  let analysisPath = options.input;
+  if (!path.isAbsolute(analysisPath)) analysisPath = path.join(cwd, analysisPath);
+  if (!fs.existsSync(analysisPath)) error(`Analysis file not found: ${analysisPath}`);
+
+  let analysis;
+  const analysisRaw = safeReadFile(analysisPath);
+  try {
+    if (analysisRaw === null) throw new Error(`analysis file not found: ${analysisPath}`);
+    analysis = JSON.parse(analysisRaw);
+  } catch (err) {
+    error(`Failed to parse analysis JSON: ${err.message}`);
+  }
+
+  if (!analysis.dimensions || typeof analysis.dimensions !== 'object') {
+    error('Analysis JSON must contain a "dimensions" object');
+  }
+  if (!analysis.profile_version) {
+    error('Analysis JSON must contain "profile_version"');
+  }
+
+  const SENSITIVE_PATTERNS = [
+    /sk-[a-zA-Z0-9]{20,}/g,
+    /Bearer\s+[a-zA-Z0-9._-]+/gi,
+    /password\s*[:=]\s*\S+/gi,
+    /secret\s*[:=]\s*\S+/gi,
+    /token\s*[:=]\s*\S+/gi,
+    /api[_-]?key\s*[:=]\s*\S+/gi,
+    /\/Users\/[a-zA-Z0-9._-]+\//g,
+    /\/home\/[a-zA-Z0-9._-]+\//g,
+    /ghp_[a-zA-Z0-9]{36}/g,
+    /gho_[a-zA-Z0-9]{36}/g,
+    /xoxb-[a-zA-Z0-9-]+/g,
+  ];
+
+  let redactedCount = 0;
+
+  function redactSensitive(text) {
+    if (typeof text !== 'string') return text;
+    let result = text;
+    for (const pattern of SENSITIVE_PATTERNS) {
+      pattern.lastIndex = 0;
+      const matches = result.match(pattern);
+      if (matches) {
+        redactedCount += matches.length;
+        result = result.replace(pattern, '[REDACTED]');
+      }
+    }
+    return result;
+  }
+
+  for (const dimKey of Object.keys(analysis.dimensions)) {
+    const dim = analysis.dimensions[dimKey];
+    if (dim.evidence && Array.isArray(dim.evidence)) {
+      for (let i = 0; i < dim.evidence.length; i++) {
+        const ev = dim.evidence[i];
+        if (ev.quote) ev.quote = redactSensitive(ev.quote);
+        if (ev.example) ev.example = redactSensitive(ev.example);
+        if (ev.signal) ev.signal = redactSensitive(ev.signal);
+      }
+    }
+  }
+
+  if (redactedCount > 0) {
+    process.stderr.write(`Sensitive content redacted: ${redactedCount} pattern(s) removed from evidence quotes\n`);
+  }
+
+  const templatePath = path.join(__dirname, '..', '..', 'templates', 'user-profile.md');
+  if (!fs.existsSync(templatePath)) error(`Template not found: ${templatePath}`);
+  let template = fs.readFileSync(templatePath, 'utf-8');
+
+  const dimensionLabels = {
+    communication_style: 'Communication',
+    decision_speed: 'Decisions',
+    explanation_depth: 'Explanations',
+    debugging_approach: 'Debugging',
+    ux_philosophy: 'UX Philosophy',
+    vendor_philosophy: 'Vendor Philosophy',
+    frustration_triggers: 'Frustration Triggers',
+    learning_style: 'Learning Style',

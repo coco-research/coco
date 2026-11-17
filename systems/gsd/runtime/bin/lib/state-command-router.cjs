@@ -254,3 +254,93 @@ function routeStateCommand({ state, args, cwd, raw, parseNamedArgs, error }) {
         args.slice(1),
         null,
         () => {
+          const { 'stopped-at': stopped_at, 'resume-file': resume_file } = parseNamedArgs(args, ['stopped-at', 'resume-file']);
+          state.cmdStateRecordSession(cwd, { stopped_at, resume_file: resume_file || 'None' }, raw);
+        },
+      ),
+      'begin-phase': sdkHandler(
+        'state.begin-phase',
+        args.slice(2),
+        args.slice(1),
+        null,
+        () => {
+          const { phase: p, name, plans } = parseNamedArgs(args, ['phase', 'name', 'plans']);
+          state.cmdStateBeginPhase(cwd, p, name, parsePlans(plans), raw);
+        },
+      ),
+      'signal-waiting': sdkHandler(
+        'state.signal-waiting',
+        args.slice(2),
+        args.slice(1),
+        null,
+        () => {
+          const { type, question, options, phase: p } = parseNamedArgs(args, ['type', 'question', 'options', 'phase']);
+          state.cmdSignalWaiting(cwd, type, question, options, p, raw);
+        },
+      ),
+      'signal-resume': sdkHandler(
+        'state.signal-resume',
+        [],
+        args.slice(1),
+        null,
+        () => state.cmdSignalResume(cwd, raw),
+      ),
+      'planned-phase': sdkHandler(
+        'state.planned-phase',
+        args.slice(2),
+        args.slice(1),
+        null,
+        () => {
+          const { phase: p, plans } = parseNamedArgs(args, ['phase', 'name', 'plans']);
+          state.cmdStatePlannedPhase(cwd, p, parsePlans(plans), raw);
+        },
+      ),
+      validate: sdkHandler(
+        'state.validate',
+        [],
+        args.slice(1),
+        null,
+        () => state.cmdStateValidate(cwd, raw),
+      ),
+      sync: sdkHandler(
+        'state.sync',
+        args.slice(2),
+        args.slice(1),
+        null,
+        () => {
+          const { verify } = parseNamedArgs(args, [], ['verify']);
+          state.cmdStateSync(cwd, { verify }, raw);
+        },
+      ),
+      prune: sdkHandler(
+        'state.prune',
+        args.slice(2),
+        args.slice(1),
+        null,
+        () => {
+          const { 'keep-recent': keepRecent, 'dry-run': dryRun } = parseNamedArgs(args, ['keep-recent'], ['dry-run']);
+          state.cmdStatePrune(cwd, { keepRecent: keepRecent || '3', dryRun: !!dryRun }, raw);
+        },
+      ),
+      // complete-phase: CJS-only — no SDK counterpart.
+      'complete-phase': () => {
+        const { phase: p } = parseNamedArgs(args, ['phase']);
+        state.cmdStateCompletePhase(cwd, raw, p || args[2]);
+      },
+      'milestone-switch': sdkHandler(
+        'state.milestone-switch',
+        args.slice(2),
+        args.slice(1),
+        null,
+        () => {
+          const { milestone, name } = parseNamedArgs(args, ['milestone', 'name']);
+          state.cmdStateMilestoneSwitch(cwd, milestone, name, raw);
+        },
+      ),
+    },
+  });
+}
+
+module.exports = {
+  routeStateCommand,
+};

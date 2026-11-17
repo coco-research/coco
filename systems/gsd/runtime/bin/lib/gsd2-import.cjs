@@ -149,3 +149,353 @@ function parseGsd2(gsdDir) {
   const milestoneIds = fs.readdirSync(milestonesBase)
     .filter(d => fs.statSync(path.join(milestonesBase, d)).isDirectory())
     .sort();
+
+  for (const mid of milestoneIds) {
+    const mDir = path.join(milestonesBase, mid);
+    const roadmapContent = readOptional(path.join(mDir, `${mid}-ROADMAP.md`));
+    const slicesDir = path.join(mDir, 'slices');
+
+    const sliceInfos = roadmapContent ? parseSlicesFromRoadmap(roadmapContent) : [];
+
+    const slices = sliceInfos.map(info => {
+      const sDir = path.join(slicesDir, info.id);
+      const hasSDir = fs.existsSync(sDir);
+      return {
+        id: info.id,
+        title: info.title,
+        done: info.done,
+        plan: hasSDir ? readOptional(path.join(sDir, `${info.id}-PLAN.md`)) : null,
+        summary: hasSDir ? readOptional(path.join(sDir, `${info.id}-SUMMARY.md`)) : null,
+        research: hasSDir ? readOptional(path.join(sDir, `${info.id}-RESEARCH.md`)) : null,
+        context: hasSDir ? readOptional(path.join(sDir, `${info.id}-CONTEXT.md`)) : null,
+        tasks: hasSDir ? readTasksDir(path.join(sDir, 'tasks')) : [],
+      };
+    });
+
+    data.milestones.push({
+      id: mid,
+      title: roadmapContent ? (parseMilestoneTitle(roadmapContent) ?? mid) : mid,
+      research: readOptional(path.join(mDir, `${mid}-RESEARCH.md`)),
+      slices,
+    });
+  }
+
+  return data;
+}
+
+// ─── Artifact Builders ──────────────────────────────────────────────────────
+
+/**
+ * Build a GSD v1 PLAN.md from a GSD-2 task.
+ */
+function buildPlanMd(task, phasePrefix, planPrefix, phaseSlug, milestoneTitle) {
+  const lines = [
+    '---',
+    `phase: "${phasePrefix}"`,
+    `plan: "${planPrefix}"`,
+    'type: "implementation"',
+    '---',
+    '',
+    '<objective>',
+    task.title,
+    '</objective>',
+    '',
+    '<context>',
+    `Phase: ${phasePrefix} (${phaseSlug}) — Milestone: ${milestoneTitle}`,
+  ];
+
+  if (task.description) {
+    lines.push('', task.description);
+  }
+
+  lines.push('</context>');
+
+  if (task.mustHaves.length > 0) {
+    lines.push('', '<must_haves>');
+    for (const mh of task.mustHaves) {
+      lines.push(`- ${mh}`);
+    }
+    lines.push('</must_haves>');
+  }
+
+  return lines.join('\n') + '\n';
+}
+
+/**
+ * Build a GSD v1 SUMMARY.md from a GSD-2 task summary.
+ * Strips the GSD-2 frontmatter and preserves the body.
+ */
+function buildSummaryMd(task, phasePrefix, planPrefix) {
+  const raw = task.summary || '';
+  // Strip GSD-2 frontmatter block (--- ... ---) if present
+  const bodyMatch = raw.match(/^---[\s\S]*?---\n+([\s\S]*)$/);
+  const body = bodyMatch ? bodyMatch[1].trim() : raw.trim();
+
+  return [
+    '---',
+    `phase: "${phasePrefix}"`,
+    `plan: "${planPrefix}"`,
+    '---',
+    '',
+    body || 'Task completed (migrated from GSD-2).',
+    '',
+  ].join('\n');
+}
+
+/**
+ * Build a GSD v1 XX-CONTEXT.md from a GSD-2 slice.
+ */
+function buildContextMd(slice, phasePrefix) {
+  const lines = [
+    `# Phase ${phasePrefix} Context`,
+    '',
+    `Migrated from GSD-2 slice ${slice.id}: ${slice.title}`,
+  ];
+
+  const extra = slice.context || '';
+  if (extra.trim()) {
+    lines.push('', extra.trim());
+  }
+
+  return lines.join('\n') + '\n';
+}
+
+/**
+ * Build the GSD v1 ROADMAP.md with milestone-sectioned format.
+ */
+function buildRoadmapMd(milestones, phaseMap) {
+  const lines = ['# Roadmap', ''];
+
+  for (const milestone of milestones) {
+    lines.push(`## ${milestone.id}: ${milestone.title}`, '');
+    const mPhases = phaseMap.filter(p => p.milestoneId === milestone.id);
+    for (const { slice, phaseNum } of mPhases) {
+      const prefix = zeroPad(phaseNum);
+      const slug = slugify(slice.title);
+      const check = slice.done ? 'x' : ' ';
+      lines.push(`- [${check}] **Phase ${prefix}: ${slug}** — ${slice.title}`);
+    }
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Build the GSD v1 STATE.md reflecting the current position in the project.
+ */
+function buildStateMd(phaseMap) {
+  const currentEntry = phaseMap.find(p => !p.slice.done);
+  const totalPhases = phaseMap.length;
+  const donePhases = phaseMap.filter(p => p.slice.done).length;
+  const pct = totalPhases > 0 ? Math.round((donePhases / totalPhases) * 100) : 0;
+
+  const currentPhaseNum = currentEntry ? zeroPad(currentEntry.phaseNum) : zeroPad(totalPhases);
+  const currentSlug = currentEntry ? slugify(currentEntry.slice.title) : 'complete';
+  const status = currentEntry ? 'Ready to plan' : 'All phases complete';
+
+  const filled = Math.round(pct / 10);
+  const bar = `[${'█'.repeat(filled)}${'░'.repeat(10 - filled)}]`;
+  const today = new Date().toISOString().split('T')[0];
+
+  return [
+    '# Project State',
+    '',
+    '## Project Reference',
+    '',
+    'See: .planning/PROJECT.md',
+    '',
+    `**Current focus:** Phase ${currentPhaseNum} (${currentSlug})`,
+    '',
+    '## Current Position',
+    '',
+    `Phase: ${currentPhaseNum} of ${zeroPad(totalPhases)} (${currentSlug})`,
+    `Status: ${status}`,
+    `Last activity: ${today} — Migrated from GSD-2`,
+    '',
+    `Progress: ${bar} ${pct}%`,
+    '',
+    '## Accumulated Context',
+    '',
+    '### Decisions',
+    '',
+    'Migrated from GSD-2. Review PROJECT.md for key decisions.',
+    '',
+    '### Blockers/Concerns',
+    '',
+    'None.',
+    '',
+    '## Session Continuity',
+    '',
+    `Last session: ${today}`,
+    'Stopped at: Migration from GSD-2 completed',
+    'Resume file: None',
+    '',
+  ].join('\n');
+}
+
+// ─── Transformer ─────────────────────────────────────────────────────────────
+
+/**
+ * Convert parsed GSD-2 data into a map of relative path → file content.
+ * All paths are relative to the .planning/ root.
+ */
+function buildPlanningArtifacts(gsd2Data) {
+  const artifacts = new Map();
+
+  // Passthrough files
+  artifacts.set('PROJECT.md', gsd2Data.projectContent || '# Project\n\n(Migrated from GSD-2)\n');
+  if (gsd2Data.requirements) {
+    artifacts.set('REQUIREMENTS.md', gsd2Data.requirements);
+  }
+
+  // Minimal valid v1 config
+  artifacts.set('config.json', JSON.stringify({ version: 1 }, null, 2) + '\n');
+
+  // Build sequential phase map: flatten Milestones → Slices into numbered phases
+  const phaseMap = [];
+  let phaseNum = 1;
+  for (const milestone of gsd2Data.milestones) {
+    for (const slice of milestone.slices) {
+      phaseMap.push({ milestoneId: milestone.id, milestoneTitle: milestone.title, slice, phaseNum });
+      phaseNum++;
+    }
+  }
+
+  artifacts.set('ROADMAP.md', buildRoadmapMd(gsd2Data.milestones, phaseMap));
+  artifacts.set('STATE.md', buildStateMd(phaseMap));
+
+  for (const { slice, phaseNum, milestoneTitle } of phaseMap) {
+    const prefix = zeroPad(phaseNum);
+    const slug = slugify(slice.title);
+    const dir = `phases/${prefix}-${slug}`;
+
+    artifacts.set(`${dir}/${prefix}-CONTEXT.md`, buildContextMd(slice, prefix));
+
+    if (slice.research) {
+      artifacts.set(`${dir}/${prefix}-RESEARCH.md`, slice.research);
+    }
+
+    for (let i = 0; i < slice.tasks.length; i++) {
+      const task = slice.tasks[i];
+      const planPrefix = zeroPad(i + 1);
+
+      artifacts.set(
+        `${dir}/${prefix}-${planPrefix}-PLAN.md`,
+        buildPlanMd(task, prefix, planPrefix, slug, milestoneTitle)
+      );
+
+      if (task.done && task.summary) {
+        artifacts.set(
+          `${dir}/${prefix}-${planPrefix}-SUMMARY.md`,
+          buildSummaryMd(task, prefix, planPrefix)
+        );
+      }
+    }
+  }
+
+  return artifacts;
+}
+
+// ─── Preview ─────────────────────────────────────────────────────────────────
+
+/**
+ * Format a dry-run preview string for display before writing.
+ */
+function buildPreview(gsd2Data, artifacts, projectDir) {
+  const lines = ['Preview — files that will be created in .planning/:'];
+
+  for (const rel of artifacts.keys()) {
+    lines.push(`  ${rel}`);
+  }
+
+  const totalSlices = gsd2Data.milestones.reduce((s, m) => s + m.slices.length, 0);
+  const doneSlices = gsd2Data.milestones.reduce((s, m) => s + m.slices.filter(sl => sl.done).length, 0);
+  const allTasks = gsd2Data.milestones.flatMap(m => m.slices.flatMap(sl => sl.tasks));
+  const doneTasks = allTasks.filter(t => t.done).length;
+
+  lines.push('');
+  lines.push(`Milestones: ${gsd2Data.milestones.length}`);
+  lines.push(`Phases (slices): ${totalSlices} (${doneSlices} completed)`);
+  lines.push(`Plans (tasks): ${allTasks.length} (${doneTasks} completed)`);
+  lines.push('');
+  lines.push('Cannot migrate automatically:');
+  lines.push('  - GSD-2 cost/token ledger (no v1 equivalent)');
+  const { formatGsdSlash, resolveRuntime } = require('./runtime-slash.cjs');
+  lines.push(`  - GSD-2 database state (rebuilt from files on first ${formatGsdSlash('health', resolveRuntime(projectDir))})`);
+  lines.push('  - VS Code extension state');
+
+  return lines.join('\n');
+}
+
+// ─── Writer ───────────────────────────────────────────────────────────────────
+
+/**
+ * Write all artifacts to the .planning/ directory.
+ */
+function writePlanningDir(artifacts, planningRoot) {
+  for (const [rel, content] of artifacts) {
+    const absPath = path.join(planningRoot, rel);
+    platformWriteSync(absPath, content);
+  }
+}
+
+// ─── Command Handler ──────────────────────────────────────────────────────────
+
+/**
+ * Entry point called from gsd-tools.cjs.
+ * Supports: --force, --dry-run, --path <dir>
+ */
+function cmdFromGsd2(args, cwd, raw) {
+  const { output, error } = require('./core.cjs');
+
+  const force = args.includes('--force');
+  const dryRun = args.includes('--dry-run');
+
+  const pathIdx = args.indexOf('--path');
+  const projectDir = pathIdx >= 0 && args[pathIdx + 1]
+    ? path.resolve(cwd, args[pathIdx + 1])
+    : cwd;
+
+  const gsdDir = findGsd2Root(projectDir);
+  if (!gsdDir) {
+    return output({ success: false, error: `No .gsd/ directory found in ${projectDir}` }, raw);
+  }
+
+  const planningRoot = path.join(path.dirname(gsdDir), '.planning');
+  if (fs.existsSync(planningRoot) && !force) {
+    return output({
+      success: false,
+      error: `.planning/ already exists at ${planningRoot}. Pass --force to overwrite.`,
+    }, raw);
+  }
+
+  const gsd2Data = parseGsd2(gsdDir);
+  const artifacts = buildPlanningArtifacts(gsd2Data);
+  // Use projectDir (resolved from --path) — not the process cwd — so the
+  // preview command targets the project actually being imported (#3584).
+  const preview = buildPreview(gsd2Data, artifacts, projectDir);
+
+  if (dryRun) {
+    return output({ success: true, dryRun: true, preview }, raw);
+  }
+
+  writePlanningDir(artifacts, planningRoot);
+
+  return output({
+    success: true,
+    planningDir: planningRoot,
+    filesWritten: artifacts.size,
+    milestones: gsd2Data.milestones.length,
+    preview,
+  }, raw);
+}
+
+module.exports = {
+  findGsd2Root,
+  parseGsd2,
+  buildPlanningArtifacts,
+  buildPreview,
+  writePlanningDir,
+  cmdFromGsd2,
+  // Exported for unit tests

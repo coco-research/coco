@@ -2,7 +2,7 @@
 
 Auto-generated view. Filtered to `domain: foundational` skills.
 
-**13 skills.**
+**12 skills.**
 
 | Skill | Description |
 |-------|-------------|
@@ -10,9 +10,6 @@ Auto-generated view. Filtered to `domain: foundational` skills.
 | [coco](../../skills/coco/SKILL.md) | Use when the user invokes /coco or /coco!, says catch me up, or asks what needs attention, a project status, their todos, decisions or people. Renders the PM dashboard and routes each subcommand to it |
 | [dispatching-parallel-agents](../../skills/dispatching-parallel-agents/SKILL.md) | Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies |
 | [executing-plans](../../skills/executing-plans/SKILL.md) | Use when you have a written implementation plan to execute in a separate session with review checkpoints |
-| [humanizer](../../skills/humanizer/SKILL.md) | Remove signs of AI-generated writing from text. Use when editing or reviewing
-text to make it sound more natural and human-written. Based on Wikipedia's
-comprehensive "Signs of AI writing" guide. Dete |
 | [karpathy-guidelines](../../skills/karpathy-guidelines/SKILL.md) | Pointer to the upstream skill for behavioural guidelines that reduce common LLM coding mistakes, installed from upstream. |
 | [subagent-driven-development](../../skills/subagent-driven-development/SKILL.md) | Use when executing implementation plans with independent tasks in the current session |
 | [systematic-debugging](../../skills/systematic-debugging/SKILL.md) | Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes |

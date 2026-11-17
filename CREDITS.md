@@ -8,7 +8,7 @@ CoCo stands on the shoulders of excellent open-source work. This file credits ev
 |---|---|---|---|
 | **Superpowers** by Jesse Vincent (obra) | The core engineering-discipline skill set bundled here (brainstorming, systematic-debugging, test-driven-development, writing-plans, executing-plans, using-git-worktrees, code-review flows, verification-before-completion, writing-skills, and the `using-superpowers` meta-skill) | https://github.com/obra/superpowers | MIT (Copyright (c) 2025 Jesse Vincent; notice at `licenses/third-party/superpowers.LICENSE`) |
 | **GSD — Get Shit Done** by TÂCHES (Lex Christopherson) | The full GSD orchestration bundle (`systems/gsd/`: 68 skills + 24 agents for phase planning, atomic execution, verification gates), vendored from the archived original at https://github.com/gsd-build/get-shit-done | https://github.com/open-gsd/gsd-core | MIT (Copyright (c) 2025 Lex Christopherson) |
-| **humanizer** by Siqi Chen | The `humanizer` skill — detects and rewrites signs of AI-generated text (vendored, pinned at v2.8.0; upstream is at v2.9.x, ordinary version drift) | https://github.com/blader/humanizer | MIT |
+| **humanizer** by Siqi Chen | The `humanizer` skill — detects and rewrites signs of AI-generated text (vendored, pinned at v3.1.0, commit `225a6f39ac85`) | https://github.com/blader/humanizer | MIT |
 | **andrej-karpathy-skills** by forrestchang | Upstream of the karpathy-guidelines skill; Coco ships only a link-only stub | https://github.com/multica-ai/andrej-karpathy-skills | MIT declared in the upstream README and SKILL.md frontmatter, but no LICENSE file or copyright notice; not redistributed |
 | **visual-explainer** by nicobailon | The `visual-explainer` skill — generates self-contained HTML diagrams, reviews, plans, recaps, and slide decks | https://github.com/nicobailon/visual-explainer | MIT |
 | **diagram-design** by Cathryn Lavery | The `coco-diagram` skill — editorial diagram design system (27 visual types, semantic patterns, draw.io / Mermaid redraw), rebranded to CoCo tokens and voice; upstream MIT notice retained at `skills/coco-diagram/LICENSE`. Pinned at upstream v2.3.2 | https://github.com/cathrynlavery/diagram-design | MIT (Copyright (c) 2025 Cathryn Lavery) |
@@ -31,6 +31,14 @@ CoCo stands on the shoulders of excellent open-source work. This file credits ev
 | **reverse-skill** by zhaoxuya520 | A curated, reference-only subset of thirty-three reverse-engineering and security-methodology skills vendored at `systems/reverse-skill/`, covering language- and platform-specific reverse engineering, binary and firmware analysis, network, cloud and identity testing, application and LLM security, and investigation, detection-authoring and reporting. Three upstream skills are deliberately not vendored (`pwn-chain`, `attack-chain` and `patch-diff-exploit`), together with nine files covering detection evasion, anti-analysis and a payload scaffold, because their stated purpose is producing a working exploit or defeating defensive controls rather than analysing a target. What is kept is unmodified, and the upstream MIT notice is retained at `systems/reverse-skill/LICENSE` | https://github.com/zhaoxuya520/reverse-skill | MIT (Copyright (c) 2026 zhaoxuya520) |
 | **Solving a Million-Step LLM Task with Zero Errors** by Meyerson et al. (Cognizant AI Lab / UT Austin) | The `maker-mdap` knowledge skill — adapted notes on Maximal Agentic Decomposition, first-to-ahead-by-k voting, red-flagging, and scaling laws. | https://arxiv.org/abs/2511.09030 | CC BY 4.0 |
 | **OfficeCLI** by goworm | The `officecli` skill, adapted from upstream SKILL.md with the install section replaced by a Homebrew check and the update check disabled; upstream LICENSE and NOTICE retained at `skills/officecli/` | https://github.com/iOfficeAI/OfficeCLI | Apache-2.0 (Copyright 2026 OfficeCLI) |
+
+## Tools used, not bundled
+
+Tools the project runs but does not redistribute. Each is installed from its own release at the version recorded where it is invoked.
+
+| Tool | What CoCo uses it for | Upstream | License |
+|---|---|---|---|
+| **SkillSpector** by NVIDIA | The static scan in `.github/workflows/skill-scan.yml`: the skill folders a pull request changes in `skills/` and `systems/*/skills/`, static rules only and no model key, failing on a high or critical finding. Installed at commit `54824463814a0be01360792523ec7245a69190fc` (release tag v2.13.4) as pinned in that workflow. | https://github.com/NVIDIA/skillspector | Apache-2.0 |
 
 ## Feature inspirations
 

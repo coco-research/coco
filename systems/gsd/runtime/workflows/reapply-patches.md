@@ -178,3 +178,249 @@ If neither git history nor pristine snapshots are available, fall back to two-wa
 ## Local Patches to Reapply
 
 **Backed up from:** v{from_version}
+**Current version:** {read VERSION file}
+**Files modified:** {count}
+**Merge strategy:** {three-way (git) | three-way (pristine) | two-way (enhanced)}
+
+| # | File | Status |
+|---|------|--------|
+| 1 | {file_path} | Pending |
+| 2 | {file_path} | Pending |
+```
+
+## Step 4: Merge each file
+
+For each file in `backup-meta.json`:
+
+1. **Read the backed-up version** (user's modified copy from `gsd-local-patches/`)
+2. **Read the newly installed version** (current file after update)
+3. **If available, read the pristine baseline** (from git history or `gsd-pristine/`)
+
+### Three-way merge (when baseline is available)
+
+Compare the three versions to isolate changes:
+- **User changes** = diff(pristine → user's version) — these are the customizations to preserve
+- **Upstream changes** = diff(pristine → new version) — these are version updates to accept
+
+**Merge rules:**
+- Sections changed only by user → apply user's version
+- Sections changed only by upstream → accept upstream version
+- Sections changed by both → flag as CONFLICT, show both, ask user
+- Sections unchanged by either → use new version (identical to all three)
+
+### Two-way merge (fallback when no baseline)
+
+When no pristine baseline is available, use these **strengthened heuristics**:
+
+**CRITICAL RULE: Every file in this backup directory was explicitly detected as modified by the installer's SHA-256 hash comparison. "No custom content" is never a valid conclusion.**
+
+For each file:
+a. Read both versions completely
+b. Identify ALL differences, then classify each as:
+   - **Mechanical drift** — path substitutions (e.g. `/Users/xxx/.claude/` → `$HOME/.claude/`), variable additions (`${GSD_WS}`, `${AGENT_SKILLS_*}`), error handling additions (`|| true`)
+   - **User customization** — added steps/sections, removed sections, reordered content, changed behavior, added frontmatter fields, modified instructions
+
+c. **If ANY differences remain after filtering out mechanical drift → those are user customizations. Merge them.**
+d. **If ALL differences appear to be mechanical drift → still flag as CONFLICT.** The installer's hash check already proved this file was modified. Ask the user: "This file appears to only have path/variable differences. Were there intentional customizations?" Do NOT silently skip.
+
+### Git-enhanced two-way merge
+
+When the config directory is a git repo but the pristine install commit can't be found, use commit history to identify user changes:
+```bash
+# Find non-update commits that touched this file
+git -C "$CONFIG_DIR" log --oneline --no-merges -- "{file_path}" | grep -v "gsd:update\|gsd-update\|GSD update\|gsd-install"
+```
+Each matching commit represents an intentional user modification. Use the commit messages and diffs to understand what was changed and why.
+
+4. **Write merged result** to the installed location
+
+### Post-merge verification
+
+After writing each merged file, verify that user modifications survived the merge:
+
+1. **Line-count check:** Count lines in the backup and the merged result. If the merged result has fewer lines than the backup minus the expected upstream removals, flag for review.
+2. **Hunk presence check:** For each user-added section identified during diff analysis, search the merged output for at least the first significant line (non-blank, non-comment) of each addition. Missing signature lines indicate a dropped hunk.
+3. **Report warnings inline** (do not block):
+   ```
+   ⚠ Potential dropped content in {file_path}:
+     - Missing hunk near line {N}: "{first_line_preview}..." ({line_count} lines)
+     - Backup available: {patches_dir}/{file_path}
+   ```
+4. **Produce a Hunk Verification Table** — one row per hunk per file. This table is **mandatory output** and must be produced before Step 5 can proceed. Format:
+
+   | file | hunk_id | signature_line | line_count | verified |
+   |------|---------|----------------|------------|----------|
+   | {file_path} | {N} | {first_significant_line} | {count} | yes |
+   | {file_path} | {N} | {first_significant_line} | {count} | no |
+
+   - `hunk_id` — sequential integer per file (1, 2, 3…)
+   - `signature_line` — first non-blank, non-comment line of the user-added section
+   - `line_count` — total lines in the hunk
+   - `verified` — `yes` if the signature_line is present in the merged output, `no` otherwise
+
+5. **Track verification status** — add to per-file report: `Merged (verified)` vs `Merged (⚠ {N} hunks may be missing)`
+
+6. **Report status per file:**
+   - `Merged` — user modifications applied cleanly (show summary of what was preserved)
+   - `Conflict` — user reviewed and chose resolution
+   - `Incorporated` — user's modification was already adopted upstream (only valid when pristine baseline confirms this)
+
+**Never report `Skipped — no custom content`.** If a file is in the backup, it has custom content.
+
+## Step 5: Hunk Verification Gate
+
+Two layered gates. Both must pass before proceeding to cleanup.
+
+### 5a: Deterministic verifier (binding gate, #2969)
+
+Run the deterministic verifier script. Do NOT rely solely on the free-text `verified: yes/no` Hunk Verification Table from Step 4 — bug #2969 traced repeated false-positive `verified: yes` reports to that table being filled in without an actual content-presence check. The script performs the check structurally and exits non-zero on any miss.
+
+Run the verifier as a child process (the gsd-tools binary directory is not required — the script ships under `get-shit-done/bin/` in the source repo and is installed to `${GSD_HOME}/get-shit-done/bin/`; it is also exposed via the SDK at `sdk/dist/cli.js verify-reapply` when present):
+
+```bash
+PRISTINE_DIR="${CONFIG_DIR}/gsd-pristine"
+
+# Build args as a bash array so paths with spaces survive expansion intact
+# (string-concat + unquoted expansion would split incorrectly on whitespace).
+VERIFY_ARGS=(
+  --patches-dir "$PATCHES_DIR"
+  --config-dir  "$CONFIG_DIR"
+)
+if [ -d "$PRISTINE_DIR" ]; then
+  VERIFY_ARGS+=(--pristine-dir "$PRISTINE_DIR")
+fi
+VERIFY_ARGS+=(--json)
+
+# Capture stdout (the structured JSON report) separately from stderr so that
+# Node warnings, deprecation notices, or stack traces do not corrupt the
+# JSON parse downstream. Stderr is preserved on the controlling terminal
+# for operator visibility.
+VERIFY_OUTPUT="$(node "${GSD_HOME}/get-shit-done/bin/verify-reapply-patches.cjs" "${VERIFY_ARGS[@]}")"
+VERIFY_STATUS=$?
+```
+
+**Step 5a: drift check** — even when `VERIFY_STATUS` is 0, the report may signal that one or more files were skipped due to pristine-snapshot drift (Bug #3657). Parse the JSON and check:
+
+```bash
+DRIFTED_COUNT="$(echo "$VERIFY_OUTPUT" | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));process.stdout.write(String(d.drifted||0))")"
+DRIFTED_FILES="$(echo "$VERIFY_OUTPUT"  | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));(d.drifted_files||[]).forEach(f=>process.stdout.write(f+'\n'))")"
+```
+
+**If `DRIFTED_COUNT` is greater than 0**, STOP and report to the user, then set `DRIFT_DETECTED=true` and halt — do not proceed to 5b or cleanup:
+
+```text
+HALT: {DRIFTED_COUNT} file(s) were skipped by the deterministic verifier because the
+gsd-pristine/ snapshot on disk does not match the hash recorded in backup-meta.json
+(pristine drift — the snapshot was refreshed to a newer GSD version after the backup
+was captured).  These files were NOT diff-verified; their user customisations may or
+may not have survived the merge.
+
+Drifted files:
+  {each path in DRIFTED_FILES, one per line, indented two spaces}
+
+Resolve before re-running:
+  (a) Re-anchor the pristine snapshot to the version recorded in backup-meta.json, or
+  (b) Restore the affected file(s) from backup and re-merge manually:
+        cp {patches_dir}/{file} {installed_path}  # then re-apply customisations
+  (c) If the upstream changes are acceptable, update the backup-meta.json
+      pristine_hashes entry for each drifted file to the current on-disk hash, then
+      re-run /gsd:update --reapply to re-verify with the refreshed baseline.
+
+Then re-run /gsd:update --reapply to re-verify.
+```
+
+```bash
+DRIFT_DETECTED=true
+# Abort — subsequent steps must not execute when drift is unresolved.
+exit 1
+```
+
+**If `VERIFY_STATUS` is non-zero**, STOP and report to the user, parsing the JSON output:
+
+```text
+ERROR: {failures} file(s) failed deterministic post-merge verification (#2969 gate).
+
+The verifier compared user-added lines (computed from the diff between
+the backup and the pristine baseline) against the merged installed file.
+Lines listed below are present in the backup but absent from the merged result.
+
+For each failed file:
+  {file}
+    missing: {first significant missing line, up to 5 per file}
+    backup:  {patches_dir}/{file}
+
+Resolve before proceeding:
+  (a) Re-merge the missing content into the installed file by hand, or
+  (b) Restore from backup: cp {patches_dir}/{file} {installed_path}
+
+Then re-run /gsd:update --reapply to re-verify.
+```
+
+Do not proceed to cleanup until the verifier exits 0.
+
+**Only when `VERIFY_STATUS` is 0** (or when all files had zero significant user-added lines, which the verifier reports as `Failures: 0`) may execution continue to gate 5b.
+
+### 5b: Hunk Verification Table review (advisory gate, #1999)
+
+The Hunk Verification Table produced in Step 4 must also be reviewed before proceeding. This is advisory after the script gate but is preserved as a defense-in-depth check — if the script ever has a bug or the pristine baseline is unavailable, the table-based gate still catches obvious regressions.
+
+**If the Hunk Verification Table is absent** (Step 4 silently produced nothing), STOP and report:
+
+```
+ERROR: Hunk Verification Table is missing — Step 4 did not produce it.
+The deterministic verifier (5a) may still have passed, but a missing table
+means post-merge verification was not fully completed. Rerun
+/gsd:update --reapply to retry with full verification.
+```
+
+A missing table absent from the workflow output cannot bypass this gate.
+
+**If any row in the Hunk Verification Table shows `verified: no`**, STOP and report:
+
+```
+ERROR: {N} hunk(s) failed Step 5b verification — content may have been dropped during merge.
+
+Unverified hunks:
+  {file} hunk {hunk_id}: signature line "{signature_line}" not found in merged output
+
+The backup is preserved at: {patches_dir}/{file}
+Review the merged file manually, then either:
+  (a) Re-merge the missing content by hand, or
+  (b) Restore from backup: cp {patches_dir}/{file} {installed_path}
+```
+
+Do not proceed to cleanup until both gates (5a and 5b) pass.
+
+**Why both gates?** 5a (the script) is the binding gate — it does the actual substring check structurally and cannot be shortcut by the LLM. 5b (the table review) is the advisory gate — it provides a redundant safety net via the Step 4 prose summary, ensuring that even a script regression or absent pristine baseline cannot silently allow a `verified: no` row to slip past, nor can a missing table go unnoticed. Layered gates favour false-positive halts (recoverable) over silent successes on lost content (unrecoverable).
+
+## Step 6: Cleanup option
+
+Ask user:
+- "Keep patch backups for reference?" → preserve `gsd-local-patches/`
+- "Clean up patch backups?" → remove `gsd-local-patches/` directory
+
+## Step 7: Report
+
+```
+## Patches Reapplied
+
+| # | File | Result | User Changes Preserved |
+|---|------|--------|----------------------|
+| 1 | {file_path} | Merged | Added step X, modified section Y |
+| 2 | {file_path} | Incorporated | Already in upstream v{version} |
+| 3 | {file_path} | Conflict resolved | User chose: keep custom section |
+
+{count} file(s) updated. Your local modifications are active again.
+```
+
+</process>
+
+<success_criteria>
+- [ ] All backed-up patches processed — zero files left unhandled
+- [ ] No file classified as "no custom content" or "SKIP" — every backed-up file is definitionally modified
+- [ ] Three-way merge used when pristine baseline available (git history or gsd-pristine/)
+- [ ] User modifications identified and merged into new version
+- [ ] Conflicts surfaced to user with both versions shown
+- [ ] Status reported for each file with summary of what was preserved
+- [ ] Post-merge verification checks each file for dropped hunks and warns if content appears missing
+</success_criteria>

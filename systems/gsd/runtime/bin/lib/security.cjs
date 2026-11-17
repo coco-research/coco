@@ -260,3 +260,245 @@ function sanitizeForPrompt(text) {
 
 /**
  * Sanitize text that will be displayed back to the user.
+ * Removes protocol-like leak markers that should never surface in checkpoints.
+ *
+ * @param {string} text - Text to sanitize
+ * @returns {string} Sanitized text
+ */
+function sanitizeForDisplay(text) {
+  if (!text || typeof text !== 'string') return text;
+
+  let sanitized = sanitizeForPrompt(text);
+
+  const protocolLeakPatterns = [
+    /^\s*(?:assistant|user|system)\s+to=[^:\s]+:[^\n]+$/i,
+    /^\s*<\|(?:assistant|user|system)[^|]*\|>\s*$/i,
+  ];
+
+  sanitized = sanitized
+    .split('\n')
+    .filter(line => !protocolLeakPatterns.some(pattern => pattern.test(line)))
+    .join('\n');
+
+  return sanitized;
+}
+
+// ─── Shell Safety ───────────────────────────────────────────────────────────
+
+/**
+ * Validate that a string is safe to use as a shell argument when quoted.
+ * This is a defense-in-depth check — callers should always use array-based
+ * exec (spawnSync) where possible.
+ *
+ * @param {string} value - The value to check
+ * @param {string} label - Description for error messages
+ * @returns {string} The validated value
+ */
+function validateShellArg(value, label) {
+  if (!value || typeof value !== 'string') {
+    throw new Error(`${label || 'Argument'}: empty or invalid value`);
+  }
+
+  // Reject null bytes
+  if (value.includes('\0')) {
+    throw new Error(`${label || 'Argument'}: contains null bytes`);
+  }
+
+  // Reject command substitution attempts
+  if (/[$`]/.test(value) && /\$\(|`/.test(value)) {
+    throw new Error(`${label || 'Argument'}: contains potential command substitution`);
+  }
+
+  return value;
+}
+
+// ─── JSON Safety ────────────────────────────────────────────────────────────
+
+/**
+ * Safely parse JSON with error handling and optional size limits.
+ * Wraps JSON.parse to prevent uncaught exceptions from malformed input.
+ *
+ * @param {string} text - JSON string to parse
+ * @param {object} [opts] - Options
+ * @param {number} [opts.maxLength=1048576] - Maximum input length (1MB default)
+ * @param {string} [opts.label='JSON'] - Description for error messages
+ * @returns {{ ok: boolean, value?: any, error?: string }}
+ */
+function safeJsonParse(text, opts = {}) {
+  const maxLength = opts.maxLength || 1048576;
+  const label = opts.label || 'JSON';
+
+  if (!text || typeof text !== 'string') {
+    return { ok: false, error: `${label}: empty or invalid input` };
+  }
+
+  if (text.length > maxLength) {
+    return { ok: false, error: `${label}: input exceeds ${maxLength} byte limit (got ${text.length})` };
+  }
+
+  try {
+    const value = JSON.parse(text);
+    return { ok: true, value };
+  } catch (err) {
+    return { ok: false, error: `${label}: parse error — ${err.message}` };
+  }
+}
+
+// ─── Phase/Argument Validation ──────────────────────────────────────────────
+
+/**
+ * Validate a phase number argument.
+ * Phase numbers must match: integer, decimal (2.1), or letter suffix (12A).
+ * Rejects arbitrary strings that could be used for injection.
+ *
+ * @param {string} phase - The phase number to validate
+ * @returns {{ valid: boolean, normalized?: string, error?: string }}
+ */
+function validatePhaseNumber(phase) {
+  if (!phase || typeof phase !== 'string') {
+    return { valid: false, error: 'Phase number is required' };
+  }
+
+  const trimmed = phase.trim();
+
+  // Standard numeric: 1, 01, 12A, 12.1, 12A.1.2
+  if (/^\d{1,4}[A-Z]?(?:\.\d{1,3})*$/i.test(trimmed)) {
+    return { valid: true, normalized: trimmed };
+  }
+
+  // Custom project IDs: PROJ-42, AUTH-101 (uppercase alphanumeric with hyphens)
+  if (/^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+){1,4}$/i.test(trimmed) && trimmed.length <= 30) {
+    return { valid: true, normalized: trimmed };
+  }
+
+  return { valid: false, error: `Invalid phase number format: "${trimmed}"` };
+}
+
+/**
+ * Validate a STATE.md field name to prevent injection into regex patterns.
+ * Field names must be alphanumeric with spaces, hyphens, underscores, or dots.
+ *
+ * @param {string} field - The field name to validate
+ * @returns {{ valid: boolean, error?: string }}
+ */
+function validateFieldName(field) {
+  if (!field || typeof field !== 'string') {
+    return { valid: false, error: 'Field name is required' };
+  }
+
+  // Allow typical field names: "Current Phase", "active_plan", "Phase 1.2"
+  if (/^[A-Za-z][A-Za-z0-9 _.\-/]{0,60}$/.test(field)) {
+    return { valid: true };
+  }
+
+  return { valid: false, error: `Invalid field name: "${field}"` };
+}
+
+// ─── Layer 3: Structural Schema Validation ───────────────────────────────────
+
+const KNOWN_VALID_TAGS = new Set([
+  'objective', 'process', 'step', 'success_criteria', 'critical_rules',
+  'available_agent_types', 'purpose', 'required_reading',
+]);
+
+/**
+ * Validate the XML structure of a prompt file.
+ * For agent/workflow files, flags any XML tag not in the known-valid set.
+ *
+ * @param {string} text - The file content to validate
+ * @param {'agent'|'workflow'|'unknown'} fileType - The type of prompt file
+ * @returns {{ valid: boolean, violations: string[] }}
+ */
+function validatePromptStructure(text, fileType) {
+  if (!text || typeof text !== 'string') {
+    return { valid: true, violations: [] };
+  }
+
+  if (fileType !== 'agent' && fileType !== 'workflow') {
+    return { valid: true, violations: [] };
+  }
+
+  const violations = [];
+  const tagRegex = /<([A-Za-z][A-Za-z0-9_-]*)/g;
+  let match;
+  while ((match = tagRegex.exec(text)) !== null) {
+    const tag = match[1].toLowerCase();
+    if (!KNOWN_VALID_TAGS.has(tag)) {
+      violations.push(`Unknown XML tag in ${fileType} file: <${tag}>`);
+    }
+  }
+
+  return { valid: violations.length === 0, violations };
+}
+
+// ─── Layer 4: Paragraph-Level Entropy Anomaly Detection ─────────────────────
+
+function shannonEntropy(text) {
+  if (!text || text.length === 0) return 0;
+  const freq = {};
+  for (const ch of text) {
+    freq[ch] = (freq[ch] || 0) + 1;
+  }
+  const len = text.length;
+  let entropy = 0;
+  for (const count of Object.values(freq)) {
+    const p = count / len;
+    entropy -= p * Math.log2(p);
+  }
+  return entropy;
+}
+
+/**
+ * Scan text for paragraphs with anomalously high Shannon entropy.
+ *
+ * @param {string} text - The text to scan
+ * @returns {{ clean: boolean, findings: string[] }}
+ */
+function scanEntropyAnomalies(text) {
+  if (!text || typeof text !== 'string') {
+    return { clean: true, findings: [] };
+  }
+
+  const findings = [];
+  const paragraphs = text.split(/\n\n+/);
+
+  for (const para of paragraphs) {
+    if (para.length <= 50) continue;
+    const entropy = shannonEntropy(para);
+    if (entropy > 5.5) {
+      findings.push(
+        `High-entropy paragraph detected (${entropy.toFixed(2)} bits/char) — possible encoded payload`
+      );
+    }
+  }
+
+  return { clean: findings.length === 0, findings };
+}
+
+module.exports = {
+  // Path safety
+  validatePath,
+  requireSafePath,
+
+  // Prompt injection
+  INJECTION_PATTERNS,
+  scanForInjection,
+  sanitizeForPrompt,
+  sanitizeForDisplay,
+
+  // Shell safety
+  validateShellArg,
+
+  // JSON safety
+  safeJsonParse,
+
+  // Input validation
+  validatePhaseNumber,
+  validateFieldName,
+
+  // Structural validation (Layer 3)
+  validatePromptStructure,
+
+  // Entropy anomaly detection (Layer 4)
+  scanEntropyAnomalies,
+};

@@ -138,3 +138,42 @@ Note todo reference in phase planning notes. Keep in pending. Return to list or 
 **Create a phase:**
 Display: `/gsd-add-phase [description from todo]`
 Keep in pending. User runs command in fresh context.
+
+**Brainstorm approach:**
+Keep in pending. Start discussion about problem and approaches.
+
+**Put it back:**
+Return to list_todos step.
+</step>
+
+<step name="update_state">
+After any action that changes todo count:
+
+Re-run `init todos` to get updated count, then update STATE.md "### Pending Todos" section if exists.
+</step>
+
+<step name="git_commit">
+If todo was moved to done/, commit the change:
+
+```bash
+git rm --cached .planning/todos/pending/[filename] 2>/dev/null || true
+gsd-sdk query commit "docs: start work on todo - [title]" --files .planning/todos/completed/[filename] .planning/STATE.md
+```
+
+Tool respects `commit_docs` config and gitignore automatically.
+
+Confirm: "Committed: docs: start work on todo - [title]"
+</step>
+
+</process>
+
+<success_criteria>
+- [ ] All pending todos listed with title, area, age
+- [ ] Area filter applied if specified
+- [ ] Selected todo's full context loaded
+- [ ] Roadmap context checked for phase match
+- [ ] Appropriate actions offered
+- [ ] Selected action executed
+- [ ] STATE.md updated if todo count changed
+- [ ] Changes committed to git (if todo moved to done/)
+</success_criteria>

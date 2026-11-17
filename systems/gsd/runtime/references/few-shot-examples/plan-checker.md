@@ -65,3 +65,9 @@ last_calibrated: 2026-03-24
 > issues:
 >   - dimension: scope_sanity
 >     severity: INFO
+>     finding: "Plan has 3 tasks -- consider splitting into smaller plans for faster iteration"
+>     affected_field: "task count"
+>     suggested_fix: "Split tasks into separate plans"
+> ```
+
+**Why this is bad:** The checker flagged a non-issue. scope_sanity allows 2-3 tasks per plan -- 3 tasks is within limits. The checker applied a personal preference ("smaller is better") rather than the documented threshold. This wastes planner time on false positives and erodes trust in the checker's judgment. A correct check would produce no issue for this plan.

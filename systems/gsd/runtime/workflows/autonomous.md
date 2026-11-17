@@ -582,3 +582,213 @@ If all phases complete, proceed to lifecycle step.
 
 <step name="lifecycle">
 
+## 5. Lifecycle
+
+**If `ONLY_PHASE` is set:** Skip lifecycle. A single phase does not trigger audit/complete/cleanup. Display:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► AUTONOMOUS ▸ PHASE ${ONLY_PHASE} COMPLETE ✓
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ Phase ${ONLY_PHASE}: ${PHASE_NAME} — Done
+ Mode: Single phase (--only)
+
+ Lifecycle skipped — run /gsd:autonomous without --only
+ after all phases complete to trigger audit/complete/cleanup.
+```
+
+Exit cleanly.
+
+**Otherwise:** After all phases complete, run the milestone lifecycle sequence: audit → complete → cleanup.
+
+Display lifecycle transition banner:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► AUTONOMOUS ▸ LIFECYCLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ All phases complete → Starting lifecycle: audit → complete → cleanup
+ Milestone: {milestone_version} — {milestone_name}
+```
+
+**5a. Audit**
+
+```
+Skill(skill="gsd-audit-milestone")
+```
+
+After audit completes, detect the result:
+
+```bash
+AUDIT_FILE=".planning/v${milestone_version}-MILESTONE-AUDIT.md"
+AUDIT_STATUS=$(grep "^status:" "${AUDIT_FILE}" 2>/dev/null | head -1 | cut -d: -f2 | tr -d ' ')
+```
+
+**If AUDIT_STATUS is empty** (no audit file or no status field):
+
+Go to handle_blocker: "Audit did not produce results — audit file missing or malformed."
+
+**If `passed`:**
+
+Display:
+```
+Audit ✅ passed — proceeding to complete milestone
+```
+
+Proceed to 5b (no user pause — per CTRL-01).
+
+**If `gaps_found`:**
+
+Read the gaps summary from the audit file. Display:
+```
+⚠ Audit: Gaps Found
+```
+
+Ask user via AskUserQuestion:
+- **question:** "Milestone audit found gaps. How to proceed?"
+- **options:** "Continue anyway — accept gaps" / "Stop — fix gaps manually"
+
+On **"Continue anyway"**: Display `Audit ⏭ Gaps accepted — proceeding to complete milestone` and proceed to 5b.
+
+On **"Stop"**: Go to handle_blocker with "User stopped — audit gaps remain. Run /gsd:audit-milestone to review, then /gsd:complete-milestone when ready."
+
+**If `tech_debt`:**
+
+Read the tech debt summary from the audit file. Display:
+```
+⚠ Audit: Tech Debt Identified
+```
+
+Show the summary, then ask user via AskUserQuestion:
+- **question:** "Milestone audit found tech debt. How to proceed?"
+- **options:** "Continue with tech debt" / "Stop — address debt first"
+
+On **"Continue with tech debt"**: Display `Audit ⏭ Tech debt acknowledged — proceeding to complete milestone` and proceed to 5b.
+
+On **"Stop"**: Go to handle_blocker with "User stopped — tech debt to address. Run /gsd:audit-milestone to review details."
+
+**5b. Complete Milestone**
+
+```
+Skill(skill="gsd-complete-milestone", args="${milestone_version}")
+```
+
+After complete-milestone returns, verify it produced output:
+
+```bash
+ls .planning/milestones/v${milestone_version}-ROADMAP.md 2>/dev/null || true
+```
+
+If the archive file does not exist, go to handle_blocker: "Complete milestone did not produce expected archive files."
+
+**5c. Cleanup**
+
+```
+Skill(skill="gsd-cleanup")
+```
+
+Cleanup shows its own dry-run and asks user for approval internally — this is an acceptable pause per CTRL-01 since it's an explicit decision about file deletion.
+
+**5d. Final Completion**
+
+Display final completion banner:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► AUTONOMOUS ▸ COMPLETE 🎉
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ Milestone: {milestone_version} — {milestone_name}
+ Status: Complete ✅
+ Lifecycle: audit ✅ → complete ✅ → cleanup ✅
+
+ Ship it! 🚀
+```
+
+</step>
+
+<step name="handle_blocker">
+
+## 6. Handle Blocker
+
+When any phase operation fails or a blocker is detected, present 3 options via AskUserQuestion:
+
+**Prompt:** "Phase {N} ({Name}) encountered an issue: {description}"
+
+**Options:**
+1. **"Fix and retry"** — Re-run the failed step (discuss, plan, or execute) for this phase
+2. **"Skip this phase"** — Mark phase as skipped, continue to the next incomplete phase
+3. **"Stop autonomous mode"** — Display summary of progress so far and exit cleanly
+
+**On "Fix and retry":** Loop back to the failed step within execute_phase. If the same step fails again after retry, re-present these options.
+
+**On "Skip this phase":** Log `Phase {N} ⏭ {Name} — Skipped by user` and proceed to iterate.
+
+**On "Stop autonomous mode":** Display progress summary:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► AUTONOMOUS ▸ STOPPED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ Completed: {list of completed phases}
+ Skipped: {list of skipped phases}
+ Remaining: {list of remaining phases}
+
+ Resume with: /gsd:autonomous ${ONLY_PHASE ? "--only " + ONLY_PHASE : "--from " + next_phase}${TO_PHASE ? " --to " + TO_PHASE : ""}
+```
+
+</step>
+
+</process>
+
+<success_criteria>
+- [ ] All incomplete phases executed in order (smart discuss → ui-phase → plan → execute → ui-review each)
+- [ ] Smart discuss proposes grey area answers in tables, user accepts or overrides per area
+- [ ] Progress banners displayed between phases
+- [ ] Execute-phase invoked with --no-transition (autonomous manages transitions)
+- [ ] Post-execution verification reads VERIFICATION.md and routes on status
+- [ ] Passed verification → automatic continue to next phase
+- [ ] Human-needed verification → user prompted to validate or skip
+- [ ] Gaps-found → user offered gap closure, continue, or stop
+- [ ] Gap closure limited to 1 retry (prevents infinite loops)
+- [ ] Plan-phase and execute-phase failures route to handle_blocker
+- [ ] ROADMAP.md re-read after each phase (catches inserted phases)
+- [ ] STATE.md checked for blockers before each phase
+- [ ] Blockers handled via user choice (retry / skip / stop)
+- [ ] Final completion or stop summary displayed
+- [ ] After all phases complete, lifecycle step is invoked (not manual suggestion)
+- [ ] Lifecycle transition banner displayed before audit
+- [ ] Audit invoked via Skill(skill="gsd-audit-milestone")
+- [ ] Audit result routing: passed → auto-continue, gaps_found → user decides, tech_debt → user decides
+- [ ] Audit technical failure (no file/no status) routes to handle_blocker
+- [ ] Complete-milestone invoked via Skill() with ${milestone_version} arg
+- [ ] Cleanup invoked via Skill() — internal confirmation is acceptable (CTRL-01)
+- [ ] Final completion banner displayed after lifecycle
+- [ ] Progress bar uses phase number / total milestone phases (not position among incomplete), with fallback display when phase numbers exceed total
+- [ ] Smart discuss documents relationship to discuss-phase with CTRL-03 note
+- [ ] Frontend phases get UI-SPEC generated before planning (step 3a.5) if not already present
+- [ ] Frontend phases get UI review audit after successful execution (step 3d.5) if UI-SPEC exists
+- [ ] UI phase and UI review respect workflow.ui_phase and workflow.ui_review config toggles
+- [ ] UI review is advisory (non-blocking) — phase proceeds to iterate regardless of score
+- [ ] `--only N` restricts execution to exactly one phase
+- [ ] `--only N` skips lifecycle step (audit/complete/cleanup)
+- [ ] `--only N` exits cleanly after single phase completes
+- [ ] `--only N` on already-complete phase exits with message
+- [ ] `--only N` handle_blocker resume message uses --only flag
+- [ ] `--to N` stops execution after phase N completes (halts at iterate step)
+- [ ] `--to N` filters out phases with number > N during discovery
+- [ ] `--to N` displays "Stopping after phase N" in startup banner
+- [ ] `--to N` on already completed target exits with "already completed" message
+- [ ] `--to N` compatible with `--from N` (run phases from M to N)
+- [ ] `--to N` handle_blocker resume message preserves --to flag
+- [ ] `--to N` skips lifecycle when not all milestone phases complete
+- [ ] `--interactive` runs discuss inline via gsd-discuss-phase (asks questions, waits for user)
+- [ ] `--interactive` dispatches plan and execute as background agents (context isolation)
+- [ ] `--interactive` enables pipeline parallelism: discuss Phase N+1 while Phase N builds
+- [ ] `--interactive` main context only accumulates discuss conversations (lean)
+- [ ] `--interactive` waits for background agents before post-execution routing
+- [ ] `--interactive` compatible with `--only`, `--from`, and `--to` flags
+</success_criteria>

@@ -1519,3 +1519,353 @@ function cmdStateSync(cwd, options, raw) {
     return;
   }
 
+  let totalDiskPlans = 0;
+  let totalDiskSummaries = 0;
+  let diskCompletedPhases = 0;
+  let highestIncompletePhase = null;
+  let highestIncompletePhaseNum = null;
+  let highestIncompletePhaseplanCount = 0;
+  let highestIncompletePhaseSummaryCount = 0;
+
+  for (const dir of entries) {
+    const dirPath = path.join(phasesDir, dir);
+    const { planCount: plans, summaryCount: summaries, completed } = scanPhasePlans(dirPath);
+    totalDiskPlans += plans;
+    totalDiskSummaries += summaries;
+    if (completed) diskCompletedPhases++;
+
+    // Track the highest phase with incomplete plans (or any plans)
+    const phaseMatch = dir.match(/^(\d+[A-Z]?(?:\.\d+)*)/i);
+    if (phaseMatch && plans > 0) {
+      if (summaries < plans) {
+        // Incomplete phase — this is likely the current one
+        highestIncompletePhase = dir;
+        highestIncompletePhaseNum = phaseMatch[1];
+        highestIncompletePhaseplanCount = plans;
+        highestIncompletePhaseSummaryCount = summaries;
+      } else if (!highestIncompletePhase) {
+        // All complete, track as potential current
+        highestIncompletePhase = dir;
+        highestIncompletePhaseNum = phaseMatch[1];
+        highestIncompletePhaseplanCount = plans;
+        highestIncompletePhaseSummaryCount = summaries;
+      }
+    }
+  }
+
+  // Determine total phases from ROADMAP (may be larger than realized disk dirs).
+  // Mirrors the logic in buildStateFrontmatter so both report consistent percents (#3242 Bug B).
+  let syncTotalPhases = null;
+  try {
+    const isDirInMilestone = getMilestonePhaseFilter(cwd);
+    if (isDirInMilestone.phaseCount > 0) {
+      syncTotalPhases = Math.max(entries.length, isDirInMilestone.phaseCount);
+    } else {
+      syncTotalPhases = entries.length;
+    }
+  } catch { /* intentionally empty */ }
+
+  // Sync Total Plans in Phase
+  if (highestIncompletePhase) {
+    const currentPlansField = stateExtractField(modified, 'Total Plans in Phase');
+    if (currentPlansField && parseInt(currentPlansField, 10) !== highestIncompletePhaseplanCount) {
+      changes.push(`Total Plans in Phase: ${currentPlansField} -> ${highestIncompletePhaseplanCount}`);
+      const result = stateReplaceField(modified, 'Total Plans in Phase', String(highestIncompletePhaseplanCount));
+      if (result) modified = result;
+    }
+  }
+
+  // Sync Progress — use shared helper so formula stays in one place (#3242 Bug B).
+  // computeProgressPercent applies min(plan_fraction, phase_fraction) so unrealised
+  // ROADMAP phases cap the reported percent rather than allowing a false 100%.
+  const percent = (() => {
+    const p = computeProgressPercent(totalDiskSummaries, totalDiskPlans, diskCompletedPhases, syncTotalPhases);
+    return p !== null ? p : 0;
+  })();
+  const currentProgress = stateExtractField(modified, 'Progress');
+  if (currentProgress) {
+    const currentPercent = parseInt(currentProgress.replace(/[^\d]/g, ''), 10);
+    if (currentPercent !== percent) {
+      const barWidth = 10;
+      const filled = Math.round(percent / 100 * barWidth);
+      const bar = '\u2588'.repeat(filled) + '\u2591'.repeat(barWidth - filled);
+      const progressStr = `[${bar}] ${percent}%`;
+      changes.push(`Progress: ${currentProgress} -> ${progressStr}`);
+      const result = stateReplaceField(modified, 'Progress', progressStr);
+      if (result) modified = result;
+    }
+  }
+
+  // Sync Last Activity
+  const result = stateReplaceField(modified, 'Last Activity', today);
+  if (result) {
+    const oldActivity = stateExtractField(modified, 'Last Activity');
+    if (oldActivity !== today) {
+      changes.push(`Last Activity: ${oldActivity} -> ${today}`);
+    }
+    modified = result;
+  }
+
+  if (verify) {
+    output({ synced: false, changes, dry_run: true }, raw);
+    return;
+  }
+
+  if (changes.length > 0 || modified !== content) {
+    writeStateMd(statePath, modified, cwd);
+  }
+
+  output({ synced: true, changes, dry_run: false }, raw);
+}
+
+/**
+ * Prune old entries from STATE.md sections that grow unboundedly (#1970).
+ * Moves decisions, recently-completed summaries, and resolved blockers
+ * older than keepRecent phases to STATE-ARCHIVE.md.
+ *
+ * Options:
+ *   keepRecent: number of recent phases to retain (default: 3)
+ *   dryRun: if true, return what would be pruned without modifying STATE.md
+ */
+function cmdStatePrune(cwd, options, raw) {
+  const silent = !!options.silent;
+  const emit = silent ? () => {} : (result, r, v) => output(result, r, v);
+  const statePath = planningPaths(cwd).state;
+  if (!fs.existsSync(statePath)) { emit({ error: 'STATE.md not found' }, raw); return; }
+
+  const keepRecent = parseInt(options.keepRecent, 10) || 3;
+  const dryRun = !!options.dryRun;
+  const currentPhaseRaw = stateExtractField(fs.readFileSync(statePath, 'utf-8'), 'Current Phase');
+  const currentPhase = parseInt(currentPhaseRaw, 10) || 0;
+  const cutoff = currentPhase - keepRecent;
+
+  if (cutoff <= 0) {
+    emit({ pruned: false, reason: `Only ${currentPhase} phases — nothing to prune with --keep-recent ${keepRecent}` }, raw, 'false');
+    return;
+  }
+
+  const archivePath = path.join(path.dirname(statePath), 'STATE-ARCHIVE.md');
+  const archived = [];
+
+  // Shared pruning logic applied to both dry-run and real passes.
+  // Returns { newContent, archivedSections }.
+  function prunePass(content) {
+    const sections = [];
+
+    // Prune Decisions section: entries like "- [Phase N]: ..."
+    const decisionPattern = /(###?\s*(?:Decisions|Decisions Made|Accumulated.*Decisions)\s*\n)([\s\S]*?)(?=\n###?|\n##[^#]|$)/i;
+    const decMatch = content.match(decisionPattern);
+    if (decMatch) {
+      const lines = decMatch[2].split('\n');
+      const keep = [];
+      const archive = [];
+      for (const line of lines) {
+        const phaseMatch = line.match(/^\s*-\s*\[Phase\s+(\d+)/i);
+        if (phaseMatch && parseInt(phaseMatch[1], 10) <= cutoff) {
+          archive.push(line);
+        } else {
+          keep.push(line);
+        }
+      }
+      if (archive.length > 0) {
+        sections.push({ section: 'Decisions', count: archive.length, lines: archive });
+        content = content.replace(decisionPattern, (_m, header) => `${header}${keep.join('\n')}`);
+      }
+    }
+
+    // Prune Recently Completed section: entries mentioning phase numbers
+    const recentPattern = /(###?\s*Recently Completed\s*\n)([\s\S]*?)(?=\n###?|\n##[^#]|$)/i;
+    const recMatch = content.match(recentPattern);
+    if (recMatch) {
+      const lines = recMatch[2].split('\n');
+      const keep = [];
+      const archive = [];
+      for (const line of lines) {
+        const phaseMatch = line.match(/Phase\s+(\d+)/i);
+        if (phaseMatch && parseInt(phaseMatch[1], 10) <= cutoff) {
+          archive.push(line);
+        } else {
+          keep.push(line);
+        }
+      }
+      if (archive.length > 0) {
+        sections.push({ section: 'Recently Completed', count: archive.length, lines: archive });
+        content = content.replace(recentPattern, (_m, header) => `${header}${keep.join('\n')}`);
+      }
+    }
+
+    // Prune resolved blockers: lines marked as resolved (strikethrough ~~text~~
+    // or "[RESOLVED]" prefix) with a phase reference older than cutoff
+    const blockersPattern = /(###?\s*(?:Blockers|Blockers\/Concerns|Blockers\s*&\s*Concerns)\s*\n)([\s\S]*?)(?=\n###?|\n##[^#]|$)/i;
+    const blockersMatch = content.match(blockersPattern);
+    if (blockersMatch) {
+      const lines = blockersMatch[2].split('\n');
+      const keep = [];
+      const archive = [];
+      for (const line of lines) {
+        const isResolved = /~~.*~~|\[RESOLVED\]/i.test(line);
+        const phaseMatch = line.match(/Phase\s+(\d+)/i);
+        if (isResolved && phaseMatch && parseInt(phaseMatch[1], 10) <= cutoff) {
+          archive.push(line);
+        } else {
+          keep.push(line);
+        }
+      }
+      if (archive.length > 0) {
+        sections.push({ section: 'Blockers (resolved)', count: archive.length, lines: archive });
+        content = content.replace(blockersPattern, (_m, header) => `${header}${keep.join('\n')}`);
+      }
+    }
+
+    // Prune Performance Metrics table rows: keep only rows for phases > cutoff.
+    // Preserves header rows (| Phase | ... and |---|...) and any prose around the table.
+    const metricsPattern = /(###?\s*Performance Metrics\s*\n)([\s\S]*?)(?=\n###?|\n##[^#]|$)/i;
+    const metricsMatch = content.match(metricsPattern);
+    if (metricsMatch) {
+      const sectionLines = metricsMatch[2].split('\n');
+      const keep = [];
+      const archive = [];
+      for (const line of sectionLines) {
+        // Table data row: starts with | followed by a number (phase)
+        const tableRowMatch = line.match(/^\|\s*(\d+)\s*\|/);
+        if (tableRowMatch) {
+          const rowPhase = parseInt(tableRowMatch[1], 10);
+          if (rowPhase <= cutoff) {
+            archive.push(line);
+          } else {
+            keep.push(line);
+          }
+        } else {
+          // Header row, separator row, or prose — always keep
+          keep.push(line);
+        }
+      }
+      if (archive.length > 0) {
+        sections.push({ section: 'Performance Metrics', count: archive.length, lines: archive });
+        content = content.replace(metricsPattern, (_m, header) => `${header}${keep.join('\n')}`);
+      }
+    }
+
+    return { newContent: content, archivedSections: sections };
+  }
+
+  if (dryRun) {
+    // Dry-run: compute what would be pruned without writing anything
+    const content = fs.readFileSync(statePath, 'utf-8');
+    const result = prunePass(content);
+    const totalPruned = result.archivedSections.reduce((sum, s) => sum + s.count, 0);
+    emit({
+      pruned: false,
+      dry_run: true,
+      cutoff_phase: cutoff,
+      keep_recent: keepRecent,
+      sections: result.archivedSections.map(s => ({ section: s.section, entries_would_archive: s.count })),
+      total_would_archive: totalPruned,
+      note: totalPruned > 0 ? 'Run without --dry-run to actually prune' : 'Nothing to prune',
+    }, raw, totalPruned > 0 ? 'true' : 'false');
+    return;
+  }
+
+  readModifyWriteStateMd(statePath, (content) => {
+    const result = prunePass(content);
+    archived.push(...result.archivedSections);
+    return result.newContent;
+  }, cwd);
+
+  // Write archived entries to STATE-ARCHIVE.md
+  if (archived.length > 0) {
+    const timestamp = new Date().toISOString().split('T')[0];
+    let archiveContent = platformReadSync(archivePath);
+    if (archiveContent === null) {
+      archiveContent = '# STATE Archive\n\nPruned entries from STATE.md. Recoverable but no longer loaded into agent context.\n\n';
+    }
+    archiveContent += `## Pruned ${timestamp} (phases 1-${cutoff}, kept recent ${keepRecent})\n\n`;
+    for (const section of archived) {
+      archiveContent += `### ${section.section}\n\n${section.lines.join('\n')}\n\n`;
+    }
+    platformWriteSync(archivePath, archiveContent);
+  }
+
+  const totalPruned = archived.reduce((sum, s) => sum + s.count, 0);
+  emit({
+    pruned: totalPruned > 0,
+    cutoff_phase: cutoff,
+    keep_recent: keepRecent,
+    sections: archived.map(s => ({ section: s.section, entries_archived: s.count })),
+    total_archived: totalPruned,
+    archive_file: totalPruned > 0 ? 'STATE-ARCHIVE.md' : null,
+  }, raw, totalPruned > 0 ? 'true' : 'false');
+}
+
+/**
+ * Mark the current phase as COMPLETE in STATE.md.
+ * Updates Status, Last Activity, and the Current Position section to reflect
+ * that the phase execution is finished and the project is ready for the next phase.
+ * Implements the `gsd state complete-phase` subcommand (issue #2735).
+ */
+function resolvePhaseIdForCompletePhase(content, overridePhase) {
+  const candidate = overridePhase ||
+    stateExtractField(content, 'Current Phase') ||
+    stateExtractField(content, 'Phase') ||
+    '';
+
+  // Accept canonical phase token only (e.g. 3, 03, 3A, 3.3, 10.2)
+  const phaseMatch = String(candidate).match(/(\d+[A-Z]?(?:\.\d+)*)/i);
+  return phaseMatch ? phaseMatch[1] : null;
+}
+
+function cmdStateCompletePhase(cwd, raw, overridePhase) {
+  const statePath = planningPaths(cwd).state;
+  if (!fs.existsSync(statePath)) {
+    output({ error: 'STATE.md not found' }, raw);
+    return;
+  }
+
+  const content = fs.readFileSync(statePath, 'utf-8');
+  const resolvedPhase = resolvePhaseIdForCompletePhase(content, overridePhase);
+  if (!resolvedPhase || /^phase$/i.test(resolvedPhase)) {
+    output({ error: 'Unable to resolve current phase. Pass an explicit phase: state complete-phase --phase <N>' }, raw);
+    return;
+  }
+
+  // Idempotency guard (#3489). If STATE.md's canonical `Current Phase` field
+  // already names a phase distinct from the one we are being asked to mark
+  // complete, the project has advanced past the requested phase (e.g. a
+  // follow-up phase was inserted, or the next phase began). Re-running
+  // `state complete-phase --phase <N>` in that situation previously rolled
+  // STATE.md back to <N>'s moment-of-completion — silently clobbering Status,
+  // Last Activity, Last Activity Description, and the Current Position body.
+  // The handler is now a no-op in that case so re-invocation from downstream
+  // workflows cannot regress the project state.
+  const existingCurrentPhaseRaw = stateExtractField(content, 'Current Phase') || '';
+  const existingCurrentPhaseMatch = String(existingCurrentPhaseRaw).match(/(\d+[A-Z]?(?:\.\d+)*)/i);
+  const existingCurrentPhase = existingCurrentPhaseMatch ? existingCurrentPhaseMatch[1] : null;
+  if (existingCurrentPhase && existingCurrentPhase !== resolvedPhase) {
+    output(
+      { updated: [], phase: resolvedPhase, idempotent: true, note: 'phase already superseded; no-op' },
+      raw,
+      'false',
+    );
+    return;
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  const updated = [];
+
+  readModifyWriteStateMd(statePath, (content) => {
+    const currentPhase = resolvedPhase;
+
+    // Update Status field
+    const statusValue = `Phase ${currentPhase} complete`;
+    let result = stateReplaceField(content, 'Status', statusValue);
+    if (result) { content = result; updated.push('Status'); }
+
+    // Update Last Activity date
+    result = stateReplaceField(content, 'Last Activity', today);
+    if (result) { content = result; updated.push('Last Activity'); }
+
+    // Update Last Activity Description
+    const activityDesc = `Phase ${currentPhase} marked complete`;
+    result = stateReplaceField(content, 'Last Activity Description', activityDesc);
+    if (result) { content = result; updated.push('Last Activity Description'); }
+

@@ -124,3 +124,168 @@ For: Choosing between options, new external integration.
 
 For: Architectural decisions, novel problems, high-risk choices.
 
+**Process:**
+
+1. **Scope the discovery** using ~/.claude/get-shit-done/templates/discovery.md:
+
+   - Define clear scope
+   - Define include/exclude boundaries
+   - List specific questions to answer
+
+2. **Exhaustive Context7 research:**
+
+   - All relevant libraries
+   - Related patterns and concepts
+   - Multiple topics per library if needed
+
+3. **Official documentation deep read:**
+
+   - Architecture guides
+   - Best practices sections
+   - Migration/upgrade guides
+   - Known limitations
+
+4. **WebSearch for ecosystem context:**
+
+   - How others solved similar problems
+   - Production experiences
+   - Gotchas and anti-patterns
+   - Recent changes/announcements
+
+5. **Cross-verify ALL findings:**
+
+   - Every WebSearch claim → verify with authoritative source
+   - Mark what's verified vs assumed
+   - Flag contradictions
+
+6. **Create comprehensive DISCOVERY.md:**
+
+   - Full structure from ~/.claude/get-shit-done/templates/discovery.md
+   - Quality report with source attribution
+   - Confidence by finding
+   - If LOW confidence on any critical finding → add validation checkpoints
+
+7. **Confidence gate:** If overall confidence is LOW, present options before proceeding.
+
+8. Return to plan-phase.md.
+
+**Output:** `.planning/phases/XX-name/DISCOVERY.md` (comprehensive)
+</step>
+
+<step name="identify_unknowns">
+**For Level 2-3:** Define what we need to learn.
+
+Ask: What do we need to learn before we can plan this phase?
+
+- Technology choices?
+- Best practices?
+- API patterns?
+- Architecture approach?
+  </step>
+
+<step name="create_discovery_scope">
+Use ~/.claude/get-shit-done/templates/discovery.md.
+
+Include:
+
+- Clear discovery objective
+- Scoped include/exclude lists
+- Source preferences (official docs, Context7, current year)
+- Output structure for DISCOVERY.md
+  </step>
+
+<step name="execute_discovery">
+Run the discovery:
+- Use web search for current info
+- Use Context7 MCP for library docs
+- Prefer current year sources
+- Structure findings per template
+</step>
+
+<step name="create_discovery_output">
+Write `.planning/phases/XX-name/DISCOVERY.md`:
+- Summary with recommendation
+- Key findings with sources
+- Code examples if applicable
+- Metadata (confidence, dependencies, open questions, assumptions)
+</step>
+
+<step name="confidence_gate">
+After creating DISCOVERY.md, check confidence level.
+
+If confidence is LOW:
+
+**Text mode (`workflow.text_mode: true` in config or `--text` flag):** Set `TEXT_MODE=true` if `--text` is present in `$ARGUMENTS` OR `text_mode` from init JSON is `true`. When TEXT_MODE is active, replace every `AskUserQuestion` call with a plain-text numbered list and ask the user to type their choice number. This is required for non-Claude runtimes (OpenAI Codex, Gemini CLI, etc.) where `AskUserQuestion` is not available.
+Use AskUserQuestion:
+
+- header: "Low Conf."
+- question: "Discovery confidence is LOW: [reason]. How would you like to proceed?"
+- options:
+  - "Dig deeper" - Do more research before planning
+  - "Proceed anyway" - Accept uncertainty, plan with caveats
+  - "Pause" - I need to think about this
+
+If confidence is MEDIUM:
+Inline: "Discovery complete (medium confidence). [brief reason]. Proceed to planning?"
+
+If confidence is HIGH:
+Proceed directly, just note: "Discovery complete (high confidence)."
+</step>
+
+<step name="open_questions_gate">
+If DISCOVERY.md has open_questions:
+
+Present them inline:
+"Open questions from discovery:
+
+- [Question 1]
+- [Question 2]
+
+These may affect implementation. Acknowledge and proceed? (yes / address first)"
+
+If "address first": Gather user input on questions, update discovery.
+</step>
+
+<step name="offer_next">
+```
+Discovery complete: .planning/phases/XX-name/DISCOVERY.md
+Recommendation: [one-liner]
+Confidence: [level]
+
+What's next?
+
+1. Discuss phase context (/gsd:discuss-phase [current-phase])
+2. Create phase plan (/gsd:plan-phase [current-phase])
+3. Refine discovery (dig deeper)
+4. Review discovery
+
+```
+
+NOTE: DISCOVERY.md is NOT committed separately. It will be committed with phase completion.
+</step>
+
+</process>
+
+<success_criteria>
+**Level 1 (Quick Verify):**
+- Context7 consulted for library/topic
+- Current state verified or concerns escalated
+- Verbal confirmation to proceed (no files)
+
+**Level 2 (Standard):**
+- Context7 consulted for all options
+- WebSearch findings cross-verified
+- DISCOVERY.md created with recommendation
+- Confidence level MEDIUM or higher
+- Ready to inform PLAN.md creation
+
+**Level 3 (Deep Dive):**
+- Discovery scope defined
+- Context7 exhaustively consulted
+- All WebSearch findings verified against authoritative sources
+- DISCOVERY.md created with comprehensive analysis
+- Quality report with source attribution
+- If LOW confidence findings → validation checkpoints defined
+- Confidence gate passed
+- Ready to inform PLAN.md creation
+</success_criteria>

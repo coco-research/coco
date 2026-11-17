@@ -1353,3 +1353,353 @@ If all tests pass:
 
 If any tests fail:
 ```
+## ⚠ Cross-Phase Regression Detected
+
+Phase {X} execution may have broken functionality from prior phases.
+
+| Test File | Phase | Status | Detail |
+|-----------|-------|--------|--------|
+| {file} | {origin_phase} | FAILED | {first_failure_line} |
+
+Options:
+1. Fix regressions before verification (recommended)
+2. Continue to verification anyway (regressions will compound)
+3. Abort phase — roll back and re-plan
+```
+
+Use AskUserQuestion to present the options.
+</step>
+
+<step name="schema_drift_gate">
+Post-execution schema drift detection. Catches false-positive verification where
+build/types pass because TypeScript types come from config, not the live database.
+
+**Run after execution completes but BEFORE verification marks success.**
+
+```bash
+SCHEMA_DRIFT=$(gsd-sdk query verify.schema-drift "${PHASE_NUMBER}" 2>/dev/null)
+```
+
+Parse JSON result for: `drift_detected`, `blocking`, `schema_files`, `orms`, `unpushed_orms`, `message`.
+
+**If `drift_detected` is false:** Skip to verify_phase_goal.
+
+**If `drift_detected` is true AND `blocking` is true:**
+
+Check for override:
+```bash
+SKIP_SCHEMA=$(echo "${GSD_SKIP_SCHEMA_CHECK:-false}")
+```
+
+**If `SKIP_SCHEMA` is `true`:**
+
+Display:
+```
+⚠ Schema drift detected but GSD_SKIP_SCHEMA_CHECK=true — bypassing gate.
+
+Schema files changed: {schema_files}
+ORMs requiring push: {unpushed_orms}
+
+Proceeding to verification (database may be out of sync).
+```
+→ Continue to verify_phase_goal.
+
+**If `SKIP_SCHEMA` is not `true`:**
+
+BLOCK verification. Display:
+
+```
+## BLOCKED: Schema Drift Detected
+
+Schema-relevant files changed during this phase but no database push command
+was executed. Build and type checks pass because TypeScript types come from
+config, not the live database — verification would produce a false positive.
+
+Schema files changed: {schema_files}
+ORMs requiring push: {unpushed_orms}
+
+Required push commands:
+{For each unpushed ORM, show the push command from the message}
+
+Options:
+1. Run push command now (recommended) — execute the push, then re-verify
+2. Skip schema check (GSD_SKIP_SCHEMA_CHECK=true) — bypass this gate
+3. Abort — stop execution and investigate
+```
+
+If `TEXT_MODE` is true, present as a plain-text numbered list. Otherwise use AskUserQuestion.
+
+**If user selects option 1:** Present the specific push command(s) to run. After user confirms execution, re-run the schema drift check. If it passes, continue to verify_phase_goal.
+
+**If user selects option 2:** Set override and continue to verify_phase_goal.
+
+**If user selects option 3:** Stop execution. Report partial completion.
+</step>
+
+<step name="codebase_drift_gate">
+Post-execution structural drift detection (#2003). Non-blocking by contract:
+any internal error here MUST fall through to `verify_phase_goal`. The phase
+is never failed by this gate.
+
+Load and follow the full step spec from
+`get-shit-done/workflows/execute-phase/steps/codebase-drift-gate.md` —
+covers the SDK call, JSON contract, `warn` vs `auto-remap` branches, mapper
+spawn template, and the two `workflow.drift_*` config keys.
+</step>
+
+<step name="verify_phase_goal">
+Verify phase achieved its GOAL, not just completed tasks.
+
+```bash
+VERIFIER_SKILLS=$(gsd-sdk query agent-skills gsd-verifier)
+```
+
+```
+Agent(
+  description="Verify phase {phase_number} goal achievement",
+  prompt="Verify phase {phase_number} goal achievement.
+Phase directory: {phase_dir}
+Phase goal: {goal from ROADMAP.md}
+Phase requirement IDs: {phase_req_ids}
+Check must_haves against actual codebase.
+Cross-reference requirement IDs from PLAN frontmatter against REQUIREMENTS.md — every ID MUST be accounted for.
+Create VERIFICATION.md.
+
+<files_to_read>
+Read these files before verification:
+- {phase_dir}/*-PLAN.md (All plans — understand intent, check must_haves)
+- {phase_dir}/*-SUMMARY.md (All summaries — cross-reference claimed vs actual)
+- .planning/REQUIREMENTS.md (Requirement traceability)
+${CONTEXT_WINDOW >= 500000 ? `- {phase_dir}/*-CONTEXT.md (User decisions — verify they were honored)
+- {phase_dir}/*-RESEARCH.md (Known pitfalls — check for traps)
+- Prior VERIFICATION.md files from earlier phases (regression check)
+` : ''}
+</files_to_read>
+
+${VERIFIER_SKILLS}",
+  subagent_type="gsd-verifier",
+  model="{verifier_model}"
+)
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+Read status:
+```bash
+grep "^status:" "$PHASE_DIR"/*-VERIFICATION.md | cut -d: -f2 | tr -d ' '
+```
+
+| Status | Action |
+|--------|--------|
+| `passed` | → update_roadmap |
+| `human_needed` | Persist and present human testing items; keep phase pending until verification reruns as `passed` |
+| `gaps_found` | Present gap summary, offer `/gsd:plan-phase {phase} --gaps ${GSD_WS}` |
+
+**If human_needed:**
+
+**Step A: Persist human verification items as UAT file.**
+
+Create `{phase_dir}/{phase_num}-HUMAN-UAT.md` using UAT template format:
+
+```markdown
+---
+status: partial
+phase: {phase_num}-{phase_name}
+source: [{phase_num}-VERIFICATION.md]
+started: [now ISO]
+updated: [now ISO]
+---
+
+## Current Test
+
+[awaiting human testing]
+
+## Tests
+
+{For each human_verification item from VERIFICATION.md:}
+
+### {N}. {item description}
+expected: {expected behavior from VERIFICATION.md}
+result: [pending]
+
+## Summary
+
+total: {count}
+passed: 0
+issues: 0
+pending: {count}
+skipped: 0
+blocked: 0
+
+## Gaps
+```
+
+Commit the file:
+```bash
+gsd-sdk query commit "test({phase_num}): persist human verification items as UAT" --files "{phase_dir}/{phase_num}-HUMAN-UAT.md"
+```
+
+**Step B: Present to user:**
+
+```
+## ✓ Phase {X}: {Name} — Human Verification Required
+
+All automated checks passed. {N} items need human testing:
+
+{From VERIFICATION.md human_verification section}
+
+Items saved to `{phase_num}-HUMAN-UAT.md` — they will appear in `/gsd:progress` and `/gsd:audit-uat`.
+
+"approved" → continue | Report issues → gap closure
+```
+
+**If user says "approved":** Proceed to `update_roadmap`. The HUMAN-UAT.md file persists with `status: partial` and will surface in future progress checks until the user runs `/gsd:verify-work` on it.
+
+**If user reports issues:** Proceed to gap closure as currently implemented.
+
+**If gaps_found:**
+```
+## ⚠ Phase {X}: {Name} — Gaps Found
+
+**Score:** {N}/{M} must-haves verified
+**Report:** {phase_dir}/{phase_num}-VERIFICATION.md
+
+### What's Missing
+{Gap summaries from VERIFICATION.md}
+
+---
+## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
+
+`/clear` then:
+
+`/gsd:plan-phase {X} --gaps ${GSD_WS}`
+
+Also: `cat {phase_dir}/{phase_num}-VERIFICATION.md` — full report
+Also: `/gsd:verify-work {X} ${GSD_WS}` — manual testing first
+```
+
+Gap closure cycle: `/gsd:plan-phase {X} --gaps ${GSD_WS}` reads VERIFICATION.md → creates gap plans with `gap_closure: true` → user runs `/gsd:execute-phase {X} --gaps-only ${GSD_WS}` → verifier re-runs.
+</step>
+
+<step name="update_roadmap">
+**Mark phase complete and update all tracking files:**
+
+```bash
+COMPLETION=$(gsd-sdk query phase.complete "${PHASE_NUMBER}")
+```
+
+The CLI handles:
+- Marking phase checkbox `[x]` with completion date
+- Updating Progress table (Status → Complete, date)
+- Updating plan count to final
+- Advancing STATE.md to next phase
+- Updating REQUIREMENTS.md traceability
+- Scanning for verification debt (returns `warnings` array)
+
+Extract from result: `next_phase`, `next_phase_name`, `is_last_phase`, `warnings`, `has_warnings`.
+
+**If has_warnings is true:**
+```
+## Phase {X} marked complete with {N} warnings:
+
+{list each warning}
+
+These items are tracked and will appear in `/gsd:progress` and `/gsd:audit-uat`.
+```
+
+```bash
+gsd-sdk query commit "docs(phase-{X}): complete phase execution" --files .planning/ROADMAP.md .planning/STATE.md .planning/REQUIREMENTS.md {phase_dir}/*-VERIFICATION.md
+```
+</step>
+
+<step name="auto_copy_learnings">
+**Auto-copy phase learnings to global store (when enabled).**
+
+This step runs AFTER phase completion and SUMMARY.md is written. It copies any LEARNINGS.md
+entries from the completed phase to the global learnings store at `~/.gsd/knowledge/`.
+
+**Check config gate:**
+```bash
+GL_ENABLED=$(gsd-sdk query config-get features.global_learnings --raw 2>/dev/null || echo "false")
+```
+
+**If `GL_ENABLED` is not `true`:** Skip this step entirely (feature disabled by default).
+
+**If enabled:**
+
+1. Check if LEARNINGS.md exists in the phase directory (use the `phase_dir` value from init context)
+2. If found, copy to global store:
+```bash
+gsd-sdk query learnings.copy 2>/dev/null || echo "⚠ Learnings copy failed — continuing"
+```
+Copy failure must NOT block phase completion.
+</step>
+
+<step name="close_phase_todos">
+**Auto-close pending todos tagged for this phase (#2433).**
+
+This step runs AFTER `update_roadmap` marks the phase complete. It moves any pending todos that carry `resolves_phase: <current-phase-number>` to the completed directory.
+
+```bash
+PHASE_NUM="${PHASE_NUMBER}"
+PENDING_DIR=".planning/todos/pending"
+COMPLETED_DIR=".planning/todos/completed"
+mkdir -p "$COMPLETED_DIR"
+
+CLOSED=()
+for TODO_FILE in "$PENDING_DIR"/*.md; do
+  [ -f "$TODO_FILE" ] || continue
+  # Extract resolves_phase from YAML frontmatter (first --- block only)
+  RP=$(awk '/^---/{c++;next} c==1 && /^resolves_phase:/{print $2;exit} c==2{exit}' "$TODO_FILE" 2>/dev/null || true)
+  if [ "$RP" = "$PHASE_NUM" ] || [ "$RP" = "\"$PHASE_NUM\"" ]; then
+    mv "$TODO_FILE" "$COMPLETED_DIR/"
+    CLOSED+=("$(basename "$TODO_FILE")")
+  fi
+done
+
+if [ ${#CLOSED[@]} -gt 0 ]; then
+  gsd-sdk query commit "docs(phase-${PHASE_NUMBER}): auto-close ${#CLOSED[@]} todo(s) resolved by this phase" --files .planning/todos/completed/ .planning/STATE.md|| true
+  echo "◆ Closed ${#CLOSED[@]} todo(s) resolved by Phase ${PHASE_NUMBER}:"
+  for f in "${CLOSED[@]}"; do echo "  ✓ $f"; done
+fi
+```
+
+**If no todos have `resolves_phase: <this-phase>`:** Skip silently — this step is always additive and never blocks phase completion.
+</step>
+
+<step name="update_project_md">
+**Evolve PROJECT.md to reflect phase completion (prevents planning document drift — #956):**
+
+PROJECT.md tracks validated requirements, decisions, and current state. Without this step,
+PROJECT.md falls behind silently over multiple phases.
+
+1. Read `.planning/PROJECT.md`
+2. If the file exists and has a `## Validated Requirements` or `## Requirements` section:
+   - Move any requirements validated by this phase from Active → Validated
+   - Add a brief note: `Validated in Phase {X}: {Name}`
+3. If the file has a `## Current State` or similar section:
+   - Update it to reflect this phase's completion (e.g., "Phase {X} complete — {one-liner}")
+4. Update the `Last updated:` footer to today's date
+5. Commit the change:
+
+```bash
+gsd-sdk query commit "docs(phase-{X}): evolve PROJECT.md after phase completion" --files .planning/PROJECT.md
+```
+
+**Skip this step if** `.planning/PROJECT.md` does not exist.
+</step>
+
+<step name="offer_next">
+
+**Exception:** If `gaps_found`, the `verify_phase_goal` step already presents the gap-closure path (`/gsd:plan-phase {X} --gaps`). No additional routing needed — skip auto-advance.
+
+**No-transition check (spawned by auto-advance chain):**
+
+Parse `--no-transition` flag from $ARGUMENTS.
+
+**If `--no-transition` flag present:**
+
+Execute-phase was spawned by plan-phase's auto-advance. Do NOT run transition.md.
+After verification passes and roadmap is updated, return completion status to parent:
+
+```

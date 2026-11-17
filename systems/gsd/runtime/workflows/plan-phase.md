@@ -410,3 +410,353 @@ If "Continue": Proceed. (Non-blocking — planner will note AI-SPEC is absent.)
 ```bash
 FRAMEWORK_LINE=$(grep "Selected Framework:" "${AI_SPEC_FILE}" | head -1)
 ```
+Pass `ai_spec_path` and `framework_line` to planner in step 7 so it can reference the AI design contract.
+
+## 5. Handle Research
+
+**Skip if:** `--gaps` flag or `--skip-research` flag or `--reviews` flag.
+
+### 5.0. Research-Only Modifiers (`--view`, `--research`, prompt)
+
+**Skip if:** `RESEARCH_ONLY` is `false`.
+
+Three branches in research-only mode (`--research-phase <N>`):
+
+1. **`--view`** (or user picks "View" in the prompt below): print `RESEARCH.md` to stdout, no spawn, exit. If `RESEARCH.md` is missing, error with: `--view requires an existing RESEARCH.md; drop --view to spawn the researcher.`
+2. **`--research`** (force-refresh): re-spawn researcher unconditionally — fall through to "Spawn gsd-phase-researcher" below.
+3. **Neither flag AND `has_research=true`:** emit `RESEARCH.md already exists for Phase ${PHASE}.` and prompt the user with three choices: `1. Update — re-spawn researcher and refresh RESEARCH.md`, `2. View — print existing RESEARCH.md and exit (no spawn)`, `3. Skip — exit without spawning or printing`. Map "Update" → fall through to spawn, "View" → set `VIEW_ONLY=true` and emit RESEARCH.md as in (1), "Skip" → exit cleanly. Mirrors the deleted `/gsd-research-phase` standalone's existing-artifact menu (#3042 parity).
+
+```bash
+if [[ "$VIEW_ONLY" == "true" ]]; then
+  [[ -f "$research_path" ]] || { echo "Error: --view requires an existing RESEARCH.md (Phase ${PHASE}). Drop --view to spawn the researcher."; exit 1; }
+  cat "$research_path"; exit 0
+fi
+```
+
+### 5.1. Standard Research Decision
+
+**Skip if** `RESEARCH_ONLY=true` (the research-only mode in 5.0 already determined the path: spawn or exit). Without this guard, an LLM following the workflow could fall through into "use existing, skip to step 6" → planner spawn, violating the research-only contract. **CR #3045 finding: this gate makes the early-exit unreachable from any non-research-only branch.**
+
+**If `has_research` is true (from init) AND no `--research` flag:** Use existing, skip to step 6.
+
+**If RESEARCH.md missing OR `--research` flag:**
+
+**If no explicit flag (`--research` or `--skip-research`) and not `--auto`:**
+Ask the user whether to research, with a contextual recommendation based on the phase:
+
+If `TEXT_MODE` is true, present as a plain-text numbered list:
+```
+Research before planning Phase {X}: {phase_name}?
+
+1. Research first (Recommended) — Investigate domain, patterns, and dependencies before planning. Best for new features, unfamiliar integrations, or architectural changes.
+2. Skip research — Plan directly from context and requirements. Best for bug fixes, simple refactors, or well-understood tasks.
+
+Enter number:
+```
+
+Otherwise use AskUserQuestion:
+```
+AskUserQuestion([
+  {
+    question: "Research before planning Phase {X}: {phase_name}?",
+    header: "Research",
+    multiSelect: false,
+    options: [
+      { label: "Research first (Recommended)", description: "Investigate domain, patterns, and dependencies before planning. Best for new features, unfamiliar integrations, or architectural changes." },
+      { label: "Skip research", description: "Plan directly from context and requirements. Best for bug fixes, simple refactors, or well-understood tasks." }
+    ]
+  }
+])
+```
+
+If user selects "Skip research": skip to step 6.
+
+**If `--auto` and `research_enabled` is false:** Skip research silently (preserves automated behavior).
+
+Display banner:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► RESEARCHING PHASE {X}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+◆ Spawning researcher...
+```
+
+### Spawn gsd-phase-researcher
+
+```bash
+PHASE_DESC=$(gsd-sdk query roadmap.get-phase "${PHASE}" --pick section)
+```
+
+Research prompt:
+
+```markdown
+<objective>
+Research how to implement Phase {phase_number}: {phase_name}
+Answer: "What do I need to know to PLAN this phase well?"
+</objective>
+
+<files_to_read>
+- {context_path} (USER DECISIONS from /gsd:discuss-phase)
+- {requirements_path} (Project requirements)
+- {state_path} (Project decisions and history)
+</files_to_read>
+
+${AGENT_SKILLS_RESEARCHER}
+
+<additional_context>
+**Phase description:** {phase_description}
+**Phase requirement IDs (MUST address):** {phase_req_ids}
+
+**Project instructions:** Read ./CLAUDE.md if exists — follow project-specific guidelines
+**Project skills:** Check .claude/skills/ or .agents/skills/ directory (if either exists) — read SKILL.md files, research should account for project skill patterns
+</additional_context>
+
+<output>
+Write to: {phase_dir}/{phase_num}-RESEARCH.md
+</output>
+```
+
+```
+Agent(
+  prompt=research_prompt,
+  subagent_type="gsd-phase-researcher",
+  model="{researcher_model}",
+  description="Research Phase {phase}"
+)
+```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
+### Handle Researcher Return
+
+- **`## RESEARCH COMPLETE`:** Display confirmation, continue to step 6
+- **`## RESEARCH BLOCKED`:** Display blocker, offer: 1) Provide context, 2) Skip research, 3) Abort
+
+### Research-Only Early Exit (`--research-phase`)
+
+**Skip if:** `RESEARCH_ONLY` is `false` (the default).
+
+**If `RESEARCH_ONLY=true`:** the user invoked `/gsd:plan-phase --research-phase <N>` for research-only mode. Do **not** continue to Section 5.5+ (validation strategy, planner, plan-checker, verification, gaps, bounce, post-planning-gaps). Print the research-complete summary and exit cleanly:
+
+```text
+✓ Research-only mode complete (#3042)
+
+  Phase:       ${PHASE}
+  RESEARCH.md: ${research_path}
+
+Re-run /gsd:plan-phase ${PHASE} to plan the phase using this research,
+or /gsd:plan-phase ${PHASE} --research to refresh research and plan.
+```
+
+This exits the workflow. The planner / plan-checker / verifier blocks below are skipped.
+
+## 5.5. Create Validation Strategy
+
+Skip if `nyquist_validation_enabled` is false OR `research_enabled` is false.
+
+If `research_enabled` is false and `nyquist_validation_enabled` is true: warn "Nyquist validation enabled but research disabled — VALIDATION.md cannot be created without RESEARCH.md. Plans will lack validation requirements (Dimension 8)." Continue to step 6.
+
+**But Nyquist is not applicable for this run** when all of the following are true:
+- `research_enabled` is false
+- `has_research` is false
+- no `--research` flag was provided
+
+In that case: **skip validation-strategy creation entirely**. Do **not** expect `RESEARCH.md` or `VALIDATION.md` for this run, and continue to Step 6.
+
+```bash
+grep -l "## Validation Architecture" "${PHASE_DIR}"/*-RESEARCH.md 2>/dev/null || true
+```
+
+**If found:**
+1. Read template: `~/.claude/get-shit-done/templates/VALIDATION.md`
+2. Write to `${PHASE_DIR}/${PADDED_PHASE}-VALIDATION.md` (use Write tool)
+3. Fill frontmatter: `{N}` → phase number, `{phase-slug}` → slug, `{date}` → current date
+4. Verify:
+```bash
+test -f "${PHASE_DIR}/${PADDED_PHASE}-VALIDATION.md" && echo "VALIDATION_CREATED=true" || echo "VALIDATION_CREATED=false"
+```
+5. If `VALIDATION_CREATED=false`: STOP — do not proceed to Step 6
+6. If `commit_docs`: `commit "docs(phase-${PHASE}): add validation strategy"`
+
+**If not found:** Warn and continue — plans may fail Dimension 8.
+
+## 5.55. Security Threat Model Gate
+
+> Skip if `workflow.security_enforcement` is explicitly `false`. Absent = enabled.
+
+```bash
+SECURITY_CFG=$(gsd-sdk query config-get workflow.security_enforcement --raw 2>/dev/null || echo "true")
+SECURITY_ASVS=$(gsd-sdk query config-get workflow.security_asvs_level --raw 2>/dev/null || echo "1")
+SECURITY_BLOCK=$(gsd-sdk query config-get workflow.security_block_on --raw 2>/dev/null || echo "high")
+```
+
+**If `SECURITY_CFG` is `false`:** Skip to step 5.6.
+
+**If `SECURITY_CFG` is `true`:** Display banner:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ GSD ► SECURITY THREAT MODEL REQUIRED (ASVS L{SECURITY_ASVS})
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Each PLAN.md must include a <threat_model> block.
+Block on: {SECURITY_BLOCK} severity threats.
+Opt out: set security_enforcement: false in .planning/config.json
+```
+
+Continue to step 5.6. Security config is passed to the planner in step 8.
+
+## 5.6. UI Design Contract Gate
+
+> Skip if `workflow.ui_phase` is explicitly `false` AND `workflow.ui_safety_gate` is explicitly `false` in `.planning/config.json`. If keys are absent, treat as enabled.
+
+```bash
+UI_PHASE_CFG=$(gsd-sdk query config-get workflow.ui_phase 2>/dev/null || echo "true")
+UI_GATE_CFG=$(gsd-sdk query config-get workflow.ui_safety_gate 2>/dev/null || echo "true")
+```
+
+**If both are `false`:** Skip to step 6.
+
+Check if phase has frontend indicators:
+
+```bash
+PHASE_SECTION=$(gsd-sdk query roadmap.get-phase "${PHASE}" 2>/dev/null)
+# Shell-free word-boundary gate (#3718): Node.js helper — no locale env-var dependency.
+# Reads via stdin to avoid OS ARG_MAX limits on large phase text.
+# Path anchored to repo root; falls back to CWD if git is unavailable
+# Exit codes mirror grep: 0 = UI tokens found, 1 = not found.
+GSD_REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ".")
+printf '%s' "$PHASE_SECTION" | node "${GSD_REPO_ROOT}/bin/lib/ui-safety-gate.cjs" > /dev/null 2>&1
+HAS_UI=$?
+```
+
+**If `HAS_UI` is 0 (frontend indicators found):**
+
+Check for existing UI-SPEC:
+```bash
+UI_SPEC_FILE=$(ls "${PHASE_DIR}"/*-UI-SPEC.md 2>/dev/null | head -1)
+```
+
+**If UI-SPEC.md found:** Set `UI_SPEC_PATH=$UI_SPEC_FILE`. Display: `Using UI design contract: ${UI_SPEC_PATH}`
+
+**If UI-SPEC.md missing AND `--skip-ui` flag is present in $ARGUMENTS:** Skip silently to step 6.
+
+**If UI-SPEC.md missing AND `UI_GATE_CFG` is `true`:**
+
+Read ephemeral chain flag (same field as `check.auto-mode` → `auto_chain_active`):
+```bash
+AUTO_CHAIN=$(gsd-sdk query check auto-mode --pick auto_chain_active 2>/dev/null || echo "false")
+```
+
+**If `AUTO_CHAIN` is `true` (running inside a `--chain` or `--auto` pipeline):**
+
+Auto-generate UI-SPEC without prompting:
+```
+Skill(skill="gsd-ui-phase", args="${PHASE} --auto ${GSD_WS}")
+```
+After `gsd-ui-phase` returns, re-read:
+```bash
+UI_SPEC_FILE=$(ls "${PHASE_DIR}"/*-UI-SPEC.md 2>/dev/null | head -1)
+UI_SPEC_PATH="${UI_SPEC_FILE}"
+```
+Continue to step 6.
+
+**If `AUTO_CHAIN` is `false` (manual invocation):**
+
+Output this markdown directly (not as a code block):
+
+```
+## ⚠ UI-SPEC.md missing for Phase {N}
+▶ Recommended next step:
+`/gsd:ui-phase {N} ${GSD_WS}` — generate UI design contract before planning
+───────────────────────────────────────────────
+Also available:
+- `/gsd:plan-phase {N} --skip-ui ${GSD_WS}` — plan without UI-SPEC (not recommended for frontend phases)
+```
+
+**Exit the plan-phase workflow. Do not continue.**
+
+**If `HAS_UI` is 1 (no frontend indicators):** Skip silently to step 5.7.
+
+## 5.7. Schema Push Detection Gate
+
+> Detects schema-relevant files in the phase scope and injects a mandatory `[BLOCKING]` schema push task into the plan. Prevents false-positive verification where build/types pass because TypeScript types come from config, not the live database.
+
+Check if any files in the phase scope match schema patterns:
+
+```bash
+PHASE_SECTION=$(gsd-sdk query roadmap.get-phase "${PHASE}" --pick section 2>/dev/null)
+```
+
+Scan `PHASE_SECTION`, `CONTEXT.md` (if loaded), and `RESEARCH.md` (if exists) for file paths matching these ORM patterns:
+
+| ORM | File Patterns |
+|-----|--------------|
+| Payload CMS | `src/collections/**/*.ts`, `src/globals/**/*.ts` |
+| Prisma | `prisma/schema.prisma`, `prisma/schema/*.prisma` |
+| Drizzle | `drizzle/schema.ts`, `src/db/schema.ts`, `drizzle/*.ts` |
+| Supabase | `supabase/migrations/*.sql` |
+| TypeORM | `src/entities/**/*.ts`, `src/migrations/**/*.ts` |
+
+Also check if any existing PLAN.md files for this phase already reference these file patterns in `files_modified`.
+
+**If schema-relevant files detected:**
+
+Set `SCHEMA_PUSH_REQUIRED=true` and `SCHEMA_ORM={detected_orm}`.
+
+Determine the push command for the detected ORM:
+
+| ORM | Push Command | Non-TTY Workaround |
+|-----|-------------|-------------------|
+| Payload CMS | `npx payload migrate` | `CI=true PAYLOAD_MIGRATING=true npx payload migrate` |
+| Prisma | `npx prisma db push` | `npx prisma db push --accept-data-loss` (if destructive) |
+| Drizzle | `npx drizzle-kit push` | `npx drizzle-kit push` |
+| Supabase | `supabase db push` | Set `SUPABASE_ACCESS_TOKEN` env var |
+| TypeORM | `npx typeorm migration:run` | `npx typeorm migration:run -d src/data-source.ts` |
+
+Inject the following into the planner prompt (step 8) as an additional constraint:
+
+```markdown
+<schema_push_requirement>
+**[BLOCKING] Schema Push Required**
+
+This phase modifies schema-relevant files ({detected_files}). The planner MUST include
+a `[BLOCKING]` task that runs the database schema push command AFTER all schema file
+modifications are complete but BEFORE verification.
+
+- ORM detected: {SCHEMA_ORM}
+- Push command: {push_command}
+- Non-TTY workaround: {env_hint}
+- If push requires interactive prompts that cannot be suppressed, flag the task for
+  manual intervention with `autonomous: false`
+
+This task is mandatory — the phase CANNOT pass verification without it. Build and
+type checks will pass without the push (types come from config, not the live database),
+creating a false-positive verification state.
+</schema_push_requirement>
+```
+
+Display: `Schema files detected ({SCHEMA_ORM}) — [BLOCKING] push task will be injected into plans`
+
+**If no schema-relevant files detected:** Skip silently to step 6.
+
+## 6. Check Existing Plans
+
+```bash
+ls "${PHASE_DIR}"/*-PLAN.md 2>/dev/null || true
+```
+
+**If exists AND `--reviews` flag:** Skip prompt — go straight to replanning (the purpose of `--reviews` is to replan with review feedback).
+
+**If exists AND no `--reviews` flag:** Offer: 1) Add more plans, 2) View existing, 3) Replan from scratch.
+
+## 7. Use Context Paths from INIT
+
+Extract from INIT JSON:
+
+```bash
+_gsd_field() { node -e "const o=JSON.parse(process.argv[1]); const v=o[process.argv[2]]; process.stdout.write(v==null?'':String(v))" "$1" "$2"; }
+STATE_PATH=$(_gsd_field "$INIT" state_path)
+ROADMAP_PATH=$(_gsd_field "$INIT" roadmap_path)
+REQUIREMENTS_PATH=$(_gsd_field "$INIT" requirements_path)

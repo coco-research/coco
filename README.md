@@ -129,7 +129,7 @@ Super Intelligence summons a panel inside the session you already have open. Eve
 
 ```bash
 /SI-Decide "Should we migrate our database to pgvector?"
-/SI-AI-Decide "Which embedding model gives the best cost/performance?"
+/SI-AI-Decide "Which embedding model should we use for semantic search over our documents?"
 /SI-Eng-Pre-Mortem "Review our zero-downtime cache migration strategy"
 /SI-GRC-Review "Check this customer onboarding flow for GDPR compliance"
 ```

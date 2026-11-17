@@ -5,7 +5,7 @@
 #   2. Copy this file to that repo as `Formula/coco.rb`
 #   3. Tag a release on coco-research/coco with `v1.0.0`
 #   4. Update sha256 below to match the release tarball
-#   5. Users install via: `brew install coco-research/coco/coco`
+#   5. Once the tap exists, users install via it. Until then: `npx cocosuperintelligence`
 #
 # Distribution path B — homebrew-core (later, requires popularity threshold):
 #   - Submit this formula to https://github.com/Homebrew/homebrew-core

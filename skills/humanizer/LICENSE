@@ -22,6 +22,5 @@ SOFTWARE.
 
 ---
 
-Vendored from https://github.com/blader/humanizer (pinned at v2.8.0; upstream
-is currently at v2.9.x — ordinary version drift, not a fork or different
-project).
+Vendored from https://github.com/blader/humanizer (pinned at v3.1.0, commit
+225a6f39ac85).

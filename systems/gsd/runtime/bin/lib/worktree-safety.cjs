@@ -829,3 +829,42 @@ function defaultReadDirSafe(dir) {
 }
 
 function defaultReadFileSafe(file) {
+  try { return fs.readFileSync(file, 'utf8'); } catch { return null; }
+}
+
+function defaultMtimeSafe(file) {
+  try { return fs.statSync(file).mtime; } catch { return null; }
+}
+
+function cmdWorktreeReapOrphans(cwd) {
+  let result;
+  try {
+    result = reapOrphanWorktrees(cwd);
+  } catch (err) {
+    // Surface failure as a one-line warning; keep exit-zero so workflows don't break.
+    process.stderr.write(`[gsd] worktree.reap-orphans failed: ${err && err.message ? err.message : String(err)}\n`);
+    result = [];
+  }
+  const skippedCount = result.filter((r) => r.status === 'skipped').length;
+  if (skippedCount > 0) {
+    // Surface skipped entries so operators are aware of unresolved orphans.
+    process.stderr.write(`[gsd] worktree.reap-orphans: ${skippedCount} orphan(s) skipped (run with DEBUG=1 for details)\n`);
+  }
+  process.stdout.write(`${JSON.stringify({ ok: true, reaped: result.filter((r) => r.status === 'reaped').length, entries: result }, null, 2)}\n`);
+}
+
+module.exports = {
+  resolveWorktreeContext,
+  parseWorktreePorcelain,
+  planWorktreePrune,
+  executeWorktreePrunePlan,
+  listLinkedWorktreePaths,
+  inspectWorktreeHealth,
+  snapshotWorktreeInventory,
+  normalizeCleanupManifest,
+  planWorktreeWaveCleanup,
+  executeWorktreeWaveCleanupPlan,
+  cmdWorktreeCleanupWave,
+  reapOrphanWorktrees,
+  cmdWorktreeReapOrphans,
+};

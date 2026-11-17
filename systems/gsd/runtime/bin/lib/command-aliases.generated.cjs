@@ -289,3 +289,353 @@ const INIT_COMMAND_ALIASES = [
     ],
     "subcommand": "resume",
     "mutation": false
+  },
+  {
+    "canonical": "init.verify-work",
+    "aliases": [
+      "init verify-work"
+    ],
+    "subcommand": "verify-work",
+    "mutation": false
+  },
+  {
+    "canonical": "init.phase-op",
+    "aliases": [
+      "init phase-op"
+    ],
+    "subcommand": "phase-op",
+    "mutation": false
+  },
+  {
+    "canonical": "init.todos",
+    "aliases": [
+      "init todos"
+    ],
+    "subcommand": "todos",
+    "mutation": false
+  },
+  {
+    "canonical": "init.milestone-op",
+    "aliases": [
+      "init milestone-op"
+    ],
+    "subcommand": "milestone-op",
+    "mutation": false
+  },
+  {
+    "canonical": "init.map-codebase",
+    "aliases": [
+      "init map-codebase"
+    ],
+    "subcommand": "map-codebase",
+    "mutation": false
+  },
+  {
+    "canonical": "init.progress",
+    "aliases": [
+      "init progress"
+    ],
+    "subcommand": "progress",
+    "mutation": false
+  },
+  {
+    "canonical": "init.manager",
+    "aliases": [
+      "init manager"
+    ],
+    "subcommand": "manager",
+    "mutation": false
+  },
+  {
+    "canonical": "init.new-workspace",
+    "aliases": [
+      "init new-workspace"
+    ],
+    "subcommand": "new-workspace",
+    "mutation": false
+  },
+  {
+    "canonical": "init.list-workspaces",
+    "aliases": [
+      "init list-workspaces"
+    ],
+    "subcommand": "list-workspaces",
+    "mutation": false
+  },
+  {
+    "canonical": "init.remove-workspace",
+    "aliases": [
+      "init remove-workspace"
+    ],
+    "subcommand": "remove-workspace",
+    "mutation": false
+  }
+];
+
+const PHASE_COMMAND_ALIASES = [
+  {
+    "canonical": "phase.list-plans",
+    "aliases": [
+      "phase list-plans"
+    ],
+    "subcommand": "list-plans",
+    "mutation": false
+  },
+  {
+    "canonical": "phase.list-artifacts",
+    "aliases": [
+      "phase list-artifacts"
+    ],
+    "subcommand": "list-artifacts",
+    "mutation": false
+  },
+  {
+    "canonical": "phase.next-decimal",
+    "aliases": [
+      "phase next-decimal"
+    ],
+    "subcommand": "next-decimal",
+    "mutation": false
+  },
+  {
+    "canonical": "phase.add",
+    "aliases": [
+      "phase add"
+    ],
+    "subcommand": "add",
+    "mutation": true
+  },
+  {
+    "canonical": "phase.add-batch",
+    "aliases": [
+      "phase add-batch"
+    ],
+    "subcommand": "add-batch",
+    "mutation": true
+  },
+  {
+    "canonical": "phase.insert",
+    "aliases": [
+      "phase insert"
+    ],
+    "subcommand": "insert",
+    "mutation": true
+  },
+  {
+    "canonical": "phase.remove",
+    "aliases": [
+      "phase remove"
+    ],
+    "subcommand": "remove",
+    "mutation": true
+  },
+  {
+    "canonical": "phase.complete",
+    "aliases": [
+      "phase complete"
+    ],
+    "subcommand": "complete",
+    "mutation": true
+  },
+  {
+    "canonical": "phase.scaffold",
+    "aliases": [
+      "phase scaffold"
+    ],
+    "subcommand": "scaffold",
+    "mutation": true
+  }
+];
+
+const PHASES_COMMAND_ALIASES = [
+  {
+    "canonical": "phases.list",
+    "aliases": [
+      "phases list"
+    ],
+    "subcommand": "list",
+    "mutation": false
+  },
+  {
+    "canonical": "phases.clear",
+    "aliases": [
+      "phases clear"
+    ],
+    "subcommand": "clear",
+    "mutation": true
+  },
+  {
+    "canonical": "phases.archive",
+    "aliases": [
+      "phases archive"
+    ],
+    "subcommand": "archive",
+    "mutation": true
+  }
+];
+
+const VALIDATE_COMMAND_ALIASES = [
+  {
+    "canonical": "validate.consistency",
+    "aliases": [
+      "validate consistency"
+    ],
+    "subcommand": "consistency",
+    "mutation": false
+  },
+  {
+    "canonical": "validate.health",
+    "aliases": [
+      "validate health"
+    ],
+    "subcommand": "health",
+    "mutation": false
+  },
+  {
+    "canonical": "validate.agents",
+    "aliases": [
+      "validate agents"
+    ],
+    "subcommand": "agents",
+    "mutation": false
+  },
+  {
+    "canonical": "validate.context",
+    "aliases": [
+      "validate context"
+    ],
+    "subcommand": "context",
+    "mutation": false
+  }
+];
+
+const ROADMAP_COMMAND_ALIASES = [
+  {
+    "canonical": "roadmap.analyze",
+    "aliases": [
+      "roadmap analyze"
+    ],
+    "subcommand": "analyze",
+    "mutation": false
+  },
+  {
+    "canonical": "roadmap.get-phase",
+    "aliases": [
+      "roadmap get-phase"
+    ],
+    "subcommand": "get-phase",
+    "mutation": false
+  },
+  {
+    "canonical": "roadmap.update-plan-progress",
+    "aliases": [
+      "roadmap update-plan-progress"
+    ],
+    "subcommand": "update-plan-progress",
+    "mutation": true
+  },
+  {
+    "canonical": "roadmap.annotate-dependencies",
+    "aliases": [
+      "roadmap annotate-dependencies"
+    ],
+    "subcommand": "annotate-dependencies",
+    "mutation": true
+  }
+];
+
+const NON_FAMILY_COMMAND_ALIASES = [
+  {
+    "canonical": "agent.classify-failure",
+    "aliases": [
+      "agent classify-failure"
+    ],
+    "mutation": false
+  },
+  {
+    "canonical": "check-commit",
+    "aliases": [],
+    "mutation": true
+  },
+  {
+    "canonical": "check.decision-coverage-plan",
+    "aliases": [
+      "check decision-coverage-plan"
+    ],
+    "mutation": false
+  },
+  {
+    "canonical": "check.decision-coverage-verify",
+    "aliases": [
+      "check decision-coverage-verify"
+    ],
+    "mutation": false
+  },
+  {
+    "canonical": "commit",
+    "aliases": [],
+    "mutation": true
+  },
+  {
+    "canonical": "commit-to-subrepo",
+    "aliases": [],
+    "mutation": true
+  },
+  {
+    "canonical": "config-ensure-section",
+    "aliases": [],
+    "mutation": true
+  },
+  {
+    "canonical": "config-new-project",
+    "aliases": [],
+    "mutation": true
+  },
+  {
+    "canonical": "config-set",
+    "aliases": [],
+    "mutation": true
+  },
+  {
+    "canonical": "config-set-model-profile",
+    "aliases": [],
+    "mutation": true
+  },
+  {
+    "canonical": "docs-init",
+    "aliases": [],
+    "mutation": true
+  },
+  {
+    "canonical": "frontmatter.get",
+    "aliases": [],
+    "mutation": false
+  },
+  {
+    "canonical": "frontmatter.merge",
+    "aliases": [],
+    "mutation": true
+  },
+  {
+    "canonical": "frontmatter.set",
+    "aliases": [],
+    "mutation": true
+  },
+  {
+    "canonical": "frontmatter.validate",
+    "aliases": [
+      "frontmatter validate"
+    ],
+    "mutation": true
+  },
+  {
+    "canonical": "generate-claude-md",
+    "aliases": [],
+    "mutation": true
+  },
+  {
+    "canonical": "generate-claude-profile",
+    "aliases": [],
+    "mutation": true
+  },
+  {

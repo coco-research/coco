@@ -208,3 +208,41 @@ The one-liner should tell someone what actually shipped.
 - **Verification:** Password hash test passes, plaintext never stored
 - **Committed in:** abc123f (Task 2 commit)
 
+**2. [Rule 3 - Blocking] Installed missing jose dependency**
+- **Found during:** Task 4 (JWT token generation)
+- **Issue:** jose package not in package.json, import failing
+- **Fix:** Ran `npm install jose`
+- **Files modified:** package.json, package-lock.json
+- **Verification:** Import succeeds, build passes
+- **Committed in:** def456g (Task 4 commit)
+
+---
+
+**Total deviations:** 2 auto-fixed (1 missing critical, 1 blocking)
+**Impact on plan:** Both auto-fixes essential for security and functionality. No scope creep.
+
+## Issues Encountered
+- jsonwebtoken CommonJS import failed in Edge runtime - switched to jose (planned library change, worked as expected)
+
+## Next Phase Readiness
+- Auth foundation complete, ready for feature development
+- User registration endpoint needed before public launch
+
+---
+*Phase: 01-foundation*
+*Completed: 2025-01-15*
+```
+</example>
+
+<guidelines>
+**Frontmatter:** MANDATORY - complete all fields. Enables automatic context assembly for future planning.
+
+**One-liner:** Must be substantive. "JWT auth with refresh rotation using jose library" not "Authentication implemented".
+
+**Decisions section:**
+- Key decisions made during execution with rationale
+- Extracted to STATE.md accumulated context
+- Use "None - followed plan as specified" if no deviations
+
+**After creation:** STATE.md updated with position, decisions, issues.
+</guidelines>

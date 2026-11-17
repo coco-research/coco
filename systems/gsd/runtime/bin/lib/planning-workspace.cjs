@@ -291,3 +291,125 @@ function withPlanningLock(cwd, fn) {
             fs.unlinkSync(lockPath);
             continue; // retry
           }
+        } catch { continue; }
+
+        // Wait and retry (cross-platform, no shell dependency)
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 100);
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  // Timeout — stale-lock recovery, then re-acquire atomically before entering critical section.
+  try { fs.unlinkSync(lockPath); } catch { /* ok */ }
+  return runWithHeldLock();
+}
+
+function createPlanningWorkspace(cwd, opts = {}) {
+  return {
+    paths: {
+      dir(ws, project) {
+        return planningDir(cwd, ws, project);
+      },
+      root() {
+        return planningRoot(cwd);
+      },
+      all(ws) {
+        return planningPaths(cwd, ws);
+      },
+    },
+    activeWorkstream: {
+      get() {
+        const adapter = pickActiveWorkstreamAdapter(cwd, opts);
+        if (!adapter) return null;
+
+        const name = adapter.read();
+        if (!name || !validateWorkstreamName(name)) {
+          adapter.clear();
+          return null;
+        }
+
+        const wsDir = path.join(planningRoot(cwd), 'workstreams', name);
+        if (!fs.existsSync(wsDir)) {
+          adapter.clear();
+          return null;
+        }
+
+        return name;
+      },
+      set(name) {
+        const adapter = pickActiveWorkstreamAdapter(cwd, opts);
+        if (!adapter) return;
+
+        if (!name) {
+          adapter.clear();
+          return;
+        }
+        if (!validateWorkstreamName(name)) {
+          throw new Error('Invalid workstream name: must be alphanumeric, hyphens, underscores, or dots');
+        }
+
+        const wsDir = path.join(planningRoot(cwd), 'workstreams', name);
+        platformEnsureDir(wsDir);
+        adapter.write(name);
+      },
+      clear() {
+        const adapter = pickActiveWorkstreamAdapter(cwd, opts);
+        if (!adapter) return;
+        adapter.clear();
+      },
+    },
+  };
+}
+
+function getActiveWorkstream(cwd) {
+  return createPlanningWorkspace(cwd).activeWorkstream.get();
+}
+
+function setActiveWorkstream(cwd, name) {
+  createPlanningWorkspace(cwd).activeWorkstream.set(name);
+}
+
+/**
+ * Locate the CONTEXT.md file in a phase directory, handling both the bare
+ * form (`CONTEXT.md`) and the padded-prefix convention (`NN-CONTEXT.md`,
+ * `NN.N-CONTEXT.md`, etc.) used by gsd-discuss-phase output.
+ *
+ * Returns the filename (not the full path) of the first match, or null if
+ * no CONTEXT.md exists in the directory.
+ *
+ * Canonical dual-form predicate extracted here to eliminate the 5-site
+ * duplication that previously existed across init.cjs, roadmap.cjs,
+ * core.cjs, gap-checker.cjs (#3739).
+ *
+ * @param {string|string[]} absDirOrFiles - Absolute path to the phase directory,
+ *   OR an already-read files array (avoids a redundant readdirSync at call sites
+ *   that already hold a directory listing).
+ * @returns {string|null}
+ */
+function findContextMdIn(absDirOrFiles) {
+  try {
+    const files = Array.isArray(absDirOrFiles)
+      ? absDirOrFiles
+      : fs.readdirSync(absDirOrFiles);
+    if (files.includes('CONTEXT.md')) return 'CONTEXT.md';
+    return files.find(f => f.endsWith('-CONTEXT.md')) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+module.exports = {
+  createPlanningWorkspace,
+  createSharedPointerAdapter,
+  createSessionScopedPointerAdapter,
+  createMemoryPointerAdapter,
+  planningDir,
+  planningRoot,
+  planningPaths,
+  withPlanningLock,
+  getActiveWorkstream,
+  setActiveWorkstream,
+  findContextMdIn,
+};

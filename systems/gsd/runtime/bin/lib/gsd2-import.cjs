@@ -499,3 +499,16 @@ module.exports = {
   writePlanningDir,
   cmdFromGsd2,
   // Exported for unit tests
+  parseSlicesFromRoadmap,
+  parseMilestoneTitle,
+  parseTaskTitle,
+  parseTaskDescription,
+  parseTaskMustHaves,
+  buildPlanMd,
+  buildSummaryMd,
+  buildContextMd,
+  buildRoadmapMd,
+  buildStateMd,
+  slugify,
+  zeroPad,
+};

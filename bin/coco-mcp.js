@@ -6,6 +6,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const si = require('./coco-mcp-si');
 
 const SUPPORTED_PROTOCOLS = ['2025-06-18', '2025-03-26', '2024-11-05'];
 const DEFAULT_PROTOCOL = '2025-06-18';
@@ -320,6 +321,9 @@ const BASE_TOOLS = [
   },
 ];
 
+const ALL_TOOLS = BASE_TOOLS.concat(si.siTools(READ_ONLY_ANNOTATIONS));
+const SI_HELPERS = { validLookupKey, isInsideRoot, parseFrontmatter, safeListDir };
+
 function createServerState(rawCocoDir) {
   let cocoDir = null;
   if (rawCocoDir) {
@@ -328,11 +332,13 @@ function createServerState(rawCocoDir) {
       if (hasDir(path.join(rp, 'skills'))) cocoDir = rp;
     } catch (_) { cocoDir = null; }
   }
-  let skillIndex = null;
+  let skillIndex = null, siIndex = null, promptIndex = null;
   const maxBytes = resolveMaxBytes();
   const pkgVersion = readPkgVersion(cocoDir);
   const getIndex = () => (skillIndex || (skillIndex = buildSkillIndex(cocoDir)));
-  return { cocoDir, maxBytes, pkgVersion, getIndex };
+  const getSi = () => (siIndex || (siIndex = si.buildSiIndex(cocoDir, SI_HELPERS)));
+  const getPrompts = () => (promptIndex || (promptIndex = si.buildPromptIndex(cocoDir, getIndex(), getSi(), SI_HELPERS)));
+  return { cocoDir, maxBytes, pkgVersion, getIndex, getSi, getPrompts };
 }
 
 function handleRpc(state, req) {
@@ -352,7 +358,11 @@ function handleRpc(state, req) {
         id,
         result: {
           protocolVersion: SUPPORTED_PROTOCOLS.includes(reqProto) ? reqProto : DEFAULT_PROTOCOL,
-          capabilities: { tools: { listChanged: false }, resources: { subscribe: false, listChanged: false } },
+          capabilities: {
+            tools: { listChanged: false },
+            resources: { subscribe: false, listChanged: false },
+            prompts: { listChanged: false },
+          },
           serverInfo: { name: 'coco', title: 'Coco Super Intelligence', version: state.pkgVersion },
         },
       };
@@ -360,11 +370,11 @@ function handleRpc(state, req) {
     case 'ping':
       return { jsonrpc: '2.0', id, result: {} };
     case 'tools/list':
-      return { jsonrpc: '2.0', id, result: { tools: BASE_TOOLS } };
+      return { jsonrpc: '2.0', id, result: { tools: ALL_TOOLS } };
     case 'tools/call': {
       const toolName = params.name;
       const args = (params.arguments && typeof params.arguments === 'object' && !Array.isArray(params.arguments)) ? params.arguments : {};
-      if (toolName !== 'coco_search' && toolName !== 'coco_skill') {
+      if (!ALL_TOOLS.some((t) => t.name === toolName)) {
         return { jsonrpc: '2.0', id, error: { code: -32602, message: `Unknown tool: ${String(toolName || '')}` } };
       }
       if (!state.cocoDir) {
@@ -380,17 +390,61 @@ function handleRpc(state, req) {
         const build = (t) => ({ jsonrpc: '2.0', id, result: { content: [{ type: 'text', text: t }] } });
         return build(fitEnvelopeText(raw, maxBytes, build));
       }
-      const res = lookupSkill(state.getIndex(), args.name);
+      if (toolName === 'coco_skill') {
+        const res = lookupSkill(state.getIndex(), args.name);
+        if (!res.ok) return { jsonrpc: '2.0', id, result: { isError: true, content: [{ type: 'text', text: res.message }] } };
+        const build = (t) => ({ jsonrpc: '2.0', id, result: { content: [{ type: 'text', text: t }] } });
+        return build(fitEnvelopeText(res.content, maxBytes, build));
+      }
+      if (toolName === 'coco_persona') {
+        const res = si.callPersona(state.getSi(), args, SI_HELPERS);
+        if (!res.ok) return { jsonrpc: '2.0', id, result: { isError: true, content: [{ type: 'text', text: res.message }] } };
+        const build = (t) => ({ jsonrpc: '2.0', id, result: { content: [{ type: 'text', text: t }] } });
+        return build(fitEnvelopeText(res.text, maxBytes, build));
+      }
+      const res = si.callBoard(state.getSi(), args, SI_HELPERS);
       if (!res.ok) return { jsonrpc: '2.0', id, result: { isError: true, content: [{ type: 'text', text: res.message }] } };
-      const build = (t) => ({ jsonrpc: '2.0', id, result: { content: [{ type: 'text', text: t }] } });
-      return build(fitEnvelopeText(res.content, maxBytes, build));
+      const build = (t) => ({
+        jsonrpc: '2.0',
+        id,
+        result: maxBytes >= 16384
+          ? { content: [{ type: 'text', text: t }], structuredContent: res.structured }
+          : { content: [{ type: 'text', text: t }] },
+      });
+      return build(fitEnvelopeText(res.text, maxBytes, build));
+    }
+    case 'prompts/list': {
+      if (!state.cocoDir) return { jsonrpc: '2.0', id, result: { prompts: [] } };
+      const pIdx = state.getPrompts();
+      const start = Math.max(0, parseInt(params.cursor, 10) || 0);
+      const page = 120;
+      const prompts = pIdx.list.slice(start, start + page).map((p) => ({
+        name: p.name, description: p.description, arguments: p.arguments,
+      }));
+      const result = { prompts };
+      if (start + page < pIdx.list.length) result.nextCursor = String(start + page);
+      return { jsonrpc: '2.0', id, result };
+    }
+    case 'prompts/get': {
+      if (!state.cocoDir) return { jsonrpc: '2.0', id, error: { code: -32002, message: MISSING_CHECKOUT_MSG } };
+      const res = si.getPrompt(state.getPrompts(), state.cocoDir, params.name, params.arguments, SI_HELPERS);
+      if (!res.ok) return { jsonrpc: '2.0', id, error: { code: res.code, message: res.message } };
+      const build = (t) => ({
+        jsonrpc: '2.0',
+        id,
+        result: { description: res.entry.description, messages: [{ role: 'user', content: { type: 'text', text: t } }] },
+      });
+      return build(fitEnvelopeText(res.text, maxBytes, build));
     }
     case 'resources/templates/list':
       return {
         jsonrpc: '2.0',
         id,
         result: {
-          resourceTemplates: [{ uriTemplate: 'coco://skill/{name}', name: 'Coco Skill', description: 'Read an allowlisted Coco skill or engineering guide by name.', mimeType: 'text/markdown' }],
+          resourceTemplates: [
+            { uriTemplate: 'coco://skill/{name}', name: 'Coco Skill', description: 'Read an allowlisted Coco skill or engineering guide by name.', mimeType: 'text/markdown' },
+            { uriTemplate: 'coco://persona/{department}/{name}', name: 'Coco Persona', description: 'Read an allowlisted Super Intelligence persona card by department and slug.', mimeType: 'text/markdown' },
+          ],
         },
       };
     case 'resources/list': {
@@ -407,8 +461,20 @@ function handleRpc(state, req) {
     }
     case 'resources/read': {
       const uri = typeof params.uri === 'string' ? params.uri : '';
+      if (uri.startsWith('coco://persona/')) {
+        if (!state.cocoDir) return { jsonrpc: '2.0', id, error: { code: -32002, message: MISSING_CHECKOUT_MSG } };
+        const rest = uri.slice('coco://persona/'.length);
+        const slash = rest.indexOf('/');
+        if (slash <= 0 || rest.indexOf('/', slash + 1) >= 0) {
+          return { jsonrpc: '2.0', id, error: { code: -32602, message: 'Refused resource URI: expected coco://persona/<department>/<name>.' } };
+        }
+        const pRes = si.readPersonaResource(state.getSi(), rest.slice(0, slash), rest.slice(slash + 1), SI_HELPERS);
+        if (!pRes.ok) return { jsonrpc: '2.0', id, error: { code: pRes.code, message: pRes.message } };
+        const build = (t) => ({ jsonrpc: '2.0', id, result: { contents: [{ uri: pRes.uri, mimeType: 'text/markdown', text: t }] } });
+        return build(fitEnvelopeText(pRes.text, maxBytes, build));
+      }
       if (!uri.startsWith('coco://skill/')) {
-        return { jsonrpc: '2.0', id, error: { code: -32602, message: 'Refused resource URI: expected coco://skill/<name>.' } };
+        return { jsonrpc: '2.0', id, error: { code: -32602, message: 'Refused resource URI: expected coco://skill/<name> or coco://persona/<department>/<name>.' } };
       }
       if (!state.cocoDir) return { jsonrpc: '2.0', id, error: { code: -32002, message: MISSING_CHECKOUT_MSG } };
       const res = lookupSkill(state.getIndex(), uri.slice('coco://skill/'.length));

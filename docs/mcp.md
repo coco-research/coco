@@ -40,12 +40,22 @@ If none of those locations contains a `skills/` directory, the server still comp
 |---|---|---|
 | `coco_search` | `query?: string`, `kind?: "skill" \| "command" \| "agent"`, `limit?: 1..50` | Case-insensitive search across allowlisted Coco skills, commands, and specialist agents. Returns matching names, kinds, and one-line descriptions. |
 | `coco_skill` | `name: string` | Returns the `SKILL.md` Markdown body of an allowlisted skill. |
+| `coco_persona` | `department?: string`, `name?: string`, `query?: string`, `limit?: 1..20` | Look up or search Super Intelligence personas and specialist agents with mandatory AI-persona attribution. |
+| `coco_board` | `question: string`, `departments?: string[]`, `size?: 1..16` | Assemble conflict-balanced persona cards across departments plus the structured 4-round debate protocol (zero server model calls). |
+
+## Prompts
+
+`prompts/list` and `prompts/get` expose:
+- Cross-department Super Intelligence commands (`SI`, `SI-Orchestrate`, `SI-Decide`, `SI-Analyse`, `SI-Review`, `SI-Tradeoff`, `SI-Pre-Mortem`, `SI-Post-Mortem`, `SI-Full-Cycle`, `SI-Re-Analyse`, `SI-Plan`, `SI-Design`, `SI-Vote`, `SI-Debug`, `SI-Stress-Test`, `SI-Defend`, `SI-Roast`).
+- Per-department Super Intelligence commands (`SI-Eng-Review`, `SI-AI-Decide`, `SI-GTM-Decide`, etc.).
+- Core Coco skills and shipped slash commands.
 
 ## Resources
 
 | URI / Template | MIME Type | Description |
 |---|---|---|
 | `coco://skill/{name}` | `text/markdown` | Read an allowlisted Coco skill `SKILL.md` by slug. |
+| `coco://persona/{department}/{name}` | `text/markdown` | Read an allowlisted Super Intelligence persona card by department and slug. |
 
 ## Security & Trust Boundary
 

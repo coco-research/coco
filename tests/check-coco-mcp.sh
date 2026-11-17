@@ -175,6 +175,44 @@ function runContentLengthAndSymlinkProbe() {
 
   const capRes = await s.request(18, 'tools/call', { name: 'coco_skill', arguments: { name: 'design-taste-frontend' } });
   assert(!capRes.msg.result.isError && capRes.byteLen <= 32768 && capRes.msg.result.content[0].text.includes('truncated at'), '32 KiB cap failed');
+
+  // Super Intelligence layer: personas, board, persona resources, and MCP prompts.
+  assert(names.includes('coco_persona') && names.includes('coco_board'), 'missing SI tools');
+  assert(init.msg.result.capabilities && init.msg.result.capabilities.prompts, 'missing prompts capability');
+
+  const pHit = await s.request(19, 'tools/call', { name: 'coco_persona', arguments: { department: 'gtm', name: 'april-dunford' } });
+  assert(!pHit.msg.result.isError && pHit.msg.result.content[0].text.includes('April Dunford persona'), 'coco_persona exact lookup failed');
+  const pSearch = await s.request(20, 'tools/call', { name: 'coco_persona', arguments: { query: 'pricing', limit: 3 } });
+  assert(!pSearch.msg.result.isError && pSearch.msg.result.content[0].text.includes('Coco personas'), 'coco_persona search failed');
+  assert((await s.request(21, 'tools/call', { name: 'coco_persona', arguments: { name: '../etc' } })).msg.result.isError === true, 'coco_persona ../etc not refused');
+
+  const pResRead = await s.request(22, 'resources/read', { uri: 'coco://persona/gtm/april-dunford' });
+  assert(pResRead.msg.result.contents[0].text.includes('April Dunford persona'), 'coco://persona read failed');
+  assert((await s.request(23, 'resources/read', { uri: 'coco://persona/../etc/foo' })).msg.error.code === -32602, 'coco://persona ../etc not refused');
+
+  const allPromptNames = [];
+  let cursor = undefined;
+  for (let p = 0; p < 6; p++) {
+    const pr = await s.request(30 + p, 'prompts/list', cursor ? { cursor } : {});
+    for (const item of pr.msg.result.prompts) allPromptNames.push(item.name);
+    cursor = pr.msg.result.nextCursor;
+    if (!cursor) break;
+  }
+  assert(allPromptNames.includes('SI-Decide') && allPromptNames.includes('SI-Eng-Review') && allPromptNames.includes('humanizer'), 'prompts/list missing SI-Decide, SI-Eng-Review, or core skill');
+
+  const siDecide = await s.request(40, 'prompts/get', { name: 'SI-Decide', arguments: { topic: 'pricing?' } });
+  assert(siDecide.msg.result.messages[0].content.text.includes('SI-Decide') && siDecide.msg.result.messages[0].content.text.includes('AI simulation'), 'prompts/get SI-Decide failed');
+  assert((await s.request(41, 'prompts/get', { name: '../etc' })).msg.error.code === -32602, 'prompts/get ../etc not refused');
+
+  const boardRes = await s.request(42, 'tools/call', { name: 'coco_board', arguments: { question: 'pricing?', departments: ['gtm', 'finance', 'strategy'] } });
+  assert(!boardRes.msg.result.isError, 'coco_board returned error');
+  const boardCards = boardRes.msg.result.structuredContent && boardRes.msg.result.structuredContent.persona_cards;
+  assert(Array.isArray(boardCards) && boardCards.length === 3, 'expected 3 persona cards, got ' + (boardCards && boardCards.length));
+  assert(boardRes.msg.result.content[0].text.includes('Structured Debate Protocol') && boardRes.msg.result.content[0].text.includes('AI simulation'), 'board output missing debate protocol or attribution');
+
+  const boardAuto = await s.request(43, 'tools/call', { name: 'coco_board', arguments: { question: 'pricing?', max_departments: 3 } });
+  assert(!boardAuto.msg.result.isError && boardAuto.msg.result.structuredContent.persona_cards.length === 3, 'auto-routed coco_board did not return 3 persona cards');
+
   assert(s.strayCount() === 0, 'notification produced an unexpected reply');
 
   const closedMain = await s.close();
@@ -192,7 +230,8 @@ function runContentLengthAndSymlinkProbe() {
 
   process.stdout.write(
     'handshake ok (protocol ' + proto + ') · tools: coco_search, coco_skill · coco_skill(prd-generator) ' +
-    prdKb + ' KB · ../etc refused · unknown refused · reply cap held · network calls ' + totalNet + '\n'
+    prdKb + ' KB · ../etc refused · unknown refused · reply cap held · network calls ' + totalNet + '\n' +
+    'prompts include SI-Decide · coco_board("pricing?", 3 depts) -> ' + boardCards.length + ' persona cards\n'
   );
 })().catch((err) => { process.stderr.write((err && err.stack ? err.stack : String(err)) + '\n'); process.exit(1); });
 NODE

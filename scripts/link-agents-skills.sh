@@ -70,9 +70,14 @@ frontmatter_name() {
 }
 
 PREV_MANAGED=$'\n'
+PREV_REPO=""
 if [[ -f "$MARKER_FILE" && ! -L "$MARKER_FILE" ]]; then
   while IFS= read -r mline || [[ -n "${mline:-}" ]]; do
     mline=${mline%$'\r'}
+    if [[ "$mline" == "# repo: "* ]]; then
+      PREV_REPO="${mline#\# repo: }"
+      continue
+    fi
     [[ -z "$mline" || "$mline" == \#* ]] && continue
     PREV_MANAGED+="${mline}"$'\n'
   done <"$MARKER_FILE"
@@ -81,13 +86,15 @@ fi
 is_coco_link() {
   local name=$1 dst=$2 target
   [[ -L "$dst" ]] || return 1
-  if [[ "$PREV_MANAGED" == *$'\n'"$name"$'\n'* ]]; then
-    return 0
-  fi
   target=$(readlink "$dst")
   case "${target%/}" in
     "$REPO_ROOT"/*) return 0 ;;
   esac
+  if [[ -n "$PREV_REPO" && "$PREV_MANAGED" == *$'\n'"$name"$'\n'* ]]; then
+    case "${target%/}" in
+      "${PREV_REPO%/}"/*) return 0 ;;
+    esac
+  fi
   return 1
 }
 
@@ -219,12 +226,12 @@ if [[ ${#SYSTEMS[@]} -gt 0 ]]; then
   done
 fi
 
-# 3. Prune stale Coco-managed symlinks from an earlier wider run (never real folders)
+# 3. Prune stale Coco-managed symlinks from an earlier wider run (never real folders or foreign symlinks)
 while IFS= read -r old_name; do
   [[ -n "$old_name" ]] || continue
   if [[ "$NEW_MANAGED" != *$'\n'"$old_name"$'\n'* ]]; then
     old_dst="$AGENTS_SKILLS_DIR/$old_name"
-    if [[ -L "$old_dst" ]]; then
+    if is_coco_link "$old_name" "$old_dst"; then
       if [[ "$DRY_RUN" -eq 1 ]]; then
         note "DRY: rm $old_dst"
       else

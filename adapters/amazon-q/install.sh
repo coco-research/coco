@@ -10,6 +10,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TARGET_HOME="${AMAZON_Q_HOME:-$HOME/.aws/amazon-q}"
+KIRO_HOME="${KIRO_HOME:-$HOME/.kiro}"
 DRY_RUN=0
 SYSTEMS=()
 
@@ -82,5 +83,17 @@ for sys in "${SYSTEMS[@]:-}"; do
     done
   fi
 done
+
+# MCP server: Amazon Q Developer CLI was renamed to Kiro CLI (~/.kiro/settings/mcp.json).
+# Keep updating legacy ~/.aws/amazonq/mcp.json only when already present without ~/.kiro.
+if [[ ! -d "$KIRO_HOME" && ( -f "$HOME/.aws/amazonq/mcp.json" || -d "$HOME/.aws/amazonq" ) ]]; then
+  MCP_CONFIG="$HOME/.aws/amazonq/mcp.json"
+  echo "Note: ~/.kiro not present; using legacy $MCP_CONFIG"
+else
+  MCP_CONFIG="$KIRO_HOME/settings/mcp.json"
+fi
+mcp_args=(--format json --key mcpServers --config "$MCP_CONFIG" --repo-root "$REPO_ROOT")
+[[ $DRY_RUN -eq 1 ]] && mcp_args+=(--dry-run)
+python3 "$REPO_ROOT/scripts/merge-mcp-config.py" "${mcp_args[@]}"
 
 echo "Done."

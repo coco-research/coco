@@ -1,8 +1,9 @@
 {
   "name": "amazon-q",
   "version": "0.1.0",
-  "description": "Wires Coco artifacts into ~/.aws/amazon-q/ for Amazon Q Developer with rules and agent context",
+  "description": "Wires Coco rules, agents, and Kiro CLI MCP server (~/.kiro/settings/mcp.json, formerly Amazon Q)",
   "targets": {
+    "mcp": "~/.kiro/settings/mcp.json",
     "rules": "~/.aws/amazon-q/rules",
     "agents": "~/.aws/amazon-q/agents"
   },

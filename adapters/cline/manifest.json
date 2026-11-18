@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Wires Coco artifacts into ~/.cline/ for Cline VS Code extension with rules and agent context",
   "targets": {
+    "mcp": "~/.cline/data/settings/cline_mcp_settings.json",
     "rules": "~/.cline/rules",
     "agents": "~/.cline/agents"
   },

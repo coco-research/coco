@@ -106,6 +106,9 @@ jobs:
       - name: Validate unknown CLI subcommands fail before any clone
         run: bash tests/check-cli-unknown-subcommand.sh
 
+      - name: Vendor drift weekly workflow and issue sync helper
+        run: bash tests/check-vendor-drift-workflow.sh
+
       - name: Validate /team evidence-gate integrity
         run: bash tests/check-evidence-gate.sh
 

@@ -1,0 +1,39 @@
+name: Vendor Drift
+
+on:
+  schedule:
+    - cron: '0 10 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: vendor-drift
+  cancel-in-progress: false
+
+jobs:
+  vendor-drift:
+    # Weekly report-only check against upstream pins in data/vendor-lock.json.
+    # Never pushes commits and never opens pull requests (contents: read only).
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.11'
+
+      - name: Check upstream vendor drift
+        run: python3 scripts/vendor-check.py --lock data/vendor-lock.json --json > "$RUNNER_TEMP/vendor-drift.json"
+
+      - name: Open or update vendor-drift issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/vendor-drift-issues.py \
+            --lock data/vendor-lock.json \
+            --report "$RUNNER_TEMP/vendor-drift.json"

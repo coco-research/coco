@@ -440,11 +440,11 @@
       },
       {
         "path": "skills/ponytail-audit/NOTICE",
-        "sha256": "88525b1b77270c61ac27f6530df657fffd1e25d9caf27fb0e3a77f520a38bc90"
+        "sha256": "5f26010a4062b9408cb3c0da5264182199cb70a1726d7ed3eb53e4e5cda18645"
       },
       {
         "path": "skills/ponytail-debt/NOTICE",
-        "sha256": "88525b1b77270c61ac27f6530df657fffd1e25d9caf27fb0e3a77f520a38bc90"
+        "sha256": "5f26010a4062b9408cb3c0da5264182199cb70a1726d7ed3eb53e4e5cda18645"
       },
       {
         "path": "skills/ponytail-gain/NOTICE",
@@ -452,11 +452,11 @@
       },
       {
         "path": "skills/ponytail-help/NOTICE",
-        "sha256": "30b7fdf70ba71741c133ce77206f7a9e57088542b011a177182d2da1813ecdc7"
+        "sha256": "3ca0c48848044572921c4e09c08025d3947b94823e7e869e1aa9596597c2ba2c"
       },
       {
         "path": "skills/ponytail-review/NOTICE",
-        "sha256": "88525b1b77270c61ac27f6530df657fffd1e25d9caf27fb0e3a77f520a38bc90"
+        "sha256": "5f26010a4062b9408cb3c0da5264182199cb70a1726d7ed3eb53e4e5cda18645"
       }
     ],
     "mode": "adapted",

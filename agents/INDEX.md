@@ -2,9 +2,9 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 34 agents** — 10 core, 24 across 1 bundles.
+**Total: 36 agents** — 12 core, 24 across 1 bundles.
 
-## Core agents (10)
+## Core agents (12)
 
 | Agent | Description |
 |-------|-------------|
@@ -15,9 +15,11 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [mcp-specialist](mcp-specialist.md) | MCP (Model Context Protocol) specialist covering server/client development, configuration, troubleshooting, tool setup, architecture, transport layers, and prot |
 | [pm-advisor](pm-advisor.md) | Product management advisor for feature planning, issue creation, prioritization, and data-driven product decisions. Use proactively when planning features, writ |
 | [refactoring-specialist](refactoring-specialist.md) | Senior refactoring specialist for transforming complex, poorly structured code into clean, maintainable systems. Use proactively when code quality metrics show  |
+| [test-engineer](test-engineer.md) | QA engineer specialized in test strategy, test writing, and coverage analysis. Use for designing test suites, writing tests for existing code, or evaluating tes |
 | [test-guardian](test-guardian.md) | Ensures tests actually test what they claim. Catches tautological assertions, mock leakage, tests that pass for wrong reasons, missing edge cases. Run after wri |
 | [typescript-pro](typescript-pro.md) | Advanced TypeScript specialist for type-level programming, complex generics, end-to-end type safety, monorepo architecture, and large-scale migrations. Use when |
 | [ui-ux-designer](ui-ux-designer.md) | Research-backed UI/UX design critic providing opinionated, evidence-based feedback on interfaces. Use proactively when reviewing UI code, designing layouts, cho |
+| [web-performance-auditor](web-performance-auditor.md) | Web performance engineer focused on Core Web Vitals, loading, rendering, and network optimization. Use for performance-focused audits, CWV analysis, and identif |
 
 ## Bundle: gsd (24 agents)
 

@@ -217,7 +217,7 @@ emit_agents_from_dir() {
     [[ -f "$agent" ]] || continue
     local name desc
     name=$(basename "$agent" .md)
-    [[ "$name" == "README" || "$name" == "INDEX" || "$name" == "PROMPT-DEFENSE" ]] && continue
+    [[ "$name" == "README" || "$name" == "INDEX" || "$name" == "PROMPT-DEFENSE" || "$name" == "THIRD-PARTY" ]] && continue
     desc=$(python3 "$REPO_ROOT/scripts/frontmatter-description.py" "$agent")
     if [[ -n "$desc" ]]; then
       echo "- **$name** — $desc"

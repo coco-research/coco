@@ -31,6 +31,7 @@ CoCo stands on the shoulders of excellent open-source work. This file credits ev
 | **reverse-skill** by zhaoxuya520 | A curated, reference-only subset of thirty-three reverse-engineering and security-methodology skills vendored at `systems/reverse-skill/`, covering language- and platform-specific reverse engineering, binary and firmware analysis, network, cloud and identity testing, application and LLM security, and investigation, detection-authoring and reporting. Three upstream skills are deliberately not vendored (`pwn-chain`, `attack-chain` and `patch-diff-exploit`), together with nine files covering detection evasion, anti-analysis and a payload scaffold, because their stated purpose is producing a working exploit or defeating defensive controls rather than analysing a target. What is kept is unmodified, and the upstream MIT notice is retained at `systems/reverse-skill/LICENSE` | https://github.com/zhaoxuya520/reverse-skill | MIT (Copyright (c) 2026 zhaoxuya520) |
 | **Solving a Million-Step LLM Task with Zero Errors** by Meyerson et al. (Cognizant AI Lab / UT Austin) | The `maker-mdap` knowledge skill — notes adapted from the paper on Maximal Agentic Decomposition, first-to-ahead-by-k voting, red-flagging and scaling laws. Changes were made: the notes are condensed and restructured. Licence: https://creativecommons.org/licenses/by/4.0/ | https://arxiv.org/abs/2511.09030 | CC BY 4.0 |
 | **OfficeCLI** by goworm | The `officecli` skill, adapted from upstream SKILL.md with the install section replaced by a Homebrew check and the update check disabled; upstream LICENSE and NOTICE retained at `skills/officecli/` | https://github.com/iOfficeAI/OfficeCLI | Apache-2.0 (Copyright 2026 OfficeCLI) |
+| **impeccable** by pbakaus | The `impeccable` front-end design skill, vendored at `skills/impeccable/` as guidance only; the engine and scripts are not included. Pinned to commit e103efe779e2dd01274dabae83531fef00bf2563. Upstream `LICENSE` kept byte for byte, and its `NOTICE.md` (which credits ehmo/platform-design-skills, MIT) ships alongside. | https://github.com/pbakaus/impeccable | Apache-2.0 |
 
 ## Tools used, not bundled
 
@@ -39,7 +40,6 @@ Tools the project runs but does not redistribute. Each is installed from its own
 | Tool | What CoCo uses it for | Upstream | License |
 |---|---|---|---|
 | **SkillSpector** by NVIDIA | The static scan in `.github/workflows/skill-scan.yml`: the skill folders a pull request changes in `skills/` and `systems/*/skills/`, static rules only and no model key, failing on a high or critical finding. Installed at commit `54824463814a0be01360792523ec7245a69190fc` (release tag v2.13.4) as pinned in that workflow. | https://github.com/NVIDIA/skillspector | Apache-2.0 |
-| **impeccable** by pbakaus | The `impeccable` front-end design skill, vendored at `skills/impeccable/` as guidance only; the engine and scripts are not included. Pinned to commit e103efe779e2dd01274dabae83531fef00bf2563. Upstream `LICENSE` kept byte for byte, and its `NOTICE.md` (which credits ehmo/platform-design-skills, MIT) ships alongside. | https://github.com/pbakaus/impeccable | Apache-2.0 |
 
 ## Feature inspirations
 

@@ -83,7 +83,7 @@
     "patch": null
   },
   {
-    "name": "GSD \u2014 Get Shit Done",
+    "name": "GSD — Get Shit Done",
     "paths": [
       "systems/gsd/**"
     ],
@@ -427,11 +427,11 @@
     "licence_files": [
       {
         "path": "skills/impeccable/LICENSE",
-        "sha256": ""
+        "sha256": "02bb8c3b4e70190e3986c0404ad2fd8d639b4f534252d82379cc1b502b6d1812"
       },
       {
         "path": "skills/impeccable/NOTICE.md",
-        "sha256": ""
+        "sha256": "c60a093c2845fd9fb82f9c6f742ece31f379f8190b535309d32d66c45ccffdcb"
       }
     ],
     "mode": "adapted",

@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en" data-product="signal">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Signal — Coco Research</title>
+<meta name="description" content="Our design language: three editions, CSS and docs.">
+<meta name="theme-color" content="#03050b">
+<meta name="color-scheme" content="dark light">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Signal — Coco Research">
+<meta property="og:description" content="Our design language: three editions, CSS and docs.">
+<meta property="og:url" content="https://cocoresearch.org/signal/">
+<meta property="og:image" content="https://cocoresearch.org/assets/img/og-cinematic.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:description" content="Our design language: three editions, CSS and docs.">
+<link rel="canonical" href="https://cocoresearch.org/signal/">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/site/favicon-32.png">
+<script>
+(function () {
+  var d = document.documentElement, rm = false, off = false, th = '';
+  try { rm = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  try { off = localStorage.getItem('coco-motion') === 'off'; } catch (e) {}
+  try { th = localStorage.getItem('coco-theme') || ''; } catch (e) {}
+  if (/[?&]motion=off/.test(location.search)) off = true;
+  var m = /[?&]theme=(light|dark)/.exec(location.search);
+  if (m) th = m[1];
+  if (th === 'light' || th === 'dark') d.setAttribute('data-theme', th);
+  d.className += ' js ' + (rm || off ? 'static' : 'cine') + (rm ? ' os-reduced' : '');
+})();
+</script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preload" as="font" type="font/woff2" crossorigin href="https://cdn.jsdelivr.net/npm/@fontsource-variable/archivo@5.3.0/files/archivo-latin-wdth-normal.woff2">
+<link rel="stylesheet" href="../assets/css/product.css">
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" } }
+</script>
+<script type="module" src="../assets/js/product-scene.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="?motion=off">View plain page (no motion)</a>
+<div class="world" aria-hidden="true"><canvas id="world"></canvas><div class="hero-point"></div></div>
+<header class="nav">
+  <a class="brand" href="../"><i aria-hidden="true"></i><span>Coco Research</span></a>
+  <div class="nav-right">
+    <button class="chip-btn" type="button" data-theme-toggle aria-pressed="false">Light theme</button>
+    <a class="btn btn-primary btn-sm nav-cta-hide" href="https://github.com/coco-research/coco-design-language">Source</a>
+  </div>
+</header>
+<main id="main" class="stage-main">
+  <section id="hero" class="hero" aria-labelledby="h-hero">
+    <div class="wrap">
+      <div class="hero-col">
+        <p class="mark-line"><span class="mark-dot" data-stage="source" aria-hidden="true"></span>Source available, Apache-2.0, no release</p>
+        <h1 id="h-hero" class="display">Signal</h1>
+        <p class="lede">Our design language: three editions, CSS and docs.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="https://github.com/coco-research/coco-design-language">View source on GitHub</a>
+          <a class="btn btn-ghost" href="../#lab">All products</a>
+        </div>
+        <div class="kns" aria-label="Key facts">
+          <div class="kn"><span class="kn-num">3 editions</span><span class="kn-lbl">CSS tokens and documentation</span></div>
+          <div class="kn"><span class="kn-num">Light + Dark</span><span class="kn-lbl">Both surfaces designed first-class</span></div>
+          <div class="kn"><span class="kn-num">Apache-2.0</span><span class="kn-lbl">Source available, no packaged release</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="what-it-is" class="sec" aria-labelledby="h-what-it-is">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Overview</p><h2 id="h-what-it-is" class="sec-title">What it is</h2></div>
+        <p class="sec-sub">Source available, Apache-2.0, no release</p>
+      </div>
+      <div class="panel-grid">
+        <div class="panel">
+          <div class="wave-art" aria-hidden="true">
+            <svg viewBox="0 0 320 140" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="34" y="28" width="96" height="84" rx="4"/><rect x="112" y="20" width="96" height="84" rx="4"/><rect x="190" y="36" width="96" height="84" rx="4"/><line x1="34" y1="56" x2="286" y2="56" stroke-opacity=".35"/><circle cx="160" cy="62" r="5" fill="currentColor"/></svg>
+          </div>
+          <p class="sec-sub">Published as Apache-2.0-licensed CSS and documentation in the public repository, with no packaged npm release today.</p>
+        </div>
+        <div class="panel">
+          <p class="section-tagline">Coco Research's open design language: three editions, CSS tokens and layout documentation.</p>
+          <p class="section-para">Signal defines the typographic scale, light paper and dark stage tokens, and semantic state rules used across Coco Research interfaces.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="capabilities" class="sec" aria-labelledby="h-capabilities">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Capabilities</p><h2 id="h-capabilities" class="sec-title">What it can do today</h2></div>
+        <p class="sec-sub">Provably true of the code and releases available today.</p>
+      </div>
+      <div class="signal-list">
+        <div class="signal-item">
+          <span class="signal-num">01</span>
+          <div class="signal-body">
+            <h3>Three editions, light and dark</h3>
+            <p>Three editions with first-class light paper and dark stage tokens across desktop and phone viewports.</p>
+          </div>
+        </div>
+        <div class="signal-item">
+          <span class="signal-num">02</span>
+          <div class="signal-body">
+            <h3>Variable typography and tabular numerals</h3>
+            <p>Archivo and Martian Mono variable typography scale with tabular numerals for counts and baselines.</p>
+          </div>
+        </div>
+        <div class="signal-item">
+          <span class="signal-num">03</span>
+          <div class="signal-body">
+            <h3>Zero runtime tracking or network calls</h3>
+            <p>Static stylesheets and page scripts make zero runtime network requests, analytics beacons or tracking calls.</p>
+          </div>
+        </div>
+        <div class="signal-item">
+          <span class="signal-num">04</span>
+          <div class="signal-body">
+            <h3>Reduced-motion fallbacks</h3>
+            <p>Native prefers-reduced-motion rules disable transitions and WebGL motion cleanly.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="cooking" class="sec" aria-labelledby="h-cooking">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Roadmap</p><h2 id="h-cooking" class="sec-title">What’s cooking</h2></div>
+        <p class="sec-sub">The next milestones sourced from active work and release roadmaps.</p>
+      </div>
+      <div class="signal-list">
+        <div class="signal-item">
+          <span class="signal-num">—</span>
+          <div class="signal-body">
+            <h3>Details soon</h3>
+            <p>Upcoming design-language items are not listed in a local checkout yet.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="stage" class="sec" aria-labelledby="h-stage">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Maturity</p><h2 id="h-stage" class="sec-title">How far along</h2></div>
+        <p class="sec-sub">Current development and release milestone tracking.</p>
+      </div>
+      <div class="stage-card">
+        <div class="stage-badge-row">
+          <span class="stage-chip stage-chip-source">Source available</span>
+        </div>
+        <p class="sec-sub">Source available under the Apache-2.0 license on GitHub, with no packaged release today.</p>
+      </div>
+    </div>
+  </section>
+  <section id="when" class="sec" aria-labelledby="h-when">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Launch window</p><h2 id="h-when" class="sec-title">When</h2></div>
+        <p class="sec-sub">Public release and availability schedule.</p>
+      </div>
+      <div class="when-card">
+        <p class="when-window">Not dated yet</p>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <a class="brand" href="../"><i aria-hidden="true"></i><span>Coco Research</span></a>
+      <p>Governed AI, built in the open. Built by Rijul Kalra.</p>
+    </div>
+    <nav class="foot-cols" aria-label="Footer">
+      <div><h2>Products</h2><ul>
+          <li><a href="../coco/">Coco Super Intelligence</a></li>
+          <li><a href="../voice/">Coco Voice</a></li>
+          <li><a href="../connect/">Coco Connect</a></li>
+      </ul></div>
+      <div><h2>Source available</h2><ul>
+          <li><a href="../signal/">Signal</a></li>
+          <li><a href="../mira/">Mira</a></li>
+          <li><a href="../loops/">Coco Loops</a></li>
+          <li><a href="../jev-use/">jev-use</a></li>
+          <li><a href="../heliopause/">Heliopause by Coco Research</a></li>
+      </ul></div>
+      <div><h2>In the lab (private)</h2><ul>
+          <li><a href="../m0/">Coco M0</a></li>
+          <li><a href="../hermes/">Coco Hermes</a></li>
+          <li><a href="../teams-ng/">Coco Teams NG</a></li>
+          <li><a href="../status-zero/">Status Zero</a></li>
+      </ul></div>
+      <div><h2>Company</h2><ul>
+          <li><a href="../#built-by">About</a></li>
+          <li><a href="https://github.com/coco-research/coco/releases">Coco changelog</a></li>
+      </ul></div>
+      <div><h2>Code</h2><ul>
+          <li><a href="https://github.com/coco-research">GitHub</a></li>
+          <li><a href="https://www.npmjs.com/package/cocosuperintelligence">npm</a></li>
+          <li><a href="https://github.com/coco-research/coco-design-language">Licence</a></li>
+      </ul></div>
+    </nav>
+  </div>
+  <div class="foot-base">
+    <p>© 2026 Coco Research</p>
+    <div class="foot-ctrls">
+      <button class="link-btn" type="button" data-theme-toggle>Light theme</button>
+      <button class="link-btn" type="button" data-motion-toggle>Reduce motion</button>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

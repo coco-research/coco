@@ -7,6 +7,7 @@
   },
   "files": [
     "bin/",
+    "data/",
     "systems/learning/scripts/suggest_skills.py",
     "README.md",
     "LICENSE",

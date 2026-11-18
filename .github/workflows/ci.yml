@@ -94,6 +94,9 @@ jobs:
       - name: Cursor uninstall removes the generated SI commands and keeps user files
         run: bash tests/check-cursor-uninstall-si.sh
 
+      - name: Shared ~/.agents/skills opt-in linker (marker, idempotency, user folders kept)
+        run: bash tests/check-agents-skills.sh
+
       - name: coco-workflow gate cases (forgery, happy path, workflow hygiene)
         run: bash tests/check-coco-gate.sh
 

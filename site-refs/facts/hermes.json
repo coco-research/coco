@@ -1,0 +1,27 @@
+[
+  {
+    "claim": "Coco Hermes answers questions over your own files with an exact quote, or says it can't.",
+    "section": "what-it-is",
+    "source": "catalog:data/products.json:104"
+  },
+  {
+    "claim": "Details soon for capability specifics pending public release.",
+    "section": "capabilities",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Details soon for roadmap milestones pending public release.",
+    "section": "cooking",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Private beta in the lab, with no public build today.",
+    "section": "stage",
+    "source": "catalog:data/products.json:105"
+  },
+  {
+    "claim": "Launch target: Not dated yet.",
+    "section": "when",
+    "source": "launch-window:not-dated"
+  }
+]

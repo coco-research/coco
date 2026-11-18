@@ -1,0 +1,27 @@
+[
+  {
+    "claim": "jev-use provides voice-driven control for macOS.",
+    "section": "what-it-is",
+    "source": "catalog:data/products.json:80"
+  },
+  {
+    "claim": "Details soon for capability specifics pending repository release.",
+    "section": "capabilities",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Details soon for roadmap milestones pending repository release.",
+    "section": "cooking",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Source available: Apache-2.0 pre-alpha repository.",
+    "section": "stage",
+    "source": "catalog:data/products.json:81"
+  },
+  {
+    "claim": "Launch target: Not dated yet.",
+    "section": "when",
+    "source": "launch-window:not-dated"
+  }
+]

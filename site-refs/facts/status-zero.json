@@ -1,0 +1,27 @@
+[
+  {
+    "claim": "Status Zero compares what a plan says against what the code actually shipped.",
+    "section": "what-it-is",
+    "source": "catalog:data/products.json:118"
+  },
+  {
+    "claim": "Details soon for capability specifics pending standalone release.",
+    "section": "capabilities",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Details soon for roadmap milestones pending standalone release.",
+    "section": "cooking",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "In the lab: private, in development.",
+    "section": "stage",
+    "source": "catalog:data/products.json:119"
+  },
+  {
+    "claim": "Launch target: Not dated yet.",
+    "section": "when",
+    "source": "launch-window:not-dated"
+  }
+]

@@ -29,6 +29,7 @@ PROTECTED_BASENAMES = ("settings.json", "settings.local.json", ".credentials.jso
 OLD_PARTS = ("skills", "commands", "agents", "systems")
 AGENT_SKIP_CORE = ("INDEX.md", "README.md", "PROMPT-DEFENSE.md")
 AGENT_SKIP_SYSTEM = ("INDEX.md", "README.md")
+MD_NO_LINK = ("THIRD-PARTY.md",)
 WORKFLOW_HOOKS = (
     "coco-workflow-pretooluse.sh",
     "coco-workflow-context.sh",
@@ -604,6 +605,8 @@ class Installer(ApplyMixin):
         if not os.path.isdir(directory):
             return
         for name in self.child_md(directory):
+            if name in MD_NO_LINK:
+                continue
             src = os.path.join(directory, name)
             dst = os.path.join(dest_dir, name)
             self.plan_link(src, dst, count=None if name in skip_names else count)

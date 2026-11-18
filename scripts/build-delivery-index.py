@@ -132,6 +132,44 @@ def count_generated(root):
     return len(seen)
 
 
+def adapter_deprecated(adapter):
+    manifest = ROOT / 'adapters' / adapter / 'manifest.json'
+    try:
+        return bool(json.loads(manifest.read_text()).get('deprecated'))
+    except (OSError, json.JSONDecodeError):
+        return False
+
+
+def detect_mcp(adapter, home):
+    """Whether the installer wired Coco's MCP server into the throwaway HOME."""
+    if adapter_deprecated(adapter):
+        return 'deprecated'
+    home_path = pathlib.Path(home)
+    cont_yaml = home_path / '.continue' / 'mcpServers' / 'coco.yaml'
+    if cont_yaml.is_file():
+        try:
+            if cont_yaml.read_text(encoding='utf-8').startswith('# managed-by: coco'):
+                return 'yes'
+        except OSError:
+            pass
+    for dirpath, _dirnames, filenames in os.walk(home, followlinks=False):
+        for fname in filenames:
+            if not fname.endswith('.coco-mcp'):
+                continue
+            cfg_path = pathlib.Path(dirpath) / fname[:-len('.coco-mcp')]
+            try:
+                doc = json.loads(cfg_path.read_text(encoding='utf-8'))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if not isinstance(doc, dict):
+                continue
+            for key in ('mcpServers', 'context_servers', 'servers', 'mcp'):
+                sec = doc.get(key)
+                if isinstance(sec, dict) and 'coco' in sec:
+                    return 'yes'
+    return '—'
+
+
 _ENV_OVERRIDE_RE = re.compile(r'\$\{([A-Za-z_][A-Za-z0-9_]*):-\$\{?HOME\}?/')
 
 
@@ -201,6 +239,7 @@ def install(adapter, bundles, mode='widest', timeout=900):
         'bundles': bundles,
         'mode': mode,
         'agents_md': (pathlib.Path(cwd) / 'AGENTS.md').exists(),
+        'mcp': detect_mcp(adapter, home),
         'tail': ' | '.join([ln for ln in output.strip().splitlines() if ln.strip()][-1:]),
     }
     shutil.rmtree(home, ignore_errors=True)
@@ -241,14 +280,14 @@ def main():
         f'(`--systems {",".join(bundles)}`) and the result counted. Counts include symlinks,',
         'because most adapters link into the checkout rather than copying.',
         '',
-        '| Adapter | Commands | of which generated | Skills | Agents | AGENTS.md | Exit |',
-        '|---|---:|---:|---:|---:|:--:|---:|',
+        '| Adapter | Commands | of which generated | Skills | Agents | AGENTS.md | MCP | Exit |',
+        '|---|---:|---:|---:|---:|:--:|:--:|---:|',
     ]
     for r in rows:
         ag = 'yes' if r['agents_md'] else '—'
         lines.append(
             f"| `{r['adapter']}` | {r['commands']} | {r['generated_commands']} | "
-            f"{r['skills']} | {r['agents']} | {ag} | {r['exit']} |"
+            f"{r['skills']} | {r['agents']} | {ag} | {r['mcp']} | {r['exit']} |"
         )
 
     lines += [

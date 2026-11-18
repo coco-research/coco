@@ -83,4 +83,10 @@ for sys in "${SYSTEMS[@]:-}"; do
   fi
 done
 
+# MCP server (~/.cline/data/settings/cline_mcp_settings.json)
+MCP_CONFIG="$TARGET_HOME/data/settings/cline_mcp_settings.json"
+mcp_args=(--format json --key mcpServers --config "$MCP_CONFIG" --repo-root "$REPO_ROOT")
+[[ $DRY_RUN -eq 1 ]] && mcp_args+=(--dry-run)
+python3 "$REPO_ROOT/scripts/merge-mcp-config.py" "${mcp_args[@]}"
+
 echo "Done."

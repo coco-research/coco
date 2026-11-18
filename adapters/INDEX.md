@@ -6,24 +6,24 @@ Each adapter was installed into a throwaway `HOME` with every bundle it advertis
 (`--systems brain,cognee,gsd,hyperframes,m0,superintelligence`) and the result counted. Counts include symlinks,
 because most adapters link into the checkout rather than copying.
 
-| Adapter | Commands | of which generated | Skills | Agents | AGENTS.md | Exit |
-|---|---:|---:|---:|---:|:--:|---:|
-| `aider` | 342 | 342 | 0 | 0 | yes | 0 |
-| `amazon-q` | 0 | 0 | 0 | 34 | — | 0 |
-| `claude-code` | 388 | 342 | 191 | 34 | — | 0 |
-| `cline` | 0 | 0 | 0 | 34 | — | 0 |
-| `codex` | 342 | 342 | 0 | 0 | yes | 0 |
-| `cursor` | 388 | 342 | 196 | 0 | — | 0 |
-| `generic` | 342 | 342 | 0 | 0 | yes | 0 |
-| `github-copilot-cli` | 0 | 0 | 0 | 0 | yes | 0 |
-| `grok` | 391 | 342 | 191 | 34 | — | 0 |
-| `hermes` | 388 | 342 | 191 | 34 | — | 0 |
-| `pi-desktop` | 388 | 342 | 194 | 37 | — | 0 |
-| `roo-code` | 0 | 0 | 0 | 34 | — | 0 |
-| `vscode` | 388 | 342 | 191 | 34 | — | 0 |
-| `vscode-continue` | 0 | 0 | 178 | 34 | — | 0 |
-| `windsurf` | 0 | 0 | 191 | 34 | — | 0 |
-| `zed` | 0 | 0 | 0 | 34 | — | 0 |
+| Adapter | Commands | of which generated | Skills | Agents | AGENTS.md | MCP | Exit |
+|---|---:|---:|---:|---:|:--:|:--:|---:|
+| `aider` | 342 | 342 | 0 | 0 | yes | — | 0 |
+| `amazon-q` | 0 | 0 | 0 | 34 | — | yes | 0 |
+| `claude-code` | 388 | 342 | 191 | 34 | — | — | 0 |
+| `cline` | 0 | 0 | 0 | 34 | — | yes | 0 |
+| `codex` | 342 | 342 | 0 | 0 | yes | — | 0 |
+| `cursor` | 388 | 342 | 196 | 0 | — | — | 0 |
+| `generic` | 342 | 342 | 0 | 0 | yes | — | 0 |
+| `github-copilot-cli` | 0 | 0 | 0 | 0 | yes | — | 0 |
+| `grok` | 391 | 342 | 191 | 34 | — | — | 0 |
+| `hermes` | 388 | 342 | 191 | 34 | — | — | 0 |
+| `pi-desktop` | 388 | 342 | 194 | 37 | — | — | 0 |
+| `roo-code` | 0 | 0 | 0 | 34 | — | — | 0 |
+| `vscode` | 388 | 342 | 191 | 34 | — | — | 0 |
+| `vscode-continue` | 0 | 0 | 178 | 34 | — | — | 0 |
+| `windsurf` | 0 | 0 | 191 | 34 | — | — | 0 |
+| `zed` | 0 | 0 | 0 | 34 | — | — | 0 |
 
 ## Widest install, against the published totals
 

@@ -11,6 +11,7 @@
 #   bash install.sh --adapter vscode           # install for VS Code / Copilot CLI
 #   bash install.sh --adapter codex            # generate AGENTS.md (Codex)
 #   bash install.sh --adapter generic          # generate AGENTS.md (any tool)
+#   bash install.sh --agents-skills            # link skills into ~/.agents/skills/
 #   bash install.sh --core-only                # core only, no bundles
 #   bash install.sh --packs gsd,si             # core + only these packs (skips picker)
 #   bash install.sh --all                      # core + all packs including reverse-skill
@@ -48,6 +49,7 @@ UNINSTALL=""
 CORE_ONLY=""
 WORKFLOW=""
 WORKFLOW_ONLY=""
+AGENTS_SKILLS=""
 
 # Human status. --json keeps stdout for the adapter's JSONL only.
 note() {
@@ -74,7 +76,7 @@ list_adapters() {
 detect_adapter() {
   if [[ -n "${CLAUDECODE:-}" || -d "${CLAUDE_HOME:-$HOME/.claude}/skills" || -f "${CLAUDE_HOME:-$HOME/.claude}/.coco/manifest.jsonl" ]]; then
     echo "claude-code"
-  elif [[ -d "$HOME/.pi/agent" || -d "$HOME/.agents" ]]; then
+  elif [[ -d "$HOME/.pi/agent" || -d "$HOME/.agents/subagents" || ( -d "$HOME/.agents" && ! -f "$HOME/.agents/skills/.coco-agents-skills" ) ]]; then
     echo "pi-desktop"
   elif [[ -d "$HOME/.cursor" ]]; then
     echo "cursor"
@@ -101,6 +103,7 @@ while [[ $# -gt 0 ]]; do
     --core-only) CORE_ONLY=1 ;;
     --workflow) WORKFLOW=1 ;;
     --workflow-only) WORKFLOW_ONLY=1 ;;
+    --agents-skills) AGENTS_SKILLS=1 ;;
     --dry-run) DRY_RUN="--dry-run" ;;
     --json) JSON_FLAG="--json" ;;
     --list) list_adapters; exit 0 ;;
@@ -109,6 +112,48 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
+
+run_agents_skills() {
+  local as_args=()
+  [[ -n "$DRY_RUN" ]] && as_args+=("$DRY_RUN")
+  [[ -n "$JSON_FLAG" ]] && as_args+=("$JSON_FLAG")
+  if [[ -n "$CORE_ONLY" ]]; then
+    as_args+=("--core-only")
+  elif [[ -n "$SYSTEMS" ]]; then
+    as_args+=("--systems" "$SYSTEMS")
+  fi
+  if [[ ${#as_args[@]} -gt 0 ]]; then
+    bash "$REPO_ROOT/scripts/link-agents-skills.sh" "${as_args[@]}"
+  else
+    bash "$REPO_ROOT/scripts/link-agents-skills.sh"
+  fi
+}
+
+if [[ -n "$UNINSTALL" && -n "$AGENTS_SKILLS" && -z "$ADAPTER" && -z "$WORKFLOW" && -z "$WORKFLOW_ONLY" ]]; then
+  u_as=(--uninstall)
+  [[ -n "$DRY_RUN" ]] && u_as+=("$DRY_RUN")
+  [[ -n "$JSON_FLAG" ]] && u_as+=("$JSON_FLAG")
+  exec bash "$REPO_ROOT/scripts/link-agents-skills.sh" "${u_as[@]}"
+fi
+
+if [[ -n "$AGENTS_SKILLS" && -z "$ADAPTER" && -z "$WORKFLOW" && -z "$WORKFLOW_ONLY" ]]; then
+  if [[ -n "$PACKS" ]]; then
+    RESOLVED_PACKS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --resolve-install "$PACKS")"
+    if [[ "$RESOLVED_PACKS" == "--core-only" ]]; then CORE_ONLY=1; else SYSTEMS="$RESOLVED_PACKS"; fi
+  elif [[ -n "$ALL_PACKS" ]]; then
+    SYSTEMS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --all-bundles)"
+  fi
+  run_agents_skills
+  if [[ -z "$DRY_RUN" ]]; then
+    VER="$(python3 -c "import json;print(json.load(open('$REPO_ROOT/package.json'))['version'])" 2>/dev/null || echo "?")"
+    note ""
+    note "Coco v$VER installed. Check for updates anytime:"
+    note "  bash \"$REPO_ROOT/scripts/check-update.sh\"      # git clones"
+    note "  node \"$REPO_ROOT/bin/coco.js\" version                 # CLI wrapper"
+    note "Suggest skills from repeated local workflows: node \"$REPO_ROOT/bin/coco.js\" suggest-skills"
+  fi
+  exit 0
+fi
 
 if [[ -z "$ADAPTER" ]]; then
   ADAPTER=$(detect_adapter)
@@ -212,6 +257,10 @@ if [[ ${#ARGS[@]} -gt 0 ]]; then
   bash "$ADAPTER_DIR/install.sh" "${ARGS[@]}"
 else
   bash "$ADAPTER_DIR/install.sh"
+fi
+
+if [[ -n "$AGENTS_SKILLS" ]]; then
+  run_agents_skills
 fi
 
 # Report installed version + how to stay current (no network call here).

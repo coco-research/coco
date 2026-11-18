@@ -9,8 +9,9 @@ npx cocosuperintelligence
 ```
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/readme/hero-dark-mode.png">
-  <img src="docs/readme/hero-light.png" width="100%" alt="Many small clusters of experts converging on one decision">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/banner-si-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="assets/banner-si-light.png">
+  <img src="assets/banner-si-dark.png" width="100%" alt="Coco Super Intelligence by Coco Research — expert persona boards, skills, and verified workflows inside the coding agent you already use">
 </picture>
 
 [![CI](https://img.shields.io/github/actions/workflow/status/coco-research/coco/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/coco-research/coco/actions/workflows/ci.yml)

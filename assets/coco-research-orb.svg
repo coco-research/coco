@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="52%">
+      <stop offset="0%" stop-color="#2447d6" stop-opacity="0.52"/>
+      <stop offset="55%" stop-color="#2447d6" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#03050b" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="28%" stop-color="#d4e3ff" stop-opacity="0.92"/>
+      <stop offset="58%" stop-color="#5b8dff" stop-opacity="0.48"/>
+      <stop offset="100%" stop-color="#2447d6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="amberNode" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff8ec" stop-opacity="1"/>
+      <stop offset="35%" stop-color="#ffb66e" stop-opacity="0.96"/>
+      <stop offset="100%" stop-color="#ffb66e" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="blueNode" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="35%" stop-color="#a9c4ff" stop-opacity="0.92"/>
+      <stop offset="100%" stop-color="#5b8dff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="#03050b"/>
+  <circle cx="256" cy="256" r="240" fill="url(#bgGlow)"/>
+  <g transform="translate(256 256) rotate(-14)">
+    <ellipse cx="0" cy="0" rx="212" ry="62" fill="none" stroke="#a9c4ff" stroke-width="5.5" stroke-opacity="0.52"/>
+  </g>
+  <g transform="translate(256 256) rotate(9)">
+    <ellipse cx="0" cy="0" rx="172" ry="66" fill="none" stroke="#5b8dff" stroke-width="7.5" stroke-opacity="0.96"/>
+  </g>
+  <circle cx="256" cy="256" r="142" fill="url(#coreGlow)"/>
+  <circle cx="256" cy="256" r="54" fill="#eef2fb"/>
+  <circle cx="88" cy="238" r="28" fill="url(#amberNode)"/>
+  <circle cx="88" cy="238" r="7" fill="#fff8ec"/>
+  <circle cx="398" cy="292" r="22" fill="url(#blueNode)"/>
+  <circle cx="398" cy="292" r="5.5" fill="#ffffff"/>
+  <circle cx="454" cy="222" r="24" fill="url(#blueNode)"/>
+  <circle cx="454" cy="222" r="6" fill="#ffffff"/>
+</svg>

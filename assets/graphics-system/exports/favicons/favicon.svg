@@ -1,53 +1,41 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Coco favicon — derived from assets/logo.svg (vertical lockup), mark only.
-
-  DERIVATION ONLY, no new brand decisions (card t_0e14a6c0):
-    • The two interlocked C-arcs are carried over VERBATIM from logo.svg —
-      same paths, same stroke-width 24, same round caps: C #1 anchor is
-      #FFFFFF, C #2 is the sampled Apple-Intelligence gradient.
-    • The gradient is the logo's own def, stop order verbatim
-      (#C2A8FF → #7FB8FF → #A6F0CD), as recorded in
-      assets/graphics-system/tokens.toml [brand_gradient].
-    • Square-safe: the mark is centered on a full square #0A0F1F canvas
-      (the logo's own canvas color) — PADDED, never cropped. The non-square
-      logo-si.png (560×530) is NOT used as a source.
-    • No wordmark: <text> does not survive favicon sizes; the mark is the
-      brand element that does.
-
-  Regenerate the rasters with scripts/export_favicons.sh (librsvg 2.62.x
-  pinned, same renderer as the rest of the graphics system).
--->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Coco">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <!-- Apple Intelligence gradient — logo.svg verbatim -->
-    <linearGradient id="intelligence" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#C2A8FF"/>
-      <stop offset="50%" stop-color="#7FB8FF"/>
-      <stop offset="100%" stop-color="#A6F0CD"/>
-    </linearGradient>
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="52%">
+      <stop offset="0%" stop-color="#2447d6" stop-opacity="0.52"/>
+      <stop offset="55%" stop-color="#2447d6" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#03050b" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="28%" stop-color="#d4e3ff" stop-opacity="0.92"/>
+      <stop offset="58%" stop-color="#5b8dff" stop-opacity="0.48"/>
+      <stop offset="100%" stop-color="#2447d6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="amberNode" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff8ec" stop-opacity="1"/>
+      <stop offset="35%" stop-color="#ffb66e" stop-opacity="0.96"/>
+      <stop offset="100%" stop-color="#ffb66e" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="blueNode" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="35%" stop-color="#a9c4ff" stop-opacity="0.92"/>
+      <stop offset="100%" stop-color="#5b8dff" stop-opacity="0"/>
+    </radialGradient>
   </defs>
-
-  <!-- Square canvas: the logo's own background color -->
-  <rect x="0" y="0" width="512" height="512" fill="#0A0F1F"/>
-
-  <!-- Mark, centered (logo.svg draws it at translate(0,30) inside a 512×720
-       lockup; mark bbox there is x 120–392, y 158–358 in group coords.
-       scale(1.2) for favicon presence, re-centered on the 512 square. -->
-  <g transform="translate(-51.2, -53.6) scale(1.2)">
-    <!-- C #1: anchor, pure white — path verbatim from logo.svg -->
-    <path d="M 232 158
-             A 100 100 0 1 0 232 358"
-          stroke="#FFFFFF"
-          stroke-width="24"
-          stroke-linecap="round"
-          fill="none"/>
-    <!-- C #2: accent, sampled gradient — path verbatim from logo.svg -->
-    <path d="M 280 158
-             A 100 100 0 1 1 280 358"
-          stroke="url(#intelligence)"
-          stroke-width="24"
-          stroke-linecap="round"
-          fill="none"/>
+  <rect width="512" height="512" fill="#03050b"/>
+  <circle cx="256" cy="256" r="240" fill="url(#bgGlow)"/>
+  <g transform="translate(256 256) rotate(-14)">
+    <ellipse cx="0" cy="0" rx="212" ry="62" fill="none" stroke="#a9c4ff" stroke-width="5.5" stroke-opacity="0.52"/>
   </g>
+  <g transform="translate(256 256) rotate(9)">
+    <ellipse cx="0" cy="0" rx="172" ry="66" fill="none" stroke="#5b8dff" stroke-width="7.5" stroke-opacity="0.96"/>
+  </g>
+  <circle cx="256" cy="256" r="142" fill="url(#coreGlow)"/>
+  <circle cx="256" cy="256" r="54" fill="#eef2fb"/>
+  <circle cx="88" cy="238" r="28" fill="url(#amberNode)"/>
+  <circle cx="88" cy="238" r="7" fill="#fff8ec"/>
+  <circle cx="398" cy="292" r="22" fill="url(#blueNode)"/>
+  <circle cx="398" cy="292" r="5.5" fill="#ffffff"/>
+  <circle cx="454" cy="222" r="24" fill="url(#blueNode)"/>
+  <circle cx="454" cy="222" r="6" fill="#ffffff"/>
 </svg>

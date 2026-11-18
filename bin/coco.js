@@ -83,13 +83,24 @@ function checkForUpdate(force) {
   });
 }
 
+function printBrandBanner() {
+  const title = `COCO RESEARCH · SUPER INTELLIGENCE v${PKG_VERSION}`;
+  if (process.stdout.isTTY && !process.env.NO_COLOR) {
+    console.log(`\x1b[1;38;2;91;141;255mCOCO RESEARCH\x1b[0m \x1b[38;2;255;182;110m·\x1b[0m \x1b[1mSUPER INTELLIGENCE\x1b[0m \x1b[38;2;169;196;255mv${PKG_VERSION}\x1b[0m`);
+    console.log(`\x1b[2mcocoresearch.org\x1b[0m\n`);
+  } else {
+    console.log(`${title}\ncocoresearch.org\n`);
+  }
+}
+
 function cmdVersion() {
-  console.log(`cocosuperintelligence v${PKG_VERSION}`);
+  console.log(`Coco Super Intelligence v${PKG_VERSION} · Coco Research (cocoresearch.org)`);
   checkForUpdate(true);
 }
 
 function help() {
-  console.log(`Coco — open-core AI workflow framework
+  console.log(`Coco Super Intelligence · Coco Research (cocoresearch.org)
+Open-core AI workflow framework (v${PKG_VERSION})
 
 Usage:
   npx cocosuperintelligence                   clone + install (auto-detect)
@@ -288,6 +299,8 @@ function cmdInstall(argv) {
     console.error('Error: bash is required. Install bash first.');
     process.exit(1);
   }
+
+  printBrandBanner();
 
   const dir = DEFAULT_DIR;
   cloneOrUpdate(dir);

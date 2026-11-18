@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en" data-product="heliopause">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Heliopause by Coco Research — Coco Research</title>
+<meta name="description" content="It gives your AI tools a Lead and roles, like a small company, on your own machine.">
+<meta name="theme-color" content="#03050b">
+<meta name="color-scheme" content="dark light">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Heliopause by Coco Research — Coco Research">
+<meta property="og:description" content="It gives your AI tools a Lead and roles, like a small company, on your own machine.">
+<meta property="og:url" content="https://cocoresearch.org/heliopause/">
+<meta property="og:image" content="https://cocoresearch.org/assets/img/og-cinematic.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:description" content="It gives your AI tools a Lead and roles, like a small company, on your own machine.">
+<link rel="canonical" href="https://cocoresearch.org/heliopause/">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/site/favicon-32.png">
+<script>
+(function () {
+  var d = document.documentElement, rm = false, off = false, th = '';
+  try { rm = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  try { off = localStorage.getItem('coco-motion') === 'off'; } catch (e) {}
+  try { th = localStorage.getItem('coco-theme') || ''; } catch (e) {}
+  if (/[?&]motion=off/.test(location.search)) off = true;
+  var m = /[?&]theme=(light|dark)/.exec(location.search);
+  if (m) th = m[1];
+  if (th === 'light' || th === 'dark') d.setAttribute('data-theme', th);
+  d.className += ' js ' + (rm || off ? 'static' : 'cine') + (rm ? ' os-reduced' : '');
+})();
+</script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preload" as="font" type="font/woff2" crossorigin href="https://cdn.jsdelivr.net/npm/@fontsource-variable/archivo@5.3.0/files/archivo-latin-wdth-normal.woff2">
+<link rel="stylesheet" href="../assets/css/product.css">
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" } }
+</script>
+<script type="module" src="../assets/js/product-scene.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="?motion=off">View plain page (no motion)</a>
+<div class="world" aria-hidden="true"><canvas id="world"></canvas><div class="hero-point"></div></div>
+<header class="nav">
+  <a class="brand" href="../"><i aria-hidden="true"></i><span>Coco Research</span></a>
+  <div class="nav-right">
+    <button class="chip-btn" type="button" data-theme-toggle aria-pressed="false">Light theme</button>
+    <a class="btn btn-primary btn-sm nav-cta-hide" href="https://github.com/coco-research/heliopause">Source</a>
+  </div>
+</header>
+<main id="main" class="stage-main">
+  <section id="hero" class="hero" aria-labelledby="h-hero">
+    <div class="wrap">
+      <div class="hero-col">
+        <p class="mark-line"><span class="mark-dot" data-stage="source" aria-hidden="true"></span>Source available, Apache-2.0, v0.7.3 early preview</p>
+        <h1 id="h-hero" class="display">Heliopause by Coco Research</h1>
+        <p class="lede">It gives your AI tools a Lead and roles, like a small company, on your own machine.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="https://github.com/coco-research/heliopause">View source on GitHub</a>
+          <a class="btn btn-ghost" href="../#lab">All products</a>
+        </div>
+        <div class="kns" aria-label="Key facts">
+          <div class="kn"><span class="kn-num">Loopback</span><span class="kn-lbl">Local live view on your machine</span></div>
+          <div class="kn"><span class="kn-num">Stdlib</span><span class="kn-lbl">Python standard library only</span></div>
+          <div class="kn"><span class="kn-num">Apache-2.0</span><span class="kn-lbl">v0.7.3 early preview</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="what-it-is" class="sec" aria-labelledby="h-what-it-is">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Overview</p><h2 id="h-what-it-is" class="sec-title">What it is</h2></div>
+        <p class="sec-sub">Source available, Apache-2.0, v0.7.3 early preview</p>
+      </div>
+      <div class="panel-grid">
+        <div class="panel">
+          <div class="wave-art" aria-hidden="true">
+            <svg viewBox="0 0 320 140" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M214 14 Q292 70 214 126"/><path d="M194 26 Q256 70 194 114" stroke-opacity=".45"/><ellipse cx="128" cy="70" rx="74" ry="28" stroke-opacity=".5"/><ellipse cx="128" cy="70" rx="44" ry="16"/><circle cx="128" cy="70" r="6" fill="currentColor"/></svg>
+          </div>
+          <p class="sec-sub">Runs on Python's standard library bound strictly to local loopback, with zero external runtime dependencies, zero telemetry and zero remote sync.</p>
+          <div class="extra-links"><a class="inline" href="https://github.com/coco-research/heliopause/releases">Tagged releases (v0.7.3)</a></div>
+        </div>
+        <div class="panel">
+          <p class="section-tagline">Gives local AI tools a Lead and roles on your machine.</p>
+          <p class="section-para">Heliopause by Coco Research gives your AI tools a Lead and roles, like a small company, and serves a live status page locally over loopback on your machine.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="capabilities" class="sec" aria-labelledby="h-capabilities">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Capabilities</p><h2 id="h-capabilities" class="sec-title">What it can do today</h2></div>
+        <p class="sec-sub">Provably true of the code and releases available today.</p>
+      </div>
+      <div class="signal-list">
+        <div class="signal-item">
+          <span class="signal-num">01</span>
+          <div class="signal-body">
+            <h3>Local loopback only</h3>
+            <p>Loopback-only local server with no account, no telemetry and no remote sync.</p>
+          </div>
+        </div>
+        <div class="signal-item">
+          <span class="signal-num">02</span>
+          <div class="signal-body">
+            <h3>Python standard library</h3>
+            <p>Runs on the Python standard library and git with zero external Python package dependencies.</p>
+          </div>
+        </div>
+        <div class="signal-item">
+          <span class="signal-num">03</span>
+          <div class="signal-body">
+            <h3>Live agent map and states</h3>
+            <p>Shows each agent as working, idle, blocked or needs-you with its latest line and pulse links.</p>
+          </div>
+        </div>
+        <div class="signal-item">
+          <span class="signal-num">04</span>
+          <div class="signal-body">
+            <h3>Sample company preview</h3>
+            <p>Includes a built-in sample company preview before you point it at your own folders.</p>
+          </div>
+        </div>
+        <div class="signal-item">
+          <span class="signal-num">05</span>
+          <div class="signal-body">
+            <h3>Signed release verification</h3>
+            <p>Release archives ship with SHA-256 digests and an ED25519-signed manifest verified via ssh-keygen.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="cooking" class="sec" aria-labelledby="h-cooking">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Roadmap</p><h2 id="h-cooking" class="sec-title">What’s cooking</h2></div>
+        <p class="sec-sub">The next milestones sourced from active work and release roadmaps.</p>
+      </div>
+      <div class="signal-list">
+        <div class="signal-item">
+          <span class="signal-num">—</span>
+          <div class="signal-body">
+            <h3>Details soon</h3>
+            <p>Upcoming milestones for Heliopause by Coco Research are not listed in the public repository yet.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="stage" class="sec" aria-labelledby="h-stage">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Maturity</p><h2 id="h-stage" class="sec-title">How far along</h2></div>
+        <p class="sec-sub">Current development and release milestone tracking.</p>
+      </div>
+      <div class="stage-card">
+        <div class="stage-badge-row">
+          <span class="stage-chip stage-chip-source">Public preview (v0.7.3)</span>
+        </div>
+        <p class="sec-sub">Early preview (v0.7.3) with Apache-2.0 source code and signed release archives published on GitHub.</p>
+      </div>
+    </div>
+  </section>
+  <section id="when" class="sec" aria-labelledby="h-when">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Launch window</p><h2 id="h-when" class="sec-title">When</h2></div>
+        <p class="sec-sub">Public release and availability schedule.</p>
+      </div>
+      <div class="when-card">
+        <p class="when-window">Not dated yet</p>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <a class="brand" href="../"><i aria-hidden="true"></i><span>Coco Research</span></a>
+      <p>Governed AI, built in the open. Built by Rijul Kalra.</p>
+    </div>
+    <nav class="foot-cols" aria-label="Footer">
+      <div><h2>Products</h2><ul>
+          <li><a href="../coco/">Coco Super Intelligence</a></li>
+          <li><a href="../voice/">Coco Voice</a></li>
+      </ul></div>
+      <div><h2>Source available</h2><ul>
+          <li><a href="../signal/">Signal</a></li>
+          <li><a href="../mira/">Mira</a></li>
+          <li><a href="../loops/">Coco Loops</a></li>
+          <li><a href="../jev-use/">jev-use</a></li>
+          <li><a href="../heliopause/">Heliopause by Coco Research</a></li>
+      </ul></div>
+      <div><h2>In the lab (private)</h2><ul>
+          <li><a href="../m0/">Coco M0</a></li>
+          <li><a href="../hermes/">Coco Hermes</a></li>
+          <li><a href="../teams-ng/">Coco Teams NG</a></li>
+          <li><a href="../status-zero/">Status Zero</a></li>
+      </ul></div>
+      <div><h2>Company</h2><ul>
+          <li><a href="../#built-by">About</a></li>
+          <li><a href="https://github.com/coco-research/coco/releases">Coco changelog</a></li>
+      </ul></div>
+      <div><h2>Code</h2><ul>
+          <li><a href="https://github.com/coco-research">GitHub</a></li>
+          <li><a href="https://www.npmjs.com/package/cocosuperintelligence">npm</a></li>
+          <li><a href="https://github.com/coco-research/heliopause">Licence</a></li>
+      </ul></div>
+    </nav>
+  </div>
+  <div class="foot-base">
+    <p>© 2026 Coco Research</p>
+    <div class="foot-ctrls">
+      <button class="link-btn" type="button" data-theme-toggle>Light theme</button>
+      <button class="link-btn" type="button" data-motion-toggle>Reduce motion</button>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

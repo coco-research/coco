@@ -115,16 +115,35 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
+resolve_pack_flags() {
+  if [[ -n "$PACKS" ]]; then
+    RESOLVED_PACKS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --resolve-install "$PACKS")"
+    if [[ "$RESOLVED_PACKS" == "--core-only" ]]; then
+      CORE_ONLY=1
+      SYSTEMS=""
+    else
+      CORE_ONLY=""
+      SYSTEMS="$RESOLVED_PACKS"
+    fi
+  elif [[ -n "$ALL_PACKS" ]]; then
+    CORE_ONLY=""
+    SYSTEMS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --all-bundles)"
+  fi
+}
+
 run_agents_skills() {
   local as_args=()
   [[ -n "$DRY_RUN" ]] && as_args+=("$DRY_RUN")
   [[ -n "$JSON_FLAG" ]] && as_args+=("$JSON_FLAG")
   if [[ -n "$UNINSTALL" ]]; then
     as_args+=("--uninstall")
-  elif [[ -n "$CORE_ONLY" ]]; then
-    as_args+=("--core-only")
-  elif [[ -n "$SYSTEMS" ]]; then
-    as_args+=("--systems" "$SYSTEMS")
+  else
+    resolve_pack_flags
+    if [[ -n "$CORE_ONLY" ]]; then
+      as_args+=("--core-only")
+    elif [[ -n "$SYSTEMS" ]]; then
+      as_args+=("--systems" "$SYSTEMS")
+    fi
   fi
   if [[ ${#as_args[@]} -gt 0 ]]; then
     bash "$REPO_ROOT/scripts/link-agents-skills.sh" "${as_args[@]}"
@@ -151,14 +170,12 @@ if [[ -n "$UNINSTALL" && -n "$AGENTS_SKILLS" && -z "$ADAPTER" && -z "$WORKFLOW" 
 fi
 
 if [[ -n "$AGENTS_SKILLS" && -z "$ADAPTER" && -z "$WORKFLOW" && -z "$WORKFLOW_ONLY" ]]; then
-  if [[ -n "$PACKS" ]]; then
-    RESOLVED_PACKS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --resolve-install "$PACKS")"
-    if [[ "$RESOLVED_PACKS" == "--core-only" ]]; then CORE_ONLY=1; else SYSTEMS="$RESOLVED_PACKS"; fi
-  elif [[ -n "$ALL_PACKS" ]]; then
-    SYSTEMS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --all-bundles)"
-  fi
+  resolve_pack_flags
   run_agents_skills
-  print_install_footer
+  if [[ -z "$DRY_RUN" ]]; then
+    target_skills_dir="${AGENTS_SKILLS_DIR:-${AGENTS_HOME:-$HOME/.agents}/skills}"
+    note "Shared skills linked in $target_skills_dir (links-only mode; no adapter settings modified)."
+  fi
   exit 0
 fi
 
@@ -197,19 +214,19 @@ if [[ -n "$UNINSTALL" ]]; then
   [[ -n "$JSON_FLAG" ]] && UARGS+=("$JSON_FLAG")
   [[ -n "$WORKFLOW_ONLY" ]] && UARGS+=(--workflow-only)
   [[ -n "$PACKS" ]] && UARGS+=(--packs "$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --resolve-uninstall "$PACKS")")
-  bash "$ADAPTER_DIR/install.sh" "${UARGS[@]}"
-  if [[ -n "$AGENTS_SKILLS" ]]; then
-    run_agents_skills
+  rc=0
+  bash "$ADAPTER_DIR/install.sh" "${UARGS[@]}" || rc=$?
+  if [[ -n "$AGENTS_SKILLS" && -z "$WORKFLOW_ONLY" ]]; then
+    as_rc=0
+    run_agents_skills || as_rc=$?
+    [[ "$rc" -eq 0 ]] && rc=$as_rc
   fi
-  exit 0
+  exit "$rc"
 fi
 
 if [[ -z "$WORKFLOW_ONLY" ]]; then
-  if [[ -n "$PACKS" ]]; then
-    RESOLVED_PACKS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --resolve-install "$PACKS")"
-    if [[ "$RESOLVED_PACKS" == "--core-only" ]]; then CORE_ONLY=1; else SYSTEMS="$RESOLVED_PACKS"; fi
-  elif [[ -n "$ALL_PACKS" ]]; then
-    SYSTEMS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --all-bundles)"
+  if [[ -n "$PACKS" || -n "$ALL_PACKS" ]]; then
+    resolve_pack_flags
   elif [[ -z "$CORE_ONLY" && -z "$SYSTEMS" && -z "$YES_FLAG" && -z "$JSON_FLAG" && -t 0 && -t 1 ]]; then
     printf '%s' "$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --picker-line)"
     IFS= read -r PICKER_REPLY || { echo "" >&2; echo "Cancelled." >&2; exit 1; }
@@ -270,7 +287,8 @@ else
   bash "$ADAPTER_DIR/install.sh"
 fi
 
-if [[ -n "$AGENTS_SKILLS" ]]; then
+if [[ -n "$AGENTS_SKILLS" && -z "$WORKFLOW_ONLY" ]]; then
+  resolve_pack_flags
   run_agents_skills
 fi
 

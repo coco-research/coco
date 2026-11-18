@@ -52,6 +52,8 @@ MARKER="$SKILLS_DIR/.coco-agents-skills"
 [[ -d "$SKILLS_DIR" ]] || fail "missing $SKILLS_DIR"
 [[ -f "$MARKER" && ! -L "$MARKER" ]] || fail "missing marker $MARKER"
 grep -qx '# managed-by: coco' "$MARKER" || fail "marker missing managed-by header"
+grep -q "links-only mode" "$WORK/fresh-1.log" || fail "links-only summary missing"
+! grep -q "Coco v.* installed" "$WORK/fresh-1.log" || fail "links-only run printed full install footer"
 
 # Check counts, SI front door resolution, and absence of reverse-skill by default.
 LINK_COUNT=$(python3 - "$SKILLS_DIR" "$ROOT_REAL" <<'PY'
@@ -160,5 +162,51 @@ env -u CLAUDECODE -u AGENTS_HOME -u AGENTS_SKILLS_DIR HOME="$COMB_HOME" \
 env -u CLAUDECODE -u AGENTS_HOME -u AGENTS_SKILLS_DIR HOME="$COMB_HOME" \
   bash "$ROOT/install.sh" --uninstall --adapter cursor --agents-skills >"$WORK/comb-uninst.log" 2>&1
 [[ ! -e "$COMB_HOME/.agents/skills/.coco-agents-skills" ]] || fail "combined --uninstall --adapter --agents-skills did not remove ~/.agents/skills"
+
+# 6a. Combined --adapter cursor --agents-skills --packs gsd links only core + gsd (no si/m0/brain bundles).
+COMB_GSD="$WORK/comb-gsd"
+mkdir -p "$COMB_GSD"
+env -u CLAUDECODE -u AGENTS_HOME -u AGENTS_SKILLS_DIR HOME="$COMB_GSD" \
+  bash "$ROOT/install.sh" --adapter cursor --agents-skills --packs gsd -y >"$WORK/comb-gsd.log" 2>&1
+[[ -L "$COMB_GSD/.agents/skills/humanizer" ]] || fail "combined --packs gsd missing core skill humanizer"
+[[ -L "$COMB_GSD/.agents/skills/gsd-code-review" ]] || fail "combined --packs gsd missing gsd skill"
+[[ ! -e "$COMB_GSD/.agents/skills/ai-super-intelligence" && ! -L "$COMB_GSD/.agents/skills/ai-super-intelligence" ]] \
+  || fail "combined --packs gsd leaked si front door into ~/.agents/skills"
+
+# 6b. Adapter uninstall non-zero exit status is preserved instead of masked by exit 0.
+FAIL_REPO="$WORK/fail-repo"
+mkdir -p "$FAIL_REPO/adapters/fake-fail"
+cp "$ROOT/install.sh" "$FAIL_REPO/install.sh"
+for item in scripts skills systems package.json; do
+  ln -s "$ROOT/$item" "$FAIL_REPO/$item"
+done
+printf '{"name":"fake-fail","version":"0.1.0","description":"stub","supports_systems":["gsd"]}\n' \
+  >"$FAIL_REPO/adapters/fake-fail/manifest.json"
+printf '#!/usr/bin/env bash\nexit 42\n' >"$FAIL_REPO/adapters/fake-fail/install.sh"
+chmod +x "$FAIL_REPO/adapters/fake-fail/install.sh"
+
+FAIL_RC=0
+env -u CLAUDECODE -u AGENTS_HOME -u AGENTS_SKILLS_DIR HOME="$COMB_GSD" \
+  bash "$FAIL_REPO/install.sh" --uninstall --adapter fake-fail --agents-skills >"$WORK/fail-uninst.log" 2>&1 || FAIL_RC=$?
+[[ "$FAIL_RC" -eq 42 ]] || fail "expected failing adapter uninstall exit 42, got $FAIL_RC"
+[[ ! -e "$COMB_GSD/.agents/skills/.coco-agents-skills" ]] || fail "agents-skills cleanup skipped after adapter uninstall"
+
+# 6c. Tampered marker entries with ../ or nested paths are refused in prune loop, and atomic relinking leaves 0 temp files.
+TAMPER_HOME="$WORK/tamper-home"
+mkdir -p "$TAMPER_HOME"
+env -u CLAUDECODE -u AGENTS_HOME -u AGENTS_SKILLS_DIR HOME="$TAMPER_HOME" \
+  bash "$ROOT/install.sh" --agents-skills --packs gsd >"$WORK/tamper-1.log" 2>&1
+ln -s "$ROOT/skills/humanizer" "$TAMPER_HOME/.agents/victim-link"
+ln -sf "$ROOT/skills/brainstorming" "$TAMPER_HOME/.agents/skills/humanizer"
+printf '../victim-link\nnested/escape\n..\n.\n' >>"$TAMPER_HOME/.agents/skills/.coco-agents-skills"
+
+env -u CLAUDECODE -u AGENTS_HOME -u AGENTS_SKILLS_DIR HOME="$TAMPER_HOME" \
+  bash "$ROOT/install.sh" --agents-skills --core-only >"$WORK/tamper-2.log" 2>&1
+[[ -L "$TAMPER_HOME/.agents/victim-link" ]] || fail "tampered ../victim-link marker deleted symlink outside skills dir"
+[[ "$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$TAMPER_HOME/.agents/skills/humanizer")" == "$ROOT_REAL/skills/humanizer" ]] \
+  || fail "atomic relink did not restore humanizer target"
+[[ ! -e "$ROOT/skills/brainstorming/link" ]] || fail "relink dereferenced target directory"
+find "$TAMPER_HOME/.agents/skills" -maxdepth 1 -name '.coco-link.*' -o -name '.coco-agents-skills.*' | grep -q . \
+  && fail "stray .coco-* temp entries left in skills dir" || true
 
 echo "~/.agents/skills: ${LINK_COUNT} links · idempotent · user folders kept · packs + dry-run clean"

@@ -137,7 +137,7 @@ grep -q 'npx cocosuperintelligence@latest update' "$T/inst.out" \
 mkdir -p "$T/home/.coco"
 node -e 'const fs=require("fs");fs.writeFileSync(process.argv[1],JSON.stringify({checkedAt:Date.now(),latest:"2.0.0"}));' \
   "$T/home/.coco/.update-check.json"
-banner_out="$(HOME="$T/home" node "$T/cli/bin/coco.js" --help)"
+banner_out="$(env -u COCO_NO_UPDATE_CHECK HOME="$T/home" node "$T/cli/bin/coco.js" --help)"
 printf '%s\n' "$banner_out" | grep -q 'Coco 2.0.0 is available' \
   || fail "(5b) cached update banner did not render"
 [ "$(printf '%s\n' "$banner_out" | grep -c 'npx cocosuperintelligence@latest update')" -ge 2 ] \

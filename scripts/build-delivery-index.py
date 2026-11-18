@@ -105,8 +105,8 @@ def count_md(root, segments):
             # INDEX.md and README.md are catalogs sitting in the same directory, and
             # PROMPT-DEFENSE.md is the preamble every agent includes: none of them is
             # a delivered command or agent.
-            if name.endswith('.md') and name not in ('INDEX.md', 'README.md',
-                                                     'PROMPT-DEFENSE.md'):
+            stem = name[:-9] if name.endswith('.agent.md') else (name[:-3] if name.endswith('.md') else '')
+            if stem and stem not in ('INDEX', 'README', 'PROMPT-DEFENSE'):
                 seen.add(str((dirpath / name).resolve()))
     return len(seen)
 
@@ -306,7 +306,8 @@ def main():
     # comparable. An AGENTS.md producer emits one file by design, and an adapter
     # whose manifest declares no bundles cannot reach the generated family at all.
     def comparable(r):
-        return not (r['agents_md'] and r['commands'] == 0)
+        return not (r['agents_md'] and r['commands'] == 0
+                    and r['skills'] == 0 and r['agents'] == 0)
 
     # Measured against the published total, not the widest adapter: grok also links
     # three workflow files as commands, and using its 389 as the ceiling marked every
@@ -347,7 +348,7 @@ def main():
     # flags than with them is one an ordinary install cannot fully benefit from.
     shortfall = []
     for r in rows:
-        if r['agents_md'] and r['commands'] == 0:
+        if r['agents_md'] and r['commands'] == 0 and r['skills'] == 0 and r['agents'] == 0:
             continue  # AGENTS.md producer: one file by design
         gap = r['skills'] - r['default_skills']
         if gap > 0:

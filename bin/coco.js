@@ -6,7 +6,7 @@
 //   npx cocosuperintelligence install       # same as above
 //   npx cocosuperintelligence install --adapter cursor
 //   npx cocosuperintelligence install --systems gsd,brain,m0
-//   npx cocosuperintelligence update        # checkout the pinned release tag
+//   npx cocosuperintelligence@latest update # checkout the latest release tag
 //   npx cocosuperintelligence uninstall     # remove symlinks + clone
 //   npx cocosuperintelligence --help
 
@@ -31,8 +31,8 @@ const UPDATE_CACHE = path.join(os.homedir(), '.coco', '.update-check.json');
 const LATEST_URL = 'https://raw.githubusercontent.com/coco-research/coco/main/package.json';
 
 function semverGt(a, b) {
-  const pa = String(a).split('.').map(n => parseInt(n, 10) || 0);
-  const pb = String(b).split('.').map(n => parseInt(n, 10) || 0);
+  const pa = String(a).replace(/^v/, '').split('.').map(n => parseInt(n, 10) || 0);
+  const pb = String(b).replace(/^v/, '').split('.').map(n => parseInt(n, 10) || 0);
   for (let i = 0; i < 3; i++) { if ((pa[i] || 0) > (pb[i] || 0)) return true; if ((pa[i] || 0) < (pb[i] || 0)) return false; }
   return false;
 }
@@ -66,7 +66,7 @@ function fetchLatestVersion(cb) {
 function banner(latest) {
   if (latest && semverGt(latest, PKG_VERSION)) {
     console.log(`\n  ⬆  Coco ${latest} is available (you have ${PKG_VERSION}).`);
-    console.log(`     Update:  node bin/coco.js update     (or: git -C <clone> pull --ff-only && bash install.sh)\n`);
+    console.log(`     Update:  npx cocosuperintelligence@latest update     (or: git -C <clone> pull --ff-only && bash install.sh)\n`);
   }
 }
 
@@ -92,14 +92,14 @@ function help() {
   console.log(`Coco — open-core AI workflow framework
 
 Usage:
-  npx cocosuperintelligence                   clone + install (auto-detect)
-  npx cocosuperintelligence install [flags]   clone + install with flags
-  npx cocosuperintelligence update [dir]      checkout the pinned release tag
-  npx cocosuperintelligence uninstall [dir]   remove symlinks + clone
-  npx cocosuperintelligence mcp               run read-only stdio MCP server
-  npx cocosuperintelligence version           show version + check for updates
-  npx cocosuperintelligence suggest-skills    suggest repeated local workflows
-  npx cocosuperintelligence --help            this message
+  npx cocosuperintelligence                      clone + install (auto-detect)
+  npx cocosuperintelligence install [flags]      clone + install with flags
+  npx cocosuperintelligence@latest update [dir]  checkout the latest release tag
+  npx cocosuperintelligence uninstall [dir]      remove symlinks + clone
+  npx cocosuperintelligence mcp                  run read-only stdio MCP server
+  npx cocosuperintelligence version              show version + check for updates
+  npx cocosuperintelligence suggest-skills       suggest repeated local workflows
+  npx cocosuperintelligence --help               this message
 
 Update checks contact only github.com (no telemetry); disable with COCO_NO_UPDATE_CHECK=1.
 
@@ -122,7 +122,7 @@ Examples:
   npx cocosuperintelligence
   npx cocosuperintelligence install --adapter cursor
   npx cocosuperintelligence install --systems gsd,brain --adapter claude-code
-  npx cocosuperintelligence update
+  npx cocosuperintelligence@latest update
   npx cocosuperintelligence uninstall
 
 Repo: https://github.com/coco-research/coco
@@ -247,7 +247,35 @@ function refuseClone(dir, why) {
   process.exit(2);
 }
 
-function cloneOrUpdate(dir) {
+const SEMVER_TAG_RE = /^v\d+\.\d+\.\d+$/;
+const REMOTE_TAG_RE = /^refs\/tags\/(v\d+\.\d+\.\d+)$/;
+
+function resolveUpdateTag(dir) {
+  let best = PINNED_TAG;
+  const localTags = gitIn(dir, ['tag', '--points-at', 'HEAD']);
+  if (!localTags.error && localTags.status === 0) {
+    for (const raw of String(localTags.stdout || '').split(/\r?\n/)) {
+      const tag = raw.trim();
+      if (SEMVER_TAG_RE.test(tag) && semverGt(tag, best)) best = tag;
+    }
+  }
+  const ls = gitIn(dir, ['ls-remote', '--tags', '--refs', 'origin', 'v[0-9]*']);
+  if (ls.error || ls.status !== 0) {
+    return { target: best, fromRemote: false };
+  }
+  const remoteSet = new Set();
+  for (const line of String(ls.stdout || '').split(/\r?\n/)) {
+    const parts = line.trim().split(/\s+/);
+    const m = parts.length >= 2 ? REMOTE_TAG_RE.exec(parts[1]) : null;
+    if (!m) continue;
+    const tag = m[1];
+    remoteSet.add(tag);
+    if (semverGt(tag, best)) best = tag;
+  }
+  return { target: best, fromRemote: remoteSet.has(best) };
+}
+
+function cloneOrUpdate(dir, { resolveLatest = false } = {}) {
   const empty = isEmptyDir(dir);
   if (fs.existsSync(dir) && !empty) {
     const why = cloneRejection(dir);
@@ -265,9 +293,24 @@ function cloneOrUpdate(dir) {
         console.error(`Not updating ${dir}: ${found == null ? 'the local-work check could not run' : `it has ${found.join(' and ')}`}. Move that work elsewhere or remove the clone. Nothing was changed.`);
         process.exit(2);
       }
-      console.log(`Coco already at ${dir} (detached). Updating to ${PINNED_TAG}...`);
-      run('git', ['fetch', '--tags', '--force', '--depth', '1', 'origin', `refs/tags/${PINNED_TAG}:refs/tags/${PINNED_TAG}`], { cwd: dir });
-      run('git', ['checkout', PINNED_TAG], { cwd: dir });
+      const { target, fromRemote } = resolveLatest
+        ? resolveUpdateTag(dir)
+        : { target: PINNED_TAG, fromRemote: true };
+      console.log(`Coco already at ${dir} (detached). Updating to ${target}...`);
+      const fetchArgs = ['fetch', '--force', '--depth', '1', 'origin', `refs/tags/${target}:refs/tags/${target}`];
+      if (fromRemote) {
+        run('git', fetchArgs, { cwd: dir });
+      } else {
+        const fetched = gitIn(dir, fetchArgs);
+        if (fetched.status !== 0) {
+          const hasLocal = gitIn(dir, ['rev-parse', '-q', '--verify', `refs/tags/${target}^{commit}`]);
+          if (hasLocal.status !== 0) {
+            if (fetched.stderr) process.stderr.write(fetched.stderr);
+            process.exit(fetched.status || 1);
+          }
+        }
+      }
+      run('git', ['checkout', target], { cwd: dir });
     } else {
       console.log(`Coco already at ${dir}. Pulling latest...`);
       run('git', ['pull', '--ff-only'], { cwd: dir });
@@ -301,7 +344,7 @@ function cmdInstall(argv) {
   run('bash', [installScript, ...argv]);
 
   console.log(`\nDone. Coco installed at ${dir}.`);
-  console.log(`Re-install later:  npx cocosuperintelligence install\nUpdate the clone to the pinned release:  npx cocosuperintelligence update`);
+  console.log(`Re-install later:  npx cocosuperintelligence install\nUpdate the clone to the latest release:  npx cocosuperintelligence@latest update`);
 }
 
 function cmdUpdate(argv) {
@@ -310,7 +353,7 @@ function cmdUpdate(argv) {
     console.error(`Error: ${dir} is not a Coco clone. Run \`npx cocosuperintelligence install\` first.`);
     process.exit(1);
   }
-  cloneOrUpdate(dir);
+  cloneOrUpdate(dir, { resolveLatest: true });
   console.log(`\nCoco updated at ${dir}. Re-run install if you want to refresh symlinks:\n  bash ${path.join(dir, 'install.sh')}`);
 }
 

@@ -160,4 +160,40 @@ assert servers.get("other") == {
 PY
 pass "--uninstall removed Coco skills, agents, and mcpServers.coco while preserving mcpServers.other"
 
+echo "=== 6. User-managed symlinks & malformed mcp-config.json during --uninstall ==="
+SYM_HOME="$WORK/sym-home"
+SYM_PROJ="$WORK/sym-proj"
+SYM_EXT="$WORK/sym-ext"
+mkdir -p "$SYM_HOME" "$SYM_PROJ/.github" "$SYM_EXT"
+printf '# Shared AGENTS\n' >"$SYM_EXT/shared-agents.md"
+ln -s "$SYM_EXT/shared-agents.md" "$SYM_PROJ/AGENTS.md"
+ln -s "$SYM_EXT/dangling-instr.md" "$SYM_PROJ/.github/copilot-instructions.md"
+
+run_installer "$SYM_PROJ" "$SYM_HOME" --core-only >"$WORK/sym-install.log" 2>&1
+[[ -L "$SYM_PROJ/AGENTS.md" && "$(readlink "$SYM_PROJ/AGENTS.md")" == "$SYM_EXT/shared-agents.md" ]] \
+  || fail "install replaced user AGENTS.md symlink"
+[[ -L "$SYM_PROJ/.github/copilot-instructions.md" && "$(readlink "$SYM_PROJ/.github/copilot-instructions.md")" == "$SYM_EXT/dangling-instr.md" ]] \
+  || fail "install replaced dangling copilot-instructions.md symlink"
+grep -q 'Shared AGENTS' "$SYM_EXT/shared-agents.md" || fail "shared AGENTS target modified"
+pass "user-managed and dangling symlinks for AGENTS.md and copilot-instructions.md preserved"
+
+# Malformed JSON & non-UTF-8 bytes in mcp-config.json must not abort --uninstall
+BAD_HOME="$WORK/bad-home"
+BAD_PROJ="$WORK/bad-proj"
+mkdir -p "$BAD_HOME" "$BAD_PROJ"
+run_installer "$BAD_PROJ" "$BAD_HOME" --core-only >"$WORK/bad-install.log" 2>&1
+printf '{broken json\n' >"$BAD_HOME/.copilot/mcp-config.json"
+run_installer "$BAD_PROJ" "$BAD_HOME" --uninstall >"$WORK/bad-uninstall1.log" 2>&1
+[[ "$(find "$BAD_HOME/.copilot/skills" -maxdepth 1 -type l 2>/dev/null | wc -l | tr -d ' ')" -eq 0 ]] \
+  || fail "--uninstall aborted before removing skills on malformed JSON"
+[[ ! -e "$BAD_PROJ/AGENTS.md" ]] || fail "--uninstall aborted before removing generated AGENTS.md on malformed JSON"
+grep -q '{broken json' "$BAD_HOME/.copilot/mcp-config.json" || fail "malformed mcp-config.json was overwritten"
+
+rm -f "$BAD_HOME/.copilot/mcp-config.json"
+run_installer "$BAD_PROJ" "$BAD_HOME" --core-only >"$WORK/bad-install2.log" 2>&1
+python3 -c 'import pathlib, sys; pathlib.Path(sys.argv[1]).write_bytes(b"\xff\xfe\x00invalid")' "$BAD_HOME/.copilot/mcp-config.json"
+run_installer "$BAD_PROJ" "$BAD_HOME" --uninstall >"$WORK/bad-uninstall2.log" 2>&1
+[[ ! -e "$BAD_PROJ/AGENTS.md" ]] || fail "--uninstall aborted on invalid UTF-8 mcp-config.json"
+pass "--uninstall handles malformed JSON and invalid UTF-8 in mcp-config.json without aborting"
+
 echo "PASS: all GitHub Copilot CLI adapter checks passed"

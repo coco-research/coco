@@ -1,0 +1,203 @@
+{
+  "schema": 1,
+  "connectors": [
+    {
+      "id": "codex",
+      "name": "OpenAI Codex CLI",
+      "level": "tested",
+      "format": "toml",
+      "config_path": "~/.codex/config.toml",
+      "env_home": "CODEX_HOME",
+      "env_rel": "config.toml",
+      "source_url": "https://learn.chatgpt.com/docs/extend/mcp?surface=cli"
+    },
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "level": "tested",
+      "format": "json",
+      "shape": "mcpServers",
+      "config_path": ".mcp.json",
+      "source_url": "https://code.claude.com/docs/en/mcp",
+      "note": "Writes project .mcp.json (never rewrites live ~/.claude.json); for user scope run: claude mcp add --scope user coco -- <cmd>"
+    },
+    {
+      "id": "claude-desktop",
+      "name": "Claude Desktop",
+      "level": "config",
+      "format": "json",
+      "shape": "mcpServers",
+      "config_path": "~/Library/Application Support/Claude/claude_desktop_config.json",
+      "source_url": "https://claude.com/docs/connectors/building"
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "level": "config",
+      "format": "json",
+      "shape": "mcpServers",
+      "config_path": "~/.cursor/mcp.json",
+      "env_home": "CURSOR_HOME",
+      "env_rel": "mcp.json",
+      "source_url": "https://cursor.com/docs/context/mcp"
+    },
+    {
+      "id": "windsurf",
+      "aliases": ["devin-desktop"],
+      "name": "Windsurf (Devin Desktop)",
+      "level": "config",
+      "format": "json",
+      "shape": "mcpServers",
+      "config_path": "~/.config/devin/mcp_config.json",
+      "env_home": "DEVIN_CONFIG_HOME",
+      "env_rel": "mcp_config.json",
+      "legacy_notes": [".codeium/mcp_config.json", ".codeium/windsurf/mcp_config.json"],
+      "source_url": "https://docs.devin.ai/desktop/cascade/mcp",
+      "note": "Renamed Devin Desktop; docs conflict across ~/.config/devin/mcp_config.json, ~/.codeium/mcp_config.json, and legacy ~/.codeium/windsurf/mcp_config.json."
+    },
+    {
+      "id": "vscode",
+      "name": "VS Code (GitHub Copilot)",
+      "level": "config",
+      "format": "json",
+      "shape": "vscodeServers",
+      "config_path": "~/Library/Application Support/Code/User/mcp.json",
+      "source_url": "https://code.visualstudio.com/docs/agents/reference/mcp-configuration",
+      "note": "Copilot agent mode also supports mcpServers in ~/.copilot/mcp-config.json and workspace .mcp.json."
+    },
+    {
+      "id": "copilot-cli",
+      "aliases": ["github-copilot-cli"],
+      "name": "GitHub Copilot CLI",
+      "level": "config",
+      "format": "json",
+      "shape": "copilotCli",
+      "config_path": "~/.copilot/mcp-config.json",
+      "env_home": "COPILOT_HOME",
+      "env_rel": "mcp-config.json",
+      "source_url": "https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers"
+    },
+    {
+      "id": "gemini-cli",
+      "name": "Gemini CLI",
+      "level": "config",
+      "format": "json",
+      "shape": "mcpServers",
+      "config_path": "~/.gemini/settings.json",
+      "env_home": "GEMINI_CLI_HOME",
+      "env_rel": "settings.json",
+      "source_url": "https://geminicli.com/docs/tools/mcp-server/"
+    },
+    {
+      "id": "antigravity",
+      "name": "Google Antigravity",
+      "level": "config",
+      "format": "json",
+      "shape": "mcpServers",
+      "config_path": "~/.gemini/config/mcp_config.json",
+      "source_url": "https://antigravity.google/docs/cli/gcli-migration/",
+      "note": "Workspace config at .agents/mcp_config.json; secondary guides also cite ~/.gemini/antigravity-cli/mcp_config.json."
+    },
+    {
+      "id": "cline",
+      "name": "Cline",
+      "level": "config",
+      "format": "json",
+      "shape": "mcpServers",
+      "config_path": "~/.cline/data/settings/cline_mcp_settings.json",
+      "env_home": "CLINE_HOME",
+      "env_rel": "cline_mcp_settings.json",
+      "source_url": "https://docs.cline.bot/mcp/configuring-mcp-servers"
+    },
+    {
+      "id": "roo-code",
+      "name": "Roo Code",
+      "level": "config",
+      "format": "json",
+      "shape": "mcpServers",
+      "config_path": "~/Library/Application Support/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/mcp_settings.json",
+      "env_home": "ROO_CODE_HOME",
+      "env_rel": "mcp_settings.json",
+      "source_url": "https://roocodeinc.github.io/Roo-Code/features/mcp/using-mcp-in-roo",
+      "note": "Reportedly shut down; unverified (single secondary source)."
+    },
+    {
+      "id": "zed",
+      "name": "Zed",
+      "level": "config",
+      "format": "json",
+      "shape": "zedContextServers",
+      "config_path": "~/.config/zed/settings.json",
+      "env_home": "ZED_HOME",
+      "env_rel": "settings.json",
+      "source_url": "https://zed.dev/docs/ai/mcp"
+    },
+    {
+      "id": "opencode",
+      "name": "OpenCode",
+      "level": "config",
+      "format": "json",
+      "shape": "opencodeMcp",
+      "config_path": "~/.config/opencode/opencode.json",
+      "source_url": "https://opencode.ai/docs/mcp-servers/",
+      "note": "Docs example also shows nested mcp.servers.<name>; verify against installed CLI."
+    },
+    {
+      "id": "amazon-q",
+      "aliases": ["kiro"],
+      "name": "Kiro CLI (formerly Amazon Q)",
+      "level": "config",
+      "format": "json",
+      "shape": "mcpServers",
+      "config_path": "~/.kiro/settings/mcp.json",
+      "env_home": "KIRO_HOME",
+      "env_rel": "mcp.json",
+      "legacy_path": "~/.aws/amazonq/mcp.json",
+      "legacy_env_home": "AMAZON_Q_HOME",
+      "legacy_rel": "mcp.json",
+      "source_url": "https://kiro.dev/docs/mcp/configuration/",
+      "note": "Renamed from Amazon Q Developer CLI; legacy ~/.aws/amazonq/mcp.json kept only when already present."
+    },
+    {
+      "id": "continue",
+      "aliases": ["vscode-continue"],
+      "name": "Continue",
+      "level": "docs",
+      "format": "docs",
+      "config_path": ".continue/mcpServers/coco.yaml",
+      "source_url": "https://docs.continue.dev/customize/deep-dives/mcp"
+    },
+    {
+      "id": "goose",
+      "name": "Goose",
+      "level": "docs",
+      "format": "docs",
+      "config_path": "~/.config/goose/config.yaml",
+      "source_url": "https://goose-docs.ai/docs/guides/config-files/"
+    },
+    {
+      "id": "aider",
+      "name": "Aider",
+      "level": "docs",
+      "format": "docs",
+      "config_path": "AGENTS.md (--read AGENTS.md)",
+      "source_url": "https://aider.chat/docs/"
+    },
+    {
+      "id": "hermes",
+      "name": "Hermes Agent",
+      "level": "docs",
+      "format": "docs",
+      "config_path": "~/.hermes/config.yaml",
+      "source_url": "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp"
+    },
+    {
+      "id": "pi-desktop",
+      "name": "Pi Coding Agent",
+      "level": "docs",
+      "format": "docs",
+      "config_path": ".pi/mcp.json",
+      "source_url": "https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/extensions.md"
+    }
+  ]
+}

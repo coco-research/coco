@@ -162,6 +162,9 @@ jobs:
       - name: Validate stdio MCP server
         run: bash tests/check-coco-mcp.sh
 
+      - name: Validate MCP harness connectors
+        run: bash tests/check-coco-connect.sh
+
       - name: Hyperframes telemetry is opt-in (no network call unless COCO_HYPERFRAMES_TELEMETRY=1)
         run: node --test systems/hyperframes/skills/media-use/scripts/lib/telemetry.test.mjs
 

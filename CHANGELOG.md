@@ -8,6 +8,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ### Added
 
+- `source-fetch` skill: fetch each public URL to local markdown with crawl4ai and record URL, status, fetch time and title in `sources.json` before citing.
 - **install:** `npx cocosuperintelligence` shows a pack picker in a terminal (defaults ticked, one `[Y/n]`); `--packs`, `--all` and `--yes` skip it, a non-interactive shell takes the defaults, and `--uninstall --packs` prints its removal list before removing (per-pack uninstall covers `claude-code` only in v2.0). A default install delivers the same files as before (191 skills, 388 commands, 34 agents on Claude Code).
 - **router:** a 120-prompt development split for the description-routing eval (12 of 13 departments), plus development and held-out run records under `evals/routing/runs/`.
 - **tests:** `tests/check-readme-prompts.py` checks that every README example prompt routes to the team its command names, under keyword and embedder routing.

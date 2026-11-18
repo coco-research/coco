@@ -160,7 +160,9 @@ atomic_symlink() {
   local src=$1 dst=$2
   TMP_LINK_DIR=$(mktemp -d "$AGENTS_SKILLS_DIR/.coco-link.XXXXXX")
   ln -s "$src" "$TMP_LINK_DIR/link"
-  python3 -c 'import os, sys; os.replace(sys.argv[1], sys.argv[2])' "$TMP_LINK_DIR/link" "$dst"
+  mv -fh "$TMP_LINK_DIR/link" "$dst" 2>/dev/null \
+    || mv -Tf "$TMP_LINK_DIR/link" "$dst" 2>/dev/null \
+    || python3 -c 'import os, sys; os.replace(sys.argv[1], sys.argv[2])' "$TMP_LINK_DIR/link" "$dst"
   rmdir "$TMP_LINK_DIR"
   TMP_LINK_DIR=""
 }

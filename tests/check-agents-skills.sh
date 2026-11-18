@@ -197,7 +197,8 @@ mkdir -p "$TAMPER_HOME"
 env -u CLAUDECODE -u AGENTS_HOME -u AGENTS_SKILLS_DIR HOME="$TAMPER_HOME" \
   bash "$ROOT/install.sh" --agents-skills --packs gsd >"$WORK/tamper-1.log" 2>&1
 ln -s "$ROOT/skills/humanizer" "$TAMPER_HOME/.agents/victim-link"
-ln -sf "$ROOT/skills/brainstorming" "$TAMPER_HOME/.agents/skills/humanizer"
+rm "$TAMPER_HOME/.agents/skills/humanizer"
+ln -s "$ROOT/skills/brainstorming" "$TAMPER_HOME/.agents/skills/humanizer"
 printf '../victim-link\nnested/escape\n..\n.\n' >>"$TAMPER_HOME/.agents/skills/.coco-agents-skills"
 
 env -u CLAUDECODE -u AGENTS_HOME -u AGENTS_SKILLS_DIR HOME="$TAMPER_HOME" \
@@ -206,7 +207,7 @@ env -u CLAUDECODE -u AGENTS_HOME -u AGENTS_SKILLS_DIR HOME="$TAMPER_HOME" \
 [[ "$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$TAMPER_HOME/.agents/skills/humanizer")" == "$ROOT_REAL/skills/humanizer" ]] \
   || fail "atomic relink did not restore humanizer target"
 [[ ! -e "$ROOT/skills/brainstorming/link" ]] || fail "relink dereferenced target directory"
-find "$TAMPER_HOME/.agents/skills" -maxdepth 1 -name '.coco-link.*' -o -name '.coco-agents-skills.*' | grep -q . \
-  && fail "stray .coco-* temp entries left in skills dir" || true
+stray_tmp=$(find "$TAMPER_HOME/.agents/skills" -maxdepth 1 \( -name '.coco-link*' -o -name '.coco-agents-skills.*' \))
+[[ -z "$stray_tmp" ]] || fail "stray .coco-* temp entries left in skills dir: $stray_tmp"
 
 echo "~/.agents/skills: ${LINK_COUNT} links · idempotent · user folders kept · packs + dry-run clean"

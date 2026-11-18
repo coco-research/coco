@@ -116,17 +116,19 @@ while [[ $# -gt 0 ]]; do
 done
 
 resolve_pack_flags() {
+  if [[ -n "$CORE_ONLY" ]]; then
+    SYSTEMS=""
+    return 0
+  fi
   if [[ -n "$PACKS" ]]; then
     RESOLVED_PACKS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --resolve-install "$PACKS")"
     if [[ "$RESOLVED_PACKS" == "--core-only" ]]; then
       CORE_ONLY=1
       SYSTEMS=""
     else
-      CORE_ONLY=""
       SYSTEMS="$RESOLVED_PACKS"
     fi
   elif [[ -n "$ALL_PACKS" ]]; then
-    CORE_ONLY=""
     SYSTEMS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --all-bundles)"
   fi
 }

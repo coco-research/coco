@@ -1,0 +1,4 @@
+Vendored from DietrichGebert/ponytail at c982cd411abb53323c4baa1baa3c2f020b8d0b08.
+Licence: MIT. Full text: skills/ponytail/LICENSE (Copyright (c) 2026 DietrichGebert).
+Modified in coco: dropped the plugin auto-update section and the session-start configuration section.
+Upstream: https://github.com/DietrichGebert/ponytail

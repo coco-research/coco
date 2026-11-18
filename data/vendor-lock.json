@@ -415,5 +415,51 @@
     ],
     "mode": "adapted",
     "patch": null
+  },
+  {
+    "name": "Ponytail",
+    "paths": [
+      "skills/ponytail/**",
+      "skills/ponytail-audit/**",
+      "skills/ponytail-debt/**",
+      "skills/ponytail-gain/**",
+      "skills/ponytail-help/**",
+      "skills/ponytail-review/**"
+    ],
+    "repo": "https://github.com/DietrichGebert/ponytail",
+    "pinned_ref": "c982cd411abb53323c4baa1baa3c2f020b8d0b08",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "skills/ponytail/LICENSE",
+        "sha256": "fb1bc6909ac3ef82d5c22106e32ef682b0cff66788fa915fb9b53b15c9d2f3ab"
+      },
+      {
+        "path": "skills/ponytail/NOTICE",
+        "sha256": "54108171f01ee07517979571e61236ee91abe6edce91fc50eca4663b9b6dd838"
+      },
+      {
+        "path": "skills/ponytail-audit/NOTICE",
+        "sha256": "5f26010a4062b9408cb3c0da5264182199cb70a1726d7ed3eb53e4e5cda18645"
+      },
+      {
+        "path": "skills/ponytail-debt/NOTICE",
+        "sha256": "5f26010a4062b9408cb3c0da5264182199cb70a1726d7ed3eb53e4e5cda18645"
+      },
+      {
+        "path": "skills/ponytail-gain/NOTICE",
+        "sha256": "685b0b154c1b31a7c45fe9ea47fcdacdc700d9018fa402fb3fb18ae1446194b8"
+      },
+      {
+        "path": "skills/ponytail-help/NOTICE",
+        "sha256": "3ca0c48848044572921c4e09c08025d3947b94823e7e869e1aa9596597c2ba2c"
+      },
+      {
+        "path": "skills/ponytail-review/NOTICE",
+        "sha256": "5f26010a4062b9408cb3c0da5264182199cb70a1726d7ed3eb53e4e5cda18645"
+      }
+    ],
+    "mode": "adapted",
+    "patch": null
   }
 ]

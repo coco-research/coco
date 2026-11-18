@@ -7,6 +7,8 @@
       "level": "tested",
       "format": "toml",
       "config_path": "~/.codex/config.toml",
+      "env_home": "CODEX_HOME",
+      "env_rel": "config.toml",
       "source_url": "https://learn.chatgpt.com/docs/extend/mcp?surface=cli"
     },
     {
@@ -35,6 +37,8 @@
       "format": "json",
       "shape": "mcpServers",
       "config_path": "~/.cursor/mcp.json",
+      "env_home": "CURSOR_HOME",
+      "env_rel": "mcp.json",
       "source_url": "https://cursor.com/docs/context/mcp"
     },
     {
@@ -45,6 +49,9 @@
       "format": "json",
       "shape": "mcpServers",
       "config_path": "~/.config/devin/mcp_config.json",
+      "env_home": "DEVIN_CONFIG_HOME",
+      "env_rel": "mcp_config.json",
+      "legacy_notes": [".codeium/mcp_config.json", ".codeium/windsurf/mcp_config.json"],
       "source_url": "https://docs.devin.ai/desktop/cascade/mcp",
       "note": "Renamed Devin Desktop; docs conflict across ~/.config/devin/mcp_config.json, ~/.codeium/mcp_config.json, and legacy ~/.codeium/windsurf/mcp_config.json."
     },
@@ -66,6 +73,8 @@
       "format": "json",
       "shape": "copilotCli",
       "config_path": "~/.copilot/mcp-config.json",
+      "env_home": "COPILOT_HOME",
+      "env_rel": "mcp-config.json",
       "source_url": "https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers"
     },
     {
@@ -75,6 +84,8 @@
       "format": "json",
       "shape": "mcpServers",
       "config_path": "~/.gemini/settings.json",
+      "env_home": "GEMINI_CLI_HOME",
+      "env_rel": "settings.json",
       "source_url": "https://geminicli.com/docs/tools/mcp-server/"
     },
     {
@@ -94,6 +105,8 @@
       "format": "json",
       "shape": "mcpServers",
       "config_path": "~/.cline/data/settings/cline_mcp_settings.json",
+      "env_home": "CLINE_HOME",
+      "env_rel": "cline_mcp_settings.json",
       "source_url": "https://docs.cline.bot/mcp/configuring-mcp-servers"
     },
     {
@@ -103,6 +116,8 @@
       "format": "json",
       "shape": "mcpServers",
       "config_path": "~/Library/Application Support/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/mcp_settings.json",
+      "env_home": "ROO_CODE_HOME",
+      "env_rel": "mcp_settings.json",
       "source_url": "https://roocodeinc.github.io/Roo-Code/features/mcp/using-mcp-in-roo",
       "note": "Reportedly shut down; unverified (single secondary source)."
     },
@@ -113,6 +128,8 @@
       "format": "json",
       "shape": "zedContextServers",
       "config_path": "~/.config/zed/settings.json",
+      "env_home": "ZED_HOME",
+      "env_rel": "settings.json",
       "source_url": "https://zed.dev/docs/ai/mcp"
     },
     {
@@ -133,6 +150,11 @@
       "format": "json",
       "shape": "mcpServers",
       "config_path": "~/.kiro/settings/mcp.json",
+      "env_home": "KIRO_HOME",
+      "env_rel": "mcp.json",
+      "legacy_path": "~/.aws/amazonq/mcp.json",
+      "legacy_env_home": "AMAZON_Q_HOME",
+      "legacy_rel": "mcp.json",
       "source_url": "https://kiro.dev/docs/mcp/configuration/",
       "note": "Renamed from Amazon Q Developer CLI; legacy ~/.aws/amazonq/mcp.json kept only when already present."
     },

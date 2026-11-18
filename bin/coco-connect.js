@@ -46,55 +46,44 @@ function appSupportDir(home, platform) {
   return process.env.XDG_CONFIG_HOME ? path.resolve(process.env.XDG_CONFIG_HOME) : path.join(home, '.config');
 }
 
+function expandCatalogPath(rawPath, home, appBase) {
+  const macAppPrefix = '~/Library/Application Support/';
+  if (rawPath.startsWith(macAppPrefix)) {
+    return path.join(appBase, ...rawPath.slice(macAppPrefix.length).split('/'));
+  }
+  if (rawPath.startsWith('~/')) {
+    return path.join(home, ...rawPath.slice(2).split('/'));
+  }
+  return path.resolve(process.cwd(), rawPath);
+}
+
+function resolveFromEnvOrCatalog(envVar, envRel, rawPath, home, appBase) {
+  if (envVar && process.env[envVar]) {
+    return path.join(path.resolve(process.env[envVar]), ...String(envRel || '').split('/'));
+  }
+  return expandCatalogPath(rawPath, home, appBase);
+}
+
 function resolveTargetPath(conn, explicitConfig) {
   if (explicitConfig) return path.resolve(explicitConfig);
+  if (conn.format === 'docs') return conn.config_path;
   const home = resolveHome();
   const plat = process.env.COCO_CONNECT_PLATFORM || process.platform;
   const appBase = appSupportDir(home, plat);
-  switch (conn.id) {
-    case 'codex':
-      return path.join(process.env.CODEX_HOME ? path.resolve(process.env.CODEX_HOME) : path.join(home, '.codex'), 'config.toml');
-    case 'claude-code':
-      return path.resolve(process.cwd(), '.mcp.json');
-    case 'claude-desktop':
-      return path.join(appBase, 'Claude', 'claude_desktop_config.json');
-    case 'cursor':
-      return path.join(process.env.CURSOR_HOME ? path.resolve(process.env.CURSOR_HOME) : path.join(home, '.cursor'), 'mcp.json');
-    case 'windsurf':
-      return path.join(process.env.DEVIN_CONFIG_HOME ? path.resolve(process.env.DEVIN_CONFIG_HOME) : path.join(home, '.config', 'devin'), 'mcp_config.json');
-    case 'vscode':
-      return path.join(appBase, 'Code', 'User', 'mcp.json');
-    case 'copilot-cli':
-      return path.join(process.env.COPILOT_HOME ? path.resolve(process.env.COPILOT_HOME) : path.join(home, '.copilot'), 'mcp-config.json');
-    case 'gemini-cli':
-      return path.join(process.env.GEMINI_CLI_HOME ? path.resolve(process.env.GEMINI_CLI_HOME) : path.join(home, '.gemini'), 'settings.json');
-    case 'antigravity':
-      return path.join(home, '.gemini', 'config', 'mcp_config.json');
-    case 'cline':
-      return path.join(process.env.CLINE_HOME ? path.resolve(process.env.CLINE_HOME) : path.join(home, '.cline', 'data', 'settings'), 'cline_mcp_settings.json');
-    case 'roo-code':
-      return path.join(process.env.ROO_CODE_HOME ? path.resolve(process.env.ROO_CODE_HOME) : path.join(appBase, 'Code', 'User', 'globalStorage', 'rooveterinaryinc.roo-cline', 'settings'), 'mcp_settings.json');
-    case 'zed':
-      return path.join(process.env.ZED_HOME ? path.resolve(process.env.ZED_HOME) : path.join(home, '.config', 'zed'), 'settings.json');
-    case 'opencode':
-      return path.join(home, '.config', 'opencode', 'opencode.json');
-    case 'amazon-q': {
-      const kiroDir = process.env.KIRO_HOME ? path.resolve(process.env.KIRO_HOME) : path.join(home, '.kiro', 'settings');
-      const legacyFile = path.join(process.env.AMAZON_Q_HOME ? path.resolve(process.env.AMAZON_Q_HOME) : path.join(home, '.aws', 'amazonq'), 'mcp.json');
-      if (!fs.existsSync(kiroDir) && fs.existsSync(legacyFile)) return legacyFile;
-      return path.join(kiroDir, 'mcp.json');
-    }
-    default:
-      return conn.config_path;
+  const primary = resolveFromEnvOrCatalog(conn.env_home, conn.env_rel, conn.config_path, home, appBase);
+  if (conn.legacy_path) {
+    const legacy = resolveFromEnvOrCatalog(conn.legacy_env_home, conn.legacy_rel, conn.legacy_path, home, appBase);
+    if (!fs.existsSync(path.dirname(primary)) && fs.existsSync(legacy)) return legacy;
   }
+  return primary;
 }
 
 function legacyPathNotes(conn, home) {
   const notes = [];
-  if (conn.id === 'windsurf') {
-    for (const oldRel of [['.codeium', 'mcp_config.json'], ['.codeium', 'windsurf', 'mcp_config.json']]) {
-      const p = path.join(home, ...oldRel);
-      if (fs.existsSync(p)) notes.push(`Note: legacy Windsurf/Codeium config also exists at ${p}`);
+  if (Array.isArray(conn.legacy_notes)) {
+    for (const rel of conn.legacy_notes) {
+      const p = path.join(home, ...rel.split('/'));
+      if (fs.existsSync(p)) notes.push(`Note: legacy ${conn.name} config also exists at ${p}`);
     }
   }
   return notes;
@@ -169,7 +158,7 @@ function mergeToml(prevText, srv, force) {
   const endIdx = prevText.indexOf(TOML_END);
   if (startIdx >= 0 && endIdx > startIdx) {
     const after = prevText.slice(endIdx + TOML_END.length).replace(/^\r?\n/, '');
-    const before = prevText.slice(0, startIdx).replace(/[ \t]*$/, '');
+    const before = prevText.slice(0, startIdx);
     const joined = before + block + (after ? '\n' + after : '\n');
     return joined.endsWith('\n') ? joined : joined + '\n';
   }
@@ -300,6 +289,9 @@ function runConnect(argv = []) {
       process.exit(2);
     } else if (!tool) {
       tool = a;
+    } else {
+      process.stderr.write(`Error: unexpected extra argument '${a}'.\n`);
+      process.exit(2);
     }
   }
 
@@ -310,7 +302,7 @@ function runConnect(argv = []) {
       '  coco connect <tool> [--npx|--local]           print MCP config snippet (no disk writes)\n' +
       '  coco connect <tool> --write [--config <path>] merge Coco MCP server into harness config\n'
     );
-    if (!flags.help && !flags.list && !tool) process.exit(2);
+    if (!flags.help) process.exit(2);
     return;
   }
   if (flags.list) { printList(catalog); return; }

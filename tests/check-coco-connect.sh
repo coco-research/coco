@@ -179,11 +179,11 @@ HOME="$USER_HOME" COCO_NO_UPDATE_CHECK=1 node "$CLI" connect codex --write --con
 HOME="$USER_HOME" COCO_NO_UPDATE_CHECK=1 node "$CLI" connect codex --write --force --config "$TOML_ARRAY" >/dev/null
 grep -q '^# coco:mcp-start$' "$TOML_ARRAY" || fail "TOML --force did not replace [[mcp_servers.coco]]"
 
-for bad_args in "cursor --write --config" "cursor --write --config --local" "cursor --write --config="; do
+for bad_args in "cursor --write --config" "cursor --write --config --local" "cursor --write --config=" "codex cursor"; do
   rc=0
   # shellcheck disable=SC2086
   HOME="$USER_HOME" COCO_NO_UPDATE_CHECK=1 node "$CLI" connect $bad_args >/dev/null 2>&1 || rc=$?
-  [ "$rc" -eq 2 ] || fail "bad --config args '$bad_args' did not exit 2 (rc=$rc)"
+  [ "$rc" -eq 2 ] || fail "bad args '$bad_args' did not exit 2 (rc=$rc)"
 done
 
 node -e "

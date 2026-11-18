@@ -88,4 +88,80 @@ readme = (root / "README.md").read_text(encoding="utf-8")
 assert "assets/banner-si-dark.png" in readme and "assets/banner-si-light.png" in readme
 PY
 
-echo "PASS: Coco SI brand assets verified"
+VER_OUT=$(COCO_NO_UPDATE_CHECK=1 node bin/coco.js --version)
+echo "$VER_OUT" | grep -q "Coco Super Intelligence" || { echo "FAIL: --version missing product name"; exit 1; }
+echo "$VER_OUT" | grep -q "Coco Research (cocoresearch.org)" || { echo "FAIL: --version missing org line"; exit 1; }
+
+HELP_OUT=$(COCO_NO_UPDATE_CHECK=1 node bin/coco.js --help)
+echo "$HELP_OUT" | grep -q "Coco Super Intelligence · Coco Research (cocoresearch.org)" || { echo "FAIL: --help missing identity line"; exit 1; }
+
+python3 - <<'PY'
+import os, pty, shutil, subprocess, tempfile
+
+with tempfile.TemporaryDirectory() as td:
+    bindir = os.path.join(td, "bin")
+    cwd = os.path.join(td, "cwd")
+    home = os.path.join(td, "home")
+    os.makedirs(bindir)
+    os.makedirs(cwd)
+    os.makedirs(home)
+    git_stub = os.path.join(bindir, "git")
+    with open(git_stub, "w", encoding="utf-8") as f:
+        f.write('#!/bin/sh\nfor a; do d="$a"; done\nmkdir -p "$d" && echo "exit 0" > "$d/install.sh"\n')
+    os.chmod(git_stub, 0o755)
+    base_env = {
+        **os.environ,
+        "HOME": home,
+        "COCO_NO_UPDATE_CHECK": "1",
+        "PATH": bindir + ":" + os.environ.get("PATH", ""),
+    }
+    env_tty = dict(base_env)
+    env_tty.pop("NO_COLOR", None)
+
+    master, slave = pty.openpty()
+    proc = subprocess.Popen(
+        ["node", os.path.abspath("bin/coco.js"), "install"],
+        cwd=cwd, env=env_tty, stdin=subprocess.DEVNULL, stdout=slave, stderr=slave, close_fds=True,
+    )
+    os.close(slave)
+    chunks = []
+    while True:
+        try:
+            b = os.read(master, 4096)
+        except OSError:
+            break
+        if not b:
+            break
+        chunks.append(b)
+    os.close(master)
+    proc.wait(timeout=15)
+    tty_out = b"".join(chunks).decode("utf-8", "replace")
+    assert "COCO RESEARCH" in tty_out and "SUPER INTELLIGENCE" in tty_out, tty_out
+    assert "\x1b[1;38;2;91;141;255m" in tty_out, "expected ANSI brand header on TTY"
+
+    shutil.rmtree(cwd)
+    os.makedirs(cwd)
+    master2, slave2 = pty.openpty()
+    env_nc = {**env_tty, "NO_COLOR": "1"}
+    proc2 = subprocess.Popen(
+        ["node", os.path.abspath("bin/coco.js"), "install"],
+        cwd=cwd, env=env_nc, stdin=subprocess.DEVNULL, stdout=slave2, stderr=slave2, close_fds=True,
+    )
+    os.close(slave2)
+    chunks2 = []
+    while True:
+        try:
+            b = os.read(master2, 4096)
+        except OSError:
+            break
+        if not b:
+            break
+        chunks2.append(b)
+    os.close(master2)
+    proc2.wait(timeout=15)
+    nc_out = b"".join(chunks2).decode("utf-8", "replace")
+    assert "COCO RESEARCH · SUPER INTELLIGENCE" in nc_out, nc_out
+    assert "\x1b[" not in nc_out, "expected zero ANSI escapes under NO_COLOR=1"
+PY
+
+echo "PASS: Coco SI brand assets and CLI banner verified"

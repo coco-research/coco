@@ -51,7 +51,7 @@ jobs:
 
       - name: Adapter install.sh syntax check
         run: |
-          for f in adapters/*/install.sh install.sh bin/coco-bootstrap.sh skills/prd-generator/scripts/generate_prd.sh skills/brainstorming/scripts/stop-server.sh tests/check-security-surface.sh tests/check-officecli-install.sh tests/check-install-manifest.sh tests/check-install-safety.sh tests/check-uninstall.sh tests/check-codex-agents-md-paths.sh tests/lib/install-home.sh tests/check-si-front-doors.sh; do
+          for f in adapters/*/install.sh install.sh bin/coco-bootstrap.sh skills/prd-generator/scripts/generate_prd.sh skills/brainstorming/scripts/stop-server.sh tests/check-security-surface.sh tests/check-officecli-install.sh tests/check-install-manifest.sh tests/check-install-safety.sh tests/check-uninstall.sh tests/check-codex-agents-md-paths.sh tests/lib/install-home.sh tests/check-si-front-doors.sh tests/check-cli-update-latest-tag.sh; do
             bash -n "$f" || { echo "Syntax error in $f"; exit 1; }
           done
           echo "All install scripts pass syntax check."
@@ -129,6 +129,9 @@ jobs:
 
       - name: Validate the CLI closing hint
         run: bash tests/check-cli-closing-hint.sh
+
+      - name: Validate coco update resolves the latest semver release tag
+        run: bash tests/check-cli-update-latest-tag.sh
 
       - name: Validate no hardcoded adapter list drifts from adapters/
         run: bash tests/check-adapter-drift.sh

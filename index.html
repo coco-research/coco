@@ -44,6 +44,7 @@
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="preload" as="font" type="font/woff2" crossorigin href="https://cdn.jsdelivr.net/npm/@fontsource-variable/archivo@5.3.0/files/archivo-latin-wdth-normal.woff2">
 <link rel="stylesheet" href="assets/css/site.css">
+<style>.lab-note { margin: -2px 0 10px; color: var(--ink-3); font-size: 0.9rem; line-height: 1.4; } html.cine .lab-note { margin: 0 0 clamp(3px, 0.6svh, 6px); font-size: 0.74rem; line-height: 1.25; }</style>
 
 <script type="importmap">
 { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" } }
@@ -262,7 +263,7 @@
           </div>
           <div class="card-body">
             <h3 id="t-connect">Coco Connect</h3>
-            <p class="tag">Available now, v0.2.1, Apple silicon</p>
+            <p class="tag">Available now, v0.2.1, Apple silicon, Apache-2.0 (releases repo)</p>
             <p>The Mac app that finds the AI coding tools on your machine, then installs and health-checks Coco for each of them.</p>
             <div class="card-actions">
               <a class="btn btn-primary btn-sm" href="https://github.com/coco-research/coco-connect-releases/releases">Download<span class="sr-only"> Coco Connect</span></a>
@@ -285,17 +286,18 @@
           <!-- products:lab:start -->
           <h3 class="lab-group">Source available</h3>
           <ul>
-            <li class="lab-item"><h4><a class="inline" href="https://github.com/coco-research/coco-design-language" rel="noopener">Signal</a></h4><p>Our design language: three editions, CSS and docs.<span class="tag">Source available, MIT, no release</span></p></li>
-            <li class="lab-item"><h4><a class="inline" href="https://github.com/coco-research/Mira" rel="noopener">Mira</a></h4><p>Makes Reels and Shorts in English and Hindi, on your own machine.<span class="tag">Source available, AGPL-3.0, Python, no release</span></p></li>
-            <li class="lab-item"><h4><a class="inline" href="https://github.com/coco-research/coco-loops" rel="noopener">Coco Loops</a></h4><p>Governance for autonomous agent loops: rules, adversary checks, budget caps and an audit trail.<span class="tag">Source available, no release</span></p></li>
+            <li class="lab-item"><h4><a class="inline" href="https://github.com/coco-research/coco-design-language" rel="noopener">Signal</a></h4><p>Our design language: three editions, CSS and docs.<span class="tag">Source available, Apache-2.0, no release</span></p></li>
+            <li class="lab-item"><h4><a class="inline" href="https://github.com/coco-research/Mira" rel="noopener">Mira</a></h4><p>Makes Reels and Shorts in English and Hindi, on your own machine.<span class="tag">Source available, AGPL-3.0, Python, archived, no release</span></p></li>
+            <li class="lab-item"><h4><a class="inline" href="https://github.com/coco-research/coco-loops" rel="noopener">Coco Loops</a></h4><p>Governance for autonomous agent loops: rules, adversary checks, budget caps and an audit trail.<span class="tag">Proprietary, source available, no release</span></p></li>
             <li class="lab-item"><h4><a class="inline" href="https://github.com/coco-research/jev-use" rel="noopener">jev-use</a></h4><p>Voice-driven control for macOS.<span class="tag">Source available, Apache-2.0, pre-alpha</span></p></li>
-            <li class="lab-item"><h4><a class="inline" href="https://github.com/coco-research/heliopause" rel="noopener">Heliopause</a></h4><p>It gives your AI tools a Lead and roles, like a small company, on your own machine.<span class="tag">Source available, MIT, early preview</span></p></li>
+            <li class="lab-item"><h4><a class="inline" href="https://github.com/coco-research/heliopause" rel="noopener">Heliopause</a></h4><p>It gives your AI tools a Lead and roles, like a small company, on your own machine.<span class="tag">Source available, Apache-2.0, early preview</span></p></li>
           </ul>
           <h3 class="lab-group">Private, in the lab</h3>
+          <p class="lab-note">Private: not open source and not publicly licensed.</p>
           <ul>
             <li class="lab-item"><h4>Coco M0</h4><p>Cross-tool memory.<span class="tag">Private beta, used daily</span></p></li>
             <li class="lab-item"><h4>Coco Hermes</h4><p>Answers questions over your own files with an exact quote, or says it can't.<span class="tag">Private, no public build</span></p></li>
-            <li class="lab-item"><h4>Coco Code</h4><p>A local-first coding harness for the terminal and the Mac.<span class="tag">Private, internal pre-release</span></p></li>
+            <li class="lab-item"><h4>Coco Code</h4><p>A local-first coding harness for the terminal and the Mac.<span class="tag">Private, paused</span></p></li>
             <li class="lab-item"><h4>Coco Teams NG</h4><p>A team of AI members you hire, brief and work with in one console.<span class="tag">Private, in development</span></p></li>
             <li class="lab-item"><h4>Status Zero</h4><p>Compares what a plan says against what the code actually shipped.<span class="tag">Private, in development</span></p></li>
           </ul>

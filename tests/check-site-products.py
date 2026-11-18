@@ -57,10 +57,10 @@ for row in source:
     else:
         fail_('source %s href %r is not https' % (pid, href))
     status = row.get('status', '')
-    if status.startswith('Source available'):
-        pass_('source %s status starts with Source available' % pid)
+    if status.startswith(('Source available', 'Proprietary, source available')):
+        pass_('source %s status has allowed prefix' % pid)
     else:
-        fail_('source %s status %r does not start with Source available' % (pid, status))
+        fail_('source %s status %r does not start with Source available or Proprietary, source available' % (pid, status))
 
 for row in lab:
     pid = row.get('id', '?')

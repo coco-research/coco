@@ -333,6 +333,8 @@ html.cine .rule-eyebrow { display: block; }
 .card-art svg { width: 100%; height: 100%; }
 .card-body { display: flex; flex-direction: column; gap: 12px; flex: 1; padding: clamp(20px, 2.4vw, 28px); }
 .card h3 { margin: 0; font: 500 clamp(1.5rem, 1.2rem + 1vw, 1.95rem) / 1.05 var(--f-sans); font-stretch: 118%; letter-spacing: -0.03em; }
+.card-link { color: inherit; text-decoration: none; }
+.card-link:hover { color: var(--blue-hi); text-decoration: underline; text-underline-offset: 4px; }
 .card p { color: var(--ink-2); font-size: 1rem; line-height: 1.5; }
 .card-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; padding-top: 12px; }
 

@@ -415,5 +415,37 @@
     ],
     "mode": "adapted",
     "patch": null
+  },
+  {
+    "name": "Agent-Skills-for-Context-Engineering",
+    "paths": [
+      "skills/memory-systems/**",
+      "skills/context-degradation/**",
+      "skills/multi-agent-patterns/**",
+      "skills/harness-engineering/**"
+    ],
+    "repo": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering",
+    "pinned_ref": "9ff0c99108b3",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "skills/memory-systems/LICENSE",
+        "sha256": "65bc33b0759a48b980962833b12bcb820404da9f5256bff39c00e89471bcf209"
+      },
+      {
+        "path": "skills/context-degradation/LICENSE",
+        "sha256": "65bc33b0759a48b980962833b12bcb820404da9f5256bff39c00e89471bcf209"
+      },
+      {
+        "path": "skills/multi-agent-patterns/LICENSE",
+        "sha256": "65bc33b0759a48b980962833b12bcb820404da9f5256bff39c00e89471bcf209"
+      },
+      {
+        "path": "skills/harness-engineering/LICENSE",
+        "sha256": "65bc33b0759a48b980962833b12bcb820404da9f5256bff39c00e89471bcf209"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
   }
 ]

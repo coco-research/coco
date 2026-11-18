@@ -10,10 +10,24 @@ const path = require('path');
 const TOML_START = '# coco:mcp-start';
 const TOML_END = '# coco:mcp-end';
 
-function loadCatalog() {
-  const file = path.resolve(__dirname, '..', 'data', 'connectors.json');
-  const data = JSON.parse(fs.readFileSync(file, 'utf8'));
-  return Array.isArray(data.connectors) ? data.connectors : [];
+function loadCatalog(catalogPath) {
+  const file = catalogPath || path.resolve(__dirname, '..', 'data', 'connectors.json');
+  let raw;
+  try {
+    raw = fs.readFileSync(file, 'utf8');
+  } catch (err) {
+    throw new Error(`Connector catalog unreadable at ${file} (${err.message}).`);
+  }
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch (err) {
+    throw new Error(`Connector catalog is not valid JSON (${err.message}).`);
+  }
+  if (!data || !Array.isArray(data.connectors)) {
+    throw new Error('Connector catalog is missing a connectors array.');
+  }
+  return data.connectors;
 }
 
 function findConnector(catalog, rawTool) {
@@ -159,20 +173,51 @@ function mergeToml(prevText, srv, force) {
     const joined = before + block + (after ? '\n' + after : '\n');
     return joined.endsWith('\n') ? joined : joined + '\n';
   }
-  const secRe = /(^|\r?\n)\[mcp_servers\.coco\]\s*(?:\r?\n|$)/;
-  const m = secRe.exec(prevText);
-  if (m) {
-    const secStart = m.index + (m[1] ? m[1].length : 0);
-    const tail = prevText.slice(secStart + m[0].length - (m[1] ? m[1].length : 0));
-    const nextHdr = /(^|\r?\n)\[[^\]]+\]/.exec(tail);
-    const secEnd = nextHdr ? (secStart + (m[0].length - (m[1] ? m[1].length : 0)) + nextHdr.index + (nextHdr[1] ? nextHdr[1].length : 0)) : prevText.length;
-    const existingSec = prevText.slice(secStart, secEnd);
-    if (!/cocosuperintelligence|coco(?:-mcp)?\.js/.test(existingSec) && !force) {
+  const rawLines = prevText.split(/\r?\n/);
+  const targetHdrRe = /^[ \t]*(\[\[?[ \t]*mcp_servers\.coco[ \t]*\]\]?)[ \t]*(?:#.*)?$/;
+  const anyHdrRe = /^[ \t]*\[/;
+  const matchedRanges = [];
+  for (let i = 0; i < rawLines.length; i++) {
+    const m = targetHdrRe.exec(rawLines[i]);
+    if (!m) continue;
+    const isArrayTable = m[1].startsWith('[[');
+    let endLine = rawLines.length;
+    for (let j = i + 1; j < rawLines.length; j++) {
+      if (anyHdrRe.test(rawLines[j])) { endLine = j; break; }
+    }
+    matchedRanges.push({ start: i, end: endLine, isArrayTable, text: rawLines.slice(i, endLine).join('\n') });
+    i = endLine - 1;
+  }
+  if (matchedRanges.length > 0) {
+    const hasArrayTable = matchedRanges.some((r) => r.isArrayTable);
+    if (hasArrayTable && !force) {
+      throw new Error('Refusing to overwrite existing [[mcp_servers.coco]] array-of-tables entry (pass --force to replace).');
+    }
+    const allCocoOwned = !hasArrayTable && matchedRanges.length === 1 &&
+      /cocosuperintelligence|coco(?:-mcp)?\.js/.test(matchedRanges[0].text);
+    if (!allCocoOwned && !force) {
       throw new Error('Refusing to overwrite existing non-Coco [mcp_servers.coco] entry (pass --force to replace).');
     }
-    const prefix = prevText.slice(0, secStart).replace(/\s*$/, '');
-    const suffix = prevText.slice(secEnd).replace(/^\r?\n/, '');
-    return (prefix ? prefix + '\n\n' : '') + block + (suffix ? '\n\n' + suffix : '\n');
+    const kept = [];
+    let inserted = false;
+    let cursor = 0;
+    for (const r of matchedRanges) {
+      if (r.start > cursor) kept.push(...rawLines.slice(cursor, r.start));
+      if (!inserted) {
+        while (kept.length > 0 && kept[kept.length - 1].trim() === '') kept.pop();
+        if (kept.length > 0) kept.push('');
+        kept.push(...block.split('\n'));
+        inserted = true;
+      }
+      cursor = r.end;
+    }
+    if (cursor < rawLines.length) {
+      const rest = rawLines.slice(cursor);
+      while (rest.length > 0 && rest[0].trim() === '') rest.shift();
+      if (rest.length > 0) kept.push('', ...rest);
+    }
+    while (kept.length > 0 && kept[kept.length - 1].trim() === '') kept.pop();
+    return kept.join('\n') + '\n';
   }
   const trimmed = prevText.trimEnd();
   return (trimmed ? trimmed + '\n\n' : '') + block + '\n';
@@ -217,7 +262,13 @@ function printList(catalog) {
 }
 
 function runConnect(argv = []) {
-  const catalog = loadCatalog();
+  let catalog;
+  try {
+    catalog = loadCatalog();
+  } catch (err) {
+    process.stderr.write(`Error: ${err.message}\n`);
+    process.exit(2);
+  }
   const flags = { write: false, list: false, help: false, npx: false, local: false, force: false, config: null };
   let tool = null;
 
@@ -229,9 +280,22 @@ function runConnect(argv = []) {
     else if (a === '--npx') flags.npx = true;
     else if (a === '--local') flags.local = true;
     else if (a === '--force') flags.force = true;
-    else if (a === '--config' && argv[i + 1]) flags.config = argv[++i];
-    else if (a.startsWith('--config=')) flags.config = a.slice('--config='.length);
-    else if (a.startsWith('-')) {
+    else if (a === '--config') {
+      const next = argv[i + 1];
+      if (!next || next.startsWith('-')) {
+        process.stderr.write("Error: missing file path after '--config'.\n");
+        process.exit(2);
+      }
+      flags.config = next;
+      i++;
+    } else if (a.startsWith('--config=')) {
+      const val = a.slice('--config='.length);
+      if (!val || val.startsWith('-')) {
+        process.stderr.write("Error: missing file path after '--config='.\n");
+        process.exit(2);
+      }
+      flags.config = val;
+    } else if (a.startsWith('-')) {
       process.stderr.write(`Error: unknown flag '${a}'. Run 'coco connect --help'.\n`);
       process.exit(2);
     } else if (!tool) {

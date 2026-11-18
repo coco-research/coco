@@ -148,9 +148,48 @@ HOME="$USER_HOME" COCO_NO_UPDATE_CHECK=1 node "$CLI" connect amazon-q --write >/
 [ -f "$USER_HOME/.kiro/settings/mcp.json" ] || fail "amazon-q did not write ~/.kiro/settings/mcp.json"
 
 CUSTOM_CONFLICT="$T/conflict.json"
-printf '{"mcpServers":{"coco":{"command":"custom-user-bin","args":["serve"]}}}\n' > "$CUSTOM_CONFLICT"
+printf '{"mcpServers":{"coco":{"command":"custom-user-bin","args":["serve"]},"keep":{"command":"echo"}}}\n' > "$CUSTOM_CONFLICT"
 rc=0
 HOME="$USER_HOME" COCO_NO_UPDATE_CHECK=1 node "$CLI" connect cursor --write --config "$CUSTOM_CONFLICT" >/dev/null 2>&1 || rc=$?
 [ "$rc" -eq 2 ] || fail "custom user coco entry was overwritten without --force (rc=$rc)"
+HOME="$USER_HOME" COCO_NO_UPDATE_CHECK=1 node "$CLI" connect cursor --write --force --config "$CUSTOM_CONFLICT" >/dev/null
+grep -q 'coco\.js' "$CUSTOM_CONFLICT" || fail "JSON --force did not replace non-Coco entry"
+grep -q '"keep"' "$CUSTOM_CONFLICT" || fail "JSON --force dropped sibling entry"
+
+# 8. Unmarked TOML `[mcp_servers.coco] # comment`, `--force`, `[[mcp_servers.coco]]`, `--config` missing value, and `loadCatalog` error handling.
+TOML_COMMENT_CONFLICT="$T/codex-conflict.toml"
+printf 'model = "o3"\n[mcp_servers.coco] # my custom notes\ncommand = "custom-toml-bin"\nargs = ["x"]\n\n[mcp_servers.keep]\ncommand = "echo"\n' > "$TOML_COMMENT_CONFLICT"
+rc=0
+HOME="$USER_HOME" COCO_NO_UPDATE_CHECK=1 node "$CLI" connect codex --write --config "$TOML_COMMENT_CONFLICT" >/dev/null 2>&1 || rc=$?
+[ "$rc" -eq 2 ] || fail "unmarked non-Coco TOML section with comment did not exit 2 (rc=$rc)"
+HOME="$USER_HOME" COCO_NO_UPDATE_CHECK=1 node "$CLI" connect codex --write --force --config "$TOML_COMMENT_CONFLICT" >/dev/null
+[ "$(grep -c '^\[mcp_servers\.coco\]' "$TOML_COMMENT_CONFLICT")" -eq 1 ] || fail "TOML --force produced duplicate [mcp_servers.coco] header"
+grep -q '^\[mcp_servers\.keep\]' "$TOML_COMMENT_CONFLICT" || fail "TOML --force dropped [mcp_servers.keep]"
+
+TOML_COCO_UNMARKED="$T/codex-unmarked-coco.toml"
+printf '[mcp_servers.coco] # legacy coco install\ncommand = "npx"\nargs = ["-y", "cocosuperintelligence", "mcp"]\n' > "$TOML_COCO_UNMARKED"
+HOME="$USER_HOME" COCO_NO_UPDATE_CHECK=1 node "$CLI" connect codex --write --config "$TOML_COCO_UNMARKED" >/dev/null
+[ "$(grep -c '^\[mcp_servers\.coco\]' "$TOML_COCO_UNMARKED")" -eq 1 ] || fail "unmarked Coco TOML section was duplicated instead of replaced"
+
+TOML_ARRAY="$T/codex-array.toml"
+printf '[[mcp_servers.coco]]\ncommand = "custom-array-bin"\n' > "$TOML_ARRAY"
+rc=0
+HOME="$USER_HOME" COCO_NO_UPDATE_CHECK=1 node "$CLI" connect codex --write --config "$TOML_ARRAY" >/dev/null 2>&1 || rc=$?
+[ "$rc" -eq 2 ] || fail "TOML [[mcp_servers.coco]] array-of-tables did not exit 2 without --force (rc=$rc)"
+HOME="$USER_HOME" COCO_NO_UPDATE_CHECK=1 node "$CLI" connect codex --write --force --config "$TOML_ARRAY" >/dev/null
+grep -q '^# coco:mcp-start$' "$TOML_ARRAY" || fail "TOML --force did not replace [[mcp_servers.coco]]"
+
+for bad_args in "cursor --write --config" "cursor --write --config --local" "cursor --write --config="; do
+  rc=0
+  # shellcheck disable=SC2086
+  HOME="$USER_HOME" COCO_NO_UPDATE_CHECK=1 node "$CLI" connect $bad_args >/dev/null 2>&1 || rc=$?
+  [ "$rc" -eq 2 ] || fail "bad --config args '$bad_args' did not exit 2 (rc=$rc)"
+done
+
+node -e "
+const assert = require('assert');
+const { loadCatalog } = require('$ROOT/bin/coco-connect.js');
+assert.throws(() => loadCatalog('$T/missing-catalog.json'), /Connector catalog unreadable/);
+"
 
 echo "coco connect ok · 19 harnesses · bytes identical · user entry kept · backup made · unknown exits 2 · tools: $PROBE_TOOLS"

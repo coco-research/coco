@@ -1,0 +1,52 @@
+[
+  {
+    "claim": "Coco M0 is memory for your AI coding tools: what you decided in one tool comes back in the next, at the moment you type your prompt.",
+    "section": "what-it-is",
+    "source": "connect:crates/connect-m0-backend"
+  },
+  {
+    "claim": "Prompt-time recall: on a fixed live check of 10 questions, M0 brought back the right memory 10 times out of 10, returned nothing for both trick questions, and answered in 21 to 53 ms.",
+    "section": "capabilities",
+    "source": "measured:m0-live-check-2026-11-16"
+  },
+  {
+    "claim": "Nothing leaves your Mac: one local store, a daemon that only listens on your own machine, and no cloud model calls. Recall and the embedder are both off until you switch them on.",
+    "section": "capabilities",
+    "source": "measured:m0-live-check-2026-11-16"
+  },
+  {
+    "claim": "Works across tools: Claude Code turns are captured and recalled today; Cursor and Pi capture is in the current build and switches on one tool at a time; Antigravity's session-start recall is wired and in its first test.",
+    "section": "capabilities",
+    "source": "connect:crates/connect-m0-backend/src/bin/coco_m0_hook.rs"
+  },
+  {
+    "claim": "A block list runs first: a name on your list is never saved, never recalled, and nothing is embedded when the list finds a hit.",
+    "section": "capabilities",
+    "source": "connect:crates/connect-m0-backend/src/capture_block.rs"
+  },
+  {
+    "claim": "Codex support: every finished Codex turn saved to M0. Built and tested, next to go live.",
+    "section": "cooking",
+    "source": "connect:crates/connect-m0-backend/tests/codex_notify.rs"
+  },
+  {
+    "claim": "A read door for every tool: Cursor, Pi and others can list and open the notes you gave M0, through a local-only door that re-checks the block list on every line and caps each answer.",
+    "section": "cooking",
+    "source": "connect:crates/connect-m0-backend/src/connect_cli.rs"
+  },
+  {
+    "claim": "One-command wiring: M0 hooks into each tool's settings and never overwrites a setting that tool already has; removing a tool's hook leaves the rest untouched.",
+    "section": "cooking",
+    "source": "plan:m0-connectors"
+  },
+  {
+    "claim": "Private beta: in daily use, with prompt-time recall live across tools.",
+    "section": "stage",
+    "source": "measured:m0-live-check-2026-11-16"
+  },
+  {
+    "claim": "Launch window: no date yet. The public release follows its safety and recall gates.",
+    "section": "when",
+    "source": "launch-window:m0-safety-gates"
+  }
+]

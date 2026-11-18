@@ -1,0 +1,67 @@
+[
+  {
+    "claim": "Coco Super Intelligence seats an advisory board of expert personas inside the coding tool you already use, returns one pick with the dissent named, then does the work through local skills, commands and agents.",
+    "section": "what-it-is",
+    "source": "coco:README.md:27"
+  },
+  {
+    "claim": "Ask one hard question with /SI-Decide and it seats 16 to 32 of 495 personas across 13 departments; add --debate for reaction rounds before the vote.",
+    "section": "capabilities",
+    "source": "coco:README.md:76"
+  },
+  {
+    "claim": "Every persona answers from cited public stances, and a stance check flags anything that does not trace to a source.",
+    "section": "capabilities",
+    "source": "coco:README.md:89"
+  },
+  {
+    "claim": "Ships 229 skills, 388 commands and 34 agents; a default Claude Code install delivers 191 of the skills.",
+    "section": "capabilities",
+    "source": "coco:README.md:112"
+  },
+  {
+    "claim": "One command, npx cocosuperintelligence, installs into Claude Code, Cursor, Codex, VS Code and 12 other coding tools (16 adapters).",
+    "section": "capabilities",
+    "source": "coco:package.json:4"
+  },
+  {
+    "claim": "Writes phase state to disk, so a cleared chat does not erase the plan.",
+    "section": "capabilities",
+    "source": "coco:README.md:27"
+  },
+  {
+    "claim": "Files stay on your machine, with no telemetry; your coding tool keeps its own model provider and keys.",
+    "section": "capabilities",
+    "source": "coco:README.md:131"
+  },
+  {
+    "claim": "--uninstall removes only what the install recorded and restores your original files.",
+    "section": "capabilities",
+    "source": "coco:CHANGELOG.md:12"
+  },
+  {
+    "claim": "A Coco MCP server, so any MCP-capable coding tool can use Coco's skills, commands, agents and the persona board, plus coco connect to wire it into a tool in one step.",
+    "section": "cooking",
+    "source": "coco:pr:476"
+  },
+  {
+    "claim": "Skills that improve themselves: an unattended loop scores each change against held-out tests and keeps only the ones that win, with an off switch.",
+    "section": "cooking",
+    "source": "coco:pr:479"
+  },
+  {
+    "claim": "An offline persona checker that tests every persona's sources before it joins the board, so the board can grow without losing its citations.",
+    "section": "cooking",
+    "source": "coco:pr:465"
+  },
+  {
+    "claim": "Released and in daily use: v1.10.0 on npm, the 10th of 10 milestone releases (v1.0.0 through v1.10.0). v2.0 is next.",
+    "section": "stage",
+    "source": "coco:package.json:3"
+  },
+  {
+    "claim": "Launch target: v2.0 this month (November 2026).",
+    "section": "when",
+    "source": "launch-window:nov-2026"
+  }
+]

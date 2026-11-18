@@ -1,0 +1,47 @@
+[
+  {
+    "claim": "Heliopause by Coco Research gives local AI tools a Lead and roles on your machine and serves a live status page at 127.0.0.1:4300.",
+    "section": "what-it-is",
+    "source": "heliopause:README.md:42"
+  },
+  {
+    "claim": "Loopback-only local server bound strictly to 127.0.0.1:4300 with no account, no telemetry and no remote sync.",
+    "section": "capabilities",
+    "source": "heliopause:README.md:51"
+  },
+  {
+    "claim": "Runs on Python 3.9 or newer standard library and git with zero external Python package dependencies.",
+    "section": "capabilities",
+    "source": "heliopause:README.md:18"
+  },
+  {
+    "claim": "Shows each agent as working, idle, blocked or needs-you with its latest line and pulse links.",
+    "section": "capabilities",
+    "source": "heliopause:README.md:45"
+  },
+  {
+    "claim": "Includes a built-in sample company preview before you point it at your own folders.",
+    "section": "capabilities",
+    "source": "heliopause:README.md:47"
+  },
+  {
+    "claim": "Release archives ship with SHA-256 digests and an ED25519-signed manifest verified via ssh-keygen.",
+    "section": "capabilities",
+    "source": "heliopause:README.md:132"
+  },
+  {
+    "claim": "Details soon for upcoming milestones; the public repository does not list a future roadmap yet.",
+    "section": "cooking",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Source available: early preview (v0.7.3) under Apache-2.0 on GitHub.",
+    "section": "stage",
+    "source": "heliopause:README.md:16"
+  },
+  {
+    "claim": "Launch target: Not dated yet.",
+    "section": "when",
+    "source": "launch-window:not-dated"
+  }
+]

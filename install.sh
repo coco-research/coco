@@ -74,9 +74,11 @@ list_adapters() {
 }
 
 detect_adapter() {
+  local agents_home="${AGENTS_HOME:-$HOME/.agents}"
+  local agents_skills_dir="${AGENTS_SKILLS_DIR:-$agents_home/skills}"
   if [[ -n "${CLAUDECODE:-}" || -d "${CLAUDE_HOME:-$HOME/.claude}/skills" || -f "${CLAUDE_HOME:-$HOME/.claude}/.coco/manifest.jsonl" ]]; then
     echo "claude-code"
-  elif [[ -d "$HOME/.pi/agent" || -d "$HOME/.agents/subagents" || ( -d "$HOME/.agents" && ! -f "$HOME/.agents/skills/.coco-agents-skills" ) ]]; then
+  elif [[ -d "$HOME/.pi/agent" || -d "$agents_home/subagents" || ( -d "$agents_home" && ! -f "$agents_skills_dir/.coco-agents-skills" ) ]]; then
     echo "pi-desktop"
   elif [[ -d "$HOME/.cursor" ]]; then
     echo "cursor"
@@ -117,7 +119,9 @@ run_agents_skills() {
   local as_args=()
   [[ -n "$DRY_RUN" ]] && as_args+=("$DRY_RUN")
   [[ -n "$JSON_FLAG" ]] && as_args+=("$JSON_FLAG")
-  if [[ -n "$CORE_ONLY" ]]; then
+  if [[ -n "$UNINSTALL" ]]; then
+    as_args+=("--uninstall")
+  elif [[ -n "$CORE_ONLY" ]]; then
     as_args+=("--core-only")
   elif [[ -n "$SYSTEMS" ]]; then
     as_args+=("--systems" "$SYSTEMS")
@@ -129,11 +133,21 @@ run_agents_skills() {
   fi
 }
 
+print_install_footer() {
+  if [[ -z "$DRY_RUN" ]]; then
+    local ver
+    ver="$(python3 -c "import json;print(json.load(open('$REPO_ROOT/package.json'))['version'])" 2>/dev/null || echo "?")"
+    note ""
+    note "Coco v$ver installed. Check for updates anytime:"
+    note "  bash \"$REPO_ROOT/scripts/check-update.sh\"      # git clones"
+    note "  node \"$REPO_ROOT/bin/coco.js\" version                 # CLI wrapper"
+    note "Suggest skills from repeated local workflows: node \"$REPO_ROOT/bin/coco.js\" suggest-skills"
+  fi
+}
+
 if [[ -n "$UNINSTALL" && -n "$AGENTS_SKILLS" && -z "$ADAPTER" && -z "$WORKFLOW" && -z "$WORKFLOW_ONLY" ]]; then
-  u_as=(--uninstall)
-  [[ -n "$DRY_RUN" ]] && u_as+=("$DRY_RUN")
-  [[ -n "$JSON_FLAG" ]] && u_as+=("$JSON_FLAG")
-  exec bash "$REPO_ROOT/scripts/link-agents-skills.sh" "${u_as[@]}"
+  run_agents_skills
+  exit 0
 fi
 
 if [[ -n "$AGENTS_SKILLS" && -z "$ADAPTER" && -z "$WORKFLOW" && -z "$WORKFLOW_ONLY" ]]; then
@@ -144,14 +158,7 @@ if [[ -n "$AGENTS_SKILLS" && -z "$ADAPTER" && -z "$WORKFLOW" && -z "$WORKFLOW_ON
     SYSTEMS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --all-bundles)"
   fi
   run_agents_skills
-  if [[ -z "$DRY_RUN" ]]; then
-    VER="$(python3 -c "import json;print(json.load(open('$REPO_ROOT/package.json'))['version'])" 2>/dev/null || echo "?")"
-    note ""
-    note "Coco v$VER installed. Check for updates anytime:"
-    note "  bash \"$REPO_ROOT/scripts/check-update.sh\"      # git clones"
-    note "  node \"$REPO_ROOT/bin/coco.js\" version                 # CLI wrapper"
-    note "Suggest skills from repeated local workflows: node \"$REPO_ROOT/bin/coco.js\" suggest-skills"
-  fi
+  print_install_footer
   exit 0
 fi
 
@@ -190,7 +197,11 @@ if [[ -n "$UNINSTALL" ]]; then
   [[ -n "$JSON_FLAG" ]] && UARGS+=("$JSON_FLAG")
   [[ -n "$WORKFLOW_ONLY" ]] && UARGS+=(--workflow-only)
   [[ -n "$PACKS" ]] && UARGS+=(--packs "$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --resolve-uninstall "$PACKS")")
-  exec bash "$ADAPTER_DIR/install.sh" "${UARGS[@]}"
+  bash "$ADAPTER_DIR/install.sh" "${UARGS[@]}"
+  if [[ -n "$AGENTS_SKILLS" ]]; then
+    run_agents_skills
+  fi
+  exit 0
 fi
 
 if [[ -z "$WORKFLOW_ONLY" ]]; then
@@ -264,11 +275,4 @@ if [[ -n "$AGENTS_SKILLS" ]]; then
 fi
 
 # Report installed version + how to stay current (no network call here).
-if [[ -z "$DRY_RUN" ]]; then
-  VER="$(python3 -c "import json;print(json.load(open('$REPO_ROOT/package.json'))['version'])" 2>/dev/null || echo "?")"
-  note ""
-  note "Coco v$VER installed. Check for updates anytime:"
-  note "  bash \"$REPO_ROOT/scripts/check-update.sh\"      # git clones"
-  note "  node \"$REPO_ROOT/bin/coco.js\" version                 # CLI wrapper"
-  note "Suggest skills from repeated local workflows: node \"$REPO_ROOT/bin/coco.js\" suggest-skills"
-fi
+print_install_footer

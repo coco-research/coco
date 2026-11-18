@@ -142,4 +142,23 @@ env -u CLAUDECODE -u AGENTS_HOME -u AGENTS_SKILLS_DIR HOME="$PACK_HOME" \
 [[ ! -L "$PACK_HOME/.agents/skills/ai-super-intelligence" ]] || fail "--packs gsd included si front door"
 [[ -L "$PACK_HOME/.agents/skills/humanizer" ]] || fail "--packs gsd missing core skill"
 
+# 5. Replacing a previously-managed symlink with a foreign symlink preserves the foreign target, and combined --uninstall --adapter --agents-skills cleans both.
+EXT_SKILL="$WORK/ext-foreign-skill"
+mkdir -p "$EXT_SKILL"
+rm "$PACK_HOME/.agents/skills/humanizer"
+ln -s "$EXT_SKILL" "$PACK_HOME/.agents/skills/humanizer"
+env -u CLAUDECODE -u AGENTS_HOME -u AGENTS_SKILLS_DIR HOME="$PACK_HOME" \
+  bash "$ROOT/install.sh" --agents-skills --core-only >"$WORK/relink.log" 2>&1
+[[ "$(readlink "$PACK_HOME/.agents/skills/humanizer")" == "$EXT_SKILL" ]] \
+  || fail "previously-managed name replaced user's foreign symlink"
+
+COMB_HOME="$WORK/comb-home"
+mkdir -p "$COMB_HOME"
+env -u CLAUDECODE -u AGENTS_HOME -u AGENTS_SKILLS_DIR HOME="$COMB_HOME" \
+  bash "$ROOT/install.sh" --adapter cursor --agents-skills --core-only -y >"$WORK/comb-inst.log" 2>&1
+[[ -f "$COMB_HOME/.agents/skills/.coco-agents-skills" ]] || fail "combined install missed ~/.agents/skills"
+env -u CLAUDECODE -u AGENTS_HOME -u AGENTS_SKILLS_DIR HOME="$COMB_HOME" \
+  bash "$ROOT/install.sh" --uninstall --adapter cursor --agents-skills >"$WORK/comb-uninst.log" 2>&1
+[[ ! -e "$COMB_HOME/.agents/skills/.coco-agents-skills" ]] || fail "combined --uninstall --adapter --agents-skills did not remove ~/.agents/skills"
+
 echo "~/.agents/skills: ${LINK_COUNT} links · idempotent · user folders kept · packs + dry-run clean"

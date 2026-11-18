@@ -83,7 +83,7 @@
     "patch": null
   },
   {
-    "name": "GSD — Get Shit Done",
+    "name": "GSD \u2014 Get Shit Done",
     "paths": [
       "systems/gsd/**"
     ],
@@ -411,6 +411,27 @@
       {
         "path": "skills/maker-mdap/NOTICE.md",
         "sha256": "1b4a432b739300237ff051ba373b748aec7b6be7403c4a33dd93420df91f0702"
+      }
+    ],
+    "mode": "adapted",
+    "patch": null
+  },
+  {
+    "name": "impeccable",
+    "paths": [
+      "skills/impeccable/**"
+    ],
+    "repo": "https://github.com/pbakaus/impeccable",
+    "pinned_ref": "e103efe779e2dd01274dabae83531fef00bf2563",
+    "licence_spdx": "Apache-2.0",
+    "licence_files": [
+      {
+        "path": "skills/impeccable/LICENSE",
+        "sha256": ""
+      },
+      {
+        "path": "skills/impeccable/NOTICE.md",
+        "sha256": ""
       }
     ],
     "mode": "adapted",

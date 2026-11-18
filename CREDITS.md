@@ -39,6 +39,7 @@ Tools the project runs but does not redistribute. Each is installed from its own
 | Tool | What CoCo uses it for | Upstream | License |
 |---|---|---|---|
 | **SkillSpector** by NVIDIA | The static scan in `.github/workflows/skill-scan.yml`: the skill folders a pull request changes in `skills/` and `systems/*/skills/`, static rules only and no model key, failing on a high or critical finding. Installed at commit `54824463814a0be01360792523ec7245a69190fc` (release tag v2.13.4) as pinned in that workflow. | https://github.com/NVIDIA/skillspector | Apache-2.0 |
+| **impeccable** by pbakaus | The `impeccable` front-end design skill, vendored at `skills/impeccable/` as guidance only; the engine and scripts are not included. Pinned to commit e103efe779e2dd01274dabae83531fef00bf2563. Upstream `LICENSE` kept byte for byte, and its `NOTICE.md` (which credits ehmo/platform-design-skills, MIT) ships alongside. | https://github.com/pbakaus/impeccable | Apache-2.0 |
 
 ## Feature inspirations
 

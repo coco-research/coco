@@ -202,6 +202,43 @@ kept_skill = subprocess.run(
 ).stdout
 assert "- rule: good" in kept_skill, "kept branch lacks updated SKILL.md"
 assert "- rule: base" in (repo / "skills/humanizer/SKILL.md").read_text(encoding="utf-8"), "working tree SKILL.md was mutated"
+
+# Verify --open-pr stays off by default, and a kept round turned into rejected at held-out
+# updates the ledger record with outcome="no change" and the rejection reason.
+sys.path.insert(0, str(repo / "evals" / "skills"))
+import improve  # noqa: E402
+import turn  # noqa: E402
+
+parsed = turn.build_parser().parse_args([])
+assert parsed.open_pr is False, "--open-pr must default to False"
+
+orig_improve_main = improve.main
+try:
+    def fake_kept_below_baseline(argv):
+        rfile = repo / "evals" / "skills" / "_rounds" / "overfit" / "r002.json"
+        rfile.parent.mkdir(parents=True, exist_ok=True)
+        rfile.write_text(json.dumps({
+            "schema": 1,
+            "round": "r002",
+            "skill": "overfit",
+            "outcome": "kept",
+            "reason": "held-out delta +0.050, p 0.010, n 20",
+            "peek_count": 1,
+            "gate": {"peek": {"cand_mean": 0.45, "base_mean": 0.50, "delta": -0.05}},
+        }, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps({"skill": "overfit", "round": "r002", "outcome": "kept"}))
+
+    improve.main = fake_kept_below_baseline
+    args = turn.build_parser().parse_args(["--root", str(repo), "--executor", "stub"])
+    status, rid, branch = turn.run_one_skill(repo, "overfit", args)
+    assert (status, rid, branch) == ("rejected", "r002", None), f"expected rejected round, got {(status, rid, branch)}"
+    rewritten = json.loads((repo / "evals/skills/_rounds/overfit/r002.json").read_text(encoding="utf-8"))
+    assert rewritten["outcome"] == "no change", f"expected ledger outcome 'no change', got {rewritten['outcome']!r}"
+    assert rewritten["reason"] == "held-out gate not met: cand 0.450 < base 0.500", f"unexpected ledger reason: {rewritten['reason']!r}"
+    branches_after = subprocess.run(["git", "-C", str(repo), "branch", "--list", "rsi/overfit-*"], capture_output=True, text=True, check=True).stdout
+    assert not branches_after.strip(), f"unexpected branch created for rejected round: {branches_after!r}"
+finally:
+    improve.main = orig_improve_main
 PY
 
 # Verify RSI.OFF stops the runner before any proposer or model call and exits 0 with "off".

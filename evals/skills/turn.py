@@ -122,6 +122,23 @@ def create_kept_branch(root, branch_dir, branch_name):
         return commit_sha
 
 
+def enforce_heldout_floor(ledger_file, rec):
+    """Turn a kept round into rejected in the ledger if held-out is missing or below baseline."""
+    peek = (rec.get("gate") or {}).get("peek") or {}
+    cand_held = peek.get("cand_mean")
+    base_held = peek.get("base_mean")
+    if cand_held is None or base_held is None or cand_held < base_held:
+        if cand_held is None or base_held is None:
+            reason = "held-out gate not met: missing cand_mean or base_mean"
+        else:
+            reason = f"held-out gate not met: cand {cand_held:.3f} < base {base_held:.3f}"
+        rec["outcome"] = "no change"
+        rec["reason"] = reason
+        improve.write_json_atomic(ledger_file, rec)
+        return False
+    return True
+
+
 def run_one_skill(root, skill, args):
     with tempfile.TemporaryDirectory(prefix=f"rsi-{skill}-") as out_dir:
         argv = [
@@ -151,14 +168,11 @@ def run_one_skill(root, skill, args):
         rec = json.loads(ledger_file.read_text(encoding="utf-8"))
 
         outcome = rec.get("outcome")
-        peek = (rec.get("gate") or {}).get("peek") or {}
         if outcome == "kept":
-            cand_held = peek.get("cand_mean")
-            base_held = peek.get("base_mean")
-            if cand_held is None or base_held is None or cand_held < base_held:
+            if not enforce_heldout_floor(ledger_file, rec):
                 return "rejected", rid, None
             branch_name = f"{args.branch_prefix}{skill}-{rid}"
-            sha = create_kept_branch(root, pathlib.Path(out_dir) / "branch", branch_name)
+            create_kept_branch(root, pathlib.Path(out_dir) / "branch", branch_name)
             if args.open_pr:
                 subprocess.run(["git", "-C", str(root), "push", "-u", "origin", branch_name], check=True, env=git_env())
                 subprocess.run(
@@ -177,7 +191,7 @@ def format_bucket(label, items):
     return f"{label} 0"
 
 
-def main(argv=None):
+def build_parser():
     ap = argparse.ArgumentParser(description="Run one unattended RSI turn across pilot skills.")
     ap.add_argument("--root", default=None)
     ap.add_argument("--executor", choices=("ollama", "stub"), default="ollama")
@@ -188,8 +202,12 @@ def main(argv=None):
     ap.add_argument("--base-ref", default="origin/main")
     ap.add_argument("--branch-prefix", default="rsi/")
     ap.add_argument("--stub-script", default=None)
-    ap.add_argument("--open-pr", action="store_true")
-    args = ap.parse_args(argv)
+    ap.add_argument("--open-pr", action="store_true", default=False)
+    return ap
+
+
+def main(argv=None):
+    args = build_parser().parse_args(argv)
 
     root = pathlib.Path(args.root).resolve() if args.root else improve.ROOT
     if (root / "RSI.OFF").exists():

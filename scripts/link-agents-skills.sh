@@ -10,6 +10,17 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 AGENTS_SKILLS_DIR="${AGENTS_SKILLS_DIR:-${AGENTS_HOME:-$HOME/.agents}/skills}"
 MARKER_FILE="$AGENTS_SKILLS_DIR/.coco-agents-skills"
 
+TMP_MARKER=""
+TMP_LINK_DIR=""
+cleanup_tmp() {
+  [[ -n "${TMP_LINK_DIR:-}" ]] && rm -rf "$TMP_LINK_DIR"
+  [[ -n "${TMP_MARKER:-}" ]] && rm -f "$TMP_MARKER"
+  return 0
+}
+trap cleanup_tmp EXIT
+trap 'cleanup_tmp; exit 130' INT
+trap 'cleanup_tmp; exit 143' TERM
+
 DRY_RUN=0
 JSON_MODE=0
 CORE_ONLY=0
@@ -145,6 +156,15 @@ if [[ "$DRY_RUN" -eq 0 ]]; then
   mkdir -p "$AGENTS_SKILLS_DIR"
 fi
 
+atomic_symlink() {
+  local src=$1 dst=$2
+  TMP_LINK_DIR=$(mktemp -d "$AGENTS_SKILLS_DIR/.coco-link.XXXXXX")
+  ln -s "$src" "$TMP_LINK_DIR/link"
+  python3 -c 'import os, sys; os.replace(sys.argv[1], sys.argv[2])' "$TMP_LINK_DIR/link" "$dst"
+  rmdir "$TMP_LINK_DIR"
+  TMP_LINK_DIR=""
+}
+
 link_candidate() {
   local name=$1 src=${2%/} key dst existing
   key=$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')
@@ -172,15 +192,24 @@ link_candidate() {
       if [[ "$DRY_RUN" -eq 1 ]]; then
         note "DRY: ln -s $src $dst"
       else
-        rm "$dst"
-        ln -s "$src" "$dst"
+        atomic_symlink "$src" "$dst"
       fi
     fi
   else
     if [[ "$DRY_RUN" -eq 1 ]]; then
       note "DRY: ln -s $src $dst"
-    else
-      ln -s "$src" "$dst"
+    elif ! ln -s "$src" "$dst" 2>/dev/null; then
+      if [[ -e "$dst" && ! -L "$dst" ]]; then
+        note "skip $name: user folder kept"
+        SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+        return 0
+      elif ! is_coco_link "$name" "$dst"; then
+        note "skip $name: user link kept"
+        SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+        return 0
+      fi
+      existing=$(readlink "$dst")
+      [[ "${existing%/}" == "$src" ]] || atomic_symlink "$src" "$dst"
     fi
   fi
 
@@ -229,6 +258,9 @@ fi
 # 3. Prune stale Coco-managed symlinks from an earlier wider run (never real folders or foreign symlinks)
 while IFS= read -r old_name; do
   [[ -n "$old_name" ]] || continue
+  if [[ ! "$old_name" =~ ^[A-Za-z0-9._-]+$ || "$old_name" == "." || "$old_name" == ".." || "$old_name" == ".coco-agents-skills" ]]; then
+    continue
+  fi
   if [[ "$NEW_MANAGED" != *$'\n'"$old_name"$'\n'* ]]; then
     old_dst="$AGENTS_SKILLS_DIR/$old_name"
     if is_coco_link "$old_name" "$old_dst"; then
@@ -243,17 +275,18 @@ done <<<"$PREV_MANAGED"
 
 # 4. Write marker file only when bytes change so re-runs are a byte-identical no-op
 if [[ "$DRY_RUN" -eq 0 ]]; then
-  tmp_marker=$(mktemp "$AGENTS_SKILLS_DIR/.coco-agents-skills.XXXXXX")
+  TMP_MARKER=$(mktemp "$AGENTS_SKILLS_DIR/.coco-agents-skills.XXXXXX")
   {
     printf '# managed-by: coco\n'
     printf '# repo: %s\n' "$REPO_ROOT"
     printf '%s' "$NEW_MANAGED" | sed '/^$/d' | LC_ALL=C sort -u
-  } >"$tmp_marker"
-  if [[ -f "$MARKER_FILE" && ! -L "$MARKER_FILE" ]] && cmp -s "$tmp_marker" "$MARKER_FILE"; then
-    rm -f "$tmp_marker"
+  } >"$TMP_MARKER"
+  if [[ -f "$MARKER_FILE" && ! -L "$MARKER_FILE" ]] && cmp -s "$TMP_MARKER" "$MARKER_FILE"; then
+    rm -f "$TMP_MARKER"
   else
-    mv "$tmp_marker" "$MARKER_FILE"
+    mv -f "$TMP_MARKER" "$MARKER_FILE"
   fi
+  TMP_MARKER=""
 fi
 
 note "~/.agents/skills: $LINKED_COUNT linked · $SKIPPED_COUNT skipped"

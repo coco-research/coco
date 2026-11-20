@@ -17,5 +17,6 @@ chmod +x "$T/bin/git"
 out=$(cd "$T/cwd" && HOME="$T/home" COCO_NO_UPDATE_CHECK=1 PATH="$T/bin:$PATH" node "$CLI" install 2>&1)
 
 echo "$out" | grep -q 'npx cocosuperintelligence install' || { echo "FAIL: hint does not name 'install' for re-installing"; echo "$out"; exit 1; }
+echo "$out" | grep -q 'npx cocosuperintelligence@latest update' || { echo "FAIL: hint does not recommend '@latest update'"; echo "$out"; exit 1; }
 ! echo "$out" | grep -qi 're-run install / update' || { echo "FAIL: hint still says update re-runs install"; exit 1; }
 echo "PASS: closing hint is truthful"

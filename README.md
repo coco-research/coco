@@ -129,7 +129,7 @@ The remote bootstrap clones the same pinned release tag as `npx` (not floating `
 bash <(curl -fsSL https://raw.githubusercontent.com/coco-research/coco/main/bin/coco-bootstrap.sh)
 ```
 
-`npx cocosuperintelligence update` checks out the pinned release tag. A git clone updates with `git pull --ff-only && bash install.sh`. `bash scripts/check-update.sh` prints the version. The check contacts GitHub at most once a day and sends no telemetry.
+`npx cocosuperintelligence@latest update` checks out the latest release tag (resolving the newest `vX.Y.Z` tag on GitHub, even from an older cached CLI). A git clone updates with `git pull --ff-only && bash install.sh`. `bash scripts/check-update.sh` prints the version. The check contacts GitHub at most once a day and sends no telemetry.
 
 Uninstall removes symlinks whose target is this clone, and only those. Run it from the clone root:
 

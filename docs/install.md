@@ -324,6 +324,23 @@ python3 systems/superintelligence/scripts/meta_select.py -- "should we ship an A
 
 ---
 
+## Updating
+
+From an `npx` install (a detached release-tag checkout):
+
+```bash
+npx cocosuperintelligence@latest update
+bash ~/coco/install.sh
+```
+
+`coco update` queries `origin` for the newest released `vX.Y.Z` tag and checks it out (refusing if the clone has uncommitted changes, a stash, or unpushed local commits). From a branch checkout (`git clone`), pull and re-run the installer instead:
+
+```bash
+git -C ~/coco pull --ff-only && bash ~/coco/install.sh
+```
+
+---
+
 ## Uninstall
 
 Claude Code records the install in `~/.claude/.coco/manifest.jsonl`. This undoes that record and writes nothing in the dry run:

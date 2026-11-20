@@ -155,7 +155,8 @@ if [[ -z "$WORKFLOW_ONLY" ]]; then
   elif [[ -n "$ALL_PACKS" ]]; then
     SYSTEMS="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --all-bundles)"
   elif [[ -z "$CORE_ONLY" && -z "$SYSTEMS" && -z "$YES_FLAG" && -z "$JSON_FLAG" && -t 0 && -t 1 ]]; then
-    printf '%s' "$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --picker-line)"
+    PICKER_LINE="$(bash "$REPO_ROOT/scripts/installable-bundles.sh" --picker-line)"  # set -e stops here, before read
+    printf '%s' "$PICKER_LINE"
     IFS= read -r PICKER_REPLY || { echo "" >&2; echo "Cancelled." >&2; exit 1; }
     case "${PICKER_REPLY%$'\r'}" in
       ""|[yY]|[yY][eE][sS]) ;;

@@ -434,5 +434,26 @@
     ],
     "mode": "verbatim",
     "patch": null
+  },
+  {
+    "name": "impeccable",
+    "paths": [
+      "skills/impeccable/**"
+    ],
+    "repo": "https://github.com/pbakaus/impeccable",
+    "pinned_ref": "e103efe779e2dd01274dabae83531fef00bf2563",
+    "licence_spdx": "Apache-2.0",
+    "licence_files": [
+      {
+        "path": "skills/impeccable/LICENSE",
+        "sha256": "02bb8c3b4e70190e3986c0404ad2fd8d639b4f534252d82379cc1b502b6d1812"
+      },
+      {
+        "path": "skills/impeccable/NOTICE.md",
+        "sha256": "c60a093c2845fd9fb82f9c6f742ece31f379f8190b535309d32d66c45ccffdcb"
+      }
+    ],
+    "mode": "adapted",
+    "patch": null
   }
 ]

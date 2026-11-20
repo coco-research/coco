@@ -153,6 +153,7 @@ def render_lab(data):
     lines.extend(render_source_row(row) for row in data['source'])
     lines.append('          </ul>')
     lines.append('          <h3 class="lab-group">Private, in the lab</h3>')
+    lines.append('          <p class="lab-note">Private: not open source and not publicly licensed.</p>')
     lines.append('          <ul>')
     lines.extend(render_lab_row(row) for row in data['lab'])
     lines.append('          </ul>')

@@ -2,7 +2,7 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 229 skills** — 77 core, 152 across 8 bundles.
+**Total: 230 skills** — 78 core, 152 across 8 bundles.
 
 ## Design (15)
 
@@ -109,10 +109,11 @@ Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 | [pmstudio-comms](stakeholder-comms/SKILL.md) | Generate templated stakeholder communications from project context. Use when someone asks to "write a go-live email", "create a status update", "onboard someone |
 | [task-prd-creator](task-prd-creator/SKILL.md) | Use when the user says I want to add X, implement Y, create a task for Z, or plan this feature. Writes a task file plus a PRD under .agent/, links them, and wai |
 
-## Unspecified (2)
+## Unspecified (3)
 
 | Skill | Description |
 |-------|-------------|
+| [context-degradation](context-degradation/SKILL.md) | This skill should be used for diagnosing and mitigating context degradation: lost-in-middle failures, context poisoning, context clash, context confusion, atten |
 | [humanizer](humanizer/SKILL.md) | Rewrite AI-sounding text so it reads like the writer without changing what it says. Use when editing or reviewing prose for AI tells: not-X-but-Y contrasts, one |
 | [officecli](officecli/SKILL.md) | Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check fo |
 

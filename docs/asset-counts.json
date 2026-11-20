@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "skills": {
-    "total": 229,
-    "core": 77,
+    "total": 230,
+    "core": 78,
     "bundle": 152
   },
   "commands": {
@@ -12,8 +12,8 @@
     "namespaces": 8
   },
   "agents": {
-    "total": 36,
-    "core": 12
+    "total": 39,
+    "core": 15
   },
   "rules": 15,
   "personas": {

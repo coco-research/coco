@@ -30,6 +30,7 @@ DEFAULT_BUNDLES=(gsd brain cognee hyperframes superintelligence m0)
 
 case "${1:-}" in
   --picker-line|--all-bundles|--resolve-install|--resolve-uninstall)
+    command -v python3 >/dev/null 2>&1 || { echo "coco install needs python3 (macOS: xcode-select --install; Linux: your package manager)" >&2; exit 1; }
     exec python3 - "$REPO_ROOT" "$1" "${2:-}" "${DEFAULT_BUNDLES[@]}" <<'PY'
 import json, pathlib, sys
 

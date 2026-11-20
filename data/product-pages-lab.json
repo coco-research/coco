@@ -1,0 +1,445 @@
+{
+  "lab": {
+    "m0": {
+      "slug": "m0",
+      "nav_cta": "In the lab",
+      "diagram": "vault",
+      "kns": [
+        [
+          "Cross-tool",
+          "Context carries across coding sessions"
+        ],
+        [
+          "On-device",
+          "Kept locally on your own machine"
+        ],
+        [
+          "Private beta",
+          "Used daily in the lab"
+        ]
+      ],
+      "how_eyebrow": "Cross-tool memory",
+      "how_title": "What you decided in one coding tool carries into the next.",
+      "how_sub": "Coco M0 keeps project context and prior decisions on your own computer so different AI coding tools on the same machine do not start from scratch each session.",
+      "panel_note": "Private beta used daily inside Coco Research. There is no public download, hosted service or open repository today.",
+      "steps": [
+        [
+          "01",
+          "Keep context on your machine",
+          "Project notes and prior decisions stay on your own computer with no cloud sync."
+        ],
+        [
+          "02",
+          "Carry work across tools",
+          "Switch between coding tools on the same machine without re-explaining earlier decisions."
+        ],
+        [
+          "03",
+          "Stay in control",
+          "Local memory remains under your own user account with explicit opt-in boundaries."
+        ]
+      ],
+      "rules_eyebrow": "Stage and privacy",
+      "rules_title": "Local by design, private in beta.",
+      "rules_sub": "Cross-tool memory belongs on the user's own hardware rather than a third-party cloud.",
+      "rules": [
+        [
+          "Rule 01",
+          "Data stays on device",
+          "Project memory stays on your own computer with no remote cloud relay."
+        ],
+        [
+          "Rule 02",
+          "User-controlled scope",
+          "You choose which tools participate on your machine."
+        ],
+        [
+          "Rule 03",
+          "Stated stage: private beta",
+          "Used daily in the lab; not yet released publicly."
+        ]
+      ],
+      "sections": {
+        "what_it_is": {
+          "tagline": "Cross-tool memory on your own machine.",
+          "paragraph": "Coco M0 keeps project context and decisions on your own computer so work in one AI coding tool carries cleanly into the next without cloud sync."
+        },
+        "capabilities": [
+          {
+            "num": "—",
+            "title": "Details soon",
+            "desc": "Detailed capabilities and measured benchmarks will be published alongside the public release."
+          }
+        ],
+        "cooking": [
+          {
+            "num": "—",
+            "title": "Details soon",
+            "desc": "Release milestones will be published when Coco M0 opens publicly."
+          }
+        ],
+        "stage": {
+          "chip": "Private beta",
+          "class": "beta",
+          "desc": "Private beta used daily inside Coco Research; not yet released publicly."
+        },
+        "when": "Not dated yet"
+      }
+    },
+    "hermes": {
+      "slug": "hermes",
+      "nav_cta": "In the lab",
+      "diagram": "folios",
+      "kns": [
+        [
+          "Exact quote",
+          "Sentences tied to your source files"
+        ],
+        [
+          "Or refuse",
+          "Says plainly when files lack the answer"
+        ],
+        [
+          "On-device",
+          "Runs locally on your own machine"
+        ]
+      ],
+      "how_eyebrow": "Private document answer engine",
+      "how_title": "Answers from your own files with an exact quote, or says it can't.",
+      "how_sub": "Coco Hermes indexes documents you choose on your computer and returns verbatim supporting passages with file links, refusing to guess when evidence is absent.",
+      "panel_note": "Private beta in the lab, running locally on your own computer with no public build, cloud account or telemetry today.",
+      "steps": [
+        [
+          "01",
+          "Point at local folders",
+          "Choose local documents on your machine without uploading files off the computer."
+        ],
+        [
+          "02",
+          "Ask a direct question",
+          "Search candidate passages locally with no external network calls."
+        ],
+        [
+          "03",
+          "Quote verbatim or refuse",
+          "Every answer cites the exact sentence in your file, or states plainly that the documents do not answer it."
+        ]
+      ],
+      "rules_eyebrow": "Trust boundaries",
+      "rules_title": "Quote or refuse. Local only.",
+      "rules_sub": "Designed so an answer never invents text your files do not contain.",
+      "rules": [
+        [
+          "Rule 01",
+          "Verify, don't paraphrase away",
+          "Responses anchor to exact spans in your own local files."
+        ],
+        [
+          "Rule 02",
+          "No cloud, no telemetry",
+          "Runs locally on one computer with no account."
+        ],
+        [
+          "Rule 03",
+          "Private beta, no public build",
+          "In private lab use today; no public installer is published."
+        ]
+      ],
+      "sections": {
+        "what_it_is": {
+          "tagline": "Answers questions over your own files with an exact quote, or says it can't.",
+          "paragraph": "Coco Hermes indexes local documents on your computer and retrieves verbatim supporting passages with source links, refusing to guess when evidence is absent."
+        },
+        "capabilities": [
+          {
+            "num": "—",
+            "title": "Details soon",
+            "desc": "Capabilities will be published once the public release is ready."
+          }
+        ],
+        "cooking": [
+          {
+            "num": "—",
+            "title": "Details soon",
+            "desc": "Milestones will be published alongside public release updates."
+          }
+        ],
+        "stage": {
+          "chip": "Private beta",
+          "class": "beta",
+          "desc": "Private beta in the lab, with no public installer or repository published today."
+        },
+        "when": "Not dated yet"
+      }
+    },
+    "teams-ng": {
+      "slug": "teams-ng",
+      "nav_cta": "In the lab",
+      "diagram": "council",
+      "kns": [
+        [
+          "Role roster",
+          "Specialists with explicit scopes"
+        ],
+        [
+          "Team chat",
+          "Direct multi-role work in one console"
+        ],
+        [
+          "Private beta",
+          "In development in the lab"
+        ]
+      ],
+      "how_eyebrow": "Multi-member workspace",
+      "how_title": "A console for running a team of AI members from one place.",
+      "how_sub": "Hire members onto a roster, give them clear roles and step-by-step procedures, put them in teams on projects, and direct the work from one console.",
+      "panel_note": "Private beta in development inside Coco Research, running locally against user-configured model endpoints.",
+      "steps": [
+        [
+          "01",
+          "Hire distinct roles",
+          "Assemble AI specialists with explicit scopes rather than one undifferentiated chat thread."
+        ],
+        [
+          "02",
+          "Brief in one console",
+          "Hand structured tasks to the right member and keep every brief inspectable."
+        ],
+        [
+          "03",
+          "Review work before it lands",
+          "Check outputs and open decisions from one calm view on your machine."
+        ]
+      ],
+      "rules_eyebrow": "Stage stated plainly",
+      "rules_title": "In development means in development.",
+      "rules_sub": "No waitlist hype and no unshipped promises.",
+      "rules": [
+        [
+          "Rule 01",
+          "Human stays in command",
+          "Members take briefs and report results; the owner decides what ships."
+        ],
+        [
+          "Rule 02",
+          "Local-first architecture",
+          "Built around local state rather than an opaque hosted workspace."
+        ],
+        [
+          "Rule 03",
+          "Private beta, in development",
+          "In private lab development today; no public release is published yet."
+        ]
+      ],
+      "sections": {
+        "what_it_is": {
+          "tagline": "A team of AI members you hire, brief and work with in one console.",
+          "paragraph": "Coco Teams NG is a local-first console for organizing AI specialists by role, briefing project work in one place, and reviewing decisions before anything ships."
+        },
+        "capabilities": [
+          {
+            "num": "—",
+            "title": "Details soon",
+            "desc": "Capabilities will be published once the public release is ready."
+          }
+        ],
+        "cooking": [
+          {
+            "num": "—",
+            "title": "Details soon",
+            "desc": "Milestones will be published alongside public release updates."
+          }
+        ],
+        "stage": {
+          "chip": "Private beta",
+          "class": "beta",
+          "desc": "Private beta in development inside Coco Research, with no public build today."
+        },
+        "when": "Not dated yet"
+      }
+    },
+    "status-zero": {
+      "slug": "status-zero",
+      "nav_cta": "In the lab",
+      "diagram": "lattice",
+      "kns": [
+        [
+          "Plan vs code",
+          "Matches planned items to shipped changes"
+        ],
+        [
+          "Surfaces gaps",
+          "Flags unlinked work or quiet items"
+        ],
+        [
+          "Private",
+          "In development on sample fixtures"
+        ]
+      ],
+      "how_eyebrow": "Plan-to-truth verification",
+      "how_title": "Compares what a plan says against what the code actually shipped.",
+      "how_sub": "Status Zero pairs planned stories against real repository changes so missing links, stalled items and actual progress stand out without guesswork.",
+      "panel_note": "Private and in development in the lab, running against synthetic sample fixtures.",
+      "steps": [
+        [
+          "01",
+          "Read the stated plan",
+          "Ingest planned work items and their expected scope."
+        ],
+        [
+          "02",
+          "Match against shipped diffs",
+          "Link code changes back to planned items and highlight gaps where the two diverge."
+        ],
+        [
+          "03",
+          "Draft from verified facts",
+          "Summarize status from matched evidence rather than manual recollection."
+        ]
+      ],
+      "rules_eyebrow": "Evidence over spin",
+      "rules_title": "Gaps named plainly.",
+      "rules_sub": "Status Zero is developed privately against synthetic sample data.",
+      "rules": [
+        [
+          "Rule 01",
+          "Verify against code",
+          "Shipped changes are the ground truth against which plans are checked."
+        ],
+        [
+          "Rule 02",
+          "Synthetic fixtures in development",
+          "Built and tested on fictional sample records with no external data."
+        ],
+        [
+          "Rule 03",
+          "Private, in development",
+          "Not publicly released today."
+        ]
+      ],
+      "sections": {
+        "what_it_is": {
+          "tagline": "Compares what a plan says against what the code actually shipped.",
+          "paragraph": "Status Zero pairs planned stories against real repository changes so missing links, stalled items and actual progress stand out without guesswork."
+        },
+        "capabilities": [
+          {
+            "num": "—",
+            "title": "Details soon",
+            "desc": "Capabilities will be published once the standalone release is ready."
+          }
+        ],
+        "cooking": [
+          {
+            "num": "—",
+            "title": "Details soon",
+            "desc": "Milestones will be published alongside public release updates."
+          }
+        ],
+        "stage": {
+          "chip": "In the lab",
+          "class": "lab",
+          "desc": "Private and in development against synthetic sample fixtures."
+        },
+        "when": "Not dated yet"
+      }
+    }
+  },
+  "unlinked": {
+    "aloomannu": {
+      "id": "aloomannu",
+      "slug": "aloomannu",
+      "name": "Aloo Mannu",
+      "tag": "Private beta, not published",
+      "description": "The local message and wake layer for coding agents. Aloo Mannu routes asks, replies and updates between agent sessions on your own machine and keeps one clear record of open asks.",
+      "nav_cta": "In the lab",
+      "diagram": "router",
+      "noindex": true,
+      "cats_stage": {
+        "tagline": "Good conversations start here.",
+        "story": "Named after two cats at home: one calls out (\"ow ow\"), and the other answers (\"meh\") and comes over."
+      },
+      "kns": [
+        [
+          "Local-only",
+          "Files and hooks on one machine"
+        ],
+        [
+          "No network",
+          "Zero cloud relays or remote servers"
+        ],
+        [
+          "No models",
+          "Deterministic message routing"
+        ]
+      ],
+      "how_eyebrow": "Agent message and wake layer",
+      "how_title": "Local asks, replies and one clear record of open asks.",
+      "how_sub": "Aloo Mannu links coding agent sessions on your own computer through plain files and tool hooks, with no cloud relay and no model calls.",
+      "panel_note": "In private lab use today, running locally on Python's standard library with zero external dependencies and no cloud account.",
+      "steps": [
+        [
+          "01",
+          "Send an addressed ask or update",
+          "Write a structured message from one coding agent session to another on your computer."
+        ],
+        [
+          "02",
+          "Deliver through local hooks",
+          "Tool hooks surface pending messages cleanly in the receiving session without cloud polling."
+        ],
+        [
+          "03",
+          "Close every open ask",
+          "Open asks stay visible locally until a matching reply closes them."
+        ]
+      ],
+      "rules_eyebrow": "Local boundaries",
+      "rules_title": "Standard library, zero network, zero model calls.",
+      "rules_sub": "Aloo Mannu keeps agent coordination small, deterministic and inspectable on disk.",
+      "rules": [
+        [
+          "Rule 01",
+          "Python standard library only",
+          "Runs locally with zero third-party runtime packages."
+        ],
+        [
+          "Rule 02",
+          "No cloud relay and no model calls",
+          "Message routing happens entirely through local files and hooks."
+        ],
+        [
+          "Rule 03",
+          "Not published today",
+          "In private lab use pending public release."
+        ]
+      ],
+      "sections": {
+        "what_it_is": {
+          "tagline": "The local message and wake layer for coding agents on your machine.",
+          "paragraph": "Aloo Mannu routes asks, replies and updates between coding agent sessions through local files and tool hooks, waking the receiving session and keeping one clear record of open asks."
+        },
+        "capabilities": [
+          {
+            "num": "—",
+            "title": "Details soon",
+            "desc": "Public capability documentation will be published alongside the open release of Aloo Mannu."
+          }
+        ],
+        "cooking": [
+          {
+            "num": "—",
+            "title": "Details soon",
+            "desc": "Release milestones will be published when Aloo Mannu opens publicly."
+          }
+        ],
+        "stage": {
+          "chip": "Private beta",
+          "class": "beta",
+          "desc": "Private beta in daily lab use; not yet published publicly."
+        },
+        "when": "Not dated yet"
+      }
+    }
+  }
+}

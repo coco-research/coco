@@ -2,6 +2,7 @@
   "shipped": [
     {
       "id": "coco-si",
+      "page": "coco/",
       "name": "Coco Super Intelligence",
       "tag": "Available now, v1.10.0, on npm",
       "description_html": "An advisory board of expert personas that installs into Claude Code, Cursor or Codex, argues a hard call out, then hands the decision to its skills.",
@@ -24,9 +25,10 @@
     },
     {
       "id": "voice",
+      "page": "voice/",
       "name": "Coco Voice",
-      "tag": "Available now",
-      "description_html": "Speech to text, with the speech model running on your own computer. Built on <a class=\"inline\" href=\"https://github.com/cjpais/Handy\" rel=\"noopener\">Handy by CJ Pais</a>, MIT licensed.",
+      "tag": "Available now, v0.11.0",
+      "description_html": "Private speech-to-text on your own computer. Hold a key to dictate into the app you have open, tidy transcripts locally, and keep cited meeting notes on disk. MIT licensed.",
       "actions": [
         {
           "label": "Download",
@@ -43,47 +45,28 @@
       ],
       "art": "assets/site/art/voice.svg",
       "footer_href": "https://github.com/coco-research/Coco-Voice"
-    },
-    {
-      "id": "connect",
-      "name": "Coco Connect",
-      "tag": "Available now, v0.2.1, Apple silicon",
-      "description_html": "The Mac app that finds the AI coding tools on your machine, then installs and health-checks Coco for each of them.",
-      "actions": [
-        {
-          "label": "Download",
-          "href": "https://github.com/coco-research/coco-connect-releases/releases",
-          "kind": "primary",
-          "sr": " Coco Connect"
-        },
-        {
-          "label": "View releases",
-          "href": "https://github.com/coco-research/coco-connect-releases",
-          "kind": "ghost",
-          "sr": " for Coco Connect"
-        }
-      ],
-      "art": "assets/site/art/connect.svg",
-      "footer_href": "https://github.com/coco-research/coco-connect-releases"
     }
   ],
   "source": [
     {
       "id": "signal",
+      "page": "signal/",
       "name": "Signal",
       "href": "https://github.com/coco-research/coco-design-language",
       "description": "Our design language: three editions, CSS and docs.",
-      "status": "Source available, MIT, no release"
+      "status": "Source available, Apache-2.0, no release"
     },
     {
       "id": "mira",
+      "page": "mira/",
       "name": "Mira",
       "href": "https://github.com/coco-research/Mira",
       "description": "Makes Reels and Shorts in English and Hindi, on your own machine.",
-      "status": "Source available, AGPL-3.0, Python, no release"
+      "status": "Source available, AGPL-3.0, archived"
     },
     {
       "id": "loops",
+      "page": "loops/",
       "name": "Coco Loops",
       "href": "https://github.com/coco-research/coco-loops",
       "description": "Governance for autonomous agent loops: rules, adversary checks, budget caps and an audit trail.",
@@ -91,6 +74,7 @@
     },
     {
       "id": "jev-use",
+      "page": "jev-use/",
       "name": "jev-use",
       "href": "https://github.com/coco-research/jev-use",
       "description": "Voice-driven control for macOS.",
@@ -98,39 +82,38 @@
     },
     {
       "id": "heliopause",
-      "name": "Heliopause",
+      "page": "heliopause/",
+      "name": "Heliopause by Coco Research",
       "href": "https://github.com/coco-research/heliopause",
       "description": "It gives your AI tools a Lead and roles, like a small company, on your own machine.",
-      "status": "Source available, MIT, early preview"
+      "status": "Source available, Apache-2.0, v0.7.3 early preview"
     }
   ],
   "lab": [
     {
       "id": "m0",
+      "page": "m0/",
       "name": "Coco M0",
       "description": "Cross-tool memory.",
       "status": "Private beta, used daily"
     },
     {
       "id": "hermes",
+      "page": "hermes/",
       "name": "Coco Hermes",
       "description": "Answers questions over your own files with an exact quote, or says it can't.",
-      "status": "Private, no public build"
-    },
-    {
-      "id": "code",
-      "name": "Coco Code",
-      "description": "A local-first coding harness for the terminal and the Mac.",
-      "status": "Private, internal pre-release"
+      "status": "Private beta, no public build"
     },
     {
       "id": "teams-ng",
+      "page": "teams-ng/",
       "name": "Coco Teams NG",
       "description": "A team of AI members you hire, brief and work with in one console.",
-      "status": "Private, in development"
+      "status": "Private beta, in development"
     },
     {
       "id": "status-zero",
+      "page": "status-zero/",
       "name": "Status Zero",
       "description": "Compares what a plan says against what the code actually shipped.",
       "status": "Private, in development"

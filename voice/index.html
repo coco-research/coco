@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en" data-product="voice">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coco Voice — Coco Research</title>
+<meta name="description" content="Private speech-to-text on your own computer. Hold a key to dictate into the app you have open, tidy transcripts locally, and keep cited meeting notes on disk. MIT licensed.">
+<meta name="theme-color" content="#03050b">
+<meta name="color-scheme" content="dark light">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Coco Voice — Coco Research">
+<meta property="og:description" content="Private speech-to-text on your own computer. Hold a key to dictate into the app you have open, tidy transcripts locally, and keep cited meeting notes on disk. MIT licensed.">
+<meta property="og:url" content="https://cocoresearch.org/voice/">
+<meta property="og:image" content="https://cocoresearch.org/assets/site/prod-voice.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:description" content="Private speech-to-text on your own computer. Hold a key to dictate into the app you have open, tidy transcripts locally, and keep cited meeting notes on disk. MIT licensed.">
+<link rel="canonical" href="https://cocoresearch.org/voice/">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/site/favicon-32.png">
+<script>
+(function () {
+  var d = document.documentElement, rm = false, off = false, th = '';
+  try { rm = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  try { off = localStorage.getItem('coco-motion') === 'off'; } catch (e) {}
+  try { th = localStorage.getItem('coco-theme') || ''; } catch (e) {}
+  if (/[?&]motion=off/.test(location.search)) off = true;
+  var m = /[?&]theme=(light|dark)/.exec(location.search);
+  if (m) th = m[1];
+  if (th === 'light' || th === 'dark') d.setAttribute('data-theme', th);
+  d.className += ' js ' + (rm || off ? 'static' : 'cine') + (rm ? ' os-reduced' : '');
+})();
+</script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preload" as="font" type="font/woff2" crossorigin href="https://cdn.jsdelivr.net/npm/@fontsource-variable/archivo@5.3.0/files/archivo-latin-wdth-normal.woff2">
+<link rel="stylesheet" href="../assets/css/product.css">
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" } }
+</script>
+<script type="module" src="../assets/js/product-scene.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="?motion=off">View plain page (no motion)</a>
+<div class="world" aria-hidden="true"><canvas id="world"></canvas><div class="hero-point"></div></div>
+<header class="nav">
+  <a class="brand" href="../"><i aria-hidden="true"></i><span>Coco Research</span></a>
+  <div class="nav-right">
+    <button class="chip-btn" type="button" data-theme-toggle aria-pressed="false">Light theme</button>
+    <a class="btn btn-primary btn-sm nav-cta-hide" href="https://github.com/coco-research/Coco-Voice/releases">Download</a>
+  </div>
+</header>
+<main id="main" class="stage-main">
+  <section id="hero" class="hero" aria-labelledby="h-hero">
+    <div class="wrap">
+      <div class="hero-col">
+        <p class="mark-line"><span class="mark-dot" data-stage="shipped" aria-hidden="true"></span>Available now, v0.11.0</p>
+        <h1 id="h-hero" class="display">Coco Voice</h1>
+        <p class="lede">Private speech-to-text on your own computer. Hold a key to dictate into the app you have open, tidy transcripts locally, and keep cited meeting notes on disk. MIT licensed.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="https://github.com/coco-research/Coco-Voice/releases">Download<span class="sr-only"> Coco Voice</span></a>
+          <a class="btn btn-ghost" href="https://github.com/coco-research/Coco-Voice">View on GitHub<span class="sr-only"> for Coco Voice</span></a>
+        </div>
+        <div class="kns" aria-label="Key facts">
+          <div class="kn"><span class="kn-num">On-device</span><span class="kn-lbl">Speech model on your computer</span></div>
+          <div class="kn"><span class="kn-num">v0.11.0</span><span class="kn-lbl">Dictation, clean-up and cited notes</span></div>
+          <div class="kn"><span class="kn-num">MIT</span><span class="kn-lbl">Open-source license</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="what-it-is" class="sec" aria-labelledby="h-what-it-is">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Overview</p><h2 id="h-what-it-is" class="sec-title">What it is</h2></div>
+        <p class="sec-sub">Available now, v0.11.0</p>
+      </div>
+      <div class="panel-grid">
+        <div class="panel">
+          <div class="wave-art" aria-hidden="true">
+            <svg viewBox="0 0 320 190" fill="currentColor">
+              <g class="wave">
+                <rect style="--h:.16;--d:0s" x="22" y="30" width="4" height="130" rx="2"/><rect style="--h:.24;--d:.1s" x="31" y="30" width="4" height="130" rx="2"/><rect style="--h:.2;--d:.2s" x="40" y="30" width="4" height="130" rx="2"/><rect style="--h:.34;--d:.05s" x="49" y="30" width="4" height="130" rx="2"/><rect style="--h:.3;--d:.25s" x="58" y="30" width="4" height="130" rx="2"/><rect style="--h:.46;--d:.15s" x="67" y="30" width="4" height="130" rx="2"/><rect style="--h:.4;--d:.3s" x="76" y="30" width="4" height="130" rx="2"/><rect style="--h:.62;--d:.08s" x="85" y="30" width="4" height="130" rx="2"/><rect style="--h:.52;--d:.22s" x="94" y="30" width="4" height="130" rx="2"/><rect style="--h:.74;--d:.12s" x="103" y="30" width="4" height="130" rx="2"/><rect style="--h:.6;--d:.32s" x="112" y="30" width="4" height="130" rx="2"/><rect style="--h:.86;--d:.02s" x="121" y="30" width="4" height="130" rx="2"/><rect style="--h:.7;--d:.18s" x="130" y="30" width="4" height="130" rx="2"/><rect style="--h:1;--d:.28s" x="139" y="30" width="4" height="130" rx="2"/><rect style="--h:.82;--d:.07s" x="148" y="30" width="4" height="130" rx="2"/><rect style="--h:.94;--d:.2s" x="157" y="30" width="4" height="130" rx="2"/><rect style="--h:.66;--d:.34s" x="166" y="30" width="4" height="130" rx="2"/><rect style="--h:.9;--d:.11s" x="175" y="30" width="4" height="130" rx="2"/><rect style="--h:.72;--d:.26s" x="184" y="30" width="4" height="130" rx="2"/><rect style="--h:.56;--d:.04s" x="193" y="30" width="4" height="130" rx="2"/><rect style="--h:.64;--d:.3s" x="202" y="30" width="4" height="130" rx="2"/><rect style="--h:.44;--d:.14s" x="211" y="30" width="4" height="130" rx="2"/><rect style="--h:.5;--d:.24s" x="220" y="30" width="4" height="130" rx="2"/><rect style="--h:.34;--d:.09s" x="229" y="30" width="4" height="130" rx="2"/><rect style="--h:.38;--d:.33s" x="238" y="30" width="4" height="130" rx="2"/><rect style="--h:.26;--d:.17s" x="247" y="30" width="4" height="130" rx="2"/><rect style="--h:.3;--d:.27s" x="256" y="30" width="4" height="130" rx="2"/><rect style="--h:.2;--d:.06s" x="265" y="30" width="4" height="130" rx="2"/><rect style="--h:.16;--d:.21s" x="274" y="30" width="4" height="130" rx="2"/><rect style="--h:.12;--d:.13s" x="283" y="30" width="4" height="130" rx="2"/><rect style="--h:.1;--d:.31s" x="292" y="30" width="4" height="130" rx="2"/>
+              </g>
+              <rect class="caret-bar" x="306" y="74" width="2.5" height="42" rx="1.2"/>
+            </svg>
+          </div>
+          <p class="sec-sub">No account, no subscription and no remote API key required. Once the model weights are on disk, dictation works offline at full speed.</p>
+          <div class="extra-links"><a class="inline" href="https://github.com/coco-research/Coco-Voice/releases">All tagged releases</a><a class="inline" href="https://github.com/coco-research/Coco-Voice">Source repository</a></div>
+        </div>
+        <div class="panel">
+          <p class="section-tagline">Hold a key, speak, and your words are typed into the app you already have open.</p>
+          <p class="section-para">Coco Voice is private speech-to-text on your own computer: hold a key to dictate into the app you have open, tidy transcripts with a local model, and keep cited meeting notes on disk with no account and no subscription.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="capabilities" class="sec" aria-labelledby="h-capabilities">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Capabilities</p><h2 id="h-capabilities" class="sec-title">What it can do today</h2></div>
+        <p class="sec-sub">Provably true of the code and releases available today.</p>
+      </div>
+      <div class="signal-list">
+        <div class="signal-item">
+          <span class="signal-num">01</span>
+          <div class="signal-body">
+            <h3>Push-to-talk in any app, offline</h3>
+            <p>Option+Space on macOS, Ctrl+Space on Windows and Linux, or toggle mode. Recognition works offline once your model is downloaded.</p>
+          </div>
+        </div>
+        <div class="signal-item">
+          <span class="signal-num">02</span>
+          <div class="signal-body">
+            <h3>Open speech models, SHA-256 checked</h3>
+            <p>Pick your own open speech model, including Whisper, Parakeet and Moonshine. Each download shows its licence and is checked against a pinned SHA-256 before use.</p>
+          </div>
+        </div>
+        <div class="signal-item">
+          <span class="signal-num">03</span>
+          <div class="signal-body">
+            <h3>On-device clean-up and custom words</h3>
+            <p>A local Qwen3-4B model on Mac tidies text and drops spoken self-corrections such as 'scratch that', alongside custom vocabulary and local history.</p>
+          </div>
+        </div>
+        <div class="signal-item">
+          <span class="signal-num">04</span>
+          <div class="signal-body">
+            <h3>Meeting notes core with segment citations</h3>
+            <p>Version 0.11.0 stores meeting notes and notepad points locally on disk, with segment citations linking each note back to what was said.</p>
+          </div>
+        </div>
+        <div class="signal-item">
+          <span class="signal-num">05</span>
+          <div class="signal-body">
+            <h3>Private by design</h3>
+            <p>Dictated text never goes into log files, app data stays private to your user account, the paste is skipped while macOS secure input is on, and if a paste fails the text stays on your clipboard.</p>
+          </div>
+        </div>
+        <div class="signal-item">
+          <span class="signal-num">06</span>
+          <div class="signal-body">
+            <h3>macOS, Windows and Linux installers</h3>
+            <p>Installers for macOS (Apple Silicon and Intel), Windows (x64 and ARM64) and Linux (AppImage, deb, rpm on x86_64 and arm64), plus a one-command install on Apple Silicon Macs and 22 UI languages.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="cooking" class="sec" aria-labelledby="h-cooking">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Roadmap</p><h2 id="h-cooking" class="sec-title">What’s cooking</h2></div>
+        <p class="sec-sub">The next milestones sourced from active work and release roadmaps.</p>
+      </div>
+      <div class="signal-list">
+        <div class="signal-item">
+          <span class="signal-num">01</span>
+          <div class="signal-body">
+            <h3>Dedicated Meetings screens</h3>
+            <p>Dedicated desktop screens for live meeting recording controls, dual-track speaker view, and searchable meeting views.</p>
+          </div>
+        </div>
+        <div class="signal-item">
+          <span class="signal-num">02</span>
+          <div class="signal-body">
+            <h3>Clean-up on out of the box</h3>
+            <p>Clean-up on out of the box, filler-word removal that follows the language you speak (and can be switched off), and history limits that do what they say.</p>
+          </div>
+        </div>
+        <div class="signal-item">
+          <span class="signal-num">03</span>
+          <div class="signal-body">
+            <h3>Per-app profiles</h3>
+            <p>Tone, capitals and punctuation follow the app in front, and apps you block are never dictated into.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="stage" class="sec" aria-labelledby="h-stage">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Maturity</p><h2 id="h-stage" class="sec-title">How far along</h2></div>
+        <p class="sec-sub">Current development and release milestone tracking.</p>
+      </div>
+      <div class="stage-card">
+        <div class="stage-badge-row">
+          <span class="stage-chip stage-chip-released">Released</span>
+          <div class="stage-progress">
+            <div class="progress-meta"><span class="progress-count">8 of 8 tagged releases published (0.9.2 to 0.11.0, latest 17 November 2026)</span></div>
+            <div class="progress-track" role="progressbar" aria-valuenow="8" aria-valuemin="0" aria-valuemax="8">
+              <div class="progress-fill" style="width: 100%"></div>
+            </div>
+          </div>
+        </div>
+        <p class="sec-sub">v0.11.0 shipped on 17 November 2026, the eighth public release since 0.9.2 (8 of 8 tagged releases published).</p>
+      </div>
+    </div>
+  </section>
+  <section id="when" class="sec" aria-labelledby="h-when">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Launch window</p><h2 id="h-when" class="sec-title">When</h2></div>
+        <p class="sec-sub">Public release and availability schedule.</p>
+      </div>
+      <div class="when-card">
+        <p class="when-window">Next release in preparation; tagged builds publish on GitHub Releases.</p>
+      </div>
+    </div>
+  </section>
+  <section id="credits" class="sec sec-credits" aria-label="Credits">
+    <div class="wrap">
+      <p class="credits-note">Credits: Started as a fork of <a class="inline" href="https://github.com/cjpais/Handy" rel="noopener">Handy</a> by CJ Pais (Copyright (c) 2025 CJ Pais, MIT License); third-party notices in <a class="inline" href="https://github.com/coco-research/Coco-Voice/blob/main/NOTICE" rel="noopener">NOTICE</a>.</p>
+    </div>
+  </section>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <a class="brand" href="../"><i aria-hidden="true"></i><span>Coco Research</span></a>
+      <p>Governed AI, built in the open. Built by Rijul Kalra.</p>
+    </div>
+    <nav class="foot-cols" aria-label="Footer">
+      <div><h2>Products</h2><ul>
+          <li><a href="../coco/">Coco Super Intelligence</a></li>
+          <li><a href="../voice/">Coco Voice</a></li>
+      </ul></div>
+      <div><h2>Source available</h2><ul>
+          <li><a href="../signal/">Signal</a></li>
+          <li><a href="../mira/">Mira</a></li>
+          <li><a href="../loops/">Coco Loops</a></li>
+          <li><a href="../jev-use/">jev-use</a></li>
+          <li><a href="../heliopause/">Heliopause by Coco Research</a></li>
+      </ul></div>
+      <div><h2>In the lab (private)</h2><ul>
+          <li><a href="../m0/">Coco M0</a></li>
+          <li><a href="../hermes/">Coco Hermes</a></li>
+          <li><a href="../teams-ng/">Coco Teams NG</a></li>
+          <li><a href="../status-zero/">Status Zero</a></li>
+      </ul></div>
+      <div><h2>Company</h2><ul>
+          <li><a href="../#built-by">About</a></li>
+          <li><a href="https://github.com/coco-research/coco/releases">Coco changelog</a></li>
+      </ul></div>
+      <div><h2>Code</h2><ul>
+          <li><a href="https://github.com/coco-research">GitHub</a></li>
+          <li><a href="https://www.npmjs.com/package/cocosuperintelligence">npm</a></li>
+          <li><a href="https://github.com/coco-research/Coco-Voice/blob/main/LICENSE">Licence</a></li>
+      </ul></div>
+    </nav>
+  </div>
+  <div class="foot-base">
+    <p>© 2026 Coco Research</p>
+    <div class="foot-ctrls">
+      <button class="link-btn" type="button" data-theme-toggle>Light theme</button>
+      <button class="link-btn" type="button" data-motion-toggle>Reduce motion</button>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

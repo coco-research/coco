@@ -24,6 +24,15 @@ python3 scripts/build-skill-pages.py --out "$out" 2>"$err" || rc=$?
 cat "$err" >&2
 [ "$rc" -eq 0 ] || { echo "build-skill-pages.py exited $rc" >&2; exit "$rc"; }
 
+# Fixture builds use the same pattern: a build that crashes must show its
+# stderr before set -e ends the script. Args: out dir, evals dir, err file.
+build_fixture() {
+  local rc=0
+  python3 scripts/build-skill-pages.py --out "$1" --evals "$2" 2>"$3" || rc=$?
+  cat "$3" >&2
+  [ "$rc" -eq 0 ] || { echo "build-skill-pages.py exited $rc" >&2; exit "$rc"; }
+}
+
 discovered=$(python3 - <<'PY'
 from pathlib import Path
 import subprocess
@@ -285,7 +294,7 @@ measured="$out/coco/skills/measured/index.html"
 [[ -f "$measured" ]]
 grep -F -q '<link rel="canonical" href="https://cocoresearch.org/coco/skills/measured/">' "$measured"
 grep -F -q 'https://cocoresearch.org/coco/skills/measured/' "$out/sitemap.xml"
-python3 scripts/build-skill-pages.py --out "$c4_out" --evals "$c4" 2>"$c4_err"
+build_fixture "$c4_out" "$c4" "$c4_err"
 grep -F -q 'Measured: 0.42 on 7 test tasks · Dec 3, 2025 <a href="/coco/skills/measured/">How we measure →</a>' "$c4_out/coco/skills/c4-architecture/index.html"
 grep -F -q '<td data-label="Last run">Dec 3, 2025</td>' "$c4_out/coco/skills/measured/index.html"
 # The measured page copy, word for word: the lede, the meta description and the first note.
@@ -399,7 +408,7 @@ JSON
 cat > "$fake/skills/c4-architecture/runs/baseline-heldout.json" <<JSON
 {"date": "2026-10-21", "split": "heldout", "executor": "ollama", "model": "qwen3:4b-instruct-2507-q4_K_M", "n": 24, "mean": 2, "skill_sha256": "$sha"}
 JSON
-python3 scripts/build-skill-pages.py --out "$fake_out" --evals "$fake" 2>"$fake_err"
+build_fixture "$fake_out" "$fake" "$fake_err"
 grep -F -q 'measured skip zz-fake: no run for the current SKILL.md' "$fake_err"
 grep -F -q 'measured skip c4-architecture: bad record ' "$fake_err"
 grep -F -q '<p class="empty">No measured skills yet.</p>' "$fake_out/coco/skills/measured/index.html"
@@ -421,7 +430,7 @@ record['top1_accuracy'] = 0.7
 record['run']['vs_keyword']['baseline_top1'] = 0.4
 (source.parent / '9999-01-01-descriptions.json').write_text(json.dumps(record, indent=2) + '\n', encoding='utf-8')
 PY
-python3 scripts/build-skill-pages.py --out "$desc_out" --evals "$desc/evals" 2>"$desc_err"
+build_fixture "$desc_out" "$desc/evals" "$desc_err"
 desc_measured="$desc_out/coco/skills/measured/index.html"
 [[ -f "$desc_measured" ]]
 grep -F -q '<td class="skill" data-label="Skill">Skill router (on descriptions, not names)</td>' "$desc_measured"
@@ -435,7 +444,7 @@ record = json.loads(path.read_text(encoding='utf-8'))
 record['method'] = 'keyword'
 path.write_text(json.dumps(record, indent=2) + '\n', encoding='utf-8')
 PY
-python3 scripts/build-skill-pages.py --out "$desc_out" --evals "$desc/evals" 2>"$desc_err"
+build_fixture "$desc_out" "$desc/evals" "$desc_err"
 if grep -F -q 'Skill router (on descriptions, not names)' "$desc_measured"; then
   echo 'a keyword routing record became a router row' >&2
   exit 1
@@ -488,7 +497,7 @@ cat > "$real/evals/routing/runs/2026-10-28-13a15e1-descriptions.json" <<'JSON'
   "keyword_fallbacks": 0
 }
 JSON
-python3 scripts/build-skill-pages.py --out "$real_out" --evals "$real/evals" 2>"$real_err"
+build_fixture "$real_out" "$real/evals" "$real_err"
 real_measured="$real_out/coco/skills/measured/index.html"
 [[ -f "$real_measured" ]]
 real_row=$(grep -A 2 -F 'Skill router (on descriptions, not names)' "$real_measured")

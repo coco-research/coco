@@ -10,19 +10,19 @@ because most adapters link into the checkout rather than copying.
 |---|---:|---:|---:|---:|:--:|:--:|---:|
 | `aider` | 342 | 342 | 0 | 0 | yes | — | 0 |
 | `amazon-q` | 0 | 0 | 0 | 41 | — | yes | 0 |
-| `claude-code` | 389 | 342 | 192 | 41 | — | — | 0 |
+| `claude-code` | 389 | 342 | 193 | 41 | — | — | 0 |
 | `cline` | 0 | 0 | 0 | 41 | — | yes | 0 |
 | `codex` | 342 | 342 | 0 | 0 | yes | — | 0 |
-| `cursor` | 389 | 342 | 197 | 0 | — | — | 0 |
+| `cursor` | 389 | 342 | 198 | 0 | — | — | 0 |
 | `generic` | 342 | 342 | 0 | 0 | yes | — | 0 |
 | `github-copilot-cli` | 0 | 0 | 0 | 0 | yes | — | 0 |
-| `grok` | 392 | 342 | 192 | 41 | — | — | 0 |
-| `hermes` | 389 | 342 | 192 | 41 | — | — | 0 |
-| `pi-desktop` | 389 | 342 | 195 | 44 | — | — | 0 |
+| `grok` | 392 | 342 | 193 | 41 | — | — | 0 |
+| `hermes` | 389 | 342 | 193 | 41 | — | — | 0 |
+| `pi-desktop` | 389 | 342 | 196 | 44 | — | — | 0 |
 | `roo-code` | 0 | 0 | 0 | 41 | — | — | 0 |
-| `vscode` | 389 | 342 | 192 | 41 | — | — | 0 |
-| `vscode-continue` | 0 | 0 | 179 | 41 | — | — | 0 |
-| `windsurf` | 0 | 0 | 192 | 41 | — | — | 0 |
+| `vscode` | 389 | 342 | 193 | 41 | — | — | 0 |
+| `vscode-continue` | 0 | 0 | 180 | 41 | — | — | 0 |
+| `windsurf` | 0 | 0 | 193 | 41 | — | — | 0 |
 | `zed` | 0 | 0 | 0 | 41 | — | — | 0 |
 
 ## Widest install, against the published totals
@@ -30,7 +30,7 @@ because most adapters link into the checkout rather than copying.
 | Surface | Best adapter | Advertised |
 |---|---:|---:|
 | Slash commands | 392 | 389 |
-| Skills | 197 | 230 |
+| Skills | 198 | 231 |
 
 ## Adapters below the command ceiling
 
@@ -64,19 +64,19 @@ the framework.
 |---|---:|---:|---:|
 | `aider` | 0 | 0 | 0 |
 | `amazon-q` | 0 | 0 | 0 |
-| `claude-code` | 192 | 192 | 0 |
+| `claude-code` | 193 | 193 | 0 |
 | `cline` | 0 | 0 | 0 |
 | `codex` | 0 | 0 | 0 |
-| `cursor` | 197 | 197 | 0 |
+| `cursor` | 198 | 198 | 0 |
 | `generic` | 0 | 0 | 0 |
 | `github-copilot-cli` | 0 | 0 | 0 |
-| `grok` | 192 | 192 | 0 |
-| `hermes` | 192 | 192 | 0 |
-| `pi-desktop` | 195 | 195 | 0 |
+| `grok` | 193 | 193 | 0 |
+| `hermes` | 193 | 193 | 0 |
+| `pi-desktop` | 196 | 196 | 0 |
 | `roo-code` | 0 | 0 | 0 |
-| `vscode` | 192 | 192 | 0 |
-| `vscode-continue` | 179 | 179 | 0 |
-| `windsurf` | 192 | 192 | 0 |
+| `vscode` | 193 | 193 | 0 |
+| `vscode-continue` | 180 | 180 | 0 |
+| `windsurf` | 193 | 193 | 0 |
 | `zed` | 0 | 0 | 0 |
 
 Every adapter delivers its full skill set on a plain run.
@@ -93,7 +93,7 @@ bug in the measurement.
   the editor user profile, so the measurement creates the two standard profile
   directories inside the throwaway HOME first. Without them it reports only the
   generated family.
-- **Skills stop at 197, not 230.** The advertised figure is the
+- **Skills stop at 198, not 231.** The advertised figure is the
   repository inventory. The difference is two sets no default install claims: the
   `reverse-skill` bundle, which is security tooling held back on purpose and reachable
   with `--systems reverse-skill`, and the five skills under `adapters/cursor/skills`,

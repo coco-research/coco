@@ -287,6 +287,43 @@ tree_id "$H" >"$WORK/nopy-after"
 cmp -s "$WORK/nopy-before" "$WORK/nopy-after" || fail "missing python3: HOME changed"
 echo "ok   missing python3 exits 1 and writes nothing"
 
+echo "=== missing python3 in a pty: install.sh prints only the clean line, no prompt waits ==="
+ln -s "$BASH_BIN" "$NOBIN/bash"
+for args in "" "--packs superintelligence" "--all" "--yes"; do
+  H="$WORK/nopty"; rm -rf "$H"; mkdir -p "$H"; printf 'keep\n' > "$H/keep"
+  tree_id "$H" >"$WORK/nopty-before"
+  # shellcheck disable=SC2086 # $args splits into flags on purpose
+  python3 - "$H" "$NOBIN" "$ROOT/install.sh" --adapter claude-code $args <<'PY' || fail "missing python3 in a pty (${args:-plain})"
+import os, pty, select, subprocess, sys, time
+home, nobin, cmd = sys.argv[1], sys.argv[2], sys.argv[3:]
+m, s = pty.openpty()  # stdin, stdout and stderr are a tty, and no key is ever sent
+p = subprocess.Popen([os.path.join(nobin, "bash"), *cmd], stdin=s, stdout=s, stderr=s, env={"PATH": nobin, "HOME": home})
+os.close(s)
+out, end = b"", time.time() + 5
+while time.time() < end:  # read while it runs: macOS drops unread pty output at exit
+    if select.select([m], [], [], 0.1)[0]:
+        try:
+            chunk = os.read(m, 4096)
+        except OSError:  # EIO: every writer has closed
+            break
+        if not chunk:
+            break
+        out += chunk
+    elif p.poll() is not None:
+        break
+try:
+    rc = p.wait(timeout=max(0.1, end - time.time()))
+except subprocess.TimeoutExpired:
+    p.kill(); sys.exit("a prompt waited for a key")
+text = out.decode("utf-8", "replace").replace("\r", "").strip()
+if rc == 0 or text != "coco install needs python3 (macOS: xcode-select --install; Linux: your package manager)":
+    sys.exit(f"rc {rc}, output {text!r}")
+PY
+  tree_id "$H" >"$WORK/nopty-after"
+  cmp -s "$WORK/nopty-before" "$WORK/nopty-after" || fail "missing python3 in a pty (${args:-plain}): HOME changed"
+done
+echo "ok   missing python3 in a pty prints only the clean line (plain, --packs, --all, --yes)"
+
 echo "=== a generator that fails after planning leaves HOME unchanged ==="
 COPY="$WORK/planfail-repo"
 cp -cR "$ROOT" "$COPY" 2>/dev/null || { rm -rf "$COPY"; cp -R "$ROOT" "$COPY"; }

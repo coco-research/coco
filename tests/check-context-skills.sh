@@ -15,7 +15,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 ROOT=$(pwd)
 
-SKILLS="context-degradation"
+SKILLS="context-degradation memory-systems"
 PY=${PYTHON:-python3}
 "$PY" -I -c pass || { echo "FAIL: $PY does not run"; exit 1; }
 RUN_DIR=$(mktemp -d)

@@ -438,7 +438,8 @@
   {
     "name": "Agent-Skills-for-Context-Engineering",
     "paths": [
-      "skills/context-degradation/**"
+      "skills/context-degradation/**",
+      "skills/memory-systems/**"
     ],
     "repo": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering",
     "pinned_ref": "9ff0c99108b3",
@@ -446,6 +447,10 @@
     "licence_files": [
       {
         "path": "skills/context-degradation/LICENSE",
+        "sha256": "65bc33b0759a48b980962833b12bcb820404da9f5256bff39c00e89471bcf209"
+      },
+      {
+        "path": "skills/memory-systems/LICENSE",
         "sha256": "65bc33b0759a48b980962833b12bcb820404da9f5256bff39c00e89471bcf209"
       }
     ],

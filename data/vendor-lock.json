@@ -475,5 +475,22 @@
     ],
     "mode": "verbatim",
     "patch": null
+  },
+  {
+    "name": "Agent-Skills-for-Context-Engineering",
+    "paths": [
+      "skills/context-degradation/**"
+    ],
+    "repo": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering",
+    "pinned_ref": "9ff0c99108b3",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "skills/context-degradation/LICENSE",
+        "sha256": "65bc33b0759a48b980962833b12bcb820404da9f5256bff39c00e89471bcf209"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
   }
 ]

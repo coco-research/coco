@@ -51,7 +51,7 @@ jobs:
 
       - name: Adapter install.sh syntax check
         run: |
-          for f in adapters/*/install.sh install.sh bin/coco-bootstrap.sh skills/prd-generator/scripts/generate_prd.sh skills/brainstorming/scripts/stop-server.sh tests/check-security-surface.sh tests/check-officecli-install.sh tests/check-install-manifest.sh tests/check-install-safety.sh tests/check-uninstall.sh tests/check-codex-agents-md-paths.sh tests/lib/install-home.sh tests/check-si-front-doors.sh; do
+          for f in adapters/*/install.sh install.sh bin/coco-bootstrap.sh skills/prd-generator/scripts/generate_prd.sh skills/brainstorming/scripts/stop-server.sh tests/check-security-surface.sh tests/check-officecli-install.sh tests/check-install-manifest.sh tests/check-install-safety.sh tests/check-uninstall.sh tests/check-codex-agents-md-paths.sh tests/lib/install-home.sh tests/check-si-front-doors.sh tests/check-cli-update-latest-tag.sh; do
             bash -n "$f" || { echo "Syntax error in $f"; exit 1; }
           done
           echo "All install scripts pass syntax check."
@@ -70,6 +70,9 @@ jobs:
 
       - name: Validate the Claude Code install safety checks
         run: bash tests/check-install-safety.sh
+
+      - name: Vendored agents are linked; THIRD-PARTY.md and licences are not
+        run: bash tests/check-agents-third-party.sh
 
       - name: Install --workflow (links, printed hook lines, no settings write)
         run: bash tests/check-install-workflow.sh
@@ -129,6 +132,9 @@ jobs:
 
       - name: Validate the CLI closing hint
         run: bash tests/check-cli-closing-hint.sh
+
+      - name: Validate coco update resolves the latest semver release tag
+        run: bash tests/check-cli-update-latest-tag.sh
 
       - name: Validate no hardcoded adapter list drifts from adapters/
         run: bash tests/check-adapter-drift.sh
@@ -211,6 +217,10 @@ jobs:
           python3 tests/check-persona-attribution.py --self-test
       - name: Persona checker fires on every planted defect
         run: bash tests/check-personas-test.sh
+      - name: Every published count place matches docs/asset-counts.json
+        run: |
+          python3 tests/check-count-sync.py
+          python3 tests/check-count-sync.py --self-test
 
       - name: Verify the delivery index matches what the adapters install
         run: |

@@ -106,7 +106,8 @@ def count_md(root, segments):
             # PROMPT-DEFENSE.md is the preamble every agent includes: none of them is
             # a delivered command or agent.
             if name.endswith('.md') and name not in ('INDEX.md', 'README.md',
-                                                     'PROMPT-DEFENSE.md'):
+                                                     'PROMPT-DEFENSE.md',
+                                                     'THIRD-PARTY.md'):
                 seen.add(str((dirpath / name).resolve()))
     return len(seen)
 

@@ -329,7 +329,7 @@ def agent_sources():
             if not path.endswith(".md") or not os.path.isfile(path):
                 continue
             stem = os.path.basename(path)[:-3]
-            if stem in ("README", "INDEX", "PROMPT-DEFENSE", "_index"):
+            if stem in ("README", "INDEX", "PROMPT-DEFENSE", "THIRD-PARTY", "_index"):
                 continue
             out.append((stem, path))
     return out

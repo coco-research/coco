@@ -335,7 +335,7 @@ mkdir -p "$T/xbin"
 cat > "$T/xbin/git" << EOF
 #!/bin/bash
 for a in "\$@"; do
-  [ "\$a" = fetch ] && exit 0
+  case "\$a" in fetch|ls-remote) exit 0 ;; esac
 done
 exec "$REALGIT" "\$@"
 EOF

@@ -415,5 +415,24 @@
     ],
     "mode": "adapted",
     "patch": null
+  },
+  {
+    "name": "agent-skills",
+    "paths": [
+      "agents/test-engineer.md",
+      "agents/web-performance-auditor.md",
+      "agents/licenses/addyosmani-agent-skills.LICENSE"
+    ],
+    "repo": "https://github.com/addyosmani/agent-skills",
+    "pinned_ref": "301b02b12bff98e4688e6984af6556802322bbde",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "agents/licenses/addyosmani-agent-skills.LICENSE",
+        "sha256": "6f202f8bd568cd730dbb2b0d1f8e243bc74c2fa1f64dbce9b2c7ea08bd5c9fd7"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
   }
 ]

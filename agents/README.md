@@ -1,6 +1,6 @@
 # Agent Catalog
 
-10 specialist agents consolidated from the original 19. Each agent provides deep domain expertise for specific tasks.
+12 specialist agents: 10 consolidated from the original 19, plus 2 vendored from upstream (see `THIRD-PARTY.md`). Each agent provides deep domain expertise for specific tasks.
 
 ## When to Use Agents
 
@@ -10,10 +10,10 @@ Use agents when you need deep domain expertise beyond general-purpose AI. Each a
 
 An installable agent is a `.md` file with YAML frontmatter, living either directly in this
 directory or in `systems/<bundle>/agents/`. Those are the files `install.sh` links and
-`scripts/build-index.py` catalogs into `agents/INDEX.md`. There are **34**: 10 here and 24 in
+`scripts/build-index.py` catalogs into `agents/INDEX.md`. There are **36**: 12 here and 24 in
 `systems/gsd/agents/`.
 
-A `find` for every `agents/*.md` in the repository returns **37**, and the extra three are not
+A `find` for every `agents/*.md` in the repository returns **39**, and the extra three are not
 missing or misplaced. They are `builder.md`, `director.md` and `finalize.md` under
 `systems/hyperframes/skills/motion-graphics/agents/`. They carry no frontmatter and are not
 role definitions; they are prompt bodies that the `motion-graphics` skill dispatches at named
@@ -21,7 +21,7 @@ stages of its own pipeline, listed in the `prompt` column of the stage table in 
 `SKILL.md`. They are internal to one skill, so they are deliberately neither linked nor
 indexed, and moving them here would change behaviour rather than fix anything.
 
-So a 37-versus-34 discrepancy is expected. The convention is that `agents/` nested inside a
+So a 39-versus-36 discrepancy is expected. The convention is that `agents/` nested inside a
 skill directory belongs to that skill. If you add such a directory, keep the files free of
 frontmatter so the indexer continues to skip them.
 
@@ -29,7 +29,7 @@ frontmatter so the indexer continues to skip them.
 
 Worth knowing, because they are easy to confuse and none is a subset of another:
 
-- the **10 core agents** in this directory, plus the **24 GSD agents** in `systems/gsd/agents/`
+- the **12 core agents** in this directory, plus the **24 GSD agents** in `systems/gsd/agents/`
 - the **`/team` roles** defined inline in `commands/team/roles.md`, spawned by the `/team`
   commands across four layers (research, execution, review, synthesis). They share no names
   with the files here. No count is quoted because three different counting methods over that
@@ -51,6 +51,8 @@ Worth knowing, because they are easy to confuse and none is a subset of another:
 | typescript-pro | TypeScript | Advanced generics, type-level programming, full-stack type safety |
 | ui-ux-designer | UI/UX Design | Research-backed critique, accessibility, typography, layout |
 | refactoring-specialist | Code Refactoring | Code smell detection, complexity reduction, incremental transformation |
+| test-engineer | Test Strategy | Test suite design, writing tests for existing code, coverage analysis (vendored) |
+| web-performance-auditor | Web Performance | Core Web Vitals, loading, rendering and network audits (vendored) |
 
 ## Consolidation Notes
 

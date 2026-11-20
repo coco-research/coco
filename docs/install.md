@@ -135,7 +135,7 @@ bash install.sh --adapter vscode-continue
 bash adapters/vscode-continue/install.sh --dry-run    # preview, writes nothing
 ```
 
-Writes into `~/.continue/` (override the root with `CONTINUE_HOME`). Skills and agents are symlinked into the clone; the markdown files directly under `rules/` are copied. Skills come with the default bundles (176 skills and 34 agents on a plain run; `--core-only` installs the core set alone, `--systems gsd,brain` an explicit subset).
+Writes into `~/.continue/` (override the root with `CONTINUE_HOME`). Skills and agents are symlinked into the clone; the markdown files directly under `rules/` are copied. Skills come with the default bundles (176 skills and 36 agents on a plain run; `--core-only` installs the core set alone, `--systems gsd,brain` an explicit subset).
 
 | Coco source | Destination |
 |-------------|-------------|
@@ -320,6 +320,23 @@ To use embeddings, load `text-embedding-nomic-embed-text-v1.5` in LM Studio and 
 curl -s -m 3 http://127.0.0.1:1234/v1/models   # any JSON reply means the LM Studio endpoint is up
 python3 systems/superintelligence/scripts/meta_select.py --doctor
 python3 systems/superintelligence/scripts/meta_select.py -- "should we ship an AI compliance product?"   # "method": "embed" when it is used
+```
+
+---
+
+## Updating
+
+From an `npx` install (a detached release-tag checkout):
+
+```bash
+npx cocosuperintelligence@latest update
+bash ~/coco/install.sh
+```
+
+`coco update` queries `origin` for the newest released `vX.Y.Z` tag and checks it out (refusing if the clone has uncommitted changes, a stash, or unpushed local commits). From a branch checkout (`git clone`), pull and re-run the installer instead:
+
+```bash
+git -C ~/coco pull --ff-only && bash ~/coco/install.sh
 ```
 
 ---

@@ -1,0 +1,27 @@
+[
+  {
+    "claim": "Coco Hermes answers questions over your own files with an exact quote, or says it cannot.",
+    "section": "what-it-is",
+    "source": "catalog:data/products.json:127"
+  },
+  {
+    "claim": "Details soon for capability specifics pending standalone release.",
+    "section": "capabilities",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Details soon for roadmap milestones pending standalone release.",
+    "section": "cooking",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Private beta: dogfood build v0.1.1 in the lab, no public build today.",
+    "section": "stage",
+    "source": "catalog:data/products.json:128"
+  },
+  {
+    "claim": "Launch target: 0.2.0 this month (November 2026).",
+    "section": "when",
+    "source": "launch-window:nov-2026"
+  }
+]

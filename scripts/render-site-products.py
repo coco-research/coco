@@ -17,6 +17,16 @@ INDEX = ROOT / 'index.html'
 DATA = ROOT / 'data' / 'products.json'
 ANCHOR = re.compile(r'<a class="inline" href="([^"]*)" rel="noopener">([^<]*)</a>')
 ID_OK = re.compile(r'[a-z0-9-]+')
+PAGE_OK = re.compile(r'[a-z0-9-]+/')
+
+
+def require_page(row):
+    pid = row['id']
+    page = row.get('page', '')
+    expected = 'coco/' if pid == 'coco-si' else '%s/' % pid
+    if not PAGE_OK.fullmatch(page) or page != expected:
+        sys.exit('%s: page must be %s' % (pid, expected))
+    return page
 
 
 def esc_text(value):
@@ -74,13 +84,15 @@ def render_card(product):
         '          <div class="card-art" aria-hidden="true">',
     ]
     lines.extend(art_lines(product))
+    page = require_page(product)
     lines.extend([
         '          </div>',
         '          <div class="card-body">',
-        '            <h3 id="t-%s">%s</h3>' % (pid, esc_text(product['name'])),
+        '            <h3 id="t-%s"><a class="card-link" href="%s">%s</a></h3>' % (pid, esc_attr(page), esc_text(product['name'])),
         '            <p class="tag">%s</p>' % esc_text(product['tag']),
         '            <p>%s</p>' % render_description_html(product['description_html'], pid),
         '            <div class="card-actions">',
+        '              <a class="btn btn-ghost btn-sm" href="%s">Product page<span class="sr-only"> for %s</span></a>' % (esc_attr(page), esc_text(product['name'])),
     ])
     actions = product['actions']
     if not actions:
@@ -132,7 +144,8 @@ def render_shipped(data):
 def render_source_row(row):
     pid = row['id']
     require_https(row['href'], pid)
-    name = '<a class="inline" href="%s" rel="noopener">%s</a>' % (esc_attr(row['href']), esc_text(row['name']))
+    page = require_page(row)
+    name = '<a class="inline" href="%s">%s</a>' % (esc_attr(page), esc_text(row['name']))
     return (
         '            <li class="lab-item"><h4>%s</h4><p>%s<span class="tag">%s</span></p></li>'
         % (name, esc_text(row['description']), esc_text(row['status']))
@@ -142,9 +155,11 @@ def render_source_row(row):
 def render_lab_row(row):
     if 'href' in row:
         sys.exit('%s: lab rows have no href' % row['id'])
+    page = require_page(row)
+    name = '<a class="inline" href="%s">%s</a>' % (esc_attr(page), esc_text(row['name']))
     return (
         '            <li class="lab-item"><h4>%s</h4><p>%s<span class="tag">%s</span></p></li>'
-        % (esc_text(row['name']), esc_text(row['description']), esc_text(row['status']))
+        % (name, esc_text(row['description']), esc_text(row['status']))
     )
 
 
@@ -161,7 +176,7 @@ def render_lab(data):
 
 def render_foot_shipped(data):
     return [
-        '          <li><a href="%s">%s</a></li>' % (esc_attr(row['footer_href']), esc_text(row['name']))
+        '          <li><a href="%s">%s</a></li>' % (esc_attr(require_page(row)), esc_text(row['name']))
         for row in data['shipped']
     ]
 
@@ -170,13 +185,13 @@ def render_foot_source(data):
     lines = []
     for row in data['source']:
         require_https(row['href'], row['id'])
-        lines.append('          <li><a href="%s">%s</a></li>' % (esc_attr(row['href']), esc_text(row['name'])))
+        lines.append('          <li><a href="%s">%s</a></li>' % (esc_attr(require_page(row)), esc_text(row['name'])))
     return lines
 
 
 def render_foot_lab(data):
     return [
-        '          <li><a href="#lab" data-goto="lab">%s</a></li>' % esc_text(row['name'])
+        '          <li><a href="%s">%s</a></li>' % (esc_attr(require_page(row)), esc_text(row['name']))
         for row in data['lab']
     ]
 

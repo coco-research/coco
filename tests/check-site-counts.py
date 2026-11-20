@@ -59,12 +59,11 @@ CHECKS = [
     ('coco/index.html', r'<meta name="description" content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'meta description (personas, skills)', (PERSONAS, SKILLS)),
     ('coco/index.html', r'<meta property="og:description" content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'og:description (personas, skills)', (PERSONAS, SKILLS)),
     ('coco/index.html', r'<meta name="twitter:description" content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'twitter:description (personas, skills)', (PERSONAS, SKILLS)),
-    ('coco/index.html', r'<p class="sub reveal">Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'on-page sub (personas, skills)', (PERSONAS, SKILLS)),
-    ('coco/index.html', r'<p class="n">(\d+)</p><p class="lbl">Expert personas</p>', 'stat tile (personas)', (PERSONAS,)),
-    ('coco/index.html', r'<p class="n">(\d+)</p><p class="lbl">Departments</p>', 'stat tile (departments)', (DEPARTMENTS,)),
-    ('coco/index.html', r'<p class="n">(\d+)</p><p class="lbl">Commands</p>', 'stat tile (commands)', (COMMANDS,)),
-    ('coco/index.html', r'<p class="n">(\d+)</p><p class="lbl">Agents</p>', 'stat tile (agents)', (AGENTS,)),
-    ('coco/index.html', r'<h2 class="reveal">(\d+) skills\. One instruction set each\.</h2>', 'section heading (skills)', (SKILLS,)),
+    ('coco/index.html', r'seats 16 to 32 of (\d+) personas across (\d+) departments', 'capabilities row (personas, departments)', (PERSONAS, DEPARTMENTS)),
+    ('coco/index.html', r'<span class="kn-num">(\d+)</span><span class="kn-lbl">Expert personas across (\d+) departments</span>', 'hero key fact (personas, departments)', (PERSONAS, DEPARTMENTS)),
+    ('coco/index.html', r'<span class="kn-num">(\d+)</span><span class="kn-lbl">Skills', 'hero key fact (skills)', (SKILLS,)),
+    ('coco/index.html', r'<span class="kn-num">(\d+)</span><span class="kn-lbl">Commands', 'hero key fact (commands)', (COMMANDS,)),
+    ('coco/index.html', r'Ships (\d+) skills, (\d+) commands and (\d+) agents;', 'capabilities row (skills, commands, agents)', (SKILLS, COMMANDS, AGENTS)),
     ('coco/index.html', r'<tr><th>Skills</th><td>(\d+) in the repository', 'spec table row (skills)', (SKILLS,)),
     ('coco/index.html', r'<tr><th>Commands</th><td>(\d+) customer-facing', 'spec table row (commands)', (COMMANDS,)),
     ('coco/index.html', r'<tr><th>Agents</th><td>(\d+)\.', 'spec table row (agents)', (AGENTS,)),
@@ -83,24 +82,24 @@ for path, pattern, label, expect in CHECKS:
     else:
         pass_(f'{path}: {label} {got} matches')
 
-# The hero SVG diagram (coco/index.html) draws one dot per persona, grouped by
-# department, from a hardcoded `depts` array. A stale array renders a stale
-# diagram even after every text claim on the page is fixed.
-coco_text = open('coco/index.html').read()
-m = re.search(r'var depts=\[(.*?)\];', coco_text, re.S)
+# The 3D constellation motif (assets/js/product-motifs-a.js) weights clusters by
+# department seat count from COCO_SI_DEPTS. A stale array renders a stale 3D
+# constellation even after every text claim on coco/index.html is updated.
+motifs_text = open('assets/js/product-motifs-a.js').read()
+m = re.search(r'COCO_SI_DEPTS\s*=\s*\[(.*?)\];', motifs_text, re.S)
 if not m:
-    fail_('coco/index.html: could not find the hero diagram depts array')
+    fail_('assets/js/product-motifs-a.js: could not find COCO_SI_DEPTS array')
 else:
-    dot_counts = [int(n) for n in re.findall(r',(\d+)\]', m.group(1))]
+    dot_counts = [int(n) for n in re.findall(r',\s*(\d+)\]', m.group(1))]
     if len(dot_counts) != DEPARTMENTS:
-        fail_(f'coco/index.html: hero diagram depts array has {len(dot_counts)} entries, '
+        fail_(f'product-motifs-a.js: COCO_SI_DEPTS has {len(dot_counts)} entries, '
               f'truth is {DEPARTMENTS} departments')
     else:
-        pass_(f'coco/index.html: hero diagram depts array entry count ({len(dot_counts)}) matches')
+        pass_(f'product-motifs-a.js: COCO_SI_DEPTS entry count ({len(dot_counts)}) matches')
     if sum(dot_counts) != PERSONAS:
-        fail_(f'coco/index.html: hero diagram depts array sums to {sum(dot_counts)}, truth is {PERSONAS}')
+        fail_(f'product-motifs-a.js: COCO_SI_DEPTS sums to {sum(dot_counts)}, truth is {PERSONAS}')
     else:
-        pass_(f'coco/index.html: hero diagram depts array sum ({sum(dot_counts)}) matches')
+        pass_(f'product-motifs-a.js: COCO_SI_DEPTS sum ({sum(dot_counts)}) matches')
 
 # <span data-count="KEY">N</span> is the delivered-count claim. The flagship
 # stats use <span class="num" data-count="495"> and are checked above.

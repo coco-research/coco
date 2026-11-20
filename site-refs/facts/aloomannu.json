@@ -1,0 +1,52 @@
+[
+  {
+    "claim": "Aloo Mannu is the local message and wake layer for coding agents, routing asks, replies and FYIs through files and hooks with one ledger of open asks.",
+    "section": "what-it-is",
+    "source": "aloomannu:README.md:3"
+  },
+  {
+    "claim": "Python 3.9+ standard library only with zero external dependencies, built into a single aloomannu.pyz zipapp.",
+    "section": "capabilities",
+    "source": "aloomannu:README.md:7"
+  },
+  {
+    "claim": "Built-in selftest verifies four adapter delivery paths on disk: claude, pi, cursor and file.",
+    "section": "capabilities",
+    "source": "aloomannu:README.md:17"
+  },
+  {
+    "claim": "Zero network and zero model calls, with every delivered message body wrapped in an untrusted-data frame.",
+    "section": "capabilities",
+    "source": "aloomannu:docs/ARCHITECTURE.md:264"
+  },
+  {
+    "claim": "Append-only per-node JSONL ledgers track sent, delivered, acknowledged, dated, done and killed states under exclusive file locks.",
+    "section": "capabilities",
+    "source": "aloomannu:aloomannu/ledger.py:1"
+  },
+  {
+    "claim": "Guided first-run setup verb that finds installed tools, previews hook diffs, saves backups and times a first message delivery.",
+    "section": "cooking",
+    "source": "aloomannu:docs/ARCHITECTURE.md:338"
+  },
+  {
+    "claim": "Structured join and leave verbs for unbound agent sessions with approver checks, 24-hour rejection holds and preserved history.",
+    "section": "cooking",
+    "source": "aloomannu:docs/ARCHITECTURE.md:344"
+  },
+  {
+    "claim": "Local web console bound to 127.0.0.1 with an in-memory fragment token, read-only thread and ledger views, and single-node compose.",
+    "section": "cooking",
+    "source": "aloomannu:docs/ARCHITECTURE.md:364"
+  },
+  {
+    "claim": "Private beta: v0.1.0 in private use, packaged as a standard-library Python zipapp and marked Private :: Do Not Upload.",
+    "section": "stage",
+    "source": "aloomannu:pyproject.toml:15"
+  },
+  {
+    "claim": "Launch target: Target: end of November 2026, on the founder's final yes.",
+    "section": "when",
+    "source": "launch-window:aloomannu-founder-yes"
+  }
+]

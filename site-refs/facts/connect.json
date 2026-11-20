@@ -1,0 +1,52 @@
+[
+  {
+    "claim": "Coco Connect is the Mac app that plugs Coco into the AI coding tools on your machine and runs the M0 memory daemon they share.",
+    "section": "what-it-is",
+    "source": "connect:README.md:3"
+  },
+  {
+    "claim": "Finds the AI coding tools installed on your Mac and shows which ones are connected.",
+    "section": "capabilities",
+    "source": "connect:CHANGELOG.md:5"
+  },
+  {
+    "claim": "Turns each module on, checks its health and disconnects it again; it reports only what it has checked, never a guess.",
+    "section": "capabilities",
+    "source": "connect:README.md:3"
+  },
+  {
+    "claim": "Runs the M0 memory daemon on your own machine only, behind a token, so tools reach your memory and nothing else does.",
+    "section": "capabilities",
+    "source": "connect:README.md:43"
+  },
+  {
+    "claim": "Native app for Apple Silicon Macs on macOS 12 or newer.",
+    "section": "capabilities",
+    "source": "connect:README.md:27"
+  },
+  {
+    "claim": "Per-tool connectors: a capture door and a read door for Cursor, Pi, Codex and more, each one removable on its own.",
+    "section": "cooking",
+    "source": "connect:crates/connect-m0-backend/src/connect_cli.rs"
+  },
+  {
+    "claim": "Codex turns flowing into M0: built and tested, next to go live.",
+    "section": "cooking",
+    "source": "connect:crates/connect-m0-backend/tests/codex_notify.rs"
+  },
+  {
+    "claim": "Safe wiring: connecting a tool never overwrites a setting that tool already has.",
+    "section": "cooking",
+    "source": "plan:m0-connectors"
+  },
+  {
+    "claim": "Beta: 0.9.0-beta is the latest tagged build, for Apple Silicon Macs.",
+    "section": "stage",
+    "source": "connect:CHANGELOG.md:72"
+  },
+  {
+    "claim": "Launch window: no date yet.",
+    "section": "when",
+    "source": "launch-window:not-dated"
+  }
+]

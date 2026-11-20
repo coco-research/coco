@@ -4,6 +4,23 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [2.1.0](https://github.com/coco-research/coco/compare/v2.0.0...v2.1.0) (2026-11-20)
+
+
+### Features
+
+* **agents:** vendor three VoltAgent specialist agents (part 1 of 2) ([#511](https://github.com/coco-research/coco/issues/511)) ([a56c7c9](https://github.com/coco-research/coco/commit/a56c7c9ef852330ed13e86ed0586acb97fea4f94))
+* **commands:** /coco improve runs one scored skill improvement round ([#500](https://github.com/coco-research/coco/issues/500)) ([031f359](https://github.com/coco-research/coco/commit/031f3590391b0de50b46d5c0098b7a0e9af84155))
+* **skills:** impeccable document, optimize and overdrive references (part 2 of 2 of [#499](https://github.com/coco-research/coco/issues/499)) ([#520](https://github.com/coco-research/coco/issues/520)) ([d424a38](https://github.com/coco-research/coco/commit/d424a38f39edbcc31f669d37f404282ea624e33d))
+* **skills:** impeccable licence, notice and first references (part 1 of 2) ([#512](https://github.com/coco-research/coco/issues/512)) ([6ea7fb9](https://github.com/coco-research/coco/commit/6ea7fb91d470f36a4b1883a05ff08478e490a6ab))
+* **skills:** vendor the context-degradation skill (part 1 of 4) ([#514](https://github.com/coco-research/coco/issues/514)) ([31e2bca](https://github.com/coco-research/coco/commit/31e2bca619fe65702262837b32ae6c1aa7c6d86a))
+
+
+### Bug Fixes
+
+* **formula:** point Homebrew at the v2.0.0 tarball ([#517](https://github.com/coco-research/coco/issues/517)) ([c95b31f](https://github.com/coco-research/coco/commit/c95b31f0843c702892eece1da8ff9bbfa7151e62))
+* **install:** no python3 prints only the clean error line ([#515](https://github.com/coco-research/coco/issues/515)) ([b949ac7](https://github.com/coco-research/coco/commit/b949ac71f882697fe9deea401faa54f97e8bc8c0))
+
 ## [2.0.0](https://github.com/coco-research/coco/compare/v1.10.0...v2.0.0) (2026-11-20)
 
 

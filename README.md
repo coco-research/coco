@@ -1,6 +1,6 @@
 # Coco Super Intelligence
 
-495 personas across 13 departments, **229 skills**[^installed] and **388 commands** in the full catalog (coco 1.10.0, 2026-10-26).
+495 personas across 13 departments, **229 skills**[^installed] and **388 commands** in the full catalog (coco 1.10.0, 2026-10-26). <!-- x-release-please-version-date -->
 
 Agent skills, slash commands and subagents for Claude Code, Cursor, Codex and other AI coding agents. One command installs them into the tool you already use. Coco's files and state stay on your machine. Your coding agent still uses its own model provider.
 

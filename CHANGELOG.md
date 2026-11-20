@@ -4,16 +4,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
-## Unreleased (v2.0)
+### 2.0 highlights
 
-### Added
+#### Added
 
-- **install:** `npx cocosuperintelligence` shows a pack picker in a terminal (defaults ticked, one `[Y/n]`); `--packs`, `--all` and `--yes` skip it, a non-interactive shell takes the defaults, and `--uninstall --packs` prints its removal list before removing (per-pack uninstall covers `claude-code` only in v2.0). A default install delivers the same files as before (191 skills, 388 commands, 34 agents on Claude Code).
+- **install:** `npx cocosuperintelligence` shows a pack picker in a terminal (defaults ticked, one `[Y/n]`); `--packs`, `--all` and `--yes` skip it, a non-interactive shell takes the defaults, and `--uninstall --packs` prints its removal list before removing (per-pack uninstall covers `claude-code` only in v2.0). A default install delivers the same files as an install without the picker (191 skills, 388 commands, 36 agents on Claude Code).
 - **router:** a 120-prompt development split for the description-routing eval (12 of 13 departments), plus development and held-out run records under `evals/routing/runs/`.
 - **tests:** `tests/check-readme-prompts.py` checks that every README example prompt routes to the team its command names, under keyword and embedder routing.
 - **gsd:** the pinned upstream toolkit ships with the repo and the Claude Code installer links it without replacing an existing user installation.
 
-### Changed
+#### Changed
 
 - **router:** team and cell descriptions in 12 registries were rewritten on the development split only. On the held-out descriptions split (104 labelled prompts, `nomic-embed-text`), top-1 went from 0.596 to 0.712 (62 to 74), top-4 from 0.663 to 0.798, and keyword from 0.490 to 0.510 (paired: 14 fixed, 2 broken; one-sided bootstrap `p = 0.0008`, 10,000 resamples, seed 0; sign test `p = 0.0021`); the 0.75 target is not met yet. On the development split, `nomic-embed-text` top-1 went from 0.642 to 0.917 and keyword from 0.142 to 0.750.
 - **docs:** the README's AI example prompt now routes to the AI team under both routing modes; the missing `brew install` tap line is gone from the formula notes.

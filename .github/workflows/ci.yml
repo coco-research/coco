@@ -100,6 +100,9 @@ jobs:
       - name: Adapter MCP server merge idempotency, backups, and user-entry preservation
         run: bash tests/check-c4-mcp-adapters.sh
 
+      - name: Shared ~/.agents/skills opt-in linker (marker, idempotency, user folders kept)
+        run: bash tests/check-agents-skills.sh
+
       - name: coco-workflow gate cases (forgery, happy path, workflow hygiene)
         run: bash tests/check-coco-gate.sh
 

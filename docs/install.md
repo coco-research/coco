@@ -4,13 +4,14 @@ Canonical path from a clone:
 
 ```bash
 bash install.sh
+bash install.sh --agents-skills
 bash install.sh --adapter cursor
 bash install.sh --adapter claude-code
 bash install.sh --systems gsd,brain
 bash install.sh --systems superintelligence
 ```
 
-`install.sh` auto-detects the active tool. `--adapter` forces one; `--systems` replaces the default bundle set. Per-adapter wiring is below. For the 30-second version, see [`README.md`](../README.md).
+`install.sh` auto-detects the active tool. `--adapter` forces one; `--systems` replaces the default bundle set; `--agents-skills` opt-in links Coco's skills into `~/.agents/skills/` with a marker file (never replacing user folders) for tools that read the shared `~/.agents/skills` convention. Per-adapter wiring is below. For the 30-second version, see [`README.md`](../README.md).
 
 ---
 

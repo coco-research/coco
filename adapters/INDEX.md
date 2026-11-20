@@ -15,7 +15,7 @@ because most adapters link into the checkout rather than copying.
 | `codex` | 342 | 342 | 0 | 0 | yes | — | 0 |
 | `cursor` | 388 | 342 | 196 | 0 | — | — | 0 |
 | `generic` | 342 | 342 | 0 | 0 | yes | — | 0 |
-| `github-copilot-cli` | 0 | 0 | 0 | 0 | yes | — | 0 |
+| `github-copilot-cli` | 0 | 0 | 191 | 34 | yes | yes | 0 |
 | `grok` | 391 | 342 | 191 | 34 | — | — | 0 |
 | `hermes` | 388 | 342 | 191 | 34 | — | — | 0 |
 | `pi-desktop` | 388 | 342 | 194 | 37 | — | — | 0 |
@@ -42,6 +42,7 @@ This section is the standing list of who is short and by how much.
 |---|---:|---:|---|
 | `amazon-q` | 0 | 388 | does not invoke the SI generators |
 | `cline` | 0 | 388 | does not invoke the SI generators |
+| `github-copilot-cli` | 0 | 388 | does not invoke the SI generators |
 | `roo-code` | 0 | 388 | does not invoke the SI generators |
 | `vscode-continue` | 0 | 388 | does not invoke the SI generators |
 | `windsurf` | 0 | 388 | does not invoke the SI generators |
@@ -49,8 +50,6 @@ This section is the standing list of who is short and by how much.
 | `aider` | 342 | 46 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
 | `codex` | 342 | 46 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
 | `generic` | 342 | 46 | AGENTS.md producer: generates the SI family, core commands are listed in AGENTS.md rather than installed as command files |
-
-Not comparable (AGENTS.md producers rather than tree installers): `github-copilot-cli`.
 
 ## Default install against the widest install
 
@@ -69,7 +68,7 @@ the framework.
 | `codex` | 0 | 0 | 0 |
 | `cursor` | 196 | 196 | 0 |
 | `generic` | 0 | 0 | 0 |
-| `github-copilot-cli` | 0 | 0 | 0 |
+| `github-copilot-cli` | 191 | 191 | 0 |
 | `grok` | 191 | 191 | 0 |
 | `hermes` | 191 | 191 | 0 |
 | `pi-desktop` | 194 | 194 | 0 |

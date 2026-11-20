@@ -1,6 +1,6 @@
 # INDEX - coco
 
-**Repo:** `coco` (published as `cocosuperintelligence` v1.5.0) · `https://github.com/rkz91/coco.git`
+**Repo:** `coco` (published as `cocosuperintelligence` v1.5.0) · `https://github.com/coco-research/coco.git`
 **Indexed at:** `8fac7c0` on branch `site/spacex-vnext-draft`
 **Method:** brownfield - ripwire (symbol map) + cartographer (code graph)
 **Tree:** 3,576 tracked files, 2,212 markdown

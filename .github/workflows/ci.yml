@@ -211,6 +211,10 @@ jobs:
           python3 tests/check-persona-attribution.py --self-test
       - name: Persona checker fires on every planted defect
         run: bash tests/check-personas-test.sh
+      - name: Every published count place matches docs/asset-counts.json
+        run: |
+          python3 tests/check-count-sync.py
+          python3 tests/check-count-sync.py --self-test
 
       - name: Verify the delivery index matches what the adapters install
         run: |

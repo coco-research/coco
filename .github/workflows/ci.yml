@@ -71,6 +71,9 @@ jobs:
       - name: Validate the Claude Code install safety checks
         run: bash tests/check-install-safety.sh
 
+      - name: Vendored agents are linked; THIRD-PARTY.md and licences are not
+        run: bash tests/check-agents-third-party.sh
+
       - name: Install --workflow (links, printed hook lines, no settings write)
         run: bash tests/check-install-workflow.sh
       - name: Validate the Claude Code uninstall

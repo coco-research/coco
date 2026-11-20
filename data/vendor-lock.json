@@ -441,6 +441,8 @@
       "agents/chaos-engineer.md",
       "agents/data-engineer.md",
       "agents/documentation-engineer.md",
+      "agents/sre-engineer.md",
+      "agents/llm-architect.md",
       "agents/licenses/voltagent-awesome-claude-code-subagents.LICENSE"
     ],
     "repo": "https://github.com/VoltAgent/awesome-claude-code-subagents",

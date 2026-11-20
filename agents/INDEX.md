@@ -2,16 +2,19 @@
 
 Auto-generated. Run `python3 scripts/build-index.py` to refresh.
 
-**Total: 36 agents** — 12 core, 24 across 1 bundles.
+**Total: 39 agents** — 15 core, 24 across 1 bundles.
 
-## Core agents (12)
+## Core agents (15)
 
 | Agent | Description |
 |-------|-------------|
 | [ai-engineer](ai-engineer.md) | Senior AI engineer for architecting, implementing, and optimizing end-to-end AI systems — from model selection and training pipelines to production deployment,  |
+| [chaos-engineer](chaos-engineer.md) | Use this agent when you need to design and execute controlled failure experiments, validate system resilience before incidents occur, or conduct game day exerci |
 | [code-reviewer](code-reviewer.md) | Senior code and architecture reviewer for comprehensive quality, security, performance, and architectural integrity analysis. Use proactively after writing or m |
+| [data-engineer](data-engineer.md) | Use this agent when you need to design, build, or optimize data pipelines, ETL/ELT processes, and data infrastructure. Invoke when designing data platforms, imp |
 | [data-specialist](data-specialist.md) | Senior data specialist covering exploratory analysis, statistical modeling, machine learning, experimentation, SQL optimization, query design, and performance t |
 | [database-architect](database-architect.md) | Database architecture and design specialist. Use PROACTIVELY for database design decisions, data modeling, scalability planning, microservices data patterns, da |
+| [documentation-engineer](documentation-engineer.md) | Use this agent when you need to create, architect, or overhaul comprehensive documentation systems including API docs, tutorials, guides, and developer-friendly |
 | [mcp-specialist](mcp-specialist.md) | MCP (Model Context Protocol) specialist covering server/client development, configuration, troubleshooting, tool setup, architecture, transport layers, and prot |
 | [pm-advisor](pm-advisor.md) | Product management advisor for feature planning, issue creation, prioritization, and data-driven product decisions. Use proactively when planning features, writ |
 | [refactoring-specialist](refactoring-specialist.md) | Senior refactoring specialist for transforming complex, poorly structured code into clean, maintainable systems. Use proactively when code quality metrics show  |

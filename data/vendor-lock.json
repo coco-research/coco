@@ -434,5 +434,25 @@
     ],
     "mode": "verbatim",
     "patch": null
+  },
+  {
+    "name": "awesome-claude-code-subagents",
+    "paths": [
+      "agents/chaos-engineer.md",
+      "agents/data-engineer.md",
+      "agents/documentation-engineer.md",
+      "agents/licenses/voltagent-awesome-claude-code-subagents.LICENSE"
+    ],
+    "repo": "https://github.com/VoltAgent/awesome-claude-code-subagents",
+    "pinned_ref": "ed74d115b7fb7026a22a4f816a8e3250f425e3b4",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "agents/licenses/voltagent-awesome-claude-code-subagents.LICENSE",
+        "sha256": "8ed27772f4430d6e3815599b849c1b6e59088671133ef67e9b1be4acef2b75da"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
   }
 ]

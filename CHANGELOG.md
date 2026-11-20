@@ -4,6 +4,61 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [2.0.0](https://github.com/coco-research/coco/compare/v1.10.0...v2.0.0) (2026-11-20)
+
+
+### Features
+
+* **adapters:** wire Coco MCP server into Kiro and Cline with config merger ([#486](https://github.com/coco-research/coco/issues/486)) ([3f82752](https://github.com/coco-research/coco/commit/3f82752aea81e59b7d7c105eb70892e608e53f1b))
+* **agents:** vendor Addy Osmani test-engineer and web-performance-auditor agents ([#501](https://github.com/coco-research/coco/issues/501)) ([6e58485](https://github.com/coco-research/coco/commit/6e58485f65e134c4bdc1489fc5dbd7ff37e17edf))
+* **brand:** apply Coco Research pure-orb favicons, light/dark banners, and CLI TTY header ([#492](https://github.com/coco-research/coco/issues/492)) ([d2d6bf8](https://github.com/coco-research/coco/commit/d2d6bf80a8504fc89165c02ea615f5f9a0f29f96))
+* **cli:** add coco connect harness MCP configurator across 19 tools ([#485](https://github.com/coco-research/coco/issues/485)) ([159ba63](https://github.com/coco-research/coco/commit/159ba639a590677ed24314030d703430e20c4acb))
+* **counts:** sync every published count from one file, and gate it in CI ([#509](https://github.com/coco-research/coco/issues/509)) ([142b3cd](https://github.com/coco-research/coco/commit/142b3cd6e9a96400151604c82ff3546efed31e2d))
+* **evals:** add unattended RSI turn runner across pilot skills ([#479](https://github.com/coco-research/coco/issues/479)) ([4f01247](https://github.com/coco-research/coco/commit/4f01247b1fd1dc86dcd9abb25069cbca563d7353))
+* **evals:** OpenAI-compatible executor path for skill evals ([#460](https://github.com/coco-research/coco/issues/460)) ([cd89f01](https://github.com/coco-research/coco/commit/cd89f013b617f7eea982a9bbc60e992974fda2aa))
+* **evals:** rule-check graders for brainstorming, api-design-principles, writing-skills ([#468](https://github.com/coco-research/coco/issues/468)) ([c7711bd](https://github.com/coco-research/coco/commit/c7711bd437831d516d44359c228ede2dc41e6f60))
+* **evals:** rule-check graders for systematic-debugging, test-driven-development, verification-before-completion ([#467](https://github.com/coco-research/coco/issues/467)) ([f573f02](https://github.com/coco-research/coco/commit/f573f02997d6cd8e14069717b26bb09138ec2c22))
+* **install:** --workflow links coco-gate and the workflow hooks, and prints the hook lines ([#403](https://github.com/coco-research/coco/issues/403)) ([95b3ddc](https://github.com/coco-research/coco/commit/95b3ddceb8ee8e96d9cf81f2e2ce3856ff89a600))
+* **install:** --workflow-only, and --uninstall --workflow-only removes only those pieces ([#410](https://github.com/coco-research/coco/issues/410)) ([6887a18](https://github.com/coco-research/coco/commit/6887a181b164fadf97d19d6db33f408b34f9854f))
+* **mcp:** add coco_persona, coco_board, and Superintelligence MCP prompts ([#477](https://github.com/coco-research/coco/issues/477)) ([4131607](https://github.com/coco-research/coco/commit/4131607d4f17574daaa89b9f9ab53f674f8e8d0b))
+* **mcp:** add read-only stdio MCP server for skills, commands, and agents ([#476](https://github.com/coco-research/coco/issues/476)) ([262ad84](https://github.com/coco-research/coco/commit/262ad8495dac71b5d0570d3ec3deca7bedaacb95))
+* **personas:** offline persona checker with planted-defect fixtures ([#465](https://github.com/coco-research/coco/issues/465)) ([f4ca699](https://github.com/coco-research/coco/commit/f4ca6991acf4a2cad1d933a44820a3c6fc836cdd))
+* **skills:** update humanizer to v3.1.0 ([#475](https://github.com/coco-research/coco/issues/475)) ([c37022c](https://github.com/coco-research/coco/commit/c37022ce2988d60251b149094a456edebcf0ba01))
+* **vendor:** detect upstream drift for vendored items (report only) ([#462](https://github.com/coco-research/coco/issues/462)) ([f665ab1](https://github.com/coco-research/coco/commit/f665ab16865783632ce8039d35968fb596479cc2))
+* **vendor:** lock vendored items to their licence files and upstream refs ([#461](https://github.com/coco-research/coco/issues/461)) ([add0110](https://github.com/coco-research/coco/commit/add0110e5ab9afde47da6d5824a83096ea0ae108))
+* **workflow:** Claude Code hooks that hold code edits until the plan is signed ([#396](https://github.com/coco-research/coco/issues/396)) ([4f4d8e8](https://github.com/coco-research/coco/commit/4f4d8e83cfaa8b748bc904138bd858342c89809b))
+* **workflow:** coco-gate githook install|remove, the git warning per repo, chain or skip, never overwrite ([#404](https://github.com/coco-research/coco/issues/404)) ([e389259](https://github.com/coco-research/coco/commit/e38925921b0cd97829410926c8db0b87d77797da))
+* **workflow:** warn-only pre-commit hook and the show check ([#397](https://github.com/coco-research/coco/issues/397)) ([4305232](https://github.com/coco-research/coco/commit/43052320c191cf8ca071df3a46751f5faf868a99))
+
+
+### Bug Fixes
+
+* **aider:** AGENTS.md carries the skills, commands, rules and SI front doors ([#258](https://github.com/coco-research/coco/issues/258)) ([#429](https://github.com/coco-research/coco/issues/429)) ([900e31e](https://github.com/coco-research/coco/commit/900e31e3db706023b25de2589b7971870c172e19))
+* **cli:** coco uninstall cleans every adapter home and never deletes unmarked files ([#224](https://github.com/coco-research/coco/issues/224)) ([#425](https://github.com/coco-research/coco/issues/425)) ([1b965e1](https://github.com/coco-research/coco/commit/1b965e171b84d39ee59ef4ce1e3affefad3d399c))
+* **cli:** resolve newest semver release tag on coco update ([#493](https://github.com/coco-research/coco/issues/493)) ([63ef335](https://github.com/coco-research/coco/commit/63ef335135d8e9c7fcc52140463729fb2dbca37e))
+* **codex:** AGENTS.md cites only files the install has, and keeps the /team router ([#261](https://github.com/coco-research/coco/issues/261), [#262](https://github.com/coco-research/coco/issues/262)) ([#421](https://github.com/coco-research/coco/issues/421)) ([9257e6f](https://github.com/coco-research/coco/commit/9257e6fbb2e391d49a4a55f340a47b3655591dd2))
+* **codex:** AGENTS.md no longer lists PROMPT-DEFENSE as an agent ([#430](https://github.com/coco-research/coco/issues/430)) ([e4ad965](https://github.com/coco-research/coco/commit/e4ad965a63e407e25cc1ed1b856fde81c463f1c3))
+* **codex:** re-installs make no AGENTS.md backup when nothing changed ([#250](https://github.com/coco-research/coco/issues/250)) ([#417](https://github.com/coco-research/coco/issues/417)) ([666062e](https://github.com/coco-research/coco/commit/666062ef4a75afa490bd768d0052043c19cbe753))
+* **cursor, windsurf:** install the 13 SI team front doors ([#207](https://github.com/coco-research/coco/issues/207)) ([#423](https://github.com/coco-research/coco/issues/423)) ([a666e06](https://github.com/coco-research/coco/commit/a666e066bc4af8356f2ad30f2ac55b9f489de5c0))
+* **cursor:** uninstall removes the generated SI-* commands and keeps user files ([#208](https://github.com/coco-research/coco/issues/208)) ([#418](https://github.com/coco-research/coco/issues/418)) ([883d1b0](https://github.com/coco-research/coco/commit/883d1b01f4dd06a6fbab468e2b3420d19ede3fe1))
+* **docs:** name the Apache 2.0 repo licence in the SI notice; README version 1.10.0 ([#508](https://github.com/coco-research/coco/issues/508)) ([0860a88](https://github.com/coco-research/coco/commit/0860a889ae6d9ef87c3b216f6117b52d49712dc7))
+* **evals:** record ledger rejection reason when held-out floor is missed ([#488](https://github.com/coco-research/coco/issues/488)) ([dbf94fd](https://github.com/coco-research/coco/commit/dbf94fdc4bb418a2b03fcb5834e86e35145e3098))
+* **grok:** /team commands find the team-gate and arch-index scripts on a grok install ([#266](https://github.com/coco-research/coco/issues/266)) ([#427](https://github.com/coco-research/coco/issues/427)) ([a9d6167](https://github.com/coco-research/coco/commit/a9d616721638d6d855708508d97b7fad4aadb6a7))
+* **pi-desktop:** --uninstall removes the generated SI prompts ([#226](https://github.com/coco-research/coco/issues/226)) ([#428](https://github.com/coco-research/coco/issues/428)) ([0f58da5](https://github.com/coco-research/coco/commit/0f58da55b33ec32f0f635ee8805107cc03ca1343))
+* **release:** 1.11.0 notes start from the 1.10.0 release ([#446](https://github.com/coco-research/coco/issues/446)) ([73acff5](https://github.com/coco-research/coco/commit/73acff55c3b82760957f8e46bfb3918a6ab346ad))
+* **router:** use Ollama when LM Studio isn't running, and never fall back to keyword silently ([#420](https://github.com/coco-research/coco/issues/420)) ([a1630ef](https://github.com/coco-research/coco/commit/a1630ef542eea4b42505370c5eb2aa6bc67e1adc))
+* **si:** generated SI commands pass arguments as $ARGUMENTS where the host expands it ([#211](https://github.com/coco-research/coco/issues/211)) ([#424](https://github.com/coco-research/coco/issues/424)) ([e1cbd5b](https://github.com/coco-research/coco/commit/e1cbd5b55ad0cf9839111877263570e1bffd427f))
+* **site:** Coco casing on cocoresearch.org and the new coco hero subhead ([#412](https://github.com/coco-research/coco/issues/412)) ([fb69a7a](https://github.com/coco-research/coco/commit/fb69a7a797f58d88348af4d3d7438ebd86ba88b8))
+* **site:** correct stale install, licence and product lines on /coco/ and the homepage ([#436](https://github.com/coco-research/coco/issues/436)) ([0dac25d](https://github.com/coco-research/coco/commit/0dac25d8344a151be0c482a6e9e47c0cbe658cd0))
+* **site:** og-image says Coco without a persona count, and the stale 389 board image is gone ([#413](https://github.com/coco-research/coco/issues/413)) ([4dc28ab](https://github.com/coco-research/coco/commit/4dc28abe7c25d98cf6a20686a913933b2e3a5c70))
+* **site:** the counts line sits after the install figure, not inside it ([#415](https://github.com/coco-research/coco/issues/415)) ([0da6701](https://github.com/coco-research/coco/commit/0da6701c9aa84deb211f9b025cf0ba0c309bbd25))
+* **vendor:** re-pin humanizer licence after SI v2.0 ([#483](https://github.com/coco-research/coco/issues/483)) ([42b0873](https://github.com/coco-research/coco/commit/42b0873dda86a3026a80e429e52f8993c76a20d2))
+
+
+### Miscellaneous Chores
+
+* pin the next Coco SI release to 2.0.0 ([#510](https://github.com/coco-research/coco/issues/510)) ([73ef28d](https://github.com/coco-research/coco/commit/73ef28d580a4a2287193929b0a9e8e9d7a104af7))
+
 ### 2.0 highlights
 
 #### Added

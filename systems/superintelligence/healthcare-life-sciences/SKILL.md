@@ -39,5 +39,5 @@ Listed by cell. Each has a YAML-frontmatter profile under `personas/<slug>.md`.
 
 **Healthcare Economics (3):** [amitabh-chandra](personas/amitabh-chandra.md) · [austin-frakt](personas/austin-frakt.md) · [uwe-reinhardt](personas/uwe-reinhardt.md)
 
-**Medtech Digital Health (3):** [bertalan-mesko](personas/bertalan-mesko.md) · [eric-topol](personas/eric-topol.md) · [uzeyn-damania](personas/uzeyn-damania.md)
+**Medtech Digital Health (3):** [bertalan-mesko](personas/bertalan-mesko.md) · [eric-topol](personas/eric-topol.md) · [zubin-damania](personas/zubin-damania.md)
 

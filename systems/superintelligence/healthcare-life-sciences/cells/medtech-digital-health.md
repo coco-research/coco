@@ -15,4 +15,4 @@ Your healthcare and life sciences brain trust — medtech digital health focus a
 |---|---|---|
 | `bertalan-mesko` | Bertalan Meskó | specialist |
 | `eric-topol` | Eric Topol | specialist |
-| `uzeyn-damania` | Zubin Damania | specialist |
+| `zubin-damania` | Zubin Damania | specialist |

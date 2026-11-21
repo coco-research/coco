@@ -1,6 +1,17 @@
 {
   "team": "legal-ip",
+  "team_id": "legal-ip-super-intelligence",
+  "team_name": "Legal & IP Super Intelligence Team",
+  "description": "Intellectual property law, patents versus trade secrets, trademarks, copyright permissions, open-source software licenses and dependency redistribution, contributor grants, commercial vendor contracts, indemnity, liability, and termination terms, confidentiality and NDAs, invention assignment, exclusive licensing, privacy law, and antitrust.",
   "personas": [],
-  "cells": [],
+  "cells": {
+    "ai-ip-governance": "AI copyright, training-data rights, algorithmic liability, and IP governance.",
+    "antitrust-competition": "Antitrust law, competition enforcement, merger scrutiny, and market dominance.",
+    "ip-patent-strategy": "Patents versus trade secrets, invention assignment, joint authorship, trademark clearance, and copyright licensing.",
+    "open-source-compliance": "Open-source software licenses, third-party dependency redistribution, and contributor license grants.",
+    "privacy-international-law": "Statutory privacy law, data protection treaties, and cross-border legal compliance.",
+    "regulatory-litigation": "Contract disputes, statutory interpretation, liability defense, and regulatory litigation.",
+    "tech-licensing-contracts": "Vendor contracts, indemnity, liability, and termination terms, confidentiality and NDAs, software licensing, and exclusive IP transfers."
+  },
   "last_updated": "2026-09-03"
 }

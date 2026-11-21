@@ -2,6 +2,7 @@
   "team_id": "education-edtech-super-intelligence",
   "personas": {
     "grant-wiggins": {"slug": "grant-wiggins"},
-    "fixture-persona": {"slug": "fixture-persona"}
+    "fixture-persona": {"slug": "fixture-persona"},
+    "fixture-good": {"slug": "fixture-good"}
   }
 }

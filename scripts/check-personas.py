@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Offline checker for Super Intelligence persona files (stdlib only, no network).
+"""Checker for Super Intelligence persona files (stdlib only; offline unless --links).
 
 Usage:
-  python3 scripts/check-personas.py <persona.md> [<persona.md> ...]
+  python3 scripts/check-personas.py [--all] [--links] [<persona.md> ...]
+
+  --all     check every systems/superintelligence/*/personas/*.md file
+  --links   also fetch each source and canonical_works URL (network, opt-in)
 
 Prints one line per problem, "<file>: (<rule>) <name>: <detail>", and exits 1
-if there is any problem, 0 if every file passes.
+if there is any problem, 0 if every file passes, 2 on a setup error.
 
 Rules (taken from the existing validate_persona.py / validate_offline.py copies,
 templates/attribution.md and the real persona files):
@@ -14,24 +17,67 @@ templates/attribution.md and the real persona files):
   (c) label         a file that speaks in the person's voice (a `> "..."` block)
                     carries the approved label line from templates/attribution.md
   (d) roster        the slug is listed in its department's registry.json / roster.json
-  (e) quote         every `> "..."` line has an https:// URL or [paraphrase] on the
-                    same or the next line
+  (e) quote         every `> "..."` line has an https:// URL, [paraphrase] or
+                    [extrapolated] on the same or the next line
   (f) stances       every public_stances entry has an evidence_url
   (g) signals       active: >= 2 recent_signal_12mo; archetype: >= 2 persistent_signals
   (h) pairs         pairs_well_with / productive_conflict_with name slugs listed in
                     some department's roster
+  (i) duplicate     slug, real_name and aliases (case-folded) are not used by any
+                    other persona file on the board, in any department (except the
+                    grandfathered two-team seats in TWO_TEAM_SEATS)
+  (j) opted-out     the sha256 of the case-folded, space-collapsed real_name is not
+                    in docs/personas/optout.sha256 (a missing file is an empty list)
+  (k) private-detail  no line looks like a phone number, a street address or a
+                    personal (non-work) email address
+  (links)           with --links: each URL answers 200 over https, and each
+                    canonical_works title appears on its HTML page
 
-The live URL check in validate_persona.py needs the network, so it is not here.
+--links fetch safety: https only, on the first URL and every redirect hop; every
+address each host resolves to must be public (stdlib ipaddress), and the
+connection goes to the address that was checked, with no second lookup; 10 s
+connect, 10 s read, at most 5 redirects, 2 MB read per page. A refused link
+prints "(links) <url>: refused: <reason>" and is never fetched.
 """
 from __future__ import annotations
 
+import hashlib
+import html
+import http.client
+import ipaddress
 import json
+import os
 import re
+import socket
+import ssl
 import sys
 from pathlib import Path
+from urllib.parse import urljoin, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
-ATTRIBUTION = ROOT / "systems" / "superintelligence" / "templates" / "attribution.md"
+BOARD = ROOT / "systems" / "superintelligence"
+ATTRIBUTION = BOARD / "templates" / "attribution.md"
+OPTOUT = ROOT / "docs" / "personas" / "optout.sha256"
+
+CONNECT_TIMEOUT = READ_TIMEOUT = 10  # seconds
+MAX_REDIRECTS = 5
+MAX_BYTES = 2 * 1024 * 1024
+REDIRECTS = (301, 302, 303, 307, 308)
+
+# (k) ponytail: regex only; the second read catches what these miss. A PII
+# library is the upgrade if second reads keep finding misses.
+URL_TEXT = re.compile(r"\b[a-z][a-z0-9+.-]*://\S+|\bwww\.\S+", re.I)
+PRIVATE = [
+    ("a phone number", re.compile(
+        r"(?<![\w.+/-])(?:\+\d{1,3}[ .-]?)?(?:\(\d{3}\)|\d{3})[ .-]\d{3}[ .-]\d{4}(?![\w-])"
+        r"|(?<![\w.+/-])\+\d{1,3}(?:[ .-]\d{2,4}){2,4}(?![\w-])")),
+    ("a street address", re.compile(
+        r"\b\d{1,5}(?:\s+[A-Z][a-z]+){1,3}\s+"
+        r"(?:Street|Avenue|Ave\.|Road|Boulevard|Blvd\.|Lane|Drive|Court|Terrace|Parkway)\b")),
+    ("a personal email address", re.compile(
+        r"[\w.+-]+@(?:gmail|googlemail|yahoo|ymail|hotmail|outlook|live|msn|aol|icloud|me|mac"
+        r"|proton|protonmail|pm|gmx|mail|yandex|zoho|qq|163|126|fastmail|hey)\.[a-z.]{2,6}\b", re.I)),
+]
 
 # The fields every one of the 495 shipped personas has, non-empty.
 REQUIRED = ["slug", "real_name", "archetype", "teams", "cell", "cell_role", "status",
@@ -41,7 +87,14 @@ REQUIRED = ["slug", "real_name", "archetype", "teams", "cell", "cell_role", "sta
 KEY = re.compile(r"^([A-Za-z0-9_]+):(?:\s+(.*))?$")
 SUBKEY = re.compile(r"^\s*([A-Za-z0-9_]+):(?:\s+(.*))?$")
 QUOTE = re.compile(r'^\s*>\s*["“]')
-SOURCED = re.compile(r"https://|\[paraphrase\]")
+SOURCED = re.compile(r"https://|\[paraphrase\]|\[extrapolated\]")
+
+# (i) ponytail: grandfathered two-team seats, one file per department, same slug.
+# New people get one file with `teams:` instead; never add to this list.
+TWO_TEAM_SEATS = frozenset({("demis-hassabis", "ai"), ("demis-hassabis", "healthcare-life-sciences"),
+                            *((s, d) for s in ("ann-cavoukian", "daniel-solove", "frank-pasquale",
+                                               "helen-nissenbaum", "lina-khan", "tim-wu")
+                              for d in ("legal-ip", "risk-compliance"))})
 
 
 def scalar(s: str):
@@ -154,7 +207,149 @@ def label_template() -> str:
     return m.group(0).strip()
 
 
-def check(path: Path, label: str, cache: dict) -> list:
+def norm(s) -> str:
+    return " ".join(str(s).casefold().split())
+
+
+def identity(fm: dict) -> set:
+    aliases = fm.get("aliases")
+    aliases = aliases if isinstance(aliases, list) else [aliases]
+    keys = {("slug", norm(fm["slug"]))} if isinstance(fm.get("slug"), str) else set()
+    return keys | {("name", norm(n)) for n in [fm.get("real_name"), *aliases] if isinstance(n, str) and n.strip()}
+
+
+def board_identities(cache: dict) -> dict:
+    """(kind, value) -> (persona file, its slug) for every board file that carries it."""
+    if "identities" not in cache:
+        index: dict = {}
+        for p in sorted(BOARD.glob("*/personas/*.md")):
+            try:
+                fm = parse_frontmatter(p.read_text(encoding="utf-8")) or {}
+            except (OSError, UnicodeDecodeError):
+                continue  # this file reports its own (a) when it is checked
+            for key in identity(fm):
+                index.setdefault(key, []).append((p.resolve(), fm.get("slug")))
+        cache["identities"] = index
+    return cache["identities"]
+
+
+def load_optout() -> set:
+    try:
+        text = OPTOUT.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return set()
+    except (OSError, UnicodeDecodeError) as e:
+        print(f"{OPTOUT}: cannot read: {e}", file=sys.stderr)
+        sys.exit(2)
+    rows = [r.strip().lower() for r in text.splitlines() if r.strip() and not r.lstrip().startswith("#")]
+    bad = [r for r in rows if not re.fullmatch(r"[0-9a-f]{64}", r)]
+    if bad:  # a malformed line would silently match no one: fail closed
+        print(f"{OPTOUT}: not a sha256 hex line: {bad[0][:20]}", file=sys.stderr)
+        sys.exit(2)
+    return set(rows)
+
+
+class Refused(Exception):
+    """A link that the fetch-safety rules do not allow; it is never fetched."""
+
+
+def is_public(ip) -> bool:
+    embedded = [getattr(ip, "ipv4_mapped", None), getattr(ip, "sixtofour", None),
+                *(getattr(ip, "teredo", None) or ())]
+    if any(e is not None and not is_public(e) for e in embedded):
+        return False
+    return ip.is_global and not (ip.is_multicast or ip.is_private or ip.is_loopback or ip.is_link_local
+                                 or ip.is_reserved or ip.is_unspecified)
+
+
+def checked_address(host: str, port: int) -> str:
+    """Resolve once; every address must be public. Returns the address to connect to."""
+    try:
+        infos = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
+    except (OSError, UnicodeError) as e:
+        raise Refused(f"cannot resolve {host}: {e}")
+    addrs = [ipaddress.ip_address(info[4][0].split("%")[0]) for info in infos]
+    if not addrs:
+        raise Refused(f"cannot resolve {host}: no addresses")
+    for a in addrs:
+        if not is_public(a):
+            raise Refused(f"{host} resolves to non-public address {a}")
+    return str(addrs[0])
+
+
+class PinnedHTTPS(http.client.HTTPSConnection):
+    """HTTPS to an address already checked: no second lookup of the host name."""
+
+    def __init__(self, host: str, port: int, address: str):
+        super().__init__(host, port, timeout=READ_TIMEOUT)
+        self.address, self.tls = address, ssl.create_default_context()
+
+    def connect(self):
+        sock = socket.create_connection((self.address, self.port), timeout=CONNECT_TIMEOUT)
+        try:
+            sock.settimeout(READ_TIMEOUT)
+            self.sock = self.tls.wrap_socket(sock, server_hostname=self.host)
+        except BaseException:
+            sock.close()
+            raise
+
+
+def fetch(url: str):
+    """GET url under the fetch-safety rules. Returns (status, content_type, body)."""
+    for hop in range(MAX_REDIRECTS + 1):
+        parts = urlsplit(url)
+        if parts.scheme != "https":
+            raise Refused(f"not https: {url}" if hop == 0 else f"redirect to non-https {url}")
+        try:
+            host, port = parts.hostname, parts.port or 443
+        except ValueError:
+            raise Refused(f"bad port in {url}")
+        if not host:
+            raise Refused(f"no host in {url}")
+        conn = PinnedHTTPS(host, port, checked_address(host, port))
+        try:
+            conn.request("GET", (parts.path or "/") + (f"?{parts.query}" if parts.query else ""),
+                         headers={"User-Agent": "coco-check-personas", "Accept": "text/html,*/*"})
+            resp = conn.getresponse()
+            location = resp.getheader("Location")
+            if resp.status in REDIRECTS and location:
+                url = urljoin(url, location)
+                continue
+            return resp.status, resp.getheader("Content-Type") or "", resp.read(MAX_BYTES)
+        finally:
+            conn.close()
+    raise Refused(f"more than {MAX_REDIRECTS} redirects")
+
+
+def link_problems(fm: dict) -> list:
+    titles: dict = {}
+    for s in fm.get("sources") if isinstance(fm.get("sources"), list) else []:
+        if isinstance(s, str):
+            titles.setdefault(s, None)
+    for w in fm.get("canonical_works") if isinstance(fm.get("canonical_works"), list) else []:
+        if isinstance(w, dict) and isinstance(w.get("url"), str):
+            if titles.get(w["url"]) is None:
+                titles[w["url"]] = w.get("title")
+    out = []
+    for url, title in titles.items():
+        try:
+            status, ctype, body = fetch(url)
+        except Refused as e:
+            out.append(f"(links) {url}: refused: {e}")
+            continue
+        except (OSError, http.client.HTTPException, ValueError) as e:
+            out.append(f"(links) {url}: dead: {e.__class__.__name__}: {e}")
+            continue
+        if status != 200:
+            out.append(f"(links) {url}: dead: HTTP {status}")
+        elif title and "html" in ctype.lower():
+            page = norm(html.unescape(re.sub(r"<[^>]+>", " ", body.decode("utf-8", "replace"))))
+            if norm(title) not in page:
+                out.append(f"(links) {url}: title not found on the page: {title}")
+    return out
+
+
+def check(path: Path, label: str, cache: dict, optout: set = frozenset(), links: bool = False) -> list:
     try:
         text = path.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as e:
@@ -190,7 +385,7 @@ def check(path: Path, label: str, cache: dict) -> list:
 
     for n in quotes:
         if not SOURCED.search(" ".join(body[n:n + 2])):
-            out.append(f"(e) quote: line {n + 1} has no https:// source or [paraphrase] on it or the next line")
+            out.append(f"(e) quote: line {n + 1} has no https:// source, [paraphrase] or [extrapolated] on it or the next line")
 
     stances = fm.get("public_stances") if isinstance(fm.get("public_stances"), list) else []
     uncited = [str(i) for i, s in enumerate(stances) if isinstance(s, dict) and not s.get("evidence_url")]
@@ -210,6 +405,30 @@ def check(path: Path, label: str, cache: dict) -> list:
             off = [v for v in vals if isinstance(v, str) and v not in pool]
             if off:
                 out.append(f"(h) pairs: {fld} names slugs not in any department roster: {', '.join(off)}")
+
+    me, shared = path.resolve(), {}
+    seat = (slug, me.parent.parent.name)
+    for key in identity(fm):
+        for other, other_slug in board_identities(cache).get(key, []):
+            twin = (other_slug, other.parent.parent.name)
+            if other != me and not (slug == other_slug and seat != twin and {seat, twin} <= TWO_TEAM_SEATS):
+                shared.setdefault(other, set()).add(key[0])
+    for other, kinds in sorted(shared.items()):
+        what = " and ".join(k for k in ("slug", "name") if k in kinds)
+        out.append(f"(i) duplicate: {what} also used by {other.relative_to(BOARD.resolve()).as_posix()}")
+
+    if isinstance(fm.get("real_name"), str) and \
+            hashlib.sha256(norm(fm["real_name"]).encode("utf-8")).hexdigest() in optout:
+        out.append("(j) opted-out: this person asked not to be included (docs/personas/TAKEDOWN.md)")
+
+    for n, line in enumerate(body):
+        visible = URL_TEXT.sub(" ", line)
+        for what, rx in PRIVATE:
+            if rx.search(visible):
+                out.append(f"(k) private-detail: line {n + 1} looks like {what}")
+
+    if links:
+        out += link_problems(fm)
     return out
 
 
@@ -217,13 +436,26 @@ def main(argv: list) -> int:
     if not argv or argv[0] in ("-h", "--help"):
         print(__doc__)
         return 0 if argv else 2
+    opts = [a for a in argv if a.startswith("--")]
+    unknown = [o for o in opts if o not in ("--all", "--links")]
+    if unknown:
+        print(f"check-personas: unknown option {unknown[0]}", file=sys.stderr)
+        return 2
+    files = [a for a in argv if not a.startswith("--")]
+    if "--all" in opts:
+        files += [os.path.relpath(p) for p in sorted(BOARD.glob("*/personas/*.md"))]
+    files = list(dict.fromkeys(files))
+    if not files:
+        print("check-personas: no persona files given (pass files or --all)", file=sys.stderr)
+        return 2
     label, cache, fails = label_template(), {}, 0
-    for f in argv:
-        problems = check(Path(f), label, cache)
+    optout, links = load_optout(), "--links" in opts
+    for f in files:
+        problems = check(Path(f), label, cache, optout, links)
         fails += bool(problems)
         for p in problems:
             print(f"{f}: {p}")
-    print(f"check-personas: {len(argv) - fails}/{len(argv)} pass", file=sys.stderr)
+    print(f"check-personas: {len(files) - fails}/{len(files)} pass", file=sys.stderr)
     return 1 if fails else 0
 
 

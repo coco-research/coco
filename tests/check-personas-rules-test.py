@@ -5,7 +5,9 @@ Everything here is offline:
 - each case builds a small board in a temp folder (a copy of the checker, the
   label template, a strategy and a gtm department) and plants one problem;
 - --links runs with name resolution and fetching stubbed, never the network;
-- --all runs over the real board with socket connections made to raise.
+- --all runs over the real board with socket connections made to raise;
+- the input-safety cases (long input, symlinks, stalled hops) use invented
+  people and a fabricated sentinel file beside the fake board.
 
 Run from repo root: python3 tests/check-personas-rules-test.py
 """
@@ -14,12 +16,16 @@ import hashlib
 import importlib.util
 import io
 import json
+import os
 import re
 import shutil
 import socket
+import ssl
 import subprocess
 import sys
 import tempfile
+import threading
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -148,6 +154,30 @@ with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
     expect(p.returncode == 0 and p.stdout == "", "(j) a missing optout.sha256 counts as an empty list", p.stdout + p.stderr)
 code, out, err = run({"o": ("o", "Opted Out Person", "", "")}, ["o"], "Opted Out Person\n")
 expect(code == 2 and "not a sha256 hex line" in err, "(j) a plain-text line in optout.sha256 stops with exit 2", err)
+# A malformed row may be a plain name: the message carries the line number, never the row.
+for case, rows, n in (("a plain name", "Secret Nameson\n", 1),
+                      ("a name after a comment, a blank and a good row", f"# note\n\n{sha('Someone Else')}\nSecret Nameson\n", 4),
+                      ("a 63-digit hash", "a" * 63 + "\n", 1), ("a hash with trailing text", sha("A B") + " Secret\n", 1)):
+    code, out, err = run({"o": ("o", "Opted Out Person", "", "")}, ["o"], rows)
+    expect(code == 2 and err.endswith(f": line {n} is not a sha256 hex line") and "Secret" not in err,
+           f"(j) {case} stops with exit 2 naming line {n}, never the row", err)
+# A comment-only or blank file is an explicit empty list (a missing one is tested above).
+for case, rows in (("a comment-only file", "# nobody has opted out yet\n"), ("a file of blank lines", "\n  \n")):
+    code, out, _ = run({"o": ("o", "Opted Out Person", "", "")}, ["o"], rows)
+    expect(code == 0 and out == [], f"(j) {case} is an explicit empty list", "\n".join(out))
+# (a) real_name is one text value: a list or mapping is never hashed, so it would dodge (j).
+for case, name, fm in (("a flow list", "[Opted Out Person]", ""), ("a block list", "", "\n  - Opted Out Person"),
+                       ("a mapping", "{first: Opted, last: Person}", ""), ("only spaces", '"   "', "")):
+    code, out, _ = run({"o": ("o", name, fm, "")}, ["o"], OPTED)
+    expect(code == 1 and out == [f"{GTM}o.md: (a) frontmatter: real_name must be one non-empty text value"],
+           f"(a) fails a real_name that is {case}, so (j) cannot be skipped", "\n".join(out))
+
+# A quoted name followed by a comment is still the name: its quotes are not part of the value that gets hashed.
+for case, name in (("double quotes and a comment", '"Opted Out Person" # reviewed'),
+                   ("single quotes and a comment with an apostrophe", "'Opted Out Person' # it's fine")):
+    code, out, _ = run({"o": ("o", name, "", "")}, ["o"], OPTED)
+    expect(code == 1 and out == [f"{GTM}o.md: (j) opted-out: this person asked not to be included (docs/personas/TAKEDOWN.md)"],
+           f"(j) catches an opted-out name written with {case}", "\n".join(out))
 
 # (k) private-detail: phone, street address, personal email; near misses stay quiet.
 for what, text in (("a street address", "Lives at 221 Baker Street, London."),
@@ -159,15 +189,160 @@ quiet = "\n\nWork email jane@stanford.edu. ISBN 978-0-13-468599-1, arXiv 2101.12
         "See https://example.com/call/415-555-0134 and doi 10.1145/3442188.3445922.\n"
 code, out, _ = run({"k": ("k", "Kay Example", "", quiet)}, ["k"])
 expect(code == 0 and out == [], "(k) stays quiet on a work email, ISBN, arXiv id, year range, URL and DOI", "\n".join(out))
+# (k) also reads what a URL used to hide (its decoded path and query), upper-case and short-suffix street
+# addresses (the street word may be in any case, the name before it is Capitalized or ALL CAPS). Invented
+# people only; the line prints the rule and the line number, never what matched.
+for what, text, secret in (
+        ("a personal email address", "See https://example.com/contact?email=jane.doe%40gmail.com for her.", "jane"),
+        ("a phone number", "See https://example.com/card?tel=%2B1%20415%20555%200134 for her.", "415"),
+        ("a phone number", "See www.example.com/card?tel=415-555-0134 for her.", "415"),
+        *(("a street address", f"Lives at {a}, London.", max(a.split()[1:-1], key=len).lower()) for a in (
+            "221 BAKER STREET", "221 Baker St", "12 Elm Rd", "10 Orchard rd.", "1600 Maple Ave.", "350 Oak Blvd", "7 Pine Ln",
+            "5 Elm Dr", "9 Hill Ct", "4 Privet Drive", "123 N Main St", "10 Sample St."))):
+    code, out, _ = run({"k": ("k", "Kay Example", "", f"\n\n{text}\n")}, ["k"])
+    expect(code == 1 and len(out) == 1 and out[0].endswith(f"looks like {what}") and secret not in out[0].lower(),
+           f"(k) fires on {what}: {text[:44]}", "\n".join(out))
+quiet_urls = ("\n\nSee https://example.com/contact?email=jane%40stanford.edu, https://doi.org/10.1145/3442188.3445922"
+              " and https://en.wikipedia.org/wiki/Grant_Wiggins_(educator).\n")
+code, out, _ = run({"k": ("k", "Kay Example", "", quiet_urls)}, ["k"])
+expect(code == 0 and out == [], "(k) stays quiet on a work email, a DOI and a wiki link inside URLs", "\n".join(out))
+# Prose is not an address: a number, then lower-case words, then "St." or "Dr." (the fully case-insensitive
+# pattern flagged all of these). A capital "I" before the next word is still not a street name.
+prose = ("\n\nIn 2008 he moved to St. Louis.\nShe spent 4 years working with Dr. Chen.\n"
+         "Since 2010 she taught at St Andrews.\nIn 2008 I moved to St. Louis.\n")
+code, out, _ = run({"k": ("k", "Kay Example", "", prose)}, ["k"])
+expect(code == 0 and out == [], "(k) stays quiet on prose with a number and St. or Dr.", "\n".join(out))
+# (k) a line over 10000 characters fails instead of being scanned, one at the limit is scanned, and
+# a 200k-character ordinary word (quadratic for the old email pattern) is answered at once.
+for case, word, want_code in (("over the limit", "a" * 10_001, 1), ("at the limit", "a" * 10_000, 0), ("200k characters", "a" * 200_000, 1)):
+    body = f"\n\n{word}\n"
+    line = persona("k", "Kay Example", "", body).split("\n").index(word) + 1
+    start = time.monotonic()
+    code, out, _ = run({"k": ("k", "Kay Example", "", body)}, ["k"])
+    expect(code == want_code and time.monotonic() - start < 10
+           and out == ([f"{GTM}k.md: (k) private-detail: line {line} is over 10000 characters, not scanned"] if want_code else []),
+           f"(k) a line {case} {'fails, unscanned' if want_code else 'is scanned and passes'}", "\n".join(out))
 
 # --all walks every persona file on the board.
 code, out, err = run({"clean-example": CLEAN}, [], args=("--all",))
 expect(code == 0 and err == "check-personas: 2/2 pass", "--all checks every board file", err)
 
+# Input safety: a symlink is refused with a diagnostic and its target is never opened. The checker runs
+# under an audit hook that kills the process if the sentinel (a fabricated file beside the fake board,
+# or inside a fake outside folder) is opened at all; MARK must not reach the output either.
+WATCH = ("import os, runpy, sys\n"
+         "want = os.path.realpath(sys.argv[1])\n"
+         "def hook(event, args):\n"
+         "    if event == 'open' and isinstance(args[0], (str, bytes, os.PathLike)) and os.path.realpath(args[0]) == want:\n"
+         "        sys.stderr.write('SENTINEL OPENED\\n'); sys.stderr.flush(); os._exit(7)\n"
+         "sys.addaudithook(hook)\n"
+         "sys.argv = sys.argv[2:]\n"
+         "runpy.run_path(sys.argv[0], run_name='__main__')\n")
+MARK = "SENTINEL-MARKER-7f3a"
+SD = "systems/superintelligence/"
+CANT = "(a) frontmatter: cannot read file: "
+
+
+def symlinked(what, links, args, want, sentinel="outside.md", content=None, unlink=()):
+    """links: {path in the fake board: its target, relative to its folder}. want(code, stdout lines, stderr) -> bool."""
+    with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
+        tmp = Path(t)
+        board(tmp, {"clean-example": CLEAN})
+        (tmp / sentinel).parent.mkdir(parents=True, exist_ok=True)
+        (tmp / sentinel).write_text(content or persona("clean-example", "Clean Example", "", f"\n{MARK}\n"), encoding="utf-8")
+        for path in unlink:
+            (tmp / path).unlink()
+        for path, target in links.items():
+            (tmp / path).parent.mkdir(parents=True, exist_ok=True)
+            (tmp / path).symlink_to(target)
+        p = subprocess.run([sys.executable, "-c", WATCH, str(tmp / sentinel), "scripts/check-personas.py", *args],
+                           cwd=tmp, capture_output=True, text=True)
+        seen = p.stdout + p.stderr
+        expect(p.returncode != 7 and "SENTINEL OPENED" not in seen and MARK not in seen and "Traceback" not in seen
+               and want(p.returncode, p.stdout.splitlines(), p.stderr.strip()), what, f"exit {p.returncode}\n{seen}")
+
+
+symlinked("a persona file that links to a file outside the board is refused, never opened",
+          {GTM + "link.md": "../../../../outside.md"}, [GTM + "link.md"],
+          lambda c, o, e: c == 1 and o == [f"{GTM}link.md: {CANT}outside its allowed folder"])
+symlinked("a persona file that links to another file inside the board is refused too",
+          {GTM + "alias.md": "clean-example.md"}, [GTM + "alias.md"],
+          lambda c, o, e: c == 1 and o == [f"{GTM}alias.md: {CANT}a symlink"], sentinel="unused.md")
+symlinked("a registry.json that links outside the board is refused, so (d) fires",
+          {SD + "gtm/registry.json": "../../../outside.json"}, [GTM + "clean-example.md"],
+          lambda c, o, e: c == 1 and o == [f"{GTM}clean-example.md: (d) roster: no readable registry.json or roster.json beside this personas/ folder"],
+          sentinel="outside.json", content=json.dumps({"personas": {"clean-example": {"slug": "clean-example"}}, "note": MARK}),
+          unlink=[SD + "gtm/registry.json"])
+symlinked("an optout.sha256 that links outside the board is refused: exit 2, never opened",
+          {"docs/personas/optout.sha256": "../../outside.txt"}, [GTM + "clean-example.md"],
+          lambda c, o, e: c == 2 and e.endswith(": outside its allowed folder") and "cannot read" in e,
+          sentinel="outside.txt", content=f"{sha('Clean Example')}\n{MARK}\n", unlink=["docs/personas/optout.sha256"])
+# The sentinel has the same slug and name as clean-example.md: indexed as a duplicate, its resolved path
+# (outside the board) used to raise from relative_to. Now it is skipped, so only the link itself fails.
+symlinked("--all over a board holding a link to an identical outside persona: refused, no crash, no false duplicate",
+          {GTM + "twin.md": "../../../../outside.md"}, ["--all"],
+          lambda c, o, e: c == 1 and o == [f"{GTM}twin.md: {CANT}outside its allowed folder"] and e == "check-personas: 2/3 pass")
+symlinked("--all over a department folder that links outside the board: refused file by file, nothing opened",
+          {SD + "evil": "../../outside_dept"}, ["--all"],
+          lambda c, o, e: c == 1 and len(o) == 1 and o[0].startswith(f"{SD}evil/personas/x.md: {CANT}"),
+          sentinel="outside_dept/personas/x.md")
+
+# Only a regular file of at most 1 MiB is read: a named pipe would block an open that waits for a writer, a
+# huge file would be read whole. Both are refused with a diagnostic (the run is cut off after 20 s if one hangs).
+with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
+    tmp = Path(t)
+    board(tmp, {"clean-example": CLEAN})
+    os.mkfifo(tmp / GTM / "pipe.md")
+    (tmp / GTM / "big.md").write_text("x" * ((1 << 20) + 1))
+    for name, why in (("pipe", "not a regular file"), ("big", "larger than 1048576 bytes")):
+        try:
+            p = subprocess.run([sys.executable, "scripts/check-personas.py", GTM + name + ".md"],
+                               cwd=tmp, capture_output=True, text=True, timeout=20)
+            ok, seen = p.returncode == 1 and p.stdout.splitlines() == [f"{GTM}{name}.md: {CANT}{why}"], p.stdout + p.stderr
+        except subprocess.TimeoutExpired:
+            ok, seen = False, "hung"
+        expect(ok, f"a {name} file is refused: {why}", seen)
+
 # --links, offline: resolution and fetching stubbed.
 spec = importlib.util.spec_from_file_location("check_personas", CHECK)
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
+
+
+def timed(fn, limit=10):
+    """(result, seconds, finished): fn runs in a daemon thread, so a hang fails its case instead of the suite."""
+    box = {}
+    worker = threading.Thread(target=lambda: box.update(out=fn()), daemon=True)
+    start = time.monotonic()
+    worker.start()
+    worker.join(limit)
+    return box.get("out"), time.monotonic() - start, not worker.is_alive()
+
+
+# Scanning is linear: 200k characters of one ordinary word, dots, blanks or stray '<' is a single pass. The old
+# patterns retried from every offset (e.g. 20k characters of "a" took the email pattern over 5 s).
+for case, text in (("an ordinary word", "a" * 200_000), ("dotted words", "a." * 100_000), ("blanks", " " * 200_000),
+                   ("digits and blanks", "1 " * 100_000), ("quotes", "'" * 200_000), ("quotes and blanks", "' " * 100_000),
+                   ("a number and capitalized words", "1 Ab " * 40_000), ("a number and single capitals", "1 A " * 70_000)):
+    scan = lambda: ([rx.search(text) for _, rx, _ in mod.PRIVATE], mod.URL_TEXT.sub(" ", text),
+                    mod.scalar("x" + text + "x"), mod.scalar("'" + text), mod.scalar("'" + text + "' # c"))
+    spent = min(timed(scan)[1] for _ in range(3))  # best of three: a busy machine must not fail a linear scan
+    expect(spent < 1, f"(k) patterns and scalar() take {spent:.2f} s on 200k characters of {case} (< 1 s)")
+# scalar(): quotes are no part of a quoted value, with or without a trailing comment; a '#' inside quotes is kept.
+shapes = {'"Opted Out Person" # note': "Opted Out Person", "'Opted Out Person' # it's fine": "Opted Out Person",
+          '"Opted Out Person"': "Opted Out Person", "Opted Out Person # note": "Opted Out Person",
+          "'a # b' # c": "a # b", '"a # b"': "a # b", "  'x'   # c  ": "x", "''": "", "'": "'", "~": None, "x #": "x"}
+bad = {k: mod.scalar(k) for k, v in shapes.items() if mod.scalar(k) != v}
+expect(not bad, "scalar() drops the quotes of a quoted value, with or without a trailing comment", bad)
+real_fetch = mod.fetch
+try:
+    for case, markup in (("stray '<'", "<" * 200_000), ("unclosed tags", "<a href=" * 25_000), ("one '<' and text", "<" + "x" * 200_000)):
+        mod.fetch = lambda url: (200, "text/html", markup.encode())
+        out, spent, _ = timed(lambda: mod.link_problems({"canonical_works": [{"title": "Real Title", "url": "https://ok.example/page"}]}))
+        expect(spent < 1 and out == ["(links) https://ok.example/page: title not found on the page: Real Title"],
+               f"--links reads a 200k-character page of {case} in {spent:.2f} s (< 1 s)", out)
+finally:
+    mod.fetch = real_fetch
 
 DNS = {"ok.example": ["93.184.216.34"], "loop.example": ["127.0.0.1"], "ten.example": ["10.0.0.5"],
        "mixed.example": ["93.184.216.34", "10.0.0.5"], "meta.example": ["169.254.169.254"], "v6.example": ["::1"]}
@@ -198,6 +373,10 @@ class FakeResponse:
 
     def read(self, n=-1):
         return self.body[:n]
+
+    def read1(self, n=-1):  # one chunk per call, empty once the body is used up (the checker reads a chunk at a time)
+        chunk, self.body = (self.body, b"") if n < 0 else (self.body[:n], self.body[n:])
+        return chunk
 
 
 class FakeConnection:
@@ -249,6 +428,69 @@ try:
     out = mod.link_problems({"canonical_works": [{"title": "Another Title", "url": "https://ok.example/page"}]})
     expect(out == ["(links) https://ok.example/page: title not found on the page: Another Title"],
            "--links reports a canonical_works title missing from its page", out)
+
+    # One deadline per hop covers lookup, headers and body together: a hop that stalls, or answers a byte
+    # at a time (each read inside the socket timeout), fails at it. HOP_TIMEOUT is shrunk to 0.3 s here.
+    # Parked workers are released at the end and then fail, so none can reach a real socket.
+    release = threading.Event()
+
+    def stuck_lookup(host, port, *a, **k):
+        release.wait()
+        raise socket.gaierror("released")
+
+    reads = []
+
+    class DribbleResponse(FakeResponse):
+        def read1(self, n=-1):
+            reads.append(1)
+            time.sleep(0.05)
+            return b"x"
+
+    class DribbleConnection(FakeConnection):
+        silent = False
+
+        def getresponse(self):
+            if self.silent:
+                release.wait()
+                raise OSError("released")
+            return DribbleResponse(200, {"Content-Type": "text/html"}, b"")
+
+    class SilentConnection(DribbleConnection):
+        silent = True
+
+    workers = []
+
+    def late_lookup(host, port, *a, **k):  # answers, but only after the hop has been given up on
+        workers.append(threading.current_thread())
+        release.wait()
+        return fake_getaddrinfo(host, port)
+
+    mod.HOP_TIMEOUT = 0.3
+    try:
+        for case, lookup, conn in (("a resolver that never returns", stuck_lookup, FakeConnection),
+                                   ("a server that accepts and never sends headers", fake_getaddrinfo, SilentConnection),
+                                   ("a body that arrives one byte at a time", fake_getaddrinfo, DribbleConnection),
+                                   ("a resolver that answers after the deadline", late_lookup, FakeConnection)):
+            socket.getaddrinfo, mod.PinnedHTTPS = lookup, conn
+            connects.clear()
+            out, spent, done = timed(lambda: mod.link_problems({"sources": ["https://ok.example/page"]}))
+            expect(done and spent < 5 and out == ["(links) https://ok.example/page: dead: TimeoutError: no answer within 0.3 s"],
+                   f"--links gives up on {case} at the hop deadline", f"{out} after {spent:.1f} s, finished: {done}")
+            if conn is DribbleConnection:  # the abandoned reader ends at the deadline too: no read starts after it
+                time.sleep(0.2)
+                seen = len(reads)
+                time.sleep(0.2)
+                expect(len(reads) == seen, "--links: the body reader of an abandoned hop stops at the deadline",
+                       f"{seen} -> {len(reads)} reads")
+        # The late lookup now returns a good answer: its abandoned worker must stop there, not dial.
+        release.set()
+        workers[0].join(5)
+        expect(not workers[0].is_alive() and connects == [],
+               "--links: a hop abandoned at its deadline does not dial when its lookup finally answers", connects)
+    finally:
+        mod.HOP_TIMEOUT = 30
+        release.set()
+        socket.getaddrinfo, mod.PinnedHTTPS = fake_getaddrinfo, FakeConnection
 finally:
     socket.getaddrinfo, socket.create_connection, socket.socket.connect, mod.PinnedHTTPS = real
 
@@ -268,6 +510,39 @@ try:
 finally:
     socket.getaddrinfo, socket.create_connection = real[0], real[1]
 expect(dialed == [("93.184.216.34", 443)], "PinnedHTTPS connects to the checked address with no second lookup", dialed)
+
+# Success path: the handshake names the original host (the certificate is checked against it, not against the
+# address), the context verifies certificates and host names, and the dial still goes to the checked address.
+named = []
+
+
+class NameRecorder:
+    def wrap_socket(self, sock, server_hostname=None):
+        named.append(server_hostname)
+        return sock
+
+
+class FakeSock:
+    def settimeout(self, seconds):
+        pass
+
+    def close(self):
+        pass
+
+
+dialed.clear()
+socket.getaddrinfo = no_network
+socket.create_connection = lambda address, *a, **k: dialed.append(address) or FakeSock()
+try:
+    conn = mod.PinnedHTTPS("ok.example", 443, "93.184.216.34")
+    verifying = conn.tls.verify_mode == ssl.CERT_REQUIRED and conn.tls.check_hostname
+    conn.tls = NameRecorder()
+    conn.connect()
+finally:
+    socket.getaddrinfo, socket.create_connection = real[0], real[1]
+expect(verifying and named == ["ok.example"] and dialed == [("93.184.216.34", 443)],
+       "PinnedHTTPS verifies certificates, names the original host in the handshake and dials the checked address",
+       f"verifying={verifying} named={named} dialed={dialed}")
 
 # End to end: --links output lines carry the file name and the refusal.
 with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
@@ -302,6 +577,20 @@ expect(p.returncode in (0, 1) and re.fullmatch(rf"check-personas: \d+/{n} pass",
 # The guard itself works: --links does reach for the network and is stopped.
 p = subprocess.run([sys.executable, "-c", guard, str(CHECK), "--links", str(GOOD)], cwd=ROOT, capture_output=True, text=True)
 expect(p.returncode == 3 and "network used" in p.stderr, "the no-network guard stops a --links run", p.stderr[-500:])
+
+# A file with a (k) finding is not fetched under --links: a URL that carries a private detail goes nowhere.
+# Same guard as above, so any attempt to resolve or connect ends the run with exit 3.
+with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
+    tmp = Path(t)
+    board(tmp, {"k": ("k", "Kay Example", "", "")})
+    f = tmp / GTM / "k.md"
+    f.write_text(f.read_text().replace("https://en.wikipedia.org/wiki/Grant_Wiggins", "https://example.com/p?email=jane.doe%40gmail.com"))
+    n = next(i for i, l in enumerate(f.read_text().split("\n"), 1) if "jane.doe" in l)
+    p = subprocess.run([sys.executable, "-c", guard, "scripts/check-personas.py", "--links", GTM + "k.md"],
+                       cwd=tmp, capture_output=True, text=True)
+    expect(p.returncode == 1 and "network used" not in p.stderr
+           and p.stdout.splitlines() == [f"{GTM}k.md: (k) private-detail: line {n} looks like a personal email address"],
+           "--links does not fetch a file with a (k) finding", p.stdout + p.stderr)
 
 print("check-personas-rules-test:", "all passed" if not failures else f"{failures} case(s) failed")
 sys.exit(1 if failures else 0)

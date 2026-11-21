@@ -12,7 +12,8 @@ if there is any problem, 0 if every file passes, 2 on a setup error.
 
 Rules (taken from the existing validate_persona.py / validate_offline.py copies,
 templates/attribution.md and the real persona files):
-  (a) frontmatter   parses, and has every field all shipped personas carry, non-empty
+  (a) frontmatter   parses, and has every field all shipped personas carry, non-empty;
+                    real_name is one text value (a list or mapping would dodge (j))
   (b) sources       at least 3 sources, each an https:// URL
   (c) label         a file that speaks in the person's voice (a `> "..."` block)
                     carries the approved label line from templates/attribution.md
@@ -27,17 +28,31 @@ templates/attribution.md and the real persona files):
                     other persona file on the board, in any department (except the
                     grandfathered two-team seats in TWO_TEAM_SEATS)
   (j) opted-out     the sha256 of the case-folded, space-collapsed real_name is not
-                    in docs/personas/optout.sha256 (a missing file is an empty list)
-  (k) private-detail  no line looks like a phone number, a street address or a
-                    personal (non-work) email address
+                    in docs/personas/optout.sha256. A missing file is an empty
+                    list, a comment-only file is an explicit empty list, and a
+                    malformed row stops the run (exit 2) naming its line number,
+                    never its text.
+  (k) private-detail  no line looks like a phone number, a street address (a number,
+                    Capitalized or ALL CAPS name words, then St, Ave, Rd, ... in any
+                    case) or a personal (non-work) email address; the decoded path and query
+                    of every URL are also scanned for emails and phone numbers;
+                    a line over 10000 characters fails instead of being skipped
   (links)           with --links: each URL answers 200 over https, and each
-                    canonical_works title appears on its HTML page
+                    canonical_works title appears on its HTML page; a file with
+                    a (k) finding is not fetched until that is fixed
+
+Input safety: a persona, registry, roster, template or opt-out file is read only
+if it is a regular file of at most 1 MiB inside the board (or the test fixtures)
+and is not reached through a symlink; anything else prints a "cannot read file"
+diagnostic and is never opened. Every scanning pattern runs in time linear in the
+line. No message prints text that matched a private-detail or opt-out check.
 
 --links fetch safety: https only, on the first URL and every redirect hop; every
 address each host resolves to must be public (stdlib ipaddress), and the
 connection goes to the address that was checked, with no second lookup; 10 s
-connect, 10 s read, at most 5 redirects, 2 MB read per page. A refused link
-prints "(links) <url>: refused: <reason>" and is never fetched.
+connect, 10 s read, 30 s for a whole hop (lookup, connect, headers and body
+together), at most 5 redirects, 2 MB read per page. A refused link prints
+"(links) <url>: refused: <reason>" and is never fetched.
 """
 from __future__ import annotations
 
@@ -50,33 +65,44 @@ import os
 import re
 import socket
 import ssl
+import stat
 import sys
+import threading
+import time
 from pathlib import Path
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import unquote, urljoin, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 BOARD = ROOT / "systems" / "superintelligence"
+FIXTURES = ROOT / "tests" / "fixtures" / "personas"  # the only other folder persona files may live in
 ATTRIBUTION = BOARD / "templates" / "attribution.md"
 OPTOUT = ROOT / "docs" / "personas" / "optout.sha256"
 
 CONNECT_TIMEOUT = READ_TIMEOUT = 10  # seconds
+HOP_TIMEOUT = 30  # seconds for one hop: lookup, connect, headers and body together
 MAX_REDIRECTS = 5
 MAX_BYTES = 2 * 1024 * 1024
+MAX_FILE = 1 << 20  # bytes: the most a persona, registry or opt-out file may hold (shipped max: 124 KB)
+MAX_LINE = 10_000  # characters: (k) fails a longer line instead of scanning it (shipped max: 2,329)
 REDIRECTS = (301, 302, 303, 307, 308)
 
 # (k) ponytail: regex only; the second read catches what these miss. A PII
-# library is the upgrade if second reads keep finding misses.
-URL_TEXT = re.compile(r"\b[a-z][a-z0-9+.-]*://\S+|\bwww\.\S+", re.I)
-PRIVATE = [
+# library is the upgrade if second reads keep finding misses. Every pattern is
+# linear in the line: no unbounded repeat that is retried from each offset, so a
+# long word, blank run or dotted run costs one pass. A 33-character URL scheme
+# is not recognised as a URL, so its text is scanned as plain text (the safe side).
+URL_TEXT = re.compile(r"\b[a-z][a-z0-9+.-]{0,31}://\S+|\bwww\.\S+", re.I)
+PRIVATE = [  # (what, pattern, also looked for in the decoded path and query of each URL)
     ("a phone number", re.compile(
         r"(?<![\w.+/-])(?:\+\d{1,3}[ .-]?)?(?:\(\d{3}\)|\d{3})[ .-]\d{3}[ .-]\d{4}(?![\w-])"
-        r"|(?<![\w.+/-])\+\d{1,3}(?:[ .-]\d{2,4}){2,4}(?![\w-])")),
+        r"|(?<![\w.+/-])\+\d{1,3}(?:[ .-]\d{2,4}){2,4}(?![\w-])"), True),
+    # Name words are Capitalized or ALL CAPS; only the street word ignores case ("In 2008 he moved to St. Louis" stays quiet).
     ("a street address", re.compile(
-        r"\b\d{1,5}(?:\s+[A-Z][a-z]+){1,3}\s+"
-        r"(?:Street|Avenue|Ave\.|Road|Boulevard|Blvd\.|Lane|Drive|Court|Terrace|Parkway)\b")),
-    ("a personal email address", re.compile(
-        r"[\w.+-]+@(?:gmail|googlemail|yahoo|ymail|hotmail|outlook|live|msn|aol|icloud|me|mac"
-        r"|proton|protonmail|pm|gmx|mail|yandex|zoho|qq|163|126|fastmail|hey)\.[a-z.]{2,6}\b", re.I)),
+        r"\b\d{1,5}(?:\s+(?:[A-Z][a-z]+|[A-Z]+)){1,3}\s+"
+        r"(?i:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|terrace|parkway)\b"), False),
+    ("a personal email address", re.compile(  # one local-part character is enough to tell it is an address
+        r"[\w.+-]@(?:gmail|googlemail|yahoo|ymail|hotmail|outlook|live|msn|aol|icloud|me|mac"
+        r"|proton|protonmail|pm|gmx|mail|yandex|zoho|qq|163|126|fastmail|hey)\.[a-z.]{2,6}\b", re.I), True),
 ]
 
 # The fields every one of the 495 shipped personas has, non-empty.
@@ -99,9 +125,11 @@ TWO_TEAM_SEATS = frozenset({("demis-hassabis", "ai"), ("demis-hassabis", "health
 
 def scalar(s: str):
     s = s.strip()
-    if s[:1] in "'\"" and s[-1:] == s[:1] and len(s) > 1:
-        return s[1:-1]
-    s = re.sub(r"\s+#.*$", "", s)
+    q = re.fullmatch(r"""(['"])(.*?)\1(?:\s+#.*)?""", s)  # a quoted value, then maybe a comment: the quotes are no part of it
+    if q:  # (a name left in its quotes would hash differently from the opt-out list, so (j) would miss it)
+        return q.group(2)
+    m = re.search(r"\s#", s)  # a trailing comment; one pass, not a blank-run pattern retried from each offset
+    s = s[:m.start()].rstrip() if m else s
     return None if s in ("", "~", "null") else s
 
 
@@ -167,6 +195,41 @@ def block_value(block: list):
     return items
 
 
+class Unsafe(OSError):
+    """A file this checker will not read; the message says why."""
+
+
+def read_file(p, roots=(BOARD, FIXTURES)) -> str:
+    """Text of a regular file inside one of roots, reached without a symlink; else Unsafe.
+
+    Every read goes through here. The path is resolved before it is opened, a symlink
+    anywhere below the root is refused (so is one swapped in at the last step: the
+    open itself does not follow it), and the check is on the opened file, not the name.
+    """
+    lexical = Path(os.path.abspath(p))
+    real = Path(os.path.realpath(lexical))
+    top = next((r for r in map(os.path.realpath, roots) if Path(r) in real.parents), None)
+    if top is None:
+        raise Unsafe("outside its allowed folder")
+    for q in (lexical, *lexical.parents):  # up to the root, which may itself sit behind a symlink (macOS /var)
+        if os.path.realpath(q) == top:
+            break
+        if q.is_symlink():
+            raise Unsafe("a symlink")
+    # O_NONBLOCK: opening a named pipe must not wait for a writer; it is refused just below.
+    fd = os.open(real, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0))
+    with os.fdopen(fd, encoding="utf-8") as f:
+        info = os.fstat(f.fileno())
+        if not stat.S_ISREG(info.st_mode):
+            raise Unsafe("not a regular file")
+        if info.st_size > MAX_FILE:
+            raise Unsafe(f"larger than {MAX_FILE} bytes")
+        text = f.read(MAX_FILE + 1)  # capped here too: the file can grow after the fstat above
+        if len(text) > MAX_FILE:
+            raise Unsafe(f"larger than {MAX_FILE} bytes")
+        return text
+
+
 def roster_slugs(dept: Path, cache: dict):
     if dept not in cache:
         slugs, found = set(), False
@@ -174,7 +237,7 @@ def roster_slugs(dept: Path, cache: dict):
             p = dept / name
             if p.is_file():
                 try:
-                    data = json.loads(p.read_text(encoding="utf-8"))
+                    data = json.loads(read_file(p))
                 except (OSError, ValueError):
                     continue  # unreadable: counts as no roster, reported as (d)
                 found = True
@@ -196,7 +259,7 @@ def roster_slugs(dept: Path, cache: dict):
 
 def label_template() -> str:
     try:
-        m = re.search(r"\*\*<Name> persona\*\*: [^\n]*", ATTRIBUTION.read_text(encoding="utf-8"))
+        m = re.search(r"\*\*<Name> persona\*\*: [^\n]*", read_file(ATTRIBUTION))
     except (OSError, UnicodeDecodeError) as e:
         m, why = None, f"cannot read: {e}"
     else:
@@ -224,9 +287,9 @@ def board_identities(cache: dict) -> dict:
         index: dict = {}
         for p in sorted(BOARD.glob("*/personas/*.md")):
             try:
-                fm = parse_frontmatter(p.read_text(encoding="utf-8")) or {}
+                fm = parse_frontmatter(read_file(p)) or {}
             except (OSError, UnicodeDecodeError):
-                continue  # this file reports its own (a) when it is checked
+                continue  # this file reports its own (a) when it is checked; a symlink is never indexed
             for key in identity(fm):
                 index.setdefault(key, []).append((p.resolve(), fm.get("slug")))
         cache["identities"] = index
@@ -234,19 +297,25 @@ def board_identities(cache: dict) -> dict:
 
 
 def load_optout() -> set:
+    """Opt-out hashes. Missing file: empty list (the Step 2 gate is where its presence gets enforced).
+    Empty or comment-only file: an explicit empty list. A row that is not a hash: exit 2."""
     try:
-        text = OPTOUT.read_text(encoding="utf-8")
+        text = read_file(OPTOUT, roots=(OPTOUT.parent,))
     except FileNotFoundError:
         return set()
     except (OSError, UnicodeDecodeError) as e:
         print(f"{OPTOUT}: cannot read: {e}", file=sys.stderr)
         sys.exit(2)
-    rows = [r.strip().lower() for r in text.splitlines() if r.strip() and not r.lstrip().startswith("#")]
-    bad = [r for r in rows if not re.fullmatch(r"[0-9a-f]{64}", r)]
-    if bad:  # a malformed line would silently match no one: fail closed
-        print(f"{OPTOUT}: not a sha256 hex line: {bad[0][:20]}", file=sys.stderr)
-        sys.exit(2)
-    return set(rows)
+    rows = set()
+    for n, raw in enumerate(text.splitlines(), 1):
+        row = raw.strip().lower()
+        if not row or row.startswith("#"):
+            continue
+        if not re.fullmatch(r"[0-9a-f]{64}", row):  # a malformed line would silently match no one: fail closed
+            print(f"{OPTOUT}: line {n} is not a sha256 hex line", file=sys.stderr)  # the row may be a plain name: never echo it
+            sys.exit(2)
+        rows.add(row)
+    return rows
 
 
 class Refused(Exception):
@@ -294,6 +363,61 @@ class PinnedHTTPS(http.client.HTTPSConnection):
             raise
 
 
+def within(seconds: float, fn, *args):
+    """fn(*args) in a daemon thread; TimeoutError if it has not finished after `seconds`.
+
+    The socket timeouts are per call, so a server that answers one byte at a time, or a
+    resolver that never returns, would otherwise hold a hop for as long as it likes.
+    ponytail: a stalled hop's thread is abandoned, not killed; it ends when its socket
+    gives up, and being a daemon it never keeps the process alive.
+    """
+    box: dict = {}
+
+    def run():
+        try:
+            box["ok"] = fn(*args)
+        except BaseException as e:  # handed to the caller below
+            box["err"] = e
+
+    worker = threading.Thread(target=run, daemon=True)
+    worker.start()
+    worker.join(seconds)
+    if worker.is_alive():
+        raise TimeoutError(f"no answer within {seconds:g} s")
+    if "err" in box:
+        raise box["err"]
+    return box["ok"]
+
+
+def check_time(deadline: float) -> None:
+    if time.monotonic() > deadline:
+        raise TimeoutError(f"no answer within {HOP_TIMEOUT:g} s")
+
+
+def get_once(host: str, port: int, target: str, deadline: float):
+    """One GET to the checked address: (status, content type, Location or None, body)."""
+    address = checked_address(host, port)
+    check_time(deadline)  # a lookup that stalled past the deadline must not go on to dial: within() has given up on this hop
+    conn = PinnedHTTPS(host, port, address)
+    try:
+        conn.request("GET", target, headers={"User-Agent": "coco-check-personas", "Accept": "text/html,*/*"})
+        resp = conn.getresponse()
+        location = resp.getheader("Location")
+        if resp.status in REDIRECTS and location:
+            return resp.status, "", location, b""
+        chunks, size = [], 0
+        while size < MAX_BYTES:  # a chunk at a time, so the deadline is checked as the body arrives
+            check_time(deadline)
+            chunk = resp.read1(min(65536, MAX_BYTES - size))
+            if not chunk:
+                break
+            chunks.append(chunk)
+            size += len(chunk)
+        return resp.status, resp.getheader("Content-Type") or "", None, b"".join(chunks)
+    finally:
+        conn.close()
+
+
 def fetch(url: str):
     """GET url under the fetch-safety rules. Returns (status, content_type, body)."""
     for hop in range(MAX_REDIRECTS + 1):
@@ -306,18 +430,13 @@ def fetch(url: str):
             raise Refused(f"bad port in {url}")
         if not host:
             raise Refused(f"no host in {url}")
-        conn = PinnedHTTPS(host, port, checked_address(host, port))
-        try:
-            conn.request("GET", (parts.path or "/") + (f"?{parts.query}" if parts.query else ""),
-                         headers={"User-Agent": "coco-check-personas", "Accept": "text/html,*/*"})
-            resp = conn.getresponse()
-            location = resp.getheader("Location")
-            if resp.status in REDIRECTS and location:
-                url = urljoin(url, location)
-                continue
-            return resp.status, resp.getheader("Content-Type") or "", resp.read(MAX_BYTES)
-        finally:
-            conn.close()
+        target = (parts.path or "/") + (f"?{parts.query}" if parts.query else "")
+        deadline = time.monotonic() + HOP_TIMEOUT  # one deadline per hop: lookup, connect, headers and body
+        status, ctype, location, body = within(HOP_TIMEOUT, get_once, host, port, target, deadline)
+        if location:
+            url = urljoin(url, location)
+            continue
+        return status, ctype, body
     raise Refused(f"more than {MAX_REDIRECTS} redirects")
 
 
@@ -343,7 +462,9 @@ def link_problems(fm: dict) -> list:
         if status != 200:
             out.append(f"(links) {url}: dead: HTTP {status}")
         elif title and "html" in ctype.lower():
-            page = norm(html.unescape(re.sub(r"<[^>]+>", " ", body.decode("utf-8", "replace"))))
+            # [^<>]: a '<' with no '>' before the next '<' fails after one short scan, so a page full
+            # of stray brackets is one pass (the old [^>]+ rescanned to the end of the page from each).
+            page = norm(html.unescape(re.sub(r"<[^<>]*>", " ", body.decode("utf-8", "replace"))))
             if norm(title) not in page:
                 out.append(f"(links) {url}: title not found on the page: {title}")
     return out
@@ -351,7 +472,7 @@ def link_problems(fm: dict) -> list:
 
 def check(path: Path, label: str, cache: dict, optout: set = frozenset(), links: bool = False) -> list:
     try:
-        text = path.read_text(encoding="utf-8")
+        text = read_file(path)
     except (OSError, UnicodeDecodeError) as e:
         return [f"(a) frontmatter: cannot read file: {e}"]
     fm = parse_frontmatter(text)
@@ -361,6 +482,9 @@ def check(path: Path, label: str, cache: dict, optout: set = frozenset(), links:
     missing = [k for k in REQUIRED if not fm.get(k)]
     if missing:
         out.append(f"(a) frontmatter: missing or empty fields: {', '.join(missing)}")
+    real = fm.get("real_name")  # a list or mapping is non-empty, so it passes the check above but is never hashed for (j)
+    if real and not (isinstance(real, str) and norm(real)):
+        out.append("(a) frontmatter: real_name must be one non-empty text value")
 
     src = fm.get("sources") if isinstance(fm.get("sources"), list) else []
     if len(src) < 3:
@@ -417,17 +541,20 @@ def check(path: Path, label: str, cache: dict, optout: set = frozenset(), links:
         what = " and ".join(k for k in ("slug", "name") if k in kinds)
         out.append(f"(i) duplicate: {what} also used by {other.relative_to(BOARD.resolve()).as_posix()}")
 
-    if isinstance(fm.get("real_name"), str) and \
-            hashlib.sha256(norm(fm["real_name"]).encode("utf-8")).hexdigest() in optout:
+    if isinstance(real, str) and hashlib.sha256(norm(real).encode("utf-8")).hexdigest() in optout:
         out.append("(j) opted-out: this person asked not to be included (docs/personas/TAKEDOWN.md)")
 
-    for n, line in enumerate(body):
+    for n, line in enumerate(body):  # only the line number and the rule are printed, never the text
+        if len(line) > MAX_LINE:
+            out.append(f"(k) private-detail: line {n + 1} is over {MAX_LINE} characters, not scanned")
+            continue
         visible = URL_TEXT.sub(" ", line)
-        for what, rx in PRIVATE:
-            if rx.search(visible):
+        urls = [unquote(u) for u in URL_TEXT.findall(line)]  # a URL's path and query can carry an address too
+        for what, rx, in_urls in PRIVATE:
+            if rx.search(visible) or (in_urls and any(rx.search(u) for u in urls)):
                 out.append(f"(k) private-detail: line {n + 1} looks like {what}")
 
-    if links:
+    if links and not any(o.startswith("(k)") for o in out):  # a file that may hold a private detail sends none of its URLs anywhere
         out += link_problems(fm)
     return out
 

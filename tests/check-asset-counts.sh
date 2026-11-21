@@ -120,12 +120,15 @@ if [ -n "$SPEC_SKILLS" ]; then
 else
   pass "no spec Total Skills row (nothing to check)"
 fi
-# Catch the exact drift class Pike found: a leftover 149 that is not skills.total.
-LEFTOVER_149=$(grep -nE '\b149\b' README.md || true)
+# Catch the exact drift class Pike found: a leftover 149 skills total that is
+# not skills.total. Anchor to the skills-total phrases only: a bare 149 also
+# matches a legitimate "(149 active assets)" total, which
+# check-skills-commands-prose.py requires, so grep for \b149\b false-positives.
+LEFTOVER_149=$(grep -nE '149 [Ss]kills|<h3>149</h3><sub>Skills' README.md || true)
 if [ -n "$LEFTOVER_149" ] && [ "$SKILLS" != "149" ]; then
-  fail_ "README still contains 149 (third skills number); customer-facing is $SKILLS: $LEFTOVER_149"
+  fail_ "README still contains a stale 149 skills total; customer-facing is $SKILLS: $LEFTOVER_149"
 else
-  pass "no leftover 149 in README"
+  pass "no stale 149 skills total in README"
 fi
 
 echo ""

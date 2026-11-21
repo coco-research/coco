@@ -1,6 +1,17 @@
 {
   "team": "healthcare-life-sciences",
+  "team_id": "healthcare-life-sciences-super-intelligence",
+  "team_name": "Healthcare & Life Sciences Super Intelligence Team",
+  "description": "Hospital care, patient safety, randomized clinical trials and observational cohorts, diagnostic accuracy and prevalence, pharmacovigilance, genomics, therapeutic drug discovery, medical devices, infection prevention, care transitions and readmissions, vaccination programs, and health economics.",
   "personas": [],
-  "cells": [],
+  "cells": {
+    "biotech-strategy": "Biotech R&D, gene therapy, biomaterials, translational medicine, and venture commercialization.",
+    "clinical-trials-evidence": "Randomized clinical trials, patient-centered endpoints, observational cohort evidence, systematic reviews, vaccination effectiveness, and adverse-event monitoring.",
+    "drug-discovery-clinical-ai": "Therapeutic compounds, preclinical assays, protein design, drug screening, and reproducible lab experiments.",
+    "genomics-precision-medicine": "Genomic variants, drug response genetics, sequencing pipelines, and precision medicine.",
+    "health-policy-regulatory": "Hospital infection prevention, patient discharge quality, readmission reduction, medical device protocols, and health policy.",
+    "healthcare-economics": "Healthcare costs, clinician staffing sustainability, hospital operations, reimbursement, and value-based care.",
+    "medtech-digital-health": "Diagnostic test uncertainty, predictive value and prevalence, clinical decision support, and medical devices."
+  },
   "last_updated": "2026-09-03"
 }

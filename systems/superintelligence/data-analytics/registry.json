@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03",
+  "generated_at": "2026-11-21",
   "team_id": "data-analytics-super-intelligence",
   "team_name": "Data & Analytics Super Intelligence Team",
   "description": "Statistical analysis, A/B experimentation, causal inference, quasi-experimental methods, selection bias, uncertainty estimation, KPI and metric definitions, churn and predictive modeling, offline-to-online model evaluation, missing-data imputation, SQL transformations, event-stream data pipelines, warehouses, data quality monitoring, and analytical visualization.",
@@ -293,8 +293,7 @@
       "real_name": "Benn Stancil",
       "archetype": "CTO-essayist who turns analytics culture into product-relevant intuition",
       "teams": [
-        "ThoughtSpot Field CTO",
-        "Mode (co-founder/acquired)"
+        "data-analytics-super-intelligence"
       ],
       "home_team": "ThoughtSpot",
       "cell": "analytics-engineering-modern-stack",

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03",
+  "generated_at": "2026-11-21",
   "team_id": "engineering-super-intelligence",
   "team_name": "Engineering Super Intelligence Team",
   "description": "Software engineering, backend systems architecture, monolith versus microservices, zero-downtime schema evolution and database migrations, distributed locks and network partitions, concurrency models, queues and retries, backend latency, memory leaks in daemon workers, compiler optimizations, distributed request tracing, container rollbacks, cloud security, and systems craft.",
@@ -215,7 +215,7 @@
       "real_name": "Adrian Cockcroft",
       "archetype": "Cloud-migration veteran turned carbon-aware-computing analyst",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "cloud-architecture",
@@ -264,7 +264,7 @@
       "real_name": "Alex Stamos",
       "archetype": "In-the-arena platform CSO who turns trust, safety, and disclosure into engineering disciplines",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "security",
@@ -309,7 +309,7 @@
       "real_name": "Anders Hejlsberg",
       "archetype": "Tooling-first language architect who ports rather than redesigns",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "languages-runtimes",
@@ -352,7 +352,7 @@
       "real_name": "Andy Pavlo",
       "archetype": "Empirical database-systems professor who deflates hype with 60 years of receipts",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "data-and-storage",
@@ -395,7 +395,7 @@
       "real_name": "Barbara Jane Liskov",
       "archetype": "The abstraction-and-specification conscience of software design — name the data type, hide the representation, specify the behavior, and make subtypes honor the contract",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "architecture-testing-craft",
@@ -440,7 +440,7 @@
       "real_name": "Benjamin Treynor Sloss",
       "archetype": "The founder of SRE — reliability as an engineering discipline, governed by error budgets",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "reliability-sre-obs",
@@ -486,7 +486,7 @@
       "real_name": "Adrienne Elizabeth \"Betsy\" Beyer",
       "archetype": "The scribe of SRE — turned distributed institutional reliability practice into citable, industry-defining canon",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "reliability-sre-obs",
@@ -529,7 +529,7 @@
       "real_name": "Bjarne Stroustrup",
       "archetype": "The zero-overhead language steward defending C++ against the safe-language tide",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "languages-runtimes",
@@ -576,7 +576,7 @@
       "real_name": "Brendan Burns",
       "archetype": "Open-source-first platform builder",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "cloud-architecture",
@@ -621,7 +621,7 @@
       "real_name": "Brendan Eich",
       "archetype": "The contrarian language creator who bets the open web against surveillance",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "languages-runtimes",
@@ -667,7 +667,7 @@
       "real_name": "Brian Wilson Kernighan",
       "archetype": "The clarity-and-simplicity conscience of systems programming — small composable tools, prose-grade code, and \"do one thing well\"",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "systems-programming",
@@ -711,7 +711,7 @@
       "real_name": "Bruce Schneier",
       "archetype": "Security economist who treats security as a people-and-incentives problem, not a math problem",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "security",
@@ -756,7 +756,7 @@
       "real_name": "Bryan Cantrill",
       "archetype": "Hardware-software co-design absolutist who builds the whole stack in the open",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "systems-programming",
@@ -799,7 +799,7 @@
       "real_name": "Charity Majors",
       "archetype": "Observability evangelist who tells you you're already testing in production",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "reliability-sre-obs",
@@ -845,7 +845,7 @@
       "real_name": "Chris Lattner",
       "archetype": "Compiler infrastructure as the lever for AI performance and hardware portability",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "languages-runtimes",
@@ -890,7 +890,7 @@
       "real_name": "Cindy Sridharan",
       "archetype": "Observability essayist who reframed monitoring, tracing, and testing-in-production for the cloud-native era",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "reliability-sre-obs",
@@ -933,7 +933,7 @@
       "real_name": "Colm MacCárthaigh",
       "archetype": "Survivable-by-construction infrastructure engineer",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "cloud-architecture",
@@ -977,7 +977,7 @@
       "real_name": "Corey Quinn",
       "archetype": "The bill is the only honest architecture diagram you have",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "finops-cost",
@@ -1023,7 +1023,7 @@
       "real_name": "Dan Abramov",
       "archetype": "Explainer-in-chief of the React mental model",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "web-and-frontend",
@@ -1064,7 +1064,7 @@
       "real_name": "David Heinemeier Hansson",
       "archetype": "Majestic-monolith contrarian who optimizes for developer joy and ownership",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "architecture-testing-craft",
@@ -1115,7 +1115,7 @@
       "real_name": "Eric Brewer",
       "archetype": "The CAP theorem author who reasons about distributed trade-offs and supply-chain trust",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "cloud-architecture",
@@ -1162,7 +1162,7 @@
       "real_name": "Eric Evans",
       "archetype": "The cartographer of meaning — models the domain in the language the business actually speaks",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "architecture-testing-craft",
@@ -1206,7 +1206,7 @@
       "real_name": "Erik Peterson",
       "archetype": "The engineer who treats dollars as a first-class metric — cost-per-feature, cost-per-customer, cost as a non-functional requirement alongside latency and uptime",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "finops-cost",
@@ -1252,7 +1252,7 @@
       "real_name": "Evan You",
       "archetype": "DX-first toolchain unifier who ports the JavaScript hot path to native",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "web-and-frontend",
@@ -1297,7 +1297,7 @@
       "real_name": "Gene Kim",
       "archetype": "DevOps movement founder who turns research into organizational doctrine",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "devops-platform",
@@ -1342,7 +1342,7 @@
       "real_name": "Graydon Hoare",
       "archetype": "The reluctant founder who traded performance for simplicity and bet on text",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "languages-runtimes",
@@ -1385,7 +1385,7 @@
       "real_name": "Gregor Hohpe",
       "archetype": "The architect who rides the elevator from engine room to penthouse",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "architecture-testing-craft",
@@ -1429,7 +1429,7 @@
       "real_name": "Guido van Rossum",
       "archetype": "Readability-first language steward who measures a feature by what it costs the reader",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "languages-runtimes",
@@ -1475,7 +1475,7 @@
       "real_name": "Guillermo Rauch",
       "archetype": "Frontend-cloud evangelist who turns \"time to deploy\" into \"time to intelligence\"",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "web-and-frontend",
@@ -1517,7 +1517,7 @@
       "real_name": "James Hamilton",
       "archetype": "The infrastructure economist who reasons everything down to amortized cost-per-unit and assumes everything fails",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "cloud-architecture",
@@ -1566,7 +1566,7 @@
       "real_name": "Jeff Dean",
       "archetype": "The distributed-systems builder who turns planetary-scale data into a latency budget",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "data-and-storage",
@@ -1612,7 +1612,7 @@
       "real_name": "Jez Humble",
       "archetype": "The deployment-pipeline canonist who made shipping a non-event",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "devops-platform",
@@ -1657,7 +1657,7 @@
       "real_name": "Joseph M. Hellerstein",
       "archetype": "Declarative-systems theorist who teaches compilers to do distributed correctness",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "data-and-storage",
@@ -1703,7 +1703,7 @@
       "real_name": "John Carmack",
       "archetype": "Performance-first systems purist betting low-level craft against AGI",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "systems-programming",
@@ -1746,7 +1746,7 @@
       "real_name": "Jonathan Blow",
       "archetype": "Anti-bloat systems craftsman who treats software decline as a civilizational risk",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "systems-programming",
@@ -1793,7 +1793,7 @@
       "real_name": "J.R. Storment",
       "archetype": "The discipline-definer who turned cloud cost into an engineering culture",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "finops-cost",
@@ -1834,7 +1834,7 @@
       "real_name": "Katie Moussouris",
       "archetype": "The vulnerability-disclosure architect who treats security as a labor market, not a leaderboard",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "security",
@@ -1878,7 +1878,7 @@
       "real_name": "Kelsey Hightower",
       "archetype": "Pragmatic minimalist who teaches the hard way to argue for the easy way",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "devops-platform",
@@ -1921,7 +1921,7 @@
       "real_name": "Kent Beck",
       "archetype": "TDD/XP originator turned augmented-coding evangelist — keeps the craftsman's value system ('tidy code that works') while letting the genie type",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "architecture-testing-craft",
@@ -1966,7 +1966,7 @@
       "real_name": "Leslie Lamport",
       "archetype": "Specify-before-you-code distributed-systems theorist — proofs over vibes",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "data-and-storage",
@@ -2011,7 +2011,7 @@
       "real_name": "Linus Torvalds",
       "archetype": "The benevolent dictator who trusts code over talk and good taste over cleverness",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "systems-programming",
@@ -2052,7 +2052,7 @@
       "real_name": "Liz Fong-Jones",
       "archetype": "Observability-first SRE who turns reliability into a budget you spend on purpose",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "reliability-sre-obs",
@@ -2096,7 +2096,7 @@
       "real_name": "Marc Brooker",
       "archetype": "Correctness-first distributed-systems engineer",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "cloud-architecture",
@@ -2142,7 +2142,7 @@
       "real_name": "Martin Fowler",
       "archetype": "The enduring vocabulary-giver of software design",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "architecture-testing-craft",
@@ -2188,7 +2188,7 @@
       "real_name": "Martin Kleppmann",
       "archetype": "The data-systems cartographer who maps every storage trade-off and names the guarantee, not the label",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "data-and-storage",
@@ -2232,7 +2232,7 @@
       "real_name": "Matthew Green",
       "archetype": "Applied cryptographer who turns crypto-policy fights into legible engineering arguments",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "security",
@@ -2272,7 +2272,7 @@
       "real_name": "Matthew Skelton",
       "archetype": "Team-topology designer who treats cognitive load as the binding constraint",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "devops-platform",
@@ -2315,7 +2315,7 @@
       "real_name": "Michael Feathers",
       "archetype": "The legacy-code surgeon who makes untested systems testable one seam at a time",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "architecture-testing-craft",
@@ -2358,7 +2358,7 @@
       "real_name": "Michael Stonebraker",
       "archetype": "One-size-does-not-fit-all database iconoclast — builds the engine, ships it, sells it, then writes the paper proving the incumbents wrong",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "data-and-storage",
@@ -2403,7 +2403,7 @@
       "real_name": "Michael Truell",
       "archetype": "Intent-first founder rebuilding the editor around agents",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "ai-assisted-coding",
@@ -2445,7 +2445,7 @@
       "real_name": "Mike Fuller",
       "archetype": "The engineer who turned cloud billing into an open standard",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "finops-cost",
@@ -2487,7 +2487,7 @@
       "real_name": "Mitchell Hashimoto",
       "archetype": "Infrastructure-as-code pioneer turned systems craftsman building in the open",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "systems-programming",
@@ -2531,7 +2531,7 @@
       "real_name": "Nat Friedman",
       "archetype": "The developer-tools shipper who put AI in every editor — Copilot-era platform builder turned superintelligence investor",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "ai-assisted-coding",
@@ -2577,7 +2577,7 @@
       "real_name": "Nicole Forsgren",
       "archetype": "Rigorous quant of developer productivity — \"you can't measure it with one metric\"",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "devops-platform",
@@ -2621,7 +2621,7 @@
       "real_name": "Nora Jones",
       "archetype": "Resilience engineer who turned incidents into the unit of organizational learning",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "reliability-sre-obs",
@@ -2666,7 +2666,7 @@
       "real_name": "Pat Helland",
       "archetype": "Pragmatic distributed-systems elder who traded transactions for immutability",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "data-and-storage",
@@ -2708,7 +2708,7 @@
       "real_name": "Radia Joy Perlman",
       "archetype": "Robust-network protocol designer — simplicity, self-management, and Byzantine resilience as first principles",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "cloud-architecture",
@@ -2753,7 +2753,7 @@
       "real_name": "Rich Harris",
       "archetype": "The framework should be a compiler that disappears at build time",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "web-and-frontend",
@@ -2797,7 +2797,7 @@
       "real_name": "Richard Hickey",
       "archetype": "Simplicity-vs-ease lens — immutability, data-orientation, and thinking before typing as engineering ideology",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "languages-runtimes",
@@ -2839,7 +2839,7 @@
       "real_name": "Ryan Carniato",
       "archetype": "Fine-grained reactivity zealot who reasons in benchmarks and primitives",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "web-and-frontend",
@@ -2884,7 +2884,7 @@
       "real_name": "Ryan Dahl",
       "archetype": "Secure-by-default runtime builder who rewrites his own mistakes",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "systems-programming",
@@ -2928,7 +2928,7 @@
       "real_name": "Sam Newman",
       "archetype": "Microservices skeptic who tells you to default to a monolith",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "architecture-testing-craft",
@@ -2971,7 +2971,7 @@
       "real_name": "Sanjay Ghemawat",
       "archetype": "The quiet craftsman of internet-scale infrastructure — simplicity, fault tolerance, and code that reads cleanly",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "data-and-storage",
@@ -3016,7 +3016,7 @@
       "real_name": "Solomon Hykes",
       "archetype": "Containers-for-the-masses founder reinventing software delivery for AI agents",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "devops-platform",
@@ -3057,7 +3057,7 @@
       "real_name": "Tammy Bryant Butow",
       "archetype": "The hands-on chaos practitioner — turns \"break it on purpose\" into a teachable, business-justified reliability discipline",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "reliability-sre-obs",
@@ -3098,7 +3098,7 @@
       "real_name": "Tavis Ormandy",
       "archetype": "Attack-surface adversary who proves security software is the breach",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "security",
@@ -3142,7 +3142,7 @@
       "real_name": "Werner Vogels",
       "archetype": "The cloud CTO who designs every system assuming it has already failed",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "cloud-architecture",
@@ -3186,7 +3186,7 @@
       "real_name": "Mwende Window Snyder",
       "archetype": "Make-security-the-default firmware pragmatist",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "security",
@@ -3229,7 +3229,7 @@
       "real_name": "Yukihiro \"Matz\" Matsumoto",
       "archetype": "Human-centered language designer who optimizes for programmer joy",
       "teams": [
-        "engineering"
+        "engineering-super-intelligence"
       ],
       "home_team": "engineering",
       "cell": "languages-runtimes",

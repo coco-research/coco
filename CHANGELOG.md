@@ -4,6 +4,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [2.2.0](https://github.com/coco-research/coco/compare/v2.1.0...v2.2.0) (2026-11-21)
+
+
+### Features
+
+* **agents:** vendor sre-engineer and llm-architect from VoltAgent (part 2 of 2) ([#523](https://github.com/coco-research/coco/issues/523)) ([de261a2](https://github.com/coco-research/coco/commit/de261a2c3121a8f6a74bbf30dc11f16c55fc9973))
+* **skills:** add the context-degradation example script (part 2 of 4) ([#524](https://github.com/coco-research/coco/issues/524)) ([2dae95b](https://github.com/coco-research/coco/commit/2dae95b11453a8b697ab69489be8ed01ff40229f))
+* **skills:** add the memory-systems example script (part 4 of 4) ([#527](https://github.com/coco-research/coco/issues/527)) ([ff2ef9a](https://github.com/coco-research/coco/commit/ff2ef9a8c67ca999aaac3d692c5e5fc3fae41d3b))
+* **skills:** vendor the memory-systems skill (part 3 of 4) ([#526](https://github.com/coco-research/coco/issues/526)) ([bda4adf](https://github.com/coco-research/coco/commit/bda4adf943a4175e221d7008319b8b19109fe039))
+
 ## [2.1.0](https://github.com/coco-research/coco/compare/v2.0.0...v2.1.0) (2026-11-20)
 
 

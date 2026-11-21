@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# ponytail: 13 near-copies of this generator; upgrade path is one shared generator taking the team as an argument (after 12-01).
+# ponytail: 13 near-copies of this generator; upgrade path is one shared generator taking the team as an argument.
 """
 Build <team>/registry.json from the persona frontmatter and <team>/roster.json.
 

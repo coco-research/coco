@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ponytail: 13 near-copies of this generator; upgrade path is one shared generator taking the team as an argument.
 """
 Build superintelligenceTeam/registry.json from persona file frontmatter.
 
@@ -33,14 +34,14 @@ PERSONAS_DIR = AI_DIR / "personas"
 REGISTRY_PATH = AI_DIR / "registry.json"
 
 KNOWN_CELLS_AI_SI = OrderedDict([
-    ("frontier-labs-research", "Frontier Labs Research — CEO/CSO tier at frontier model labs."),
-    ("applied-ai-leadership", "Applied AI Leadership — product/strategy founders building real AI products."),
-    ("model-architects", "Model Architects — pretraining, scaling laws, and model design."),
-    ("reasoning-rl-agents", "Reasoning, RL, and Agents — post-training and agentic systems."),
-    ("alignment-interp-safety", "Alignment, Interpretability, and Safety."),
-    ("theory-science", "Theory and Science of Deep Learning — foundational researchers."),
-    ("multimodal-embodied", "Multimodal, Vision, and Embodied AI — robotics + diffusion + spatial."),
-    ("systems-kernels-serving", "Systems, Kernels, and Serving — training infrastructure + inference."),
+    ("frontier-labs-research", "Frontier foundation models, compute scaling, pretraining economics, and capability strategy."),
+    ("applied-ai-leadership", "Language-model assistants, chatbots, document QA, semantic vector search, RAG, and citation grounding."),
+    ("model-architects", "Transformer architectures, model compression, quantization, knowledge distillation, pruning, tokenization, fine-tuning, and prompting."),
+    ("reasoning-rl-agents", "Post-training, RLHF, preference optimization, reward modeling, reasoning, tool calling, and agentic workflows."),
+    ("alignment-interp-safety", "Safety alignment, mechanistic interpretability, prompt-injection defense, hallucination detection, and evaluation benchmarks."),
+    ("theory-science", "Deep learning theory, dense representations, semantic similarity, uncertainty calibration, and natural language processing."),
+    ("multimodal-embodied", "Multimodal vision-language models, image and video diffusion, world models, speech, and robotics."),
+    ("systems-kernels-serving", "Distributed training, GPU kernels, edge and on-device inference, batching, and low-latency model serving."),
 ])
 
 KNOWN_TEAMS = OrderedDict([
@@ -69,6 +70,22 @@ def length_of(field):
     if isinstance(field, list):
         return len(field)
     return 0
+
+
+def write_registry(registry: OrderedDict) -> None:
+    """Write registry.json; generated_at keeps its committed date unless something else changed."""
+    old = REGISTRY_PATH.read_text(encoding="utf-8") if REGISTRY_PATH.exists() else ""
+    stamps = [date.today().isoformat()]
+    try:
+        stamps.insert(0, json.loads(old)["generated_at"])
+    except (ValueError, KeyError, TypeError):
+        pass
+    for stamp in stamps:
+        registry["generated_at"] = stamp
+        text = json.dumps(registry, indent=2) + "\n"
+        if text == old:
+            break
+    REGISTRY_PATH.write_text(text, encoding="utf-8")
 
 
 def build_persona_index(persona_files: list[Path]) -> tuple[dict, dict]:
@@ -107,8 +124,9 @@ def build_persona_index(persona_files: list[Path]) -> tuple[dict, dict]:
             "public_stances_count": length_of(fm.get("public_stances")),
             "confidence": fm.get("confidence"),
             "last_verified": str(fm.get("last_verified", "")),
-            "voice_style_excerpt": (fm.get("voice_style", "") or "").strip().splitlines()[0][:160],
-            "file_path": f"superintelligenceTeam/personas/{path.name}",
+            "voice_style_excerpt": (fm.get("voice_style", "") or "").strip().splitlines()[0][:160]
+            if fm.get("voice_style") else "",
+            "file_path": f"superintelligence/ai/personas/{path.name}",
             "research_dir": f"superintelligenceTeam/research/{slug}/",
         }
     return personas, cells
@@ -143,11 +161,12 @@ def main() -> None:
         ("team_name", "AI Super Intelligence Team"),
         (
             "description",
-            "Your AI research and engineering brain trust. 47 named personas across 8 cells "
-            "covering frontier labs, applied product, model architecture, reasoning/RL/agents, "
-            "alignment and interpretability, theory and science of DL, multimodal and embodied, "
-            "and systems/kernels/serving. Reusable across all CoCo-routed work — invoked by "
-            "/superintelligenceTeam slash commands.",
+            "Large and small language models, chatbots, AI assistants, transformers, dense "
+            "embeddings, semantic vector search, retrieval-augmented generation (RAG), grounding "
+            "and citation checks, hallucination detection, fine-tuning versus prompting, model "
+            "compression, quantization, distillation, tool calling, RLHF and preference "
+            "alignment, prompt-injection defense, evaluation benchmarks, multimodal models, and "
+            "inference serving.",
         ),
         ("personas_count", len(personas)),
         ("cells_count", len(cells_to_slugs)),
@@ -176,10 +195,7 @@ def main() -> None:
         ),
     ])
 
-    REGISTRY_PATH.write_text(
-        json.dumps(registry, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
+    write_registry(registry)
     print(f"Wrote {REGISTRY_PATH} ({len(personas)} personas, {len(cells_to_slugs)} cells).")
 
     # Sanity checks

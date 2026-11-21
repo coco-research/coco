@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ponytail: 13 near-copies of this generator; upgrade path is one shared generator taking the team as an argument.
 """
 Build superintelligence/engineering/registry.json from persona file frontmatter.
 
@@ -30,17 +31,17 @@ PERSONAS_DIR = ENG_DIR / "personas"
 REGISTRY_PATH = ENG_DIR / "registry.json"
 
 KNOWN_CELLS_ENG_SI = OrderedDict([
-    ("cloud-architecture", "Cloud Architecture — cloud-scale system design, infra primitives, build-vs-managed lens."),
-    ("reliability-sre-obs", "Reliability, SRE, and Observability — SRE practice, incident response, resilience."),
-    ("data-and-storage", "Data and Storage — databases, distributed data, consistency, distributed-systems theory."),
-    ("security", "Security — security architecture, cryptography, vuln research, disclosure policy."),
-    ("finops-cost", "FinOps and Cost — cloud cost engineering and FinOps practice."),
-    ("languages-runtimes", "Languages and Runtimes — language design, type systems, compilers, runtimes."),
-    ("systems-programming", "Systems Programming — low-level, OS, performance, systems craft."),
-    ("web-and-frontend", "Web and Frontend — frontend frameworks, web platform, UI engineering."),
-    ("architecture-testing-craft", "Architecture, Testing, and Craft — software architecture, DDD, testing discipline."),
-    ("devops-platform", "DevOps and Platform Engineering — DevOps movement, internal developer platforms."),
-    ("ai-assisted-coding", "AI-Assisted Coding — agentic dev tools, codegen, the AI-coding frontier."),
+    ("cloud-architecture", "Distributed systems, monolith versus services, queues, retries, backpressure, and cloud infrastructure."),
+    ("reliability-sre-obs", "Site reliability engineering, SLOs, distributed request tracing, observability stacks, chaos testing, and incident response."),
+    ("data-and-storage", "Database internals, zero-downtime schema migrations, query latency, transactions, distributed locks, and network partitions."),
+    ("security", "Application security, cryptography, authentication, vulnerability research, and threat modeling."),
+    ("finops-cost", "Cloud cost engineering, compute utilization, infrastructure spend, and FinOps."),
+    ("languages-runtimes", "Programming languages, type systems, compiler optimizations, numerical semantics, and runtime internals."),
+    ("systems-programming", "Operating systems, server concurrency, async I/O, worker processes, memory leaks, profiling, and low-level performance."),
+    ("web-and-frontend", "Frontend engineering, browser rendering, CSS frameworks, web standards, and build tooling."),
+    ("architecture-testing-craft", "Software modularity, API boundaries, distributed fault testing, refactoring, and engineering craft."),
+    ("devops-platform", "CI/CD pipelines, containers, Kubernetes, progressive delivery, deployment rollbacks, and developer platforms."),
+    ("ai-assisted-coding", "Code editors, automated refactoring, and developer productivity tooling."),
 ])
 
 KNOWN_TEAMS = OrderedDict([
@@ -73,6 +74,22 @@ def length_of(field):
     if isinstance(field, list):
         return len(field)
     return 0
+
+
+def write_registry(registry: OrderedDict) -> None:
+    """Write registry.json; generated_at keeps its committed date unless something else changed."""
+    old = REGISTRY_PATH.read_text(encoding="utf-8") if REGISTRY_PATH.exists() else ""
+    stamps = [date.today().isoformat()]
+    try:
+        stamps.insert(0, json.loads(old)["generated_at"])
+    except (ValueError, KeyError, TypeError):
+        pass
+    for stamp in stamps:
+        registry["generated_at"] = stamp
+        text = json.dumps(registry, indent=2, ensure_ascii=False) + "\n"
+        if text == old:
+            break
+    REGISTRY_PATH.write_text(text, encoding="utf-8")
 
 
 def build_persona_index(persona_files: list[Path]) -> tuple[dict, dict]:
@@ -147,11 +164,11 @@ def main() -> None:
         ("team_name", "Engineering Super Intelligence Team"),
         (
             "description",
-            "Your software-engineering brain trust. Named personas across 11 cells covering "
-            "cloud architecture, reliability/SRE/observability, data and storage, security, "
-            "FinOps, languages and runtimes, systems programming, web and frontend, "
-            "architecture/testing/craft, DevOps/platform, and AI-assisted coding. Reusable as a "
-            "decision-making partner — invoked by /SI-Eng slash commands.",
+            "Software engineering, backend systems architecture, monolith versus microservices, "
+            "zero-downtime schema evolution and database migrations, distributed locks and "
+            "network partitions, concurrency models, queues and retries, backend latency, memory "
+            "leaks in daemon workers, compiler optimizations, distributed request tracing, "
+            "container rollbacks, cloud security, and systems craft.",
         ),
         ("personas_count", len(personas)),
         ("cells_count", len(cells_to_slugs)),
@@ -161,10 +178,7 @@ def main() -> None:
         ("known_teams", KNOWN_TEAMS),
     ])
 
-    REGISTRY_PATH.write_text(
-        json.dumps(registry, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
+    write_registry(registry)
     print(f"Wrote {REGISTRY_PATH} ({len(personas)} personas, {len(cells_to_slugs)} cells).")
 
     for cell_id, slugs in cells_to_slugs.items():

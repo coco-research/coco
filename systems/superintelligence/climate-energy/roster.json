@@ -1,6 +1,17 @@
 {
   "team": "climate-energy",
+  "team_id": "climate-energy-super-intelligence",
+  "team_name": "Climate & Energy Super Intelligence Team",
+  "description": "Climate science, clean energy transition, electric power grids, battery storage, heat pumps and electrification, industrial decarbonization, methane and emissions mitigation, carbon removal and carbon markets, lifecycle assessment, circular materials and waste reduction, ESG reporting, and environmental regulation.",
   "personas": [],
-  "cells": [],
+  "cells": {
+    "carbon-markets-climate-finance": "Carbon markets, offset integrity, durable carbon removal, and climate transition finance.",
+    "climate-modeling-science": "Climate modeling, atmospheric physics, emissions pathways, and warming attribution.",
+    "energy-transition-renewables": "Solar, wind, heat pumps, electrification, industrial process heat, and renewable economics.",
+    "environmental-policy-regulation": "Environmental regulation, methane abatement, water and land use, and emissions standards.",
+    "esg-corporate-sustainability": "Corporate sustainability reporting, greenhouse gas inventories, Scope 1-3 accounting, and ESG materiality.",
+    "grid-infrastructure-storage": "Electric power grids, renewable balancing, battery chemistries, utility storage, and fleet charging infrastructure.",
+    "sustainability-tech-circularity": "Circular economy, sustainable materials, industrial recycling, waste reduction, and lifecycle impact."
+  },
   "last_updated": "2026-09-03"
 }

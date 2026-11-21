@@ -1,6 +1,17 @@
 {
   "team": "education-edtech",
+  "team_id": "education-edtech-super-intelligence",
+  "team_name": "Education & EdTech Super Intelligence Team",
+  "description": "Learning science, cognitive psychology of memory, spaced retrieval and long-term retention, classroom pedagogy, curriculum design, student quizzes and mastery rubrics, adaptive tutoring software, learner accessibility, school pilots, higher-education strategy, and workforce upskilling.",
   "personas": [],
-  "cells": [],
+  "cells": {
+    "ai-tutoring-adaptive": "Adaptive tutoring software, personalized practice schedules, scaffolding, and formative feedback.",
+    "assessment-evaluation": "Quizzes, exams, conceptual understanding versus memorization, mastery rubrics, and fair student assessment.",
+    "curriculum-instructional-design": "Curriculum architecture, conceptual transfer, backwards design, and project-based learning.",
+    "edtech-product-platform": "Digital learning platforms, classroom pilots, teacher workload, and accessible assistive tools.",
+    "institutional-higher-ed-strategy": "School and university strategy, institutional adoption, educational equity, and academic reform.",
+    "learning-science-pedagogy": "Cognitive load, spaced retrieval practice, memory retention, study strategies, and instructional science.",
+    "workforce-development-skills": "Career pathways, competency credentials, and workforce reskilling."
+  },
   "last_updated": "2026-09-03"
 }

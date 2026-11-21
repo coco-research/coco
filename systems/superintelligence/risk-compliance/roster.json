@@ -1,18 +1,19 @@
 {
   "team_id": "risk-compliance-super-intelligence",
   "team_name": "Risk & Compliance (GRC) Super Intelligence Team",
+  "description": "Governance, risk, and compliance (GRC), internal and external audit readiness, access-control review evidence, personal-data control matrices, retention and deletion controls, privacy impact assessments, vendor risk due-diligence exceptions, third-party assurance, incident escalation, procurement conflicts of interest, remediation tracking, and AML/KYC.",
   "command_short": "GRC",
   "locked": "2026-06-01",
   "build_method": "local-first (LM Studio + retriever + validator); EXPECT heavy Claude top-up — thinnest public-voice domain so far; lean on cross-lists.",
   "notes": "Merged Risk + Compliance. Ultra-think restructured cells toward where citable PUBLIC voices exist (privacy, AI-accountability, reg-policy, security-via-crosslist) and dropped the thin standalone audit/regtech cell (audit folded into erm-grc-leadership). 30 native + ~12 cross-listed.",
   "cells": {
-    "privacy-data-protection": "Privacy law, data protection, GDPR/CCPA, privacy-by-design.",
-    "ai-governance-responsible-ai": "AI governance, responsible AI, algorithmic accountability, EU AI Act / NIST RMF.",
-    "regulatory-tech-policy": "Tech regulation, antitrust, platform policy, algorithmic-accountability journalism/law.",
-    "security-governance": "Security governance, disclosure, threat policy (cross-listed from Engineering).",
-    "erm-grc-leadership": "Enterprise risk management, GRC frameworks, internal audit, three-lines model.",
-    "financial-crime-aml": "AML/KYC, sanctions, financial-crime compliance.",
-    "model-systemic-risk": "Model risk, validation (SR 11-7), systemic/financial-stability risk (cross-listed from Trading)."
+    "privacy-data-protection": "Privacy impact assessments, customer-record control matrices, GDPR/CCPA, and retention and deletion controls.",
+    "ai-governance-responsible-ai": "AI governance, algorithmic risk controls, EU AI Act and NIST AI RMF compliance.",
+    "regulatory-tech-policy": "Regulatory reporting, incident escalation policies, and statutory compliance.",
+    "security-governance": "Access-control review evidence, SOC 2 and ISO 27001 controls, and third-party vendor assurance questionnaires.",
+    "erm-grc-leadership": "Enterprise risk management, internal audit, policy exceptions, training compliance, procurement conflicts of interest, and remediation tracking.",
+    "financial-crime-aml": "Anti-money laundering, KYC due diligence, sanctions screening, and financial-crime compliance.",
+    "model-systemic-risk": "Model risk management, SR 11-7 validation, and operational risk."
   },
   "personas": [
     {"slug":"daniel-solove","name":"Daniel Solove","cell":"privacy-data-protection","role":"lead-driver","anchor":"GWU; the privacy-law authority; taxonomy of privacy, 'Nothing to Hide', prolific"},

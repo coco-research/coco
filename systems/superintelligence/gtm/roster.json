@@ -1,18 +1,19 @@
 {
   "team_id": "gtm-super-intelligence",
   "team_name": "Sales, GTM & Marketing Super Intelligence Team",
+  "description": "Go-to-market execution, demand generation, launch campaigns, ICP definition, inbound lead qualification, outbound sales discovery calls, buyer messaging and positioning statements, lifecycle email sequences, paid versus referral acquisition, reseller enablement, SaaS pricing, and customer retention.",
   "command_short": "GTM",
   "locked": "2026-06-01",
   "build_method": "local-first (LM Studio + retriever + validator); Claude top-up on thin signals",
   "notes": "Go-to-market: category design, demand gen, sales methodology, PLG, brand, pricing, customer success. Loud public voices (books, podcasts, frameworks). Boundary: product strategy/discovery => Product&Design; growth-as-product-analytics overlaps Data. geoffrey-moore cross-listed from Strategy (built earlier in the same queue).",
   "cells": {
-    "category-design-positioning": "Category creation, positioning, market framing, crossing the chasm.",
-    "demand-gen-content-marketing": "Demand generation, content, SEO, audience building, inbound.",
-    "sales-methodology-negotiation": "Sales process, methodology, enablement, negotiation.",
-    "product-led-growth": "PLG, self-serve, freemium, product-as-the-go-to-market.",
-    "brand-strategy": "Brand building, distinctiveness, marketing effectiveness science.",
-    "pricing-monetization": "Pricing strategy, packaging, monetization, willingness-to-pay.",
-    "customer-success-retention": "Post-sale expansion, retention, net revenue retention, CS as a discipline."
+    "category-design-positioning": "Category design, positioning statements, differentiation messaging, and buyer-outcome framing.",
+    "demand-gen-content-marketing": "Launch campaigns, SEO, content marketing, inbound lead qualification, and acquisition channels.",
+    "sales-methodology-negotiation": "Outbound sales, discovery calls, buyer qualification, enterprise deals, and reseller partner enablement.",
+    "product-led-growth": "Free-trial activation, lifecycle email sequences, referral incentives, and self-serve conversion.",
+    "brand-strategy": "Brand salience, distinctive assets, creative campaigns, and market reach.",
+    "pricing-monetization": "SaaS packaging, price tiers, willingness-to-pay, and monetization.",
+    "customer-success-retention": "Customer onboarding, account expansion, net revenue retention, and renewal playbooks."
   },
   "personas": [
     {"slug":"christopher-lochhead","name":"Christopher Lochhead","cell":"category-design-positioning","role":"lead-driver","anchor":"'Play Bigger', 'Niche Down'; category design, 'category king' economics, 3x ex-CMO"},

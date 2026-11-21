@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ponytail: 13 near-copies of this generator; upgrade path is one shared generator taking the team as an argument.
 """
 Build superintelligence/product-design/registry.json from persona frontmatter.
 Re-run after editing any Product & Design persona file. Idempotent.
@@ -24,14 +25,14 @@ PERSONAS_DIR = PD_DIR / "personas"
 REGISTRY_PATH = PD_DIR / "registry.json"
 
 KNOWN_CELLS_PD_SI = OrderedDict([
-    ("product-strategy", "Product Strategy — product vision, strategy, positioning, business model."),
-    ("product-discovery-research", "Product Discovery and Research — continuous discovery, JTBD, user research, lean."),
-    ("growth-metrics", "Growth and Metrics — growth loops, metrics, experimentation, PLG, analytics."),
-    ("design-foundations-usability", "Design Foundations and Usability — HCI, usability, interaction design, accessibility."),
-    ("design-leadership-craft", "Design Leadership and Craft — design leadership, visual/industrial craft, culture."),
-    ("ux-content-research", "UX, Content, and Research — content strategy, content design, information architecture."),
-    ("design-systems-interaction", "Design Systems and Interaction — design systems, component architecture, patterns."),
-    ("sprints-behavior-bridge", "Sprints, Behavior, and Bridge — product×design: sprints, behavioral design, ethics."),
+    ("product-strategy", "Product vision, user problem framing, and interface prioritization."),
+    ("product-discovery-research", "Usability studies, operator interviews, interactive prototype validation, and user research."),
+    ("growth-metrics", "Signup UX, checkout flows, and onboarding friction reduction."),
+    ("design-foundations-usability", "Interaction hierarchy, WCAG contrast, keyboard navigation, accessible interactions, and usability heuristics."),
+    ("design-leadership-craft", "Visual design, typography, layout spacing, iconography clarity, and dense UI craft."),
+    ("ux-content-research", "UX microcopy, error and transactional messaging, navigation labels, and information architecture."),
+    ("design-systems-interaction", "Design systems, UI component patterns, empty/loading/error/success states, and interface specs."),
+    ("sprints-behavior-bridge", "Design sprints, rapid prototyping, behavioral UX, and humane interfaces."),
 ])
 
 KNOWN_TEAMS = OrderedDict([
@@ -62,6 +63,22 @@ def parse_frontmatter(path: Path) -> dict:
 
 def length_of(field):
     return len(field) if isinstance(field, list) else 0
+
+
+def write_registry(registry: OrderedDict) -> None:
+    """Write registry.json; generated_at keeps its committed date unless something else changed."""
+    old = REGISTRY_PATH.read_text(encoding="utf-8") if REGISTRY_PATH.exists() else ""
+    stamps = [date.today().isoformat()]
+    try:
+        stamps.insert(0, json.loads(old)["generated_at"])
+    except (ValueError, KeyError, TypeError):
+        pass
+    for stamp in stamps:
+        registry["generated_at"] = stamp
+        text = json.dumps(registry, indent=2, ensure_ascii=False) + "\n"
+        if text == old:
+            break
+    REGISTRY_PATH.write_text(text, encoding="utf-8")
 
 
 def build_persona_index(persona_files):
@@ -138,11 +155,10 @@ def main() -> None:
         ("team_name", "Product & Design Super Intelligence Team"),
         (
             "description",
-            "Your product + design brain trust and decision partner. Named personas across 8 "
-            "cells spanning product strategy, discovery/research, growth/metrics, design "
-            "foundations/usability, design leadership/craft, UX/content, design systems, and a "
-            "product×design bridge. One merged team that convenes both lenses; pure-discipline "
-            "input via /SI-PD-Huddle or --cells. Invoked by /SI-PD slash commands.",
+            "User interface and UX design, signup and checkout usability, interaction hierarchy, "
+            "information architecture, typography and layout spacing, color contrast and "
+            "keyboard accessibility, accessible interactions, user prototypes, usability "
+            "studies, onboarding UX, error microcopy, and design-system UI states.",
         ),
         ("personas_count", len(personas)),
         ("cells_count", len(cells_to_slugs)),
@@ -152,10 +168,7 @@ def main() -> None:
         ("known_teams", KNOWN_TEAMS),
     ])
 
-    REGISTRY_PATH.write_text(
-        json.dumps(registry, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
+    write_registry(registry)
     print(f"Wrote {REGISTRY_PATH} ({len(personas)} personas, {len(cells_to_slugs)} cells).")
     for cell_id, slugs in cells_to_slugs.items():
         if not slugs:

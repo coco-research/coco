@@ -1,18 +1,19 @@
 {
   "team_id": "data-analytics-super-intelligence",
   "team_name": "Data & Analytics Super Intelligence Team",
+  "description": "Statistical analysis, A/B experimentation, causal inference, quasi-experimental methods, selection bias, uncertainty estimation, KPI and metric definitions, churn and predictive modeling, offline-to-online model evaluation, missing-data imputation, SQL transformations, event-stream data pipelines, warehouses, data quality monitoring, and analytical visualization.",
   "command_short": "Data",
   "locked": "2026-06-01",
   "build_method": "local-first (LM Studio + retriever + validator); Claude top-up on archetypes/thin signals",
   "notes": "Data engineering, analytics, ML systems, viz, governance, experimentation. Loud public voices (books, OSS, blogs). Archetypes (Inmon, Kimball, Pearl, Tukey-lineage) use persistent_signals. Boundary: ML RESEARCH => AI team; data INFRA-as-product => some overlap with Engineering data-and-storage (kept distinct by the analytics/decision lens here).",
   "cells": {
-    "data-engineering-architecture": "Pipelines, warehouses, lakehouse, data mesh, modeling, orchestration.",
-    "analytics-engineering-modern-stack": "dbt-era analytics engineering, the modern data stack, metrics layers.",
-    "mlops-ml-systems": "Productionizing ML, ML system design, applied-ML engineering, eval.",
-    "data-science-statistics": "Statistical practice, data-science tooling, decision intelligence.",
-    "data-visualization": "Visualization theory, dataviz craft, communicating with data.",
-    "data-governance-quality": "Data quality, observability, governance, contracts, leadership.",
-    "experimentation-causal-inference": "A/B testing, controlled experiments, causal inference."
+    "data-engineering-architecture": "Reproducible ETL/ELT pipelines, event-stream integration, data warehouses, lakehouses, and dimensional modeling.",
+    "analytics-engineering-modern-stack": "SQL analytics, dbt, semantic metrics layers, active-account KPIs, conversion funnels, and BI reporting.",
+    "mlops-ml-systems": "Predictive model deployment, offline-to-online skew, feature drift, and production ML evaluation.",
+    "data-science-statistics": "Applied statistics, Bayesian inference, uncertainty estimation, missing-value imputation, churn modeling, and exploratory analysis.",
+    "data-visualization": "Analytical charts, statistical graphics, visual integrity, and quantitative storytelling.",
+    "data-governance-quality": "Data quality testing, schema contracts, metric anomaly triage, lineage, and dataset reliability.",
+    "experimentation-causal-inference": "Randomized experiments, cluster randomization, statistical significance, causal inference, and selection bias."
   },
   "personas": [
     {"slug":"joe-reis","name":"Joe Reis","cell":"data-engineering-architecture","role":"lead-driver","anchor":"'Fundamentals of Data Engineering'; the data-engineering lifecycle, very public educator"},

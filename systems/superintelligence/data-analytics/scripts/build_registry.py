@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ponytail: 13 near-copies of this generator; upgrade path is one shared generator taking the team as an argument.
 """
 Team-generic registry builder. Drop into superintelligence/<team>/scripts/ and run.
 Resolves the team from its own location (parents[1]), reads roster.json for the cell
@@ -9,7 +10,8 @@ cell with home_team + file_path pointing at the home team — no file is copied.
 
     python3 superintelligence/<team>/scripts/build_registry.py
 
-Idempotent. Behavior for Finance is preserved because it reads the same cells/meta.
+Idempotent: generated_at keeps its date until something else in the file changes.
+Behavior for Finance is preserved because it reads the same cells/meta.
 """
 from __future__ import annotations
 import json, sys
@@ -58,6 +60,22 @@ def parse_frontmatter(path: Path) -> dict:
 
 def length_of(f):
     return len(f) if isinstance(f, list) else 0
+
+
+def write_registry(registry: OrderedDict) -> None:
+    """Write registry.json; generated_at keeps its committed date unless something else changed."""
+    old = REGISTRY_PATH.read_text(encoding="utf-8") if REGISTRY_PATH.exists() else ""
+    stamps = [date.today().isoformat()]
+    try:
+        stamps.insert(0, json.loads(old)["generated_at"])
+    except (ValueError, KeyError, TypeError):
+        pass
+    for stamp in stamps:
+        registry["generated_at"] = stamp
+        text = json.dumps(registry, indent=2, ensure_ascii=False) + "\n"
+        if text == old:
+            break
+    REGISTRY_PATH.write_text(text, encoding="utf-8")
 
 
 def main() -> None:
@@ -131,7 +149,7 @@ def main() -> None:
         ("cells", cells_section), ("personas", personas),
         ("known_teams", KNOWN_TEAMS),
     ])
-    REGISTRY_PATH.write_text(json.dumps(registry, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    write_registry(registry)
     print(f"Wrote {REGISTRY_PATH} ({len(personas)} personas [{registry['native_personas_count']} native + "
           f"{len(cross)} cross-listed], {len(cells)} cells).")
     for cid, slugs in cells.items():

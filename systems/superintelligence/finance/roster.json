@@ -1,18 +1,19 @@
 {
   "team_id": "finance-super-intelligence",
   "team_name": "Finance Super Intelligence Team",
+  "description": "Corporate finance, FP&A budgeting, cash runway and burn forecasting, fixed versus usage-based cost modeling, subscription unit economics, break-even analysis, margin and CAC sensitivity, accrual revenue versus cash flow, working capital, debt versus equity financing, DCF company valuation, forensic accounting, macroeconomics, and fintech.",
   "command_short": "Fin",
   "locked": "2026-06-01",
   "build_method": "local-first (LM Studio qwen3.6 + ddgs/trafilatura retriever); validator-gated; Claude top-up only on flagged niche",
   "finance_trading_boundary": "Fundamental/discretionary + corporate finance => Finance. Systematic/quant/markets-execution => Trading (next team). Reserved for Trading: Asness/factor, Taleb/tail-risk, Derman/quant-eng, Dalio+Druckenmiller/hedge-fund-macro, market-microstructure, derivatives, crypto-trading. Macro ECONOMISTS stay in Finance.",
   "cells": {
-    "valuation-corporate-finance": "Valuation, corporate finance, intrinsic value, capital structure.",
-    "investing-capital-allocation": "Value/discretionary investing and capital allocation.",
-    "accounting-fpa-reporting": "Forensic accounting, financial reporting, FP&A practice.",
-    "macro-economics": "Macro economists and policy/markets framing.",
-    "fintech-payments": "Fintech, payments, banking-as-a-service, fintech investing.",
-    "behavioral-decision-science": "Behavioral finance and decision-making under uncertainty.",
-    "capital-markets-ma-private": "IPOs, M&A, private equity/VC finance, distress/restructuring."
+    "valuation-corporate-finance": "DCF company valuation, discount rates, lease-versus-buy analysis, capital budgeting, and debt versus equity structure.",
+    "investing-capital-allocation": "Fundamental equity investing, intrinsic value, moats, and long-term capital allocation.",
+    "accounting-fpa-reporting": "Monthly budgets, fixed and usage costs, cash runway, break-even analysis, working capital, revenue-cash reconciliation, and operating expenses.",
+    "macro-economics": "Monetary policy, interest rates, inflation, labor cycles, and fiscal policy.",
+    "fintech-payments": "Payment rails, digital banking, embedded finance, and financial infrastructure.",
+    "behavioral-decision-science": "Behavioral finance, cognitive biases, and investment decision hygiene.",
+    "capital-markets-ma-private": "IPOs, mergers and acquisitions, private equity, venture financing, and corporate distress."
   },
   "personas": [
     {

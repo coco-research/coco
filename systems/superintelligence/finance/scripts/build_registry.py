@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ponytail: 13 near-copies of this generator; upgrade path is one shared generator taking the team as an argument.
 """
 Build superintelligence/finance/registry.json from persona frontmatter.
 Re-run after editing any Finance persona file. Idempotent.
@@ -18,16 +19,9 @@ except ImportError:
 FIN_DIR = Path(__file__).resolve().parents[1]
 PERSONAS_DIR = FIN_DIR / "personas"
 REGISTRY_PATH = FIN_DIR / "registry.json"
+ROSTER = json.loads((FIN_DIR / "roster.json").read_text(encoding="utf-8"))
 
-KNOWN_CELLS = OrderedDict([
-    ("valuation-corporate-finance", "Valuation, corporate finance, intrinsic value, capital structure."),
-    ("investing-capital-allocation", "Value / discretionary investing and capital allocation."),
-    ("accounting-fpa-reporting", "Forensic accounting, financial reporting, and FP&A practice."),
-    ("macro-economics", "Macro economists and policy / markets framing."),
-    ("fintech-payments", "Fintech, payments, banking-as-a-service, fintech investing."),
-    ("behavioral-decision-science", "Behavioral finance and decision-making under uncertainty."),
-    ("capital-markets-ma-private", "IPOs, M&A, private equity / VC finance, distress and restructuring."),
-])
+KNOWN_CELLS = OrderedDict(ROSTER["cells"])  # id -> description
 
 KNOWN_TEAMS = OrderedDict([
     ("ai-super-intelligence", "AI Super Intelligence Team."),
@@ -51,6 +45,22 @@ def parse_frontmatter(path: Path) -> dict:
 
 def length_of(f):
     return len(f) if isinstance(f, list) else 0
+
+
+def write_registry(registry: OrderedDict) -> None:
+    """Write registry.json; generated_at keeps its committed date unless something else changed."""
+    old = REGISTRY_PATH.read_text(encoding="utf-8") if REGISTRY_PATH.exists() else ""
+    stamps = [date.today().isoformat()]
+    try:
+        stamps.insert(0, json.loads(old)["generated_at"])
+    except (ValueError, KeyError, TypeError):
+        pass
+    for stamp in stamps:
+        registry["generated_at"] = stamp
+        text = json.dumps(registry, indent=2, ensure_ascii=False) + "\n"
+        if text == old:
+            break
+    REGISTRY_PATH.write_text(text, encoding="utf-8")
 
 
 def main() -> None:
@@ -97,16 +107,13 @@ def main() -> None:
                               "file_path": f"superintelligence/finance/cells/{cid}.md"}
     registry = OrderedDict([
         ("schema_version", "1.0"), ("generated_at", date.today().isoformat()),
-        ("team_id", "finance-super-intelligence"), ("team_name", "Finance Super Intelligence Team"),
-        ("description", "Your finance brain trust and decision partner. Named personas across 7 cells: "
-                        "valuation/corporate finance, investing, accounting/FP&A, macro, fintech, behavioral, "
-                        "and capital markets/M&A/private. Markets/quant/derivatives are reserved for the Trading "
-                        "team. Built local-first (LM Studio) and validator-gated. Invoked by /SI-Fin commands."),
+        ("team_id", ROSTER["team_id"]), ("team_name", ROSTER["team_name"]),
+        ("description", ROSTER["description"]),
         ("personas_count", len(personas)), ("cells_count", len(cells)),
         ("cells", cells_section), ("personas", personas),
         ("known_teams", KNOWN_TEAMS),
     ])
-    REGISTRY_PATH.write_text(json.dumps(registry, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    write_registry(registry)
     print(f"Wrote {REGISTRY_PATH} ({len(personas)} personas, {len(cells)} cells).")
     for cid, slugs in cells.items():
         if not slugs:

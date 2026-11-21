@@ -1,18 +1,19 @@
 {
   "team_id": "strategy-super-intelligence",
   "team_name": "Strategy Super Intelligence Team",
+  "description": "Corporate and competitive strategy, low-cost versus niche positioning, defensible competitive advantage, geographic expansion versus core focus, direct versus partner distribution channels, competitor pricing reactions, service bundling and retention, portfolio resource allocation across core and adjacent investments, M&A focus, and two-sided marketplace network effects.",
   "command_short": "Strat",
   "locked": "2026-06-01",
   "build_method": "local-first (LM Studio + retriever + validator); Claude top-up on archetypes/thin signals",
   "notes": "McKinsey-native strategy brain trust. Loud, citable public voices preferred (books, columns, frameworks). Archetypes (Porter emeritus, Christensen d.2020, Bruce Henderson d.1992) use persistent_signals. Boundary: corporate/business STRATEGY here; product strategy => Product&Design; finance valuation => Finance.",
   "cells": {
-    "competitive-strategy-advantage": "Competitive strategy, sources of durable advantage, positioning, industry structure.",
-    "growth-innovation": "Growth strategy, disruption, new-market creation, innovation frameworks.",
-    "corporate-portfolio-strategy": "Corporate-level strategy, portfolio, core/adjacency, where-to-play at the group level.",
-    "strategy-execution-org": "Turning strategy into action: choices, simple rules, execution, org alignment.",
-    "game-theory-decision": "Game theory, competitive dynamics, co-opetition, strategic decision structure.",
-    "behavioral-strategy-bias": "Behavioral strategy, debiasing big decisions, narrative/halo traps.",
-    "platform-ecosystem-strategy": "Platform, network-effect, ecosystem, and aggregation strategy."
+    "competitive-strategy-advantage": "Cost leadership versus specialized niche positioning, incumbent defense, and durable competitive advantage.",
+    "growth-innovation": "Geographic expansion, market entry, service bundling, and disruptive innovation.",
+    "corporate-portfolio-strategy": "Portfolio resource allocation, core and adjacent investments, acquisition strategy, and strategic focus.",
+    "strategy-execution-org": "Where-to-play and how-to-win choices, direct versus distributor channel strategy, and organizational alignment.",
+    "game-theory-decision": "Game theory, co-opetition, competitor responses, and strategic pricing-model dynamics.",
+    "behavioral-strategy-bias": "Strategic decision debiasing, outside-view forecasting, and executive judgment.",
+    "platform-ecosystem-strategy": "Two-sided marketplaces, network effects, multi-homing, and ecosystem strategy."
   },
   "personas": [
     {"slug":"michael-porter","name":"Michael Porter","cell":"competitive-strategy-advantage","role":"lead-driver","anchor":"HBS; Five Forces, generic strategies, value chain, competitive advantage — the field's founder (active emeritus => persistent_signals)"},

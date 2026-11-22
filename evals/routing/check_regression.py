@@ -125,7 +125,7 @@ def probe_exit(ok, ref):
     return 1 if ref == "refs/heads/main" else 0
 
 
-def probe(url="http://127.0.0.1:11434", model="nomic-embed-text"):
+def probe(url="http://127.0.0.1:11434", model="nomic-embed-text", timeout=30):
     import shutil, subprocess
     import meta_select
     try:
@@ -135,7 +135,10 @@ def probe(url="http://127.0.0.1:11434", model="nomic-embed-text"):
         return False
     if not shutil.which("ollama"):
         return False
-    return subprocess.run(["ollama", "show", model], capture_output=True, timeout=30).returncode == 0
+    try:
+        return subprocess.run(["ollama", "show", model], capture_output=True, timeout=timeout).returncode == 0
+    except (subprocess.TimeoutExpired, OSError):
+        return False
 
 
 def self_test():
@@ -226,6 +229,8 @@ def _assert_local_http_ignores_proxy():
         base = f"http://127.0.0.1:{port}"
         assert model_digest(base, "nomic-embed-text") == "abc"
         assert probe(base, "nomic-embed-text") is True
+        exe.write_text("#!/bin/sh\nsleep 5\n")
+        assert probe(base, "nomic-embed-text", timeout=1) is False
     finally:
         for key, value in old.items():
             if value is None:

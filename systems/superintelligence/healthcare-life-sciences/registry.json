@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-04",
+  "generated_at": "2026-11-21",
   "team_id": "healthcare-life-sciences-super-intelligence",
   "team_name": "Healthcare & Life Sciences Super Intelligence Team",
   "description": "Hospital care, patient safety, randomized clinical trials and observational cohorts, diagnostic accuracy and prevalence, pharmacovigilance, genomics, therapeutic drug discovery, medical devices, infection prevention, care transitions and readmissions, vaccination programs, and health economics.",
@@ -84,7 +84,7 @@
       "personas": [
         "bertalan-mesko",
         "eric-topol",
-        "uzeyn-damania"
+        "zubin-damania"
       ],
       "file_path": "superintelligence/healthcare-life-sciences/cells/medtech-digital-health.md"
     }
@@ -228,17 +228,17 @@
       "cell": "healthcare-economics",
       "file_path": "superintelligence/healthcare-life-sciences/personas/uwe-reinhardt.md"
     },
-    "uzeyn-damania": {
-      "slug": "uzeyn-damania",
-      "real_name": "Zubin Damania",
-      "cell": "medtech-digital-health",
-      "file_path": "superintelligence/healthcare-life-sciences/personas/uzeyn-damania.md"
-    },
     "vinod-khosla": {
       "slug": "vinod-khosla",
       "real_name": "Vinod Khosla",
       "cell": "biotech-strategy",
       "file_path": "superintelligence/healthcare-life-sciences/personas/vinod-khosla.md"
+    },
+    "zubin-damania": {
+      "slug": "zubin-damania",
+      "real_name": "Zubin Damania",
+      "cell": "medtech-digital-health",
+      "file_path": "superintelligence/healthcare-life-sciences/personas/zubin-damania.md"
     }
   }
 }

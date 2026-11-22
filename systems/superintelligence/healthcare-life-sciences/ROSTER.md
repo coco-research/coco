@@ -74,5 +74,5 @@ Healthcare & Life Sciences Super Intelligence Team cell: Medtech Digital Health
 |---|---|---|
 | `bertalan-mesko` | Bertalan Meskó |  |
 | `eric-topol` | Eric Topol |  |
-| `uzeyn-damania` | Zubin Damania |  |
+| `zubin-damania` | Zubin Damania |  |
 

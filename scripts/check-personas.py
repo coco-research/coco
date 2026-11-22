@@ -14,7 +14,8 @@ Rules (taken from the existing validate_persona.py / validate_offline.py copies,
 templates/attribution.md and the real persona files):
   (a) frontmatter   parses, and has every field all shipped personas carry, non-empty;
                     real_name is one text value (a list or mapping would dodge (j))
-  (b) sources       at least 3 sources, each an https:// URL
+  (b) sources       at least 3 sources, each an https:// URL (a failure names the item
+                    numbers, never the values)
   (c) label         a file that speaks in the person's voice (a `> "..."` block)
                     carries the approved label line from templates/attribution.md
   (d) roster        the slug is listed in its department's registry.json / roster.json
@@ -54,13 +55,18 @@ that matched a private-detail or opt-out check.
 
 --links fetch safety: https only, on the first URL and every redirect hop; every
 address each host resolves to must be public (stdlib ipaddress), and the
-connection goes to the address that was checked, with no second lookup; a
-per-operation timeout plus a deadline: 10 s for the connect and for each read,
-and a 30 s deadline per hop, after which the hop fails and its connection is shut
-down and closed (a name lookup still running then cannot be interrupted, but is
-not allowed to go on to connect); at most 5 redirects, 2 MB read per page. A
-refused link prints "(links) <host>, line <n>: refused: <reason>" and is never
-fetched; no (links) line prints a URL's path or query, or a title.
+connection goes to the address that was checked, with no second lookup; the
+(k) checks run on the decoded path and query of every hop's URL, redirect targets
+included, before that hop is made; a per-operation timeout plus a deadline: 10 s
+for the connect and for each read, and a 30 s deadline per hop. The deadline
+always holds for the caller. When it passes, the socket that carries the hop is
+shut down, which ends the TLS handshake, the headers or the body read, whichever
+is running (the worker then closes it). Two phases have no socket to shut down
+yet: a name lookup is left to finish, and a TCP connect runs out on its own 10 s
+timeout; neither is then allowed to go on. At most 5
+redirects, 2 MB read per page. A refused link prints "(links) <host>, line <n>:
+refused: <reason>" and is never fetched; every reason is a fixed category, and no
+(links) line prints a URL's path or query, a title, an address or an error's text.
 """
 from __future__ import annotations
 
@@ -349,49 +355,60 @@ def checked_address(host: str, port: int) -> str:
     """Resolve once; every address must be public. Returns the address to connect to."""
     try:
         infos = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
-    except (OSError, UnicodeError) as e:
-        raise Refused(f"cannot resolve {host}: {e}")
+    except (OSError, UnicodeError):
+        raise Refused("cannot resolve the host")  # a fixed category: the resolver's text is not printed
     addrs = [ipaddress.ip_address(info[4][0].split("%")[0]) for info in infos]
     if not addrs:
-        raise Refused(f"cannot resolve {host}: no addresses")
-    for a in addrs:
-        if not is_public(a):
-            raise Refused(f"{host} resolves to non-public address {a}")
+        raise Refused("cannot resolve the host")
+    if not all(is_public(a) for a in addrs):
+        raise Refused("the host resolves to a non-public address")
     return str(addrs[0])
 
 
 class PinnedHTTPS(http.client.HTTPSConnection):
     """HTTPS to an address already checked: no second lookup of the host name."""
 
-    auto_open = 0  # once hang_up has closed it, request() raises NotConnected instead of quietly dialing again
+    auto_open = 0  # a connection without a socket never redials: request() raises NotConnected instead
+    hung_up = False  # set by hang_up; a dial that finishes after it goes no further
 
     def __init__(self, host: str, port: int, address: str):
         super().__init__(host, port, timeout=READ_TIMEOUT)
         self.address, self.tls = address, ssl.create_default_context()
 
     def connect(self):
-        sock = socket.create_connection((self.address, self.port), timeout=CONNECT_TIMEOUT)
-        self.sock = sock  # the raw socket first, so a hang_up during the TLS handshake can shut it down
+        """Dial, then handshake. self.transport is always the socket that owns the descriptor (the raw one,
+        then the TLS one before its handshake starts), and close() never clears it, so hang_up reaches it
+        in the handshake and after getresponse has handed the connection to the response."""
+        self.transport = socket.create_connection((self.address, self.port), timeout=CONNECT_TIMEOUT)
         try:
-            sock.settimeout(READ_TIMEOUT)
-            self.sock = self.tls.wrap_socket(sock, server_hostname=self.host)
+            if self.hung_up:  # hang_up came during the dial, when there was no socket to shut down
+                raise TimeoutError("hung up during the connect")
+            self.transport.settimeout(READ_TIMEOUT)
+            self.transport = self.tls.wrap_socket(self.transport, server_hostname=self.host, do_handshake_on_connect=False)
+            if self.hung_up:  # hang_up came inside the wrap, and its shutdown reached only the detached raw socket
+                raise TimeoutError("hung up during the connect")
+            self.transport.do_handshake()
         except BaseException:
-            sock.close()
+            self.transport.close()
             raise
+        self.sock = self.transport
 
 
 def hang_up(conn) -> None:
-    """Shut down and close conn from another thread, so a read blocked on it returns.
+    """Shut down conn's transport (else conn.sock) from another thread, so whatever I/O the worker
+    is blocked in on it (TLS handshake, request, headers, body) fails at once.
 
-    shutdown, not only close: a response reader holds its own reference to the socket,
-    so close() alone would leave the descriptor open and the blocked read waiting.
+    shutdown, not close: a response reader holds its own reference to the socket, so close() alone
+    would leave the descriptor open and the read waiting, and closing from this thread races the
+    worker (a TLS handshake blocked on it missed the wake-up in 1 of 3 local runs; shutdown alone
+    never did). The worker closes the socket itself as its failed I/O unwinds: connect() on error,
+    get_once's finally, or the response it was reading.
     """
-    sock = getattr(conn, "sock", None)
+    conn.hung_up = True  # set before the transport is read: connect() sets the transport, then reads this
+    sock = getattr(conn, "transport", None) or getattr(conn, "sock", None)
     if sock is not None:
         with contextlib.suppress(OSError):
             sock.shutdown(socket.SHUT_RDWR)
-    with contextlib.suppress(OSError):
-        conn.close()
 
 
 def within(seconds: float, fn, *args, held: dict | None = None):
@@ -399,11 +416,13 @@ def within(seconds: float, fn, *args, held: dict | None = None):
 
     The socket timeouts are per operation (the connect, each read), so a server that
     answers one byte at a time, or a resolver that never returns, would otherwise hold
-    a hop for as long as it likes: this is the deadline on top of them. On timeout,
-    held["expired"] is set and the connection fn put in held["conn"] is hung up, so a
-    read blocked on it ends and the worker with it. ponytail: a worker still inside the
-    name lookup cannot be interrupted; it is abandoned (a daemon, so it never keeps the
-    process alive) and get_once does not let it go on to connect.
+    a hop for as long as it likes: this is the deadline on top of them, and it always
+    holds for the caller. On timeout, held["expired"] is set and the connection fn put in
+    held["conn"] is hung up, which ends its TLS handshake, header or body read, and the
+    worker with it. ponytail: a worker still inside the name lookup or the TCP connect
+    has no socket to shut down yet; it is abandoned (a daemon, so it never keeps the
+    process alive), the connect gives up on its own 10 s timeout, and get_once does not
+    let either go on.
     """
     box: dict = {}
     held = {} if held is None else held
@@ -471,6 +490,8 @@ def fetch(url: str):
         parts = urlsplit(url)
         if parts.scheme != "https":
             raise Refused("not https" if hop == 0 else "redirect to a non-https URL")
+        if url_contact(url):  # before every hop: a redirect target can carry a contact detail too
+            raise Refused("contact detail in the URL" if hop == 0 else "contact detail in a redirect target")
         try:
             host, port = parts.hostname, parts.port or 443
         except ValueError:
@@ -562,9 +583,9 @@ def check(path: Path, label: str, cache: dict, optout: set = frozenset(), links:
     src = fm.get("sources") if isinstance(fm.get("sources"), list) else []
     if len(src) < 3:
         out.append(f"(b) sources: {len(src)} source URLs, need at least 3")
-    bad = [s for s in src if not (isinstance(s, str) and s.startswith("https://"))]
-    if bad:
-        out.append(f"(b) sources: not https://: {', '.join(map(str, bad[:3]))}")
+    bad = [str(i) for i, s in enumerate(src, 1) if not (isinstance(s, str) and s.startswith("https://"))]
+    if bad:  # item numbers only: a value could carry a private detail
+        out.append(f"(b) sources: {len(bad)} not https:// (items {', '.join(bad)})")
 
     body = text.split("\n")
     quotes = [n for n, line in enumerate(body) if QUOTE.match(line)]

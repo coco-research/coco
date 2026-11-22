@@ -223,6 +223,16 @@ for case, word, want_code in (("over the limit", "a" * 10_001, 1), ("at the limi
            and out == ([f"{GTM}k.md: (k) private-detail: line {line} is over 10000 characters, not scanned"] if want_code else []),
            f"(k) a line {case} {'fails, unscanned' if want_code else 'is scanned and passes'}", "\n".join(out))
 
+# 676: (b) names how many sources are not https:// and their item numbers, never the values.
+with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
+    board(Path(t), {"b": ("b", "Bee Example", "", "")})
+    f = Path(t) / GTM / "b.md"
+    f.write_text(f.read_text().replace("https://www.ascd.org/books/understanding-by-design-expanded-2nd-edition\n  - https://en",
+                                       "http://example.org/zq7?q=zq7\n  - ftp://example.org/zq7\n  - https://en", 1))
+    p = subprocess.run([sys.executable, "scripts/check-personas.py", GTM + "b.md"], cwd=t, capture_output=True, text=True)
+expect(p.returncode == 1 and p.stdout.splitlines() == [f"{GTM}b.md: (b) sources: 2 not https:// (items 2, 3)"]
+       and "zq7" not in p.stdout, "(b) names the count and item numbers of non-https sources, never their values", p.stdout + p.stderr)
+
 # --all walks every persona file on the board.
 code, out, err = run({"clean-example": CLEAN}, [], args=("--all",))
 expect(code == 0 and err == "check-personas: 2/2 pass", "--all checks every board file", err)
@@ -588,13 +598,31 @@ try:
     want = ["(links) ok.example, line 2: refused: not https",
             "(links) ok.example, line 3: dead: HTTP 404",
             "(links) ok.example, line 4: refused: redirect to a non-https URL",
-            "(links) nohost.example, line 5: refused: cannot resolve nohost.example: unknown host nohost.example",
+            "(links) nohost.example, line 5: refused: cannot resolve the host",
             "(links) ok.example, line 6: refused: bad port",
             "(links) ok.example, line 8: title not found on the page",
             "(links) ok.example, line 1: dead: InvalidURL"]
     expect(out == want and not any("zq7" in l for l in out),
            "--links diagnostics show only the host, the line and the reason (no path, query, error text or title)",
            "\n".join(out))
+
+    # 676: the contact policy runs before every hop: a redirect whose target carries a phone number is refused
+    # with a fixed reason, and the second hop is never made. Invented number on an example host.
+    ROUTES["/to-phone"] = (302, {"Location": "/card?tel=415-555-0134"}, b"")
+    ROUTES["/card?tel=415-555-0134"] = ROUTES["/page"]
+    connects.clear()
+    out = links({"sources": ["https://ok.example/to-phone"]})
+    fetched = [host + path for host, _, path in connects]
+    expect(out == ["(links) ok.example, line 1: refused: contact detail in a redirect target"] and fetched == ["ok.example/to-phone"],
+           "--links refuses a redirect to a URL carrying a phone number, never making the second hop",
+           "\n".join(out) + f"\nfetched: {fetched}")
+
+    # 676: resolver refusals are fixed categories, never the resolver's text or the address.
+    DNS["zq7.example"] = ["10.9.9.7"]
+    out = [links({"sources": [u]})[0] for u in ("https://zq7.example/x", "https://unknown-zq8.example/x")]
+    expect(out == ["(links) zq7.example, line 1: refused: the host resolves to a non-public address",
+                   "(links) unknown-zq8.example, line 1: refused: cannot resolve the host"],
+           "--links resolver refusals are fixed categories (no address, no resolver text)", "\n".join(out))
 finally:
     socket.getaddrinfo, socket.create_connection, socket.socket.connect, mod.PinnedHTTPS = real
 
@@ -620,10 +648,16 @@ expect(dialed == [("93.184.216.34", 443)], "PinnedHTTPS connects to the checked 
 named = []
 
 
-class NameRecorder:  # also records whether the raw socket was already on the connection (so hang_up can reach it)
-    def wrap_socket(self, sock, server_hostname=None):
-        named.append((server_hostname, conn.sock is sock))
-        return sock
+handshakes = []
+
+
+class NameRecorder:  # returns a new socket object, as TLS wrapping does
+    def wrap_socket(self, sock, server_hostname=None, do_handshake_on_connect=True):
+        named.append(server_hostname)
+        tls = FakeSock()
+        if do_handshake_on_connect:
+            tls.do_handshake()
+        return tls
 
 
 class FakeSock:
@@ -632,6 +666,9 @@ class FakeSock:
 
     def close(self):
         pass
+
+    def do_handshake(self):  # records whether hang_up could reach this socket while the handshake runs
+        handshakes.append(getattr(conn, "transport", None) is self)
 
 
 dialed.clear()
@@ -644,10 +681,10 @@ try:
     conn.connect()
 finally:
     socket.getaddrinfo, socket.create_connection = real[0], real[1]
-expect(verifying and named == [("ok.example", True)] and dialed == [("93.184.216.34", 443)],
+expect(verifying and named == ["ok.example"] and handshakes == [True] and dialed == [("93.184.216.34", 443)],
        "PinnedHTTPS verifies certificates, names the original host in the handshake and dials the checked address"
-       " (the raw socket is on the connection during the handshake)",
-       f"verifying={verifying} named={named} dialed={dialed}")
+       " (the TLS socket is on the connection before its handshake starts)",
+       f"verifying={verifying} named={named} handshakes={handshakes} dialed={dialed}")
 
 # 608(2) race: a connection hang_up closed before it connected must not reconnect on its own. http.client's
 # default auto_open would quietly call connect() again from request(), opening a connection nobody watches.
@@ -670,6 +707,141 @@ except Exception as e:
 expect(raised == "NotConnected" and calls == [],
        "a connection hang_up closed before it connected raises NotConnected on request(), never reconnecting",
        f"raised {raised}, connect() calls: {len(calls)}")
+
+# 676: hang_up reaches the socket that owns the descriptor in every phase after the lookup. The "server" is
+# one end of a local socketpair; the dial is stubbed to return the other end. Each case's worker must end
+# within 5 s of hang_up (the per-read socket timeout is 10 s, so a hang_up that misses fails the case).
+
+
+def cancelled(phase, connect_tls, server):
+    """Run conn.connect() (and, for the body, a GET) in a worker; server(peer, ready) plays the server and
+    sets ready once the worker is blocked in the phase under test; then hang_up and time the worker."""
+    a, b = socket.socketpair()
+    conn = mod.PinnedHTTPS("ok.example", 443, "93.184.216.34")
+    if connect_tls:
+        conn.tls = connect_tls
+    ready, seen = threading.Event(), {}
+
+    def work():
+        try:
+            conn.connect()
+            conn.request("GET", "/page")
+            resp = conn.getresponse()
+            seen["sock cleared"] = conn.sock is None
+            seen["first"] = resp.read1(5)
+            ready.set()
+            resp.read1(5)  # blocks: the server sends no more
+        except Exception as e:  # how the worker ended, for the failure detail
+            seen["ended by"] = e.__class__.__name__
+
+    socket.getaddrinfo, socket.create_connection = no_network, lambda *x, **k: a
+    try:
+        worker = threading.Thread(target=work, daemon=True)
+        worker.start()
+        server(b, ready)
+        ok_ready = ready.wait(5)
+        mod.hang_up(conn)
+        worker.join(5)
+        alive = worker.is_alive()
+    finally:
+        socket.getaddrinfo, socket.create_connection = real[0], real[1]
+        b.close()  # frees a worker the checker left blocked
+    expect(ok_ready and not alive, f"hang_up ends {phase}", f"ready: {ok_ready}, worker alive: {alive}, seen: {seen}")
+    return seen
+
+
+def in_handshake(peer, ready):
+    peer.settimeout(5)
+    with contextlib.suppress(OSError):
+        peer.recv(1)  # the ClientHello: the worker is now waiting inside the TLS handshake
+    ready.set()
+
+
+cancelled("a TLS handshake that gets no answer", None, in_handshake)
+
+
+class PlainTLS(socket.socket):  # stands in for SSLSocket: takes the descriptor over from the raw socket
+    def do_handshake(self):
+        pass
+
+
+class NoTLS:
+    def wrap_socket(self, sock, server_hostname=None, do_handshake_on_connect=True):
+        timeout = sock.gettimeout()  # as SSLSocket does: a socket built on a non-blocking descriptor starts non-blocking
+        tls = PlainTLS(sock.family, sock.type, fileno=sock.detach())
+        tls.settimeout(timeout)
+        if do_handshake_on_connect:
+            tls.do_handshake()
+        return tls
+
+
+def mid_body(peer, ready):  # answers with "Connection: close" (so getresponse clears conn.sock), then stalls
+    peer.settimeout(5)
+    with contextlib.suppress(OSError):
+        peer.recv(65536)
+        peer.sendall(b"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nConnection: close\r\n\r\nhello")
+
+
+# hang_up during the TCP dial has no socket to shut down: the dial may finish, but no handshake starts.
+wraps = []
+
+
+class CountingTLS:
+    def wrap_socket(self, sock, **k):
+        wraps.append(1)
+        raise AssertionError("handshake started")
+
+
+a, b = socket.socketpair()
+conn = mod.PinnedHTTPS("ok.example", 443, "93.184.216.34")
+conn.tls = CountingTLS()
+socket.getaddrinfo, socket.create_connection = no_network, lambda *x, **k: mod.hang_up(conn) or a
+try:
+    conn.connect()
+    raised = "nothing"
+except Exception as e:
+    raised = e.__class__.__name__
+finally:
+    socket.getaddrinfo, socket.create_connection = real[0], real[1]
+    a.close(), b.close()
+expect(raised == "TimeoutError" and wraps == [], "hang_up during the TCP dial: the dial finishes, but no TLS handshake starts",
+       f"raised {raised}, handshakes started: {len(wraps)}")
+
+# hang_up inside wrap_socket: the raw socket is already detached (so its shutdown reaches nothing) and the TLS
+# socket is not yet on the connection. The flag must still stop the handshake.
+handshook = []
+
+
+class HandshakeRecorder(PlainTLS):
+    def do_handshake(self):
+        handshook.append(1)
+
+
+class HangUpInWrap:
+    def wrap_socket(self, sock, server_hostname=None, do_handshake_on_connect=True):
+        tls = HandshakeRecorder(sock.family, sock.type, fileno=sock.detach())
+        mod.hang_up(conn)  # conn.transport is still the detached raw socket here
+        return tls
+
+
+a, b = socket.socketpair()
+conn = mod.PinnedHTTPS("ok.example", 443, "93.184.216.34")
+conn.tls = HangUpInWrap()
+socket.getaddrinfo, socket.create_connection = no_network, lambda *x, **k: a
+try:
+    conn.connect()
+    raised = "nothing"
+except Exception as e:
+    raised = e.__class__.__name__
+finally:
+    socket.getaddrinfo, socket.create_connection = real[0], real[1]
+    b.close()
+expect(raised == "TimeoutError" and handshook == [], "hang_up inside wrap_socket (raw socket detached): no TLS handshake starts",
+       f"raised {raised}, handshakes: {len(handshook)}")
+
+seen = cancelled("a body read after getresponse has cleared conn.sock", NoTLS(), mid_body)
+expect(seen.get("sock cleared") is True and seen.get("first") == b"hello",
+       "the body case really reads after getresponse cleared conn.sock", seen)
 
 # End to end: --links output lines carry the file name and the refusal.
 with tempfile.TemporaryDirectory(prefix="check-personas-") as t:

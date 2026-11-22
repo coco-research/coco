@@ -34,28 +34,37 @@ templates/attribution.md and the real persona files):
                     never its text.
   (k) private-detail  no line looks like a phone number, a street address (a number,
                     Capitalized or ALL CAPS name words, then St, Ave, Rd, ... in any
-                    case) or a personal (non-work) email address; the decoded path and query
-                    of every URL are also scanned for emails and phone numbers;
-                    a line over 10000 characters fails instead of being skipped
+                    case) or a personal (non-work) email address; the decoded text of
+                    every URL is also scanned for all three; a line over 10000
+                    characters fails instead of being skipped
   (links)           with --links: each URL answers 200 over https, and each
                     canonical_works title appears on its HTML page; a file with
-                    a (k) finding is not fetched until that is fixed
+                    a (k) finding is not fetched until that is fixed, and before
+                    anything is fetched the decoded path and query of every URL
+                    to fetch get the same three checks (a match is a (k) line)
 
 Input safety: a persona, registry, roster, template or opt-out file is read only
-if it is a regular file of at most 1 MiB inside the board (or the test fixtures)
-and is not reached through a symlink; anything else prints a "cannot read file"
-diagnostic and is never opened. Every scanning pattern runs in time linear in the
-line. No message prints text that matched a private-detail or opt-out check.
+if it is a regular file of at most 1 MiB (counted in bytes) inside the board (or
+the test fixtures) and is not reached through a symlink; anything else prints a
+"cannot read file" diagnostic. The threat model is the repo's own checked-out
+tree as it stands: the checks are made on the path and then on the opened file,
+so a path component swapped for a symlink while the checker runs is out of scope.
+Every scanning pattern runs in time linear in the line. No message prints text
+that matched a private-detail or opt-out check.
 
 --links fetch safety: https only, on the first URL and every redirect hop; every
 address each host resolves to must be public (stdlib ipaddress), and the
-connection goes to the address that was checked, with no second lookup; 10 s
-connect, 10 s read, 30 s for a whole hop (lookup, connect, headers and body
-together), at most 5 redirects, 2 MB read per page. A refused link prints
-"(links) <url>: refused: <reason>" and is never fetched.
+connection goes to the address that was checked, with no second lookup; a
+per-operation timeout plus a deadline: 10 s for the connect and for each read,
+and a 30 s deadline per hop, after which the hop fails and its connection is shut
+down and closed (a name lookup still running then cannot be interrupted, but is
+not allowed to go on to connect); at most 5 redirects, 2 MB read per page. A
+refused link prints "(links) <host>, line <n>: refused: <reason>" and is never
+fetched; no (links) line prints a URL's path or query, or a title.
 """
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import html
 import http.client
@@ -70,7 +79,7 @@ import sys
 import threading
 import time
 from pathlib import Path
-from urllib.parse import unquote, urljoin, urlsplit
+from urllib.parse import unquote, unquote_plus, urljoin, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 BOARD = ROOT / "systems" / "superintelligence"
@@ -79,7 +88,7 @@ ATTRIBUTION = BOARD / "templates" / "attribution.md"
 OPTOUT = ROOT / "docs" / "personas" / "optout.sha256"
 
 CONNECT_TIMEOUT = READ_TIMEOUT = 10  # seconds
-HOP_TIMEOUT = 30  # seconds for one hop: lookup, connect, headers and body together
+HOP_TIMEOUT = 30  # seconds: the deadline per hop, on top of the per-operation socket timeouts
 MAX_REDIRECTS = 5
 MAX_BYTES = 2 * 1024 * 1024
 MAX_FILE = 1 << 20  # bytes: the most a persona, registry or opt-out file may hold (shipped max: 124 KB)
@@ -92,17 +101,17 @@ REDIRECTS = (301, 302, 303, 307, 308)
 # long word, blank run or dotted run costs one pass. A 33-character URL scheme
 # is not recognised as a URL, so its text is scanned as plain text (the safe side).
 URL_TEXT = re.compile(r"\b[a-z][a-z0-9+.-]{0,31}://\S+|\bwww\.\S+", re.I)
-PRIVATE = [  # (what, pattern, also looked for in the decoded path and query of each URL)
+PRIVATE = [  # (what, pattern); each is also looked for in the decoded text of every URL
     ("a phone number", re.compile(
         r"(?<![\w.+/-])(?:\+\d{1,3}[ .-]?)?(?:\(\d{3}\)|\d{3})[ .-]\d{3}[ .-]\d{4}(?![\w-])"
-        r"|(?<![\w.+/-])\+\d{1,3}(?:[ .-]\d{2,4}){2,4}(?![\w-])"), True),
+        r"|(?<![\w.+/-])\+\d{1,3}(?:[ .-]\d{2,4}){2,4}(?![\w-])")),
     # Name words are Capitalized or ALL CAPS; only the street word ignores case ("In 2008 he moved to St. Louis" stays quiet).
     ("a street address", re.compile(
         r"\b\d{1,5}(?:\s+(?:[A-Z][a-z]+|[A-Z]+)){1,3}\s+"
-        r"(?i:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|terrace|parkway)\b"), False),
+        r"(?i:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|terrace|parkway)\b")),
     ("a personal email address", re.compile(  # one local-part character is enough to tell it is an address
         r"[\w.+-]@(?:gmail|googlemail|yahoo|ymail|hotmail|outlook|live|msn|aol|icloud|me|mac"
-        r"|proton|protonmail|pm|gmx|mail|yandex|zoho|qq|163|126|fastmail|hey)\.[a-z.]{2,6}\b", re.I), True),
+        r"|proton|protonmail|pm|gmx|mail|yandex|zoho|qq|163|126|fastmail|hey)\.[a-z.]{2,6}\b", re.I)),
 ]
 
 # The fields every one of the 495 shipped personas has, non-empty.
@@ -202,9 +211,12 @@ class Unsafe(OSError):
 def read_file(p, roots=(BOARD, FIXTURES)) -> str:
     """Text of a regular file inside one of roots, reached without a symlink; else Unsafe.
 
-    Every read goes through here. The path is resolved before it is opened, a symlink
-    anywhere below the root is refused (so is one swapped in at the last step: the
-    open itself does not follow it), and the check is on the opened file, not the name.
+    Every read goes through here. Threat model: the checker reads the repo's own
+    checked-out tree. The path is resolved and every component below the root is
+    checked for a symlink before the open; a component swapped while the checker
+    runs (between those checks and the open) is out of scope. The open does not
+    follow a symlink in the last component, the type and size checks are on the
+    opened file, and at most MAX_FILE + 1 bytes are read before decoding.
     """
     lexical = Path(os.path.abspath(p))
     real = Path(os.path.realpath(lexical))
@@ -218,16 +230,18 @@ def read_file(p, roots=(BOARD, FIXTURES)) -> str:
             raise Unsafe("a symlink")
     # O_NONBLOCK: opening a named pipe must not wait for a writer; it is refused just below.
     fd = os.open(real, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0))
-    with os.fdopen(fd, encoding="utf-8") as f:
+    with os.fdopen(fd, "rb") as f:
         info = os.fstat(f.fileno())
         if not stat.S_ISREG(info.st_mode):
             raise Unsafe("not a regular file")
         if info.st_size > MAX_FILE:
             raise Unsafe(f"larger than {MAX_FILE} bytes")
-        text = f.read(MAX_FILE + 1)  # capped here too: the file can grow after the fstat above
-        if len(text) > MAX_FILE:
-            raise Unsafe(f"larger than {MAX_FILE} bytes")
-        return text
+        data = f.read(MAX_FILE + 1)  # bytes, capped here too: the file can grow after the fstat above
+    if len(data) > MAX_FILE:
+        raise Unsafe(f"larger than {MAX_FILE} bytes")
+    # A decode error is a UnicodeDecodeError, which every caller reports as "cannot read". The newline
+    # handling is what the old text-mode open did: CRLF and CR read as LF.
+    return data.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
 
 
 def roster_slugs(dept: Path, cache: dict):
@@ -349,12 +363,15 @@ def checked_address(host: str, port: int) -> str:
 class PinnedHTTPS(http.client.HTTPSConnection):
     """HTTPS to an address already checked: no second lookup of the host name."""
 
+    auto_open = 0  # once hang_up has closed it, request() raises NotConnected instead of quietly dialing again
+
     def __init__(self, host: str, port: int, address: str):
         super().__init__(host, port, timeout=READ_TIMEOUT)
         self.address, self.tls = address, ssl.create_default_context()
 
     def connect(self):
         sock = socket.create_connection((self.address, self.port), timeout=CONNECT_TIMEOUT)
+        self.sock = sock  # the raw socket first, so a hang_up during the TLS handshake can shut it down
         try:
             sock.settimeout(READ_TIMEOUT)
             self.sock = self.tls.wrap_socket(sock, server_hostname=self.host)
@@ -363,15 +380,33 @@ class PinnedHTTPS(http.client.HTTPSConnection):
             raise
 
 
-def within(seconds: float, fn, *args):
+def hang_up(conn) -> None:
+    """Shut down and close conn from another thread, so a read blocked on it returns.
+
+    shutdown, not only close: a response reader holds its own reference to the socket,
+    so close() alone would leave the descriptor open and the blocked read waiting.
+    """
+    sock = getattr(conn, "sock", None)
+    if sock is not None:
+        with contextlib.suppress(OSError):
+            sock.shutdown(socket.SHUT_RDWR)
+    with contextlib.suppress(OSError):
+        conn.close()
+
+
+def within(seconds: float, fn, *args, held: dict | None = None):
     """fn(*args) in a daemon thread; TimeoutError if it has not finished after `seconds`.
 
-    The socket timeouts are per call, so a server that answers one byte at a time, or a
-    resolver that never returns, would otherwise hold a hop for as long as it likes.
-    ponytail: a stalled hop's thread is abandoned, not killed; it ends when its socket
-    gives up, and being a daemon it never keeps the process alive.
+    The socket timeouts are per operation (the connect, each read), so a server that
+    answers one byte at a time, or a resolver that never returns, would otherwise hold
+    a hop for as long as it likes: this is the deadline on top of them. On timeout,
+    held["expired"] is set and the connection fn put in held["conn"] is hung up, so a
+    read blocked on it ends and the worker with it. ponytail: a worker still inside the
+    name lookup cannot be interrupted; it is abandoned (a daemon, so it never keeps the
+    process alive) and get_once does not let it go on to connect.
     """
     box: dict = {}
+    held = {} if held is None else held
 
     def run():
         try:
@@ -383,6 +418,9 @@ def within(seconds: float, fn, *args):
     worker.start()
     worker.join(seconds)
     if worker.is_alive():
+        held["expired"] = True
+        if held.get("conn") is not None:
+            hang_up(held["conn"])
         raise TimeoutError(f"no answer within {seconds:g} s")
     if "err" in box:
         raise box["err"]
@@ -394,12 +432,21 @@ def check_time(deadline: float) -> None:
         raise TimeoutError(f"no answer within {HOP_TIMEOUT:g} s")
 
 
-def get_once(host: str, port: int, target: str, deadline: float):
-    """One GET to the checked address: (status, content type, Location or None, body)."""
+def get_once(host: str, port: int, target: str, deadline: float, held: dict):
+    """One GET to the checked address: (status, content type, Location or None, body).
+
+    The connection goes in held["conn"], where within() hangs it up if the hop runs out of time.
+    """
     address = checked_address(host, port)
     check_time(deadline)  # a lookup that stalled past the deadline must not go on to dial: within() has given up on this hop
     conn = PinnedHTTPS(host, port, address)
+    held["conn"] = conn
     try:
+        if held.get("expired"):  # within() gave up just before conn was stored, so it could not hang it up
+            raise TimeoutError(f"no answer within {HOP_TIMEOUT:g} s")
+        conn.connect()  # explicit: with auto_open off, request() never dials on its own
+        if held.get("expired"):  # within() gave up during the connect
+            raise TimeoutError(f"no answer within {HOP_TIMEOUT:g} s")
         conn.request("GET", target, headers={"User-Agent": "coco-check-personas", "Accept": "text/html,*/*"})
         resp = conn.getresponse()
         location = resp.getheader("Location")
@@ -423,16 +470,17 @@ def fetch(url: str):
     for hop in range(MAX_REDIRECTS + 1):
         parts = urlsplit(url)
         if parts.scheme != "https":
-            raise Refused(f"not https: {url}" if hop == 0 else f"redirect to non-https {url}")
+            raise Refused("not https" if hop == 0 else "redirect to a non-https URL")
         try:
             host, port = parts.hostname, parts.port or 443
         except ValueError:
-            raise Refused(f"bad port in {url}")
+            raise Refused("bad port")
         if not host:
-            raise Refused(f"no host in {url}")
+            raise Refused("no host")
         target = (parts.path or "/") + (f"?{parts.query}" if parts.query else "")
-        deadline = time.monotonic() + HOP_TIMEOUT  # one deadline per hop: lookup, connect, headers and body
-        status, ctype, location, body = within(HOP_TIMEOUT, get_once, host, port, target, deadline)
+        deadline = time.monotonic() + HOP_TIMEOUT  # one deadline per hop, on top of the per-operation socket timeouts
+        held: dict = {}
+        status, ctype, location, body = within(HOP_TIMEOUT, get_once, host, port, target, deadline, held, held=held)
         if location:
             url = urljoin(url, location)
             continue
@@ -440,7 +488,23 @@ def fetch(url: str):
     raise Refused(f"more than {MAX_REDIRECTS} redirects")
 
 
-def link_problems(fm: dict) -> list:
+def url_contact(url: str) -> list:
+    """What (k) finds in the decoded path and query of url: the parts a fetch sends to its host."""
+    try:
+        parts = urlsplit(url)
+    except ValueError:
+        return []  # fetch cannot split it either, so it is never sent
+    texts = (unquote(parts.path), unquote(parts.query), unquote_plus(parts.query))
+    return [what for what, rx in PRIVATE if any(rx.search(t) for t in texts)]
+
+
+def link_problems(fm: dict, lines: list) -> list:
+    """(links) problems of fm's sources and canonical_works; lines is the file, for line numbers.
+
+    Before anything is fetched, every URL to fetch gets the (k) checks on its decoded path and
+    query: one match and the (k) lines are all that is returned, with nothing fetched. A (links)
+    line names only the host, the line in the file and the reason: never a path, query or title.
+    """
     titles: dict = {}
     for s in fm.get("sources") if isinstance(fm.get("sources"), list) else []:
         if isinstance(s, str):
@@ -449,24 +513,33 @@ def link_problems(fm: dict) -> list:
         if isinstance(w, dict) and isinstance(w.get("url"), str):
             if titles.get(w["url"]) is None:
                 titles[w["url"]] = w.get("title")
+    line = {url: next((n for n, text in enumerate(lines, 1) if url in text), 0) for url in titles}
+    found = [f"(k) private-detail: line {line[url]} looks like {what}" for url in titles for what in url_contact(url)]
+    if found:
+        return list(dict.fromkeys(found))
     out = []
     for url, title in titles.items():
         try:
+            host = urlsplit(url).hostname or "no host"
+        except ValueError:
+            host = "a bad host"
+        where = f"(links) {host}, line {line[url]}"
+        try:
             status, ctype, body = fetch(url)
         except Refused as e:
-            out.append(f"(links) {url}: refused: {e}")
+            out.append(f"{where}: refused: {e}")
             continue
-        except (OSError, http.client.HTTPException, ValueError) as e:
-            out.append(f"(links) {url}: dead: {e.__class__.__name__}: {e}")
+        except (OSError, http.client.HTTPException, ValueError) as e:  # the class only: an error's text can quote the URL
+            out.append(f"{where}: dead: {e.__class__.__name__}")
             continue
         if status != 200:
-            out.append(f"(links) {url}: dead: HTTP {status}")
+            out.append(f"{where}: dead: HTTP {status}")
         elif title and "html" in ctype.lower():
             # [^<>]: a '<' with no '>' before the next '<' fails after one short scan, so a page full
             # of stray brackets is one pass (the old [^>]+ rescanned to the end of the page from each).
             page = norm(html.unescape(re.sub(r"<[^<>]*>", " ", body.decode("utf-8", "replace"))))
             if norm(title) not in page:
-                out.append(f"(links) {url}: title not found on the page: {title}")
+                out.append(f"{where}: title not found on the page")
     return out
 
 
@@ -550,12 +623,12 @@ def check(path: Path, label: str, cache: dict, optout: set = frozenset(), links:
             continue
         visible = URL_TEXT.sub(" ", line)
         urls = [unquote(u) for u in URL_TEXT.findall(line)]  # a URL's path and query can carry an address too
-        for what, rx, in_urls in PRIVATE:
-            if rx.search(visible) or (in_urls and any(rx.search(u) for u in urls)):
+        for what, rx in PRIVATE:
+            if rx.search(visible) or any(rx.search(u) for u in urls):
                 out.append(f"(k) private-detail: line {n + 1} looks like {what}")
 
     if links and not any(o.startswith("(k)") for o in out):  # a file that may hold a private detail sends none of its URLs anywhere
-        out += link_problems(fm)
+        out += link_problems(fm, body)
     return out
 
 

@@ -302,6 +302,11 @@ with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
         except subprocess.TimeoutExpired:
             ok, seen = False, "hung"
         expect(ok, f"a {name} file is refused: {why}", seen)
+    # A file that is not UTF-8 is a clean "cannot read file" line, not a traceback.
+    (tmp / GTM / "latin.md").write_bytes(b"---\nreal_name: Caf\xe9\n---\n")
+    p = subprocess.run([sys.executable, "scripts/check-personas.py", GTM + "latin.md"], cwd=tmp, capture_output=True, text=True)
+    expect(p.returncode == 1 and p.stdout.startswith(f"{GTM}latin.md: {CANT}") and "Traceback" not in p.stderr,
+           "a file that is not UTF-8 is refused with a diagnostic, no traceback", p.stdout + p.stderr)
 
 # --links, offline: resolution and fetching stubbed.
 spec = importlib.util.spec_from_file_location("check_personas", CHECK)
@@ -324,7 +329,7 @@ def timed(fn, limit=10):
 for case, text in (("an ordinary word", "a" * 200_000), ("dotted words", "a." * 100_000), ("blanks", " " * 200_000),
                    ("digits and blanks", "1 " * 100_000), ("quotes", "'" * 200_000), ("quotes and blanks", "' " * 100_000),
                    ("a number and capitalized words", "1 Ab " * 40_000), ("a number and single capitals", "1 A " * 70_000)):
-    scan = lambda: ([rx.search(text) for _, rx, _ in mod.PRIVATE], mod.URL_TEXT.sub(" ", text),
+    scan = lambda: ([rx.search(text) for _, rx in mod.PRIVATE], mod.URL_TEXT.sub(" ", text),
                     mod.scalar("x" + text + "x"), mod.scalar("'" + text), mod.scalar("'" + text + "' # c"))
     spent = min(timed(scan)[1] for _ in range(3))  # best of three: a busy machine must not fail a linear scan
     expect(spent < 1, f"(k) patterns and scalar() take {spent:.2f} s on 200k characters of {case} (< 1 s)")
@@ -334,12 +339,46 @@ shapes = {'"Opted Out Person" # note': "Opted Out Person", "'Opted Out Person' #
           "'a # b' # c": "a # b", '"a # b"': "a # b", "  'x'   # c  ": "x", "''": "", "'": "'", "~": None, "x #": "x"}
 bad = {k: mod.scalar(k) for k, v in shapes.items() if mod.scalar(k) != v}
 expect(not bad, "scalar() drops the quotes of a quoted value, with or without a trailing comment", bad)
+
+# 608(3): the size cap counts bytes, not characters. The file grows after the fstat (made here to report the
+# size it had before), to just over MAX_FILE bytes of two-byte characters: well under MAX_FILE characters.
+# A CRLF file still reads as "\n" lines, as it did when the file was opened in text mode.
+with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
+    grew, crlf = Path(t) / "grew.md", Path(t) / "crlf.md"
+    grew.write_bytes(("é" * (mod.MAX_FILE // 2 + 1)).encode("utf-8"))
+    crlf.write_bytes(b"---\r\nslug: x\r\n")
+    real_fstat = os.fstat
+
+    class BeforeGrowth:
+        def __init__(self, fd):
+            self.st_mode, self.st_size = real_fstat(fd).st_mode, 0
+
+    os.fstat = BeforeGrowth
+    try:
+        try:
+            mod.read_file(grew, roots=(t,))
+            why = "read"
+        except mod.Unsafe as e:
+            why = str(e)
+        text = mod.read_file(crlf, roots=(t,))
+    finally:
+        os.fstat = real_fstat
+expect(why == f"larger than {mod.MAX_FILE} bytes" and text == "---\nslug: x\n",
+       "a file over MAX_FILE bytes but under MAX_FILE characters is refused (a byte-counted read)",
+       f"grew.md: {why}; crlf.md: {text!r}")
+
+
+def links(fm):
+    """link_problems with the whole frontmatter on line 1 of the file."""
+    return mod.link_problems(fm, [json.dumps(fm)])
+
+
 real_fetch = mod.fetch
 try:
     for case, markup in (("stray '<'", "<" * 200_000), ("unclosed tags", "<a href=" * 25_000), ("one '<' and text", "<" + "x" * 200_000)):
         mod.fetch = lambda url: (200, "text/html", markup.encode())
-        out, spent, _ = timed(lambda: mod.link_problems({"canonical_works": [{"title": "Real Title", "url": "https://ok.example/page"}]}))
-        expect(spent < 1 and out == ["(links) https://ok.example/page: title not found on the page: Real Title"],
+        out, spent, _ = timed(lambda: links({"canonical_works": [{"title": "Real Title", "url": "https://ok.example/page"}]}))
+        expect(spent < 1 and out == ["(links) ok.example, line 1: title not found on the page"],
                f"--links reads a 200k-character page of {case} in {spent:.2f} s (< 1 s)", out)
 finally:
     mod.fetch = real_fetch
@@ -383,6 +422,9 @@ class FakeConnection:
     def __init__(self, host, port, address):
         self.host, self.address = host, address
 
+    def connect(self):
+        pass
+
     def request(self, method, path, headers=None):
         connects.append((self.host, self.address, path))
         self.path = path
@@ -414,19 +456,19 @@ try:
         ("a 6th redirect", "https://ok.example/b0", [f"ok.example/b{i}" for i in range(6)]),
     ):
         lookups.clear(), connects.clear()
-        out = mod.link_problems({"sources": [url]})
+        out = links({"sources": [url]})
         fetched = [host + path for host, _, path in connects]
-        expect(len(out) == 1 and out[0].startswith(f"(links) {url}: refused: ") and fetched == sent,
+        expect(len(out) == 1 and out[0].startswith(f"(links) {url.split('/')[2]}, line 1: refused: ") and fetched == sent,
                f"--links refuses {case}, never fetching it", "\n".join(out) + f"\nfetched: {fetched}")
     lookups.clear(), connects.clear()
-    out = mod.link_problems({"sources": ["https://ok.example/a0"],
+    out = links({"sources": ["https://ok.example/a0"],
                              "canonical_works": [{"title": "The Real Title", "url": "https://ok.example/a0"}]})
     pinned = all(addr == DNS[host][0] for host, addr, _ in connects)
     expect(out == [] and len(connects) == 6 and lookups == ["ok.example"] * 6 and pinned,
            "--links follows 5 redirects, resolves once per hop and connects to the checked address",
            f"{out} {connects} {lookups}")
-    out = mod.link_problems({"canonical_works": [{"title": "Another Title", "url": "https://ok.example/page"}]})
-    expect(out == ["(links) https://ok.example/page: title not found on the page: Another Title"],
+    out = links({"canonical_works": [{"title": "Another Title", "url": "https://ok.example/page"}]})
+    expect(out == ["(links) ok.example, line 1: title not found on the page"],
            "--links reports a canonical_works title missing from its page", out)
 
     # One deadline per hop covers lookup, headers and body together: a hop that stalls, or answers a byte
@@ -473,8 +515,8 @@ try:
                                    ("a resolver that answers after the deadline", late_lookup, FakeConnection)):
             socket.getaddrinfo, mod.PinnedHTTPS = lookup, conn
             connects.clear()
-            out, spent, done = timed(lambda: mod.link_problems({"sources": ["https://ok.example/page"]}))
-            expect(done and spent < 5 and out == ["(links) https://ok.example/page: dead: TimeoutError: no answer within 0.3 s"],
+            out, spent, done = timed(lambda: links({"sources": ["https://ok.example/page"]}))
+            expect(done and spent < 5 and out == ["(links) ok.example, line 1: dead: TimeoutError"],
                    f"--links gives up on {case} at the hop deadline", f"{out} after {spent:.1f} s, finished: {done}")
             if conn is DribbleConnection:  # the abandoned reader ends at the deadline too: no read starts after it
                 time.sleep(0.2)
@@ -491,6 +533,68 @@ try:
         mod.HOP_TIMEOUT = 30
         release.set()
         socket.getaddrinfo, mod.PinnedHTTPS = fake_getaddrinfo, FakeConnection
+
+    # 608(2): a hop given up on at its deadline has its connection closed, so a read blocked on it ends
+    # and its worker thread with it. The "server" is one end of a local socketpair that never writes.
+    blocked = []
+
+    class BlockedConnection(FakeConnection):
+        def request(self, method, path, headers=None):
+            self.sock, self.peer = socket.socketpair()
+            blocked.append(self)
+
+        def getresponse(self):
+            self.worker = threading.current_thread()
+            self.sock.recv(1)  # blocks until the socket is shut down
+            raise OSError("read ended")
+
+        def close(self):
+            self.sock.close()
+
+    mod.HOP_TIMEOUT, mod.PinnedHTTPS = 0.3, BlockedConnection
+    try:
+        try:
+            mod.fetch("https://ok.example/page")
+            timed_out = False
+        except TimeoutError:
+            timed_out = True
+        conn = blocked[0]
+        conn.worker.join(2)
+        expect(timed_out and conn.sock.fileno() == -1 and not conn.worker.is_alive(),
+               "--links closes the connection of a hop given up on at its deadline, so its blocked read ends",
+               f"timed out: {timed_out}, socket open: {conn.sock.fileno() != -1}, worker alive: {conn.worker.is_alive()}")
+    finally:
+        mod.HOP_TIMEOUT, mod.PinnedHTTPS = 30, FakeConnection
+        for c in blocked:
+            c.peer.close()  # frees a worker the checker left blocked
+
+    # 608(5c): a (links) line names the host, the line in the file and the reason: never the URL's path or
+    # query, an exception's text or the title. Every path, query and title here carries the marker zq7.
+    class InvalidConnection(FakeConnection):
+        def request(self, method, path, headers=None):
+            raise mod.http.client.InvalidURL(f"URL can't contain control characters. {path!r}")
+
+    ROUTES["/gone-zq7?q=zq7"] = (404, {}, b"")
+    ROUTES["/to-http-zq7?q=zq7"] = (301, {"Location": "http://ok.example/page-zq7?q=zq7"}, b"")
+    fm = {"sources": ["http://ok.example/plain-zq7?q=zq7", "https://ok.example/gone-zq7?q=zq7",
+                      "https://ok.example/to-http-zq7?q=zq7", "https://nohost.example/x-zq7?q=zq7",
+                      "https://ok.example:99999/port-zq7?q=zq7"],
+          "canonical_works": [{"title": "Missing Title zq7", "url": "https://ok.example/page"}]}
+    lines = ["sources:", *fm["sources"], "canonical_works:", "https://ok.example/page"]
+    out = mod.link_problems(fm, lines)
+    mod.PinnedHTTPS = InvalidConnection
+    out += mod.link_problems({"sources": ["https://ok.example/bad-zq7?q=zq7"]}, ["https://ok.example/bad-zq7?q=zq7"])
+    mod.PinnedHTTPS = FakeConnection
+    want = ["(links) ok.example, line 2: refused: not https",
+            "(links) ok.example, line 3: dead: HTTP 404",
+            "(links) ok.example, line 4: refused: redirect to a non-https URL",
+            "(links) nohost.example, line 5: refused: cannot resolve nohost.example: unknown host nohost.example",
+            "(links) ok.example, line 6: refused: bad port",
+            "(links) ok.example, line 8: title not found on the page",
+            "(links) ok.example, line 1: dead: InvalidURL"]
+    expect(out == want and not any("zq7" in l for l in out),
+           "--links diagnostics show only the host, the line and the reason (no path, query, error text or title)",
+           "\n".join(out))
 finally:
     socket.getaddrinfo, socket.create_connection, socket.socket.connect, mod.PinnedHTTPS = real
 
@@ -516,9 +620,9 @@ expect(dialed == [("93.184.216.34", 443)], "PinnedHTTPS connects to the checked 
 named = []
 
 
-class NameRecorder:
+class NameRecorder:  # also records whether the raw socket was already on the connection (so hang_up can reach it)
     def wrap_socket(self, sock, server_hostname=None):
-        named.append(server_hostname)
+        named.append((server_hostname, conn.sock is sock))
         return sock
 
 
@@ -540,9 +644,32 @@ try:
     conn.connect()
 finally:
     socket.getaddrinfo, socket.create_connection = real[0], real[1]
-expect(verifying and named == ["ok.example"] and dialed == [("93.184.216.34", 443)],
-       "PinnedHTTPS verifies certificates, names the original host in the handshake and dials the checked address",
+expect(verifying and named == [("ok.example", True)] and dialed == [("93.184.216.34", 443)],
+       "PinnedHTTPS verifies certificates, names the original host in the handshake and dials the checked address"
+       " (the raw socket is on the connection during the handshake)",
        f"verifying={verifying} named={named} dialed={dialed}")
+
+# 608(2) race: a connection hang_up closed before it connected must not reconnect on its own. http.client's
+# default auto_open would quietly call connect() again from request(), opening a connection nobody watches.
+calls = []
+
+
+class CountingHTTPS(mod.PinnedHTTPS):
+    def connect(self):
+        calls.append(1)
+        raise AssertionError("connect() called again")
+
+
+conn = CountingHTTPS("ok.example", 443, "93.184.216.34")
+mod.hang_up(conn)
+try:
+    conn.request("GET", "/page")
+    raised = "nothing"
+except Exception as e:
+    raised = e.__class__.__name__
+expect(raised == "NotConnected" and calls == [],
+       "a connection hang_up closed before it connected raises NotConnected on request(), never reconnecting",
+       f"raised {raised}, connect() calls: {len(calls)}")
 
 # End to end: --links output lines carry the file name and the refusal.
 with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
@@ -552,7 +679,7 @@ with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
     spec = importlib.util.spec_from_file_location("check_personas_tmp", Path(t) / "scripts/check-personas.py")
     tmod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(tmod)
-    tmod.link_problems = lambda fm: [f"(links) {u}: refused: stubbed" for u in fm["sources"] if u.startswith("http:")]
+    tmod.link_problems = lambda fm, *lines: [f"(links) {u}: refused: stubbed" for u in fm["sources"] if u.startswith("http:")]
     buf, ebuf = io.StringIO(), io.StringIO()
     with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(ebuf):
         code = tmod.main(["--links", str(f)])
@@ -591,6 +718,38 @@ with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
     expect(p.returncode == 1 and "network used" not in p.stderr
            and p.stdout.splitlines() == [f"{GTM}k.md: (k) private-detail: line {n} looks like a personal email address"],
            "--links does not fetch a file with a (k) finding", p.stdout + p.stderr)
+
+# 608(5a): before --links fetches anything, the decoded path and query of every URL it would fetch are checked
+# for a phone number, a personal email and a street address. A match is a (k) line and nothing is fetched (the
+# fetch stub records every call). Invented people and numbers on example.org only. The last two are URLs the
+# line scan cannot see whole: a quoted URL with literal spaces, and '+' for a space in the query.
+results = {}
+for case, url, what, secret in (
+        ("a phone number in the query", "https://example.org/card?tel=415-555-0134", "a phone number", "0134"),
+        ("a personal email in the query", "https://example.org/contact?to=jane.doe%40gmail.com", "a personal email address", "jane"),
+        ("a street address in the path", "https://example.org/visit/221%20Baker%20Street", "a street address", "baker"),
+        ("a street address in a quoted URL", '"https://example.org/visit/12 Elm Rd"', "a street address", "elm"),
+        ("a street address in the query, '+' for space", "https://example.org/map?at=221+Baker+Street", "a street address", "baker")):
+    with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
+        board(Path(t), {"k": ("k", "Kay Example", "", "")})
+        f = Path(t) / GTM / "k.md"
+        f.write_text(f.read_text().replace("https://en.wikipedia.org/wiki/Grant_Wiggins", url))
+        n = next(i for i, l in enumerate(f.read_text().split("\n"), 1) if url in l)
+        spec = importlib.util.spec_from_file_location("check_personas_k", Path(t) / "scripts/check-personas.py")
+        tmod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(tmod)
+        fetched = []
+        tmod.fetch = lambda u: fetched.append(u) or (200, "text/html", b"")
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(io.StringIO()):
+            code = tmod.main(["--links", str(f)])
+        lines = buf.getvalue().splitlines()
+        ok = (code == 1 and not fetched and lines == [f"{f}: (k) private-detail: line {n} looks like {what}"]
+              and secret not in buf.getvalue().replace(str(f), "").lower())
+        results[case] = "ok" if ok else f"exit {code}, fetched {len(fetched)}, output {lines}"
+expect(all(v == "ok" for v in results.values()),
+       "--links checks each URL's path and query for a phone, a personal email and a street address before any fetch",
+       "\n".join(f"{k}: {v}" for k, v in results.items()))
 
 print("check-personas-rules-test:", "all passed" if not failures else f"{failures} case(s) failed")
 sys.exit(1 if failures else 0)

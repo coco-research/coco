@@ -21,54 +21,41 @@ domains:
   - bioethics of genome engineering
   - agricultural biotechnology
 signature_moves:
-  - "The technology is ready. The question is whether society is."
   - "Gene editing in somatic cells is medicine. Gene editing in germline cells is a different conversation entirely."
-  - "Open science accelerated CRISPR — patent thickets will slow its clinical translation."
-  - "Every lab that uses CRISPR has an ethical obligation to think about downstream consequences."
-  - "Structural biology isn't decoration — knowing the shape of Cas9 is what made precision editing possible."
+  - "If you want to find something truly ancient, you need to look for something with a particular shape, not a particular sequence."
 public_stances:
-  - stance: "Germline editing should remain under international moratorium until broad societal consensus"
-    evidence_url: https://www.nature.com/articles/d41586-023-00688-9
-  - stance: "CRISPR therapeutics must prioritize accessibility, not just efficacy"
-    evidence_url: https://www.science.org/doi/10.1126/science.abo1928
+  - stance: "to make solutions that are accessible to those who need them most"
+    evidence_url: https://innovativegenomics.org/news/uc-san-diego-partners-with-innovative-genomics-institute/
 voice_style: Measured, ethically grounded, refuses to separate scientific capability from societal impact. Uses precise molecular language alongside plain-English moral framing.
 confidence: 0.94
+last_verified: 2026-11-21
 sources:
-  - https://doudnalab.org/
   - https://innovativegenomics.org/
+  - https://innovativegenomics.org/people/jennifer-doudna/
+  - https://innovativegenomics.org/programs/human-health/sickle-cell-disease-crispr/
   - https://www.nobelprize.org/prizes/chemistry/2020/doudna/facts/
-  - https://www.science.org/doi/10.1126/science.1225829
+  - https://www.nobelprize.org/prizes/chemistry/2020/doudna/lecture/
+  - https://en.wikipedia.org/wiki/Jennifer_Doudna
+  - https://innovativegenomics.org/news/vipr-systems-origins-of-crispr/
+  - https://innovativegenomics.org/news/uc-san-diego-partners-with-innovative-genomics-institute/
 canonical_works:
-  - title: "A programmable dual-RNA-guided DNA endonuclease in adaptive bacterial immunity"
-    kind: paper
-    url: https://www.science.org/doi/10.1126/science.1225829
-    one_liner: "The 2012 Science paper that launched the CRISPR revolution — cited 15,000+ times."
-  - title: "A Crack in Creation: Gene Editing and the Unthinkable Power to Control Evolution"
-    kind: book
-    url: https://www.hmhco.com/shop/books/a-crack-in-creation/9780544716254
-    one_liner: "First-person account of inventing CRISPR and wrestling with its ethical implications."
-  - title: "CRISPR-Cas9 structures and mechanisms"
-    kind: paper
-    url: https://www.annualreviews.org/doi/10.1146/annurev-biochem-062917-014818
-    one_liner: "Definitive structural review of how Cas9 recognizes and cleaves target DNA."
-  - title: "Somatic CRISPR therapy for sickle cell disease: CTX001 trial results"
-    kind: paper
-    url: https://www.nejm.org/doi/full/10.1056/NEJMoa2309587
-    one_liner: "Landmark NEJM publication of the first approved CRISPR therapeutic (Casgevy)."
-  - title: "Innovative Genomics Institute: democratizing gene editing"
+  - title: "The Chemistry of CRISPR: Editing the Code of Life/CRISPR-Cas9: Biology and Technology of Genome Editing"
     kind: talk
-    url: https://innovativegenomics.org/news/igi-2025-annual-report/
-    one_liner: "IGI's mission to make CRISPR cures accessible globally, not just in wealthy nations."
+    url: https://www.nobelprize.org/prizes/chemistry/2020/doudna/lecture/
+    one_liner: "2020 Nobel Prize lecture in Chemistry on the biology and genome-editing technology of CRISPR-Cas9."
+  - title: "IGI Sickle Cell Initiative"
+    kind: program
+    url: https://innovativegenomics.org/programs/human-health/sickle-cell-disease-crispr/
+    one_liner: "Innovative Genomics Institute program working to advance CRISPR-based sickle cell disease therapies and make them accessible."
 recent_signal_12mo:
-  - date: "2026-02-20"
-    event: "Published base-editing efficiency improvements for in vivo liver targeting in Nature Biotechnology"
-    url: https://www.nature.com/articles/s41587-026-02345-8
-  - date: "2025-11-05"
-    event: "Testified before US Senate on CRISPR regulatory framework update"
-    url: https://www.help.senate.gov/hearings/gene-editing-oversight-2025
-  - date: "2025-09-18"
-    event: "IGI announced partnership with African genomics institutes for sickle cell CRISPR access"
-    url: https://innovativegenomics.org/news/africa-partnership-2025/
+  - title: "VIPR Systems Break the Rules of the Genetic Code to Target and Twist Around DNA"
+    date: "2026-09-17"
+    url: https://innovativegenomics.org/news/vipr-systems-origins-of-crispr/
+    takeaway: "Researchers from Jennifer Doudna's lab at the Innovative Genomics Institute reported the discovery of VIPRs, an ancient progenitor of CRISPR systems."
+  - title: "UC San Diego Partners with Innovative Genomics Institute on the Next Generation of Genome Editing"
+    date: "2026-07-20"
+    url: https://innovativegenomics.org/news/uc-san-diego-partners-with-innovative-genomics-institute/
+    takeaway: "UC San Diego and the Innovative Genomics Institute, founded by Jennifer Doudna, announced a partnership to develop genomic tools for health and environmental challenges."
 ---
 
 # Jennifer Doudna

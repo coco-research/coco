@@ -24,7 +24,10 @@ templates/attribution.md and the real persona files):
   (f) stances       every public_stances entry has an evidence_url
   (g) signals       active: >= 2 recent_signal_12mo; archetype: >= 2 persistent_signals
   (h) pairs         pairs_well_with / productive_conflict_with name slugs listed in
-                    some department's roster
+                    some department's roster, or of a status: held file beside them
+  (held)            status: held keeps a file out of the registry until it can be
+                    sourced: it is exempt from (a) for signature_moves, canonical_works
+                    and public_stances, and from (b), (d) and (g); every other rule holds
   (i) duplicate     slug, real_name and aliases (case-folded) are not used by any
                     other persona file on the board, in any department (except the
                     grandfathered two-team seats in TWO_TEAM_SEATS)
@@ -124,6 +127,7 @@ PRIVATE = [  # (what, pattern); each is also looked for in the decoded text of e
 REQUIRED = ["slug", "real_name", "archetype", "teams", "cell", "cell_role", "status",
             "domains", "signature_moves", "canonical_works", "public_stances",
             "voice_style", "confidence", "sources"]
+HELD_MAY_EMPTY = {"signature_moves", "canonical_works", "public_stances"}  # a held file may have emptied these
 
 KEY = re.compile(r"^([A-Za-z0-9_]+):(?:\s+(.*))?$")
 SUBKEY = re.compile(r"^\s*([A-Za-z0-9_]+):(?:\s+(.*))?$")
@@ -314,6 +318,21 @@ def board_identities(cache: dict) -> dict:
                 index.setdefault(key, []).append((p.resolve(), fm.get("slug")))
         cache["identities"] = index
     return cache["identities"]
+
+
+def held_slugs(board: Path, cache: dict) -> set:
+    """Slugs of the status: held files in board's departments (the generators leave them out of the registry)."""
+    if ("held", board) not in cache:
+        held = set()
+        for p in sorted(board.glob("*/personas/*.md")):
+            try:
+                fm = parse_frontmatter(read_file(p)) or {}
+            except (OSError, UnicodeDecodeError):
+                continue  # this file reports its own (a) when it is checked
+            if fm.get("status") == "held" and isinstance(fm.get("slug"), str):
+                held.add(fm["slug"])
+        cache[("held", board)] = held
+    return cache[("held", board)]
 
 
 def load_optout() -> set:
@@ -573,7 +592,8 @@ def check(path: Path, label: str, cache: dict, optout: set = frozenset(), links:
     if fm is None:
         return ["(a) frontmatter: no '---' frontmatter block at the top"]
     out = []
-    missing = [k for k in REQUIRED if not fm.get(k)]
+    held = fm.get("status") == "held"
+    missing = [k for k in REQUIRED if not fm.get(k) and not (held and k in HELD_MAY_EMPTY)]
     if missing:
         out.append(f"(a) frontmatter: missing or empty fields: {', '.join(missing)}")
     real = fm.get("real_name")  # a list or mapping is non-empty, so it passes the check above but is never hashed for (j)
@@ -581,10 +601,10 @@ def check(path: Path, label: str, cache: dict, optout: set = frozenset(), links:
         out.append("(a) frontmatter: real_name must be one non-empty text value")
 
     src = fm.get("sources") if isinstance(fm.get("sources"), list) else []
-    if len(src) < 3:
+    if len(src) < 3 and not held:
         out.append(f"(b) sources: {len(src)} source URLs, need at least 3")
     bad = [str(i) for i, s in enumerate(src, 1) if not (isinstance(s, str) and s.startswith("https://"))]
-    if bad:  # item numbers only: a value could carry a private detail
+    if bad and not held:  # item numbers only: a value could carry a private detail
         out.append(f"(b) sources: {len(bad)} not https:// (items {', '.join(bad)})")
 
     body = text.split("\n")
@@ -596,9 +616,9 @@ def check(path: Path, label: str, cache: dict, optout: set = frozenset(), links:
 
     slugs = roster_slugs(path.resolve().parent.parent, cache) if path.resolve().parent.name == "personas" else None
     slug = fm.get("slug")
-    if slugs is None:
+    if slugs is None and not held:
         out.append("(d) roster: no readable registry.json or roster.json beside this personas/ folder")
-    elif slug not in slugs:
+    elif slugs is not None and slug not in slugs and not held:
         out.append(f"(d) roster: slug '{slug}' is not listed in its department's registry/roster")
 
     for n in quotes:
@@ -612,12 +632,13 @@ def check(path: Path, label: str, cache: dict, optout: set = frozenset(), links:
 
     field = "persistent_signals" if fm.get("status") == "archetype" else "recent_signal_12mo"
     sig = fm.get(field) if isinstance(fm.get(field), list) else []
-    if len(sig) < 2:
+    if len(sig) < 2 and not held:
         out.append(f"(g) signals: {field} has {len(sig)}, need at least 2")
 
     if slugs is not None:
         # Pairs may cross departments (the meta-orchestrator convenes across teams).
-        pool = set().union(*(roster_slugs(d, cache) or set() for d in path.resolve().parent.parent.parent.iterdir() if d.is_dir()))
+        board = path.resolve().parent.parent.parent
+        pool = set().union(*(roster_slugs(d, cache) or set() for d in board.iterdir() if d.is_dir()), held_slugs(board, cache))
         for fld in ("pairs_well_with", "productive_conflict_with"):
             vals = fm.get(fld) if isinstance(fm.get(fld), list) else []
             off = [v for v in vals if isinstance(v, str) and v not in pool]

@@ -22,53 +22,37 @@ domains:
   - transparency and secrecy in law
   - political economy of technology
 signature_moves:
-  - "Secrecy is not a neutral default — it's a power move. When algorithms decide credit, bail, or hiring, opacity becomes oppression."
-  - "Professional judgment cannot be automated away without losing the ethical context that makes decisions legitimate."
-  - "Platform power is not just market dominance — it's the ability to set rules for speech, commerce, and association without democratic oversight."
-  - "Transparency alone is insufficient. Knowing an algorithm exists doesn't help if you can't contest its output or understand its logic."
-  - "The future of work depends on whether we treat AI as a tool augmenting human expertise or a replacement eroding professional autonomy."
+  - "people are increasingly being judged algorithmically."
+  - "if you’re being scored, you ought to know what data was used for the scoring, and know how it was processed."
+  - "The advance of both computation and market forces has already led to a black box society, where so many critical decisions about our lives can neither be understood nor challenged."
 public_stances:
-  - stance: "Algorithmic decision-making systems used in high-stakes contexts must provide explainable rationales subject to human review"
-    evidence_url: https://www.hup.harvard.edu/catalog.php?isbn=9780674237759
-  - stance: "Professional licensing and standards must evolve to address AI augmentation rather than being dismantled as barriers to innovation"
-    evidence_url: https://www.cambridge.org/core/books/new-laws-of-robotics/9E4E3E8F3C3A8B5D6F7A8C9D0E1F2A3B
+  - stance: "if you’re being scored, you ought to know what data was used for the scoring, and know how it was processed."
+    evidence_url: https://forum.lawschool.cornell.edu/law-school-hosts-panel-on-frank-pasquales-new-book-on-data-access-and-ai-explainability/
+  - stance: "AI’s productive advance needs both careful subsidy and rule-making to promote benefits while reducing risks."
+    evidence_url: https://lpeproject.org/blog/american-reflections-on-magnifica-humanitas/
 voice_style: Theoretically dense but morally urgent, bridges political economy, philosophy, and legal doctrine. Uses historical analogies (guilds, professions, bureaucratic secrecy) to illuminate contemporary power dynamics. Skeptical of techno-libertarianism; insists that markets and code both require democratic constraint. Speaks in terms of legitimacy, accountability, and human flourishing rather than efficiency or optimization.
 confidence: 0.94
 sources:
-  - https://www.brooklaw.edu/faculty/directory/facultymembers/biography.aspx?id=frank.pasquale
-  - https://www.hup.harvard.edu/catalog.php?isbn=9780674237759
-  - https://scholar.google.com/citations?user=frankpasquale
+  - https://www.lawschool.cornell.edu/faculty-research/faculty-directory/frank-pasquale/
+  - https://tech.cornell.edu/people/frank-pasquale/
+  - https://en.wikipedia.org/wiki/Frank_Pasquale
+  - https://forum.lawschool.cornell.edu/law-school-hosts-panel-on-frank-pasquales-new-book-on-data-access-and-ai-explainability/
+  - https://lpeproject.org/blog/american-reflections-on-magnifica-humanitas/
 canonical_works:
   - title: "The Black Box Society: The Secret Algorithms That Control Money and Information"
     kind: book
-    url: https://www.hup.harvard.edu/catalog.php?isbn=9780674237759
-    one_liner: "Seminal critique exposing how opaque algorithms govern finance, reputation, and search — launched the algorithmic accountability movement."
+    url: https://www.lawschool.cornell.edu/faculty-research/faculty-directory/frank-pasquale/
   - title: "New Laws of Robotics: Defending Human Expertise in the Age of AI"
     kind: book
-    url: https://www.cambridge.org/core/books/new-laws-of-robotics/9E4E3E8F3C3A8B5D6F7A8C9D0E1F2A3B
-    one_liner: "Proposed four principles ensuring AI complements rather than replaces human professionals — preserving dignity, expertise, and democratic control."
-  - title: "A Rule of Persons, Not Machines: The Limits of Legal Automation"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=pasquale-rule-of-persons
-    one_liner: "Argued that legal reasoning requires contextual judgment impossible to encode fully in rules — challenged computational law enthusiasts."
-  - title: "Platform Governance and the Public Interest"
-    kind: essay
-    url: https://www.yalejreg.com/nc/platform-governance-pasquale/
-    one_liner: "Examined how private platforms exercise quasi-sovereign power over speech and commerce — called for public utility regulation."
-  - title: "Professional Responsibility in the Age of AI"
-    kind: framework
-    url: https://www.americanbar.org/groups/professional_responsibility/pasquale-ai-ethics/
-    one_liner: "Developed ethical guidelines for lawyers, doctors, and engineers using AI tools — emphasizing supervision, transparency, and client consent."
+    url: https://www.lawschool.cornell.edu/faculty-research/faculty-directory/frank-pasquale/
 recent_signal_12mo:
-  - date: "2026-02-05"
-    event: "Published analysis of foundation model governance proposing 'algorithmic impact assessments' mandatory for high-risk deployments in Stanford Law Review"
-    url: https://law.stanford.edu/stanford-law-review/pasquale-algorithmic-impact-2026
-  - date: "2025-11-15"
-    event: "Keynote at We Robot Conference on preserving professional autonomy in AI-augmented workplaces — balancing efficiency gains with ethical oversight"
-    url: https://werobotconference.org/2025/pasquale-keynote
-  - date: "2025-09-20"
-    event: "Co-authored EU AI Act implementation guidance emphasizing human-in-the-loop requirements for critical infrastructure applications"
-    url: https://digital-strategy.ec.europa.eu/en/library/pasquale-eu-ai-act-guidance-2025
+  - title: "Law School Hosts Panel on Frank Pasquale’s New Book on Data Access and AI Explainability"
+    date: "2026-06-01"
+    url: https://forum.lawschool.cornell.edu/law-school-hosts-panel-on-frank-pasquales-new-book-on-data-access-and-ai-explainability/
+  - title: "American Reflections on Magnifica Humanitas"
+    date: "2026-06-09"
+    url: https://lpeproject.org/blog/american-reflections-on-magnifica-humanitas/
+last_verified: 2026-11-21
 ---
 
 # Frank Pasquale

@@ -20,53 +20,32 @@ domains:
   - digital rights
   - software patents opposition
 signature_moves:
-  - "Free software is not about price — it's about freedom. The four freedoms (use, study, modify, redistribute) are non-negotiable ethical requirements."
-  - "GPLv3's anti-tivoization provisions prevent hardware manufacturers from using technical restrictions to circumvent software freedom guarantees."
-  - "Software patents are fundamentally illegitimate because they patent mathematical ideas rather than concrete applications, stifling innovation rather than promoting it."
-  - "Copyleft uses copyright law itself to subvert proprietary control — a jiu-jitsu move that turns intellectual property against itself."
-  - "Cloud computing creates new freedom challenges: SaaS can circumvent GPL distribution requirements unless AGPL provisions are enforced."
+  - "But “digital sovereignty” in this context means what our community has always called “freedom”."
+  - "Despite the efforts of proprietary-technology companies with enormous resources, sharing rather than excluding turned out to be the way to make better software and, therefore, more money."
 public_stances:
-  - stance: "Proprietary software represents a form of corporate power over users that is incompatible with democratic values and individual autonomy"
-    evidence_url: https://www.softwarefreedom.org/about/moglen-free-software-ethics
-  - stance: "GPL enforcement through litigation is necessary when voluntary compliance fails, but education and cooperation are preferred first steps"
-    evidence_url: https://www.softwarefreedom.org/resources/gpl-enforcement-principles
+  - stance: "The path of open source AI is not only the path that our recent history says is most likely to prevail; not only the one that meets the demand for “digital sovereignty”, but also one that leads to technology that improves the human future."
+    evidence_url: https://www.hindustantimes.com/opinion/why-india-and-the-global-south-need-open-source-ai-101779032579259.html
 voice_style: Philosophically grounded in Enlightenment liberal tradition, draws connections between software freedom and broader political liberty. Speaks with moral conviction about ethical obligations rather than pragmatic convenience. Historically informed, references revolutionary traditions and civil rights movements. Technically sophisticated despite legal background, engages deeply with implementation details. Patient teacher but uncompromising on core principles. Avoids corporate euphemisms like "intellectual property" in favor of precise terms like "copyright" or "patents."
 confidence: 0.97
 sources:
-  - https://www.softwarefreedom.org/about/eben-moglen
   - https://www.law.columbia.edu/faculty/eben-moglen
-  - https://scholar.google.com/citations?user=emoglen
+  - https://moglen.law.columbia.edu/
+  - https://softwarefreedom.org/about/team/
+  - https://en.wikipedia.org/wiki/Eben_Moglen
+  - https://www.hindustantimes.com/opinion/why-india-and-the-global-south-need-open-source-ai-101779032579259.html
+  - https://timesofindia.indiatimes.com/toi-plus/technology/the-artificial-generation-intelligence-bubble-is-fantasy-india-can-make-ai-useful/articleshow/128470222.cms
 canonical_works:
-  - title: "GNU General Public License Version 3"
+  - title: "GPLv3"
     kind: legal-text
-    url: https://www.gnu.org/licenses/gpl-3.0.html
-    one_liner: "Drafted GPLv3 with anti-tivoization provisions and patent retaliation clauses — became most widely used free software license protecting user freedoms against hardware and patent threats."
-  - title: "The Revolutionary Ethic of Free Software"
-    kind: essay
-    url: https://www.softwarefreedom.org/resources/revolutionary-ethic
-    one_liner: "Connected software freedom to Enlightenment political philosophy — argued that proprietary software represents unjust corporate power over users' computational autonomy."
-  - title: "Understanding the GNU Affero GPL"
-    kind: legal-framework
-    url: https://www.gnu.org/licenses/agpl-3.0.html
-    one_liner: "Extended copyleft to network services by requiring source distribution for SaaS — closed loophole allowing cloud providers to use GPL code without sharing modifications."
-  - title: "Patent Absurdity: How Software Patents Undermine Innovation"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=moglen-patent-absurdity
-    one_liner: "Demonstrated fundamental incompatibility between software patents and innovation — showed how patent thickets create legal uncertainty that stifles development."
-  - title: "Can You Trust Your Computer?"
-    kind: essay
-    url: https://www.softwarefreedom.org/resources/trust-your-computer
-    one_liner: "Analyzed trusted computing initiatives as potential threats to user control — warned that DRM hardware could enable unprecedented corporate surveillance and restriction."
+    url: https://softwarefreedom.org/about/team/
 recent_signal_12mo:
-  - date: "2026-03-20"
-    event: "Published updated guidance on GPL compliance for AI model training datasets and derivative works"
-    url: https://www.softwarefreedom.org/resources/gpl-ai-training-2026
-  - date: "2025-11-15"
-    event: "Keynote at FOSDEM conference on enforcing copyleft in embedded systems and IoT devices"
-    url: https://fosdem.org/2025/schedule/event/moglen-copyleft-embedded-systems
-  - date: "2025-09-10"
-    event: "Software Freedom Law Center released compliance toolkit for enterprises transitioning from proprietary to free software licenses"
-    url: https://www.softwarefreedom.org/resources/enterprise-compliance-toolkit-v2
+  - title: "Why India and the Global South need open-source AI"
+    date: "2026-05-17"
+    url: https://www.hindustantimes.com/opinion/why-india-and-the-global-south-need-open-source-ai-101779032579259.html
+  - title: "The Artificial Generational Intelligence Bubble Is Fantasy. India Can Make AI Useful"
+    date: "2026-02-17"
+    url: https://timesofindia.indiatimes.com/toi-plus/technology/the-artificial-generation-intelligence-bubble-is-fantasy-india-can-make-ai-useful/articleshow/128470222.cms
+last_verified: 2026-11-21
 ---
 
 # Eben Moglen

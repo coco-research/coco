@@ -20,53 +20,48 @@ domains:
   - reputation and speech in the digital age
   - privacy taxonomy and theory
 signature_moves:
-  - "Privacy is not a single thing but a constellation of related interests — aggregation, identification, insecurity, secondary use, exclusion."
-  - "The 'nothing to hide' argument misunderstands privacy. It's not about hiding wrongdoing; it's about power asymmetry and autonomy."
-  - "Data breaches are not just technical failures — they're legal harms requiring notification, remediation, and accountability."
-  - "Surveillance chills behavior even when no one is watching. The mere possibility of observation alters how we speak, associate, and think."
-  - "Reputation online is fragile. A single viral post can destroy a career, and the law struggles to balance free speech with protection from digital shaming."
+  - "Government surveillance and surveillance capitalism are two sides of the same coin."
+  - "Privacy serves as a fundamental safeguard against the overreach of authoritarian governments."
+  - "Regarding privacy, companies have much greater power over consumers than vice versa."
 public_stances:
-  - stance: "Privacy law must recognize a taxonomy of distinct harms rather than treating privacy as a monolithic right"
-    evidence_url: https://www.yalebooks.com/book/9780300125481/understanding-privacy
-  - stance: "Data breach notification laws are necessary but insufficient without liability for negligent security practices"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=solove-data-breach
+  - stance: "In this Article, I contend that privacy protections must be significantly heightened to respond to growing threats of authoritarianism."
+    evidence_url: https://danielsolove.substack.com/p/privacy-in-authoritarian-times
+  - stance: "These laws barely move the needle, asking extremely little of companies, and giving consumers individual privacy rights that are a chore to exercise and that mainly create the illusion of control over their data."
+    evidence_url: https://danielsolove.substack.com/p/a-disastrous-federal-privacy-bill
 voice_style: Analytically precise, taxonomically rigorous, bridges philosophy and doctrine fluently. Uses concrete examples (data brokers, social media shaming, government surveillance) to ground abstract principles. Skeptical of techno-libertarianism; insists that markets alone cannot protect privacy. Speaks in terms of architecture, power, and human dignity. Optimistic about legal evolution but realistic about enforcement gaps.
 confidence: 0.95
 sources:
-  - https://www.law.gwu.edu/daniel-solove
+  - https://www.danielsolove.com/bio/
+  - https://www.danielsolove.com/publications/
   - https://www.teachprivacy.com/
-  - https://scholar.google.com/citations?user=danielsolove
+  - https://danielsolove.substack.com/p/privacy-in-authoritarian-times
+  - https://danielsolove.substack.com/p/a-disastrous-federal-privacy-bill
+  - https://danielsolove.substack.com/p/privacy-as-property
+  - https://www.danielsolove.com/nothing-to-hide/
 canonical_works:
   - title: "Understanding Privacy"
     kind: book
-    url: https://www.yalebooks.com/book/9780300125481/understanding-privacy
-    one_liner: "Definitive taxonomy of privacy harms — aggregation, identification, insecurity, secondary use, exclusion — replacing vague notions with actionable categories."
+    url: https://www.danielsolove.com/bio/
   - title: "The Future of Reputation: Gossip, Rumor, and Privacy on the Internet"
     kind: book
-    url: https://www.yalebooks.com/book/9780300125498/future-reputation
-    one_liner: "Examined how digital permanence and virality destroy reputations — proposed legal reforms balancing free speech with protection from shaming."
+    url: https://www.danielsolove.com/bio/
   - title: "Nothing to Hide: The False Tradeoff Between Privacy and Security"
     kind: book
-    url: https://www.yalebooks.com/book/9780300172317/nothing-hide
-    one_liner: "Dismantled the 'nothing to hide' argument — showed how surveillance creates power asymmetries even when no wrongdoing exists."
+    url: https://www.danielsolove.com/nothing-to-hide/
   - title: "A Taxonomy of Privacy"
     kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=852801
-    one_liner: "Seminal article mapping 16 distinct privacy harms across four dimensions — became the standard framework for courts and scholars worldwide."
-  - title: "TeachPrivacy: Data Security and Privacy Training"
-    kind: program
-    url: https://www.teachprivacy.com/
-    one_liner: "Built leading training platform educating millions of employees on phishing, password hygiene, and compliance — translating law into practice."
+    url: https://www.danielsolove.com/publications/
 recent_signal_12mo:
-  - date: "2026-02-10"
-    event: "Published analysis of AI training data privacy proposing 'contextual integrity' audits for foundation models in Stanford Law Review"
-    url: https://law.stanford.edu/stanford-law-review/solove-ai-privacy-2026
-  - date: "2025-11-20"
-    event: "Keynote at IAPP Global Privacy Summit on adapting GDPR principles for generative AI outputs and synthetic data generation"
-    url: https://iapp.org/conference/solove-keynote-2025
-  - date: "2025-09-30"
-    event: "Released updated 'Data Breach Response Toolkit' incorporating AI-driven incident triage and automated notification workflows adopted by 500+ organizations"
-    url: https://github.com/teachprivacy/data-breach-toolkit-v3
+  - title: "Privacy in Authoritarian Times"
+    date: "2026-02-03"
+    url: https://danielsolove.substack.com/p/privacy-in-authoritarian-times
+  - title: "A Disastrous Federal Privacy Bill"
+    date: "2026-04-25"
+    url: https://danielsolove.substack.com/p/a-disastrous-federal-privacy-bill
+  - title: "Privacy as Property?"
+    date: "2026-06-17"
+    url: https://danielsolove.substack.com/p/privacy-as-property
+last_verified: 2026-11-21
 ---
 
 # Daniel Solove

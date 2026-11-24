@@ -20,53 +20,40 @@ domains:
   - environmental impacts of computation
   - algorithmic bias and fairness
 signature_moves:
-  - "AI is not artificial — it is embodied in physical infrastructure, human labor, and extractive supply chains from mineral mining to content moderation."
-  - "The term 'artificial intelligence' obscures more than it reveals: these are socio-technical systems embedded in power structures, not neutral tools."
-  - "Training large language models requires enormous computational resources whose environmental costs are externalized onto communities near data centers and mining operations."
-  - "Bias in AI systems is not a bug but a feature of training on historical data that encodes existing inequalities — debiasing requires structural change, not just technical fixes."
-  - "The rush to deploy AI in high-stakes domains like criminal justice and healthcare ignores evidence of systematic harms while concentrating power in unaccountable corporations."
+  - "The full planetary costs of generative AI are closely guarded corporate secrets."
+  - "I’ve seen consistent downplaying and denial about the AI industry’s environmental costs since I started publishing about them in 2018."
+  - "Regular environmental audits by independent bodies would support transparency and adherence to standards."
+  - "When we take a look at the bedrock layer of labeled images, we find highly questionable semiotic assumptions, echoes of nineteenth-century phrenology, and the representational harm of classifying images of people without their consent or participation."
+  - "This means that algorithmic systems are contributing to the process of government decisionmaking without any mechanisms of accountability or liability."
 public_stances:
-  - stance: "AI regulation must address the full lifecycle from mineral extraction to disposal, not just algorithmic decision-making at point of use"
-    evidence_url: https://www.atlasofai.com/introduction
-  - stance: "Moratoriums on certain AI applications (facial recognition, predictive policing) are justified given evidence of harm and lack of democratic oversight"
-    evidence_url: https://ainowinstitute.org/publications/moratorium-facial-recognition
+  - stance: "To truly address the environmental impacts of AI requires a multifaceted approach including the AI industry, researchers and legislators."
+    evidence_url: https://www.nature.com/articles/d41586-024-00478-x
+  - stance: "Until appropriate safeguards are in place, we need a moratorium on biometric technology that identifies individuals"
+    evidence_url: https://www.nature.com/articles/d41586-019-02514-7
 voice_style: Critically engaged, theoretically sophisticated, and empirically grounded. Draws on feminist science studies, political economy, and media theory to analyze AI systems as socio-technical formations. Avoids techno-utopian rhetoric in favor of careful analysis of who benefits and who bears costs. Uses concrete examples from fieldwork with content moderators, data annotators, and affected communities. Speaks with moral clarity about power imbalances without resorting to simplistic good-versus-evil narratives.
 confidence: 0.95
 sources:
   - https://www.katecrawford.net/
-  - https://ainowinstitute.org/people/kate-crawford
-  - https://www.atlasofai.com/
+  - https://katecrawford.net/pubs
+  - https://katecrawford.net/atlas
+  - https://www.nature.com/articles/d41586-024-00478-x
+  - https://www.nature.com/articles/d41586-019-02514-7
+  - https://excavating.ai/
+  - https://columbialawreview.org/content/ai-systems-as-state-actors/
 canonical_works:
   - title: "Atlas of AI: Power, Politics, and the Planetary Costs of Artificial Intelligence"
     kind: book
-    url: https://www.atlasofai.com/
-    one_liner: "Mapped the material foundations of AI from lithium mines in Chile to content moderation centers in Kenya — revealed hidden labor and environmental costs obscured by 'cloud' metaphors."
-  - title: "The Trouble with Bias"
-    kind: paper
-    url: https://papers.nips.cc/paper_files/paper/2017/file/crawford-trouble-with-bias.pdf
-    one_liner: "Critiqued narrow technical approaches to algorithmic bias — argued that bias is constitutive of AI systems trained on historical data encoding structural inequalities."
+    url: https://katecrawford.net/atlas
   - title: "Excavating AI"
     kind: investigation
     url: https://excavating.ai/
-    one_liner: "Exposed use of non-consensual images in computer vision training datasets including private photos and surveillance imagery — sparked debate about consent and data rights in machine learning."
-  - title: "AI's Carbon Footprint"
-    kind: paper
-    url: https://arxiv.org/abs/crawford-ai-carbon-footprint
-    one_liner: "Quantified energy consumption and greenhouse gas emissions from training large language models — demonstrated environmental externalities of compute-intensive AI development."
-  - title: "Stop Biometric Surveillance"
-    kind: advocacy
-    url: https://ainowinstitute.org/work/stop-biometric-surveillance
-    one_liner: "Led coalition calling for bans on facial recognition and other biometric surveillance technologies — influenced legislation in multiple cities and states restricting government use."
 recent_signal_12mo:
-  - date: "2026-04-05"
-    event: "Published follow-up to Atlas of AI examining generative AI's impact on creative labor markets and copyright regimes"
-    url: https://www.atlasofai.com/generative-labor-2026
-  - date: "2026-01-12"
-    event: "Testimony before EU Parliament on implementing AI Act provisions for high-risk systems and fundamental rights impact assessments"
-    url: https://www.europarl.europa.eu/hearings/crawford-testimony-ai-act-2026
-  - date: "2025-11-28"
-    event: "AI Now Institute released report on AI labor practices in data annotation industry documenting working conditions and wage disparities"
-    url: https://ainowinstitute.org/reports/ai-labor-data-annotation-2025
+  - title: "Kate Crawford Discusses Costs and Challenges of AI"
+    date: "2026-09-30"
+    url: https://amherststudent.com/article/kate-crawford-discusses-costs-and-challenges-of-ai/
+  - title: "AI Expert Kate Crawford Joins the Weizenbaum Institute as a Distinguished Fellow"
+    date: "2026-07-30"
+    url: https://www.weizenbaum-institut.de/en/news/detail/ai-expert-kate-crawford-joins-the-weizenbaum-institute-as-a-distinguished-fellow/
 ---
 
 # Kate Crawford

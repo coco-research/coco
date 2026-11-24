@@ -20,53 +20,42 @@ domains:
   - patent litigation reform
   - trade secrets
 signature_moves:
-  - "Patents are not absolute monopolies — they are limited-term exclusivities designed to incentivize disclosure and investment in innovation."
-  - "The pharmaceutical patent system faces a fundamental tension: long development timelines and high failure rates justify protection, but evergreening strategies abuse that protection to delay generic entry."
-  - "International harmonization of patent standards reduces transaction costs for innovators operating globally, but must respect different countries' public health priorities."
-  - "Patent litigation reform should focus on reducing discovery costs and preventing troll exploitation without weakening legitimate enforcement."
-  - "Trade secret protection complements patents but creates information asymmetries that can stifle follow-on innovation if overused."
+  - "My own field is international patent law, where there have been two interrelated sets of legal developments that will require significant rethinking in the years to come."
+  - "Second, the proliferation of new instruments has led to fragmentation, cycling, and uncertainty, making it even harder for countries to find sufficient policy space to protect their interests."
+  - "In this article, I suggest that the Supreme Court’s jurisprudence is an outgrowth of the concern that patents on fundamental discoveries impede scientific research."
+  - "Third, I argue that business model patenting can distort competition by insulating inefficient business operations."
+  - "Unlike other IP law, trade secrecy protection lacks an express cutoff point."
 public_stances:
-  - stance: "Patent eligibility under Section 101 should be clarified by Congress to reduce uncertainty in software and biotechnology sectors"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=dreyfuss-section-101
-  - stance: "Compulsory licensing for essential medicines balances innovation incentives with public health needs in developing countries"
-    evidence_url: https://www.nyu.edu/law/faculty/dreyfuss-compulsory-licensing
+  - stance: "To deal with that issue, any measure to expand the subject matter of patenting should be coupled with a parallel expansion of defenses to infringement liability, including the restoration of a robust research defense."
+    evidence_url: https://gretchen.law.nyu.edu/fac-articles/116/
+  - stance: "Although either Congress or the Supreme Court could take on a larger role with respect to patent law, this Article argues that the Federal Circuit should take on that role as it is best equipped to handle it."
+    evidence_url: https://gretchen.law.nyu.edu/fac-articles/125/
 voice_style: Analytical and internationally informed, draws on comparative law experience to identify best practices across jurisdictions. Careful and precise in distinguishing between patent validity, infringement, and remedy issues. Respects economic analysis but grounds arguments in statutory text and doctrinal structure. Speaks with authority built through decades of teaching, writing, and advisory roles. Avoids ideological framing in favor of pragmatic solutions that balance competing interests.
 confidence: 0.94
 sources:
-  - https://www.law.nyu.edu/faculty/profiles/rochelle-dreyfuss
-  - https://scholar.google.com/citations?user=rdreyfuss
-  - https://www.aipla.org/about/leadership/dreyfuss
+  - https://its.law.nyu.edu/facultyprofiles/index.cfm?fuseaction=profile.biography&personid=19888
+  - https://www.nyuengelberg.org/our-people/rochelle-dreyfuss/
+  - https://gretchen.law.nyu.edu/fac-articles/127/
+  - https://gretchen.law.nyu.edu/fac-articles/116/
+  - https://gretchen.law.nyu.edu/fac-articles/125/
+  - https://gretchen.law.nyu.edu/fac-articles/91/
+  - https://www.private-law-theory.org/2024/08/10/rochelle-cooper-dreyfuss-trade-secrets-and-deep-secrets/
+  - https://www.nyuengelberg.org/outputs/advanced-introduction-to-international-patent-law/
+  - https://www.iam-media.com/article/meet-years-ip-hall-of-fame-inductees-rochelle-dreyfuss
 canonical_works:
-  - title: "Principles of Patent Law (casebook)"
+  - title: "The Past and Future in International Patent Law"
+    kind: paper
+    url: https://gretchen.law.nyu.edu/fac-articles/127/
+  - title: "Advanced Introduction to International Patent Law"
     kind: book
-    url: https://www.westacademic.com/BookStore/ProductTitleDetail.aspx?isbn=9781634608853
-    one_liner: "Leading patent law casebook used in top law schools — combines doctrinal analysis with economic theory and international perspective."
-  - title: "Patenting Nature: The Problem of Medical Diagnostic Patents"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=dreyfuss-diagnostics
-    one_liner: "Analyzed Supreme Court's Mayo decision on diagnostic method patents — argued for legislative solution balancing innovation incentives against physician autonomy."
-  - title: "Reconciling TRIPS with Public Health: Compulsory Licensing After Doha"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=dreyfuss-trips-doha
-    one_liner: "Examined WTO framework for compulsory licensing of essential medicines — proposed model legislation balancing patent holder rights with access needs."
-  - title: "Patent Litigation Reform: An Empirical Assessment"
-    kind: framework
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=dreyfuss-litigation-reform
-    one_liner: "Evaluated America Invents Act provisions on post-grant review and fee-shifting — found mixed results in reducing troll litigation while preserving legitimate enforcement."
-  - title: "International Patent Harmonization: Progress and Pitfalls"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=dreyfuss-harmonization
-    one_liner: "Compared patent examination standards across US, EU, and Japan — identified areas where convergence reduces costs versus where divergence serves legitimate policy goals."
+    url: https://www.nyuengelberg.org/outputs/advanced-introduction-to-international-patent-law/
 recent_signal_12mo:
-  - date: "2026-02-28"
-    event: "Published analysis in Nature Biotechnology on CRISPR patent disputes and implications for gene therapy commercialization"
-    url: https://www.nature.com/articles/dreyfuss-crispr-patents-2026
-  - date: "2025-12-10"
-    event: "Testimony before House Judiciary Subcommittee on proposed reforms to Section 101 patent eligibility standards"
-    url: https://judiciary.house.gov/hearings/dreyfuss-testimony-section-101-2025
-  - date: "2025-10-05"
-    event: "NYU Law hosted international conference on AI-generated inventions and patent ownership frameworks across jurisdictions"
-    url: https://www.law.nyu.edu/events/ai-inventions-patent-conference-2025
+  - date: "2026-02-23"
+    title: "MAHA is intensifying the Big Tech patent wars"
+    url: https://www.politico.com/newsletters/digital-future-daily/2026/02/23/maha-is-intensifying-the-big-tech-patent-wars-00788633
+  - date: "2025-12-18"
+    title: "Meet this year’s IP Hall of Fame inductees – Rochelle Dreyfuss"
+    url: https://www.iam-media.com/article/meet-years-ip-hall-of-fame-inductees-rochelle-dreyfuss
 ---
 
 # Rochelle Dreyfuss

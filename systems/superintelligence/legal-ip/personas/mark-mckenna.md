@@ -19,53 +19,36 @@ domains:
   - false advertising
   - right of publicity
 signature_moves:
-  - "Trademark law's core purpose is preventing consumer confusion, but modern expansion has transformed it into a property right protecting brand investment regardless of confusion."
-  - "The proliferation of trademark claims in product design disputes reflects strategic behavior where companies use IP to suppress legitimate competition rather than protect source identification."
-  - "Patent-trademark overlap creates problematic double protection: when functional features receive both patent and trademark rights, exclusivity extends beyond patent term through trademark backdoor."
-  - "False advertising litigation under Lanham Act Section 43(a) provides important competitive checks but risks becoming weaponized for anti-competitive purposes without proper standing limits."
-  - "Right of publicity claims increasingly conflict with First Amendment values when celebrities seek to control expressive uses of their identity in artistic works."
+  - "Contrary to widespread contemporary understanding, early trademark cases were decidedly producer-centered."
+  - "Second, and somewhat counterintuitively, expansion of trademark law in the twentieth century was more a consequence of the modern search cost rationale than a deviation from that model."
+  - "The limitations counted on by proponents of the new model have proven almost infinitely pliable and have failed to halt trademark law's growth."
+  - "Failure to differentiate between these different relationships has enabled trademark owners to push the boundaries of trademark protection, as they have been able to characterize virtually every use of their marks in consumer confusion terms."
+  - "Consumers, it turns out, are quite adept at compartmentalizing their quality expectations."
 public_stances:
-  - stance: "Trademark doctrine should reject functionality-based claims more aggressively to prevent perpetual monopolies on useful product features"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=mckenna-functionality-doctrine
-  - stance: "Consumer confusion surveys are methodologically flawed and courts should require rigorous experimental design before accepting them as evidence"
-    evidence_url: https://www.law.nd.edu/faculty/mckenna-confusion-surveys
+  - stance: "It demonstrates that non-competitive uses of a mark are unlikely to impact negatively the mark owner’s reputation for quality."
+    evidence_url: https://scholarship.law.nd.edu/law_faculty_scholarship/619/
+  - stance: "The criticisms cannot draw their normative force by pointing to information transmission principles that did not animate traditional trademark law."
+    evidence_url: https://scholarship.law.nd.edu/law_faculty_scholarship/226/
 voice_style: Doctrinally precise with deep knowledge of case law evolution. Analyzes trademark and patent issues through historical development showing how modern expansions depart from original purposes. Careful and scholarly, avoids ideological rhetoric in favor of detailed textual and structural analysis. Uses concrete examples from recent litigation including Apple-Samsung design patents and pharmaceutical trade dress disputes. Grounds arguments in statutory interpretation and common law tradition.
 confidence: 0.93
 sources:
-  - https://law.nd.edu/faculty/mark-mckenna
-  - https://scholar.google.com/citations?user=mmckenna
-  - https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=mmckenna
+  - https://law.ucla.edu/faculty/faculty-profiles/mark-mckenna
+  - https://newsroom.ucla.edu/experts/mark-mckenna
+  - https://scholarship.law.nd.edu/law_faculty_scholarship/226/
+  - https://scholarship.law.nd.edu/law_faculty_scholarship/619/
+  - https://newsroom.ucla.edu/in-the-news/ucla-in-the-news-january-14-2026
+  - https://www.law.ucla.edu/events/who-gets-last-word-trademark-laws-debate-over-judges-juries-and-proof-ft-prof-mark-mckenna
 canonical_works:
-  - title: "Trademark Law's Theory of Harm"
+  - title: "Testing Modern Trademark Law's Theory of Harm"
     kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=mckenna-theory-of-harm
-    one_liner: "Argued that trademark expansion beyond source identification undermines competition by protecting brand investment rather than preventing confusion — proposed returning to traditional confusion-based framework."
-  - title: "The Trademark-Patent Overlap Problem"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=mckenna-trademark-patent-overlap
-    one_liner: "Identified doctrinal tensions when functional features receive both patent and trademark protection — showed how this enables perpetual exclusivity contrary to patent law's limited term principle."
-  - title: "Confusion's Role in Trademark Law"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=mckenna-confusion-role
-    one_liner: "Traced historical centrality of consumer confusion to trademark liability — critiqued modern dilution and tarnishment theories that dispense with confusion requirement entirely."
-  - title: "False Advertising and Competitive Injury"
-    kind: framework
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=mckenna-false-advertising
-    one_liner: "Examined Lanham Act Section 43(a) litigation patterns — recommended stricter standing requirements preventing competitors from using false advertising claims to suppress comparative advertising."
-  - title: "Right of Publicity and First Amendment Tensions"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=mckenna-right-publicity
-    one_liner: "Analyzed conflicts between celebrity publicity rights and artistic expression — proposed transformative use test balancing celebrity interests against free speech values."
+    url: https://scholarship.law.nd.edu/law_faculty_scholarship/619/
 recent_signal_12mo:
-  - date: "2026-03-12"
-    event: "Published analysis in Texas Law Review on trademark implications of AI-generated brand content and deepfake endorsements"
-    url: https://texaslawreview.org/mckenna-ai-brand-content-2026
-  - date: "2025-12-18"
-    event: "Testimony before House Judiciary Subcommittee on proposed reforms to Lanham Act standing requirements for false advertising cases"
-    url: https://judiciary.house.gov/hearings/mckenna-testimony-lanham-standing-2025
-  - date: "2025-10-25"
-    event: "Notre Dame Law hosted symposium on intellectual property overlaps featuring scholars examining trademark-patent-copyright boundary issues"
-    url: https://law.nd.edu/news/ip-overlaps-symposium-2025
+  - title: "Who Gets the Last Word? Trademark Law’s Debate Over Judges, Juries, and Proof ft. Prof. Mark McKenna"
+    date: "2026-09-09"
+    url: https://www.law.ucla.edu/events/who-gets-last-word-trademark-laws-debate-over-judges-juries-and-proof-ft-prof-mark-mckenna
+  - title: "UCLA in the News January 14, 2026"
+    date: "2026-01-14"
+    url: https://newsroom.ucla.edu/in-the-news/ucla-in-the-news-january-14-2026
 ---
 
 # Mark McKenna

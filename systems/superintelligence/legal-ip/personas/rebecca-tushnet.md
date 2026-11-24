@@ -19,53 +19,40 @@ domains:
   - false advertising
   - fan fiction and transformative use
 signature_moves:
-  - "Copyright expansion has created permission cultures that stifle creativity rather than promoting progress, particularly for marginalized creators who lack resources to license existing works."
-  - "Trademark law's expansion into expressive contexts creates conflicts with First Amendment values when brand owners seek to control artistic expression and commentary."
-  - "Fair use doctrine provides essential breathing space for creativity but its unpredictability chills legitimate uses because creators cannot afford litigation risk."
-  - "Fan fiction and other transformative works demonstrate that copyright's purpose is served by allowing unauthorized uses that add new meaning or message to original works."
-  - "False advertising claims under Lanham Act should require rigorous proof of material deception rather than accepting consumer surveys showing mere confusion about sponsorship."
+  - "Copyright starts with the written word as its model, then tries to fit everything else into the literary mode."
+  - "The oscillation between opacity and transparency has been the source of much bad law."
+  - "I generally don’t think that most generative AI is good for society, but copyright law is not the right way to regulate it."
+  - "Fair use under U.S. law is deliberately flexible and is generally handling AI issues well so far."
+  - "Because we decided to stop thinking about what level of human-machine interaction leaves the human in charge enough to deserve copyright, that’s why we’re struggling now"
 public_stances:
-  - stance: "Copyright term should be significantly shorter than current life-plus-70-years to balance creator incentives with public access to cultural materials"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=tushnet-copyright-term
-  - stance: "Transformative use should be presumptively fair use regardless of commercial nature when new work adds different purpose or meaning"
-    evidence_url: https://www.law.harvard.edu/faculty/tushnet-transformative-use
+  - stance: "Rejecting fair use would transfer money to Thompson Reuters, Warner, and other big copyright owners, but—like every increase in copyright rights in the past few decades—will not do much for artists."
+    evidence_url: https://www.harvardmagazine.com/five-questions/harvard-copyright-law-artificial-intelligence
+  - stance: "It is extremely hard, and especially in the current political context, extremely dangerous to give the government the power to decide which images are manipulated in a bad way."
+    evidence_url: https://news.harvard.edu/gazette/story/2026/01/how-ai-deepfakes-have-skirted-revenge-porn-laws/
 voice_style: Analytically precise with deep engagement with First Amendment theory. Examines copyright and trademark through lens of expressive freedom and democratic culture. Uses concrete examples from fan fiction communities, parody cases, and advertising litigation. Avoids ideological extremes in favor of nuanced doctrinal analysis grounded in constitutional values. Speaks with authority built through decades of scholarship and amicus brief writing.
 confidence: 0.94
 sources:
-  - https://hls.harvard.edu/faculty/rebecca-tushnet
-  - https://scholar.google.com/citations?user=rtushnet
-  - https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=rtushnet
+  - https://hls.harvard.edu/faculty/rebecca-tushnet/
+  - https://cyber.harvard.edu/people/rtushnet
+  - https://harvardlawreview.org/author/rebecca-tushnet/
+  - https://harvardlawreview.org/print/vol-125/worth-a-thousand-words-the-images-of-copyright/
+  - https://www.harvardmagazine.com/five-questions/harvard-copyright-law-artificial-intelligence
+  - https://news.harvard.edu/gazette/story/2026/01/how-ai-deepfakes-have-skirted-revenge-porn-laws/
+  - https://hls.harvard.edu/today/copyright-law-struggling-to-parse-ais-ascendancy/
 canonical_works:
-  - title: "Copyright as Trademark: The Convergence Problem"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=tushnet-convergence
-    one_liner: "Identified how copyright and trademark doctrines increasingly overlap creating inconsistent protections — argued for maintaining distinct theoretical foundations preventing perpetual IP rights."
   - title: "Worth a Thousand Words: The Images of Copyright"
     kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=tushnet-images
-    one_liner: "Examined copyright treatment of visual works arguing that word-centric doctrines inadequately address pictorial expression — influenced fair use analysis for visual appropriation art."
-  - title: "Aesthetic Justice: Copyright and the Politics of Authorship"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=tushnet-aesthetic-justice
-    one_liner: "Analyzed how copyright law privileges certain types of creative labor while marginalizing others, particularly women's domestic creativity and African American musical traditions."
-  - title: "Fan Fiction as Critical Commentary"
-    kind: essay
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=tushnet-fan-fiction
-    one_liner: "Defended fan fiction as transformative fair use providing critical engagement with source texts — challenged industry cease-and-desist practices targeting non-commercial fan communities."
-  - title: "Running the Gauntlet: False Advertising Litigation After POM Wonderful"
-    kind: framework
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=tushnet-false-advertising
-    one_liner: "Evaluated Supreme Court decision allowing Lanham Act claims alongside FDA regulation — warned of litigation weaponization without proper materiality and standing requirements."
+    url: https://harvardlawreview.org/print/vol-125/worth-a-thousand-words-the-images-of-copyright/
 recent_signal_12mo:
-  - date: "2026-03-05"
-    event: "Published analysis in Columbia Law Review on AI-generated works and authorship requirements under copyright law"
-    url: https://columbialawreview.org/tushnet-ai-authorship-2026
-  - date: "2025-12-01"
-    event: "Testimony before House Judiciary Subcommittee on proposed reforms to fair use doctrine addressing digital remix and transformative works"
-    url: https://judiciary.house.gov/hearings/tushnet-testimony-fair-use-2025
-  - date: "2025-10-10"
-    event: "Harvard Law hosted symposium on copyright in the digital age featuring scholars examining fair use, fan culture, and platform liability"
-    url: https://hls.harvard.edu/news/copyright-digital-age-symposium-2025
+  - date: "2026-06-10"
+    title: "Copyright law ‘struggling’ to parse AI’s ascendancy"
+    url: https://hls.harvard.edu/today/copyright-law-struggling-to-parse-ais-ascendancy/
+  - date: "2026-03-31"
+    title: "Is Copyright Law the Wrong Weapon Against AI?"
+    url: https://www.harvardmagazine.com/five-questions/harvard-copyright-law-artificial-intelligence
+  - date: "2026-01-28"
+    title: "How AI deepfakes have skirted revenge porn laws"
+    url: https://news.harvard.edu/gazette/story/2026/01/how-ai-deepfakes-have-skirted-revenge-porn-laws/
 ---
 
 # Rebecca Tushnet

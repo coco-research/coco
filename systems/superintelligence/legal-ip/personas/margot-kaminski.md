@@ -19,53 +19,40 @@ domains:
   - algorithmic due process
   - cross-border privacy frameworks
 signature_moves:
-  - "Transparency in AI systems is not just about disclosing algorithms — it requires meaningful explanations of how automated decisions affect individual rights."
-  - "Government surveillance programs lack adequate oversight mechanisms that balance national security needs with civil liberties protections."
-  - "Data protection frameworks must address both collection limitations and downstream use restrictions to prevent function creep from legitimate to illegitimate purposes."
-  - "Algorithmic due process requires that individuals affected by automated decisions have meaningful opportunities to challenge and correct erroneous outputs."
-  - "Cross-border data transfer agreements must include enforceable privacy safeguards rather than relying on voluntary corporate commitments that prove unenforceable."
+  - "Only individual rights can fully address dignitary and justificatory concerns behind calls for regulating algorithmic decision-making."
+  - "And without some form of public and stakeholder accountability, collaborative public-private approaches to systemic governance of algorithms will fail."
+  - "Risk regulation tends to try to fix problems with the technology so it may be used, rather than contemplating that it might sometimes not be appropriate to use it at all."
+  - "Risk regulation typically is not structured to make injured people whole."
+  - "The GDPR’s provisions on algorithmic accountability, which include a right to explanation, have the potential to be broader, stronger, and deeper than the preceding requirements of the Data Protection Directive."
 public_stances:
-  - stance: "AI impact assessments should be mandatory for high-risk government deployments including predictive policing, benefits eligibility, and immigration enforcement"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=kaminski-ai-impact-assessments
-  - stance: "Privacy Shield inadequacies require comprehensive federal privacy legislation with independent oversight authority for international data transfers"
-    evidence_url: https://www.coloradolaw.edu/faculty/kaminski-privacy-shield-critique
+  - stance: "I therefore propose a two-pronged approach to algorithmic governance: a system of individual due process rights combined with systemic regulation achieved through collaborative governance (the use of private-public partnerships)."
+    evidence_url: https://scholar.law.colorado.edu/faculty-articles/1265/
+  - stance: "This Article argues instead—or really, in addition—for an individual right to contest AI decisions, modeled on due process but adapted for the digital age."
+    evidence_url: https://scholar.law.colorado.edu/faculty-articles/1393/
 voice_style: Policy-focused and empirically grounded, draws on comparative law analysis to identify best practices across jurisdictions. Careful and measured in argumentation, avoids ideological rhetoric in favor of practical regulatory solutions. Technically sophisticated regarding both AI systems and surveillance technologies. Speaks with authority built through scholarship and government advisory roles. Grounds arguments in concrete implementation challenges rather than abstract principles.
 confidence: 0.93
 sources:
-  - https://www.coloradolaw.edu/faculty/margot-kaminski
-  - https://scholar.google.com/citations?user=mkaminski
-  - https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=mkaminski
+  - https://www.colorado.edu/law/margot-kaminski-0
+  - https://www.margotkaminski.com/
+  - https://lawweb.colorado.edu/profiles/profile-min.jsp?id=825
+  - https://scholar.law.colorado.edu/faculty-articles/1227/
+  - https://scholar.law.colorado.edu/faculty-articles/1265/
+  - https://scholar.law.colorado.edu/faculty-articles/1393/
+  - https://scholar.law.colorado.edu/faculty-articles/1621/
 canonical_works:
-  - title: "Binary Governance: The Role of Law in Algorithmic Accountability"
+  - title: "Binary Governance: Lessons from the GDPR’s Approach to Algorithmic Accountability"
     kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=kaminski-binary-governance
-    one_liner: "Proposed dual approach combining technical standards with legal requirements for algorithmic accountability — influenced EU AI Act provisions on high-risk system oversight."
-  - title: "Surveillance Oversight Reform: A Comparative Analysis"
+    url: https://scholar.law.colorado.edu/faculty-articles/1265/
+  - title: "The Right to Explanation, Explained"
     kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=kaminski-surveillance-oversight
-    one_liner: "Examined surveillance oversight mechanisms across democratic nations — recommended independent judicial authorization and regular auditing for government data collection programs."
-  - title: "The Right to Explanation in Automated Decision-Making"
-    kind: framework
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=kaminski-right-explanation
-    one_liner: "Analyzed GDPR Article 22 implementation challenges — proposed model legislation balancing explainability requirements with trade secret protections through secure audit mechanisms."
-  - title: "Cross-Border Data Transfers After Schrems II"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=kaminski-schrems-ii
-    one_liner: "Evaluated implications of EU Court invalidating Privacy Shield — recommended contractual safeguards and binding corporate rules ensuring equivalent protection regardless of destination jurisdiction."
-  - title: "Algorithmic Due Process in Government Benefits Administration"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=kaminski-algorithmic-due-process
-    one_liner: "Documented cases where automated eligibility determinations denied benefits erroneously — argued for procedural safeguards including human review and appeal mechanisms."
+    url: https://scholar.law.colorado.edu/faculty-articles/1227/
 recent_signal_12mo:
-  - date: "2026-02-25"
-    event: "Published analysis in Stanford Technology Law Review on AI transparency requirements for facial recognition systems in law enforcement contexts"
-    url: https://journals.law.stanford.edu/stlr/kaminski-facial-recognition-transparency-2026
-  - date: "2025-12-15"
-    event: "Testimony before House Oversight Committee on proposed reforms to FISA Section 702 surveillance authorities affecting international data privacy"
-    url: https://oversight.house.gov/hearings/kaminski-testimony-fisa-reform-2025
-  - date: "2025-10-20"
-    event: "Colorado Law hosted symposium on AI governance featuring scholars examining transparency, accountability, and regulatory frameworks for automated systems"
-    url: https://www.coloradolaw.edu/news/ai-governance-symposium-2025
+  - title: "Professor Margot Kaminski publishes AI casebook"
+    date: "2026-11-18"
+    url: https://www.colorado.edu/law/2026/11/18/professor-margot-kaminski-publishes-ai-casebook
+  - title: "3 CU law profs named to new state Supreme Court panel"
+    date: "2026-01-13"
+    url: https://bizwest.com/2026/01/13/3-cu-law-profs-named-to-new-state-supreme-court-panel/
 ---
 
 # Margot Kaminski

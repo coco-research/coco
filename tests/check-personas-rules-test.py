@@ -923,5 +923,66 @@ expect(all(v == "ok" for v in results.values()),
        "--links checks each URL's path and query for a phone, a personal email and a street address before any fetch",
        "\n".join(f"{k}: {v}" for k, v in results.items()))
 
+# status: held. A held file (emptied list fields, 1 source, no signals, not in the registry) passes, and a
+# sibling that pairs with it passes (h). The same gaps under status: active still fail (a), (b), (d) and (g),
+# and a sibling pairing with that file still fails (h).
+def gapped(slug, name, status):
+    text = persona(slug, name)
+    for key in ("signature_moves", "public_stances", "canonical_works", "persistent_signals"):
+        text = re.sub(rf"^{key}:\n(?: .*\n)*", f"{key}: []\n", text, count=1, flags=re.M)
+    text = re.sub(r"^sources:\n(?: .*\n)*", "sources:\n  - https://www.authenticeducation.org/\n", text, count=1, flags=re.M)
+    return re.sub(r"^status: .*$", f"status: {status}", text, count=1, flags=re.M)
+
+
+for status, want in (("held", []), ("active", [
+        f"{GTM}gap-example.md: (a) frontmatter: missing or empty fields: signature_moves, canonical_works, public_stances",
+        f"{GTM}gap-example.md: (b) sources: 1 source URLs, need at least 3",
+        f"{GTM}gap-example.md: (d) roster: slug 'gap-example' is not listed in its department's registry/roster",
+        f"{GTM}gap-example.md: (g) signals: recent_signal_12mo has 0, need at least 2",
+        f"{GTM}sib-example.md: (h) pairs: pairs_well_with names slugs not in any department roster: gap-example"])):
+    with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
+        tmp = Path(t)
+        board(tmp, {"sib-example": ("sib-example", "Sib Example", "\npairs_well_with: [gap-example]", "")})
+        (tmp / GTM / "gap-example.md").write_text(gapped("gap-example", "Gap Example", status), encoding="utf-8")
+        p = subprocess.run([sys.executable, "scripts/check-personas.py", GTM + "gap-example.md", GTM + "sib-example.md"],
+                           cwd=tmp, capture_output=True, text=True)
+        expect(p.returncode == (1 if want else 0) and p.stdout.splitlines() == want,
+               f"status: {status} file with emptied lists, 1 source, no signals, no roster row "
+               + ("passes, and so does a sibling pairing with it" if not want else "fails (a), (b), (d), (g) and its sibling (h)"),
+               f"exit {p.returncode}\n{p.stdout}{p.stderr}")
+
+# Every build_registry*.py skips a status: held file: its slug is in no cell and not in personas. A twin with
+# the same file under status: active is still listed. Each runs on a copy of its team in a temp folder.
+SI = ROOT / "systems/superintelligence"
+gens = {g: g.parents[1].name for g in sorted(SI.glob("*/scripts/build_registry*.py"))}
+gens[SI / "scripts/build_registry_generic.py"] = "strategy"  # the generic one is dropped into a team's scripts/
+results = {}
+for gen, team in gens.items():
+    with tempfile.TemporaryDirectory(prefix="build-registry-") as t:
+        tdir = Path(t) / "systems/superintelligence" / team
+        shutil.copytree(SI / team / "personas", tdir / "personas")
+        (tdir / "scripts").mkdir()
+        shutil.copy(gen, tdir / "scripts/build_registry.py")
+        for name in ("roster.json", "registry.json"):
+            if (SI / team / name).is_file():
+                shutil.copy(SI / team / name, tdir / name)
+        seed = sorted((tdir / "personas").glob("*.md"))[0].read_text(encoding="utf-8")
+        for slug, status in (("held-example", "held"), ("active-example", "active")):
+            text = re.sub(r"^slug: .*$", f"slug: {slug}", seed, count=1, flags=re.M)
+            text = re.sub(r"^real_name: .*$", f"real_name: {slug.title()}", text, count=1, flags=re.M)
+            (tdir / "personas" / f"{slug}.md").write_text(re.sub(r"^status: .*$", f"status: {status}", text, count=1, flags=re.M),
+                                                          encoding="utf-8")
+        p = subprocess.run([sys.executable, str(tdir / "scripts/build_registry.py")], capture_output=True, text=True)
+        try:
+            reg = json.loads((tdir / "registry.json").read_text(encoding="utf-8"))
+            listed = set(reg["personas"]) | {s for c in reg["cells"].values() for s in c["personas"]}
+            ok = p.returncode == 0 and "held-example" not in listed and "active-example" in listed
+        except (OSError, ValueError, KeyError, TypeError) as e:
+            ok, p.stderr = False, repr(e)
+        results[gen.relative_to(SI).as_posix()] = "ok" if ok else f"exit {p.returncode}, held listed or active missing {p.stderr[-300:]}"
+expect(len(results) == 14 and all(v == "ok" for v in results.values()),
+       f"each of the {len(results)} build_registry generators skips a status: held file and keeps its active twin",
+       "\n".join(f"{k}: {v}" for k, v in results.items() if v != "ok"))
+
 print("check-personas-rules-test:", "all passed" if not failures else f"{failures} case(s) failed")
 sys.exit(1 if failures else 0)

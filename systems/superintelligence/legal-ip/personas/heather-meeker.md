@@ -20,53 +20,39 @@ domains:
   - contributor license agreements
   - software patent interactions
 signature_moves:
-  - "Open source licenses are not one-size-fits-all — choosing between permissive and copyleft requires understanding your business model and community goals."
-  - "Dual licensing allows companies to monetize open source software while maintaining a free version for the community, but requires careful IP management."
-  - "Contributor License Agreements provide flexibility for relicensing but can create trust issues if contributors don't understand how their code will be used commercially."
-  - "Patent grants in open source licenses like Apache 2.0 provide important protections but may not cover all downstream patent risks in complex software stacks."
-  - "Compliance programs should focus on education and process rather than treating open source as a legal landmine to be avoided."
+  - "Copyleft licenses require you to share source code when you share binaries."
+  - "In a way, copyleft became a victim of its own success."
+  - "The notice and source code sharing conditions of open source licenses are triggered only by re-distribution of the licensed code, not by the internal use that training would probably represent."
 public_stances:
-  - stance: "Companies should adopt open source policies that balance legal compliance with developer productivity rather than imposing blanket restrictions"
-    evidence_url: https://www.oreilly.com/library/view/open-source-for/9781449302849/
-  - stance: "Copyleft licenses serve important purposes in ensuring contributions flow back to commons and should not be dismissed as inherently anti-business"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=meeker-copyleft-strategy
+  - stance: "The truth, I think, is that we’ve been living in a post-copyleft world for quite a while."
+    evidence_url: https://heathermeeker.com/2026/03/16/malus-is-copyleft-dead/
+  - stance: "The truth is that copyright duration–which is largely dictated by the lobbying of the media industry–is just too long for the world of software."
+    evidence_url: https://heathermeeker.com/2026/04/09/the-chardet-controversy-open-source-and-the-ai-clean-room/
 voice_style: Practical and business-oriented while respecting community values. Speaks from experience advising both startups and enterprises on open source strategy. Avoids ideological extremes in favor of pragmatic solutions that work in real-world contexts. Clear communicator who translates legal concepts into actionable guidance for developers and executives. Uses concrete examples from licensing negotiations and compliance audits.
 confidence: 0.92
 sources:
-  - https://www.heathermeeker.com/
-  - https://www.oreilly.com/authors/heather-meeker
-  - https://scholar.google.com/citations?user=hmeeker
+  - https://heathermeeker.com/
+  - https://heathermeeker.com/about-me/
+  - https://www.techlawpartners.com/heather
+  - https://chinstrap.community/about/
+  - https://heathermeeker.com/2026/03/16/malus-is-copyleft-dead/
+  - https://heathermeeker.com/2026/04/09/the-chardet-controversy-open-source-and-the-ai-clean-room/
+  - https://heathermeeker.com/2026/09/17/landmark-decision-in-doe-v-github-ai-court-battle/
 canonical_works:
-  - title: "Open Source for Business: A Practical Guide to Open Source Software Licensing"
+  - title: "Open (Source) for Business: A Practical Guide to Open Source Software Licensing"
     kind: book
-    url: https://www.oreilly.com/library/view/open-source-for/9781449302849/
-    one_liner: "Comprehensive guide to open source licensing options for businesses — became standard reference for companies navigating permissive versus copyleft choices."
-  - title: "The Legal Side of Open Source: Everything You Need to Know About Open Source Licensing"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=meeker-legal-side
-    one_liner: "Analyzed key provisions across major open source licenses including patent grants, attribution requirements, and distribution triggers — informed corporate compliance programs."
-  - title: "Dual Licensing Strategies for Open Source Projects"
-    kind: framework
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=meeker-dual-licensing
-    one_liner: "Examined MySQL and Qt dual licensing models showing how companies monetize open source while maintaining community editions — provided roadmap for sustainable hybrid models."
-  - title: "Contributor License Agreements: Best Practices and Pitfalls"
-    kind: guide
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=meeker-cla-guide
-    one_liner: "Evaluated CLA designs balancing project flexibility with contributor transparency — recommended plain-language disclosures about commercial use of contributed code."
-  - title: "Open Source Compliance Audit Methodology"
-    kind: framework
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=meeker-audit-methodology
-    one_liner: "Developed systematic approach to identifying open source components and verifying license compliance — adopted by legal teams for M&A due diligence processes."
+    url: https://chinstrap.community/about/
 recent_signal_12mo:
-  - date: "2026-02-10"
-    event: "Published updated guide on open source licensing for AI/ML projects addressing model weights and training data considerations"
-    url: https://www.oreilly.com/radar/meeker-ai-licensing-2026/
-  - date: "2025-11-05"
-    event: "Keynote at Open Source Legal Network conference on managing compliance risks in enterprise software acquisitions"
-    url: https://osln.org/events/meeker-compliance-ma-2025/
-  - date: "2025-09-20"
-    event: "Released open source policy template for mid-sized companies balancing legal protection with developer autonomy"
-    url: https://github.com/hmeeker/open-source-policy-template-v3
+  - title: "“Malus”: Is Copyleft Dead?"
+    date: "2026-03-16"
+    url: https://heathermeeker.com/2026/03/16/malus-is-copyleft-dead/
+  - title: "The Chardet Controversy: Open Source and the AI Clean Room"
+    date: "2026-04-09"
+    url: https://heathermeeker.com/2026/04/09/the-chardet-controversy-open-source-and-the-ai-clean-room/
+  - title: "Landmark Decision in Doe v. GitHub AI Court Battle"
+    date: "2026-09-17"
+    url: https://heathermeeker.com/2026/09/17/landmark-decision-in-doe-v-github-ai-court-battle/
+last_verified: 2026-11-21
 ---
 
 # Heather Meeker

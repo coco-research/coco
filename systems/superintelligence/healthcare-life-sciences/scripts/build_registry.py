@@ -70,6 +70,8 @@ def main() -> None:
         except Exception as exc:
             print(f"WARN: skipping {path.name}: {exc}", file=sys.stderr)
             continue
+        if fm.get("status") == "held":  # held out until it can be sourced: not in the registry, so not in ROSTER/SKILL/cells
+            continue
         slug, cell = fm["slug"], fm.get("cell")
         if cell in cells:
             cells[cell].append(slug)

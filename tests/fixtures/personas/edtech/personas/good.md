@@ -1,10 +1,10 @@
 ---
-slug: grant-wiggins
+slug: fixture-good
 teams: [education-edtech-super-intelligence]
 home_team: education-edtech-super-intelligence
 cell: curriculum-instructional-design
 cell_role: lead-driver
-real_name: Grant Wiggins
+real_name: Fixture Good
 archetype: Assessment reformer who insisted understanding must be designed backward from evidence
 status: archetype
 affiliations_2026: []

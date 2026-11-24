@@ -19,53 +19,43 @@ domains:
   - constitutional interpretation
   - information fiduciary duties
 signature_moves:
-  - "Free speech in the digital age requires reconceptualizing platforms not as state actors but as information fiduciaries with duties to protect user autonomy."
-  - "The First Amendment protects both freedom of speech and freedom of listening — surveillance capitalism violates the latter by exploiting attention for profit."
-  - "Platform regulation should focus on procedural due process requirements ensuring transparent content moderation rather than substantive speech mandates."
-  - "Constitutional rot occurs when political institutions become unresponsive to popular will due to economic inequality and regulatory capture — digital platforms exacerbate this dynamic."
-  - "Network neutrality and data privacy are free speech issues because they affect who controls information flows and whose voices get amplified or suppressed."
+  - "The United States is living through a constitutional interregnum: the Reagan regime has exhausted itself, but no successor has yet emerged."
+  - "Constitutional rot creates a widening gap between constitutional institutions and the constitutional values these institutions were designed to serve."
+  - "It took many decades for constitutional rot to develop in the United States. Freeing ourselves from it may take many more."
 public_stances:
-  - stance: "Platforms should be regulated as information fiduciaries owing duties of confidentiality, loyalty, and care to users whose data they collect and monetize"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=balkin-information-fiduciary
-  - stance: "Section 230 reform should balance platform accountability with protection for good-faith moderation efforts through safe harbor frameworks"
-    evidence_url: https://www.yalelawjournal.org/balkin-section-230-reform
+  - stance: "Renewal remains possible, but it is neither guaranteed nor imminent; it requires sustained mobilization, constitutional and institutional reform, protection of vulnerable groups, and a long time horizon."
+    evidence_url: https://balkin.blogspot.com/2026/09/stuck-in-middle-with-you-constitution.html
+  - stance: "The most plausible democratic path resembles the Progressive Era: state and local experimentation, cross-party reform coalitions, institutional rebuilding, and a shift from culture-war issues toward questions of affordability, wealth inequality, concentrated economic power, industrial policy, and class."
+    evidence_url: https://balkin.blogspot.com/2026/09/stuck-in-middle-with-you-constitution.html
 voice_style: Theoretically sophisticated, drawing on constitutional theory, media studies, and political philosophy. Examines digital governance through historical analogies to earlier communication revolutions. Careful and scholarly, avoids ideological rhetoric in favor of nuanced doctrinal analysis. Uses concrete examples from social media moderation, broadband regulation, and surveillance practices. Speaks with authority built through decades of constitutional scholarship.
 confidence: 0.95
 sources:
-  - https://www.law.yale.edu/faculty/jack-m-balkin
-  - https://scholar.google.com/citations?user=jbalkin
-  - https://isp.yale.edu/people/jack-balkin
+  - https://law.yale.edu/jack-m-balkin
+  - https://jackbalkin.yale.edu/
+  - https://jackbalkin.yale.edu/bibliography/articles
+  - https://en.wikipedia.org/wiki/Jack_Balkin
+  - https://balkin.blogspot.com/
+  - https://balkin.blogspot.com/2026/09/stuck-in-middle-with-you-constitution.html
+  - https://balkin.blogspot.com/2026/09/constitution-day-talk-at-stanford.html
+  - https://www.nyls.edu/events/constitutionalism-the-rule-of-law-and-democracy-a-retrospective-on-jack-balkins-impact/
 canonical_works:
-  - title: "Free Speech in a Digital Age"
-    kind: book
-    url: https://yalebooks.yale.edu/book/free-speech-digital-age
-    one_liner: "Examined how digital platforms reshape First Amendment doctrine — argued for regulatory approaches balancing platform liability with protection for user expression and innovation."
   - title: "Information Fiduciaries and the First Amendment"
     kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=balkin-information-fiduciary
-    one_liner: "Proposed fiduciary framework for platform regulation where companies collecting personal data owe duties of care, confidentiality, and loyalty to users — influenced GDPR and state privacy legislation."
-  - title: "Constitutional Democracy in Crisis"
-    kind: book
-    url: https://www.press.uchicago.edu/books/constitutional-democracy-crisis
-    one_liner: "Analyzed institutional decay in American democracy — argued that economic inequality and political polarization undermine constitutional governance requiring structural reforms."
-  - title: "Network Neutrality as Free Speech Policy"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=balkin-network-neutrality
-    one_liner: "Connected broadband regulation to First Amendment values — showed how ISP control over transmission affects speaker access and listener choice in digital public forums."
+    url: https://jackbalkin.yale.edu/bibliography/articles
   - title: "The Cycles of Constitutional Time"
     kind: book
-    url: https://www.yalelawjournal.org/books/cycles-constitutional-time
-    one_liner: "Traced recurring patterns in constitutional development showing how periods of polarization and reform alternate — provided framework for understanding current democratic challenges."
+    url: https://law.yale.edu/jack-m-balkin
 recent_signal_12mo:
-  - date: "2026-03-22"
-    event: "Published analysis in Yale Law Journal on AI content moderation and procedural due process requirements for platform governance"
-    url: https://law.yale.edu/ylj/balkin-ai-moderation-due-process-2026
-  - date: "2026-01-15"
-    event: "Testimony before Senate Commerce Committee on proposed platform accountability legislation addressing algorithmic transparency and user appeal mechanisms"
-    url: https://www.commerce.senate.gov/hearings/balkin-testimony-platform-accountability-2026
-  - date: "2025-11-08"
-    event: "Yale Information Society Project released report on information fiduciary duties for health data applications including mental health and reproductive services"
-    url: https://isp.yale.edu/reports/health-data-fiduciary-2025
+  - title: "Constitution Day Talk at Stanford: Technology and Constitutional Rot"
+    date: "2026-09-22"
+    url: https://balkin.blogspot.com/2026/09/constitution-day-talk-at-stanford.html
+  - title: "Stuck in the Middle With You: The Constitution Between Regimes"
+    date: "2026-09-14"
+    url: https://balkin.blogspot.com/2026/09/stuck-in-middle-with-you-constitution.html
+  - title: "Constitutionalism, The Rule of Law and Democracy: A Retrospective on Jack Balkin’s Impact"
+    date: "2026-03-18"
+    url: https://www.nyls.edu/events/constitutionalism-the-rule-of-law-and-democracy-a-retrospective-on-jack-balkins-impact/
+last_verified: 2026-11-21
 ---
 
 # Jack Balkin

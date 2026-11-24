@@ -25,17 +25,12 @@ canonical_works:
 key_publications:
   - 'No standalone books/articles were provided in the provided web context'
 recent_signal_12mo:
-  - title: 'Lions LB Jack Campbell signs 4-year, $81M extension'
-    date: '2026-05-21'
-    url: 'https://www.nfl.com/news/lions-sign-lb-jack-campbell-to-contract-extension-through-2030'
-  - title: 'Patrick Campbell-Lyons, musician who was co-founder of the original Nirvana in...'
-    date: '2026-05-25'
-    url: 'https://www.yahoo.com/entertainment/music/articles/patrick-campbell-lyons-musician-co-050000351.html'
-  - title: 'Rock legend who founded the original Nirvana dead at 82'
-    date: '2026-04-02'
-    url: 'https://www.yahoo.com/entertainment/music/articles/rock-legend-founded-original-nirvana-090046868.html'
-  - title: 'Patrick Price'
-    date: '2026-05-15'
+  - title: 'Lessons from Patrick Campbell'
+    date: '2026-07-01'
+    url: 'https://www.antoinebuteau.com/lessons-from-patrick-campbell/'
+  - title: 'Patrick Campbell wrote an ebook, then sold pricing audits to ProfitWell''s first 20 customers'
+    date: '2026-08-25'
+    url: 'https://startupfounderstories.com/stories/patrick-campbell-profitwell-content-playbook-to-1m-arr'
 public_stances:
   - stance: 'Freemium/free products should be meaningfully better than paid alternatives; begin only after product-market fit'
     evidence_url: 'https://practicalfounders.com/podcast/37-bootstrapped-for-10-years-and-sold-profitwell-for-200-million-patrick-campbell/'
@@ -66,7 +61,7 @@ when_to_summon:
   - 'When evaluating “freemium” in terms of what the free product must accomplish vs just acquiring users'
   - 'When aligning product, payments/billing ops, and retention into a single execution pipeline'
 confidence: 0.78
-last_verified: '2026-06-01'
+last_verified: '2026-11-21'
 sources:
   - 'https://www.paddle.com/profitwell-acquisition'
   - 'https://www.prnewswire.com/news-releases/paddle-acquires-profitwell-to-automate-payments-infrastructure-for-saas-companies-301554570.html'
@@ -75,9 +70,9 @@ sources:
   - 'https://www.prnewswire.co.uk/news-releases/paddle-acquires-profitwell-to-automate-payments-infrastructure-for-saas-companies-851463902.html'
   - 'https://review.firstround.com/articles/patrick-campbell/'
   - 'https://www.levelingup.com/sales/patrick-campbell-price-intelligently/'
-  - 'https://www.nfl.com/news/lions-sign-lb-jack-campbell-to-contract-extension-through-2030'
-  - 'https://www.yahoo.com/entertainment/music/articles/patrick-campbell-lyons-musician-co-050000351.html'
-  - 'https://www.yahoo.com/entertainment/music/articles/rock-legend-founded-original-nirvana-090046868.html'
+  - 'https://www.antoinebuteau.com/lessons-from-patrick-campbell/'
+  - 'https://startupfounderstories.com/stories/patrick-campbell-profitwell-content-playbook-to-1m-arr'
+  - 'https://www.youtube.com/watch?v=npadtGFiCGA'
 
 ---
 

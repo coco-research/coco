@@ -19,53 +19,37 @@ domains:
   - predatory pricing
   - regulated industries
 signature_moves:
-  - "Antitrust law is fundamentally about protecting competition as a process, not competitors — but that process requires structural safeguards against concentration."
-  - "The Chicago School's efficiency defense went too far in dismissing non-price harms and barriers to entry that matter for long-term innovation."
-  - "Merger enforcement must consider dynamic competition effects, not just static price impacts — especially in digital markets where data advantages compound."
-  - "Predatory pricing doctrine needs recalibration for markets where zero-price services and cross-subsidization are common strategies."
-  - "Historical analysis shows that periods of weak antitrust enforcement correlate with reduced startup formation and slower productivity growth."
+  - "Antitrust law struggles to measure market power in digital markets."
+  - "Measuring market power for purely digital products is hard, and we still do not have a consensus about how to go about it."
+  - "Product differentiation counters the tendency toward monopoly, or winner-take-all, because differentiated firms appeal to different consumer tastes."
 public_stances:
-  - stance: "Modern antitrust should return to structural presumptions against horizontal mergers in concentrated markets"
-    evidence_url: https://www.upenn.edu/law/faculty/hovenkamp-antitrust-structuralism
-  - stance: "The consumer welfare standard has been misapplied to ignore quality degradation and innovation harms"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=hovenkamp-consumer-welfare-critique
+  - stance: "Because digital sectors are highly dynamic and innovation-driven, antitrust enforcement must exercise caution to avoid misdiagnosing healthy competition as monopoly power."
+    evidence_url: https://www.networklawreview.org/digital-market-power/
+  - stance: "The best approach in such cases is to (1) require higher share numbers to establish a given amount of power; (2) insist that the shares in question be durable; and (3) seek out other types of evidence that links high shares to market power."
+    evidence_url: https://www.networklawreview.org/digital-market-power/
 voice_style: Scholarly and historically grounded, draws on decades of antitrust treatise writing to connect current debates to historical precedent. Careful and measured in argumentation, avoids ideological rhetoric in favor of detailed economic and legal analysis. Respects Chicago School contributions while identifying where its assumptions break down in modern markets. Speaks with authority built through comprehensive scholarship rather than polemics.
 confidence: 0.96
 sources:
-  - https://www.law.upenn.edu/faculty/profile/hhovenkamp
-  - https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=12345
-  - https://scholar.google.com/citations?user=hhovenkamp
+  - https://www.law.upenn.edu/faculty/hhovenka/
+  - https://en.wikipedia.org/wiki/Herbert_Hovenkamp
+  - https://www.law.upenn.edu/live/tags/Herbert%20Hovenkamp/type/news
+  - https://www.networklawreview.org/digital-market-power/
+  - https://www.thedp.com/article/2026/03/penn-carey-law-school-top-100-legal-scholars
 canonical_works:
-  - title: "Antitrust Law (treatise)"
+  - title: "Antitrust Law"
     kind: book
-    url: https://www.amazon.com/Antitrust-Law-Herbert-Hovenkamp/dp/0314278141
-    one_liner: "Comprehensive treatise covering all aspects of antitrust doctrine — cited by courts hundreds of times as authoritative statement of antitrust principles."
+    url: https://www.law.upenn.edu/faculty/hhovenka/
   - title: "The Antitrust Enterprise: Principle and Execution"
     kind: book
-    url: https://www.hup.harvard.edu/books/the-antitrust-enterprise
-    one_liner: "Argued for consistent application of core antitrust principles across different contexts — influenced judicial approach to vertical restraints and merger analysis."
-  - title: "Predatory Pricing and the Evolution of Monopoly"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=hovenkamp-predatory-pricing
-    one_liner: "Reexamined predatory pricing doctrine in light of modern economic theory — challenged Areeda-Turner test's applicability to digital markets."
-  - title: "The Rise and Fall of the Chicago School in Antitrust"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=hovenkamp-chicago-school
-    one_liner: "Traced Chicago School influence from 1970s to present — identified where efficiency assumptions diverged from empirical reality in platform markets."
-  - title: "Merger Enforcement in Digital Markets"
-    kind: framework
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=hovenkamp-digital-mergers
-    one_liner: "Proposed analytical framework for evaluating tech acquisitions where traditional revenue thresholds miss competitive harm from data aggregation and ecosystem control."
+    url: https://www.law.upenn.edu/faculty/hhovenka/
 recent_signal_12mo:
-  - date: "2026-03-10"
-    event: "Published updated edition of Antitrust Law treatise incorporating AI market concentration analysis and platform competition cases"
-    url: https://www.upenn.edu/law/news/hovenkamp-treatise-ai-markets-2026
-  - date: "2025-12-05"
-    event: "Testimony before Senate Judiciary Committee on proposed amendments to Clayton Act addressing digital platform acquisitions"
-    url: https://www.judiciary.senate.gov/hearings/hovenkamp-testimony-clayton-amendments-2025
-  - date: "2025-10-15"
-    event: "Keynote at American Antitrust Institute conference on restoring structural presumptions in merger review"
-    url: https://www.antitrustinstitute.org/events/hovenkamp-keynote-structural-presumptions-2025
+  - title: "Assessing Antitrust Market Power for Digital Products"
+    date: "2026-11-16"
+    url: https://www.networklawreview.org/digital-market-power/
+  - title: "Seven Penn Carey Law professors ranked among nation’s 100 most cited legal scholars"
+    date: "2026-03-24"
+    url: https://www.thedp.com/article/2026/03/penn-carey-law-school-top-100-legal-scholars
+last_verified: 2026-11-21
 ---
 
 # Herbert Hovenkamp

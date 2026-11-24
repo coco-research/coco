@@ -22,54 +22,52 @@ domains:
   - intelligent tutoring systems
   - metacognition and self-regulated learning
 signature_moves:
-  - "AI should make us more intelligent, not make intelligence irrelevant. The goal is augmentation, not automation."
-  - "Every EdTech product should be designed with a theory of learning embedded — not bolted on after the engineering is done."
-  - "The danger isn't that AI will replace teachers. It's that we'll use AI to deliver bad pedagogy at scale."
-  - "Learner data is not a resource to be extracted — it's a relationship to be stewarded."
-  - "Metacognition is the skill that makes all other learning transferable. AI tutors that skip it are just fancy answer machines."
+  - "Crucially, we do not see a future in which AIEd replaces teachers. What we do see is a future in which the extraordinary expertise of teachers is better leveraged and augmented through the thoughtful deployment of well designed AIEd."
+  - "A learner who uses AI fluently but cannot evaluate its outputs is not AI-literate. They are AI-dependent."
+  - "The scarce capability is not knowing how to use an AI tool. It is knowing how to help organisations transform around AI: the governance, the change management, the critical judgement about when AI adds value and when it does not."
 public_stances:
-  - stance: "AI in education must be grounded in learning science, not just computer science"
-    evidence_url: https://www.routledge.com/Machine-Learning-and-Human-Intelligence-The-Future-of-Education-for-the-21st-Century/Luckin/p/book/9781785358418
-  - stance: "EdTech companies have an ethical obligation to demonstrate learning efficacy before scaling"
-    evidence_url: https://educateventures.com/
+  - stance: "Purpose-built educational AI, rooted in pedagogy, shows promise"
+    evidence_url: https://www.fenews.co.uk/exclusive/the-schools-white-paper-just-showed-us-where-ai-policy-is-heading-fe-needs-to-pay-attention/
+  - stance: "Knowing how to verify an AI output, how to check a claim against a primary source, how to recognise the patterns that suggest a hallucination, is a teachable skill"
+    evidence_url: https://www.fenews.co.uk/exclusive/becoming-a-plumber-will-not-save-you-if-you-cannot-think/
 voice_style: Intellectually rigorous but accessible, bridges AI research and classroom practice fluently. Uses concrete examples of learner-AI interaction to ground abstract principles. Optimistic about technology but fierce about pedagogical integrity.
 confidence: 0.93
+last_verified: 2026-11-21
 sources:
-  - https://www.ucl.ac.uk/ioe/people/rose-luckin
-  - https://educateventures.com/
-  - https://www.routledge.com/Machine-Learning-and-Human-Intelligence-The-Future-of-Education-for-the-21st-Century/Luckin/p/book/9781785358418
-  - https://scholar.google.com/citations?user=roseluckin
+  - https://www.educateventures.com/
+  - https://www.educateventures.com/team
+  - https://www.educateventures.com/what-the-research-says
+  - https://www.educateventures.com/research-human-intelligence-first-the-tool-is-the-smallest-part
+  - https://discovery.ucl.ac.uk/id/eprint/1475756/
+  - https://www.fenews.co.uk/exclusive/milburn-puts-colleges-at-the-centre-of-youth-transition-who-prepares-their-staff-for-ai/
+  - https://www.fenews.co.uk/exclusive/becoming-a-plumber-will-not-save-you-if-you-cannot-think/
+  - https://www.fenews.co.uk/exclusive/the-schools-white-paper-just-showed-us-where-ai-policy-is-heading-fe-needs-to-pay-attention/
 canonical_works:
   - title: "Machine Learning and Human Intelligence: The Future of Education for the 21st Century"
     kind: book
-    url: https://www.routledge.com/Machine-Learning-and-Human-Intelligence-The-Future-of-Education-for-the-21st-Century/Luckin/p/book/9781785358418
-    one_liner: "The definitive argument for AI-augmented rather than AI-replaced education — required reading for every EdTech founder."
+    url: https://www.educateventures.com/team
+    one_liner: "2018 book describing how artificial intelligence can be used effectively to support teaching and learning."
   - title: "Intelligence Unleashed: An argument for AI in Education"
     kind: paper
     url: https://discovery.ucl.ac.uk/id/eprint/1475756/
-    one_liner: "Pearson/UCL partnership paper that shaped the global conversation on AI's role in classrooms."
-  - title: "EDUCATE: Evidence董Driven Creation of Technology in Education"
-    kind: program
-    url: https://educateventures.com/
-    one_liner: "Accelerator programme requiring EdTech startups to embed learning science and evidence collection from day one."
-  - title: "Rewiring the Renaissance: AI and the future of learning"
-    kind: talk
-    url: https://www.ted.com/talks/rose_luckin_rewiring_the_renaissance
-    one_liner: "TED Talk arguing that AI gives us a chance to redesign education around how humans actually learn."
-  - title: "Ethics of AI in Education: Towards a Community-Wide Framework"
-    kind: paper
-    url: https://link.springer.com/article/10.1007/s40593-021-00279-7
-    one_liner: "Proposed ethical framework for learner data governance now referenced by UNESCO and OECD policy documents."
+    one_liner: "Pearson/UCL Knowledge Lab paper setting out how AI in education can support personalised learning and augment teachers rather than replace them."
+  - title: "Human Intelligence First: the Tool is the Smallest Part"
+    kind: report
+    url: https://www.educateventures.com/research-human-intelligence-first-the-tool-is-the-smallest-part
+    one_liner: "Shape the Future Leaders Coalition report facilitated by Educate Ventures Research synthesizing nine practitioner-led action research projects on AI across schools in England."
 recent_signal_12mo:
-  - date: "2026-03-05"
-    event: "Published position paper on generative AI safeguards for K-12 adaptive learning systems in British Journal of Educational Technology"
-    url: https://bera-journals.onlinelibrary.wiley.com/doi/10.1111/bjet.13456
-  - date: "2025-12-12"
-    event: "Advised UK Department for Education on national AI in schools guidance framework"
-    url: https://www.gov.uk/government/publications/ai-in-education-guidance-2025
-  - date: "2025-10-20"
-    event: "EDUCATE Ventures graduated its 50th cohort of evidence-driven EdTech startups"
-    url: https://educateventures.com/news/cohort-50-graduation/
+  - title: "Milburn puts Colleges at the Centre of Youth Transition. Who Prepares their Staff for AI?"
+    date: "2026-11-19"
+    url: https://www.fenews.co.uk/exclusive/milburn-puts-colleges-at-the-centre-of-youth-transition-who-prepares-their-staff-for-ai/
+    takeaway: "Rose Luckin examined Alan Milburn's 17 November NEET report, noting the report does not specify how FE staff will be prepared to teach and assess AI-related judgement or interpret learner data."
+  - title: "Becoming a Plumber Will Not Save You If You Cannot Think"
+    date: "2026-04-07"
+    url: https://www.fenews.co.uk/exclusive/becoming-a-plumber-will-not-save-you-if-you-cannot-think/
+    takeaway: "Rose Luckin argued that vocational learners in skilled trades still need critical evaluation and verification skills to detect errors in AI-assisted diagnostic tools, compliance platforms, and job management systems."
+  - title: "The Schools White Paper Just Showed Us Where AI Policy Is Heading. FE Needs to Pay Attention"
+    date: "2026-02-25"
+    url: https://www.fenews.co.uk/exclusive/the-schools-white-paper-just-showed-us-where-ai-policy-is-heading-fe-needs-to-pay-attention/
+    takeaway: "Rose Luckin analyzed the UK schools white paper's £23 million EdTech evidence programme and distinction between general-purpose AI and pedagogy-grounded educational AI."
 ---
 
 # Rose Luckin

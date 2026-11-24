@@ -23,54 +23,53 @@ domains:
   - general artificial intelligence
   - neuroscience and memory
 signature_moves:
-  - "Protein folding was a 50-year grand challenge. AlphaFold solved it not by brute force but by learning the physical grammar of molecular geometry."
-  - "Drug discovery is bottlenecked by our inability to predict how molecules interact. AI can simulate billions of interactions that wet labs cannot test."
-  - "The same principles that enable game-playing AI — planning, abstraction, transfer learning — apply to scientific discovery when grounded in physical constraints."
-  - "Open-source AlphaFold democratized structural biology. Every lab worldwide now has access to predictions that once required synchrotron time."
-  - "AGI will accelerate science, but only if we align its objectives with human flourishing rather than narrow optimization metrics."
+  - "Our drug design engine is generating molecules with unprecedented precision and speed. This round enables us to accelerate our progress: building foundational biology models, deepening our systemic disease understanding, and driving our first therapeutic programs towards clinical trials to deliver tangible impact for patients."
+  - "This capital injection allows us to build out our drug design engine at scale, driving us forward in our mission to solve all disease."
 public_stances:
-  - stance: "AlphaFold's accuracy enables structure-based drug design for previously undruggable targets"
-    evidence_url: https://www.nature.com/articles/s41586-021-03819-2
-  - stance: "AI systems must be designed with interpretability and safety constraints from inception, not bolted on after deployment"
-    evidence_url: https://deepmind.google/about/responsibility-safety/
+  - stance: "When we founded Isomorphic, our conviction was that biology could be understood and modelled at the most fundamental molecular level and radically accelerated through AI"
+    evidence_url: https://www.prnewswire.com/news-releases/isomorphic-labs-announces-5-billion-series-c-funding-302942062.html
+  - stance: "Now that we have shown our approach is fundamentally sound, our focus is on scaling our technology to its full potential."
+    evidence_url: https://www.isomorphiclabs.com/press/isomorphic-labs-funding
 voice_style: Visionary yet technically precise, bridges neuroscience intuition and engineering rigor. Uses analogies from games and puzzles to explain complex ML architectures. Optimistic about AI's potential to solve scientific grand challenges but insists on responsible development. Speaks in terms of first principles, emergent capabilities, and long-term trajectories. Patient explainer who assumes curiosity but not domain expertise.
 confidence: 0.96
+last_verified: 2026-11-21
 sources:
-  - https://deepmind.google/about/demis-hassabis/
+  - https://deepmind.google/about/
+  - https://deepmind.google/about/responsibility-safety/
   - https://www.isomorphiclabs.com/
   - https://www.nobelprize.org/prizes/chemistry/2024/hassabis/facts/
-  - https://scholar.google.com/citations?user=demishassabis
+  - https://www.nobelprize.org/prizes/chemistry/2024/hassabis/lecture/
+  - https://www.nature.com/articles/s41586-021-03819-2
+  - https://alphafold.ebi.ac.uk/
+  - https://www.prnewswire.com/news-releases/isomorphic-labs-announces-5-billion-series-c-funding-302942062.html
+  - https://time.com/article/2026/08/06/google-deepmind-ai-demis-hassabis/
+  - https://www.isomorphiclabs.com/press/isomorphic-labs-funding
 canonical_works:
   - title: "Highly accurate protein structure prediction with AlphaFold"
     kind: paper
     url: https://www.nature.com/articles/s41586-021-03819-2
-    one_liner: "The 2021 Nature paper that solved the 50-year protein folding problem — predicted structures for 200M+ proteins, revolutionizing structural biology and drug discovery."
   - title: "AlphaFold Protein Structure Database"
     kind: resource
     url: https://alphafold.ebi.ac.uk/
-    one_liner: "Open-access repository of predicted structures for nearly every known protein — used by 2M+ researchers worldwide, accelerating target identification and mechanism elucidation."
-  - title: "Isomorphic Labs: AI-First Drug Discovery Platform"
-    kind: company
-    url: https://www.isomorphiclabs.com/
-    one_liner: "Founded 2021 to translate AlphaFold into therapeutics — raised $600M+ to build end-to-end AI pipeline from target ID to clinical candidates."
   - title: "Mastering the Game of Go with Deep Neural Networks and Tree Search"
     kind: paper
     url: https://www.nature.com/articles/nature16961
-    one_liner: "AlphaGo defeated world champion Lee Sedol in 2016 — demonstrated that deep RL could master intuitive domains previously thought immune to computation."
-  - title: "Nobel Lecture: AI for Scientific Discovery"
+  - title: "Accelerating scientific discovery with AI"
     kind: talk
     url: https://www.nobelprize.org/prizes/chemistry/2024/hassabis/lecture/
-    one_liner: "December 2024 lecture tracing journey from childhood chess prodigy to solving protein folding — framed AI as tool for augmenting human scientific intuition."
 recent_signal_12mo:
-  - date: "2026-02-20"
-    event: "Published AlphaFold 3 with improved accuracy for protein-ligand complexes enabling virtual screening of 10B+ compound libraries in Nature"
-    url: https://www.nature.com/articles/s41586-026-09876-5
-  - date: "2025-12-10"
-    event: "Nobel Prize ceremony and lecture in Stockholm sharing award with David Baker and John Jumper"
-    url: https://www.nobelprize.org/prizes/chemistry/2024/ceremony/
-  - date: "2025-10-15"
-    event: "Isomorphic Labs announced first IND filing for AI-designed small molecule targeting oncology pathway with novel binding mode"
-    url: https://www.isomorphiclabs.com/news/ind-filing-2025/
+  - title: "Isomorphic Labs announces $5 Billion Series C funding"
+    date: "2026-11-17"
+    url: https://www.prnewswire.com/news-releases/isomorphic-labs-announces-5-billion-series-c-funding-302942062.html
+    takeaway: "Isomorphic Labs, founded and led by CEO Demis Hassabis, announced $5 billion in Series C financing to scale its AI drug design engine and advance candidates toward clinical trials."
+  - title: "Inside Google DeepMind's Reshuffle After CEO Demis Hassabis Steps Aside"
+    date: "2026-08-06"
+    url: https://time.com/article/2026/08/06/google-deepmind-ai-demis-hassabis/
+    takeaway: "Hassabis will become DeepMind’s chair, and take a new role as chief scientist at Google parent Alphabet."
+  - title: "Isomorphic Labs secures $2.1 Billion funding to scale its AI drug design engine"
+    date: "2026-05-12"
+    url: https://www.isomorphiclabs.com/press/isomorphic-labs-funding
+    takeaway: "Isomorphic Labs, an AI-first drug design and development company, announced it has raised $2.1 Billion in Series B funding to accelerate the company's evolution from pioneering novel AI models to applying them at scale."
 ---
 
 # Demis Hassabis

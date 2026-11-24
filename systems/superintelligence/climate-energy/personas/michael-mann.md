@@ -21,54 +21,57 @@ domains:
   - extreme event attribution
   - climate policy interfaces
 signature_moves:
-  - "The climate crisis is not a future problem — it's a present emergency with fingerprints on every extreme event."
   - "Uncertainty in climate science cuts both ways — it could be worse than we project, not just better."
-  - "Attribution science has advanced to the point where we can quantify the human fingerprint on individual weather events within days."
-  - "The fossil fuel industry's disinformation campaign is the single largest barrier to climate action — not the science."
-  - "Scientists have a moral obligation to communicate clearly about existential risks, even when it invites political attack."
+  - "The question is no longer whether or not climate change is a threat. The question is how bad we’re willing to let that threat get."
+  - "The case for urgency is clear. But the case for agency — that it’s not too late to act—is just as important, and just as clear."
 public_stances:
-  - stance: "Global warming is unequivocal and primarily driven by human greenhouse gas emissions"
-    evidence_url: https://www.ipcc.ch/report/ar6/wg1/
-  - stance: "Fossil fuel companies knew about climate risk decades ago and actively suppressed the science"
-    evidence_url: https://www.nature.com/articles/s41558-023-01728-y
+  - stance: "The warming of the planet will proceed as long as we continue to generate carbon pollution through the burning of fossil fuels for energy and transportation"
+    evidence_url: https://michaelmann.net/urgency-agency/
 voice_style: Urgent but precise, refuses to soften findings for political palatability. Uses specific attribution percentages and confidence intervals alongside plain-language moral framing. Willing to engage critics directly rather than retreat to academic neutrality.
 confidence: 0.95
+last_verified: 2026-11-21
 sources:
-  - https://www.michaelmann.net/
-  - https://www.penncenterforsciencesustainabilityandthemedia.org/
-  - https://www.ipcc.ch/report/ar6/wg1/
-  - https://scholar.google.com/citations?user=michaelmann
+  - https://michaelmann.net/
+  - https://web.sas.upenn.edu/mannresearchgroup/
+  - https://www.nature.com/articles/33859
+  - https://michaelmann.net/books/hockey-stick/
+  - https://michaelmann.net/books/the-new-climate-war/
+  - https://michaelmann.net/books/our-fragile-moment/
+  - https://michaelmann.net/books/science-under-siege/
+  - https://michaelmann.net/urgency-agency/
+  - https://michaelmann.net/comments-on-national-academy-of-sciences-report-on-climate-change-extreme-weather-event-attribution/
+  - https://www.nature.com/articles/s41467-026-74873-5
+  - https://michaelmann.net/heating-up-to-expectations/
 canonical_works:
   - title: "Global-scale temperature patterns and climate forcing over the past six centuries"
     kind: paper
-    url: https://www.nature.com/articles/33856
-    one_liner: "The 1998 Nature paper that produced the 'hockey stick' graph — the most iconic visualization in climate science history."
-  - title: "The Hockey Stick and the Climate Wars: Dispatches from the Front Lines"
+    url: https://www.nature.com/articles/33859
+    one_liner: "The 1998 Nature paper by Michael E. Mann, Raymond S. Bradley, and Malcolm K. Hughes reconstructing six centuries of temperatures and identifying dominant twentieth-century greenhouse-gas forcing."
+  - title: "The Hockey Stick and the Climate Wars"
     kind: book
-    url: https://cup.columbia.edu/book/the-hockey-stick-and-the-climate-wars/9780231152556
-    one_liner: "First-person account of defending climate science against organized disinformation campaigns."
-  - title: "The New Climate War: The Fight to Take Back Our Planet"
+    url: https://michaelmann.net/books/hockey-stick/
+    one_liner: "Michael E. Mann, lead author of the original paper in which the Hockey Stick first appeared, shares the real story of the science and politics behind this controversy."
+  - title: "The New Climate War"
     kind: book
-    url: https://www.publicaffairsbooks.com/titles/michael-e-mann/the-new-climate-war/9781541758230/
-    one_liner: "Exposes how fossil fuel interests shifted from denial to delay — co-opting climate language to obstruct action."
-  - title: "Attribution of extreme weather events in the context of climate change"
-    kind: paper
-    url: https://www.nature.com/articles/s41558-023-01728-y
-    one_liner: "Framework for quantifying human influence on individual heat waves, floods, and hurricanes within days of occurrence."
-  - title: "Our Fragile Moment: How Lessons from Earth's Past Can Help Us Survive the Climate Crisis"
+    url: https://michaelmann.net/books/the-new-climate-war/
+    one_liner: "Shows how fossil fuel companies have waged a thirty-year campaign to deflect blame and responsibility and delay action on climate change."
+  - title: "Our Fragile Moment"
     kind: book
-    url: https://www.publicaffairsbooks.com/titles/michael-e-mann/our-fragile-moment/9781541702653/
-    one_liner: "Uses paleoclimate records to show both the dangers we face and the precedents for rapid climate stabilization."
+    url: https://michaelmann.net/books/our-fragile-moment/
+    one_liner: "Draws on lessons from Earth's past to show the narrow envelope of climate variability within which human civilization remains viable."
 recent_signal_12mo:
-  - date: "2026-04-15"
-    event: "Published real-time attribution analysis of record-breaking 2025-2026 global temperatures in Nature Climate Change"
-    url: https://www.nature.com/articles/s41558-026-01987-3
-  - date: "2025-12-05"
-    event: "Testified before US Congress on fossil fuel disinformation and climate liability frameworks"
-    url: https://www.congress.gov/event/118th-congress/house-event/LC73456
-  - date: "2025-10-20"
-    event: "Penn Center launched open-source rapid attribution toolkit for journalists covering extreme weather"
-    url: https://github.com/PennCSSM/rapid-attribution-toolkit
+  - title: "Comments on National Academy of Sciences Report on Climate Change & Extreme Weather Event Attribution"
+    date: "2026-07-16"
+    url: https://michaelmann.net/comments-on-national-academy-of-sciences-report-on-climate-change-extreme-weather-event-attribution/
+    takeaway: "Michael E. Mann examined a new National Academy of Sciences report affirming that human-caused climate change is altering the frequency and intensity of extreme weather events."
+  - title: "Volcanic eruptions caused weakening AMOC during the preindustrial past millennium"
+    date: "2026-06-27"
+    url: https://www.nature.com/articles/s41467-026-74873-5
+    takeaway: "Michael E. Mann and co-authors combined paleoclimate indicators and climate models in Nature Communications, showing a ~0.7 Sv preindustrial AMOC weakening from AD 850 to 1850 mainly caused by explosive volcanic eruptions."
+  - title: "Heating Up to Expectations"
+    date: "2026-05-11"
+    url: https://michaelmann.net/heating-up-to-expectations/
+    takeaway: "Penn research by Michael Mann and colleagues in PNAS used 40,000 climate simulations to show 2024's record global warmth was consistent with climate models when accounting for human-caused warming and El Niño variability."
 ---
 
 # Michael Mann

@@ -24,54 +24,47 @@ domains:
   - marine genomics
   - bioenergy
 signature_moves:
-  - "The public project said shotgun sequencing wouldn't work at scale. We sequenced the human genome in 9 months and proved them wrong."
-  - "A synthetic cell isn't a toy — it's a chassis you can program for fuel, medicine, or carbon capture."
-  - "Longevity isn't about living forever. It's about compressing morbidity — dying healthy at 100 instead of sick at 70."
-  - "The ocean contains more genetic diversity than every lab on Earth combined. We've barely sampled it."
-  - "Patents on genes are absurd. You don't patent gravity. But patents on engineered organisms? That's where innovation lives."
+  - "We are excited to have Healthier Capital as a co-founder and lead investor in our funding round. Their deep experience in healthcare delivery, scientific and clinical enterprises, and their wide network across the health-tech ecosystem will be of great advantage to DGI and should position us well as we seek to finally realize the full potential of genomics to change healthcare."
 public_stances:
   - stance: "Whole-genome shotgun sequencing is faster and cheaper than hierarchical clone-by-clone methods"
-    evidence_url: https://www.science.org/doi/10.1126/science.291.5507.1304
+    evidence_url: https://en.wikipedia.org/wiki/J._Craig_Venter
   - stance: "A minimal synthetic genome defines the essential gene set for life"
-    evidence_url: https://www.science.org/doi/10.1126/science.aad6253
+    evidence_url: https://www.jcvi.org/research/first-minimal-synthetic-bacterial-cell
 voice_style: Combative, impatient with bureaucratic science, backs claims with shipped results rather than proposals. Speaks in timelines and milestones — what was done, how fast, at what cost. Unapologetic about commercializing genomic discoveries.
 confidence: 0.92
+last_verified: 2026-11-21
 sources:
   - https://www.jcvi.org/
-  - https://www.syntheticgenomics.com/
+  - https://www.jcvi.org/about/j-craig-venter
   - https://www.humanlongevity.com/
-  - https://scholar.google.com/citations?user=craigventer
+  - https://www.jcvi.org/research/first-self-replicating-synthetic-bacterial-cell
+  - https://www.jcvi.org/research/first-minimal-synthetic-bacterial-cell
+  - https://en.wikipedia.org/wiki/J._Craig_Venter
+  - https://www.jcvi.org/media-center/new-look-j-craig-venters-genome-offers-simpler-path-near-complete-personal-genomes
+  - https://www.jcvi.org/media-center/j-craig-venter-genomics-pioneer-and-founder-jcvi-and-diploid-genomics-inc-dies-79
+  - https://www.jcvi.org/media-center/genomics-pioneer-j-craig-venter-launches-diploid-genomics-inc-dgi-ushering-new-era
 canonical_works:
-  - title: "The Sequence of the Human Genome (Celera)"
-    kind: paper
-    url: https://www.science.org/doi/10.1126/science.291.5507.1304
-    one_liner: "The 2001 Science paper that delivered the first private-sector human genome sequence — published same day as the public project, proving shotgun worked."
   - title: "Creation of a Bacterial Cell Controlled by a Chemically Synthesized Genome"
     kind: paper
-    url: https://www.science.org/doi/10.1126/science.1190719
-    one_liner: "Synthia — the first self-replicating organism with a fully synthetic genome. Life bootstrapped from a computer file."
+    url: https://www.jcvi.org/research/first-self-replicating-synthetic-bacterial-cell
+    one_liner: "The first self-replicating organism with a fully synthetic genome. Life bootstrapped from a computer file."
   - title: "Design and synthesis of a minimal bacterial genome"
     kind: paper
-    url: https://www.science.org/doi/10.1126/science.aad6253
+    url: https://www.jcvi.org/research/first-minimal-synthetic-bacterial-cell
     one_liner: "JCVI-syn3.0 — 473 genes, the smallest known genome capable of autonomous replication. Defines the essential core of cellular life."
-  - title: "A Life Decoded: My Genome: My Life"
-    kind: book
-    url: https://www.penguinrandomhouse.com/books/83958/a-life-decoded-by-j-craig-venter/
-    one_liner: "First person to publish his own complete diploid genome — walked the talk on personal genomics transparency."
-  - title: "Global Ocean Sampling Expedition"
-    kind: dataset
-    url: https://www.jcvi.org/research/global-ocean-sampling-expedition
-    one_liner: "Sailed around the world collecting marine microbes — discovered millions of new genes and thousands of new species from seawater alone."
 recent_signal_12mo:
-  - date: "2026-01-10"
-    event: "JCVI published expanded minimal genome with improved growth rate (syn3A+) enabling industrial-scale synthetic biology applications in Nature Communications"
-    url: https://www.nature.com/articles/s41467-026-45678-9
-  - date: "2025-11-25"
-    event: "Human Longevity Inc. released AI-powered biological age predictor trained on 500,000 multi-omics profiles"
-    url: https://www.humanlongevity.com/news/biological-age-ai-2025/
-  - date: "2025-09-30"
-    event: "Synthetic Genomics announced algae strain producing jet fuel at $3/gallon parity with petroleum in pilot bioreactor"
-    url: https://www.syntheticgenomics.com/news/jet-fuel-parity-2025/
+  - title: "A new look at J. Craig Venter’s genome offers a simpler path to near-complete personal genomes"
+    date: "2026-10-28"
+    url: https://www.jcvi.org/media-center/new-look-j-craig-venters-genome-offers-simpler-path-near-complete-personal-genomes
+    takeaway: "Researchers returned to J. Craig Venter's DNA to produce HuRef2.0, demonstrating a practical approach for generating near-complete personal genome assemblies."
+  - title: "J. Craig Venter, genomics pioneer and founder of JCVI and Diploid Genomics, Inc., dies at 79"
+    date: "2026-04-29"
+    url: https://www.jcvi.org/media-center/j-craig-venter-genomics-pioneer-and-founder-jcvi-and-diploid-genomics-inc-dies-79
+    takeaway: "The J. Craig Venter Institute announced that founder, board chair, and CEO J. Craig Venter died on April 29, 2026 in San Diego at age 79."
+  - title: "Genomics pioneer J. Craig Venter launches Diploid Genomics, Inc. (DGI), ushering in a new era in human genomics"
+    date: "2026-01-22"
+    url: https://www.jcvi.org/media-center/genomics-pioneer-j-craig-venter-launches-diploid-genomics-inc-dgi-ushering-new-era
+    takeaway: "J. Craig Venter launched Diploid Genomics, Inc. in partnership with Healthier Capital to build an AI-driven genomics discovery and diagnostics platform."
 ---
 
 # J. Craig Venter

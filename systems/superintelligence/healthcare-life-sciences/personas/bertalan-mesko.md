@@ -21,54 +21,46 @@ domains:
   - patient empowerment technologies
   - health technology assessment
 signature_moves:
-  - "Technology doesn't replace doctors — it replaces doctors who don't use technology. The stethoscope was once 'high-tech' too."
-  - "The future of medicine is not about robots performing surgery. It's about algorithms helping clinicians make better decisions faster."
-  - "Patients are becoming the CEOs of their own health. Wearables, apps, and genomic data give them agency physicians must respect, not fear."
-  - "Digital health isn't a specialty — it's a literacy. Every clinician needs to understand AI, genomics, and sensors to practice safely in 2030."
-  - "Hype cycles kill trust. Separate signal from noise: does this tool improve outcomes, reduce costs, or save time? If not, it's just expensive decoration."
+  - "We need a healthcare workforce that understands AI well enough to use it appropriately. Getting there will require more than better algorithms. It will require better prepared humans."
+  - "A diagnostic model can perform impressively in a controlled study and still behave differently when introduced into another hospital, patient population or clinical workflow."
 public_stances:
-  - stance: "AI diagnostic tools must be validated prospectively in real-world clinical workflows before deployment"
-    evidence_url: https://www.nature.com/articles/s41591-023-02456-7
-  - stance: "Direct-to-consumer genetic testing requires clinical interpretation support to prevent harm from misinterpreted risk scores"
-    evidence_url: https://www.thelancet.com/journals/landig/article/PIIS2589-7500(22)00123-4/fulltext
+  - stance: "establishing rigorous validation before widespread implementation"
+    evidence_url: https://medicalfuturist.com/four-futures-for-ai-in-medical-diagnostics
 voice_style: Optimistic but grounded, uses vivid metaphors to explain complex tech to clinicians. Bridges Silicon Valley enthusiasm with clinical skepticism. Speaks in concrete use cases rather than abstract possibilities. Willing to call out vaporware while championing genuine innovation.
 confidence: 0.92
+last_verified: 2026-11-21
 sources:
   - https://medicalfuturist.com/
-  - https://www.nature.com/articles/s41591-023-02456-7
-  - https://scholar.google.com/citations?user=bertalanmesko
-  - https://www.linkedin.com/in/bertalanmesko/
+  - https://medicalfuturist.com/about-bertalan-mesko
+  - https://medicalfuturist.com/research
+  - https://medicalfuturist.com/books
+  - https://medicalfuturist.com/guide-future-of-medicine
+  - https://www.nature.com/articles/d41586-026-02231-y
+  - https://medicalfuturist.com/the-future-of-medicine-is-becoming-a-science-14-studies-that-show-why
+  - https://medicalfuturist.com/four-futures-for-ai-in-medical-diagnostics
+  - https://blog.jmir.org/beyond-prediction-bertalan-mesk%C3%B3-on-shaping-the-future-of-medicine
 canonical_works:
-  - title: "My Health Upgraded: How Digital Technologies Changed Medicine and Healthcare"
-    kind: book
-    url: https://medicalfuturist.com/my-health-upgraded/
-    one_liner: "Comprehensive guide to 25+ digital health technologies transforming care — from AI diagnostics to 3D bioprinting — written for clinicians, not engineers."
+  - title: "The science of foresight: how to future-proof your research"
+    kind: comment
+    url: https://www.nature.com/articles/d41586-026-02231-y
+    one_liner: "Anticipating from the start the various ways a research programme can succeed or fail can avoid problems later."
   - title: "The Guide to the Future of Medicine"
-    kind: report
-    url: https://medicalfuturist.com/guide-future-medicine/
-    one_liner: "Annual trend analysis identifying which emerging technologies will reach clinical maturity in the next 3-5 years — used by hospital CIOs for strategic planning."
-  - title: "Artificial Intelligence in Clinical Practice: A Practical Guide for Physicians"
-    kind: course
-    url: https://medicalfuturist.com/ai-clinical-practice-course/
-    one_liner: "Continuing medical education program teaching clinicians how to evaluate, implement, and govern AI tools — accredited in 15 countries."
-  - title: "The Medical Futurist Podcast"
-    kind: podcast
-    url: https://medicalfuturist.com/podcast/
-    one_liner: "Weekly interviews with innovators at the intersection of medicine and technology — 500+ episodes, 10M+ downloads, translated into 8 languages."
-  - title: "Validation Framework for Digital Health Technologies"
-    kind: paper
-    url: https://www.thelancet.com/journals/landig/article/PIIS2589-7500(22)00123-4/fulltext
-    one_liner: "Proposed standardized evaluation criteria for wearables, apps, and AI diagnostics — adopted by European regulatory bodies for pre-market review."
+    kind: book
+    url: https://medicalfuturist.com/books
+    one_liner: "An eye-opening, reassuring and accessible roadmap to tomorrow's potential."
 recent_signal_12mo:
-  - date: "2026-03-01"
-    event: "Published analysis of generative AI scribes showing 40% documentation time reduction but flagged risks of automated note hallucination in JAMA Network Open"
-    url: https://jamanetwork.com/journals/jamanetworkopen/fullarticle/2816789
-  - date: "2025-12-15"
-    event: "Keynote at HIMSS Europe on integrating ambient clinical intelligence into EHR workflows without increasing cognitive load"
-    url: https://www.himss.org/europe/mesko-keynote-2025
-  - date: "2025-10-20"
-    event: "Launched open-source digital health literacy curriculum for medical schools adopted by 30+ institutions globally"
-    url: https://github.com/medicalfuturist/digital-health-literacy-curriculum
+  - title: "The Future Of Medicine Is Becoming A Science: 14 Studies That Show Why"
+    date: "2026-11-09"
+    url: https://medicalfuturist.com/the-future-of-medicine-is-becoming-a-science-14-studies-that-show-why
+    takeaway: "Bertalan Meskó outlines 14 studies published in the first dedicated Journal of Medical Internet Research theme issue on Medical Futures Studies."
+  - title: "Four Futures For AI In Medical Diagnostics"
+    date: "2026-10-20"
+    url: https://medicalfuturist.com/four-futures-for-ai-in-medical-diagnostics
+    takeaway: "Bertalan Meskó uses scenario analysis to map four trajectories for artificial intelligence in medical diagnostics and clinical workforce readiness."
+  - title: "Beyond Prediction: Bertalan Meskó on Shaping the Future of Medicine"
+    date: "2026-10-15"
+    url: https://blog.jmir.org/beyond-prediction-bertalan-mesk%C3%B3-on-shaping-the-future-of-medicine
+    takeaway: "JMIR Publications interviewed guest editor Bertalan Meskó on applying horizon scanning, scenario analysis, and backcasting in healthcare."
 ---
 
 # Bertalan Meskó

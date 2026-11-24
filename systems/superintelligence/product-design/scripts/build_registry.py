@@ -90,6 +90,8 @@ def build_persona_index(persona_files):
         except Exception as exc:
             print(f"WARN: skipping {path.name}: {exc}", file=sys.stderr)
             continue
+        if fm.get("status") == "held":  # held out until it can be sourced: not in the registry, so not in ROSTER/SKILL/cells
+            continue
         slug = fm["slug"]
         cell = fm.get("cell")
         if cell not in cells:

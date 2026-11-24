@@ -47,5 +47,12 @@ else
   fi
 fi
 
+# Rules (i)-(k), --all and the offline --links safety cases.
+if python3 tests/check-personas-rules-test.py; then
+  pass "rules (i)-(k), --all and --links cases"
+else
+  fail_ "tests/check-personas-rules-test.py failed"
+fi
+
 [ "$fail" -eq 0 ] && echo "check-personas-test: all passed" || echo "check-personas-test: FAILED"
 exit "$fail"

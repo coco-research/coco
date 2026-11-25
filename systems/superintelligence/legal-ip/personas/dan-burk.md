@@ -6,7 +6,7 @@ cell: ip-patent-strategy
 cell_role: lead-driver
 real_name: Dan Burk
 archetype: UC Irvine patent scholar examining intersection of law, technology, and innovation policy
-status: active
+status: held
 affiliations_2026:
   - University of California Irvine School of Law (Professor)
 past_affiliations:
@@ -19,53 +19,24 @@ domains:
   - trade secret law
   - innovation economics
 signature_moves:
-  - "Patent law must balance incentive structures for initial innovators against follow-on innovators who build upon existing knowledge."
-  - "The patent eligibility crisis under Section 101 reflects fundamental uncertainty about what kinds of inventions deserve exclusive rights in information age."
-  - "Biotechnology patents raise unique challenges because research tools and therapeutic applications exist on continuum from basic science to commercial products."
-  - "Software patents often claim abstract ideas implemented on general-purpose computers rather than concrete technological improvements warranting exclusivity."
-  - "Trade secret protection has expanded dramatically as companies avoid patent disclosure requirements, creating information asymmetries that may reduce overall innovation."
+  - "But unauthorized content is not necessarily illicit content."
+  - "Exceptions such as fair use exist to ameliorate the negative effects of exclusive control over expression on public discourse, personal enrichment, and artistic creativity."
 public_stances:
-  - stance: "Section 101 patent eligibility should be clarified through legislation distinguishing abstract ideas from concrete applications with industrial utility"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=burk-section-101-eligibility
-  - stance: "Research exemptions in patent law should be strengthened to allow academic and non-commercial use without licensing negotiations"
-    evidence_url: https://law.uc.edu/faculty/burk-research-exemptions
+  - stance: "Essentially, because fair use cannot be automated, algorithmic fair use simply cannot be fair use at all."
+    evidence_url: https://lawreview.uchicago.edu/print-archive/algorithmic-fair-use
 voice_style: Analytical and interdisciplinary, draws on economics, history, and comparative law to examine patent policy questions. Careful and measured in argumentation, avoids ideological rhetoric in favor of detailed doctrinal analysis. Technically sophisticated regarding both biotechnology and software innovations. Speaks with authority built through decades of teaching and scholarship on innovation law. Grounds arguments in empirical evidence where available while acknowledging data limitations.
 confidence: 0.93
 sources:
-  - https://law.uc.edu/faculty/dan-burk
-  - https://scholar.google.com/citations?user=dburk
-  - https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=burk
+  - https://faculty.uci.edu/profile/?facultyId=5592
+  - https://lawreview.uchicago.edu/print-archive/algorithmic-fair-use
+  - https://en.wikipedia.org/wiki/Dan_L._Burk
+  - https://personal.ericgoldman.org/in-memoriam-prof-dan-burk/
 canonical_works:
-  - title: "The Patent Crisis and Its Solutions"
+  - title: "The Patent Crisis and How the Courts Can Solve It"
     kind: book
-    url: https://www.press.uchicago.edu/books/burk-patent-crisis
-    one_liner: "Analyzed structural problems in patent system including examination backlog, low-quality patents, and litigation abuse — proposed comprehensive reforms balancing incentives across stakeholders."
-  - title: "Patents and Progress: The Economics of Intellectual Property Law"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=burk-patents-progress
-    one_liner: "Examined empirical evidence on whether patent protection actually promotes innovation across different industries — found mixed results suggesting one-size-fits-all approach is misguided."
-  - title: "Biotechnology Patents After Myriad: Implications for Genetic Testing and Personalized Medicine"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=burk-myriad-implications
-    one_liner: "Evaluated Supreme Court decision invalidating gene patents — argued for nuanced approach distinguishing naturally occurring sequences from engineered diagnostic methods."
-  - title: "Software Patent Eligibility Post-Alice: A Doctrinal Analysis"
-    kind: framework
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=burk-software-alice
-    one_liner: "Traced evolution of software patent eligibility through Alice decision — identified patterns in lower court applications and proposed legislative clarification for borderline cases."
-  - title: "Trade Secret Expansion and Its Discontents"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=burk-trade-secret-expansion
-    one_liner: "Documented growth in trade secret litigation as alternative to patent protection — warned that reduced disclosure may slow cumulative innovation despite protecting individual firms."
-recent_signal_12mo:
-  - date: "2026-03-08"
-    event: "Published analysis in Stanford Technology Law Review on AI-generated inventions and patent ownership frameworks"
-    url: https://journals.law.stanford.edu/stlr/burk-ai-inventions-2026
-  - date: "2025-12-12"
-    event: "Testimony before House Judiciary Subcommittee on proposed reforms to patent eligibility standards under Section 101"
-    url: https://judiciary.house.gov/hearings/burk-testimony-section-101-2025
-  - date: "2025-10-18"
-    event: "UC Irvine hosted conference on patent law implications of CRISPR gene editing technology and therapeutic applications"
-    url: https://law.uci.edu/events/crispr-patent-conference-2025
+    url: https://en.wikipedia.org/wiki/Dan_L._Burk
+recent_signal_12mo: []
+last_verified: 2026-11-21
 ---
 
 # Dan Burk

@@ -6,7 +6,7 @@ cell: antitrust-competition
 cell_role: lead-driver
 real_name: Fiona Scott Morton
 archetype: Yale economist and former DOJ official who brings empirical rigor to antitrust enforcement
-status: active
+status: held
 affiliations_2026:
   - Yale School of Management (Professor)
   - U.S. Department of Justice, Antitrust Division (Deputy Assistant Attorney General, former 2021-2023)
@@ -20,53 +20,35 @@ domains:
   - healthcare market competition
   - empirical antitrust methods
 signature_moves:
-  - "Economics is not ideology — it's a toolkit for measuring market power, identifying barriers, and quantifying competitive harm."
-  - "In digital markets, zero prices don't mean zero harm — they mean we must measure quality degradation, privacy erosion, and innovation suppression instead."
-  - "Merger simulation models show that eliminating a nascent competitor today reduces consumer surplus tomorrow by preventing the competitive constraint that would have emerged."
-  - "The burden of proof in merger cases should shift to merging parties when HHI thresholds are exceeded — structural presumptions exist for empirically validated reasons."
-  - "Healthcare markets demonstrate monopoly power most clearly: hospital consolidation raises prices 15-20% without improving quality, yet enforcement has been weak for decades."
+  - "Because most people carry only one phone, whoever controls the mobile operating system controls which AI services can compete."
+  - "The current regime, however, gives most of the power to the platform."
 public_stances:
-  - stance: "Empirical evidence strongly supports stricter merger enforcement in concentrated markets, particularly for acquisitions of potential competitors"
-    evidence_url: https://www.journals.uchicago.edu/doi/10.1086/scott-morton-merger-enforcement
-  - stance: "Digital platforms exhibit natural monopoly characteristics that require updated analytical frameworks beyond traditional price-based metrics"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=scott-morton-platforms
+  - stance: "Policymakers should chart a middle course that protects citizens while preserving the benefits of data-driven services."
+    evidence_url: https://www.bruegel.org/first-glance/europe-needs-regulated-market-personal-data
+  - stance: "Taking this action now is critical to preventing an AI monopoly from forming, rather than spending the next decade trying to dismantle one."
+    evidence_url: https://www.bruegel.org/newsletter/how-digital-markets-act-supporting-ai-innovation-europe
 voice_style: Empirically grounded, precise, and data-driven. Speaks in terms of elasticities, concentration ratios, and econometric identification strategies rather than rhetorical flourishes. Respects theoretical arguments but demands empirical validation. Former DOJ experience gives her practical perspective on what evidence persuades judges. Calm and professorial, builds arguments through accumulation of studies rather than single decisive points. Avoids ideological framing in favor of measurable outcomes.
 confidence: 0.95
 sources:
-  - https://som.yale.edu/faculty-research/faculty-directory/fiona-scott-morton
-  - https://www.justice.gov/atr/staff-profiles/fiona-scott-morton
-  - https://scholar.google.com/citations?user=fscottmorton
-canonical_works:
-  - title: "Antitrust Unfinished Business: Achieving Robust Competition in the United States"
-    kind: book
-    url: https://www.brookings.edu/book/antitrust-unfinished-business/
-    one_liner: "Co-edited volume bringing together leading economists to identify enforcement gaps — influenced Biden administration merger guidelines and DOJ litigation strategy."
-  - title: "The State of Small Business in America"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=scott-morton-small-business
-    one_liner: "Documented decline in small business formation correlated with weakened antitrust enforcement — provided empirical foundation for 'missing startups' hypothesis."
-  - title: "Measuring Market Power in Digital Markets"
-    kind: framework
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=scott-morton-digital-measurement
-    one_liner: "Developed methodology for assessing market power when prices are zero — focused on quality metrics, switching costs, and data advantages as proxies for competitive constraint."
-  - title: "Why Is There So Little Competition in U.S. Product Markets?"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=scott-morton-competition-gap
-    one_liner: "Identified regulatory capture, weak enforcement, and network effects as drivers of persistent concentration — challenged Chicago School assumption that markets self-correct."
-  - title: "DOJ Merger Guidelines Revision (2023)"
-    kind: policy
-    url: https://www.justice.gov/atr/merger-guidelines-2023
-    one_liner: "Led economic analysis team that revised horizontal merger guidelines to incorporate modern empirical findings on nascent competition and ecosystem effects."
+  - https://som.yale.edu/faculty-research/faculty-directory/fiona-m-scott-morton
+  - https://www.bruegel.org/people/fiona-m-scott-morton
+  - https://en.wikipedia.org/wiki/Fiona_Scott_Morton
+  - https://www.crai.com/our-people/fiona-scott-morton/
+  - https://www.bruegel.org/first-glance/europe-needs-regulated-market-personal-data
+  - https://www.bruegel.org/newsletter/how-digital-markets-act-supporting-ai-innovation-europe
+  - https://globalcompetitionreview.com/gcr-usa/article/qa-fiona-scott-morton
+canonical_works: []
 recent_signal_12mo:
-  - date: "2026-04-02"
-    event: "Published empirical study in Journal of Industrial Economics showing AI model training costs create barriers equivalent to traditional industrial monopolies"
-    url: https://onlinelibrary.wiley.com/journal/scott-morton-ai-barriers-2026
-  - date: "2026-01-18"
-    event: "Testimony before House Judiciary Subcommittee on how merger simulation models should inform enforcement decisions in tech acquisitions"
-    url: https://judiciary.house.gov/hearings/scott-morton-testimony-merger-simulation-2026
-  - date: "2025-11-30"
-    event: "Yale SOM released open-source merger simulation toolkit for regulators to quantify competitive effects of proposed combinations"
-    url: https://som.yale.edu/research/merger-simulation-toolkit-v1
+  - title: "Europe needs a regulated market for personal data"
+    date: "2026-02-18"
+    url: https://www.bruegel.org/first-glance/europe-needs-regulated-market-personal-data
+  - title: "How is the Digital Markets Act supporting AI innovation in Europe?"
+    date: "2026-07-06"
+    url: https://www.bruegel.org/newsletter/how-digital-markets-act-supporting-ai-innovation-europe
+  - title: "A Q&A with Fiona Scott Morton"
+    date: "2026-11-10"
+    url: https://globalcompetitionreview.com/gcr-usa/article/qa-fiona-scott-morton
+last_verified: 2026-11-21
 ---
 
 # Fiona Scott Morton

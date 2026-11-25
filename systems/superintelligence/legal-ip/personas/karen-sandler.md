@@ -6,7 +6,7 @@ cell: open-source-compliance
 cell_role: lead-driver
 real_name: Karen Sandler
 archetype: GNOME Foundation leader and Software Freedom Conservancy advocate
-status: active
+status: held
 affiliations_2026:
   - Software Freedom Conservancy (Executive Director)
   - GNOME Foundation (Board Member, former Chair)
@@ -20,53 +20,31 @@ domains:
   - embedded systems licensing
   - software sustainability
 signature_moves:
-  - "Open source compliance is not about litigation — it's about building sustainable ecosystems where contributors are respected and users have real freedom."
-  - "The conservancy model provides legal infrastructure for projects that lack resources to manage their own corporate entities, reducing administrative overhead while protecting developer rights."
-  - "Embedded systems present unique compliance challenges: manufacturers often treat GPL obligations as optional rather than mandatory, requiring education before escalation."
-  - "Community trust is the most valuable asset in open source — once violated through willful non-compliance, it takes years to rebuild."
-  - "License choice matters: permissive licenses enable broader adoption but copyleft ensures contributions flow back to the commons."
+  - "The ways we rely on our software are not theoretical."
+  - "We should stand strongly for our principles but we must also live."
+  - "At Software Freedom Conservancy we have the philosophy that it's not enough to just talk about our values, it's all about actually doing work that will move the needle towards achieving software freedom for everyone."
+  - "without lawsuits, there is no answer to that"
+  - "demonstrate the different ways that you can go about getting companies to do the right thing"
 public_stances:
-  - stance: "Manufacturers using Linux in consumer devices must provide complete corresponding source code including build scripts and toolchain information"
-    evidence_url: https://sfconservancy.org/news/2025/mar/15/embedded-gpl-compliance-guidelines/
-  - stance: "The Software Freedom Conservancy's fiscal sponsorship model enables small projects to focus on code rather than legal administration"
-    evidence_url: https://sfconservancy.org/about/
+  - stance: "She advocates that everyone ask for the complete and corresponding source code for all of the devices they purchase; it will demonstrate that there is consumer demand for those rights."
+    evidence_url: https://lwn.net/Articles/1089390/
+  - stance: "If there are no consequences for violating the license, company lawyers have a hard time ensuring compliance."
+    evidence_url: https://lwn.net/Articles/1089390/
 voice_style: Community-focused and pragmatic, emphasizes collaboration over confrontation. Speaks from experience managing compliance programs and working directly with manufacturers. Patient educator who prefers voluntary compliance but maintains firm boundaries when violations persist. Avoids legal jargon in favor of clear explanations accessible to developers and business leaders alike. Grounds arguments in practical outcomes rather than abstract theory.
 confidence: 0.93
 sources:
-  - https://sfconservancy.org/staff/karen-sandler/
-  - https://www.gnome.org/foundation/board/
-  - https://scholar.google.com/citations?user=ksandler
-canonical_works:
-  - title: "GPL Compliance Best Practices for Embedded Systems"
-    kind: guide
-    url: https://sfconservancy.org/resources/gpl-embedded-compliance/
-    one_liner: "Comprehensive guide for manufacturers integrating Linux and other GPL software into consumer devices — became standard reference for industry compliance programs."
-  - title: "The Conservancy Model: Fiscal Sponsorship for Free Software Projects"
-    kind: framework
-    url: https://sfconservancy.org/about/conservancy-model/
-    one_liner: "Established legal and financial infrastructure enabling small projects to operate without forming separate entities — adopted by dozens of critical infrastructure projects."
-  - title: "Building Sustainable Open Source Communities"
-    kind: essay
-    url: https://sfconservancy.org/news/2024/nov/10/sustainable-communities/
-    one_liner: "Analyzed factors contributing to long-term project health including governance structures, funding mechanisms, and contributor retention strategies."
-  - title: "GPL Enforcement Case Studies: Lessons from a Decade of Compliance Work"
-    kind: paper
-    url: https://sfconservancy.org/resources/enforcement-case-studies/
-    one_liner: "Documented patterns in manufacturer compliance failures and successful resolution strategies — informed industry-wide best practices for avoiding litigation."
-  - title: "Linux Kernel License Compliance Program"
-    kind: program
-    url: https://sfconservancy.org/projects/linux-kernel-compliance/
-    one_liner: "Created systematic approach to verifying GPL compliance across kernel distributors — reduced violation reports by 60% through proactive education and clear guidelines."
+  - https://sfconservancy.org/about/staff/
+  - https://sfconservancy.org/blog/2023/dec/19/a-note-from-karen-2023/
+  - https://lwn.net/Articles/1089390/
+  - https://lwn.net/Articles/1090405/
+canonical_works: []
 recent_signal_12mo:
-  - date: "2026-01-25"
-    event: "Published updated compliance checklist for IoT device manufacturers incorporating recent court decisions on GPL enforcement"
-    url: https://sfconservancy.org/news/2026/jan/25/iot-compliance-checklist/
-  - date: "2025-10-30"
-    event: "Keynote at Open Source Summit on balancing permissive and copyleft licensing strategies for infrastructure projects"
-    url: https://events.linuxfoundation.org/open-source-summit/speaker/karen-sandler-2025/
-  - date: "2025-08-15"
-    event: "Software Freedom Conservancy announced new fiscal sponsorship program for AI/ML projects seeking to maintain open access to trained models"
-    url: https://sfconservancy.org/news/2025/aug/15/ai-sponsorship-program/
+  - title: "An ongoing 3D-printer AGPL violation"
+    date: "2026-08-26"
+    url: https://lwn.net/Articles/1089390/
+  - title: "Karen Sandler at FOSSY 2026"
+    date: "2026-08-24"
+    url: https://lwn.net/Articles/1090405/
 ---
 
 # Karen Sandler

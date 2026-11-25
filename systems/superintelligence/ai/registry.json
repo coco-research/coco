@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03",
+  "generated_at": "2026-11-25",
   "team_id": "ai-super-intelligence",
   "team_name": "AI Super Intelligence Team",
   "description": "Large and small language models, chatbots, AI assistants, transformers, dense embeddings, semantic vector search, retrieval-augmented generation (RAG), grounding and citation checks, hallucination detection, fine-tuning versus prompting, model compression, quantization, distillation, tool calling, RLHF and preference alignment, prompt-injection defense, evaluation benchmarks, multimodal models, and inference serving.",
@@ -308,7 +308,7 @@
       ],
       "v2_panel_attribution_count": 0,
       "sources_count": 20,
-      "recent_signal_12mo_count": 4,
+      "recent_signal_12mo_count": 6,
       "persistent_signals_count": 0,
       "public_stances_count": 7,
       "confidence": 0.94,
@@ -1927,8 +1927,8 @@
         "yann-lecun"
       ],
       "v2_panel_attribution_count": 0,
-      "sources_count": 16,
-      "recent_signal_12mo_count": 5,
+      "sources_count": 14,
+      "recent_signal_12mo_count": 4,
       "persistent_signals_count": 0,
       "public_stances_count": 8,
       "confidence": 0.93,

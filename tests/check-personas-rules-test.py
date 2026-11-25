@@ -51,6 +51,9 @@ def sha(name):
 def persona(slug, name, fm="", body=""):
     text = re.sub(r"^slug: .*$", f"slug: {slug}", GOOD.read_text(encoding="utf-8"), count=1, flags=re.M)
     text = re.sub(r"^real_name: .*$", lambda _: f"real_name: {name}{fm}", text, count=1, flags=re.M)
+    plain = re.sub(r"\s*#.*$", "", name).strip().strip("'\"")
+    if plain and not plain.startswith(("[", "{")):
+        text = text.replace("Fixture Good", plain)
     return text + body
 
 
@@ -983,6 +986,180 @@ for gen, team in gens.items():
 expect(len(results) == 14 and all(v == "ok" for v in results.values()),
        f"each of the {len(results)} build_registry generators skips a status: held file and keeps its active twin",
        "\n".join(f"{k}: {v}" for k, v in results.items() if v != "ok"))
+
+# status: held paired with (i) duplicate, (j) opted-out and (k) private-detail:
+# held exempts (a)/(b)/(d)/(g) count, but (i), (j) and (k) must still fire.
+with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
+    tmp = Path(t)
+    board(tmp, {"clean-example": CLEAN}, OPTED)
+    held_bad = gapped("held-bad", "Opted Out Person", "held")
+    held_bad = re.sub(r"^real_name: .*$", "real_name: Opted Out Person\naliases: [Strategy Example]", held_bad, count=1, flags=re.M)
+    held_bad += "\n\nOffice line: 415-555-0134\n"
+    (tmp / GTM / "held-bad.md").write_text(held_bad, encoding="utf-8")
+    hline = held_bad.split("\n").index("Office line: 415-555-0134") + 1
+    p = subprocess.run([sys.executable, "scripts/check-personas.py", GTM + "held-bad.md"],
+                       cwd=tmp, capture_output=True, text=True)
+    want_held = [
+        f"{GTM}held-bad.md: (i) duplicate: name also used by strategy/personas/strategy-example.md",
+        f"{GTM}held-bad.md: (j) opted-out: this person asked not to be included (docs/personas/TAKEDOWN.md)",
+        f"{GTM}held-bad.md: (k) private-detail: line {hline} looks like a phone number",
+    ]
+    expect(p.returncode == 1 and p.stdout.splitlines() == want_held and p.stderr.strip() == "check-personas: 0/1 pass",
+           "status: held paired with (i) duplicate, (j) opted-out and (k) private-detail still fires all three",
+           f"exit {p.returncode}\n{p.stdout}{p.stderr}")
+
+
+def with_signals(slug, name, status, sig_block, extra_fm=""):
+    text = persona(slug, name, extra_fm)
+    text = re.sub(r"^status: .*$", f"status: {status}", text, count=1, flags=re.M)
+    return re.sub(r"^persistent_signals:\n(?: .*\n)*", sig_block, text, count=1, flags=re.M)
+
+
+# (g) untitled signals fail on both recent_signal_12mo and persistent_signals; titled items pass.
+for case, status, sig_block, want_out in (
+        ("untitled recent_signal_12mo", "active",
+         "recent_signal_12mo:\n  - date: '2026-10-01'\n    event: 'Spoke at summit'\n    url: https://ok.example/1\n"
+         "  - title: 'Example keynote'\n    url: https://ok.example/2\n",
+         [f"{GTM}sig.md: (g) signals: recent_signal_12mo missing title (items 1)"]),
+        ("empty-title recent_signal_12mo", "active",
+         "recent_signal_12mo:\n  - title: \"\"\n    url: https://ok.example/1\n"
+         "  - title: 'Example keynote'\n    url: https://ok.example/2\n",
+         [f"{GTM}sig.md: (g) signals: recent_signal_12mo missing title (items 1)"]),
+        ("untitled persistent_signals", "archetype",
+         "persistent_signals:\n  - signal: 'Legacy work'\n    evidence_url: https://ok.example/p1\n"
+         "  - title: 'Example paper'\n    url: https://ok.example/p2\n",
+         [f"{GTM}sig.md: (g) signals: persistent_signals missing title (items 1)"]),
+        ("titled recent_signal_12mo", "active",
+         "recent_signal_12mo:\n  - title: 'Example keynote'\n    url: https://ok.example/1\n"
+         "  - title: 'Example paper'\n    url: https://ok.example/2\n",
+         []),
+):
+    with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
+        tmp = Path(t)
+        board(tmp, {"sig": ("sig", "Jane Example", "", "")})
+        (tmp / GTM / "sig.md").write_text(with_signals("sig", "Jane Example", status, sig_block), encoding="utf-8")
+        p = subprocess.run([sys.executable, "scripts/check-personas.py", GTM + "sig.md"],
+                           cwd=tmp, capture_output=True, text=True)
+        expect(p.returncode == (1 if want_out else 0) and p.stdout.splitlines() == want_out,
+               f"(g) {case} {'fails' if want_out else 'passes'}", f"exit {p.returncode}\n{p.stdout}{p.stderr}")
+
+# (g) surname-match warning: NFKD-folded (accents dropped), casefolded, hyphens->spaces, initials ignored;
+# warns on stderr (exit 0) when no surname token from real_name or aliases appears in title or takeaway.
+for case, real_name, extra_fm, sig_block, want_warn in (
+        ("mismatched signal warns (exit 0)", "Jane Example", "",
+         "recent_signal_12mo:\n  - title: 'Unrelated keynote'\n    takeaway: 'No surname here'\n    url: https://ok.example/1\n"
+         "  - title: 'Example annual report'\n    url: https://ok.example/2\n",
+         True),
+        ("accented surname matched by plain ASCII stays quiet", "Johan Rockström", "",
+         "recent_signal_12mo:\n  - title: 'Rockstrom 2026 climate lecture'\n    url: https://ok.example/1\n"
+         "  - title: 'Planetary update'\n    takeaway: 'Johan Rockstrom presents new data'\n    url: https://ok.example/2\n",
+         False),
+        ("hyphenated surname matched by split token in takeaway stays quiet", "Linda Darling-Hammond", "",
+         "recent_signal_12mo:\n  - title: 'Darling Hammond on curricula'\n    url: https://ok.example/1\n"
+         "  - title: 'Teacher policy review'\n    takeaway: 'Hammond outlines staffing plan'\n    url: https://ok.example/2\n",
+         False),
+        ("alias token matches and stays quiet", "Jordan Fish", "\naliases: [Cobie]",
+         "recent_signal_12mo:\n  - title: 'Cobie market structure podcast'\n    url: https://ok.example/1\n"
+         "  - title: 'Fish commentary on exchanges'\n    url: https://ok.example/2\n",
+         False),
+        ("initials are ignored and still warn when surname is absent", "J. K. Rowling", "",
+         "recent_signal_12mo:\n  - title: 'K. spoke at book fair'\n    takeaway: 'J. opened the panel'\n    url: https://ok.example/1\n"
+         "  - title: 'Rowling interview'\n    url: https://ok.example/2\n",
+         True),
+        ("generational suffix is ignored and surname matches", "G. Bennett Stewart III", "",
+         "recent_signal_12mo:\n  - title: 'Stewart value metrics note'\n    url: https://ok.example/1\n"
+         "  - title: 'Corporate finance brief'\n    takeaway: 'Stewart updates EVA model'\n    url: https://ok.example/2\n",
+         False),
+):
+    with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
+        tmp = Path(t)
+        board(tmp, {"sm": ("sm", real_name, extra_fm, "")})
+        (tmp / GTM / "sm.md").write_text(with_signals("sm", real_name, "active", sig_block, extra_fm), encoding="utf-8")
+        p = subprocess.run([sys.executable, "scripts/check-personas.py", GTM + "sm.md"],
+                           cwd=tmp, capture_output=True, text=True)
+        warn_lines = [l for l in p.stderr.splitlines() if "warning:" in l]
+        ok = (p.returncode == 0 and p.stdout == ""
+              and (len(warn_lines) == 1 and "recent_signal_12mo item 1" in warn_lines[0] if want_warn else warn_lines == []))
+        expect(ok, f"(g) surname check: {case}", f"exit {p.returncode}\nstdout={p.stdout}\nstderr={p.stderr}")
+
+spent = min(timed(lambda: mod.fold_name("a-é-" * 50_000))[1] for _ in range(3))
+expect(spent < 1, f"fold_name() runs linearly on 200k characters in {spent:.2f} s (< 1 s)")
+
+# --links: covers recent_signal_12mo, persistent_signals and public_stances[].evidence_url with fetch safety;
+# 404, 410, DNS failure and refusals fail; HTTP 403 and 429 warn (for sources, canonical_works, signals and stances).
+ROUTES["/dead404"] = (404, {}, b"")
+ROUTES["/dead410"] = (410, {}, b"")
+ROUTES["/wall403"] = (403, {}, b"")
+ROUTES["/limit429"] = (429, {}, b"")
+socket.getaddrinfo, socket.create_connection, socket.socket.connect = fake_getaddrinfo, no_network, no_network
+mod.PinnedHTTPS = FakeConnection
+try:
+    for case, fm, want_out in (
+            ("dead 404 recent_signal_12mo url",
+             {"recent_signal_12mo": [{"title": "T", "url": "https://ok.example/dead404"}]},
+             ["(links) ok.example, line 1: dead: HTTP 404"]),
+            ("dead 410 persistent_signals url",
+             {"persistent_signals": [{"title": "T", "url": "https://ok.example/dead410"}]},
+             ["(links) ok.example, line 1: dead: HTTP 410"]),
+            ("dead 404 public_stances evidence_url",
+             {"public_stances": [{"stance": "S", "evidence_url": "https://ok.example/dead404"}]},
+             ["(links) ok.example, line 1: dead: HTTP 404"]),
+            ("DNS failure on recent_signal_12mo url",
+             {"recent_signal_12mo": [{"title": "T", "url": "https://nohost.example/x"}]},
+             ["(links) nohost.example, line 1: refused: cannot resolve the host"]),
+            ("refused private-IP redirect on public_stances evidence_url",
+             {"public_stances": [{"stance": "S", "evidence_url": "https://ok.example/to-meta"}]},
+             ["(links) ok.example, line 1: refused: the host resolves to a non-public address"]),
+            ("private detail in signal URL blocked as (k) before fetch",
+             {"recent_signal_12mo": [{"title": "T", "url": "https://ok.example/card?tel=415-555-0134"}]},
+             ["(k) private-detail: line 1 looks like a phone number"]),
+    ):
+        connects.clear()
+        warns = []
+        out = mod.link_problems(fm, [json.dumps(fm)], warns)
+        expect(out == want_out and warns == [], f"--links fails on {case}", f"out={out} warns={warns}")
+
+    # 403 and 429 warn (0 failures) across sources, canonical_works, signals, persistent_signals and stances.
+    for case, fm, want_w in (
+            ("403 on source", {"sources": ["https://ok.example/wall403"]},
+             ["(links) ok.example, line 1: warning: HTTP 403"]),
+            ("429 on canonical_works", {"canonical_works": [{"title": "The Real Title", "url": "https://ok.example/limit429"}]},
+             ["(links) ok.example, line 1: warning: HTTP 429"]),
+            ("403 on recent_signal_12mo", {"recent_signal_12mo": [{"title": "T", "url": "https://ok.example/wall403"}]},
+             ["(links) ok.example, line 1: warning: HTTP 403"]),
+            ("429 on persistent_signals", {"persistent_signals": [{"title": "T", "url": "https://ok.example/limit429"}]},
+             ["(links) ok.example, line 1: warning: HTTP 429"]),
+            ("403 on public_stances evidence_url", {"public_stances": [{"stance": "S", "evidence_url": "https://ok.example/wall403"}]},
+             ["(links) ok.example, line 1: warning: HTTP 403"]),
+    ):
+        warns = []
+        out = mod.link_problems(fm, [json.dumps(fm)], warns)
+        expect(out == [] and warns == want_w, f"--links warns (does not fail) on {case}", f"out={out} warns={warns}")
+finally:
+    socket.getaddrinfo, socket.create_connection, socket.socket.connect, mod.PinnedHTTPS = real
+
+# End to end CLI: --links with HTTP 403/429 exits 0 and prints warnings on stderr.
+with tempfile.TemporaryDirectory(prefix="check-personas-") as t:
+    board(Path(t), {"clean-example": CLEAN})
+    f = Path(t) / GTM / "clean-example.md"
+    spec = importlib.util.spec_from_file_location("check_personas_warn", Path(t) / "scripts/check-personas.py")
+    tmod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(tmod)
+    page_html = ("<html>Understanding by Design (Expanded 2nd Edition) "
+                 "Educating for Insight: What Understanding Requires "
+                 "Assessing Student Performance: Exploring the Purpose and Limits of Testing "
+                 "The Understanding by Design Guide to Creating High-Quality Units "
+                 "On Understanding by Design blog</html>").encode()
+    tmod.fetch = lambda u: (403, "text/html", b"") if "wikipedia" in u else (
+        (429, "text/html", b"") if "scholar" in u else (200, "text/html", page_html)
+    )
+    buf, ebuf = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(ebuf):
+        code = tmod.main(["--links", str(f)])
+    expect(code == 0 and buf.getvalue() == "" and "warning: HTTP 403" in ebuf.getvalue()
+           and "warning: HTTP 429" in ebuf.getvalue()
+           and ebuf.getvalue().strip().splitlines()[-1] == "check-personas: 1/1 pass",
+           "--links CLI exits 0 and emits stderr warnings on HTTP 403 and 429", buf.getvalue() + ebuf.getvalue())
 
 print("check-personas-rules-test:", "all passed" if not failures else f"{failures} case(s) failed")
 sys.exit(1 if failures else 0)

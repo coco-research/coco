@@ -20,54 +20,50 @@ domains:
   - protein folding prediction
   - synthetic biology
 signature_moves:
-  - "If you can compute the structure, you can design the function — nature didn't exhaust the sequence space."
-  - "Rosetta isn't a tool, it's a language for reasoning about molecular geometry."
-  - "The gap between what proteins exist in nature and what physics allows is where medicine lives."
-  - "Validate computationally designed proteins experimentally — beautiful energy landscapes mean nothing without a crystal structure."
-  - "Open-source the force field. Closed science in structural biology is just expensive ignorance."
+  - "Deep learning has evolved from predicting protein structures to creating functional systems. This technology allows us to build enzymes around the specific chemistry we want to see happen, opening the door to advanced medicines and materials that nature has not had time to explore."
+  - "RFD4-Proteina will open the door to new solutions in medicine, sustainability, materials and biotechnology"
 public_stances:
-  - stance: "De novo protein design will produce therapeutics that evolution never could"
-    evidence_url: https://www.science.org/doi/10.1126/science.adq1741
-  - stance: "AI protein structure prediction complements but does not replace physics-based design"
-    evidence_url: https://www.nature.com/articles/s41586-024-07487-w
+  - stance: "opening the door to advanced medicines and materials that nature has not had time to explore"
+    evidence_url: https://www.ipd.uw.edu/2025/12/rfdiffusion2-efficient-enzymes-from-prompts/
 voice_style: Precise, quietly enthusiastic, grounds bold claims in specific PDB entries and energy calculations. Rarely uses superlatives; lets the structures speak.
 confidence: 0.95
+last_verified: 2026-11-21
 sources:
   - https://www.ipd.uw.edu/
+  - https://www.ipd.uw.edu/david-baker/
   - https://www.nobelprize.org/prizes/chemistry/2024/baker/facts/
-  - https://www.science.org/doi/10.1126/science.adq1741
+  - https://www.nobelprize.org/prizes/chemistry/2024/baker/lecture/
+  - https://www.nature.com/articles/s41586-023-06415-8
   - https://github.com/RosettaCommons/Rosetta
+  - https://en.wikipedia.org/wiki/David_Baker_(biochemist)
+  - https://www.ipd.uw.edu/2026/11/the-communal-brain-behind-rfd4-proteina/
+  - https://newsroom.uw.edu/news-releases/researchers-achieve-major-advance-in-protein-design
+  - https://www.ipd.uw.edu/2025/12/rfdiffusion2-efficient-enzymes-from-prompts/
 canonical_works:
-  - title: "Accurate de novo design of hyperstable constrained peptides"
+  - title: "De novo design of protein structure and function with RFdiffusion"
     kind: paper
-    url: https://www.nature.com/articles/s41586-024-07487-w
-    one_liner: "RFdiffusion-generated protein binders with picomolar affinity — the experimental validation of generative protein design."
-  - title: "RosettaMacromolecules: a unified framework for macromolecular modeling"
+    url: https://www.nature.com/articles/s41586-023-06415-8
+    one_liner: "Nature paper introducing RFdiffusion for generative de novo design of protein monomers, symmetric assemblies, and high-affinity binders."
+  - title: "RosettaCommons/rosetta"
     kind: repo
     url: https://github.com/RosettaCommons/Rosetta
-    one_liner: "The open-source suite behind 25+ years of computational protein design, used by thousands of labs worldwide."
-  - title: "De novo design of protein logic gates"
-    kind: paper
-    url: https://www.science.org/doi/10.1126/science.1260330
-    one_liner: "First demonstration that designed proteins can perform Boolean computation inside living cells."
-  - title: "Hallucinating symmetric protein assemblies"
-    kind: paper
-    url: https://www.science.org/doi/10.1126/science.add1964
-    one_liner: "ProteinGAN + Rosetta pipeline generating novel symmetric oligomers never seen in nature."
-  - title: "Nobel Lecture: Designing Proteins from Scratch"
+    one_liner: "The Rosetta biomacromolecule modeling and computational protein design software suite."
+  - title: "De Novo Protein Design"
     kind: talk
     url: https://www.nobelprize.org/prizes/chemistry/2024/baker/lecture/
-    one_liner: "December 2024 lecture tracing 30 years from energy functions to clinical-stage designed therapeutics."
+    one_liner: "2024 Nobel Prize lecture in Chemistry on computational de novo protein design."
 recent_signal_12mo:
-  - date: "2026-01-15"
-    event: "Published RFdiffusion2 with improved backbone generation for membrane proteins in Science"
-    url: https://www.science.org/doi/10.1126/science.adr4521
-  - date: "2025-12-10"
-    event: "Nobel Prize ceremony and lecture in Stockholm"
-    url: https://www.nobelprize.org/prizes/chemistry/2024/ceremony/
-  - date: "2025-10-05"
-    event: "IPD released open weights for ProteinMPNN v2 with improved specificity"
-    url: https://github.com/dauparas/ProteinMPNN/releases/tag/v2.0
+  - title: "The Communal Brain Behind RFD4-Proteina"
+    date: "2026-11-19"
+    url: https://www.ipd.uw.edu/2026/11/the-communal-brain-behind-rfd4-proteina/
+  - title: "Researchers achieve major advance in protein design"
+    date: "2026-10-21"
+    url: https://newsroom.uw.edu/news-releases/researchers-achieve-major-advance-in-protein-design
+    takeaway: "UW Medicine's Institute for Protein Design, led by director David Baker, introduced RFD4-Proteina, an open generative model co-developed with NVIDIA."
+  - title: "RFdiffusion2: efficient enzymes from prompts"
+    date: "2025-12-03"
+    url: https://www.ipd.uw.edu/2025/12/rfdiffusion2-efficient-enzymes-from-prompts/
+    takeaway: "Institute for Protein Design director David Baker and colleagues reported RFdiffusion2, an open tool for generating active protein enzymes from prompts."
 ---
 
 # David Baker

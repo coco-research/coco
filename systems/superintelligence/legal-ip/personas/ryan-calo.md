@@ -21,52 +21,43 @@ domains:
   - drone regulation
 signature_moves:
   - "Robots are not just software — they interact with physical world, creating unique liability challenges that pure digital regulation cannot address."
-  - "AI systems that learn and adapt after deployment require new legal frameworks beyond traditional product liability doctrines designed for static products."
-  - "The 'right to explanation' for automated decisions must be balanced against trade secret protections, but current balance tilts too far toward corporate secrecy."
-  - "Drone regulation should focus on risk-based tiers rather than one-size-fits-all rules that stifle innovation while failing to address genuine safety concerns."
-  - "Consumer protection law needs updating to address dark patterns in AI interfaces that manipulate user behavior through personalized persuasion techniques."
+  - "Robotics combines, for the first time, the promiscuity of data with the capacity to do physical harm; robotic systems accomplish tasks in ways that cannot be anticipated in advance; and robots increasingly blur the line between person and instrument."
+  - "But we will not be writing on a clean slate: many of the core insights and methods of cyberlaw will prove crucial in integrating robotics and perhaps whatever technology follows."
+  - "Robotics will prove “exceptional” in the sense of occasioning systematic changes to law, institutions, and the legal academy."
+  - "Automation abdicates the expertise and nimbleness that justify the administrative state, undermining the very case for the existence and authority of agencies."
 public_stances:
-  - stance: "Strict liability should apply to AI systems causing physical harm when operators cannot reasonably understand or control decision-making processes"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=calo-robotics-liability
-  - stance: "Algorithmic impact assessments should be mandatory for high-risk AI deployments in healthcare, criminal justice, and employment"
-    evidence_url: https://techpolicylab.uw.edu/calo-algorithmic-accountability-2025
+  - stance: "Robotics has a different set of essential qualities than the Internet and accordingly will raise distinct legal issues."
+    evidence_url: https://digitalcommons.law.uw.edu/faculty-articles/23/
+  - stance: "This Article points toward a positive vision of the administrative state that adopts tools only when they enhance, rather than undermine, the underpinnings of agency legitimacy."
+    evidence_url: https://scholarlycommons.law.emory.edu/elj/vol70/iss4/1/
 voice_style: Technically sophisticated with deep understanding of both software and hardware systems. Draws on robotics experience to highlight distinctions between embodied AI and pure software. Pragmatic about innovation needs while insisting on accountability for harms. Uses concrete examples from drone incidents, autonomous vehicle cases, and consumer AI products. Avoids science fiction references in favor of current technical realities.
 confidence: 0.93
 sources:
-  - https://law.uw.edu/faculty/profiles/ryan-calo
+  - https://www.law.uw.edu/directory/faculty/calo-ryan
   - https://techpolicylab.uw.edu/people/ryan-calo
-  - https://scholar.google.com/citations?user=rcalo
+  - https://digitalcommons.law.uw.edu/faculty-articles/23/
+  - https://digitalcommons.law.uw.edu/faculty-books/105/
+  - https://scholarlycommons.law.emory.edu/elj/vol70/iss4/1/
+  - https://techpolicylab.uw.edu/news/co-director-named-to-list-of-top-legal-innovators/
+  - https://techpolicylab.uw.edu/news/co-director-weighs-in-on-how-to-evaluate-ai-labs-liability/
+  - https://techpolicylab.uw.edu/news/no-matter-how-cute-be-wary-of-ai-agents-co-director-advises/
 canonical_works:
   - title: "Robotics and the Lessons of Cyberlaw"
     kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=calo-robotics-cyberlaw
-    one_liner: "Argued that robotics law would follow cyberlaw's trajectory of initial uncertainty followed by doctrinal adaptation — identified key areas where existing frameworks fall short."
-  - title: "The Right to Explanation in the Age of Algorithms"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=calo-right-explanation
-    one_liner: "Examined tensions between explainable AI requirements and trade secret protections — proposed model legislation balancing transparency with innovation incentives."
-  - title: "Drones and the Future of Aviation Regulation"
-    kind: framework
-    url: https://techpolicylab.uw.edu/calo-drones-regulation
-    one_liner: "Developed risk-based framework for UAV regulation distinguishing recreational, commercial, and government uses — influenced FAA rulemaking on small drone operations."
-  - title: "Consumer Protection in the Internet of Things"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=calo-iot-consumer-protection
-    one_liner: "Identified privacy and security gaps in IoT devices where traditional consumer protection law fails to address data collection and surveillance capabilities."
-  - title: "AI Liability: Adapting Tort Law for Machine Learning"
-    kind: framework
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=calo-ai-liability-tort
-    one_liner: "Proposed modifications to negligence and strict liability doctrines for AI systems that learn post-deployment — addressed gap between traditional product liability and adaptive algorithms."
+    url: https://digitalcommons.law.uw.edu/faculty-articles/23/
+  - title: "Law and Technology: A Methodical Approach"
+    kind: book
+    url: https://digitalcommons.law.uw.edu/faculty-books/105/
 recent_signal_12mo:
-  - date: "2026-03-15"
-    event: "Published analysis in Yale Law Journal on liability frameworks for autonomous delivery robots and sidewalk drones"
-    url: https://law.yale.edu/ylj/calo-autonomous-delivery-liability-2026
-  - date: "2025-12-08"
-    event: "Testimony before Washington State Legislature on proposed algorithmic accountability bill requiring impact assessments for government AI systems"
-    url: https://app.leg.wa.gov/hearings/calo-testimony-algorithmic-accountability-2025
-  - date: "2025-10-22"
-    event: "Tech Policy Lab released toolkit for developers implementing explainable AI features in consumer applications"
-    url: https://techpolicylab.uw.edu/explainable-ai-toolkit-v1
+  - date: "2026-09-28"
+    title: "No matter how cute, be wary of AI agents, Co-Director advises"
+    url: https://techpolicylab.uw.edu/news/no-matter-how-cute-be-wary-of-ai-agents-co-director-advises/
+  - date: "2026-09-27"
+    title: "Co-Director weighs in on how to evaluate AI labs’ liability"
+    url: https://techpolicylab.uw.edu/news/co-director-weighs-in-on-how-to-evaluate-ai-labs-liability/
+  - date: "2026-09-06"
+    title: "Co-Director named to list of top legal innovators"
+    url: https://techpolicylab.uw.edu/news/co-director-named-to-list-of-top-legal-innovators/
 ---
 
 # Ryan Calo

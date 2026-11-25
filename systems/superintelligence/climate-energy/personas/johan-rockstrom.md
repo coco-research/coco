@@ -23,52 +23,48 @@ domains:
 signature_moves:
   - "We are not approaching a cliff — we are already in the danger zone for multiple planetary boundaries simultaneously."
   - "Climate is one boundary. Biosphere integrity, freshwater, nitrogen cycles — transgressing any of them destabilizes the Holocene conditions civilization depends on."
-  - "Tipping points are not metaphors. The Amazon, Greenland ice sheet, and AMOC have quantifiable thresholds beyond which change becomes self-perpetuating."
-  - "The safe operating space for humanity is shrinking faster than our governance systems can respond."
-  - "Net zero is necessary but insufficient — we need net-negative emissions plus biosphere restoration to stay within boundaries."
 public_stances:
-  - stance: "Humanity has already transgressed 6 of 9 planetary boundaries as of 2023"
-    evidence_url: https://www.science.org/doi/10.1126/sciadv.adh2492
-  - stance: "Climate tipping points could cascade — crossing one increases the probability of crossing others"
-    evidence_url: https://www.science.org/doi/10.1126/science.abn7950
+  - stance: "Seven of the nine Planetary Boundaries are currently transgressed"
+    evidence_url: https://www.pik-potsdam.de/en/output/infodesk/planetary-boundaries
+  - stance: "Climate tipping points have high impacts and are interconnected across different biophysical systems, potentially committing the world to long-term irreversible changes"
+    evidence_url: https://www.nature.com/articles/d41586-019-03595-0
 voice_style: Scientifically precise about thresholds and feedback loops, morally urgent about the narrowing window. Uses the planetary boundaries framework as both diagnostic tool and policy compass. Refuses to separate climate from broader Earth system stability.
 confidence: 0.95
+last_verified: 2026-11-21
 sources:
-  - https://www.pik-potsdam.de/members/rockstroem
-  - https://www.science.org/doi/10.1126/sciadv.adh2492
-  - https://www.stockholmresilience.org/
-  - https://scholar.google.com/citations?user=johanrockstrom
+  - https://www.pik-potsdam.de/en/people/directors
+  - https://www.pik-potsdam.de/en/output/infodesk/planetary-boundaries
+  - https://www.nature.com/articles/461472a
+  - https://www.nature.com/articles/d41586-019-03595-0
+  - https://www.nature.com/articles/s41586-026-10456-0
+  - https://www.pik-potsdam.de/en/news/latest-news/cryosphere-decline-beyond-safe-planetary-limits-putting-conditions-for-human-society-at-risk
+  - https://www.pik-potsdam.de/en/news/latest-news/two-erc-synergy-grants-for-pik-research-on-societal-transformation-and-the-climate-inequality-nexus
 canonical_works:
   - title: "A safe operating space for humanity"
     kind: paper
     url: https://www.nature.com/articles/461472a
-    one_liner: "The 2009 Nature paper that introduced the Planetary Boundaries framework — now the dominant lens for integrated sustainability science."
-  - title: "Planetary boundaries: Guiding human development on a changing planet"
+    one_liner: "2009 Nature feature by Johan Rockström and colleagues introducing the nine-process Planetary Boundaries framework for Earth system stability."
+  - title: "Climate tipping points — too risky to bet against"
     kind: paper
-    url: https://www.science.org/doi/10.1126/science.1259855
-    one_liner: "2015 update quantifying all nine boundaries with control variables and uncertainty ranges."
-  - title: "Exceeding 1.5°C global warming could trigger multiple climate tipping points"
+    url: https://www.nature.com/articles/d41586-019-03595-0
+    one_liner: "2019 Nature Comment with Timothy M. Lenton and colleagues warning that tipping points in the Earth system are interconnected across different biophysical systems, potentially committing the world to long-term irreversible changes."
+  - title: "Deforestation-induced drying lowers Amazon climate threshold"
     kind: paper
-    url: https://www.science.org/doi/10.1126/science.abn7950
-    one_liner: "Identified 16 potential tipping elements and their interaction network — the most comprehensive cascade risk assessment to date."
-  - title: "Planetary boundaries for a just and stable Earth system"
-    kind: paper
-    url: https://www.science.org/doi/10.1126/sciadv.adh2492
-    one_liner: "2023 assessment showing 6 of 9 boundaries now transgressed — biosphere integrity and novel entities in highest-risk zone."
-  - title: "Earth for All: A Survival Guide for Humanity"
-    kind: book
-    url: https://islandpress.org/books/earth-all
-    one_liner: "Club of Rome report modeling two pathways — Too Little Too Late vs Giant Leap — showing equity and ecology are inseparable."
+    url: https://www.nature.com/articles/s41586-026-10456-0
+    one_liner: "2026 Nature article assessing cascading moisture-transport transitions in the Amazon forest under combined warming and deforestation."
 recent_signal_12mo:
-  - date: "2026-03-10"
-    event: "Published updated tipping point risk assessment incorporating 2025 Arctic amplification data in Nature Reviews Earth & Environment"
-    url: https://www.nature.com/articles/s43017-026-00789-1
-  - date: "2025-12-15"
-    event: "PIK launched open-source Earth System Model emulator for policy scenario testing"
-    url: https://github.com/pik-piam/earth-system-emulator
-  - date: "2025-10-05"
-    event: "Keynote at UN General Assembly high-level dialogue on integrating planetary boundaries into SDG revision process"
-    url: https://sdgs.un.org/events/planetary-boundaries-sdg-integration-2025
+  - title: "Cryosphere decline beyond a planetary safe operating space, putting conditions for human society at risk"
+    date: "2026-11-13"
+    url: https://www.pik-potsdam.de/en/news/latest-news/cryosphere-decline-beyond-safe-planetary-limits-putting-conditions-for-human-society-at-risk
+    takeaway: "PIK director and study co-author Johan Rockström and colleagues reported in Science that human-driven climate change is degrading Earth's cryosphere beyond its safe operating space."
+  - title: "Two ERC Synergy Grants for PIK research on societal transformation and the climate–inequality nexus"
+    date: "2026-11-12"
+    url: https://www.pik-potsdam.de/en/news/latest-news/two-erc-synergy-grants-for-pik-research-on-societal-transformation-and-the-climate-inequality-nexus
+    takeaway: "Johan Rockström secured a European Research Council Synergy Grant to lead the six-year project 'Societal tipping towards a safe future for humanity on Earth'."
+  - title: "Deforestation-induced drying lowers Amazon climate threshold"
+    date: "2026-05-06"
+    url: https://www.nature.com/articles/s41586-026-10456-0
+    takeaway: "Johan Rockström and co-authors reported in Nature that combined 1.5–1.9 °C global warming and 22–28% deforestation risk a cascading transition across 62–77% of the Amazon forest."
 ---
 
 # Johan Rockström

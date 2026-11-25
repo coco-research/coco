@@ -20,54 +20,42 @@ domains:
   - nanomedicine
   - biotech entrepreneurship
 signature_moves:
-  - "The molecule is only half the battle — delivering it to the right cell at the right time is the engineering challenge."
-  - "Polymers aren't just packaging. They're programmable release kinetics."
-  - "Academic labs should spawn companies. Translation is not a distraction from science — it's the point."
-  - "If you can't manufacture it at scale, you haven't invented a drug — you've invented a curiosity."
-  - "Tissue engineering needs vascularization first. Cells die without blood supply, no matter how perfect the scaffold."
+  - 'You have two choices: you can do something that’s incremental and secure, or you can do something that might be a really big idea and could change the world, but it’s risky, and there’s certainly a chance of failure. I tell people, “Do the second. Try to do something important.”'
+  - "I look at the history of American innovation and education over the past 250 years, and it’s been spectacular. Plenty of times there’ve been setbacks. We’ve had world wars, you know, we’ve had depressions, and people keep persisting and keep learning. They keep discovering and they keep inventing."
 public_stances:
-  - stance: "Controlled-release polymers can replace daily injections for chronic diseases"
-    evidence_url: https://www.science.org/doi/10.1126/science.263941
-  - stance: "mRNA vaccines were enabled by decades of lipid nanoparticle delivery research"
-    evidence_url: https://www.nature.com/articles/s41578-020-00266-9
+  - stance: "Genetic therapies, in my opinion, would not exist without materials science—nanoparticles to deliver them and things like that."
+    evidence_url: https://www.scientificamerican.com/article/robert-langer/
+  - stance: "Lipid nanoparticles have successfully entered the clinic for the delivery of mRNA; in particular, lipid nanoparticle–mRNA vaccines are now in clinical use against coronavirus disease 2019 (COVID-19)"
+    evidence_url: https://www.nature.com/articles/s41578-021-00358-0
 voice_style: Relentlessly practical, focuses on manufacturability and scale alongside molecular elegance. Speaks in patents and startups as much as papers. Optimistic about engineering solutions to biological problems.
 confidence: 0.96
+last_verified: 2026-11-21
 sources:
   - https://langerlab.mit.edu/
-  - https://www.nae.edu/20366/Dr-Robert-Langer
-  - https://www.science.org/doi/10.1126/science.263941
-  - https://scholar.google.com/citations?user=robertlanger
+  - https://langerlab.mit.edu/langer-bio/
+  - https://www.nature.com/articles/s41578-021-00358-0
+  - https://en.wikipedia.org/wiki/Robert_S._Langer
+  - https://welch1.org/news-reports/news/the-welch-foundation-announces-2026-welch-award-recipient
+  - https://www.scientificamerican.com/article/robert-langer/
+  - https://news.mit.edu/2026/mit-engineering-faculty-staff-receive-awards-0917
 canonical_works:
-  - title: "Biodegradable polymers as controlled-release drug-delivery systems"
-    kind: paper
-    url: https://www.science.org/doi/10.1126/science.263941
-    one_liner: "The 1980 Science paper that launched the field of controlled drug delivery — cited 10,000+ times."
   - title: "Lipid nanoparticles for mRNA delivery"
     kind: paper
-    url: https://www.nature.com/articles/s41578-020-00266-9
-    one_liner: "Review of the delivery technology that made COVID-19 mRNA vaccines possible — decades of Langer lab work crystallized."
-  - title: "Moderna Therapeutics (Co-founder)"
-    kind: company
-    url: https://www.modernatx.com/
-    one_liner: "Co-founded in 2010 to translate mRNA platform into medicines — validated by 2020 pandemic response."
-  - title: "Tissue engineering: the development of functional substitutes for transplantation"
-    kind: paper
-    url: https://www.sciencedirect.com/science/article/pii/S014296120000137X
-    one_liner: "Foundational review defining the engineering principles for growing replacement organs."
-  - title: "Over 1,400 patents issued"
-    kind: portfolio
-    url: https://patents.google.com/?inventor=Robert+Langer
-    one_liner: "Most patented engineer in history — covering drug delivery, diagnostics, tissue engineering, and consumer products."
+    url: https://www.nature.com/articles/s41578-021-00358-0
+    one_liner: "Nature Reviews Materials review on lipid nanoparticle delivery platforms for mRNA therapeutics and vaccines."
 recent_signal_12mo:
-  - date: "2026-01-25"
-    event: "Published CRISPR-Cas9 delivery via biodegradable nanoparticles for in vivo gene editing in Nature Biotechnology"
-    url: https://www.nature.com/articles/s41587-026-02456-9
-  - date: "2025-11-30"
-    event: "Koch Institute announced clinical trial launch for implantable glioblastoma drug-delivery device"
-    url: https://ki.mit.edu/news/2025/glioblastoma-implant-trial
-  - date: "2025-09-15"
-    event: "Received Queen Elizabeth Prize for Engineering for contributions to mRNA vaccine delivery systems"
-    url: https://qeprize.org/winners/2025
+  - title: "MIT School of Engineering faculty and staff receive awards in spring 2026"
+    date: "2026-09-17"
+    url: https://news.mit.edu/2026/mit-engineering-faculty-staff-receive-awards-0917
+    takeaway: "MIT News recognized Institute Professor Robert Langer receiving the 2026 Robert A. Welch Award in Chemistry among spring 2026 faculty honors."
+  - title: "Robert Langer reveals why celebrating science can boost discovery"
+    date: "2026-06-16"
+    url: https://www.scientificamerican.com/article/robert-langer/
+    takeaway: "Scientific American featured MIT professor Robert Langer on innovation and why celebrating scientific research supports discovery."
+  - title: "The Welch Foundation Announces 2026 Welch Award Recipient"
+    date: "2026-05-19"
+    url: https://welch1.org/news-reports/news/the-welch-foundation-announces-2026-welch-award-recipient
+    takeaway: "The Welch Foundation named MIT Institute Professor Robert S. Langer as the 2026 Welch Award in Chemistry recipient for controlled macromolecule delivery and tissue engineering."
 ---
 
 # Robert Langer

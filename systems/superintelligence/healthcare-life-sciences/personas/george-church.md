@@ -22,54 +22,54 @@ domains:
   - personal genomics
   - molecular recording
 signature_moves:
-  - "DNA is the ultimate storage medium — denser than silicon, more durable than paper, readable in ten thousand years."
-  - "Sequencing costs dropped faster than Moore's Law because we treated biology as an information problem, not a wet-lab problem."
-  - "CRISPR is powerful but imprecise. Prime editing and base editing are the next generation — surgical, not sledgehammer."
-  - "De-extinction isn't Jurassic Park. It's about restoring ecosystem functions lost when keystone species vanished."
-  - "Personal genomics only matters if the data leads to actionable interventions — otherwise it's expensive curiosity."
+  - "One of the great successes of engineering is the development of safety features, such as the rounding of sharp corners on objects and the invention of airbags for cars, and in biological engineering we want to emulate the process of designing safety features in ways relevant to the technologies we develop."
 public_stances:
-  - stance: "Multiplexed sequencing technologies can reduce cost per genome below $100"
-    evidence_url: https://www.science.org/doi/10.1126/science.1117389
-  - stance: "Gene drives for malaria mosquito suppression require contained field trials before release"
+  - stance: "These molecular safeguards should enable the development of safe CRISPR gene drives for diverse organisms"
     evidence_url: https://www.nature.com/articles/nbt.3412
 voice_style: Rapid-fire ideas, connects seemingly unrelated domains (computing, evolution, ethics) in single sentences. Optimistic about technological solutions but insists on containment and reversibility. Speaks in orders of magnitude — cost reductions, data densities, population scales.
 confidence: 0.93
+last_verified: 2026-11-21
 sources:
   - https://arep.med.harvard.edu/
   - https://wyss.harvard.edu/team/core-faculty/george-church/
-  - https://www.science.org/doi/10.1126/science.1117389
-  - https://scholar.google.com/citations?user=georgechurch
+  - https://www.nature.com/articles/nbt.3412
+  - https://wyss.harvard.edu/news/safeguarding-gene-drives/
+  - https://www.hachettebookgroup.com/titles/george-church/regenesis/9780465075706/
+  - https://www.personalgenomes.org/
+  - https://colossal.com/
+  - https://wyss.harvard.edu/news/reversing-age-by-reprogramming-gene-expression-networks/
+  - https://www.nature.com/articles/s41586-026-10949-y
+  - https://www.nature.com/articles/s41596-026-01409-y
 canonical_works:
-  - title: "Genome sequencing at gigabase scale using microfabricated high-density picolitre reactors"
-    kind: paper
-    url: https://www.nature.com/articles/nature03517
-    one_liner: "The 2005 Nature paper that launched 454 sequencing — first next-gen platform, reduced cost 100x overnight."
-  - title: "Programmable in vivo RNA editing using CRISPR-Cas13"
-    kind: paper
-    url: https://www.science.org/doi/10.1126/science.aat9023
-    one_liner: "Extended CRISPR beyond DNA to RNA — enabling reversible, non-permanent gene modulation."
-  - title: "Colossal Biosciences (Co-founder)"
+  - title: "Colossal Biosciences"
     kind: company
     url: https://colossal.com/
-    one_liner: "De-extinction company targeting woolly mammoth revival to restore Arctic grasslands — raised $225M+."
-  - title: "Regenesis: How Synthetic Biology Will Reinvent Nature and Ourselves"
+    one_liner: "Genetics and biosciences company co-founded by George Church and Ben Lamm applying gene editing to woolly mammoth de-extinction and species conservation."
+  - title: "Regenesis"
     kind: book
-    url: https://www.basicbooks.com/titles/george-church-ed-regenesis/9780465022670/
-    one_liner: "Vision for rewriting the genetic code itself — expanding beyond 20 amino acids to create novel biochemistries."
-  - title: "Personal Genome Project (Founder)"
+    url: https://www.hachettebookgroup.com/titles/george-church/regenesis/9780465075706/
+    one_liner: "Book with Edward Regis exploring how synthetic biology and genome modification can create new organisms, improve health, and revive extinct species."
+  - title: "The Personal Genome Project"
     kind: initiative
-    url: https://personalgenomes.org/
-    one_liner: "Open-access genomic and phenotypic data from 5,000+ volunteers — pioneered consent models for public genomics."
+    url: https://www.personalgenomes.org/
+    one_liner: "Coalition of projects initiated in 2005 to create public genome, health, and trait data under non-anonymous open consent; the pilot Harvard PGP is based in George Church's laboratory."
+  - title: "Safeguarding CRISPR-Cas9 gene drives in yeast"
+    kind: paper
+    url: https://www.nature.com/articles/nbt.3412
+    one_liner: "Nature Biotechnology paper demonstrating molecular confinement safeguards and overwriting reversal drives for CRISPR-Cas9 gene drives."
 recent_signal_12mo:
-  - date: "2026-02-05"
-    event: "Published multiplexed prime editing achieving 90% efficiency across 12 genomic loci simultaneously in Cell"
-    url: https://www.cell.com/cell/fulltext/S0092-8674(26)00123-4
-  - date: "2025-12-20"
-    event: "Colossal Biosciences announced successful elephant-mammoth hybrid embryo development to blastocyst stage"
-    url: https://colossal.com/news/embryo-milestone-2025/
-  - date: "2025-10-10"
-    event: "Wyss Institute released open-source molecular recording system for tracking cellular lineage in vivo"
-    url: https://github.com/wyssinstitute/molecular-recorder-v2
+  - title: "Reversing age by reprogramming gene expression networks"
+    date: "2026-10-14"
+    url: https://wyss.harvard.edu/news/reversing-age-by-reprogramming-gene-expression-networks/
+    takeaway: "Study led by George Church used a transcriptomic reprogramming screen to identify splicing factor SRSF1 as a regulator of aging that extended healthspan and lifespan in aged mice."
+  - title: "Automated prototyping of genetic codes"
+    date: "2026-08-26"
+    url: https://www.nature.com/articles/s41586-026-10949-y
+    takeaway: "George M. Church and colleagues reported AGENTEX in Nature, an automated cell-free translation platform for prototyping compressed genetic codes and incorporating non-standard amino acids."
+  - title: "Large-scale genome structure interrogation via recombinase-mediated rearrangements of multiplexed prime edits in repetitive elements"
+    date: "2026-07-21"
+    url: https://www.nature.com/articles/s41596-026-01409-y
+    takeaway: "George M. Church and co-authors published a Nature Protocols method combining multiplexed prime editing at repetitive elements with recombinase-mediated rearrangements, facilitating the introduction of hundreds to thousands of precise genomic edits per cell."
 ---
 
 # George Church

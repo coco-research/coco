@@ -38,15 +38,15 @@ key_publications:
   - 'Facial Recognition Is the Perfect Tool for Oppression (2018)'
   - 'The Indispensable, Inadequate Fair Information Practices (2017)'
 recent_signal_12mo:
-  - title: 'Government watchdog finds weak enforcement of US privacy regulations'
-    date: '2026-05-30T20:35:46+00:00'
-    url: 'https://www.cnet.com/news/politics/government-watchdog-finds-weak-enforcement-in-us-privacy-regulations/'
-  - title: 'AI Privacy Concerns and Issues'
-    date: '2026-05-19T20:35:46+00:00'
-    url: 'https://www.consumeraffairs.com/news/ai-privacy-concerns/'
-  - title: 'The Supreme Court Protected Donor Privacy. The IRS Didn’t Get the Memo.'
-    date: '2026-05-21T20:35:46+00:00'
-    url: 'https://reason.com/2026/05/21/the-supreme-court-protected-donor-privacy-the-irs-didnt-get-the-memo/'
+  - title: 'Scaling Laws: Is AI a Death Sentence for Civic Institutions? with Jessica Silbey and Woodrow Hartzog'
+    date: '2026-03-17'
+    url: 'https://www.lawfaremedia.org/article/scaling-laws--is-ai-a-death-sentence-for-civic-institutions--with-jessica-silbey-and-woodrow-hartzog'
+  - title: 'Recording Available: How AI Destroys Institutions'
+    date: '2026-04-30'
+    url: 'https://www.tcd.ie/law/news--events/2026/news/how-ai-destroys-institutions-recording-available/'
+  - title: 'Alumnus Woodrow Hartzog Shapes National Conversations on Technology, Law and Justice'
+    date: '2026-09-09'
+    url: 'https://www.samford.edu/law/news/2026/Alumnus-Woodrow-Hartzog-Shapes-National-Conversations-on-Technology-Law-and-Justice'
 public_stances:
   - stance: 'Supports strong limits/guardrails and warrant-based controls on law enforcement use of facial recognition technology, emphasizing transparency, accountability, probable cause for serious violent felonies, and reporting/assessments to protect civil liberties.'
     evidence_url: 'http://lieu.house.gov/media-center/press-releases/reps-lieu-jackson-lee-clarke-gomez-ivey-and-veasey-introduce-bill'
@@ -72,7 +72,7 @@ when_to_summon:
   - 'When assessing AI governance beyond accuracy: contestability, legitimacy, and rule-of-law alignment.'
   - 'When diagnosing why privacy/security compliance fails in practice (enforcement gaps, weak penalties, non-verifiable obligations).'
 confidence: 0.68
-last_verified: '2026-06-01'
+last_verified: '2026-11-21'
 sources:
   - 'https://cyber.harvard.edu/people/woodrow-hartzog/'
   - 'https://www.bu.edu/law/profile/woodrow-hartzog/'
@@ -80,9 +80,7 @@ sources:
   - 'https://cssh.northeastern.edu/faculty/woodrow-hartzog/'
   - 'https://www.lawfaremedia.org/article/scaling-laws--is-ai-a-death-sentence-for-civic-institutions--with-jessica-silbey-and-woodrow-hartzog'
   - 'https://www.tcd.ie/law/news--events/2026/news/how-ai-destroys-institutions-recording-available/'
-  - 'https://www.consumeraffairs.com/news/ai-privacy-concerns/'
-  - 'https://www.cnet.com/news/politics/government-watchdog-finds-weak-enforcement-in-us-privacy-regulations/'
-  - 'https://reason.com/2026/05/21/the-supreme-court-protected-donor-privacy-the-irs-didnt-get-the-memo/'
+  - 'https://www.samford.edu/law/news/2026/Alumnus-Woodrow-Hartzog-Shapes-National-Conversations-on-Technology-Law-and-Justice'
 ---
 
 # Woodrow Hartzog — narrative profile

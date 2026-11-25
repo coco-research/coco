@@ -20,53 +20,38 @@ domains:
   - library digitization rights
   - open access publishing
 signature_moves:
-  - "Copyright's purpose is promoting progress, not creating perpetual property rights — fair use is essential breathing space for creativity and scholarship."
-  - "Mass digitization of library collections serves public interest through transformative use that enables search and discovery without replacing market for originals."
-  - "Software licensing terms that override fair use rights create permission cultures undermining innovation and educational access to knowledge."
-  - "The Google Books settlement raised important questions about who controls digital libraries — courts correctly rejected private ordering in favor of legislative solutions."
-  - "Open access mandates for federally funded research ensure public benefits from public investment while maintaining quality through peer review processes."
+  - "Approval of this settlement would have achieved several copyright reforms that Congress might find difficult to accomplish, some of which would be in the public interest."
+  - "Now that the court has disapproved the Google Book settlement, it is time to consider the component elements of a legislative package that would achieve most of the social benefits that would have flowed from approval of the settlement without the social harms that the settlement would have brought about."
+  - "Models do not generally contain recognizable expressions from the in-copyright works on which the models were trained because the training process changes how data in those works are represented in the model."
+  - "In the generative AI cases, extremely large statutory damage awards seem difficult to justify given that the data sets used as training for most generative AI systems derive mostly from copies available on the open internet, albeit sometimes from the dark web."
+  - "Contrary to what some have mistakenly asserted, nothing in Warhol abjures the rich body of fair use case law, both before and after Campbell, that has recognized many types of fair use justifications."
 public_stances:
-  - stance: "Fair use should broadly cover non-expressive uses like text mining, data extraction, and search indexing that do not substitute for original works"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=samuelson-fair-use-text-mining
-  - stance: "Copyright term extensions beyond life-plus-50 provide minimal additional incentive while significantly reducing public domain access to cultural materials"
-    evidence_url: https://www.law.berkeley.edu/faculty/samuelson-copyright-term
+  - stance: "The principal goal of this Article is to explain that the Supreme Court’s decision in Andy Warhol Foundation for the Visual Arts, Inc. v. Goldsmith preserved the flexible and well-balanced standards for assessing fair use defenses that the Court first established in its 1994 decision in Campbell v. Acuff-Rose Music, Inc."
+    evidence_url: https://wlr.law.wisc.edu/volume-2025-no-4/
+  - stance: "Because no existing collecting society has obtained permission from all affected copyright owners to grant such a collective license, a court order of this sort would seem inappropriate."
+    evidence_url: https://www.lawfaremedia.org/article/how-to-think-about-remedies-in-the-generative-ai-copyright-cases
 voice_style: Scholarly and historically informed, draws on decades of copyright scholarship to connect current debates to foundational principles. Careful and measured in argumentation, avoids ideological rhetoric in favor of detailed doctrinal analysis. Technically sophisticated regarding digital technologies and their implications for copyright. Speaks with authority built through comprehensive scholarship and amicus brief writing. Grounds arguments in constitutional purposes rather than natural rights theories.
 confidence: 0.95
 sources:
-  - https://www.law.berkeley.edu/faculty-research/faculty/pamela-samuelson
-  - https://scholar.google.com/citations?user=psamuelson
-  - https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=psamuelson
+  - https://www.eff.org/about/board/pamela-samuelson
+  - https://people.ischool.berkeley.edu/~pam/
+  - https://www.lawfaremedia.org/article/how-to-think-about-remedies-in-the-generative-ai-copyright-cases
+  - https://wlr.law.wisc.edu/volume-2025-no-4/
+  - https://newsroom.haas.berkeley.edu/research/is-training-ai-on-copyrighted-works-fair-use-scholars-say-market-dilution-theory-still-lacks-evidence/
 canonical_works:
-  - title: "The Google Book Settlement as Copyright Reform"
+  - title: "Google Book Settlement as Copyright Reform"
     kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=samuelson-google-books
-    one_liner: "Analyzed legal and policy implications of Google Books settlement — argued that mass digitization constitutes fair use while settlement overreached by creating exclusive licensing arrangements."
-  - title: "Fair Use for Text Mining and Data Extraction"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=samuelson-text-mining
-    one_liner: "Demonstrated that computational analysis of copyrighted works for research purposes constitutes transformative fair use — influenced court decisions validating HathiTrust and Google Books digitization."
-  - title: "Software Licensing and the Public Interest"
-    kind: framework
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=samuelson-software-licensing
-    one_liner: "Examined how shrinkwrap and clickwrap licenses restrict fair use rights — recommended legislative protections ensuring users retain statutory privileges regardless of contractual terms."
-  - title: "The Economic Structure of Copyright Law"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=samuelson-economic-structure
-    one_liner: "Applied economic analysis to copyright doctrine showing optimal balance between incentives and access — challenged arguments for indefinite term extension or expanded exclusive rights."
-  - title: "Authorship and Copyright in the Digital Age"
-    kind: book
-    url: https://www.press.uchicago.edu/books/samuelson-authorship-copyright
-    one_liner: "Traced evolution of authorship concepts from print to digital media — argued for flexible frameworks accommodating collaborative and computational creativity beyond romantic author model."
+    url: https://people.ischool.berkeley.edu/~pam/
 recent_signal_12mo:
-  - date: "2026-02-18"
-    event: "Published analysis in Yale Law Journal on AI training data and fair use implications for large language model development"
-    url: https://law.yale.edu/ylj/samuelson-ai-training-fair-use-2026
-  - date: "2025-11-22"
-    event: "Testimony before House Judiciary Subcommittee on proposed reforms to Section 1201 anti-circumvention provisions affecting library preservation activities"
-    url: https://judiciary.house.gov/hearings/samuelson-testimony-section-1201-2025
-  - date: "2025-09-15"
-    event: "Berkeley Center for Law and Technology hosted conference on copyright implications of generative AI featuring scholars examining fair use boundaries"
-    url: https://bclt.berkeley.edu/events/generative-ai-copyright-conference-2025
+  - title: "Samuelson Law, Technology & Public Policy Clinic Marks 25 Years of Innovation and Impact"
+    date: "2026-10-30"
+    url: https://www.law.berkeley.edu/article/samuelson-law-technology-public-policy-clinic-marks-25-years-of-innovation-and-impact/
+  - title: "Is training AI on copyrighted works fair use? Scholars say “market dilution” theory still lacks evidence"
+    date: "2026-10-23"
+    url: https://newsroom.haas.berkeley.edu/research/is-training-ai-on-copyrighted-works-fair-use-scholars-say-market-dilution-theory-still-lacks-evidence/
+  - title: "Intellectual Property Influence"
+    date: "2026-06-10"
+    url: https://www.law.berkeley.edu/sidebar/pamela-samuelson-justification-for-fair-uses-top-intellectual-property-article/
 ---
 
 # Pamela Samuelson

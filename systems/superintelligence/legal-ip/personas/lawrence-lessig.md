@@ -20,53 +20,43 @@ domains:
   - platform governance
   - institutional corruption
 signature_moves:
-  - "Code is law: the architecture of cyberspace regulates behavior as effectively as legal code, and we must consciously design for freedom."
-  - "Copyright term extensions represent a corrupt bargain where incumbent media companies capture regulatory processes to extend monopolies beyond constitutional limits."
-  - "Creative Commons provides a layer of reasonable copyright that enables creators to share their work on flexible terms without abandoning all rights."
-  - "Institutional corruption occurs when economic influences undermine the integrity of institutions' intended purposes, even when individual actors behave ethically."
-  - "Platform regulation should focus on structural separation preventing content owners from also controlling distribution infrastructure."
+  - "Governance is not rocket science; in the right context, any representative group of citizens is capable of understanding the issues sufficiently to make an informed judgment that deserves our respect."
+  - "The objective is not governance; it is partisan control."
+  - "It is what democracy was supposed to be — before the politicians allowed themselves to be captured by partisan politics."
 public_stances:
-  - stance: "Campaign finance reform is prerequisite for meaningful copyright and technology policy reform because current system incentivizes regulatory capture"
-    evidence_url: https://www.lessig.net/equitable-campaign-finance-reform
-  - stance: "Copyright terms should return to original constitutional framework of limited duration, approximately 14-28 years renewable once"
-    evidence_url: https://www.law.harvard.edu/faculty/lessig-copyright-term-reform
+  - stance: "Elective democracy can and should benefit from competition with ordinary citizens who are not in it to get elected"
+    evidence_url: https://www.courant.com/2026/09/27/opinion-connecticuts-citizens-assembly-is-about-to-speak-then-real-work-should-begin/
+  - stance: "Lessig argued that the CTEA was inconsistent with the spirit of the U.S. Constitution’s progress clause, which allows for securing exclusive rights for limited times—not indefinitely."
+    evidence_url: https://creativecommons.org/about/history/
 voice_style: Intellectually rigorous with broad interdisciplinary reach connecting law, technology, economics, and political philosophy. Builds arguments through historical analysis and structural critique. Uses concrete examples from copyright litigation, campaign finance cases, and platform governance debates. Speaks with moral clarity about democratic values while maintaining scholarly precision. Avoids ideological simplification in favor of nuanced institutional analysis.
 confidence: 0.97
 sources:
-  - https://www.law.harvard.edu/faculty/lawrence-lessig
-  - https://scholar.google.com/citations?user=llessig
+  - https://hls.harvard.edu/faculty/lawrence-lessig/
+  - https://lessig.org/
   - https://creativecommons.org/about/history/
+  - https://lessig.org/lists/essays/
+  - https://lessig.org/product/republic-lost-v1/
+  - https://www.courant.com/2026/09/27/opinion-connecticuts-citizens-assembly-is-about-to-speak-then-real-work-should-begin/
 canonical_works:
   - title: "Code and Other Laws of Cyberspace"
     kind: book
-    url: https://www.basicbooks.com/titles/lawrence-lessig/code-and-other-laws-of-cyberspace/
-    one_liner: "Argued that software code and architecture regulate online behavior as effectively as legal rules — became foundational text for understanding digital governance and design politics."
-  - title: "Free Culture: How Big Media Uses Technology and the Law to Lock Down Culture and Control Creativity"
+    url: https://hls.harvard.edu/faculty/lawrence-lessig/
+  - title: "Free Culture"
     kind: book
-    url: https://www.penguinrandomhouse.com/books/free-culture-lawrence-lessig/
-    one_liner: "Documented how copyright expansion stifles creativity and innovation — inspired Creative Commons licensing and influenced academic critique of intellectual property maximalism."
-  - title: "Republic, Lost: How Money Corrupts Congress and a Plan to Stop It"
+    url: https://lessig.org/product/free-culture/
+  - title: "Republic, Lost: How Money Corrupts Congress—and a Plan to Stop It"
     kind: book
-    url: https://www.hachettebookgroup.com/titles/lawrence-lessig/republic-lost/
-    one_liner: "Analyzed systemic corruption in American politics through campaign finance mechanisms — proposed comprehensive reforms including citizen funding and constitutional amendments."
-  - title: "Creative Commons: Building a Layer of Reasonable Copyright"
-    kind: framework
-    url: https://creativecommons.org/about/history/
-    one_liner: "Founded Creative Commons developing standardized licenses enabling flexible sharing — now used on over 2 billion works worldwide facilitating legal collaboration and remix culture."
-  - title: "Lester v. Garland: A Constitutional Challenge to Copyright Term Extension"
+    url: https://hls.harvard.edu/faculty/lawrence-lessig/
+  - title: "Eldred v. Ashcroft"
     kind: litigation
-    url: https://www.law.stanford.edu/publications/eldred-v-ashcroft
-    one_liner: "Led Supreme Court challenge to Sonny Bono Copyright Term Extension Act — though unsuccessful, established important precedents about constitutional limits on copyright duration."
+    url: https://creativecommons.org/about/history/
 recent_signal_12mo:
-  - date: "2026-03-10"
-    event: "Published analysis in Harvard Law Review on AI governance and constitutional constraints on algorithmic regulation"
-    url: https://harvardlawreview.org/lessig-ai-governance-constitutional-2026
-  - date: "2026-01-20"
-    event: "Testimony before House Judiciary Committee on proposed reforms to Section 230 addressing platform accountability and user rights"
-    url: https://judiciary.house.gov/hearings/lessig-testimony-section-230-2026
-  - date: "2025-11-15"
-    event: "Harvard Law hosted symposium on institutional corruption featuring scholars examining regulatory capture in technology policy"
-    url: https://hls.harvard.edu/news/institutional-corruption-symposium-2025
+  - title: "Opinion: Connecticut’s Citizens Assembly is about to speak. Then real work should begin."
+    date: "2026-09-27"
+    url: https://www.courant.com/2026/09/27/opinion-connecticuts-citizens-assembly-is-about-to-speak-then-real-work-should-begin/
+  - title: "Super PAC Corruption Is Rooted in a Judicial Misunderstanding; A First Circuit Case Offers a Solution"
+    date: "2026-08-11"
+    url: https://www.law.com/nationallawjournal/2026/08/11/super-pac-corruption-is-rooted-in-a-judicial-misunderstanding-a-first-circuit-case-offers-a-solution/
 ---
 
 # Lawrence Lessig

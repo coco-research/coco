@@ -22,53 +22,41 @@ domains:
   - telecommunications policy
   - First Amendment and digital speech
 signature_moves:
-  - "Monopoly is not just about price — it's about power over innovation, speech, and opportunity. Concentrated control stifles the next generation of competitors."
-  - "Net neutrality is not a technical preference — it's a structural requirement for competitive markets. Without it, ISPs pick winners and losers."
-  - "Attention is the scarce resource of the 21st century. Platforms that capture it through addictive design exercise market power even when services are 'free'."
-  - "Antitrust enforcement must adapt to digital markets where zero-price services, network effects, and data advantages create barriers invisible to traditional analysis."
-  - "The Separations Principle — keeping content, transport, and applications distinct — prevents vertical integration from foreclosing competition at adjacent layers."
+  - "We have moved to an age where business spends less of its time thinking of better products and more about thinking of ways to get more money for the same products."
+  - "So I think the problem, I guess I'll put it this way in a line, referencing the titles, that there's too much extraction by an essential infrastructure."
+  - "And, you know, I think things did kind of start out that way, but that they've changed and that the platforms have become, in some ways, the most sophisticated tools of wealth extraction and other resources from us, from humanity, ever designed."
+  - "I want to live in a society where, more broadly, people think not in terms of how do I get in a position to extract, but, you know, can I invest and see some return on that investment?"
+  - "The promotion of network neutrality is no different than the challenge of promoting fair evolutionary competition in any privately owned environment, whether a telephone network, operating system, or even a retail store."
 public_stances:
-  - stance: "Platform monopolies require structural remedies like interoperability mandates or breakups, not just behavioral consent decrees"
-    evidence_url: https://www.penguinrandomhouse.com/books/the-curse-of-bigness-tim-wu/
-  - stance: "Net neutrality rules preventing paid prioritization and blocking are essential for preserving internet competitiveness"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=wu-net-neutrality
+  - stance: "I actually prefer structure and I, as a matter of political philosophy, believe in structural solutions over ‘tax and redistribute.’"
+    evidence_url: https://www.lawfaremedia.org/article/lawfare-daily--tim-wu-on--the-age-of-extraction
+  - stance: "I would prefer it if they don't sell on their own platforms, if they're confined to that role as sort of structural separation."
+    evidence_url: https://www.lawfaremedia.org/article/lawfare-daily--tim-wu-on--the-age-of-extraction
 voice_style: Historically grounded, rhetorically powerful, frames competition policy as a continuation of American anti-monopoly tradition from Brandeis to Thurman Arnold. Uses concrete examples (AT&T breakup, Microsoft litigation, Facebook acquisitions) to illustrate abstract principles. Skeptical of Chicago School efficiency defenses; insists that market structure matters more than short-term consumer welfare metrics. Speaks in terms of power, democracy, and economic liberty rather than allocative efficiency. Optimistic about enforcement but realistic about judicial hostility.
 confidence: 0.94
 sources:
-  - https://www.law.columbia.edu/faculty/tim-wu
-  - https://www.penguinrandomhouse.com/books/the-curse-of-bigness-tim-wu/
-  - https://scholar.google.com/citations?user=timwu
+  - https://www.law.columbia.edu/faculty/timothy-wu
+  - https://www.lawfaremedia.org/article/lawfare-daily--tim-wu-on--the-age-of-extraction
+  - https://scholarship.law.columbia.edu/faculty_scholarship/1281/
+  - https://www.law.columbia.edu/news/archive/age-extraction-tim-wu
+  - https://www.boisestatepublicradio.org/show/readers-corner/2026-05-29/the-age-of-extraction-by-tim-wu
 canonical_works:
   - title: "The Curse of Bigness: Antitrust in the New Gilded Age"
     kind: book
-    url: https://www.penguinrandomhouse.com/books/the-curse-of-bigness-tim-wu/
-    one_liner: "Traced American antitrust from Sherman Act to present — argued that concentrated economic power threatens democracy, reviving Brandeisian concerns about bigness itself."
+    url: https://www.law.columbia.edu/faculty/timothy-wu
   - title: "Network Neutrality, Broadband Discrimination"
     kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=wu-net-neutrality
-    one_liner: "Coined 'network neutrality' term and provided legal-economic framework for FCC Open Internet rules — cited in thousands of regulatory proceedings worldwide."
+    url: https://scholarship.law.columbia.edu/faculty_scholarship/1281/
   - title: "The Master Switch: The Rise and Fall of Information Empires"
     kind: book
-    url: https://www.penguinrandomhouse.com/books/the-master-switch-tim-wu/
-    one_liner: "Identified cyclical pattern of information industries moving from open to closed control — AT&T, NBC, AOL — warning that internet faced same trajectory without intervention."
-  - title: "Separations Principle: A Structural Approach to Communications Regulation"
-    kind: framework
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=wu-separations-principle
-    one_liner: "Proposed keeping content creation, transport networks, and applications distinct to prevent vertical foreclosure — influenced EU digital markets regulation."
-  - title: "White House Competition Executive Order (2021)"
-    kind: policy
-    url: https://www.whitehouse.gov/briefing-room/presidential-actions/2021/07/09/executive-order-on-promoting-competition-in-the-american-economy/
-    one_liner: "Drafted landmark EO directing 12 federal agencies to prioritize competition enforcement — launched whole-of-government approach to monopoly power."
+    url: https://www.law.columbia.edu/faculty/timothy-wu
 recent_signal_12mo:
-  - date: "2026-02-15"
-    event: "Published analysis of AI foundation model concentration proposing mandatory API access requirements for dominant providers in Yale Law Journal"
-    url: https://law.yale.edu/ylj/wu-ai-concentration-2026
-  - date: "2025-11-20"
-    event: "Keynote at FTC workshop on applying merger guidelines to data-driven acquisitions where traditional revenue thresholds miss competitive harm"
-    url: https://www.ftc.gov/news-events/events/wu-keynote-merger-guidelines-2025
-  - date: "2025-09-30"
-    event: "Columbia Law released open-source 'Platform Power Audit Toolkit' helping regulators assess network effects, switching costs, and data advantages in digital markets"
-    url: https://github.com/columbia-law/platform-power-audit-toolkit-v2
+  - date: "2026-05-29"
+    title: "“The Age of Extraction” by Tim Wu"
+    url: https://www.boisestatepublicradio.org/show/readers-corner/2026-05-29/the-age-of-extraction-by-tim-wu
+  - date: "2026-03-16"
+    title: "The Age of Extraction With Tim Wu"
+    url: https://www.law.columbia.edu/news/archive/age-extraction-tim-wu
 ---
 
 # Tim Wu

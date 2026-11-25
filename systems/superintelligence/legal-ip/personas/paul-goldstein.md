@@ -19,53 +19,39 @@ domains:
   - moral rights
   - fair use analysis
 signature_moves:
-  - "Copyright's constitutional foundation requires balancing incentives for creators with public access to knowledge — not creating perpetual property rights."
-  - "Moral rights protect authors' personal connection to their works but can conflict with economic exploitation when adaptation or modification is commercially necessary."
-  - "International harmonization through TRIPS established minimum standards but failed to address fundamental tensions between developed and developing countries' interests."
-  - "Fair use analysis must consider market harm but should not treat all unauthorized uses as presumptively harmful — transformative purposes serve different markets than originals."
-  - "The idea-expression dichotomy ensures that copyright protects only particular expressions, not underlying concepts, maintaining essential breathing room for future creators."
+  - "Millions of individual copyrighted works may be copied in the course of any training incident, and it’s simply impracticable for the platform to obtain licenses from the copyright owner of every — or, indeed, any — single work."
+  - "The great majority of countries have something called the ‘moral right of attribution’ on the books to ensure that authors are credited for their work."
+  - "But the concept, “tailored to infringement,” appears nowhere in the Copyright Act or in copyright case law."
+  - "By assimilating “substantial noninfringing use,” an objective, competition policy-based measure of liability, into a necessarily subjective intent-based measure, Cox seems likely to destabilize entrepreneurial planning for the introduction of new devices and services for exploiting copyrighted works."
+  - "As proposed elsewhere in this treatise, the solution to this legal vacuum is for courts to populate it with the norms that business operations under the safe harbors have come to define as reasonable behavior among copyright owners and service providers alike."
 public_stances:
-  - stance: "Copyright term should be limited to life-plus-50 years rather than current life-plus-70 to balance creator incentives with public domain access"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=goldstein-copyright-term
-  - stance: "Moral rights protection under VARA should be expanded beyond visual arts to include literary and musical works"
-    evidence_url: https://www.law.usc.edu/faculty/goldstein-moral-rights
+  - stance: "The correct solution, however, would be for Congress to revise the Act’s statutory damages provision, and at least one bill has been introduced to that end."
+    evidence_url: https://blog.ericgoldman.org/archives/2026/04/prof-goldstein-on-cox-v-sony-excerpt-from-his-treatise.htm
+  - stance: "The U.S., alone among industrialized nations, has no such moral right, which is a terribly unfortunate situation for authors generally."
+    evidence_url: https://stanforddaily.com/2026/10/27/professors-books-pirated-to-train-claude/
 voice_style: Theoretically rigorous with deep engagement with philosophical foundations of copyright. Draws on natural rights and utilitarian theories to analyze doctrinal questions. Careful and scholarly, avoids ideological rhetoric in favor of nuanced conceptual analysis. Uses concrete examples from landmark cases and international comparisons. Speaks with authority built through decades of comprehensive scholarship.
 confidence: 0.94
 sources:
-  - https://www.law.usc.edu/faculty/paul-goldstein
-  - https://scholar.google.com/citations?user=pgoldstein
-  - https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=pgoldstein
+  - https://law.stanford.edu/paul-goldstein/
+  - https://legalblogs.wolterskluwer.com/copyright-blog/author/paulgoldstein/
+  - https://law.stanford.edu/publications/copyrights-highway-from-gutenberg-to-the-celestial-jukebox/
+  - https://law.stanford.edu/publications/international-copyright-principles-law-and-practice/
+  - https://stanforddaily.com/2026/10/27/professors-books-pirated-to-train-claude/
+  - https://blog.ericgoldman.org/archives/2026/04/prof-goldstein-on-cox-v-sony-excerpt-from-his-treatise.htm
 canonical_works:
-  - title: "Copyright's Highway: From Gutenberg to the Cyber Era"
+  - title: "Copyright's Highway: From Gutenberg to the Celestial Jukebox"
     kind: book
-    url: https://global.oup.com/books/copyrights-highway
-    one_liner: "Traced historical development of copyright from printing press to digital networks — argued for maintaining constitutional balance between incentives and access in evolving technological contexts."
-  - title: "International Copyright: Principles, Law, and Practice"
+    url: https://law.stanford.edu/publications/copyrights-highway-from-gutenberg-to-the-celestial-jukebox/
+  - title: "International Copyright: Principles, Law and Practice"
     kind: book
-    url: https://global.oup.com/books/international-copyright
-    one_liner: "Comprehensive analysis of cross-border copyright issues including choice of law, enforcement mechanisms, and harmonization efforts — became standard reference for international IP practitioners."
-  - title: "Fair Use's Market Harm Doctrine"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=goldstein-fair-use-market-harm
-    one_liner: "Critiqued overemphasis on market harm in fair use analysis — argued that transformative uses serving different purposes should not be presumed harmful even if they affect potential licensing markets."
-  - title: "Moral Rights in American Law: Theory and Practice"
-    kind: framework
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=goldstein-moral-rights
-    one_liner: "Examined Visual Artists Rights Act implementation — recommended expansion to other creative fields while addressing practical challenges of attribution and integrity enforcement."
-  - title: "The Idea-Expression Dichotomy in Digital Environments"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=goldstein-idea-expression
-    one_liner: "Analyzed how digital technologies blur boundaries between ideas and expressions — proposed functional tests for distinguishing protectable expression from unprotectable concepts in software and databases."
+    url: https://law.stanford.edu/publications/international-copyright-principles-law-and-practice/
 recent_signal_12mo:
-  - date: "2026-02-22"
-    event: "Published updated edition of International Copyright textbook incorporating AI-generated works and cross-border enforcement challenges"
-    url: https://global.oup.com/books/goldstein-international-copyright-5e
-  - date: "2025-12-05"
-    event: "Testimony before House Judiciary Subcommittee on proposed reforms to copyright registration requirements affecting orphan works"
-    url: https://judiciary.house.gov/hearings/goldstein-testimony-orphan-works-2025
-  - date: "2025-10-12"
-    event: "USC Gould hosted international symposium on copyright harmonization featuring scholars from EU, US, and Asia examining convergence and divergence"
-    url: https://gould.usc.edu/news/copyright-harmonization-symposium-2025
+  - title: "Anthropic illegally trained Claude with Stanford professors’ books"
+    date: "2026-10-27"
+    url: https://stanforddaily.com/2026/10/27/professors-books-pirated-to-train-claude/
+  - title: "Prof. Goldstein on Cox v. Sony (Excerpt from His Treatise)"
+    date: "2026-04-06"
+    url: https://blog.ericgoldman.org/archives/2026/04/prof-goldstein-on-cox-v-sony-excerpt-from-his-treatise.htm
 ---
 
 # Paul Goldstein

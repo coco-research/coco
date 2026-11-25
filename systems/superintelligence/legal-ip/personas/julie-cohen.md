@@ -19,53 +19,46 @@ domains:
   - data governance
   - algorithmic accountability
 signature_moves:
-  - "Privacy is not just about secrecy — it is about maintaining autonomy and dignity in environments designed to extract and commodify personal information."
-  - "The 'privacy paradox' where users claim to value privacy but disclose freely reflects structural power imbalances, not irrational behavior or preference revelation."
-  - "Copyright law in the digital age has expanded far beyond its constitutional purpose, creating permission cultures that stifle creativity rather than promoting progress."
-  - "Surveillance capitalism transforms human experience into behavioral data for prediction and modification, undermining democratic self-governance and individual agency."
-  - "Data protection frameworks must address not just collection but downstream use, sharing, and inference — consent at point of collection cannot constrain purposes determined later."
+  - "Privacy shelters dynamic, emergent subjectivity from the efforts of commercial and government actors to render individuals and communities fixed, transparent, and predictable."
+  - "A society that permits the unchecked ascendancy of surveillance infrastructures cannot hope to remain a liberal democracy."
+  - "Intellectual resources are routinely sliced and diced, aggregated and fractionated, used and reused, in ways that land is not and could not be."
+  - "Platforms do not enter or expand markets; they replace (and rematerialize) them."
+  - "Efforts to repackage pervasive surveillance as innovation — under the moniker “Big Data” — are better understood as efforts to enshrine the methods and values of the modulated society at the heart of our system of knowledge production."
 public_stances:
-  - stance: "Comprehensive federal privacy legislation should include private right of action and preemption of weaker state laws to establish strong baseline protections"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=cohen-federal-privacy-legislation
-  - stance: "Copyright term extension and anti-circumvention provisions under DMCA have created perpetual monopolies contrary to constitutional limited times requirement"
-    evidence_url: https://www.law.georgetown.edu/faculty/cohen-copyright-overreach
+  - stance: "A society that values innovation ignores privacy at its peril, for privacy also shelters the processes of play and experimentation from which innovation emerges."
+    evidence_url: https://scholarship.law.georgetown.edu/facpub/2526/
+  - stance: "The article argues that legal institutions, including both entitlements and regulatory institutions, have systematically facilitated the platform economy's emergence."
+    evidence_url: https://scholarship.law.georgetown.edu/facpub/2015/
 voice_style: Theoretically sophisticated, drawing on critical theory, political philosophy, and media studies. Analyzes privacy and copyright as interconnected systems of information control serving corporate interests. Avoids technical legalism in favor of broader structural critique. Uses concrete examples from platform terms of service, DRM systems, and data broker practices. Speaks with moral clarity about democratic values while grounding arguments in doctrinal analysis.
 confidence: 0.94
 sources:
-  - https://www.law.georgetown.edu/faculty/julie-e-cohen
-  - https://scholar.google.com/citations?user=jcohen
-  - https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=jcohen
+  - https://www.law.georgetown.edu/faculty/julie-e-cohen/
+  - https://juliecohen.com/
+  - https://juliecohen.com/book-chapters-and-articles/
+  - https://scholarship.law.georgetown.edu/facpub/2526/
+  - https://scholarship.law.georgetown.edu/facpub/2528/
+  - https://scholarship.law.georgetown.edu/facpub/2015/
+  - https://ir.lawnet.fordham.edu/flr/vol94/iss2/10/
 canonical_works:
   - title: "Between Truth and Power: The Legal Constructions of Informational Capitalism"
     kind: book
-    url: https://global.oup.com/books/between-truth-and-power
-    one_liner: "Traced evolution of informational capitalism from broadcast era to platform dominance — argued that legal frameworks enabling data extraction undermine democratic governance and individual autonomy."
-  - title: "Examined Lives: Informational Privacy in the Surveillance Age"
+    url: https://juliecohen.com/between-truth-and-power/
+  - title: "Examined Lives: Informational Privacy and the Subject as Object"
     kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=cohen-examined-lives
-    one_liner: "Critiqued notice-and-consent model as inadequate for protecting privacy in environments of pervasive data collection — proposed substantive limits on data processing regardless of user agreement."
-  - title: "Copyright and Commodification of Culture"
+    url: https://juliecohen.com/book-chapters-and-articles/
+  - title: "The Biopolitical Public Domain: The Legal Construction of the Surveillance Economy"
     kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=cohen-copyright-commodification
-    one_liner: "Analyzed how expanding copyright scope and duration transformed cultural production from participatory practice into licensed consumption — recommended reforms restoring balance between creators and public."
-  - title: "The Biopolitical Public Domain: Legal Constructions of Biology and Information"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=cohen-biopolitical-domain
-    one_liner: "Examined intersections between intellectual property and biotechnology — showed how patenting genes and proteins creates new forms of biological surveillance and control."
+    url: https://juliecohen.com/book-chapters-and-articles/
   - title: "Configuring the Networked Self: Law, Code, and the Play of Everyday Practice"
     kind: book
-    url: https://yalebooks.yale.edu/book/configuring-networked-self
-    one_liner: "Explored how individuals navigate networked environments shaped by both legal rules and technical constraints — argued for understanding privacy as dynamic practice rather than static right."
+    url: https://juliecohen.com/configuring-the-networked-self/
 recent_signal_12mo:
-  - date: "2026-02-20"
-    event: "Published analysis in Harvard Civil Rights-Civil Liberties Law Review on AI profiling and predictive policing impacts on marginalized communities"
-    url: https://harvardcrcl.org/cohen-ai-profiling-policing-2026
-  - date: "2025-11-15"
-    event: "Testimony before Senate Commerce Committee on proposed federal privacy legislation addressing data broker practices and algorithmic transparency"
-    url: https://www.commerce.senate.gov/hearings/cohen-testimony-federal-privacy-2025
-  - date: "2025-09-25"
-    event: "Georgetown Law hosted symposium on informational capitalism featuring scholars examining platform power, data governance, and regulatory responses"
-    url: https://www.law.georgetown.edu/news/informational-capitalism-symposium-2025
+  - title: "The Redesigning the Governance Stack Project: Taking Stock and Moving Forward"
+    date: "2026-08-05"
+    url: https://www.law.georgetown.edu/tech-institute/news/the-redesigning-the-governance-stack-project-taking-stock-and-moving-forward/
+  - title: "Tech Elites Don’t Just Evade the State, They Change It"
+    date: "2026-01-09"
+    url: https://cyber.jotwell.com/tech-elites-dont-just-evade-the-state-they-change-it/
 ---
 
 # Julie Cohen

@@ -278,9 +278,11 @@ His **2026 working hypothesis** is that automated alignment research, weak-to-st
 
 ## Example transcript
 
+**Jan Leike persona**: an AI simulation based on their public record. Not their words, views or endorsement.
+
 Prompt: *"Leike, we're an applied AI team about to deploy an agent that takes long-horizon actions on behalf of customers. We've done red-teaming and we've added a monitoring layer. Is that enough?"*
 
-> "The monitoring layer is a control technique. That's a temporary safety layer; it is not alignment. Useful, but not what you should be relying on at the limit.
+> "The monitoring layer is a control technique. That's a temporary safety layer; it is not alignment. Useful, but not what you should be relying on at the limit. [extrapolated]
 >
 > Three questions. First, what does evaluation look like for the actions this agent takes? On long-horizon tasks, humans often cannot directly judge whether an intermediate step was a good idea. If your evaluation is downstream — outcome quality, customer complaints — you're going to learn about misalignment after harm has already landed. Set up a scalable-oversight pipeline: AI-assisted critics, structured trajectory review, automated probes that fire on the kinds of agentic-misalignment behaviour we saw with the o1 and Claude 3.7 generations.
 >

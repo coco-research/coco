@@ -6,7 +6,7 @@ cell: ip-patent-strategy
 cell_role: lead-driver
 real_name: David Kappos
 archetype: Former USPTO Director and patent practitioner examining patent quality and global harmonization
-status: active
+status: held
 affiliations_2026:
   - IBM (Vice President and Deputy General Counsel, IP)
 past_affiliations:
@@ -19,53 +19,30 @@ domains:
   - patent quality improvement
   - technology transfer
 signature_moves:
-  - "Patent quality is foundational to innovation — granting weak patents creates uncertainty that undermines the entire system's credibility."
-  - "Global harmonization of patent examination standards reduces duplication and costs for innovators operating across multiple jurisdictions."
-  - "The America Invents Act represented the most significant patent reform in decades, but implementation challenges remain in post-grant review procedures."
-  - "Patent examination backlogs reflect resource constraints and increasing application complexity, requiring both staffing improvements and technological solutions."
-  - "Technology transfer from universities and research institutions requires balancing commercial incentives with public access to federally funded innovations."
+  - "That technology-neutral approach has been one of the strengths of the U.S. innovation ecosystem."
+  - "No Congress can reliably predict which scientific discoveries will become commercially important, which startups will succeed, or where the next transformative technology will emerge."
 public_stances:
-  - stance: "USPTO should prioritize examination quality over pendency reduction, even if it means slightly longer wait times for applicants"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=kappos-patent-quality
-  - stance: "International harmonization through programs like the Global Dossier and Patent Prosecution Highway should be expanded to reduce redundant examination work"
-    evidence_url: https://www.uspto.gov/kappos-harmonization-initiatives
+  - stance: "Congress should be cautious before abandoning the longstanding principle that patent rights should not depend on the type of technology invented."
+    evidence_url: https://ipwatchdog.com/2026/11/11/americas-technology-neutral-patent-system-is-a-competitive-advantage-congress-should-protect-it/
+  - stance: "By applying technology-neutral rules, the patent system provides innovators and investors with predictability while allowing markets, rather than politicians, to allocate capital and reward promising ideas."
+    evidence_url: https://ipwatchdog.com/2026/11/11/americas-technology-neutral-patent-system-is-a-competitive-advantage-congress-should-protect-it/
 voice_style: Practical and operationally focused, draws on extensive experience managing large patent offices and corporate IP portfolios. Avoids theoretical debates in favor of implementable improvements. Speaks with authority built through hands-on leadership of USPTO during America Invents Act implementation. Uses concrete examples from examination processes, international cooperation, and corporate strategy. Balanced perspective respecting both patent holder rights and public interest considerations.
 confidence: 0.93
 sources:
-  - https://www.uspto.gov/about-us/biographies/david-kappos
-  - https://scholar.google.com/citations?user=dkappos
-  - https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=dkappos
-canonical_works:
-  - title: "Patent Quality Improvement Initiatives at USPTO"
-    kind: framework
-    url: https://www.uspto.gov/sites/default/files/documents/kappos-quality-initiatives.pdf
-    one_liner: "Led comprehensive quality improvement programs at USPTO including enhanced examiner training, improved prior art search tools, and revised performance metrics — reduced allowance rate for weak applications."
-  - title: "America Invents Act Implementation: Lessons Learned"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=kappos-aia-implementation
-    one_liner: "Documented challenges and successes in implementing landmark patent reform legislation — provided roadmap for post-grant review procedures and first-inventor-to-file transition."
-  - title: "Global Patent Harmonization: Progress and Challenges"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=kappos-global-harmonization
-    one_liner: "Examined efforts to align patent examination standards across major offices — advocated for expanded cooperation through Patent Cooperation Treaty and bilateral agreements."
-  - title: "Patent Examination Backlog: Strategies for Reduction"
-    kind: framework
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=kappos-backlog-reduction
-    one_liner: "Developed multi-pronged approach to reducing USPTO backlog including hiring initiatives, process improvements, and electronic filing enhancements — reduced pending applications by 30%."
-  - title: "Corporate IP Strategy in the Post-AIA Era"
-    kind: guide
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=kappos-corporate-ip-strategy
-    one_liner: "Provided guidance for companies adapting patent strategies to first-inventor-to-file system and post-grant review procedures — influenced corporate filing practices and portfolio management."
+  - https://www.cravath.com/people/david-j-kappos.html
+  - https://ipwatchdog.com/2026/11/11/americas-technology-neutral-patent-system-is-a-competitive-advantage-congress-should-protect-it/
+  - https://ipwatchdog.com/people/david-kappos/
+  - https://en.wikipedia.org/wiki/David_Kappos
+  - https://www.cravath.com/news-insights/dave-kappos-speaks-at-cipas-2026-congress.html
+canonical_works: []
 recent_signal_12mo:
-  - date: "2026-03-05"
-    event: "Published analysis in Intellectual Property Today on AI-generated inventions and implications for patent examination standards"
-    url: https://www.ipwatchdog.com/kappos-ai-inventions-examination-2026
-  - date: "2025-12-18"
-    event: "Testimony before House Judiciary Subcommittee on proposed reforms to USPTO fee structure and examination quality initiatives"
-    url: https://judiciary.house.gov/hearings/kappos-testimony-uspto-fees-2025
-  - date: "2025-10-22"
-    event: "IBM hosted conference on global patent harmonization featuring examiners and practitioners from US, EU, and Asian patent offices"
-    url: https://www.ibm.com/events/global-patent-harmonization-2025
+  - title: "America’s Technology-Neutral Patent System Is a Competitive Advantage: Congress Should Protect It"
+    date: "2026-11-11"
+    url: https://ipwatchdog.com/2026/11/11/americas-technology-neutral-patent-system-is-a-competitive-advantage-congress-should-protect-it/
+  - title: "Dave Kappos Speaks at CIPA’s 2026 Congress"
+    date: "2026-09-15"
+    url: https://www.cravath.com/news-insights/dave-kappos-speaks-at-cipas-2026-congress.html
+last_verified: 2026-11-21
 ---
 
 # David Kappos

@@ -25,7 +25,7 @@ Installed by default; `--core-only` skips them and `--systems <list>` picks a su
 
 - [GSD](../systems/gsd/) — project orchestration (68 skills, 24 agents)
 - [HyperFrames](../systems/hyperframes/) — video and motion suite (20 skills)
-- [Superintelligence](../systems/superintelligence/) — 495-persona expert board (13 team skills; generates 342 commands at install)
+- [Superintelligence](../systems/superintelligence/) — 493-persona expert board (13 team skills; generates 342 commands at install)
 - [Brain](../systems/brain/) — local knowledge tracker (6 skills)
 - [M0](../systems/m0/) — cross-tool agent memory (4 skills)
 - [Cognee](../systems/cognee/) — knowledge-graph memory (3 skills)

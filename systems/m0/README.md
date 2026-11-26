@@ -1,14 +1,17 @@
-# M0 — Cross-Tool Agent Memory
+# M0: m0/1 L0 Wire Contract and Stdlib Reference Server
 
-A shared *operational thread* for agents: one small local store that records what
-was done, what was verified, and what happens next, so a session starting cold in
-one tool can pick up work left by another.
+This bundle ships the `m0/1` L0 wire contract ([`SPEC.md`](SPEC.md)) and its
+Python standard-library reference server (`m0_server.py`) plus stdio MCP wrapper
+(`m0_mcp.py`). Together they provide a small local *operational thread* for
+agents: one SQLite table recording what was done, what was verified, and what
+happens next, so a session starting cold in one tool can pick up work left by
+another.
 
-M0 is Coco's own memory bundle. It ships a working server, an MCP server, and a
-published wire contract ([`SPEC.md`](SPEC.md)). It is deliberately small: one
-SQLite table, two endpoints, Python standard library only, no network calls, no
-telemetry. It sits alongside the [cognee](#m0-or-cognee) bundle, which solves a
-larger problem in a larger way.
+The wire contract defines two core endpoints (`POST /api/brain/checkpoint` and
+`GET /api/brain/thread`) and two optional endpoints (`GET /api/health` and
+`POST /api/brain/sidecars/drain`). The stdlib reference server started below
+implements all four with Python standard library only, no outbound network
+calls, and no telemetry.
 
 ---
 
@@ -110,70 +113,20 @@ write under a genuinely locked store, the drain on restart, and the MCP tools
 over stdio. It touches no existing store. Point `M0_BASE_URL` at another
 implementation to check it against the spec.
 
-## M0 or cognee
+## Reference server limits
 
-Both bundles give agents memory that outlives a session. They are not the same
-size of thing, and the honest summary is that cognee can do much more.
+The bundled stdlib reference server implements the `m0/1` L0 operational thread only:
 
-**cognee is a mature knowledge-graph memory platform** (Apache-2.0, developed
-independently of Coco; the `systems/cognee/` bundle wires the upstream project in).
-It
-builds a real graph with embeddings over your content: semantic search, graph
-traversal, cross-dataset entity linking, ingestion pipelines for documents and
-code, a choice of vector and graph backends. If you want to ask "what do we know
-about X" and get an answer assembled from everything you have ever fed it,
-cognee is the right tool and M0 is not a substitute.
-
-**M0 is a session-continuity log.** It answers one question — "where were we, and
-what is next" — and answers it in a few milliseconds from a file with no server
-dependencies beyond `python3`.
-
-| | M0 | cognee |
-|---|---|---|
-| Problem solved | Cross-tool session continuity | General long-term knowledge memory |
-| Storage | One SQLite table | Knowledge graph + vector store (+ relational) |
-| Retrieval | Recent entries by project and kind | Semantic, graph traversal, lexical, hybrid |
-| Dependencies | Python standard library | Python package plus graph/vector backends |
-| Runtime | ~640 lines of stdlib Python, one process — or none | A server and its backing stores |
-| Entity extraction | None | Automatic, LLM-assisted |
-| Embeddings / LLM calls | None | Yes, by design |
-| Network | Loopback only, no outbound calls | Model and backend endpoints as configured |
-| Wire contract | Published, `m0/1`, reimplementable | The project's own API |
-| Reads across projects | Yes, flat by `project` key | Yes, as graph queries across datasets |
-
-### What M0 does not do
-
-Stated plainly, so you can rule it out quickly:
-
-- **No semantic search.** Retrieval is by project, kind and recency. There is no
-  embedding, no ranking, no similarity. "Show me the last 20 entries" is the query
-  model. Nothing else.
-- **No entity or relationship extraction.** M0 stores the prose you give it. It
-  does not discover that two entries mention the same person or module, and there
-  is no graph to traverse.
-- **No summarisation, compression or consolidation.** The thread grows
-  monotonically. Nothing merges old entries or builds higher-level summaries; if
-  you want that, write a `compact_checkpoint` yourself.
-- **No ingestion.** It does not read your documents, mail, transcripts or
-  repository. Every entry arrives because something called the write endpoint.
-- **No multi-user story.** `owner_user_id` and `visibility` exist as columns and
-  are stamped on every row, but the reference server enforces nothing and has no
-  authentication. It binds to loopback and trusts every caller.
-- **No automatic capture.** Nothing writes for you until you wire a hook or an
-  agent decides to call `m0_remember`. The `/m0` skill has hook recipes; installing
-  them is your choice.
-- **No conflict resolution or sync.** One local file. No replication, no merge, no
-  remote. Two machines are two threads.
-
-### Choosing
-
-- Pick **M0** if you want session continuity across tools today, with nothing to
-  operate and nothing leaving the machine; or if you need a memory contract you
-  can implement in another language.
-- Pick **cognee** if you want a searchable knowledge base with entity linking and
-  semantic retrieval, and you are willing to run and feed it.
-- Run **both** if that fits: M0 for "where were we", cognee for "what do we know".
-  They share no state and do not interfere.
+- **Recency retrieval only.** `GET /api/brain/thread` filters by `project` and
+  `kind` and returns entries newest first (capped at 500). It provides no
+  semantic search, embeddings, ranking, or graph traversal.
+- **Explicit writes only.** The thread grows monotonically as callers post to
+  `POST /api/brain/checkpoint` or run `m0_server.py write`. It does not extract
+  entities, summarise old entries, or ingest documents automatically.
+- **Single-machine, single-store, no authentication.** It binds to loopback
+  (`127.0.0.1:8787`) and trusts local callers. `owner_user_id` and `visibility`
+  are stored as columns per the wire contract, not enforced. There is no sync or
+  replication between machines.
 
 ## Layout
 

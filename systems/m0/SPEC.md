@@ -1,19 +1,19 @@
-# M0 protocol specification
+# m0/1 L0 wire contract specification
 
 **Spec version:** `m0/1`
 **Status:** stable
 **License:** MIT
 
-M0 is a minimal protocol for a shared *operational thread*: the running record of
-what an agent did, what it verified, and what should happen next. Any number of
-tools — different CLIs, editors, hooks, daemons — write to one store and read the
-same thread back, so a session that starts cold can pick up where another left off.
+This document specifies the `m0/1` L0 wire contract and its bundled Python
+standard-library reference server (`skills/m0/scripts/m0_server.py`). The
+contract defines a minimal *operational thread*: the running record of what an
+agent did, what it verified, and what should happen next, written via
+`POST /api/brain/checkpoint`, read via `GET /api/brain/thread`, and optionally
+inspected or drained via `GET /api/health` and `POST /api/brain/sidecars/drain`.
 
-This document is the contract. It is written so that a second implementation can
-be built from it without reference to any particular codebase, in any language,
-and remain wire-compatible. The reference implementation that ships with this
-bundle (`skills/m0/scripts/m0_server.py`, Python standard library only) is one
-conforming server, not the definition.
+The specification is self-contained so a second implementation can be built
+from it in any language and remain wire-compatible. The bundled stdlib
+reference server is one conforming server, not the definition.
 
 The keywords MUST, MUST NOT, SHOULD and MAY are used in the usual sense.
 

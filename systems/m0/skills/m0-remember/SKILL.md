@@ -1,45 +1,65 @@
 ---
 name: m0-remember
-description: "Use when the user says 'm0 remember', 'record what we did', 'note for next session' or 'write a checkpoint', or after finishing a step worth handing to the next session. Appends one entry to the M0 thread (re-sending writes a second entry unless you pass the same `id`)."
+description: "Use when the user says 'm0 remember', 'record what we did', 'note for next session' or 'write a checkpoint', or after finishing a step worth handing to the next session. Appends one idempotent entry to the M0 thread."
 ---
 
-# /m0-remember — Write to the Operational Thread
+# /m0-remember: Write to the Operational Thread
 
 The write path for M0. One call appends one entry to the shared thread for a
-project.
-
-The token is read from ~/.coco/m0-token on each call; never print it.
+project. Writing the same content twice leaves one row and returns the same
+response, so retries are harmless.
 
 ## Quick Reference
 
-```bash
-M0="${COCO_M0_URL:-http://127.0.0.1:8000}"
+Default reference server address: `M0="${COCO_M0_URL:-http://127.0.0.1:8787}"`.
 
-curl -s -X POST "$M0/api/brain/checkpoint" \
-  -H 'Content-Type: application/json' \
-  -H "Authorization: Bearer $(cat ~/.coco/m0-token)" \
-  -d '{"project":"acme-web","kind":"step_done",
-       "text":"Fixed the token refresh race in the auth middleware.",
-       "next_step":"Add a regression test for two concurrent refreshes.",
-       "last_verified":"pytest tests/auth -q: 31 passed",
-       "source_tool":"claude_code"}'
+HTTP endpoint (`POST $M0/api/brain/checkpoint`, `Content-Type: application/json`,
+no token required):
+
+```json
+{
+  "project": "acme-web",
+  "kind": "step_done",
+  "text": "Fixed the token refresh race in the auth middleware.",
+  "next_step": "Add a regression test for two concurrent refreshes.",
+  "last_verified": "pytest tests/auth -q: 31 passed",
+  "source_tool": "claude-code",
+  "meta_json": {"pr": 42}
+}
 ```
 
-If the MCP tool is wired (`/m0 mcp`), call `m0` in `remember` mode directly —
-same endpoint, fewer moving parts.
+Response: `{"id":"9a71de71...","ts":"2026-08-01T13:31:26.536Z","ok":true,"deferred":false}`
+
+Direct CLI against the same SQLite store (same guarantees, no server required):
+
+```bash
+M0S="$HOME/.claude/skills/m0/scripts"
+
+python3 "$M0S/m0_server.py" write \
+  --project acme-web --kind step_done \
+  --text "Fixed the token refresh race in the auth middleware." \
+  --next-step "Add a regression test for two concurrent refreshes." \
+  --last-verified "pytest tests/auth -q: 31 passed" \
+  --source-tool claude-code --meta '{"pr":42}'
+```
+
+If the MCP tools are wired (`/m0 mcp`), call `m0_remember` directly. It wraps
+`POST /api/brain/checkpoint` (falling back to local SQLite when no server is
+listening) and accepts `meta` as a JSON object.
 
 ## Fields
 
 | Field | Required | What to put in it |
 |-------|----------|-------------------|
-| `project` | yes | The project key. Use one stable value per project — the repository or directory name is the usual choice. Getting this wrong splits the thread. |
-| `text` | yes | What happened, in one or two plain sentences. Capped at 400 characters and redacted by the daemon. Written for a reader with no other context. |
+| `project` | yes | The project key. Use one stable value per project (the repository or directory name is the usual choice). Getting this wrong splits the thread. |
+| `text` | yes | What happened, in one or two plain sentences. Written for a reader with no other context. |
 | `kind` | no | Defaults to `step_done`. See the table below. |
 | `next_step` | no | The single next action. Concrete enough to act on without re-deriving it. |
 | `last_verified` | no | What was actually checked, and how. A command and its result, not an impression. |
+| `meta_json` | no | Structured metadata as a JSON object (alias `meta`), e.g. `{"pr":42,"tests":"green"}`. |
 | `session_id` | no | Session identifier, when known. |
-| `role` | no | The role the entry was written under, when it matters. |
-| `source_tool` | no | Which tool is writing: `claude_code`, `cococode`, `ambient`, `manual`, `hook`, `paperclip`. Fill it in — it is what makes the thread legible across tools. |
+| `role` | no | The role the entry speaks for (`assistant` by default; `user` or `system` permitted). |
+| `source_tool` | no | Which tool is writing (for example `claude-code`, `cursor`, `mcp`, or `hook`), so the thread stays legible across tools. |
 | `branch`, `head_sha` | no | Version-control position. Worth including whenever the entry is about code. |
 
 Kinds:
@@ -72,9 +92,10 @@ reader looks in.
 4. **Be honest in `last_verified`.** Put the command and its actual result there.
    If nothing was verified, leave it empty. A false verification claim in a
    memory store outlives the session that made it and misleads every later reader.
-5. **A durable Lab decision or ruling is not an m0-remember.** It becomes a
-   decision record via `decide new` (HQ commits records); the thread gets at most
-   a `step_done` pointing at it.
+5. **Check the response.** `{"ok":true,"deferred":false}` means the entry is
+   durable in SQLite. `"deferred":true` means the store was busy and the entry
+   was spooled to a sidecar file; it is readable immediately and lands on the
+   next drain or server start. Say so rather than reporting a clean write.
 
 ## Good and bad entries
 
@@ -93,7 +114,10 @@ last_verified: "Tests should pass now."               # a claim, not a check
 
 ## Notes
 
-- **Local-only.** Loopback daemon, no outbound calls, no telemetry. Text fields
-  are capped at 400 characters and redacted by the daemon.
-- There is no offline path: if the daemon is down, say so and stop; do not write anywhere else.
+- **Idempotent.** `id` is a SHA-256 of the content fields (`ts` excluded).
+  Re-writing identical content returns the same response and leaves one row.
+- **Metadata is lenient.** An object, a JSON string, or free text all work;
+  non-JSON strings are stored as `{"note": "..."}`.
+- **Local-only.** SQLite on disk, loopback server (`127.0.0.1:8787`), no
+  outbound calls, no telemetry.
 - **Reading back:** `/m0-recall`. **Handoffs:** `/m0-handoff`. **Plumbing:** `/m0`.

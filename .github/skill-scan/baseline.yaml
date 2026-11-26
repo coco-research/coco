@@ -1,0 +1,8 @@
+# ponytail: 1 file, 1 rule, 4 request vars plus 1 transport selector. A PR can edit this file or summarize.py; kernel-owner review of any change under .github/skill-scan/** is the control. Upgrade path: per-sink taint tracking upstream, or a typed config module in the bridge.
+# ponytail: values returned from sibling modules aren't traced into m0_mcp.py's Request; the shield is that no sibling can read a credential-named or unreadable env key, and none has an outbound path. Upgrade path: an inter-module taint pass, or a named allow-list per sibling (option a) if a sibling ever needs a secret.
+version: 2
+rules:
+  - id: "TT3"
+    path: "scripts/m0_mcp.py"
+    message: "*os.environ.get*urllib.request.urlopen*"
+    reason: "Reads only M0_BASE_URL, M0_HTTP_TIMEOUT, M0_PROJECT, M0_SOURCE_TOOL, and M0_MCP_TRANSPORT; _validate_base_url restricts HTTP to loopback, proven by m0-smoke.sh section 5 red/green loopback cases."

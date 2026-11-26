@@ -185,6 +185,41 @@ printf '%s' "$MCP_OUT" | grep -Fq '"isError": false'; check "tools/call succeeds
 printf '%s' "$MCP_OUT" | grep -Fq '\"nested\":{\"ok\":true}'; check "nested metadata object round-trips" "$?"
 echo
 
+# ------------------------------------------------------- 5. loopback URL guard
+echo "5. MCP loopback M0_BASE_URL guard"
+INIT_REQ='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{}}}'
+EXPECTED_ERR=""
+for BAD_URL in \
+  "http://example.invalid" \
+  "http://127.0.0.1@example.invalid" \
+  "http://localhost.example.invalid"; do
+  BAD_ERR="$(printf '%s\n' "$INIT_REQ" | M0_BASE_URL="$BAD_URL" python3 "$MCP" 2>&1 >/dev/null)"
+  BAD_RC=$?
+  BAD_LINES="$(printf '%s\n' "$BAD_ERR" | wc -l | tr -d ' ')"
+  if [ "$BAD_RC" -ne 0 ] && [ "$BAD_LINES" = "1" ] \
+    && printf '%s' "$BAD_ERR" | grep -Fq "M0_BASE_URL" \
+    && printf '%s' "$BAD_ERR" | grep -Fq "127.0.0.1" \
+    && printf '%s' "$BAD_ERR" | grep -Fq "localhost" \
+    && printf '%s' "$BAD_ERR" | grep -Fq "::1" \
+    && { [ -z "$EXPECTED_ERR" ] || [ "$BAD_ERR" = "$EXPECTED_ERR" ]; }; then
+    EXPECTED_ERR="$BAD_ERR"
+    check "refuses $BAD_URL with one consistent loopback error line" 0
+  else
+    check "refuses $BAD_URL with one consistent loopback error line" 1
+  fi
+done
+
+IPV6_OUT="$(printf '%s\n' "$INIT_REQ" | M0_BASE_URL="http://[::1]:8787" python3 "$MCP" 2>"$WORK/mcp-ipv6.err")"
+IPV6_RC=$?
+if [ "$IPV6_RC" -eq 0 ] \
+  && [ ! -s "$WORK/mcp-ipv6.err" ] \
+  && printf '%s' "$IPV6_OUT" | grep -Fq '"serverInfo"'; then
+  check "accepts http://[::1]:8787 at startup" 0
+else
+  check "accepts http://[::1]:8787 at startup" 1
+fi
+echo
+
 echo "----"
 echo "PASS $PASS   FAIL $FAIL"
 [ "$FAIL" -eq 0 ] || exit 1

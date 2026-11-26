@@ -85,7 +85,33 @@ def main() -> None:
     assert rc == 1 and "::error::sample.json: overall risk score 80 (critical, block)" in out, out
     print("PASS 8: critical risk_assessment with empty issues fails closed")
 
-    print("check-skill-scan-summarize: all 8 cases passed")
+    # 9. newline, %, CR, and control chars in scanned fields are escaped once
+    rep9 = clean(
+        issues=[{
+            "id": "R9",
+            "severity": "high",
+            "location": {"file": "x\n::warning::y", "start_line": 12},
+            "explanation": "100% bad\x07line",
+        }]
+    )
+    rc, out = run_case(json.dumps(rep9), 0)
+    assert rc == 1, f"case 9 expected rc 1, got {rc}: {out}"
+    assert not any(ln.startswith("::warning::") for ln in out.splitlines()), out
+    assert "x%0A::warning::y:12 100%25 bad?line" in out, out
+    rep9b = clean(issues=[{"id": "R9", "severity": "high", "location": {"file": "a%b\r\x7fc", "start_line": 3}}])
+    rc_b, out_b = run_case(json.dumps(rep9b), 0)
+    assert rc_b == 1 and "a%25b%0D?c:3" in out_b, out_b
+    print("PASS 9: workflow command injection chars escaped once at print time")
+
+    # 10. unknown severity in issue or risk_assessment -> 1
+    rc, out = run_case(json.dumps(clean(issues=[{"id": "X1", "severity": "bogus"}])), 0)
+    assert rc == 1 and "::error::sample.json: [bogus] X1 unknown severity" in out, out
+    rep10b = clean(risk_assessment={"score": 10, "severity": "bogus", "recommendation": "review"})
+    rc_b, out_b = run_case(json.dumps(rep10b), 0)
+    assert rc_b == 1 and "::error::sample.json: [bogus] risk_assessment unknown severity" in out_b, out_b
+    print("PASS 10: unknown severity in issue or risk_assessment fails closed")
+
+    print("check-skill-scan-summarize: all 10 cases passed")
 
 
 if __name__ == "__main__":

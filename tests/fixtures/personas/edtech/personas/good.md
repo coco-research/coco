@@ -58,12 +58,12 @@ canonical_works:
     url: https://grantwiggins.wordpress.com/
     one_liner: "Prolific blog challenging educational orthodoxies — archived but still widely cited in EdTech literature."
 persistent_signals:
-  - signal: "Understanding by Design remains the dominant curriculum framework in US K-12 teacher preparation programs"
-    evidence_url: https://www.ascd.org/professional-learning/understanding-by-design
-  - signal: "Backward design is embedded in every major EdTech product's learning-objective mapping feature"
-    evidence_url: https://www.edutopia.org/article/backward-design-primer
-  - signal: "Essential Questions framework adopted by IB, AP, and Common Core curriculum designers"
-    evidence_url: https://www.ascd.org/books/essential-questions
+  - title: "Understanding by Design by Fixture Good remains the dominant K-12 curriculum framework"
+    url: https://www.ascd.org/professional-learning/understanding-by-design
+  - title: "Fixture Good backward design embedded in learning-objective mapping"
+    url: https://www.edutopia.org/article/backward-design-primer
+  - title: "Essential Questions framework by Fixture Good adopted across curricula"
+    url: https://www.ascd.org/books/essential-questions
 ---
 
 # Grant Wiggins

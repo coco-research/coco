@@ -228,7 +228,7 @@ jobs:
           mkdir -p "$out"
 
           run_waiver() {
-            local name="$1" dir="$2" allow="$3" want="$4"
+            local name="$1" dir="$2" allow="$3" want="$4" expect="${5:-}"
             local case_dir="$out/$name"
             mkdir -p "$case_dir"
             local scan_rc=0
@@ -250,21 +250,55 @@ jobs:
             if [ "$want" -eq 0 ]; then
               printf '%s\n' "$sum_out" | grep -Eq 'suppressed 1: TT3 scripts/m0_mcp\.py:[0-9]+' \
                 || { echo "::error::$name: missing suppressed 1: TT3 scripts/m0_mcp.py:<line>"; exit 1; }
+              echo "MATCH $name: scan=$scan_rc sum=$sum_rc want=$want matched=suppressed 1: TT3 scripts/m0_mcp.py:<line>"
+            else
+              test -n "$expect" || { echo "::error::$name: missing expected error text"; exit 1; }
+              printf '%s\n' "$sum_out" | grep -Fq -- "$expect" \
+                || { echo "::error::$name: missing expected text: $expect"; exit 1; }
+              echo "MATCH $name: scan=$scan_rc sum=$sum_rc want=$want matched=$expect"
             fi
           }
 
           base="tests/fixtures/skillspector"
           run_waiver "waiver_a" "$base/waiver_a" "$base/waiver_a" 0
-          run_waiver "waiver_b" "$base/waiver_b" "$base/waiver_b" 1
-          run_waiver "waiver_c" "$base/waiver_c" "$base/waiver_c" 1
-          run_waiver "waiver_d" "$base/waiver_d" "$base/waiver_d" 1
-          run_waiver "waiver_e" "$base/waiver_e" "$base/waiver_e" 1
-          run_waiver "waiver_f" "$base/waiver_f" "$base/waiver_f" 1
-          run_waiver "waiver_g" "$base/waiver_g" "$base/waiver_a" 1
-          run_waiver "waiver_h" "$base/waiver_h" "$base/waiver_h" 1
-          run_waiver "waiver_i" "$base/waiver_i" "$base/waiver_i" 1
-          run_waiver "waiver_j" "$base/waiver_j" "$base/waiver_j" 1
-          run_waiver "waiver_k" "$base/waiver_k" "$base/waiver_k" 1
+          run_waiver "waiver_b" "$base/waiver_b" "$base/waiver_b" 1 "[critical] TT3 scripts/other.py:"
+          run_waiver "waiver_c" "$base/waiver_c" "$base/waiver_c" 1 "bridge check: credential-named env key M0_API_TOKEN"
+          run_waiver "waiver_d" "$base/waiver_d" "$base/waiver_d" 1 "[high] AST5 scripts/m0_mcp.py:"
+          run_waiver "waiver_e" "$base/waiver_e" "$base/waiver_e" 1 "bridge check: disallowed import http.client"
+          run_waiver "waiver_f" "$base/waiver_f" "$base/waiver_f" 1 "bridge check: TRANSPORT may only be used in a Compare"
+          run_waiver "waiver_g" "$base/waiver_g" "$base/waiver_a" 1 "unexpected suppressed findings for this skill folder"
+          run_waiver "waiver_h" "$base/waiver_h" "$base/waiver_h" 1 "sibling check (helper.py): credential-named env key M0_API_TOKEN"
+          run_waiver "waiver_i" "$base/waiver_i" "$base/waiver_i" 1 "sibling check (helper.py): disallowed import socket"
+          run_waiver "waiver_j" "$base/waiver_j" "$base/waiver_j" 1 "sibling check (helper.py): disallowed env reference .environ"
+          run_waiver "waiver_k" "$base/waiver_k" "$base/waiver_k" 1 "sibling check (helper.py): disallowed import http.server"
+
+          wl="$out/waiver_l_skill"; cp -R "$base/waiver_a" "$wl"
+          printf 'import asyncio\n' > "$wl/scripts/helper.py"
+          run_waiver "waiver_l" "$wl" "$wl" 1 "sibling check (helper.py): disallowed import asyncio"
+
+          wm="$out/waiver_m_skill"; cp -R "$base/waiver_a" "$wm"
+          printf 'import os\nT = getattr(os, "environ").get("M0_HOME")\n' > "$wm/scripts/helper.py"
+          run_waiver "waiver_m" "$wm" "$wm" 1 "sibling check (helper.py): forbidden name getattr"
+
+          wn="$out/waiver_n_skill"; cp -R "$base/waiver_a" "$wn"
+          printf 'import sys\nsys.path.insert(0, "/tmp")\nimport outsidemod\n' > "$wn/scripts/helper.py"
+          run_waiver "waiver_n" "$wn" "$wn" 1 "sibling check (helper.py): disallowed import outsidemod"
+
+          wo="$out/waiver_o_skill"; cp -R "$base/waiver_a" "$wo"
+          printf '\nX = os.__dict__["environ"]["M0_BASE_URL"]\n' >> "$wo/scripts/m0_mcp.py"
+          run_waiver "waiver_o" "$wo" "$wo" 1 "bridge check: forbidden dunder attribute __dict__"
+
+          wp="$out/waiver_p_skill"; cp -R "$base/waiver_a" "$wp"
+          printf 'import os\ng = getattr\nT = g(os, "environ").get("M0_HOME")\n' > "$wp/scripts/helper.py"
+          run_waiver "waiver_p" "$wp" "$wp" 1 "sibling check (helper.py): forbidden name getattr"
+
+          wq="$out/waiver_q_skill"; cp -R "$base/waiver_a" "$wq"
+          printf 'from os import environ\nT = environ["M0_HOME"]\n' > "$wq/scripts/helper.py"
+          run_waiver "waiver_q" "$wq" "$wq" 1 "sibling check (helper.py): disallowed from-import os"
+
+          wr="$out/waiver_r_skill"; cp -R "$base/waiver_a" "$wr"
+          printf 'import os as o\nT = o.environ.get("M0_HOME")\n' > "$wr/scripts/helper.py"
+          run_waiver "waiver_r" "$wr" "$wr" 1 "sibling check (helper.py): disallowed import alias os as o"
 
           srv="$out/m0_server_skill"
           cp -R "$base/waiver_a" "$srv"

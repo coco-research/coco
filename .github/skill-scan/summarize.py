@@ -23,14 +23,38 @@ ALLOWED_BRIDGE_ENV = {
     "M0_MCP_TRANSPORT",
 }
 DENY_ENV_RE = re.compile(r"KEY|TOKEN|SECRET|PASS|AUTH|CRED", re.IGNORECASE)
-FORBIDDEN_NET_MODS = {
-    "http", "http.client", "socket", "ssl", "requests", "httpx", "urllib3",
-    "aiohttp", "ftplib", "smtplib", "telnetlib", "xmlrpc", "websocket",
-    "websockets", "subprocess",
+ALLOWED_IMPORTS_BRIDGE = {
+    "__future__", "json", "os", "sys", "urllib", "urllib.error", "urllib.parse",
+    "urllib.request", "pathlib", "m0_server",
 }
-ENV_ATTRS = {"environ", "environb", "getenv", "getenvb", "putenv"}
-BRIDGE_FORBIDDEN_CALLS = {"getattr", "__import__", "vars", "globals", "exec", "eval"}
-SIBLING_FORBIDDEN_CALLS = {"__import__", "exec", "eval"}
+ALLOWED_IMPORTS_SERVER = {
+    "__future__", "argparse", "hashlib", "json", "os", "sqlite3", "sys",
+    "tempfile", "datetime", "http.server", "pathlib", "urllib.parse",
+}
+ALLOWED_FROM_BRIDGE = {
+    "__future__": {"annotations"},
+    "pathlib": {"Path"},
+}
+ALLOWED_FROM_SERVER = {
+    "__future__": {"annotations"},
+    "datetime": {"datetime", "timezone"},
+    "http.server": {"BaseHTTPRequestHandler", "ThreadingHTTPServer"},
+    "pathlib": {"Path"},
+    "urllib.parse": {"parse_qs", "urlparse"},
+}
+ALLOWED_DUNDER_ATTRS = {"__name__", "__init__"}
+ENV_ATTRS = {"environ", "environb", "getenv", "getenvb", "putenv", "unsetenv"}
+FORBIDDEN_BUILTIN_NAMES = {
+    "getattr", "vars", "globals", "locals", "compile",
+    "__import__", "__builtins__", "eval", "exec",
+}
+FORBIDDEN_ATTR_CALLS = {
+    "__import__", "exec", "eval", "import_module", "system", "popen", "create_connection",
+}
+
+
+def _is_forbidden_os_attr(attr: str) -> bool:
+    return attr in {"system", "popen", "fork", "forkpty"} or attr.startswith(("exec", "spawn", "posix_spawn"))
 
 
 def _is_num(v: object) -> bool:
@@ -66,82 +90,103 @@ def _str_const(node: ast.AST) -> str | None:
     return node.value if isinstance(node, ast.Constant) and isinstance(node.value, str) else None
 
 
-def _check_bridge_file(path: pathlib.Path) -> list[str]:
+def _check_common(
+    tree: ast.AST,
+    prefix: str,
+    allowed_imports: set[str],
+    allowed_from: dict[str, set[str]],
+) -> list[str]:
     errs: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                mod = alias.name
+                top = mod.split(".", 1)[0]
+                if alias.asname:
+                    errs.append(f"{prefix}: disallowed import alias {mod} as {alias.asname}")
+                if mod not in allowed_imports or top not in allowed_imports:
+                    errs.append(f"{prefix}: disallowed import {mod}")
+        elif isinstance(node, ast.ImportFrom):
+            if node.level:
+                errs.append(f"{prefix}: disallowed relative import")
+            else:
+                mod = node.module or ""
+                allowed_names = allowed_from.get(mod)
+                for alias in node.names:
+                    if alias.asname:
+                        errs.append(f"{prefix}: disallowed import alias {mod}.{alias.name} as {alias.asname}")
+                if allowed_names is None:
+                    errs.append(f"{prefix}: disallowed from-import {mod}")
+                else:
+                    for alias in node.names:
+                        if alias.name not in allowed_names:
+                            errs.append(f"{prefix}: disallowed from-import {mod}.{alias.name}")
+        elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load) and node.id in FORBIDDEN_BUILTIN_NAMES:
+            errs.append(f"{prefix}: forbidden name {node.id}")
+        elif isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Attribute) and node.func.attr in FORBIDDEN_ATTR_CALLS:
+                errs.append(f"{prefix}: forbidden call .{node.func.attr}")
+        elif isinstance(node, ast.Attribute):
+            if (
+                node.attr.startswith("__")
+                and node.attr.endswith("__")
+                and len(node.attr) >= 4
+                and node.attr not in ALLOWED_DUNDER_ATTRS
+            ):
+                errs.append(f"{prefix}: forbidden dunder attribute {node.attr}")
+            elif node.attr == "modules" and isinstance(node.value, ast.Name) and node.value.id == "sys":
+                errs.append(f"{prefix}: forbidden attribute sys.modules")
+            elif isinstance(node.value, ast.Name) and node.value.id == "os" and _is_forbidden_os_attr(node.attr):
+                errs.append(f"{prefix}: forbidden os attribute os.{node.attr}")
+        elif isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value in ENV_ATTRS:
+            errs.append(f"{prefix}: forbidden env string constant {node.value!r}")
+    return errs
+
+
+def _check_env(
+    tree: ast.AST,
+    parents: dict[ast.AST, ast.AST],
+    prefix: str,
+    allowed_keys: set[str] | None,
+) -> tuple[list[str], list[ast.Call]]:
+    errs: list[str] = []
+    transport_calls: list[ast.Call] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr in ENV_ATTRS:
+            if node.attr == "environ" and isinstance(node.value, ast.Name) and node.value.id == "os":
+                p = parents.get(node)
+                gp = parents.get(p) if isinstance(p, ast.Attribute) and p.value is node and p.attr == "get" else None
+                if isinstance(gp, ast.Call) and gp.func is p and 1 <= len(gp.args) <= 2 and not gp.keywords:
+                    key = _str_const(gp.args[0])
+                    if key is None:
+                        errs.append(f"{prefix}: non-literal env key")
+                    elif DENY_ENV_RE.search(key):
+                        errs.append(f"{prefix}: credential-named env key {key}")
+                    elif allowed_keys is not None and key not in allowed_keys:
+                        errs.append(f"{prefix}: disallowed env key {key}")
+                    elif key == "M0_MCP_TRANSPORT":
+                        transport_calls.append(gp)
+                    continue
+            errs.append(f"{prefix}: disallowed env reference .{node.attr}")
+        elif isinstance(node, ast.Name) and node.id in ENV_ATTRS:
+            errs.append(f"{prefix}: disallowed env name {node.id}")
+    return errs, transport_calls
+
+
+def _check_bridge_file(path: pathlib.Path) -> list[str]:
     try:
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     except (OSError, SyntaxError, UnicodeDecodeError) as exc:
         return [f"bridge check: cannot parse {path.name} ({exc})"]
 
     parents = _parent_map(tree)
-    allowed_env_attrs: set[ast.AST] = set()
-    transport_calls: list[ast.Call] = []
+    errs = _check_common(tree, "bridge check", ALLOWED_IMPORTS_BRIDGE, ALLOWED_FROM_BRIDGE)
+    env_errs, transport_calls = _check_env(tree, parents, "bridge check", ALLOWED_BRIDGE_ENV)
+    errs.extend(env_errs)
     urlopen_calls = 0
 
     for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                mod, root = alias.name, alias.name.split(".")[0]
-                if mod in FORBIDDEN_NET_MODS or root in FORBIDDEN_NET_MODS or root in {"importlib", "posix", "nt"}:
-                    errs.append(f"bridge check: forbidden import {mod}")
-                elif mod in {"os", "urllib", "urllib.request"} and alias.asname:
-                    errs.append(f"bridge check: aliased import {mod}")
-        elif isinstance(node, ast.ImportFrom):
-            mod = node.module or ""
-            root = mod.split(".")[0]
-            if root in {"os", "posix", "nt", "importlib"} or mod in FORBIDDEN_NET_MODS or root in FORBIDDEN_NET_MODS:
-                errs.append(f"bridge check: forbidden from-import {mod}")
-            elif mod == "urllib" and any(a.name == "request" for a in node.names):
-                errs.append("bridge check: forbidden from urllib import request")
-            elif mod == "urllib.request":
-                errs.append("bridge check: forbidden from urllib.request import")
-        elif isinstance(node, ast.Call):
-            if isinstance(node.func, ast.Name) and node.func.id in BRIDGE_FORBIDDEN_CALLS:
-                errs.append(f"bridge check: forbidden call {node.func.id}")
-            elif isinstance(node.func, ast.Attribute) and (
-                node.func.attr in BRIDGE_FORBIDDEN_CALLS
-                or node.func.attr in {"import_module", "system", "popen"}
-            ):
-                errs.append(f"bridge check: forbidden call .{node.func.attr}")
-
-            env_attr: ast.AST | None = None
-            if (
-                isinstance(node.func, ast.Attribute)
-                and node.func.attr == "get"
-                and isinstance(node.func.value, ast.Attribute)
-                and node.func.value.attr == "environ"
-                and isinstance(node.func.value.value, ast.Name)
-                and node.func.value.value.id == "os"
-            ):
-                env_attr = node.func.value
-            elif (
-                isinstance(node.func, ast.Attribute)
-                and node.func.attr == "getenv"
-                and isinstance(node.func.value, ast.Name)
-                and node.func.value.id == "os"
-            ):
-                env_attr = node.func
-
-            if env_attr is not None:
-                key = _str_const(node.args[0]) if node.args and not node.keywords else None
-                if key is None:
-                    errs.append("bridge check: non-literal env key")
-                else:
-                    if DENY_ENV_RE.search(key):
-                        errs.append(f"bridge check: credential-named env key {key}")
-                    elif key not in ALLOWED_BRIDGE_ENV:
-                        errs.append(f"bridge check: disallowed env key {key}")
-                    else:
-                        allowed_env_attrs.add(env_attr)
-                        if key == "M0_MCP_TRANSPORT":
-                            transport_calls.append(node)
-
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Attribute) and node.attr in ENV_ATTRS and node not in allowed_env_attrs:
-            errs.append(f"bridge check: disallowed env reference .{node.attr}")
-        elif isinstance(node, ast.Name) and node.id in ENV_ATTRS:
-            errs.append(f"bridge check: disallowed env name {node.id}")
-        elif (
+        if (
             isinstance(node, ast.Attribute)
             and node.attr == "request"
             and isinstance(node.value, ast.Name)
@@ -200,7 +245,6 @@ def _check_bridge_file(path: pathlib.Path) -> list[str]:
 
 
 def _check_sibling_file(path: pathlib.Path, scripts_dir: pathlib.Path) -> list[str]:
-    errs: list[str] = []
     rel = path.relative_to(scripts_dir).as_posix()
     is_m0_server = path.parent == scripts_dir and path.name == "m0_server.py"
     try:
@@ -208,112 +252,32 @@ def _check_sibling_file(path: pathlib.Path, scripts_dir: pathlib.Path) -> list[s
     except (OSError, SyntaxError, UnicodeDecodeError) as exc:
         return [f"sibling check ({rel}): cannot parse ({exc})"]
 
-    allowed_env: set[ast.AST] = set()
+    prefix = f"sibling check ({rel})"
+    parents = _parent_map(tree)
+    allowed_imports = ALLOWED_IMPORTS_SERVER if is_m0_server else set()
+    allowed_from = ALLOWED_FROM_SERVER if is_m0_server else {}
+    errs = _check_common(tree, prefix, allowed_imports, allowed_from)
+    env_errs, _ = _check_env(tree, parents, prefix, None)
+    errs.extend(env_errs)
     for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                mod, root = alias.name, alias.name.split(".")[0]
-                if mod == "http.server" and is_m0_server:
-                    continue
-                if (
-                    mod in FORBIDDEN_NET_MODS
-                    or root in FORBIDDEN_NET_MODS
-                    or mod == "urllib.request"
-                    or mod.startswith("urllib.request.")
-                    or root in {"importlib", "posix", "nt"}
-                ):
-                    errs.append(f"sibling check ({rel}): forbidden import {mod}")
-                elif mod in {"os", "urllib"} and alias.asname:
-                    errs.append(f"sibling check ({rel}): aliased import {mod}")
-        elif isinstance(node, ast.ImportFrom):
-            mod = node.module or ""
-            root = mod.split(".")[0]
-            if mod == "http.server" and is_m0_server:
-                continue
-            if (
-                mod in FORBIDDEN_NET_MODS
-                or root in FORBIDDEN_NET_MODS
-                or mod == "urllib.request"
-                or mod.startswith("urllib.request.")
-                or (mod == "urllib" and any(a.name == "request" for a in node.names))
-                or root in {"importlib", "posix", "nt"}
-            ):
-                errs.append(f"sibling check ({rel}): forbidden from-import {mod}")
-            elif any(a.name in ENV_ATTRS and a.asname for a in node.names):
-                errs.append(f"sibling check ({rel}): aliased env import")
-        elif isinstance(node, ast.Attribute) and node.attr == "request" and isinstance(node.value, ast.Name) and node.value.id == "urllib":
-            errs.append(f"sibling check ({rel}): forbidden urllib.request reference")
+        if isinstance(node, ast.Attribute) and node.attr == "request" and isinstance(node.value, ast.Name) and node.value.id == "urllib":
+            errs.append(f"{prefix}: forbidden urllib.request reference")
         elif isinstance(node, ast.Call):
-            if isinstance(node.func, ast.Name) and node.func.id in (SIBLING_FORBIDDEN_CALLS | {"system", "popen"}):
-                errs.append(f"sibling check ({rel}): forbidden call {node.func.id}")
-            elif isinstance(node.func, ast.Attribute) and (
-                node.func.attr in SIBLING_FORBIDDEN_CALLS
-                or node.func.attr in {"system", "popen", "create_connection", "import_module"}
-            ):
-                errs.append(f"sibling check ({rel}): forbidden call .{node.func.attr}")
+            if isinstance(node.func, ast.Name) and node.func.id in {"system", "popen"}:
+                errs.append(f"{prefix}: forbidden call {node.func.id}")
             elif (
                 isinstance(node.func, ast.Attribute)
                 and node.func.attr == "connect"
                 and isinstance(node.func.value, ast.Name)
                 and node.func.value.id == "socket"
             ):
-                errs.append(f"sibling check ({rel}): forbidden call socket.connect")
-
-            env_ref: ast.AST | None = None
-            if (
-                isinstance(node.func, ast.Attribute)
-                and node.func.attr in {"get", "setdefault"}
-                and (
-                    (isinstance(node.func.value, ast.Attribute) and node.func.value.attr == "environ"
-                     and isinstance(node.func.value.value, ast.Name) and node.func.value.value.id == "os")
-                    or (isinstance(node.func.value, ast.Name) and node.func.value.id == "environ")
-                )
-            ):
-                env_ref = node.func.value
-            elif (
-                isinstance(node.func, ast.Attribute)
-                and node.func.attr == "getenv"
-                and isinstance(node.func.value, ast.Name)
-                and node.func.value.id == "os"
-            ) or (isinstance(node.func, ast.Name) and node.func.id == "getenv"):
-                env_ref = node.func
-
-            if env_ref is not None:
-                key = _str_const(node.args[0]) if node.args and not node.keywords else None
-                if key is None:
-                    errs.append(f"sibling check ({rel}): non-literal env key")
-                else:
-                    if DENY_ENV_RE.search(key):
-                        errs.append(f"sibling check ({rel}): credential-named env key {key}")
-                    allowed_env.add(env_ref)
-        elif isinstance(node, ast.Subscript):
-            env_ref = None
-            if (
-                isinstance(node.value, ast.Attribute)
-                and node.value.attr == "environ"
-                and isinstance(node.value.value, ast.Name)
-                and node.value.value.id == "os"
-            ) or (isinstance(node.value, ast.Name) and node.value.id == "environ"):
-                env_ref = node.value
-            if env_ref is not None:
-                key = _str_const(node.slice)
-                if key is None:
-                    errs.append(f"sibling check ({rel}): non-literal env subscript")
-                else:
-                    if DENY_ENV_RE.search(key):
-                        errs.append(f"sibling check ({rel}): credential-named env key {key}")
-                    allowed_env.add(env_ref)
-
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Attribute) and node.attr in ENV_ATTRS and node not in allowed_env:
-            errs.append(f"sibling check ({rel}): disallowed env reference .{node.attr}")
-        elif isinstance(node, ast.Name) and node.id in ENV_ATTRS and node not in allowed_env:
-            errs.append(f"sibling check ({rel}): disallowed env name {node.id}")
+                errs.append(f"{prefix}: forbidden call socket.connect")
     return errs
 
 
 # ponytail: 1 file, 1 rule, 4 request vars plus 1 transport selector. A PR can edit this file or summarize.py; kernel-owner review of any change under .github/skill-scan/** is the control. Upgrade path: per-sink taint tracking upstream, or a typed config module in the bridge.
-# ponytail: values returned from sibling modules aren't traced into m0_mcp.py's Request; the shield is that no sibling can read a credential-named or unreadable env key, and none has an outbound path. Upgrade path: an inter-module taint pass, or a named allow-list per sibling (option a) if a sibling ever needs a secret.
+# ponytail: values returned from sibling modules aren't traced into m0_mcp.py's Request; the shield is that no sibling can read a credential-named or unreadable env key, and none has an outbound path. Upgrade path: an inter-module taint pass, or a named allow-list per sibling (option a) if a sibling ever needs a secret. a new import in the m0 scripts needs a gate change.
+# ponytail: static AST check; determined obfuscation in Python can still get past it. The backstop is the R3 human read of any diff touching waived files.
 def check_bridge(skill_dir: pathlib.Path) -> list[str]:
     scripts_dir = skill_dir / "scripts"
     bridge = scripts_dir / "m0_mcp.py"

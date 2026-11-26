@@ -5,10 +5,10 @@ Usage:
   python3 scripts/check-personas.py [--all] [--links] [<persona.md> ...]
 
   --all     check every systems/superintelligence/*/personas/*.md file
-  --links   also fetch each source and canonical_works URL (network, opt-in)
+  --links   also fetch each source, canonical_works, signal and stance URL (network, opt-in)
 
-Prints one line per problem, "<file>: (<rule>) <name>: <detail>", and exits 1
-if there is any problem, 0 if every file passes, 2 on a setup error.
+Prints one line per problem on stdout, "<file>: (<rule>) <name>: <detail>", warnings on
+stderr, and exits 1 if there is any problem, 0 if every file passes, 2 on a setup error.
 
 Rules (taken from the existing validate_persona.py / validate_offline.py copies,
 templates/attribution.md and the real persona files):
@@ -22,12 +22,15 @@ templates/attribution.md and the real persona files):
   (e) quote         every `> "..."` line has an https:// URL, [paraphrase] or
                     [extrapolated] on the same or the next line
   (f) stances       every public_stances entry has an evidence_url
-  (g) signals       active: >= 2 recent_signal_12mo; archetype: >= 2 persistent_signals
+  (g) signals       active: >= 2 recent_signal_12mo; archetype: >= 2 persistent_signals;
+                    every signal or persistent signal carries a non-empty title; a signal
+                    whose title and takeaway lack any folded surname token from real_name
+                    or aliases warns on stderr
   (h) pairs         pairs_well_with / productive_conflict_with name slugs listed in
                     some department's roster, or of a status: held file beside them
   (held)            status: held keeps a file out of the registry until it can be
                     sourced: it is exempt from (a) for signature_moves, canonical_works
-                    and public_stances, and from (b), (d) and (g); every other rule holds
+                    and public_stances, and from (b), (d) and (g) count; every other rule holds
   (i) duplicate     slug, real_name and aliases (case-folded) are not used by any
                     other persona file on the board, in any department (except the
                     grandfathered two-team seats in TWO_TEAM_SEATS)
@@ -41,11 +44,13 @@ templates/attribution.md and the real persona files):
                     case) or a personal (non-work) email address; the decoded text of
                     every URL is also scanned for all three; a line over 10000
                     characters fails instead of being skipped
-  (links)           with --links: each URL answers 200 over https, and each
-                    canonical_works title appears on its HTML page; a file with
-                    a (k) finding is not fetched until that is fixed, and before
-                    anything is fetched the decoded path and query of every URL
-                    to fetch get the same three checks (a match is a (k) line)
+  (links)           with --links: each source, canonical_works, signal, persistent-signal
+                    and public_stances evidence_url answers 200 over https (HTTP 403 and
+                    429 warn on stderr; 404, 410, DNS failure and refusals fail), and each
+                    canonical_works title appears on its HTML page; a file with a (k)
+                    finding is not fetched until that is fixed, and before anything is
+                    fetched the decoded path and query of every URL to fetch get the same
+                    three checks (a match is a (k) line)
 
 Input safety: a persona, registry, roster, template or opt-out file is read only
 if it is a regular file of at most 1 MiB (counted in bytes) inside the board (or
@@ -87,6 +92,7 @@ import stat
 import sys
 import threading
 import time
+import unicodedata
 from pathlib import Path
 from urllib.parse import unquote, unquote_plus, urljoin, urlsplit
 
@@ -296,6 +302,40 @@ def label_template() -> str:
 
 def norm(s) -> str:
     return " ".join(str(s).casefold().split())
+
+
+NAME_SUFFIXES = frozenset({"jr", "sr", "ii", "iii", "iv", "v", "phd", "md"})
+HYPHENS = re.compile(r"[-\u2010\u2011\u2013\u2014]")
+WORD_TOK = re.compile(r"[^\W_]+")
+
+
+def fold_name(s: str) -> str:
+    """NFKD-fold (accents dropped), casefold, turn hyphens into spaces, collapse whitespace."""
+    decomposed = unicodedata.normalize("NFKD", s)
+    stripped = "".join(ch for ch in decomposed if not unicodedata.combining(ch))
+    return " ".join(HYPHENS.sub(" ", stripped.casefold()).split())
+
+
+def surname_tokens(fm: dict) -> set:
+    """Folded surname tokens of real_name and aliases; initials (len <= 1) are ignored."""
+    aliases = fm.get("aliases")
+    aliases = aliases if isinstance(aliases, list) else ([aliases] if aliases is not None else [])
+    tokens = set()
+    for raw in (fm.get("real_name"), *aliases):
+        if not isinstance(raw, str) or not raw.strip():
+            continue
+        cleaned = re.sub(r"\([^)]*\)", " ", raw).strip() or raw
+        words = [w.strip(".,;:'\"") for w in cleaned.split()]
+        words = [w for w in words if w]
+        while len(words) > 1 and fold_name(words[-1]).replace(".", "") in NAME_SUFFIXES:
+            words.pop()
+        non_initial = [w for w in words if any(len(t) > 1 for t in WORD_TOK.findall(fold_name(w)))]
+        if not non_initial:
+            continue
+        for tok in WORD_TOK.findall(fold_name(non_initial[-1])):
+            if len(tok) > 1:
+                tokens.add(tok)
+    return tokens
 
 
 def identity(fm: dict) -> set:
@@ -538,12 +578,13 @@ def url_contact(url: str) -> list:
     return [what for what, rx in PRIVATE if any(rx.search(t) for t in texts)]
 
 
-def link_problems(fm: dict, lines: list) -> list:
-    """(links) problems of fm's sources and canonical_works; lines is the file, for line numbers.
+def link_problems(fm: dict, lines: list, warnings: list | None = None) -> list:
+    """(links) problems of fm's sources, canonical_works, signals and public_stances; lines is the file.
 
     Before anything is fetched, every URL to fetch gets the (k) checks on its decoded path and
     query: one match and the (k) lines are all that is returned, with nothing fetched. A (links)
     line names only the host, the line in the file and the reason: never a path, query or title.
+    HTTP 403 and 429 are recorded as warnings instead of failures.
     """
     titles: dict = {}
     for s in fm.get("sources") if isinstance(fm.get("sources"), list) else []:
@@ -553,6 +594,15 @@ def link_problems(fm: dict, lines: list) -> list:
         if isinstance(w, dict) and isinstance(w.get("url"), str):
             if titles.get(w["url"]) is None:
                 titles[w["url"]] = w.get("title")
+    for sig_field in ("recent_signal_12mo", "persistent_signals"):
+        for item in fm.get(sig_field) if isinstance(fm.get(sig_field), list) else []:
+            if isinstance(item, dict):
+                for key in ("url", "evidence_url"):
+                    if isinstance(item.get(key), str):
+                        titles.setdefault(item[key], None)
+    for stance in fm.get("public_stances") if isinstance(fm.get("public_stances"), list) else []:
+        if isinstance(stance, dict) and isinstance(stance.get("evidence_url"), str):
+            titles.setdefault(stance["evidence_url"], None)
     line = {url: next((n for n, text in enumerate(lines, 1) if url in text), 0) for url in titles}
     found = [f"(k) private-detail: line {line[url]} looks like {what}" for url in titles for what in url_contact(url)]
     if found:
@@ -572,7 +622,10 @@ def link_problems(fm: dict, lines: list) -> list:
         except (OSError, http.client.HTTPException, ValueError) as e:  # the class only: an error's text can quote the URL
             out.append(f"{where}: dead: {e.__class__.__name__}")
             continue
-        if status != 200:
+        if status in (403, 429):
+            if warnings is not None:
+                warnings.append(f"{where}: warning: HTTP {status}")
+        elif status != 200:
             out.append(f"{where}: dead: HTTP {status}")
         elif title and "html" in ctype.lower():
             # [^<>]: a '<' with no '>' before the next '<' fails after one short scan, so a page full
@@ -583,7 +636,8 @@ def link_problems(fm: dict, lines: list) -> list:
     return out
 
 
-def check(path: Path, label: str, cache: dict, optout: set = frozenset(), links: bool = False) -> list:
+def check(path: Path, label: str, cache: dict, optout: set = frozenset(), links: bool = False,
+          warnings: list | None = None) -> list:
     try:
         text = read_file(path)
     except (OSError, UnicodeDecodeError) as e:
@@ -634,6 +688,21 @@ def check(path: Path, label: str, cache: dict, optout: set = frozenset(), links:
     sig = fm.get(field) if isinstance(fm.get(field), list) else []
     if len(sig) < 2 and not held:
         out.append(f"(g) signals: {field} has {len(sig)}, need at least 2")
+    surnames = surname_tokens(fm)
+    for sig_field in ("recent_signal_12mo", "persistent_signals"):
+        items = fm.get(sig_field) if isinstance(fm.get(sig_field), list) else []
+        untitled = [str(i) for i, item in enumerate(items, 1)
+                    if not (isinstance(item, dict) and isinstance(item.get("title"), str) and item["title"].strip())]
+        if untitled:
+            out.append(f"(g) signals: {sig_field} missing title (items {', '.join(untitled)})")
+        if surnames and warnings is not None:
+            for i, item in enumerate(items, 1):
+                if not (isinstance(item, dict) and isinstance(item.get("title"), str) and item["title"].strip()):
+                    continue
+                takeaway = item.get("takeaway") if isinstance(item.get("takeaway"), str) else ""
+                hay_words = set(WORD_TOK.findall(fold_name(f"{item['title']} {takeaway}")))
+                if not (surnames & hay_words):
+                    warnings.append(f"(g) signals: warning: {sig_field} item {i} title/takeaway has no surname match")
 
     if slugs is not None:
         # Pairs may cross departments (the meta-orchestrator convenes across teams).
@@ -670,7 +739,7 @@ def check(path: Path, label: str, cache: dict, optout: set = frozenset(), links:
                 out.append(f"(k) private-detail: line {n + 1} looks like {what}")
 
     if links and not any(o.startswith("(k)") for o in out):  # a file that may hold a private detail sends none of its URLs anywhere
-        out += link_problems(fm, body)
+        out += link_problems(fm, body, warnings)
     return out
 
 
@@ -693,10 +762,13 @@ def main(argv: list) -> int:
     label, cache, fails = label_template(), {}, 0
     optout, links = load_optout(), "--links" in opts
     for f in files:
-        problems = check(Path(f), label, cache, optout, links)
+        warns: list = []
+        problems = check(Path(f), label, cache, optout, links, warns)
         fails += bool(problems)
         for p in problems:
             print(f"{f}: {p}")
+        for w in warns:
+            print(f"{f}: {w}", file=sys.stderr)
     print(f"check-personas: {len(files) - fails}/{len(files)} pass", file=sys.stderr)
     return 1 if fails else 0
 

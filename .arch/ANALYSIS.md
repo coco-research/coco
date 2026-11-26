@@ -57,7 +57,7 @@ namespaces including `team`, the four-layer orchestration router. 38 committed h
 
 **Bundled Orchestration Systems** (`systems/`) — opt-in bundles shipping nested skills,
 agents and registries: GSD (68 skills, 24 agents), HyperFrames (20), Super Intelligence
-(13 skills over 495 personas), brain, cognee, m0. The SI registries are the source the
+(13 skills over 493 personas), brain, cognee, m0. The SI registries are the source the
 generators read.
 
 **Subagent Role Definitions** (`agents/`, `rules/`) — the named roles commands dispatch

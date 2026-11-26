@@ -107,7 +107,7 @@ file.
 bash systems/m0/tests/m0-smoke.sh
 ```
 
-27 assertions in a throwaway directory on an ephemeral port: round trip,
+Smoke assertions in a throwaway directory on an ephemeral port: round trip,
 idempotency (including the same metadata re-encoded as a string), the deferred
 write under a genuinely locked store, the drain on restart, and the MCP tools
 over stdio. It touches no existing store. Point `M0_BASE_URL` at another
@@ -143,7 +143,7 @@ systems/m0/
 │   ├── m0-remember/SKILL.md        write path
 │   ├── m0-recall/SKILL.md          read path
 │   └── m0-handoff/SKILL.md         handoff / resume flow
-└── tests/m0-smoke.sh               27 assertions against a live server
+└── tests/m0-smoke.sh               smoke assertions against a live server
 ```
 
 ## License

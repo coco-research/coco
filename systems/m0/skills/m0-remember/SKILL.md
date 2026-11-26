@@ -58,7 +58,7 @@ listening) and accepts `meta` as a JSON object.
 | `last_verified` | no | What was actually checked, and how. A command and its result, not an impression. |
 | `meta_json` | no | Structured metadata as a JSON object (alias `meta`), e.g. `{"pr":42,"tests":"green"}`. |
 | `session_id` | no | Session identifier, when known. |
-| `role` | no | The role the entry speaks for (`assistant` by default; `user` or `system` permitted). |
+| `role` | no | The role the entry speaks for: any non-empty string; `assistant` by default. |
 | `source_tool` | no | Which tool is writing (for example `claude-code`, `cursor`, `mcp`, or `hook`), so the thread stays legible across tools. |
 | `branch`, `head_sha` | no | Version-control position. Worth including whenever the entry is about code. |
 

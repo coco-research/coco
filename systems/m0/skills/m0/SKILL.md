@@ -93,7 +93,7 @@ python3 "$HOME/.claude/skills/m0/scripts/m0_server.py" write \
 bash systems/m0/tests/m0-smoke.sh
 ```
 
-Runs 27 assertions in a throwaway directory on an ephemeral port (round trip,
+Runs the smoke assertions in a throwaway directory on an ephemeral port (round trip,
 idempotency, locked-store sidecar spool, restart drain, and MCP stdio tools).
 
 ### /m0 privacy

@@ -47,7 +47,7 @@
     {
       "id": "connect",
       "name": "Coco Connect",
-      "tag": "Available now, v0.2.1, Apple silicon",
+      "tag": "Available now, v0.2.1, Apple silicon, Apache-2.0 (releases repo)",
       "description_html": "The Mac app that finds the AI coding tools on your machine, then installs and health-checks Coco for each of them.",
       "actions": [
         {
@@ -73,21 +73,21 @@
       "name": "Signal",
       "href": "https://github.com/coco-research/coco-design-language",
       "description": "Our design language: three editions, CSS and docs.",
-      "status": "Source available, MIT, no release"
+      "status": "Source available, Apache-2.0, no release"
     },
     {
       "id": "mira",
       "name": "Mira",
       "href": "https://github.com/coco-research/Mira",
       "description": "Makes Reels and Shorts in English and Hindi, on your own machine.",
-      "status": "Source available, AGPL-3.0, Python, no release"
+      "status": "Source available, AGPL-3.0, Python, archived, no release"
     },
     {
       "id": "loops",
       "name": "Coco Loops",
       "href": "https://github.com/coco-research/coco-loops",
       "description": "Governance for autonomous agent loops: rules, adversary checks, budget caps and an audit trail.",
-      "status": "Source available, no release"
+      "status": "Proprietary, source available, no release"
     },
     {
       "id": "jev-use",
@@ -101,7 +101,7 @@
       "name": "Heliopause",
       "href": "https://github.com/coco-research/heliopause",
       "description": "It gives your AI tools a Lead and roles, like a small company, on your own machine.",
-      "status": "Source available, MIT, early preview"
+      "status": "Source available, Apache-2.0, early preview"
     }
   ],
   "lab": [
@@ -121,7 +121,7 @@
       "id": "code",
       "name": "Coco Code",
       "description": "A local-first coding harness for the terminal and the Mac.",
-      "status": "Private, internal pre-release"
+      "status": "Private, paused"
     },
     {
       "id": "teams-ng",

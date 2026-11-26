@@ -4,6 +4,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [2.4.0](https://github.com/coco-research/coco/compare/v2.3.0...v2.4.0) (2026-11-26)
+
+
+### Features
+
+* **checker:** enforce persona source and held-status validation rules ([#560](https://github.com/coco-research/coco/issues/560)) ([aaf3b84](https://github.com/coco-research/coco/commit/aaf3b845bd0f7f21503759a4105a9014821fe53e))
+
+
+### Bug Fixes
+
+* **m0:** accept only a loopback M0_BASE_URL in the m0 MCP bridge; refresh the m0 skill docs ([#566](https://github.com/coco-research/coco/issues/566)) ([a5e8081](https://github.com/coco-research/coco/commit/a5e8081be608db458b3cb75a1a52d1b05094b75a))
+* **personas:** update 5 verified legal-ip profiles and remove 2 retired entries ([#559](https://github.com/coco-research/coco/issues/559)) ([e891039](https://github.com/coco-research/coco/commit/e89103937d9b5cd96694f8704af1aa516e138b3d))
+
 ## [2.3.0](https://github.com/coco-research/coco/compare/v2.2.0...v2.3.0) (2026-11-26)
 
 

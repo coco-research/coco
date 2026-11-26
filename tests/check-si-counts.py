@@ -129,8 +129,8 @@ check_two(ARCH, r'Super Intelligence\n\((\d+) skills over (\d+) personas\)',
 check_one(ARCH, r'(\d+) commands derive from thirteen', 'key decision', COMMANDS)
 
 INSTALL = 'docs/install.md'
-check_one(INSTALL, r'`superintelligence` \| 495-persona expert board, generates (\d+) commands at install',
-          'bundle table row', COMMANDS)
+check_two(INSTALL, r'`superintelligence` \| (\d+)-persona expert board, generates (\d+) commands at install',
+          'bundle table row', PERSONAS, COMMANDS)
 
 CI = '.github/workflows/ci.yml'
 check_one(CI, r'invoking the Super Intelligence generators drops (\d+) commands', 'delivery-index comment', COMMANDS)

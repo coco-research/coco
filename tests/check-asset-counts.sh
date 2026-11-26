@@ -181,6 +181,14 @@ else
 fi
 
 echo ""
+echo "=== Super Intelligence registry-to-file consistency ==="
+if python3 tests/check-registry-files.py; then
+  pass "SI team registries match persona files on disk"
+else
+  fail_ "SI team registries disagree with persona files on disk (see above)"
+fi
+
+echo ""
 echo "=== Summary ==="
 if [ "$fail" -eq 0 ]; then
   echo "  all shipped public counts agree with docs/asset-counts.json"

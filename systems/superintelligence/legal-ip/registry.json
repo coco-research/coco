@@ -4,7 +4,7 @@
   "team_id": "legal-ip-super-intelligence",
   "team_name": "Legal & IP Super Intelligence Team",
   "description": "Intellectual property law, patents versus trade secrets, trademarks, copyright permissions, open-source software licenses and dependency redistribution, contributor grants, commercial vendor contracts, indemnity, liability, and termination terms, confidentiality and NDAs, invention assignment, exclusive licensing, privacy law, and antitrust.",
-  "personas_count": 31,
+  "personas_count": 29,
   "cells_count": 7,
   "cells": {
     "ai-ip-governance": {
@@ -85,11 +85,9 @@
     "tech-licensing-contracts": {
       "id": "tech-licensing-contracts",
       "description": "Vendor contracts, indemnity, liability, and termination terms, confidentiality and NDAs, software licensing, and exclusive IP transfers.",
-      "personas_count": 4,
+      "personas_count": 2,
       "personas": [
-        "corynne-cohen",
         "heather-meeker",
-        "michael-carroll",
         "pamela-samuelson"
       ],
       "file_path": "superintelligence/legal-ip/cells/tech-licensing-contracts.md"
@@ -101,12 +99,6 @@
       "real_name": "Ann Cavoukian",
       "cell": "privacy-international-law",
       "file_path": "superintelligence/legal-ip/personas/ann-cavoukian.md"
-    },
-    "corynne-cohen": {
-      "slug": "corynne-cohen",
-      "real_name": "Corynne Cohen",
-      "cell": "tech-licensing-contracts",
-      "file_path": "superintelligence/legal-ip/personas/corynne-cohen.md"
     },
     "dan-burk": {
       "slug": "dan-burk",
@@ -233,12 +225,6 @@
       "real_name": "Mark McKenna",
       "cell": "ip-patent-strategy",
       "file_path": "superintelligence/legal-ip/personas/mark-mckenna.md"
-    },
-    "michael-carroll": {
-      "slug": "michael-carroll",
-      "real_name": "Michael Carroll",
-      "cell": "tech-licensing-contracts",
-      "file_path": "superintelligence/legal-ip/personas/michael-carroll.md"
     },
     "pamela-samuelson": {
       "slug": "pamela-samuelson",

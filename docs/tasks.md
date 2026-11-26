@@ -28,7 +28,7 @@ and can run in parallel.
 | # | Task | Why now | Blocked on |
 | --- | --- | --- | --- |
 | 4 | Fix `.githooks/pre-push`: a false positive in the secret scan, then point it at this repo's real fast gates | the gate that landed in #198 runs the secret scan and `npm test`, which is `node bin/coco.js --help`. It runs no check that catches a regression here. Worse, its secret scan regex is `(api[_-]?key|secret|token).*=.*(sk-\|ghp_\|xox[baprs]-)`, and a single-line file mentioning a token count and the department `risk-compliance` matches on the `sk-` inside "risk". Reproduced on 2026-09-19 while wiring the hook: the gate blocked a push over its own repository's content. Fixed then by not committing the generated ripwire map, but the regex is still fragile, and the playbook's rule 10 is about exactly this: a tool that cries wolf gets ignored and then protects nothing. The real gates total about 4.2 s, measured, so they fit a pre-push budget | nothing |
-| 5 | Persona scale toward 1000 | the owner asked for it on 2026-09-18; the roster is at 495 | tasks 10 and 11 of the loop plan |
+| 5 | Persona scale toward 1000 | the owner asked for it on 2026-09-18; the roster is at 493 | tasks 10 and 11 of the loop plan |
 
 ## Deferred on purpose
 

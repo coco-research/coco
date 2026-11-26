@@ -1,7 +1,7 @@
 {
   "name": "cocosuperintelligence",
-  "version": "2.2.0",
-  "description": "CoCo Super Intelligence — summon an advisory board of 495 world-class minds inside your AI coding session. A vendor-neutral orchestration layer for Claude Code, Cursor, and Codex: 231 skills (193 installed by default), 389 commands, 41 agents, and disk-persistent state. 100% local, no telemetry. Open-core: Apache-2.0 core, proprietary Super Intelligence.",
+  "version": "2.3.0",
+  "description": "CoCo Super Intelligence — summon an advisory board of 493 world-class minds inside your AI coding session. A vendor-neutral orchestration layer for Claude Code, Cursor, and Codex: 231 skills (193 installed by default), 389 commands, 41 agents, and disk-persistent state. 100% local, no telemetry. Open-core: Apache-2.0 core, proprietary Super Intelligence.",
   "bin": {
     "coco": "bin/coco.js"
   },

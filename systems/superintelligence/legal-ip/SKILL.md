@@ -1,6 +1,6 @@
 ---
 name: legal-ip-super-intelligence
-description: "Your legal, IP, and regulatory brain trust. 31 named personas across 7 cells covering patent strategy, tech licensing, regulatory litigation, AI governance, open-source compliance, privacy law, and antitrust."
+description: "Your legal, IP, and regulatory brain trust. 29 named personas across 7 cells covering patent strategy, tech licensing, regulatory litigation, AI governance, open-source compliance, privacy law, and antitrust."
 team_id: legal-ip-super-intelligence
 team_name: Legal & IP Super Intelligence Team
 last_updated: 2026-09-04
@@ -9,7 +9,7 @@ schema_version: 1.0
 
 # Legal & IP Super Intelligence Team — SKILL entry
 
-Your legal, IP, and regulatory brain trust. 31 named personas across 7 cells covering patent strategy, tech licensing, regulatory litigation, AI governance, open-source compliance, privacy law, and antitrust.
+Your legal, IP, and regulatory brain trust. 29 named personas across 7 cells covering patent strategy, tech licensing, regulatory litigation, AI governance, open-source compliance, privacy law, and antitrust.
 
 ## Cells (7)
 
@@ -21,9 +21,9 @@ Your legal, IP, and regulatory brain trust. 31 named personas across 7 cells cov
 | `open-source-compliance` | 3 | Open Source Compliance |
 | `privacy-international-law` | 5 | Privacy International Law |
 | `regulatory-litigation` | 3 | Regulatory Litigation |
-| `tech-licensing-contracts` | 4 | Tech Licensing Contracts |
+| `tech-licensing-contracts` | 2 | Tech Licensing Contracts |
 
-## Personas (31)
+## Personas (29)
 
 Listed by cell. Each has a YAML-frontmatter profile under `personas/<slug>.md`.
 
@@ -39,5 +39,5 @@ Listed by cell. Each has a YAML-frontmatter profile under `personas/<slug>.md`.
 
 **Regulatory Litigation (3):** [danielle-citron](personas/danielle-citron.md) · [jack-balkin](personas/jack-balkin.md) · [lawrence-lessig](personas/lawrence-lessig.md)
 
-**Tech Licensing Contracts (4):** [corynne-cohen](personas/corynne-cohen.md) · [heather-meeker](personas/heather-meeker.md) · [michael-carroll](personas/michael-carroll.md) · [pamela-samuelson](personas/pamela-samuelson.md)
+**Tech Licensing Contracts (2):** [heather-meeker](personas/heather-meeker.md) · [pamela-samuelson](personas/pamela-samuelson.md)
 

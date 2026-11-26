@@ -1,6 +1,6 @@
 # Coco Super Intelligence
 
-495 personas across 13 departments, **231 skills**[^installed] and **389 commands** in the full catalog (coco 2.2.0, 2026-11-21). <!-- x-release-please-version-date -->
+493 personas across 13 departments, **231 skills**[^installed] and **389 commands** in the full catalog (coco 2.3.0, 2026-11-26). <!-- x-release-please-version-date -->
 
 Agent skills, slash commands and subagents for Claude Code, Cursor, Codex and other AI coding agents. One command installs them into the tool you already use. Coco's files and state stay on your machine. Your coding agent still uses its own model provider.
 
@@ -18,14 +18,14 @@ npx cocosuperintelligence
 [![Release](https://img.shields.io/github/v/release/coco-research/coco?style=flat-square&color=1234FF)](https://github.com/coco-research/coco/releases)
 [![Skills](https://img.shields.io/badge/skills-231-5F5F58?style=flat-square&labelColor=0B0B0B)](skills/)
 [![Commands](https://img.shields.io/badge/commands-389-5F5F58?style=flat-square&labelColor=0B0B0B)](commands/)
-[![Personas](https://img.shields.io/badge/personas-495-5F5F58?style=flat-square&color=5F5F58&labelColor=0B0B0B)](systems/superintelligence/)
+[![Personas](https://img.shields.io/badge/personas-493-5F5F58?style=flat-square&color=5F5F58&labelColor=0B0B0B)](systems/superintelligence/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-5F5F58?style=flat-square&labelColor=0B0B0B)](LICENSE)
 
 Open-core: the core is [Apache-2.0](LICENSE), and Super Intelligence is [proprietary](systems/superintelligence/LICENSE). Relicensed from MIT to Apache-2.0 from 2026-11-05. Earlier releases remain under MIT. Files stay on your machine. No telemetry. A version check may contact GitHub once a day.
 
 ## Why it exists
 
-A hard call in a coding session usually gets one model's opinion, with no name on it and no record of who disagreed. CoCo seats a cross-team board of 495 personas, each modeled on the public writing of a named expert, answering from cited public stances, and returns one pick plus the dissent. They are not those people's views or endorsement. The same install carries the skills and commands that do the work after the verdict, and writes phase state to disk so a cleared chat does not erase the plan. It is not a new model and not a new harness. It installs into the one you already run.
+A hard call in a coding session usually gets one model's opinion, with no name on it and no record of who disagreed. CoCo seats a cross-team board of 493 personas, each modeled on the public writing of a named expert, answering from cited public stances, and returns one pick plus the dissent. They are not those people's views or endorsement. The same install carries the skills and commands that do the work after the verdict, and writes phase state to disk so a cleared chat does not erase the plan. It is not a new model and not a new harness. It installs into the one you already run.
 
 ## See it
 
@@ -46,7 +46,7 @@ An illustration built from a real `/SI-Decide` run (Claude Sonnet 5.5, 30 Septem
 
 Prerequisites: git, bash, Node.js 14 or newer (for `npx`), and python3 (it generates the `/SI-*` commands).
 
-`npx cocosuperintelligence` installs the latest release. It clones the pinned release tag (currently `v2.2.0`, not floating `main`) into `./coco` of the current directory, then runs `install.sh`. Run it from your home folder, so the clone is `~/coco` and not a folder inside another project. On a fresh machine it took about 3 minutes, including the download. <!-- x-release-please-version -->
+`npx cocosuperintelligence` installs the latest release. It clones the pinned release tag (currently `v2.3.0`, not floating `main`) into `./coco` of the current directory, then runs `install.sh`. Run it from your home folder, so the clone is `~/coco` and not a folder inside another project. On a fresh machine it took about 3 minutes, including the download. <!-- x-release-please-version -->
 
 ```bash
 npx cocosuperintelligence
@@ -74,7 +74,7 @@ folder. It makes no network or model calls and does not install the suggestions.
 ## What it does
 
 - Get one clear pick on a hard call, with the disagreement named and each stance cited.
-- Ask in one line. `/SI-Decide` seats 16-32 of 495 personas across 13 departments. Add `--debate` for reaction rounds.
+- Ask in one line. `/SI-Decide` seats 16-32 of 493 personas across 13 departments. Add `--debate` for reaction rounds.
 - Keep going after `/clear`. Decisions, phase state, and progress stay on disk.
 - Install into Claude Code, Cursor, Codex, VS Code, or another adapter. Your model and your keys stay yours.
 - Carry the verdict into the work: planning, review, verification, PRDs, and a pull request, with gates that have real exit codes.
@@ -87,7 +87,7 @@ folder. It makes no network or model calls and does not install the suggestions.
   <img src="docs/readme/how-it-works-light.svg" width="100%" alt="From /SI-Decide through an orchestrator seating 16-32 personas to a decision, with a dashed named-dissent branch off the debate step">
 </picture>
 
-You type a question. The orchestrator scores 495 personas across 13 departments on domain fit, cell coverage, and productive conflict, then seats 16-32. Each seated persona is modeled on the public writing of a named expert, answers from cited public stances, and is not that person's views or endorsement. `--debate` adds reaction rounds before the tally. The decision is one pick, the dissents are named, and a stance check flags anything that does not trace to a source.
+You type a question. The orchestrator scores 493 personas across 13 departments on domain fit, cell coverage, and productive conflict, then seats 16-32. Each seated persona is modeled on the public writing of a named expert, answers from cited public stances, and is not that person's views or endorsement. `--debate` adds reaction rounds before the tally. The decision is one pick, the dissents are named, and a stance check flags anything that does not trace to a source.
 
 How the router scores teams: [`systems/superintelligence/README.md`](systems/superintelligence/README.md). What each editor actually receives: [`adapters/INDEX.md`](adapters/INDEX.md).
 
@@ -154,7 +154,7 @@ Super Intelligence summons a panel inside the session you already have open. Eve
 /SI-GRC-Review "Check this customer onboarding flow for GDPR compliance"
 ```
 
-**495 expert personas**, organized across 13 specialized departments:
+**493 expert personas**, organized across 13 specialized departments:
 
 | Department | Experts | Focus |
 |---|---:|---|
@@ -163,7 +163,7 @@ Super Intelligence summons a panel inside the session you already have open. Eve
 | **Product & Design** | 56 | Design systems, UX, product strategy, growth loops |
 | **Finance** | 47 | Valuation, corporate finance, macro modeling, fintech infrastructure |
 | **Trading** | 46 | Quant analysis, market microstructure, derivatives pricing, crypto liquidity |
-| **Legal & IP** | 31 | Privacy law, antitrust, patent and copyright policy, digital rights |
+| **Legal & IP** | 29 | Privacy law, antitrust, patent and copyright policy, digital rights |
 | **Risk & Compliance (GRC)** | 30 | GDPR, HIPAA, SOC 2, security auditing, international regulation |
 | **Strategy** | 29 | Platform economics, business models, competitive analysis |
 | **Data & Analytics** | 29 | Data engineering, pipeline optimization, predictive modeling |
@@ -177,7 +177,7 @@ Super Intelligence summons a panel inside the session you already have open. Eve
 - **Two-stage routing.** Stage A reads the meta-registry and picks the top teams. Stage B loads compact records for those teams only and seats 16-32 people with weights 0.40 domain, 0.30 cell coverage, 0.30 productive conflict, then pairs opposing views. If one team dominates, that team's own orchestrator takes the question.
 - **`--debate`.** The panel argues in reacting rounds, then returns a verdict with named dissent instead of a false consensus.
 
-The 495-persona roster was compiled with a systematic multi-tier workflow. Candidate generation was evaluated across local Qwen (via LM Studio), a hosted small model, and Gemini Flash, but **Claude research agents proved the quality winner** for resolving historical data and citing verifiable signal. Personas are checked by an advisory validation gate (`validate_persona.py`) that enforces five things: every required frontmatter field is present; at least 4 cited URLs resolve live (non-404); every `public_stance` carries an `evidence_url`, so no stance is uncited; at least 2 recent signals within 12 months (or 2 persistent signals for historical archetypes); and any `pairs_well_with` / `productive_conflict_with` slug refers to a real roster member. Two limits are worth stating plainly: the gate confirms that a stance is *cited*, not that a quotation is authentic, and `home_team` is only checked for presence, not validated against the list of real teams. A `NEEDS-TOPUP` verdict is advisory. It does not currently affect which personas a council selects at runtime.
+The 493-persona roster was compiled with a systematic multi-tier workflow. Candidate generation was evaluated across local Qwen (via LM Studio), a hosted small model, and Gemini Flash, but **Claude research agents proved the quality winner** for resolving historical data and citing verifiable signal. Personas are checked by an advisory validation gate (`validate_persona.py`) that enforces five things: every required frontmatter field is present; at least 4 cited URLs resolve live (non-404); every `public_stance` carries an `evidence_url`, so no stance is uncited; at least 2 recent signals within 12 months (or 2 persistent signals for historical archetypes); and any `pairs_well_with` / `productive_conflict_with` slug refers to a real roster member. Two limits are worth stating plainly: the gate confirms that a stance is *cited*, not that a quotation is authentic, and `home_team` is only checked for presence, not validated against the list of real teams. A `NEEDS-TOPUP` verdict is advisory. It does not currently affect which personas a council selects at runtime.
 
 ## Skills catalog
 
@@ -216,7 +216,7 @@ Six bundles install by default. `--core-only` skips them. `--systems <list>` ins
 
 1. **GSD.** An orchestration engine of **68 skills and 24 agents** for phased work on a large codebase. The pinned upstream toolkit is bundled and linked by the Claude Code installer without replacing a user installation; see [`systems/gsd/README.md`](systems/gsd/README.md). Phase state lives in `.planning/`. Workstreams are isolated git checkouts.
 2. **Brain.** A local knowledge-graph engine of **6 skills**. SQLite indexes code entities, decisions, and project terms. The wiki generator writes a page per entity.
-3. **Super Intelligence.** The **495-persona advisory board** and its **342 generated `/SI-*` commands** across 13 teams. This is the board [above](#the-board).
+3. **Super Intelligence.** The **493-persona advisory board** and its **342 generated `/SI-*` commands** across 13 teams. This is the board [above](#the-board).
 4. **HyperFrames.** **20 skills** for video and motion, vendored from HeyGen's `hyperframes` under Apache-2.0.
 5. **M0.** **4 skills** for a cross-tool memory thread in one local SQLite file. Python standard library only.
 6. **Cognee.** **3 skills** for a local Cognee graph. They fall back to Brain when `cognee server` is not running.
@@ -232,7 +232,7 @@ A default Claude Code install delivers **193 skills, 389 commands and 41 agents*
 <td align="center" width="20%"><h3>231</h3><sub>Skills</sub><br><small>79 Core + 152 Bundle · 193 install by default</small></td>
 <td align="center" width="20%"><h3>389</h3><sub>Slash Commands</sub><br><small>47 Core + 342 Generated</small></td>
 <td align="center" width="20%"><h3>41</h3><sub>Specialized Agents</sub><br><small>17 Core + 24 Bundle</small></td>
-<td align="center" width="20%"><h3>495</h3><sub>Expert Personas</sub><br><small>Super Intelligence Board</small></td>
+<td align="center" width="20%"><h3>493</h3><sub>Expert Personas</sub><br><small>Super Intelligence Board</small></td>
 <td align="center" width="20%"><h3>15</h3><sub>Cross-IDE Rules</sub><br><small>Cursor MDC Rules</small></td>
 </tr>
 </table>
@@ -249,7 +249,7 @@ A default Claude Code install delivers **193 skills, 389 commands and 41 agents*
 <tr><td><strong>Total Skills</strong></td><td>231 in the repository (79 Core + 152 Bundle); 193 install by default on Claude Code</td></tr>
 <tr><td><strong>Slash Commands</strong></td><td>389 on a default install — 47 Core (shipped) + 342 Super Intelligence (325 per-team + 17 cross-team, generated at install)</td></tr>
 <tr><td><strong>Specialized Agents</strong></td><td>34 (10 Core + 24 Bundle)</td></tr>
-<tr><td><strong>Expert Personas</strong></td><td>495 across 13 departments and 98 cells</td></tr>
+<tr><td><strong>Expert Personas</strong></td><td>493 across 13 departments and 98 cells</td></tr>
 <tr><td><strong>System Bundles</strong></td><td>6 (GSD, Brain, Cognee, HyperFrames, Super Intelligence, M0) — installed by default. <code>reverse-skill</code>, the security-testing bundle, stays opt-in with <code>--systems reverse-skill</code>. <code>/team</code> is core and needs no flag.</td></tr>
 <tr><td><strong>Cross-IDE Rules</strong></td><td>15 (.mdc files)</td></tr>
 <tr><td><strong>Workflows Defined</strong></td><td>3 (.md pipelines)</td></tr>

@@ -406,12 +406,9 @@ jobs:
     # Router regression gate (router eval audit step 3). Reruns evals/routing/score.py
     # in auto mode on the heldout split and fails if top-1 or delegate precision drops
     # below the newest file in evals/routing/runs/ (or the pinned model digest changed).
-    # Runs on the self-hosted Mac (no GitHub-hosted minutes) against an Ollama that is
-    # already there. Nothing is downloaded or pulled; if Ollama or the model is missing
-    # the job fails on main and prints a skip (exit 0) on PRs. No paid API, no key, loopback only.
-    # Fork PRs never get the self-hosted runner.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: [self-hosted, macOS, ARM64, local]
+    # Runs on a GitHub-hosted Ubuntu runner with Ollama pinned to v0.33.2 by sha256
+    # and the model digest pinned by the gate. Loopback only, no key, no paid API.
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
       COCO_EMBED_URL: http://127.0.0.1:11434/v1/embeddings
@@ -420,7 +417,41 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # No actions/setup-python here: it is broken on this runner (see self-hosted-probe.yml).
+      - name: Cache Ollama engine and model
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.ollama/models
+            ~/.cache/ollama-dl/ollama-linux-amd64.tar.zst
+          key: ollama-0.33.2-nomic-embed-text-latest
+
+      - name: Install and start pinned Ollama
+        run: |
+          set -euo pipefail
+          TARBALL="$HOME/.cache/ollama-dl/ollama-linux-amd64.tar.zst"
+          mkdir -p "$HOME/.cache/ollama-dl"
+          if [ ! -f "$TARBALL" ]; then
+            curl -fsSL -o "$TARBALL" \
+              https://github.com/ollama/ollama/releases/download/v0.33.2/ollama-linux-amd64.tar.zst
+          fi
+          echo "9785247dea264d9072f09f6c9c0eb4b8e666892826a3d8388eba3e8fb9ed1db9  $TARBALL" | sha256sum -c -
+          sudo tar --zstd -C /usr -xf "$TARBALL"
+          nohup ollama serve </dev/null >/tmp/ollama-serve.log 2>&1 &
+          ready=0
+          for _ in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:11434/api/version; then
+              echo ""
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/ollama-serve.log >&2 || true
+            exit 1
+          fi
+          ollama pull nomic-embed-text
+
       - name: Gate self-test
         run: python3 evals/routing/check_regression.py --self-test
 
@@ -435,3 +466,12 @@ jobs:
       - name: Router regression gate
         if: steps.probe.outputs.ok == '1'
         run: python3 evals/routing/check_regression.py --write "$RUNNER_TEMP/router-run.json"
+
+      - name: Upload router-run artifact
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: router-run
+          path: ${{ runner.temp }}/router-run.json
+          retention-days: 14
+          if-no-files-found: warn

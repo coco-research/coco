@@ -47,7 +47,7 @@ fails any published claim that disagrees with it.
 | Commands | 386 | 44 shipped, 342 generated at install time across 7 namespaces |
 | Agents | 34 | 10 core roles plus 24 GSD agents |
 | Rules | 15 | Cursor `.mdc` behavioural rules |
-| Personas | 495 | Across 13 Super Intelligence departments |
+| Personas | 493 | Across 13 Super Intelligence departments |
 | Adapters | 16 | One installer and manifest per target editor or CLI |
 | Bundles | 7 | Installed by default: gsd, brain, cognee, hyperframes, superintelligence, m0. Opt-in: reverse-skill. (`team` and `learning` ship no installable artifacts.) |
 

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03",
+  "generated_at": "2026-11-25",
   "team_id": "finance-super-intelligence",
   "team_name": "Finance Super Intelligence Team",
   "description": "Corporate finance, FP&A budgeting, cash runway and burn forecasting, fixed versus usage-based cost modeling, subscription unit economics, break-even analysis, margin and CAC sensitivity, accrual revenue versus cash flow, working capital, debt versus equity financing, DCF company valuation, forensic accounting, macroeconomics, and fintech.",
@@ -199,9 +199,9 @@
       "real_name": "Angela Strange",
       "archetype": "Fintech infrastructure investor—product-led, AI-native systems-thinker",
       "teams": [
-        "a16z fintech"
+        "finance-super-intelligence"
       ],
-      "home_team": "a16z fintech",
+      "home_team": "finance-super-intelligence",
       "cell": "fintech-payments",
       "cell_role": "investor",
       "status": "active",
@@ -1782,7 +1782,7 @@
       ],
       "productive_conflict_with": [],
       "sources_count": 6,
-      "recent_signal_12mo_count": 1,
+      "recent_signal_12mo_count": 3,
       "persistent_signals_count": 0,
       "public_stances_count": 2,
       "confidence": 0.62,
@@ -1860,7 +1860,7 @@
       ],
       "productive_conflict_with": [],
       "sources_count": 14,
-      "recent_signal_12mo_count": 0,
+      "recent_signal_12mo_count": 3,
       "persistent_signals_count": 0,
       "public_stances_count": 1,
       "confidence": 0.72,

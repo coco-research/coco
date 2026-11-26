@@ -1,0 +1,27 @@
+{
+  "top1_accuracy": 0.8793103448275862,
+  "top4_recall": 0.9741379310344828,
+  "delegate_precision": 1.0,
+  "abstain_rate": 1.0,
+  "per_team_top1": {
+    "ai": 0.7777777777777778,
+    "climate-energy": 1.0,
+    "data-analytics": 0.8888888888888888,
+    "education-edtech": 0.8888888888888888,
+    "engineering": 0.6,
+    "finance": 1.0,
+    "gtm": 0.6666666666666666,
+    "healthcare-life-sciences": 1.0,
+    "legal-ip": 0.9,
+    "product-design": 1.0,
+    "risk-compliance": 1.0,
+    "strategy": 0.8888888888888888,
+    "trading": 0.875
+  },
+  "run": {
+    "mode": "auto",
+    "split": "heldout",
+    "embed_model": "nomic-embed-text",
+    "embed_digest": "0a109f422b47e3a30ba2b10eca18548e944e8a23073ee3f3e947efcf3c45e59f"
+  }
+}

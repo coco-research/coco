@@ -4,6 +4,25 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [2.3.0](https://github.com/coco-research/coco/compare/v2.2.0...v2.3.0) (2026-11-26)
+
+
+### Features
+
+* **personas:** check-personas rules (i)-(k), --all and a hardened --links ([#536](https://github.com/coco-research/coco/issues/536)) ([cb50e47](https://github.com/coco-research/coco/commit/cb50e479ef6618ce174ec291acd975612b4fc35f))
+* **personas:** held personas may have empty lists and skip the registry ([#553](https://github.com/coco-research/coco/issues/553)) ([251600a](https://github.com/coco-research/coco/commit/251600ab07c9d6a715beec2b8d0e377a8d8e9a39))
+
+
+### Bug Fixes
+
+* **evals:** treat a timed-out Ollama probe as not available ([#543](https://github.com/coco-research/coco/issues/543)) ([b915ee1](https://github.com/coco-research/coco/commit/b915ee1125800f3b141b6a13e199d7b2e82dac50))
+* **healthcare:** rename the uzeyn-damania persona to zubin-damania ([#542](https://github.com/coco-research/coco/issues/542)) ([7b1f682](https://github.com/coco-research/coco/commit/7b1f6829b00ef1231ac2307fa74d530ce69dc21e)), closes [#466](https://github.com/coco-research/coco/issues/466)
+* **registry:** ai, engineering, product-design generators match their registries, no registry change ([#534](https://github.com/coco-research/coco/issues/534)) ([921f459](https://github.com/coco-research/coco/commit/921f459d106976b485eb60789469e0bce56cf468))
+* **registry:** own generators for climate-energy and education-edtech, no registry change ([#532](https://github.com/coco-research/coco/issues/532)) ([1f3b47f](https://github.com/coco-research/coco/commit/1f3b47fe225fe6b9468722fe2a479456579dba83))
+* **registry:** own generators for healthcare-life-sciences and legal-ip, no registry change ([#533](https://github.com/coco-research/coco/issues/533)) ([859ca25](https://github.com/coco-research/coco/commit/859ca25ade9fa49f6eadb8af7cb7c2b0d89c6938))
+* **registry:** regenerate ai, engineering, finance and data-analytics registries ([#558](https://github.com/coco-research/coco/issues/558)) ([f1097cc](https://github.com/coco-research/coco/commit/f1097ccfe9866a58c89238d0366d07c6f75595c5))
+* **registry:** six team generators match their registries, no registry change ([#535](https://github.com/coco-research/coco/issues/535)) ([e63fbd8](https://github.com/coco-research/coco/commit/e63fbd815e02b3db53de700146db180b0b75e761))
+
 ## [2.2.0](https://github.com/coco-research/coco/compare/v2.1.0...v2.2.0) (2026-11-21)
 
 

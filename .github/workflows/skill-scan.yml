@@ -143,16 +143,16 @@ jobs:
             # 0 and 1 both leave a report to read. Anything else is a broken run and
             # fails here rather than being read as a clean scan.
             rc=0
-            skillspector scan "$dir" --no-llm --format json --output "$report" || rc=$?
+            skillspector scan "$dir" --baseline .github/skill-scan/baseline.yaml --no-llm --format json --output "$report" || rc=$?
             case "$rc" in
-              0|1) printf '%s\t%s\n' "$rc" "$dir" >> "$out/exit-codes.txt" ;;
+              0|1) printf '%s\t%s\t%s\n' "$rc" "$dir" "$(basename "$report")" >> "$out/exit-codes.txt" ;;
               *) echo "::error::skillspector exited $rc for $dir"; exit 1 ;;
             esac
           done < "$RUNNER_TEMP/skill-dirs.txt"
 
       - name: Fail on a high or critical finding
         if: steps.changed.outputs.count != '0'
-        run: python3 .github/skill-scan/summarize.py "$RUNNER_TEMP/skill-scan"
+        run: python3 .github/skill-scan/summarize.py "$RUNNER_TEMP/skill-scan" --allow-suppressed systems/m0/skills/m0
 
   fixtures:
     name: Fixture assertion
@@ -204,8 +204,8 @@ jobs:
           test "$bad_rc" -eq 1 || { echo "::error::bad/ must exit 1, got $bad_rc"; exit 1; }
           test "$good_rc" -eq 0 || { echo "::error::good/ must exit 0, got $good_rc"; exit 1; }
 
-          printf '%s\t%s\n' "$bad_rc" "tests/fixtures/skillspector/bad" > "$out/bad/exit-codes.txt"
-          printf '%s\t%s\n' "$good_rc" "tests/fixtures/skillspector/good" > "$out/good/exit-codes.txt"
+          printf '%s\t%s\t%s\n' "$bad_rc" "tests/fixtures/skillspector/bad" "bad.json" > "$out/bad/exit-codes.txt"
+          printf '%s\t%s\t%s\n' "$good_rc" "tests/fixtures/skillspector/good" "good.json" > "$out/good/exit-codes.txt"
 
           bad_sum_rc=0
           bad_out="$(python3 .github/skill-scan/summarize.py "$out/bad")" || bad_sum_rc=$?
@@ -220,3 +220,54 @@ jobs:
           test "$good_sum_rc" -eq 0 || { echo "::error::summarize.py on good/ must exit 0, got $good_sum_rc"; exit 1; }
           printf '%s\n' "$good_out" | grep -Fq '0 problem(s)' \
             || { echo "::error::good/ summary missing 0 problem(s)"; exit 1; }
+
+      - name: The TT3 bridge waiver fixtures enforce the boundary
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/skill-waiver-fixtures"
+          mkdir -p "$out"
+
+          run_waiver() {
+            local name="$1" dir="$2" allow="$3" want="$4"
+            local case_dir="$out/$name"
+            mkdir -p "$case_dir"
+            local scan_rc=0
+            skillspector scan "$dir" --baseline .github/skill-scan/baseline.yaml --no-llm --format json \
+              --output "$case_dir/report.json" || scan_rc=$?
+            case "$scan_rc" in
+              0|1) printf '%s\t%s\t%s\n' "$scan_rc" "$dir" "report.json" > "$case_dir/exit-codes.txt" ;;
+              *) echo "::error::$name: skillspector exited $scan_rc"; exit 1 ;;
+            esac
+            local sum_rc=0 sum_out=""
+            if [ -n "$allow" ]; then
+              sum_out="$(python3 .github/skill-scan/summarize.py "$case_dir" --allow-suppressed "$allow")" || sum_rc=$?
+            else
+              sum_out="$(python3 .github/skill-scan/summarize.py "$case_dir")" || sum_rc=$?
+            fi
+            echo "=== $name (scan=$scan_rc, sum=$sum_rc, want=$want) ==="
+            printf '%s\n' "$sum_out"
+            test "$sum_rc" -eq "$want" || { echo "::error::$name: summarize.py exited $sum_rc, want $want"; exit 1; }
+            if [ "$want" -eq 0 ]; then
+              printf '%s\n' "$sum_out" | grep -Eq 'suppressed 1: TT3 scripts/m0_mcp\.py:[0-9]+' \
+                || { echo "::error::$name: missing suppressed 1: TT3 scripts/m0_mcp.py:<line>"; exit 1; }
+            fi
+          }
+
+          base="tests/fixtures/skillspector"
+          run_waiver "waiver_a" "$base/waiver_a" "$base/waiver_a" 0
+          run_waiver "waiver_b" "$base/waiver_b" "$base/waiver_b" 1
+          run_waiver "waiver_c" "$base/waiver_c" "$base/waiver_c" 1
+          run_waiver "waiver_d" "$base/waiver_d" "$base/waiver_d" 1
+          run_waiver "waiver_e" "$base/waiver_e" "$base/waiver_e" 1
+          run_waiver "waiver_f" "$base/waiver_f" "$base/waiver_f" 1
+          run_waiver "waiver_g" "$base/waiver_g" "$base/waiver_a" 1
+          run_waiver "waiver_h" "$base/waiver_h" "$base/waiver_h" 1
+          run_waiver "waiver_i" "$base/waiver_i" "$base/waiver_i" 1
+          run_waiver "waiver_j" "$base/waiver_j" "$base/waiver_j" 1
+          run_waiver "waiver_k" "$base/waiver_k" "$base/waiver_k" 1
+
+          srv="$out/m0_server_skill"
+          cp -R "$base/waiver_a" "$srv"
+          cp "systems/m0/skills/m0/scripts/m0_server.py" "$srv/scripts/m0_server.py"
+          cmp -s "systems/m0/skills/m0/scripts/m0_server.py" "$srv/scripts/m0_server.py"
+          run_waiver "m0_server_pass" "$srv" "$srv" 0

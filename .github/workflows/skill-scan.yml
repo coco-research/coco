@@ -16,6 +16,8 @@ name: Skill scan
 # Exit codes, from the upstream README: 0 = SAFE or CAUTION, 1 = risk score above 50
 # (or a --fail-on-findings hit), 2 = usage. The scan step gates on that default exit
 # code, and the report step adds an explicit high/critical severity check on top.
+# Both jobs share .github/skill-scan/summarize.py to parse reports by schema and print
+# rule id, file:line, and severity for each high or critical finding.
 
 env:
   # The commit tagged v2.13.4, not the tag itself: a tag can be moved, a commit cannot.
@@ -28,6 +30,7 @@ on:
       - 'skills/**'
       - 'systems/**/skills/**'
       - '.github/workflows/skill-scan.yml'
+      - '.github/skill-scan/**'
       - 'tests/fixtures/skillspector/**'
 
 permissions:
@@ -149,63 +152,7 @@ jobs:
 
       - name: Fail on a high or critical finding
         if: steps.changed.outputs.count != '0'
-        run: |
-          python3 - "$RUNNER_TEMP/skill-scan" <<'PY'
-          import json
-          import pathlib
-          import sys
-
-          SEVERE = {"high", "critical"}
-          root = pathlib.Path(sys.argv[1])
-          problems = []
-
-          def severity(node):
-              for key in ("severity", "level"):
-                  value = node.get(key)
-                  if isinstance(value, str) and value.strip():
-                      return value.strip().lower()
-              return None
-
-          def walk(node, where):
-              if isinstance(node, dict):
-                  level = severity(node)
-                  if level in SEVERE:
-                      label = next((node[key] for key in ("title", "message", "rule", "rule_id", "id")
-                                    if isinstance(node.get(key), str)), "unnamed finding")
-                      problems.append(f"{where}: [{level}] {label}")
-                  for value in node.values():
-                      walk(value, where)
-              elif isinstance(node, list):
-                  for value in node:
-                      walk(value, where)
-
-          codes = root / "exit-codes.txt"
-          lines = codes.read_text(encoding="utf-8").splitlines() if codes.is_file() else []
-          for line in lines:
-              code, _, where = line.partition("\t")
-              if code.strip() == "1":
-                  problems.append(f"{where}: skillspector exited 1, so the folder is above "
-                                  "the default risk threshold")
-
-          reports = sorted(root.glob("*.json"))
-          if not reports:
-              problems.append("no report was written for any changed skill folder")
-          elif len(reports) != len(lines):
-              problems.append(f"{len(lines)} skill folder(s) scanned but {len(reports)} "
-                              "report(s) written")
-          for report in reports:
-              try:
-                  data = json.loads(report.read_text(encoding="utf-8"))
-              except (OSError, ValueError) as error:
-                  problems.append(f"{report.name}: not a readable JSON report ({error})")
-                  continue
-              walk(data, report.name)
-
-          for problem in problems:
-              print(f"::error::{problem}")
-          print(f"{len(reports)} report(s) checked, {len(problems)} problem(s)")
-          sys.exit(1 if problems else 0)
-          PY
+        run: python3 .github/skill-scan/summarize.py "$RUNNER_TEMP/skill-scan"
 
   fixtures:
     name: Fixture assertion
@@ -242,14 +189,14 @@ jobs:
         run: |
           set -euo pipefail
           out="$RUNNER_TEMP/skill-fixtures"
-          mkdir -p "$out"
+          mkdir -p "$out/bad" "$out/good"
 
           bad_rc=0
           skillspector scan tests/fixtures/skillspector/bad --no-llm --format json \
-            --output "$out/bad.json" --fail-on-findings || bad_rc=$?
+            --output "$out/bad/bad.json" --fail-on-findings || bad_rc=$?
           good_rc=0
           skillspector scan tests/fixtures/skillspector/good --no-llm --format json \
-            --output "$out/good.json" --fail-on-findings || good_rc=$?
+            --output "$out/good/good.json" --fail-on-findings || good_rc=$?
 
           echo "bad/ exit $bad_rc (want 1), good/ exit $good_rc (want 0)"
           # With --fail-on-findings, exit 1 is the upstream contract for "at least one
@@ -257,47 +204,19 @@ jobs:
           test "$bad_rc" -eq 1 || { echo "::error::bad/ must exit 1, got $bad_rc"; exit 1; }
           test "$good_rc" -eq 0 || { echo "::error::good/ must exit 0, got $good_rc"; exit 1; }
 
-          # The reports must agree with the exit codes: read them back, and fail on a
-          # report that cannot be parsed or that calls good/ high or critical.
-          python3 - "$out" <<'PY'
-          import json
-          import pathlib
-          import sys
+          printf '%s\t%s\n' "$bad_rc" "tests/fixtures/skillspector/bad" > "$out/bad/exit-codes.txt"
+          printf '%s\t%s\n' "$good_rc" "tests/fixtures/skillspector/good" > "$out/good/exit-codes.txt"
 
-          SEVERE = {"high", "critical"}
-          out = pathlib.Path(sys.argv[1])
+          bad_sum_rc=0
+          bad_out="$(python3 .github/skill-scan/summarize.py "$out/bad")" || bad_sum_rc=$?
+          printf '%s\n' "$bad_out"
+          test "$bad_sum_rc" -eq 1 || { echo "::error::summarize.py on bad/ must exit 1, got $bad_sum_rc"; exit 1; }
+          printf '%s\n' "$bad_out" | grep -Eq '\[(high|critical)\] [^[:space:]]+ [^[:space:]]*SKILL\.md:[0-9]+ ' \
+            || { echo "::error::bad/ summary missing high/critical rule id and SKILL.md:line"; exit 1; }
 
-          def severities(node):
-              if isinstance(node, dict):
-                  for key in ("severity", "level"):
-                      value = node.get(key)
-                      if isinstance(value, str) and value.strip():
-                          yield value.strip().lower()
-                  for value in node.values():
-                      yield from severities(value)
-              elif isinstance(node, list):
-                  for value in node:
-                      yield from severities(value)
-
-          def read(name):
-              try:
-                  return json.loads((out / name).read_text(encoding="utf-8"))
-              except (OSError, ValueError) as error:
-                  sys.exit(f"::error::{name}: no readable report ({error})")
-
-          bad = sorted(severities(read("bad.json")))
-          good = sorted(severities(read("good.json")))
-          print(f"bad/ severities: {bad or 'none reported'}")
-          print(f"good/ severities: {good or 'none reported'}")
-
-          # bad/ must carry a severity, or the high/critical gate in the scan job has
-          # nothing to read and would pass every folder as clean.
-          problems = []
-          if not bad:
-              problems.append("bad/ reported no severity, so the high/critical gate would "
-                              "never fire")
-          problems += [f"good/ reported a {level} severity" for level in good if level in SEVERE]
-          for problem in problems:
-              print(f"::error::{problem}")
-          sys.exit(1 if problems else 0)
-          PY
+          good_sum_rc=0
+          good_out="$(python3 .github/skill-scan/summarize.py "$out/good")" || good_sum_rc=$?
+          printf '%s\n' "$good_out"
+          test "$good_sum_rc" -eq 0 || { echo "::error::summarize.py on good/ must exit 0, got $good_sum_rc"; exit 1; }
+          printf '%s\n' "$good_out" | grep -Fq '0 problem(s)' \
+            || { echo "::error::good/ summary missing 0 problem(s)"; exit 1; }

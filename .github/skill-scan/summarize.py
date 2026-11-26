@@ -51,6 +51,7 @@ FORBIDDEN_BUILTIN_NAMES = {
 FORBIDDEN_ATTR_CALLS = {
     "__import__", "exec", "eval", "import_module", "system", "popen", "create_connection",
 }
+FORBIDDEN_ATTRS = {"format", "format_map"}
 
 
 def _is_forbidden_os_attr(attr: str) -> bool:
@@ -134,6 +135,8 @@ def _check_common(
                 and node.attr not in ALLOWED_DUNDER_ATTRS
             ):
                 errs.append(f"{prefix}: forbidden dunder attribute {node.attr}")
+            elif node.attr in FORBIDDEN_ATTRS:
+                errs.append(f"{prefix}: forbidden attribute {node.attr}")
             elif node.attr == "modules" and isinstance(node.value, ast.Name) and node.value.id == "sys":
                 errs.append(f"{prefix}: forbidden attribute sys.modules")
             elif isinstance(node.value, ast.Name) and node.value.id == "os" and _is_forbidden_os_attr(node.attr):

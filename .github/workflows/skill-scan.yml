@@ -272,6 +272,10 @@ jobs:
           run_waiver "waiver_j" "$base/waiver_j" "$base/waiver_j" 1 "sibling check (helper.py): disallowed env reference .environ"
           run_waiver "waiver_k" "$base/waiver_k" "$base/waiver_k" 1 "sibling check (helper.py): disallowed import http.server"
 
+          wt="$out/waiver_t_skill"; cp -R "$base/waiver_a" "$wt"
+          printf 'import os\ns = "{0.environ}".format(os)\n' > "$wt/scripts/helper.py"
+          run_waiver "waiver_t" "$wt" "$wt" 1 "sibling check (helper.py): forbidden attribute format"
+
           wl="$out/waiver_l_skill"; cp -R "$base/waiver_a" "$wl"
           printf 'import asyncio\n' > "$wl/scripts/helper.py"
           run_waiver "waiver_l" "$wl" "$wl" 1 "sibling check (helper.py): disallowed import asyncio"

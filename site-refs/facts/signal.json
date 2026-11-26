@@ -1,0 +1,42 @@
+[
+  {
+    "claim": "Signal defines the typographic scale, light paper and dark stage tokens, and semantic state rules used across Coco Research interfaces.",
+    "section": "what-it-is",
+    "source": "catalog:data/products.json:56"
+  },
+  {
+    "claim": "Three editions with first-class light paper and dark stage tokens across desktop and phone viewports.",
+    "section": "capabilities",
+    "source": "signal:assets/css/product.css:1"
+  },
+  {
+    "claim": "Archivo and Martian Mono variable typography scale with tabular numerals for counts and baselines.",
+    "section": "capabilities",
+    "source": "signal:assets/css/product.css:18"
+  },
+  {
+    "claim": "Zero runtime network requests, analytics beacons or tracking scripts in page stylesheets and scripts.",
+    "section": "capabilities",
+    "source": "signal:tests/check-product-pages.py:68"
+  },
+  {
+    "claim": "Native prefers-reduced-motion rules disable transitions and WebGL motion cleanly.",
+    "section": "capabilities",
+    "source": "signal:assets/css/product.css:376"
+  },
+  {
+    "claim": "Details soon for upcoming design-language milestones; the public repository does not list a packaged roadmap yet.",
+    "section": "cooking",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Source available: Apache-2.0-licensed CSS and documentation on GitHub, with no packaged release today.",
+    "section": "stage",
+    "source": "catalog:data/products.json:57"
+  },
+  {
+    "claim": "Launch target: Not dated yet.",
+    "section": "when",
+    "source": "launch-window:not-dated"
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "claim": "Coco Loops provides governance for autonomous agent loops: rules, adversary checks, budget caps and an audit trail.",
+    "section": "what-it-is",
+    "source": "catalog:data/products.json:72"
+  },
+  {
+    "claim": "Details soon for capability specifics pending repository release.",
+    "section": "capabilities",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Details soon for roadmap milestones pending repository release.",
+    "section": "cooking",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Source available: public repository, no packaged release today.",
+    "section": "stage",
+    "source": "catalog:data/products.json:73"
+  },
+  {
+    "claim": "Launch target: Not dated yet.",
+    "section": "when",
+    "source": "launch-window:not-dated"
+  }
+]

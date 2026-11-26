@@ -43,6 +43,7 @@ ALLOWED_FROM_SERVER = {
     "urllib.parse": {"parse_qs", "urlparse"},
 }
 ALLOWED_DUNDER_ATTRS = {"__name__", "__init__"}
+BARE_MODULE_NAMES = {"os", "sys", "urllib"}
 ENV_ATTRS = {"environ", "environb", "getenv", "getenvb", "putenv", "unsetenv"}
 FORBIDDEN_BUILTIN_NAMES = {
     "getattr", "vars", "globals", "locals", "compile",
@@ -93,6 +94,7 @@ def _str_const(node: ast.AST) -> str | None:
 
 def _check_common(
     tree: ast.AST,
+    parents: dict[ast.AST, ast.AST],
     prefix: str,
     allowed_imports: set[str],
     allowed_from: dict[str, set[str]],
@@ -122,8 +124,13 @@ def _check_common(
                     for alias in node.names:
                         if alias.name not in allowed_names:
                             errs.append(f"{prefix}: disallowed from-import {mod}.{alias.name}")
-        elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load) and node.id in FORBIDDEN_BUILTIN_NAMES:
-            errs.append(f"{prefix}: forbidden name {node.id}")
+        elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load):
+            if node.id in FORBIDDEN_BUILTIN_NAMES:
+                errs.append(f"{prefix}: forbidden name {node.id}")
+            elif node.id in BARE_MODULE_NAMES:
+                p = parents.get(node)
+                if not (isinstance(p, ast.Attribute) and p.value is node):
+                    errs.append(f"{prefix}: bare module reference {node.id}")
         elif isinstance(node, ast.Call):
             if isinstance(node.func, ast.Attribute) and node.func.attr in FORBIDDEN_ATTR_CALLS:
                 errs.append(f"{prefix}: forbidden call .{node.func.attr}")
@@ -183,7 +190,7 @@ def _check_bridge_file(path: pathlib.Path) -> list[str]:
         return [f"bridge check: cannot parse {path.name} ({exc})"]
 
     parents = _parent_map(tree)
-    errs = _check_common(tree, "bridge check", ALLOWED_IMPORTS_BRIDGE, ALLOWED_FROM_BRIDGE)
+    errs = _check_common(tree, parents, "bridge check", ALLOWED_IMPORTS_BRIDGE, ALLOWED_FROM_BRIDGE)
     env_errs, transport_calls = _check_env(tree, parents, "bridge check", ALLOWED_BRIDGE_ENV)
     errs.extend(env_errs)
     urlopen_calls = 0
@@ -259,7 +266,7 @@ def _check_sibling_file(path: pathlib.Path, scripts_dir: pathlib.Path) -> list[s
     parents = _parent_map(tree)
     allowed_imports = ALLOWED_IMPORTS_SERVER if is_m0_server else set()
     allowed_from = ALLOWED_FROM_SERVER if is_m0_server else {}
-    errs = _check_common(tree, prefix, allowed_imports, allowed_from)
+    errs = _check_common(tree, parents, prefix, allowed_imports, allowed_from)
     env_errs, _ = _check_env(tree, parents, prefix, None)
     errs.extend(env_errs)
     for node in ast.walk(tree):

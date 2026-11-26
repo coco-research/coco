@@ -153,6 +153,37 @@ def _check_common(
     return errs
 
 
+ALLOWED_SYS_PATH_DUMP = ast.dump(
+    ast.parse("sys.path.insert(0, str(Path(__file__).resolve().parent))", mode="eval").body
+)
+
+
+def _check_sys_path(
+    tree: ast.AST,
+    parents: dict[ast.AST, ast.AST],
+    prefix: str,
+    is_bridge: bool,
+) -> list[str]:
+    errs: list[str] = []
+    ok_calls = 0
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.Attribute)
+            and node.attr == "path"
+            and isinstance(node.value, ast.Name)
+            and node.value.id == "sys"
+        ):
+            if is_bridge:
+                p = parents.get(node)
+                gp = parents.get(p) if isinstance(p, ast.Attribute) and p.value is node and p.attr == "insert" else None
+                if isinstance(gp, ast.Call) and gp.func is p and ast.dump(gp) == ALLOWED_SYS_PATH_DUMP:
+                    ok_calls += 1
+                    if ok_calls <= 1:
+                        continue
+            errs.append(f"{prefix}: sys.path use outside the reviewed insert")
+    return errs
+
+
 def _check_env(
     tree: ast.AST,
     parents: dict[ast.AST, ast.AST],
@@ -191,6 +222,7 @@ def _check_bridge_file(path: pathlib.Path) -> list[str]:
 
     parents = _parent_map(tree)
     errs = _check_common(tree, parents, "bridge check", ALLOWED_IMPORTS_BRIDGE, ALLOWED_FROM_BRIDGE)
+    errs.extend(_check_sys_path(tree, parents, "bridge check", True))
     env_errs, transport_calls = _check_env(tree, parents, "bridge check", ALLOWED_BRIDGE_ENV)
     errs.extend(env_errs)
     urlopen_calls = 0
@@ -267,6 +299,7 @@ def _check_sibling_file(path: pathlib.Path, scripts_dir: pathlib.Path) -> list[s
     allowed_imports = ALLOWED_IMPORTS_SERVER if is_m0_server else set()
     allowed_from = ALLOWED_FROM_SERVER if is_m0_server else {}
     errs = _check_common(tree, parents, prefix, allowed_imports, allowed_from)
+    errs.extend(_check_sys_path(tree, parents, prefix, False))
     env_errs, _ = _check_env(tree, parents, prefix, None)
     errs.extend(env_errs)
     for node in ast.walk(tree):

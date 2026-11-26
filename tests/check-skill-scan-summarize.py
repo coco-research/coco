@@ -263,7 +263,13 @@ def main() -> None:
         ("C9 local", VALID_BRIDGE.replace('TRANSPORT = os.environ.get("M0_MCP_TRANSPORT", "auto").strip().lower()\n', "").replace('if TRANSPORT == "direct":', 'TRANSPORT = os.environ.get("M0_MCP_TRANSPORT", "auto").strip().lower()\n    if TRANSPORT == "direct":'), "module-level name"),
         ("bare sys", "import sys\n" + VALID_BRIDGE + "\nx = sys\n", "bare module reference sys"),
         ("bare urllib", VALID_BRIDGE + "\nX = [urllib]\n", "bare module reference urllib"),
+        ("sys.path twice", "import sys\nfrom pathlib import Path\n" + VALID_BRIDGE + "\nsys.path.insert(0, str(Path(__file__).resolve().parent))\nsys.path.insert(0, str(Path(__file__).resolve().parent))\n", "sys.path use outside the reviewed insert"),
+        ("sys.path insert tmp", "import sys\n" + VALID_BRIDGE + '\nsys.path.insert(0, "/tmp")\n', "sys.path use outside the reviewed insert"),
+        ("sys.path append", "import sys\n" + VALID_BRIDGE + '\nsys.path.append("x")\n', "sys.path use outside the reviewed insert"),
+        ("sys.path assign", "import sys\n" + VALID_BRIDGE + "\np = sys.path\n", "sys.path use outside the reviewed insert"),
+        ("sys.path no resolve", "import sys\nfrom pathlib import Path\n" + VALID_BRIDGE + "\nsys.path.insert(0, str(Path(__file__).parent))\n", "sys.path use outside the reviewed insert"),
     ]
+    assert check_src("import sys\nfrom pathlib import Path\n" + VALID_BRIDGE + "\nsys.path.insert(0, str(Path(__file__).resolve().parent))\n") == []
     for label, src, want in bad_bridges:
         errs = check_src(src)
         assert any(want in e for e in errs), f"bridge case {label} missing {want!r}: {errs}"
@@ -329,6 +335,7 @@ def main() -> None:
         ("bare os arg", {"helper.py": "import os\ndef f(x):\n    return x\nf(os)\n"}, "bare module reference os"),
         ("bare os server", {"m0_server.py": "import os\ndef f(x):\n    return x\nf(os)\n"}, "bare module reference os"),
         ("bare urllib list", {"m0_server.py": "X = [urllib]\n"}, "bare module reference urllib"),
+        ("sibling sys.path template", {"m0_server.py": "import sys\nfrom pathlib import Path\nsys.path.insert(0, str(Path(__file__).resolve().parent))\n"}, "sys.path use outside the reviewed insert"),
     ]
     for label, sibs, want in bad_siblings:
         errs = check_src(VALID_BRIDGE, sibs)

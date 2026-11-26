@@ -288,7 +288,7 @@ Writes into `~/.config/zed/` (override with `ZED_HOME`): the markdown files in `
 | `brain` | 6-skill local knowledge tracker | `--systems brain` |
 | `cognee` | 3-skill knowledge-graph memory | `--systems cognee` |
 | `hyperframes` | 20-skill video and motion suite | `--systems hyperframes` |
-| `superintelligence` | 495-persona expert board, generates 342 commands at install | `--systems superintelligence` |
+| `superintelligence` | 493-persona expert board, generates 342 commands at install | `--systems superintelligence` |
 | `m0` | 4-skill cross-tool agent memory | `--systems m0` |
 
 Combine freely:

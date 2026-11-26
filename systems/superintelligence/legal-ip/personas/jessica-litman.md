@@ -6,7 +6,7 @@ cell: ip-patent-strategy
 cell_role: lead-driver
 real_name: Jessica Litman
 archetype: Michigan law scholar examining copyright history, digital lending, and fair use boundaries
-status: active
+status: held
 affiliations_2026:
   - University of Michigan Law School (Professor)
 past_affiliations:
@@ -19,53 +19,31 @@ domains:
   - first sale doctrine
   - library copyright issues
 signature_moves:
-  - "Copyright's first sale doctrine ensures that once a copy is sold, the owner can resell, lend, or give it away without permission from the copyright holder."
-  - "Digital lending by libraries faces uncertain legal ground because licensing agreements often override statutory rights that apply to physical copies."
-  - "Fair use analysis must consider whether the secondary use serves a different purpose than the original, not just whether it affects potential markets."
-  - "The history of copyright shows repeated cycles of industry panic followed by adaptation when new technologies enable easier copying."
-  - "Controlled digital lending provides a balanced approach where libraries lend digital copies under terms mirroring physical lending limitations."
+  - "Copyright law's primary device for promoting progress is to bestow rights on the authors of works."
+  - "The copyright system's mechanisms for determining who authored works (and therefore automatically obtained copyright rights) should be both accurate and reliable, since misidentifications will undermine the law's working as intended."
+  - "Owners of copyrights claim that the copyright law should give them full control of all commercially valuable uses of their works. The law has never secured control that extensive, but over the past 60 years, copyright owners have tried repeatedly to fix that."
 public_stances:
-  - stance: "Libraries should have explicit statutory rights to engage in controlled digital lending without facing copyright infringement liability"
-    evidence_url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=litman-controlled-digital-lending
-  - stance: "Copyright term extensions provide minimal additional incentive for creation while significantly reducing public access to cultural works"
-    evidence_url: https://www.law.umich.edu/faculty/litman-copyright-term
+  - stance: "I suggest that if copyright lawyers can't move past their suspicion and mistrust, any proposed response to those challenges is likely to make them worse rather than better."
+    evidence_url: https://repository.law.umich.edu/pub_law_archive/1/
+  - stance: "Accordingly, courts have adopted rules that minimize, reallocate, or erase the creative contributions of inconvenient collaborators. These well-settled rules are nonsense, neither well-reasoned nor probative."
+    evidence_url: https://repository.law.umich.edu/pub_law_archive/20/
 voice_style: Historically informed with deep knowledge of copyright's evolution. Draws on archival research to show how current debates mirror past conflicts. Careful and scholarly, avoids ideological rhetoric in favor of detailed historical and doctrinal analysis. Uses concrete examples from publishing industry responses to printing press, phonograph, and photocopier. Speaks with authority built through decades of copyright scholarship.
 confidence: 0.94
 sources:
-  - https://www.law.umich.edu/faculty/jessica-litman
-  - https://scholar.google.com/citations?user=jlitman
-  - https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=jlitman
+  - https://en.wikipedia.org/wiki/Jessica_Litman
+  - https://michigan.law.umich.edu/faculty-and-scholarship/our-faculty/jessica-litman
+  - https://repository.law.umich.edu/pub_law_archive/1/
+  - https://repository.law.umich.edu/pub_law_archive/20/
+  - https://repository.law.umich.edu/pub_law_archive/679/
 canonical_works:
   - title: "Digital Copyright"
     kind: book
-    url: https://www.prometheusbooks.com/digital-copyright
-    one_liner: "Traced copyright law's struggle to adapt to digital technologies — argued for balanced approaches protecting both creators' interests and public access rights."
-  - title: "Controlled Digital Lending: A Legal Analysis"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=litman-cdl-analysis
-    one_liner: "Examined legal foundations for library digital lending programs — provided framework for balancing copyright holder rights with library missions in digital environments."
-  - title: "The Story of Fair Use"
-    kind: essay
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=litman-fair-use-story
-    one_liner: "Documented historical development of fair use doctrine from British common law to modern U.S. statute — showed how courts adapted fairness concepts to new technologies."
-  - title: "Copyright's First Sale Doctrine in the Digital Age"
-    kind: paper
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=litman-first-sale-digital
-    one_liner: "Analyzed challenges to first sale doctrine from software licensing and digital distribution — argued for maintaining resale and lending rights regardless of distribution format."
-  - title: "Reforming Copyright Law"
-    kind: framework
-    url: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=litman-reforming-copyright
-    one_liner: "Proposed comprehensive reforms including shorter terms, stronger fair use protections, and explicit library exemptions — influenced academic and legislative reform proposals."
+    url: https://en.wikipedia.org/wiki/Jessica_Litman
 recent_signal_12mo:
-  - date: "2026-02-15"
-    event: "Published analysis in Michigan Law Review on AI-generated works and implications for copyright authorship requirements"
-    url: https://michiganlawreview.org/litman-ai-authorship-2026
-  - date: "2025-11-20"
-    event: "Testimony before House Judiciary Subcommittee on proposed reforms to Section 108 library exemptions addressing digital preservation needs"
-    url: https://judiciary.house.gov/hearings/litman-testimony-section-108-2025
-  - date: "2025-09-30"
-    event: "Michigan Law hosted symposium on copyright in the digital age featuring librarians, publishers, and scholars examining lending rights"
-    url: https://www.law.umich.edu/news/copyright-digital-lending-symposium-2025
+  - title: "Casting Aspersions"
+    date: "2026-06-08"
+    url: https://repository.law.umich.edu/pub_law_archive/1/
+last_verified: 2026-11-21
 ---
 
 # Jessica Litman

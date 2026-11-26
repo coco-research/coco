@@ -300,6 +300,10 @@ jobs:
           printf 'import os as o\nT = o.environ.get("M0_HOME")\n' > "$wr/scripts/helper.py"
           run_waiver "waiver_r" "$wr" "$wr" 1 "sibling check (helper.py): disallowed import alias os as o"
 
+          ws="$out/waiver_s_skill"; cp -R "$base/waiver_a" "$ws"
+          printf 'import os\no = os\no.system("true")\n' > "$ws/scripts/helper.py"
+          run_waiver "waiver_s" "$ws" "$ws" 1 "sibling check (helper.py): bare module reference os"
+
           srv="$out/m0_server_skill"
           cp -R "$base/waiver_a" "$srv"
           cp "systems/m0/skills/m0/scripts/m0_server.py" "$srv/scripts/m0_server.py"

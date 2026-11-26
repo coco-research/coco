@@ -258,6 +258,8 @@ def main() -> None:
         ("C9 fstring", VALID_BRIDGE + '\nMSG = f"{TRANSPORT}"\n', "may only be used in a Compare"),
         ("C9 upper", VALID_BRIDGE.replace(".strip().lower()", ".upper()"), "module-level name"),
         ("C9 local", VALID_BRIDGE.replace('TRANSPORT = os.environ.get("M0_MCP_TRANSPORT", "auto").strip().lower()\n', "").replace('if TRANSPORT == "direct":', 'TRANSPORT = os.environ.get("M0_MCP_TRANSPORT", "auto").strip().lower()\n    if TRANSPORT == "direct":'), "module-level name"),
+        ("bare sys", "import sys\n" + VALID_BRIDGE + "\nx = sys\n", "bare module reference sys"),
+        ("bare urllib", VALID_BRIDGE + "\nX = [urllib]\n", "bare module reference urllib"),
     ]
     for label, src, want in bad_bridges:
         errs = check_src(src)
@@ -318,6 +320,9 @@ def main() -> None:
         ("C3 __import__", {"m0_server.py": '__import__("os")\n'}, "forbidden name __import__"),
         ("C3 exec", {"m0_server.py": 'exec("pass")\n'}, "forbidden name exec"),
         ("C3 eval", {"m0_server.py": 'eval("1")\n'}, "forbidden name eval"),
+        ("bare os arg", {"helper.py": "import os\ndef f(x):\n    return x\nf(os)\n"}, "bare module reference os"),
+        ("bare os server", {"m0_server.py": "import os\ndef f(x):\n    return x\nf(os)\n"}, "bare module reference os"),
+        ("bare urllib list", {"m0_server.py": "X = [urllib]\n"}, "bare module reference urllib"),
     ]
     for label, sibs, want in bad_siblings:
         errs = check_src(VALID_BRIDGE, sibs)

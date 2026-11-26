@@ -209,7 +209,10 @@ def main() -> None:
     # 13. check_bridge AST rules on scripts/m0_mcp.py (allow-list, reflection, env, sinks, transport)
     assert check_src(VALID_BRIDGE) == []
     assert check_src(VALID_BRIDGE + "\nclass C:\n    def __init__(self):\n        super().__init__()\ndef ok(r, e):\n    return r.compile('x'), type(e).__name__, __file__\n") == []
+    assert check_src(VALID_BRIDGE + '\ndef ok_fstr(e):\n    return f"{type(e).__name__}"\n') == []
     bad_bridges = [
+        ("str format_map", VALID_BRIDGE + '\nS = "{x}".format_map(d)\n', "forbidden attribute format_map"),
+        ("str.format", VALID_BRIDGE + '\nS = str.format("{}", 1)\n', "forbidden attribute format"),
         ("C10 cred", VALID_BRIDGE + '\nX = os.environ.get("M0_API_TOKEN", "")\n', "credential-named env key M0_API_TOKEN"),
         ("C10 other", VALID_BRIDGE + '\nX = os.environ.get("HOME", "")\n', "disallowed env key HOME"),
         ("T3 sub", VALID_BRIDGE + '\nX = os.environ["M0_PROJECT"]\n', "disallowed env reference .environ"),
@@ -274,6 +277,9 @@ def main() -> None:
     for want in ("disallowed import asyncio", "forbidden name getattr", "forbidden env string constant 'environ'"):
         assert any(want in e for e in cp_errs), f"combined proof missing {want!r}: {cp_errs}"
     bad_siblings = [
+        ("str format", {"helper.py": 'S = "{}".format(1)\n'}, "forbidden attribute format"),
+        ("str.format", {"helper.py": 'S = str.format("{}", 1)\n'}, "forbidden attribute format"),
+        ("str format_map", {"m0_server.py": 'S = "{x}".format_map(d)\n'}, "forbidden attribute format_map"),
         ("MF1 helper import os", {"helper.py": 'import os\nPORT = os.environ.get("M0_PORT", "8787")\n'}, "disallowed import os"),
         ("L1 helper alias", {"helper.py": 'import os as o\nT = o.environ.get("M0_HOME")\n'}, "disallowed import alias os as o"),
         ("L1 helper from os", {"helper.py": 'from os import environ\nT = environ["M0_HOME"]\n'}, "disallowed from-import os"),

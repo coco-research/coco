@@ -45,7 +45,39 @@ import m0_server  # noqa: E402  (local module, same directory)
 SERVER_NAME = "coco-m0"
 SERVER_VERSION = m0_server.VERSION
 DEFAULT_PROTOCOL = "2025-06-18"
-BASE_URL = os.environ.get("M0_BASE_URL", "http://127.0.0.1:8787").rstrip("/")
+DEFAULT_BASE_URL = "http://127.0.0.1:8787"
+LOOPBACK_NETLOC = {
+    "127.0.0.1": "127.0.0.1",
+    "localhost": "localhost",
+    "::1": "[::1]",
+}
+LOOPBACK_ERROR = (
+    "M0_BASE_URL must be an http:// loopback URL using one of: "
+    "127.0.0.1, localhost, ::1"
+)
+
+
+def _validate_base_url(raw: str) -> str:
+    try:
+        parsed = urllib.parse.urlsplit(raw)
+        port = parsed.port
+    except ValueError:
+        sys.stderr.write(LOOPBACK_ERROR + "\n")
+        sys.exit(2)
+    netloc = LOOPBACK_NETLOC.get((parsed.hostname or "").lower())
+    if (
+        parsed.scheme != "http"
+        or netloc is None
+        or parsed.username is not None
+        or parsed.password is not None
+    ):
+        sys.stderr.write(LOOPBACK_ERROR + "\n")
+        sys.exit(2)
+    authority = f"{netloc}:{port}" if port is not None else netloc
+    return f"http://{authority}{parsed.path.rstrip('/')}"
+
+
+BASE_URL = _validate_base_url(os.environ.get("M0_BASE_URL", DEFAULT_BASE_URL))
 TRANSPORT = os.environ.get("M0_MCP_TRANSPORT", "auto").strip().lower()
 HTTP_TIMEOUT = float(os.environ.get("M0_HTTP_TIMEOUT", "15"))
 

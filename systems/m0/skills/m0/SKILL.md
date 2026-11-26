@@ -3,88 +3,109 @@ name: m0
 description: "Use when the user says 'm0', 'm0 status', 'start m0', 'cross-tool memory', 'operational thread', or 'where is my memory stored', or when the M0 daemon or MCP wiring needs attention."
 ---
 
-# /m0 — Cross-Tool Agent Memory
+# /m0: Reference Server Control Plane
 
-M0 keeps one local *operational thread* per project: what was done, what was
-verified, what is next. Any tool can write to it and read it back, so a session
-that starts cold can continue work another tool began.
+M0 ships the `m0/1` L0 wire contract (`systems/m0/SPEC.md`) and its Python
+standard-library reference server (`m0_server.py`) plus stdio MCP server
+(`m0_mcp.py`). Together they keep one local SQLite *operational thread* per
+project: what was done, what was verified, and what is next.
 
-The live M0 is the Rust daemon `coco-m0d`, serving `127.0.0.1:8000` under the
-launchd job `com.coco.m0-backend`. The write path is `/m0-remember`, the read
-path is `/m0-recall`, and the session handoff flow is `/m0-handoff`.
-
-The token is read from ~/.coco/m0-token on each call; never print it.
+The write path is `/m0-remember`, the read path is `/m0-recall`, and the
+session handoff flow is `/m0-handoff`.
 
 ## Quick Reference
 
 ```bash
-M0="${COCO_M0_URL:-http://127.0.0.1:8000}"     # daemon base URL
+M0S="$HOME/.claude/skills/m0/scripts"           # installed location
+M0="${COCO_M0_URL:-http://127.0.0.1:8787}"      # reference server base URL
 
-# Is it up? (health needs no token)
-curl -s "$M0/api/health"
+# Start the stdlib reference server on 127.0.0.1:8787
+python3 "$M0S/m0_server.py" serve
 
-# Is the launchd job loaded?
-launchctl list | grep com.coco.m0-backend
-
-# Everything else needs the token, for example the recent thread:
-curl -s -H "Authorization: Bearer $(cat ~/.coco/m0-token)" \
-  "$M0/api/brain/thread?project=my-project&limit=5"
+# Direct CLI against the same SQLite store (no server required)
+python3 "$M0S/m0_server.py" health
+python3 "$M0S/m0_server.py" write --project acme-web --text "Did the step."
+python3 "$M0S/m0_server.py" read  --project acme-web --limit 5
+python3 "$M0S/m0_server.py" drain
 ```
 
-There is no offline path: if the daemon is down, say so and stop; do not write anywhere else.
+HTTP endpoints served at `$M0` (default `http://127.0.0.1:8787`, overridable by
+`COCO_M0_URL`; keep `COCO_M0_URL` loopback-bound to `127.0.0.1` or `localhost`
+because the reference server endpoints carry no authentication):
+
+- `POST /api/brain/checkpoint` (write one idempotent entry; JSON body)
+- `GET /api/brain/thread?project=acme-web&limit=5` (read recent entries, newest first)
+- `GET /api/health` (optional liveness and store stats)
+- `POST /api/brain/sidecars/drain` (optional on-demand sidecar spool drain)
+
+If the scripts are not yet at `$HOME/.claude/skills/m0/scripts`, run them
+directly from `systems/m0/skills/m0/scripts`, or see `systems/m0/README.md`
+for installation instructions.
 
 ## Sub-commands
 
-### /m0 status — is memory working
+### /m0 status
+
+Check store health directly with the CLI or by sending `GET $M0/api/health`
+(where `M0="${COCO_M0_URL:-http://127.0.0.1:8787}"`):
 
 ```bash
-M0="${COCO_M0_URL:-http://127.0.0.1:8000}"
-curl -s "$M0/api/health"
-launchctl list | grep com.coco.m0-backend
+python3 "$HOME/.claude/skills/m0/scripts/m0_server.py" health
 ```
 
-Report to the user, in this order:
+Report in order:
+1. **Server:** reachable at `$M0` or stopped (CLI and MCP direct fallback still work).
+2. **Store:** `db` path (default `$XDG_DATA_HOME/coco-m0/thread.db`) and `rows` count.
+3. **Pending:** if `pending_sidecars > 0`, drain with `POST $M0/api/brain/sidecars/drain` or `m0_server.py drain`.
+4. **Degraded:** if set, another process holds the SQLite lock; reads return spooled rows and writes defer cleanly.
 
-1. **Daemon** — reachable at `$M0` or not.
-2. **launchd** — whether the job `com.coco.m0-backend` is loaded and running.
+### /m0 start
 
-If either is missing, tell the user and stop. Do not work around it.
+Start the reference server in the foreground (`python3 "$M0S/m0_server.py" serve`)
+or background (`nohup python3 "$M0S/m0_server.py" serve > "$HOME/.local/share/coco-m0/server.log" 2>&1 &`).
+Key environment variables: `M0_HOST` (`127.0.0.1`), `M0_PORT` (`8787`), `M0_DB`,
+`M0_SIDECAR_DIR`, `M0_BUSY_TIMEOUT_MS` (`10000`), `M0_PROJECT`, `M0_SOURCE_TOOL`.
 
-### /m0 start — you do not start it
+### /m0 mcp
 
-The daemon runs under launchd; if it is down, tell the user and stop (restarts
-and deploys are the owner's).
+`m0_mcp.py` exposes two stdio JSON-RPC tools (`m0_remember` and `m0_recall`),
+preferring loopback HTTP (`M0_BASE_URL`, default `http://127.0.0.1:8787`) and
+falling back to the local SQLite store directly when no server is listening.
+See `systems/m0/README.md` for optional MCP client setup when the user wants
+persistent MCP registration.
 
-### /m0 mcp — the MCP tool
+### /m0 hooks
 
-The daemon's MCP binary `coco-platform-mcp` exposes one tool, `m0`, with modes
-`recall`, `context`, `wip`, `handoff`, and `remember`. Call it directly — it is
-the lowest-friction way to make memory habitual.
-
-### /m0 verify — prove it works
+Automatic capture is opt-in; do not edit user settings files without asking.
+Session-end hook example:
 
 ```bash
-curl -s "$M0/api/health"
+python3 "$HOME/.claude/skills/m0/scripts/m0_server.py" write \
+  --project "$(basename "$PWD")" --kind session_end --source-tool claude-code \
+  --branch "$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" \
+  --head-sha "$(git rev-parse --short HEAD 2>/dev/null)" \
+  --text "Session ended."
 ```
 
-A healthy response means the daemon is serving. Quote the output rather than
-summarising it.
+### /m0 verify
 
-### /m0 privacy — what leaves the machine
+```bash
+bash systems/m0/tests/m0-smoke.sh
+```
 
-Nothing. The daemon binds to loopback, there are no outbound calls in the
-request path and no telemetry. Text fields are capped at 400 characters and
-redacted by the daemon before storage.
+Runs the smoke assertions in a throwaway directory on an ephemeral port (round trip,
+idempotency, locked-store sidecar spool, restart drain, and MCP stdio tools).
+
+### /m0 privacy
+
+Nothing leaves the machine. The reference server binds to `127.0.0.1:8787` with
+no outbound network calls and no telemetry. The store is a plain SQLite file
+(`$XDG_DATA_HOME/coco-m0/thread.db`): inspect with `sqlite3`, back up with `cp`,
+or remove to delete all local entries.
 
 ## When to reach for this
 
-- **Use `/m0-recall`** at the start of a session, or when picking up work started
-  elsewhere, before asking the user to repeat context.
-- **Use `/m0-remember`** after a step lands, a decision is made, or something is
-  verified.
+- **Use `/m0-recall`** at session start or when picking up work from another tool.
+- **Use `/m0-remember`** after a step lands, a decision is made, or something is verified.
 - **Use `/m0-handoff`** before context is compacted or a session ends.
-- **Use `/m0` (this skill)** for the plumbing: daemon, token, wiring.
-
-M0 answers "where were we and what is next". For deeper knowledge-graph
-retrieval see the comparison with the cognee bundle in `systems/m0/README.md`
-before choosing.
+- **Use `/m0` (this skill)** for the reference server, store, spool, hooks, and MCP wiring.

@@ -469,3 +469,12 @@ jobs:
       - name: Router regression gate
         if: steps.probe.outputs.ok == '1'
         run: python3 evals/routing/check_regression.py --write "$RUNNER_TEMP/router-run.json"
+
+      - name: Upload router-run artifact
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: router-run
+          path: ${{ runner.temp }}/router-run.json
+          retention-days: 14
+          if-no-files-found: warn

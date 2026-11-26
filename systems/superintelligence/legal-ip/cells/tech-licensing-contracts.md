@@ -1,7 +1,7 @@
 ---
 cell_id: tech-licensing-contracts
 team: legal-ip-super-intelligence
-personas_count: 4
+personas_count: 2
 last_updated: 2026-09-04
 ---
 
@@ -9,11 +9,9 @@ last_updated: 2026-09-04
 
 Your legal, IP, and regulatory brain trust — tech licensing contracts focus area.
 
-## Personas (4)
+## Personas (2)
 
 | Slug | Name | Cell role |
 |---|---|---|
-| `corynne-cohen` | Corynne Cohen | specialist |
 | `heather-meeker` | Heather Meeker | specialist |
-| `michael-carroll` | Michael Carroll | specialist |
 | `pamela-samuelson` | Pamela Samuelson | specialist |

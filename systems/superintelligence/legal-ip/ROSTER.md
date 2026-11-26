@@ -2,7 +2,7 @@
 
 **Status:** generated from `registry.json` on 2026-09-04 by `build_roster_md.py` — regenerate, do not hand-edit.
 **Team ID:** `legal-ip-super-intelligence`
-**Native personas:** 31 across 7 cells.
+**Native personas:** 29 across 7 cells.
 **Quality bar:** ≥8 source URLs, ≥3 recent signals, every `public_stance` carries an `evidence_url`. Full English prose.
 
 ---
@@ -72,13 +72,11 @@ Legal & IP Super Intelligence Team cell: Regulatory Litigation
 | `jack-balkin` | Jack Balkin |  |
 | `lawrence-lessig` | Lawrence Lessig |  |
 
-### 7. tech-licensing-contracts (4)
+### 7. tech-licensing-contracts (2)
 Legal & IP Super Intelligence Team cell: Tech Licensing Contracts
 
 | Slug | Name | Anchor |
 |---|---|---|
-| `corynne-cohen` | Corynne Cohen |  |
 | `heather-meeker` | Heather Meeker |  |
-| `michael-carroll` | Michael Carroll |  |
 | `pamela-samuelson` | Pamela Samuelson |  |
 

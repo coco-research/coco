@@ -1,0 +1,525 @@
+{
+  "lab": {
+    "m0": {
+      "slug": "m0",
+      "nav_cta": "In the lab",
+      "diagram": "vault",
+      "kns": [
+        [
+          "Cross-tool",
+          "Shared context across local agents"
+        ],
+        [
+          "Loopback",
+          "Local store on your own machine"
+        ],
+        [
+          "Private beta",
+          "Used daily in the lab"
+        ]
+      ],
+      "how_eyebrow": "Local cross-tool memory",
+      "how_title": "One local memory store across the coding tools on your machine.",
+      "how_sub": "Coco M0 keeps project context and decisions in one local store so different AI coding tools on the same computer do not start from scratch each session.",
+      "panel_note": "Private beta used daily inside Coco Research. There is no public download, hosted service or open repository today.",
+      "steps": [
+        [
+          "01",
+          "Write locally from active tools",
+          "Coding sessions record project checkpoints into a local store bound to loopback on your computer."
+        ],
+        [
+          "02",
+          "Recall across tools",
+          "A second tool on the same machine can read relevant project context without re-explaining prior work."
+        ],
+        [
+          "03",
+          "Keep records on your disk",
+          "Memory files stay under your local user directory with explicit file permissions and no cloud sync."
+        ]
+      ],
+      "rules_eyebrow": "Stage and privacy",
+      "rules_title": "Local by architecture, private in beta.",
+      "rules_sub": "Cross-tool memory belongs on the user's own hardware rather than a third-party cloud.",
+      "rules": [
+        [
+          "Rule 01",
+          "Data stays local",
+          "Checkpoints and thread history live on your own machine over 127.0.0.1."
+        ],
+        [
+          "Rule 02",
+          "Scoped access",
+          "Read and write paths use separate local permissions on disk."
+        ],
+        [
+          "Rule 03",
+          "Stated stage: private beta",
+          "Used daily in the lab; not yet released publicly."
+        ]
+      ],
+      "sections": {
+        "what_it_is": {
+          "tagline": "Memory for your AI coding tools, brought back at the moment you type your prompt.",
+          "paragraph": "Coco M0 is memory for your AI coding tools: what you decided in one tool comes back in the next, at the moment you type your prompt."
+        },
+        "capabilities": [
+          {
+            "num": "01",
+            "title": "Prompt-time recall",
+            "desc": "On a fixed live check of 10 questions, M0 brought back the right memory 10 of 10 times, returned 0 of 2 trick questions, and answered in 21 to 53 ms."
+          },
+          {
+            "num": "02",
+            "title": "Nothing leaves your Mac",
+            "desc": "One local store, a daemon that only listens on your own machine, and no cloud model calls. Recall and the embedder are both off until you switch them on."
+          },
+          {
+            "num": "03",
+            "title": "Works across tools",
+            "desc": "Claude Code is live; Cursor and Pi switch on per tool; Antigravity is in its first test, with session-start recall wired."
+          },
+          {
+            "num": "04",
+            "title": "A block list runs first",
+            "desc": "A name on your list is never saved, never recalled, and nothing is embedded when the list finds a hit."
+          }
+        ],
+        "cooking": [
+          {
+            "num": "01",
+            "title": "Codex support",
+            "desc": "Every finished Codex turn saved to M0. Built and tested, next to go live."
+          },
+          {
+            "num": "02",
+            "title": "A read door for every tool",
+            "desc": "Cursor, Pi and others can list and open the notes you gave M0, through a local-only door that re-checks the block list on every line and caps each answer."
+          },
+          {
+            "num": "03",
+            "title": "One-command wiring",
+            "desc": "M0 hooks into each tool's settings and never overwrites a setting that tool already has; removing a tool's hook leaves the rest untouched."
+          }
+        ],
+        "stage": {
+          "chip": "Private beta",
+          "class": "beta",
+          "desc": "Private beta: in daily use, with prompt-time recall live across tools."
+        },
+        "when": "Private beta, used daily. Public release after its safety gates. No date yet."
+      }
+    },
+    "hermes": {
+      "slug": "hermes",
+      "nav_cta": "In the lab",
+      "diagram": "folios",
+      "kns": [
+        [
+          "Exact quote",
+          "Sentences linked back to source files"
+        ],
+        [
+          "Or refuse",
+          "Says plainly when files lack the answer"
+        ],
+        [
+          "127.0.0.1",
+          "Loopback-only Rust engine on one Mac"
+        ]
+      ],
+      "how_eyebrow": "Private document answer engine",
+      "how_title": "Answers from your own files with an exact quote, or says it can't.",
+      "how_sub": "Coco Hermes indexes documents you choose on your Mac and returns verbatim supporting passages with file links, refusing to guess when evidence is absent.",
+      "panel_note": "Private beta build (v0.1.1) in the lab, written in Rust with a local browser interface. There is no public build, cloud account or telemetry.",
+      "steps": [
+        [
+          "01",
+          "Index local folders",
+          "Point Coco Hermes at local documents on your Mac without uploading files off the machine."
+        ],
+        [
+          "02",
+          "Ask a direct question",
+          "Retrieve candidate passages locally over loopback with no external network egress."
+        ],
+        [
+          "03",
+          "Quote verbatim or refuse",
+          "Every answer cites the exact sentence in your file, or states plainly that the documents do not answer it."
+        ]
+      ],
+      "rules_eyebrow": "Trust boundaries",
+      "rules_title": "Quote or refuse. Loopback only.",
+      "rules_sub": "Designed so an answer never invents text your files do not contain.",
+      "rules": [
+        [
+          "Rule 01",
+          "Verify, don't paraphrase away",
+          "Responses anchor to exact spans in your own local files."
+        ],
+        [
+          "Rule 02",
+          "No cloud, no telemetry",
+          "Runs strictly on loopback on one computer with no account."
+        ],
+        [
+          "Rule 03",
+          "Private beta, no public build",
+          "Version 0.1.1 in private lab use today; no public installer is published."
+        ]
+      ],
+      "sections": {
+        "what_it_is": {
+          "tagline": "Answers questions over your own files with an exact quote, or says it can't.",
+          "paragraph": "Coco Hermes indexes local documents on your Mac and retrieves verbatim supporting passages with source links, refusing to guess when evidence is absent."
+        },
+        "capabilities": [
+          {
+            "num": "\u2014",
+            "title": "Details soon",
+            "desc": "Capabilities will be published once the standalone release is ready."
+          }
+        ],
+        "cooking": [
+          {
+            "num": "\u2014",
+            "title": "Details soon",
+            "desc": "Milestones will be published alongside public release updates."
+          }
+        ],
+        "stage": {
+          "chip": "Private beta (v0.1.1)",
+          "class": "beta",
+          "desc": "Private dogfood build (v0.1.1) in the lab, written in Rust with a local browser interface."
+        },
+        "when": "0.2.0 this month (November 2026)."
+      }
+    },
+    "teams-ng": {
+      "slug": "teams-ng",
+      "nav_cta": "In the lab",
+      "diagram": "council",
+      "kns": [
+        [
+          "1,199 entries",
+          "71 members, 227 skills, 15 procedures, 367 tools, 3 KBs"
+        ],
+        [
+          "Whole-team chat",
+          "One composed answer split by role"
+        ],
+        [
+          "Private beta",
+          "v0.10.0 \u00b7 114 of 150 journeys checked"
+        ]
+      ],
+      "how_eyebrow": "Multi-member workspace",
+      "how_title": "A console for running a firm of AI members from one place.",
+      "how_sub": "Hire members onto a roster, give them roles, skills and step-by-step procedures, put them in teams on projects, and direct the work from one place.",
+      "panel_note": "Private beta: version 0.10.0 (26 October 2026), with 114 of 150 user journeys working and checked.",
+      "steps": [
+        [
+          "01",
+          "Hire distinct roles",
+          "Assemble AI specialists with explicit scopes rather than one undifferentiated chat thread."
+        ],
+        [
+          "02",
+          "Brief in one console",
+          "Hand structured tasks to the right member and keep every brief inspectable."
+        ],
+        [
+          "03",
+          "Review work before it lands",
+          "Check outputs and open decisions from one calm view on your machine."
+        ]
+      ],
+      "rules_eyebrow": "Stage stated plainly",
+      "rules_title": "In development means in development.",
+      "rules_sub": "No waitlist hype and no unshipped promises.",
+      "rules": [
+        [
+          "Rule 01",
+          "Human stays in command",
+          "Members take briefs and report results; the owner decides what ships."
+        ],
+        [
+          "Rule 02",
+          "Local-first architecture",
+          "Built around local state rather than an opaque hosted workspace."
+        ],
+        [
+          "Rule 03",
+          "Private beta, v0.10.0",
+          "Version 0.10.0 in private beta, with 114 of 150 user journeys checked."
+        ]
+      ],
+      "sections": {
+        "what_it_is": {
+          "tagline": "A console for running a firm of AI members from one place.",
+          "paragraph": "Coco Teams NG is a console for running a firm of AI members: you hire them onto a roster, give them roles, skills and step-by-step procedures, put them in teams on projects, and direct the work from one place."
+        },
+        "capabilities": [
+          {
+            "num": "01",
+            "title": "Built-in catalogue of 1,199 entries",
+            "desc": "Hire from a built-in catalogue of 1,199 entries: 71 ready-made members, 227 skills, 15 standard procedures, 367 tools and 3 knowledge bases."
+          },
+          {
+            "num": "02",
+            "title": "Talk to a whole team at once",
+            "desc": "Put members on a team, open one conversation, and get one composed answer that splits the work by role."
+          },
+          {
+            "num": "03",
+            "title": "Shared project workspaces",
+            "desc": "Projects keep a team, its conversation and its memory together, and can be shared with someone outside your workspace for 30 days."
+          },
+          {
+            "num": "04",
+            "title": "Schedules and general assistant",
+            "desc": "Schedules run work on a timer, and a general assistant answers when you do not want to pick a member."
+          },
+          {
+            "num": "05",
+            "title": "One command on your own machine",
+            "desc": "Runs on your own machine with one command and talks to any OpenAI-compatible model endpoint you choose."
+          }
+        ],
+        "cooking": [
+          {
+            "num": "01",
+            "title": "One model call per team member",
+            "desc": "Each member on a team answers with its own model call, instead of one call for the whole team."
+          },
+          {
+            "num": "02",
+            "title": "Cross-workspace search",
+            "desc": "Search across projects, documents and conversations, not just members, teams and the catalogue."
+          },
+          {
+            "num": "03",
+            "title": "File attachments in chat",
+            "desc": "File attachments in chat."
+          }
+        ],
+        "stage": {
+          "chip": "Private beta",
+          "class": "beta",
+          "desc": "Private beta: version 0.10.0 (released 26 October 2026) with 114 of 150 user journeys working and checked."
+        },
+        "when": "The next build round is planned for December 2026. No public launch date is set yet."
+      }
+    },
+    "status-zero": {
+      "slug": "status-zero",
+      "nav_cta": "In the lab",
+      "diagram": "lattice",
+      "kns": [
+        [
+          "Plan vs code",
+          "Matches planned items to shipped changes"
+        ],
+        [
+          "Surfaces gaps",
+          "Flags unlinked work or quiet items"
+        ],
+        [
+          "Private",
+          "In development on sample fixtures"
+        ]
+      ],
+      "how_eyebrow": "Plan-to-truth verification",
+      "how_title": "Compares what a plan says against what the code actually shipped.",
+      "how_sub": "Status Zero pairs planned stories against real repository changes so missing links, stalled items and actual progress stand out without guesswork.",
+      "panel_note": "Private and in development in the lab, built in Rust with a Signal interface running against synthetic sample fixtures.",
+      "steps": [
+        [
+          "01",
+          "Read the stated plan",
+          "Ingest planned work items and their expected scope."
+        ],
+        [
+          "02",
+          "Match against shipped diffs",
+          "Link code changes back to planned items and highlight gaps where the two diverge."
+        ],
+        [
+          "03",
+          "Draft from verified facts",
+          "Summarize weekly status from matched evidence rather than manual recollection."
+        ]
+      ],
+      "rules_eyebrow": "Evidence over spin",
+      "rules_title": "Gaps named plainly.",
+      "rules_sub": "Status Zero is developed privately against synthetic sample data.",
+      "rules": [
+        [
+          "Rule 01",
+          "Verify against code",
+          "Shipped changes are the ground truth against which plans are checked."
+        ],
+        [
+          "Rule 02",
+          "Synthetic fixtures in development",
+          "Built and tested on fictional sample records with no external data."
+        ],
+        [
+          "Rule 03",
+          "Private, in development",
+          "Not publicly released today."
+        ]
+      ],
+      "sections": {
+        "what_it_is": {
+          "tagline": "Compares what a plan says against what the code actually shipped.",
+          "paragraph": "Status Zero pairs planned stories against real repository changes so missing links, stalled items and actual progress stand out without guesswork."
+        },
+        "capabilities": [
+          {
+            "num": "\u2014",
+            "title": "Details soon",
+            "desc": "Capabilities will be published once the standalone release is ready."
+          }
+        ],
+        "cooking": [
+          {
+            "num": "\u2014",
+            "title": "Details soon",
+            "desc": "Milestones will be published alongside public release updates."
+          }
+        ],
+        "stage": {
+          "chip": "In the lab",
+          "class": "lab",
+          "desc": "Private and in development against synthetic sample fixtures."
+        },
+        "when": "Not dated yet"
+      }
+    }
+  },
+  "unlinked": {
+    "aloomannu": {
+      "id": "aloomannu",
+      "slug": "aloomannu",
+      "name": "Aloo Mannu",
+      "tag": "Private, v0.1.0, not published",
+      "description": "The local message and wake layer for coding agents. Routes asks, replies and FYIs between agent sessions through files and hooks, and keeps one ledger of open asks.",
+      "nav_cta": "In the lab",
+      "diagram": "router",
+      "noindex": true,
+      "cats_stage": {
+        "tagline": "Good conversations start here.",
+        "story": "Named after two cats at home: one calls out (\"ow ow\"), and the other answers (\"meh\") and comes over."
+      },
+      "kns": [
+        [
+          "Stdlib only",
+          "Python 3.9+ standard library"
+        ],
+        [
+          "Zero network",
+          "Files and hooks on one machine"
+        ],
+        [
+          "Zero models",
+          "Deterministic routing and ledger"
+        ]
+      ],
+      "how_eyebrow": "Agent message and wake layer",
+      "how_title": "Local asks, replies and one ledger of who owes an answer.",
+      "how_sub": "Aloo Mannu connects coding agent sessions on your own computer through plain files and tool hooks, with no daemon cloud, no network sockets and no model calls.",
+      "panel_note": "Version 0.1.0 in private lab use today. Packaged as a Python standard-library zipapp with zero third-party dependencies.",
+      "steps": [
+        [
+          "01",
+          "Send a structured ask or FYI",
+          "Write an addressed message header to the local store from any supported agent session."
+        ],
+        [
+          "02",
+          "Deliver via local hooks",
+          "Adapter hooks surface pending messages cleanly in the recipient session without polling the network."
+        ],
+        [
+          "03",
+          "Track open asks in one ledger",
+          "Every ask stays open in the local ledger until a matching reply closes it."
+        ]
+      ],
+      "rules_eyebrow": "Four hard invariants",
+      "rules_title": "Standard library, zero network, zero model calls.",
+      "rules_sub": "Message routing stays small, deterministic and inspectable on disk.",
+      "rules": [
+        [
+          "Rule 01",
+          "Python standard library only",
+          "Runs on Python 3.9 or newer with zero third-party packages."
+        ],
+        [
+          "Rule 02",
+          "No network and no model calls",
+          "Every route, header parse and ledger update executes locally on files."
+        ],
+        [
+          "Rule 03",
+          "Not public today",
+          "Held privately in the lab until owner release sign-off."
+        ]
+      ],
+      "sections": {
+        "what_it_is": {
+          "tagline": "The local message and wake layer for coding agents on one Mac.",
+          "paragraph": "Aloo Mannu routes asks, replies and FYIs between agent sessions through files and hooks, waking the receiving chat and keeping one ledger of open asks."
+        },
+        "capabilities": [
+          {
+            "num": "01",
+            "title": "Python 3.9+ standard-library zipapp",
+            "desc": "Runs on Python 3.9+ standard library only with zero external dependencies, built into a single aloomannu.pyz zipapp."
+          },
+          {
+            "num": "02",
+            "title": "Four selftest adapter paths",
+            "desc": "Built-in selftest verifies four adapter delivery paths on disk: claude, pi, cursor and file."
+          },
+          {
+            "num": "03",
+            "title": "Zero network, zero model calls",
+            "desc": "Routes messages locally through files and hooks, wrapping every delivered message body in an untrusted-data frame."
+          },
+          {
+            "num": "04",
+            "title": "Append-only per-node ledger",
+            "desc": "Append-only JSONL ledgers track sent, delivered, acknowledged, dated, done and killed states under exclusive file locks."
+          }
+        ],
+        "cooking": [
+          {
+            "num": "01",
+            "title": "Guided first-run setup",
+            "desc": "Interactive setup verb that finds installed tools, previews hook diffs, saves backups and times a first message delivery."
+          },
+          {
+            "num": "02",
+            "title": "Session join and leave verbs",
+            "desc": "Structured join and leave verbs for unbound agent sessions with approver checks, 24-hour rejection holds and preserved history."
+          },
+          {
+            "num": "03",
+            "title": "Loopback web console",
+            "desc": "Local web console bound to 127.0.0.1 with an in-memory fragment token, read-only thread and ledger views, and single-node compose."
+          }
+        ],
+        "stage": {
+          "chip": "Private beta",
+          "class": "beta",
+          "desc": "Version 0.1.0 in private use, packaged as a standard-library Python zipapp and not published publicly."
+        },
+        "when": "Target: end of November 2026, on the founder's final yes."
+      }
+    }
+  }
+}

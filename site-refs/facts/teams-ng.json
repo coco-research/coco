@@ -1,0 +1,57 @@
+[
+  {
+    "claim": "Coco Teams NG is a console for running a firm of AI members: you hire them onto a roster, give them roles, skills and step-by-step procedures, put them in teams on projects, and direct the work from one place.",
+    "section": "what-it-is",
+    "source": "teams-ng:README.md:3"
+  },
+  {
+    "claim": "Hire from a built-in catalogue of 1,199 entries: 71 ready-made members, 227 skills, 15 standard procedures, 367 tools and 3 knowledge bases.",
+    "section": "capabilities",
+    "source": "teams-ng:README.md:98"
+  },
+  {
+    "claim": "Talk to a whole team at once: put members on a team, open one conversation, and get one composed answer that splits the work by role.",
+    "section": "capabilities",
+    "source": "teams-ng:README.md:99"
+  },
+  {
+    "claim": "Projects keep a team, its conversation and its memory together, and can be shared with someone outside your workspace for 30 days.",
+    "section": "capabilities",
+    "source": "teams-ng:README.md:100"
+  },
+  {
+    "claim": "Schedules run work on a timer, and a general assistant answers when you don't want to pick a member.",
+    "section": "capabilities",
+    "source": "teams-ng:README.md:101"
+  },
+  {
+    "claim": "Runs on your own machine with one command and talks to any OpenAI-compatible model endpoint you choose.",
+    "section": "capabilities",
+    "source": "teams-ng:README.md:54"
+  },
+  {
+    "claim": "Each member on a team answers with its own model call, instead of one call for the whole team.",
+    "section": "cooking",
+    "source": "teams-ng:README.md:133"
+  },
+  {
+    "claim": "Search across projects, documents and conversations, not just members, teams and the catalogue.",
+    "section": "cooking",
+    "source": "teams-ng:README.md:134"
+  },
+  {
+    "claim": "File attachments in chat.",
+    "section": "cooking",
+    "source": "teams-ng:README.md:135"
+  },
+  {
+    "claim": "Private beta: version 0.10.0 (released 26 October 2026) with 114 of 150 user journeys working and checked.",
+    "section": "stage",
+    "source": "teams-ng:tag:v0.10.0"
+  },
+  {
+    "claim": "The next build round is planned for December 2026. No public launch date is set yet.",
+    "section": "when",
+    "source": "launch-window:dec-2026-build-not-dated"
+  }
+]

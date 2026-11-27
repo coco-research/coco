@@ -218,12 +218,16 @@ async function bootCatsStage() {
     renderFrame = (t, isStatic) => {
       if (contextLost) return;
       if (isStatic) {
-        leftCat.headPivot.position.y = -1.10;
-        rightCat.headPivot.position.y = 0.42;
+        leftCat.headPivot.position.y = leftCat.rest.headY;
+        rightCat.headPivot.position.y = rightCat.rest.headY;
         leftCat.headPivot.rotation.set(leftCat.baseRot.x, leftCat.baseRot.y, leftCat.baseRot.z);
         rightCat.headPivot.rotation.set(rightCat.baseRot.x, rightCat.baseRot.y, rightCat.baseRot.z);
-        leftCat.lids.forEach((lid, idx) => lid.rotation.set(leftCat.lidRestX, 0, -(idx === 0 ? -1 : 1) * 0.18));
-        rightCat.lids.forEach((lid, idx) => lid.rotation.set(rightCat.lidRestX, 0, -(idx === 0 ? -1 : 1) * 0.14));
+        leftCat.chin.position.y = leftCat.rest.chinY;
+        rightCat.chin.position.y = rightCat.rest.chinY;
+        leftCat.earR.rotation.z = leftCat.rest.earRRestZ;
+        rightCat.earL.rotation.z = rightCat.rest.earLRestZ;
+        leftCat.lids.forEach((lid, idx) => lid.rotation.set(leftCat.rest.lidRestX, 0, -(idx === 0 ? -1 : 1) * leftCat.rest.lidTiltZ));
+        rightCat.lids.forEach((lid, idx) => lid.rotation.set(rightCat.rest.lidRestX, 0, -(idx === 0 ? -1 : 1) * rightCat.rest.lidTiltZ));
         const staticTextAlpha = outlineOnly ? 0 : 0.94;
         callBubble.update(staticTextAlpha, 0, 1);
         replyBubble.update(staticTextAlpha, 0, 1);
@@ -239,29 +243,29 @@ async function bootCatsStage() {
       callBubble.update(0.22 + 0.78 * callW, callW * 0.07 + Math.sin(t * 1.7) * 0.02, 0.96 + 0.05 * callW);
       replyBubble.update(0.22 + 0.78 * replyW, replyW * 0.08 + Math.cos(t * 1.5) * 0.02, 0.96 + 0.05 * replyW);
 
-      leftCat.headPivot.position.y = -1.10 + Math.sin(t * 1.8) * 0.012;
-      rightCat.headPivot.position.y = 0.42 + Math.sin(t * 1.55 + 1.1) * 0.014;
+      leftCat.headPivot.position.y = leftCat.rest.headY + Math.sin(t * 1.8) * 0.012;
+      rightCat.headPivot.position.y = rightCat.rest.headY + Math.sin(t * 1.55 + 1.1) * 0.014;
 
       leftCat.headPivot.rotation.set(
         leftCat.baseRot.x - callW * 0.08 + Math.sin(t * 0.9) * 0.015,
         leftCat.baseRot.y + callW * 0.05,
         leftCat.baseRot.z,
       );
-      leftCat.chin.position.y = -0.32 - Math.max(0, Math.sin(t * 9.0)) * callW * 0.024;
-      leftCat.earR.rotation.z = -0.52 - Math.pow(Math.max(0, Math.sin(t * 2.3)), 8) * 0.14;
+      leftCat.chin.position.y = leftCat.rest.chinY - Math.max(0, Math.sin(t * 9.0)) * callW * 0.024;
+      leftCat.earR.rotation.z = leftCat.rest.earRRestZ - Math.pow(Math.max(0, Math.sin(t * 2.3)), 8) * 0.14;
 
       rightCat.headPivot.rotation.set(
         rightCat.baseRot.x + replyW * 0.04 + Math.cos(t * 0.8) * 0.014,
         rightCat.baseRot.y - replyW * 0.14,
         rightCat.baseRot.z - replyW * 0.04,
       );
-      rightCat.chin.position.y = -0.38 - replyW * 0.022;
-      rightCat.earL.rotation.z = 0.40 + Math.pow(Math.max(0, Math.sin(t * 1.9 + 0.8)), 10) * 0.16;
+      rightCat.chin.position.y = rightCat.rest.chinY - replyW * 0.022;
+      rightCat.earL.rotation.z = rightCat.rest.earLRestZ + Math.pow(Math.max(0, Math.sin(t * 1.9 + 0.8)), 10) * 0.16;
 
       const blinkR = Math.max(smoothWindow(cycle, 4.05, 4.16, 4.24, 4.38), smoothWindow(cycle, 6.8, 6.9, 6.96, 7.08));
-      rightCat.lids.forEach((lid, idx) => lid.rotation.set(rightCat.lidRestX + blinkR * 1.24, 0, -(idx === 0 ? -1 : 1) * 0.14));
+      rightCat.lids.forEach((lid, idx) => lid.rotation.set(rightCat.rest.lidRestX + blinkR * 1.24, 0, -(idx === 0 ? -1 : 1) * rightCat.rest.lidTiltZ));
       const blinkL = smoothWindow(cycle, 1.75, 1.86, 1.94, 2.08);
-      leftCat.lids.forEach((lid, idx) => lid.rotation.set(leftCat.lidRestX + blinkL * 0.78, 0, -(idx === 0 ? -1 : 1) * 0.18));
+      leftCat.lids.forEach((lid, idx) => lid.rotation.set(leftCat.rest.lidRestX + blinkL * 0.78, 0, -(idx === 0 ? -1 : 1) * leftCat.rest.lidTiltZ));
 
       flows.animate(t);
       renderer.render(scene, camera);
@@ -318,19 +322,26 @@ async function bootCatsStage() {
     return;
   }
 
+  // Explicit readiness signal consumed by offline banner export scripts.
+  const READY_FLAG = '__ALOO_BANNER_READY';
+  const markReady = () => {
+    window[READY_FLAG] = true;
+    document.documentElement.dataset.alooBannerReady = '1';
+  };
+
   if (paused) {
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => {
         if (contextLost) return;
         resize();
         renderFrame(0, true);
-        window.__ALOO_BANNER_READY = true;
-      }).catch(() => { /* font readiness fallback already rendered */ window.__ALOO_BANNER_READY = true; });
+        markReady();
+      }).catch(() => { /* font readiness fallback already rendered */ markReady(); });
     } else {
-      window.__ALOO_BANNER_READY = true;
+      markReady();
     }
   } else {
-    window.__ALOO_BANNER_READY = true;
+    markReady();
     if (!document.hidden && inView && !contextLost) raf = requestAnimationFrame(loop);
   }
 

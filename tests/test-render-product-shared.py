@@ -144,15 +144,16 @@ class SvgAndJsonLdTests(unittest.TestCase):
         self.assertNotIn('operatingSystem', no_os_app)
 
         # M1 + M2 on real repo data: coco-si uses #licence (never bare /LICENSE) and omits operatingSystem; voice keeps os.
-        real_pub = json.loads((M.ROOT / 'data' / 'product-pages-public.json').read_text(encoding='utf-8'))
-        si_html = M.build_jsonld('coco-si', 'shipped', {'name': 'Coco Super Intelligence', 'description': 'Advisory board.'}, real_pub['coco-si'])
-        si_app = json.loads(si_html.split('\n', 2)[2].rsplit('\n', 1)[0])['@graph'][0]
-        self.assertEqual(si_app['license'], 'https://github.com/coco-research/coco#licence')
-        self.assertFalse(si_app['license'].endswith('/LICENSE'))
-        self.assertNotIn('operatingSystem', si_app)
-        voice_html = M.build_jsonld('voice', 'shipped', {'name': 'Coco Voice', 'description': 'Speech to text.'}, real_pub['voice'])
-        voice_app = json.loads(voice_html.split('\n', 2)[2].rsplit('\n', 1)[0])['@graph'][0]
-        self.assertIn('Linux x64 and arm64', voice_app['operatingSystem'])
+        with mock.patch.object(M, 'ROOT', REPO_ROOT):
+            real_pub = json.loads((M.ROOT / 'data' / 'product-pages-public.json').read_text(encoding='utf-8'))
+            si_html = M.build_jsonld('coco-si', 'shipped', {'name': 'Coco Super Intelligence', 'description': 'Advisory board.'}, real_pub['coco-si'])
+            si_app = json.loads(si_html.split('\n', 2)[2].rsplit('\n', 1)[0])['@graph'][0]
+            self.assertEqual(si_app['license'], 'https://github.com/coco-research/coco#licence')
+            self.assertFalse(si_app['license'].endswith('/LICENSE'))
+            self.assertNotIn('operatingSystem', si_app)
+            voice_html = M.build_jsonld('voice', 'shipped', {'name': 'Coco Voice', 'description': 'Speech to text.'}, real_pub['voice'])
+            voice_app = json.loads(voice_html.split('\n', 2)[2].rsplit('\n', 1)[0])['@graph'][0]
+            self.assertIn('Linux x64 and arm64', voice_app['operatingSystem'])
 
         no_ver = M.build_jsonld('demo-arch', 'source', data['lab'][1], pub_specs['demo-arch'])
         self.assertNotIn('version', json.loads(no_ver.split('\n', 2)[2].rsplit('\n', 1)[0])['@graph'][0])

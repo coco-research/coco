@@ -218,8 +218,8 @@ jobs:
         run: python3 tests/test-render-product-shared.py
       - name: Product-page renderer is tested
         run: python3 tests/test-render-product-pages.py
-      - name: Aloo Mannu page and banner generator are tested
-        run: python3 tests/test-render-aloo-banners.py
+      - name: Aloo Mannu page and spec are tested
+        run: python3 tests/test-aloomannu-page.py
       - name: Persona attribution wording is in every generated SI command
         run: |
           python3 tests/check-persona-attribution.py

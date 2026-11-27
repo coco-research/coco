@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heliopause by Coco Research</title>
+<meta name="description" content="Heliopause by Coco Research is out, as an early preview. It gives your AI tools a Lead and roles, like a small company, on your own machine.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cocoresearch.org/heliopause/">
+<meta property="og:title" content="Heliopause by Coco Research">
+<meta property="og:description" content="Heliopause by Coco Research is out, as an early preview. It gives your AI tools a Lead and roles, like a small company, on your own machine.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Heliopause by Coco Research">
+<meta name="twitter:description" content="Heliopause by Coco Research is out, as an early preview. It gives your AI tools a Lead and roles, like a small company, on your own machine.">
+<link rel="icon" type="image/svg+xml" href="/assets/site/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/site/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/assets/site/site.webmanifest">
+<link rel="canonical" href="https://cocoresearch.org/heliopause/">
+<style>
+/* ============================================================================
+   Type scale, spacing, and layout proportions follow the Apple methodology
+   (computed styles, ranked by usage). The accent is deliberately our own —
+   a deep navy, not Apple's blue — to keep the visual identity distinct.
+   Colours: 5 total. Shadows: 1. Weights: 400/600 only. Easing: 1 curve.
+   Font stack resolves to real SF Pro on Apple devices, the system default elsewhere.
+   ========================================================================== */
+:root{
+  --ink:#14171c;            /* primary text, never pure black */
+  --ink-2:#333336;          /* secondary */
+  --muted:#5b6169;          /* tertiary */
+  --surface:#f6f5f2;        /* the one off-white, warm rather than Apple's cool grey */
+  --white:#fff;
+  --blue:#0a3a66;           /* button fill — deep navy, our own, not Apple's blue */
+  --link:#0a3a66;           /* link — same navy, one accent throughout */
+  --hair:rgba(0,0,0,.10);
+  --shadow:0 5px 30px rgba(0,0,0,.22);   /* the single shadow */
+  --ease:cubic-bezier(.4,0,.6,1);        /* the single curve */
+  --dur:.32s;
+  --stadium:100px;
+  --wide:1024px;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:clip;max-width:100%}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+@media (prefers-reduced-motion: no-preference){html{scroll-behavior:smooth}}
+body{margin:0;background:var(--white);color:var(--ink);font-family:var(--sans);
+  font-size:17px;line-height:1.47;letter-spacing:-.022em;font-weight:400}
+a{color:var(--link);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:var(--wide);margin:0 auto;padding:0 22px}
+
+/* ---- nav: 12px, translucent, hairline. Own blur recipe, not Apple's documented one. ---- */
+.nav{position:sticky;top:0;z-index:100;height:44px;
+  background:rgba(255,255,255,.78);backdrop-filter:saturate(150%) blur(16px);
+  -webkit-backdrop-filter:saturate(150%) blur(16px);border-bottom:1px solid var(--hair)}
+.nav-in{max-width:var(--wide);margin:0 auto;padding:0 22px;height:44px;
+  display:flex;align-items:center;gap:34px}
+.nav a{font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;transition:opacity var(--dur) var(--ease);
+  display:inline-flex;align-items:center;min-height:44px;padding:0 10px}
+.nav a:hover{opacity:1;text-decoration:none}
+.nav .mark{font-size:15px;font-weight:600;letter-spacing:-.02em;margin-right:4px;
+  display:inline-flex;align-items:center;gap:8px}
+.nav .mark svg{display:block;flex:none}
+.nav .back{opacity:.6}
+.nav .back:hover{opacity:1}
+.nav .spacer{flex:1}
+
+/* ---- type scale. Tracking flips sign with size: the key Apple detail. ---- */
+h1{font-size:80px;line-height:1.05;font-weight:600;letter-spacing:-.015em;margin:0}
+h2{font-size:48px;line-height:1.08;font-weight:600;letter-spacing:-.012em;margin:0 0 18px}
+.sub{font-size:28px;line-height:1.21;font-weight:400;letter-spacing:.007em;color:var(--ink-2);
+  margin:18px auto 0;max-width:34ch}
+.body{font-size:17px;line-height:1.5;letter-spacing:-.022em;color:var(--muted);max-width:52ch}
+
+/* ---- sections: tight component padding, huge section padding ---- */
+section{padding:92px 0}
+section.tint{background:var(--surface)}
+.center{text-align:center}
+
+/* ---- the CTA pair: stadium fill + plain link, Apple's canonical pattern ---- */
+.cta{display:flex;gap:26px;justify-content:center;align-items:center;margin-top:34px;flex-wrap:wrap}
+#main:focus{outline:none}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.btn{position:relative;display:inline-block;background:var(--blue);color:#fff;font-size:17px;letter-spacing:-.022em;
+  padding:12px 24px;border-radius:var(--stadium);transition:opacity var(--dur) var(--ease)}
+.btn:hover{opacity:.85;text-decoration:none}
+/* ---- footer ---- */
+footer{background:var(--surface);padding:44px 0 56px}
+footer .row{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:18px}
+footer a{font-size:12px;letter-spacing:-.01em;color:var(--link)}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .nav a,.btn{transition:none}
+}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible,video:focus-visible{
+  outline:2px solid var(--blue);outline-offset:3px}
+
+/* Between the mobile breakpoint and the full-width desktop layout, the
+   content column is too narrow for an 80px h1 to hold its intended line
+   count — verified live: this specific headline wraps to 3 lines from
+   861px up to just under 1024px. 60px holds 2 lines across that whole gap. */
+@media (min-width:861px) and (max-width:1023px){
+  h1{font-size:60px}
+}
+@media (max-width:860px){
+  h1{font-size:48px} h2{font-size:34px} .sub{font-size:21px}
+  section{padding:64px 0}
+  /* Every nav destination stays reachable on mobile — swipeable instead of
+     hidden, an overflow-scroll pattern on the nav row. */
+  .nav-in{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .nav-in::-webkit-scrollbar{display:none}
+  .nav-in .mark,.nav-in .back,.nav-in a{flex:0 0 auto}
+  .nav-in .spacer{flex:0 0 16px}
+}
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "Heliopause by Coco Research",
+      "description": "Heliopause by Coco Research is out, as an early preview. It gives your AI tools a Lead and roles, like a small company, on your own machine.",
+      "codeRepository": "https://github.com/coco-research/heliopause",
+      "license": "https://opensource.org/licenses/MIT",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Coco Research"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Coco Research",
+          "item": "https://cocoresearch.org/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Heliopause",
+          "item": "https://cocoresearch.org/heliopause/"
+        }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-in">
+    <a href="#main" class="back">Skip to content</a>
+    <a href="/" class="mark">Coco Research</a>
+    <div class="spacer"></div>
+  </div>
+</nav>
+
+<main id="main" tabindex="-1">
+
+<!-- ================= HERO ================= -->
+<section id="top" class="center" style="padding-top:76px">
+  <div class="wrap">
+    <h1>Heliopause by Coco Research</h1>
+    <p class="sub">Heliopause by Coco Research is out, as an early preview.</p>
+    <p class="sub" style="margin-top:8px">It gives your AI tools a Lead and roles, like a small company, on your own machine.</p>
+    <p class="body" style="margin:24px auto 0">Heliopause organizes your AI tools like a small company.</p>
+  </div>
+</section>
+
+<!-- ================= FIRST SESSION ================= -->
+<section class="tint center">
+  <div class="wrap">
+    <h2>Heliopause shows it first.</h2>
+    <p class="body" style="margin:0 auto">In your first session, the Lead doesn't hand you a tour. Heliopause gives it one thing it found in your setup to open with, then it asks which project to watch first.</p>
+  </div>
+</section>
+
+<!-- ================= HOW IT RUNS ================= -->
+<section class="center">
+  <div class="wrap">
+    <h2>How it runs</h2>
+    <p class="body" style="margin:0 auto 14px">Heliopause sends nothing of its own. It runs on your own machine, on localhost.</p>
+    <p class="body" style="margin:0 auto 14px">It runs on 127.0.0.1. No account, no telemetry, no remote sync. Optional GitHub lookups go through your own gh, read-only, and the AI tools you use still talk to their own services.</p>
+    <p class="body" style="margin:0 auto">Setup prints its plan and waits for your yes before it changes anything outside ~/atlas-lab. MIT licence.</p>
+  </div>
+</section>
+
+<!-- ================= GET IT ================= -->
+<section class="tint center">
+  <div class="wrap">
+    <h2>Get it</h2>
+    <div class="cta">
+      <a class="btn" href="https://github.com/coco-research/heliopause">View on GitHub<span class="sr-only"> for Heliopause</span></a>
+      <a class="btn" href="https://github.com/coco-research/heliopause/releases">Releases<span class="sr-only"> for Heliopause</span></a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <a href="/">Coco Research</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

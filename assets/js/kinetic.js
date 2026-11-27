@@ -262,12 +262,12 @@ export function buildMaster(gsap, refs, view) {
     hide(r.beat, b1 + (last ? 0.2 : 0.02));
   });
 
-  /* 4. Shipped: heading, then a carousel of posters, one per shipped product flying in from depth. */
-  const [s0, s1] = TL.shipped;
-  const head = $('.b-shipped');
+  /* 4. All products: heading, then a carousel of posters, one per shipped product flying in from depth. */
+  const [s0, s1] = TL.products;
+  const head = $('.b-products');
   show(head, s0 + 0.2);
-  ft($('.b-shipped h2'), { opacity: 0, y: 34, filter: 'blur(10px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, ease: 'expo.out' }, s0 + 0.2);
-  ft($('.b-shipped h2'), { opacity: 1, y: 0 }, { opacity: 0, y: -26, duration: 0.3, ease: 'power2.in' }, s1 - 0.34);
+  ft($('.b-products h2'), { opacity: 0, y: 34, filter: 'blur(10px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, ease: 'expo.out' }, s0 + 0.2);
+  ft($('.b-products h2'), { opacity: 1, y: 0 }, { opacity: 0, y: -26, duration: 0.3, ease: 'power2.in' }, s1 - 0.34);
   hide(head, s1 - 0.03);
   const deck = view.deck;
   // One poster per product row in data/products.json. layoutDeck (main.js) reads deck['e' + i] for every card; each e{k}

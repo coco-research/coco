@@ -145,10 +145,10 @@ export function createDirector(view) {
     const u = i / 8;
     orbit(lerp(R0, R1, u), lerp(0, ang.rulesEnd, u), (lerp(40, 33, u) + 1.3 * Math.sin(u * TAU * 2)) * fit, lerp(3.0, 2.0, u), 40 - 2 * Math.sin(u * TAU));
   }
-  // 6. Shipped and lab: the shape disperses into a field and the camera drifts through it.
-  orbit(14.2, lerp(ang.rulesEnd, ang.shippedEnd, 0.55), 26 * fit, 1.2, 40);
-  orbit(TL.shipped[1], ang.shippedEnd, 22 * fit, 0.6, 40);
-  orbit(17.35, lerp(ang.shippedEnd, ang.labEnd, 0.5), 19 * fit, 0.3, 40);
+  // 6. Products and lab: the shape disperses into a field and the camera drifts through it.
+  orbit(14.2, lerp(ang.rulesEnd, ang.productsEnd, 0.55), 26 * fit, 1.2, 40);
+  orbit(TL.products[1], ang.productsEnd, 22 * fit, 0.6, 40);
+  orbit(17.35, lerp(ang.productsEnd, ang.labEnd, 0.5), 19 * fit, 0.3, 40);
   orbit(TL.lab[1], ang.labEnd, 14 * fit, 0.0, 40);
   // 7. Close: pull all the way back to reveal one constellation.
   orbit(19.6, ang.labEnd, 28 * fit, 3.0, 40);

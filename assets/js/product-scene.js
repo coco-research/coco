@@ -38,16 +38,22 @@ void main() {
   else gl_FragColor = vec4(vCol * (0.58 + core * 0.92), al);
 }`;
 
+const MORPH_GLSL = `
+vec2 rot2(vec2 v, float a) { float c = cos(a), s = sin(a); return vec2(c * v.x - s * v.y, s * v.x + c * v.y); }
+vec3 pick(float i) { if (i < 0.5) return aT0; if (i < 1.5) return aT1; return aT2; }
+vec3 morphPos(out float e, out float w0) {
+  float m = clamp(uMorph, 0.0, 2.0), i0 = floor(min(m, 1.9999)), f = m - i0;
+  e = f * f * (3.0 - 2.0 * f); w0 = max(0.0, 1.0 - m);
+  return mix(pick(i0), pick(i0 + 1.0), e);
+}`;
+
 const SHAPE_VERT = `
 attribute vec3 aT0, aT1, aT2; attribute vec4 aSeed;
 uniform float uMorph, uTime, uPx, uCamRef, uMaxPt, uLight, uSpinY, uSpinX, uPulse;
 varying vec3 vCol; varying float vA;
-vec2 rot2(vec2 v, float a) { float c = cos(a), s = sin(a); return vec2(c * v.x - s * v.y, s * v.x + c * v.y); }
-vec3 pick(float i) { return i < 0.5 ? aT0 : (i < 1.5 ? aT1 : aT2); }
+${MORPH_GLSL}
 void main() {
-  float m = clamp(uMorph, 0.0, 2.0), i0 = floor(min(m, 1.9999)), f = m - i0;
-  float e = f * f * (3.0 - 2.0 * f), w0 = max(0.0, 1.0 - m);
-  vec3 p = mix(pick(i0), pick(i0 + 1.0), e);
+  float e, w0; vec3 p = morphPos(e, w0);
   p.y *= 1.0 + 0.13 * uPulse * sin(uTime * 2.1 + aSeed.y * 10.0) * w0;
   p += vec3(cos(aSeed.x * 18.0 + uTime), sin(aSeed.z * 14.0 + uTime), cos(aSeed.y * 16.0)) * sin(3.14159265 * e) * 1.15;
   p.xz = rot2(p.xz, uSpinY); p.yz = rot2(p.yz, uSpinX);
@@ -63,12 +69,10 @@ void main() {
 
 const WIRE_VERT = `
 attribute vec3 aT0, aT1, aT2; uniform float uMorph, uTime, uSpinY, uSpinX, uPulse; varying float vA;
-vec2 rot2(vec2 v, float a) { float c = cos(a), s = sin(a); return vec2(c * v.x - s * v.y, s * v.x + c * v.y); }
-vec3 pick(float i) { return i < 0.5 ? aT0 : (i < 1.5 ? aT1 : aT2); }
+${MORPH_GLSL}
 void main() {
-  float m = clamp(uMorph, 0.0, 2.0), i0 = floor(min(m, 1.9999)), f = m - i0, e = f * f * (3.0 - 2.0 * f);
-  vec3 p = mix(pick(i0), pick(i0 + 1.0), e);
-  p.y *= 1.0 + 0.13 * uPulse * sin(uTime * 2.1 + (p.x * 0.18 + 0.5) * 10.0) * max(0.0, 1.0 - m);
+  float e, w0; vec3 p = morphPos(e, w0);
+  p.y *= 1.0 + 0.13 * uPulse * sin(uTime * 2.1 + (p.x * 0.18 + 0.5) * 10.0) * w0;
   p.xz = rot2(p.xz, uSpinY); p.yz = rot2(p.yz, uSpinX);
   vA = 1.0 - sin(3.14159265 * e) * 0.65;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
@@ -110,10 +114,13 @@ void main() {
   else gl_FragColor = vec4((vec3(0.36, 0.55, 1.0) * sx * 0.72 + vec3(1.0) * sx2 * 0.52) * edge, 1.0);
 }`;
 
+// The shared top bar (site-nav.js) owns theme storage, theme toggles, and meta[name="theme-color"].
+// When present, this file only reads data-theme / prefers-color-scheme and owns the 3D Pause control.
+const SHARED_NAV = !!document.querySelector('[data-site-nav]');
 function resolveTheme() {
   const docEl = document.documentElement;
   let explicit = docEl.getAttribute('data-theme');
-  if (explicit !== 'light' && explicit !== 'dark') {
+  if (!SHARED_NAV && explicit !== 'light' && explicit !== 'dark') {
     try { explicit = localStorage.getItem('coco-theme'); } catch (e) { explicit = null; }
     if (explicit === 'light' || explicit === 'dark') docEl.setAttribute('data-theme', explicit);
   }
@@ -135,16 +142,14 @@ function writePaused(paused) {
 }
 
 // Labels swap text only (no aria-pressed): WCAG 2.2.2 pause control and a label that changes with state.
-// The shared top bar (site-nav.js) owns the theme toggle, the drawer and the Products menu. This file only follows the
-// theme it sets (data-theme on <html>) and owns the 3D Pause control, so the two never fight over a button.
-const SHARED_NAV = !!document.querySelector('[data-site-nav]');
 function syncButtons(theme, paused) {
-  if (!SHARED_NAV) document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
-    btn.textContent = theme === 'light' ? 'Dark theme' : 'Light theme';
-    btn.removeAttribute('aria-pressed');
-  });
   document.querySelectorAll('[data-motion-toggle]').forEach((btn) => {
     btn.textContent = paused ? 'Play 3D' : 'Pause 3D';
+    btn.removeAttribute('aria-pressed');
+  });
+  if (SHARED_NAV) return;
+  document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
+    btn.textContent = theme === 'light' ? 'Dark theme' : 'Light theme';
     btn.removeAttribute('aria-pressed');
   });
   const meta = document.querySelector('meta[name="theme-color"]');
@@ -261,8 +266,9 @@ async function startScene(initialTheme, initialPaused) {
   let vw = 1, vh = 1, camZ = 24, portrait = false, raf = 0, disposed = false, still = initialPaused;
   const ptr = { x: 0, y: 0 }, flarePos = new THREE.Vector3(), proj = new THREE.Vector3();
 
+  const mobileMax = Number(docEl.dataset.mobileMax) || 860;
   const resize = () => {
-    vw = Math.max(1, window.innerWidth); vh = Math.max(1, window.innerHeight); portrait = vw <= 860;
+    vw = Math.max(1, window.innerWidth); vh = Math.max(1, window.innerHeight); portrait = vw <= mobileMax;
     const dpr = Math.min(window.devicePixelRatio || 1, 2), aspect = vw / vh;
     renderer.setPixelRatio(dpr); renderer.setSize(vw, vh, false); camera.aspect = aspect;
     const tanV = Math.tan((camera.fov * Math.PI) / 360), tanH = tanV * aspect;
@@ -293,7 +299,8 @@ async function startScene(initialTheme, initialPaused) {
     const w0 = Math.max(0, 1 - u.uMorph.value), fs = Math.max(0.9, camZ / 21);
     flarePos.set(0.35 * w0, 0.05 * w0, 1.25 * w0);
     // Light Paper: keep the horizontal flare in the right half so it never crosses the hero copy column.
-    const streakX = isLight ? (portrait ? 0.5 : 0.52) : 1;
+    let streakX = 1;
+    if (isLight) streakX = portrait ? 0.5 : 0.52;
     for (const m of [flareGlow, flareStreak]) { m.position.copy(flarePos); m.quaternion.copy(camera.quaternion); m.scale.set(fs, fs, 1); }
     flareStreak.scale.set(fs * streakX, fs, 1);
     proj.copy(flarePos).project(camera);
@@ -322,7 +329,7 @@ async function startScene(initialTheme, initialPaused) {
     if (document.hidden) { cancelAnimationFrame(raf); raf = 0; }
     else if (!raf) raf = requestAnimationFrame(loop);
   };
-  const onContextLost = (e) => { e.preventDefault(); cancelAnimationFrame(raf); raf = 0; docEl.classList.remove('gl'); docEl.classList.add('nogl'); };
+  const onContextLost = (e) => { e.preventDefault(); disposed = true; cancelAnimationFrame(raf); raf = 0; docEl.classList.remove('gl'); docEl.classList.add('nogl'); };
   window.addEventListener('resize', onResize, { passive: true });
   window.addEventListener('pointermove', onPointer, { passive: true });
   document.addEventListener('visibilitychange', onVisibility);
@@ -331,7 +338,7 @@ async function startScene(initialTheme, initialPaused) {
   renderFrame(1.8); docEl.classList.remove('nogl'); docEl.classList.add('gl');
   if (!still && !document.hidden) raf = requestAnimationFrame(loop);
 
-  return (window.__productScene = {
+  return {
     setTheme, pause, play,
     get paused() { return still; },
     dispose() {
@@ -344,7 +351,7 @@ async function startScene(initialTheme, initialPaused) {
       [bgMat, dustMat, shapeMat, wireMat, flareGlowMat, flareStreakMat].forEach((m) => m.dispose());
       docEl.classList.remove('gl'); renderer.dispose();
     },
-  });
+  };
 }
 
 function boot() {
@@ -380,6 +387,9 @@ function boot() {
     try {
       api = await startScene(theme, paused);
       if (!api) failed = true;
+    } catch (e) {
+      docEl.classList.add('nogl');
+      failed = true;
     } finally { starting = false; }
     if (api && api.paused !== paused) { if (paused) api.pause(); else api.play(); }
   };
@@ -396,6 +406,17 @@ function boot() {
     matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
       if (docEl.getAttribute('data-theme')) return;
       theme = resolveTheme(); syncButtons(theme, paused); if (api) api.setTheme(theme);
+    });
+  } catch (e) {}
+  try {
+    matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (ev) => {
+      let stored = null;
+      try { stored = sessionStorage.getItem(PAUSE_KEY); } catch (e) {}
+      if (stored !== null) return;
+      paused = ev.matches;
+      docEl.classList.toggle('still', paused);
+      syncButtons(theme, paused);
+      if (api) { if (paused) api.pause(); else api.play(); }
     });
   } catch (e) {}
 

@@ -1,0 +1,41 @@
+# Coco Research
+
+> Local-first AI tools and governed agents that run on your own machine, with every stage and licence stated plainly.
+
+- Website: https://cocoresearch.org/
+- Founder: Rijul Kalra (https://cocoresearch.org/rijul-kalra/)
+- Contact: product@cocoresearch.org
+- GitHub: https://github.com/coco-research
+- All products: https://cocoresearch.org/products/
+- In the lab: https://cocoresearch.org/lab/
+- What's new: https://cocoresearch.org/whats-new/
+
+## Four Rules
+
+1. Data stays local. Voice runs offline. Our tools run on your machine.
+2. Verify, don't average. Dissent is named, not averaged away.
+3. Stage is stated plainly. In development means in development.
+4. Credit travels with the code. Open-source work we build on is named and linked.
+
+## Products (2, available now)
+
+- [Coco Super Intelligence](https://cocoresearch.org/coco/): Coco Super Intelligence seats an advisory board of expert personas inside the coding tool you already use. You ask one hard question, the board argues it out, you get one pick with the dissent named, and your local skills, commands and agents then do the work. Stage: Available now, v2.4.0, on npm (21 tagged releases). Released: 26 Nov 2026. Licence: Open-core: core framework under Apache-2.0; Super Intelligence board proprietary.
+- [Coco Voice](https://cocoresearch.org/voice/): Coco Voice is private speech-to-text on your own computer. Hold a key and your words are typed into the app you already have open, transcripts are tidied locally, and meetings are saved as cited notes on disk, with no account and no subscription. Stage: Available now, v0.20.9 (16 tagged releases). Released: 26 Nov 2026. Licence: MIT License (open source).
+
+## In the lab (8)
+
+Work in progress: public early previews and source tools, then private projects with no public download.
+
+- [Heliopause by Coco Research](https://cocoresearch.org/heliopause/): Gives your AI tools a Lead and roles, like a small company. Source available, Apache-2.0, v0.7.3 early preview.
+- [Signal](https://cocoresearch.org/signal/): A ready-made look for your product: three editions, CSS and docs. Source available, Apache-2.0, no release.
+- [Mira](https://cocoresearch.org/mira/): Makes Reels and Shorts in English and Hindi. Source available, AGPL-3.0, archived.
+- [jev-use](https://cocoresearch.org/jev-use/): Control your Mac with your voice. Source available, Apache-2.0, pre-alpha.
+- [Coco M0](https://cocoresearch.org/m0/): Remembers across your AI tools, so you stop re-explaining. Private beta, used daily.
+- [Coco Hermes](https://cocoresearch.org/hermes/): Answers over your own files with an exact quote, or says it can’t. Private beta, no public build.
+- [Coco Teams NG](https://cocoresearch.org/teams-ng/): A team of AI members you hire, brief and work with in one console. Private beta, in development.
+- [Aloo Mannu](https://cocoresearch.org/aloomannu/): The local message and wake layer for coding agents on your machine. Private, in the lab.
+
+## Guides
+
+- [How to add guardrails to an AI coding agent](https://cocoresearch.org/coco/guardrails/): Five layers of guardrails for AI coding agents.
+- [How to manage multiple AI coding agents](https://cocoresearch.org/guides/manage-multiple-ai-coding-agents/): Practical coordination patterns for running multiple coding agents with git worktrees.

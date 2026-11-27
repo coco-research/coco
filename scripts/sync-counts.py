@@ -6,7 +6,7 @@ and HOW-IT-WORKS.html) takes its numbers from docs/asset-counts.json, so a
 persona change moves every count in the same commit.
 
 --site: only the website files (index.html, coco/index.html,
-assets/js/product-motifs-a.js), from docs/released-counts.json. The site shows
+assets/js/product-motifs-a.js, data/products.json, data/product-pages-public.json), from docs/released-counts.json. The site shows
 the last release, so run this in a release change only.
 
 --check: change nothing; print each count that is out of date and exit 1.
@@ -40,7 +40,7 @@ SITE_DEPTS = {  # coco/index.html hero diagram label -> by_department key
     'Healthcare & life sciences': 'healthcare-life-sciences', 'Sales & GTM': 'gtm',
 }
 
-P, D = 'personas', 'departments'
+P, D, PUB = 'personas', 'departments', 'data/product-pages-public.json'
 
 # (file, pattern, one key per capture group)
 PLACES = [
@@ -70,9 +70,12 @@ PLACES = [
 ]
 
 SITE_PLACES = [
+    ('index.html', r'Coco (\d+\.\d+\.\d+) <span', ('version',)),
+    ('index.html', r'Available now, v(\d+\.\d+\.\d+), on npm', ('version',)),
     ('index.html', r'data-count="(\d+)">(\d+)</span> <span class="unit">experts\.', (P, P)),
     ('index.html', r'data-count="(\d+)">(\d+)</span> <span class="unit">departments\.', (D, D)),
     ('index.html', r'<span class="nw">(\d+) skills, (\d+) commands\.</span>', ('skills', 'commands')),
+    ('data/products.json', r'"Available now, v(\d+\.\d+\.\d+), on npm"', ('version',)),
     ('coco/index.html', r'content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills',
      (P, 'skills')),
     ('coco/index.html', r'<p class="sub reveal">Each of the (\d+) requires a live, checkable source\. Then (\d+) skills',
@@ -95,19 +98,47 @@ SITE_PLACES = [
 ] + [
     ('assets/js/product-motifs-a.js', r"\['" + re.escape(label) + r"', (\d+)\]", ('dept:' + key,))
     for label, key in SITE_DEPTS.items()
+] + [
+    (PUB, r'"(\d+) expert personas across (\d+) departments, (\d+) skills, and (\d+) commands inside Claude Code, Cursor, Codex, and (\d+) more coding tools\."', (P, D, 'skills', 'commands', 'adapters_more_3')),
+    (PUB, r'"og_image_alt": "Coco Super Intelligence[^"]*",\s*"version": "(\d+\.\d+\.\d+)"', ('version',)),
+    (PUB, r'"(\d+)",\s*"Expert personas across (\d+) departments"', (P, D)),
+    (PUB, r'"(\d+)",\s*"Skills \((\d+) core \+ (\d+) bundle\)"', ('skills', 'skills_core', 'skills_bundle')),
+    (PUB, r'"(\d+)",\s*"Commands across (\d+) adapters"', ('commands', 'adapters')),
+    (PUB, r'Open-core, v(\d+\.\d+\.\d+)\.', ('version',)),
+    (PUB, r'seats 16 to 32 of (\d+) personas across (\d+) departments;', (P, D)),
+    (PUB, r'Ships (\d+) skills, (\d+) commands and (\d+) agents; a default Claude Code install delivers (\d+) of the skills\.', ('skills', 'commands', 'agents', 'delivered_skills')),
+    (PUB, r'"One command, (\d+) coding tools",\s*"One command, npx cocosuperintelligence, installs into Claude Code, Cursor, Codex, VS Code and (\d+) other coding tools \((\d+) adapters\)\."', ('adapters', 'adapters_other_4', 'adapters')),
+    (PUB, r'Available now, v(\d+\.\d+\.\d+), on npm', ('version',)),
+    (PUB, r'VS Code and (\d+) other coding tools \((\d+) install adapters\)', ('adapters_other_4', 'adapters')),
+    (PUB, r'"(\d+\.\d+\.\d+) \(\d+ GitHub releases\)"', ('version',)),
+    (PUB, r'"(\d+) in the repository \((\d+) core \+ (\d+) bundle; (\d+) delivered by default on Claude Code\)\."', ('skills', 'skills_core', 'skills_bundle', 'delivered_skills')),
+    (PUB, r'"(\d+) customer-facing \((\d+) shipped \+ (\d+) generated at install\)\."', ('commands', 'commands_shipped', 'commands_generated')),
+    (PUB, r'"(\d+)\. (\d+) core, plus (\d+) in the GSD bundle\."', ('agents', 'agents_core', 'agents_bundle')),
+    (PUB, r'"(\d+) across (\d+) departments, modeled on public writing', (P, D)),
+    (PUB, r'"(\d+) install adapters plus a local stdio MCP server', ('adapters',)),
+    (PUB, r'tagged releases shipped \(latest: v(\d+\.\d+\.\d+)\)', ('version',)),
+    (PUB, r'registry maintenance across all (\d+) departments\.', (D,)),
+    (PUB, r'"(?:GitHub r|R)elease v(\d+\.\d+\.\d+)",\s*"https://github\.com/coco-research/coco/releases/tag/v(\d+\.\d+\.\d+)"', ('version', 'version')),
+    (PUB, r'pinned v(\d+\.\d+\.\d+) release tag into \./coco', ('version',)),
+    (PUB, r'Install Coco Super Intelligence \(v(\d+\.\d+\.\d+)\)', ('version',)),
 ]
+
+VALUE_GETTERS = {
+    P: lambda c: c['personas']['total'], D: lambda c: c['departments']['total'],
+    'skills': lambda c: c['skills']['total'], 'skills_core': lambda c: c['skills']['core'],
+    'skills_bundle': lambda c: c['skills']['bundle'], 'delivered_skills': lambda c: c['delivered']['skills'],
+    'commands': lambda c: c['commands']['customer_facing'], 'commands_shipped': lambda c: c['commands']['shipped'],
+    'commands_generated': lambda c: c['commands']['generated_si'], 'agents': lambda c: c['agents']['total'],
+    'agents_core': lambda c: c['agents']['core'], 'agents_bundle': lambda c: c['agents']['total'] - c['agents']['core'],
+    'adapters': lambda c: c['adapters']['total'], 'adapters_more_3': lambda c: c['adapters']['total'] - 3,
+    'adapters_other_4': lambda c: c['adapters']['total'] - 4, 'version': lambda c: c['version'],
+}
 
 
 def value(counts, key):
     if key.startswith('dept:'):
         return counts['personas']['by_department'][key[5:]]
-    return {
-        P: counts['personas']['total'],
-        D: counts['departments']['total'],
-        'skills': counts['skills']['total'],
-        'commands': counts['commands']['customer_facing'],
-        'agents': counts['agents']['total'],
-    }[key]
+    return VALUE_GETTERS[key](counts)
 
 
 def label(key):
@@ -141,7 +172,7 @@ def main(argv):
         for m in reversed(matches):
             for g in range(len(keys), 0, -1):
                 want = value(counts, keys[g - 1])
-                got = int(m.group(g))
+                got = m.group(g) if isinstance(want, str) else int(m.group(g))
                 if got == want:
                     continue
                 line = text.count('\n', 0, m.start(g)) + 1

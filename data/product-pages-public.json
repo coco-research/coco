@@ -1,0 +1,809 @@
+{
+  "coco-si": {
+    "slug": "coco",
+    "meta_description": "493 expert personas across 13 departments, 231 skills, and 389 commands inside Claude Code, Cursor, Codex, and 13 more coding tools.",
+    "og_image": "https://cocoresearch.org/assets/img/og-coco-si.png",
+    "og_image_alt": "Coco Super Intelligence — Coco Research",
+    "version": "2.4.0",
+    "app_category": "DeveloperApplication",
+    "os": "macOS, Linux, Windows",
+    "license_url": "https://github.com/coco-research/coco/blob/main/LICENSE",
+    "code_repository": "https://github.com/coco-research/coco",
+    "kns": [
+      [
+        "493",
+        "Expert personas across 13 departments"
+      ],
+      [
+        "231",
+        "Skills (79 core + 152 bundle)"
+      ],
+      [
+        "389",
+        "Commands across 16 adapters"
+      ]
+    ],
+    "licence_href": "https://github.com/coco-research/coco/blob/main/LICENSE",
+    "does_for_you": "Coco Super Intelligence seats an advisory board of expert personas inside the coding tool you already use. You ask one hard question, the board argues it out, you get one pick with the dissent named, and your local skills, commands and agents then do the work.",
+    "who_detail": "You already work in Claude Code, Cursor or Codex, and the calls that hurt are the ones with no obvious answer: architecture, scope, risk, go or no-go. You want the strongest objections on the table before you commit.",
+    "try_above": {
+      "kind": "command",
+      "label": "npx cocosuperintelligence",
+      "href": "#try",
+      "note": "One command. Open-core, v2.4.0."
+    },
+    "does": [
+      [
+        "16 to 32 personas on /SI-Decide",
+        "Ask one hard question with /SI-Decide and it seats 16 to 32 of 493 personas across 13 departments; add --debate for reaction rounds before the vote."
+      ],
+      [
+        "Named dissent, not an average",
+        "Every advisory round records who disagreed and why, backed by an offline checker that enforces persona source and held-status rules."
+      ],
+      [
+        "Skills, commands and agents that do the work",
+        "Ships 231 skills, 389 commands and 41 agents; a default Claude Code install delivers 193 of the skills."
+      ],
+      [
+        "One command, 16 coding tools",
+        "One command, npx cocosuperintelligence, installs into Claude Code, Cursor, Codex, VS Code and 12 other coding tools (16 adapters)."
+      ],
+      [
+        "Runs on your own machine, no telemetry",
+        "Files and state stay on your machine with no telemetry; your coding tool keeps its own model provider and keys."
+      ]
+    ],
+    "slot_label": "Real app capture not yet added — Coco Super Intelligence inside Claude Code, Cursor or Codex",
+    "status": [
+      [
+        "Stage",
+        "Available now, v2.4.0, on npm (21 tagged releases)"
+      ],
+      [
+        "Released",
+        "26 Nov 2026"
+      ],
+      [
+        "Licence",
+        "Open-core: core framework under Apache-2.0; Super Intelligence board proprietary"
+      ],
+      [
+        "Works with",
+        "Claude Code, Cursor, Codex, VS Code and 12 other coding tools (16 install adapters)"
+      ],
+      [
+        "Requirements",
+        "A terminal with npx (Node.js) and one of the supported coding tools"
+      ],
+      [
+        "Privacy",
+        "Files and state stay on your machine, no telemetry; your coding tool keeps its own model provider and keys"
+      ]
+    ],
+    "specs": [
+      [
+        "Version",
+        "2.4.0 (21 GitHub releases)"
+      ],
+      [
+        "Skills",
+        "231 in the repository (79 core + 152 bundle; 193 delivered by default on Claude Code)."
+      ],
+      [
+        "Commands",
+        "389 customer-facing (47 shipped + 342 generated at install)."
+      ],
+      [
+        "Agents",
+        "41. 17 core, plus 24 in the GSD bundle."
+      ],
+      [
+        "Personas",
+        "493 across 13 departments, modeled on public writing with offline source validation."
+      ],
+      [
+        "Adapters & MCP",
+        "16 install adapters plus a local stdio MCP server with 19 tool connectors."
+      ],
+      [
+        "Bundles",
+        "6 default bundles: GSD, HyperFrames, Super Intelligence, Brain, M0 and Cognee."
+      ]
+    ],
+    "progress": {
+      "count": "21 tagged releases shipped (latest: v2.4.0)",
+      "now": 21,
+      "max": 21,
+      "pct": 100,
+      "aria_label": "Coco Super Intelligence release progress"
+    },
+    "next": [
+      [
+        "Expanded MCP connector verification",
+        "Promoting more of the 19 documented MCP tool connectors from configuration templates to full automated verification."
+      ],
+      [
+        "Ongoing persona registry audits",
+        "Continuing offline source checks, profile hygiene and registry maintenance across all 13 departments."
+      ]
+    ],
+    "links": [
+      [
+        "GitHub repository",
+        "https://github.com/coco-research/coco"
+      ],
+      [
+        "npm package",
+        "https://www.npmjs.com/package/cocosuperintelligence"
+      ],
+      [
+        "Release v2.4.0",
+        "https://github.com/coco-research/coco/releases/tag/v2.4.0"
+      ],
+      [
+        "All tagged releases",
+        "https://github.com/coco-research/coco/releases"
+      ],
+      [
+        "Licence",
+        "https://github.com/coco-research/coco/blob/main/LICENSE"
+      ],
+      [
+        "Persona disclaimer",
+        "https://github.com/coco-research/coco/blob/main/systems/superintelligence/DISCLAIMER.md"
+      ],
+      [
+        "Guardrails guide",
+        "../coco/guardrails/"
+      ],
+      [
+        "Multi-agent guide",
+        "../guides/manage-multiple-ai-coding-agents/"
+      ]
+    ],
+    "stage": {
+      "chip": "Released",
+      "cls": "released"
+    },
+    "try": {
+      "heading": "Install in one step",
+      "lead": "Run one command in a terminal. It clones the pinned v2.4.0 release tag into ./coco and wires your coding agent locally.",
+      "install": {
+        "label": "Install Coco Super Intelligence (v2.4.0)",
+        "cmd": "npx cocosuperintelligence"
+      },
+      "buttons": [
+        [
+          "npm package",
+          "https://www.npmjs.com/package/cocosuperintelligence",
+          "ghost"
+        ],
+        [
+          "GitHub release v2.4.0",
+          "https://github.com/coco-research/coco/releases/tag/v2.4.0",
+          "ghost"
+        ]
+      ],
+      "note": "Open-core: the core framework is Apache-2.0 and the Super Intelligence board is proprietary. Remove it any time with --uninstall, which removes only what the install recorded and restores your original files."
+    },
+    "try_alt": {
+      "label": "npm package",
+      "href": "https://www.npmjs.com/package/cocosuperintelligence"
+    }
+  },
+  "voice": {
+    "slug": "voice",
+    "meta_description": "Private on-device speech-to-text and cited meeting notes for macOS, Windows, and Linux. Works offline with open models. MIT licensed.",
+    "og_image": "https://cocoresearch.org/assets/img/og-coco-voice.png",
+    "og_image_alt": "Coco Voice — Coco Research",
+    "version": "0.20.9",
+    "app_category": "UtilitiesApplication",
+    "os": "macOS (Apple Silicon and Intel), Windows (x64), Linux",
+    "license_url": "https://github.com/coco-research/Coco-Voice/blob/main/LICENSE",
+    "code_repository": "https://github.com/coco-research/Coco-Voice",
+    "kns": [
+      [
+        "On-device",
+        "Speech model on your computer"
+      ],
+      [
+        "v0.20.9",
+        "Dictation, clean-up and cited meetings"
+      ],
+      [
+        "MIT",
+        "Open-source license"
+      ]
+    ],
+    "licence_href": "https://github.com/coco-research/Coco-Voice/blob/main/LICENSE",
+    "does_for_you": "Coco Voice is private speech-to-text on your own computer. Hold a key and your words are typed into the app you already have open, transcripts are tidied locally, and meetings are saved as cited notes on disk, with no account and no subscription.",
+    "who_detail": "You dictate emails, code comments or notes all day, or sit in meetings you later need to search, and you would rather the audio and text stayed on your own machine than went to a cloud service.",
+    "try_above": {
+      "label": "Download v0.20.9",
+      "href": "https://github.com/coco-research/Coco-Voice/releases/latest",
+      "kind": "primary",
+      "note": "macOS, Windows x64 and Linux x64 installers on GitHub Releases."
+    },
+    "try_alt": {
+      "label": "Install steps",
+      "href": "#try"
+    },
+    "does": [
+      [
+        "Hold-to-talk dictation into any app",
+        "Option+Space on macOS, Ctrl+Space on Windows and Linux, or toggle mode. Recognition works offline once your speech model is downloaded."
+      ],
+      [
+        "Meeting notes with speakers and citations",
+        "Grouped Home, Meetings and Voice screens with live recording controls, a dual-track speaker view, segment citations, cross-meeting to-dos and local BM25 cited Q&A saved on disk."
+      ],
+      [
+        "Local clean-up and your own words",
+        "A local Qwen3-4B model on Mac tidies text and drops spoken self-corrections such as “scratch that”, alongside custom vocabulary and local history."
+      ],
+      [
+        "Open speech models, checked before use",
+        "Pick an open speech model, including Whisper, Parakeet and Moonshine. Each download shows its licence and is checked against a pinned SHA-256 before use."
+      ]
+    ],
+    "slot_label": "Real app capture not yet added — Coco Voice on macOS, Windows and Linux",
+    "status": [
+      [
+        "Stage",
+        "Available now, v0.20.9 (16 tagged releases)"
+      ],
+      [
+        "Released",
+        "26 Nov 2026"
+      ],
+      [
+        "Licence",
+        "MIT License (open source)"
+      ],
+      [
+        "Platforms",
+        "macOS (Apple Silicon and Intel), Windows x64, Linux x64"
+      ],
+      [
+        "Privacy",
+        "Works offline once the speech model is downloaded. Dictated text never goes into log files, app data stays private to your user account, and the paste is skipped while macOS secure input is on."
+      ],
+      [
+        "Updates",
+        "Published on GitHub Releases"
+      ]
+    ],
+    "credits_html": "Licence credit: <a class=\"inline\" href=\"https://github.com/cjpais/Handy\" rel=\"noopener\">Handy</a> by CJ Pais (MIT). Copyright (c) 2025 CJ Pais. Third-party notices in <a class=\"inline\" href=\"https://github.com/coco-research/Coco-Voice/blob/main/NOTICE\" rel=\"noopener\">NOTICE</a>.",
+    "progress": {
+      "count": "16 tagged releases published (latest: v0.20.9)",
+      "now": 16,
+      "max": 16,
+      "pct": 100,
+      "aria_label": "Coco Voice release progress"
+    },
+    "next": [
+      [
+        "Clean-up on out of the box",
+        "Clean-up on out of the box, filler-word removal that follows the language you speak (and can be switched off), and history limits that do what they say."
+      ],
+      [
+        "Per-app profiles",
+        "Tone, capitals and punctuation follow the app in front, and apps you block are never dictated into."
+      ]
+    ],
+    "links": [
+      [
+        "GitHub repository",
+        "https://github.com/coco-research/Coco-Voice"
+      ],
+      [
+        "Latest release",
+        "https://github.com/coco-research/Coco-Voice/releases/latest"
+      ],
+      [
+        "All 16 tagged releases",
+        "https://github.com/coco-research/Coco-Voice/releases"
+      ],
+      [
+        "MIT licence",
+        "https://github.com/coco-research/Coco-Voice/blob/main/LICENSE"
+      ],
+      [
+        "NOTICE (third-party credits)",
+        "https://github.com/coco-research/Coco-Voice/blob/main/NOTICE"
+      ]
+    ],
+    "stage": {
+      "chip": "Released",
+      "cls": "released"
+    },
+    "try": {
+      "heading": "Download the installer for your computer",
+      "lead": "Open the latest GitHub Release and pick the file for your system. Verify it against SHA256SUMS if you like.",
+      "downloads": [
+        [
+          "Coco.Voice_0.20.9_aarch64.dmg",
+          "Mac with Apple Silicon"
+        ],
+        [
+          "Coco.Voice_0.20.9_x64.dmg",
+          "Mac with an Intel chip"
+        ],
+        [
+          "Coco.Voice_0.20.9_x64-setup.exe",
+          "Windows x64"
+        ],
+        [
+          "Coco.Voice_0.20.9_amd64.AppImage",
+          "Linux x64 (also .deb and .rpm)"
+        ],
+        [
+          "SHA256SUMS and .sig files",
+          "Checksums and signatures for the release"
+        ]
+      ],
+      "buttons": [
+        [
+          "Download v0.20.9",
+          "https://github.com/coco-research/Coco-Voice/releases/latest",
+          "primary"
+        ],
+        [
+          "Release notes v0.20.9",
+          "https://github.com/coco-research/Coco-Voice/releases/tag/v0.20.9",
+          "ghost"
+        ]
+      ],
+      "note": "Windows and Linux builds are x64 only for this release."
+    }
+  },
+  "signal": {
+    "slug": "signal",
+    "meta_description": "Signal is Coco Research's open design language: three editions, Light Paper and Dark Stage CSS tokens, and rules for legible interfaces. Apache-2.0.",
+    "og_image": "https://cocoresearch.org/assets/img/og-coco-research.png",
+    "og_image_alt": "Coco Research",
+    "license_url": "https://www.apache.org/licenses/LICENSE-2.0",
+    "code_repository": "https://github.com/coco-research/coco-design-language",
+    "programming_language": "CSS",
+    "diagram": "editions",
+    "kns": [
+      [
+        "Three editions",
+        "CSS tokens and documentation"
+      ],
+      [
+        "Light + Dark",
+        "Both surfaces designed first-class"
+      ],
+      [
+        "Apache-2.0",
+        "Source available, no packaged release"
+      ]
+    ],
+    "licence_href": "https://github.com/coco-research/coco-design-language",
+    "does_for_you": "Signal is Coco Research’s design language. It gives your product a coherent look without a design team: a type scale, Light Paper and Dark Stage colour tokens, and written rules for keeping an interface legible.",
+    "who_detail": "You are building a site or app and want a ready-made, accessible look you can read, copy and adapt, with light and dark themes that already work on desktop and phone.",
+    "try_above": {
+      "label": "View source on GitHub",
+      "href": "https://github.com/coco-research/coco-design-language",
+      "kind": "primary",
+      "note": "Source available. No packaged release."
+    },
+    "does": [
+      [
+        "Three editions, light and dark",
+        "Three editions with first-class Light Paper and Dark Stage tokens across desktop and phone viewports."
+      ],
+      [
+        "Readable type with steady numbers",
+        "Archivo and Martian Mono variable typography with tabular numerals for counts and baselines."
+      ],
+      [
+        "No tracking, no network calls",
+        "Static stylesheets and page scripts make zero runtime network requests, analytics beacons or tracking calls."
+      ],
+      [
+        "Respects reduced motion",
+        "Native prefers-reduced-motion rules switch transitions and WebGL motion off cleanly."
+      ]
+    ],
+    "status": [
+      [
+        "Stage",
+        "Source available, no packaged release"
+      ],
+      [
+        "Licence",
+        "Apache-2.0 (open source)"
+      ],
+      [
+        "Requirements",
+        "A browser and a text editor; static CSS and docs"
+      ],
+      [
+        "Privacy",
+        "Static stylesheets and scripts make no runtime network requests"
+      ]
+    ],
+    "next": [
+      [
+        "No packaged release yet",
+        "Use the CSS and docs straight from the repository. No release is tagged and no date is announced."
+      ],
+      [
+        "Upcoming items are not listed",
+        "The public repository does not list a future roadmap."
+      ]
+    ],
+    "links": [
+      [
+        "GitHub repository",
+        "https://github.com/coco-research/coco-design-language"
+      ],
+      [
+        "Licence (Apache-2.0)",
+        "https://www.apache.org/licenses/LICENSE-2.0"
+      ]
+    ],
+    "stage": {
+      "chip": "Source available",
+      "cls": "source"
+    },
+    "try": {
+      "heading": "Clone the repository",
+      "lead": "There is no packaged release yet. Clone the source and use the CSS and docs directly.",
+      "clone": "https://github.com/coco-research/coco-design-language.git",
+      "buttons": [
+        [
+          "View source on GitHub",
+          "https://github.com/coco-research/coco-design-language",
+          "primary"
+        ]
+      ],
+      "note": "Source available under Apache-2.0."
+    }
+  },
+  "mira": {
+    "slug": "mira",
+    "meta_description": "Local Python pipeline for assembling vertical Reels and Shorts in English and Hindi on your own machine. Archived AGPL-3.0 source repository.",
+    "og_image": "https://cocoresearch.org/assets/img/og-coco-research.png",
+    "og_image_alt": "Coco Research",
+    "license_url": "https://www.gnu.org/licenses/agpl-3.0.en.html",
+    "code_repository": "https://github.com/coco-research/Mira",
+    "programming_language": "Python",
+    "diagram": "frames",
+    "kns": [
+      [
+        "EN + HI",
+        "English and Hindi vertical video"
+      ],
+      [
+        "On-machine",
+        "Python pipeline runs locally"
+      ],
+      [
+        "AGPL-3.0",
+        "Archived source repository"
+      ]
+    ],
+    "licence_href": "https://github.com/coco-research/Mira",
+    "does_for_you": "Mira turns your material into vertical short videos, the shape Reels and Shorts use, in English and Hindi, using a Python pipeline that runs on your own machine.",
+    "who_detail": "You make short-form video, you are comfortable running a Python project, and you want the work done locally. The repository is archived, so it is best treated as reference you can read and fork.",
+    "try_above": {
+      "label": "View source on GitHub",
+      "href": "https://github.com/coco-research/Mira",
+      "kind": "primary",
+      "note": "Archived source. No packaged release."
+    },
+    "does": [
+      [
+        "Vertical Reels and Shorts",
+        "Assembles vertical short-form videos in the shape Reels and Shorts use."
+      ],
+      [
+        "English and Hindi",
+        "Builds videos in English and in Hindi."
+      ],
+      [
+        "Runs on your own machine",
+        "A Python pipeline you run locally; there is no packaged binary."
+      ]
+    ],
+    "status": [
+      [
+        "Stage",
+        "Archived source, no packaged release"
+      ],
+      [
+        "Licence",
+        "AGPL-3.0 (open source)"
+      ],
+      [
+        "Requirements",
+        "Python, run from the source repository"
+      ],
+      [
+        "Privacy",
+        "The pipeline runs on your own machine"
+      ]
+    ],
+    "next": [
+      [
+        "Archived",
+        "The repository is archived on GitHub with no active roadmap, so treat it as read-only reference."
+      ],
+      [
+        "No release",
+        "There is no packaged binary and no date for one."
+      ]
+    ],
+    "links": [
+      [
+        "GitHub repository",
+        "https://github.com/coco-research/Mira"
+      ],
+      [
+        "Licence (AGPL-3.0)",
+        "https://www.gnu.org/licenses/agpl-3.0.en.html"
+      ]
+    ],
+    "stage": {
+      "chip": "Archived",
+      "cls": "source"
+    },
+    "try": {
+      "heading": "Clone the repository",
+      "lead": "There is no packaged release. The source is archived on GitHub, so read it, run it, or fork it.",
+      "clone": "https://github.com/coco-research/Mira.git",
+      "buttons": [
+        [
+          "View source on GitHub",
+          "https://github.com/coco-research/Mira",
+          "primary"
+        ]
+      ],
+      "note": "Archived source under AGPL-3.0."
+    }
+  },
+  "jev-use": {
+    "slug": "jev-use",
+    "meta_description": "jev-use explores local voice-driven desktop control for macOS on your own machine, published openly as pre-alpha Apache-2.0 source code on GitHub.",
+    "og_image": "https://cocoresearch.org/assets/img/og-coco-research.png",
+    "og_image_alt": "Coco Research",
+    "license_url": "https://www.apache.org/licenses/LICENSE-2.0",
+    "code_repository": "https://github.com/coco-research/jev-use",
+    "programming_language": "Python",
+    "diagram": "ripple",
+    "kns": [
+      [
+        "macOS",
+        "Voice-driven desktop control"
+      ],
+      [
+        "Pre-alpha",
+        "Early source, stage stated plainly"
+      ],
+      [
+        "Apache-2.0",
+        "Open-source repository"
+      ]
+    ],
+    "licence_href": "https://github.com/coco-research/jev-use",
+    "does_for_you": "jev-use explores controlling your Mac with your voice: you speak, and the desktop responds. It is early, pre-alpha code that you can read and run.",
+    "who_detail": "You like trying early software, you use a Mac, and you are curious about hands-free control. Expect rough edges and change.",
+    "try_above": {
+      "label": "View source on GitHub",
+      "href": "https://github.com/coco-research/jev-use",
+      "kind": "primary",
+      "note": "Pre-alpha source. No packaged release."
+    },
+    "does": [
+      [
+        "Control your Mac by voice",
+        "Voice-driven control of the macOS desktop."
+      ],
+      [
+        "Local, on your own machine",
+        "Explores local voice-driven control without a hosted service."
+      ],
+      [
+        "Open, early source",
+        "Pre-alpha Apache-2.0 code you can read, run and change."
+      ]
+    ],
+    "status": [
+      [
+        "Stage",
+        "Pre-alpha source, no packaged release"
+      ],
+      [
+        "Licence",
+        "Apache-2.0 (open source)"
+      ],
+      [
+        "Platforms",
+        "macOS"
+      ],
+      [
+        "Privacy",
+        "Designed to run locally on your own machine"
+      ]
+    ],
+    "next": [
+      [
+        "Pre-alpha",
+        "Expect rough edges and change. The stage is stated on the label on purpose."
+      ],
+      [
+        "No release",
+        "There is no packaged release and no date for one."
+      ]
+    ],
+    "links": [
+      [
+        "GitHub repository",
+        "https://github.com/coco-research/jev-use"
+      ],
+      [
+        "Licence (Apache-2.0)",
+        "https://www.apache.org/licenses/LICENSE-2.0"
+      ]
+    ],
+    "stage": {
+      "chip": "Source available",
+      "cls": "source"
+    },
+    "try": {
+      "heading": "Clone the repository",
+      "lead": "There is no packaged release. Clone the source to try it on a Mac.",
+      "clone": "https://github.com/coco-research/jev-use.git",
+      "buttons": [
+        [
+          "View source on GitHub",
+          "https://github.com/coco-research/jev-use",
+          "primary"
+        ]
+      ],
+      "note": "Pre-alpha: expect rough edges and breaking changes."
+    }
+  },
+  "heliopause": {
+    "slug": "heliopause",
+    "page_title": "Heliopause — Coco Research",
+    "meta_description": "Heliopause by Coco Research gives local AI tools a Lead and roles on your machine, serving a live status board over loopback. Apache-2.0, v0.7.3.",
+    "og_image": "https://cocoresearch.org/assets/img/og-coco-research.png",
+    "og_image_alt": "Coco Research",
+    "version": "0.7.3",
+    "license_url": "https://www.apache.org/licenses/LICENSE-2.0",
+    "code_repository": "https://github.com/coco-research/heliopause",
+    "programming_language": "Python",
+    "diagram": "heliosphere",
+    "kns": [
+      [
+        "Loopback",
+        "Local live view on your machine"
+      ],
+      [
+        "Stdlib",
+        "Python standard library only"
+      ],
+      [
+        "Apache-2.0",
+        "v0.7.3 early preview"
+      ]
+    ],
+    "licence_href": "https://github.com/coco-research/heliopause",
+    "does_for_you": "Heliopause gives your AI tools a Lead and roles, like a small company, and shows who is working, idle, blocked or waiting on you in a live status page that runs only on your own machine.",
+    "who_detail": "You run several AI coding tools or agents at once and lose track of which one is doing what. You want one local view, with no account and no cloud.",
+    "try_above": {
+      "label": "View source on GitHub",
+      "href": "https://github.com/coco-research/heliopause",
+      "kind": "primary",
+      "note": "Early preview v0.7.3. Apache-2.0."
+    },
+    "try_alt": {
+      "label": "Release v0.7.3",
+      "href": "https://github.com/coco-research/heliopause/releases/tag/v0.7.3"
+    },
+    "does": [
+      [
+        "A live map of your agents",
+        "Shows each agent as working, idle, blocked or needs-you, with its latest line and pulse links."
+      ],
+      [
+        "Local only, no account",
+        "A loopback-only local server with no account, no telemetry and no remote sync."
+      ],
+      [
+        "A sample company to try first",
+        "Includes a built-in sample company preview before you point it at your own folders."
+      ],
+      [
+        "No packages to install",
+        "Runs on the Python standard library and git, with zero external Python package dependencies."
+      ],
+      [
+        "Signed release archives",
+        "Release archives ship with SHA-256 digests and an ED25519-signed manifest you can verify with ssh-keygen."
+      ]
+    ],
+    "slot_label": "Real app capture not yet added — Heliopause live status page",
+    "status": [
+      [
+        "Stage",
+        "Source available, early preview"
+      ],
+      [
+        "Version",
+        "v0.7.3, released 31 Oct 2026"
+      ],
+      [
+        "Licence",
+        "Apache-2.0 (open source)"
+      ],
+      [
+        "Requirements",
+        "Python standard library and git; no external packages"
+      ],
+      [
+        "Privacy",
+        "Loopback-only server on your machine, no account, no telemetry, no remote sync"
+      ]
+    ],
+    "next": [
+      [
+        "Early preview",
+        "v0.7.3 is an early preview, so expect changes between versions."
+      ],
+      [
+        "Upcoming milestones are not listed",
+        "The public repository does not list a future roadmap yet."
+      ]
+    ],
+    "links": [
+      [
+        "GitHub repository",
+        "https://github.com/coco-research/heliopause"
+      ],
+      [
+        "Release v0.7.3",
+        "https://github.com/coco-research/heliopause/releases/tag/v0.7.3"
+      ],
+      [
+        "All tagged releases",
+        "https://github.com/coco-research/heliopause/releases"
+      ],
+      [
+        "Licence (Apache-2.0)",
+        "https://www.apache.org/licenses/LICENSE-2.0"
+      ],
+      [
+        "Multi-agent guide",
+        "../guides/manage-multiple-ai-coding-agents/"
+      ]
+    ],
+    "stage": {
+      "chip": "Public preview (v0.7.3)",
+      "cls": "source"
+    },
+    "try": {
+      "heading": "Clone it, or take the signed archive",
+      "lead": "Clone the repository, or download the v0.7.3 early-preview archive from GitHub Releases and verify it.",
+      "clone": "https://github.com/coco-research/heliopause.git",
+      "buttons": [
+        [
+          "View source on GitHub",
+          "https://github.com/coco-research/heliopause",
+          "primary"
+        ],
+        [
+          "Release v0.7.3",
+          "https://github.com/coco-research/heliopause/releases/tag/v0.7.3",
+          "ghost"
+        ]
+      ],
+      "note": "Early preview: expect changes between versions."
+    }
+  }
+}

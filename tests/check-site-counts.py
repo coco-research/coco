@@ -227,7 +227,7 @@ if not pub_errs:
 
 with open('data/products.json', encoding='utf-8') as fh:
     products_raw = json.load(fh)
-products_by_id = {r['id']: r for g in ('shipped', 'source', 'lab') for r in products_raw.get(g, ()) if 'id' in r}
+products_by_id = {r['id']: r for g in ('products', 'shipped', 'source', 'lab') for r in products_raw.get(g, ()) if 'id' in r}
 for pid, entry in json.loads(pub_text).items():
     strings = list(_iter_strings(entry))
     if 'version' in entry:

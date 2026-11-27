@@ -20,30 +20,47 @@
   src: url('../vendor/fonts/martian-mono-latin-wdth-normal.woff2') format('woff2');
 }
 
-/* Light Paper and Dark Stage tokens via color-scheme + light-dark() (single source of truth;
-   follows OS prefers-color-scheme unless data-theme overrides color-scheme). */
+/* Dark Stage plain-hex base (works on every browser); Light Paper + Dark Stage unified
+   via color-scheme + light-dark() when supported (follows OS unless data-theme overrides). */
 :root {
   color-scheme: light dark;
-  --paper: light-dark(#f3f2ee, #03050b);
-  --surface: light-dark(#ffffff, #0b1021);
-  --raised: light-dark(#faf9f5, #111830);
-  --ink: light-dark(#0b0b0b, #eceae4);
-  --ink-2: light-dark(#3c3c37, #c1c0b9);
-  --ink-3: light-dark(#5f5f58, #929089);
-  --rule: light-dark(#0b0b0b, #eceae4);
-  --line: light-dark(rgba(11, 11, 11, 0.14), rgba(150, 178, 255, 0.18));
-  --line-2: light-dark(rgba(11, 11, 11, 0.32), rgba(160, 188, 255, 0.34));
-  --blue: light-dark(#1234ff, #2f4bff);
-  --blue-text: light-dark(#1234ff, #8fa2ff);
+  --paper: #03050b;
+  --surface: #0b1021;
+  --raised: #111830;
+  --ink: #eceae4;
+  --ink-2: #c1c0b9;
+  --ink-3: #929089;
+  --rule: #eceae4;
+  --line: rgba(150, 178, 255, 0.18);
+  --line-2: rgba(160, 188, 255, 0.34);
+  --blue: #2f4bff;
+  --blue-text: #8fa2ff;
   --blue-ink: #ffffff;
-  --green: light-dark(#0b7a45, #3fd98a);
-  --amber: light-dark(#9a5200, #ffb44a);
+  --green: #3fd98a;
+  --amber: #ffb44a;
   --f-sans: 'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --f-mono: 'Martian Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --pad: clamp(20px, 5vw, 72px);
   --out: cubic-bezier(0.16, 1, 0.3, 1);
   --nav-h: 68px;
   --touch: 44px;
+}
+@supports (color: light-dark(#000, #fff)) {
+  :root {
+    --paper: light-dark(#f3f2ee, #03050b);
+    --surface: light-dark(#ffffff, #0b1021);
+    --raised: light-dark(#faf9f5, #111830);
+    --ink: light-dark(#0b0b0b, #eceae4);
+    --ink-2: light-dark(#3c3c37, #c1c0b9);
+    --ink-3: light-dark(#5f5f58, #929089);
+    --rule: light-dark(#0b0b0b, #eceae4);
+    --line: light-dark(rgba(11, 11, 11, 0.14), rgba(150, 178, 255, 0.18));
+    --line-2: light-dark(rgba(11, 11, 11, 0.32), rgba(160, 188, 255, 0.34));
+    --blue: light-dark(#1234ff, #2f4bff);
+    --blue-text: light-dark(#1234ff, #8fa2ff);
+    --green: light-dark(#0b7a45, #3fd98a);
+    --amber: light-dark(#9a5200, #ffb44a);
+  }
 }
 :root[data-theme="dark"] { color-scheme: dark; }
 :root[data-theme="light"] { color-scheme: light; }
@@ -371,12 +388,10 @@ html[data-product="aloomannu"] .world { display: none; }
   .stage-progress { width: 100%; max-width: 100%; }
   .spec-table th { width: 38%; }
   .spec-table th, .spec-table td { padding: 12px; }
-  /* Phone touch targets: every standalone link and control is at least 44px tall. */
-  .foot ul { gap: 0; }
-  .foot a { display: inline-flex; align-items: center; min-height: var(--touch); }
   .foot-ctrls { gap: 4px 16px; }
 }
-@media (pointer: coarse) {
+/* Phone & coarse-pointer touch targets: standalone footer links are at least 44px tall. */
+@media (max-width: 860px), (pointer: coarse) {
   .foot ul { gap: 0; }
   .foot a { display: inline-flex; align-items: center; min-height: var(--touch); }
 }
@@ -433,7 +448,7 @@ html[data-product="aloomannu"] .hero > .wrap { min-width: 0; max-width: 100%; }
 .aloo-banner.aloo-webgl-fallback #aloo-cats-canvas, .aloo-banner.aloo-webgl-fallback .aloo-pause-btn { display: none; }
 /* The still image already carries the title and tagline: keep the heading for assistive tech only. */
 .aloo-banner.aloo-webgl-fallback .aloo-banner-copy {
-  position: absolute; width: 1px; height: 1px; max-width: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%);
+  position: absolute; width: 1px; height: 1px; max-width: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
 }
 .aloo-story { margin: 0 0 28px; color: var(--ink-2); font-size: 0.98rem; max-width: 54rem; }
 .sec-credits { padding: 20px 0 32px; border-top: 1px solid var(--line); }
@@ -449,7 +464,7 @@ html[data-product="aloomannu"] .hero > .wrap { min-width: 0; max-width: 100%; }
   /* Phone fallback: show the cats and keep the live heading and tagline over the still art. */
   .aloo-banner.aloo-webgl-fallback { background-position: 78% center; }
   .aloo-banner.aloo-webgl-fallback .aloo-banner-copy {
-    position: relative; width: auto; height: auto; max-width: calc(100% - 120px); margin: 0; padding: 20px 18px 0; overflow: visible; clip-path: none;
+    position: relative; width: auto; height: auto; max-width: calc(100% - 120px); margin: 0; padding: 20px 18px 0; overflow: visible; clip: auto; clip-path: none;
   }
 }
 
@@ -640,6 +655,7 @@ html[data-banner-export] .aloo-banner-tagline { font-size: 1.30rem !important; m
 /* Part 5: status and licence */
 .facts-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; margin: 0; padding: 0 clamp(16px, 2.4vw, 24px); background: var(--surface); border: 1px solid var(--line-2); border-top: 2px solid var(--rule); border-radius: 0 0 14px 14px; }
 .facts-grid .fact { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin: 0; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 0.92rem; }
+.facts-grid .fact:last-child { border-bottom: 0; }
 .facts-grid dt { font: 500 0.72rem / 1.3 var(--f-mono); text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-3); }
 .facts-grid dd { margin: 0; color: var(--ink); text-align: right; overflow-wrap: anywhere; }
 /* /lab/ stage key: long sentences read left-aligned under their word. */

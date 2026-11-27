@@ -38,7 +38,7 @@
 .site-nav {
   position: sticky; top: 0; z-index: 80;
   display: flex; align-items: center; gap: 12px;
-  min-height: 68px; padding: 0 var(--sn-pad);
+  min-height: var(--nav-h, 68px); padding: 0 var(--sn-pad);
   background: var(--sn-paper); color: var(--sn-ink);
   border-bottom: 1px solid var(--sn-line-2);
   font-family: var(--sn-sans); font-size: 1rem; line-height: 1.4;
@@ -59,7 +59,7 @@
   transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
 }
 .sn-tab:hover { color: var(--sn-ink); border-color: var(--sn-line-2); }
-.sn-tab[aria-current="page"] { color: var(--sn-blue-text); background: color-mix(in srgb, var(--sn-blue) 14%, transparent); }
+.sn-tab[aria-current="page"] { color: var(--sn-blue-text); background: var(--sn-surface); background: color-mix(in srgb, var(--sn-blue) 14%, transparent); }
 .sn-tab[aria-expanded="true"] { color: var(--sn-ink); border-color: var(--sn-ink); }
 .sn-caret { font-size: 0.8em; line-height: 1; }
 
@@ -198,7 +198,7 @@ a.sn-d-row:hover .sn-d-name { color: var(--sn-blue-text); }
   .sn-m-grid { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 860px) {
-  .site-nav { gap: 12px; min-height: 64px; }
+  .site-nav { gap: 12px; min-height: var(--nav-h, 64px); }
   .site-nav .sn-links,
   .site-nav .sn-cta,
   .site-nav .sn-right > .sn-chip,

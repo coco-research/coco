@@ -129,7 +129,7 @@
       const back = drawer._opener;
       if (back && back.focus && doc.activeElement !== back && (!doc.activeElement || doc.activeElement === doc.body)) back.focus();
     }
-    function isOpen() { return !!(drawer.open || drawer.hasAttribute('open')); }
+    function isOpen() { return !!drawer.open; }
     function open(from) {
       if (isOpen()) return;
       $$('[data-products-menu]').forEach((m) => { if (m._snClose) m._snClose(); });
@@ -139,7 +139,7 @@
     }
     function close() {
       if (!isOpen()) return;
-      if (typeof drawer.close === 'function' && drawer.open) drawer.close();
+      if (typeof drawer.close === 'function') drawer.close();
       else { drawer.removeAttribute('open'); setExpanded(false); restoreFocus(); }
     }
 

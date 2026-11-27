@@ -115,15 +115,9 @@ void main() {
 }`;
 
 // The shared top bar (site-nav.js) owns theme storage, theme toggles, and meta[name="theme-color"].
-// When present, this file only reads data-theme / prefers-color-scheme and owns the 3D Pause control.
-const SHARED_NAV = !!document.querySelector('[data-site-nav]');
+// This file only reads data-theme / prefers-color-scheme and owns the 3D Pause control.
 function resolveTheme() {
-  const docEl = document.documentElement;
-  let explicit = docEl.getAttribute('data-theme');
-  if (!SHARED_NAV && explicit !== 'light' && explicit !== 'dark') {
-    try { explicit = localStorage.getItem('coco-theme'); } catch (e) { explicit = null; }
-    if (explicit === 'light' || explicit === 'dark') docEl.setAttribute('data-theme', explicit);
-  }
+  const explicit = document.documentElement.getAttribute('data-theme');
   if (explicit === 'light' || explicit === 'dark') return explicit;
   try { return matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; } catch (e) { return 'dark'; }
 }
@@ -142,18 +136,11 @@ function writePaused(paused) {
 }
 
 // Labels swap text only (no aria-pressed): WCAG 2.2.2 pause control and a label that changes with state.
-function syncButtons(theme, paused) {
+function syncButtons(paused) {
   document.querySelectorAll('[data-motion-toggle]').forEach((btn) => {
     btn.textContent = paused ? 'Play 3D' : 'Pause 3D';
     btn.removeAttribute('aria-pressed');
   });
-  if (SHARED_NAV) return;
-  document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
-    btn.textContent = theme === 'light' ? 'Dark theme' : 'Light theme';
-    btn.removeAttribute('aria-pressed');
-  });
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', theme === 'light' ? '#f3f2ee' : '#03050b');
 }
 
 function copyText(text) {
@@ -200,8 +187,8 @@ async function loadDeps() {
 async function startScene(initialTheme, initialPaused) {
   const docEl = document.documentElement;
   const canvas = document.getElementById('world');
-  // /aloomannu/ owns its own banner WebGL context; skip the background stage so the page uses 1 context, not 2.
-  if (!canvas || docEl.dataset.product === 'aloomannu') return null;
+  // Pages with their own banner WebGL stage set data-own-stage on <html> so they keep 1 context, not 2.
+  if (!canvas || docEl.hasAttribute('data-own-stage')) return null;
 
   let deps;
   try { deps = await loadDeps(); } catch (e) { docEl.classList.add('nogl'); return null; }
@@ -266,6 +253,7 @@ async function startScene(initialTheme, initialPaused) {
   let vw = 1, vh = 1, camZ = 24, portrait = false, raf = 0, disposed = false, still = initialPaused;
   const ptr = { x: 0, y: 0 }, flarePos = new THREE.Vector3(), proj = new THREE.Vector3();
 
+  // Fallback matches site-nav.js MOBILE_MAX; every page loads site-nav.js so data-mobile-max is always set.
   const mobileMax = Number(docEl.dataset.mobileMax) || 860;
   const resize = () => {
     vw = Math.max(1, window.innerWidth); vh = Math.max(1, window.innerHeight); portrait = vw <= mobileMax;
@@ -360,44 +348,40 @@ function boot() {
   let theme = resolveTheme(), paused = readPaused(), api = null, starting = false, failed = false;
   docEl.classList.remove('static');
   docEl.classList.toggle('still', paused);
-  syncButtons(theme, paused);
+  syncButtons(paused);
 
-  if (SHARED_NAV) {
-    // site-nav.js flips data-theme; the 3D stage follows it.
-    const follow = () => {
-      const next = resolveTheme();
-      if (next === theme) return;
-      theme = next; syncButtons(theme, paused); if (api) api.setTheme(theme);
-    };
-    try { new MutationObserver(follow).observe(docEl, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) {}
-    document.addEventListener('coco:themechange', follow);
-  } else {
-    document.querySelectorAll('[data-theme-toggle]').forEach((btn) => btn.addEventListener('click', () => {
-      theme = theme === 'light' ? 'dark' : 'light';
-      docEl.setAttribute('data-theme', theme);
-      try { localStorage.setItem('coco-theme', theme); } catch (e) {}
-      syncButtons(theme, paused);
-      if (api) api.setTheme(theme);
-    }));
-  }
+  // site-nav.js flips data-theme; the 3D stage follows it.
+  const follow = () => {
+    const next = resolveTheme();
+    if (next === theme) return;
+    theme = next; if (api) api.setTheme(theme);
+  };
+  try { new MutationObserver(follow).observe(docEl, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) {}
+  document.addEventListener('coco:themechange', follow);
 
   const ensureScene = async () => {
     if (api || starting || failed) return;
     starting = true;
+    const startedTheme = theme;
     try {
-      api = await startScene(theme, paused);
+      api = await startScene(startedTheme, paused);
       if (!api) failed = true;
     } catch (e) {
       docEl.classList.add('nogl');
       failed = true;
     } finally { starting = false; }
-    if (api && api.paused !== paused) { if (paused) api.pause(); else api.play(); }
+    if (api) {
+      const latest = resolveTheme();
+      if (latest !== theme) theme = latest;
+      if (theme !== startedTheme) api.setTheme(theme);
+      if (api.paused !== paused) { if (paused) api.pause(); else api.play(); }
+    }
   };
   document.querySelectorAll('[data-motion-toggle]').forEach((btn) => btn.addEventListener('click', () => {
     paused = !paused;
     writePaused(paused);
     docEl.classList.toggle('still', paused);
-    syncButtons(theme, paused);
+    syncButtons(paused);
     if (api) { if (paused) api.pause(); else api.play(); } else ensureScene();
   }));
 
@@ -405,7 +389,7 @@ function boot() {
   try {
     matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
       if (docEl.getAttribute('data-theme')) return;
-      theme = resolveTheme(); syncButtons(theme, paused); if (api) api.setTheme(theme);
+      theme = resolveTheme(); if (api) api.setTheme(theme);
     });
   } catch (e) {}
   try {
@@ -415,7 +399,7 @@ function boot() {
       if (stored !== null) return;
       paused = ev.matches;
       docEl.classList.toggle('still', paused);
-      syncButtons(theme, paused);
+      syncButtons(paused);
       if (api) { if (paused) api.pause(); else api.play(); }
     });
   } catch (e) {}

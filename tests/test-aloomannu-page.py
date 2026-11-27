@@ -10,13 +10,19 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 ALOO_HTML = REPO_ROOT / 'aloomannu' / 'index.html'
 LAB_SPEC = REPO_ROOT / 'data' / 'product-pages-lab.json'
 FORBIDDEN_CAT_LABEL = re.compile(
-    r'\b(?:left\s+cat\s+is\s+(?:aloo|mannu)|right\s+cat\s+is\s+(?:aloo|mannu)|'
-    r'aloo\s*\((?:left|right|smaller|taller)\)|mannu\s*\((?:left|right|smaller|taller)\))\b',
+    r'\b(?:(?:left|right)\s+cat\s+is\s+(?:aloo|mannu)\b|'
+    r'(?:aloo|mannu)\s*\((?:left|right|smaller|taller)\)(?!\w))',
     re.I,
 )
 
 
 class AlooMannuPageTest(unittest.TestCase):
+    def test_forbidden_cat_label_regex(self):
+        for bad in ('Aloo (left) calls', 'Mannu (taller).', 'the left cat is Aloo', 'right cat is Mannu'):
+            self.assertIsNotNone(FORBIDDEN_CAT_LABEL.search(bad), bad)
+        for clean in ('Named after two cats at home: Aloo Mannu.', 'Aloo (cat) and Mannu play.'):
+            self.assertIsNone(FORBIDDEN_CAT_LABEL.search(clean), clean)
+
     def test_aloomannu_page_and_spec_match_and_enforce_no_cloud(self):
         spec = json.loads(LAB_SPEC.read_text(encoding='utf-8'))['lab']['aloomannu']
         page = ALOO_HTML.read_text(encoding='utf-8')

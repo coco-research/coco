@@ -252,6 +252,23 @@ class RenderProductPagesTest(unittest.TestCase):
         with self.assertRaises(SystemExit):
             M.render_whats_new(catalog, data, counts)
 
+    def test_count_words_follow_catalog_and_stage_key(self):
+        self.assertEqual((M._count_word(0), M._count_word(12, cap=True), M._count_word(13), M._count_word(13, cap=True)),
+                         ('zero', 'Twelve', '13', '13'))
+        data, pub_specs, lab_specs, catalog, _counts = _sample_fixtures()
+        prod0, lab0 = catalog[0], catalog[1]
+        cat_3_7 = [dict(prod0, pid='p%d' % i) for i in range(3)] + [dict(lab0, pid='l%d' % i) for i in range(7)]
+        for it in cat_3_7:
+            it['catalog'] = cat_3_7
+        prod_html = M.render_products(cat_3_7, data)
+        self.assertIn('All 10 Coco Research products and what each does for you: three available now and seven in the lab.', prod_html)
+        self.assertIn('Ten products in two groups. Three you can use today, seven still in the lab, each with its stage stated plainly.', prod_html)
+        lab_html = M.render_lab(cat_3_7, data)
+        self.assertIn('Seven projects in progress, from public early previews to private betas.', lab_html)
+        self.assertIn('Five labels, used the same way on every page.', lab_html)
+        with mock.patch.object(M, 'LAB_STAGE_KEY', M.LAB_STAGE_KEY[:4]):
+            self.assertIn('Four labels, used the same way on every page.', M.render_lab(cat_3_7, data))
+
     def test_render_sitemap_and_render_llms(self):
         _data, _pub, _lab, catalog, _counts = _sample_fixtures()
         catalog[2]['spec']['slug'] = 'a&b'
@@ -261,6 +278,8 @@ class RenderProductPagesTest(unittest.TestCase):
         self.assertNotIn('demo-cats', sm)
         self.assertIn('/rijul-kalra/', sm)
         llms = M.render_llms(catalog)
+        self.assertIn('1. Data stays local. Voice runs offline. Our tools run on your machine.', llms)
+        self.assertNotIn('speech model', llms)
         self.assertIn('## Products (1, available now)', llms)
         self.assertIn('## In the lab (5)', llms)
         self.assertIn('Stage: Available now. Licence: Open-core. Tests: Green.', llms)
@@ -281,25 +300,29 @@ class RenderProductPagesTest(unittest.TestCase):
                 'skills': {'total': 130}, 'commands': {'customer_facing': 80}, 'agents': {'total': 12},
             }))
 
-            def run_main(argv):
+            def run_main(argv, expect_exit=None):
                 buf = io.StringIO()
                 with contextlib.ExitStack() as stack:
                     for obj, attr_name, val in (
-                        (M, 'ROOT', root), (S, 'ROOT', root),
-                        (S, 'DATA', root / 'data' / 'products.json'),
+                        (M, 'ROOT', root), (S, 'ROOT', root), (S, 'DATA', root / 'data' / 'products.json'),
                         (S, 'SPEC_PUBLIC', root / 'data' / 'product-pages-public.json'),
                         (S, 'SPEC_LAB', root / 'data' / 'product-pages-lab.json'),
                         (sys, 'argv', ['render-product-pages.py'] + argv),
                     ):
                         stack.enter_context(mock.patch.object(obj, attr_name, val))
                     stack.enter_context(contextlib.redirect_stdout(buf))
-                    M.main()
+                    if expect_exit is None:
+                        M.main()
+                    else:
+                        with self.assertRaises(SystemExit) as cm:
+                            M.main()
+                        if expect_exit is not True:
+                            self.assertEqual(cm.exception.code, expect_exit)
                 return buf.getvalue()
 
             self.assertNotIn('aria-current="page"', run_main(['--print-nav', 'none']))
             self.assertIn('aria-current="page"', run_main(['--print-nav', 'products']))
-            with self.assertRaises(SystemExit):
-                run_main([])
+            run_main([], expect_exit=True)
             three_js = root / 'assets' / 'vendor' / 'three' / 'three.module.min.js'
             three_js.parent.mkdir(parents=True)
             three_js.write_text('// three')
@@ -314,21 +337,7 @@ class RenderProductPagesTest(unittest.TestCase):
             self.assertEqual(run_main(['--check']), '')
             stale = root / 'llms.txt'
             stale.write_text('stale\n')
-            buf = io.StringIO()
-            with contextlib.ExitStack() as stack:
-                for obj, attr_name, val in (
-                    (M, 'ROOT', root), (S, 'ROOT', root),
-                    (S, 'DATA', root / 'data' / 'products.json'),
-                    (S, 'SPEC_PUBLIC', root / 'data' / 'product-pages-public.json'),
-                    (S, 'SPEC_LAB', root / 'data' / 'product-pages-lab.json'),
-                    (sys, 'argv', ['render-product-pages.py', '--check']),
-                ):
-                    stack.enter_context(mock.patch.object(obj, attr_name, val))
-                stack.enter_context(contextlib.redirect_stdout(buf))
-                with self.assertRaises(SystemExit) as cm:
-                    M.main()
-            self.assertEqual(cm.exception.code, 1)
-            self.assertIn('--- llms.txt', buf.getvalue())
+            self.assertIn('--- llms.txt', run_main(['--check'], expect_exit=1))
             self.assertEqual(stale.read_text(), 'stale\n')
             run_main(['--include-custom'])
             self.assertTrue((root / 'm0' / 'index.html').is_file())

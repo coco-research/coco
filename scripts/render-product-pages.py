@@ -40,6 +40,17 @@ li_dl, copy_box, part_head = _shared.li_dl, _shared.copy_box, _shared.part_head
 stage_page, dir_hero, sec_open = _shared.stage_page, _shared.dir_hero, _shared.sec_open
 
 
+_NUM_WORDS = (
+    'zero', 'one', 'two', 'three', 'four', 'five', 'six',
+    'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',
+)
+
+
+def _count_word(n, cap=False):
+    word = _NUM_WORDS[n] if 0 <= n < len(_NUM_WORDS) else str(n)
+    return word.capitalize() if cap else word
+
+
 def _safe_href(href, where):
     if not href.startswith(('../', '#', 'mailto:')):
         require_https(href, where)
@@ -310,11 +321,13 @@ def render_products(catalog, data):
            '<span class="sh %s" aria-hidden="true"></span>' % shape if shape else '', esc(label), cnt)
         for i, (k, label, cnt, shape) in enumerate(tabs))
     cards = '\n'.join(card_html(it) for it in catalog)
-    desc = 'All %d Coco Research products and what each does for you: %s available now and %s in the lab.' % (n, 'two', 'eight')
+    desc = 'All %d Coco Research products and what each does for you: %s available now and %s in the lab.' % (
+        n, _count_word(counts['products']), _count_word(counts['lab']))
     ld = collection_ld('Products \u2014 Coco Research', SITE + '/products/', desc, catalog)
     hero = dir_hero(
         eyebrow='Products', h1='What we make, and what it does for you',
-        for_you='Ten products in two groups. Two you can use today, eight still in the lab, each with its stage stated plainly.',
+        for_you='%s products in %s groups. %s you can use today, %s still in the lab, each with its stage stated plainly.' % (
+            _count_word(n, cap=True), _count_word(len(GROUPS)), _count_word(counts['products'], cap=True), _count_word(counts['lab'])),
         who_k='How to read this',
         who='Products are available now: install or download them. In the lab is work in progress, from public early previews to private betas.',
         actions=['<a class="btn btn-primary" href="../coco/">Get Coco Super Intelligence</a>',
@@ -355,7 +368,7 @@ def render_lab(catalog, data):
     ld = collection_ld('In the lab \u2014 Coco Research', SITE + '/lab/', desc, labs)
     hero = dir_hero(
         eyebrow='In the lab', h1='What we are building next',
-        for_you='Eight projects in progress, from public early previews to private betas. Each one says what you can use today, and what you cannot.',
+        for_you='%s projects in progress, from public early previews to private betas. Each one says what you can use today, and what you cannot.' % _count_word(len(labs), cap=True),
         who_k='What this is',
         who='The lab is where work lives before it is a product. Some of it has public code. Some of it is private and used daily by us.',
         actions=['<a class="btn btn-primary" href="../heliopause/">See Heliopause by Coco Research</a>',
@@ -370,7 +383,7 @@ def render_lab(catalog, data):
         sec_open('private-work', '02', 'Private', 'Work that is not released', 'Built and used inside Coco Research. No public download, and no repository link here.'),
         '      <div class="dir-grid" role="list" aria-label="Private lab projects">',
         cards(priv), '      </div>', SEC_CLOSE,
-        sec_open('stages', '03', 'Stages', 'How to read a stage', 'Five labels, used the same way on every page.'),
+        sec_open('stages', '03', 'Stages', 'How to read a stage', '%s labels, used the same way on every page.' % _count_word(len(LAB_STAGE_KEY), cap=True)),
         '      <dl class="facts-grid" aria-label="Stage key">', key, '      </dl>', SEC_CLOSE])
     return stage_page('lab', title='In the lab \u2014 Coco Research', desc=desc, jsonld=ld_script(ld), hero=hero, body=body, catalog=catalog, data=data)
 
@@ -506,7 +519,7 @@ def render_llms(catalog):
 
 ## Four Rules
 
-1. Data stays local. Voice works offline once the speech model is downloaded. Our tools run on your machine.
+1. Data stays local. Voice runs offline. Our tools run on your machine.
 2. Verify, don't average. Dissent is named, not averaged away.
 3. Stage is stated plainly. In development means in development.
 4. Credit travels with the code. Open-source work we build on is named and linked.

@@ -1,0 +1,11 @@
+# Byte-for-byte SHA-256 checksums of vendored third-party site assets
+# three@0.170.0 (sha512-FQK+LEpYc0fBD+J8g6oSEyyNzjp+Q7Ks1C568WWaoMRLW+TkNNWmenWeGgJjV105Gd+p/2ql1ZcjYvNiPZBhuQ==)
+08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7  three/three.module.min.js
+4c40a1ef62450b857c3b2aaf294936304cd552d965fbcd9d32d4c5bcf4ba4454  three/LICENSE
+# gsap@3.15.0 (sha512-dMW4CWBTUK1AEEDeZc1g4xpPGIrSf9fJF960qbTZmN/QwZIWY5wgliS6JWl9/25fpTGJrMRtSjGtOmPnfjZB+A==)
+92bb9a96476f983d212a2bc4f54c889039c1696dd4461d40a736860938570fbb  gsap/gsap.min.js
+b0b14d67b55b0c43c756ac0b106cfcb09d0879945f6ead64451065b0672916a2  gsap/ScrollTrigger.min.js
+# @fontsource-variable/archivo@5.3.0 (sha512-HogK8FJelrD1o7TlZlkIVtHgc20bO5PZRWE7mUeUTdMN055alznQV6/00J00IBeu8FQAH4s3zW9UJNvKExXf+g==)
+e3a28eade21a900c7155a247757f4b2834c07bb7ef07ad7efa55cebaac1e8f5e  fonts/archivo-latin-wdth-normal.woff2
+# @fontsource-variable/martian-mono@5.3.0 (sha512-0wVODx9ILwNnaYC4XCuSaFRYtj1Prd89MRVaSuv2ng6zLiQkS4SepaWEPefs7vqCZS8sbEOA8jb/4F5KNMnGdg==)
+f9c1655c2c9d1ed5bb8b301a57d1169a1123ffef1a588dc50a7a487810f7d732  fonts/martian-mono-latin-wdth-normal.woff2

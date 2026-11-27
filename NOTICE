@@ -1,2 +1,6 @@
 Coco Super Intelligence by Coco Research. Copyright 2026 Coco Research.
 Apache-2.0 covers the Coco core. systems/superintelligence/ is proprietary; see its LICENSE. Third-party components keep their own licences.
+assets/vendor/** contains third-party site runtime assets and is NOT under this repository's Apache-2.0 license:
+- assets/vendor/three/ (three@0.170.0): MIT License (see assets/vendor/three/LICENSE).
+- assets/vendor/gsap/ (gsap@3.15.0, ScrollTrigger): GSAP Standard No-Charge License (Webflow), not open source (see assets/vendor/gsap/LICENSE.md).
+- assets/vendor/fonts/ (@fontsource-variable/archivo@5.3.0, @fontsource-variable/martian-mono@5.3.0): SIL Open Font License 1.1 (see assets/vendor/fonts/OFL.txt).

@@ -94,7 +94,7 @@ html.gl .world canvas { opacity: 1; }
 html.nogl .world canvas { display: none; }
 .world-svg-fallback {
   position: absolute; inset: 0; width: 100%; height: 100%; color: var(--blue-text);
-  opacity: 0.9; visibility: visible; object-fit: cover;
+  opacity: 0.9; visibility: visible;
 }
 html.gl .world-svg-fallback { opacity: 0; visibility: hidden; }
 /* CSS-only point of light for pages that ship no SVG artwork: a flat dot and hairline, no glow. */
@@ -129,7 +129,7 @@ html[data-product="aloomannu"] .world { display: none; }
 /* Page chapters */
 .stage-main { position: relative; z-index: 10; }
 .wrap { width: min(1240px, 100%); margin-inline: auto; padding-inline: var(--pad); }
-.hero { min-height: calc(100svh - var(--nav-h)); display: flex; align-items: center; padding-block: clamp(44px, 8svh, 96px); }
+.hero { min-height: calc(100vh - var(--nav-h)); min-height: calc(100svh - var(--nav-h)); display: flex; align-items: center; padding-block: clamp(44px, 8vh, 96px); padding-block: clamp(44px, 8svh, 96px); }
 .hero-col { max-width: 37rem; }
 .mark-line {
   display: inline-flex; align-items: center; gap: 8px; margin-bottom: 18px;
@@ -152,12 +152,12 @@ html[data-product="aloomannu"] .world { display: none; }
 
 .kns {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px;
-  margin-top: clamp(34px, 6svh, 56px); padding-top: 18px; border-top: 2px solid var(--rule);
+  margin-top: clamp(34px, 6vh, 56px); margin-top: clamp(34px, 6svh, 56px); padding-top: 18px; border-top: 2px solid var(--rule);
 }
 .kn-num { display: block; font: 600 clamp(1.2rem, 1.65vw, 1.6rem) / 1.08 var(--f-sans); font-stretch: 116%; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .kn-lbl { display: block; margin-top: 5px; font: 400 0.78rem / 1.35 var(--f-mono); color: var(--ink-3); }
 
-.sec { padding-block: clamp(64px, 11svh, 132px); border-top: 1px solid var(--line); }
+.sec { padding-block: clamp(64px, 11vh, 132px); padding-block: clamp(64px, 11svh, 132px); border-top: 1px solid var(--line); }
 .sec-head { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 24px 48px; align-items: end; margin-bottom: 36px; }
 .eyebrow { margin: 0 0 10px; font: 500 0.78rem / 1.2 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue-text); }
 .sec-title { margin: 0; font: 500 clamp(1.85rem, 3.6vw, 3.2rem) / 1.04 var(--f-sans); font-stretch: 120%; letter-spacing: -0.03em; }
@@ -350,7 +350,7 @@ html[data-product="aloomannu"] .world { display: none; }
 .contact-grid > * { display: grid; gap: 6px; padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow-wrap: anywhere; }
 
 /* Footer */
-.foot { position: relative; z-index: 20; background: var(--paper); border-top: 1px solid var(--line-2); padding: clamp(56px, 9svh, 96px) var(--pad) 28px; }
+.foot { position: relative; z-index: 20; background: var(--paper); border-top: 1px solid var(--line-2); padding: clamp(56px, 9vh, 96px) var(--pad) 28px; padding: clamp(56px, 9svh, 96px) var(--pad) 28px; }
 .foot-inner { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 2.1fr); gap: 40px; }
 .brand {
   display: inline-flex; align-items: center; gap: 0.68em; text-decoration: none; min-height: var(--touch);
@@ -373,7 +373,7 @@ html[data-product="aloomannu"] .world { display: none; }
 
 @media (max-width: 860px) {
   :root { --nav-h: 64px; }
-  .hero { align-items: flex-start; min-height: auto; padding-top: 248px; padding-bottom: 36px; }
+  .hero { align-items: flex-start; min-height: auto; padding-top: 248px; padding-bottom: 36px; } /* clears .hero-point (top: 22.5%) + --nav-h (64px) */
   .display { font-size: clamp(2.5rem, 9.5vw, 3.4rem); }
   .lede { margin-top: 14px; font-size: 1rem; }
   .cta-row { margin-top: 20px; gap: 10px; }
@@ -409,7 +409,7 @@ html[data-product="aloomannu"] .world { display: none; }
 }
 
 /* Aloo Mannu 3D Three.js Banner Stage (component-specific dark surface in both themes) */
-html[data-product="aloomannu"] .hero { flex-direction: column; align-items: stretch; padding-top: clamp(24px, 4svh, 48px); min-height: 0; }
+html[data-product="aloomannu"] .hero { flex-direction: column; align-items: stretch; padding-top: clamp(24px, 4vh, 48px); padding-top: clamp(24px, 4svh, 48px); min-height: 0; }
 html[data-product="aloomannu"] .hero > .wrap { min-width: 0; max-width: 100%; }
 .aloo-banner {
   position: relative; width: 100%; max-width: 100%; aspect-ratio: 16 / 9; min-height: 260px; max-height: clamp(260px, 40vh, 380px);
@@ -508,7 +508,7 @@ html[data-banner-export] .aloo-banner-tagline { font-size: 1.30rem !important; m
 
 /* ---------------------------------------------------------------- /products/ directory (V12-2) */
 
-.dir-head { padding-block: clamp(36px, 6svh, 64px) 8px; } /* horizontal padding comes from .wrap */
+.dir-head { padding-block: clamp(36px, 6vh, 64px) 8px; padding-block: clamp(36px, 6svh, 64px) 8px; } /* horizontal padding comes from .wrap */
 .dir-head h1 {
   margin: 0; max-width: 18ch; font: 500 clamp(2rem, 1.3rem + 2.8vw, 3.4rem) / 1.04 var(--f-sans);
   font-stretch: 118%; letter-spacing: -0.03em;
@@ -523,9 +523,9 @@ html[data-banner-export] .aloo-banner-tagline { font-size: 1.30rem !important; m
 .dir-tab:hover { border-color: var(--ink); }
 .dir-tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 .dir-tab .tn, .dir-tab .dir-tn { opacity: 0.9; }
-.dir-body { padding-bottom: clamp(24px, 5svh, 48px); }
+.dir-body { padding-bottom: clamp(24px, 5vh, 48px); padding-bottom: clamp(24px, 5svh, 48px); }
 .dir-count { margin: 16px 0 0; color: var(--ink-3); font: 400 0.78rem / 1.4 var(--f-mono); }
-.dir-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 12px 0 clamp(40px, 7svh, 72px); }
+.dir-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 12px 0 clamp(40px, 7vh, 72px); padding: 12px 0 clamp(40px, 7svh, 72px); }
 .dir-card {
   display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 20px;
   background: var(--surface); border: 1px solid var(--line-2); border-radius: 12px;
@@ -546,7 +546,7 @@ html[data-banner-export] .aloo-banner-tagline { font-size: 1.30rem !important; m
 
 /* --------------------------------------------------------- 7-part product template (V12-4A / V12-4B) */
 
-.p-hero { padding-block: clamp(36px, 7svh, 84px) clamp(28px, 5svh, 56px); }
+.p-hero { padding-block: clamp(36px, 7vh, 84px) clamp(28px, 5vh, 56px); padding-block: clamp(36px, 7svh, 84px) clamp(28px, 5svh, 56px); }
 .p-hero .display { max-width: 15em; }
 .p-for-you {
   margin-top: 20px; max-width: 30em; color: var(--ink); font: 500 clamp(1.2rem, 1rem + 1vw, 1.7rem) / 1.3 var(--f-sans);
@@ -614,7 +614,7 @@ html[data-banner-export] .aloo-banner-tagline { font-size: 1.30rem !important; m
 .stage-chip[data-stage="beta"], .stage-chip[data-stage="lab"], .stage-chip[data-stage="dev"], .stage-chip[data-stage="private"] { color: var(--amber); background: color-mix(in srgb, var(--amber) 11%, var(--surface)); border-color: color-mix(in srgb, var(--amber) 45%, var(--surface)); }
 .stage-chip[data-stage="archived"] { color: var(--ink-2); background: color-mix(in srgb, var(--ink-3) 12%, var(--surface)); border-color: var(--line-2); }
 
-.p-part { padding-block: clamp(36px, 6svh, 72px); }
+.p-part { padding-block: clamp(36px, 6vh, 72px); padding-block: clamp(36px, 6svh, 72px); }
 .p-part-num { display: block; margin: 0 0 10px; font: 500 0.74rem / 1.25 var(--f-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--blue-text); }
 .p-part .sec-title { margin-bottom: 18px; font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.4rem); }
 .p-part .section-para, .p-part > .wrap > p { max-width: 46em; }
@@ -680,11 +680,11 @@ html[data-banner-export] .aloo-banner-tagline { font-size: 1.30rem !important; m
 
 /* ---------------------------------------------------------------- /whats-new/ timeline (V12-5) */
 
-.wn-head, .wn-hero { margin: clamp(28px, 5svh, 56px) auto 24px; padding: clamp(22px, 3vw, 34px); background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; }
+.wn-head, .wn-hero { margin: clamp(28px, 5vh, 56px) auto 24px; margin: clamp(28px, 5svh, 56px) auto 24px; padding: clamp(22px, 3vw, 34px); background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; }
 .wn-head h1, .wn-hero h1 { margin: 0; max-width: 16em; font: 500 clamp(1.85rem, 1.2rem + 2.4vw, 2.9rem) / 1.05 var(--f-sans); font-stretch: 118%; letter-spacing: -0.03em; }
 .wn-head p, .wn-hero p { max-width: 48em; margin-top: 12px; color: var(--ink-2); line-height: 1.54; }
-.wn-section, .wn-releases { padding-block: clamp(24px, 4.5svh, 48px); }
-.wn-also { margin-top: clamp(36px, 6svh, 68px); padding-block: clamp(44px, 7svh, 84px) clamp(56px, 9svh, 96px); border-top: 1px solid var(--line); }
+.wn-section, .wn-releases { padding-block: clamp(24px, 4.5vh, 48px); padding-block: clamp(24px, 4.5svh, 48px); }
+.wn-also { margin-top: clamp(36px, 6vh, 68px); margin-top: clamp(36px, 6svh, 68px); padding-block: clamp(44px, 7vh, 84px) clamp(56px, 9vh, 96px); padding-block: clamp(44px, 7svh, 84px) clamp(56px, 9svh, 96px); border-top: 1px solid var(--line); }
 .wn-list, .timeline {
   display: grid; margin: 0; padding: 0 clamp(16px, 2.6vw, 28px); list-style: none;
   background: var(--surface); border: 1px solid var(--line-2); border-top: 2px solid var(--rule); border-radius: 0 0 14px 14px;

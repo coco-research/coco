@@ -209,7 +209,10 @@
     "name": "GSAP",
     "paths": [
       "systems/hyperframes/skills/music-to-video/references/motion-primitives/assets/gsap.min.js",
-      "systems/hyperframes/skills/talking-head-recut/assets/vendor/gsap.min.js"
+      "systems/hyperframes/skills/talking-head-recut/assets/vendor/gsap.min.js",
+      "assets/vendor/gsap/gsap.min.js",
+      "assets/vendor/gsap/ScrollTrigger.min.js",
+      "assets/vendor/gsap/LICENSE.md"
     ],
     "repo": "https://gsap.com",
     "pinned_ref": "3.15.0",
@@ -222,6 +225,18 @@
       {
         "path": "systems/hyperframes/skills/talking-head-recut/assets/vendor/gsap.min.js",
         "sha256": "c3a03a345e45bc954cd48c43f11572891f5dca7a5d99348d5bc14753a728618c"
+      },
+      {
+        "path": "assets/vendor/gsap/gsap.min.js",
+        "sha256": "96c01b81f44a3290e2b4532f55e2c9534b2adc43273a19f3756b2cb41f0fd0b6"
+      },
+      {
+        "path": "assets/vendor/gsap/ScrollTrigger.min.js",
+        "sha256": "308219390e5e3b84cda0c481e70caa9820883ae10bda44e6e9a149a81aac4b3f"
+      },
+      {
+        "path": "assets/vendor/gsap/LICENSE.md",
+        "sha256": "35eafecf0e1cede4c15a722cfadf864a5d4d045d9833d541f44ed1620374ecf8"
       }
     ],
     "mode": "verbatim",
@@ -495,6 +510,40 @@
       {
         "path": "skills/memory-systems/LICENSE",
         "sha256": "65bc33b0759a48b980962833b12bcb820404da9f5256bff39c00e89471bcf209"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "Three.js",
+    "paths": [
+      "assets/vendor/three/**"
+    ],
+    "repo": "https://github.com/mrdoob/three.js",
+    "pinned_ref": "r170",
+    "licence_spdx": "MIT",
+    "licence_files": [
+      {
+        "path": "assets/vendor/three/LICENSE",
+        "sha256": "4c40a1ef62450b857c3b2aaf294936304cd552d965fbcd9d32d4c5bcf4ba4454"
+      }
+    ],
+    "mode": "verbatim",
+    "patch": null
+  },
+  {
+    "name": "Archivo & Martian Mono Variable Fonts",
+    "paths": [
+      "assets/vendor/fonts/**"
+    ],
+    "repo": "https://fontsource.org",
+    "pinned_ref": "5.3.0",
+    "licence_spdx": "OFL-1.1",
+    "licence_files": [
+      {
+        "path": "assets/vendor/fonts/OFL.txt",
+        "sha256": "c2235f8f23fc0209b9148fa10c2a5a12c4a981e50593dec6bb0b9a849d8a0f50"
       }
     ],
     "mode": "verbatim",

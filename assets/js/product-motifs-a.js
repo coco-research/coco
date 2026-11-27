@@ -7,13 +7,14 @@ export const VOICE_BARS = [
   0.86, 0.70, 1.00, 0.82, 0.94, 0.66, 0.90, 0.72, 0.56, 0.64, 0.44,
   0.50, 0.34, 0.38, 0.26, 0.30, 0.20, 0.16, 0.12, 0.10,
 ];
-// Coco SI v2.4.0 persona roster: 493 personas across 13 departments (matches docs/asset-counts.json).
+// Coco SI persona roster from docs/released-counts.json (checked by tests/check-site-counts.py, synced by scripts/sync-counts.py --site).
 export const COCO_SI_DEPTS = [
   ['Engineering', 70], ['AI', 59], ['Product & design', 56], ['Finance', 47],
   ['Trading', 46], ['Legal & IP', 29], ['Risk & compliance', 30], ['Strategy', 29],
   ['Data & analytics', 29], ['Climate & energy', 25], ['Education & edtech', 25],
   ['Healthcare & life sciences', 25], ['Sales & GTM', 23],
 ];
+const COCO_SI_MAX_DEPT = Math.max(...COCO_SI_DEPTS.map((d) => d[1]));
 
 export function mulberry32(a) {
   return () => {
@@ -76,6 +77,7 @@ export function finalizeMotif(rand, pts0, meta, amber, segs0, N, M, pulse = 0.28
     addLoop(segs2, (t) => { const a = t * TAU; return [2.05 + rr * Math.cos(a), off, rr * Math.sin(a)]; }, 42);
   }
 
+  // Deterministic height-then-azimuth order so the three morph shapes line up smoothly.
   const order = (pts) => pts
     .map((p, idx) => [Math.floor((p[1] / 12 + 0.5) * 32) * 10 + ((Math.atan2(p[2], p[0]) + Math.PI) / TAU) * 9.99, idx])
     .sort((a, b) => a[0] - b[0]).map((k) => k[1]);
@@ -121,7 +123,7 @@ export const PUBLIC_MOTIFS = {
       } else {
         let pick = ((i - dissentCut) / (N - dissentCut)) * total, di = 0;
         while (di < COCO_SI_DEPTS.length - 1 && pick >= COCO_SI_DEPTS[di][1]) { pick -= COCO_SI_DEPTS[di][1]; di++; }
-        const c = centers[di], spread = 0.42 + (COCO_SI_DEPTS[di][1] / 70) * 0.46;
+        const c = centers[di], spread = 0.42 + (COCO_SI_DEPTS[di][1] / COCO_SI_MAX_DEPT) * 0.46;
         const u = rand() * 2 - 1, a = rand() * TAU, r = Math.pow(rand(), 0.55) * spread, s = Math.sqrt(1 - u * u);
         pts.push([c[0] + r * s * Math.cos(a), c[1] + r * u, c[2] + r * s * Math.sin(a)]);
         meta[i] = di / COCO_SI_DEPTS.length;

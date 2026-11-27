@@ -221,7 +221,14 @@ export const LAB_MOTIFS = {
   },
 };
 
+const WARNED_UNKNOWN = new Set();
+
 export function buildProductMotif(kind, N = 2800, M = 440) {
-  const fn = PUBLIC_MOTIFS[kind] || LAB_MOTIFS[kind] || PUBLIC_MOTIFS.voice;
-  return fn(N, M);
+  const fn = PUBLIC_MOTIFS[kind] || LAB_MOTIFS[kind];
+  if (fn) return fn(N, M);
+  if (!WARNED_UNKNOWN.has(kind)) {
+    WARNED_UNKNOWN.add(kind);
+    console.warn(`Unknown product motif "${kind}", falling back to "voice".`);
+  }
+  return PUBLIC_MOTIFS.voice(N, M);
 }

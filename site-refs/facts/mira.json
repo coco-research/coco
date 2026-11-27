@@ -1,0 +1,27 @@
+[
+  {
+    "claim": "Mira makes Reels and Shorts in English and Hindi on your own machine.",
+    "section": "what-it-is",
+    "source": "catalog:data/products.json:102"
+  },
+  {
+    "claim": "Details soon for capability specifics while the public repository is archived.",
+    "section": "capabilities",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Details soon for roadmap milestones; the public repository is archived.",
+    "section": "cooking",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Archived source: AGPL-3.0 Python source on GitHub, no packaged release.",
+    "section": "stage",
+    "source": "catalog:data/products.json:103"
+  },
+  {
+    "claim": "Launch target: Not dated yet.",
+    "section": "when",
+    "source": "launch-window:not-dated"
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "claim": "Coco Super Intelligence seats an advisory board of expert personas inside the coding tool you already use, returns one pick with the dissent named, then does the work through local skills, commands and agents.",
+    "section": "what-it-is",
+    "source": "coco:README.md:28"
+  },
+  {
+    "claim": "Ask one hard question with /SI-Decide and it seats 16 to 32 of 493 personas across 13 departments; add --debate for reaction rounds before the vote.",
+    "section": "capabilities",
+    "source": "coco:README.md:77"
+  },
+  {
+    "claim": "Every advisory round records disagreement by name rather than averaging it away, backed by an offline persona checker enforcing source and held-status validation rules.",
+    "section": "capabilities",
+    "source": "coco:CHANGELOG.md:12"
+  },
+  {
+    "claim": "Ships 231 skills, 389 commands and 41 agents; a default Claude Code install delivers 193 of the skills.",
+    "section": "capabilities",
+    "source": "coco:README.md:260"
+  },
+  {
+    "claim": "One command, npx cocosuperintelligence, installs into Claude Code, Cursor, Codex, VS Code and 12 other coding tools (16 adapters).",
+    "section": "capabilities",
+    "source": "coco:package.json:4"
+  },
+  {
+    "claim": "Built-in coco mcp stdio server and one-step harness setup let MCP-capable coding tools call Coco skills, commands, agents and the persona board across 19 documented tool connectors.",
+    "section": "capabilities",
+    "source": "coco:README.md:100"
+  },
+  {
+    "claim": "A scored improvement loop (/coco improve) evaluates candidate skill edits against held-out graders and keeps only verified wins, with an off switch.",
+    "section": "capabilities",
+    "source": "coco:CHANGELOG.md:55"
+  },
+  {
+    "claim": "Writes phase state to disk, so a cleared chat does not erase the plan.",
+    "section": "capabilities",
+    "source": "coco:README.md:78"
+  },
+  {
+    "claim": "Files stay on your machine with no telemetry; your coding tool keeps its own model provider and keys.",
+    "section": "capabilities",
+    "source": "coco:README.md:273"
+  },
+  {
+    "claim": "--uninstall removes only what the install recorded and restores your original files.",
+    "section": "capabilities",
+    "source": "coco:scripts/claude_uninstall.py:1"
+  },
+  {
+    "claim": "Promoting more of the 19 documented MCP tool connectors from configuration templates to full automated verification.",
+    "section": "cooking",
+    "source": "coco:data/connectors.json:3"
+  },
+  {
+    "claim": "Continuing offline source checks, profile hygiene, and registry maintenance across all 13 departments.",
+    "section": "cooking",
+    "source": "coco:CHANGELOG.md:25"
+  },
+  {
+    "claim": "Released and in daily use: v2.4.0 on npm and GitHub Releases (21 tagged releases shipped).",
+    "section": "stage",
+    "source": "coco:package.json:3"
+  },
+  {
+    "claim": "Available now (v2.4.0); updates publish on GitHub Releases and npm.",
+    "section": "when",
+    "source": "launch-window:v2-4-0-released"
+  }
+]

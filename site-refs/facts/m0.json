@@ -1,0 +1,27 @@
+[
+  {
+    "claim": "Coco M0 keeps cross-tool memory on your own computer so work in one AI coding tool carries cleanly into the next without cloud sync.",
+    "section": "what-it-is",
+    "source": "catalog:data/products.json:129"
+  },
+  {
+    "claim": "Details soon for detailed capabilities and measured benchmarks alongside the public release.",
+    "section": "capabilities",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Details soon for release milestones when Coco M0 opens publicly.",
+    "section": "cooking",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Private beta used daily inside Coco Research; not yet released publicly.",
+    "section": "stage",
+    "source": "catalog:data/products.json:130"
+  },
+  {
+    "claim": "Launch target: Not dated yet.",
+    "section": "when",
+    "source": "launch-window:not-dated"
+  }
+]

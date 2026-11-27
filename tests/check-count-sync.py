@@ -27,7 +27,8 @@ import tempfile
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SYNC = os.path.join(ROOT, 'scripts', 'sync-counts.py')
 SITE_FILES = ['index.html', 'coco/index.html', 'assets/js/kinetic.js',
-              'assets/js/layout.js', 'assets/js/world.js']
+              'assets/js/layout.js', 'assets/js/world.js',
+              'assets/js/product-motifs-a.js']
 
 
 def never_synced(rel):
@@ -107,7 +108,7 @@ def self_test():
         expect(code == 1, 'a persona change leaves places out of date until synced', out)
         code, out = run(tmp, SYNC)
         expect(code == 0, 'sync-counts.py rewrites the batch change', out)
-        expect(digest(tmp, site) == before_site, 'without --site the 5 site files are byte-identical')
+        expect(digest(tmp, site) == before_site, f'without --site the {len(site)} site files are byte-identical')
         expect(digest(tmp, frozen) == before_frozen, 'without --site the never-synced paths are byte-identical')
         n = counts['personas']['total']
         expect(f'badge/personas-{n}-' in open(readme).read(), f'README badge now says {n}')

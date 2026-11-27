@@ -14,10 +14,18 @@ a pass.
 
 Run from repo root: python3 tests/check-site-counts.py
 """
+import importlib.util
 import json
 import os
 import re
 import sys
+
+_SYNC_SPEC = importlib.util.spec_from_file_location(
+    'sync_counts', os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                'scripts', 'sync-counts.py'))
+_SYNC_MOD = importlib.util.module_from_spec(_SYNC_SPEC)
+_SYNC_SPEC.loader.exec_module(_SYNC_MOD)
+SITE_DEPTS = _SYNC_MOD.SITE_DEPTS
 
 fail = 0
 
@@ -101,6 +109,43 @@ else:
         fail_(f'coco/index.html: hero diagram depts array sums to {sum(dot_counts)}, truth is {PERSONAS}')
     else:
         pass_(f'coco/index.html: hero diagram depts array sum ({sum(dot_counts)}) matches')
+
+# The 3D product motif roster (assets/js/product-motifs-a.js) sizes each
+# department cluster from COCO_SI_DEPTS; check it against docs/released-counts.json.
+motifs_path = 'assets/js/product-motifs-a.js'
+motifs_text = open(motifs_path, encoding='utf-8').read()
+m = re.search(r'export const COCO_SI_DEPTS = \[(.*?)\];', motifs_text, re.S)
+if not m:
+    fail_(f'{motifs_path}: could not find COCO_SI_DEPTS array')
+else:
+    entries = [(lbl, int(n)) for lbl, n in re.findall(r"\['([^']+)',\s*(\d+)\]", m.group(1))]
+    if len(entries) != DEPARTMENTS:
+        fail_(f'{motifs_path}: COCO_SI_DEPTS has {len(entries)} entries, truth is {DEPARTMENTS} departments')
+    else:
+        pass_(f'{motifs_path}: COCO_SI_DEPTS entry count ({len(entries)}) matches')
+    if sum(n for _, n in entries) != PERSONAS:
+        fail_(f'{motifs_path}: COCO_SI_DEPTS sums to {sum(n for _, n in entries)}, truth is {PERSONAS}')
+    else:
+        pass_(f'{motifs_path}: COCO_SI_DEPTS sum ({sum(n for _, n in entries)}) matches')
+    by_dept = counts['personas']['by_department']
+    seen_labels = set()
+    mismatches = []
+    for lbl, n in entries:
+        if lbl in seen_labels:
+            mismatches.append(f'duplicate label {lbl!r}')
+        seen_labels.add(lbl)
+        key = SITE_DEPTS.get(lbl)
+        if key is None:
+            mismatches.append(f'unknown label {lbl!r}')
+        elif n != by_dept.get(key):
+            mismatches.append(f'{lbl!r} says {n}, released-counts[{key!r}] says {by_dept.get(key)}')
+    missing_labels = sorted(set(SITE_DEPTS) - seen_labels)
+    if missing_labels:
+        mismatches.append(f'missing labels {missing_labels}')
+    if mismatches:
+        fail_(f'{motifs_path}: COCO_SI_DEPTS mismatch: {"; ".join(mismatches)}')
+    else:
+        pass_(f'{motifs_path}: all {len(entries)} COCO_SI_DEPTS entries match docs/released-counts.json')
 
 # <span data-count="KEY">N</span> is the delivered-count claim. The flagship
 # stats use <span class="num" data-count="495"> and are checked above.

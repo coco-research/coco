@@ -5,9 +5,9 @@ Default: the live public text (README.md, package.json, agents/README.md, docs/
 and HOW-IT-WORKS.html) takes its numbers from docs/asset-counts.json, so a
 persona change moves every count in the same commit.
 
---site: only the two website pages (index.html, coco/index.html), from
-docs/released-counts.json. The site shows the last release, so run this in a
-release change only.
+--site: only the website files (index.html, coco/index.html,
+assets/js/product-motifs-a.js), from docs/released-counts.json. The site shows
+the last release, so run this in a release change only.
 
 --check: change nothing; print each count that is out of date and exit 1.
 
@@ -91,6 +91,9 @@ SITE_PLACES = [
     ('coco/index.html', r'/personas/\. Sum = (\d+)\.', (P,)),
 ] + [
     ('coco/index.html', r'\["' + re.escape(label) + r'",(\d+)\]', ('dept:' + key,))
+    for label, key in SITE_DEPTS.items()
+] + [
+    ('assets/js/product-motifs-a.js', r"\['" + re.escape(label) + r"', (\d+)\]", ('dept:' + key,))
     for label, key in SITE_DEPTS.items()
 ]
 

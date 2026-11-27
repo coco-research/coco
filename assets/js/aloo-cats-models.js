@@ -90,6 +90,15 @@ function addCatMuzzle(headPivot, whiteMat, opts) {
   return chin;
 }
 
+function addPaws(root, whiteMat, specs) {
+  specs.forEach(([padDarkAccents, pos, rotY]) => {
+    const paw = buildPaw(whiteMat, padDarkAccents);
+    paw.position.set(...pos);
+    paw.rotation.y = rotY;
+    root.add(paw);
+  });
+}
+
 function buildCat(spec) {
   const root = new THREE.Group();
   const whiteTex = makeCanvas(512, 512, (ctx, w, h) => {
@@ -101,7 +110,7 @@ function buildCat(spec) {
 
   const { rest, baseRot } = spec;
   const headPivot = new THREE.Group();
-  headPivot.position.set(spec.head.pos[0], rest.headY, spec.head.pos[2]);
+  headPivot.position.set(spec.head.x, rest.headY, spec.head.z);
   const headMat = new THREE.MeshStandardMaterial({
     map: spec.head.texture(),
     roughness: spec.head.roughness,
@@ -123,7 +132,7 @@ function buildCat(spec) {
 
   headPivot.rotation.set(baseRot.x, baseRot.y, baseRot.z);
   root.add(headPivot);
-  return { root, headPivot, earL, earR, lids, lidRestX: rest.lidRestX, chin, baseRot, rest };
+  return { root, headPivot, earL, earR, lids, chin, baseRot, rest };
 }
 
 export function buildLeftCat() {
@@ -140,13 +149,14 @@ export function buildLeftCat() {
         leg.rotation.x = 0.78; leg.position.set(lx, ly, lz);
         root.add(leg);
       });
-      const pawL = buildPaw(whiteMat, false); pawL.position.set(-0.22, -2.23, 1.48); pawL.rotation.y = 0.08;
-      const pawR = buildPaw(whiteMat, true);  pawR.position.set(0.94, -2.23, 1.50);  pawR.rotation.y = -0.06;
-      root.add(pawL, pawR);
+      addPaws(root, whiteMat, [
+        [false, [-0.22, -2.23, 1.48], 0.08],
+        [true,  [0.94, -2.23, 1.50], -0.06],
+      ]);
     },
     rest,
     baseRot: { x: 0.36, y: 0.17, z: -0.05 },
-    head: { pos: [0.46, rest.headY, 1.10], texture: makeLeftHeadTexture, roughness: 0.84, metalness: 0.01, geo: [0.75, 0.34, 0.09, 0.06] },
+    head: { x: 0.46, z: 1.10, texture: makeLeftHeadTexture, roughness: 0.84, metalness: 0.01, geo: [0.75, 0.34, 0.09, 0.06] },
     ears: [
       { outer: 0x12151e, inner: 0xdca19a, height: 0.64, width: 0.32, tuft: 0xf7f4ed, pos: [-0.44, 0.43, 0.02], rot: [0.16, -0.22, 0.56] },
       { outer: 0x12151e, inner: 0xdca19a, height: 0.66, width: 0.33, tuft: 0xf7f4ed, pos: [0.44, 0.45, 0.02], rot: [0.14, 0.22, rest.earRRestZ] },
@@ -191,17 +201,22 @@ export function buildRightCat() {
       flankPatch.scale.set(0.55, 1.15, 0.95);
       flankPatch.position.set(4.01, -1.52, 0.58); flankPatch.rotation.z = 0.22;
       root.add(flankPatch);
-      const legL = new THREE.Mesh(new THREE.CapsuleGeometry(0.215, 1.40, 16, 22), whiteMat);
-      legL.position.set(2.58, -1.46, 1.04); legL.rotation.set(0.28, 0, -0.04);
-      const legR = new THREE.Mesh(new THREE.CapsuleGeometry(0.22, 1.42, 16, 22), whiteMat);
-      legR.position.set(3.52, -1.45, 1.06); legR.rotation.set(0.29, 0, 0.05);
-      const pawL = buildPaw(whiteMat, false); pawL.position.set(2.52, -2.23, 1.54); pawL.rotation.y = -0.05;
-      const pawR = buildPaw(whiteMat, false); pawR.position.set(3.58, -2.23, 1.58); pawR.rotation.y = -0.10;
-      root.add(legL, legR, pawL, pawR);
+      [
+        [0.215, 1.40, [2.58, -1.46, 1.04], [0.28, 0, -0.04]],
+        [0.22,  1.42, [3.52, -1.45, 1.06], [0.29, 0,  0.05]],
+      ].forEach(([rad, len, pos, rot]) => {
+        const leg = new THREE.Mesh(new THREE.CapsuleGeometry(rad, len, 16, 22), whiteMat);
+        leg.position.set(...pos); leg.rotation.set(...rot);
+        root.add(leg);
+      });
+      addPaws(root, whiteMat, [
+        [false, [2.52, -2.23, 1.54], -0.05],
+        [false, [3.58, -2.23, 1.58], -0.10],
+      ]);
     },
     rest,
     baseRot: { x: 0.05, y: -0.11, z: 0.12 },
-    head: { pos: [2.72, rest.headY, 1.00], texture: makeRightHeadTexture, roughness: 0.80, metalness: 0.02, geo: [0.91, 0.31, 0.16, 0.05] },
+    head: { x: 2.72, z: 1.00, texture: makeRightHeadTexture, roughness: 0.80, metalness: 0.02, geo: [0.91, 0.31, 0.16, 0.05] },
     ears: [
       { outer: 0x0d1017, inner: 0xa87469, height: 0.85, width: 0.39, tuft: 0xebe4d9, pos: [-0.51, 0.56, 0.02], rot: [0.10, -0.12, rest.earLRestZ] },
       { outer: 0x0d1017, inner: 0xa87469, height: 0.89, width: 0.40, tuft: 0xebe4d9, pos: [0.45, 0.62, 0.02], rot: [0.10, 0.12, -0.24] },

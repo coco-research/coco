@@ -102,15 +102,41 @@ function buildFlowLines(THREE) {
   };
 }
 
+const smoothstep = (u) => u * u * (3 - 2 * u);
+
 function smoothWindow(t, start, riseEnd, holdEnd, fallEnd) {
   if (t <= start || t >= fallEnd) return 0;
-  if (t < riseEnd) {
-    const u = (t - start) / (riseEnd - start);
-    return u * u * (3 - 2 * u);
-  }
+  if (t < riseEnd) return smoothstep((t - start) / (riseEnd - start));
   if (t <= holdEnd) return 1;
-  const u = 1 - (t - holdEnd) / (fallEnd - holdEnd);
-  return u * u * (3 - 2 * u);
+  return smoothstep(1 - (t - holdEnd) / (fallEnd - holdEnd));
+}
+
+const CAMERA_VIEWS = {
+  readme: { fov: 25.8, pos: [0.0, -0.05, 13.55], lookAt: [0.0, -0.11, 0] },
+  social: { fov: 27.2, pos: [0.0, -0.04, 13.30], lookAt: [0.0, -0.10, 0] },
+  narrow: { fov: 34,   pos: [1.98, 0.62, 18.6],  lookAt: [1.98, -0.28, 0] },
+  wide:   { fov: 28,   pos: [0.0, -0.04, 13.2],  lookAt: [0.0, -0.10, 0] },
+};
+
+function setLids(cat, blinkOffset = 0) {
+  cat.lids.forEach((lid, idx) => {
+    const sign = idx === 0 ? 1 : -1;
+    lid.rotation.set(cat.rest.lidRestX + blinkOffset, 0, sign * cat.rest.lidTiltZ);
+  });
+}
+
+function resetCatPose(cat) {
+  cat.headPivot.position.y = cat.rest.headY;
+  cat.headPivot.rotation.set(cat.baseRot.x, cat.baseRot.y, cat.baseRot.z);
+  cat.chin.position.y = cat.rest.chinY;
+  if (cat.rest.earRRestZ !== undefined) cat.earR.rotation.z = cat.rest.earRRestZ;
+  if (cat.rest.earLRestZ !== undefined) cat.earL.rotation.z = cat.rest.earLRestZ;
+  setLids(cat, 0);
+}
+
+function setToggleLabel(btn, label) {
+  btn.textContent = label;
+  btn.removeAttribute('aria-pressed');
 }
 
 async function bootCatsStage() {
@@ -128,11 +154,13 @@ async function bootCatsStage() {
   const toggleBtn = document.querySelector('[data-cats-motion-toggle]');
   const ownStage = document.documentElement.hasAttribute('data-own-stage');
   const navMotionBtns = ownStage ? Array.from(document.querySelectorAll('[data-motion-toggle]')) : [];
+  const allToggleBtns = [toggleBtn, ...navMotionBtns].filter(Boolean);
   const useFallback = () => {
     if (stageEl) stageEl.classList.add('aloo-webgl-fallback');
-    if (toggleBtn) toggleBtn.hidden = true;
-    navMotionBtns.forEach((btn) => { btn.hidden = true; });
+    allToggleBtns.forEach((btn) => { btn.hidden = true; });
   };
+  let reducedMq = null;
+  try { reducedMq = matchMedia('(prefers-reduced-motion: reduce)'); } catch (e) { /* matchMedia unsupported */ }
 
   let renderer = null;
   let resize, renderFrame, syncControl, setPaused, stopLoop, startLoop, readStoredPause;
@@ -193,39 +221,19 @@ async function bootCatsStage() {
       renderer.setPixelRatio(dpr);
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
-      if (bannerMode === 'readme') {
-        camera.fov = 25.8;
-        camera.position.set(0.0, -0.05, 13.55);
-        camera.lookAt(0.0, -0.11, 0);
-      } else if (bannerMode === 'social') {
-        camera.fov = 27.2;
-        camera.position.set(0.0, -0.04, 13.30);
-        camera.lookAt(0.0, -0.10, 0);
-      } else if (w <= 760) {
-        camera.fov = 34;
-        camera.position.set(1.98, 0.62, 18.6);
-        camera.lookAt(1.98, -0.28, 0);
-      } else {
-        camera.fov = 28;
-        camera.position.set(0.0, -0.04, 13.2);
-        camera.lookAt(0.0, -0.10, 0);
-      }
+      const viewKey = isBannerExport ? bannerMode : (w <= 760 ? 'narrow' : 'wide');
+      const view = CAMERA_VIEWS[viewKey];
+      camera.fov = view.fov;
+      camera.position.set(...view.pos);
+      camera.lookAt(...view.lookAt);
       camera.updateProjectionMatrix();
     };
 
     renderFrame = (t, isStatic) => {
       if (contextLost) return;
       if (isStatic) {
-        leftCat.headPivot.position.y = leftCat.rest.headY;
-        rightCat.headPivot.position.y = rightCat.rest.headY;
-        leftCat.headPivot.rotation.set(leftCat.baseRot.x, leftCat.baseRot.y, leftCat.baseRot.z);
-        rightCat.headPivot.rotation.set(rightCat.baseRot.x, rightCat.baseRot.y, rightCat.baseRot.z);
-        leftCat.chin.position.y = leftCat.rest.chinY;
-        rightCat.chin.position.y = rightCat.rest.chinY;
-        leftCat.earR.rotation.z = leftCat.rest.earRRestZ;
-        rightCat.earL.rotation.z = rightCat.rest.earLRestZ;
-        leftCat.lids.forEach((lid, idx) => lid.rotation.set(leftCat.rest.lidRestX, 0, -(idx === 0 ? -1 : 1) * leftCat.rest.lidTiltZ));
-        rightCat.lids.forEach((lid, idx) => lid.rotation.set(rightCat.rest.lidRestX, 0, -(idx === 0 ? -1 : 1) * rightCat.rest.lidTiltZ));
+        resetCatPose(leftCat);
+        resetCatPose(rightCat);
         const staticTextAlpha = outlineOnly ? 0 : 0.94;
         callBubble.update(staticTextAlpha, 0, 1);
         replyBubble.update(staticTextAlpha, 0, 1);
@@ -261,33 +269,25 @@ async function bootCatsStage() {
       rightCat.earL.rotation.z = rightCat.rest.earLRestZ + Math.pow(Math.max(0, Math.sin(t * 1.9 + 0.8)), 10) * 0.16;
 
       const blinkR = Math.max(smoothWindow(cycle, 4.05, 4.16, 4.24, 4.38), smoothWindow(cycle, 6.8, 6.9, 6.96, 7.08));
-      rightCat.lids.forEach((lid, idx) => lid.rotation.set(rightCat.rest.lidRestX + blinkR * 1.24, 0, -(idx === 0 ? -1 : 1) * rightCat.rest.lidTiltZ));
+      setLids(rightCat, blinkR * 1.24);
       const blinkL = smoothWindow(cycle, 1.75, 1.86, 1.94, 2.08);
-      leftCat.lids.forEach((lid, idx) => lid.rotation.set(leftCat.rest.lidRestX + blinkL * 0.78, 0, -(idx === 0 ? -1 : 1) * leftCat.rest.lidTiltZ));
+      setLids(leftCat, blinkL * 0.78);
 
       flows.animate(t);
       renderer.render(scene, camera);
     };
 
-    // Dedicated per-page key for the cats banner so it never drifts from product-scene.js.
-    const pauseKey = 'coco-cats-pause:' + location.pathname;
+    // Dedicated per-page key scoped to this module so it never drifts from product-scene.js.
+    const pauseKey = 'aloo-cats-pause:' + location.pathname;
     readStoredPause = () => { try { return sessionStorage.getItem(pauseKey); } catch (e) { /* private mode / storage blocked */ return null; } };
-    let reducedMedia = false;
-    try { reducedMedia = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { /* matchMedia unsupported */ }
     const stored = readStoredPause();
-    paused = isBannerExport || stored === '1' || (stored === null && reducedMedia);
+    paused = isBannerExport || stored === '1' || (stored === null && Boolean(reducedMq && reducedMq.matches));
     t0 = performance.now();
 
     // Label swaps text only; aria-pressed would double-announce the state (WCAG 2.2.2 Pause/Play control).
     syncControl = () => {
-      if (toggleBtn) {
-        toggleBtn.textContent = paused ? 'Play motion' : 'Pause motion';
-        toggleBtn.removeAttribute('aria-pressed');
-      }
-      navMotionBtns.forEach((btn) => {
-        btn.textContent = paused ? 'Play 3D' : 'Pause 3D';
-        btn.removeAttribute('aria-pressed');
-      });
+      if (toggleBtn) setToggleLabel(toggleBtn, paused ? 'Play motion' : 'Pause motion');
+      navMotionBtns.forEach((btn) => setToggleLabel(btn, paused ? 'Play 3D' : 'Pause 3D'));
     };
     const canAnimate = () => !paused && !document.hidden && inView && !contextLost;
     const loop = (now) => {
@@ -319,11 +319,11 @@ async function bootCatsStage() {
     syncControl();
     // Run the initial render synchronously inside the start try so any build/shader/render throw triggers fallback.
     renderFrame(0, paused);
-  } catch (e) {
-    /* dynamic import, WebGL init, scene build, or first render failed; fall back to pre-rendered banner */
+  } catch (err) {
+    console.warn('aloo-cats: fallback', err);
     useFallback();
     if (renderer) {
-      try { renderer.dispose(); } catch (err) { /* ignore dispose failure on broken context */ }
+      try { renderer.dispose(); } catch (disposeErr) { /* ignore dispose failure on broken context */ }
     }
     return;
   }
@@ -334,13 +334,16 @@ async function bootCatsStage() {
     window[READY_FLAG] = true;
     document.documentElement.dataset.alooBannerReady = '1';
   };
+  const redrawIfPaused = () => {
+    if (contextLost) return;
+    resize();
+    if (paused) renderFrame(0, true);
+  };
 
   if (paused) {
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => {
-        if (contextLost) return;
-        resize();
-        renderFrame(0, true);
+        redrawIfPaused();
         markReady();
       }).catch(() => { /* font readiness fallback already rendered */ markReady(); });
     } else {
@@ -351,11 +354,7 @@ async function bootCatsStage() {
     startLoop();
   }
 
-  window.addEventListener('resize', () => {
-    if (contextLost) return;
-    resize();
-    if (paused) renderFrame(0, true);
-  }, { passive: true });
+  window.addEventListener('resize', redrawIfPaused, { passive: true });
   document.addEventListener('visibilitychange', () => {
     if (paused || contextLost) return;
     if (document.hidden) stopLoop();
@@ -375,10 +374,13 @@ async function bootCatsStage() {
     contextLost = true;
     stopLoop();
     useFallback();
+    markReady();
   });
-  if (toggleBtn) toggleBtn.addEventListener('click', () => setPaused(!paused, true));
-  navMotionBtns.forEach((btn) => btn.addEventListener('click', () => setPaused(!paused, true)));
-  try { matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (ev) => { if (readStoredPause() === null) setPaused(ev.matches); }); } catch (e) { /* matchMedia listener unsupported */ }
+  const onToggleClick = () => setPaused(!paused, true);
+  allToggleBtns.forEach((btn) => btn.addEventListener('click', onToggleClick));
+  if (reducedMq) {
+    try { reducedMq.addEventListener('change', (ev) => { if (readStoredPause() === null) setPaused(ev.matches); }); } catch (e) { /* matchMedia listener unsupported */ }
+  }
 }
 
-bootCatsStage().catch(() => { /* fallback handled inside bootCatsStage */ });
+bootCatsStage().catch((err) => { console.warn('aloo-cats: fallback', err); });

@@ -90,137 +90,147 @@ function addCatMuzzle(headPivot, whiteMat, opts) {
   return chin;
 }
 
-export function buildLeftCat() {
+function buildCat(spec) {
   const root = new THREE.Group();
   const whiteTex = makeCanvas(512, 512, (ctx, w, h) => {
-    ctx.fillStyle = '#f7f4ed'; ctx.fillRect(0, 0, w, h);
-    paintFurStrokes(ctx, 0, 0, w, h, 2600, '#e4ddd1', 0.30, 15, 2203);
+    ctx.fillStyle = spec.fur.base; ctx.fillRect(0, 0, w, h);
+    paintFurStrokes(ctx, 0, 0, w, h, spec.fur.count, '#e4ddd1', spec.fur.alpha, 15, spec.fur.seed);
   });
-  const whiteMat = new THREE.MeshStandardMaterial({ map: whiteTex, roughness: 0.86, metalness: 0.01 });
+  const whiteMat = new THREE.MeshStandardMaterial({ map: whiteTex, roughness: spec.fur.roughness, metalness: 0.01 });
+  spec.buildBody(root, whiteMat);
 
-  const body = new THREE.Mesh(new THREE.SphereGeometry(0.88, 36, 28), whiteMat);
-  body.scale.set(0.94, 0.88, 1.12);
-  body.position.set(0.36, -1.94, 0.40);
-  root.add(body);
-  [[-0.16, -1.86, 0.98], [0.86, -1.88, 0.98]].forEach(([lx, ly, lz]) => {
-    const leg = new THREE.Mesh(new THREE.CapsuleGeometry(0.21, 0.56, 12, 18), whiteMat);
-    leg.rotation.x = 0.78; leg.position.set(lx, ly, lz);
-    root.add(leg);
-  });
-
-  const pawL = buildPaw(whiteMat, false); pawL.position.set(-0.22, -2.23, 1.48); pawL.rotation.y = 0.08;
-  const pawR = buildPaw(whiteMat, true);  pawR.position.set(0.94, -2.23, 1.50);  pawR.rotation.y = -0.06;
-  root.add(pawL, pawR);
-
-  const rest = { headY: -1.10, chinY: -0.32, lidRestX: -0.26, lidTiltZ: 0.18, earRRestZ: -0.52 };
+  const { rest, baseRot } = spec;
   const headPivot = new THREE.Group();
-  headPivot.position.set(0.46, rest.headY, 1.10);
-  const headMat = new THREE.MeshStandardMaterial({ map: makeLeftHeadTexture(), roughness: 0.84, metalness: 0.01 });
-  headPivot.add(new THREE.Mesh(sculptFelineHeadGeo(0.75, 0.34, 0.09, 0.06), headMat));
+  headPivot.position.set(spec.head.pos[0], rest.headY, spec.head.pos[2]);
+  const headMat = new THREE.MeshStandardMaterial({
+    map: spec.head.texture(),
+    roughness: spec.head.roughness,
+    metalness: spec.head.metalness,
+  });
+  headPivot.add(new THREE.Mesh(sculptFelineHeadGeo(...spec.head.geo), headMat));
 
-  const earL = buildEar(0x12151e, 0xdca19a, 0.64, 0.32, 0xf7f4ed);
-  earL.position.set(-0.44, 0.43, 0.02); earL.rotation.set(0.16, -0.22, 0.56);
-  const earR = buildEar(0x12151e, 0xdca19a, 0.66, 0.33, 0xf7f4ed);
-  earR.position.set(0.44, 0.45, 0.02);  earR.rotation.set(0.14, 0.22, rest.earRRestZ);
+  const [earL, earR] = spec.ears.map((e) => {
+    const ear = buildEar(e.outer, e.inner, e.height, e.width, e.tuft);
+    ear.position.set(...e.pos);
+    ear.rotation.set(...e.rot);
+    return ear;
+  });
   headPivot.add(earL, earR);
 
-  const lids = addCatEyes(headPivot, {
-    irisBase: '#989d55', irisRim: '#4b5030', pupilWidth: 0.20, eyeRoughness: 0.06,
-    lidColor: 0xf1ebe0, lidRoughness: 0.80, radius: 0.128, segs: [24, 20],
-    eyeScale: [1.10, 0.88, 0.72], eyeRotX: 0.18, eyeRotY: 0.24, eyeRotZ: 0.16,
-    posX: 0.285, posY: 0.03, posZ: 0.67, lidRadius: 0.138, lidSegs: [22, 16], lidArc: 0.50,
-    lidScale: [1.12, 0.92, 0.76], lidRestX: rest.lidRestX, lidTiltZ: rest.lidTiltZ,
-    lash: { color: 0x5c4744, roughness: 0.70, radius: 0.122, tube: 0.009, posY: 0.045, posZ: 0.725, rotY: 0.22, rotZBase: 0.16, rotZSide: 0.18 },
-  });
-  const chin = addCatMuzzle(headPivot, whiteMat, {
-    padRadius: 0.145, padSegs: [18, 14], padScale: [1.04, 0.80, 0.90], padX: 0.115, padY: -0.21, padZ: 0.83,
-    noseColor: 0xe69ca2, noseScale: 0.92, noseY: -0.15, noseZ: 1.03,
-    chinRadius: 0.15, chinScale: [1.04, 0.66, 0.90], chinY: rest.chinY, chinZ: 0.78,
-    whiskers: { x: 0.19, y: -0.21, z: 0.82, count: 5, lenLeft: 0.66, lenRight: 0.62, spreadLeft: 0.19, spreadRight: 0.19, radius: 0.0025, opacity: 0.50 },
-  });
+  const lids = addCatEyes(headPivot, { ...spec.eyes, lidRestX: rest.lidRestX, lidTiltZ: rest.lidTiltZ });
+  const chin = addCatMuzzle(headPivot, whiteMat, { ...spec.muzzle, chinY: rest.chinY });
+  if (spec.decorateHead) spec.decorateHead(headPivot);
 
-  const baseRot = { x: 0.36, y: 0.17, z: -0.05 };
   headPivot.rotation.set(baseRot.x, baseRot.y, baseRot.z);
   root.add(headPivot);
   return { root, headPivot, earL, earR, lids, lidRestX: rest.lidRestX, chin, baseRot, rest };
 }
 
+export function buildLeftCat() {
+  const rest = { headY: -1.10, chinY: -0.32, lidRestX: -0.26, lidTiltZ: 0.18, earRRestZ: -0.52 };
+  return buildCat({
+    fur: { base: '#f7f4ed', count: 2600, alpha: 0.30, seed: 2203, roughness: 0.86 },
+    buildBody(root, whiteMat) {
+      const body = new THREE.Mesh(new THREE.SphereGeometry(0.88, 36, 28), whiteMat);
+      body.scale.set(0.94, 0.88, 1.12);
+      body.position.set(0.36, -1.94, 0.40);
+      root.add(body);
+      [[-0.16, -1.86, 0.98], [0.86, -1.88, 0.98]].forEach(([lx, ly, lz]) => {
+        const leg = new THREE.Mesh(new THREE.CapsuleGeometry(0.21, 0.56, 12, 18), whiteMat);
+        leg.rotation.x = 0.78; leg.position.set(lx, ly, lz);
+        root.add(leg);
+      });
+      const pawL = buildPaw(whiteMat, false); pawL.position.set(-0.22, -2.23, 1.48); pawL.rotation.y = 0.08;
+      const pawR = buildPaw(whiteMat, true);  pawR.position.set(0.94, -2.23, 1.50);  pawR.rotation.y = -0.06;
+      root.add(pawL, pawR);
+    },
+    rest,
+    baseRot: { x: 0.36, y: 0.17, z: -0.05 },
+    head: { pos: [0.46, rest.headY, 1.10], texture: makeLeftHeadTexture, roughness: 0.84, metalness: 0.01, geo: [0.75, 0.34, 0.09, 0.06] },
+    ears: [
+      { outer: 0x12151e, inner: 0xdca19a, height: 0.64, width: 0.32, tuft: 0xf7f4ed, pos: [-0.44, 0.43, 0.02], rot: [0.16, -0.22, 0.56] },
+      { outer: 0x12151e, inner: 0xdca19a, height: 0.66, width: 0.33, tuft: 0xf7f4ed, pos: [0.44, 0.45, 0.02], rot: [0.14, 0.22, rest.earRRestZ] },
+    ],
+    eyes: {
+      irisBase: '#989d55', irisRim: '#4b5030', pupilWidth: 0.20, eyeRoughness: 0.06,
+      lidColor: 0xf1ebe0, lidRoughness: 0.80, radius: 0.128, segs: [24, 20],
+      eyeScale: [1.10, 0.88, 0.72], eyeRotX: 0.18, eyeRotY: 0.24, eyeRotZ: 0.16,
+      posX: 0.285, posY: 0.03, posZ: 0.67, lidRadius: 0.138, lidSegs: [22, 16], lidArc: 0.50,
+      lidScale: [1.12, 0.92, 0.76],
+      lash: { color: 0x5c4744, roughness: 0.70, radius: 0.122, tube: 0.009, posY: 0.045, posZ: 0.725, rotY: 0.22, rotZBase: 0.16, rotZSide: 0.18 },
+    },
+    muzzle: {
+      padRadius: 0.145, padSegs: [18, 14], padScale: [1.04, 0.80, 0.90], padX: 0.115, padY: -0.21, padZ: 0.83,
+      noseColor: 0xe69ca2, noseScale: 0.92, noseY: -0.15, noseZ: 1.03,
+      chinRadius: 0.15, chinScale: [1.04, 0.66, 0.90], chinZ: 0.78,
+      whiskers: { x: 0.19, y: -0.21, z: 0.82, count: 5, lenLeft: 0.66, lenRight: 0.62, spreadLeft: 0.19, spreadRight: 0.19, radius: 0.0025, opacity: 0.50 },
+    },
+  });
+}
+
 export function buildRightCat() {
-  const root = new THREE.Group();
-  const whiteTex = makeCanvas(512, 512, (ctx, w, h) => {
-    ctx.fillStyle = '#f8f5ee'; ctx.fillRect(0, 0, w, h);
-    paintFurStrokes(ctx, 0, 0, w, h, 2800, '#e4ddd1', 0.28, 15, 6653);
-  });
-  const whiteMat = new THREE.MeshStandardMaterial({ map: whiteTex, roughness: 0.85, metalness: 0.01 });
-  const blackMat = new THREE.MeshStandardMaterial({ color: 0x0f1219, roughness: 0.82, metalness: 0.02 });
-
-  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.84, 1.48, 22, 32), whiteMat);
-  torso.rotation.set(0.18, -0.18, 0.22);
-  torso.scale.set(1.04, 1.0, 0.96);
-  torso.position.set(3.24, -1.12, 0.52);
-  const chest = new THREE.Mesh(new THREE.SphereGeometry(0.80, 28, 22), whiteMat);
-  chest.scale.set(1.04, 1.16, 0.88);
-  chest.position.set(3.04, -0.66, 0.72);
-  root.add(torso, chest);
-
-  [[2.62, -0.84, 0.90], [3.48, -0.84, 0.92]].forEach(([sx, sy, sz]) => {
-    const sh = new THREE.Mesh(new THREE.SphereGeometry(0.28, 18, 14), whiteMat);
-    sh.scale.set(0.96, 1.24, 0.94); sh.position.set(sx, sy, sz);
-    root.add(sh);
-  });
-
-  const flankPatch = new THREE.Mesh(new THREE.SphereGeometry(0.48, 22, 18), blackMat);
-  flankPatch.scale.set(0.55, 1.15, 0.95);
-  flankPatch.position.set(4.01, -1.52, 0.58); flankPatch.rotation.z = 0.22;
-  root.add(flankPatch);
-
-  const legL = new THREE.Mesh(new THREE.CapsuleGeometry(0.215, 1.40, 16, 22), whiteMat);
-  legL.position.set(2.58, -1.46, 1.04); legL.rotation.set(0.28, 0, -0.04);
-  const legR = new THREE.Mesh(new THREE.CapsuleGeometry(0.22, 1.42, 16, 22), whiteMat);
-  legR.position.set(3.52, -1.45, 1.06); legR.rotation.set(0.29, 0, 0.05);
-  const pawL = buildPaw(whiteMat, false); pawL.position.set(2.52, -2.23, 1.54); pawL.rotation.y = -0.05;
-  const pawR = buildPaw(whiteMat, false); pawR.position.set(3.58, -2.23, 1.58); pawR.rotation.y = -0.10;
-  root.add(legL, legR, pawL, pawR);
-
   const rest = { headY: 0.42, chinY: -0.38, lidRestX: -0.72, lidTiltZ: 0.14, earLRestZ: 0.40 };
-  const headPivot = new THREE.Group();
-  headPivot.position.set(2.72, rest.headY, 1.00);
-  const headMat = new THREE.MeshStandardMaterial({ map: makeRightHeadTexture(), roughness: 0.80, metalness: 0.02 });
-  headPivot.add(new THREE.Mesh(sculptFelineHeadGeo(0.91, 0.31, 0.16, 0.05), headMat));
-
-  const earL = buildEar(0x0d1017, 0xa87469, 0.85, 0.39, 0xebe4d9);
-  earL.position.set(-0.51, 0.56, 0.02); earL.rotation.set(0.10, -0.12, rest.earLRestZ);
-  const earR = buildEar(0x0d1017, 0xa87469, 0.89, 0.40, 0xebe4d9);
-  earR.position.set(0.45, 0.62, 0.02);  earR.rotation.set(0.10, 0.12, -0.24);
-  headPivot.add(earL, earR);
-
-  const lids = addCatEyes(headPivot, {
-    irisBase: '#889662', irisRim: '#3a4327', pupilWidth: 0.22, eyeRoughness: 0.04,
-    lidColor: 0x0d1017, lidRoughness: 0.78, radius: 0.184, segs: [28, 24],
-    eyeScale: [1.08, 0.96, 0.76], eyeRotX: 0.04, eyeRotY: 0.18, eyeRotZ: 0.10,
-    posX: 0.345, posY: 0.07, posZ: 0.81, lidRadius: 0.194, lidSegs: [24, 16], lidArc: 0.48,
-    lidScale: [1.09, 0.98, 0.78], lidRestX: rest.lidRestX, lidTiltZ: rest.lidTiltZ,
+  return buildCat({
+    fur: { base: '#f8f5ee', count: 2800, alpha: 0.28, seed: 6653, roughness: 0.85 },
+    buildBody(root, whiteMat) {
+      const blackMat = new THREE.MeshStandardMaterial({ color: 0x0f1219, roughness: 0.82, metalness: 0.02 });
+      const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.84, 1.48, 22, 32), whiteMat);
+      torso.rotation.set(0.18, -0.18, 0.22);
+      torso.scale.set(1.04, 1.0, 0.96);
+      torso.position.set(3.24, -1.12, 0.52);
+      const chest = new THREE.Mesh(new THREE.SphereGeometry(0.80, 28, 22), whiteMat);
+      chest.scale.set(1.04, 1.16, 0.88);
+      chest.position.set(3.04, -0.66, 0.72);
+      root.add(torso, chest);
+      [[2.62, -0.84, 0.90], [3.48, -0.84, 0.92]].forEach(([sx, sy, sz]) => {
+        const sh = new THREE.Mesh(new THREE.SphereGeometry(0.28, 18, 14), whiteMat);
+        sh.scale.set(0.96, 1.24, 0.94); sh.position.set(sx, sy, sz);
+        root.add(sh);
+      });
+      const flankPatch = new THREE.Mesh(new THREE.SphereGeometry(0.48, 22, 18), blackMat);
+      flankPatch.scale.set(0.55, 1.15, 0.95);
+      flankPatch.position.set(4.01, -1.52, 0.58); flankPatch.rotation.z = 0.22;
+      root.add(flankPatch);
+      const legL = new THREE.Mesh(new THREE.CapsuleGeometry(0.215, 1.40, 16, 22), whiteMat);
+      legL.position.set(2.58, -1.46, 1.04); legL.rotation.set(0.28, 0, -0.04);
+      const legR = new THREE.Mesh(new THREE.CapsuleGeometry(0.22, 1.42, 16, 22), whiteMat);
+      legR.position.set(3.52, -1.45, 1.06); legR.rotation.set(0.29, 0, 0.05);
+      const pawL = buildPaw(whiteMat, false); pawL.position.set(2.52, -2.23, 1.54); pawL.rotation.y = -0.05;
+      const pawR = buildPaw(whiteMat, false); pawR.position.set(3.58, -2.23, 1.58); pawR.rotation.y = -0.10;
+      root.add(legL, legR, pawL, pawR);
+    },
+    rest,
+    baseRot: { x: 0.05, y: -0.11, z: 0.12 },
+    head: { pos: [2.72, rest.headY, 1.00], texture: makeRightHeadTexture, roughness: 0.80, metalness: 0.02, geo: [0.91, 0.31, 0.16, 0.05] },
+    ears: [
+      { outer: 0x0d1017, inner: 0xa87469, height: 0.85, width: 0.39, tuft: 0xebe4d9, pos: [-0.51, 0.56, 0.02], rot: [0.10, -0.12, rest.earLRestZ] },
+      { outer: 0x0d1017, inner: 0xa87469, height: 0.89, width: 0.40, tuft: 0xebe4d9, pos: [0.45, 0.62, 0.02], rot: [0.10, 0.12, -0.24] },
+    ],
+    eyes: {
+      irisBase: '#889662', irisRim: '#3a4327', pupilWidth: 0.22, eyeRoughness: 0.04,
+      lidColor: 0x0d1017, lidRoughness: 0.78, radius: 0.184, segs: [28, 24],
+      eyeScale: [1.08, 0.96, 0.76], eyeRotX: 0.04, eyeRotY: 0.18, eyeRotZ: 0.10,
+      posX: 0.345, posY: 0.07, posZ: 0.81, lidRadius: 0.194, lidSegs: [24, 16], lidArc: 0.48,
+      lidScale: [1.09, 0.98, 0.78],
+    },
+    muzzle: {
+      padRadius: 0.19, padSegs: [20, 16], padScale: [1.06, 0.82, 0.92], padX: 0.145, padY: -0.24, padZ: 0.96,
+      noseColor: 0xe29798, noseScale: 1.12, noseY: -0.16, noseZ: 1.22,
+      chinRadius: 0.19, chinScale: [1.10, 0.66, 0.92], chinZ: 0.90,
+      whiskers: { x: 0.24, y: -0.24, z: 0.95, count: 6, lenLeft: 1.12, lenRight: 1.02, spreadLeft: 0.36, spreadRight: 0.34, radius: 0.0031, opacity: 0.72 },
+    },
+    decorateHead(headPivot) {
+      [-1, 1].forEach((s) => {
+        const browMat = new THREE.MeshBasicMaterial({ color: 0xf4f7fc, transparent: true, opacity: 0.66 });
+        for (let b = 0; b < 4; b++) {
+          const curve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3((0.23 + b * 0.045) * s, 0.26, 0.81),
+            new THREE.Vector3((0.38 + b * 0.085) * s, 0.55 + b * 0.035, 0.67),
+            new THREE.Vector3((0.54 + b * 0.10) * s, 0.72 + b * 0.03, 0.45),
+          ]);
+          headPivot.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 10, 0.0028, 4, false), browMat));
+        }
+      });
+    },
   });
-  const chin = addCatMuzzle(headPivot, whiteMat, {
-    padRadius: 0.19, padSegs: [20, 16], padScale: [1.06, 0.82, 0.92], padX: 0.145, padY: -0.24, padZ: 0.96,
-    noseColor: 0xe29798, noseScale: 1.12, noseY: -0.16, noseZ: 1.22,
-    chinRadius: 0.19, chinScale: [1.10, 0.66, 0.92], chinY: rest.chinY, chinZ: 0.90,
-    whiskers: { x: 0.24, y: -0.24, z: 0.95, count: 6, lenLeft: 1.12, lenRight: 1.02, spreadLeft: 0.36, spreadRight: 0.34, radius: 0.0031, opacity: 0.72 },
-  });
-  [-1, 1].forEach((s) => {
-    const browMat = new THREE.MeshBasicMaterial({ color: 0xf4f7fc, transparent: true, opacity: 0.66 });
-    for (let b = 0; b < 4; b++) {
-      const curve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3((0.23 + b * 0.045) * s, 0.26, 0.81),
-        new THREE.Vector3((0.38 + b * 0.085) * s, 0.55 + b * 0.035, 0.67),
-        new THREE.Vector3((0.54 + b * 0.10) * s, 0.72 + b * 0.03, 0.45),
-      ]);
-      headPivot.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 10, 0.0028, 4, false), browMat));
-    }
-  });
-
-  const baseRot = { x: 0.05, y: -0.11, z: 0.12 };
-  headPivot.rotation.set(baseRot.x, baseRot.y, baseRot.z);
-  root.add(headPivot);
-  return { root, headPivot, earL, earR, lids, lidRestX: rest.lidRestX, chin, baseRot, rest };
 }

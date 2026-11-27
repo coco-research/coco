@@ -3,7 +3,6 @@
 // Renders two coded black-and-white cats on a cream ledge, flowing signal lines, and "ow ow" / "meh" bubbles.
 // Three.js and the cat models load with dynamic import() inside bootCatsStage(), so a missing vendored
 // module or WebGL context falls back to the pre-rendered banner instead of a dead module graph.
-let THREE = null;
 
 function drawBubbleCanvas(canvas, text, textAlpha, tailSide) {
   const ctx = canvas.getContext('2d');
@@ -51,7 +50,7 @@ function drawBubbleCanvas(canvas, text, textAlpha, tailSide) {
   ctx.restore();
 }
 
-function makeBubbleActor(text, tailSide, pos, size) {
+function makeBubbleActor(THREE, text, tailSide, pos, size) {
   const canvas = document.createElement('canvas');
   canvas.width = 420; canvas.height = 230;
   drawBubbleCanvas(canvas, text, 1, tailSide);
@@ -76,7 +75,7 @@ function makeBubbleActor(text, tailSide, pos, size) {
   };
 }
 
-function buildFlowLines() {
+function buildFlowLines(THREE) {
   const specs = [
     { color: 0xdbe5f2, opacity: 0.74, radius: 0.012, pts: [[-2.18, -2.28, 0.3], [-1.52, -2.02, 0.3], [-1.05, -1.24, 0.3], [-0.55, -1.08, 0.3]] },
     { color: 0x73b7ff, opacity: 0.88, radius: 0.013, pts: [[-0.08, 0.34, 0.25], [0.46, 0.22, 0.25], [1.14, 0.52, 0.25], [1.78, 0.58, 0.25]] },
@@ -136,12 +135,11 @@ async function bootCatsStage() {
   };
 
   let renderer = null;
-  let resize, renderFrame, syncControl, setPaused, loop, readStoredPause;
+  let resize, renderFrame, syncControl, setPaused, stopLoop, startLoop, readStoredPause;
   let paused = false, raf = 0, t0 = 0, contextLost = false, inView = true;
 
   try {
-    const [three, models] = await Promise.all([import('three'), import('./aloo-cats-models.js')]);
-    THREE = three;
+    const [THREE, models] = await Promise.all([import('three'), import('./aloo-cats-models.js')]);
     const { buildCreamLedge, buildLeftCat, buildRightCat } = models;
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'low-power' });
     if (!renderer.getContext()) throw new Error('no webgl context');
@@ -178,9 +176,9 @@ async function bootCatsStage() {
     const ledge = buildCreamLedge();
     const leftCat = buildLeftCat();
     const rightCat = buildRightCat();
-    const flows = buildFlowLines();
-    const callBubble = makeBubbleActor('ow ow', 'right', [0.16, 0.88, 0.85], [1.48, 0.82]);
-    const replyBubble = makeBubbleActor('meh', 'left', [4.24, 1.72, 0.85], [1.62, 0.88]);
+    const flows = buildFlowLines(THREE);
+    const callBubble = makeBubbleActor(THREE, 'ow ow', 'right', [0.16, 0.88, 0.85], [1.48, 0.82]);
+    const replyBubble = makeBubbleActor(THREE, 'meh', 'left', [4.24, 1.72, 0.85], [1.62, 0.88]);
 
     const stageGroup = new THREE.Group();
     stageGroup.add(ledge, flows.group, leftCat.root, rightCat.root, callBubble.mesh, replyBubble.mesh);
@@ -292,9 +290,18 @@ async function bootCatsStage() {
       });
     };
     const canAnimate = () => !paused && !document.hidden && inView && !contextLost;
-    loop = (now) => {
+    const loop = (now) => {
       if (!canAnimate()) { raf = 0; return; }
       renderFrame((now - t0) * 0.001, false);
+      raf = requestAnimationFrame(loop);
+    };
+    stopLoop = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+    };
+    startLoop = () => {
+      if (!canAnimate() || raf) return;
+      t0 = performance.now();
       raf = requestAnimationFrame(loop);
     };
     const writeStoredPause = (val) => { try { sessionStorage.setItem(pauseKey, val ? '1' : '0'); } catch (e) { /* private mode: this tab only */ } };
@@ -303,10 +310,9 @@ async function bootCatsStage() {
       paused = next;
       if (persist) writeStoredPause(paused);
       syncControl();
-      cancelAnimationFrame(raf);
-      raf = 0;
+      stopLoop();
       if (paused) renderFrame(0, true);
-      else if (canAnimate()) { t0 = performance.now(); raf = requestAnimationFrame(loop); }
+      else startLoop();
     };
 
     resize();
@@ -342,7 +348,7 @@ async function bootCatsStage() {
     }
   } else {
     markReady();
-    if (!document.hidden && inView && !contextLost) raf = requestAnimationFrame(loop);
+    startLoop();
   }
 
   window.addEventListener('resize', () => {
@@ -352,23 +358,22 @@ async function bootCatsStage() {
   }, { passive: true });
   document.addEventListener('visibilitychange', () => {
     if (paused || contextLost) return;
-    if (document.hidden) { cancelAnimationFrame(raf); raf = 0; }
-    else if (inView && !raf) { t0 = performance.now(); raf = requestAnimationFrame(loop); }
+    if (document.hidden) stopLoop();
+    else startLoop();
   });
   if (!isBannerExport && typeof IntersectionObserver !== 'undefined') {
     const io = new IntersectionObserver((entries) => {
       if (contextLost) return;
       inView = entries.some((entry) => entry.isIntersecting);
-      if (!inView) { cancelAnimationFrame(raf); raf = 0; }
-      else if (!paused && !document.hidden && !raf) { t0 = performance.now(); raf = requestAnimationFrame(loop); }
+      if (!inView) stopLoop();
+      else startLoop();
     }, { threshold: 0.01 });
     io.observe(stageEl || canvas);
   }
   canvas.addEventListener('webglcontextlost', (e) => {
     e.preventDefault();
     contextLost = true;
-    cancelAnimationFrame(raf);
-    raf = 0;
+    stopLoop();
     useFallback();
   });
   if (toggleBtn) toggleBtn.addEventListener('click', () => setPaused(!paused, true));

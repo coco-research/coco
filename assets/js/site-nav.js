@@ -129,7 +129,7 @@
       const back = drawer._opener;
       if (back && back.focus && doc.activeElement !== back && (!doc.activeElement || doc.activeElement === doc.body)) back.focus();
     }
-    function isOpen() { return !!drawer.open; }
+    function isOpen() { return canModal ? drawer.open : drawer.hasAttribute('open'); } // a real <dialog> reflects open; an unsupported element only has the attribute
     function open(from) {
       if (isOpen()) return;
       $$('[data-products-menu]').forEach((m) => { if (m._snClose) m._snClose(); });

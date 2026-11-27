@@ -49,20 +49,23 @@ function addCatEyes(headPivot, opts) {
   });
   const lidMat = new THREE.MeshStandardMaterial({ color: opts.lidColor, roughness: opts.lidRoughness });
   const lashMat = opts.lash ? new THREE.MeshStandardMaterial({ color: opts.lash.color, roughness: opts.lash.roughness }) : null;
+  const eyeGeo = new THREE.SphereGeometry(opts.radius, opts.segs[0], opts.segs[1]);
+  const lidGeo = new THREE.SphereGeometry(opts.lidRadius, opts.lidSegs[0], opts.lidSegs[1], 0, Math.PI * 2, 0, Math.PI * opts.lidArc);
+  const lashGeo = lashMat ? new THREE.TorusGeometry(opts.lash.radius, opts.lash.tube, 8, 22, Math.PI * 0.88) : null;
   const lids = [];
   [-1, 1].forEach((s) => {
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(opts.radius, opts.segs[0], opts.segs[1]), eyeMat);
+    const eye = new THREE.Mesh(eyeGeo, eyeMat);
     eye.scale.set(...opts.eyeScale);
     eye.rotation.set(opts.eyeRotX, -Math.PI * 0.5 + s * opts.eyeRotY, -s * opts.eyeRotZ);
     eye.position.set(opts.posX * s, opts.posY, opts.posZ);
-    const lid = new THREE.Mesh(new THREE.SphereGeometry(opts.lidRadius, opts.lidSegs[0], opts.lidSegs[1], 0, Math.PI * 2, 0, Math.PI * opts.lidArc), lidMat);
+    const lid = new THREE.Mesh(lidGeo, lidMat);
     lid.scale.set(...opts.lidScale);
     lid.position.copy(eye.position);
     lid.rotation.set(opts.lidRestX, 0, -s * opts.lidTiltZ);
     lids.push(lid);
     headPivot.add(eye, lid);
     if (lashMat) {
-      const lash = new THREE.Mesh(new THREE.TorusGeometry(opts.lash.radius, opts.lash.tube, 8, 22, Math.PI * 0.88), lashMat);
+      const lash = new THREE.Mesh(lashGeo, lashMat);
       lash.position.set(opts.posX * s, opts.lash.posY, opts.lash.posZ);
       lash.rotation.set(opts.eyeRotX, s * opts.lash.rotY, opts.lash.rotZBase - opts.lash.rotZSide * s);
       headPivot.add(lash);
@@ -72,8 +75,9 @@ function addCatEyes(headPivot, opts) {
 }
 
 function addCatMuzzle(headPivot, whiteMat, opts) {
+  const padGeo = new THREE.SphereGeometry(opts.padRadius, opts.padSegs[0], opts.padSegs[1]);
   [-1, 1].forEach((s) => {
-    const pad = new THREE.Mesh(new THREE.SphereGeometry(opts.padRadius, opts.padSegs[0], opts.padSegs[1]), whiteMat);
+    const pad = new THREE.Mesh(padGeo, whiteMat);
     pad.scale.set(...opts.padScale);
     pad.position.set(opts.padX * s, opts.padY, opts.padZ);
     headPivot.add(pad);
@@ -144,8 +148,9 @@ export function buildLeftCat() {
       body.scale.set(0.94, 0.88, 1.12);
       body.position.set(0.36, -1.94, 0.40);
       root.add(body);
+      const legGeo = new THREE.CapsuleGeometry(0.21, 0.56, 12, 18);
       [[-0.16, -1.86, 0.98], [0.86, -1.88, 0.98]].forEach(([lx, ly, lz]) => {
-        const leg = new THREE.Mesh(new THREE.CapsuleGeometry(0.21, 0.56, 12, 18), whiteMat);
+        const leg = new THREE.Mesh(legGeo, whiteMat);
         leg.rotation.x = 0.78; leg.position.set(lx, ly, lz);
         root.add(leg);
       });
@@ -192,8 +197,9 @@ export function buildRightCat() {
       chest.scale.set(1.04, 1.16, 0.88);
       chest.position.set(3.04, -0.66, 0.72);
       root.add(torso, chest);
+      const shoulderGeo = new THREE.SphereGeometry(0.28, 18, 14);
       [[2.62, -0.84, 0.90], [3.48, -0.84, 0.92]].forEach(([sx, sy, sz]) => {
-        const sh = new THREE.Mesh(new THREE.SphereGeometry(0.28, 18, 14), whiteMat);
+        const sh = new THREE.Mesh(shoulderGeo, whiteMat);
         sh.scale.set(0.96, 1.24, 0.94); sh.position.set(sx, sy, sz);
         root.add(sh);
       });
@@ -235,8 +241,8 @@ export function buildRightCat() {
       whiskers: { x: 0.24, y: -0.24, z: 0.95, count: 6, lenLeft: 1.12, lenRight: 1.02, spreadLeft: 0.36, spreadRight: 0.34, radius: 0.0031, opacity: 0.72 },
     },
     decorateHead(headPivot) {
+      const browMat = new THREE.MeshBasicMaterial({ color: 0xf4f7fc, transparent: true, opacity: 0.66 });
       [-1, 1].forEach((s) => {
-        const browMat = new THREE.MeshBasicMaterial({ color: 0xf4f7fc, transparent: true, opacity: 0.66 });
         for (let b = 0; b < 4; b++) {
           const curve = new THREE.CatmullRomCurve3([
             new THREE.Vector3((0.23 + b * 0.045) * s, 0.26, 0.81),

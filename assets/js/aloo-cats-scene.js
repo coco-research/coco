@@ -139,6 +139,13 @@ function setToggleLabel(btn, label) {
   btn.removeAttribute('aria-pressed');
 }
 
+// Explicit readiness signal consumed by offline banner export scripts ('1' = WebGL rendered, 'fallback' = fallback banner).
+const READY_FLAG = '__ALOO_BANNER_READY';
+function markReady(state = '1') {
+  window[READY_FLAG] = true;
+  document.documentElement.dataset.alooBannerReady = state;
+}
+
 async function bootCatsStage() {
   const canvas = document.getElementById('aloo-cats-canvas');
   if (!canvas) return;
@@ -158,6 +165,7 @@ async function bootCatsStage() {
   const useFallback = () => {
     if (stageEl) stageEl.classList.add('aloo-webgl-fallback');
     allToggleBtns.forEach((btn) => { btn.hidden = true; });
+    markReady('fallback');
   };
   let reducedMq = null;
   try { reducedMq = matchMedia('(prefers-reduced-motion: reduce)'); } catch (e) { /* matchMedia unsupported */ }
@@ -221,7 +229,8 @@ async function bootCatsStage() {
       renderer.setPixelRatio(dpr);
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
-      const viewKey = isBannerExport ? bannerMode : (w <= 760 ? 'narrow' : 'wide');
+      let viewKey = w <= 760 ? 'narrow' : 'wide';
+      if (isBannerExport) viewKey = bannerMode;
       const view = CAMERA_VIEWS[viewKey];
       camera.fov = view.fov;
       camera.position.set(...view.pos);
@@ -328,12 +337,6 @@ async function bootCatsStage() {
     return;
   }
 
-  // Explicit readiness signal consumed by offline banner export scripts.
-  const READY_FLAG = '__ALOO_BANNER_READY';
-  const markReady = () => {
-    window[READY_FLAG] = true;
-    document.documentElement.dataset.alooBannerReady = '1';
-  };
   const redrawIfPaused = () => {
     if (contextLost) return;
     resize();
@@ -344,13 +347,13 @@ async function bootCatsStage() {
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => {
         redrawIfPaused();
-        markReady();
-      }).catch(() => { /* font readiness fallback already rendered */ markReady(); });
+        if (!contextLost) markReady('1');
+      }).catch(() => { /* font readiness fallback already rendered */ if (!contextLost) markReady('1'); });
     } else {
-      markReady();
+      markReady('1');
     }
   } else {
-    markReady();
+    markReady('1');
     startLoop();
   }
 
@@ -374,7 +377,6 @@ async function bootCatsStage() {
     contextLost = true;
     stopLoop();
     useFallback();
-    markReady();
   });
   const onToggleClick = () => setPaused(!paused, true);
   allToggleBtns.forEach((btn) => btn.addEventListener('click', onToggleClick));
@@ -383,4 +385,7 @@ async function bootCatsStage() {
   }
 }
 
-bootCatsStage().catch((err) => { console.warn('aloo-cats: fallback', err); });
+bootCatsStage().catch((err) => {
+  console.warn('aloo-cats: fallback', err);
+  markReady('fallback');
+});

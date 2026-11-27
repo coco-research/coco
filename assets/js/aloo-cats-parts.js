@@ -181,8 +181,9 @@ export function buildNoseAndMouth(noseColor, scale = 1.0) {
   tip.position.set(0, -0.040 * scale, -0.004 * scale);
   g.add(top, tip);
   const darkMat = new THREE.MeshBasicMaterial({ color: 0x93696c, transparent: true, opacity: 0.34 });
+  const nostrilGeo = new THREE.SphereGeometry(0.014 * scale, 8, 8);
   [-1, 1].forEach((s) => {
-    const nostril = new THREE.Mesh(new THREE.SphereGeometry(0.014 * scale, 8, 8), darkMat);
+    const nostril = new THREE.Mesh(nostrilGeo, darkMat);
     nostril.position.set(0.039 * scale * s, -0.024 * scale, 0.046 * scale);
     const lipCurve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(0, -0.074 * scale, 0.026 * scale),
@@ -200,13 +201,16 @@ export function buildPaw(whiteMat, padDarkAccents = false) {
   base.scale.set(1.16, 0.58, 1.12);
   paw.add(base);
   const xs = [-0.185, -0.062, 0.062, 0.185], zs = [0.15, 0.22, 0.22, 0.15];
+  const toeGeo = new THREE.SphereGeometry(0.10, 18, 14);
+  const clawMat = padDarkAccents ? new THREE.MeshStandardMaterial({ color: 0x23252c, roughness: 0.6 }) : null;
+  const clawGeo = padDarkAccents ? new THREE.ConeGeometry(0.020, 0.052, 8) : null;
   xs.forEach((tx, idx) => {
-    const toe = new THREE.Mesh(new THREE.SphereGeometry(0.10, 18, 14), whiteMat);
+    const toe = new THREE.Mesh(toeGeo, whiteMat);
     toe.scale.set(0.86, 0.78, 1.30);
     toe.position.set(tx, -0.04, zs[idx]);
     paw.add(toe);
-    if (padDarkAccents && (idx === 0 || idx === 1)) {
-      const tip = new THREE.Mesh(new THREE.ConeGeometry(0.020, 0.052, 8), new THREE.MeshStandardMaterial({ color: 0x23252c, roughness: 0.6 }));
+    if (clawMat && (idx === 0 || idx === 1)) {
+      const tip = new THREE.Mesh(clawGeo, clawMat);
       tip.rotation.x = Math.PI * 0.58;
       tip.position.set(tx, -0.090, zs[idx] + 0.12);
       paw.add(tip);

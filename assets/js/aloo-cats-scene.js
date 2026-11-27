@@ -1,8 +1,8 @@
 // 3D Three.js banner stage for /aloomannu/ and deterministic repo banner exports (?banner=readme|social).
 // ES module: loaded with type="module"; top-level names are module-scoped.
 // Renders two coded black-and-white cats on a cream ledge, flowing signal lines, and "ow ow" / "meh" bubbles.
-// Three.js and the cat models load with dynamic import() inside boot(), so a blocked CDN or a missing
-// WebGL context falls back to the pre-rendered banner instead of a dead module graph.
+// Three.js and the cat models load with dynamic import() inside bootCatsStage(), so a missing vendored
+// module or WebGL context falls back to the pre-rendered banner instead of a dead module graph.
 let THREE = null;
 
 function drawBubbleCanvas(canvas, text, textAlpha, tailSide) {
@@ -127,204 +127,242 @@ async function bootCatsStage() {
 
   const stageEl = canvas.closest('.aloo-banner');
   const toggleBtn = document.querySelector('[data-cats-motion-toggle]');
+  const ownStage = document.documentElement.hasAttribute('data-own-stage');
+  const navMotionBtns = ownStage ? Array.from(document.querySelectorAll('[data-motion-toggle]')) : [];
   const useFallback = () => {
     if (stageEl) stageEl.classList.add('aloo-webgl-fallback');
     if (toggleBtn) toggleBtn.hidden = true;
+    navMotionBtns.forEach((btn) => { btn.hidden = true; });
   };
 
-  let buildCreamLedge, buildLeftCat, buildRightCat, renderer;
+  let renderer = null;
+  let resize, renderFrame, syncControl, setPaused, loop, readStoredPause;
+  let paused = false, raf = 0, t0 = 0, contextLost = false, inView = true;
+
   try {
     const [three, models] = await Promise.all([import('three'), import('./aloo-cats-models.js')]);
     THREE = three;
-    ({ buildCreamLedge, buildLeftCat, buildRightCat } = models);
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
+    const { buildCreamLedge, buildLeftCat, buildRightCat } = models;
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'low-power' });
     if (!renderer.getContext()) throw new Error('no webgl context');
+
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.06;
+    renderer.setClearColor(0x0c1e36, 1);
+
+    const scene = new THREE.Scene();
+    const bgCanvas = document.createElement('canvas');
+    bgCanvas.width = 512; bgCanvas.height = 256;
+    const bctx = bgCanvas.getContext('2d');
+    if (bctx) {
+      const bgGrad = bctx.createRadialGradient(340, 125, 30, 260, 130, 340);
+      bgGrad.addColorStop(0, '#142d4e');
+      bgGrad.addColorStop(0.56, '#0c1e36');
+      bgGrad.addColorStop(1, '#071325');
+      bctx.fillStyle = bgGrad; bctx.fillRect(0, 0, 512, 256);
+    }
+    const bgTex = new THREE.CanvasTexture(bgCanvas);
+    bgTex.colorSpace = THREE.SRGBColorSpace;
+    const bgMesh = new THREE.Mesh(new THREE.PlaneGeometry(28, 16), new THREE.MeshBasicMaterial({ map: bgTex, depthWrite: false }));
+    bgMesh.position.set(0, 0, -3.2);
+    scene.add(bgMesh);
+
+    const camera = new THREE.PerspectiveCamera(28, 16 / 9, 0.1, 60);
+    scene.add(new THREE.AmbientLight(0xd9e4f5, 1.26));
+    const key = new THREE.DirectionalLight(0xfff4e4, 2.04); key.position.set(-2.6, 4.8, 6.4);
+    const fill = new THREE.DirectionalLight(0x8ab8ff, 0.78); fill.position.set(4.5, 1.5, 4.2);
+    const rim = new THREE.DirectionalLight(0xdbeaff, 0.92); rim.position.set(1.2, 4.2, -3.5);
+    scene.add(key, fill, rim);
+
+    const ledge = buildCreamLedge();
+    const leftCat = buildLeftCat();
+    const rightCat = buildRightCat();
+    const flows = buildFlowLines();
+    const callBubble = makeBubbleActor('ow ow', 'right', [0.16, 0.88, 0.85], [1.48, 0.82]);
+    const replyBubble = makeBubbleActor('meh', 'left', [4.24, 1.72, 0.85], [1.62, 0.88]);
+
+    const stageGroup = new THREE.Group();
+    stageGroup.add(ledge, flows.group, leftCat.root, rightCat.root, callBubble.mesh, replyBubble.mesh);
+    scene.add(stageGroup);
+
+    resize = () => {
+      if (contextLost) return;
+      const rect = (stageEl || canvas).getBoundingClientRect();
+      const w = Math.max(280, Math.round(rect.width || window.innerWidth));
+      const h = Math.max(240, Math.round(rect.height || 520));
+      const dpr = isBannerExport ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+      renderer.setPixelRatio(dpr);
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      if (bannerMode === 'readme') {
+        camera.fov = 25.8;
+        camera.position.set(0.0, -0.05, 13.55);
+        camera.lookAt(0.0, -0.11, 0);
+      } else if (bannerMode === 'social') {
+        camera.fov = 27.2;
+        camera.position.set(0.0, -0.04, 13.30);
+        camera.lookAt(0.0, -0.10, 0);
+      } else if (w <= 760) {
+        camera.fov = 34;
+        camera.position.set(1.98, 0.62, 18.6);
+        camera.lookAt(1.98, -0.28, 0);
+      } else {
+        camera.fov = 28;
+        camera.position.set(0.0, -0.04, 13.2);
+        camera.lookAt(0.0, -0.10, 0);
+      }
+      camera.updateProjectionMatrix();
+    };
+
+    renderFrame = (t, isStatic) => {
+      if (contextLost) return;
+      if (isStatic) {
+        leftCat.headPivot.position.y = -1.10;
+        rightCat.headPivot.position.y = 0.42;
+        leftCat.headPivot.rotation.set(leftCat.baseRot.x, leftCat.baseRot.y, leftCat.baseRot.z);
+        rightCat.headPivot.rotation.set(rightCat.baseRot.x, rightCat.baseRot.y, rightCat.baseRot.z);
+        leftCat.lids.forEach((lid, idx) => lid.rotation.set(leftCat.lidRestX, 0, -(idx === 0 ? -1 : 1) * 0.18));
+        rightCat.lids.forEach((lid, idx) => lid.rotation.set(rightCat.lidRestX, 0, -(idx === 0 ? -1 : 1) * 0.14));
+        const staticTextAlpha = outlineOnly ? 0 : 0.94;
+        callBubble.update(staticTextAlpha, 0, 1);
+        replyBubble.update(staticTextAlpha, 0, 1);
+        flows.animate(0);
+        renderer.render(scene, camera);
+        return;
+      }
+
+      const cycle = t % 7.6;
+      const callW = smoothWindow(cycle, 0.25, 0.75, 2.35, 2.95);
+      const replyW = smoothWindow(cycle, 2.75, 3.25, 5.25, 5.95);
+
+      callBubble.update(0.22 + 0.78 * callW, callW * 0.07 + Math.sin(t * 1.7) * 0.02, 0.96 + 0.05 * callW);
+      replyBubble.update(0.22 + 0.78 * replyW, replyW * 0.08 + Math.cos(t * 1.5) * 0.02, 0.96 + 0.05 * replyW);
+
+      leftCat.headPivot.position.y = -1.10 + Math.sin(t * 1.8) * 0.012;
+      rightCat.headPivot.position.y = 0.42 + Math.sin(t * 1.55 + 1.1) * 0.014;
+
+      leftCat.headPivot.rotation.set(
+        leftCat.baseRot.x - callW * 0.08 + Math.sin(t * 0.9) * 0.015,
+        leftCat.baseRot.y + callW * 0.05,
+        leftCat.baseRot.z,
+      );
+      leftCat.chin.position.y = -0.32 - Math.max(0, Math.sin(t * 9.0)) * callW * 0.024;
+      leftCat.earR.rotation.z = -0.52 - Math.pow(Math.max(0, Math.sin(t * 2.3)), 8) * 0.14;
+
+      rightCat.headPivot.rotation.set(
+        rightCat.baseRot.x + replyW * 0.04 + Math.cos(t * 0.8) * 0.014,
+        rightCat.baseRot.y - replyW * 0.14,
+        rightCat.baseRot.z - replyW * 0.04,
+      );
+      rightCat.chin.position.y = -0.38 - replyW * 0.022;
+      rightCat.earL.rotation.z = 0.40 + Math.pow(Math.max(0, Math.sin(t * 1.9 + 0.8)), 10) * 0.16;
+
+      const blinkR = Math.max(smoothWindow(cycle, 4.05, 4.16, 4.24, 4.38), smoothWindow(cycle, 6.8, 6.9, 6.96, 7.08));
+      rightCat.lids.forEach((lid, idx) => lid.rotation.set(rightCat.lidRestX + blinkR * 1.24, 0, -(idx === 0 ? -1 : 1) * 0.14));
+      const blinkL = smoothWindow(cycle, 1.75, 1.86, 1.94, 2.08);
+      leftCat.lids.forEach((lid, idx) => lid.rotation.set(leftCat.lidRestX + blinkL * 0.78, 0, -(idx === 0 ? -1 : 1) * 0.18));
+
+      flows.animate(t);
+      renderer.render(scene, camera);
+    };
+
+    // Dedicated per-page key for the cats banner so it never drifts from product-scene.js.
+    const pauseKey = 'coco-cats-pause:' + location.pathname;
+    readStoredPause = () => { try { return sessionStorage.getItem(pauseKey); } catch (e) { /* private mode / storage blocked */ return null; } };
+    let reducedMedia = false;
+    try { reducedMedia = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { /* matchMedia unsupported */ }
+    const stored = readStoredPause();
+    paused = isBannerExport || stored === '1' || (stored === null && reducedMedia);
+    t0 = performance.now();
+
+    // Label swaps text only; aria-pressed would double-announce the state (WCAG 2.2.2 Pause/Play control).
+    syncControl = () => {
+      if (toggleBtn) {
+        toggleBtn.textContent = paused ? 'Play motion' : 'Pause motion';
+        toggleBtn.removeAttribute('aria-pressed');
+      }
+      navMotionBtns.forEach((btn) => {
+        btn.textContent = paused ? 'Play 3D' : 'Pause 3D';
+        btn.removeAttribute('aria-pressed');
+      });
+    };
+    const canAnimate = () => !paused && !document.hidden && inView && !contextLost;
+    loop = (now) => {
+      if (!canAnimate()) { raf = 0; return; }
+      renderFrame((now - t0) * 0.001, false);
+      raf = requestAnimationFrame(loop);
+    };
+    const writeStoredPause = (val) => { try { sessionStorage.setItem(pauseKey, val ? '1' : '0'); } catch (e) { /* private mode: this tab only */ } };
+    setPaused = (next, persist = false) => {
+      if (contextLost) return;
+      paused = next;
+      if (persist) writeStoredPause(paused);
+      syncControl();
+      cancelAnimationFrame(raf);
+      raf = 0;
+      if (paused) renderFrame(0, true);
+      else if (canAnimate()) { t0 = performance.now(); raf = requestAnimationFrame(loop); }
+    };
+
+    resize();
+    syncControl();
+    // Run the initial render synchronously inside the start try so any build/shader/render throw triggers fallback.
+    renderFrame(0, paused);
   } catch (e) {
-    /* dynamic import or WebGL init failed; fall back to the pre-rendered banner */
+    /* dynamic import, WebGL init, scene build, or first render failed; fall back to pre-rendered banner */
     useFallback();
+    if (renderer) {
+      try { renderer.dispose(); } catch (err) { /* ignore dispose failure on broken context */ }
+    }
     return;
   }
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.06;
-  renderer.setClearColor(0x0c1e36, 1);
 
-  const scene = new THREE.Scene();
-  const bgCanvas = document.createElement('canvas');
-  bgCanvas.width = 512; bgCanvas.height = 256;
-  const bctx = bgCanvas.getContext('2d');
-  if (bctx) {
-    const bgGrad = bctx.createRadialGradient(340, 125, 30, 260, 130, 340);
-    bgGrad.addColorStop(0, '#142d4e');
-    bgGrad.addColorStop(0.56, '#0c1e36');
-    bgGrad.addColorStop(1, '#071325');
-    bctx.fillStyle = bgGrad; bctx.fillRect(0, 0, 512, 256);
-  }
-  const bgTex = new THREE.CanvasTexture(bgCanvas);
-  bgTex.colorSpace = THREE.SRGBColorSpace;
-  const bgMesh = new THREE.Mesh(new THREE.PlaneGeometry(28, 16), new THREE.MeshBasicMaterial({ map: bgTex, depthWrite: false }));
-  bgMesh.position.set(0, 0, -3.2);
-  scene.add(bgMesh);
-
-  const camera = new THREE.PerspectiveCamera(28, 16 / 9, 0.1, 60);
-  scene.add(new THREE.AmbientLight(0xd9e4f5, 1.26));
-  const key = new THREE.DirectionalLight(0xfff4e4, 2.04); key.position.set(-2.6, 4.8, 6.4);
-  const fill = new THREE.DirectionalLight(0x8ab8ff, 0.78); fill.position.set(4.5, 1.5, 4.2);
-  const rim = new THREE.DirectionalLight(0xdbeaff, 0.92); rim.position.set(1.2, 4.2, -3.5);
-  scene.add(key, fill, rim);
-
-  const ledge = buildCreamLedge();
-  const leftCat = buildLeftCat();
-  const rightCat = buildRightCat();
-  const flows = buildFlowLines();
-  const callBubble = makeBubbleActor('ow ow', 'right', [0.16, 0.88, 0.85], [1.48, 0.82]);
-  const replyBubble = makeBubbleActor('meh', 'left', [4.24, 1.72, 0.85], [1.62, 0.88]);
-
-  const stageGroup = new THREE.Group();
-  stageGroup.add(ledge, flows.group, leftCat.root, rightCat.root, callBubble.mesh, replyBubble.mesh);
-  scene.add(stageGroup);
-
-  const resize = () => {
-    const rect = (stageEl || canvas).getBoundingClientRect();
-    const w = Math.max(280, Math.round(rect.width || window.innerWidth));
-    const h = Math.max(240, Math.round(rect.height || 520));
-    const dpr = isBannerExport ? 1 : Math.min(window.devicePixelRatio || 1, 2);
-    renderer.setPixelRatio(dpr);
-    renderer.setSize(w, h, false);
-    camera.aspect = w / h;
-    if (bannerMode === 'readme') {
-      camera.fov = 25.8;
-      camera.position.set(0.0, -0.05, 13.55);
-      camera.lookAt(0.0, -0.11, 0);
-    } else if (bannerMode === 'social') {
-      camera.fov = 27.2;
-      camera.position.set(0.0, -0.04, 13.30);
-      camera.lookAt(0.0, -0.10, 0);
-    } else if (w <= 760) {
-      camera.fov = 34;
-      camera.position.set(1.98, 0.62, 18.6);
-      camera.lookAt(1.98, -0.28, 0);
-    } else {
-      camera.fov = 28;
-      camera.position.set(0.0, -0.04, 13.2);
-      camera.lookAt(0.0, -0.10, 0);
-    }
-    camera.updateProjectionMatrix();
-  };
-
-  const renderFrame = (t, isStatic) => {
-    if (isStatic) {
-      leftCat.headPivot.position.y = -1.10;
-      rightCat.headPivot.position.y = 0.42;
-      leftCat.headPivot.rotation.set(leftCat.baseRot.x, leftCat.baseRot.y, leftCat.baseRot.z);
-      rightCat.headPivot.rotation.set(rightCat.baseRot.x, rightCat.baseRot.y, rightCat.baseRot.z);
-      leftCat.lids.forEach((lid, idx) => lid.rotation.set(leftCat.lidRestX, 0, -(idx === 0 ? -1 : 1) * 0.18));
-      rightCat.lids.forEach((lid, idx) => lid.rotation.set(rightCat.lidRestX, 0, -(idx === 0 ? -1 : 1) * 0.14));
-      const staticTextAlpha = outlineOnly ? 0 : 0.94;
-      callBubble.update(staticTextAlpha, 0, 1);
-      replyBubble.update(staticTextAlpha, 0, 1);
-      flows.animate(0);
-      renderer.render(scene, camera);
-      return;
-    }
-
-    const cycle = t % 7.6;
-    const callW = smoothWindow(cycle, 0.25, 0.75, 2.35, 2.95);
-    const replyW = smoothWindow(cycle, 2.75, 3.25, 5.25, 5.95);
-
-    callBubble.update(0.22 + 0.78 * callW, callW * 0.07 + Math.sin(t * 1.7) * 0.02, 0.96 + 0.05 * callW);
-    replyBubble.update(0.22 + 0.78 * replyW, replyW * 0.08 + Math.cos(t * 1.5) * 0.02, 0.96 + 0.05 * replyW);
-
-    leftCat.headPivot.position.y = -1.10 + Math.sin(t * 1.8) * 0.012;
-    rightCat.headPivot.position.y = 0.42 + Math.sin(t * 1.55 + 1.1) * 0.014;
-
-    leftCat.headPivot.rotation.set(
-      leftCat.baseRot.x - callW * 0.08 + Math.sin(t * 0.9) * 0.015,
-      leftCat.baseRot.y + callW * 0.05,
-      leftCat.baseRot.z,
-    );
-    leftCat.chin.position.y = -0.32 - Math.max(0, Math.sin(t * 9.0)) * callW * 0.024;
-    leftCat.earR.rotation.z = -0.52 - Math.pow(Math.max(0, Math.sin(t * 2.3)), 8) * 0.14;
-
-    rightCat.headPivot.rotation.set(
-      rightCat.baseRot.x + replyW * 0.04 + Math.cos(t * 0.8) * 0.014,
-      rightCat.baseRot.y - replyW * 0.14,
-      rightCat.baseRot.z - replyW * 0.04,
-    );
-    rightCat.chin.position.y = -0.38 - replyW * 0.022;
-    rightCat.earL.rotation.z = 0.40 + Math.pow(Math.max(0, Math.sin(t * 1.9 + 0.8)), 10) * 0.16;
-
-    const blinkR = Math.max(smoothWindow(cycle, 4.05, 4.16, 4.24, 4.38), smoothWindow(cycle, 6.8, 6.9, 6.96, 7.08));
-    rightCat.lids.forEach((lid, idx) => lid.rotation.set(rightCat.lidRestX + blinkR * 1.24, 0, -(idx === 0 ? -1 : 1) * 0.14));
-    const blinkL = smoothWindow(cycle, 1.75, 1.86, 1.94, 2.08);
-    leftCat.lids.forEach((lid, idx) => lid.rotation.set(leftCat.lidRestX + blinkL * 0.78, 0, -(idx === 0 ? -1 : 1) * 0.18));
-
-    flows.animate(t);
-    renderer.render(scene, camera);
-  };
-
-  // Same per-page key as product-scene.js: pausing 3D here never leaks to other pages.
-  const pauseKey = 'coco-3d-pause:' + location.pathname;
-  const readStoredPause = () => { try { return sessionStorage.getItem(pauseKey); } catch (e) { /* private mode / storage blocked */ return null; } };
-  let reducedMedia = false;
-  try { reducedMedia = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { /* matchMedia unsupported */ }
-  const stored = readStoredPause();
-  let paused = isBannerExport || stored === '1' || (stored === null && reducedMedia), raf = 0;
-  let t0 = performance.now();
-
-  // Label swaps text only; aria-pressed would double-announce the state (WCAG 2.2.2 Pause/Play control).
-  const syncControl = () => {
-    if (!toggleBtn) return;
-    toggleBtn.textContent = paused ? 'Play motion' : 'Pause motion';
-    toggleBtn.removeAttribute('aria-pressed');
-  };
-  const loop = (now) => {
-    if (paused || document.hidden) return;
-    renderFrame((now - t0) * 0.001, false);
-    raf = requestAnimationFrame(loop);
-  };
-  const writeStoredPause = (val) => { try { sessionStorage.setItem(pauseKey, val ? '1' : '0'); } catch (e) { /* private mode: this tab only */ } };
-  const setPaused = (next, persist = false) => {
-    paused = next;
-    if (persist) writeStoredPause(paused);
-    syncControl();
-    cancelAnimationFrame(raf);
-    raf = 0;
-    if (paused) renderFrame(0, true);
-    else { t0 = performance.now(); if (!document.hidden) raf = requestAnimationFrame(loop); }
-  };
-
-  resize();
-  syncControl();
   if (paused) {
-    renderFrame(0, true);
     if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => { resize(); renderFrame(0, true); window.__ALOO_BANNER_READY = true; });
+      document.fonts.ready.then(() => {
+        if (contextLost) return;
+        resize();
+        renderFrame(0, true);
+        window.__ALOO_BANNER_READY = true;
+      }).catch(() => { /* font readiness fallback already rendered */ window.__ALOO_BANNER_READY = true; });
     } else {
       window.__ALOO_BANNER_READY = true;
     }
   } else {
     window.__ALOO_BANNER_READY = true;
-    if (!document.hidden) raf = requestAnimationFrame(loop);
+    if (!document.hidden && inView && !contextLost) raf = requestAnimationFrame(loop);
   }
 
-  window.addEventListener('resize', () => { resize(); if (paused) renderFrame(0, true); }, { passive: true });
+  window.addEventListener('resize', () => {
+    if (contextLost) return;
+    resize();
+    if (paused) renderFrame(0, true);
+  }, { passive: true });
   document.addEventListener('visibilitychange', () => {
-    if (paused) return;
+    if (paused || contextLost) return;
     if (document.hidden) { cancelAnimationFrame(raf); raf = 0; }
-    else if (!raf) raf = requestAnimationFrame(loop);
+    else if (inView && !raf) { t0 = performance.now(); raf = requestAnimationFrame(loop); }
   });
+  if (!isBannerExport && typeof IntersectionObserver !== 'undefined') {
+    const io = new IntersectionObserver((entries) => {
+      if (contextLost) return;
+      inView = entries.some((entry) => entry.isIntersecting);
+      if (!inView) { cancelAnimationFrame(raf); raf = 0; }
+      else if (!paused && !document.hidden && !raf) { t0 = performance.now(); raf = requestAnimationFrame(loop); }
+    }, { threshold: 0.01 });
+    io.observe(stageEl || canvas);
+  }
   canvas.addEventListener('webglcontextlost', (e) => {
     e.preventDefault();
+    contextLost = true;
     cancelAnimationFrame(raf);
     raf = 0;
     useFallback();
   });
   if (toggleBtn) toggleBtn.addEventListener('click', () => setPaused(!paused, true));
-  document.querySelectorAll('[data-motion-toggle]').forEach((btn) => {
-    btn.addEventListener('click', () => setTimeout(() => setPaused(readStoredPause() === '1'), 0));
-  });
+  navMotionBtns.forEach((btn) => btn.addEventListener('click', () => setPaused(!paused, true)));
   try { matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (ev) => { if (readStoredPause() === null) setPaused(ev.matches); }); } catch (e) { /* matchMedia listener unsupported */ }
 }
 
-bootCatsStage();
+bootCatsStage().catch(() => { /* fallback handled inside bootCatsStage */ });

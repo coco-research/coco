@@ -199,7 +199,7 @@
     "og_image_alt": "Coco Voice — Coco Research",
     "version": "0.20.9",
     "app_category": "UtilitiesApplication",
-    "os": "macOS (Apple Silicon and Intel), Windows (x64), Linux",
+    "os": "macOS (Apple Silicon and Intel), Windows x64, Linux x64 and arm64",
     "license_url": "https://github.com/coco-research/Coco-Voice/blob/main/LICENSE",
     "code_repository": "https://github.com/coco-research/Coco-Voice",
     "kns": [
@@ -223,7 +223,7 @@
       "label": "Download v0.20.9",
       "href": "https://github.com/coco-research/Coco-Voice/releases/latest",
       "kind": "primary",
-      "note": "macOS, Windows x64 and Linux x64 installers on GitHub Releases."
+      "note": "macOS, Windows x64, and Linux x64 and arm64 installers on GitHub Releases."
     },
     "try_alt": {
       "label": "Install steps",
@@ -263,7 +263,7 @@
       ],
       [
         "Platforms",
-        "macOS (Apple Silicon and Intel), Windows x64, Linux x64"
+        "macOS (Apple Silicon and Intel), Windows x64, Linux x64 and arm64"
       ],
       [
         "Privacy",
@@ -339,8 +339,12 @@
           "Linux x64 (also .deb and .rpm)"
         ],
         [
-          "SHA256SUMS and .sig files",
-          "Checksums and signatures for the release"
+          "Coco.Voice_0.20.9_aarch64.AppImage",
+          "Linux arm64 (also .deb and .rpm)"
+        ],
+        [
+          "SHA256SUMS",
+          "Checksums for every file"
         ]
       ],
       "buttons": [
@@ -355,7 +359,7 @@
           "ghost"
         ]
       ],
-      "note": "Windows and Linux builds are x64 only for this release."
+      "note": "Windows builds are x64; Linux ships x64 and arm64 installers for this release."
     }
   },
   "signal": {
@@ -724,7 +728,7 @@
         "Runs on the Python standard library and git, with zero external Python package dependencies."
       ],
       [
-        "Signed release archives",
+        "SHA-256 digests and an ED25519-signed manifest",
         "Release archives ship with SHA-256 digests and an ED25519-signed manifest you can verify with ssh-keygen."
       ]
     ],
@@ -788,7 +792,7 @@
       "cls": "source"
     },
     "try": {
-      "heading": "Clone it, or take the signed archive",
+      "heading": "Clone it, or download the verified archive",
       "lead": "Clone the repository, or download the v0.7.3 early-preview archive from GitHub Releases and verify it.",
       "clone": "https://github.com/coco-research/heliopause.git",
       "buttons": [

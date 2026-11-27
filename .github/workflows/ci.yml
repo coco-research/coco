@@ -216,6 +216,8 @@ jobs:
         run: python3 tests/check-site-products.py
       - name: Shared product-page renderer helpers are tested
         run: python3 tests/test-render-product-shared.py
+      - name: Product-page renderer is tested
+        run: python3 tests/test-render-product-pages.py
       - name: Persona attribution wording is in every generated SI command
         run: |
           python3 tests/check-persona-attribution.py

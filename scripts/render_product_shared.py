@@ -133,7 +133,6 @@ def build_jsonld(pid, stage, row, spec):
             'description': desc,
             'url': url,
             'applicationCategory': spec.get('app_category', 'DeveloperApplication'),
-            'operatingSystem': spec.get('os', 'macOS, Linux, Windows'),
             'softwareVersion': spec.get('version', ''),
             'license': spec.get('license_url', spec.get('licence_href', '')),
             'codeRepository': spec.get('code_repository', ''),
@@ -145,6 +144,8 @@ def build_jsonld(pid, stage, row, spec):
                 'priceCurrency': 'USD',
             },
         }
+        if spec.get('os'):
+            entity['operatingSystem'] = spec['os']
     else:
         entity = {
             '@type': 'SoftwareSourceCode',
@@ -162,12 +163,11 @@ def build_jsonld(pid, stage, row, spec):
         '@context': 'https://schema.org',
         '@graph': [entity, crumb],
     }
-    dumped = json.dumps(payload, indent=2, ensure_ascii=False).replace('</', '<\\/')
-    return '\n<script type="application/ld+json">\n%s\n</script>' % dumped
+    return ld_script(payload)
 
 
 def ld_script(payload):
-    dumped = json.dumps(payload, indent=2, ensure_ascii=False).replace('</', '<\\/')
+    dumped = json.dumps(payload, indent=2, ensure_ascii=False).replace('<', '\\u003c')
     return '\n<script type="application/ld+json">\n%s\n</script>' % dumped
 
 

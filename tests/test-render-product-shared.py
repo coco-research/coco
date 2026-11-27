@@ -125,21 +125,43 @@ class SvgAndJsonLdTests(unittest.TestCase):
         self.assertEqual(crumb['@type'], 'BreadcrumbList')
         self.assertEqual(crumb['itemListElement'][1]['item'], 'https://cocoresearch.org/demo-prod/')
 
-        src_row = {'id': 's1', 'name': 'Src </script>', 'href': 'https://example.org/s1', 'description': 'Desc'}
+        src_row = {'id': 's1', 'name': 'Src <!-- </script>', 'href': 'https://example.org/s1', 'description': 'Desc'}
         src_html = M.build_jsonld('s1', 'source', src_row, {'slug': 's1', 'version': '0.9.0', 'licence_href': 'https://example.org/l'})
-        self.assertIn('<\\/script>', src_html)
+        inner = src_html.split('\n', 2)[2].rsplit('\n', 1)[0]
+        self.assertNotIn('<', inner)
+        self.assertIn('\\u003c!-- \\u003c/script>', inner)
         self.assertEqual(src_html.count('</script>'), 1)
-        src_ent = json.loads(src_html.split('\n', 2)[2].rsplit('\n', 1)[0])['@graph'][0]
+        src_ent = json.loads(inner)['@graph'][0]
         self.assertEqual(src_ent['@type'], 'SoftwareSourceCode')
         self.assertEqual(src_ent['codeRepository'], 'https://example.org/s1')
         self.assertEqual(src_ent['version'], '0.9.0')
+
+        # M2: shipped spec without 'os' omits operatingSystem (never falls back to Windows).
+        no_os_spec = dict(pub_specs['demo-prod'])
+        no_os_spec.pop('os', None)
+        no_os_html = M.build_jsonld('demo-prod', 'shipped', data['products'][0], no_os_spec)
+        no_os_app = json.loads(no_os_html.split('\n', 2)[2].rsplit('\n', 1)[0])['@graph'][0]
+        self.assertNotIn('operatingSystem', no_os_app)
+
+        # M1 + M2 on real repo data: coco-si uses #licence (never bare /LICENSE) and omits operatingSystem; voice keeps os.
+        real_pub = json.loads((M.ROOT / 'data' / 'product-pages-public.json').read_text(encoding='utf-8'))
+        si_html = M.build_jsonld('coco-si', 'shipped', {'name': 'Coco Super Intelligence', 'description': 'Advisory board.'}, real_pub['coco-si'])
+        si_app = json.loads(si_html.split('\n', 2)[2].rsplit('\n', 1)[0])['@graph'][0]
+        self.assertEqual(si_app['license'], 'https://github.com/coco-research/coco#licence')
+        self.assertFalse(si_app['license'].endswith('/LICENSE'))
+        self.assertNotIn('operatingSystem', si_app)
+        voice_html = M.build_jsonld('voice', 'shipped', {'name': 'Coco Voice', 'description': 'Speech to text.'}, real_pub['voice'])
+        voice_app = json.loads(voice_html.split('\n', 2)[2].rsplit('\n', 1)[0])['@graph'][0]
+        self.assertIn('Linux x64 and arm64', voice_app['operatingSystem'])
 
         no_ver = M.build_jsonld('demo-arch', 'source', data['lab'][1], pub_specs['demo-arch'])
         self.assertNotIn('version', json.loads(no_ver.split('\n', 2)[2].rsplit('\n', 1)[0])['@graph'][0])
 
     def test_ld_script_breadcrumb_and_collection_ld(self):
-        script = M.ld_script({'note': 'a </script> \u2014 b'})
-        self.assertIn('<\\/script>', script)
+        script = M.ld_script({'note': 'a <!-- </script> \u2014 b'})
+        inner = script.split('\n', 2)[2].rsplit('\n', 1)[0]
+        self.assertNotIn('<', inner)
+        self.assertIn('\\u003c!-- \\u003c/script>', inner)
         self.assertIn('\u2014', script)
         self.assertEqual(script.count('</script>'), 1)
 

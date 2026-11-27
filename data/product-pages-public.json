@@ -6,8 +6,7 @@
     "og_image_alt": "Coco Super Intelligence — Coco Research",
     "version": "2.4.0",
     "app_category": "DeveloperApplication",
-    "os": "macOS, Linux, Windows",
-    "license_url": "https://github.com/coco-research/coco/blob/main/LICENSE",
+    "license_url": "https://github.com/coco-research/coco#licence",
     "code_repository": "https://github.com/coco-research/coco",
     "kns": [
       [
@@ -23,7 +22,7 @@
         "Commands across 16 adapters"
       ]
     ],
-    "licence_href": "https://github.com/coco-research/coco/blob/main/LICENSE",
+    "licence_href": "https://github.com/coco-research/coco#licence",
     "does_for_you": "Coco Super Intelligence seats an advisory board of expert personas inside the coding tool you already use. You ask one hard question, the board argues it out, you get one pick with the dissent named, and your local skills, commands and agents then do the work.",
     "who_detail": "You already work in Claude Code, Cursor or Codex, and the calls that hurt are the ones with no obvious answer: architecture, scope, risk, go or no-go. You want the strongest objections on the table before you commit.",
     "try_above": {
@@ -147,7 +146,7 @@
       ],
       [
         "Licence",
-        "https://github.com/coco-research/coco/blob/main/LICENSE"
+        "https://github.com/coco-research/coco#licence"
       ],
       [
         "Persona disclaimer",

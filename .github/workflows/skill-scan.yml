@@ -313,3 +313,7 @@ jobs:
           cp "systems/m0/skills/m0/scripts/m0_server.py" "$srv/scripts/m0_server.py"
           cmp -s "systems/m0/skills/m0/scripts/m0_server.py" "$srv/scripts/m0_server.py"
           run_waiver "m0_server_pass" "$srv" "$srv" 0
+
+          wu="$out/waiver_u_skill"; cp -R "$base/waiver_a" "$wu"
+          printf '\nimport sys\nsys.path.insert(0, "/tmp")\n' >> "$wu/scripts/m0_mcp.py"
+          run_waiver "waiver_u" "$wu" "$wu" 1 "bridge check: sys.path use outside the reviewed insert"

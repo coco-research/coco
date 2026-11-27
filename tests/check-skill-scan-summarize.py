@@ -263,7 +263,33 @@ def main() -> None:
         ("C9 local", VALID_BRIDGE.replace('TRANSPORT = os.environ.get("M0_MCP_TRANSPORT", "auto").strip().lower()\n', "").replace('if TRANSPORT == "direct":', 'TRANSPORT = os.environ.get("M0_MCP_TRANSPORT", "auto").strip().lower()\n    if TRANSPORT == "direct":'), "module-level name"),
         ("bare sys", "import sys\n" + VALID_BRIDGE + "\nx = sys\n", "bare module reference sys"),
         ("bare urllib", VALID_BRIDGE + "\nX = [urllib]\n", "bare module reference urllib"),
+        ("sys.path twice", "import sys\nfrom pathlib import Path\n" + VALID_BRIDGE + "\nsys.path.insert(0, str(Path(__file__).resolve().parent))\nsys.path.insert(0, str(Path(__file__).resolve().parent))\n", "sys.path use outside the reviewed insert"),
+        ("sys.path insert tmp", "import sys\n" + VALID_BRIDGE + '\nsys.path.insert(0, "/tmp")\n', "sys.path use outside the reviewed insert"),
+        ("sys.path append", "import sys\n" + VALID_BRIDGE + '\nsys.path.append("x")\n', "sys.path use outside the reviewed insert"),
+        ("sys.path assign", "import sys\n" + VALID_BRIDGE + "\np = sys.path\n", "sys.path use outside the reviewed insert"),
+        ("sys.path no resolve", "import sys\nfrom pathlib import Path\n" + VALID_BRIDGE + "\nsys.path.insert(0, str(Path(__file__).parent))\n", "sys.path use outside the reviewed insert"),
+        ("rebind __file__", VALID_BRIDGE + '\n__file__ = "/tmp/x.py"\n', "rebinding protected name __file__"),
+        ("rebind def str", VALID_BRIDGE + '\ndef str(x):\n    return "/tmp"\n', "rebinding protected name str"),
+        ("rebind class Path", VALID_BRIDGE + '\nclass Path:\n    def __init__(self, p):\n        pass\n    def resolve(self):\n        return self\n    parent = "/tmp"\n', "rebinding protected name Path"),
+        ("attr store Path.resolve", "from pathlib import Path\n" + VALID_BRIDGE + "\nPath.resolve = lambda self: self\n", "assignment to attribute of protected name Path"),
+        ("setattr Path", "from pathlib import Path\n" + VALID_BRIDGE + '\nsetattr(Path, "parent", "/tmp")\n', "forbidden name setattr"),
+        ("delattr Path", "from pathlib import Path\n" + VALID_BRIDGE + '\ndelattr(Path, "parent")\n', "forbidden name delattr"),
+        ("attr store pathlib.Path.resolve", "import pathlib\n" + VALID_BRIDGE + "\npathlib.Path.resolve = lambda s: s\n", "assignment to attribute of protected name pathlib"),
+        ("attr store builtins.str", "import builtins\n" + VALID_BRIDGE + "\nbuiltins.str = len\n", "assignment to attribute of protected name builtins"),
+        ("attr del str.x", VALID_BRIDGE + "\ndel str.x\n", "assignment to attribute of protected name str"),
+        ("walrus str", VALID_BRIDGE + "\nX = (str := len)\n", "rebinding protected name str"),
+        ("for Path", VALID_BRIDGE + "\nfor Path in []:\n    pass\n", "rebinding protected name Path"),
+        ("lambda __file__", VALID_BRIDGE + "\nF = lambda __file__: 1\n", "rebinding protected name __file__"),
+        ("nested import sys", VALID_BRIDGE + "\ndef f():\n    import sys\n", "rebinding protected name sys"),
+        ("star import", "from pathlib import *\n" + VALID_BRIDGE, "rebinding protected name *"),
+        ("global Path", VALID_BRIDGE + "\ndef f():\n    global Path\n", "rebinding protected name Path"),
+        ("match capture str", VALID_BRIDGE + "\nmatch 1:\n    case str:\n        pass\n", "rebinding protected name str"),
+        ("sys.meta_path", "import sys\n" + VALID_BRIDGE + "\nsys.meta_path.insert(0, object())\n", "forbidden attribute sys.meta_path"),
+        ("sys.path_hooks", "import sys\n" + VALID_BRIDGE + "\nsys.path_hooks.append(len)\n", "forbidden attribute sys.path_hooks"),
+        ("sys.settrace", "import sys\n" + VALID_BRIDGE + "\nsys.settrace(None)\n", "forbidden attribute sys.settrace"),
     ]
+    assert check_src("import sys\nfrom pathlib import Path\n" + VALID_BRIDGE + "\nsys.path.insert(0, str(Path(__file__).resolve().parent))\n") == []
+    assert check_src(VALID_BRIDGE + "\nclass OkBox:\n    def __init__(self):\n        self.x = 1\n") == []
     for label, src, want in bad_bridges:
         errs = check_src(src)
         assert any(want in e for e in errs), f"bridge case {label} missing {want!r}: {errs}"
@@ -329,6 +355,9 @@ def main() -> None:
         ("bare os arg", {"helper.py": "import os\ndef f(x):\n    return x\nf(os)\n"}, "bare module reference os"),
         ("bare os server", {"m0_server.py": "import os\ndef f(x):\n    return x\nf(os)\n"}, "bare module reference os"),
         ("bare urllib list", {"m0_server.py": "X = [urllib]\n"}, "bare module reference urllib"),
+        ("sibling sys.path template", {"m0_server.py": "import sys\nfrom pathlib import Path\nsys.path.insert(0, str(Path(__file__).resolve().parent))\n"}, "sys.path use outside the reviewed insert"),
+        ("sibling def str", {"helper.py": "def str(x):\n    return x\n"}, "rebinding protected name str"),
+        ("sibling except as sys", {"helper.py": "try:\n    pass\nexcept Exception as sys:\n    pass\n"}, "rebinding protected name sys"),
     ]
     for label, sibs, want in bad_siblings:
         errs = check_src(VALID_BRIDGE, sibs)

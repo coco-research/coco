@@ -43,10 +43,11 @@ ALLOWED_FROM_SERVER = {
     "urllib.parse": {"parse_qs", "urlparse"},
 }
 ALLOWED_DUNDER_ATTRS = {"__name__", "__init__"}
+ALLOWED_SYS_ATTRS = {"exit", "path", "stderr", "stdin", "stdout"}
 BARE_MODULE_NAMES = {"os", "sys", "urllib"}
 ENV_ATTRS = {"environ", "environb", "getenv", "getenvb", "putenv", "unsetenv"}
 FORBIDDEN_BUILTIN_NAMES = {
-    "getattr", "vars", "globals", "locals", "compile",
+    "getattr", "setattr", "delattr", "vars", "globals", "locals", "compile",
     "__import__", "__builtins__", "eval", "exec",
 }
 FORBIDDEN_ATTR_CALLS = {
@@ -144,12 +145,101 @@ def _check_common(
                 errs.append(f"{prefix}: forbidden dunder attribute {node.attr}")
             elif node.attr in FORBIDDEN_ATTRS:
                 errs.append(f"{prefix}: forbidden attribute {node.attr}")
-            elif node.attr == "modules" and isinstance(node.value, ast.Name) and node.value.id == "sys":
-                errs.append(f"{prefix}: forbidden attribute sys.modules")
+            elif isinstance(node.value, ast.Name) and node.value.id == "sys" and node.attr not in ALLOWED_SYS_ATTRS:
+                errs.append(f"{prefix}: forbidden attribute sys.{node.attr}")
             elif isinstance(node.value, ast.Name) and node.value.id == "os" and _is_forbidden_os_attr(node.attr):
                 errs.append(f"{prefix}: forbidden os attribute os.{node.attr}")
         elif isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value in ENV_ATTRS:
             errs.append(f"{prefix}: forbidden env string constant {node.value!r}")
+    return errs
+
+
+ALLOWED_SYS_PATH_DUMP = ast.dump(
+    ast.parse("sys.path.insert(0, str(Path(__file__).resolve().parent))", mode="eval").body
+)
+PROTECTED_NAMES = {"__file__", "str", "Path", "sys", "pathlib"}
+GATED_IMPORT_MODULES = {"sys", "pathlib", "builtins"}
+
+
+# ponytail: only the names the template calls (__file__, str, Path, sys, pathlib) are protected from rebinding, and sys attributes are allow-listed; any new name in the template, or a new sys attribute, needs a gate change.
+def _check_sys_path(
+    tree: ast.AST,
+    parents: dict[ast.AST, ast.AST],
+    prefix: str,
+    is_bridge: bool,
+) -> list[str]:
+    errs: list[str] = []
+    ok_calls = 0
+    top_body = set(tree.body) if isinstance(tree, ast.Module) else set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute):
+            if (
+                node.attr == "path"
+                and isinstance(node.value, ast.Name)
+                and node.value.id == "sys"
+            ):
+                ok = False
+                if is_bridge:
+                    p = parents.get(node)
+                    if isinstance(p, ast.Attribute) and p.value is node and p.attr == "insert":
+                        gp = parents.get(p)
+                        if isinstance(gp, ast.Call) and gp.func is p and ast.dump(gp) == ALLOWED_SYS_PATH_DUMP:
+                            ok_calls += 1
+                            ok = ok_calls == 1
+                if not ok:
+                    errs.append(f"{prefix}: sys.path use outside the reviewed insert")
+            if isinstance(node.ctx, (ast.Store, ast.Del)):
+                cur: ast.AST = node.value
+                while isinstance(cur, (ast.Attribute, ast.Subscript)):
+                    cur = cur.value
+                if isinstance(cur, ast.Name) and (cur.id in PROTECTED_NAMES or cur.id in {"builtins", "__builtins__"}):
+                    errs.append(f"{prefix}: assignment to attribute of protected name {cur.id}")
+        elif isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+            if node.id in PROTECTED_NAMES:
+                errs.append(f"{prefix}: rebinding protected name {node.id}")
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            if node.name in PROTECTED_NAMES:
+                errs.append(f"{prefix}: rebinding protected name {node.name}")
+        elif isinstance(node, ast.arg):
+            if node.arg in PROTECTED_NAMES:
+                errs.append(f"{prefix}: rebinding protected name {node.arg}")
+        elif isinstance(node, ast.ExceptHandler):
+            if node.name in PROTECTED_NAMES:
+                errs.append(f"{prefix}: rebinding protected name {node.name}")
+        elif isinstance(node, ast.Import):
+            for alias in node.names:
+                top = alias.name.split(".", 1)[0]
+                bound = alias.asname or top
+                allowed_top = node in top_body and alias.asname is None and alias.name in {"sys", "pathlib"}
+                if bound in PROTECTED_NAMES and not allowed_top:
+                    errs.append(f"{prefix}: rebinding protected name {bound}")
+                elif top in GATED_IMPORT_MODULES and not allowed_top:
+                    errs.append(f"{prefix}: disallowed import {alias.name}")
+        elif isinstance(node, ast.ImportFrom):
+            mod_top = (node.module or "").split(".", 1)[0]
+            for alias in node.names:
+                bound = alias.asname or alias.name
+                allowed_from = (
+                    node in top_body
+                    and alias.asname is None
+                    and node.level == 0
+                    and node.module == "pathlib"
+                    and alias.name == "Path"
+                )
+                if (bound in PROTECTED_NAMES or alias.name == "*") and not allowed_from:
+                    errs.append(f"{prefix}: rebinding protected name {bound}")
+                elif mod_top in GATED_IMPORT_MODULES and not allowed_from:
+                    errs.append(f"{prefix}: disallowed from-import {node.module}")
+        elif isinstance(node, (ast.MatchAs, ast.MatchStar)):
+            if node.name in PROTECTED_NAMES:
+                errs.append(f"{prefix}: rebinding protected name {node.name}")
+        elif isinstance(node, ast.MatchMapping):
+            if node.rest in PROTECTED_NAMES:
+                errs.append(f"{prefix}: rebinding protected name {node.rest}")
+        elif isinstance(node, (ast.Global, ast.Nonlocal)):
+            for name in node.names:
+                if name in PROTECTED_NAMES:
+                    errs.append(f"{prefix}: rebinding protected name {name}")
     return errs
 
 
@@ -191,6 +281,7 @@ def _check_bridge_file(path: pathlib.Path) -> list[str]:
 
     parents = _parent_map(tree)
     errs = _check_common(tree, parents, "bridge check", ALLOWED_IMPORTS_BRIDGE, ALLOWED_FROM_BRIDGE)
+    errs.extend(_check_sys_path(tree, parents, "bridge check", True))
     env_errs, transport_calls = _check_env(tree, parents, "bridge check", ALLOWED_BRIDGE_ENV)
     errs.extend(env_errs)
     urlopen_calls = 0
@@ -267,6 +358,7 @@ def _check_sibling_file(path: pathlib.Path, scripts_dir: pathlib.Path) -> list[s
     allowed_imports = ALLOWED_IMPORTS_SERVER if is_m0_server else set()
     allowed_from = ALLOWED_FROM_SERVER if is_m0_server else {}
     errs = _check_common(tree, parents, prefix, allowed_imports, allowed_from)
+    errs.extend(_check_sys_path(tree, parents, prefix, False))
     env_errs, _ = _check_env(tree, parents, prefix, None)
     errs.extend(env_errs)
     for node in ast.walk(tree):

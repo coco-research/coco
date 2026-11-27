@@ -64,18 +64,17 @@ CHECKS = [
     ('index.html', r'data-count="(\d+)">\d+</span> <span class="unit">experts\.', 'flagship stat (personas)', (PERSONAS,)),
     ('index.html', r'data-count="(\d+)">\d+</span> <span class="unit">departments\.', 'flagship stat (departments)', (DEPARTMENTS,)),
     ('index.html', r'<span class="nw">(\d+) skills, (\d+) commands\.</span>', 'flagship facts (skills, commands)', (SKILLS, COMMANDS)),
-    ('coco/index.html', r'<meta name="description" content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'meta description (personas, skills)', (PERSONAS, SKILLS)),
-    ('coco/index.html', r'<meta property="og:description" content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'og:description (personas, skills)', (PERSONAS, SKILLS)),
-    ('coco/index.html', r'<meta name="twitter:description" content="Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'twitter:description (personas, skills)', (PERSONAS, SKILLS)),
-    ('coco/index.html', r'<p class="sub reveal">Each of the (\d+) requires a live, checkable source\. Then (\d+) skills', 'on-page sub (personas, skills)', (PERSONAS, SKILLS)),
-    ('coco/index.html', r'<p class="n">(\d+)</p><p class="lbl">Expert personas</p>', 'stat tile (personas)', (PERSONAS,)),
-    ('coco/index.html', r'<p class="n">(\d+)</p><p class="lbl">Departments</p>', 'stat tile (departments)', (DEPARTMENTS,)),
-    ('coco/index.html', r'<p class="n">(\d+)</p><p class="lbl">Commands</p>', 'stat tile (commands)', (COMMANDS,)),
-    ('coco/index.html', r'<p class="n">(\d+)</p><p class="lbl">Agents</p>', 'stat tile (agents)', (AGENTS,)),
-    ('coco/index.html', r'<h2 class="reveal">(\d+) skills\. One instruction set each\.</h2>', 'section heading (skills)', (SKILLS,)),
+    ('coco/index.html', r'<meta name="description" content="(\d+) expert personas across (\d+) departments, (\d+) skills, and (\d+) commands', 'meta description', (PERSONAS, DEPARTMENTS, SKILLS, COMMANDS)),
+    ('coco/index.html', r'<meta property="og:description" content="(\d+) expert personas across (\d+) departments, (\d+) skills, and (\d+) commands', 'og:description', (PERSONAS, DEPARTMENTS, SKILLS, COMMANDS)),
+    ('coco/index.html', r'<meta name="twitter:description" content="(\d+) expert personas across (\d+) departments, (\d+) skills, and (\d+) commands', 'twitter:description', (PERSONAS, DEPARTMENTS, SKILLS, COMMANDS)),
+    ('coco/index.html', r'"description": "(\d+) expert personas across (\d+) departments, (\d+) skills, and (\d+) commands', 'JSON-LD description', (PERSONAS, DEPARTMENTS, SKILLS, COMMANDS)),
+    ('coco/index.html', r'<span class="kn-num">(\d+)</span><span class="kn-lbl">Expert personas across (\d+) departments</span>', 'key fact (personas, depts)', (PERSONAS, DEPARTMENTS)),
+    ('coco/index.html', r'<span class="kn-num">(\d+)</span><span class="kn-lbl">Skills \(', 'key fact (skills)', (SKILLS,)),
+    ('coco/index.html', r'<span class="kn-num">(\d+)</span><span class="kn-lbl">Commands across', 'key fact (commands)', (COMMANDS,)),
+    ('coco/index.html', r'Ships (\d+) skills, (\d+) commands and (\d+) agents;', 'capability summary', (SKILLS, COMMANDS, AGENTS)),
     ('coco/index.html', r'<tr><th>Skills</th><td>(\d+) in the repository', 'spec table row (skills)', (SKILLS,)),
-    ('coco/index.html', r'<tr><th>Commands</th><td>(\d+) \(', 'spec table row (commands)', (COMMANDS,)),
-    ('coco/index.html', r'<tr><th>Agents</th><td>(\d+) delivered by', 'spec table row (agents)', (AGENTS,)),
+    ('coco/index.html', r'<tr><th>Commands</th><td>(\d+) customer-facing', 'spec table row (commands)', (COMMANDS,)),
+    ('coco/index.html', r'<tr><th>Agents</th><td>(\d+)\.', 'spec table row (agents)', (AGENTS,)),
     ('coco/index.html', r'<tr><th>Personas</th><td>(\d+) across (\d+) departments', 'spec table row (personas, departments)', (PERSONAS, DEPARTMENTS)),
 ]
 
@@ -91,24 +90,11 @@ for path, pattern, label, expect in CHECKS:
     else:
         pass_(f'{path}: {label} {got} matches')
 
-# The hero SVG diagram (coco/index.html) draws one dot per persona, grouped by
-# department, from a hardcoded `depts` array. A stale array renders a stale
-# diagram even after every text claim on the page is fixed.
 coco_text = open('coco/index.html').read()
-m = re.search(r'var depts=\[(.*?)\];', coco_text, re.S)
-if not m:
-    fail_('coco/index.html: could not find the hero diagram depts array')
+if f'"softwareVersion": "{VERSION}"' in coco_text and f'<tr><th>Version</th><td>{VERSION} (' in coco_text:
+    pass_(f'coco/index.html: JSON-LD softwareVersion and Version row match {VERSION}')
 else:
-    dot_counts = [int(n) for n in re.findall(r',(\d+)\]', m.group(1))]
-    if len(dot_counts) != DEPARTMENTS:
-        fail_(f'coco/index.html: hero diagram depts array has {len(dot_counts)} entries, '
-              f'truth is {DEPARTMENTS} departments')
-    else:
-        pass_(f'coco/index.html: hero diagram depts array entry count ({len(dot_counts)}) matches')
-    if sum(dot_counts) != PERSONAS:
-        fail_(f'coco/index.html: hero diagram depts array sums to {sum(dot_counts)}, truth is {PERSONAS}')
-    else:
-        pass_(f'coco/index.html: hero diagram depts array sum ({sum(dot_counts)}) matches')
+    fail_(f'coco/index.html: version mismatch against {VERSION}')
 
 # The 3D product motif roster (assets/js/product-motifs-a.js) sizes each
 # department cluster from COCO_SI_DEPTS; check it against docs/released-counts.json.

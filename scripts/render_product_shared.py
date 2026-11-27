@@ -456,7 +456,7 @@ def head_html(*, title, desc, slug, og_img, og_alt, robots, jsonld, three, produ
 
 def li_dl(spec):
     out = []
-    for i, (name, note) in enumerate(spec['try'].get('downloads', [])):
+    for name, note in spec['try'].get('downloads', []):
         out.append('            <li><code>%s</code><span>%s</span></li>' % (esc(name), esc(note)))
     return '\n'.join(out)
 

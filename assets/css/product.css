@@ -1,5 +1,5 @@
 /* Coco Research 3D product pages: Flat Signal. Light Paper and Dark Stage tokens, Archivo + Martian Mono,
-   fixed WebGL stage with SVG fallback, shared header / native dialog drawer / footer, desktop (1280) and phone (400).
+   fixed WebGL stage with SVG fallback, shared footer, desktop (1280) and phone (400).
    Flat only: opaque surfaces and 1px borders. No glass blur and no radial glow behind content.
    The WebGL canvas itself is the only soft-light element on the page. */
 
@@ -125,57 +125,11 @@ html.gl .world-svg-fallback { opacity: 0; visibility: hidden; }
   content: ''; position: absolute; left: -16vw; width: 32vw; top: -1px; height: 2px;
   background: var(--blue-text); opacity: 0.5;
 }
-html.gl .hero-point, .world:has(.world-svg-fallback) .hero-point { opacity: 0; visibility: hidden; }
+html.gl .hero-point { opacity: 0; visibility: hidden; }
+.world:has(.world-svg-fallback) .hero-point { opacity: 0; visibility: hidden; }
 @media (max-width: 860px) { .hero-point { left: 50%; top: 22.5%; } }
 /* /aloomannu/ renders its own banner canvas: the background stage is off so the page uses one WebGL context. */
 html[data-product="aloomannu"] .world { display: none; }
-
-/* Header: flat bar, inline links on desktop, native dialog drawer on phones */
-.nav {
-  position: sticky; top: 0; z-index: 60; height: var(--nav-h); display: flex; align-items: center;
-  justify-content: space-between; gap: 12px; padding: 0 var(--pad);
-  background: var(--paper); border-bottom: 1px solid var(--line);
-}
-.brand {
-  display: inline-flex; align-items: center; gap: 0.68em; text-decoration: none; min-height: var(--touch);
-  font: 500 0.96rem / 1 var(--f-sans); font-stretch: 112%; letter-spacing: -0.01em;
-}
-.brand i { width: 9px; height: 9px; border-radius: 50%; background: var(--blue); flex: none; }
-.nav-links { display: flex; align-items: center; gap: clamp(8px, 2vw, 28px); margin: 0 auto 0 clamp(16px, 3vw, 44px); padding: 0; list-style: none; }
-.nav-links a {
-  display: inline-flex; align-items: center; min-height: var(--touch); padding: 0 4px;
-  color: var(--ink-2); font: 500 0.92rem / 1 var(--f-sans); font-stretch: 108%; text-decoration: none;
-}
-.nav-links a:hover, .nav-links a[aria-current="page"] { color: var(--ink); text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1.5px; }
-.nav-right { display: flex; align-items: center; gap: 10px; }
-.chip-btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  min-height: var(--touch); padding: 0 16px; border-radius: 999px; border: 1px solid var(--line-2);
-  background: transparent; color: var(--ink-2); font: 500 0.8rem / 1 var(--f-mono); cursor: pointer;
-}
-.chip-btn:hover { border-color: var(--ink); color: var(--ink); }
-.nav-menu-btn { display: none; min-width: var(--touch); gap: 8px; color: var(--ink); }
-
-dialog.nav-drawer {
-  margin: 0 0 0 auto; padding: 0; border: 0; border-left: 1px solid var(--line-2);
-  width: min(360px, 100vw); max-width: 100vw; height: 100vh; height: 100dvh; max-height: 100dvh;
-  background: var(--surface); color: var(--ink);
-}
-dialog.nav-drawer[open] { display: flex; flex-direction: column; }
-dialog.nav-drawer::backdrop { background: rgba(3, 5, 11, 0.72); }
-.nav-drawer-inner { display: flex; flex-direction: column; gap: 4px; flex: 1; padding: 14px 20px 28px; overflow-y: auto; }
-.nav-drawer-head { display: flex; align-items: center; justify-content: space-between; min-height: 56px; margin-bottom: 8px; border-bottom: 1px solid var(--line); }
-.nav-drawer a, .nav-drawer button {
-  display: flex; align-items: center; min-height: var(--touch); padding: 0 4px;
-  font: 500 1.02rem / 1.2 var(--f-sans); font-stretch: 108%; color: var(--ink); text-decoration: none;
-  background: none; border: 0; text-align: left; cursor: pointer;
-}
-.nav-drawer a:hover { text-decoration: underline; text-underline-offset: 5px; }
-.nav-drawer .btn { justify-content: center; margin-top: 16px; padding: 0 1.45em; border: 1px solid transparent; }
-.nav-drawer .btn-primary { background: var(--blue); color: var(--blue-ink); }
-.nav-drawer .btn-ghost { background: var(--raised); border-color: var(--line-2); }
-.nav-drawer-links { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
-.nav-drawer-links li { border-bottom: 1px solid var(--line); }
 
 /* Buttons and links */
 .btn {
@@ -201,11 +155,12 @@ dialog.nav-drawer::backdrop { background: rgba(3, 5, 11, 0.72); }
 }
 /* Stage marks pair a shape with text, so colour is never the only signal (WCAG 1.4.1). */
 .mark-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); flex: none; }
-.mark-dot[data-stage="source"] { background: transparent; border: 2px solid var(--blue-text); }
+.mark-dot[data-stage="source"], .mark-dot[data-stage="preview"] { background: transparent; border: 2px solid var(--blue-text); }
 .mark-dot[data-stage="beta"] { border-radius: 1px; background: var(--amber); }
-.mark-dot[data-stage="lab"], .mark-dot[data-stage="dev"] {
+.mark-dot[data-stage="lab"], .mark-dot[data-stage="dev"], .mark-dot[data-stage="private"] {
   width: 8px; height: 8px; border-radius: 0; background: transparent; border: 1.8px solid var(--amber); transform: rotate(45deg);
 }
+.mark-dot[data-stage="archived"] { width: 10px; height: 2px; border-radius: 1px; background: var(--ink-3); }
 .display {
   margin: 0; font-family: var(--f-sans); font-weight: 500; font-stretch: 125%;
   font-size: clamp(2.8rem, 6.2vw, 5.8rem); line-height: 0.96; letter-spacing: -0.038em;
@@ -334,19 +289,11 @@ dialog.nav-drawer::backdrop { background: rgba(3, 5, 11, 0.72); }
   margin-bottom: 18px;
 }
 
-/* Stage badges: shape + text. Released = solid dot, Source/Preview = ring, Private Beta = square, Private In dev = diamond. */
+/* Stage badges & chips: pill shell here; unified stage glyphs and tints live in one block below. */
 .stage-badge, .stage-chip {
   display: inline-flex; align-items: center; gap: 10px; min-height: 32px; padding: 6px 14px;
   border-radius: 999px; background: var(--surface); color: var(--ink); border: 1px solid var(--line-2);
   font: 500 0.78rem / 1 var(--f-mono); text-transform: uppercase; letter-spacing: 0.05em;
-}
-.stage-badge::before, .stage-chip::before { content: ''; flex: none; width: 10px; height: 10px; box-sizing: border-box; }
-.stage-released::before, .stage-chip-released::before, .stage-badge[data-stage="released"]::before { border-radius: 50%; background: var(--green); }
-.stage-source::before, .stage-chip-source::before, .stage-badge[data-stage="source"]::before,
-.stage-preview::before, .stage-badge[data-stage="preview"]::before { border-radius: 50%; background: transparent; border: 2px solid var(--blue-text); }
-.stage-beta::before, .stage-chip-beta::before, .stage-badge[data-stage="beta"]::before { border-radius: 1px; background: var(--amber); }
-.stage-dev::before, .stage-chip-lab::before, .stage-badge[data-stage="dev"]::before, .stage-badge[data-stage="lab"]::before {
-  width: 9px; height: 9px; margin: 0 1px; border-radius: 0; background: transparent; border: 2px solid var(--amber); transform: rotate(45deg);
 }
 .stage-progress {
   min-width: 220px;
@@ -423,6 +370,11 @@ dialog.nav-drawer::backdrop { background: rgba(3, 5, 11, 0.72); }
 /* Footer */
 .foot { position: relative; z-index: 20; background: var(--paper); border-top: 1px solid var(--line-2); padding: clamp(56px, 9svh, 96px) var(--pad) 28px; }
 .foot-inner { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 2.1fr); gap: 40px; }
+.brand {
+  display: inline-flex; align-items: center; gap: 0.68em; text-decoration: none; min-height: var(--touch);
+  font: 500 0.96rem / 1 var(--f-sans); font-stretch: 112%; letter-spacing: -0.01em;
+}
+.brand i { width: 9px; height: 9px; border-radius: 50%; background: var(--blue); flex: none; }
 .foot-brand p { margin-top: 12px; color: var(--ink-3); max-width: 24ch; }
 .foot-cols { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 22px; }
 .foot h2 { margin: 0 0 12px; font: 500 0.8rem / 1.2 var(--f-sans); font-stretch: 112%; color: var(--ink-3); }
@@ -464,13 +416,8 @@ dialog.nav-drawer::backdrop { background: rgba(3, 5, 11, 0.72); }
   .foot a { display: inline-flex; align-items: center; min-height: var(--touch); }
 }
 
-@media (max-width: 760px) {
-  .nav-links, .nav-cta-hide, .nav-right > .chip-btn:not(.nav-menu-btn) { display: none; }
-  .nav-menu-btn { display: inline-flex; }
-}
-
 /* Motion is opt-in: colour and border hovers always work; movement only runs without a reduce preference. */
-.btn, .chip-btn, .copy-btn, .link-btn, .nav-links a, .foot a { transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease; }
+.btn, .copy-btn, .link-btn, .foot a { transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease; }
 @media (prefers-reduced-motion: no-preference) {
   .world canvas, .world-svg-fallback { transition: opacity 0.25s ease; }
   html:not(.still) .wave rect { animation: wave 1.6s ease-in-out infinite alternate; animation-delay: var(--d); }
@@ -545,7 +492,7 @@ html[data-product="aloomannu"] .hero > .wrap { min-width: 0; max-width: 100%; }
 html[data-banner-export], html[data-banner-export] body {
   margin: 0 !important; padding: 0 !important; width: 100vw; height: 100vh; overflow: hidden !important; background: transparent !important;
 }
-html[data-banner-export] .skip, html[data-banner-export] .world, html[data-banner-export] .nav,
+html[data-banner-export] .skip, html[data-banner-export] .world, html[data-banner-export] .site-nav,
 html[data-banner-export] .foot, html[data-banner-export] .aloo-pause-btn, html[data-banner-export] .aloo-story,
 html[data-banner-export] .hero-col, html[data-banner-export] .sec { display: none !important; }
 html[data-banner-export] .stage-main, html[data-banner-export] .hero, html[data-banner-export] .hero > .wrap {
@@ -573,16 +520,6 @@ html[data-banner-export] .aloo-banner-tagline { font-size: 1.30rem !important; m
 :root { --ctl: var(--ink-3); } /* control borders: at least 3:1 against the page in both themes */
 [hidden] { display: none !important; }
 
-/* Stage chips: the shape is part of the label (dot = available, ring = source, square = beta, diamond = lab) */
-.stage-chip[data-stage="available"]::before, .stage-chip[data-stage="released"]::before { border-radius: 50%; background: var(--green); }
-.stage-chip[data-stage="source"]::before, .stage-chip[data-stage="preview"]::before { border-radius: 50%; background: transparent; border: 2px solid var(--blue-text); }
-.stage-chip[data-stage="beta"]::before { border-radius: 1px; background: var(--amber); }
-.stage-chip[data-stage="lab"]::before, .stage-chip[data-stage="dev"]::before, .stage-chip[data-stage="private"]::before {
-  width: 9px; height: 9px; margin: 0 1px; border-radius: 0; background: transparent; border: 2px solid var(--amber); transform: rotate(45deg);
-}
-.stage-chip[data-stage="available"], .stage-chip[data-stage="released"] { color: var(--green); background: color-mix(in srgb, var(--green) 11%, var(--surface)); border-color: color-mix(in srgb, var(--green) 45%, var(--surface)); }
-.stage-chip[data-stage="source"], .stage-chip[data-stage="preview"] { color: var(--blue-text); background: color-mix(in srgb, var(--blue-text) 11%, var(--surface)); border-color: color-mix(in srgb, var(--blue-text) 42%, var(--surface)); }
-.stage-chip[data-stage="beta"], .stage-chip[data-stage="lab"], .stage-chip[data-stage="dev"], .stage-chip[data-stage="private"] { color: var(--amber); background: color-mix(in srgb, var(--amber) 11%, var(--surface)); border-color: color-mix(in srgb, var(--amber) 45%, var(--surface)); }
 .lic-chip, .dir-lic {
   display: inline-flex; align-items: center; max-width: 100%; min-height: 32px; padding: 6px 12px; border-radius: 999px;
   border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2);
@@ -648,15 +585,50 @@ html[data-banner-export] .aloo-banner-tagline { font-size: 1.30rem !important; m
 .p-try-above .p-badges { margin-top: 14px; }
 .p-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .p-badge {
-  display: inline-flex; align-items: center; min-height: 32px; padding: 5px 12px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 5px 12px; border-radius: 999px;
   border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2); font: 500 0.72rem / 1.2 var(--f-mono);
 }
 .p-badge[data-kind="stage"] { color: var(--ink); }
-.p-badge[data-kind="stage"]::before { content: ''; flex: none; width: 9px; height: 9px; margin-right: 8px; border-radius: 50%; background: var(--green); }
-.p-badge[data-stage="source"]::before { background: transparent; border: 2px solid var(--blue-text); }
-.p-badge[data-stage="lab"]::before, .p-badge[data-stage="dev"]::before, .p-badge[data-stage="private"]::before {
-  width: 8px; height: 8px; border-radius: 0; background: transparent; border: 2px solid var(--amber); transform: rotate(45deg);
+
+/* Unified stage glyphs (single source of truth for .stage-badge, .stage-chip and .p-badge; WCAG 1.4.1 shape + text):
+   released/available = green dot, source/preview = blue ring, beta = amber square,
+   lab/dev/private = amber diamond, archived = neutral bar. */
+.stage-badge::before, .stage-chip::before, .p-badge[data-kind="stage"]::before {
+  content: ''; flex: none; width: 10px; height: 10px; box-sizing: border-box;
+  border-radius: 50%; background: var(--green);
 }
+.p-badge[data-kind="stage"]::before { width: 9px; height: 9px; }
+:is(.stage-badge, .stage-chip, .p-badge)[data-stage="available"]::before,
+:is(.stage-badge, .stage-chip, .p-badge)[data-stage="released"]::before,
+.stage-released::before, .stage-chip-released::before {
+  border-radius: 50%; background: var(--green); border: 0; transform: none;
+}
+:is(.stage-badge, .stage-chip, .p-badge)[data-stage="source"]::before,
+:is(.stage-badge, .stage-chip, .p-badge)[data-stage="preview"]::before,
+.stage-source::before, .stage-chip-source::before, .stage-preview::before {
+  border-radius: 50%; background: transparent; border: 2px solid var(--blue-text); transform: none;
+}
+:is(.stage-badge, .stage-chip, .p-badge)[data-stage="beta"]::before,
+.stage-beta::before, .stage-chip-beta::before {
+  border-radius: 1px; background: var(--amber); border: 0; transform: none;
+}
+:is(.stage-badge, .stage-chip, .p-badge)[data-stage="lab"]::before,
+:is(.stage-badge, .stage-chip, .p-badge)[data-stage="dev"]::before,
+:is(.stage-badge, .stage-chip, .p-badge)[data-stage="private"]::before,
+.stage-dev::before, .stage-chip-lab::before {
+  width: 9px; height: 9px; margin-inline: 1px; border-radius: 0; background: transparent; border: 2px solid var(--amber); transform: rotate(45deg);
+}
+.p-badge[data-stage="lab"]::before, .p-badge[data-stage="dev"]::before, .p-badge[data-stage="private"]::before {
+  width: 8px; height: 8px;
+}
+:is(.stage-badge, .stage-chip, .p-badge)[data-stage="archived"]::before,
+.stage-archived::before, .stage-chip-archived::before {
+  width: 10px; height: 2px; border-radius: 1px; background: var(--ink-3); border: 0; transform: none;
+}
+.stage-chip[data-stage="available"], .stage-chip[data-stage="released"] { color: var(--green); background: color-mix(in srgb, var(--green) 11%, var(--surface)); border-color: color-mix(in srgb, var(--green) 45%, var(--surface)); }
+.stage-chip[data-stage="source"], .stage-chip[data-stage="preview"] { color: var(--blue-text); background: color-mix(in srgb, var(--blue-text) 11%, var(--surface)); border-color: color-mix(in srgb, var(--blue-text) 42%, var(--surface)); }
+.stage-chip[data-stage="beta"], .stage-chip[data-stage="lab"], .stage-chip[data-stage="dev"], .stage-chip[data-stage="private"] { color: var(--amber); background: color-mix(in srgb, var(--amber) 11%, var(--surface)); border-color: color-mix(in srgb, var(--amber) 45%, var(--surface)); }
+.stage-chip[data-stage="archived"] { color: var(--ink-2); background: color-mix(in srgb, var(--ink-3) 12%, var(--surface)); border-color: var(--line-2); }
 
 .p-part { padding-block: clamp(36px, 6svh, 72px); }
 .p-part-num { display: block; margin: 0 0 10px; font: 500 0.74rem / 1.25 var(--f-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--blue-text); }
@@ -713,7 +685,8 @@ html[data-banner-export] .aloo-banner-tagline { font-size: 1.30rem !important; m
 
 /* Part 7: links */
 .links-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-.stage-chip:has(.sh)::before, .dir-stage::before, .tl-entry .stage-chip::before { display: none; }
+.dir-stage::before, .tl-entry .stage-chip::before { display: none; }
+.stage-chip:has(.sh)::before { display: none; }
 .p-static-pill {
   display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px;
   border: 1px dashed var(--line-2); border-radius: 999px; background: var(--surface);

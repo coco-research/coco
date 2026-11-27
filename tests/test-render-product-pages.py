@@ -257,17 +257,17 @@ class RenderProductPagesTest(unittest.TestCase):
                          ('zero', 'Twelve', '13', '13'))
         data, pub_specs, lab_specs, catalog, _counts = _sample_fixtures()
         prod0, lab0 = catalog[0], catalog[1]
-        cat_3_7 = [dict(prod0, pid='p%d' % i) for i in range(3)] + [dict(lab0, pid='l%d' % i) for i in range(7)]
-        for it in cat_3_7:
-            it['catalog'] = cat_3_7
-        prod_html = M.render_products(cat_3_7, data)
-        self.assertIn('All 10 Coco Research products and what each does for you: three available now and seven in the lab.', prod_html)
-        self.assertIn('Ten products in two groups. Three you can use today, seven still in the lab, each with its stage stated plainly.', prod_html)
-        lab_html = M.render_lab(cat_3_7, data)
-        self.assertIn('Seven projects in progress, from public early previews to private betas.', lab_html)
+        cat_3_6 = [dict(prod0, pid='p%d' % i) for i in range(3)] + [dict(lab0, pid='l%d' % i) for i in range(6)]
+        for it in cat_3_6:
+            it['catalog'] = cat_3_6
+        prod_html = M.render_products(cat_3_6, data)
+        self.assertIn('All 9 Coco Research products and what each does for you: three available now and six in the lab.', prod_html)
+        self.assertIn('Nine products in two groups. Three you can use today, six still in the lab, each with its stage stated plainly.', prod_html)
+        lab_html = M.render_lab(cat_3_6, data)
+        self.assertIn('Six projects in progress, from public early previews to private betas.', lab_html)
         self.assertIn('Five labels, used the same way on every page.', lab_html)
         with mock.patch.object(M, 'LAB_STAGE_KEY', M.LAB_STAGE_KEY[:4]):
-            self.assertIn('Four labels, used the same way on every page.', M.render_lab(cat_3_7, data))
+            self.assertIn('Four labels, used the same way on every page.', M.render_lab(cat_3_6, data))
 
     def test_render_sitemap_and_render_llms(self):
         _data, _pub, _lab, catalog, _counts = _sample_fixtures()

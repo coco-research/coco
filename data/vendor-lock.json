@@ -228,15 +228,15 @@
       },
       {
         "path": "assets/vendor/gsap/gsap.min.js",
-        "sha256": "96c01b81f44a3290e2b4532f55e2c9534b2adc43273a19f3756b2cb41f0fd0b6"
+        "sha256": "92bb9a96476f983d212a2bc4f54c889039c1696dd4461d40a736860938570fbb"
       },
       {
         "path": "assets/vendor/gsap/ScrollTrigger.min.js",
-        "sha256": "308219390e5e3b84cda0c481e70caa9820883ae10bda44e6e9a149a81aac4b3f"
+        "sha256": "b0b14d67b55b0c43c756ac0b106cfcb09d0879945f6ead64451065b0672916a2"
       },
       {
         "path": "assets/vendor/gsap/LICENSE.md",
-        "sha256": "35eafecf0e1cede4c15a722cfadf864a5d4d045d9833d541f44ed1620374ecf8"
+        "sha256": "921e325caa448238c3273953eecc22ec96683194bd7758d62a9a528198329ae6"
       }
     ],
     "mode": "verbatim",

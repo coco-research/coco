@@ -190,6 +190,71 @@ for path in html_pages():
 if span_total == 0:
     pass_('no <span data-count="KEY"> spans on index.html or under coco/; check passed')
 
+
+def _iter_strings(obj, prefix=''):
+    if isinstance(obj, str):
+        yield prefix, obj
+    elif isinstance(obj, list):
+        for i, item in enumerate(obj):
+            yield from _iter_strings(item, f'{prefix}[{i}]')
+    elif isinstance(obj, dict):
+        for k, v in obj.items():
+            yield from _iter_strings(v, f'{prefix}.{k}' if prefix else k)
+
+
+PUB_PATH = 'data/product-pages-public.json'
+SEMVER_RE = re.compile(r'(?<![0-9.])v?(\d+\.\d+\.\d+)(?!\.\d|\d)')
+REL_COUNT_RE = re.compile(r'\b(\d+)\s+(?:tagged|GitHub)\s+releases\b')
+with open(PUB_PATH, encoding='utf-8') as fh:
+    pub_text = fh.read()
+pub_places = [(pat, keys) for p, pat, keys in _SYNC_MOD.SITE_PLACES if p == PUB_PATH]
+pub_errs = []
+for pat, keys in pub_places:
+    ms = list(re.finditer(pat, pub_text))
+    if not ms:
+        pub_errs.append(f'pattern not found: /{pat}/')
+    for m in ms:
+        for i, key in enumerate(keys, 1):
+            want = _SYNC_MOD.value(counts, key)
+            got = m.group(i) if isinstance(want, str) else int(m.group(i))
+            if got != want:
+                line = pub_text.count('\n', 0, m.start(i)) + 1
+                pub_errs.append(f'line {line}: {key} says {got}, truth is {want}')
+for msg in pub_errs:
+    fail_(f'{PUB_PATH}: {msg}')
+if not pub_errs:
+    pass_(f'{PUB_PATH}: all {len(pub_places)} coco-si count/version places match docs/released-counts.json')
+
+with open('data/products.json', encoding='utf-8') as fh:
+    products_raw = json.load(fh)
+products_by_id = {r['id']: r for g in ('products', 'shipped', 'source', 'lab') for r in products_raw.get(g, ()) if 'id' in r}
+for pid, entry in json.loads(pub_text).items():
+    strings = list(_iter_strings(entry))
+    if 'version' in entry:
+        ver, row = entry['version'], products_by_id.get(pid, {})
+        mp = re.search(r'\bv(\d+\.\d+\.\d+)\b', f"{row.get('tag', '')} {row.get('status', '')}")
+        pver = row.get('version') or (mp.group(1) if mp else None)
+        bad = [] if isinstance(ver, str) and re.fullmatch(r'\d+\.\d+\.\d+', ver) else [f'invalid version {ver!r}']
+        bad.extend(f'{fp} says {m.group(1)}' for fp, s in strings for m in SEMVER_RE.finditer(s) if m.group(1) != ver)
+        if pver and pver != ver:
+            bad.append(f'data/products.json says {pver}')
+        if bad:
+            fail_(f'{PUB_PATH}: {pid} version {ver} mismatch: {"; ".join(bad)}')
+        else:
+            pass_(f'{PUB_PATH}: {pid} version {ver} is consistent')
+    if 'progress' in entry:
+        now, mx = entry['progress'].get('now'), entry['progress'].get('max')
+        rels = [(fp, int(m.group(1))) for fp, s in strings for m in REL_COUNT_RE.finditer(s)]
+        bad = [f'{fp} says {n}' for fp, n in rels if n != now]
+        if type(now) is not int or type(mx) is not int or now != mx:
+            bad.insert(0, f'progress now={now!r} max={mx!r}')
+        if not any(fp == 'progress.count' for fp, _ in rels):
+            bad.append('progress.count missing release count')
+        if bad:
+            fail_(f'{PUB_PATH}: {pid} release count mismatch: {"; ".join(bad)}')
+        else:
+            pass_(f'{PUB_PATH}: {pid} release count ({now}) consistent ({len(rels)} mentions)')
+
 print()
 if fail == 0:
     print('  all site-page counts agree with docs/released-counts.json')

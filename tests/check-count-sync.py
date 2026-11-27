@@ -28,7 +28,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SYNC = os.path.join(ROOT, 'scripts', 'sync-counts.py')
 SITE_FILES = ['index.html', 'coco/index.html', 'assets/js/kinetic.js',
               'assets/js/layout.js', 'assets/js/world.js',
-              'assets/js/product-motifs-a.js']
+              'assets/js/product-motifs-a.js', 'data/products.json',
+              'data/product-pages-public.json']
 
 
 def never_synced(rel):

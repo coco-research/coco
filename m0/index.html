@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="en" data-product="m0">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coco M0 — Coco Research</title>
+<meta name="description" content="Coco M0 keeps project context and prior decisions locally on your own machine across AI coding tools. Private beta; not open source or publicly licensed.">
+<meta name="theme-color" content="#03050b">
+<meta name="color-scheme" content="light dark">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Coco M0 — Coco Research">
+<meta property="og:description" content="Coco M0 keeps project context and prior decisions locally on your own machine across AI coding tools. Private beta; not open source or publicly licensed.">
+<meta property="og:url" content="https://cocoresearch.org/m0/">
+<meta property="og:image" content="https://cocoresearch.org/assets/img/og-coco-research.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Coco Research">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Coco M0 — Coco Research">
+<meta name="twitter:description" content="Coco M0 keeps project context and prior decisions locally on your own machine across AI coding tools. Private beta; not open source or publicly licensed.">
+<meta name="twitter:image" content="https://cocoresearch.org/assets/img/og-coco-research.png">
+<link rel="canonical" href="https://cocoresearch.org/m0/">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/site/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/assets/site/site.webmanifest">
+<script>
+(function () {
+  var d = document.documentElement, rm = false, off = false, th = '';
+  try { rm = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  try { off = sessionStorage.getItem('coco-3d-pause:' + location.pathname) === '1'; } catch (e) {}
+  if (/[?&]motion=off/.test(location.search)) off = true;
+  try { th = localStorage.getItem('coco-theme') || ''; } catch (e) {}
+  var m = /[?&]theme=(light|dark)/.exec(location.search);
+  if (m) th = m[1];
+  if (th === 'light' || th === 'dark') d.setAttribute('data-theme', th);
+  d.className += ' js' + (rm || off ? ' still' : ' cine') + (rm ? ' os-reduced' : '');
+})();
+</script>
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/vendor/fonts/archivo-latin-wdth-normal.woff2">
+<link rel="modulepreload" href="../assets/vendor/three/three.module.min.js">
+<link rel="stylesheet" href="../assets/css/site-nav.css">
+<link rel="stylesheet" href="../assets/css/product.css">
+<script type="importmap">
+{ "imports": { "three": "../assets/vendor/three/three.module.min.js" } }
+</script>
+<script type="module" src="../assets/js/site-nav.js"></script>
+<script type="module" src="../assets/js/product-scene.js"></script>
+<style>
+/* Coco M0 marketing + architecture page: additions on top of product.css (Flat Signal: opaque surfaces, 1px hairlines, no blur, no glow). */
+.m0-main .sec { padding-block: clamp(44px, 8svh, 96px); }
+.m0-main .p-part .sec-title { font-size: clamp(1.7rem, 1.1rem + 2.2vw, 2.9rem); max-width: 18em; text-wrap: balance; }
+.m0-main .p-lead { margin-top: 0; }
+.m0-main .sec-head { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.m0-main .sec-sub { max-width: 38em; }
+.m0-lede { margin-top: 18px; max-width: 34em; color: var(--ink-2); font-size: clamp(1.04rem, 0.96rem + 0.4vw, 1.24rem); line-height: 1.55; }
+.hero-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+
+/* Status tags: shape + word, never colour alone */
+.st { display: inline-flex; align-items: center; gap: 7px; padding: 4px 10px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--raised); font: 500 0.68rem / 1.2 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; color: var(--ink-2); }
+.st::before { content: ''; flex: none; width: 8px; height: 8px; box-sizing: border-box; }
+.st-live { color: var(--green); border-color: var(--green); }
+.st-live::before { border-radius: 50%; background: currentColor; }
+.st-off { color: var(--amber); border-color: var(--amber); }
+.st-off::before { border-radius: 2px; border: 2px solid currentColor; }
+.st-plan { color: var(--ink-3); border-style: dashed; }
+.st-plan::before { border-radius: 50%; border: 2px solid currentColor; }
+.st-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 4px; }
+
+/* 01 Without / With */
+.vs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 28px; }
+.vs-col { padding: clamp(20px, 2.6vw, 28px); background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; }
+.vs-col h3 { margin: 0 0 14px; font: 600 0.78rem / 1.2 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; }
+.vs-without h3 { color: var(--ink-3); }
+.vs-with { border-color: var(--blue-text); }
+.vs-with h3 { color: var(--blue-text); }
+.vs-col ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 0; border-top: 1.5px solid var(--rule); }
+.vs-col li { padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--ink-2); font-size: 0.97rem; line-height: 1.5; }
+.vs-with li { color: var(--ink); }
+
+/* 02 Six choices */
+.six { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.six-card { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: clamp(20px, 2.2vw, 26px); background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; }
+.six-card .cap-head { align-items: baseline; }
+.six-card h3 { margin: 0; font: 600 1.14rem / 1.22 var(--f-sans); font-stretch: 112%; letter-spacing: -0.01em; }
+.six-card p { color: var(--ink-2); font-size: 0.95rem; line-height: 1.55; }
+.six-card p b { color: var(--ink); font-weight: 600; }
+
+.cmp-wrap { margin-top: clamp(34px, 5vw, 56px); }
+.cmp-title { margin: 0 0 14px; font: 600 0.8rem / 1.2 var(--f-mono); text-transform: uppercase; letter-spacing: 0.07em; }
+.cmp { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line-2); }
+.cmp th, .cmp td { padding: 14px clamp(12px, 1.6vw, 20px); text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); font-size: 0.95rem; line-height: 1.5; }
+.cmp thead th { font: 600 0.72rem / 1.3 var(--f-mono); text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-3); border-bottom: 1.5px solid var(--rule); }
+.cmp thead th:last-child { color: var(--blue-text); }
+.cmp tbody th { width: 17%; font: 600 0.9rem / 1.4 var(--f-sans); font-stretch: 108%; color: var(--ink); }
+.cmp td { width: 41.5%; color: var(--ink-2); }
+.cmp td:last-child { color: var(--ink); }
+.cmp tbody tr:last-child > * { border-bottom: 0; }
+.cmp-note { margin-top: 12px; max-width: 52em; color: var(--ink-3); font: 400 0.76rem / 1.55 var(--f-mono); }
+
+/* 03 Blueprint */
+.arch-card { margin-top: 8px; padding: clamp(10px, 1.6vw, 18px); background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; }
+.arch-scroll { overflow-x: auto; overscroll-behavior-x: contain; }
+.arch-scroll:focus-visible { outline: 2px solid var(--blue-text); outline-offset: 2px; }
+.arch-svg { width: 100%; min-width: 900px; height: auto; font-family: var(--f-sans); }
+.arch-svg .zone { fill: none; stroke: var(--line-2); stroke-width: 1.2; stroke-dasharray: 3 5; }
+.arch-svg .svc { fill: none; stroke: var(--blue-text); stroke-width: 1.3; stroke-opacity: 0.7; }
+.arch-svg .bx { fill: var(--raised); stroke: var(--line-2); stroke-width: 1.2; }
+.arch-svg .bx-live { stroke: var(--blue-text); stroke-opacity: 0.85; }
+.arch-svg .bx-off { stroke: var(--amber); stroke-dasharray: 5 4; }
+.arch-svg .bx-store { fill: var(--raised); stroke: var(--rule); stroke-width: 1.4; }
+.arch-svg .div { stroke: var(--line-2); stroke-width: 1; }
+.arch-svg .ln { fill: none; stroke: var(--blue-text); stroke-width: 1.5; }
+.arch-svg .ln-off { fill: none; stroke: var(--amber); stroke-width: 1.4; stroke-dasharray: 5 4; }
+.arch-svg .ln-store { fill: none; stroke: var(--ink-3); stroke-width: 1.2; stroke-dasharray: 2 4; }
+.arch-svg .mk-b { fill: var(--blue-text); }
+.arch-svg .mk-a { fill: var(--amber); }
+.arch-svg .mk-g { fill: var(--ink-3); }
+.arch-svg .t-h { font-size: 13px; font-weight: 600; font-stretch: 108%; fill: var(--ink); }
+.arch-svg .t-s { font-size: 12px; font-weight: 600; font-stretch: 108%; fill: var(--ink); }
+.arch-svg .t-b { font-family: var(--f-sans); font-size: 11.5px; fill: var(--ink-2); }
+.arch-svg .t-k { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.07em; fill: var(--ink-3); }
+.arch-svg .t-kb { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.07em; fill: var(--blue-text); }
+.arch-svg .lab-bg { fill: var(--surface); }
+.arch-svg .tg-live { fill: var(--green); }
+.arch-svg .tg-off { fill: var(--amber); }
+.arch-svg .tg-live-t, .arch-svg .tg-off-t { font-family: var(--f-mono); font-size: 9.5px; font-weight: 500; letter-spacing: 0.06em; }
+.arch-svg .tg-live-t { fill: var(--green); }
+.arch-svg .tg-off-t { fill: var(--amber); }
+.arch-svg .tg-off-sq { fill: none; stroke: var(--amber); stroke-width: 1.8; }
+.arch-hint { display: none; margin-top: 10px; font: 400 0.76rem / 1.4 var(--f-mono); color: var(--ink-3); }
+.arch-legend { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; margin-top: 14px; font: 400 0.78rem / 1.4 var(--f-mono); color: var(--ink-3); }
+.layers { margin: clamp(26px, 4vw, 40px) 0 0; padding: 0; list-style: none; border-top: 1.5px solid var(--rule); }
+.layer { display: grid; grid-template-columns: 2.6rem minmax(11rem, 0.7fr) minmax(0, 1.9fr); gap: 6px 22px; align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.layer-n { font: 500 0.78rem / 1.2 var(--f-mono); color: var(--blue-text); }
+.layer h3 { margin: 0; font: 600 1.02rem / 1.3 var(--f-sans); font-stretch: 110%; }
+.layer p { color: var(--ink-2); font-size: 0.95rem; line-height: 1.55; }
+.layer p + p { margin-top: 8px; }
+.layer .st-row { padding-top: 10px; }
+
+/* 04 Time and truth */
+.ex { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 26px; }
+.ex-col { padding: clamp(18px, 2.4vw, 26px); background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; }
+.ex-col h3 { margin: 0 0 6px; font: 600 0.78rem / 1.2 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.ex-m0 { border-color: var(--blue-text); }
+.ex-m0 h3 { color: var(--blue-text); }
+.ex-q { margin: 0 0 14px; font: 400 0.82rem / 1.45 var(--f-mono); color: var(--ink-3); }
+.ex-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline; padding: 12px 14px; margin-top: 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--raised); }
+.ex-row b { font-weight: 600; color: var(--ink); }
+.ex-row small { grid-column: 1 / -1; color: var(--ink-3); font: 400 0.76rem / 1.4 var(--f-mono); }
+.ex-row.is-old { border-style: dashed; }
+.ex-row.is-old b { color: var(--ink-3); text-decoration: line-through; text-decoration-thickness: 1px; }
+.ex-cap { margin-top: 12px; font: 400 0.76rem / 1.5 var(--f-mono); color: var(--ink-3); }
+.rule-box { margin-top: 28px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.rule-box > div { padding: clamp(18px, 2.4vw, 26px); background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; }
+.rule-box h3 { margin: 0 0 12px; font: 600 1.02rem / 1.3 var(--f-sans); font-stretch: 110%; }
+.rule-box ul { margin: 0; padding: 0; list-style: none; border-top: 1.5px solid var(--rule); }
+.rule-box li { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr); gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--line); color: var(--ink-2); font-size: 0.94rem; line-height: 1.5; }
+.rule-box li i { font: normal 500 0.76rem / 1.6 var(--f-mono); color: var(--blue-text); }
+.rule-box p { margin-top: 12px; color: var(--ink-2); font-size: 0.94rem; line-height: 1.55; }
+.clocks { margin-top: 28px; width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line-2); }
+.clocks th, .clocks td { padding: 13px clamp(12px, 1.6vw, 20px); text-align: left; vertical-align: baseline; border-bottom: 1px solid var(--line); font-size: 0.94rem; line-height: 1.45; }
+.clocks thead th { font: 600 0.72rem / 1.3 var(--f-mono); text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-3); border-bottom: 1.5px solid var(--rule); }
+.clocks tbody th { font: 600 0.92rem / 1.4 var(--f-sans); font-stretch: 108%; width: 20%; }
+.clocks td { color: var(--ink-2); }
+.clocks td:last-child { width: 9rem; }
+.clocks tbody tr:last-child > * { border-bottom: 0; }
+
+/* 05 Recall flow, 06 ledger flow */
+.flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin-top: 24px; border: 1px solid var(--line-2); border-radius: 14px; background: var(--surface); overflow: hidden; }
+.flow > li { position: relative; padding: clamp(16px, 2vw, 24px); list-style: none; }
+.flow > li + li { border-left: 1px solid var(--line-2); }
+.flow-n { display: block; margin-bottom: 8px; font: 500 0.74rem / 1.2 var(--f-mono); color: var(--blue-text); }
+.flow h3 { margin: 0 0 6px; font: 600 1rem / 1.3 var(--f-sans); font-stretch: 110%; }
+.flow p { color: var(--ink-2); font-size: 0.92rem; line-height: 1.52; }
+.flow-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 18px; }
+.note-card { padding: clamp(18px, 2.4vw, 26px); background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; }
+.note-card h3 { margin: 0 0 8px; font: 600 1.02rem / 1.3 var(--f-sans); font-stretch: 110%; }
+.note-card p { color: var(--ink-2); font-size: 0.95rem; line-height: 1.56; }
+.note-card p + p { margin-top: 8px; }
+.note-card .st-row { padding-top: 12px; }
+.states { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 16px 0 0; padding: 0; list-style: none; font: 500 0.78rem / 1.2 var(--f-mono); }
+.states li { padding: 6px 12px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--raised); }
+.states li.arrow { padding: 0; border: 0; background: none; color: var(--ink-3); }
+
+/* 07 Connectors */
+.hosts { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line-2); margin-top: 8px; }
+.hosts th, .hosts td { padding: 13px clamp(12px, 1.6vw, 20px); text-align: left; vertical-align: baseline; border-bottom: 1px solid var(--line); font-size: 0.94rem; line-height: 1.45; }
+.hosts thead th { font: 600 0.72rem / 1.3 var(--f-mono); text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-3); border-bottom: 1.5px solid var(--rule); }
+.hosts tbody th { font: 600 0.92rem / 1.4 var(--f-sans); font-stretch: 108%; width: 17%; }
+.hosts td { color: var(--ink-2); }
+.hosts td:last-child { width: 11rem; }
+.hosts tbody tr:last-child > * { border-bottom: 0; }
+
+/* 08 Privacy */
+.lock { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; margin: 0; padding: 0; list-style: none; border-top: 1.5px solid var(--rule); }
+.lock li { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr); gap: 8px; padding: 13px 0; border-bottom: 1px solid var(--line); color: var(--ink-2); font-size: 0.96rem; line-height: 1.5; }
+.lock li i { width: 8px; height: 8px; margin-top: 0.5em; border-radius: 50%; background: var(--green); }
+.lock li b { color: var(--ink); font-weight: 600; }
+
+/* 09 Status */
+.stand { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 8px; }
+.stand > div { padding: clamp(18px, 2.4vw, 26px); background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; }
+.stand h3 { display: flex; align-items: center; gap: 9px; margin: 0 0 12px; font: 600 0.78rem / 1.2 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; }
+.stand-live h3 { color: var(--green); }
+.stand-off h3 { color: var(--amber); }
+.stand-plan h3 { color: var(--ink-3); }
+.stand ul { margin: 0; padding: 0; list-style: none; border-top: 1.5px solid var(--rule); }
+.stand li { padding: 10px 0; border-bottom: 1px solid var(--line); color: var(--ink-2); font-size: 0.92rem; line-height: 1.5; }
+.stand li:last-child { border-bottom: 0; }
+.stand-note { margin-top: 14px; max-width: 52em; color: var(--ink-3); font: 400 0.76rem / 1.55 var(--f-mono); }
+
+@media (max-width: 960px) {
+  .six { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stand { grid-template-columns: minmax(0, 1fr); }
+  .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flow > li:nth-child(3) { border-left: 0; }
+  .flow > li:nth-child(n+3) { border-top: 1px solid var(--line-2); }
+  .flow-3 { grid-template-columns: minmax(0, 1fr); }
+  .flow-3 > li + li { border-left: 0; border-top: 1px solid var(--line-2); }
+  .arch-hint { display: block; }
+}
+@media (max-width: 760px) {
+  .vs, .ex, .rule-box, .two, .lock { grid-template-columns: minmax(0, 1fr); }
+  .six { grid-template-columns: minmax(0, 1fr); }
+  .layer { grid-template-columns: 2.2rem minmax(0, 1fr); }
+  .layer > div:last-child { grid-column: 2; }
+  .flow { grid-template-columns: minmax(0, 1fr); }
+  .flow > li + li, .flow > li:nth-child(3) { border-left: 0; border-top: 1px solid var(--line-2); }
+  .cmp, .cmp tbody, .cmp tr, .cmp th, .cmp td, .hosts, .hosts tbody, .hosts tr, .hosts th, .hosts td, .clocks, .clocks tbody, .clocks tr, .clocks th, .clocks td { display: block; width: 100% !important; }
+  .cmp thead, .hosts thead, .clocks thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .cmp tbody tr, .hosts tbody tr, .clocks tbody tr { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .cmp tbody th, .cmp td, .hosts tbody th, .hosts td, .clocks tbody th, .clocks td { border-bottom: 0; padding: 4px clamp(12px, 3vw, 18px); }
+  .cmp td::before { content: attr(data-l); display: block; margin-bottom: 2px; font: 600 0.68rem / 1.3 var(--f-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-3); }
+  .cmp td:last-child::before { color: var(--blue-text); }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="?motion=off">View plain page (no motion)</a>
+<div class="world" aria-hidden="true"><canvas id="world"></canvas><div class="hero-point"></div><svg class="world-svg-fallback" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" focusable="false"><circle cx="840" cy="370" r="190" fill="none" stroke="currentColor" stroke-width="1" stroke-opacity=".14" stroke-dasharray="5 8"/><line x1="600" y1="370" x2="1080" y2="370" stroke="currentColor" stroke-width="1" stroke-opacity=".12"/><g transform="translate(610 250) scale(1.25)" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".55"><polygon points="160,18 208,44 208,96 160,122 112,96 112,44"/><line x1="160" y1="18" x2="160" y2="122" stroke-opacity=".4"/><line x1="112" y1="44" x2="208" y2="96" stroke-opacity=".4"/><line x1="208" y1="44" x2="112" y2="96" stroke-opacity=".4"/><circle cx="48" cy="42" r="6"/><circle cx="272" cy="42" r="6"/><circle cx="48" cy="98" r="6"/><circle cx="272" cy="98" r="6"/><line x1="54" y1="44" x2="112" y2="58" stroke-opacity=".45"/><line x1="266" y1="44" x2="208" y2="58" stroke-opacity=".45"/></g></svg></div>
+<header class="site-nav" data-site-nav>
+  <a class="sn-brand" href="../"><i aria-hidden="true"></i><span>Coco Research</span></a>
+  <nav class="sn-links" aria-label="Primary">
+    <button class="sn-tab" type="button" data-products-trigger aria-expanded="false" aria-controls="site-products-menu">Products <span class="sn-caret" aria-hidden="true">▾</span></button>
+    <a class="sn-tab" href="../lab/">In the lab</a>
+    <a class="sn-tab" href="../whats-new/">What's new</a>
+    <a class="sn-tab" href="../rijul-kalra/">Rijul Kalra</a>
+  </nav>
+  <div class="sn-right">
+    <button class="sn-chip" type="button" data-theme-toggle>Dark</button>
+    <button class="sn-chip" type="button" data-motion-toggle>Pause 3D</button>
+    <a class="sn-cta" href="../coco/">Get Coco</a>
+    <button class="sn-menu-btn" type="button" data-drawer-open aria-expanded="false" aria-controls="site-mobile-drawer" aria-label="Open menu">Menu</button>
+  </div>
+  <div class="sn-menu" id="site-products-menu" data-products-menu hidden>
+    <div class="sn-m-grid">
+      <div class="sn-m-group" data-group="products">
+        <h3 class="sn-m-h g-products"><span class="sh sh-dot" aria-hidden="true"></span>Products<span class="sn-m-n">2</span></h3>
+        <ul aria-label="Products">
+          <li><a class="sn-m-item" href="../coco/"><span class="sn-m-name">Coco Super Intelligence</span><span class="sn-m-line">Argues a hard call out with expert personas, then hands it to skills.</span></a></li>
+          <li><a class="sn-m-item" href="../voice/"><span class="sn-m-name">Coco Voice</span><span class="sn-m-line">Hold a key to dictate into any app. Private, on your computer.</span></a></li>
+        </ul>
+      </div>
+      <div class="sn-m-group" data-group="lab">
+        <h3 class="sn-m-h g-lab"><span class="sh sh-sq" aria-hidden="true"></span>In the lab<span class="sn-m-n">8</span></h3>
+        <ul aria-label="In the lab">
+          <li><a class="sn-m-item" href="../heliopause/"><span class="sn-m-name">Heliopause</span><span class="sn-m-line">Gives your AI tools a Lead and roles, like a small company.</span></a></li>
+          <li><a class="sn-m-item" href="../signal/"><span class="sn-m-name">Signal</span><span class="sn-m-line">A ready-made look for your product: three editions, CSS and docs.</span></a></li>
+          <li><a class="sn-m-item" href="../mira/"><span class="sn-m-name">Mira<span class="sn-m-badge">Archived</span></span><span class="sn-m-line">Makes Reels and Shorts in English and Hindi.</span></a></li>
+          <li><a class="sn-m-item" href="../jev-use/"><span class="sn-m-name">jev-use</span><span class="sn-m-line">Control your Mac with your voice.</span></a></li>
+          <li><a class="sn-m-item" href="../m0/"><span class="sn-m-name">Coco M0</span><span class="sn-m-line">Remembers across your AI tools, so you stop re-explaining.</span></a></li>
+          <li><a class="sn-m-item" href="../hermes/"><span class="sn-m-name">Coco Hermes</span><span class="sn-m-line">Answers over your own files with an exact quote, or says it can’t.</span></a></li>
+          <li><a class="sn-m-item" href="../teams-ng/"><span class="sn-m-name">Coco Teams NG</span><span class="sn-m-line">A team of AI members you hire, brief and work with in one console.</span></a></li>
+          <li><a class="sn-m-item" href="../aloomannu/"><span class="sn-m-name">Aloo Mannu</span><span class="sn-m-line">The local message and wake layer for coding agents on your machine.</span><span class="sn-m-priv"><span class="sh sh-sq" aria-hidden="true"></span>Private, in the lab</span></a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="sn-m-foot"><a href="../products/">Browse all 10 products →</a><a href="../lab/">In the lab →</a><a href="../whats-new/">What's new →</a></div>
+  </div>
+</header>
+<dialog class="sn-drawer" id="site-mobile-drawer" data-mobile-drawer aria-labelledby="sn-drawer-title">
+  <div class="sn-d-head">
+    <a class="sn-brand" href="../"><i aria-hidden="true"></i><span>Coco Research</span></a>
+    <h2 class="sr-only" id="sn-drawer-title">Site menu</h2>
+    <button class="sn-chip" type="button" data-drawer-close>Close</button>
+  </div>
+  <div class="sn-d-body">
+    <p class="sn-d-label">Products</p>
+    <div class="sn-m-grid">
+    <div class="sn-m-group" data-group="products">
+      <h3 class="sn-m-h g-products"><span class="sh sh-dot" aria-hidden="true"></span>Products<span class="sn-m-n">2</span></h3>
+      <ul aria-label="Products">
+        <li><a class="sn-m-item" href="../coco/"><span class="sn-m-name">Coco Super Intelligence</span><span class="sn-m-line">Argues a hard call out with expert personas, then hands it to skills.</span></a></li>
+        <li><a class="sn-m-item" href="../voice/"><span class="sn-m-name">Coco Voice</span><span class="sn-m-line">Hold a key to dictate into any app. Private, on your computer.</span></a></li>
+      </ul>
+    </div>
+    <div class="sn-m-group" data-group="lab">
+      <h3 class="sn-m-h g-lab"><span class="sh sh-sq" aria-hidden="true"></span>In the lab<span class="sn-m-n">8</span></h3>
+      <ul aria-label="In the lab">
+        <li><a class="sn-m-item" href="../heliopause/"><span class="sn-m-name">Heliopause</span><span class="sn-m-line">Gives your AI tools a Lead and roles, like a small company.</span></a></li>
+        <li><a class="sn-m-item" href="../signal/"><span class="sn-m-name">Signal</span><span class="sn-m-line">A ready-made look for your product: three editions, CSS and docs.</span></a></li>
+        <li><a class="sn-m-item" href="../mira/"><span class="sn-m-name">Mira<span class="sn-m-badge">Archived</span></span><span class="sn-m-line">Makes Reels and Shorts in English and Hindi.</span></a></li>
+        <li><a class="sn-m-item" href="../jev-use/"><span class="sn-m-name">jev-use</span><span class="sn-m-line">Control your Mac with your voice.</span></a></li>
+        <li><a class="sn-m-item" href="../m0/"><span class="sn-m-name">Coco M0</span><span class="sn-m-line">Remembers across your AI tools, so you stop re-explaining.</span></a></li>
+        <li><a class="sn-m-item" href="../hermes/"><span class="sn-m-name">Coco Hermes</span><span class="sn-m-line">Answers over your own files with an exact quote, or says it can’t.</span></a></li>
+        <li><a class="sn-m-item" href="../teams-ng/"><span class="sn-m-name">Coco Teams NG</span><span class="sn-m-line">A team of AI members you hire, brief and work with in one console.</span></a></li>
+        <li><a class="sn-m-item" href="../aloomannu/"><span class="sn-m-name">Aloo Mannu</span><span class="sn-m-line">The local message and wake layer for coding agents on your machine.</span><span class="sn-m-priv"><span class="sh sh-sq" aria-hidden="true"></span>Private, in the lab</span></a></li>
+      </ul>
+    </div>
+    </div>
+    <a class="sn-m-item sn-d-all" href="../products/"><span class="sn-m-name">Browse all 10 products →</span></a>
+    <div class="sn-d-top">
+      <a href="../lab/">In the lab →</a>
+      <a href="../whats-new/">What's new →</a>
+      <a href="../rijul-kalra/">Rijul Kalra →</a>
+    </div>
+    <div class="sn-d-foot"><button class="sn-chip" type="button" data-theme-toggle>Dark</button><a class="sn-cta" href="../coco/">Get Coco</a></div>
+  </div>
+</dialog>
+<main id="main" class="stage-main p-main m0-main">
+  <section id="hero" class="hero p-hero" aria-labelledby="h-hero">
+    <div class="wrap">
+      <div class="hero-col">
+        <h1 id="h-hero" class="display">Coco M0</h1>
+        <p class="p-for-you">Remembers across your AI tools, so you stop re-explaining.</p>
+        <p class="m0-lede">A memory layer that lives on your own machine. It captures what you decide, keeps the newest truth, and hands the right context back to any tool you use, with its source attached.</p>
+        <div class="p-who"><span class="p-who-k">Who it’s for</span><p>People who switch between AI coding tools on one machine and are tired of repeating earlier decisions.</p></div>
+        <div class="p-try-above" aria-label="How to try it">
+          <div class="cta-row">
+            <span class="p-static-pill"><span class="sh sh-sq" aria-hidden="true"></span>Private beta, used daily — no public download yet</span>
+          </div>
+          <div class="hero-links">
+            <a class="btn btn-primary" href="#special">Why it is special</a>
+            <a class="btn btn-ghost" href="#architecture">See the architecture</a>
+          </div>
+          <div class="p-badges" aria-label="Stage and licence"><span class="p-badge" data-kind="stage" data-stage="lab">In the lab</span><span class="p-badge" data-kind="licence" data-open="false">Private</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="why" class="sec p-part" data-part="01" aria-labelledby="h-p-01">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">01</span> The problem</p><h2 id="h-p-01" class="sec-title">Every AI tool starts from zero</h2></div>
+      </div>
+      <p class="p-lead">You settle a question on Monday in one tool. On Tuesday a different tool has never heard of it. Chat history stays inside its chat, and the memory features built into one product stay inside that product. So you explain the same decisions again, and sooner or later two tools act on two different versions of the truth.</p>
+      <p class="p-detail" style="margin-top:12px;max-width:46em;color:var(--ink-2)">Coco M0 is one memory on your machine that your tools share. They write what happened into it and read what is still true out of it.</p>
+      <div class="vs">
+        <div class="vs-col vs-without">
+          <h3>Without a shared memory</h3>
+          <ul>
+            <li>You re-explain earlier decisions every time you switch tools.</li>
+            <li>An old statement and its newer replacement sit side by side, and the model picks one.</li>
+            <li>Memory lives in someone else’s cloud, tied to one product.</li>
+            <li>When the tool doesn’t know, it guesses.</li>
+          </ul>
+        </div>
+        <div class="vs-col vs-with">
+          <h3>With Coco M0</h3>
+          <ul>
+            <li>One memory on your machine. Every connected tool reads and writes it.</li>
+            <li>A newer fact retires the older one, and the history stays.</li>
+            <li>Built so nothing leaves your Mac. Any cloud model is an opt-in you choose.</li>
+            <li>It can say it has no confident answer, and answers carry their source.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="special" class="sec p-part" data-part="02" aria-labelledby="h-p-02">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">02</span> Why it is special</p><h2 id="h-p-02" class="sec-title">The design choices that make it more than a vector store</h2></div>
+        <p class="sec-sub">A plain vector store remembers what sounds similar. M0 is built around what is true, what replaced what, and where each fact came from.</p>
+      </div>
+      <div class="six">
+        <article class="six-card">
+          <div class="cap-head"><span class="cap-idx">01</span><h3>One memory, every tool</h3></div>
+          <p>Capture comes in through hooks and plugins. Recall goes out through a local API and one MCP tool, so any MCP client can reach it. <b>Claude Code is wired in and live.</b> Codex, OpenCode and Cursor adapters are built and switched off.</p>
+          <div class="st-row"><span class="st st-live">Live: Claude Code</span><span class="st st-off">Built, off: other tools</span></div>
+        </article>
+        <article class="six-card">
+          <div class="cap-head"><span class="cap-idx">02</span><h3>It knows when</h3></div>
+          <p>M0 keeps separate clocks: when something happened, when M0 wrote it down, and each time it was seen again. A fact is never just a vector with no date. When a fact is true out in the world is a planned fourth axis, not built yet.</p>
+          <div class="st-row"><span class="st st-live">Live</span><span class="st st-plan">Planned: world time</span></div>
+        </article>
+        <article class="six-card">
+          <div class="cap-head"><span class="cap-idx">03</span><h3>The newest truth wins, and the history stays</h3></div>
+          <p>When a newer fact about the same thing arrives, M0 closes the older one and links the two. When it isn’t clear-cut, M0 holds both and flags the contradiction instead of guessing.</p>
+          <div class="st-row"><span class="st st-live">Live</span></div>
+        </article>
+        <article class="six-card">
+          <div class="cap-head"><span class="cap-idx">04</span><h3>Two ways to find a memory, fused</h3></div>
+          <p>Full-text keyword search and local semantic embeddings are ranked together by rank fusion. Recall reports how it matched, and it abstains rather than bluff when nothing clears the bar.</p>
+          <div class="st-row"><span class="st st-live">Live</span></div>
+        </article>
+        <article class="six-card">
+          <div class="cap-head"><span class="cap-idx">05</span><h3>Every fact keeps its receipts</h3></div>
+          <p>Each fact stores its source and a confidence. Every re-sighting is logged as an observation instead of being silently merged. Your decisions live as plain markdown records, one file each, kept in git.</p>
+          <div class="st-row"><span class="st st-live">Live</span></div>
+        </article>
+        <article class="six-card">
+          <div class="cap-head"><span class="cap-idx">06</span><h3>Local-first and fail-safe</h3></div>
+          <p>The service listens on loopback only, with a token on every route except health. Embeddings are local. Hooks never block your chat: if the service is busy or down, events wait in a local spool and replay safely.</p>
+          <div class="st-row"><span class="st st-live">Live</span></div>
+        </article>
+      </div>
+
+      <div class="cmp-wrap">
+        <h3 class="cmp-title">A common approach, and Coco M0</h3>
+        <table class="cmp">
+          <thead><tr><th scope="col"><span class="sr-only">Topic</span></th><th scope="col">A common approach</th><th scope="col">Coco M0</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Where it lives</th><td data-l="A common approach">A vendor’s cloud, or inside one tool.</td><td data-l="Coco M0">One store on your machine, reached over loopback only.</td></tr>
+            <tr><th scope="row">Across tools</th><td data-l="A common approach">Each tool keeps its own memory.</td><td data-l="Coco M0">Every connected tool reads and writes the same one.</td></tr>
+            <tr><th scope="row">When a fact changes</th><td data-l="A common approach">Old and new both stay, or the old one is overwritten.</td><td data-l="Coco M0">The older fact is closed and linked to the newer one. Unclear cases are held and flagged.</td></tr>
+            <tr><th scope="row">Finding things</th><td data-l="A common approach">Meaning-only vector search.</td><td data-l="Coco M0">Keyword and meaning lanes fused by rank, and it abstains when nothing clears the bar.</td></tr>
+            <tr><th scope="row">Where an answer came from</th><td data-l="A common approach">Often unclear.</td><td data-l="Coco M0">Source, confidence and every sighting are stored with each fact.</td></tr>
+            <tr><th scope="row">When something is down</th><td data-l="A common approach">Capture can be lost, or the chat stalls.</td><td data-l="Coco M0">Hooks never block. Events spool locally and replay safely.</td></tr>
+          </tbody>
+        </table>
+        <p class="cmp-note">The left column is a generalisation of how many memory layers work. It is not a claim about any one product, and no benchmark is implied. Coco M0 publishes no recall or speed figures.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="architecture" class="sec p-part" data-part="03" aria-labelledby="h-p-03">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">03</span> Architecture</p><h2 id="h-p-03" class="sec-title">How it is built</h2></div>
+        <p class="sec-sub">A small local service on your machine sits between your tools and one local store. Everything below runs on loopback.</p>
+      </div>
+      <figure class="arch-card" style="margin:0">
+        <div class="arch-scroll" tabindex="0" role="region" aria-label="Coco M0 architecture blueprint. Scrolls sideways on narrow screens.">
+          <svg class="arch-svg" viewBox="0 0 1120 560" role="img" aria-labelledby="arch-t arch-d" focusable="false">
+            <title id="arch-t">Coco M0 architecture blueprint</title>
+            <desc id="arch-d">Tools and hooks send events into a local service on loopback. Inside the service, events flow through a capture and normalizer stage, a temporal fact and entity store with a hybrid index, a conflict and supersession resolver, and a grounded recall stage that answers over an HTTP API and an MCP tool. All stages read and write one local store. Recall results return to the tools. Claude Code is live; other tools are built and switched off.</desc>
+            <defs>
+              <marker id="ah-b" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-b" d="M0 0L10 5L0 10z"/></marker>
+              <marker id="ah-a" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk-a" d="M0 0L10 5L0 10z"/></marker>
+              <marker id="ah-g" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk-g" d="M0 0L10 5L0 10z"/></marker>
+            </defs>
+
+            <rect class="zone" x="6" y="6" width="1108" height="548" rx="14"/>
+            <text class="t-k" x="24" y="28">YOUR MACHINE · NOTHING BELOW LEAVES IT</text>
+
+            <!-- Tools and hooks -->
+            <text class="t-k" x="28" y="52">TOOLS AND HOOKS</text>
+            <rect class="bx bx-live" x="28" y="64" width="184" height="128" rx="10"/>
+            <text class="t-h" x="44" y="90">Claude Code</text>
+            <text class="t-b" x="44" y="112">Session, tool and stop</text>
+            <text class="t-b" x="44" y="128">hooks, plus a prompt</text>
+            <text class="t-b" x="44" y="144">hook that injects recall</text>
+            <text class="t-b" x="44" y="160">MCP tool: m0</text>
+            <circle class="tg-live" cx="48" cy="177" r="3.5"/><text class="tg-live-t" x="58" y="180.5">LIVE</text>
+
+            <rect class="bx bx-off" x="28" y="208" width="184" height="116" rx="10"/>
+            <text class="t-h" x="44" y="234">Other tools</text>
+            <text class="t-b" x="44" y="256">Codex, OpenCode, Cursor</text>
+            <text class="t-b" x="44" y="272">capture plugins and</text>
+            <text class="t-b" x="44" y="288">MCP config</text>
+            <rect class="tg-off-sq" x="44" y="299" width="7" height="7" rx="1.5"/><text class="tg-off-t" x="58" y="306">BUILT, OFF</text>
+
+            <rect class="bx bx-live" x="28" y="340" width="184" height="108" rx="10"/>
+            <text class="t-h" x="44" y="366">Any MCP client</text>
+            <text class="t-b" x="44" y="388">Reads through the</text>
+            <text class="t-b" x="44" y="404">m0 tool. No hooks</text>
+            <text class="t-b" x="44" y="420">needed.</text>
+            <circle class="tg-live" cx="48" cy="436" r="3.5"/><text class="tg-live-t" x="58" y="439.5">LIVE</text>
+
+            <!-- Service boundary -->
+            <rect class="svc" x="236" y="48" width="872" height="366" rx="12"/>
+            <text class="t-kb" x="254" y="70">M0 LOCAL SERVICE · LOOPBACK ONLY · TOKEN ON EVERY ROUTE BUT HEALTH</text>
+
+            <!-- Stage 1 -->
+            <rect class="bx bx-live" x="254" y="92" width="178" height="246" rx="10"/>
+            <text class="t-k" x="270" y="112">01 · CAPTURE</text>
+            <text class="t-h" x="270" y="136">Capture &amp; normalizer</text>
+            <text class="t-b" x="270" y="162">One event contract</text>
+            <text class="t-b" x="270" y="178">for every host</text>
+            <text class="t-b" x="270" y="204">Secrets redacted</text>
+            <text class="t-b" x="270" y="220">Denied folders skipped</text>
+            <text class="t-b" x="270" y="246">Spool if service down</text>
+            <text class="t-b" x="270" y="262">Replay-safe by event id</text>
+            <circle class="tg-live" cx="274" cy="319" r="3.5"/><text class="tg-live-t" x="284" y="322.5">LIVE</text>
+
+            <!-- Stage 2 -->
+            <rect class="bx bx-live" x="458" y="92" width="206" height="246" rx="10"/>
+            <text class="t-k" x="474" y="112">02 · STORE + INDEX</text>
+            <text class="t-h" x="474" y="136">Temporal fact store</text>
+            <text class="t-b" x="474" y="160">Events become atoms:</text>
+            <text class="t-b" x="474" y="176">subject, predicate, object,</text>
+            <text class="t-b" x="474" y="192">confidence, source</text>
+            <text class="t-b" x="474" y="208">Clocks: event, record,</text>
+            <text class="t-b" x="474" y="224">observed. Edges:</text>
+            <text class="t-b" x="474" y="240">supersedes, contradicts</text>
+            <line class="div" x1="474" y1="254" x2="648" y2="254"/>
+            <text class="t-s" x="474" y="274">Hybrid index</text>
+            <text class="t-b" x="474" y="292">Keyword (full-text) +</text>
+            <text class="t-b" x="474" y="308">local embeddings, derived</text>
+            <circle class="tg-live" cx="478" cy="326" r="3.5"/><text class="tg-live-t" x="488" y="329.5">LIVE</text>
+
+            <!-- Stage 3 -->
+            <rect class="bx bx-live" x="690" y="92" width="178" height="246" rx="10"/>
+            <text class="t-k" x="706" y="112">03 · RESOLVE</text>
+            <text class="t-h" x="706" y="136">Conflict resolver</text>
+            <text class="t-b" x="706" y="162">A newer state fact for</text>
+            <text class="t-b" x="706" y="178">the same subject closes</text>
+            <text class="t-b" x="706" y="194">the older. History kept.</text>
+            <text class="t-b" x="706" y="220">Anything else is held,</text>
+            <text class="t-b" x="706" y="236">with a contradicts link</text>
+            <text class="t-b" x="706" y="262">Database triggers refuse</text>
+            <text class="t-b" x="706" y="278">backwards supersedes</text>
+            <circle class="tg-live" cx="710" cy="319" r="3.5"/><text class="tg-live-t" x="720" y="322.5">LIVE</text>
+
+            <!-- Stage 4 -->
+            <rect class="bx bx-live" x="894" y="92" width="198" height="246" rx="10"/>
+            <text class="t-k" x="910" y="112">04 · RECALL</text>
+            <text class="t-h" x="910" y="136">Grounded recall</text>
+            <text class="t-b" x="910" y="162">HTTP API on loopback</text>
+            <text class="t-b" x="910" y="178">+ one MCP tool, m0:</text>
+            <text class="t-b" x="910" y="194">recall, context, wip,</text>
+            <text class="t-b" x="910" y="210">handoff, remember</text>
+            <text class="t-b" x="910" y="236">Keyword + meaning,</text>
+            <text class="t-b" x="910" y="252">fused by rank</text>
+            <text class="t-b" x="910" y="268">Answers with its source,</text>
+            <text class="t-b" x="910" y="284">or says it can’t</text>
+            <circle class="tg-live" cx="914" cy="319" r="3.5"/><text class="tg-live-t" x="924" y="322.5">LIVE</text>
+
+            <!-- Flow arrows -->
+            <path class="ln" d="M212 128 H252" marker-end="url(#ah-b)"/>
+            <path class="ln-off" d="M212 266 H252" marker-end="url(#ah-a)"/>
+            <path class="ln" d="M434 215 H456" marker-end="url(#ah-b)"/>
+            <path class="ln" d="M666 215 H688" marker-end="url(#ah-b)"/>
+            <path class="ln" d="M870 215 H892" marker-end="url(#ah-b)"/>
+
+            <!-- Recall returns to the tools -->
+            <path class="ln" d="M993 338 V364 H224"/>
+            <path class="ln" d="M224 364 V176"/>
+            <path class="ln" d="M224 364 H214" marker-end="url(#ah-b)"/>
+            <path class="ln" d="M224 176 H214" marker-end="url(#ah-b)"/>
+            <path class="ln-off" d="M224 300 H214" marker-end="url(#ah-a)"/>
+            <rect class="lab-bg" x="252" y="347" width="318" height="14"/>
+            <text class="t-kb" x="256" y="357">RECALL RETURNS TO THE TOOLS WITH ITS SOURCE</text>
+
+            <!-- Stages read and write the store -->
+            <path class="ln-store" d="M343 338 V426" marker-start="url(#ah-g)" marker-end="url(#ah-g)"/>
+            <path class="ln-store" d="M561 338 V426" marker-start="url(#ah-g)" marker-end="url(#ah-g)"/>
+            <path class="ln-store" d="M779 338 V426" marker-start="url(#ah-g)" marker-end="url(#ah-g)"/>
+            <path class="ln-store" d="M993 366 V426" marker-start="url(#ah-g)" marker-end="url(#ah-g)"/>
+            <rect class="lab-bg" x="379" y="372" width="146" height="36"/>
+            <text class="t-k" x="452" y="386" text-anchor="middle">EACH STAGE READS</text>
+            <text class="t-k" x="452" y="401" text-anchor="middle">AND WRITES THE STORE</text>
+
+            <!-- Local storage -->
+            <rect class="bx-store" x="236" y="430" width="872" height="96" rx="10"/>
+            <text class="t-k" x="254" y="454">LOCAL STORAGE · ON DISK, ON YOUR MACHINE</text>
+            <text class="t-s" x="254" y="480">One SQLite file</text>
+            <text class="t-b" x="254" y="498">events, atoms, observations, links</text>
+            <text class="t-s" x="560" y="480">Derived vector index</text>
+            <text class="t-b" x="560" y="498">rebuilt from stored embeddings</text>
+            <text class="t-s" x="846" y="480">Decision ledger</text>
+            <text class="t-b" x="846" y="498">plain markdown, one file each, in git</text>
+            <circle class="tg-live" cx="1046" cy="450" r="3.5"/><text class="tg-live-t" x="1056" y="453.5">LIVE</text>
+          </svg>
+        </div>
+        <p class="arch-hint">Scroll the blueprint sideways. The layer notes below say the same in words.</p>
+        <figcaption class="arch-legend">
+          <span class="st st-live">Live</span><span>running in the lab today</span>
+          <span class="st st-off">Built, off</span><span>code exists, switched off</span>
+          <span class="st st-plan">Planned</span><span>decided, not built</span>
+        </figcaption>
+      </figure>
+
+      <ol class="layers" aria-label="Layer by layer">
+        <li class="layer"><span class="layer-n">01</span><h3>Tools and hooks</h3><div>
+          <p>Claude Code reports session start, tool use, compaction and stop through small hooks that always exit cleanly, so a failure is logged and never blocks the chat. A prompt hook spots your rulings, corrections and delegations and queues them, and can slip a few short, relevant hits into the prompt before the model sees it.</p>
+          <p>Other tools reach M0 through capture plugins and an MCP configuration. Those adapters are built and switched off. Any MCP client can already read through the one <code>m0</code> tool.</p>
+          <div class="st-row"><span class="st st-live">Live: Claude Code</span><span class="st st-off">Built, off: Codex, OpenCode, Cursor</span></div>
+        </div></li>
+        <li class="layer"><span class="layer-n">02</span><h3>Capture and normalizer</h3><div>
+          <p>Every host event is mapped onto one contract: an event name becomes a row kind. Secrets are redacted before anything is queued, and folders you have denied are never captured. If the service is busy, starting or down, the capture client appends to a local spool and the service replays it later. Event ids make replay idempotent, so nothing is stored twice.</p>
+          <div class="st-row"><span class="st st-live">Live</span></div>
+        </div></li>
+        <li class="layer"><span class="layer-n">03</span><h3>Temporal fact and entity store, with a hybrid index</h3><div>
+          <p>Raw events become atoms, one fact per row, with subject, predicate, object, confidence, source and status. A fact can be active, quarantined (reversible, never recalled) or retracted. Repeat sightings are kept as observations. Quiet background tiers build episodes, scenes and a persona profile on a schedule.</p>
+          <p>The index is derived: full-text search plus local embeddings, rebuilt from what is stored and never the source of truth. Model-based extraction of facts from raw conversation is built and switched off until a quality gate passes, and M0 runs without it.</p>
+          <div class="st-row"><span class="st st-live">Live</span><span class="st st-off">Built, off: model extraction</span></div>
+        </div></li>
+        <li class="layer"><span class="layer-n">04</span><h3>Conflict and supersession resolver</h3><div>
+          <p>A newer fact retires an older one only under strict conditions, written out in the next section. Everything else is held with a recorded reason and a link between the two facts. The database itself refuses a supersede that crosses projects or runs backwards in time.</p>
+          <div class="st-row"><span class="st st-live">Live</span></div>
+        </div></li>
+        <li class="layer"><span class="layer-n">05</span><h3>Grounded recall: API and MCP</h3><div>
+          <p>One loopback HTTP API and one MCP tool with modes for recall, context, work in progress, handoff and remember. Recall fuses the keyword and meaning lanes, says how a hit matched, and reports when results were withheld or the engine is not ready. A session-start bundle gives a new session its context in one call.</p>
+          <div class="st-row"><span class="st st-live">Live</span></div>
+        </div></li>
+        <li class="layer"><span class="layer-n">06</span><h3>Local storage</h3><div>
+          <p>One SQLite file holds events, atoms, observations and links. The vector index sits beside it as a derived file. Decisions are separate plain markdown records, one per file, committed to git, so you can read and diff your own history.</p>
+          <div class="st-row"><span class="st st-live">Live</span></div>
+        </div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="time" class="sec p-part" data-part="04" aria-labelledby="h-p-04">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">04</span> Time and truth</p><h2 id="h-p-04" class="sec-title">Why a vector index alone gets changing facts wrong</h2></div>
+        <p class="sec-sub">Plain vector search finds what sounds similar. It has no idea which of two similar statements is newer, which replaced which, or which was only ever a plan.</p>
+      </div>
+      <div class="ex" aria-label="Illustration">
+        <div class="ex-col">
+          <h3>A plain vector index</h3>
+          <p class="ex-q">Query: “which day do we release?”</p>
+          <div class="ex-row"><b>“We release on Fridays.”</b><span class="st">match</span><small>said earlier</small></div>
+          <div class="ex-row"><b>“We release on Tuesdays now.”</b><span class="st">match</span><small>said later</small></div>
+          <p class="ex-cap">Both come back, nearly tied. The model has to guess which one still holds.</p>
+        </div>
+        <div class="ex-col ex-m0">
+          <h3>Coco M0</h3>
+          <p class="ex-q">Query: “which day do we release?”</p>
+          <div class="ex-row"><b>“We release on Tuesdays now.”</b><span class="st st-live">current</span><small>replaces the earlier statement · source attached</small></div>
+          <div class="ex-row is-old"><b>“We release on Fridays.”</b><span class="st st-plan">closed</span><small>kept in history, not offered as current</small></div>
+          <p class="ex-cap">The newer fact closed the older one. The old statement is still there if you ask for the history.</p>
+        </div>
+      </div>
+      <p class="ex-cap" style="margin-top:10px">An illustration of the mechanism, not a transcript.</p>
+
+      <div class="rule-box">
+        <div>
+          <h3>When M0 closes an older fact</h3>
+          <ul>
+            <li><i>a</i><span>The new fact is a state, not a decision.</span></li>
+            <li><i>b</i><span>It is about the same project, subject and attribute.</span></li>
+            <li><i>c</i><span>Its event time is strictly later.</span></li>
+          </ul>
+          <p>Only when all of that holds does the older fact close, and a supersedes link is written in the same transaction.</p>
+        </div>
+        <div>
+          <h3>When it does not</h3>
+          <ul>
+            <li><i>·</i><span>Anything else is held, with the reason recorded and a contradicts link between the two.</span></li>
+            <li><i>·</i><span>A decision never supersedes by slot. It can retire an earlier decision only through an explicit reverse link (planned).</span></li>
+            <li><i>·</i><span>Database triggers refuse a supersede that crosses projects or runs backwards in time.</span></li>
+          </ul>
+          <p>The current view is one shared query: active, and not superseded. An as-of-time view is built, and no route exposes it yet.</p>
+        </div>
+      </div>
+
+      <table class="clocks">
+        <thead><tr><th scope="col">Clock</th><th scope="col">What it answers</th><th scope="col">Status</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Event time</th><td>When the source event happened. Today that is its capture time.</td><td><span class="st st-live">Live</span></td></tr>
+          <tr><th scope="row">Record time</th><td>When M0 wrote the fact down.</td><td><span class="st st-live">Live</span></td></tr>
+          <tr><th scope="row">Observed time</th><td>Each later time the same fact was seen again.</td><td><span class="st st-live">Live</span></td></tr>
+          <tr><th scope="row">Decision date</th><td>When you made a ruling.</td><td><span class="st st-live">Live</span></td></tr>
+          <tr><th scope="row">Valid time</th><td>When a fact is true out in the world. A date written in prose is stored apart and does not drive supersession yet.</td><td><span class="st st-plan">Planned</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="recall" class="sec p-part" data-part="05" aria-labelledby="h-p-05">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">05</span> Recall</p><h2 id="h-p-05" class="sec-title">Memory out, with its source</h2></div>
+        <p class="sec-sub">Recall is hybrid by design, runs on your machine, and would rather say “not sure” than make something up.</p>
+      </div>
+      <ol class="flow" aria-label="How recall works">
+        <li><span class="flow-n">01</span><h3>Ask</h3><p>A prompt hook, the local API or the MCP tool asks what M0 knows about the task in front of you.</p></li>
+        <li><span class="flow-n">02</span><h3>Two lanes</h3><p>A full-text keyword lane and a local semantic lane search in parallel. No cloud call is involved.</p></li>
+        <li><span class="flow-n">03</span><h3>Fuse and rank</h3><p>The lanes are fused by rank. Among decisions on the same subject, the newer one comes first and the older is marked.</p></li>
+        <li><span class="flow-n">04</span><h3>Answer with a source</h3><p>Each hit says how it matched and where it came from. If nothing clears the bar, M0 abstains instead of bluffing.</p></li>
+      </ol>
+      <div class="two">
+        <div class="note-card">
+          <h3>Push-recall in the prompt</h3>
+          <p>Before the model sees your prompt, M0 can inject a few short hits from separate lanes: decisions you made, questions still open, and topic notes. The hook has a hard time limit and fails open. If M0 is slow, your prompt goes through untouched. Secrets are redacted, and the prompt itself is never logged.</p>
+          <div class="st-row"><span class="st st-live">Live</span></div>
+        </div>
+        <div class="note-card">
+          <h3>Built, waiting to be switched on</h3>
+          <p>A sessions lane that answers “what did we do on X last week” from your own local transcripts. A constitution: the standing rules you have confirmed, rendered into one file and injected into every new chat. Recency weighting for recall. Each is built and switched off.</p>
+          <div class="st-row"><span class="st st-off">Built, off</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ledger" class="sec p-part" data-part="06" aria-labelledby="h-p-06">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">06</span> Decisions</p><h2 id="h-p-06" class="sec-title">The ruling you made stays made</h2></div>
+        <p class="sec-sub">Recall alone becomes a commodity. A confirmed trail of decisions does not, so M0 keeps one as its own record.</p>
+      </div>
+      <div class="two" style="margin-top:0">
+        <div class="note-card">
+          <h3>A ledger you can read</h3>
+          <p>Every decision is one plain markdown file outside the database, committed to git. A new one starts as proposed, and you confirm it or withdraw it with a reason. An active decision can later be superseded.</p>
+          <ul class="states" aria-label="Decision states"><li>proposed</li><li class="arrow" aria-hidden="true">→</li><li>active</li><li class="arrow" aria-hidden="true">→</li><li>superseded</li><li class="arrow" aria-hidden="true">or</li><li>withdrawn</li></ul>
+          <div class="st-row"><span class="st st-live">Live</span></div>
+        </div>
+        <div class="note-card">
+          <h3>Contradictions are caught at the door</h3>
+          <p>Confirming a decision is refused when an active one in the same scope shares a tag with it, so two rulings cannot quietly disagree. A daily, read-only check verifies that each ruling attributed to you carries a word-for-word quote from the transcript. Enforcing that check is planned.</p>
+          <div class="st-row"><span class="st st-live">Live: confirm and check</span><span class="st st-plan">Planned: enforcement</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="connectors" class="sec p-part" data-part="07" aria-labelledby="h-p-07">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">07</span> Hooks and connectors</p><h2 id="h-p-07" class="sec-title">Meant to connect to any tool</h2></div>
+        <p class="sec-sub">The aim is a memory any product can plug into. Today one host is live. Here is exactly where each one stands.</p>
+      </div>
+      <table class="hosts">
+        <thead><tr><th scope="col">Tool</th><th scope="col">How it connects</th><th scope="col">Status</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Claude Code</th><td>Hooks, a prompt hook and the MCP tool.</td><td><span class="st st-live">Live</span></td></tr>
+          <tr><th scope="row">Codex</th><td>A notify hook into the local spool. MCP through its config file.</td><td><span class="st st-off">Built, off</span></td></tr>
+          <tr><th scope="row">OpenCode</th><td>A capture plugin into the spool. MCP through its config.</td><td><span class="st st-off">Built, off</span></td></tr>
+          <tr><th scope="row">Cursor</th><td>MCP plus a rules marker and memory scripts.</td><td><span class="st st-off">Built, off</span></td></tr>
+          <tr><th scope="row">Grok</th><td>A read-only bridge to the session-start context over a private local socket.</td><td><span class="st st-off">Built, off</span></td></tr>
+          <tr><th scope="row">Coco Hermes</th><td>Shares M0’s single hook rather than adding a second one.</td><td><span class="st st-off">Built, off</span></td></tr>
+          <tr><th scope="row">Coco Teams NG</th><td>Calls the same API, each user against their own M0.</td><td><span class="st st-plan">Planned</span></td></tr>
+        </tbody>
+      </table>
+      <div class="two">
+        <div class="note-card">
+          <h3>Where it is going</h3>
+          <p>Thin per-tool adapters on one published event contract, with MCP as the universal surface, so a new tool needs only a small adapter and no special logic in the service. A versioned, open export of your memory as markdown, so it can leave for any system. These are plans.</p>
+          <div class="st-row"><span class="st st-plan">Planned</span></div>
+        </div>
+        <div class="note-card">
+          <h3>Said plainly</h3>
+          <p>There is no import from or export to other memory systems yet, and none has been promised. The connector design is a proposal, not a ruling.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="privacy" class="sec p-part" data-part="08" aria-labelledby="h-p-08">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">08</span> Privacy</p><h2 id="h-p-08" class="sec-title">What never leaves your Mac</h2></div>
+        <p class="sec-sub">Local-first is the structure of the system, not a setting.</p>
+      </div>
+      <ul class="lock">
+        <li><i aria-hidden="true"></i><span><b>Loopback only.</b> The service binds to the local interface, and every route except health needs a token.</span></li>
+        <li><i aria-hidden="true"></i><span><b>Local embeddings.</b> The embedding address must be local. Meaning-search never calls a cloud service.</span></li>
+        <li><i aria-hidden="true"></i><span><b>No cloud backend by default.</b> With none chosen, no captured text leaves the machine. Anything that sends text off the machine is opt-in and gated.</span></li>
+        <li><i aria-hidden="true"></i><span><b>Denied folders stay dark.</b> Sessions in folders you deny are never captured, and the list is checked on every call.</span></li>
+        <li><i aria-hidden="true"></i><span><b>Secrets are redacted</b> before anything is queued, and the prompt itself is never logged.</span></li>
+        <li><i aria-hidden="true"></i><span><b>Nothing trains a model.</b> Nothing M0 holds is sent to train any model. Your live store never goes into a repository or a test fixture.</span></li>
+      </ul>
+      <p class="stand-note">A model is optional. M0 runs with no model at all today. A small local model is the intended default, and your own API key or a company gateway are planned opt-ins.</p>
+    </div>
+  </section>
+
+  <section id="status" class="sec p-part" data-part="09" aria-labelledby="h-p-09">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">09</span> Where it stands</p><h2 id="h-p-09" class="sec-title">Honest status</h2></div>
+        <p class="sec-sub">Private beta, used daily inside Coco Research. Nothing here is a public release.</p>
+      </div>
+      <div class="stand">
+        <div class="stand-live">
+          <h3><span class="sh sh-dot" aria-hidden="true"></span>Live</h3>
+          <ul>
+            <li>Claude Code capture hooks and the prompt hook</li>
+            <li>Local spool with idempotent replay</li>
+            <li>Atoms, observations, episodes and links in one local store</li>
+            <li>Supersession gate and contradiction holds</li>
+            <li>Hybrid recall over a loopback API and the MCP tool</li>
+            <li>Decision ledger with newest-wins recall</li>
+          </ul>
+        </div>
+        <div class="stand-off">
+          <h3><span class="sh sh-sq" aria-hidden="true"></span>Built, switched off</h3>
+          <ul>
+            <li>Codex, OpenCode and Cursor adapters</li>
+            <li>Model-based fact extraction and its keep-or-drop judge</li>
+            <li>Sessions lane and the constitution file</li>
+            <li>As-of-time view and recency weighting</li>
+            <li>Verified install, update and rollback</li>
+          </ul>
+        </div>
+        <div class="stand-plan">
+          <h3><span class="sh sh-ring" aria-hidden="true"></span>Planned</h3>
+          <ul>
+            <li>World time for facts</li>
+            <li>Witness confirmation of rulings and enforced quote checks</li>
+            <li>Plan-lint: a warning when a plan contradicts a recorded decision</li>
+            <li>One adapter contract and an open export</li>
+            <li>Coco Teams NG on the same API</li>
+          </ul>
+        </div>
+      </div>
+      <p class="stand-note">Statuses follow the engineering record of 20 October 2026. No recall, accuracy or speed numbers are published for M0.</p>
+
+      <div class="stage-card" style="margin-top:28px">
+        <span class="stage-badge stage-chip stage-chip-beta" data-stage="beta">Private beta</span>
+        <dl class="facts-grid">
+          <div class="fact"><dt>Stage</dt><dd>Private beta, used daily inside Coco Research</dd></div>
+          <div class="fact"><dt>Availability</dt><dd>No public download today</dd></div>
+          <div class="fact"><dt>Licence</dt><dd>Private: not open source and not publicly licensed.</dd></div>
+          <div class="fact"><dt>Platforms</dt><dd>Runs locally on your own machine</dd></div>
+          <div class="fact"><dt>Privacy</dt><dd>Project memory stays on your computer, with no cloud relay</dd></div>
+        </dl>
+        <div class="kns" aria-label="Key facts">
+          <div class="kn"><span class="kn-num">Cross-tool</span><span class="kn-lbl">One memory shared by your tools</span></div>
+          <div class="kn"><span class="kn-num">On-device</span><span class="kn-lbl">Kept locally on your own machine</span></div>
+          <div class="kn"><span class="kn-num">Private beta</span><span class="kn-lbl">Used daily in the lab</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="links" class="sec p-part" data-part="10" aria-labelledby="h-p-10">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">10</span> Questions</p><h2 id="h-p-10" class="sec-title">Private, in the lab</h2></div>
+      </div>
+      <div class="try-panel">
+        <p class="try-lead">Private, in the lab — no public download yet. Coco M0 is used daily inside Coco Research.</p>
+        <p class="try-note">Questions: <a class="inline" href="mailto:product@cocoresearch.org">product@cocoresearch.org</a></p>
+      </div>
+      <div class="links-row" style="margin-top:18px">
+        <a class="link-pill" href="../products/">Browse all 10 products</a>
+        <a class="link-pill" href="../lab/">In the lab</a>
+        <a class="link-pill" href="../whats-new/">What’s new</a>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <a class="brand" href="../"><i aria-hidden="true"></i><span>Coco Research</span></a>
+      <p>Governed AI, built in the open. Built by <a class="inline" href="../rijul-kalra/">Rijul Kalra</a>.</p>
+      <p>product@cocoresearch.org · <a class="inline" href="mailto:product@cocoresearch.org">Email</a></p>
+    </div>
+    <nav class="foot-cols" aria-label="Footer">
+      <div><h2>Products</h2><ul>
+          <li><a href="../coco/">Coco Super Intelligence</a></li>
+          <li><a href="../voice/">Coco Voice</a></li>
+      </ul></div>
+      <div><h2>In the lab</h2><ul>
+          <li><a href="../heliopause/">Heliopause by Coco Research</a></li>
+          <li><a href="../signal/">Signal</a></li>
+          <li><a href="../mira/">Mira</a> <span class="sn-badge">Archived</span></li>
+          <li><a href="../jev-use/">jev-use</a></li>
+          <li><a href="../m0/">Coco M0</a></li>
+          <li><a href="../hermes/">Coco Hermes</a></li>
+          <li><a href="../teams-ng/">Coco Teams NG</a></li>
+          <li><a href="../aloomannu/">Aloo Mannu</a></li>
+      </ul></div>
+      <div><h2>Company</h2><ul>
+          <li><a href="../products/">All products</a></li>
+          <li><a href="../lab/">In the lab</a></li>
+          <li><a href="../whats-new/">What's new</a></li>
+          <li><a href="../rijul-kalra/">Rijul Kalra</a></li>
+          <li><a href="../guides/manage-multiple-ai-coding-agents/">Guides</a></li>
+          <li><a href="https://github.com/coco-research/coco/releases">Coco changelog</a></li>
+      </ul></div>
+      <div><h2>Code</h2><ul>
+          <li><a href="https://github.com/coco-research">GitHub</a></li>
+          <li><a href="https://www.npmjs.com/package/cocosuperintelligence">npm</a></li>
+      </ul></div>
+    </nav>
+  </div>
+  <div class="foot-base">
+    <p>© 2026 Coco Research</p>
+  </div>
+</footer>
+</body>
+</html>

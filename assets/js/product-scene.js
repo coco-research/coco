@@ -1,4 +1,5 @@
 // Shared 3D Three.js stage for Coco Research product pages.
+// ES module: loaded with type="module"; top-level names are module-scoped.
 // Uses the same point, hairline and anamorphic flare language as world.js,
 // rendered in Signal Dark (#03050b / #2f4bff) and Signal Light (#f3f2ee / #1234ff)
 // with zero runtime network requests beyond the pinned three.js module.
@@ -114,25 +115,21 @@ void main() {
   else gl_FragColor = vec4((vec3(0.36, 0.55, 1.0) * sx * 0.72 + vec3(1.0) * sx2 * 0.52) * edge, 1.0);
 }`;
 
-// The shared top bar (site-nav.js) owns theme storage, theme toggles, and meta[name="theme-color"].
-// This file only reads data-theme / prefers-color-scheme and owns the 3D Pause control.
-function resolveTheme() {
-  const explicit = document.documentElement.getAttribute('data-theme');
-  if (explicit === 'light' || explicit === 'dark') return explicit;
-  try { return matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; } catch (e) { return 'dark'; }
-}
+// The shared top bar (site-nav.js) owns theme storage, theme resolution, theme toggles, and meta[name="theme-color"].
+// This file reads window.cocoTheme.current() and owns the 3D Pause control.
+const resolveTheme = () => (window.cocoTheme ? window.cocoTheme.current() : 'dark');
 
 // Per-page 3D pause: scoped to this pathname in sessionStorage so pausing /voice/ never touches / or other pages.
 const PAUSE_KEY = 'coco-3d-pause:' + location.pathname;
 function readPaused() {
   let stored = null;
-  try { stored = sessionStorage.getItem(PAUSE_KEY); } catch (e) {}
+  try { stored = sessionStorage.getItem(PAUSE_KEY); } catch (e) { /* private mode / storage blocked */ }
   if (stored === '1') return true;
   if (stored === '0') return false;
   try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; }
 }
 function writePaused(paused) {
-  try { sessionStorage.setItem(PAUSE_KEY, paused ? '1' : '0'); } catch (e) {}
+  try { sessionStorage.setItem(PAUSE_KEY, paused ? '1' : '0'); } catch (e) { /* private mode: this tab only */ }
 }
 
 // Labels swap text only (no aria-pressed): WCAG 2.2.2 pause control and a label that changes with state.
@@ -155,7 +152,7 @@ function legacyCopy(text) {
     ta.value = text; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
     document.body.appendChild(ta); ta.select();
     let ok = false;
-    try { ok = document.execCommand('copy'); } catch (e) {}
+    try { ok = document.execCommand('copy'); } catch (e) { /* execCommand unsupported */ }
     ta.remove();
     if (ok) resolve(); else reject(new Error('copy failed'));
   });
@@ -250,13 +247,14 @@ async function startScene(initialTheme, initialPaused) {
   scene.add(dust, wires, shape, flareStreak, flareGlow);
 
   const blendMats = [dustMat, wireMat, shapeMat, flareGlowMat, flareStreakMat];
+  const flareMeshes = [flareGlow, flareStreak];
   let vw = 1, vh = 1, camZ = 24, portrait = false, raf = 0, disposed = false, still = initialPaused;
   const ptr = { x: 0, y: 0 }, flarePos = new THREE.Vector3(), proj = new THREE.Vector3();
 
-  // Fallback matches site-nav.js MOBILE_MAX; every page loads site-nav.js so data-mobile-max is always set.
-  const mobileMax = Number(docEl.dataset.mobileMax) || 860;
+  // Read the mobile breakpoint published by site-nav.js on <html data-mobile-max>.
+  const mobileMax = Number(docEl.dataset.mobileMax) || 0;
   const resize = () => {
-    vw = Math.max(1, window.innerWidth); vh = Math.max(1, window.innerHeight); portrait = vw <= mobileMax;
+    vw = Math.max(1, window.innerWidth); vh = Math.max(1, window.innerHeight); portrait = mobileMax > 0 && vw <= mobileMax;
     const dpr = Math.min(window.devicePixelRatio || 1, 2), aspect = vw / vh;
     renderer.setPixelRatio(dpr); renderer.setSize(vw, vh, false); camera.aspect = aspect;
     const tanV = Math.tan((camera.fov * Math.PI) / 360), tanH = tanV * aspect;
@@ -289,7 +287,7 @@ async function startScene(initialTheme, initialPaused) {
     // Light Paper: keep the horizontal flare in the right half so it never crosses the hero copy column.
     let streakX = 1;
     if (isLight) streakX = portrait ? 0.5 : 0.52;
-    for (const m of [flareGlow, flareStreak]) { m.position.copy(flarePos); m.quaternion.copy(camera.quaternion); m.scale.set(fs, fs, 1); }
+    for (const m of flareMeshes) { m.position.copy(flarePos); m.quaternion.copy(camera.quaternion); m.scale.set(fs, fs, 1); }
     flareStreak.scale.set(fs * streakX, fs, 1);
     proj.copy(flarePos).project(camera);
     bgMat.uniforms.uGlowPos.value.set(proj.x * 0.5 + 0.5, proj.y * 0.5 + 0.5);
@@ -305,10 +303,10 @@ async function startScene(initialTheme, initialPaused) {
     renderFrame(u.uTime.value);
   };
 
-  const tStart = performance.now();
-  const loop = (now) => { if (disposed || still || document.hidden) return; renderFrame(1.8 + (now - tStart) * 0.001); raf = requestAnimationFrame(loop); };
+  let tBase = performance.now();
+  const loop = (now) => { if (disposed || still || document.hidden) return; renderFrame(1.8 + (now - tBase) * 0.001); raf = requestAnimationFrame(loop); };
   const pause = () => { still = true; cancelAnimationFrame(raf); raf = 0; renderFrame(1.8); };
-  const play = () => { if (!still || disposed) return; still = false; cancelAnimationFrame(raf); if (!document.hidden) raf = requestAnimationFrame(loop); };
+  const play = () => { if (!still || disposed) return; still = false; tBase = performance.now(); cancelAnimationFrame(raf); if (!document.hidden) raf = requestAnimationFrame(loop); };
 
   const onResize = () => { if (disposed) return; resize(); renderFrame(u.uTime.value); };
   const onPointer = (e) => { ptr.x = (e.clientX / Math.max(1, vw) - 0.5) * 2; ptr.y = -(e.clientY / Math.max(1, vh) - 0.5) * 2; };
@@ -356,7 +354,7 @@ function boot() {
     if (next === theme) return;
     theme = next; if (api) api.setTheme(theme);
   };
-  try { new MutationObserver(follow).observe(docEl, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) {}
+  try { new MutationObserver(follow).observe(docEl, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) { /* MutationObserver unsupported */ }
   document.addEventListener('coco:themechange', follow);
 
   const ensureScene = async () => {
@@ -387,22 +385,16 @@ function boot() {
 
   wireCopy();
   try {
-    matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
-      if (docEl.getAttribute('data-theme')) return;
-      theme = resolveTheme(); if (api) api.setTheme(theme);
-    });
-  } catch (e) {}
-  try {
     matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (ev) => {
       let stored = null;
-      try { stored = sessionStorage.getItem(PAUSE_KEY); } catch (e) {}
+      try { stored = sessionStorage.getItem(PAUSE_KEY); } catch (e) { /* private mode / storage blocked */ }
       if (stored !== null) return;
       paused = ev.matches;
       docEl.classList.toggle('still', paused);
       syncButtons(paused);
       if (api) { if (paused) api.pause(); else api.play(); }
     });
-  } catch (e) {}
+  } catch (e) { /* matchMedia listener unsupported */ }
 
   docEl.classList.add('ready');
   // Three.js loads only now, after every control is wired. Paused/reduced motion still renders one static frame.

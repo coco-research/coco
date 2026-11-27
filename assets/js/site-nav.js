@@ -14,7 +14,7 @@
   const doc = document;
   const root = doc.documentElement;
   const THEME_KEY = 'coco-theme';
-  // Single breakpoint shared with product-scene.js via data-mobile-max (matches @media (max-width: 860px) in CSS).
+  // Single breakpoint shared with scene scripts via data-mobile-max (matches @media (max-width: 860px) in CSS).
   const MOBILE_MAX = 860;
   root.dataset.mobileMax = String(MOBILE_MAX);
   const $ = (sel, scope) => (scope || doc).querySelector(sel);
@@ -37,6 +37,7 @@
     if (attr === 'light' || attr === 'dark') return attr;
     return lightMq && lightMq.matches ? 'light' : 'dark';
   }
+  window.cocoTheme = Object.freeze({ current: currentTheme });
   // Applied as early as this script runs, so a saved choice wins before the toggle is ever touched.
   if (!locked && root.getAttribute('data-theme') !== 'light' && root.getAttribute('data-theme') !== 'dark') {
     const saved = storedTheme();
@@ -66,7 +67,11 @@
       try { doc.dispatchEvent(new CustomEvent('coco:themechange', { detail: { theme: next } })); } catch (err) { /* old browser */ }
     });
     if (lightMq && lightMq.addEventListener) {
-      lightMq.addEventListener('change', () => { if (!root.hasAttribute('data-theme')) syncThemeButtons(); });
+      lightMq.addEventListener('change', () => {
+        if (root.hasAttribute('data-theme')) return;
+        syncThemeButtons();
+        try { doc.dispatchEvent(new CustomEvent('coco:themechange', { detail: { theme: currentTheme() } })); } catch (err) { /* old browser */ }
+      });
     }
   }
 

@@ -1,0 +1,364 @@
+{
+  "lab": {
+    "m0": {
+      "slug": "m0",
+      "meta_description": "Coco M0 keeps project context and prior decisions locally on your own machine across AI coding tools. Private beta; not open source or publicly licensed.",
+      "og_image": "https://cocoresearch.org/assets/img/og-coco-research.png",
+      "og_image_alt": "Coco Research",
+      "diagram": "vault",
+      "kns": [
+        [
+          "Cross-tool",
+          "Context carries across coding sessions"
+        ],
+        [
+          "On-device",
+          "Kept locally on your own machine"
+        ],
+        [
+          "Private beta",
+          "Used daily in the lab"
+        ]
+      ],
+      "does_for_you": "Coco M0 keeps project context and earlier decisions on your own computer, so the AI coding tools you use on that machine do not start from scratch each session.",
+      "who_detail": "You move between more than one AI coding tool on the same machine and keep re-explaining what you already decided. You want that memory kept locally, under your control.",
+      "does": [
+        [
+          "Keeps context on your machine",
+          "Project notes and prior decisions stay on your own computer, with no cloud sync."
+        ],
+        [
+          "Carries work across tools",
+          "Switch between coding tools on the same machine without re-explaining earlier decisions."
+        ],
+        [
+          "Stays under your control",
+          "The memory sits under your own user account, and you choose which tools take part."
+        ]
+      ],
+      "status": [
+        [
+          "Stage",
+          "Private beta, used daily inside Coco Research"
+        ],
+        [
+          "Availability",
+          "No public download today"
+        ],
+        [
+          "Licence",
+          "Private: not open source and not publicly licensed."
+        ],
+        [
+          "Platforms",
+          "Runs locally on your own machine"
+        ],
+        [
+          "Privacy",
+          "Project memory stays on your computer, with no cloud relay"
+        ]
+      ],
+      "next": [
+        [
+          "Public release: not dated",
+          "There is no public build and no announced date. This page says so until that changes."
+        ],
+        [
+          "Details stay private for now",
+          "Detailed capabilities and screenshots are not published while it is private."
+        ]
+      ],
+      "stage": {
+        "chip": "Private beta",
+        "cls": "beta"
+      },
+      "slot_label": "Private beta — no public screenshots yet",
+      "licence_label": "Private",
+      "links": [],
+      "try_above": {
+        "label": "Private, in the lab — no public download yet",
+        "href": "",
+        "kind": "static",
+        "note": ""
+      },
+      "try": {
+        "heading": "Private, in the lab",
+        "lead": "Private, in the lab — no public download yet. Coco M0 is used daily inside Coco Research.",
+        "note": "Questions: product@cocoresearch.org"
+      }
+    },
+    "hermes": {
+      "slug": "hermes",
+      "meta_description": "Coco Hermes answers questions over your own local files with exact verbatim quotes, or says plainly it cannot. Private beta, not publicly licensed.",
+      "og_image": "https://cocoresearch.org/assets/img/og-coco-research.png",
+      "og_image_alt": "Coco Research",
+      "diagram": "folios",
+      "kns": [
+        [
+          "Exact quote",
+          "Sentences tied to your source files"
+        ],
+        [
+          "Or refuse",
+          "Says plainly when files lack the answer"
+        ],
+        [
+          "On-device",
+          "Runs locally on your own machine"
+        ]
+      ],
+      "does_for_you": "Coco Hermes indexes documents on your own computer and answers a question with the exact sentence from your files and a link to its source. If your files do not answer it, it says so instead of guessing.",
+      "who_detail": "You work from your own documents, such as notes, contracts or research, and a plausible-sounding wrong answer would cost you more than no answer.",
+      "does": [
+        [
+          "Point it at local folders",
+          "Choose documents on your machine without uploading files off the computer."
+        ],
+        [
+          "Ask a direct question",
+          "Candidate passages are searched locally, with no external network calls."
+        ],
+        [
+          "Quote verbatim or refuse",
+          "Every answer cites the exact sentence in your file, or states plainly that the documents do not answer it."
+        ]
+      ],
+      "status": [
+        [
+          "Stage",
+          "Private beta, no public build"
+        ],
+        [
+          "Availability",
+          "No public installer today"
+        ],
+        [
+          "Licence",
+          "Private: not open source and not publicly licensed."
+        ],
+        [
+          "Platforms",
+          "Runs locally on your own machine"
+        ],
+        [
+          "Privacy",
+          "Documents are searched locally, with no external network calls"
+        ]
+      ],
+      "next": [
+        [
+          "Public release: not dated",
+          "There is no public installer and no announced date."
+        ],
+        [
+          "Details stay private for now",
+          "Detailed capabilities and screenshots are not published while it is private."
+        ]
+      ],
+      "stage": {
+        "chip": "Private beta",
+        "cls": "beta"
+      },
+      "slot_label": "Private beta — no public screenshots yet",
+      "licence_label": "Private",
+      "links": [],
+      "try_above": {
+        "label": "Private, in the lab — no public download yet",
+        "href": "",
+        "kind": "static",
+        "note": ""
+      },
+      "try": {
+        "heading": "Private, in the lab",
+        "lead": "Private, in the lab — no public download yet. Coco Hermes runs locally in private beta.",
+        "note": "Questions: product@cocoresearch.org"
+      }
+    },
+    "teams-ng": {
+      "slug": "teams-ng",
+      "meta_description": "Coco Teams NG is a local-first console for hiring, briefing, and reviewing a team of specialist AI members. Private beta, in development in the lab.",
+      "og_image": "https://cocoresearch.org/assets/img/og-coco-research.png",
+      "og_image_alt": "Coco Research",
+      "diagram": "council",
+      "kns": [
+        [
+          "Role roster",
+          "Specialists with explicit scopes"
+        ],
+        [
+          "Team chat",
+          "Direct multi-role work in one console"
+        ],
+        [
+          "Private beta",
+          "In development in the lab"
+        ]
+      ],
+      "does_for_you": "Coco Teams NG is a console for organising AI specialists by role. You hire the members you need, brief them on project work in one place, and review what they produce before it lands.",
+      "who_detail": "You want more than one undifferentiated chat thread: distinct roles with clear scopes, briefs you can inspect, and a calm place to review the results.",
+      "does": [
+        [
+          "Hire distinct roles",
+          "Assemble AI specialists with explicit scopes rather than one undifferentiated chat thread."
+        ],
+        [
+          "Brief in one console",
+          "Hand structured tasks to the right member and keep every brief inspectable."
+        ],
+        [
+          "Review work before it lands",
+          "Check outputs and open decisions from one calm view on your machine."
+        ]
+      ],
+      "status": [
+        [
+          "Stage",
+          "Private beta, in development"
+        ],
+        [
+          "Availability",
+          "No public build today"
+        ],
+        [
+          "Licence",
+          "Private: not open source and not publicly licensed."
+        ],
+        [
+          "Platforms",
+          "Runs locally on your own machine"
+        ],
+        [
+          "Privacy",
+          "Local-first: the console runs on your own computer"
+        ]
+      ],
+      "next": [
+        [
+          "Public release: not dated",
+          "There is no public build and no announced date."
+        ],
+        [
+          "Still in development",
+          "It is being built inside Coco Research; capabilities are not published yet."
+        ]
+      ],
+      "stage": {
+        "chip": "Private beta",
+        "cls": "beta"
+      },
+      "slot_label": "Private beta — no public screenshots yet",
+      "licence_label": "Private",
+      "links": [],
+      "try_above": {
+        "label": "Private, in the lab — no public download yet",
+        "href": "",
+        "kind": "static",
+        "note": ""
+      },
+      "try": {
+        "heading": "Private, in the lab",
+        "lead": "Private, in the lab — no public download yet. Coco Teams NG is in private beta.",
+        "note": "Questions: product@cocoresearch.org"
+      }
+    },
+    "aloomannu": {
+      "id": "aloomannu",
+      "slug": "aloomannu",
+      "name": "Aloo Mannu",
+      "tag": "Private, in the lab",
+      "description": "The local message and wake layer for coding agents on your machine.",
+      "meta_description": "Aloo Mannu is the local message and wake layer for coding agents on your own machine, routing asks and replies through plain files and hooks.",
+      "og_image": "https://cocoresearch.org/assets/img/og-coco-research.png",
+      "og_image_alt": "Coco Research",
+      "diagram": "router",
+      "cats_stage": {
+        "tagline": "Good conversations start here.",
+        "story": "Named after two cats at home: one calls out (\"ow ow\"), and the other answers (\"meh\") and comes over."
+      },
+      "kns": [
+        [
+          "Local-only",
+          "Files and hooks on one machine"
+        ],
+        [
+          "No network",
+          "Zero cloud relays or remote servers"
+        ],
+        [
+          "No models",
+          "Deterministic message routing"
+        ]
+      ],
+      "does_for_you": "Aloo Mannu routes asks, replies and updates between coding agent sessions on your own machine through local files and tool hooks, wakes the session that needs to answer, and keeps one clear record of open asks.",
+      "who_detail": "You run more than one coding agent session on the same machine and want them to pass work to each other without a cloud service, with nothing left unanswered.",
+      "does": [
+        [
+          "Send an addressed ask or update",
+          "Write a structured message from one coding agent session to another on your computer."
+        ],
+        [
+          "Deliver through local hooks",
+          "Tool hooks surface pending messages in the receiving session without cloud polling."
+        ],
+        [
+          "Close every open ask",
+          "Open asks stay visible locally until a matching reply closes them."
+        ]
+      ],
+      "status": [
+        [
+          "Stage",
+          "Private beta, in daily lab use"
+        ],
+        [
+          "Availability",
+          "Not published, no public download"
+        ],
+        [
+          "Licence",
+          "Private: not open source and not publicly licensed."
+        ],
+        [
+          "Platforms",
+          "Local files and hooks on one machine, Python standard library"
+        ],
+        [
+          "Privacy",
+          "No network, no cloud relays, no models; deterministic message routing"
+        ]
+      ],
+      "next": [
+        [
+          "Public release: not dated",
+          "It is not published and no date is announced."
+        ],
+        [
+          "Details stay private for now",
+          "Detailed capabilities and screenshots are not published while it is private."
+        ]
+      ],
+      "for_you": "The local message and wake layer for coding agents on your machine.",
+      "who_for": "Developers running more than one coding agent session on the same machine.",
+      "licence_short": "Private",
+      "open_source": false,
+      "stage": {
+        "chip": "Private beta",
+        "cls": "beta"
+      },
+      "slot_label": "Private beta — no public screenshots yet",
+      "licence_label": "Private",
+      "links": [],
+      "try_above": {
+        "label": "Private, in the lab — no public download yet",
+        "href": "",
+        "kind": "static",
+        "note": ""
+      },
+      "try": {
+        "heading": "Private, in the lab",
+        "lead": "Private, in the lab — no public download yet. Aloo Mannu is in daily lab use.",
+        "note": "Questions: product@cocoresearch.org"
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+[
+  {
+    "claim": "Aloo Mannu is the local message and wake layer for coding agents, routing asks, replies and updates through local files and hooks with one clear record of open asks.",
+    "section": "what-it-is",
+    "source": "plan:aloomannu-overview"
+  },
+  {
+    "claim": "Details soon for public capability documentation alongside the open release of Aloo Mannu.",
+    "section": "capabilities",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Details soon for release milestones when Aloo Mannu opens publicly.",
+    "section": "cooking",
+    "source": "gap:details-soon"
+  },
+  {
+    "claim": "Private beta in daily lab use; not yet published publicly.",
+    "section": "stage",
+    "source": "plan:aloomannu-private-beta"
+  },
+  {
+    "claim": "Launch target: Not dated yet.",
+    "section": "when",
+    "source": "launch-window:not-dated"
+  }
+]

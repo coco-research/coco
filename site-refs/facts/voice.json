@@ -1,0 +1,57 @@
+[
+  {
+    "claim": "Coco Voice is private speech-to-text on your own computer: hold a key to dictate into the app you have open, tidy transcripts with a local model, and keep cited meeting notes on disk with no account and no subscription.",
+    "section": "what-it-is",
+    "source": "voice:README.md:35"
+  },
+  {
+    "claim": "Push-to-talk on any app: Option+Space on macOS, Ctrl+Space on Windows and Linux, or toggle mode. Recognition works offline once your model is downloaded.",
+    "section": "capabilities",
+    "source": "voice:README.md:86"
+  },
+  {
+    "claim": "Pick your own open speech model, including Whisper, Parakeet and Moonshine. Each download shows its licence and is checked against a pinned SHA-256 before use.",
+    "section": "capabilities",
+    "source": "voice:CHANGELOG.md:34"
+  },
+  {
+    "claim": "On-device clean-up and custom words: a local Qwen3-4B model on Mac tidies text and drops spoken self-corrections such as 'scratch that', alongside custom vocabulary and local history.",
+    "section": "capabilities",
+    "source": "voice:CHANGELOG.md:53"
+  },
+  {
+    "claim": "Dedicated Meetings screens and local BM25 cited Q&A: grouped Home, Meetings and Voice desktop screens with live meeting recording controls, dual-track speaker view, segment citations, cross-meeting to-dos, and local SQLite BM25 cited meeting Q&A on disk.",
+    "section": "capabilities",
+    "source": "voice:pr:288"
+  },
+  {
+    "claim": "Private by design: dictated text never goes into log files, app data stays private to your user account, the paste is skipped while macOS secure input is on, and if a paste fails the text stays on your clipboard.",
+    "section": "capabilities",
+    "source": "voice:CHANGELOG.md:78"
+  },
+  {
+    "claim": "Installers for macOS (Apple Silicon and Intel), Windows (x64) and Linux (AppImage, deb, rpm on x86_64 and arm64), plus a one-command install on Apple Silicon Macs and 22 UI languages.",
+    "section": "capabilities",
+    "source": "voice:README.md:43"
+  },
+  {
+    "claim": "Clean-up on out of the box, filler-word removal that follows the language you speak (and can be switched off), and history limits that do what they say.",
+    "section": "cooking",
+    "source": "voice:README.md:103"
+  },
+  {
+    "claim": "Per-app profiles: tone, capitals and punctuation follow the app in front, and apps you block are never dictated into.",
+    "section": "cooking",
+    "source": "voice:README.md:110"
+  },
+  {
+    "claim": "Released: v0.20.9 is live on GitHub Releases (16 tagged releases published across macOS, Windows x64, and Linux).",
+    "section": "stage",
+    "source": "voice:tag:v0.20.9"
+  },
+  {
+    "claim": "Available now (v0.20.9); updates publish on GitHub Releases.",
+    "section": "when",
+    "source": "launch-window:voice-releases"
+  }
+]

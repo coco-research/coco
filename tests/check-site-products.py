@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Assert homepage product rows are complete and index.html matches the render.
+"""Assert product rows are complete (homepage, /products/, /lab/, release feed), the two-group 2 + 8 = 10 contract holds, and the generated pages match the render.
 
 Run from repo root: python3 tests/check-site-products.py
 """
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -22,11 +23,24 @@ def pass_(msg):
 
 
 data = json.loads(Path('data/products.json').read_text())
-shipped = data['shipped']
-source = data['source']
-lab = data['lab']
+if sorted(data) == ['lab', 'products']:
+    pass_('data/products.json has exactly two groups: products and lab (no source group)')
+else:
+    fail_('data/products.json groups are %s, expected exactly products and lab' % sorted(data))
+shipped = data.get('products', [])
+lab = data.get('lab', [])
+source = [r for r in lab if 'href' in r]      # lab projects with a public repository
+private = [r for r in lab if 'href' not in r]  # private lab projects
 
-print('=== homepage products: shipped=%d source=%d lab=%d ===' % (len(shipped), len(source), len(lab)))
+print('=== homepage products: products=%d lab=%d (public source %d, private %d) ===' % (len(shipped), len(lab), len(source), len(private)))
+if (len(shipped), len(lab)) == (2, 8) and len(shipped) + len(lab) == 10:
+    pass_('2 products + 8 in the lab = 10')
+else:
+    fail_('expected 2 + 8 = 10, got %d + %d' % (len(shipped), len(lab)))
+if [r['id'] for r in shipped] == ['coco-si', 'voice'] and [r['id'] for r in lab] == ['heliopause', 'signal', 'mira', 'jev-use', 'm0', 'hermes', 'teams-ng', 'aloomannu']:
+    pass_('group membership and order match the plan (Products: coco-si, voice; In the lab: heliopause ... aloomannu)')
+else:
+    fail_('group membership or order drifted: %s / %s' % ([r['id'] for r in shipped], [r['id'] for r in lab]))
 
 for row in shipped:
     pid = row.get('id', '?')
@@ -38,9 +52,9 @@ for row in shipped:
     if not row.get('actions'):
         missing.append('action')
     if missing:
-        fail_('shipped %s missing %s' % (pid, ', '.join(missing)))
+        fail_('product %s missing %s' % (pid, ', '.join(missing)))
     else:
-        pass_('shipped %s has tag, description and an action' % pid)
+        pass_('product %s has tag, description and an action' % pid)
 
 for row in shipped:
     art = Path(row.get('art', ''))
@@ -53,38 +67,161 @@ for row in source:
     pid = row.get('id', '?')
     href = row.get('href', '')
     if href.startswith('https://'):
-        pass_('source %s href is https' % pid)
+        pass_('lab %s href is https' % pid)
     else:
-        fail_('source %s href %r is not https' % (pid, href))
+        fail_('lab %s href %r is not https' % (pid, href))
     status = row.get('status', '')
     if status.startswith('Source available'):
-        pass_('source %s status starts with Source available' % pid)
+        pass_('lab %s status starts with Source available' % pid)
     else:
-        fail_('source %s status %r does not start with Source available' % (pid, status))
+        fail_('lab %s status %r does not start with Source available' % (pid, status))
 
-for row in lab:
+for row in private:
     pid = row.get('id', '?')
-    if 'href' in row:
-        fail_('lab %s has an href' % pid)
-    else:
-        pass_('lab %s has no href' % pid)
     status = row.get('status', '')
     if status.startswith('Private'):
         pass_('lab %s status starts with Private' % pid)
     else:
         fail_('lab %s status %r does not start with Private' % (pid, status))
-
-proc = subprocess.run(
-    [sys.executable, 'scripts/render-site-products.py', '--check'],
-    capture_output=True,
-    text=True,
-)
-if proc.returncode == 0:
-    pass_('index.html matches data/products.json')
+alo = next((r for r in lab if r['id'] == 'aloomannu'), None)
+if alo and alo['status'] == 'Private, in the lab' and 'href' not in alo and alo['page'] == 'aloomannu/':
+    pass_('Aloo Mannu is in the lab as "Private, in the lab", linked to /aloomannu/, with no repository href')
 else:
-    fail_('index.html differs from data/products.json (render --check exited %s)' % proc.returncode)
-    sys.stdout.write(proc.stdout)
-    sys.stderr.write(proc.stderr)
+    fail_('Aloo Mannu row is missing or wrong')
+for gone in ('status-zero', 'loops'):
+    if any(r['id'] == gone for r in shipped + lab) or Path(gone).exists():
+        fail_('%s is still in the data or on disk' % gone)
+    else:
+        pass_('%s is removed from the data and from disk' % gone)
+
+for script in ('scripts/render-site-products.py',):
+    proc = subprocess.run([sys.executable, script, '--check'], capture_output=True, text=True)
+    if proc.returncode == 0:
+        pass_('index.html matches data/products.json')
+    else:
+        fail_('index.html differs from data/products.json (render --check exited %s)' % proc.returncode)
+        sys.stdout.write(proc.stdout[:2000])
+        sys.stderr.write(proc.stderr)
+
+# ---- v1.3 directory fields: drive /products/, /lab/, the menu and /whats-new/ ----
+LICENCES = {
+    'coco-si': ('Open-core (Apache-2.0 core)', False), 'voice': ('MIT License \u00b7 Open source', True),
+    'signal': ('Apache-2.0 \u00b7 Open source', True), 'mira': ('AGPL-3.0 \u00b7 Open source', True),
+    'jev-use': ('Apache-2.0 \u00b7 Open source', True), 'heliopause': ('Apache-2.0 \u00b7 Open source', True),
+    'm0': ('Private', False), 'hermes': ('Private', False), 'teams-ng': ('Private', False), 'aloomannu': ('Private', False),
+}
+RELEASES = {'coco-si': ('2026-11-26', 'v2.4.0'), 'voice': ('2026-11-26', 'v0.20.9'), 'heliopause': ('2026-10-31', 'v0.7.3')}
+date_re = re.compile(r'\d{4}-\d{2}-\d{2}')
+rows = shipped + lab
+check_n = 0
+if len(rows) == 10:
+    pass_('catalog holds 10 linked products')
+else:
+    fail_('catalog holds %d rows, expected 10' % len(rows))
+for row in rows:
+    pid = row.get('id', '?')
+    missing = [k for k in ('for_you', 'who_for', 'licence_short', 'whats_new') if not str(row.get(k, '')).strip()]
+    if missing:
+        fail_('%s missing %s' % (pid, ', '.join(missing)))
+    else:
+        pass_('%s has for_you, who_for, licence_short and whats_new' % pid)
+    want_lic, want_open = LICENCES.get(pid, (None, None))
+    if row.get('licence_short') == want_lic and row.get('open_source') is want_open:
+        pass_('%s licence %r, open_source=%s' % (pid, want_lic, want_open))
+    else:
+        fail_('%s licence/open_source is %r/%r, expected %r/%r' % (pid, row.get('licence_short'), row.get('open_source'), want_lic, want_open))
+    rd = row.get('release_date')
+    if pid in RELEASES:
+        if (rd, row.get('release_version')) == RELEASES[pid] and str(row.get('release_url', '')).startswith('https://github.com/coco-research/') \
+                and row['release_url'].endswith('/releases/tag/' + RELEASES[pid][1]):
+            pass_('%s release %s %s with a tag URL' % (pid, RELEASES[pid][1], rd))
+        else:
+            fail_('%s release facts drifted: %r %r' % (pid, rd, row.get('release_version')))
+    elif rd is not None:
+        fail_('%s has an unexpected release_date %r' % (pid, rd))
+    else:
+        pass_('%s has no release date, as expected' % pid)
+    blob = ' '.join(str(v) for v in row.values())
+    if 'Details soon' in blob or 'Coco Teams ' in blob.replace('Coco Teams NG', ''):
+        fail_('%s has a stub or a shortened Coco Teams NG name' % pid)
+if any('open source' in (r.get('for_you', '') + r.get('whats_new', '')).lower() for r in rows if r['id'] == 'coco-si'):
+    fail_('coco-si copy calls the product open source')
+else:
+    pass_('coco-si is never called open source')
+
+# ---- editorial copy rules on every data file and rendered page ----
+COPY_RULE_FILES = [Path('data/products.json'), Path('data/product-pages-public.json'), Path('data/product-pages-lab.json'),
+                   Path('index.html'), Path('products/index.html'), Path('lab/index.html'), Path('whats-new/index.html'),
+                   Path('voice/index.html'), Path('llms.txt')]
+banned = re.compile(r'\bbuilt on\b|built (?:it |this |them )?from scratch|own speech engine', re.I)
+voice_only = re.compile(r'notariz|\bsigned\b|\bunsigned\b', re.I)  # never claim Voice builds are signed or notarized
+specs_public = json.loads(Path('data/product-pages-public.json').read_text())
+voice_blobs = {
+    'data/products.json (voice row)': json.dumps(next(r for r in shipped if r['id'] == 'voice')),
+    'data/product-pages-public.json (voice spec)': json.dumps(specs_public['voice']),
+}
+for f in COPY_RULE_FILES:
+    txt = f.read_text() if f.is_file() else ''
+    if f.name == 'product-pages-public.json':  # credits_html is the Licence credit row: the one place the upstream app is named
+        txt = re.sub(r'"credits_html":\s*"(?:[^"\\]|\\.)*"', '"credits_html": ""', txt)
+    if f.name == 'index.html' and f.parent.name == 'voice':
+        txt = txt.partition('<section id="credits"')[0]  # the Licence credit row is the only place the upstream app may be named
+        voice_blobs[str(f)] = txt
+    hit = banned.search(txt)
+    if hit:
+        fail_('%s breaks a copy rule: %r' % (f, hit.group(0)))
+    elif re.search(r'handy', txt, re.I):
+        fail_('%s names the upstream speech app outside the credit row' % f)
+    else:
+        bad = [m.group(0) for m in re.finditer(r'super[ -]?intelligence', re.sub(r'<!--.*?-->', '', txt), re.I)
+               if m.group(0) not in ('Super Intelligence', 'superintelligence')]
+        if bad:
+            fail_('%s misspells Coco Super Intelligence: %s' % (f, sorted(set(bad))))
+        else:
+            pass_('%s: copy rules hold (no built-on / from-scratch / own engine, upstream app unnamed, Coco Super Intelligence spelled in full)' % f)
+for name, blob in voice_blobs.items():
+    if voice_only.search(blob):
+        fail_('%s says Coco Voice builds are signed or notarized' % name)
+    else:
+        pass_('%s: no signed / notarized claim' % name)
+whats_voice = re.search(r'<article class="tl-entry">(?:(?!</article>).)*?Coco Voice(?:(?!</article>).)*?</article>', whatsnew_voice := Path('whats-new/index.html').read_text(), re.S)
+if whats_voice and not voice_only.search(whats_voice.group(0)):
+    pass_('whats-new/index.html Coco Voice entry: no signed / notarized claim')
+else:
+    fail_('whats-new/index.html Coco Voice entry missing or claims signed / notarized')
+
+# ---- generated discovery surface ----
+proc = subprocess.run([sys.executable, 'scripts/render-product-pages.py', '--check'], capture_output=True, text=True)
+if proc.returncode == 0:
+    pass_('9 generated product pages, /products/, /lab/, /whats-new/, sitemap.xml and llms.txt match the data (m0 is hand-built)')
+else:
+    fail_('generated product surface is stale (render-product-pages --check exited %s)' % proc.returncode)
+    sys.stdout.write(proc.stdout[:2000])
+products_html = Path('products/index.html').read_text()
+lab_html = Path('lab/index.html').read_text()
+whatsnew_html = Path('whats-new/index.html').read_text()
+if products_html.count('<article class="dir-card"') == 10 and 'Aloo Mannu' in products_html and 'href="../aloomannu/"' in products_html:
+    pass_('/products/ shows all 10 cards, Aloo Mannu linked')
+else:
+    fail_('/products/ card count or Aloo Mannu link wrong')
+if lab_html.count('<article class="dir-card"') == 8 and 'href="../aloomannu/"' in lab_html and 'Private, in the lab' in lab_html:
+    pass_('/lab/ shows the 8 lab projects, Aloo Mannu linked and marked Private, in the lab')
+else:
+    fail_('/lab/ card count or Aloo Mannu link wrong')
+if whatsnew_html.count('<article class="tl-entry">') == 3 and 'href="../aloomannu/"' in whatsnew_html:
+    pass_('/whats-new/ shows the three tagged releases and links Aloo Mannu')
+else:
+    fail_('/whats-new/ release count or Aloo Mannu link wrong')
+for name, text in (('products/index.html', products_html), ('lab/index.html', lab_html), ('whats-new/index.html', whatsnew_html)):
+    if 'Details soon' in text or 'cdn.jsdelivr' in text or re.search(r'status[- ]zero|coco[- ]loops|/loops/|Source available</button>', text, re.I):
+        fail_('%s has a stub, a CDN URL, a removed product or a Source available tab' % name)
+    else:
+        pass_('%s: zero stubs, zero CDN URLs, zero Status Zero / Coco Loops, no Source available tab' % name)
+alo_html = Path('aloomannu/index.html').read_text()
+if 'noindex' in alo_html:
+    fail_('aloomannu/index.html is still noindex')
+else:
+    pass_('aloomannu/index.html is indexable (no noindex)')
 
 print()
 if fail == 0:

@@ -1,55 +1,100 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="no-js" data-theme="dark" data-theme-locked="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Coco Research</title>
+<title>Coco Research — Local-First AI Tools &amp; Governed Agents</title>
 <meta name="description" content="Coco Research makes AI tools that run on your own machine, and every one of them says plainly whether you can use it today.">
 <meta name="theme-color" content="#03050b">
 <meta name="color-scheme" content="dark">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Coco Research">
+<meta property="og:title" content="Coco Research — Local-First AI Tools &amp; Governed Agents">
 <meta property="og:description" content="Governed AI, built in the open.">
 <meta property="og:url" content="https://cocoresearch.org/">
-<meta property="og:image" content="https://cocoresearch.org/assets/img/og-cinematic.jpg">
+<meta property="og:image" content="https://cocoresearch.org/assets/img/og-coco-research.png">
 <meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="675">
+<meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Coco: Governed AI, built in the open.">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Coco Research — Local-First AI Tools &amp; Governed Agents">
+<meta name="twitter:description" content="Governed AI, built in the open.">
+<meta name="twitter:image" content="https://cocoresearch.org/assets/img/og-coco-research.png">
 <link rel="canonical" href="https://cocoresearch.org/">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/site/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="manifest" href="/assets/site/site.webmanifest">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://cocoresearch.org/#organization",
+      "name": "Coco Research",
+      "url": "https://cocoresearch.org/",
+      "description": "Local-first, open-source AI tools and governed agents that run on your own machine.",
+      "email": "product@cocoresearch.org",
+      "founder": { "@id": "https://cocoresearch.org/rijul-kalra/#person" },
+      "sameAs": [
+        "https://github.com/coco-research",
+        "https://www.npmjs.com/package/cocosuperintelligence"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://cocoresearch.org/#website",
+      "url": "https://cocoresearch.org/",
+      "name": "Coco Research",
+      "publisher": { "@id": "https://cocoresearch.org/#organization" }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://cocoresearch.org/rijul-kalra/#person",
+      "name": "Rijul Kalra",
+      "url": "https://cocoresearch.org/rijul-kalra/",
+      "jobTitle": "Founder",
+      "worksFor": { "@id": "https://cocoresearch.org/#organization" }
+    }
+  ]
+}
+</script>
 
 <!-- Runs before first paint: picks the layout so nothing flashes or shifts.
      Without JS none of these classes exist and the page is the plain static layout. -->
 <script>
 (function () {
   var d = document.documentElement, rm = false, off = false, short = false;
+  d.classList.remove('no-js');
   try { rm = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
-  // Landscape phones and tiny windows: the fixed stage cannot hold the lab list, so they get the plain page.
+  // Landscape phones and tiny windows: the fixed stage cannot hold the lab list, so they get the plain page
+  // (main.js re-checks this when the window is resized).
   try { short = matchMedia('(max-height: 580px)').matches; } catch (e) {}
-  try { off = localStorage.getItem('coco-motion') === 'off'; } catch (e) {}
+  // Only this page's own opt-out counts. The 3D Pause on product pages uses a different key and never reaches here.
+  try { off = localStorage.getItem('coco-home-static') === 'off'; } catch (e) {}
   if (/[?&]motion=off/.test(location.search)) off = true;
-  d.className += ' js ' + (rm || off || short ? 'static' : 'cine') + (rm ? ' os-reduced' : '') + (short ? ' short' : '');
+  d.className += ' js ' + (rm || off || short ? 'static' : 'cine') + (rm ? ' os-reduced' : '') + (off ? ' opt-out' : '') + (short ? ' short' : '');
   // If the cinematic layer has not come up in time (blocked CDN, old browser), fall back to the static page.
+  // main.js upgrades a rescued page to the full film if the scripts arrive late and the visitor has not scrolled.
   setTimeout(function () {
     if (d.classList.contains('cine') && !d.classList.contains('ready')) { d.classList.remove('cine'); d.classList.add('static', 'rescued'); }
   }, 5000);
 })();
 </script>
 
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="preload" as="font" type="font/woff2" crossorigin href="https://cdn.jsdelivr.net/npm/@fontsource-variable/archivo@5.3.0/files/archivo-latin-wdth-normal.woff2">
-<link rel="stylesheet" href="assets/css/site.css">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="assets/vendor/fonts/archivo-latin-wdth-normal.woff2">
+<link rel="stylesheet" href="./assets/css/site.css">
+<link rel="stylesheet" href="./assets/css/site-nav.css">
 
 <script type="importmap">
-{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" } }
+{ "imports": { "three": "./assets/vendor/three/three.module.min.js" } }
 </script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<link rel="modulepreload" href="assets/js/world.js">
+<link rel="modulepreload" href="./assets/vendor/three/three.module.min.js">
+<!-- First in line: the top bar works even while gsap or three.js are slow to arrive. -->
+<script type="module" src="./assets/js/site-nav.js"></script>
+<script defer src="assets/vendor/gsap/gsap.min.js"></script>
+<script defer src="assets/vendor/gsap/ScrollTrigger.min.js"></script>
 <script type="module" src="assets/js/main.js"></script>
 </head>
 
@@ -66,18 +111,95 @@
   <div class="bars"><i></i><i></i></div>
 </div>
 
-<header class="nav">
-  <a class="brand" href="#hero" data-goto="hero"><i aria-hidden="true"></i><span>Coco Research</span></a>
-  <a class="btn btn-primary btn-sm nav-cta" href="https://github.com/coco-research/coco">Get Coco</a>
+<!-- products:nav:start -->
+<header class="site-nav" data-site-nav>
+  <a class="sn-brand" href="./"><i aria-hidden="true"></i><span>Coco Research</span></a>
+  <nav class="sn-links" aria-label="Primary">
+    <button class="sn-tab" type="button" data-products-trigger aria-expanded="false" aria-controls="site-products-menu">Products <span class="sn-caret" aria-hidden="true">▾</span></button>
+    <a class="sn-tab" href="./lab/">In the lab</a>
+    <a class="sn-tab" href="./whats-new/">What's new</a>
+    <a class="sn-tab" href="./rijul-kalra/">Rijul Kalra</a>
+  </nav>
+  <div class="sn-right">
+    <button class="sn-chip" type="button" data-motion-toggle hidden>Pause 3D</button>
+    <a class="sn-cta" href="./coco/">Get Coco</a>
+    <button class="sn-menu-btn" type="button" data-drawer-open aria-expanded="false" aria-controls="site-mobile-drawer" aria-label="Open menu">Menu</button>
+  </div>
+  <div class="sn-menu" id="site-products-menu" data-products-menu hidden>
+    <div class="sn-m-grid">
+      <div class="sn-m-group" data-group="products">
+        <h3 class="sn-m-h g-products"><span class="sh sh-dot" aria-hidden="true"></span>Products<span class="sn-m-n">2</span></h3>
+        <ul aria-label="Products">
+          <li><a class="sn-m-item" href="./coco/"><span class="sn-m-name">Coco Super Intelligence</span><span class="sn-m-line">Argues a hard call out with expert personas, then hands it to skills.</span></a></li>
+          <li><a class="sn-m-item" href="./voice/"><span class="sn-m-name">Coco Voice</span><span class="sn-m-line">Hold a key to dictate into any app. Private, on your computer.</span></a></li>
+        </ul>
+      </div>
+      <div class="sn-m-group" data-group="lab">
+        <h3 class="sn-m-h g-lab"><span class="sh sh-sq" aria-hidden="true"></span>In the lab<span class="sn-m-n">8</span></h3>
+        <ul aria-label="In the lab">
+          <li><a class="sn-m-item" href="./heliopause/"><span class="sn-m-name">Heliopause</span><span class="sn-m-line">Gives your AI tools a Lead and roles, like a small company.</span></a></li>
+          <li><a class="sn-m-item" href="./signal/"><span class="sn-m-name">Signal</span><span class="sn-m-line">A ready-made look for your product: three editions, CSS and docs.</span></a></li>
+          <li><a class="sn-m-item" href="./mira/"><span class="sn-m-name">Mira<span class="sn-m-badge">Archived</span></span><span class="sn-m-line">Makes Reels and Shorts in English and Hindi.</span></a></li>
+          <li><a class="sn-m-item" href="./jev-use/"><span class="sn-m-name">jev-use</span><span class="sn-m-line">Control your Mac with your voice.</span></a></li>
+          <li><a class="sn-m-item" href="./m0/"><span class="sn-m-name">Coco M0</span><span class="sn-m-line">Remembers across your AI tools, so you stop re-explaining.</span></a></li>
+          <li><a class="sn-m-item" href="./hermes/"><span class="sn-m-name">Coco Hermes</span><span class="sn-m-line">Answers over your own files with an exact quote, or says it can’t.</span></a></li>
+          <li><a class="sn-m-item" href="./teams-ng/"><span class="sn-m-name">Coco Teams NG</span><span class="sn-m-line">A team of AI members you hire, brief and work with in one console.</span></a></li>
+          <li><a class="sn-m-item" href="./aloomannu/"><span class="sn-m-name">Aloo Mannu</span><span class="sn-m-line">The local message and wake layer for coding agents on your machine.</span><span class="sn-m-priv"><span class="sh sh-sq" aria-hidden="true"></span>Private, in the lab</span></a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="sn-m-foot"><a href="./products/">Browse all 10 products →</a><a href="./lab/">In the lab →</a><a href="./whats-new/">What's new →</a></div>
+  </div>
 </header>
+<dialog class="sn-drawer" id="site-mobile-drawer" data-mobile-drawer aria-labelledby="sn-drawer-title">
+  <div class="sn-d-head">
+    <span class="sn-brand" id="sn-drawer-title"><i aria-hidden="true"></i><span>Coco Research</span></span>
+    <button class="sn-chip" type="button" data-drawer-close>Close</button>
+  </div>
+  <div class="sn-d-body">
+    <p class="sn-d-label">Products</p>
+    <div class="sn-m-grid">
+    <div class="sn-m-group" data-group="products">
+      <h3 class="sn-m-h g-products"><span class="sh sh-dot" aria-hidden="true"></span>Products<span class="sn-m-n">2</span></h3>
+      <ul aria-label="Products">
+        <li><a class="sn-m-item" href="./coco/"><span class="sn-m-name">Coco Super Intelligence</span><span class="sn-m-line">Argues a hard call out with expert personas, then hands it to skills.</span></a></li>
+        <li><a class="sn-m-item" href="./voice/"><span class="sn-m-name">Coco Voice</span><span class="sn-m-line">Hold a key to dictate into any app. Private, on your computer.</span></a></li>
+      </ul>
+    </div>
+    <div class="sn-m-group" data-group="lab">
+      <h3 class="sn-m-h g-lab"><span class="sh sh-sq" aria-hidden="true"></span>In the lab<span class="sn-m-n">8</span></h3>
+      <ul aria-label="In the lab">
+        <li><a class="sn-m-item" href="./heliopause/"><span class="sn-m-name">Heliopause</span><span class="sn-m-line">Gives your AI tools a Lead and roles, like a small company.</span></a></li>
+        <li><a class="sn-m-item" href="./signal/"><span class="sn-m-name">Signal</span><span class="sn-m-line">A ready-made look for your product: three editions, CSS and docs.</span></a></li>
+        <li><a class="sn-m-item" href="./mira/"><span class="sn-m-name">Mira<span class="sn-m-badge">Archived</span></span><span class="sn-m-line">Makes Reels and Shorts in English and Hindi.</span></a></li>
+        <li><a class="sn-m-item" href="./jev-use/"><span class="sn-m-name">jev-use</span><span class="sn-m-line">Control your Mac with your voice.</span></a></li>
+        <li><a class="sn-m-item" href="./m0/"><span class="sn-m-name">Coco M0</span><span class="sn-m-line">Remembers across your AI tools, so you stop re-explaining.</span></a></li>
+        <li><a class="sn-m-item" href="./hermes/"><span class="sn-m-name">Coco Hermes</span><span class="sn-m-line">Answers over your own files with an exact quote, or says it can’t.</span></a></li>
+        <li><a class="sn-m-item" href="./teams-ng/"><span class="sn-m-name">Coco Teams NG</span><span class="sn-m-line">A team of AI members you hire, brief and work with in one console.</span></a></li>
+        <li><a class="sn-m-item" href="./aloomannu/"><span class="sn-m-name">Aloo Mannu</span><span class="sn-m-line">The local message and wake layer for coding agents on your machine.</span><span class="sn-m-priv"><span class="sh sh-sq" aria-hidden="true"></span>Private, in the lab</span></a></li>
+      </ul>
+    </div>
+    </div>
+    <a class="sn-m-item sn-d-all" href="./products/"><span class="sn-m-name">Browse all 10 products →</span></a>
+    <div class="sn-d-top">
+      <a href="./lab/">In the lab →</a>
+      <a href="./whats-new/">What's new →</a>
+      <a href="./rijul-kalra/">Rijul Kalra →</a>
+    </div>
+    <div class="sn-d-foot">
+      <button class="sn-chip" type="button" data-motion-toggle hidden>Pause 3D</button><a class="sn-cta" href="./coco/">Get Coco</a></div>
+  </div>
+</dialog>
+<!-- products:nav:end -->
 
 <nav class="rail" aria-label="Chapters">
   <a href="#hero" data-goto="hero"><span>Start</span><i></i></a>
   <a href="#flagship" data-goto="flagship"><span>Flagship</span><i></i></a>
   <a href="#rules" data-goto="rules"><span>Rules</span><i></i></a>
-  <a href="#shipped" data-goto="shipped"><span>Shipped</span><i></i></a>
-  <a href="#lab" data-goto="lab"><span>Lab</span><i></i></a>
+  <a href="#products" data-goto="products"><span>Products</span><i></i></a>
+  <a href="#lab" data-goto="lab"><span>In the lab</span><i></i></a>
   <a href="#built-by" data-goto="close"><span>About</span><i></i></a>
+  <a class="rail-jump" href="./products/"><span>All 10 <span aria-hidden="true">→</span></span><i></i></a>
 </nav>
 
 <main id="main" class="story">
@@ -138,7 +260,7 @@
           <li class="node"><span>+11 more<span class="sr-only"> adapters</span></span></li>
         </ul>
         <div class="ring-foot">
-          <p class="ring-cap">16 adapters. Full command set on 6 of them.</p>
+          <p class="ring-cap">16 adapters. Full command set on 6 of them. <a class="see" href="./coco/">See Coco Super Intelligence <span aria-hidden="true">→</span></a></p>
           <p class="facts"><span class="nw">231 skills, 389 commands.</span> <span>Open-core — most of the framework is Apache-2.0; the Super Intelligence board is proprietary.</span></p>
         </div>
       </div>
@@ -169,13 +291,17 @@
       </div>
     </section>
 
-    <!-- 4. Shipped -->
-    <section id="shipped" class="ch ch-shipped" aria-labelledby="h-shipped">
-      <div class="beat b-shipped">
-        <h2 id="h-shipped" class="display d-sec">Shipped.</h2>
+    <!-- 4. All products, group 1: Products (available now). Group 2 is the In the lab chapter below. -->
+    <section id="products" class="ch ch-products" aria-labelledby="h-products">
+      <div class="beat b-products">
+        <div class="products-head">
+          <h2 id="h-products" class="display d-sec">All products.</h2>
+          <p class="group-label"><span class="sh sh-dot" aria-hidden="true"></span>Products <span class="group-n">2</span> · available now</p>
+          <a class="see" href="./products/">Browse all 10 products <span aria-hidden="true">→</span></a>
+        </div>
       </div>
       <div class="deck">
-        <!-- products:shipped:start -->
+        <!-- products:products:start -->
         <article class="card card-coco-si" aria-labelledby="t-coco-si">
           <div class="card-art" aria-hidden="true">
             <svg viewBox="0 0 320 190" fill="none" stroke="currentColor" stroke-width="1.2">
@@ -213,10 +339,11 @@
             </svg>
           </div>
           <div class="card-body">
-            <h3 id="t-coco-si">Coco Super Intelligence</h3>
+            <h3 id="t-coco-si"><a class="card-link" href="coco/">Coco Super Intelligence</a></h3>
             <p class="tag">Available now, v2.4.0, on npm</p>
             <p>An advisory board of expert personas that installs into Claude Code, Cursor or Codex, argues a hard call out, then hands the decision to its skills.</p>
             <div class="card-actions">
+              <a class="btn btn-ghost btn-sm" href="coco/">Product page<span class="sr-only"> for Coco Super Intelligence</span></a>
               <a class="btn btn-primary btn-sm" href="https://github.com/coco-research/coco/releases">Releases<span class="sr-only"> for Coco Super Intelligence</span></a>
               <a class="btn btn-ghost btn-sm" href="https://www.npmjs.com/package/cocosuperintelligence">npm<span class="sr-only"> package for Coco Super Intelligence</span></a>
             </div>
@@ -233,44 +360,39 @@
             </svg>
           </div>
           <div class="card-body">
-            <h3 id="t-voice">Coco Voice</h3>
-            <p class="tag">Available now</p>
-            <p>Speech to text, with the speech model running on your own computer. Built on <a class="inline" href="https://github.com/cjpais/Handy" rel="noopener">Handy by CJ Pais</a>, MIT licensed.</p>
+            <h3 id="t-voice"><a class="card-link" href="voice/">Coco Voice</a></h3>
+            <p class="tag">Available now, v0.20.9</p>
+            <p>Private speech-to-text on your own computer. Hold a key to dictate into the app you have open, tidy transcripts locally, and keep cited meeting notes on disk. MIT licensed.</p>
             <div class="card-actions">
-              <a class="btn btn-primary btn-sm" href="https://github.com/coco-research/Coco-Voice/releases/latest">Download<span class="sr-only"> Coco Voice</span></a>
-              <a class="btn btn-ghost btn-sm" href="/voice/">About<span class="sr-only"> Coco Voice</span></a>
+              <a class="btn btn-ghost btn-sm" href="voice/">Product page<span class="sr-only"> for Coco Voice</span></a>
+              <a class="btn btn-primary btn-sm" href="https://github.com/coco-research/Coco-Voice/releases">Download<span class="sr-only"> Coco Voice</span></a>
               <a class="btn btn-ghost btn-sm" href="https://github.com/coco-research/Coco-Voice">View on GitHub<span class="sr-only"> for Coco Voice</span></a>
             </div>
           </div>
         </article>
-        <!-- products:shipped:end -->
+        <!-- products:products:end -->
       </div>
     </section>
 
-    <!-- 5. In the lab -->
+    <!-- 5. All products, group 2: In the lab -->
     <section id="lab" class="ch ch-lab" aria-labelledby="h-lab">
       <div class="lab-wrap">
         <div class="lab-lead">
           <h2 id="h-lab" class="display d-sec lab-head">In the lab.</h2>
-          <p class="lab-sub">Public source first, then private work.</p>
+          <p class="lab-sub"><span class="sh sh-sq" aria-hidden="true"></span>In the lab <span class="group-n">8</span> · early previews, source tools and private betas.</p>
+          <a class="see" href="./lab/">Open the lab <span aria-hidden="true">→</span></a>
         </div>
         <div class="lab-list">
           <!-- products:lab:start -->
-          <h3 class="lab-group">Source available</h3>
           <ul>
-            <li class="lab-item"><h4><a class="inline" href="https://github.com/coco-research/coco-design-language" rel="noopener">Signal</a></h4><p>Our design language: three editions, CSS and docs.<span class="tag">Source available, Apache-2.0, no release</span></p></li>
-            <li class="lab-item"><h4><a class="inline" href="https://github.com/coco-research/Mira" rel="noopener">Mira</a></h4><p>Makes Reels and Shorts in English and Hindi.<span class="tag">Source available, AGPL-3.0, Python, no release</span></p></li>
-            <li class="lab-item"><h4><a class="inline" href="https://github.com/coco-research/coco-loops" rel="noopener">Coco Loops</a></h4><p>Governance for autonomous agent loops: rules, adversary checks, budget caps and an audit trail.<span class="tag">Source available, no release</span></p></li>
-            <li class="lab-item"><h4><a class="inline" href="https://github.com/coco-research/jev-use" rel="noopener">jev-use</a></h4><p>Voice-driven control for macOS.<span class="tag">Source available, Apache-2.0, pre-alpha</span></p></li>
-            <li class="lab-item"><h4><a class="inline" href="https://github.com/coco-research/heliopause" rel="noopener">Heliopause</a></h4><p>It gives your AI tools a Lead and roles, like a small company, on your own machine.<span class="tag">Source available, Apache-2.0, early preview</span></p></li>
-          </ul>
-          <h3 class="lab-group">Private, in the lab</h3>
-          <ul>
-            <li class="lab-item"><h4>Coco M0</h4><p>Cross-tool memory.<span class="tag">Private beta, used daily</span></p></li>
-            <li class="lab-item"><h4>Coco Hermes</h4><p>Answers questions over your own files with an exact quote, or says it can't.<span class="tag">Private, no public build</span></p></li>
-            <li class="lab-item"><h4>Coco Code</h4><p>A local-first coding harness for the terminal and the Mac.<span class="tag">Private, internal pre-release</span></p></li>
-            <li class="lab-item"><h4>Coco Teams NG</h4><p>A team of AI members you hire, brief and work with in one console.<span class="tag">Private, in development</span></p></li>
-            <li class="lab-item"><h4>Status Zero</h4><p>Compares what a plan says against what the code actually shipped.<span class="tag">Private, in development</span></p></li>
+            <li class="lab-item"><h4><a class="inline" href="heliopause/">Heliopause by Coco Research</a></h4><p>It gives your AI tools a Lead and roles, like a small company, on your own machine.<span class="tag">Source available, Apache-2.0, v0.7.3 early preview</span></p></li>
+            <li class="lab-item"><h4><a class="inline" href="signal/">Signal</a></h4><p>Our design language: three editions, CSS and docs.<span class="tag">Source available, Apache-2.0, no release</span></p></li>
+            <li class="lab-item"><h4><a class="inline" href="mira/">Mira</a> <span class="sn-badge">Archived</span></h4><p>Makes Reels and Shorts in English and Hindi.<span class="tag">Source available, AGPL-3.0, archived</span></p></li>
+            <li class="lab-item"><h4><a class="inline" href="jev-use/">jev-use</a></h4><p>Voice-driven control for macOS.<span class="tag">Source available, Apache-2.0, pre-alpha</span></p></li>
+            <li class="lab-item"><h4><a class="inline" href="m0/">Coco M0</a></h4><p>Cross-tool memory.<span class="tag">Private beta, used daily</span></p></li>
+            <li class="lab-item"><h4><a class="inline" href="hermes/">Coco Hermes</a></h4><p>Answers questions over your own files with an exact quote, or says it can't.<span class="tag">Private beta, no public build</span></p></li>
+            <li class="lab-item"><h4><a class="inline" href="teams-ng/">Coco Teams NG</a></h4><p>A team of AI members you hire, brief and work with in one console.<span class="tag">Private beta, in development</span></p></li>
+            <li class="lab-item"><h4><a class="inline" href="aloomannu/">Aloo Mannu</a></h4><p>The local message and wake layer for coding agents on your machine.<span class="tag">Private, in the lab</span></p></li>
           </ul>
           <!-- products:lab:end -->
         </div>
@@ -281,7 +403,8 @@
     <section id="close" class="ch ch-close" aria-labelledby="h-close">
       <div class="beat b-close">
         <h2 id="h-close" class="display d-hero" data-split="chars">Coco Research</h2>
-        <p class="credit" id="built-by">Built by Rijul Kalra</p>
+        <p class="credit" id="built-by">Built by <a class="inline" href="rijul-kalra/">Rijul Kalra</a></p>
+        <a class="see" href="./rijul-kalra/">About Rijul Kalra <span aria-hidden="true">→</span></a>
         <a class="btn btn-primary btn-lg" href="https://github.com/coco-research/coco"><span>Get Coco</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9.2M8.4 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
       </div>
     </section>
@@ -294,46 +417,43 @@
   <div class="foot-inner">
     <div class="foot-brand">
       <a class="brand" href="#hero" data-goto="hero"><i aria-hidden="true"></i><span>Coco Research</span></a>
-      <p>Governed AI, built in the open.</p>
+      <p>Governed AI, built in the open. Built by <a class="inline" href="rijul-kalra/">Rijul Kalra</a>.</p>
+      <p class="foot-contact"><span>product@cocoresearch.org</span> <a class="inline" href="mailto:product@cocoresearch.org">Email</a></p>
     </div>
     <nav class="foot-cols" aria-label="Footer">
       <div>
         <h2>Products</h2>
         <ul>
-          <!-- products:foot-shipped:start -->
-          <li><a href="https://github.com/coco-research/coco">Coco Super Intelligence</a></li>
-          <li><a href="/voice/">Coco Voice</a></li>
-          <!-- products:foot-shipped:end -->
+          <!-- products:foot-products:start -->
+          <li><a href="coco/">Coco Super Intelligence</a></li>
+          <li><a href="voice/">Coco Voice</a></li>
+          <!-- products:foot-products:end -->
         </ul>
       </div>
       <div>
-        <h2>Source available</h2>
-        <ul>
-          <!-- products:foot-source:start -->
-          <li><a href="https://github.com/coco-research/coco-design-language">Signal</a></li>
-          <li><a href="https://github.com/coco-research/Mira">Mira</a></li>
-          <li><a href="https://github.com/coco-research/coco-loops">Coco Loops</a></li>
-          <li><a href="https://github.com/coco-research/jev-use">jev-use</a></li>
-          <li><a href="https://github.com/coco-research/heliopause">Heliopause</a></li>
-          <!-- products:foot-source:end -->
-        </ul>
-      </div>
-      <div>
-        <h2>In the lab (private)</h2>
+        <h2>In the lab</h2>
         <ul>
           <!-- products:foot-lab:start -->
-          <li><a href="#lab" data-goto="lab">Coco M0</a></li>
-          <li><a href="#lab" data-goto="lab">Coco Hermes</a></li>
-          <li><a href="#lab" data-goto="lab">Coco Code</a></li>
-          <li><a href="#lab" data-goto="lab">Coco Teams NG</a></li>
-          <li><a href="#lab" data-goto="lab">Status Zero</a></li>
+          <li><a href="heliopause/">Heliopause by Coco Research</a></li>
+          <li><a href="signal/">Signal</a></li>
+          <li><a href="mira/">Mira</a> <span class="sn-badge">Archived</span></li>
+          <li><a href="jev-use/">jev-use</a></li>
+          <li><a href="m0/">Coco M0</a></li>
+          <li><a href="hermes/">Coco Hermes</a></li>
+          <li><a href="teams-ng/">Coco Teams NG</a></li>
+          <li><a href="aloomannu/">Aloo Mannu</a></li>
           <!-- products:foot-lab:end -->
         </ul>
       </div>
       <div>
         <h2>Company</h2>
         <ul>
-          <li><a href="#built-by" data-goto="close">About</a></li>
+          <li><a href="./products/">All products</a></li>
+          <li><a href="./lab/">In the lab</a></li>
+          <li><a href="./whats-new/">What's new</a></li>
+          <li><a href="rijul-kalra/">Rijul Kalra</a></li>
+          <li><a href="#rules" data-goto="rules">Four rules</a></li>
+          <li><a href="guides/manage-multiple-ai-coding-agents/">Guides</a></li>
           <li><a href="https://github.com/coco-research/coco/releases">Coco changelog</a></li>
         </ul>
       </div>

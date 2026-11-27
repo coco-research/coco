@@ -58,7 +58,7 @@ def _safe_href(href, where):
 
 
 # ---------------------------------------------------------------- product page
-def render_page(it, data, counts):
+def render_page(it, data):
     pid, row, spec, bucket = it['pid'], it['row'], it['spec'], it['bucket']
     catalog = it['catalog']
     slug = spec['slug']
@@ -564,7 +564,7 @@ def main():
             continue
         if it['pid'] in CUSTOM_PAGES and not args.include_custom:
             continue
-        outputs.append(('%s/index.html' % it['spec']['slug'], render_page(it, data, counts)))
+        outputs.append(('%s/index.html' % it['spec']['slug'], render_page(it, data)))
     if not only:
         outputs.append(('products/index.html', render_products(catalog, data)))
         outputs.append(('lab/index.html', render_lab(catalog, data)))

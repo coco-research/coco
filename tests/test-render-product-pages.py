@@ -142,8 +142,8 @@ class RenderProductPagesTest(unittest.TestCase):
                 M._safe_href(bad, 't')
 
     def test_render_page_shipped_command_all_fields(self):
-        data, _pub, _lab, catalog, counts = _sample_fixtures()
-        html = M.render_page(catalog[0], data, counts)
+        data, _pub, _lab, catalog, _counts = _sample_fixtures()
+        html = M.render_page(catalog[0], data)
         for needle in (
             '<title>Demo &lt;Prod&gt; &amp; Co \u2014 Coco Research</title>',
             'content="Meta desc for demo &amp; &lt;tests&gt;."',
@@ -169,8 +169,8 @@ class RenderProductPagesTest(unittest.TestCase):
         self.assertEqual(ent['codeRepository'], 'https://example.org/prod')
 
     def test_render_page_source_primary_and_page_title(self):
-        data, _pub, _lab, catalog, counts = _sample_fixtures()
-        html = M.render_page(catalog[1], data, counts)
+        data, _pub, _lab, catalog, _counts = _sample_fixtures()
+        html = M.render_page(catalog[1], data)
         for needle in (
             '<title>Custom Preview Title</title>',
             '<a class="btn btn-primary" href="https://example.org/prev">View source</a>',
@@ -185,8 +185,8 @@ class RenderProductPagesTest(unittest.TestCase):
                          ('SoftwareSourceCode', 'https://example.org/prev', '0.7.0'))
 
     def test_render_page_lab_private_cats_stage_and_noindex(self):
-        data, _pub, _lab, catalog, counts = _sample_fixtures()
-        html = M.render_page(catalog[5], data, counts)
+        data, _pub, _lab, catalog, _counts = _sample_fixtures()
+        html = M.render_page(catalog[5], data)
         for needle in (
             '<meta name="robots" content="noindex, nofollow">', 'src="../assets/js/aloo-cats-scene.js"',
             'id="aloo-cats-canvas"', 'Two cats, zero cloud.', 'Named after two cats.',
@@ -199,7 +199,7 @@ class RenderProductPagesTest(unittest.TestCase):
 
     def test_render_page_rejects_unsafe_hrefs(self):
         for field in ('try_above', 'try_alt', 'buttons', 'links', 'licence_href'):
-            data, _pub, _lab, catalog, counts = _sample_fixtures()
+            data, _pub, _lab, catalog, _counts = _sample_fixtures()
             it = catalog[1] if field == 'try_above' else catalog[0]
             spec = it['spec']
             if field == 'try_above':
@@ -213,7 +213,7 @@ class RenderProductPagesTest(unittest.TestCase):
             else:
                 spec['licence_href'] = 'javascript:x()'
             with self.assertRaises(SystemExit, msg=field):
-                M.render_page(it, data, counts)
+                M.render_page(it, data)
 
     def test_card_html_render_products_and_render_lab(self):
         data, _pub, _lab, catalog, _counts = _sample_fixtures()
@@ -366,11 +366,10 @@ class RenderProductPagesTest(unittest.TestCase):
         catalog = S.build_catalog(data, pub_specs, lab_specs)
         for it in catalog:
             it['catalog'] = catalog
-        counts = {'personas': 1, 'departments': 1, 'skills': 1, 'commands': 1, 'agents': 1}
         self.assertEqual(len(catalog), 10)
         for it in catalog:
             spec = it['spec']
-            html = M.render_page(it, data, counts)
+            html = M.render_page(it, data)
             ld = _parse_jsonld(html) if it['bucket'] != 'lab' else None
             if it['bucket'] == 'lab':
                 self.assertNotIn('application/ld+json', html)

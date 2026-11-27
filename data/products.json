@@ -1,7 +1,8 @@
 {
-  "shipped": [
+  "products": [
     {
       "id": "coco-si",
+      "page": "coco/",
       "name": "Coco Super Intelligence",
       "tag": "Available now, v2.4.0, on npm",
       "description_html": "An advisory board of expert personas that installs into Claude Code, Cursor or Codex, argues a hard call out, then hands the decision to its skills.",
@@ -20,24 +21,27 @@
         }
       ],
       "art": "assets/site/art/coco-si.svg",
-      "footer_href": "https://github.com/coco-research/coco"
+      "footer_href": "https://github.com/coco-research/coco",
+      "for_you": "Argues a hard call out with expert personas, then hands it to skills.",
+      "who_for": "Developers and tech leads who use Claude Code, Cursor or Codex and want a second opinion before a hard call.",
+      "licence_short": "Open-core (Apache-2.0 core)",
+      "open_source": false,
+      "release_date": "2026-11-26",
+      "release_version": "v2.4.0",
+      "release_url": "https://github.com/coco-research/coco/releases/tag/v2.4.0",
+      "whats_new": "Open-core advisory skills, commands and rules for Claude Code, Cursor and Codex: {personas} personas across {departments} departments, {skills} skills and {commands} commands."
     },
     {
       "id": "voice",
+      "page": "voice/",
       "name": "Coco Voice",
-      "tag": "Available now",
-      "description_html": "Speech to text, with the speech model running on your own computer. Built on <a class=\"inline\" href=\"https://github.com/cjpais/Handy\" rel=\"noopener\">Handy by CJ Pais</a>, MIT licensed.",
+      "tag": "Available now, v0.20.9",
+      "description_html": "Private speech-to-text on your own computer. Hold a key to dictate into the app you have open, tidy transcripts locally, and keep cited meeting notes on disk. MIT licensed.",
       "actions": [
         {
           "label": "Download",
-          "href": "https://github.com/coco-research/Coco-Voice/releases/latest",
+          "href": "https://github.com/coco-research/Coco-Voice/releases",
           "kind": "primary",
-          "sr": " Coco Voice"
-        },
-        {
-          "label": "About",
-          "href": "/voice/",
-          "kind": "ghost",
           "sr": " Coco Voice"
         },
         {
@@ -48,76 +52,127 @@
         }
       ],
       "art": "assets/site/art/voice.svg",
-      "footer_href": "/voice/"
-    }
-  ],
-  "source": [
-    {
-      "id": "signal",
-      "name": "Signal",
-      "href": "https://github.com/coco-research/coco-design-language",
-      "description": "Our design language: three editions, CSS and docs.",
-      "status": "Source available, Apache-2.0, no release"
-    },
-    {
-      "id": "mira",
-      "name": "Mira",
-      "href": "https://github.com/coco-research/Mira",
-      "description": "Makes Reels and Shorts in English and Hindi.",
-      "status": "Source available, AGPL-3.0, Python, no release"
-    },
-    {
-      "id": "loops",
-      "name": "Coco Loops",
-      "href": "https://github.com/coco-research/coco-loops",
-      "description": "Governance for autonomous agent loops: rules, adversary checks, budget caps and an audit trail.",
-      "status": "Source available, no release"
-    },
-    {
-      "id": "jev-use",
-      "name": "jev-use",
-      "href": "https://github.com/coco-research/jev-use",
-      "description": "Voice-driven control for macOS.",
-      "status": "Source available, Apache-2.0, pre-alpha"
-    },
-    {
-      "id": "heliopause",
-      "name": "Heliopause",
-      "href": "https://github.com/coco-research/heliopause",
-      "description": "It gives your AI tools a Lead and roles, like a small company, on your own machine.",
-      "status": "Source available, Apache-2.0, early preview"
+      "footer_href": "https://github.com/coco-research/Coco-Voice",
+      "for_you": "Hold a key to dictate into any app. Private, on your computer.",
+      "who_for": "People who want fast dictation and searchable meeting notes without a cloud transcription subscription.",
+      "licence_short": "MIT License · Open source",
+      "open_source": true,
+      "release_date": "2026-11-26",
+      "release_version": "v0.20.9",
+      "release_url": "https://github.com/coco-research/Coco-Voice/releases/tag/v0.20.9",
+      "whats_new": "Private desktop speech-to-text for macOS, Windows x64, and Linux x64 and arm64, with local meeting notes and cited Q&A. MIT licensed."
     }
   ],
   "lab": [
     {
+      "id": "heliopause",
+      "page": "heliopause/",
+      "name": "Heliopause by Coco Research",
+      "href": "https://github.com/coco-research/heliopause",
+      "description": "It gives your AI tools a Lead and roles, like a small company, on your own machine.",
+      "status": "Source available, Apache-2.0, v0.7.3 early preview",
+      "for_you": "Gives your AI tools a Lead and roles, like a small company.",
+      "who_for": "People running several AI coding tools at once who want to see who is working, idle or blocked.",
+      "licence_short": "Apache-2.0 · Open source",
+      "open_source": true,
+      "release_date": "2026-10-31",
+      "release_version": "v0.7.3",
+      "release_url": "https://github.com/coco-research/heliopause/releases/tag/v0.7.3",
+      "whats_new": "Local multi-role AI orchestration on your own machine, with a live status page over loopback. Early preview, Apache-2.0."
+    },
+    {
+      "id": "signal",
+      "page": "signal/",
+      "name": "Signal",
+      "href": "https://github.com/coco-research/coco-design-language",
+      "description": "Our design language: three editions, CSS and docs.",
+      "status": "Source available, Apache-2.0, no release",
+      "for_you": "A ready-made look for your product: three editions, CSS and docs.",
+      "who_for": "Designers and front-end builders who want a legible interface language they can read, copy and adapt.",
+      "licence_short": "Apache-2.0 · Open source",
+      "open_source": true,
+      "release_date": null,
+      "whats_new": "Source repository, Apache-2.0, no packaged release."
+    },
+    {
+      "id": "mira",
+      "page": "mira/",
+      "name": "Mira",
+      "href": "https://github.com/coco-research/Mira",
+      "description": "Makes Reels and Shorts in English and Hindi.",
+      "status": "Source available, AGPL-3.0, archived",
+      "for_you": "Makes Reels and Shorts in English and Hindi.",
+      "who_for": "Creators comfortable running a Python pipeline who want English and Hindi short videos made locally.",
+      "licence_short": "AGPL-3.0 · Open source",
+      "open_source": true,
+      "release_date": null,
+      "whats_new": "Archived source repository, AGPL-3.0."
+    },
+    {
+      "id": "jev-use",
+      "page": "jev-use/",
+      "name": "jev-use",
+      "href": "https://github.com/coco-research/jev-use",
+      "description": "Voice-driven control for macOS.",
+      "status": "Source available, Apache-2.0, pre-alpha",
+      "for_you": "Control your Mac with your voice.",
+      "who_for": "Mac tinkerers who want to try voice-driven desktop control and do not mind pre-alpha code.",
+      "licence_short": "Apache-2.0 · Open source",
+      "open_source": true,
+      "release_date": null,
+      "whats_new": "Pre-alpha source repository, Apache-2.0."
+    },
+    {
       "id": "m0",
+      "page": "m0/",
       "name": "Coco M0",
       "description": "Cross-tool memory.",
-      "status": "Private beta, used daily"
+      "status": "Private beta, used daily",
+      "for_you": "Remembers across your AI tools, so you stop re-explaining.",
+      "who_for": "People who switch between AI coding tools on one machine and are tired of repeating earlier decisions.",
+      "licence_short": "Private",
+      "open_source": false,
+      "release_date": null,
+      "whats_new": "Private beta, used daily inside Coco Research."
     },
     {
       "id": "hermes",
+      "page": "hermes/",
       "name": "Coco Hermes",
       "description": "Answers questions over your own files with an exact quote, or says it can't.",
-      "status": "Private, no public build"
-    },
-    {
-      "id": "code",
-      "name": "Coco Code",
-      "description": "A local-first coding harness for the terminal and the Mac.",
-      "status": "Private, internal pre-release"
+      "status": "Private beta, no public build",
+      "for_you": "Answers over your own files with an exact quote, or says it can’t.",
+      "who_for": "People who need answers tied to their own documents, where a confident guess is worse than no answer.",
+      "licence_short": "Private",
+      "open_source": false,
+      "release_date": null,
+      "whats_new": "Private beta, no public build."
     },
     {
       "id": "teams-ng",
+      "page": "teams-ng/",
       "name": "Coco Teams NG",
       "description": "A team of AI members you hire, brief and work with in one console.",
-      "status": "Private, in development"
+      "status": "Private beta, in development",
+      "for_you": "A team of AI members you hire, brief and work with in one console.",
+      "who_for": "People who want to organise AI specialists by role instead of one undifferentiated chat.",
+      "licence_short": "Private",
+      "open_source": false,
+      "release_date": null,
+      "whats_new": "Private beta, in development."
     },
     {
-      "id": "status-zero",
-      "name": "Status Zero",
-      "description": "Compares what a plan says against what the code actually shipped.",
-      "status": "Private, in development"
+      "id": "aloomannu",
+      "page": "aloomannu/",
+      "name": "Aloo Mannu",
+      "description": "The local message and wake layer for coding agents on your machine.",
+      "status": "Private, in the lab",
+      "for_you": "The local message and wake layer for coding agents on your machine.",
+      "who_for": "Developers running more than one coding agent session on the same machine.",
+      "licence_short": "Private",
+      "open_source": false,
+      "release_date": null,
+      "whats_new": "Private, in the lab: the local message and wake layer for coding agents. No public download yet."
     }
   ]
 }

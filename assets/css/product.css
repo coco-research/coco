@@ -20,68 +20,33 @@
   src: url('../vendor/fonts/martian-mono-latin-wdth-normal.woff2') format('woff2');
 }
 
-/* Dark Stage is the base; Light Paper follows the OS unless data-theme says otherwise. */
+/* Light Paper and Dark Stage tokens via color-scheme + light-dark() (single source of truth;
+   follows OS prefers-color-scheme unless data-theme overrides color-scheme). */
 :root {
   color-scheme: light dark;
-  --paper: #03050b;
-  --surface: #0b1021;
-  --raised: #111830;
-  --ink: #eceae4;
-  --ink-2: #c1c0b9;
-  --ink-3: #929089;
-  --rule: #eceae4;
-  --line: rgba(150, 178, 255, 0.18);
-  --line-2: rgba(160, 188, 255, 0.34);
-  --blue: #2f4bff;
-  --blue-text: #8fa2ff;
+  --paper: light-dark(#f3f2ee, #03050b);
+  --surface: light-dark(#ffffff, #0b1021);
+  --raised: light-dark(#faf9f5, #111830);
+  --ink: light-dark(#0b0b0b, #eceae4);
+  --ink-2: light-dark(#3c3c37, #c1c0b9);
+  --ink-3: light-dark(#5f5f58, #929089);
+  --rule: light-dark(#0b0b0b, #eceae4);
+  --line: light-dark(rgba(11, 11, 11, 0.14), rgba(150, 178, 255, 0.18));
+  --line-2: light-dark(rgba(11, 11, 11, 0.32), rgba(160, 188, 255, 0.34));
+  --blue: light-dark(#1234ff, #2f4bff);
+  --blue-text: light-dark(#1234ff, #8fa2ff);
   --blue-ink: #ffffff;
-  --green: #3fd98a;
-  --amber: #ffb44a;
+  --green: light-dark(#0b7a45, #3fd98a);
+  --amber: light-dark(#9a5200, #ffb44a);
   --f-sans: 'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --f-mono: 'Martian Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --pad: clamp(20px, 5vw, 72px);
   --out: cubic-bezier(0.16, 1, 0.3, 1);
-  --nav-h: 72px;
+  --nav-h: 68px;
   --touch: 44px;
 }
 :root[data-theme="dark"] { color-scheme: dark; }
-
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --paper: #f3f2ee;
-    --surface: #ffffff;
-    --raised: #faf9f5;
-    --ink: #0b0b0b;
-    --ink-2: #3c3c37;
-    --ink-3: #5f5f58;
-    --rule: #0b0b0b;
-    --line: rgba(11, 11, 11, 0.14);
-    --line-2: rgba(11, 11, 11, 0.32);
-    --blue: #1234ff;
-    --blue-text: #1234ff;
-    --blue-ink: #ffffff;
-    --green: #0b7a45;
-    --amber: #9a5200;
-  }
-}
-
-:root[data-theme="light"] {
-  color-scheme: light;
-  --paper: #f3f2ee;
-  --surface: #ffffff;
-  --raised: #faf9f5;
-  --ink: #0b0b0b;
-  --ink-2: #3c3c37;
-  --ink-3: #5f5f58;
-  --rule: #0b0b0b;
-  --line: rgba(11, 11, 11, 0.14);
-  --line-2: rgba(11, 11, 11, 0.32);
-  --blue: #1234ff;
-  --blue-text: #1234ff;
-  --blue-ink: #ffffff;
-  --green: #0b7a45;
-  --amber: #9a5200;
-}
+:root[data-theme="light"] { color-scheme: light; }
 
 *, *::before, *::after { box-sizing: border-box; }
 html { background: var(--paper); color: var(--ink); -webkit-text-size-adjust: 100%; overflow-x: clip; }
@@ -390,7 +355,7 @@ html[data-product="aloomannu"] .world { display: none; }
 .link-btn:hover { color: var(--ink); }
 
 @media (max-width: 860px) {
-  :root { --nav-h: 62px; }
+  :root { --nav-h: 64px; }
   .hero { align-items: flex-start; min-height: auto; padding-top: 248px; padding-bottom: 36px; }
   .display { font-size: clamp(2.5rem, 9.5vw, 3.4rem); }
   .lede { margin-top: 14px; font-size: 1rem; }
@@ -580,7 +545,7 @@ html[data-banner-export] .aloo-banner-tagline { font-size: 1.30rem !important; m
 .p-who p { color: var(--ink); font-size: 1rem; line-height: 1.5; }
 .p-try-above { display: block; margin-top: 22px; }
 .p-try-above .cta-row { align-items: center; margin-top: 0; }
-.p-try-above .install-box { flex: 1 1 22rem; max-width: 32rem; margin-top: 0; }
+.p-try-above .install-box { max-width: 32rem; margin-top: 0; }
 .p-try-note { margin-top: 12px; color: var(--ink-2); font-size: 0.92rem; }
 .p-try-above .p-badges { margin-top: 14px; }
 .p-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
@@ -600,12 +565,14 @@ html[data-banner-export] .aloo-banner-tagline { font-size: 1.30rem !important; m
 .p-badge[data-kind="stage"]::before { width: 9px; height: 9px; }
 :is(.stage-badge, .stage-chip, .p-badge)[data-stage="available"]::before,
 :is(.stage-badge, .stage-chip, .p-badge)[data-stage="released"]::before,
+.stage-available::before, .stage-chip-available::before,
 .stage-released::before, .stage-chip-released::before {
   border-radius: 50%; background: var(--green); border: 0; transform: none;
 }
 :is(.stage-badge, .stage-chip, .p-badge)[data-stage="source"]::before,
 :is(.stage-badge, .stage-chip, .p-badge)[data-stage="preview"]::before,
-.stage-source::before, .stage-chip-source::before, .stage-preview::before {
+.stage-source::before, .stage-chip-source::before,
+.stage-preview::before, .stage-chip-preview::before {
   border-radius: 50%; background: transparent; border: 2px solid var(--blue-text); transform: none;
 }
 :is(.stage-badge, .stage-chip, .p-badge)[data-stage="beta"]::before,
@@ -615,7 +582,9 @@ html[data-banner-export] .aloo-banner-tagline { font-size: 1.30rem !important; m
 :is(.stage-badge, .stage-chip, .p-badge)[data-stage="lab"]::before,
 :is(.stage-badge, .stage-chip, .p-badge)[data-stage="dev"]::before,
 :is(.stage-badge, .stage-chip, .p-badge)[data-stage="private"]::before,
-.stage-dev::before, .stage-chip-lab::before {
+.stage-lab::before, .stage-chip-lab::before,
+.stage-dev::before, .stage-chip-dev::before,
+.stage-private::before, .stage-chip-private::before {
   width: 9px; height: 9px; margin-inline: 1px; border-radius: 0; background: transparent; border: 2px solid var(--amber); transform: rotate(45deg);
 }
 .p-badge[data-stage="lab"]::before, .p-badge[data-stage="dev"]::before, .p-badge[data-stage="private"]::before {
@@ -685,7 +654,7 @@ html[data-banner-export] .aloo-banner-tagline { font-size: 1.30rem !important; m
 
 /* Part 7: links */
 .links-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-.dir-stage::before, .tl-entry .stage-chip::before { display: none; }
+.tl-entry .stage-chip::before { display: none; }
 .stage-chip:has(.sh)::before { display: none; }
 .p-static-pill {
   display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px;

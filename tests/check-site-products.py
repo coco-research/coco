@@ -223,6 +223,62 @@ if 'noindex' in alo_html:
 else:
     pass_('aloomannu/index.html is indexable (no noindex)')
 
+# ---- shared nav/drawer parity: every top-level */index.html matches a generated page's nav at the same depth ----
+nav_re = re.compile(r'<header class="site-nav".*?</dialog>', re.S)
+
+
+def _norm_nav(text):
+    m = nav_re.search(text)
+    return m.group(0).replace(' aria-current="page"', '') if m else None
+
+
+ref_nav = _norm_nav(products_html)
+nav_checked = 0
+for page_p in sorted(Path('.').glob('*/index.html')):
+    ptxt = page_p.read_text()
+    if '<meta http-equiv="refresh"' in ptxt:
+        continue
+    got_nav = _norm_nav(ptxt)
+    if ref_nav and got_nav == ref_nav:
+        nav_checked += 1
+    else:
+        fail_('%s: nav/drawer differs from generated page nav' % page_p)
+if nav_checked == 14:
+    pass_('all %d top-level */index.html pages match the generated nav/drawer byte-for-byte' % nav_checked)
+else:
+    fail_('expected 14 top-level pages with shared nav, verified %d' % nav_checked)
+
+# ---- guard homepage, /m0/, and /rijul-kalra/ count literals against len(products) and len(lab) ----
+NUM_WORDS = ('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve')
+
+
+def _word(n, cap=False):
+    w = NUM_WORDS[n] if 0 <= n < len(NUM_WORDS) else str(n)
+    return w.capitalize() if cap else w
+
+
+n_prod, n_lab, n_total = len(shipped), len(lab), len(shipped) + len(lab)
+index_html = Path('index.html').read_text()
+m0_html = Path('m0/index.html').read_text()
+rijul_html = Path('rijul-kalra/index.html').read_text()
+
+count_checks = [
+    ('index.html products-head group-n', index_html, r'Products <span class="group-n">(\d+)</span>', (str(n_prod),)),
+    ('index.html products-head Browse all', index_html, r'<a class="see" href="\./products/">Browse all (\d+) products', (str(n_total),)),
+    ('index.html lab-sub group-n', index_html, r'In the lab <span class="group-n">(\d+)</span>', (str(n_lab),)),
+    ('index.html rail All N', index_html, r'<a class="rail-jump" href="\./products/"><span>All (\d+) ', (str(n_total),)),
+    ('m0/index.html body Browse all', m0_html, r'<a class="link-pill" href="\.\./products/">Browse all (\d+) products</a>', (str(n_total),)),
+    ('rijul-kalra/index.html count summary', rijul_html,
+     r'<p>(\w+) in all: (\w+) you can use today, and (\w+) in the lab\.</p>',
+     (_word(n_total, cap=True), _word(n_prod), _word(n_lab))),
+]
+for label, haystack, pat, want in count_checks:
+    m = re.search(pat, haystack)
+    if m and m.groups() == want:
+        pass_('%s matches %s' % (label, want))
+    else:
+        fail_('%s drifted: got %r, expected %r' % (label, m.groups() if m else None, want))
+
 print()
 if fail == 0:
     print('  homepage product rows agree with data/products.json')

@@ -9,18 +9,58 @@ const root = document.documentElement;
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const HOME_KEY = 'coco-home-static'; // this page's own opt-out; product pages use 'coco-motion' for their 3D Pause
 
 const lite = matchMedia('(max-width: 820px)').matches || (navigator.hardwareConcurrency || 8) <= 4;
 root.classList.toggle('lite', lite);
 
 let teardown = () => {};
+let cineRan = false; // the film builds once per page load (text splitting is not repeatable)
+// An explicit choice (this page's opt-out key, ?motion=off) or the OS reduced-motion setting: never upgrade.
+const userOptedOut = () => root.classList.contains('opt-out') || root.classList.contains('os-reduced');
+const gsapReady = () => !!(window.gsap && window.ScrollTrigger);
 wireCommon();
-if (root.classList.contains('cine')) {
-  if (!window.gsap || !window.ScrollTrigger) rescue('GSAP did not load');
-  else {
-    try { cine(); } catch (e) { console.warn('[coco] cinematic layer failed, showing the static page', e); rescue('error'); }
-  }
+boot();
+
+// Boots the film when the page is (or can safely become) cinematic. A page rescued after 5 s because the scripts were
+// slow is promoted to the full film if they arrive late and the visitor is still at the top.
+function boot() {
+  if (!root.classList.contains('cine') && canPromote()) { promote(); return; }
+  if (root.classList.contains('cine')) startCine();
 }
+function canPromote() {
+  return root.classList.contains('rescued') && !cineRan && window.scrollY < 40 && !userOptedOut()
+    && !root.classList.contains('short') && gsapReady();
+}
+function promote() {
+  root.classList.remove('static', 'rescued');
+  root.classList.add('cine');
+  startCine();
+}
+function startCine() {
+  if (!gsapReady()) { rescue('GSAP did not load'); return; }
+  cineRan = true;
+  try { cine(); } catch (e) { console.warn('[coco] cinematic layer failed, showing the static page', e); rescue('error'); }
+  syncMotionToggle();
+}
+
+// A short window (landscape phone, DevTools docked) gets the plain page; making it taller brings the film back without a reload.
+try {
+  const shortMq = matchMedia('(max-height: 580px)');
+  shortMq.addEventListener('change', () => {
+    if (shortMq.matches) {
+      root.classList.add('short');
+      if (root.classList.contains('cine')) { location.reload(); return; } // the plain page is rebuilt from scratch
+    } else {
+      root.classList.remove('short');
+      if (!userOptedOut() && root.classList.contains('static')) {
+        if (cineRan) { location.reload(); return; }
+        if (gsapReady()) { root.classList.remove('rescued'); promote(); return; }
+      }
+    }
+    syncMotionToggle();
+  });
+} catch (e) { /* older Safari: the plain page stays until reload */ }
 
 /* ---------------------------------------------------- shared behaviours */
 
@@ -51,34 +91,58 @@ function wireCommon() {
     });
   });
   // "View plain page" skip link: remember the choice (the link itself carries ?motion=off).
+  // This page has its own key; the 3D Pause on product pages ("coco-motion") never changes how this page loads.
   const plain = $('.skip-plain');
-  if (plain) plain.addEventListener('click', () => { try { localStorage.setItem('coco-motion', 'off'); } catch (e) { /* the URL flag still applies */ } });
-  const tog = $('.motion-toggle');
-  // Hidden when the OS asks for reduced motion, or the viewport is too short for the stage (neither can be toggled off here).
-  if (tog && !root.classList.contains('os-reduced') && !root.classList.contains('short')) {
-    const isStatic = root.classList.contains('static');
-    tog.hidden = false;
-    tog.textContent = isStatic ? 'Restore motion' : 'Reduce motion';
-    tog.addEventListener('click', () => {
-      try { localStorage.setItem('coco-motion', isStatic ? 'on' : 'off'); } catch (e) { /* private mode: falls back to the URL flag */ }
-      const u = new URL(location.href);
-      u.searchParams.delete('motion');
-      if (!isStatic) u.searchParams.set('motion', 'off');
-      history.replaceState(null, '', u);
-      location.reload();
-    });
-  }
+  if (plain) plain.addEventListener('click', () => { try { localStorage.setItem(HOME_KEY, 'off'); } catch (e) { /* the URL flag still applies */ } });
+  // Motion off/on: the footer link and the Pause 3D chip in the top bar (and drawer) are the same control. Off = the plain page.
+  const flipMotion = () => {
+    const restoring = root.classList.contains('static');
+    try { localStorage.setItem(HOME_KEY, restoring ? 'on' : 'off'); } catch (e) { /* private mode: falls back to the URL flag */ }
+    const u = new URL(location.href);
+    u.searchParams.delete('motion');
+    if (!restoring) u.searchParams.set('motion', 'off');
+    history.replaceState(null, '', u);
+    location.reload();
+  };
+  $$('.motion-toggle, [data-motion-toggle]').forEach((t) => t.addEventListener('click', flipMotion));
+  syncMotionToggle();
+  // The top bar and its drawer belong to site-nav.js (menu, Esc, backdrop, focus).
   // The visitor changed their OS motion setting while the page was open.
   try {
     matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => location.reload());
   } catch (e) { /* older Safari */ }
 }
 
+// The toggles are hidden only when the OS asks for reduced motion (nothing to toggle). A short window shows why the film is off.
+function syncMotionToggle() {
+  const reduced = root.classList.contains('os-reduced');
+  const isStatic = root.classList.contains('static');
+  const waitingForHeight = isStatic && root.classList.contains('short') && !root.classList.contains('opt-out');
+  const tog = $('.motion-toggle');
+  if (tog) {
+    if (reduced) tog.hidden = true;
+    else {
+      tog.hidden = false;
+      tog.disabled = waitingForHeight;
+      tog.textContent = waitingForHeight ? 'Motion needs a taller window' : (isStatic ? 'Restore motion' : 'Reduce motion');
+    }
+  }
+  $$('[data-motion-toggle]').forEach((b) => {
+    if (reduced) { b.hidden = true; return; }
+    b.hidden = false;
+    b.disabled = waitingForHeight;
+    b.textContent = isStatic ? 'Play 3D' : 'Pause 3D'; // the label names the action, so no aria-pressed
+    b.removeAttribute('aria-pressed');
+    b.title = waitingForHeight ? 'Motion needs a taller window' : '';
+  });
+}
+
 function rescue(reason) {
   console.warn('[coco] cinematic layer off:', reason);
   try { teardown(); } catch (e) { /* nothing to undo */ }
-  root.classList.remove('cine', 'gl', 'nogl', 'ready', 'show-cta', 'in-foot');
+  root.classList.remove('cine', 'gl', 'nogl', 'ready', 'in-foot');
   root.classList.add('static', 'rescued');
+  syncMotionToggle();
   if (window.gsap) {
     window.gsap.set($$('.beat, .sw, .swi, .sc, .dgi, .win, .win *, .card, .lab-wrap, .lab-group, .lab-item, .hero-sub, .hero-point, .cta .btn, .meta, .copy, .ring-cap, .facts, .stat-sub, .lab-sub, .rule-eyebrow, .num, .unit, .node, .ch-close'), { clearProps: 'all' });
   }
@@ -93,10 +157,17 @@ function cine() {
   ST.config({ ignoreMobileResize: true });
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
+  // Start fetching the 3D layer now (modulepreload in <head> already warmed it); it is attached after first paint.
+  const worldModule = import('./world.js').catch((e) => {
+    console.warn('[coco] 3D layer unavailable, continuing without it', e);
+    root.classList.add('nogl');
+    return null;
+  });
+
   const canvas = $('#world');
   const spacer = $('.spacer');
   const bars = $$('.bars i');
-  const railLinks = $$('.rail a');
+  const railLinks = $$('.rail a[data-goto]'); // the Products jump is a page link, never a chapter
   const nodeEls = $$('.ring .node');
   const NODE_IDX = [0, 3, 5, 8, 11, 13]; // which of the sixteen ring nodes (one per adapter) carry a label; evenly spread
   const cards = $$('.card');
@@ -176,8 +247,8 @@ function cine() {
   const deckState = { on: false };
   let deckWasActive = false;
   function layoutDeck(s) {
-    const active = s > TL.shipped[0] - 0.05 && s < TL.shipped[1] + 0.05;
-    if (active !== deckState.on) { deckState.on = active; root.classList.toggle('in-shipped', active); }
+    const active = s > TL.products[0] - 0.05 && s < TL.products[1] + 0.05;
+    if (active !== deckState.on) { deckState.on = active; root.classList.toggle('in-products', active); }
     if (!active) {
       if (deckWasActive) cards.forEach((c) => { c.style.visibility = 'hidden'; c.style.opacity = '0'; });
       deckWasActive = false;
@@ -231,12 +302,12 @@ function cine() {
   }
 
   /* ---- page chrome driven by scroll */
-  const chrome = { cta: false, idx: -1, bars: -1 };
+  const chrome = { idx: -1, bars: -1 };
+  let travelIdx = -1; // while an anchor flight is running the rail already shows its destination
   function updateChrome(s, P) {
-    const cta = s > 1.15;
-    if (cta !== chrome.cta) { chrome.cta = cta; root.classList.toggle('show-cta', cta); }
     let idx = 0;
     for (let i = 0; i < CHAPTERS.length; i++) if (s >= CHAPTERS[i].at - 0.001) idx = i;
+    if (travelIdx >= 0) idx = travelIdx;
     if (idx !== chrome.idx) {
       chrome.idx = idx;
       railLinks.forEach((a, i) => { a.classList.toggle('on', i === idx); if (i === idx) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
@@ -276,6 +347,7 @@ function cine() {
   }
 
   function startWorld(mod) {
+    if (world || !mod) return;
     const w = mod.createWorld({
       canvas, lite,
       onLost: () => { world = null; root.classList.remove('gl'); root.classList.add('nogl'); },
@@ -306,19 +378,34 @@ function cine() {
   g.ticker.add(frame);
 
   /* ---- travel: anchors fly the camera instead of jumping */
+  // The story position is driven directly during a flight (no scrub lag, nothing blank on arrival), then the scroll
+  // bar and ScrollTrigger's smoothing are snapped to the destination so the page rests exactly on the chapter.
   let travelTween = null;
-  const stopTravel = () => { if (travelTween) { travelTween.kill(); travelTween = null; } };
+  const curS = () => (forced != null ? forced : prog.v);
+  const snapTo = (s) => {
+    window.scrollTo(0, Math.round(s * screenPx()));
+    try { ST.update(); const t = st.getTween && st.getTween(); if (t) t.progress(1); } catch (e) { /* the scrub catches up on its own */ }
+  };
+  const stopTravel = () => {
+    if (travelTween) { travelTween.kill(); travelTween = null; }
+    travelIdx = -1;
+  };
   function travel(id) {
-    const ch = CHAPTERS.find((c) => c.id === id) || CHAPTERS[0];
-    const target = Math.round(ch.stop * screenPx());
-    const from = window.scrollY;
-    const dist = Math.abs(target - from);
-    if (dist < 4) return;
+    const idx = Math.max(0, CHAPTERS.findIndex((c) => c.id === id));
+    const to = CHAPTERS[idx].stop;
+    const from = curS();
+    const dist = Math.abs(to - from);
+    if (dist < 0.02) return;
     stopTravel();
-    const o = { y: from };
+    travelIdx = idx;
+    const o = { s: from };
+    forced = from;
+    snapTo(to);
+    // Short flights: never longer than half a second.
     travelTween = g.to(o, {
-      y: target, duration: clamp(0.9 + (dist / screenPx()) * 0.17, 1.1, 3.4), ease: 'power3.inOut',
-      onUpdate: () => window.scrollTo(0, o.y), onComplete: () => { travelTween = null; },
+      s: to, duration: clamp(0.2 + dist * 0.02, 0.2, 0.5), ease: 'power2.inOut',
+      onUpdate: () => { forced = o.s; },
+      onComplete: () => { travelTween = null; travelIdx = -1; forced = null; snapTo(to); },
     });
   }
   $$('[data-goto]').forEach((a) => a.addEventListener('click', (e) => {
@@ -328,6 +415,63 @@ function cine() {
   }));
   ['wheel', 'touchstart', 'keydown'].forEach((t) => addEventListener(t, stopTravel, { passive: true }));
   ['wheel', 'touchstart', 'keydown'].forEach((t) => addEventListener(t, () => { if (forced != null) { prog.v = forced; forced = null; } }, { passive: true }));
+
+  /* ---- keyboard: every control on the stage is reachable with Tab */
+  // Chapters that are off screen are hidden (visibility), so the browser would skip them. Tab therefore moves the film
+  // to the chapter that owns the next control, then focuses it. The pinned stage is also never allowed to scroll itself.
+  const stage = $('.stage');
+  const stageControls = () => $$('.stage a[href], .stage button').filter((el) => !el.disabled && !el.closest('[inert]'));
+  const shown = (el) => { const cs = getComputedStyle(el); return cs.visibility === 'visible' && cs.display !== 'none'; };
+  function stopFor(el) {
+    const ch = el.closest('.ch');
+    const id = ch ? ch.id : 'hero';
+    if (id === 'flagship') return TL.editor.install[1] + 0.35; // the install window is fully drawn and holding
+    if (id === 'products') {
+      const i = Math.max(0, cards.indexOf(el.closest('.card')));
+      const t = TL.products[0] + 1.1 + 1.7 * (cards.length > 1 ? i / (cards.length - 1) : 0) + 0.05; // card i is the focal poster
+      return Math.min(t, TL.products[1] - 0.65);
+    }
+    const c = CHAPTERS.find((x) => x.id === id);
+    return c ? c.stop : 0;
+  }
+  function jumpTo(s) {
+    stopTravel();
+    forced = s;
+    snapTo(s);
+    frame(g.ticker.time);
+    setTimeout(() => { if (forced === s) forced = null; }, 1200); // by now the scrub has caught up with the scroll position
+  }
+  function chromeBefore() { // the last tabbable control before the stage, in DOM order
+    const pre = $$('.skip, .site-nav a, .site-nav button, .rail a').filter((el) => !el.disabled && shown(el) && el.getClientRects().length);
+    return pre[pre.length - 1] || null;
+  }
+  addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab' || e.altKey || e.ctrlKey || e.metaKey || e.defaultPrevented) return;
+    if (document.querySelector('dialog[open]')) return;
+    const controls = stageControls();
+    const act = document.activeElement;
+    const i = controls.indexOf(act);
+    let next = null;
+    if (i >= 0) next = controls[i + (e.shiftKey ? -1 : 1)] || null;
+    else if (!e.shiftKey && act && act === chromeBefore()) {
+      // entering the stage from the header/rail: the control on the current chapter, else the first one
+      next = controls.find((el) => shown(el) && Math.abs(curS() - stopFor(el)) < 0.9) || controls[0] || null;
+    }
+    if (!next) return; // leaving the stage: the browser continues to the footer (or header) as usual
+    const to = stopFor(next);
+    if (shown(next) && Math.abs(curS() - to) < 0.45) return; // already on screen: native Tab
+    e.preventDefault();
+    jumpTo(to);
+    next.focus({ preventScroll: true });
+  });
+  // Anything else that takes focus inside the stage (assistive tech, scripts) also brings its chapter into view.
+  $('.story').addEventListener('focusin', (e) => {
+    stage.scrollTop = 0; stage.scrollLeft = 0;
+    if (!e.target.closest || !e.target.closest('.stage')) return;
+    const to = stopFor(e.target);
+    if (Math.abs(curS() - to) > 0.9) jumpTo(to);
+  });
+  stage.addEventListener('scroll', () => { stage.scrollTop = 0; stage.scrollLeft = 0; }, { passive: true });
 
   /* ---- resize: re-measure; flipping orientation rebuilds the whole timeline */
   let lastW = innerWidth;
@@ -356,17 +500,11 @@ function cine() {
 
   /* ---- go */
   root.classList.add('ready');
-  const introDone = new Promise((res) => { intro.eventCallback('onComplete', res); });
   intro.play();
-  const afterPaint = (fn) => requestAnimationFrame(() => requestAnimationFrame(() => {
-    if ('requestIdleCallback' in window) requestIdleCallback(fn, { timeout: 1500 }); else setTimeout(fn, 300);
+  // The 3D layer attaches right after the first paint; it no longer waits for the intro or an idle slot.
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    worldModule.then((mod) => { if (mod) startWorld(mod); });
   }));
-  afterPaint(() => {
-    const wait = new Promise((res) => setTimeout(res, 3600));
-    Promise.all([import('./world.js'), Promise.race([introDone, wait])])
-      .then(([mod]) => startWorld(mod))
-      .catch((e) => { console.warn('[coco] 3D layer unavailable, continuing without it', e); root.classList.add('nogl'); });
-  });
 
   if (location.hash && CHAPTERS.some((c) => '#' + c.id === location.hash)) {
     const id = location.hash.slice(1);
@@ -383,7 +521,7 @@ function cine() {
     },
     release() { if (forced != null) { prog.v = forced; forced = null; } },
     step() { frame(g.ticker.time); },
-    async boot3d() { if (!world) startWorld(await import('./world.js')); return !!world; },
+    async boot3d() { if (!world) startWorld(await worldModule); return !!world; },
     finishIntro() { intro.progress(1); },
     timeFrames(n = 5) {
       if (!world) return null;

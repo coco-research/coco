@@ -16,7 +16,7 @@ export const TL = {
   editor: { unfold: [6.7, 7.4], install: [7.2, 7.7], facts: [7.5, 7.95], hold: 8.45, collapse: [8.45, 8.95] },
   warp: [8.45, 9.25],
   rules: [[9.1, 9.95], [9.95, 10.8], [10.8, 11.65], [11.65, 12.55]],
-  shipped: [12.55, 15.85],
+  products: [12.55, 15.85],
   lab: [15.85, 18.85],
   close: [18.85, 21.1],
   modeFlip: 13.0, // star layout switches from "flight" to "final" while the stars are invisible
@@ -27,7 +27,7 @@ export const CHAPTERS = [
   { id: 'hero', at: 0, stop: 0 },
   { id: 'flagship', at: 1.0, stop: 1.5 },
   { id: 'rules', at: 8.9, stop: 9.55 },
-  { id: 'shipped', at: 12.45, stop: 14.1 },
+  { id: 'products', at: 12.45, stop: 14.1 },
   { id: 'lab', at: 15.8, stop: 18.2 },
   { id: 'close', at: 18.8, stop: 21.1 },
 ];
@@ -38,7 +38,7 @@ export const LAYOUT = {
   C: [0, 0, -182], // the point all constellations converge to (editor scene)
   S: [0, 0, -268], // centre of the four-rules shapes and of the final constellation
   sizes: [34, 41, 36, 44, 38, 33, 40, 37, 42, 35, 39, 36, 40], // 13 departments, 495 stars in total
-  ang: { rulesEnd: 1.35, shippedEnd: 1.75, labEnd: 2.0 }, // camera orbit around S (radians)
+  ang: { rulesEnd: 1.35, productsEnd: 1.75, labEnd: 2.0 }, // camera orbit around S (radians)
 };
 
 // The flight path the camera follows through the constellations, as a lateral wobble

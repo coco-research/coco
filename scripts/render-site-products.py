@@ -89,8 +89,10 @@ def render_card(product):
         kind = action['kind']
         if kind not in ('primary', 'ghost'):
             sys.exit('%s: action kind must be primary or ghost' % pid)
-        if not action['href'].startswith('https://'):
-            sys.exit('%s: action href must be https://' % pid)
+        href = action['href']
+        is_rel = href.startswith('/') and not href.startswith('//') and '..' not in href.split('/')
+        if '<' in href or '>' in href or not (href.startswith('https://') or is_rel):
+            sys.exit('%s: action href must be https:// or a root-relative path' % pid)
         lines.append(
             '              <a class="btn btn-%s btn-sm" href="%s">%s<span class="sr-only">%s</span></a>'
             % (kind, esc_attr(action['href']), esc_text(action['label']), esc_text(action['sr']))

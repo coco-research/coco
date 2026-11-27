@@ -3,7 +3,7 @@
     {
       "id": "coco-si",
       "name": "Coco Super Intelligence",
-      "tag": "Available now, v1.10.0, on npm",
+      "tag": "Available now, v2.4.0, on npm",
       "description_html": "An advisory board of expert personas that installs into Claude Code, Cursor or Codex, argues a hard call out, then hands the decision to its skills.",
       "actions": [
         {
@@ -30,8 +30,14 @@
       "actions": [
         {
           "label": "Download",
-          "href": "https://github.com/coco-research/Coco-Voice/releases",
+          "href": "https://github.com/coco-research/Coco-Voice/releases/latest",
           "kind": "primary",
+          "sr": " Coco Voice"
+        },
+        {
+          "label": "About",
+          "href": "/voice/",
+          "kind": "ghost",
           "sr": " Coco Voice"
         },
         {
@@ -42,7 +48,7 @@
         }
       ],
       "art": "assets/site/art/voice.svg",
-      "footer_href": "https://github.com/coco-research/Coco-Voice"
+      "footer_href": "/voice/"
     },
     {
       "id": "connect",

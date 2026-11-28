@@ -281,8 +281,8 @@
           "Files and hooks on one machine"
         ],
         [
-          "No network",
-          "Zero cloud relays or remote servers"
+          "No cloud",
+          "Messages never leave your machine"
         ],
         [
           "No models",
@@ -324,7 +324,7 @@
         ],
         [
           "Privacy",
-          "No network, no cloud relays, no models; deterministic message routing"
+          "No cloud: messages never leave your machine; no models, deterministic routing"
         ]
       ],
       "next": [

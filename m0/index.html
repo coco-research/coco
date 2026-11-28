@@ -173,8 +173,13 @@
 .flow-n { display: block; margin-bottom: 8px; font: 500 0.74rem / 1.2 var(--f-mono); color: var(--blue-text); }
 .flow h3 { margin: 0 0 6px; font: 600 1rem / 1.3 var(--f-sans); font-stretch: 110%; }
 .flow p { color: var(--ink-2); font-size: 0.92rem; line-height: 1.52; }
-.flow-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 18px; }
+.two-flush { margin-top: 0; }
+.m0-summary { margin-top: 12px; max-width: 46em; color: var(--ink-2); }
+.m0-main .arch-card { margin: 0; }
+.ex-cap-note { margin-top: 10px; }
+.stage-card-spaced { margin-top: 28px; }
+.links-row-spaced { margin-top: 18px; }
 .note-card { padding: clamp(18px, 2.4vw, 26px); background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; }
 .note-card h3 { margin: 0 0 8px; font: 600 1.02rem / 1.3 var(--f-sans); font-stretch: 110%; }
 .note-card p { color: var(--ink-2); font-size: 0.95rem; line-height: 1.56; }
@@ -217,8 +222,6 @@
   .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .flow > li:nth-child(3) { border-left: 0; }
   .flow > li:nth-child(n+3) { border-top: 1px solid var(--line-2); }
-  .flow-3 { grid-template-columns: minmax(0, 1fr); }
-  .flow-3 > li + li { border-left: 0; border-top: 1px solid var(--line-2); }
   .arch-hint { display: block; }
 }
 @media (max-width: 760px) {
@@ -232,7 +235,7 @@
   .cmp thead, .hosts thead, .clocks thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   .cmp tbody tr, .hosts tbody tr, .clocks tbody tr { padding: 12px 0; border-bottom: 1px solid var(--line); }
   .cmp tbody th, .cmp td, .hosts tbody th, .hosts td, .clocks tbody th, .clocks td { border-bottom: 0; padding: 4px clamp(12px, 3vw, 18px); }
-  .cmp td::before { content: attr(data-l); display: block; margin-bottom: 2px; font: 600 0.68rem / 1.3 var(--f-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-3); }
+  .cmp td::before, .hosts td::before, .clocks td::before { content: attr(data-l); display: block; margin-bottom: 2px; font: 600 0.68rem / 1.3 var(--f-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-3); }
   .cmp td:last-child::before { color: var(--blue-text); }
 }
 </style>
@@ -348,7 +351,7 @@
         <div><p class="eyebrow"><span class="p-part-num">01</span> The problem</p><h2 id="h-p-01" class="sec-title">Every AI tool starts from zero</h2></div>
       </div>
       <p class="p-lead">You settle a question on Monday in one tool. On Tuesday a different tool has never heard of it. Chat history stays inside its chat, and the memory features built into one product stay inside that product. So you explain the same decisions again, and sooner or later two tools act on two different versions of the truth.</p>
-      <p class="p-detail" style="margin-top:12px;max-width:46em;color:var(--ink-2)">Coco M0 is one memory on your machine that your tools share. They write what happened into it and read what is still true out of it.</p>
+      <p class="p-detail m0-summary">Coco M0 is one memory on your machine that your tools share. They write what happened into it and read what is still true out of it.</p>
       <div class="vs">
         <div class="vs-col vs-without">
           <h3>Without a shared memory</h3>
@@ -435,7 +438,7 @@
         <div><p class="eyebrow"><span class="p-part-num">03</span> Architecture</p><h2 id="h-p-03" class="sec-title">How it is built</h2></div>
         <p class="sec-sub">A small local service on your machine sits between your tools and one local store. Everything below runs on loopback.</p>
       </div>
-      <figure class="arch-card" style="margin:0">
+      <figure class="arch-card">
         <div class="arch-scroll" tabindex="0" role="region" aria-label="Coco M0 architecture blueprint. Scrolls sideways on narrow screens.">
           <svg class="arch-svg" viewBox="0 0 1120 560" role="img" aria-labelledby="arch-t arch-d" focusable="false">
             <title id="arch-t">Coco M0 architecture blueprint</title>
@@ -630,7 +633,7 @@
           <p class="ex-cap">The newer fact closed the older one. The old statement is still there if you ask for the history.</p>
         </div>
       </div>
-      <p class="ex-cap" style="margin-top:10px">An illustration of the mechanism, not a transcript.</p>
+      <p class="ex-cap ex-cap-note">An illustration of the mechanism, not a transcript.</p>
 
       <div class="rule-box">
         <div>
@@ -656,11 +659,11 @@
       <table class="clocks">
         <thead><tr><th scope="col">Clock</th><th scope="col">What it answers</th><th scope="col">Status</th></tr></thead>
         <tbody>
-          <tr><th scope="row">Event time</th><td>When the source event happened. Today that is its capture time.</td><td><span class="st st-live">Live</span></td></tr>
-          <tr><th scope="row">Record time</th><td>When M0 wrote the fact down.</td><td><span class="st st-live">Live</span></td></tr>
-          <tr><th scope="row">Observed time</th><td>Each later time the same fact was seen again.</td><td><span class="st st-live">Live</span></td></tr>
-          <tr><th scope="row">Decision date</th><td>When you made a ruling.</td><td><span class="st st-live">Live</span></td></tr>
-          <tr><th scope="row">Valid time</th><td>When a fact is true out in the world. A date written in prose is stored apart and does not drive supersession yet.</td><td><span class="st st-plan">Planned</span></td></tr>
+          <tr><th scope="row">Event time</th><td data-l="What it answers">When the source event happened. Today that is its capture time.</td><td data-l="Status"><span class="st st-live">Live</span></td></tr>
+          <tr><th scope="row">Record time</th><td data-l="What it answers">When M0 wrote the fact down.</td><td data-l="Status"><span class="st st-live">Live</span></td></tr>
+          <tr><th scope="row">Observed time</th><td data-l="What it answers">Each later time the same fact was seen again.</td><td data-l="Status"><span class="st st-live">Live</span></td></tr>
+          <tr><th scope="row">Decision date</th><td data-l="What it answers">When you made a ruling.</td><td data-l="Status"><span class="st st-live">Live</span></td></tr>
+          <tr><th scope="row">Valid time</th><td data-l="What it answers">When a fact is true out in the world. A date written in prose is stored apart and does not drive supersession yet.</td><td data-l="Status"><span class="st st-plan">Planned</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -699,7 +702,7 @@
         <div><p class="eyebrow"><span class="p-part-num">06</span> Decisions</p><h2 id="h-p-06" class="sec-title">The ruling you made stays made</h2></div>
         <p class="sec-sub">Recall alone becomes a commodity. A confirmed trail of decisions does not, so M0 keeps one as its own record.</p>
       </div>
-      <div class="two" style="margin-top:0">
+      <div class="two two-flush">
         <div class="note-card">
           <h3>A ledger you can read</h3>
           <p>Every decision is one plain markdown file outside the database, committed to git. A new one starts as proposed, and you confirm it or withdraw it with a reason. An active decision can later be superseded.</p>
@@ -724,13 +727,13 @@
       <table class="hosts">
         <thead><tr><th scope="col">Tool</th><th scope="col">How it connects</th><th scope="col">Status</th></tr></thead>
         <tbody>
-          <tr><th scope="row">Claude Code</th><td>Hooks, a prompt hook and the MCP tool.</td><td><span class="st st-live">Live</span></td></tr>
-          <tr><th scope="row">Codex</th><td>A notify hook into the local spool. MCP through its config file.</td><td><span class="st st-off">Built, off</span></td></tr>
-          <tr><th scope="row">OpenCode</th><td>A capture plugin into the spool. MCP through its config.</td><td><span class="st st-off">Built, off</span></td></tr>
-          <tr><th scope="row">Cursor</th><td>MCP plus a rules marker and memory scripts.</td><td><span class="st st-off">Built, off</span></td></tr>
-          <tr><th scope="row">Grok</th><td>A read-only bridge to the session-start context over a private local socket.</td><td><span class="st st-off">Built, off</span></td></tr>
-          <tr><th scope="row">Coco Hermes</th><td>Shares M0’s single hook rather than adding a second one.</td><td><span class="st st-off">Built, off</span></td></tr>
-          <tr><th scope="row">Coco Teams NG</th><td>Calls the same API, each user against their own M0.</td><td><span class="st st-plan">Planned</span></td></tr>
+          <tr><th scope="row">Claude Code</th><td data-l="How it connects">Hooks, a prompt hook and the MCP tool.</td><td data-l="Status"><span class="st st-live">Live</span></td></tr>
+          <tr><th scope="row">Codex</th><td data-l="How it connects">A notify hook into the local spool. MCP through its config file.</td><td data-l="Status"><span class="st st-off">Built, off</span></td></tr>
+          <tr><th scope="row">OpenCode</th><td data-l="How it connects">A capture plugin into the spool. MCP through its config.</td><td data-l="Status"><span class="st st-off">Built, off</span></td></tr>
+          <tr><th scope="row">Cursor</th><td data-l="How it connects">MCP plus a rules marker and memory scripts.</td><td data-l="Status"><span class="st st-off">Built, off</span></td></tr>
+          <tr><th scope="row">Grok</th><td data-l="How it connects">A read-only bridge to the session-start context over a private local socket.</td><td data-l="Status"><span class="st st-off">Built, off</span></td></tr>
+          <tr><th scope="row">Coco Hermes</th><td data-l="How it connects">Shares M0’s single hook rather than adding a second one.</td><td data-l="Status"><span class="st st-off">Built, off</span></td></tr>
+          <tr><th scope="row">Coco Teams NG</th><td data-l="How it connects">Calls the same API, each user against their own M0.</td><td data-l="Status"><span class="st st-plan">Planned</span></td></tr>
         </tbody>
       </table>
       <div class="two">
@@ -806,7 +809,7 @@
       </div>
       <p class="stand-note">Statuses follow the engineering record of 20 October 2026. No recall, accuracy or speed numbers are published for M0.</p>
 
-      <div class="stage-card" style="margin-top:28px">
+      <div class="stage-card stage-card-spaced">
         <span class="stage-badge stage-chip stage-chip-beta" data-stage="beta">Private beta</span>
         <dl class="facts-grid">
           <div class="fact"><dt>Stage</dt><dd>Private beta, used daily inside Coco Research</dd></div>
@@ -833,7 +836,7 @@
         <p class="try-lead">Private, in the lab — no public download yet. Coco M0 is used daily inside Coco Research.</p>
         <p class="try-note">Questions: <a class="inline" href="mailto:product@cocoresearch.org">product@cocoresearch.org</a></p>
       </div>
-      <div class="links-row" style="margin-top:18px">
+      <div class="links-row links-row-spaced">
         <a class="link-pill" href="../products/">Browse all 10 products</a>
         <a class="link-pill" href="../lab/">In the lab</a>
         <a class="link-pill" href="../whats-new/">What’s new</a>

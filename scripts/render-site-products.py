@@ -15,6 +15,7 @@ from pathlib import Path
 
 ROOT = Path.cwd()
 INDEX = ROOT / 'index.html'
+M0 = ROOT / 'm0' / 'index.html'
 DATA = ROOT / 'data' / 'products.json'
 ANCHOR = re.compile(r'<a class="inline" href="([^"]*)" rel="noopener">([^<]*)</a>')
 ID_OK = re.compile(r'[a-z0-9-]+')
@@ -174,7 +175,7 @@ def render_foot(data, group):
     ]
 
 
-def replace_region(text, name, inner):
+def replace_region(text, name, inner, where='index.html'):
     start = '<!-- products:%s:start -->' % name
     end = '<!-- products:%s:end -->' % name
     lines = text.splitlines(keepends=True)
@@ -186,18 +187,29 @@ def replace_region(text, name, inner):
             end_at = index
             break
     if start_at is None or end_at is None or end_at <= start_at:
-        sys.exit('index.html is missing products:%s markers' % name)
+        sys.exit('%s is missing products:%s markers' % (where, name))
     block = [line + '\n' for line in inner]
     return ''.join(lines[:start_at + 1] + block + lines[end_at:])
 
 
-def render_nav(prefix='./'):
-    """The shared top bar and phone drawer, from the same generator the product pages use (home: locked dark)."""
+def _load_page_renderer():
     spec = importlib.util.spec_from_file_location('render_product_pages', ROOT / 'scripts' / 'render-product-pages.py')
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
+    return mod
+
+
+def render_nav(prefix='./', home=True):
+    """The shared top bar and phone drawer, from the same generator the product pages use."""
+    mod = _load_page_renderer()
     _data, catalog = mod.load_catalog()
-    return mod.nav_html(catalog, None, True, prefix=prefix, home=True).split('\n')
+    return mod.nav_html(catalog, None, True, prefix=prefix, home=home).split('\n')
+
+
+def render_footer_block(data):
+    """The shared footer nav for subpages, from the same generator the product pages use."""
+    mod = _load_page_renderer()
+    return mod.footer_html(data, '').split('\n')
 
 
 def render(text, data):
@@ -210,6 +222,13 @@ def render(text, data):
     return text
 
 
+def render_m0(text, data):
+    check_ids(data)
+    text = replace_region(text, 'nav', render_nav(prefix='../', home=False), where='m0/index.html')
+    text = replace_region(text, 'foot', render_footer_block(data), where='m0/index.html')
+    return text
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--check', action='store_true', help='exit 1 with a unified diff if index.html is stale')
@@ -217,6 +236,7 @@ def main():
     data = json.loads(DATA.read_text())
     old = INDEX.read_text()
     new = render(old, data)
+    stale = False
     if args.check:
         if new != old:
             sys.stdout.writelines(difflib.unified_diff(
@@ -225,10 +245,26 @@ def main():
                 fromfile='index.html',
                 tofile='index.html (rendered)',
             ))
-            sys.exit(1)
-        return
-    if new != old:
+            stale = True
+    elif new != old:
         INDEX.write_text(new)
+    # ponytail: ceiling = 1 absent hand-built page (m0/index.html) before /m0/ lands; upgrade path = require m0/index.html unconditionally once /m0/ exists on main.
+    if M0.is_file():
+        old_m0 = M0.read_text()
+        new_m0 = render_m0(old_m0, data)
+        if args.check:
+            if new_m0 != old_m0:
+                sys.stdout.writelines(difflib.unified_diff(
+                    old_m0.splitlines(keepends=True),
+                    new_m0.splitlines(keepends=True),
+                    fromfile='m0/index.html',
+                    tofile='m0/index.html (rendered)',
+                ))
+                stale = True
+        elif new_m0 != old_m0:
+            M0.write_text(new_m0)
+    if args.check and stale:
+        sys.exit(1)
 
 
 if __name__ == '__main__':

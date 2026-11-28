@@ -867,6 +867,8 @@ def check_private_stage_prose(root, lab_specs):
                     errs.append('%s/index.html hero pill %r mentions other key label %r (expected %r)' % (slug, pill_text, lbl, page_label))
             if not pill_text.startswith(page_label):
                 errs.append('%s/index.html hero pill %r does not start with %r' % (slug, pill_text, page_label))
+            if pill_text != ta_label:
+                errs.append('%s/index.html hero pill %r != spec try_above.label %r' % (slug, pill_text, ta_label))
         fm = stage_fact_re.search(txt)
         if not fm:
             errs.append('%s/index.html is missing <dt>Stage</dt><dd> fact' % slug)
@@ -911,16 +913,22 @@ with tempfile.TemporaryDirectory(prefix='r1b-priv-prose-') as tmp:
     bad_specs = json.loads(json.dumps(specs_lab))
     bad_specs['lab']['m0']['try_above']['label'] = 'Private, in the lab \u2014 no public download yet'
     bad_spec_ta = check_private_stage_prose(troot, bad_specs)
+
+    orig_m0_p = (troot / 'm0' / 'index.html').read_text()
+    (troot / 'm0' / 'index.html').write_text(orig_m0_p.replace('Private beta, used daily \u2014 no public download yet', 'Private beta, drifted \u2014 no public download yet', 1))
+    bad_m0_drift = check_private_stage_prose(troot, specs_lab)
+    (troot / 'm0' / 'index.html').write_text(orig_m0_p)
 if (
     ok_priv == []
     and any('hermes/index.html hero pill' in e for e in bad_pill_txt)
     and any('aloomannu/index.html Stage fact' in e for e in bad_fact_txt)
     and any('aloomannu/index.html .p-static-pill shape' in e for e in bad_pill_shape)
     and any('spec m0: try_above.label' in e for e in bad_spec_ta)
+    and any('m0/index.html hero pill' in e and 'spec try_above.label' in e for e in bad_m0_drift)
 ):
-    pass_('AC-17 / AC-18 self-test: mismatched pill text, Stage fact, pill shape, and spec try_above.label all fail')
+    pass_('AC-17 / AC-18 self-test: mismatched pill text, Stage fact, pill shape, spec try_above.label, and m0 pill drift all fail')
 else:
-    fail_('AC-17 / AC-18 self-test failed: ok=%r pill=%r fact=%r shape=%r spec=%r' % (ok_priv, bad_pill_txt, bad_fact_txt, bad_pill_shape, bad_spec_ta))
+    fail_('AC-17 / AC-18 self-test failed: ok=%r pill=%r fact=%r shape=%r spec=%r m0_drift=%r' % (ok_priv, bad_pill_txt, bad_fact_txt, bad_pill_shape, bad_spec_ta, bad_m0_drift))
 
 # Self-test: button aria-current, h2 card title, role=list, missing m0 aria-current, wrong product href, and sh-sq priv marker all fail.
 with tempfile.TemporaryDirectory(prefix='r1b-a11y-') as tmp:

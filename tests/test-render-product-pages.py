@@ -235,6 +235,14 @@ class RenderProductPagesTest(unittest.TestCase):
         data, _pub, _lab, catalog, counts = _sample_fixtures()
         wn = M.render_whats_new(catalog, data, counts)
         for needle in (
+            "<title>What's new \u2014 Coco Research</title>",
+            '<meta property="og:title" content="What&#x27;s new \u2014 Coco Research">',
+            '<meta name="twitter:title" content="What&#x27;s new \u2014 Coco Research">',
+            '<h1 id="h-hero" class="display">What\'s new</h1>',
+            '<div class="p-try-above" role="group" aria-label="Where to start">',
+            '<div class="p-badges" role="group" aria-label="Groups">',
+            '<div class="timeline" role="group" aria-label="Latest tagged releases">',
+            '<div class="active-table" role="group" aria-label="Source projects without a packaged release">',
             'Demo &lt;Prod&gt; &amp; Co v1.2.3, released 26 Nov 2026.', '70 personas and 130 skills.',
             'First preview with 80 commands.', 'Source release with 12 agents.',
             'Released \u00b7 Open-core (Apache-2.0 core)', 'Early preview \u00b7 Apache-2.0',
@@ -242,6 +250,10 @@ class RenderProductPagesTest(unittest.TestCase):
             '<li><a href="../demo-cats/">Demo Cats</a></li>', '3 tagged releases',
         ):
             self.assertIn(needle, wn)
+        self.assertNotIn('What\u2019s new', wn)
+        ld = _parse_jsonld(wn)['@graph']
+        self.assertEqual(ld[0]['name'], "What's new \u2014 Coco Research")
+        self.assertEqual(ld[1]['itemListElement'][-1]['name'], "What's new")
         self.assertLess(wn.index('2026-11-26'), wn.index('2026-11-01'))
         self.assertLess(wn.index('2026-11-01'), wn.index('2026-10-15'))
         catalog[0]['row']['release_url'] = 'http://insecure.example/r'
@@ -273,10 +285,17 @@ class RenderProductPagesTest(unittest.TestCase):
         _data, _pub, _lab, catalog, _counts = _sample_fixtures()
         catalog[2]['spec']['slug'] = 'a&b'
         sm = M.render_sitemap(catalog)
-        self.assertIn('<loc>%s/demo-prod/</loc>' % M.SITE, sm)
-        self.assertIn('<loc>%s/a&amp;b/</loc>' % M.SITE, sm)
+        self.assertIn('<loc>%s/whats-new/</loc>\n    <lastmod>2026-11-26</lastmod>' % M.SITE, sm)
+        self.assertIn('<loc>%s/demo-prod/</loc>\n    <lastmod>2026-11-26</lastmod>' % M.SITE, sm)
+        self.assertIn('<loc>%s/demo-prev/</loc>\n    <lastmod>2026-10-15</lastmod>' % M.SITE, sm)
+        self.assertIn('<loc>%s/a&amp;b/</loc>\n    <lastmod>2026-11-01</lastmod>' % M.SITE, sm)
+        self.assertIn('<loc>%s/demo-src/</loc>\n  </url>' % M.SITE, sm)
+        self.assertIn('<loc>%s/</loc>\n  </url>' % M.SITE, sm)
+        self.assertIn('<loc>%s/rijul-kalra/</loc>\n  </url>' % M.SITE, sm)
         self.assertNotIn('demo-cats', sm)
-        self.assertIn('/rijul-kalra/', sm)
+        for it in catalog:
+            it['row'].pop('release_date', None)
+        self.assertNotIn('<lastmod>', M.render_sitemap(catalog))
         llms = M.render_llms(catalog)
         self.assertIn('1. Data stays local. Voice runs offline. Our tools run on your machine.', llms)
         self.assertNotIn('speech model', llms)

@@ -419,6 +419,195 @@ if Path('m0/index.html').is_file() and Path('rijul-kalra/index.html').is_file():
 else:
     fail_('count-literal self-test skipped: m0/index.html or rijul-kalra/index.html is missing')
 
+# ---- AC-1 / AC-2: single stage key on /lab/ governs every lab-group chip/badge ----
+STAGE_EXPECTED = {
+    'Early preview': ('source', 'sh-ring'),
+    'Source available': ('source', 'sh-ring'),
+    'Archived': ('archived', 'sh-bar'),
+    'Private beta': ('beta', 'sh-sq'),
+    'Private, in the lab': ('lab', 'sh-sq'),
+}
+
+
+def _stage_base(text):
+    return text.split(' \u00b7 ', 1)[0].strip()
+
+
+def check_stage_labels_and_key(root, catalog_data, pub_specs, lab_specs):
+    errs = []
+    lab_p = root / 'lab' / 'index.html'
+    prod_p = root / 'products' / 'index.html'
+    wn_p = root / 'whats-new' / 'index.html'
+    for rel, p in (('lab/index.html', lab_p), ('products/index.html', prod_p), ('whats-new/index.html', wn_p)):
+        if not p.is_file():
+            errs.append('%s is missing for stage-label check' % rel)
+    if errs:
+        return errs
+
+    lab_txt = lab_p.read_text()
+    key_sec = re.search(r'<dl class="facts-grid" aria-label="Stage key">(.*?)</dl>', lab_txt, re.S)
+    if not key_sec:
+        return ['lab/index.html is missing <dl class="facts-grid" aria-label="Stage key">']
+    key_rows = re.findall(
+        r'<dt data-stage="([^"]+)"><span class="sh ([^"]+)" aria-hidden="true"></span>([^<]+)</dt>',
+        key_sec.group(1),
+    )
+    key_map = {label.strip(): (skey, shape) for skey, shape, label in key_rows}
+    if len(key_rows) != len(key_map) or not key_map:
+        errs.append('lab/index.html stage key has duplicate or missing <dt> entries: %r' % (key_rows,))
+    if key_map != STAGE_EXPECTED:
+        errs.append('lab/index.html stage key drifted: got %r, expected %r' % (key_map, STAGE_EXPECTED))
+
+    sub_m = re.search(r'<p class="sec-sub">(\w+) labels, used the same way on every page\.</p>', lab_txt)
+    want_word = _word(len(key_rows), cap=True)
+    if not sub_m or sub_m.group(1) != want_word:
+        errs.append('lab/index.html stage key count word drifted: got %r, expected %r' % (sub_m.group(1) if sub_m else None, want_word))
+
+    shipped_ids = {r['id'] for r in catalog_data.get('products', [])}
+    lab_ids = {r['id'] for r in catalog_data.get('lab', [])}
+    card_pat = re.compile(
+        r'<article class="dir-card"[^>]*id="p-([^"]+)"[^>]*>.*?'
+        r'<span class="stage-chip dir-stage" data-stage="([^"]+)"><span class="sh ([^"]+)" aria-hidden="true"></span>([^<]+)</span>',
+        re.S,
+    )
+    card_labels = {}
+    for page_rel, page_txt, expect_ids in (
+        ('products/index.html', prod_p.read_text(), shipped_ids | lab_ids),
+        ('lab/index.html', lab_txt, lab_ids),
+    ):
+        found = {}
+        for pid, dstage, shape, label in card_pat.findall(page_txt):
+            label = label.strip()
+            found[pid] = (dstage, shape, label)
+            if pid in shipped_ids:
+                if dstage != 'released' or shape != 'sh-dot' or not label.startswith('Available now'):
+                    errs.append('%s %s: product-group chip drifted (%r, %r, %r)' % (page_rel, pid, dstage, shape, label))
+            else:
+                base = _stage_base(label)
+                if base not in key_map:
+                    errs.append('%s %s: stage label %r is not in the /lab/ key' % (page_rel, pid, label))
+                else:
+                    want_key, want_shape = key_map[base]
+                    if (dstage, shape) != (want_key, want_shape):
+                        errs.append('%s %s: chip (%r, %r) disagrees with key %r for %r' % (page_rel, pid, dstage, shape, (want_key, want_shape), base))
+                prev = card_labels.get(pid)
+                if prev is not None and prev != base:
+                    errs.append('%s %s: card label %r disagrees with %r' % (page_rel, pid, base, prev))
+                card_labels[pid] = base
+        if set(found) != expect_ids:
+            errs.append('%s: card set drifted: got %r, expected %r' % (page_rel, sorted(found), sorted(expect_ids)))
+
+    wn_txt = wn_p.read_text()
+    wn_chips = re.findall(
+        r'<span class="stage-chip" data-stage="([^"]+)"><span class="sh ([^"]+)" aria-hidden="true"></span>([^<]+)</span>',
+        wn_txt,
+    )
+    if not wn_chips:
+        errs.append('whats-new/index.html: no stage chips found')
+    for dstage, shape, label in wn_chips:
+        base = _stage_base(label)
+        if base == 'Released':
+            if (dstage, shape) != ('released', 'sh-dot'):
+                errs.append('whats-new/index.html: Released chip drifted (%r, %r)' % (dstage, shape))
+        elif base not in key_map:
+            errs.append('whats-new/index.html: stage chip %r is not in the /lab/ key' % label)
+        elif (dstage, shape) != key_map[base]:
+            errs.append('whats-new/index.html: chip (%r, %r) disagrees with key %r for %r' % (dstage, shape, key_map[base], base))
+
+    specs_all = dict(pub_specs)
+    specs_all.update(lab_specs.get('lab', {}))
+    hero_re = re.compile(r'<span class="p-badge" data-kind="stage" data-stage="([^"]+)">([^<]+)</span>')
+    stage_re = re.compile(r'<span class="stage-badge stage-chip[^"]*" data-stage="([^"]+)">([^<]+)</span>')
+    for row in catalog_data.get('products', []) + catalog_data.get('lab', []):
+        pid = row['id']
+        slug = row['page'].rstrip('/')
+        page_p = root / slug / 'index.html'
+        if not page_p.is_file():
+            errs.append('%s/index.html is missing for stage check' % slug)
+            continue
+        ptxt = page_p.read_text()
+        hm, sm = hero_re.search(ptxt), stage_re.search(ptxt)
+        if not hm or not sm:
+            errs.append('%s/index.html is missing hero stage badge or stage-card chip' % slug)
+            continue
+        h_stage, h_label = hm.group(1), hm.group(2).strip()
+        s_stage, s_label = sm.group(1), sm.group(2).strip()
+        if pid in shipped_ids:
+            if h_stage != 'released' or s_stage != 'released' or not h_label.startswith('Available now') or s_label != 'Released':
+                errs.append('%s/index.html: product-group badges drifted (%r/%r, %r/%r)' % (slug, h_stage, h_label, s_stage, s_label))
+            continue
+        spec_st = specs_all.get(pid, {}).get('stage', {})
+        spec_base = _stage_base(spec_st.get('chip', ''))
+        if spec_base not in key_map:
+            errs.append('spec %s: stage.chip %r is not in the /lab/ key' % (pid, spec_st.get('chip')))
+        elif spec_st.get('cls') != key_map[spec_base][0]:
+            errs.append('spec %s: stage.cls %r != key %r for %r' % (pid, spec_st.get('cls'), key_map[spec_base][0], spec_base))
+        for where, dstage, label in (('hero badge', h_stage, h_label), ('stage card', s_stage, s_label)):
+            base = _stage_base(label)
+            if base not in key_map:
+                errs.append('%s/index.html %s: label %r is not in the /lab/ key' % (slug, where, label))
+            else:
+                if dstage != key_map[base][0]:
+                    errs.append('%s/index.html %s: data-stage %r != key %r for %r' % (slug, where, dstage, key_map[base][0], base))
+                if pid in card_labels and base != card_labels[pid]:
+                    errs.append('%s/index.html %s: label %r disagrees with card label %r' % (slug, where, base, card_labels[pid]))
+    return errs
+
+
+specs_lab = json.loads(Path('data/product-pages-lab.json').read_text())
+stage_errs = check_stage_labels_and_key(Path('.'), data, specs_public, specs_lab)
+if stage_errs:
+    for err in stage_errs:
+        fail_(err)
+else:
+    pass_('AC-1 / AC-2: all lab stage chips, page badges, specs, and /lab/ key agree (5 labels)')
+
+# Self-test: stage-label guard fails on sixth label, shape/key mismatch, card/page mismatch, or key count drift.
+with tempfile.TemporaryDirectory(prefix='r1a-stages-') as tmp:
+    troot = Path(tmp)
+    for rel in (
+        'lab/index.html', 'products/index.html', 'whats-new/index.html',
+        *[row['page'].rstrip('/') + '/index.html' for row in shipped + lab],
+    ):
+        dst = troot / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(Path(rel).read_text())
+    ok_stage = check_stage_labels_and_key(troot, data, specs_public, specs_lab)
+
+    # 1. Sixth label on jev-use card
+    orig_lab = (troot / 'lab' / 'index.html').read_text()
+    (troot / 'lab' / 'index.html').write_text(
+        orig_lab.replace('id="p-jev-use"', 'id="p-jev-use"').replace(
+            '<span class="sh sh-ring" aria-hidden="true"></span>Source available</span><span class="lic-chip" data-open="true">Apache-2.0 \u00b7 Open source</span></div>\n          <h2 class="dir-name">jev-use',
+            '<span class="sh sh-ring" aria-hidden="true"></span>Pre-alpha</span><span class="lic-chip" data-open="true">Apache-2.0 \u00b7 Open source</span></div>\n          <h2 class="dir-name">jev-use',
+        )
+    )
+    bad_sixth = check_stage_labels_and_key(troot, data, specs_public, specs_lab)
+
+    # 2. Shape mismatch on Archived chip
+    (troot / 'lab' / 'index.html').write_text(orig_lab.replace('data-stage="archived"><span class="sh sh-bar"', 'data-stage="archived"><span class="sh sh-ring"', 1))
+    bad_shape = check_stage_labels_and_key(troot, data, specs_public, specs_lab)
+
+    # 3. Wrong key count word
+    (troot / 'lab' / 'index.html').write_text(orig_lab.replace('Five labels, used the same way', 'Four labels, used the same way', 1))
+    bad_word = check_stage_labels_and_key(troot, data, specs_public, specs_lab)
+    (troot / 'lab' / 'index.html').write_text(orig_lab)
+
+    # 4. Card/page label disagreement on Heliopause
+    orig_helio = (troot / 'heliopause' / 'index.html').read_text()
+    (troot / 'heliopause' / 'index.html').write_text(orig_helio.replace('Early preview \u00b7 v0.7.3', 'Source available \u00b7 v0.7.3', 1))
+    bad_page = check_stage_labels_and_key(troot, data, specs_public, specs_lab)
+if (
+    ok_stage == []
+    and any('not in the /lab/ key' in e for e in bad_sixth)
+    and any('disagrees with key' in e for e in bad_shape)
+    and any('count word drifted' in e for e in bad_word)
+    and any('disagrees with card label' in e for e in bad_page)
+):
+    pass_('stage-label self-test: sixth label, shape mismatch, key count drift, and card/page mismatch all fail')
+else:
+    fail_('stage-label self-test failed: ok=%r sixth=%r shape=%r word=%r page=%r' % (ok_stage, bad_sixth, bad_shape, bad_word, bad_page))
+
 print()
 if fail == 0:
     print('  homepage product rows agree with data/products.json')

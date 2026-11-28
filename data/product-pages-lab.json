@@ -342,8 +342,8 @@
       "licence_short": "Private",
       "open_source": false,
       "stage": {
-        "chip": "Private beta",
-        "cls": "beta"
+        "chip": "Private, in the lab",
+        "cls": "lab"
       },
       "slot_label": "Private beta — no public screenshots yet",
       "licence_label": "Private",

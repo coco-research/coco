@@ -228,8 +228,8 @@ class RenderProductPagesTest(unittest.TestCase):
         lab_html = M.render_lab(catalog, data)
         self.assertIn('Public code \u00b7 3', lab_html)
         self.assertIn('Private \u00b7 2', lab_html)
-        for label, _desc in M.LAB_STAGE_KEY:
-            self.assertIn('<dt>%s</dt>' % label, lab_html)
+        for label, skey, shape, _desc in M.LAB_STAGE_KEY:
+            self.assertIn('<dt data-stage="%s"><span class="sh %s" aria-hidden="true"></span>%s</dt>' % (skey, shape, label), lab_html)
         self.assertEqual(_parse_jsonld(lab_html)['@graph'][0]['mainEntity']['numberOfItems'], 5)
 
     def test_render_whats_new_sorting_chips_counts_and_guards(self):
@@ -257,6 +257,10 @@ class RenderProductPagesTest(unittest.TestCase):
         self.assertEqual(ld[1]['itemListElement'][-1]['name'], "What's new")
         self.assertLess(wn.index('2026-11-26'), wn.index('2026-11-01'))
         self.assertLess(wn.index('2026-11-01'), wn.index('2026-10-15'))
+        # Archived source row in /whats-new/ active table uses archived key and bar shape.
+        catalog[3]['row']['status'] = 'Source available, AGPL-3.0, archived'
+        wn_arch = M.render_whats_new(catalog, data, counts)
+        self.assertIn('<span class="stage-chip" data-stage="archived"><span class="sh sh-bar" aria-hidden="true"></span>Archived</span>', wn_arch)
         catalog[0]['row']['release_url'] = 'http://insecure.example/r'
         with self.assertRaises(SystemExit):
             M.render_whats_new(catalog, data, counts)

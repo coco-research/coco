@@ -231,38 +231,47 @@ def counts_ctx():
             'agents': c['agents']['total']}
 
 
-def stage_chip_text(it):
-    row = it['row']
-    if it['bucket'] == 'shipped':
-        m = re.search(r'\bv\d+\.\d+\.\d+', row['tag'])
-        return 'Available now' + (' \u00b7 %s' % m.group(0) if m else '')
-    if it['bucket'] == 'source':
-        return 'Archived' if 'archived' in row.get('status', '').lower() else 'Source available'
-    return 'In the lab'
+STAGES = (
+    ('Early preview', 'source', 'sh-ring', 'Public code you can run today. Not a stable release, and the version number says so.'),
+    ('Source available', 'source', 'sh-ring', 'A public repository with a licence. Read it, copy it, adapt it; there is no packaged release.'),
+    ('Archived', 'archived', 'sh-bar', 'Public source kept as read-only reference. No active development and no packaged release.'),
+    ('Private beta', 'beta', 'sh-sq', 'Used inside Coco Research. No public build and no repository link.'),
+    ('Private, in the lab', 'lab', 'sh-sq', 'Built here, not released. A page exists so you can see what it is; there is nothing to download yet.'),
+)
+STAGE_BY_LABEL = {label: (key, shape) for label, key, shape, _desc in STAGES}
 
 
 def stage_label(it):
-    """Short fact label for directory cards (/products/, /lab/): what you can actually do today."""
+    """Short fact label for directory cards (/products/, /lab/) and lab page badges."""
     row, bucket = it['row'], it['bucket']
     if bucket == 'shipped':
-        return stage_chip_text(it)
+        m = re.search(r'\bv\d+\.\d+\.\d+', row['tag'])
+        return 'Available now' + (' \u00b7 %s' % m.group(0) if m else '')
     status = row['status'].lower()
     if status == 'private, in the lab':
         return 'Private, in the lab'
     if bucket == 'source':
-        for key, label in (('early preview', 'Early preview'), ('archived', 'Archived'), ('pre-alpha', 'Pre-alpha')):
+        for key, label in (('early preview', 'Early preview'), ('archived', 'Archived')):
             if key in status:
                 return label
         return 'Source available'
     return row['status'].split(',')[0]
 
 
+def stage_chip_text(it):
+    return stage_label(it)
+
+
 def stage_shape(it):
-    return {'shipped': 'sh-dot', 'source': 'sh-ring', 'lab': 'sh-sq'}[it['bucket']]
+    if it['bucket'] == 'shipped':
+        return 'sh-dot'
+    return STAGE_BY_LABEL[stage_label(it)][1]
 
 
 def stage_key(it):
-    return {'shipped': 'released', 'source': 'source', 'lab': 'beta' if it['spec']['stage']['cls'] == 'beta' else 'lab'}[it['bucket']]
+    if it['bucket'] == 'shipped':
+        return 'released'
+    return STAGE_BY_LABEL[stage_label(it)][0]
 
 
 def short_status(it):

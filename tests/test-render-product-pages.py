@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Unit tests for scripts/render-product-pages.py."""
 import contextlib
+from html.parser import HTMLParser
 import importlib.util
 import io
 import json
@@ -410,6 +411,92 @@ class RenderProductPagesTest(unittest.TestCase):
             elif it['pid'] == 'aloomannu':
                 self.assertIn('aloo-cats-scene.js', html)
                 self.assertIn('mailto:product@cocoresearch.org', html)
+
+    def test_try_dl_contains_only_code_and_span(self):
+        class TryDlParser(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.in_try_dl = False
+                self.depth = 0
+                self.ul_count = 0
+                self.items = []
+                self.cur_item = None
+                self.bad = []
+
+            def handle_starttag(self, tag, attrs):
+                classes = set((dict(attrs).get('class') or '').split())
+                if not self.in_try_dl:
+                    if tag == 'ul' and 'try-dl' in classes:
+                        self.in_try_dl = True
+                        self.depth = 1
+                        self.ul_count += 1
+                    return
+                self.depth += 1
+                if 'link-pill' in classes:
+                    self.bad.append('link-pill inside .try-dl')
+                if self.depth == 2:
+                    if tag != 'li':
+                        self.bad.append('expected <li> inside .try-dl, got <%s>' % tag)
+                    else:
+                        self.cur_item = []
+                elif self.depth == 3:
+                    if self.cur_item is not None:
+                        self.cur_item.append(tag)
+                else:
+                    self.bad.append('unexpected nested <%s> at depth %d in .try-dl' % (tag, self.depth))
+
+            def handle_endtag(self, tag):
+                if not self.in_try_dl:
+                    return
+                if self.depth == 2 and tag == 'li' and self.cur_item is not None:
+                    if self.cur_item != ['code', 'span']:
+                        self.bad.append('expected li > code + span, got %r' % (self.cur_item,))
+                    self.items.append(self.cur_item)
+                    self.cur_item = None
+                self.depth -= 1
+                if self.depth == 0:
+                    self.in_try_dl = False
+
+        def check_try_dl(html_text, expect_lists):
+            p = TryDlParser()
+            p.feed(html_text)
+            p.close()
+            self.assertEqual(p.ul_count, expect_lists)
+            self.assertEqual(p.bad, [])
+            if expect_lists:
+                self.assertTrue(p.items)
+
+        pub_specs = json.loads((REPO_ROOT / 'data' / 'product-pages-public.json').read_text())
+        lab_specs = json.loads((REPO_ROOT / 'data' / 'product-pages-lab.json').read_text())
+        data = {'products': [], 'lab': []}
+        for pid, spec in pub_specs.items():
+            row = {
+                'id': pid, 'name': pid, 'page': spec['slug'] + '/', 'tag': 'Available now, v1.0.0',
+                'status': 'Source available, early preview', 'open_source': pid != 'coco-si',
+                'licence_short': 'Open-core' if pid == 'coco-si' else 'Apache-2.0',
+                'for_you': 'For you %s' % pid, 'who_for': 'Who for %s' % pid,
+            }
+            if pid in ('coco-si', 'voice'):
+                data['products'].append(row)
+            else:
+                row['href'] = spec.get('code_repository', 'https://example.org/' + pid)
+                data['lab'].append(row)
+        for pid, spec in lab_specs['lab'].items():
+            data['lab'].append({
+                'id': pid, 'name': pid, 'page': spec['slug'] + '/', 'status': 'Private, in the lab',
+                'open_source': False, 'licence_short': 'Private', 'for_you': 'For you %s' % pid, 'who_for': 'Who for %s' % pid,
+            })
+        catalog = S.build_catalog(data, pub_specs, lab_specs)
+        for it in catalog:
+            it['catalog'] = catalog
+        counts = {'personas': 1, 'departments': 1, 'skills': 1, 'commands': 1, 'agents': 1}
+        for it in catalog:
+            html = M.render_page(it, data, counts)
+            check_try_dl(html, 1 if it['pid'] == 'voice' else 0)
+        voice_html = (REPO_ROOT / 'voice' / 'index.html').read_text(encoding='utf-8')
+        check_try_dl(voice_html, 1)
+        with self.assertRaises(AssertionError):
+            check_try_dl('<ul class="try-dl"><li><a class="link-pill" href="#x">x</a></li></ul>', 1)
 
 
 if __name__ == '__main__':

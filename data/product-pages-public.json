@@ -193,7 +193,7 @@
   },
   "voice": {
     "slug": "voice",
-    "meta_description": "Private on-device speech-to-text for macOS, Windows and Linux, with cited meeting notes on macOS 14.4 and later. Works offline with open models. MIT licensed.",
+    "meta_description": "On-device speech-to-text for macOS, Windows and Linux, with cited meeting notes on macOS 14.4 and later. Works offline with open models. MIT licensed.",
     "og_image": "https://cocoresearch.org/assets/img/og-coco-voice.png",
     "og_image_alt": "Coco Voice — Coco Research",
     "version": "0.20.9",
@@ -216,7 +216,7 @@
       ]
     ],
     "licence_href": "https://github.com/coco-research/Coco-Voice/blob/main/LICENSE",
-    "does_for_you": "Coco Voice is private speech-to-text on your own computer. Hold a key to dictate into the app you already have open on macOS, Windows and Linux, tidy transcripts locally, and save cited meeting notes on macOS 14.4 and later, with no account and no subscription.",
+    "does_for_you": "Coco Voice is desktop speech-to-text on your own computer. Hold a key to dictate into the app you already have open on macOS, Windows and Linux, tidy transcripts locally, and save cited meeting notes on macOS 14.4 and later, with no account and no subscription.",
     "who_detail": "You dictate emails, code comments or notes all day on macOS, Windows or Linux, or record searchable meeting notes on macOS 14.4 and later, and you would rather the audio and text stayed on your own machine than went to a cloud service.",
     "try_above": {
       "label": "Download v0.20.9",

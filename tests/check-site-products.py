@@ -1264,6 +1264,16 @@ else:
 VOICE_REMOVED_PHRASES = (
     'Private, ' + 'on your computer',
     'Private ' + 'desktop speech',
+    'Private ' + 'on-device',
+    'private ' + 'speech-to-text',
+)
+CLAIM_TARGET_FILES = (
+    'data/products.json',
+    'data/product-pages-public.json',
+    'data/product-pages-lab.json',
+    'site-refs/facts/voice.json',
+    'index.html',
+    'llms.txt',
 )
 SI_COUNT_PLACEHOLDERS = ('{personas}', '{departments}', '{skills}', '{commands}')
 
@@ -1271,7 +1281,7 @@ SI_COUNT_PLACEHOLDERS = ('{personas}', '{departments}', '{skills}', '{commands}'
 def check_removed_claims(root):
     errs = []
     targets = []
-    for rel in ('data/products.json', 'data/product-pages-public.json', 'data/product-pages-lab.json', 'index.html', 'llms.txt'):
+    for rel in CLAIM_TARGET_FILES:
         p = root / rel
         if p.is_file():
             targets.append(p)
@@ -1334,10 +1344,13 @@ else:
 
 with tempfile.TemporaryDirectory(prefix='voice-claims-') as tmp:
     troot = Path(tmp)
-    for rel in ('data/products.json', 'data/product-pages-public.json', 'data/product-pages-lab.json', 'index.html', 'llms.txt'):
+    for rel in CLAIM_TARGET_FILES:
+        src = Path(rel)
+        if not src.is_file():
+            continue
         dst = troot / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
-        dst.write_text(Path(rel).read_text())
+        dst.write_text(src.read_text())
     for page_p in sorted(Path('.').glob('*/index.html')):
         if '<meta http-equiv="refresh"' in page_p.read_text():
             continue
@@ -1358,6 +1371,16 @@ with tempfile.TemporaryDirectory(prefix='voice-claims-') as tmp:
     bad_si_wn, _ = check_removed_claims(troot)
     (troot / 'whats-new' / 'index.html').write_text(orig_wn_html)
 
+    orig_voice_html = (troot / 'voice' / 'index.html').read_text()
+    (troot / 'voice' / 'index.html').write_text(orig_voice_html.replace('content="On-device speech-to-text', 'content="' + VOICE_REMOVED_PHRASES[2] + ' speech-to-text', 1))
+    bad_v3, _ = check_removed_claims(troot)
+    (troot / 'voice' / 'index.html').write_text(orig_voice_html)
+
+    orig_pub_json = (troot / 'data' / 'product-pages-public.json').read_text()
+    (troot / 'data' / 'product-pages-public.json').write_text(orig_pub_json.replace('desktop speech-to-text', VOICE_REMOVED_PHRASES[3], 1))
+    bad_v4, _ = check_removed_claims(troot)
+    (troot / 'data' / 'product-pages-public.json').write_text(orig_pub_json)
+
     orig_pj = (troot / 'data' / 'products.json').read_text()
     (troot / 'data' / 'products.json').write_text(orig_pj.replace('Advisory skills, commands and rules', 'Open-core advisory skills {personas}', 1))
     bad_si_json, _ = check_removed_claims(troot)
@@ -1365,14 +1388,16 @@ if (
     ok_claims == []
     and any('removed Voice phrase' in e for e in bad_v1)
     and any('removed Voice phrase' in e for e in bad_v2)
+    and any('voice/index.html contains removed Voice phrase' in e for e in bad_v3)
+    and any('data/product-pages-public.json contains removed Voice phrase' in e for e in bad_v4)
     and any('SI entry text contains Open-core' in e for e in bad_si_wn)
     and any('SI entry text contains count 493' in e for e in bad_si_wn)
     and any('coco-si whats_new contains Open-core' in e for e in bad_si_json)
     and any('count placeholder' in e for e in bad_si_json)
 ):
-    pass_('removed-claims self-test: restored Voice phrases, SI Open-core, and count placeholders/numbers all fail')
+    pass_('removed-claims self-test: restored Voice phrases (all 4), SI Open-core, and count placeholders/numbers all fail')
 else:
-    fail_('removed-claims self-test failed: ok=%r v1=%r v2=%r si_wn=%r si_json=%r' % (ok_claims, bad_v1, bad_v2, bad_si_wn, bad_si_json))
+    fail_('removed-claims self-test failed: ok=%r v1=%r v2=%r v3=%r v4=%r si_wn=%r si_json=%r' % (ok_claims, bad_v1, bad_v2, bad_v3, bad_v4, bad_si_wn, bad_si_json))
 
 print()
 if fail == 0:

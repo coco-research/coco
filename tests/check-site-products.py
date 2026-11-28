@@ -818,8 +818,6 @@ def check_a11y_structure_and_current(root, catalog_data):
             classes = [re.search(r'\bclass="([^"]+)"', attrs).group(1) if re.search(r'\bclass="([^"]+)"', attrs) else '' for _, attrs, _ in hits]
             if classes != ['sn-m-item', 'sn-m-item']:
                 errs.append('%s aria-current product link classes=%r, expected two sn-m-item links' % (page_p, classes))
-            if slug == 'aloomannu' and '<span class="p-static-pill"><span class="sh sh-dia"' not in txt:
-                errs.append('aloomannu/index.html .p-static-pill must use sh-dia')
     if checked != 14:
         errs.append('expected 14 top-level pages for AC-5 check, verified %d' % checked)
     return errs, checked
@@ -831,6 +829,98 @@ if a11y_errs:
         fail_(err)
 else:
     pass_('AC-5: /products/ and /lab/ lists/headings, .sn-m-priv diamond, and aria-current across all %d pages hold' % a11y_checked)
+
+# ---- AC-17 / AC-18: private lab pages (m0, hermes, teams-ng, aloomannu) hero pill shape & stage prose ----
+pill_re = re.compile(r'<span class="p-static-pill"><span class="sh ([^"]+)" aria-hidden="true"></span>([^<]+)</span>')
+stage_fact_re = re.compile(r'<dt>Stage</dt><dd>([^<]+)</dd>')
+
+
+def check_private_stage_prose(root, lab_specs):
+    errs = []
+    private_specs = lab_specs.get('lab', {})
+    if sorted(private_specs) != ['aloomannu', 'hermes', 'm0', 'teams-ng']:
+        errs.append('unexpected private lab specs set: %r' % sorted(private_specs))
+    for pid, spec in sorted(private_specs.items()):
+        slug = spec.get('slug', pid)
+        page_label = _stage_base(spec.get('stage', {}).get('chip', ''))
+        if page_label not in STAGE_EXPECTED:
+            errs.append('private spec %s: stage.chip %r is not in STAGE_EXPECTED' % (pid, page_label))
+            continue
+        want_shape = STAGE_EXPECTED[page_label][1]
+        ta_label = str(spec.get('try_above', {}).get('label', ''))
+        if not ta_label.startswith(page_label):
+            errs.append('spec %s: try_above.label %r does not start with key label %r' % (pid, ta_label, page_label))
+        page_p = root / slug / 'index.html'
+        if not page_p.is_file():
+            errs.append('%s/index.html is missing for AC-17/AC-18 check' % slug)
+            continue
+        txt = page_p.read_text()
+        pm = pill_re.search(txt)
+        if not pm:
+            errs.append('%s/index.html is missing .p-static-pill with shape glyph' % slug)
+        else:
+            got_shape, pill_text = pm.group(1), pm.group(2).strip()
+            if got_shape != want_shape:
+                errs.append('%s/index.html .p-static-pill shape %r != expected %r for %r' % (slug, got_shape, want_shape, page_label))
+            for lbl in STAGE_EXPECTED:
+                if lbl.lower() in pill_text.lower() and lbl != page_label:
+                    errs.append('%s/index.html hero pill %r mentions other key label %r (expected %r)' % (slug, pill_text, lbl, page_label))
+            if not pill_text.startswith(page_label):
+                errs.append('%s/index.html hero pill %r does not start with %r' % (slug, pill_text, page_label))
+        fm = stage_fact_re.search(txt)
+        if not fm:
+            errs.append('%s/index.html is missing <dt>Stage</dt><dd> fact' % slug)
+        else:
+            fact_text = fm.group(1).strip()
+            for lbl in STAGE_EXPECTED:
+                if lbl.lower() in fact_text.lower() and lbl != page_label:
+                    errs.append('%s/index.html Stage fact %r mentions other key label %r (expected %r)' % (slug, fact_text, lbl, page_label))
+            if page_label.lower() not in fact_text.lower():
+                errs.append('%s/index.html Stage fact %r does not name key label %r' % (slug, fact_text, page_label))
+    return errs
+
+
+priv_prose_errs = check_private_stage_prose(Path('.'), specs_lab)
+if priv_prose_errs:
+    for err in priv_prose_errs:
+        fail_(err)
+else:
+    pass_('AC-17 / AC-18: all 4 private lab pages hero pill shapes, try_above.label, and Stage facts agree with their key label')
+
+# Self-test: mismatched pill label, Stage fact label, pill shape, or spec try_above.label must fail.
+with tempfile.TemporaryDirectory(prefix='r1b-priv-prose-') as tmp:
+    troot = Path(tmp)
+    for slug in ('m0', 'hermes', 'teams-ng', 'aloomannu'):
+        dst = troot / slug / 'index.html'
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(Path(slug, 'index.html').read_text())
+    ok_priv = check_private_stage_prose(troot, specs_lab)
+
+    orig_hermes = (troot / 'hermes' / 'index.html').read_text()
+    (troot / 'hermes' / 'index.html').write_text(orig_hermes.replace('Private beta \u2014 no public download yet', 'Private, in the lab \u2014 no public download yet', 1))
+    bad_pill_txt = check_private_stage_prose(troot, specs_lab)
+    (troot / 'hermes' / 'index.html').write_text(orig_hermes)
+
+    orig_aloo = (troot / 'aloomannu' / 'index.html').read_text()
+    (troot / 'aloomannu' / 'index.html').write_text(orig_aloo.replace('Private, in the lab, in daily use inside Coco Research', 'Private beta, in daily lab use', 1))
+    bad_fact_txt = check_private_stage_prose(troot, specs_lab)
+    (troot / 'aloomannu' / 'index.html').write_text(orig_aloo.replace('<span class="p-static-pill"><span class="sh sh-dia"', '<span class="p-static-pill"><span class="sh sh-sq"', 1))
+    bad_pill_shape = check_private_stage_prose(troot, specs_lab)
+    (troot / 'aloomannu' / 'index.html').write_text(orig_aloo)
+
+    bad_specs = json.loads(json.dumps(specs_lab))
+    bad_specs['lab']['m0']['try_above']['label'] = 'Private, in the lab \u2014 no public download yet'
+    bad_spec_ta = check_private_stage_prose(troot, bad_specs)
+if (
+    ok_priv == []
+    and any('hermes/index.html hero pill' in e for e in bad_pill_txt)
+    and any('aloomannu/index.html Stage fact' in e for e in bad_fact_txt)
+    and any('aloomannu/index.html .p-static-pill shape' in e for e in bad_pill_shape)
+    and any('spec m0: try_above.label' in e for e in bad_spec_ta)
+):
+    pass_('AC-17 / AC-18 self-test: mismatched pill text, Stage fact, pill shape, and spec try_above.label all fail')
+else:
+    fail_('AC-17 / AC-18 self-test failed: ok=%r pill=%r fact=%r shape=%r spec=%r' % (ok_priv, bad_pill_txt, bad_fact_txt, bad_pill_shape, bad_spec_ta))
 
 # Self-test: button aria-current, h2 card title, role=list, missing m0 aria-current, wrong product href, and sh-sq priv marker all fail.
 with tempfile.TemporaryDirectory(prefix='r1b-a11y-') as tmp:

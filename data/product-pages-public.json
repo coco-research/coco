@@ -193,7 +193,7 @@
   },
   "voice": {
     "slug": "voice",
-    "meta_description": "Private on-device speech-to-text and cited meeting notes for macOS, Windows, and Linux. Works offline with open models. MIT licensed.",
+    "meta_description": "Private on-device speech-to-text for macOS, Windows and Linux, with cited meeting notes on macOS 14.4 and later. Works offline with open models. MIT licensed.",
     "og_image": "https://cocoresearch.org/assets/img/og-coco-voice.png",
     "og_image_alt": "Coco Voice — Coco Research",
     "version": "0.20.9",
@@ -208,7 +208,7 @@
       ],
       [
         "v0.20.9",
-        "Dictation, clean-up and cited meetings"
+        "Dictation, clean-up, and meetings on macOS 14.4 and later"
       ],
       [
         "MIT",
@@ -216,8 +216,8 @@
       ]
     ],
     "licence_href": "https://github.com/coco-research/Coco-Voice/blob/main/LICENSE",
-    "does_for_you": "Coco Voice is private speech-to-text on your own computer. Hold a key and your words are typed into the app you already have open, transcripts are tidied locally, and meetings are saved as cited notes on disk, with no account and no subscription.",
-    "who_detail": "You dictate emails, code comments or notes all day, or sit in meetings you later need to search, and you would rather the audio and text stayed on your own machine than went to a cloud service.",
+    "does_for_you": "Coco Voice is private speech-to-text on your own computer. Hold a key to dictate into the app you already have open on macOS, Windows and Linux, tidy transcripts locally, and save cited meeting notes on macOS 14.4 and later, with no account and no subscription.",
+    "who_detail": "You dictate emails, code comments or notes all day on macOS, Windows or Linux, or record searchable meeting notes on macOS 14.4 and later, and you would rather the audio and text stayed on your own machine than went to a cloud service.",
     "try_above": {
       "label": "Download v0.20.9",
       "href": "https://github.com/coco-research/Coco-Voice/releases/latest",
@@ -234,8 +234,8 @@
         "Option+Space on macOS, Ctrl+Space on Windows and Linux, or toggle mode. Recognition works offline once your speech model is downloaded."
       ],
       [
-        "Meeting notes with speakers and citations",
-        "Grouped Home, Meetings and Voice screens with live recording controls, a dual-track speaker view, segment citations, cross-meeting to-dos and local BM25 cited Q&A saved on disk."
+        "Meeting notes with speakers and citations (macOS 14.4 and later)",
+        "On macOS 14.4 and later, grouped Home, Meetings and Voice screens provide live recording controls, a dual-track speaker view, segment citations, cross-meeting to-dos and local BM25 cited Q&A saved on disk."
       ],
       [
         "Local clean-up and your own words",
@@ -246,7 +246,7 @@
         "Pick an open speech model, including Whisper, Parakeet and Moonshine. Each download shows its licence and is checked against a pinned SHA-256 before use."
       ]
     ],
-    "slot_label": "Real app capture not yet added — Coco Voice on macOS, Windows and Linux",
+    "slot_label": "Real app capture not yet added — Coco Voice (dictation on macOS, Windows and Linux; meetings on macOS 14.4 and later)",
     "status": [
       [
         "Stage",
@@ -262,7 +262,7 @@
       ],
       [
         "Platforms",
-        "macOS (Apple Silicon and Intel), Windows x64, Linux x64 and arm64"
+        "macOS (Apple Silicon and Intel), Windows x64, Linux x64 and arm64 (meetings on macOS 14.4 and later)"
       ],
       [
         "Privacy",
@@ -358,7 +358,7 @@
           "ghost"
         ]
       ],
-      "note": "Windows builds are x64; Linux ships x64 and arm64 installers for this release."
+      "note": "Windows builds are x64; Linux ships x64 and arm64 installers for this release. Meeting notes are included in macOS builds only (macOS 14.4 and later)."
     }
   },
   "signal": {

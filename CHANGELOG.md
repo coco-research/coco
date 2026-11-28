@@ -4,6 +4,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ---
 
+## [2.5.0](https://github.com/coco-research/coco/compare/v2.4.0...v2.5.0) (2026-11-28)
+
+
+### Features
+
+* **site:** add shared navigation and product page stylesheets ([#584](https://github.com/coco-research/coco/issues/584)) ([8caf304](https://github.com/coco-research/coco/commit/8caf304a0a31118b20ffc719e3b0157eb7e988e5))
+
+
+### Bug Fixes
+
+* **site:** refresh /coco to 2.4.0 and add /voice page ([#581](https://github.com/coco-research/coco/issues/581)) ([88730aa](https://github.com/coco-research/coco/commit/88730aa7e34188d895ddac1f91e6a418ecf56467))
+* **site:** unify lab stage chips and /lab/ stage key under STAGES table ([#610](https://github.com/coco-research/coco/issues/610)) ([dd5db46](https://github.com/coco-research/coco/commit/dd5db4685bb7b93d8344523ff0026dffc48186e9))
+
 ## [2.4.0](https://github.com/coco-research/coco/compare/v2.3.0...v2.4.0) (2026-11-26)
 
 

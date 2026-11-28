@@ -77,7 +77,7 @@ EOF
 done
 echo "PASS: anchor links and glued identifiers do not trip the skills drift check"
 
-for phrase in '149 Skills' 'Skills: 149' 'Skills (149)' '| Total Skills | 149 |' '<h3>149</h3><sub>Skills</sub>' '<h3>149</h3><sub>skills</sub>'; do
+for phrase in '149 Skills' 'Skills: 149' 'Skills (149)' 'Skills - 149' '| Total Skills | 149 |' '| Installed Skills | 149 |' '<h3>149</h3><sub>Skills</sub>' '<h3>149</h3><sub>skills</sub>'; do
   cat > "$tmp/README.md" <<EOF
 # coco
 
@@ -107,6 +107,11 @@ cat > "$tmp/README.md" <<'EOF'
 EOF
 run_checker
 assert_no_skills_drift
+if ! grep -q 'skills count mentions of 149 match current truth' "$tmp/output"; then
+  echo "FAIL: SKILLS=149 did not exercise the matching-count branch"
+  tail -30 "$tmp/output"
+  exit 1
+fi
 echo "PASS: the current skills total of 149 does not trip the drift check"
 
 mkdir -p "$tmp/bin"

@@ -185,9 +185,11 @@
 .note-card p { color: var(--ink-2); font-size: 0.95rem; line-height: 1.56; }
 .note-card p + p { margin-top: 8px; }
 .note-card .st-row { padding-top: 12px; }
-.states { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 16px 0 0; padding: 0; list-style: none; font: 500 0.78rem / 1.2 var(--f-mono); }
+.states-group { display: grid; gap: 8px; margin-top: 16px; }
+.states { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 0; padding: 0; list-style: none; font: 500 0.78rem / 1.2 var(--f-mono); }
 .states li { padding: 6px 12px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--raised); }
 .states li.arrow { padding: 0; border: 0; background: none; color: var(--ink-3); }
+.states li.states-note { padding: 0; border: 0; background: none; color: var(--ink-3); font-weight: 400; }
 
 /* 07 Connectors */
 .hosts { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line-2); margin-top: 8px; }
@@ -706,7 +708,10 @@
         <div class="note-card">
           <h3>A ledger you can read</h3>
           <p>Every decision is one plain markdown file outside the database, committed to git. A new one starts as proposed, and you confirm it or withdraw it with a reason. An active decision can later be superseded.</p>
-          <ul class="states" aria-label="Decision states"><li>proposed</li><li class="arrow" aria-hidden="true">→</li><li>active</li><li class="arrow" aria-hidden="true">→</li><li>superseded</li><li class="arrow" aria-hidden="true">or</li><li>withdrawn</li></ul>
+          <div class="states-group" role="group" aria-label="Decision states">
+            <ul class="states" aria-label="Confirmed path"><li>proposed</li><li class="arrow" aria-hidden="true">→</li><li>active</li><li class="arrow" aria-hidden="true">→</li><li>superseded</li></ul>
+            <ul class="states" aria-label="Withdrawn path"><li>proposed</li><li class="arrow" aria-hidden="true">→</li><li>withdrawn</li><li class="states-note">(with a reason)</li></ul>
+          </div>
           <div class="st-row"><span class="st st-live">Live</span></div>
         </div>
         <div class="note-card">

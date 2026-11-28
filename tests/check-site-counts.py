@@ -332,11 +332,15 @@ def check_drawer_html(path):
     return parser.errors, parser.div_opens, parser.div_closes
 
 
-drawer_pages = ['coco/index.html']
-for candidate in sorted(glob.glob('*/index.html')):
-    rel = candidate.replace('\\', '/')
-    if rel != 'coco/index.html' and 'sn-drawer' in open(rel, encoding='utf-8').read():
-        drawer_pages.append(rel)
+drawer_pages = [
+    candidate.replace('\\', '/')
+    for candidate in sorted(glob.glob('*/index.html'))
+    if 'sn-drawer' in open(candidate, encoding='utf-8').read()
+]
+if not drawer_pages:
+    fail_('expected at least 1 */index.html page with .sn-drawer')
+if 'coco/index.html' not in drawer_pages:
+    fail_('coco/index.html: expected .sn-drawer dialog')
 for dpath in drawer_pages:
     derrs, dopens, dcloses = check_drawer_html(dpath)
     if derrs:

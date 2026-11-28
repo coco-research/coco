@@ -76,7 +76,7 @@
       "licence_label": "Private",
       "links": [],
       "try_above": {
-        "label": "Private, in the lab — no public download yet",
+        "label": "Private beta, used daily — no public download yet",
         "href": "",
         "kind": "static",
         "note": ""
@@ -163,7 +163,7 @@
       "licence_label": "Private",
       "links": [],
       "try_above": {
-        "label": "Private, in the lab — no public download yet",
+        "label": "Private beta — no public download yet",
         "href": "",
         "kind": "static",
         "note": ""
@@ -250,7 +250,7 @@
       "licence_label": "Private",
       "links": [],
       "try_above": {
-        "label": "Private, in the lab — no public download yet",
+        "label": "Private beta — no public download yet",
         "href": "",
         "kind": "static",
         "note": ""
@@ -308,7 +308,7 @@
       "status": [
         [
           "Stage",
-          "Private beta, in daily lab use"
+          "Private, in the lab, in daily use inside Coco Research"
         ],
         [
           "Availability",

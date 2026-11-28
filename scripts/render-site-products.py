@@ -220,7 +220,7 @@ def render_m0(text, data):
     check_ids(data)
     mod = _load_page_renderer()
     _data, catalog = mod.load_catalog()
-    nav = mod.nav_html(catalog, None, True, prefix='../', home=False).split('\n')
+    nav = mod.nav_html(catalog, 'm0', True, prefix='../', home=False).split('\n')
     foot = mod.footer_html(data, '').split('\n')
     text = replace_region(text, 'nav', nav, where='m0/index.html')
     text = replace_region(text, 'foot', foot, where='m0/index.html')

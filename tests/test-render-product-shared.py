@@ -263,6 +263,12 @@ class CatalogDatesAndStagesTests(unittest.TestCase):
             ('released', 'source', 'archived', 'beta', 'lab'),
         )
         self.assertEqual(len(M.STAGES), 5)
+        bad_lab = {'pid': 'demo-unknown', 'bucket': 'lab', 'row': {'status': 'Stealth prototype, internal'}, 'spec': {'stage': {'cls': 'lab'}}}
+        for fn in (M.stage_shape, M.stage_key):
+            with self.assertRaises(SystemExit) as ctx:
+                fn(bad_lab)
+            self.assertIn('demo-unknown', str(ctx.exception))
+            self.assertIn('Stealth prototype', str(ctx.exception))
         self.assertEqual(M.short_status(by_id['demo-prod']), 'Available now, v1.2.3, on npm')
         self.assertEqual(M.short_status(by_id['demo-beta']), 'Private beta, used daily')
 
@@ -272,12 +278,14 @@ class ChromeAndBuildersTests(unittest.TestCase):
         data, pub_specs, lab_specs = _sample_fixtures()
         cat = M.build_catalog(data, pub_specs, lab_specs)
 
-        menu = M.menu_group_html(cat, 2, '../')
+        menu = M.menu_group_html(cat, 2, '../', current='demo-prod')
         for snippet in ('data-group="products"', '<span class="sn-m-n">2</span>', '<span class="sn-m-n">5</span>',
+                        'href="../demo-prod/" aria-current="page"',
                         'Demo &lt;Prod&gt; &amp; Co', 'Fast &amp; &lt;safe&gt; helper', '>Heliopause</span>',
                         '<span class="sn-m-badge">Archived</span>',
-                        '<span class="sn-m-priv"><span class="sh sh-sq" aria-hidden="true"></span>Private, in the lab</span>'):
+                        '<span class="sn-m-priv"><span class="sh sh-dia" aria-hidden="true"></span>Private, in the lab</span>'):
             self.assertIn(snippet, menu)
+        self.assertEqual(menu.count('aria-current="page"'), 1)
 
         nav = M.nav_html(cat, 'lab', three=True)
         for snippet in ('href="../lab/" aria-current="page"', 'data-theme-toggle', 'data-motion-toggle>Pause 3D</button>',
@@ -292,8 +300,12 @@ class ChromeAndBuildersTests(unittest.TestCase):
         nav_home = M.nav_html(cat, 'products', three=True, prefix='./', home=True)
         self.assertNotIn('data-theme-toggle', nav_home)
         self.assertEqual(nav_home.count('data-motion-toggle hidden'), 2)
-        self.assertIn('aria-controls="site-products-menu" aria-current="page"', nav_home)
+        self.assertNotIn('aria-controls="site-products-menu" aria-current="page"', nav_home)
+        self.assertEqual(nav_home.count('href="./products/" aria-current="page"'), 2)
         self.assertIn('<span class="sn-brand" id="sn-drawer-title">', nav_home)
+
+        nav_prod = M.nav_html(cat, 'demo-beta', three=True)
+        self.assertEqual(nav_prod.count('href="../demo-beta/" aria-current="page"'), 2)
 
         foot = M.footer_html(data, '\n          <li><a href="https://example.org/mit">MIT</a></li>')
         for snippet in ('href="../demo-arch/&quot;x"', 'Demo &lt;Prod&gt; &amp; Co', ' <span class="sn-badge">Archived</span>', 'https://example.org/mit'):
@@ -324,7 +336,7 @@ class ChromeAndBuildersTests(unittest.TestCase):
         self.assertEqual(M.li_dl(pub_specs['demo-plain']), '')
 
         box = M.copy_box('Install "Demo"', 'npx demo --flag="1" & echo <ok>')
-        self.assertIn('aria-label="Install &quot;Demo&quot;"', box)
+        self.assertIn('<div class="install-box try-box" role="group" aria-label="Install &quot;Demo&quot;">', box)
         self.assertIn('<code class="install-cmd">npx demo --flag="1" &amp; echo &lt;ok&gt;</code>', box)
         self.assertIn('data-copy="npx demo --flag=&quot;1&quot; &amp; echo &lt;ok&gt;"', box)
         self.assertIn('data-copy-status aria-live="polite"', box)
@@ -338,6 +350,8 @@ class ChromeAndBuildersTests(unittest.TestCase):
         hero = M.dir_hero(eyebrow='Dir & <1>', h1='<em>All</em>', for_you='For <you>', who_k='Who & why',
                           who='Builders <all>', actions=['<a href="#a">Go</a>'], badges=[('released"x', 'Live & <now>')])
         self.assertIn('<h1 id="h-hero" class="display"><em>All</em></h1>', hero)
+        self.assertIn('<div class="p-try-above" role="group" aria-label="Where to start">', hero)
+        self.assertIn('<div class="p-badges" role="group" aria-label="Groups">', hero)
         self.assertIn('data-kind="stage" data-stage="released&quot;x">Live &amp; &lt;now&gt;</span>', hero)
         self.assertIn('<p class="p-for-you">For &lt;you&gt;</p>', hero)
 
@@ -349,9 +363,12 @@ class ChromeAndBuildersTests(unittest.TestCase):
 
         page = M.stage_page('products', title='Products', desc='All products', jsonld='', hero=hero, body='<p>Body</p>', catalog=cat, data=data)
         for snippet in ('<html lang="en" data-product="products">', '<body data-page="products">', 'href="?motion=off"',
-                        'data-page-main="products"', 'aria-controls="site-products-menu" aria-current="page"',
+                        'data-page-main="products"', 'aria-controls="site-products-menu"',
+                        '<div class="sn-m-foot"><a href="../products/" aria-current="page">',
+                        '<a class="sn-m-item sn-d-all" href="../products/" aria-current="page">',
                         M.DIAGRAMS['editions'], '<p>Body</p>'):
             self.assertIn(snippet, page)
+        self.assertNotIn('aria-controls="site-products-menu" aria-current="page"', page)
 
 
 if __name__ == '__main__':

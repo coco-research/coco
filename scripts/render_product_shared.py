@@ -262,16 +262,24 @@ def stage_chip_text(it):
     return stage_label(it)
 
 
+def _stage_entry(it):
+    label = stage_label(it)
+    entry = STAGE_BY_LABEL.get(label)
+    if entry is None:
+        sys.exit('%s: stage %r is not in STAGES' % (it.get('pid', '?'), label))
+    return entry
+
+
 def stage_shape(it):
     if it['bucket'] == 'shipped':
         return 'sh-dot'
-    return STAGE_BY_LABEL[stage_label(it)][1]
+    return _stage_entry(it)[1]
 
 
 def stage_key(it):
     if it['bucket'] == 'shipped':
         return 'released'
-    return STAGE_BY_LABEL[stage_label(it)][0]
+    return _stage_entry(it)[0]
 
 
 def short_status(it):
@@ -280,7 +288,7 @@ def short_status(it):
 
 
 # ---------------------------------------------------------------- shared chrome
-def menu_group_html(catalog, indent, prefix):
+def menu_group_html(catalog, indent, prefix, current=None):
     """The two menu / drawer groups: Products (2) and In the lab (8). Every row is a link."""
     pad = ' ' * indent
     cols = []
@@ -293,10 +301,12 @@ def menu_group_html(catalog, indent, prefix):
             badge = '<span class="sn-m-badge">Archived</span>' if 'archived' in it['row'].get('status', '').lower() else ''
             priv = ''
             if it['row'].get('status') == 'Private, in the lab':
-                priv = '<span class="sn-m-priv"><span class="sh sh-sq" aria-hidden="true"></span>Private, in the lab</span>'
+                priv = '<span class="sn-m-priv"><span class="sh sh-dia" aria-hidden="true"></span>Private, in the lab</span>'
+            slug = it['spec']['slug']
+            cur_attr = ' aria-current="page"' if current in (it['pid'], slug) else ''
             lis.append(
-                '%s    <li><a class="sn-m-item" href="%s%s/"><span class="sn-m-name">%s%s</span><span class="sn-m-line">%s</span>%s</a></li>'
-                % (pad, prefix, it['spec']['slug'], nm, badge, line, priv))
+                '%s    <li><a class="sn-m-item" href="%s%s/"%s><span class="sn-m-name">%s%s</span><span class="sn-m-line">%s</span>%s</a></li>'
+                % (pad, prefix, slug, cur_attr, nm, badge, line, priv))
         cols.append(
             '%s<div class="sn-m-group" data-group="%s">\n'
             '%s  <h3 class="sn-m-h g-%s"><span class="sh %s" aria-hidden="true"></span>%s<span class="sn-m-n">%d</span></h3>\n'
@@ -306,7 +316,7 @@ def menu_group_html(catalog, indent, prefix):
 
 
 def nav_html(catalog, current, three, prefix='../', home=False):
-    """The one shared top bar + phone drawer. current: products | lab | whats-new | rijul | None.
+    """The one shared top bar + phone drawer. current: products | lab | whats-new | rijul | <product id/slug> | None.
 
     prefix is the path back to the site root ('../' from a page folder, './' from the home page).
     home=True is the locked-dark home page: no theme toggle, the 3D chip starts hidden until main.js wires it.
@@ -321,14 +331,14 @@ def nav_html(catalog, current, three, prefix='../', home=False):
         theme = '\n    <button class="sn-chip" type="button" data-theme-toggle>Dark</button>'
         theme_drawer = '<button class="sn-chip" type="button" data-theme-toggle>Dark</button>'
     n = len(catalog)
-    menu = menu_group_html(catalog, 6, prefix)
-    drawer = menu_group_html(catalog, 4, prefix)
+    menu = menu_group_html(catalog, 6, prefix, current=current)
+    drawer = menu_group_html(catalog, 4, prefix, current=current)
     brand_drawer = ('<span class="sn-brand" id="sn-drawer-title"><i aria-hidden="true"></i><span>Coco Research</span></span>' if home else
                     '<a class="sn-brand" href="%s"><i aria-hidden="true"></i><span>Coco Research</span></a>\n    <h2 class="sr-only" id="sn-drawer-title">Site menu</h2>' % prefix)
     return f"""<header class="site-nav" data-site-nav>
   <a class="sn-brand" href="{prefix}"><i aria-hidden="true"></i><span>Coco Research</span></a>
   <nav class="sn-links" aria-label="Primary">
-    <button class="sn-tab" type="button" data-products-trigger aria-expanded="false" aria-controls="site-products-menu"{cur('products')}>Products <span class="sn-caret" aria-hidden="true">\u25be</span></button>
+    <button class="sn-tab" type="button" data-products-trigger aria-expanded="false" aria-controls="site-products-menu">Products <span class="sn-caret" aria-hidden="true">\u25be</span></button>
     <a class="sn-tab" href="{prefix}lab/"{cur('lab')}>In the lab</a>
     <a class="sn-tab" href="{prefix}whats-new/"{cur('whats-new')}>What's new</a>
     <a class="sn-tab" href="{prefix}rijul-kalra/"{cur('rijul')}>Rijul Kalra</a>
@@ -341,7 +351,7 @@ def nav_html(catalog, current, three, prefix='../', home=False):
     <div class="sn-m-grid">
 {menu}
     </div>
-    <div class="sn-m-foot"><a href="{prefix}products/">Browse all {n} products \u2192</a><a href="{prefix}lab/">In the lab \u2192</a><a href="{prefix}whats-new/">What's new \u2192</a></div>
+    <div class="sn-m-foot"><a href="{prefix}products/"{cur('products')}>Browse all {n} products \u2192</a><a href="{prefix}lab/">In the lab \u2192</a><a href="{prefix}whats-new/">What's new \u2192</a></div>
   </div>
 </header>
 <dialog class="sn-drawer" id="site-mobile-drawer" data-mobile-drawer aria-labelledby="sn-drawer-title">
@@ -354,7 +364,7 @@ def nav_html(catalog, current, three, prefix='../', home=False):
     <div class="sn-m-grid">
 {drawer}
     </div>
-    <a class="sn-m-item sn-d-all" href="{prefix}products/"><span class="sn-m-name">Browse all {n} products \u2192</span></a>
+    <a class="sn-m-item sn-d-all" href="{prefix}products/"{cur('products')}><span class="sn-m-name">Browse all {n} products \u2192</span></a>
     <div class="sn-d-top">
       <a href="{prefix}lab/"{cur('lab')}>In the lab \u2192</a>
       <a href="{prefix}whats-new/"{cur('whats-new')}>What's new \u2192</a>
@@ -472,7 +482,7 @@ def li_dl(spec):
 
 def copy_box(label, cmd):
     return (
-        '<div class="install-box try-box" aria-label="%s">\n'
+        '<div class="install-box try-box" role="group" aria-label="%s">\n'
         '            <code class="install-cmd">%s</code>\n'
         '            <button class="copy-btn" type="button" data-copy="%s">Copy</button>\n'
         '            <span class="copy-status" data-copy-status aria-live="polite"></span>\n'
@@ -518,11 +528,11 @@ def dir_hero(*, eyebrow, h1, for_you, who_k, who, actions, badges):
         <h1 id="h-hero" class="display">{h1}</h1>
         <p class="p-for-you">{esc(for_you)}</p>
         <div class="p-who"><span class="p-who-k">{esc(who_k)}</span><p>{esc(who)}</p></div>
-        <div class="p-try-above" aria-label="Where to start">
+        <div class="p-try-above" role="group" aria-label="Where to start">
           <div class="cta-row">
             {acts}
           </div>
-          <div class="p-badges" aria-label="Groups">{chips}</div>
+          <div class="p-badges" role="group" aria-label="Groups">{chips}</div>
         </div>
       </div>
     </div>

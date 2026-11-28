@@ -161,6 +161,14 @@ class RenderProductPagesTest(unittest.TestCase):
             '<li><a href="https://example.org/prod#licence">Licence</a></li>',
         ):
             self.assertIn(needle, html)
+        self.assertEqual(html.count('href="../demo-prod/" aria-current="page"'), 2)
+        for role_div in (
+            '<div class="p-try-above" role="group" aria-label="How to try it">',
+            '<div class="p-badges" role="group" aria-label="Stage and licence">',
+            '<div class="install-box try-box" role="group" aria-label="Install">',
+            '<div class="kns" role="group" aria-label="Key facts">',
+        ):
+            self.assertIn(role_div, html)
         self.assertNotIn('noindex, nofollow', html)
         ent = _parse_jsonld(html)['@graph'][0]
         self.assertEqual(ent['@type'], 'SoftwareApplication')
@@ -191,7 +199,8 @@ class RenderProductPagesTest(unittest.TestCase):
         for needle in (
             '<meta name="robots" content="noindex, nofollow">', 'src="../assets/js/aloo-cats-scene.js"',
             'id="aloo-cats-canvas"', 'Two cats, zero cloud.', 'Named after two cats.',
-            'data-product="demo-cats" data-own-stage>', '<span class="p-static-pill">',
+            'data-product="demo-cats" data-own-stage>',
+            '<span class="p-static-pill"><span class="sh sh-dia" aria-hidden="true"></span>',
             'What it does</h2>', 'Private, in the lab</h2>', 'mailto:product@cocoresearch.org',
         ):
             self.assertIn(needle, html)
@@ -219,15 +228,22 @@ class RenderProductPagesTest(unittest.TestCase):
     def test_card_html_render_products_and_render_lab(self):
         data, _pub, _lab, catalog, _counts = _sample_fixtures()
         self.assertIn('Try it<span class="sr-only"> Demo &lt;Prod&gt; &amp; Co</span>', M.card_html(catalog[0]))
+        self.assertIn('<h3 class="dir-name">Demo &lt;Prod&gt; &amp; Co</h3>', M.card_html(catalog[0]))
         self.assertIn('Read more<span class="sr-only"> about Demo Preview</span>', M.card_html(catalog[1]))
         self.assertIn('Read more<span class="sr-only"> about Demo M0</span>', M.card_html(catalog[4]))
         prod_html = M.render_products(catalog, data)
-        for needle in ('All <span class="dir-tn">(6)</span>', 'Products <span class="dir-tn">(1)</span>', 'In the lab <span class="dir-tn">(5)</span>'):
+        for needle in ('All <span class="dir-tn">(6)</span>', 'Products <span class="dir-tn">(1)</span>', 'In the lab <span class="dir-tn">(5)</span>',
+                       '<div class="p-try-above" role="group" aria-label="Where to start">',
+                       '<div class="p-badges" role="group" aria-label="Groups">'):
             self.assertIn(needle, prod_html)
+        self.assertNotIn('<h2 class="dir-name">', prod_html)
+        self.assertEqual(prod_html.count('href="../products/" aria-current="page"'), 2)
         self.assertEqual(_parse_jsonld(prod_html)['@graph'][0]['mainEntity']['numberOfItems'], 6)
         lab_html = M.render_lab(catalog, data)
         self.assertIn('Public code \u00b7 3', lab_html)
         self.assertIn('Private \u00b7 2', lab_html)
+        self.assertNotIn('role="list"', lab_html)
+        self.assertNotIn('<h2 class="dir-name">', lab_html)
         for label, skey, shape, _desc in M.LAB_STAGE_KEY:
             self.assertIn('<dt data-stage="%s"><span class="sh %s" aria-hidden="true"></span>%s</dt>' % (skey, shape, label), lab_html)
         self.assertEqual(_parse_jsonld(lab_html)['@graph'][0]['mainEntity']['numberOfItems'], 5)
@@ -287,6 +303,9 @@ class RenderProductPagesTest(unittest.TestCase):
             self.assertIn('Four labels, used the same way on every page.', M.render_lab(cat_3_6, data))
 
     def test_render_sitemap_and_render_llms(self):
+        self.assertEqual(M._valid_date({'release_date': '2026-11-26'}), '2026-11-26')
+        for bad_row in ({}, {'release_date': None}, {'release_date': 20261126}, {'release_date': '2026-11'}, {'release_date': 'bad'}):
+            self.assertIsNone(M._valid_date(bad_row))
         _data, _pub, _lab, catalog, _counts = _sample_fixtures()
         catalog[2]['spec']['slug'] = 'a&b'
         sm = M.render_sitemap(catalog)

@@ -72,7 +72,7 @@ def render_page(it, data):
     # ---- hero (above the fold) ----
     ta = spec['try_above']
     if ta['kind'] == 'static':
-        act = '<span class="p-static-pill"><span class="sh sh-sq" aria-hidden="true"></span>%s</span>' % esc(ta['label'])
+        act = '<span class="p-static-pill"><span class="sh %s" aria-hidden="true"></span>%s</span>' % (stage_shape(it), esc(ta['label']))
     elif ta['kind'] == 'command':
         ib = spec['try']['install']
         act = copy_box(ib['label'], ib['cmd']).replace('try-box', 'try-box p-try-cmd')
@@ -203,7 +203,7 @@ def render_page(it, data):
 <a class="skip" href="#main">Skip to content</a>
 <a class="skip" href="?motion=off">View plain page (no motion)</a>
 <div class="world" aria-hidden="true"><canvas id="world"></canvas><div class="hero-point"></div>{world_fallback_svg(pid, spec)}</div>
-{nav_html(catalog, None, True)}
+{nav_html(catalog, pid, True)}
 <main id="main" class="stage-main p-main">
   <section id="hero" class="hero p-hero" aria-labelledby="h-hero">
     <div class="wrap">{cats_banner}
@@ -211,11 +211,11 @@ def render_page(it, data):
         <h1 id="h-hero" class="display">{name}</h1>
         <p class="p-for-you">{esc(row['for_you'])}</p>
         <div class="p-who"><span class="p-who-k">{who_label}</span><p>{esc(row['who_for'])}</p></div>
-        <div class="p-try-above" aria-label="How to try it">
+        <div class="p-try-above" role="group" aria-label="How to try it">
           <div class="cta-row">
           {act}{alt_html}
           </div>{note_html}
-          <div class="p-badges" aria-label="Stage and licence">{stage_badge}{lic_badge}</div>
+          <div class="p-badges" role="group" aria-label="Stage and licence">{stage_badge}{lic_badge}</div>
         </div>
       </div>
     </div>
@@ -257,7 +257,7 @@ def render_page(it, data):
         <dl class="facts-grid">
 {facts}
         </dl>
-        <div class="kns" aria-label="Key facts">
+        <div class="kns" role="group" aria-label="Key facts">
 {kns}
         </div>{specs_markup}
       </div>
@@ -299,7 +299,7 @@ def card_html(it):
         '        <article class="dir-card" data-product-card id="p-%s" data-group="%s" data-stage="%s">\n'
         '          <div class="dir-tags"><span class="stage-chip dir-stage" data-stage="%s"><span class="sh %s" aria-hidden="true"></span>%s</span>'
         '<span class="lic-chip" data-open="%s">%s</span></div>\n'
-        '          <h2 class="dir-name">%s</h2>\n'
+        '          <h3 class="dir-name">%s</h3>\n'
         '          <p class="dir-line">%s</p>\n'
         '          <p class="dir-meta">%s</p>\n'
         '          <div class="dir-act">%s</div>\n'
@@ -374,10 +374,10 @@ def render_lab(catalog, data):
     )
     body = '\n'.join([
         sec_open('public-code', '01', 'Public code', 'Source you can read', 'Early previews and source tools. Each has a repository you can open today.'),
-        '      <div class="dir-grid" role="list" aria-label="Lab projects with public code">',
+        '      <div class="dir-grid" role="group" aria-label="Lab projects with public code">',
         cards(pub), '      </div>', SEC_CLOSE,
         sec_open('private-work', '02', 'Private', 'Work that is not released', 'Built and used inside Coco Research. No public download, and no repository link here.'),
-        '      <div class="dir-grid" role="list" aria-label="Private lab projects">',
+        '      <div class="dir-grid" role="group" aria-label="Private lab projects">',
         cards(priv), '      </div>', SEC_CLOSE,
         sec_open('stages', '03', 'Stages', 'How to read a stage', '%s labels, used the same way on every page.' % _count_word(len(LAB_STAGE_KEY), cap=True)),
         '      <dl class="facts-grid" aria-label="Stage key">', key, '      </dl>', SEC_CLOSE])
@@ -454,11 +454,6 @@ def render_whats_new(catalog, data, counts):
         actions=['<a class="btn btn-primary" href="#releases">Read the release log</a>',
                  '<a class="btn btn-ghost" href="../lab/">In the lab</a>'],
         badges=[('released', '%d tagged releases' % len(releases)), ('lab', '%d projects in the lab' % sum(1 for it in catalog if it['group'] == 'lab'))])
-    hero = (hero
-            .replace('<div class="p-try-above" aria-label="Where to start">',
-                     '<div class="p-try-above" role="group" aria-label="Where to start">')
-            .replace('<div class="p-badges" aria-label="Groups">',
-                     '<div class="p-badges" role="group" aria-label="Groups">'))
     body = f"""  <section id="releases" class="sec p-part wn-releases" data-part="01" aria-labelledby="h-rel">
     <div class="wrap">
       <div class="sec-head"><div><p class="eyebrow"><span class="p-part-num">01</span> Tagged public releases</p><h2 id="h-rel" class="sec-title">Newest first</h2></div><p class="sec-sub">Each entry links to the product page and its GitHub release.</p></div>
@@ -492,14 +487,18 @@ def render_whats_new(catalog, data, counts):
 _ISO_DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
 
 
+def _valid_date(row):
+    d = row.get('release_date')
+    return d if isinstance(d, str) and _ISO_DATE_RE.match(d) else None
+
+
 def render_sitemap(catalog):
-    dated = [d for it in catalog for d in (it['row'].get('release_date'),) if isinstance(d, str) and _ISO_DATE_RE.match(d)]
+    dated = [d for it in catalog for d in (_valid_date(it['row']),) if d]
     latest = max(dated) if dated else None
     entries = [(SITE + '/', None), (SITE + '/products/', None), (SITE + '/lab/', None), (SITE + '/whats-new/', latest)]
     for it in catalog:
         if not it['spec'].get('noindex'):
-            d = it['row'].get('release_date')
-            entries.append(('%s/%s/' % (SITE, it['spec']['slug']), d if isinstance(d, str) and _ISO_DATE_RE.match(d) else None))
+            entries.append(('%s/%s/' % (SITE, it['spec']['slug']), _valid_date(it['row'])))
     entries += [(SITE + '/rijul-kalra/', None), (SITE + '/coco/guardrails/', None),
                 (SITE + '/guides/manage-multiple-ai-coding-agents/', None)]
     body = '\n'.join(

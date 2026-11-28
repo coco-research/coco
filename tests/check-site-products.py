@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Assert product rows are complete (homepage, /products/, /lab/, release feed),
 the two-group 2 + 8 = 10 contract holds, Voice meetings copy names macOS 14.4,
-shared nav/drawer regions match across all 14 pages, and count literals agree.
+shared nav/drawer and footer product lists match across all 14 pages, count
+literals agree, stage labels match the /lab/ key, and a11y guards hold.
 
 Run from repo root: python3 tests/check-site-products.py
 """
@@ -36,7 +37,7 @@ source = [r for r in lab if 'href' in r]
 private = [r for r in lab if 'href' not in r]
 
 print('=== homepage products: products=%d lab=%d (public source %d, private %d) ===' % (len(shipped), len(lab), len(source), len(private)))
-if (len(shipped), len(lab)) == (2, 8) and len(shipped) + len(lab) == 10:
+if (len(shipped), len(lab)) == (2, 8):
     pass_('2 products + 8 in the lab = 10')
 else:
     fail_('expected 2 + 8 = 10, got %d + %d' % (len(shipped), len(lab)))
@@ -343,6 +344,88 @@ if (
 else:
     fail_('C6 self-test failed: missing=%r no_nav=%r no_foot=%r ok_m0=%r' % (missing_m0, no_nav, no_foot, ok_m0))
 
+# ---- AC-14: C6 footer parity for Products and In the lab <ul> columns across all 14 pages ----
+foot_re = re.compile(r'<footer class="foot".*?</footer>', re.S)
+foot_col_res = (
+    ('Products', re.compile(r'<div><h2>Products</h2><ul>.*?</ul></div>', re.S)),
+    ('In the lab', re.compile(r'<div><h2>In the lab</h2><ul>.*?</ul></div>', re.S)),
+)
+
+
+def _foot_product_cols(text):
+    fm = foot_re.search(text)
+    if not fm:
+        return None
+    foot_html = fm.group(0)
+    cols = []
+    for _, col_re in foot_col_res:
+        cm = col_re.search(foot_html)
+        if not cm:
+            return None
+        cols.append(cm.group(0))
+    return tuple(cols)
+
+
+def check_c6_footer_products(root, ref_cols):
+    errs = []
+    checked = 0
+    if not ref_cols:
+        return ['reference footer Products / In the lab columns missing'], 0
+    for page_p in sorted(root.glob('*/index.html')):
+        ptxt = page_p.read_text()
+        if '<meta http-equiv="refresh"' in ptxt:
+            continue
+        if _foot_product_cols(ptxt) == ref_cols:
+            checked += 1
+        else:
+            errs.append('%s: footer Products / In the lab lists differ from generated footer' % page_p)
+    if checked != 14:
+        errs.append('expected 14 top-level pages with matching footer product lists, verified %d' % checked)
+    m0_path = root / 'm0' / 'index.html'
+    if not m0_path.is_file():
+        errs.append('m0/index.html is missing for footer parity check')
+    else:
+        m0_txt = m0_path.read_text()
+        m_foot = re.search(r'<!-- products:foot:start -->\s*(.*?)\s*<!-- products:foot:end -->', m0_txt, re.S)
+        if not m_foot:
+            errs.append('m0/index.html missing products:foot markers for footer parity check')
+        elif _foot_product_cols(m_foot.group(1)) != ref_cols:
+            errs.append('m0/index.html products:foot Products / In the lab lists differ from generated footer')
+    return errs, checked
+
+
+ref_foot_cols = _foot_product_cols(products_html)
+c6_foot_errs, foot_checked = check_c6_footer_products(Path('.'), ref_foot_cols)
+if c6_foot_errs:
+    for err in c6_foot_errs:
+        fail_(err)
+else:
+    pass_('AC-14: all %d top-level */index.html pages match generated footer Products and In the lab lists' % foot_checked)
+
+# Self-test: drifted footer Products or In the lab column must fail; matching footer passes.
+with tempfile.TemporaryDirectory(prefix='c6-foot-check-') as tmp:
+    troot = Path(tmp)
+    for page_p in sorted(Path('.').glob('*/index.html')):
+        if '<meta http-equiv="refresh"' in page_p.read_text():
+            continue
+        dst = troot / page_p
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(page_p.read_text())
+    ok_foot, _ = check_c6_footer_products(troot, ref_foot_cols)
+    orig_rk = (troot / 'rijul-kalra' / 'index.html').read_text()
+    (troot / 'rijul-kalra' / 'index.html').write_text(orig_rk.replace('<li><a href="../voice/">Coco Voice</a></li>', '<li><a href="../voice/">Voice</a></li>', 1))
+    bad_prod_foot, _ = check_c6_footer_products(troot, ref_foot_cols)
+    (troot / 'rijul-kalra' / 'index.html').write_text(orig_rk.replace('<li><a href="../aloomannu/">Aloo Mannu</a></li>', '', 1))
+    bad_lab_foot, _ = check_c6_footer_products(troot, ref_foot_cols)
+if (
+    ok_foot == []
+    and any('rijul-kalra/index.html' in e for e in bad_prod_foot)
+    and any('rijul-kalra/index.html' in e for e in bad_lab_foot)
+):
+    pass_('AC-14 self-test: drifted footer Products or In the lab list fails; matching footers pass')
+else:
+    fail_('AC-14 self-test failed: ok=%r bad_prod=%r bad_lab=%r' % (ok_foot, bad_prod_foot, bad_lab_foot))
+
 # ---- guard homepage, /m0/, and /rijul-kalra/ count literals against len(products) and len(lab) ----
 NUM_WORDS = ('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve')
 
@@ -584,8 +667,8 @@ with tempfile.TemporaryDirectory(prefix='r1a-stages-') as tmp:
     orig_lab = (troot / 'lab' / 'index.html').read_text()
     (troot / 'lab' / 'index.html').write_text(
         orig_lab.replace(
-            '<span class="sh sh-ring" aria-hidden="true"></span>Source available</span><span class="lic-chip" data-open="true">Apache-2.0 \u00b7 Open source</span></div>\n          <h2 class="dir-name">jev-use',
-            '<span class="sh sh-ring" aria-hidden="true"></span>Pre-alpha</span><span class="lic-chip" data-open="true">Apache-2.0 \u00b7 Open source</span></div>\n          <h2 class="dir-name">jev-use',
+            '<span class="sh sh-ring" aria-hidden="true"></span>Source available</span><span class="lic-chip" data-open="true">Apache-2.0 \u00b7 Open source</span></div>\n          <h3 class="dir-name">jev-use',
+            '<span class="sh sh-ring" aria-hidden="true"></span>Pre-alpha</span><span class="lic-chip" data-open="true">Apache-2.0 \u00b7 Open source</span></div>\n          <h3 class="dir-name">jev-use',
         )
     )
     bad_sixth = check_stage_labels_and_key(troot, data, specs_public, specs_lab)
@@ -618,6 +701,183 @@ if (
     pass_('stage-label self-test: sixth label, shape mismatch, key count drift, action stage word, and card/page mismatch all fail')
 else:
     fail_('stage-label self-test failed: ok=%r sixth=%r shape=%r word=%r act=%r page=%r' % (ok_stage, bad_sixth, bad_shape, bad_word, bad_act, bad_page))
+
+# ---- AC-3: every <div> with aria-label also carries a role across all 14 pages + index.html ----
+div_aria_re = re.compile(r'<div\b[^>]*\baria-label="[^"]*"[^>]*>', re.S)
+
+
+def check_labelled_divs(root):
+    errs = []
+    pages = []
+    idx_p = root / 'index.html'
+    if idx_p.is_file():
+        pages.append(idx_p)
+    else:
+        errs.append('index.html is missing for labelled-div role check')
+    for page_p in sorted(root.glob('*/index.html')):
+        if '<meta http-equiv="refresh"' in page_p.read_text():
+            continue
+        pages.append(page_p)
+    if len(pages) != 15:
+        errs.append('expected 15 site HTML pages for labelled-div check, found %d' % len(pages))
+    for page_p in pages:
+        txt = page_p.read_text()
+        for m in div_aria_re.finditer(txt):
+            tag = m.group(0)
+            if not re.search(r'\brole="[^"]+"', tag):
+                errs.append('%s: role-less labelled <div>: %s' % (page_p, tag))
+    return errs, len(pages)
+
+
+div_errs, div_checked = check_labelled_divs(Path('.'))
+if div_errs:
+    for err in div_errs:
+        fail_(err)
+else:
+    pass_('AC-3: every <div aria-label=...> across all %d pages has a role' % div_checked)
+
+# Self-test: a role-less <div aria-label=...> must fail.
+with tempfile.TemporaryDirectory(prefix='r1b-divs-') as tmp:
+    troot = Path(tmp)
+    (troot / 'index.html').write_text(index_html)
+    for page_p in sorted(Path('.').glob('*/index.html')):
+        if '<meta http-equiv="refresh"' in page_p.read_text():
+            continue
+        dst = troot / page_p
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(page_p.read_text())
+    ok_divs, _ = check_labelled_divs(troot)
+    orig_coco = (troot / 'coco' / 'index.html').read_text()
+    (troot / 'coco' / 'index.html').write_text(orig_coco.replace('role="group" aria-label="Stage and licence"', 'aria-label="Stage and licence"', 1))
+    bad_div, _ = check_labelled_divs(troot)
+if ok_divs == [] and any('role-less labelled <div>' in e for e in bad_div):
+    pass_('AC-3 self-test: role-less labelled <div> fails; all live pages pass')
+else:
+    fail_('AC-3 self-test failed: ok=%r bad=%r' % (ok_divs, bad_div))
+
+# ---- AC-5: lists, card heading levels, aria-current placement, and .sn-m-priv diamond ----
+tag_aria_cur_re = re.compile(r'<(\w+)\b([^>]*\baria-current="([^"]+)"[^>]*)>', re.S)
+
+
+def check_a11y_structure_and_current(root, catalog_data):
+    errs = []
+    for rel, expect_cards in (('products/index.html', 10), ('lab/index.html', 8)):
+        p = root / rel
+        if not p.is_file():
+            errs.append('%s is missing for AC-5 check' % rel)
+            continue
+        txt = p.read_text()
+        if 'role="list"' in txt and 'role="listitem"' not in txt:
+            errs.append('%s has role="list" without role="listitem" children' % rel)
+        if '<h2 class="dir-name">' in txt:
+            errs.append('%s uses <h2 class="dir-name"> instead of <h3>' % rel)
+        h3_count = txt.count('<h3 class="dir-name">')
+        if h3_count != expect_cards:
+            errs.append('%s has %d <h3 class="dir-name"> headings, expected %d' % (rel, h3_count, expect_cards))
+
+    idx_p = root / 'index.html'
+    if not idx_p.is_file():
+        errs.append('index.html is missing for AC-5 check')
+    else:
+        idx_txt = idx_p.read_text()
+        if re.search(r'<button\b[^>]*\baria-current=', idx_txt, re.S):
+            errs.append('index.html has aria-current on a <button>')
+        if 'aria-current="page"' in idx_txt:
+            errs.append('index.html unexpectedly carries aria-current="page"')
+        if 'sn-m-priv"><span class="sh sh-sq"' in idx_txt or 'sn-m-priv"><span class="sh sh-dia"' not in idx_txt:
+            errs.append('index.html .sn-m-priv marker must use sh-dia (not sh-sq)')
+
+    product_slugs = {row['page'].rstrip('/') for row in catalog_data.get('products', []) + catalog_data.get('lab', [])}
+    checked = 0
+    for page_p in sorted(root.glob('*/index.html')):
+        txt = page_p.read_text()
+        if '<meta http-equiv="refresh"' in txt:
+            continue
+        checked += 1
+        slug = page_p.parent.name
+        if re.search(r'<button\b[^>]*\baria-current=', txt, re.S):
+            errs.append('%s has aria-current on a <button>' % page_p)
+        hits = tag_aria_cur_re.findall(txt)
+        want_href = '../%s/' % slug
+        if len(hits) != 2:
+            errs.append('%s has %d aria-current elements, expected 2' % (page_p, len(hits)))
+        for tag, attrs, val in hits:
+            if tag != 'a' or val != 'page':
+                errs.append('%s has aria-current=%r on <%s>, expected <a aria-current="page">' % (page_p, val, tag))
+            hm = re.search(r'\bhref="([^"]+)"', attrs)
+            if not hm or hm.group(1) != want_href:
+                errs.append('%s aria-current link href=%r, expected %r' % (page_p, hm.group(1) if hm else None, want_href))
+        if slug == 'products':
+            if '<div class="sn-m-foot"><a href="../products/" aria-current="page">Browse all ' not in txt:
+                errs.append('products/index.html missing aria-current="page" on dropdown foot Browse all link')
+            if '<a class="sn-m-item sn-d-all" href="../products/" aria-current="page">' not in txt:
+                errs.append('products/index.html missing aria-current="page" on drawer Browse all link')
+            if 'sn-m-priv"><span class="sh sh-sq"' in txt or 'sn-m-priv"><span class="sh sh-dia"' not in txt:
+                errs.append('products/index.html .sn-m-priv marker must use sh-dia (not sh-sq)')
+        elif slug in product_slugs:
+            classes = [re.search(r'\bclass="([^"]+)"', attrs).group(1) if re.search(r'\bclass="([^"]+)"', attrs) else '' for _, attrs, _ in hits]
+            if classes != ['sn-m-item', 'sn-m-item']:
+                errs.append('%s aria-current product link classes=%r, expected two sn-m-item links' % (page_p, classes))
+            if slug == 'aloomannu' and '<span class="p-static-pill"><span class="sh sh-dia"' not in txt:
+                errs.append('aloomannu/index.html .p-static-pill must use sh-dia')
+    if checked != 14:
+        errs.append('expected 14 top-level pages for AC-5 check, verified %d' % checked)
+    return errs, checked
+
+
+a11y_errs, a11y_checked = check_a11y_structure_and_current(Path('.'), data)
+if a11y_errs:
+    for err in a11y_errs:
+        fail_(err)
+else:
+    pass_('AC-5: /products/ and /lab/ lists/headings, .sn-m-priv diamond, and aria-current across all %d pages hold' % a11y_checked)
+
+# Self-test: button aria-current, h2 card title, role=list, missing m0 aria-current, wrong product href, and sh-sq priv marker all fail.
+with tempfile.TemporaryDirectory(prefix='r1b-a11y-') as tmp:
+    troot = Path(tmp)
+    (troot / 'index.html').write_text(index_html)
+    for page_p in sorted(Path('.').glob('*/index.html')):
+        if '<meta http-equiv="refresh"' in page_p.read_text():
+            continue
+        dst = troot / page_p
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(page_p.read_text())
+    ok_a11y, _ = check_a11y_structure_and_current(troot, data)
+
+    orig_prod = (troot / 'products' / 'index.html').read_text()
+    (troot / 'products' / 'index.html').write_text(orig_prod.replace('data-products-trigger', 'data-products-trigger aria-current="page"', 1))
+    bad_btn, _ = check_a11y_structure_and_current(troot, data)
+    (troot / 'products' / 'index.html').write_text(orig_prod.replace('<h3 class="dir-name">', '<h2 class="dir-name">', 1))
+    bad_h2, _ = check_a11y_structure_and_current(troot, data)
+    (troot / 'products' / 'index.html').write_text(orig_prod.replace('sn-m-priv"><span class="sh sh-dia"', 'sn-m-priv"><span class="sh sh-sq"'))
+    bad_priv, _ = check_a11y_structure_and_current(troot, data)
+    (troot / 'products' / 'index.html').write_text(orig_prod)
+
+    orig_lab2 = (troot / 'lab' / 'index.html').read_text()
+    (troot / 'lab' / 'index.html').write_text(orig_lab2.replace('<div class="dir-grid" role="group"', '<div class="dir-grid" role="list"', 1))
+    bad_list, _ = check_a11y_structure_and_current(troot, data)
+    (troot / 'lab' / 'index.html').write_text(orig_lab2)
+
+    orig_m0 = (troot / 'm0' / 'index.html').read_text()
+    (troot / 'm0' / 'index.html').write_text(orig_m0.replace(' aria-current="page"', ''))
+    bad_m0_cur, _ = check_a11y_structure_and_current(troot, data)
+    (troot / 'm0' / 'index.html').write_text(orig_m0)
+
+    orig_voice = (troot / 'voice' / 'index.html').read_text()
+    (troot / 'voice' / 'index.html').write_text(orig_voice.replace('href="../voice/" aria-current="page"', 'href="../coco/" aria-current="page"', 1))
+    bad_href, _ = check_a11y_structure_and_current(troot, data)
+if (
+    ok_a11y == []
+    and any('aria-current on a <button>' in e for e in bad_btn)
+    and any('<h2 class="dir-name">' in e for e in bad_h2)
+    and any('sh-dia' in e for e in bad_priv)
+    and any('role="list" without role="listitem"' in e for e in bad_list)
+    and any('m0/index.html has 0 aria-current' in e for e in bad_m0_cur)
+    and any("expected '../voice/'" in e for e in bad_href)
+):
+    pass_('AC-5 self-test: button aria-current, h2 card, sh-sq priv marker, role=list, missing m0 aria-current, and wrong href all fail')
+else:
+    fail_('AC-5 self-test failed: ok=%r btn=%r h2=%r priv=%r list=%r m0=%r href=%r' % (ok_a11y, bad_btn, bad_h2, bad_priv, bad_list, bad_m0_cur, bad_href))
 
 print()
 if fail == 0:

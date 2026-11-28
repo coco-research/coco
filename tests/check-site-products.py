@@ -425,7 +425,7 @@ STAGE_EXPECTED = {
     'Source available': ('source', 'sh-ring'),
     'Archived': ('archived', 'sh-bar'),
     'Private beta': ('beta', 'sh-sq'),
-    'Private, in the lab': ('lab', 'sh-sq'),
+    'Private, in the lab': ('lab', 'sh-dia'),
 }
 
 
@@ -496,6 +496,12 @@ def check_stage_labels_and_key(root, catalog_data, pub_specs, lab_specs):
                 card_labels[pid] = base
         if set(found) != expect_ids:
             errs.append('%s: card set drifted: got %r, expected %r' % (page_rel, sorted(found), sorted(expect_ids)))
+        stage_words = sorted(set(key_map) | {'Released', 'Available now'})
+        for act_m in re.finditer(r'<div class="dir-act">(.*?)</div>', page_txt, re.S):
+            act_text = re.sub(r'<[^>]+>', ' ', act_m.group(1)).lower()
+            for word in stage_words:
+                if word.lower() in act_text:
+                    errs.append('%s: card action link carries stage word %r' % (page_rel, word))
 
     wn_txt = wn_p.read_text()
     wn_chips = re.findall(
@@ -577,7 +583,7 @@ with tempfile.TemporaryDirectory(prefix='r1a-stages-') as tmp:
     # 1. Sixth label on jev-use card
     orig_lab = (troot / 'lab' / 'index.html').read_text()
     (troot / 'lab' / 'index.html').write_text(
-        orig_lab.replace('id="p-jev-use"', 'id="p-jev-use"').replace(
+        orig_lab.replace(
             '<span class="sh sh-ring" aria-hidden="true"></span>Source available</span><span class="lic-chip" data-open="true">Apache-2.0 \u00b7 Open source</span></div>\n          <h2 class="dir-name">jev-use',
             '<span class="sh sh-ring" aria-hidden="true"></span>Pre-alpha</span><span class="lic-chip" data-open="true">Apache-2.0 \u00b7 Open source</span></div>\n          <h2 class="dir-name">jev-use',
         )
@@ -591,9 +597,13 @@ with tempfile.TemporaryDirectory(prefix='r1a-stages-') as tmp:
     # 3. Wrong key count word
     (troot / 'lab' / 'index.html').write_text(orig_lab.replace('Five labels, used the same way', 'Four labels, used the same way', 1))
     bad_word = check_stage_labels_and_key(troot, data, specs_public, specs_lab)
+
+    # 4. Card action link carrying a stage word
+    (troot / 'lab' / 'index.html').write_text(orig_lab.replace('Read more<span class="sr-only"> about Coco M0', 'Private, in the lab<span class="sr-only"> Coco M0', 1))
+    bad_act = check_stage_labels_and_key(troot, data, specs_public, specs_lab)
     (troot / 'lab' / 'index.html').write_text(orig_lab)
 
-    # 4. Card/page label disagreement on Heliopause
+    # 5. Card/page label disagreement on Heliopause
     orig_helio = (troot / 'heliopause' / 'index.html').read_text()
     (troot / 'heliopause' / 'index.html').write_text(orig_helio.replace('Early preview \u00b7 v0.7.3', 'Source available \u00b7 v0.7.3', 1))
     bad_page = check_stage_labels_and_key(troot, data, specs_public, specs_lab)
@@ -602,11 +612,12 @@ if (
     and any('not in the /lab/ key' in e for e in bad_sixth)
     and any('disagrees with key' in e for e in bad_shape)
     and any('count word drifted' in e for e in bad_word)
+    and any('card action link carries stage word' in e for e in bad_act)
     and any('disagrees with card label' in e for e in bad_page)
 ):
-    pass_('stage-label self-test: sixth label, shape mismatch, key count drift, and card/page mismatch all fail')
+    pass_('stage-label self-test: sixth label, shape mismatch, key count drift, action stage word, and card/page mismatch all fail')
 else:
-    fail_('stage-label self-test failed: ok=%r sixth=%r shape=%r word=%r page=%r' % (ok_stage, bad_sixth, bad_shape, bad_word, bad_page))
+    fail_('stage-label self-test failed: ok=%r sixth=%r shape=%r word=%r act=%r page=%r' % (ok_stage, bad_sixth, bad_shape, bad_word, bad_act, bad_page))
 
 print()
 if fail == 0:

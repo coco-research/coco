@@ -255,8 +255,8 @@ class CatalogDatesAndStagesTests(unittest.TestCase):
         self.assertEqual(M.stage_label(by_id['demo-beta']), 'Private beta')
 
         self.assertEqual(
-            (M.stage_shape(by_id['demo-prod']), M.stage_shape(by_id['heliopause']), M.stage_shape(by_id['demo-arch']), M.stage_shape(by_id['demo-priv'])),
-            ('sh-dot', 'sh-ring', 'sh-bar', 'sh-sq'),
+            (M.stage_shape(by_id['demo-prod']), M.stage_shape(by_id['heliopause']), M.stage_shape(by_id['demo-arch']), M.stage_shape(by_id['demo-beta']), M.stage_shape(by_id['demo-priv'])),
+            ('sh-dot', 'sh-ring', 'sh-bar', 'sh-sq', 'sh-dia'),
         )
         self.assertEqual(
             (M.stage_key(by_id['demo-prod']), M.stage_key(by_id['heliopause']), M.stage_key(by_id['demo-arch']), M.stage_key(by_id['demo-beta']), M.stage_key(by_id['demo-priv'])),

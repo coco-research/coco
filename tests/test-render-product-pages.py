@@ -220,7 +220,7 @@ class RenderProductPagesTest(unittest.TestCase):
         data, _pub, _lab, catalog, _counts = _sample_fixtures()
         self.assertIn('Try it<span class="sr-only"> Demo &lt;Prod&gt; &amp; Co</span>', M.card_html(catalog[0]))
         self.assertIn('Read more<span class="sr-only"> about Demo Preview</span>', M.card_html(catalog[1]))
-        self.assertIn('Private, in the lab<span class="sr-only"> Demo M0</span>', M.card_html(catalog[4]))
+        self.assertIn('Read more<span class="sr-only"> about Demo M0</span>', M.card_html(catalog[4]))
         prod_html = M.render_products(catalog, data)
         for needle in ('All <span class="dir-tn">(6)</span>', 'Products <span class="dir-tn">(1)</span>', 'In the lab <span class="dir-tn">(5)</span>'):
             self.assertIn(needle, prod_html)

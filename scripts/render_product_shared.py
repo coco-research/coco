@@ -236,7 +236,7 @@ STAGES = (
     ('Source available', 'source', 'sh-ring', 'A public repository with a licence. Read it, copy it, adapt it; there is no packaged release.'),
     ('Archived', 'archived', 'sh-bar', 'Public source kept as read-only reference. No active development and no packaged release.'),
     ('Private beta', 'beta', 'sh-sq', 'Used inside Coco Research. No public build and no repository link.'),
-    ('Private, in the lab', 'lab', 'sh-sq', 'Built here, not released. A page exists so you can see what it is; there is nothing to download yet.'),
+    ('Private, in the lab', 'lab', 'sh-dia', 'Built here, not released. A page exists so you can see what it is; there is nothing to download yet.'),
 )
 STAGE_BY_LABEL = {label: (key, shape) for label, key, shape, _desc in STAGES}
 

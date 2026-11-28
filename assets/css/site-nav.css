@@ -135,6 +135,7 @@ a.sn-m-item:hover { background: var(--sn-raised); outline: 1px solid var(--sn-li
 .sh-dot, .sn-sh-dot { border-radius: 50%; background: currentColor; }
 .sh-ring, .sn-sh-ring { border-radius: 50%; border: 2px solid currentColor; }
 .sh-sq, .sn-sh-sq { border-radius: 2px; border: 1.8px solid currentColor; }
+.sh-dia, .sn-sh-dia { width: 8px; height: 8px; margin-inline: 1px; border-radius: 0; border: 1.8px solid currentColor; transform: rotate(45deg); }
 .sh-bar, .sn-sh-bar { width: 10px; height: 2px; border-radius: 1px; background: currentColor; }
 
 /* ------------------------------------------------ phone drawer (dialog) */

@@ -293,11 +293,8 @@ def card_html(it):
     slug = attr(spec['slug'])
     if it['bucket'] == 'shipped':
         act = '<a class="btn btn-primary" href="../%s/">Try it<span class="sr-only"> %s</span> <span aria-hidden="true">\u2192</span></a>' % (slug, nm)
-    elif it['bucket'] == 'source':
-        act = '<a class="btn btn-ghost" href="../%s/">Read more<span class="sr-only"> about %s</span> <span aria-hidden="true">\u2192</span></a>' % (slug, nm)
     else:
-        act = ('<a class="btn btn-lab" href="../%s/"><span class="sh sh-sq" aria-hidden="true"></span>Private, in the lab'
-               '<span class="sr-only"> %s</span></a>' % (slug, nm))
+        act = '<a class="btn btn-ghost" href="../%s/">Read more<span class="sr-only"> about %s</span> <span aria-hidden="true">\u2192</span></a>' % (slug, nm)
     return (
         '        <article class="dir-card" data-product-card id="p-%s" data-group="%s" data-stage="%s">\n'
         '          <div class="dir-tags"><span class="stage-chip dir-stage" data-stage="%s"><span class="sh %s" aria-hidden="true"></span>%s</span>'
@@ -478,7 +475,7 @@ def render_whats_new(catalog, data, counts):
 {active_rows}
         </div>
         <aside class="private-summary" aria-label="Private lab status">
-          <span class="stage-chip" data-stage="lab"><span class="sh sh-sq" aria-hidden="true"></span>Private, in the lab</span>
+          <span class="stage-chip" data-stage="lab"><span class="sh sh-dia" aria-hidden="true"></span>Private, in the lab</span>
           <h3>Not publicly released today</h3>
           <p>These projects are in private development inside Coco Research, with no public download and no announced release date.</p>
           <ul class="private-names">

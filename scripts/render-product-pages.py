@@ -170,7 +170,7 @@ def render_page(it, data):
         extra = '' if safe.startswith('../') else ' rel="noopener"'
         link_html.append('        <a class="link-pill" href="%s"%s>%s</a>' % (attr(safe), extra, esc(label)))
     link_html.append('        <a class="link-pill" href="../products/">Browse all %d products</a>' % len(catalog))
-    link_html.append('        <a class="link-pill" href="../whats-new/">What\u2019s new</a>')
+    link_html.append('        <a class="link-pill" href="../whats-new/">What\'s new</a>')
     links_markup = '\n'.join(link_html)
 
     credits_sec = ''
@@ -365,7 +365,7 @@ def render_lab(catalog, data):
         who='The lab is where work lives before it is a product. Some of it has public code. Some of it is private and used daily by us.',
         actions=['<a class="btn btn-primary" href="../heliopause/">See Heliopause by Coco Research</a>',
                  '<a class="btn btn-ghost" href="../products/">All products</a>',
-                 '<a class="btn btn-ghost" href="../whats-new/">What\u2019s new</a>'],
+                 '<a class="btn btn-ghost" href="../whats-new/">What\'s new</a>'],
         badges=[('source', 'Public code \u00b7 %d' % len(pub)), ('lab', 'Private \u00b7 %d' % len(priv))])
     key = '\n'.join(
         '          <div class="fact"><dt data-stage="%s"><span class="sh %s" aria-hidden="true"></span>%s</dt><dd>%s</dd></div>'

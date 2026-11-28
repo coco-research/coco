@@ -867,6 +867,8 @@ def check_private_stage_prose(root, lab_specs):
                     errs.append('%s/index.html hero pill %r mentions other key label %r (expected %r)' % (slug, pill_text, lbl, page_label))
             if not pill_text.startswith(page_label):
                 errs.append('%s/index.html hero pill %r does not start with %r' % (slug, pill_text, page_label))
+            if pill_text != ta_label:
+                errs.append('%s/index.html hero pill %r != spec try_above.label %r' % (slug, pill_text, ta_label))
         fm = stage_fact_re.search(txt)
         if not fm:
             errs.append('%s/index.html is missing <dt>Stage</dt><dd> fact' % slug)
@@ -911,16 +913,22 @@ with tempfile.TemporaryDirectory(prefix='r1b-priv-prose-') as tmp:
     bad_specs = json.loads(json.dumps(specs_lab))
     bad_specs['lab']['m0']['try_above']['label'] = 'Private, in the lab \u2014 no public download yet'
     bad_spec_ta = check_private_stage_prose(troot, bad_specs)
+
+    orig_m0_p = (troot / 'm0' / 'index.html').read_text()
+    (troot / 'm0' / 'index.html').write_text(orig_m0_p.replace('Private beta, used daily \u2014 no public download yet', 'Private beta, drifted \u2014 no public download yet', 1))
+    bad_m0_drift = check_private_stage_prose(troot, specs_lab)
+    (troot / 'm0' / 'index.html').write_text(orig_m0_p)
 if (
     ok_priv == []
     and any('hermes/index.html hero pill' in e for e in bad_pill_txt)
     and any('aloomannu/index.html Stage fact' in e for e in bad_fact_txt)
     and any('aloomannu/index.html .p-static-pill shape' in e for e in bad_pill_shape)
     and any('spec m0: try_above.label' in e for e in bad_spec_ta)
+    and any('m0/index.html hero pill' in e and 'spec try_above.label' in e for e in bad_m0_drift)
 ):
-    pass_('AC-17 / AC-18 self-test: mismatched pill text, Stage fact, pill shape, and spec try_above.label all fail')
+    pass_('AC-17 / AC-18 self-test: mismatched pill text, Stage fact, pill shape, spec try_above.label, and m0 pill drift all fail')
 else:
-    fail_('AC-17 / AC-18 self-test failed: ok=%r pill=%r fact=%r shape=%r spec=%r' % (ok_priv, bad_pill_txt, bad_fact_txt, bad_pill_shape, bad_spec_ta))
+    fail_('AC-17 / AC-18 self-test failed: ok=%r pill=%r fact=%r shape=%r spec=%r m0_drift=%r' % (ok_priv, bad_pill_txt, bad_fact_txt, bad_pill_shape, bad_spec_ta, bad_m0_drift))
 
 # Self-test: button aria-current, h2 card title, role=list, missing m0 aria-current, wrong product href, and sh-sq priv marker all fail.
 with tempfile.TemporaryDirectory(prefix='r1b-a11y-') as tmp:
@@ -1031,9 +1039,13 @@ def check_head_flags_theme_icons(root):
                     if tre.search(bad_q):
                         errs.append('%s theme regex %r matched unanchored %r' % (page_p, tp.group(1), bad_q))
 
-        # AC-7: static ?motion=off skip link + progressive URLSearchParams rewrite
-        if not re.search(r'<a\b[^>]*class="[^"]*\bskip\b[^"]*"[^>]*href="\?motion=off"', txt):
-            errs.append('%s is missing static <a class="skip..." href="?motion=off"> fallback' % page_p)
+        # AC-7: static ?motion=off skip link in body + exact head selector and URLSearchParams rewrite
+        body_m = re.search(r'<body\b[^>]*>(.*)</body>', txt, re.S)
+        body_txt = body_m.group(1) if body_m else ''
+        if not re.search(r'<a\b[^>]*class="[^"]*\bskip\b[^"]*"[^>]*href="\?motion=off"', body_txt):
+            errs.append('%s body is missing static <a class="skip..." href="?motion=off"> fallback' % page_p)
+        if 'a.skip[href="?motion=off"]' not in head_txt:
+            errs.append('%s head script is missing exact selector a.skip[href="?motion=off"]' % page_p)
         if 'URLSearchParams(location.search)' not in head_txt or "p.set('motion', 'off')" not in head_txt:
             errs.append('%s head script is missing URLSearchParams skip-link rewrite' % page_p)
 
@@ -1110,6 +1122,12 @@ with tempfile.TemporaryDirectory(prefix='r1c-head-') as tmp:
     bad_themed_tc, _ = check_head_flags_theme_icons(troot)
     (troot / 'products' / 'index.html').write_text(orig_p.replace('href="/assets/site/favicon.svg"', 'href="../assets/img/favicon.svg"', 1))
     bad_icon, _ = check_head_flags_theme_icons(troot)
+    (troot / 'products' / 'index.html').write_text(orig_p)
+
+    orig_m0_h = (troot / 'm0' / 'index.html').read_text()
+    (troot / 'm0' / 'index.html').write_text(orig_m0_h.replace('a.skip[href="?motion=off"]', 'a.skip[href="?motion=no"]', 1))
+    bad_sel, _ = check_head_flags_theme_icons(troot)
+    (troot / 'm0' / 'index.html').write_text(orig_m0_h)
 if (
     ok_head == []
     and any('matched unanchored' in e and 'motion' in e for e in bad_motion)
@@ -1118,10 +1136,129 @@ if (
     and any('URLSearchParams skip-link rewrite' in e for e in bad_skip)
     and any('(themed) theme-color' in e for e in bad_themed_tc)
     and any('icon/manifest hrefs' in e for e in bad_icon)
+    and any('exact selector a.skip[href="?motion=off"]' in e for e in bad_sel)
 ):
-    pass_('AC-6..AC-9 self-test: unanchored motion/theme, missing skip rewrite, theme-color drift, and relative icon all fail')
+    pass_('AC-6..AC-9 self-test: unanchored motion/theme, missing skip rewrite, selector typo, theme-color drift, and relative icon all fail')
 else:
-    fail_('AC-6..AC-9 self-test failed: ok=%r motion=%r locked=%r theme=%r skip=%r themed=%r icon=%r' % (ok_head, bad_motion, bad_locked_tc, bad_theme, bad_skip, bad_themed_tc, bad_icon))
+    fail_('AC-6..AC-9 self-test failed: ok=%r motion=%r locked=%r theme=%r skip=%r themed=%r icon=%r sel=%r' % (ok_head, bad_motion, bad_locked_tc, bad_theme, bad_skip, bad_themed_tc, bad_icon, bad_sel))
+
+# ---- AC-10: footer Licence links end in /LICENSE or #licence ----
+def check_licence_hrefs(root, pub_specs):
+    errs = []
+    for pid, spec in sorted(pub_specs.items()):
+        href = str(spec.get('licence_href', ''))
+        if not href:
+            errs.append('spec %s: missing licence_href' % pid)
+            continue
+        if not (href.endswith('/LICENSE') or href.endswith('#licence')):
+            errs.append('spec %s: licence_href %r does not end in /LICENSE or #licence' % (pid, href))
+        slug = spec.get('slug', pid)
+        page_p = root / slug / 'index.html'
+        if not page_p.is_file():
+            errs.append('%s/index.html is missing for licence_href check' % slug)
+        elif '<li><a href="%s">Licence</a></li>' % href not in page_p.read_text():
+            errs.append('%s/index.html footer missing Licence link %r' % (slug, href))
+    return errs
+
+
+lic_errs = check_licence_hrefs(Path('.'), specs_public)
+if lic_errs:
+    for err in lic_errs:
+        fail_(err)
+else:
+    pass_('AC-10: all %d public licence_href values and footer links end in /LICENSE or #licence' % len(specs_public))
+
+with tempfile.TemporaryDirectory(prefix='r1d-lic-') as tmp:
+    troot = Path(tmp)
+    for pid, spec in specs_public.items():
+        slug = spec.get('slug', pid)
+        dst = troot / slug / 'index.html'
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(Path(slug, 'index.html').read_text())
+    ok_lic = check_licence_hrefs(troot, specs_public)
+    bad_pub = json.loads(json.dumps(specs_public))
+    bad_pub['signal']['licence_href'] = 'https://github.com/coco-research/coco-design-language'
+    bad_lic = check_licence_hrefs(troot, bad_pub)
+if ok_lic == [] and any('does not end in /LICENSE or #licence' in e for e in bad_lic):
+    pass_('AC-10 self-test: repo-root licence_href without /LICENSE fails; live specs pass')
+else:
+    fail_('AC-10 self-test failed: ok=%r bad=%r' % (ok_lic, bad_lic))
+
+# ---- AC-11: straight "What's new" everywhere (zero curly apostrophe or &rsquo;) ----
+curly_wn_re = re.compile(r'What(?:\u2019|\\u2019|&rsquo;)s new')
+
+
+def check_straight_whats_new(root):
+    errs = []
+    targets = []
+    for rel in ('index.html', 'llms.txt', 'scripts/render-product-pages.py', 'scripts/render-site-products.py', 'scripts/render_product_shared.py'):
+        p = root / rel
+        if p.is_file():
+            targets.append(p)
+        else:
+            errs.append('%s is missing for AC-11 check' % rel)
+    for page_p in sorted(root.glob('*/index.html')):
+        if '<meta http-equiv="refresh"' in page_p.read_text():
+            continue
+        targets.append(page_p)
+    for p in targets:
+        m = curly_wn_re.search(p.read_text())
+        if m:
+            errs.append('%s contains curly What\'s new (%r)' % (p, m.group(0)))
+    return errs, len(targets)
+
+
+wn_errs, wn_checked = check_straight_whats_new(Path('.'))
+if wn_errs:
+    for err in wn_errs:
+        fail_(err)
+else:
+    pass_('AC-11: zero curly What\'s new across all %d HTML, llms.txt, and renderer files' % wn_checked)
+
+with tempfile.TemporaryDirectory(prefix='r1d-wn-') as tmp:
+    troot = Path(tmp)
+    for rel in ('index.html', 'llms.txt', 'scripts/render-product-pages.py', 'scripts/render-site-products.py', 'scripts/render_product_shared.py'):
+        dst = troot / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(Path(rel).read_text())
+    for page_p in sorted(Path('.').glob('*/index.html')):
+        if '<meta http-equiv="refresh"' in page_p.read_text():
+            continue
+        dst = troot / page_p
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(page_p.read_text())
+    ok_wn, _ = check_straight_whats_new(troot)
+    orig_m0_wn = (troot / 'm0' / 'index.html').read_text()
+    (troot / 'm0' / 'index.html').write_text(orig_m0_wn.replace("What's new", 'What\u2019s new', 1))
+    bad_curly, _ = check_straight_whats_new(troot)
+    (troot / 'm0' / 'index.html').write_text(orig_m0_wn.replace("What's new", 'What&rsquo;s new', 1))
+    bad_entity, _ = check_straight_whats_new(troot)
+if (
+    ok_wn == []
+    and any("contains curly What's new" in e for e in bad_curly)
+    and any("contains curly What's new" in e for e in bad_entity)
+):
+    pass_('AC-11 self-test: curly apostrophe and &rsquo; in What\'s new both fail; live files pass')
+else:
+    fail_('AC-11 self-test failed: ok=%r curly=%r entity=%r' % (ok_wn, bad_curly, bad_entity))
+
+# ---- AC-12 / AC-13: m0 bare .st ::before scoped to stateful chips; .links-row .link-pill kept; home Shift+Tab ----
+m0_css_txt = Path('m0/index.html').read_text()
+if re.search(r'(?m)^\.st::before\b', m0_css_txt):
+    fail_('AC-12: m0/index.html still applies unconditional .st::before to bare match chips')
+elif '.st-live::before, .st-off::before, .st-plan::before' in m0_css_txt:
+    pass_('AC-12: m0/index.html scopes .st ::before box to stateful chips only (bare match chips draw no box)')
+else:
+    fail_('AC-12: m0/index.html stateful .st ::before rule missing')
+if '.links-row .link-pill' in Path('assets/css/product.css').read_text():
+    pass_('AC-12 guard: live .links-row .link-pill rule in assets/css/product.css stays intact')
+else:
+    fail_('AC-12 guard: .links-row .link-pill was unexpectedly removed from assets/css/product.css')
+main_js_txt = Path('assets/js/main.js').read_text()
+if 'function chromeAfter()' in main_js_txt and 'e.shiftKey && act && act === chromeAfter()' in main_js_txt:
+    pass_('AC-13: assets/js/main.js defines chromeAfter() for Shift+Tab from footer into close chapter')
+else:
+    fail_('AC-13: assets/js/main.js missing chromeAfter() Shift+Tab handler')
 
 print()
 if fail == 0:

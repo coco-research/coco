@@ -445,6 +445,10 @@ function cine() {
     const pre = $$('.skip, .site-nav a, .site-nav button, .rail a').filter((el) => !el.disabled && shown(el) && el.getClientRects().length);
     return pre[pre.length - 1] || null;
   }
+  function chromeAfter() { // the first tabbable control after the stage, in DOM order
+    const post = $$('.foot a[href], .foot button').filter((el) => !el.disabled && shown(el) && el.getClientRects().length);
+    return post[0] || null;
+  }
   addEventListener('keydown', (e) => {
     if (e.key !== 'Tab' || e.altKey || e.ctrlKey || e.metaKey || e.defaultPrevented) return;
     if (document.querySelector('dialog[open]')) return;
@@ -456,12 +460,16 @@ function cine() {
     else if (!e.shiftKey && act && act === chromeBefore()) {
       // entering the stage from the header/rail: the control on the current chapter, else the first one
       next = controls.find((el) => shown(el) && Math.abs(curS() - stopFor(el)) < 0.9) || controls[0] || null;
+    } else if (e.shiftKey && act && act === chromeAfter()) {
+      // re-entering the stage backwards from the footer: the close chapter's last control
+      next = controls[controls.length - 1] || null;
     }
     if (!next) return; // leaving the stage: the browser continues to the footer (or header) as usual
     const to = stopFor(next);
     if (shown(next) && Math.abs(curS() - to) < 0.45) return; // already on screen: native Tab
     e.preventDefault();
     jumpTo(to);
+    if (next.closest('.ch-close')) { ST.update(); closeCh.style.visibility = ''; }
     next.focus({ preventScroll: true });
   });
   // Anything else that takes focus inside the stage (assistive tech, scripts) also brings its chapter into view.

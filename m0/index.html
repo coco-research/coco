@@ -64,7 +64,7 @@
 
 /* Status tags: shape + word, never colour alone */
 .st { display: inline-flex; align-items: center; gap: 7px; padding: 4px 10px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--raised); font: 500 0.68rem / 1.2 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; color: var(--ink-2); }
-.st::before { content: ''; flex: none; width: 8px; height: 8px; box-sizing: border-box; }
+.st-live::before, .st-off::before, .st-plan::before { content: ''; flex: none; width: 8px; height: 8px; box-sizing: border-box; }
 .st-live { color: var(--green); border-color: var(--green); }
 .st-live::before { border-radius: 50%; background: currentColor; }
 .st-off { color: var(--amber); border-color: var(--amber); }
@@ -852,7 +852,7 @@
       <div class="links-row links-row-spaced">
         <a class="link-pill" href="../products/">Browse all 10 products</a>
         <a class="link-pill" href="../lab/">In the lab</a>
-        <a class="link-pill" href="../whats-new/">What’s new</a>
+        <a class="link-pill" href="../whats-new/">What's new</a>
       </div>
     </div>
   </section>

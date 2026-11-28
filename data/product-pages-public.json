@@ -384,7 +384,7 @@
         "Source available, no packaged release"
       ]
     ],
-    "licence_href": "https://github.com/coco-research/coco-design-language",
+    "licence_href": "https://github.com/coco-research/coco-design-language/blob/main/LICENSE",
     "does_for_you": "Signal is Coco Research’s design language. It gives your product a coherent look without a design team: a type scale, Light Paper and Dark Stage colour tokens, and written rules for keeping an interface legible.",
     "who_detail": "You are building a site or app and want a ready-made, accessible look you can read, copy and adapt, with light and dark themes that already work on desktop and phone.",
     "try_above": {
@@ -490,7 +490,7 @@
         "Archived source repository"
       ]
     ],
-    "licence_href": "https://github.com/coco-research/Mira",
+    "licence_href": "https://github.com/coco-research/Mira/blob/main/LICENSE",
     "does_for_you": "Mira turns your material into vertical short videos, the shape Reels and Shorts use, in English and Hindi, using a Python pipeline that runs on your own machine.",
     "who_detail": "You make short-form video, you are comfortable running a Python project, and you want the work done locally. The repository is archived, so it is best treated as reference you can read and fork.",
     "try_above": {
@@ -592,7 +592,7 @@
         "Open-source repository"
       ]
     ],
-    "licence_href": "https://github.com/coco-research/jev-use",
+    "licence_href": "https://github.com/coco-research/jev-use/blob/main/LICENSE",
     "does_for_you": "jev-use explores controlling your Mac with your voice: you speak, and the desktop responds. It is early, pre-alpha code that you can read and run.",
     "who_detail": "You like trying early software, you use a Mac, and you are curious about hands-free control. Expect rough edges and change.",
     "try_above": {
@@ -696,7 +696,7 @@
         "v0.7.3 early preview"
       ]
     ],
-    "licence_href": "https://github.com/coco-research/heliopause",
+    "licence_href": "https://github.com/coco-research/heliopause/blob/main/LICENSE",
     "does_for_you": "Heliopause gives your AI tools a Lead and roles, like a small company, and shows who is working, idle, blocked or waiting on you in a live status page that runs only on your own machine.",
     "who_detail": "You run several AI coding tools or agents at once and lose track of which one is doing what. You want one local view, with no account and no cloud.",
     "try_above": {

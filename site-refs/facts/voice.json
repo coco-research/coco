@@ -1,6 +1,6 @@
 [
   {
-    "claim": "Coco Voice is private speech-to-text on your own computer: hold a key to dictate into the app you have open, tidy transcripts with a local model, and keep cited meeting notes on disk with no account and no subscription.",
+    "claim": "Coco Voice is desktop speech-to-text on your own computer: hold a key to dictate into the app you have open, tidy transcripts with a local model, and keep cited meeting notes on disk with no account and no subscription.",
     "section": "what-it-is",
     "source": "voice:README.md:35"
   },

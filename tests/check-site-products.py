@@ -1260,6 +1260,120 @@ if 'function chromeAfter()' in main_js_txt and 'e.shiftKey && act && act === chr
 else:
     fail_('AC-13: assets/js/main.js missing chromeAfter() Shift+Tab handler')
 
+# ---- removed claims guard: Voice "Private" phrases and SI /whats-new/ entry text ----
+VOICE_REMOVED_PHRASES = (
+    'Private, ' + 'on your computer',
+    'Private ' + 'desktop speech',
+)
+SI_COUNT_PLACEHOLDERS = ('{personas}', '{departments}', '{skills}', '{commands}')
+
+
+def check_removed_claims(root):
+    errs = []
+    targets = []
+    for rel in ('data/products.json', 'data/product-pages-public.json', 'data/product-pages-lab.json', 'index.html', 'llms.txt'):
+        p = root / rel
+        if p.is_file():
+            targets.append(p)
+        else:
+            errs.append('%s is missing for removed-claims check' % rel)
+    for page_p in sorted(root.glob('*/index.html')):
+        if '<meta http-equiv="refresh"' in page_p.read_text():
+            continue
+        targets.append(page_p)
+
+    for p in targets:
+        low = p.read_text().lower()
+        for phrase in VOICE_REMOVED_PHRASES:
+            if phrase.lower() in low:
+                errs.append('%s contains removed Voice phrase %r' % (p, phrase))
+
+    prod_p = root / 'data' / 'products.json'
+    if prod_p.is_file():
+        pdata = json.loads(prod_p.read_text())
+        si_row = next((r for r in pdata.get('products', []) if r.get('id') == 'coco-si'), None)
+        if not si_row:
+            errs.append('data/products.json missing coco-si row for removed-claims check')
+        else:
+            si_wn = str(si_row.get('whats_new', ''))
+            if 'open-core' in si_wn.lower():
+                errs.append('data/products.json coco-si whats_new contains Open-core: %r' % si_wn)
+            for ph in SI_COUNT_PLACEHOLDERS:
+                if ph in si_wn:
+                    errs.append('data/products.json coco-si whats_new contains count placeholder %r' % ph)
+
+    wn_p = root / 'whats-new' / 'index.html'
+    if wn_p.is_file():
+        wn_txt = wn_p.read_text()
+        si_art = re.search(r'<article class="tl-entry">(?:(?!</article>).)*?Coco Super Intelligence(?:(?!</article>).)*?</article>', wn_txt, re.S)
+        if not si_art:
+            errs.append('whats-new/index.html missing Coco Super Intelligence entry')
+        else:
+            art_html = si_art.group(0)
+            if 'Released \u00b7 Open-core (Apache-2.0 core)' not in art_html:
+                errs.append('whats-new/index.html Coco Super Intelligence entry lost its Open-core licence chip')
+            tl_m = re.search(r'<p class="tl-line">(.*?)</p>', art_html, re.S)
+            if not tl_m:
+                errs.append('whats-new/index.html Coco Super Intelligence entry missing <p class="tl-line">')
+            else:
+                tl_txt = tl_m.group(1)
+                if 'open-core' in tl_txt.lower():
+                    errs.append('whats-new/index.html SI entry text contains Open-core: %r' % tl_txt)
+                for num in ('493', '231', '389'):
+                    if re.search(r'\b%s\b' % num, tl_txt):
+                        errs.append('whats-new/index.html SI entry text contains count %s: %r' % (num, tl_txt))
+    return errs, len(targets)
+
+
+claim_errs, claim_checked = check_removed_claims(Path('.'))
+if claim_errs:
+    for err in claim_errs:
+        fail_(err)
+else:
+    pass_('removed-claims guard: 0 removed Voice phrases across %d files; SI whats_new has no Open-core or count placeholders' % claim_checked)
+
+with tempfile.TemporaryDirectory(prefix='voice-claims-') as tmp:
+    troot = Path(tmp)
+    for rel in ('data/products.json', 'data/product-pages-public.json', 'data/product-pages-lab.json', 'index.html', 'llms.txt'):
+        dst = troot / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(Path(rel).read_text())
+    for page_p in sorted(Path('.').glob('*/index.html')):
+        if '<meta http-equiv="refresh"' in page_p.read_text():
+            continue
+        dst = troot / page_p
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(page_p.read_text())
+    ok_claims, _ = check_removed_claims(troot)
+
+    orig_prod_html = (troot / 'products' / 'index.html').read_text()
+    (troot / 'products' / 'index.html').write_text(orig_prod_html.replace('On your computer.', VOICE_REMOVED_PHRASES[0] + '.', 1))
+    bad_v1, _ = check_removed_claims(troot)
+    (troot / 'products' / 'index.html').write_text(orig_prod_html)
+
+    orig_wn_html = (troot / 'whats-new' / 'index.html').read_text()
+    (troot / 'whats-new' / 'index.html').write_text(orig_wn_html.replace('Desktop speech-to-text', VOICE_REMOVED_PHRASES[1] + '-to-text', 1))
+    bad_v2, _ = check_removed_claims(troot)
+    (troot / 'whats-new' / 'index.html').write_text(orig_wn_html.replace('<p class="tl-line">Advisory skills', '<p class="tl-line">Open-core advisory skills 493', 1))
+    bad_si_wn, _ = check_removed_claims(troot)
+    (troot / 'whats-new' / 'index.html').write_text(orig_wn_html)
+
+    orig_pj = (troot / 'data' / 'products.json').read_text()
+    (troot / 'data' / 'products.json').write_text(orig_pj.replace('Advisory skills, commands and rules', 'Open-core advisory skills {personas}', 1))
+    bad_si_json, _ = check_removed_claims(troot)
+if (
+    ok_claims == []
+    and any('removed Voice phrase' in e for e in bad_v1)
+    and any('removed Voice phrase' in e for e in bad_v2)
+    and any('SI entry text contains Open-core' in e for e in bad_si_wn)
+    and any('SI entry text contains count 493' in e for e in bad_si_wn)
+    and any('coco-si whats_new contains Open-core' in e for e in bad_si_json)
+    and any('count placeholder' in e for e in bad_si_json)
+):
+    pass_('removed-claims self-test: restored Voice phrases, SI Open-core, and count placeholders/numbers all fail')
+else:
+    fail_('removed-claims self-test failed: ok=%r v1=%r v2=%r si_wn=%r si_json=%r' % (ok_claims, bad_v1, bad_v2, bad_si_wn, bad_si_json))
+
 print()
 if fail == 0:
     print('  homepage product rows agree with data/products.json')

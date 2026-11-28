@@ -29,7 +29,7 @@
       "release_date": "2026-11-26",
       "release_version": "v2.4.0",
       "release_url": "https://github.com/coco-research/coco/releases/tag/v2.4.0",
-      "whats_new": "Open-core advisory skills, commands and rules for Claude Code, Cursor and Codex: {personas} personas across {departments} departments, {skills} skills and {commands} commands."
+      "whats_new": "Advisory skills, commands and rules for Claude Code, Cursor and Codex."
     },
     {
       "id": "voice",
@@ -53,14 +53,14 @@
       ],
       "art": "assets/site/art/voice.svg",
       "footer_href": "https://github.com/coco-research/Coco-Voice",
-      "for_you": "Hold a key to dictate into any app. Private, on your computer.",
+      "for_you": "Hold a key to dictate into any app. On your computer.",
       "who_for": "People who want fast dictation on macOS, Windows or Linux, and searchable meeting notes on macOS 14.4 and later, without a cloud transcription subscription.",
       "licence_short": "MIT License · Open source",
       "open_source": true,
       "release_date": "2026-11-26",
       "release_version": "v0.20.9",
       "release_url": "https://github.com/coco-research/Coco-Voice/releases/tag/v0.20.9",
-      "whats_new": "Private desktop speech-to-text for macOS, Windows x64, and Linux x64 and arm64, with local meeting notes and cited Q&A on macOS 14.4 and later. MIT licensed."
+      "whats_new": "Desktop speech-to-text for macOS, Windows x64, and Linux x64 and arm64, with local meeting notes and cited Q&A on macOS 14.4 and later. MIT licensed."
     }
   ],
   "lab": [

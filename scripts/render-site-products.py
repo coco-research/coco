@@ -246,21 +246,21 @@ def main():
             stale = True
     elif new != old:
         INDEX.write_text(new)
-    # ponytail: ceiling = 1 absent hand-built page (m0/index.html) before /m0/ lands; upgrade path = require m0/index.html unconditionally once /m0/ exists on main.
-    if M0.is_file():
-        old_m0 = M0.read_text()
-        new_m0 = render_m0(old_m0, data)
-        if args.check:
-            if new_m0 != old_m0:
-                sys.stdout.writelines(difflib.unified_diff(
-                    old_m0.splitlines(keepends=True),
-                    new_m0.splitlines(keepends=True),
-                    fromfile='m0/index.html',
-                    tofile='m0/index.html (rendered)',
-                ))
-                stale = True
-        elif new_m0 != old_m0:
-            M0.write_text(new_m0)
+    if not M0.is_file():
+        sys.exit('m0/index.html is missing')
+    old_m0 = M0.read_text()
+    new_m0 = render_m0(old_m0, data)
+    if args.check:
+        if new_m0 != old_m0:
+            sys.stdout.writelines(difflib.unified_diff(
+                old_m0.splitlines(keepends=True),
+                new_m0.splitlines(keepends=True),
+                fromfile='m0/index.html',
+                tofile='m0/index.html (rendered)',
+            ))
+            stale = True
+    elif new_m0 != old_m0:
+        M0.write_text(new_m0)
     if args.check and stale:
         sys.exit(1)
 

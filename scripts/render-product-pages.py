@@ -11,6 +11,7 @@ with a unified diff when any generated file is missing or stale.
 import argparse
 import difflib
 import importlib.util
+import re
 import sys
 from pathlib import Path
 
@@ -444,23 +445,28 @@ def render_whats_new(catalog, data, counts):
     priv_li = '\n'.join('              <li><a href="../%s/">%s</a></li>' % (attr(it['spec']['slug']), esc(it['row']['name'])) for it in priv)
     latest = releases[0]['row']
     ld = {'@context': 'https://schema.org', '@graph': [
-        {'@type': 'WebPage', 'name': 'What\u2019s new \u2014 Coco Research', 'url': SITE + '/whats-new/',
+        {'@type': 'WebPage', 'name': "What's new \u2014 Coco Research", 'url': SITE + '/whats-new/',
          'description': 'Latest tagged releases across Coco Research products: version, date, licence and one plain line on what shipped.',
          'isPartOf': {'@type': 'WebSite', 'name': 'Coco Research', 'url': SITE + '/'}},
-        breadcrumb('What\u2019s new', SITE + '/whats-new/')]}
+        breadcrumb("What's new", SITE + '/whats-new/')]}
     desc = 'Latest tagged releases across Coco Research products: version, date, licence and one plain line on what shipped.'
     hero = dir_hero(
-        eyebrow='Release log', h1='What\u2019s new',
+        eyebrow='Release log', h1="What's new",
         for_you='Every tagged release across Coco Research, newest first: version, date, licence and one plain line on what shipped.',
         who_k='Latest',
         who='%s %s, released %s.' % (latest['name'], latest['release_version'], human_date(latest['release_date'])),
         actions=['<a class="btn btn-primary" href="#releases">Read the release log</a>',
                  '<a class="btn btn-ghost" href="../lab/">In the lab</a>'],
         badges=[('released', '%d tagged releases' % len(releases)), ('lab', '%d projects in the lab' % sum(1 for it in catalog if it['group'] == 'lab'))])
+    hero = (hero
+            .replace('<div class="p-try-above" aria-label="Where to start">',
+                     '<div class="p-try-above" role="group" aria-label="Where to start">')
+            .replace('<div class="p-badges" aria-label="Groups">',
+                     '<div class="p-badges" role="group" aria-label="Groups">'))
     body = f"""  <section id="releases" class="sec p-part wn-releases" data-part="01" aria-labelledby="h-rel">
     <div class="wrap">
       <div class="sec-head"><div><p class="eyebrow"><span class="p-part-num">01</span> Tagged public releases</p><h2 id="h-rel" class="sec-title">Newest first</h2></div><p class="sec-sub">Each entry links to the product page and its GitHub release.</p></div>
-      <div class="timeline" aria-label="Latest tagged releases">
+      <div class="timeline" role="group" aria-label="Latest tagged releases">
 {chr(10).join(entries)}
       </div>
     </div>
@@ -469,7 +475,7 @@ def render_whats_new(catalog, data, counts):
     <div class="wrap">
       <div class="sec-head"><div><p class="eyebrow"><span class="p-part-num">02</span> Also active</p><h2 id="h-also" class="sec-title">In the lab</h2></div><p class="sec-sub">Public source projects without a packaged release, and private lab work.</p></div>
       <div class="also-grid">
-        <div class="active-table" aria-label="Source projects without a packaged release">
+        <div class="active-table" role="group" aria-label="Source projects without a packaged release">
 {active_rows}
         </div>
         <aside class="private-summary" aria-label="Private lab status">
@@ -483,15 +489,26 @@ def render_whats_new(catalog, data, counts):
       </div>
     </div>
   </section>"""
-    return stage_page('whats-new', title='What\u2019s new \u2014 Coco Research', desc=desc, jsonld=ld_script(ld), hero=hero, body=body, catalog=catalog, data=data)
+    return stage_page('whats-new', title="What's new \u2014 Coco Research", desc=desc, jsonld=ld_script(ld), hero=hero, body=body, catalog=catalog, data=data)
 
 
 # ---------------------------------------------------------------- SEO files
+_ISO_DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+
+
 def render_sitemap(catalog):
-    locs = [SITE + '/', SITE + '/products/', SITE + '/lab/', SITE + '/whats-new/']
-    locs += ['%s/%s/' % (SITE, it['spec']['slug']) for it in catalog if not it['spec'].get('noindex')]
-    locs += [SITE + '/rijul-kalra/', SITE + '/coco/guardrails/', SITE + '/guides/manage-multiple-ai-coding-agents/']
-    body = '\n'.join('  <url>\n    <loc>%s</loc>\n  </url>' % esc(l) for l in locs)
+    dated = [d for it in catalog for d in (it['row'].get('release_date'),) if isinstance(d, str) and _ISO_DATE_RE.match(d)]
+    latest = max(dated) if dated else None
+    entries = [(SITE + '/', None), (SITE + '/products/', None), (SITE + '/lab/', None), (SITE + '/whats-new/', latest)]
+    for it in catalog:
+        if not it['spec'].get('noindex'):
+            d = it['row'].get('release_date')
+            entries.append(('%s/%s/' % (SITE, it['spec']['slug']), d if isinstance(d, str) and _ISO_DATE_RE.match(d) else None))
+    entries += [(SITE + '/rijul-kalra/', None), (SITE + '/coco/guardrails/', None),
+                (SITE + '/guides/manage-multiple-ai-coding-agents/', None)]
+    body = '\n'.join(
+        '  <url>\n    <loc>%s</loc>%s\n  </url>' % (esc(loc), '\n    <lastmod>%s</lastmod>' % esc(lm) if lm else '')
+        for loc, lm in entries)
     return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n%s\n</urlset>\n' % body
 
 

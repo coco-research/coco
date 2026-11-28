@@ -20,7 +20,7 @@
 <meta name="twitter:description" content="Governed AI, built in the open.">
 <meta name="twitter:image" content="https://cocoresearch.org/assets/img/og-coco-research.png">
 <link rel="canonical" href="https://cocoresearch.org/">
-<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/site/favicon.svg" type="image/svg+xml">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/site/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="manifest" href="/assets/site/site.webmanifest">
@@ -72,8 +72,13 @@
   try { short = matchMedia('(max-height: 580px)').matches; } catch (e) {}
   // Only this page's own opt-out counts. The 3D Pause on product pages uses a different key and never reaches here.
   try { off = localStorage.getItem('coco-home-static') === 'off'; } catch (e) {}
-  if (/[?&]motion=off/.test(location.search)) off = true;
+  if (/[?&]motion=off(?:&|$)/.test(location.search)) off = true;
   d.className += ' js ' + (rm || off || short ? 'static' : 'cine') + (rm ? ' os-reduced' : '') + (off ? ' opt-out' : '') + (short ? ' short' : '');
+  document.addEventListener('DOMContentLoaded', function () {
+    var a = document.querySelector('a.skip[href="?motion=off"]');
+    if (!a) return;
+    try { var p = new URLSearchParams(location.search); p.set('motion', 'off'); a.setAttribute('href', '?' + p.toString() + location.hash); } catch (e) {}
+  });
   // If the cinematic layer has not come up in time (blocked CDN, old browser), fall back to the static page.
   // main.js upgrades a rescued page to the full film if the scripts arrive late and the visitor has not scrolled.
   setTimeout(function () {

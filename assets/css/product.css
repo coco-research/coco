@@ -745,7 +745,7 @@ html[data-banner-export] .aloo-banner-tagline { font-size: 1.30rem !important; m
   .cap-slot { min-height: 92px; padding: 12px; gap: 6px; }
   .facts-grid dd { text-align: left; }
   .facts-grid .fact { flex-direction: column; gap: 2px; }
-  .links-row .link-pill, .try-dl .link-pill { max-width: 100%; }
+  .links-row .link-pill { max-width: 100%; }
   .try-dl li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
   .try-dl li span { text-align: left; }
   .wn-item, .tl-entry { padding: 16px 0; }

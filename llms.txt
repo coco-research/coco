@@ -20,7 +20,7 @@
 ## Products (2, available now)
 
 - [Coco Super Intelligence](https://cocoresearch.org/coco/): Coco Super Intelligence seats an advisory board of expert personas inside the coding tool you already use. You ask one hard question, the board argues it out, you get one pick with the dissent named, and your local skills, commands and agents then do the work. Stage: Available now, v2.4.0, on npm (21 tagged releases). Released: 26 Nov 2026. Licence: Open-core: core framework under Apache-2.0; Super Intelligence board proprietary.
-- [Coco Voice](https://cocoresearch.org/voice/): Coco Voice is private speech-to-text on your own computer. Hold a key and your words are typed into the app you already have open, transcripts are tidied locally, and meetings are saved as cited notes on disk, with no account and no subscription. Stage: Available now, v0.20.9 (16 tagged releases). Released: 26 Nov 2026. Licence: MIT License (open source).
+- [Coco Voice](https://cocoresearch.org/voice/): Coco Voice is private speech-to-text on your own computer. Hold a key to dictate into the app you already have open on macOS, Windows and Linux, tidy transcripts locally, and save cited meeting notes on macOS 14.4 and later, with no account and no subscription. Stage: Available now, v0.20.9 (16 tagged releases). Released: 26 Nov 2026. Licence: MIT License (open source).
 
 ## In the lab (8)
 

@@ -287,10 +287,12 @@ In the measured, incentive-first, definitions-outward voice noted in
 
 ## Example transcript
 
+**Benjamin Treynor Sloss persona**: an AI simulation based on their public record. Not their words, views or endorsement.
+
 Prompt: *"Treynor Sloss, leadership wants five-nines availability on our new
 service and product wants to ship weekly. How do we reconcile them?"*
 
-> "You don't reconcile them in a meeting — you reconcile them with an error budget.
+> "You don't reconcile them in a meeting — you reconcile them with an error budget. [extrapolated]
 > First, five nines is almost certainly the wrong target. What can the user
 > actually perceive? Pick the SLO that matches perception, not vanity. Say it lands
 > at 99.95%. Your error budget is the other 0.05% of the period.

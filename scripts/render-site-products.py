@@ -7,6 +7,7 @@ and prints a unified diff when index.html differs from the render.
 import argparse
 import difflib
 import html
+import importlib.util
 import json
 import re
 import sys
@@ -14,9 +15,20 @@ from pathlib import Path
 
 ROOT = Path.cwd()
 INDEX = ROOT / 'index.html'
+M0 = ROOT / 'm0' / 'index.html'
 DATA = ROOT / 'data' / 'products.json'
 ANCHOR = re.compile(r'<a class="inline" href="([^"]*)" rel="noopener">([^<]*)</a>')
 ID_OK = re.compile(r'[a-z0-9-]+')
+PAGE_OK = re.compile(r'[a-z0-9-]+/')
+
+
+def require_page(row):
+    pid = row['id']
+    page = row.get('page', '')
+    expected = 'coco/' if pid == 'coco-si' else '%s/' % pid
+    if not PAGE_OK.fullmatch(page) or page != expected:
+        sys.exit('%s: page must be %s' % (pid, expected))
+    return page
 
 
 def esc_text(value):
@@ -74,13 +86,15 @@ def render_card(product):
         '          <div class="card-art" aria-hidden="true">',
     ]
     lines.extend(art_lines(product))
+    page = require_page(product)
     lines.extend([
         '          </div>',
         '          <div class="card-body">',
-        '            <h3 id="t-%s">%s</h3>' % (pid, esc_text(product['name'])),
+        '            <h3 id="t-%s"><a class="card-link" href="%s">%s</a></h3>' % (pid, esc_attr(page), esc_text(product['name'])),
         '            <p class="tag">%s</p>' % esc_text(product['tag']),
         '            <p>%s</p>' % render_description_html(product['description_html'], pid),
         '            <div class="card-actions">',
+        '              <a class="btn btn-ghost btn-sm" href="%s">Product page<span class="sr-only"> for %s</span></a>' % (esc_attr(page), esc_text(product['name'])),
     ])
     actions = product['actions']
     if not actions:
@@ -106,8 +120,10 @@ def render_card(product):
 
 
 def check_ids(data):
+    if sorted(data) != ['lab', 'products']:
+        sys.exit('data/products.json must hold exactly two groups: products and lab (got %s)' % ', '.join(sorted(data)))
     seen = set()
-    for group in ('shipped', 'source', 'lab'):
+    for group in ('products', 'lab'):
         for row in data[group]:
             pid = row['id']
             if not ID_OK.fullmatch(pid):
@@ -122,68 +138,44 @@ def require_https(href, where):
         sys.exit('%s: href must be a plain https:// URL' % where)
 
 
-def render_shipped(data):
+def render_deck(data):
     lines = []
-    for index, product in enumerate(data['shipped']):
+    for index, product in enumerate(data['products']):
         if index:
             lines.append('')
         lines.extend(render_card(product))
     return lines
 
 
-def render_source_row(row):
-    pid = row['id']
-    require_https(row['href'], pid)
-    name = '<a class="inline" href="%s" rel="noopener">%s</a>' % (esc_attr(row['href']), esc_text(row['name']))
-    return (
-        '            <li class="lab-item"><h4>%s</h4><p>%s<span class="tag">%s</span></p></li>'
-        % (name, esc_text(row['description']), esc_text(row['status']))
-    )
-
-
 def render_lab_row(row):
     if 'href' in row:
-        sys.exit('%s: lab rows have no href' % row['id'])
+        require_https(row['href'], row['id'])
+    page = require_page(row)
+    name = '<a class="inline" href="%s">%s</a>' % (esc_attr(page), esc_text(row['name']))
+    badge = ' <span class="sn-badge">Archived</span>' if 'archived' in row.get('status', '').lower() else ''
     return (
-        '            <li class="lab-item"><h4>%s</h4><p>%s<span class="tag">%s</span></p></li>'
-        % (esc_text(row['name']), esc_text(row['description']), esc_text(row['status']))
+        '            <li class="lab-item"><h4>%s%s</h4><p>%s<span class="tag">%s</span></p></li>'
+        % (name, badge, esc_text(row['description']), esc_text(row['status']))
     )
 
 
 def render_lab(data):
-    lines = ['          <h3 class="lab-group">Source available</h3>', '          <ul>']
-    lines.extend(render_source_row(row) for row in data['source'])
-    lines.append('          </ul>')
-    lines.append('          <h3 class="lab-group">Private, in the lab</h3>')
-    lines.append('          <ul>')
+    lines = ['          <ul>']
     lines.extend(render_lab_row(row) for row in data['lab'])
     lines.append('          </ul>')
     return lines
 
 
-def render_foot_shipped(data):
+def render_foot(data, group):
     return [
-        '          <li><a href="%s">%s</a></li>' % (esc_attr(row['footer_href']), esc_text(row['name']))
-        for row in data['shipped']
+        '          <li><a href="%s">%s</a>%s</li>'
+        % (esc_attr(require_page(row)), esc_text(row['name']),
+           ' <span class="sn-badge">Archived</span>' if 'archived' in row.get('status', '').lower() else '')
+        for row in data[group]
     ]
 
 
-def render_foot_source(data):
-    lines = []
-    for row in data['source']:
-        require_https(row['href'], row['id'])
-        lines.append('          <li><a href="%s">%s</a></li>' % (esc_attr(row['href']), esc_text(row['name'])))
-    return lines
-
-
-def render_foot_lab(data):
-    return [
-        '          <li><a href="#lab" data-goto="lab">%s</a></li>' % esc_text(row['name'])
-        for row in data['lab']
-    ]
-
-
-def replace_region(text, name, inner):
+def replace_region(text, name, inner, where='index.html'):
     start = '<!-- products:%s:start -->' % name
     end = '<!-- products:%s:end -->' % name
     lines = text.splitlines(keepends=True)
@@ -195,18 +187,43 @@ def replace_region(text, name, inner):
             end_at = index
             break
     if start_at is None or end_at is None or end_at <= start_at:
-        sys.exit('index.html is missing products:%s markers' % name)
+        sys.exit('%s is missing products:%s markers' % (where, name))
     block = [line + '\n' for line in inner]
     return ''.join(lines[:start_at + 1] + block + lines[end_at:])
 
 
+def _load_page_renderer():
+    spec = importlib.util.spec_from_file_location('render_product_pages', ROOT / 'scripts' / 'render-product-pages.py')
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def render_nav(prefix='./'):
+    """The shared top bar and phone drawer, from the same generator the product pages use (home: locked dark)."""
+    mod = _load_page_renderer()
+    _data, catalog = mod.load_catalog()
+    return mod.nav_html(catalog, None, True, prefix=prefix, home=True).split('\n')
+
+
 def render(text, data):
     check_ids(data)
-    text = replace_region(text, 'shipped', render_shipped(data))
+    text = replace_region(text, 'nav', render_nav())
+    text = replace_region(text, 'products', render_deck(data))
     text = replace_region(text, 'lab', render_lab(data))
-    text = replace_region(text, 'foot-shipped', render_foot_shipped(data))
-    text = replace_region(text, 'foot-source', render_foot_source(data))
-    text = replace_region(text, 'foot-lab', render_foot_lab(data))
+    text = replace_region(text, 'foot-products', render_foot(data, 'products'))
+    text = replace_region(text, 'foot-lab', render_foot(data, 'lab'))
+    return text
+
+
+def render_m0(text, data):
+    check_ids(data)
+    mod = _load_page_renderer()
+    _data, catalog = mod.load_catalog()
+    nav = mod.nav_html(catalog, None, True, prefix='../', home=False).split('\n')
+    foot = mod.footer_html(data, '').split('\n')
+    text = replace_region(text, 'nav', nav, where='m0/index.html')
+    text = replace_region(text, 'foot', foot, where='m0/index.html')
     return text
 
 
@@ -217,6 +234,7 @@ def main():
     data = json.loads(DATA.read_text())
     old = INDEX.read_text()
     new = render(old, data)
+    stale = False
     if args.check:
         if new != old:
             sys.stdout.writelines(difflib.unified_diff(
@@ -225,10 +243,26 @@ def main():
                 fromfile='index.html',
                 tofile='index.html (rendered)',
             ))
-            sys.exit(1)
-        return
-    if new != old:
+            stale = True
+    elif new != old:
         INDEX.write_text(new)
+    # ponytail: ceiling = 1 absent hand-built page (m0/index.html) before /m0/ lands; upgrade path = require m0/index.html unconditionally once /m0/ exists on main.
+    if M0.is_file():
+        old_m0 = M0.read_text()
+        new_m0 = render_m0(old_m0, data)
+        if args.check:
+            if new_m0 != old_m0:
+                sys.stdout.writelines(difflib.unified_diff(
+                    old_m0.splitlines(keepends=True),
+                    new_m0.splitlines(keepends=True),
+                    fromfile='m0/index.html',
+                    tofile='m0/index.html (rendered)',
+                ))
+                stale = True
+        elif new_m0 != old_m0:
+            M0.write_text(new_m0)
+    if args.check and stale:
+        sys.exit(1)
 
 
 if __name__ == '__main__':

@@ -220,6 +220,8 @@ jobs:
         run: python3 tests/test-render-product-pages.py
       - name: Aloo Mannu page and spec are tested
         run: python3 tests/test-aloomannu-page.py
+      - name: Generated product pages match the renderer
+        run: python3 scripts/render-product-pages.py --check
       - name: Persona attribution wording is in every generated SI command
         run: |
           python3 tests/check-persona-attribution.py

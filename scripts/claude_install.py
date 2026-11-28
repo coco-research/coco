@@ -605,11 +605,11 @@ class Installer(ApplyMixin):
         if not os.path.isdir(directory):
             return
         for name in self.child_md(directory):
-            if name in MD_NO_LINK:
+            if name in MD_NO_LINK or name in skip_names:
                 continue
             src = os.path.join(directory, name)
             dst = os.path.join(dest_dir, name)
-            self.plan_link(src, dst, count=None if name in skip_names else count)
+            self.plan_link(src, dst, count=count)
 
     def plan_core(self):
         self.plan_skills(os.path.join(self.repo, "skills"), "skills", "skill")

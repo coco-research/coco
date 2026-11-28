@@ -1039,9 +1039,13 @@ def check_head_flags_theme_icons(root):
                     if tre.search(bad_q):
                         errs.append('%s theme regex %r matched unanchored %r' % (page_p, tp.group(1), bad_q))
 
-        # AC-7: static ?motion=off skip link + progressive URLSearchParams rewrite
-        if not re.search(r'<a\b[^>]*class="[^"]*\bskip\b[^"]*"[^>]*href="\?motion=off"', txt):
-            errs.append('%s is missing static <a class="skip..." href="?motion=off"> fallback' % page_p)
+        # AC-7: static ?motion=off skip link in body + exact head selector and URLSearchParams rewrite
+        body_m = re.search(r'<body\b[^>]*>(.*)</body>', txt, re.S)
+        body_txt = body_m.group(1) if body_m else ''
+        if not re.search(r'<a\b[^>]*class="[^"]*\bskip\b[^"]*"[^>]*href="\?motion=off"', body_txt):
+            errs.append('%s body is missing static <a class="skip..." href="?motion=off"> fallback' % page_p)
+        if 'a.skip[href="?motion=off"]' not in head_txt:
+            errs.append('%s head script is missing exact selector a.skip[href="?motion=off"]' % page_p)
         if 'URLSearchParams(location.search)' not in head_txt or "p.set('motion', 'off')" not in head_txt:
             errs.append('%s head script is missing URLSearchParams skip-link rewrite' % page_p)
 
@@ -1118,6 +1122,12 @@ with tempfile.TemporaryDirectory(prefix='r1c-head-') as tmp:
     bad_themed_tc, _ = check_head_flags_theme_icons(troot)
     (troot / 'products' / 'index.html').write_text(orig_p.replace('href="/assets/site/favicon.svg"', 'href="../assets/img/favicon.svg"', 1))
     bad_icon, _ = check_head_flags_theme_icons(troot)
+    (troot / 'products' / 'index.html').write_text(orig_p)
+
+    orig_m0_h = (troot / 'm0' / 'index.html').read_text()
+    (troot / 'm0' / 'index.html').write_text(orig_m0_h.replace('a.skip[href="?motion=off"]', 'a.skip[href="?motion=no"]', 1))
+    bad_sel, _ = check_head_flags_theme_icons(troot)
+    (troot / 'm0' / 'index.html').write_text(orig_m0_h)
 if (
     ok_head == []
     and any('matched unanchored' in e and 'motion' in e for e in bad_motion)
@@ -1126,10 +1136,11 @@ if (
     and any('URLSearchParams skip-link rewrite' in e for e in bad_skip)
     and any('(themed) theme-color' in e for e in bad_themed_tc)
     and any('icon/manifest hrefs' in e for e in bad_icon)
+    and any('exact selector a.skip[href="?motion=off"]' in e for e in bad_sel)
 ):
-    pass_('AC-6..AC-9 self-test: unanchored motion/theme, missing skip rewrite, theme-color drift, and relative icon all fail')
+    pass_('AC-6..AC-9 self-test: unanchored motion/theme, missing skip rewrite, selector typo, theme-color drift, and relative icon all fail')
 else:
-    fail_('AC-6..AC-9 self-test failed: ok=%r motion=%r locked=%r theme=%r skip=%r themed=%r icon=%r' % (ok_head, bad_motion, bad_locked_tc, bad_theme, bad_skip, bad_themed_tc, bad_icon))
+    fail_('AC-6..AC-9 self-test failed: ok=%r motion=%r locked=%r theme=%r skip=%r themed=%r icon=%r sel=%r' % (ok_head, bad_motion, bad_locked_tc, bad_theme, bad_skip, bad_themed_tc, bad_icon, bad_sel))
 
 # ---- AC-10: footer Licence links end in /LICENSE or #licence ----
 def check_licence_hrefs(root, pub_specs):

@@ -269,9 +269,11 @@ Her **2026 working hypothesis** is that the alignment-interp-safety field is ins
 
 ## Example transcript
 
+**Beth Barnes persona**: an AI simulation based on their public record. Not their words, views or endorsement.
+
 Prompt: *"Barnes, an applied-AI team is rolling out an autonomous coding agent to ten thousand enterprise developers. The lab's internal safety team published a card saying the agent passes their dangerous-capability evaluations. The PM wants to ship in two weeks. What's the call?"*
 
-> "Two questions before the call. First, what's the agent's 50%-time-horizon on real software-engineering tasks calibrated against human time, and what's the 80% horizon? Not what's the HumanEval pass rate. Not what's the SWE-Bench number. The actual time horizon. If the team can't tell you, that's the first finding.
+> "Two questions before the call. First, what's the agent's 50%-time-horizon on real software-engineering tasks calibrated against human time, and what's the 80% horizon? Not what's the HumanEval pass rate. Not what's the SWE-Bench number. The actual time horizon. If the team can't tell you, that's the first finding. [extrapolated]
 >
 > Second, what's the elicitation protocol? If the lab's safety team prompt-engineered against the same task suite they're reporting numbers on, the numbers are bounded above by whatever a determined adversary with post-training access could elicit, and you don't know how big that gap is. Add a safety margin or run a held-out test.
 >

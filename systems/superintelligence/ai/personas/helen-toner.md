@@ -278,9 +278,11 @@ Her **2026 outputs sharpen the policy program** as automation enters AI R&D itse
 
 ## Example transcript
 
+**Helen Toner persona**: an AI simulation based on their public record. Not their words, views or endorsement.
+
 Prompt: *"Toner, OpenAI is proposing a voluntary Responsible Scaling Policy and asking the public to treat it as a meaningful safety commitment. How do you evaluate it?"*
 
-> "I'd start with the costly-signals frame. The question is not whether the policy sounds good — it almost always does, because the people writing it are smart and they know what good policy looks like. The question is what cost the company pays if it doesn't follow through.
+> "I'd start with the costly-signals frame. The question is not whether the policy sounds good — it almost always does, because the people writing it are smart and they know what good policy looks like. The question is what cost the company pays if it doesn't follow through. [extrapolated]
 >
 > So I'd want to see three things. First, is the policy externally auditable? Can someone outside the company examine whether the stated thresholds were actually applied? If the answer is 'we audit ourselves and publish a summary,' that's grading their own homework. We've seen what that produces.
 >

@@ -294,9 +294,11 @@ Her **2024–2026 working hypothesis** has three load-bearing pieces. First, the
 
 ## Example transcript
 
+**Yejin Choi persona**: an AI simulation based on their public record. Not their words, views or endorsement.
+
 Prompt: *"Choi, our team has a 70B-parameter model that scores 89 percent on a commonsense reasoning benchmark. We are about to publish the result and call it 'human-level commonsense reasoning.' Sanity-check us."*
 
-> "I am happy for the team — eighty-nine percent is a real number. Let me ask three things before I would agree with the framing.
+> "I am happy for the team — eighty-nine percent is a real number. Let me ask three things before I would agree with the framing. [extrapolated]
 >
 > First, what does the benchmark actually measure? Many commonsense benchmarks turn out, on careful inspection, to be testing recall of frequently-occurring assertions on the internet rather than reasoning about novel situations. If the items in the eval set look like things that appeared in pretraining, the eighty-nine percent may be a recall score in a reasoning costume. Run the simple ablation — does the model do equally well on items that we know were not in the pretraining corpus? If the score drops to forty percent on the held-out items, you are measuring memorization, and the headline number should be much more modest.
 >

@@ -162,6 +162,8 @@ class RenderProductPagesTest(unittest.TestCase):
         ):
             self.assertIn(needle, html)
         self.assertEqual(html.count('href="../demo-prod/" aria-current="page"'), 2)
+        self.assertIn('<a class="link-pill" href="../whats-new/">What\'s new</a>', html)
+        self.assertNotIn('What\u2019s new', html)
         for role_div in (
             '<div class="p-try-above" role="group" aria-label="How to try it">',
             '<div class="p-badges" role="group" aria-label="Stage and licence">',
@@ -240,6 +242,8 @@ class RenderProductPagesTest(unittest.TestCase):
         self.assertEqual(prod_html.count('href="../products/" aria-current="page"'), 2)
         self.assertEqual(_parse_jsonld(prod_html)['@graph'][0]['mainEntity']['numberOfItems'], 6)
         lab_html = M.render_lab(catalog, data)
+        self.assertIn('<a class="btn btn-ghost" href="../whats-new/">What\'s new</a>', lab_html)
+        self.assertNotIn('What\u2019s new', lab_html)
         self.assertIn('Public code \u00b7 3', lab_html)
         self.assertIn('Private \u00b7 2', lab_html)
         self.assertNotIn('role="list"', lab_html)

@@ -1123,6 +1123,124 @@ if (
 else:
     fail_('AC-6..AC-9 self-test failed: ok=%r motion=%r locked=%r theme=%r skip=%r themed=%r icon=%r' % (ok_head, bad_motion, bad_locked_tc, bad_theme, bad_skip, bad_themed_tc, bad_icon))
 
+# ---- AC-10: footer Licence links end in /LICENSE or #licence ----
+def check_licence_hrefs(root, pub_specs):
+    errs = []
+    for pid, spec in sorted(pub_specs.items()):
+        href = str(spec.get('licence_href', ''))
+        if not href:
+            errs.append('spec %s: missing licence_href' % pid)
+            continue
+        if not (href.endswith('/LICENSE') or href.endswith('#licence')):
+            errs.append('spec %s: licence_href %r does not end in /LICENSE or #licence' % (pid, href))
+        slug = spec.get('slug', pid)
+        page_p = root / slug / 'index.html'
+        if not page_p.is_file():
+            errs.append('%s/index.html is missing for licence_href check' % slug)
+        elif '<li><a href="%s">Licence</a></li>' % href not in page_p.read_text():
+            errs.append('%s/index.html footer missing Licence link %r' % (slug, href))
+    return errs
+
+
+lic_errs = check_licence_hrefs(Path('.'), specs_public)
+if lic_errs:
+    for err in lic_errs:
+        fail_(err)
+else:
+    pass_('AC-10: all %d public licence_href values and footer links end in /LICENSE or #licence' % len(specs_public))
+
+with tempfile.TemporaryDirectory(prefix='r1d-lic-') as tmp:
+    troot = Path(tmp)
+    for pid, spec in specs_public.items():
+        slug = spec.get('slug', pid)
+        dst = troot / slug / 'index.html'
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(Path(slug, 'index.html').read_text())
+    ok_lic = check_licence_hrefs(troot, specs_public)
+    bad_pub = json.loads(json.dumps(specs_public))
+    bad_pub['signal']['licence_href'] = 'https://github.com/coco-research/coco-design-language'
+    bad_lic = check_licence_hrefs(troot, bad_pub)
+if ok_lic == [] and any('does not end in /LICENSE or #licence' in e for e in bad_lic):
+    pass_('AC-10 self-test: repo-root licence_href without /LICENSE fails; live specs pass')
+else:
+    fail_('AC-10 self-test failed: ok=%r bad=%r' % (ok_lic, bad_lic))
+
+# ---- AC-11: straight "What's new" everywhere (zero curly apostrophe or &rsquo;) ----
+curly_wn_re = re.compile(r'What(?:\u2019|\\u2019|&rsquo;)s new')
+
+
+def check_straight_whats_new(root):
+    errs = []
+    targets = []
+    for rel in ('index.html', 'llms.txt', 'scripts/render-product-pages.py', 'scripts/render-site-products.py', 'scripts/render_product_shared.py'):
+        p = root / rel
+        if p.is_file():
+            targets.append(p)
+        else:
+            errs.append('%s is missing for AC-11 check' % rel)
+    for page_p in sorted(root.glob('*/index.html')):
+        if '<meta http-equiv="refresh"' in page_p.read_text():
+            continue
+        targets.append(page_p)
+    for p in targets:
+        m = curly_wn_re.search(p.read_text())
+        if m:
+            errs.append('%s contains curly What\'s new (%r)' % (p, m.group(0)))
+    return errs, len(targets)
+
+
+wn_errs, wn_checked = check_straight_whats_new(Path('.'))
+if wn_errs:
+    for err in wn_errs:
+        fail_(err)
+else:
+    pass_('AC-11: zero curly What\'s new across all %d HTML, llms.txt, and renderer files' % wn_checked)
+
+with tempfile.TemporaryDirectory(prefix='r1d-wn-') as tmp:
+    troot = Path(tmp)
+    for rel in ('index.html', 'llms.txt', 'scripts/render-product-pages.py', 'scripts/render-site-products.py', 'scripts/render_product_shared.py'):
+        dst = troot / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(Path(rel).read_text())
+    for page_p in sorted(Path('.').glob('*/index.html')):
+        if '<meta http-equiv="refresh"' in page_p.read_text():
+            continue
+        dst = troot / page_p
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(page_p.read_text())
+    ok_wn, _ = check_straight_whats_new(troot)
+    orig_m0_wn = (troot / 'm0' / 'index.html').read_text()
+    (troot / 'm0' / 'index.html').write_text(orig_m0_wn.replace("What's new", 'What\u2019s new', 1))
+    bad_curly, _ = check_straight_whats_new(troot)
+    (troot / 'm0' / 'index.html').write_text(orig_m0_wn.replace("What's new", 'What&rsquo;s new', 1))
+    bad_entity, _ = check_straight_whats_new(troot)
+if (
+    ok_wn == []
+    and any("contains curly What's new" in e for e in bad_curly)
+    and any("contains curly What's new" in e for e in bad_entity)
+):
+    pass_('AC-11 self-test: curly apostrophe and &rsquo; in What\'s new both fail; live files pass')
+else:
+    fail_('AC-11 self-test failed: ok=%r curly=%r entity=%r' % (ok_wn, bad_curly, bad_entity))
+
+# ---- AC-12 / AC-13: m0 bare .st ::before scoped to stateful chips; .links-row .link-pill kept; home Shift+Tab ----
+m0_css_txt = Path('m0/index.html').read_text()
+if re.search(r'(?m)^\.st::before\b', m0_css_txt):
+    fail_('AC-12: m0/index.html still applies unconditional .st::before to bare match chips')
+elif '.st-live::before, .st-off::before, .st-plan::before' in m0_css_txt:
+    pass_('AC-12: m0/index.html scopes .st ::before box to stateful chips only (bare match chips draw no box)')
+else:
+    fail_('AC-12: m0/index.html stateful .st ::before rule missing')
+if '.links-row .link-pill' in Path('assets/css/product.css').read_text():
+    pass_('AC-12 guard: live .links-row .link-pill rule in assets/css/product.css stays intact')
+else:
+    fail_('AC-12 guard: .links-row .link-pill was unexpectedly removed from assets/css/product.css')
+main_js_txt = Path('assets/js/main.js').read_text()
+if 'function chromeAfter()' in main_js_txt and 'e.shiftKey && act && act === chromeAfter()' in main_js_txt:
+    pass_('AC-13: assets/js/main.js defines chromeAfter() for Shift+Tab from footer into close chapter')
+else:
+    fail_('AC-13: assets/js/main.js missing chromeAfter() Shift+Tab handler')
+
 print()
 if fail == 0:
     print('  homepage product rows agree with data/products.json')

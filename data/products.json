@@ -36,7 +36,7 @@
       "page": "voice/",
       "name": "Coco Voice",
       "tag": "Available now, v0.20.9",
-      "description_html": "Private speech-to-text on your own computer. Hold a key to dictate into the app you have open, tidy transcripts locally, and keep cited meeting notes on disk. MIT licensed.",
+      "description_html": "Private speech-to-text on your own computer. Hold a key to dictate into the app you have open on macOS, Windows and Linux, tidy transcripts locally, and keep cited meeting notes on disk on macOS 14.4 and later. MIT licensed.",
       "actions": [
         {
           "label": "Download",
@@ -54,13 +54,13 @@
       "art": "assets/site/art/voice.svg",
       "footer_href": "https://github.com/coco-research/Coco-Voice",
       "for_you": "Hold a key to dictate into any app. Private, on your computer.",
-      "who_for": "People who want fast dictation and searchable meeting notes without a cloud transcription subscription.",
+      "who_for": "People who want fast dictation on macOS, Windows or Linux, and searchable meeting notes on macOS 14.4 and later, without a cloud transcription subscription.",
       "licence_short": "MIT License · Open source",
       "open_source": true,
       "release_date": "2026-11-26",
       "release_version": "v0.20.9",
       "release_url": "https://github.com/coco-research/Coco-Voice/releases/tag/v0.20.9",
-      "whats_new": "Private desktop speech-to-text for macOS, Windows x64, and Linux x64 and arm64, with local meeting notes and cited Q&A. MIT licensed."
+      "whats_new": "Private desktop speech-to-text for macOS, Windows x64, and Linux x64 and arm64, with local meeting notes and cited Q&A on macOS 14.4 and later. MIT licensed."
     }
   ],
   "lab": [

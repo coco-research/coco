@@ -190,6 +190,38 @@ if whats_voice and not voice_only.search(whats_voice.group(0)):
 else:
     fail_('whats-new/index.html Coco Voice entry missing or claims signed / notarized')
 
+# Voice meetings are built into macOS builds only (macOS 14.4 and later); every
+# Voice copy blob that mentions "meeting" must state "macOS 14.4".
+llms_voice = next((ln for ln in Path('llms.txt').read_text().splitlines() if '[Coco Voice](' in ln), '')
+home_voice = re.search(r'<article\b[^>]*class="[^"]*\bcard\b[^"]*"(?:(?!</article>).)*?id="t-voice"(?:(?!</article>).)*?</article>', Path('index.html').read_text(), re.S)
+meeting_blobs = {
+    'data/products.json (voice row)': voice_blobs['data/products.json (voice row)'],
+    'data/product-pages-public.json (voice spec)': voice_blobs['data/product-pages-public.json (voice spec)'],
+    'voice/index.html (before #credits)': voice_blobs['voice/index.html'],
+    'whats-new/index.html (Coco Voice entry)': whats_voice.group(0) if whats_voice else '',
+    'llms.txt (Coco Voice line)': llms_voice,
+    'index.html (home Coco Voice card)': home_voice.group(0) if home_voice else '',
+}
+for name, blob in meeting_blobs.items():
+    if not blob:
+        fail_('%s missing for Voice meetings platform check' % name)
+    elif re.search(r'meeting', blob, re.I):
+        if 'macOS 14.4' in blob:
+            pass_('%s: meetings claim states macOS 14.4' % name)
+        else:
+            fail_('%s mentions meetings without macOS 14.4' % name)
+    else:
+        pass_('%s: no meetings claim' % name)
+voice_pre_credits = voice_blobs['voice/index.html']
+voice_meeting_lines = [
+    (lineno, ln.strip()) for lineno, ln in enumerate(voice_pre_credits.splitlines(), 1)
+    if re.search(r'meeting', ln, re.I) and 'macOS 14.4' not in ln
+]
+if voice_meeting_lines:
+    fail_('voice/index.html has meetings lines without macOS 14.4: %s' % ', '.join('L%d' % n for n, _ in voice_meeting_lines))
+else:
+    pass_('voice/index.html: every line mentioning meetings names macOS 14.4')
+
 # ---- generated discovery surface ----
 proc = subprocess.run([sys.executable, 'scripts/render-product-pages.py', '--check'], capture_output=True, text=True)
 if proc.returncode == 0:

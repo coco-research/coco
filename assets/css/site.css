@@ -9,7 +9,7 @@
   font-weight: 100 900;
   font-stretch: 62% 125%;
   font-display: swap;
-  src: url('https://cdn.jsdelivr.net/npm/@fontsource-variable/archivo@5.3.0/files/archivo-latin-wdth-normal.woff2') format('woff2');
+  src: url('../vendor/fonts/archivo-latin-wdth-normal.woff2') format('woff2');
 }
 @font-face {
   font-family: 'Martian Mono';
@@ -17,7 +17,7 @@
   font-weight: 100 800;
   font-stretch: 75% 112%;
   font-display: swap;
-  src: url('https://cdn.jsdelivr.net/npm/@fontsource-variable/martian-mono@5.3.0/files/martian-mono-latin-wdth-normal.woff2') format('woff2');
+  src: url('../vendor/fonts/martian-mono-latin-wdth-normal.woff2') format('woff2');
 }
 
 :root {
@@ -31,11 +31,18 @@
   --blue: #5b8dff;
   --blue-hi: #a9c4ff;
   --amber: #ffb66e;
+  /* Dark Stage tokens the shared top bar (site-nav.css) reads; this page is dark-only. */
+  --paper: #03050b;
+  --surface: #0b1021;
+  --raised: #111830;
+  --ctl: #8d98b2;
+  --blue-text: #8fa2ff;
+  --green: #3fd98a;
   --f-sans: 'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --f-mono: 'Martian Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --pad: clamp(20px, 5vw, 72px);
   --out: cubic-bezier(0.16, 1, 0.3, 1);
-  --nav-h: 76px;
+  --nav-h: 68px;
   --screens: 21.1;
 }
 
@@ -129,27 +136,16 @@ html.cine .bars { display: block; }
 
 /* --------------------------------------------------------- nav + rail */
 
-.nav {
-  position: absolute; z-index: 60; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between;
-  padding: calc(env(safe-area-inset-top, 0px) + 16px) var(--pad) 0; pointer-events: none;
-}
-html.cine .nav { position: fixed; }
-.nav > * { pointer-events: auto; }
+/* The top bar is the shared Flat Signal bar (site-nav.css). In the film the stage is fixed, so the bar is too and takes no
+   room in the page flow (the scroll spacer must start at 0); on the plain page it is the usual sticky bar. */
+html.cine .site-nav { position: fixed; top: 0; left: 0; right: 0; }
 .brand {
   display: inline-flex; align-items: center; gap: 0.72em; text-decoration: none;
   min-height: 44px; font: 500 0.98rem / 1 var(--f-sans); font-stretch: 112%; letter-spacing: -0.01em; color: var(--ink);
-  transition: opacity 0.3s;
 }
-/* the footer has its own lockup: the fixed nav one steps aside while the footer is on screen */
-html.cine.in-foot .nav .brand { opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0s linear 0.3s; }
 .brand i {
-  width: 9px; height: 9px; border-radius: 50%; background: #e4edff;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 10px 3px rgba(91, 141, 255, 0.85), 0 0 26px 8px rgba(60, 100, 255, 0.45);
+  width: 9px; height: 9px; border-radius: 50%; background: var(--blue);
 }
-.nav-cta { transition: opacity 0.6s var(--out), transform 0.6s var(--out), background-color 0.3s; }
-/* hidden = not focusable either, so keyboard focus never lands on an invisible button */
-html.cine .nav-cta { opacity: 0; transform: translateY(-6px); pointer-events: none; visibility: hidden; transition: opacity 0.6s var(--out), transform 0.6s var(--out), background-color 0.3s, visibility 0s linear 0.6s; }
-html.cine.show-cta .nav-cta { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition: opacity 0.6s var(--out), transform 0.6s var(--out), background-color 0.3s, visibility 0s; }
 
 .rail {
   position: fixed; z-index: 60; right: clamp(12px, 1.8vw, 26px); top: 50%; transform: translateY(-50%);
@@ -170,6 +166,11 @@ html.cine .rail { display: flex; }
 }
 .rail a:hover span, .rail a:focus-visible span, .rail a.on span { opacity: 1; transform: none; color: var(--ink); }
 .rail a.on i { opacity: 1; transform: scale(1.7); background: var(--blue-hi); box-shadow: 0 0 10px 2px rgba(91, 141, 255, 0.7); }
+/* Products jump: a page link, not a chapter. Its label stays visible so a visitor can always find the full list. */
+.rail a.rail-jump { margin-top: 6px; padding-top: 6px; height: 34px; border-top: 1px solid var(--line-2); color: var(--blue-text); }
+.rail a.rail-jump span { opacity: 1; transform: none; color: var(--blue-text); }
+.rail a.rail-jump:hover span, .rail a.rail-jump:focus-visible span { color: #fff; }
+.rail a.rail-jump i { border-radius: 1px; opacity: 1; }
 @media (max-width: 899px) { html.cine .rail { display: none; } }
 
 /* ------------------------------------------------------------- buttons */
@@ -230,6 +231,21 @@ html.cine .rail { display: flex; }
 .credit { color: var(--ink-3); font-size: 0.95rem; letter-spacing: 0.01em; font-stretch: 108%; }
 .inline { color: var(--blue-hi); text-decoration: underline; text-decoration-color: rgba(169, 196, 255, 0.4); text-underline-offset: 3px; transition: text-decoration-color 0.3s, color 0.3s; }
 .inline:hover { color: #fff; text-decoration-color: #fff; }
+/* Per-chapter discovery link: "See <product> →". Flat text link, 44px target. */
+.see {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 44px; margin-top: 10px; padding: 0 2px;
+  color: var(--blue-text); font: 500 0.88rem / 1 var(--f-mono); letter-spacing: 0.01em; text-decoration: underline;
+  text-decoration-thickness: 1px; text-underline-offset: 6px; pointer-events: auto;
+}
+.see:hover { color: #fff; text-decoration-thickness: 2px; }
+.ring-cap .see { margin: -14px 0 -14px 14px; padding: 14px 2px; } /* keeps the 44px target without adding a line of height */
+.products-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 28px; }
+.products-head .see { margin-top: 0; }
+/* The two groups of the All products section: a shape + word label, so group is never colour alone. */
+.group-label { display: inline-flex; align-items: center; gap: 9px; margin: 0; color: var(--ink-2); font: 600 0.78rem / 1.2 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; }
+.group-label .sh { color: var(--green); }
+.group-n { color: var(--ink-3); font-weight: 400; }
+.lab-sub .sh { margin-right: 9px; color: var(--amber); vertical-align: 0.04em; }
 
 /* ====================================================================
    STATIC LAYOUT (default: JS off, reduced motion, rescued)
@@ -258,7 +274,7 @@ html.cine .rail { display: flex; }
 .b-editor { margin-top: clamp(56px, 10svh, 110px); }
 
 .win {
-  width: min(640px, 100%); border-radius: 14px; background: linear-gradient(180deg, #0c1224, #080c19);
+  width: min(640px, 100%); border-radius: 14px; background: #0a0f1f;
   border: 1px solid var(--line-2); overflow: hidden; position: relative; z-index: 2;
   box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.85);
 }
@@ -315,28 +331,30 @@ html.cine .rule-eyebrow { display: block; }
 .ch-rules .b-rule .rule-line { margin-top: 0; padding-bottom: 0.6em; }
 @media (max-width: 820px) { .ch-rules .b-rule { grid-template-columns: 1fr; } }
 
-.b-shipped { margin-bottom: clamp(28px, 5svh, 48px); }
+.b-products { margin-bottom: clamp(28px, 5svh, 48px); }
 .deck { display: grid; grid-template-columns: 1fr; gap: clamp(16px, 2vw, 28px); }
 @media (min-width: 1000px) { .deck { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 .card {
   position: relative; display: flex; flex-direction: column; border-radius: 22px; overflow: hidden;
-  background: linear-gradient(180deg, #0b1021 0%, #070a15 100%); border: 1px solid var(--line);
+  background: #0a0f1f; border: 1px solid var(--line);
   box-shadow: 0 50px 100px -40px rgba(0, 0, 0, 0.9), 0 18px 40px -20px rgba(0, 0, 0, 0.6);
 }
 .card::after { content: ""; position: absolute; inset: 0; background: var(--bg); opacity: var(--dim, 0); pointer-events: none; }
 .card-art {
   position: relative; aspect-ratio: 320 / 190; display: grid; place-items: center; color: var(--blue-hi);
-  background: radial-gradient(120% 100% at 50% 0%, rgba(70, 110, 255, 0.16), transparent 70%), #080c1a;
+  background: #080c1a;
   border-bottom: 1px solid var(--line);
 }
 .card-art svg { width: 100%; height: 100%; }
 .card-body { display: flex; flex-direction: column; gap: 12px; flex: 1; padding: clamp(20px, 2.4vw, 28px); }
 .card h3 { margin: 0; font: 500 clamp(1.5rem, 1.2rem + 1vw, 1.95rem) / 1.05 var(--f-sans); font-stretch: 118%; letter-spacing: -0.03em; }
 .card p { color: var(--ink-2); font-size: 1rem; line-height: 1.5; }
+.card-link { color: inherit; text-decoration: none; }
+.card-link:hover { color: var(--blue-hi); text-decoration: underline; text-underline-offset: 4px; }
 .card-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; padding-top: 12px; }
 
-.lab-wrap { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr); gap: clamp(28px, 6vw, 96px); align-items: start; }
+.lab-wrap { display: grid; grid-template-columns: minmax(0, 0.6fr) minmax(0, 1.7fr); gap: clamp(24px, 4vw, 72px); align-items: start; }
 .lab-list, .lab-list ul { list-style: none; margin: 0; padding: 0; }
 .lab-group {
   margin: 28px 0 8px; font: 500 0.82rem / 1.2 var(--f-sans); font-stretch: 112%; color: var(--ink-3);
@@ -346,9 +364,12 @@ html.cine .rule-eyebrow { display: block; }
   padding: clamp(16px, 2.8svh, 24px) 0; border-top: 1px solid var(--line);
 }
 .lab-item:last-child { border-bottom: 1px solid var(--line); }
+.lab-note { margin: 0 0 6px; color: var(--ink-3); font: 400 0.8rem / 1.4 var(--f-mono); }
+html.cine .lab-note { margin: 0 0 clamp(2px, 0.5svh, 6px); font-size: 0.7rem; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lab-sub { margin-top: 14px; max-width: 18em; color: var(--ink-2); font-size: clamp(1rem, 0.95rem + 0.3vw, 1.2rem); line-height: 1.45; font-stretch: 106%; }
 .lab-item .tag { margin-top: 8px; }
 .lab-item h4 { margin: 0; font: 500 clamp(1.15rem, 1rem + 0.6vw, 1.5rem) / 1.15 var(--f-sans); font-stretch: 116%; letter-spacing: -0.02em; }
+.lab-item h4 .sn-badge { vertical-align: middle; margin-left: 8px; }
 .lab-item p { color: var(--ink-2); font-size: clamp(0.95rem, 0.9rem + 0.2vw, 1.08rem); }
 @media (max-width: 820px) {
   .lab-wrap { grid-template-columns: 1fr; }
@@ -405,6 +426,9 @@ html.cine .lab-item .tag {
 .foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .foot a { color: var(--ink-2); text-decoration: none; overflow-wrap: break-word; transition: color 0.3s; }
 .foot a:hover { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+.foot a.inline { color: var(--blue-hi); text-decoration: underline; text-decoration-color: rgba(169, 196, 255, 0.4); text-underline-offset: 3px; }
+.foot-brand .foot-contact { margin-top: 10px; color: var(--ink-2); font: 400 0.9rem / 1.4 var(--f-mono); overflow-wrap: anywhere; }
+.foot-brand p { max-width: 28ch; }
 .foot-base {
   max-width: 1240px; margin: clamp(48px, 9svh, 96px) auto 0; padding-top: 22px; border-top: 1px solid var(--line);
   display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; color: var(--ink-3); font-size: 0.86rem;
@@ -419,7 +443,7 @@ html.cine .lab-item .tag {
 }
 @media (pointer: coarse), (max-width: 820px) {
   .foot ul { gap: 0; }
-  .foot ul a { display: inline-flex; align-items: center; min-height: 44px; }
+  .foot ul a, .foot a.inline, .foot .brand { display: inline-flex; align-items: center; min-height: 44px; }
 }
 
 /* ====================================================================
@@ -429,7 +453,8 @@ html.cine .lab-item .tag {
 
 html.cine .world { position: fixed; height: auto; bottom: 0; }
 html.cine .spacer { height: calc(var(--screens) * 100svh); }
-html.cine .stage { position: fixed; inset: 0; height: 100svh; overflow: hidden; pointer-events: none; }
+html.cine .stage { position: fixed; inset: 0; height: 100svh; overflow: hidden; overflow: clip; pointer-events: none; }
+html.cine .stage :focus-visible { outline: 2px solid var(--blue-hi); outline-offset: 3px; }
 html.cine .stage a, html.cine .stage button, html.cine .stage .card { pointer-events: auto; }
 html.cine .ch { position: absolute; inset: 0; padding: 0; }
 html.cine .ch > .beat, html.cine .ch > .deck, html.cine .ch > .lab-wrap { width: auto; margin: 0; padding-inline: var(--pad); }
@@ -440,7 +465,7 @@ html.cine .beat {
   position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
   padding: var(--nav-h) var(--pad) 0; visibility: hidden; opacity: 0; margin: 0;
 }
-html.cine .ch-flagship .beat + .beat, html.cine .b-shipped { margin: 0; }
+html.cine .ch-flagship .beat + .beat, html.cine .b-products { margin: 0; }
 
 /* hero */
 html.cine .b-hero { place-items: end center; padding: var(--nav-h) var(--pad) clamp(24px, 6.5svh, 76px); }
@@ -482,8 +507,15 @@ html.cine .b-rule .rule-line { margin-top: clamp(16px, 3svh, 30px); }
   html.cine .b-rule .display { max-width: 100%; }
 }
 
-/* shipped: a 3D carousel of posters */
-html.cine .b-shipped { place-items: start center; padding-top: clamp(78px, 11svh, 120px); }
+/* products: a 3D carousel of posters */
+html.cine .b-products { place-items: start center; padding-top: calc(var(--nav-h) + clamp(10px, 2svh, 22px)); }
+html.cine .products-head { justify-content: center; }
+@media (min-aspect-ratio: 1/1) {
+  /* Landscape: a smaller heading, a shorter poster art and a lower carousel so "Shipped." never sits behind the first card (1280x800). */
+  html.cine .b-products .d-sec { font-size: clamp(2.2rem, min(4.6vw, 7.4svh), 4.4rem); }
+  html.cine .card-art { aspect-ratio: 320 / 150; overflow: hidden; }
+  html.cine .deck .card { top: 56%; width: min(372px, 80vw, 47svh); }
+}
 html.cine .deck { position: absolute; inset: 0; display: block; perspective: 1700px; perspective-origin: 50% 48%; padding: 0; }
 html.cine .card {
   position: absolute; left: 50%; top: 52%; width: min(372px, 80vw); visibility: hidden; opacity: 0;
@@ -511,7 +543,7 @@ html.cine .foot {
 .play { transform-box: fill-box; transform-origin: center; }
 .caret-bar { opacity: 0.9; }
 
-html.cine:not(.in-shipped) .card-art *, html.cine:not(.in-shipped) .card-art *::before { animation-play-state: paused !important; }
+html.cine:not(.in-products) .card-art *, html.cine:not(.in-products) .card-art *::before { animation-play-state: paused !important; }
 @media (prefers-reduced-motion: no-preference) {
   html:not(.static) .card-art .sweep { animation: spin 6s linear infinite; }
   html:not(.static) .ping { animation: ping 6s linear infinite; animation-delay: var(--t); }

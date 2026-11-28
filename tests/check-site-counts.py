@@ -14,7 +14,6 @@ a pass.
 
 Run from repo root: python3 tests/check-site-counts.py
 """
-import glob
 from html.parser import HTMLParser
 import importlib.util
 import json
@@ -242,108 +241,31 @@ for pid, entry in json.loads(pub_text).items():
             fail_(f'{PUB_PATH}: {pid} release count mismatch: {"; ".join(bad)}')
         else:
             pass_(f'{PUB_PATH}: {pid} release count ({now}) consistent ({len(rels)} mentions)')
-
-# Verify mobile drawer HTML structure on coco/index.html and every */index.html
-# that carries .sn-drawer: .sn-d-all, .sn-d-top and .sn-d-foot must be direct
-# children of .sn-d-body (never nested in .sn-m-grid), and <div> tags must balance.
-VOID_TAGS = frozenset((
-    'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
-    'link', 'meta', 'param', 'source', 'track', 'wbr',
-))
-DRAWER_DIRECT_CHILDREN = ('sn-d-all', 'sn-d-top', 'sn-d-foot')
-
-
 class _DrawerParser(HTMLParser):
     def __init__(self):
-        super().__init__(convert_charrefs=False)
-        self.in_drawer = False
-        self.drawers_seen = 0
-        self.stack = []
-        self.div_opens = 0
-        self.div_closes = 0
-        self.seen = {}
-        self.errors = []
-
+        super().__init__(convert_charrefs=False); self.on, self.n, self.o, self.c, self.s, self.seen, self.e = False, 0, 0, 0, [], {}, []
     def handle_starttag(self, tag, attrs):
-        attr_map = dict(attrs)
-        classes = set((attr_map.get('class') or '').split())
-        if not self.in_drawer:
-            if tag == 'dialog' and ('sn-drawer' in classes or attr_map.get('id') == 'site-mobile-drawer'):
-                self.in_drawer = True
-                self.drawers_seen += 1
-                self.stack = [(tag, classes)]
-                self.div_opens = 0
-                self.div_closes = 0
-                self.seen = {c: 0 for c in DRAWER_DIRECT_CHILDREN}
+        a = dict(attrs); cls = set((a.get('class') or '').split())
+        if not self.on:
+            if tag == 'dialog' and ('sn-drawer' in cls or a.get('id') == 'site-mobile-drawer'):
+                self.on, self.n, self.o, self.c, self.s, self.seen = True, self.n + 1, 0, 0, [(tag, cls)], {'sn-d-all': 0, 'sn-d-top': 0, 'sn-d-foot': 0}
             return
-        if tag == 'div':
-            self.div_opens += 1
-        for cls in DRAWER_DIRECT_CHILDREN:
-            if cls in classes:
-                self.seen[cls] += 1
-                parent_tag, parent_cls = self.stack[-1] if self.stack else ('', set())
-                if 'sn-d-body' not in parent_cls:
-                    self.errors.append(
-                        f'.{cls} parent is <{parent_tag} class="{" ".join(sorted(parent_cls))}">, expected .sn-d-body'
-                    )
-                if any('sn-m-grid' in anc_cls for _, anc_cls in self.stack):
-                    self.errors.append(f'.{cls} is nested inside .sn-m-grid')
-        if tag not in VOID_TAGS:
-            self.stack.append((tag, classes))
-
+        self.o += tag == 'div'
+        for k in cls & self.seen.keys():
+            self.seen[k] += 1
+            if 'sn-d-body' not in self.s[-1][1] or any('sn-m-grid' in c for _, c in self.s): self.e.append(f'.{k} not direct child of .sn-d-body')
+        if tag not in ('area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'): self.s.append((tag, cls))
     def handle_endtag(self, tag):
-        if not self.in_drawer:
-            return
-        if tag == 'div':
-            self.div_closes += 1
-            for idx in range(len(self.stack) - 1, 0, -1):
-                if self.stack[idx][0] == 'div':
-                    del self.stack[idx:]
-                    return
-            self.errors.append('extra </div> inside drawer with no matching <div>')
-            return
+        if not self.on: return
         if tag == 'dialog':
-            unclosed = [c for t, c in self.stack[1:] if t == 'div']
-            if unclosed or self.div_opens != self.div_closes:
-                self.errors.append(
-                    f'unbalanced divs in drawer: {self.div_opens} opened vs '
-                    f'{self.div_closes} closed ({len(unclosed)} unclosed at </dialog>)'
-                )
-            for cls, cnt in self.seen.items():
-                if cnt != 1:
-                    self.errors.append(f'expected 1 .{cls} in drawer, found {cnt}')
-            self.in_drawer = False
-            self.stack = []
-            return
-        for idx in range(len(self.stack) - 1, 0, -1):
-            if self.stack[idx][0] == tag:
-                del self.stack[idx:]
-                break
-
-
-def check_drawer_html(path):
-    parser = _DrawerParser()
-    parser.feed(open(path, encoding='utf-8').read())
-    parser.close()
-    if parser.in_drawer:
-        parser.errors.append('unclosed <dialog> drawer')
-    if parser.drawers_seen != 1:
-        parser.errors.append(f'expected 1 .sn-drawer dialog, found {parser.drawers_seen}')
-    return parser.errors, parser.div_opens, parser.div_closes
-
-
-drawer_pages = ['coco/index.html']
-for candidate in sorted(glob.glob('*/index.html')):
-    rel = candidate.replace('\\', '/')
-    if rel != 'coco/index.html' and 'sn-drawer' in open(rel, encoding='utf-8').read():
-        drawer_pages.append(rel)
-for dpath in drawer_pages:
-    derrs, dopens, dcloses = check_drawer_html(dpath)
-    if derrs:
-        fail_(f'{dpath}: drawer structure failed: {"; ".join(derrs)}')
-    else:
-        pass_(f'{dpath}: drawer balanced ({dopens}/{dcloses} divs; .sn-d-all/.sn-d-top/.sn-d-foot direct under .sn-d-body)')
-
+            if any(t == 'div' for t, _ in self.s[1:]) or self.o != self.c or any(v != 1 for v in self.seen.values()): self.e.append(f'divs {self.o}/{self.c} seen={self.seen}')
+            self.on, self.s = False, []; return
+        self.c += tag == 'div'; idx = next((i for i in range(len(self.s) - 1, 0, -1) if self.s[i][0] == tag), None)
+        if idx is not None: del self.s[idx:]
+        elif tag == 'div': self.e.append('extra </div>')
+for dpath in sorted({p for p in ['coco/index.html'] + [f'{d}/index.html' for d in os.listdir('.') if os.path.isfile(f'{d}/index.html')] if p == 'coco/index.html' or 'sn-drawer' in open(p, encoding='utf-8').read()}):
+    dp = _DrawerParser(); dp.feed(open(dpath, encoding='utf-8').read()); dp.close(); bad = dp.on or dp.n != 1 or dp.e
+    (fail_ if bad else pass_)(f'{dpath}: drawer {"FAILED" if bad else "balanced"} ({dp.o}/{dp.c} divs; {"; ".join(dp.e) or ".sn-d-all/.sn-d-top/.sn-d-foot direct under .sn-d-body"})')
 print()
 if fail == 0:
     print('  all site-page counts agree with docs/released-counts.json')

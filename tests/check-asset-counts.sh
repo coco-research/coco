@@ -123,7 +123,7 @@ fi
 # Catch the exact drift class Pike found: a leftover 149 that is not skills.total.
 # Anchored to skills phrasings only: a bare 149 is also a legitimate non-skills
 # count (e.g. the core-install "(149 active assets)" total, #473).
-LEFTOVER_149=$(grep -niE '(^|[^[:alnum:]])149[[:space:]]+skills([^[:alnum:]]|$)|(^|[^[:alnum:]])skills[[:space:]:=-]+149([^[:alnum:]]|$)|<h3>[[:space:]]*149[[:space:]]*</h3>[[:space:]]*<sub>[[:space:]]*skills[[:space:]]*</sub>' README.md || true)
+LEFTOVER_149=$(grep -niE '(^|[^[:alnum:]])149([[:space:][:punct:]]|<[^>]+>)*skills([^[:alnum:]]|$)|(^|[^[:alnum:]])skills([[:space:][:punct:]]|<[^>]+>)*149([^[:alnum:]]|$)' README.md || true)
 if [ -n "$LEFTOVER_149" ] && [ "$SKILLS" != "149" ]; then
   fail_ "ASSET_COUNT_SKILLS_DRIFT: README still contains 149 (third skills number); customer-facing is $SKILLS: $LEFTOVER_149"
 else

@@ -10,6 +10,18 @@ mkdir -p "$tmp/tests" "$tmp/docs"
 tr -d '\r' < "$repo/tests/check-asset-counts.sh" > "$tmp/tests/check-asset-counts.sh"
 cp "$repo/docs/asset-counts.json" "$tmp/docs/"
 cp "$repo/package.json" "$tmp/"
+python3 - "$tmp/docs/asset-counts.json" <<'PY'
+import json
+import sys
+
+path = sys.argv[1]
+with open(path, encoding='utf-8') as source:
+    counts = json.load(source)
+# Keep this fixture independent of the live total, including if it becomes 149.
+counts['skills']['total'] = 0
+with open(path, 'w', encoding='utf-8') as destination:
+    json.dump(counts, destination)
+PY
 
 run_checker() {
   if bash "$tmp/tests/check-asset-counts.sh" > "$tmp/output" 2>&1; then
@@ -38,6 +50,11 @@ assert_skills_drift() {
     tail -30 "$tmp/output"
     exit 1
   fi
+  if [ "$checker_status" -eq 0 ]; then
+    echo "FAIL: skills count drift was reported but checker exited successfully"
+    tail -30 "$tmp/output"
+    exit 1
+  fi
 }
 
 cat > "$tmp/README.md" <<'EOF'
@@ -49,7 +66,7 @@ run_checker
 assert_no_skills_drift
 echo "PASS: non-skills 149 in README does not trip the skills drift check"
 
-for phrase in '149 Skills' 'Skills: 149' '<h3>149</h3><sub>Skills</sub>' '<h3>149</h3><sub>skills</sub>'; do
+for phrase in '149 Skills' 'Skills: 149' 'Skills (149)' '| Total Skills | 149 |' '<h3>149</h3><sub>Skills</sub>' '<h3>149</h3><sub>skills</sub>'; do
   cat > "$tmp/README.md" <<EOF
 # coco
 

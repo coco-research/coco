@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en" data-product="whats-new">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>What's new — Coco Research</title>
+<meta name="description" content="Latest tagged releases across Coco Research products: version, date, licence and one plain line on what shipped.">
+<meta name="theme-color" content="#03050b">
+<meta name="color-scheme" content="light dark">
+<meta property="og:type" content="website">
+<meta property="og:title" content="What&#x27;s new — Coco Research">
+<meta property="og:description" content="Latest tagged releases across Coco Research products: version, date, licence and one plain line on what shipped.">
+<meta property="og:url" content="https://cocoresearch.org/whats-new/">
+<meta property="og:image" content="https://cocoresearch.org/assets/img/og-coco-research.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="What&#x27;s new — Coco Research">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="What&#x27;s new — Coco Research">
+<meta name="twitter:description" content="Latest tagged releases across Coco Research products: version, date, licence and one plain line on what shipped.">
+<meta name="twitter:image" content="https://cocoresearch.org/assets/img/og-coco-research.png">
+<link rel="canonical" href="https://cocoresearch.org/whats-new/">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/site/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/assets/site/site.webmanifest">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "name": "What's new — Coco Research",
+      "url": "https://cocoresearch.org/whats-new/",
+      "description": "Latest tagged releases across Coco Research products: version, date, licence and one plain line on what shipped.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "Coco Research",
+        "url": "https://cocoresearch.org/"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Coco Research",
+          "item": "https://cocoresearch.org/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "What's new",
+          "item": "https://cocoresearch.org/whats-new/"
+        }
+      ]
+    }
+  ]
+}
+</script>
+<script>
+(function () {
+  var d = document.documentElement, rm = false, off = false, th = '';
+  try { rm = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  try { off = sessionStorage.getItem('coco-3d-pause:' + location.pathname) === '1'; } catch (e) {}
+  if (/[?&]motion=off/.test(location.search)) off = true;
+  try { th = localStorage.getItem('coco-theme') || ''; } catch (e) {}
+  var m = /[?&]theme=(light|dark)/.exec(location.search);
+  if (m) th = m[1];
+  if (th === 'light' || th === 'dark') d.setAttribute('data-theme', th);
+  d.className += ' js' + (rm || off ? ' still' : ' cine') + (rm ? ' os-reduced' : '');
+})();
+</script>
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/vendor/fonts/archivo-latin-wdth-normal.woff2">
+<link rel="modulepreload" href="../assets/vendor/three/three.module.min.js">
+<link rel="stylesheet" href="../assets/css/site-nav.css">
+<link rel="stylesheet" href="../assets/css/product.css">
+<script type="importmap">
+{ "imports": { "three": "../assets/vendor/three/three.module.min.js" } }
+</script>
+<script type="module" src="../assets/js/site-nav.js"></script>
+<script type="module" src="../assets/js/product-scene.js"></script>
+</head>
+<body data-page="whats-new">
+<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="?motion=off">View plain page (no motion)</a>
+<div class="world" aria-hidden="true"><canvas id="world"></canvas><div class="hero-point"></div><svg class="world-svg-fallback" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" focusable="false"><circle cx="840" cy="370" r="190" fill="none" stroke="currentColor" stroke-width="1" stroke-opacity=".14" stroke-dasharray="5 8"/><line x1="600" y1="370" x2="1080" y2="370" stroke="currentColor" stroke-width="1" stroke-opacity=".12"/><g transform="translate(610 250) scale(1.25)" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".55"><rect x="52" y="16" width="56" height="108" rx="6" stroke-opacity=".45"/><rect x="132" y="16" width="56" height="108" rx="6"/><rect x="212" y="16" width="56" height="108" rx="6" stroke-opacity=".45"/><path d="M24 72 Q92 26 160 72 T296 72"/><path d="M24 72 Q92 118 160 72 T296 72" stroke-opacity=".5"/></g></svg></div>
+<header class="site-nav" data-site-nav>
+  <a class="sn-brand" href="../"><i aria-hidden="true"></i><span>Coco Research</span></a>
+  <nav class="sn-links" aria-label="Primary">
+    <button class="sn-tab" type="button" data-products-trigger aria-expanded="false" aria-controls="site-products-menu">Products <span class="sn-caret" aria-hidden="true">▾</span></button>
+    <a class="sn-tab" href="../lab/">In the lab</a>
+    <a class="sn-tab" href="../whats-new/" aria-current="page">What's new</a>
+    <a class="sn-tab" href="../rijul-kalra/">Rijul Kalra</a>
+  </nav>
+  <div class="sn-right">
+    <button class="sn-chip" type="button" data-theme-toggle>Dark</button>
+    <button class="sn-chip" type="button" data-motion-toggle>Pause 3D</button>
+    <a class="sn-cta" href="../coco/">Get Coco</a>
+    <button class="sn-menu-btn" type="button" data-drawer-open aria-expanded="false" aria-controls="site-mobile-drawer" aria-label="Open menu">Menu</button>
+  </div>
+  <div class="sn-menu" id="site-products-menu" data-products-menu hidden>
+    <div class="sn-m-grid">
+      <div class="sn-m-group" data-group="products">
+        <h3 class="sn-m-h g-products"><span class="sh sh-dot" aria-hidden="true"></span>Products<span class="sn-m-n">2</span></h3>
+        <ul aria-label="Products">
+          <li><a class="sn-m-item" href="../coco/"><span class="sn-m-name">Coco Super Intelligence</span><span class="sn-m-line">Argues a hard call out with expert personas, then hands it to skills.</span></a></li>
+          <li><a class="sn-m-item" href="../voice/"><span class="sn-m-name">Coco Voice</span><span class="sn-m-line">Hold a key to dictate into any app. Private, on your computer.</span></a></li>
+        </ul>
+      </div>
+      <div class="sn-m-group" data-group="lab">
+        <h3 class="sn-m-h g-lab"><span class="sh sh-sq" aria-hidden="true"></span>In the lab<span class="sn-m-n">8</span></h3>
+        <ul aria-label="In the lab">
+          <li><a class="sn-m-item" href="../heliopause/"><span class="sn-m-name">Heliopause</span><span class="sn-m-line">Gives your AI tools a Lead and roles, like a small company.</span></a></li>
+          <li><a class="sn-m-item" href="../signal/"><span class="sn-m-name">Signal</span><span class="sn-m-line">A ready-made look for your product: three editions, CSS and docs.</span></a></li>
+          <li><a class="sn-m-item" href="../mira/"><span class="sn-m-name">Mira<span class="sn-m-badge">Archived</span></span><span class="sn-m-line">Makes Reels and Shorts in English and Hindi.</span></a></li>
+          <li><a class="sn-m-item" href="../jev-use/"><span class="sn-m-name">jev-use</span><span class="sn-m-line">Control your Mac with your voice.</span></a></li>
+          <li><a class="sn-m-item" href="../m0/"><span class="sn-m-name">Coco M0</span><span class="sn-m-line">Remembers across your AI tools, so you stop re-explaining.</span></a></li>
+          <li><a class="sn-m-item" href="../hermes/"><span class="sn-m-name">Coco Hermes</span><span class="sn-m-line">Answers over your own files with an exact quote, or says it can’t.</span></a></li>
+          <li><a class="sn-m-item" href="../teams-ng/"><span class="sn-m-name">Coco Teams NG</span><span class="sn-m-line">A team of AI members you hire, brief and work with in one console.</span></a></li>
+          <li><a class="sn-m-item" href="../aloomannu/"><span class="sn-m-name">Aloo Mannu</span><span class="sn-m-line">The local message and wake layer for coding agents on your machine.</span><span class="sn-m-priv"><span class="sh sh-sq" aria-hidden="true"></span>Private, in the lab</span></a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="sn-m-foot"><a href="../products/">Browse all 10 products →</a><a href="../lab/">In the lab →</a><a href="../whats-new/">What's new →</a></div>
+  </div>
+</header>
+<dialog class="sn-drawer" id="site-mobile-drawer" data-mobile-drawer aria-labelledby="sn-drawer-title">
+  <div class="sn-d-head">
+    <a class="sn-brand" href="../"><i aria-hidden="true"></i><span>Coco Research</span></a>
+    <h2 class="sr-only" id="sn-drawer-title">Site menu</h2>
+    <button class="sn-chip" type="button" data-drawer-close>Close</button>
+  </div>
+  <div class="sn-d-body">
+    <p class="sn-d-label">Products</p>
+    <div class="sn-m-grid">
+    <div class="sn-m-group" data-group="products">
+      <h3 class="sn-m-h g-products"><span class="sh sh-dot" aria-hidden="true"></span>Products<span class="sn-m-n">2</span></h3>
+      <ul aria-label="Products">
+        <li><a class="sn-m-item" href="../coco/"><span class="sn-m-name">Coco Super Intelligence</span><span class="sn-m-line">Argues a hard call out with expert personas, then hands it to skills.</span></a></li>
+        <li><a class="sn-m-item" href="../voice/"><span class="sn-m-name">Coco Voice</span><span class="sn-m-line">Hold a key to dictate into any app. Private, on your computer.</span></a></li>
+      </ul>
+    </div>
+    <div class="sn-m-group" data-group="lab">
+      <h3 class="sn-m-h g-lab"><span class="sh sh-sq" aria-hidden="true"></span>In the lab<span class="sn-m-n">8</span></h3>
+      <ul aria-label="In the lab">
+        <li><a class="sn-m-item" href="../heliopause/"><span class="sn-m-name">Heliopause</span><span class="sn-m-line">Gives your AI tools a Lead and roles, like a small company.</span></a></li>
+        <li><a class="sn-m-item" href="../signal/"><span class="sn-m-name">Signal</span><span class="sn-m-line">A ready-made look for your product: three editions, CSS and docs.</span></a></li>
+        <li><a class="sn-m-item" href="../mira/"><span class="sn-m-name">Mira<span class="sn-m-badge">Archived</span></span><span class="sn-m-line">Makes Reels and Shorts in English and Hindi.</span></a></li>
+        <li><a class="sn-m-item" href="../jev-use/"><span class="sn-m-name">jev-use</span><span class="sn-m-line">Control your Mac with your voice.</span></a></li>
+        <li><a class="sn-m-item" href="../m0/"><span class="sn-m-name">Coco M0</span><span class="sn-m-line">Remembers across your AI tools, so you stop re-explaining.</span></a></li>
+        <li><a class="sn-m-item" href="../hermes/"><span class="sn-m-name">Coco Hermes</span><span class="sn-m-line">Answers over your own files with an exact quote, or says it can’t.</span></a></li>
+        <li><a class="sn-m-item" href="../teams-ng/"><span class="sn-m-name">Coco Teams NG</span><span class="sn-m-line">A team of AI members you hire, brief and work with in one console.</span></a></li>
+        <li><a class="sn-m-item" href="../aloomannu/"><span class="sn-m-name">Aloo Mannu</span><span class="sn-m-line">The local message and wake layer for coding agents on your machine.</span><span class="sn-m-priv"><span class="sh sh-sq" aria-hidden="true"></span>Private, in the lab</span></a></li>
+      </ul>
+    </div>
+    </div>
+    <a class="sn-m-item sn-d-all" href="../products/"><span class="sn-m-name">Browse all 10 products →</span></a>
+    <div class="sn-d-top">
+      <a href="../lab/">In the lab →</a>
+      <a href="../whats-new/" aria-current="page">What's new →</a>
+      <a href="../rijul-kalra/">Rijul Kalra →</a>
+    </div>
+    <div class="sn-d-foot"><button class="sn-chip" type="button" data-theme-toggle>Dark</button><a class="sn-cta" href="../coco/">Get Coco</a></div>
+  </div>
+</dialog>
+<main id="main" class="stage-main p-main" data-page-main="whats-new">
+  <section id="hero" class="hero p-hero dir-hero" aria-labelledby="h-hero">
+    <div class="wrap">
+      <div class="hero-col">
+        <p class="eyebrow">Release log</p>
+        <h1 id="h-hero" class="display">What's new</h1>
+        <p class="p-for-you">Every tagged release across Coco Research, newest first: version, date, licence and one plain line on what shipped.</p>
+        <div class="p-who"><span class="p-who-k">Latest</span><p>Coco Super Intelligence v2.4.0, released 26 Nov 2026.</p></div>
+        <div class="p-try-above" role="group" aria-label="Where to start">
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#releases">Read the release log</a>
+            <a class="btn btn-ghost" href="../lab/">In the lab</a>
+          </div>
+          <div class="p-badges" role="group" aria-label="Groups"><span class="p-badge" data-kind="stage" data-stage="released">3 tagged releases</span><span class="p-badge" data-kind="stage" data-stage="lab">8 projects in the lab</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="releases" class="sec p-part wn-releases" data-part="01" aria-labelledby="h-rel">
+    <div class="wrap">
+      <div class="sec-head"><div><p class="eyebrow"><span class="p-part-num">01</span> Tagged public releases</p><h2 id="h-rel" class="sec-title">Newest first</h2></div><p class="sec-sub">Each entry links to the product page and its GitHub release.</p></div>
+      <div class="timeline" role="group" aria-label="Latest tagged releases">
+        <article class="tl-entry">
+          <time class="tl-date" datetime="2026-11-26">26 Nov 2026</time>
+          <div class="tl-main">
+            <div class="tl-title-row">
+              <h3 class="tl-name">Coco Super Intelligence</h3>
+              <span class="tl-ver">v2.4.0</span>
+              <span class="stage-chip" data-stage="released"><span class="sh sh-dot" aria-hidden="true"></span>Released · Open-core (Apache-2.0 core)</span>
+            </div>
+            <p class="tl-line">Open-core advisory skills, commands and rules for Claude Code, Cursor and Codex: 493 personas across 13 departments, 231 skills and 389 commands.</p>
+          </div>
+          <div class="tl-links">
+            <a class="btn btn-ghost btn-sm" href="../coco/">Product page<span class="sr-only"> for Coco Super Intelligence</span></a>
+            <a class="btn btn-primary btn-sm" href="https://github.com/coco-research/coco/releases/tag/v2.4.0">GitHub release<span class="sr-only"> Coco Super Intelligence v2.4.0</span></a>
+          </div>
+        </article>
+        <article class="tl-entry">
+          <time class="tl-date" datetime="2026-11-26">26 Nov 2026</time>
+          <div class="tl-main">
+            <div class="tl-title-row">
+              <h3 class="tl-name">Coco Voice</h3>
+              <span class="tl-ver">v0.20.9</span>
+              <span class="stage-chip" data-stage="released"><span class="sh sh-dot" aria-hidden="true"></span>Released · MIT License</span>
+            </div>
+            <p class="tl-line">Private desktop speech-to-text for macOS, Windows x64, and Linux x64 and arm64, with local meeting notes and cited Q&amp;A on macOS 14.4 and later. MIT licensed.</p>
+          </div>
+          <div class="tl-links">
+            <a class="btn btn-ghost btn-sm" href="../voice/">Product page<span class="sr-only"> for Coco Voice</span></a>
+            <a class="btn btn-primary btn-sm" href="https://github.com/coco-research/Coco-Voice/releases/tag/v0.20.9">GitHub release<span class="sr-only"> Coco Voice v0.20.9</span></a>
+          </div>
+        </article>
+        <article class="tl-entry">
+          <time class="tl-date" datetime="2026-10-31">31 Oct 2026</time>
+          <div class="tl-main">
+            <div class="tl-title-row">
+              <h3 class="tl-name">Heliopause by Coco Research</h3>
+              <span class="tl-ver">v0.7.3</span>
+              <span class="stage-chip" data-stage="source"><span class="sh sh-ring" aria-hidden="true"></span>Early preview · Apache-2.0</span>
+            </div>
+            <p class="tl-line">Local multi-role AI orchestration on your own machine, with a live status page over loopback. Early preview, Apache-2.0.</p>
+          </div>
+          <div class="tl-links">
+            <a class="btn btn-ghost btn-sm" href="../heliopause/">Product page<span class="sr-only"> for Heliopause by Coco Research</span></a>
+            <a class="btn btn-primary btn-sm" href="https://github.com/coco-research/heliopause/releases/tag/v0.7.3">GitHub release<span class="sr-only"> Heliopause by Coco Research v0.7.3</span></a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+  <section id="also-active" class="sec p-part wn-also" data-part="02" aria-labelledby="h-also">
+    <div class="wrap">
+      <div class="sec-head"><div><p class="eyebrow"><span class="p-part-num">02</span> Also active</p><h2 id="h-also" class="sec-title">In the lab</h2></div><p class="sec-sub">Public source projects without a packaged release, and private lab work.</p></div>
+      <div class="also-grid">
+        <div class="active-table" role="group" aria-label="Source projects without a packaged release">
+          <div class="active-row">
+            <h3 class="active-name"><a class="inline" href="../signal/">Signal</a></h3>
+            <p>A ready-made look for your product: three editions, CSS and docs.</p>
+            <span class="stage-chip" data-stage="source"><span class="sh sh-ring" aria-hidden="true"></span>Source available</span>
+          </div>
+          <div class="active-row">
+            <h3 class="active-name"><a class="inline" href="../mira/">Mira</a></h3>
+            <p>Makes Reels and Shorts in English and Hindi.</p>
+            <span class="stage-chip" data-stage="source"><span class="sh sh-ring" aria-hidden="true"></span>Archived</span>
+          </div>
+          <div class="active-row">
+            <h3 class="active-name"><a class="inline" href="../jev-use/">jev-use</a></h3>
+            <p>Control your Mac with your voice.</p>
+            <span class="stage-chip" data-stage="source"><span class="sh sh-ring" aria-hidden="true"></span>Pre-alpha</span>
+          </div>
+        </div>
+        <aside class="private-summary" aria-label="Private lab status">
+          <span class="stage-chip" data-stage="lab"><span class="sh sh-sq" aria-hidden="true"></span>Private, in the lab</span>
+          <h3>Not publicly released today</h3>
+          <p>These projects are in private development inside Coco Research, with no public download and no announced release date.</p>
+          <ul class="private-names">
+              <li><a href="../m0/">Coco M0</a></li>
+              <li><a href="../hermes/">Coco Hermes</a></li>
+              <li><a href="../teams-ng/">Coco Teams NG</a></li>
+              <li><a href="../aloomannu/">Aloo Mannu</a></li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <a class="brand" href="../"><i aria-hidden="true"></i><span>Coco Research</span></a>
+      <p>Governed AI, built in the open. Built by <a class="inline" href="../rijul-kalra/">Rijul Kalra</a>.</p>
+      <p>product@cocoresearch.org · <a class="inline" href="mailto:product@cocoresearch.org">Email</a></p>
+    </div>
+    <nav class="foot-cols" aria-label="Footer">
+      <div><h2>Products</h2><ul>
+          <li><a href="../coco/">Coco Super Intelligence</a></li>
+          <li><a href="../voice/">Coco Voice</a></li>
+      </ul></div>
+      <div><h2>In the lab</h2><ul>
+          <li><a href="../heliopause/">Heliopause by Coco Research</a></li>
+          <li><a href="../signal/">Signal</a></li>
+          <li><a href="../mira/">Mira</a> <span class="sn-badge">Archived</span></li>
+          <li><a href="../jev-use/">jev-use</a></li>
+          <li><a href="../m0/">Coco M0</a></li>
+          <li><a href="../hermes/">Coco Hermes</a></li>
+          <li><a href="../teams-ng/">Coco Teams NG</a></li>
+          <li><a href="../aloomannu/">Aloo Mannu</a></li>
+      </ul></div>
+      <div><h2>Company</h2><ul>
+          <li><a href="../products/">All products</a></li>
+          <li><a href="../lab/">In the lab</a></li>
+          <li><a href="../whats-new/">What's new</a></li>
+          <li><a href="../rijul-kalra/">Rijul Kalra</a></li>
+          <li><a href="../guides/manage-multiple-ai-coding-agents/">Guides</a></li>
+          <li><a href="https://github.com/coco-research/coco/releases">Coco changelog</a></li>
+      </ul></div>
+      <div><h2>Code</h2><ul>
+          <li><a href="https://github.com/coco-research">GitHub</a></li>
+          <li><a href="https://www.npmjs.com/package/cocosuperintelligence">npm</a></li>
+      </ul></div>
+    </nav>
+  </div>
+  <div class="foot-base">
+    <p>© 2026 Coco Research</p>
+  </div>
+</footer>
+</body>
+</html>

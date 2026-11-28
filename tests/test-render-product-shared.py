@@ -2,6 +2,7 @@
 """Unit tests for scripts/render_product_shared.py."""
 import importlib.util
 import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -317,15 +318,40 @@ class ChromeAndBuildersTests(unittest.TestCase):
                          three=True, product_id='demo-prod', own_stage=True)
         for snippet in ('<html lang="en" data-product="demo-prod" data-own-stage>', '<title>A &amp; "B"</title>',
                         'content="A &amp; &quot;B&quot;"', 'content="D &lt;&quot;1&quot;&gt;"',
+                        '<meta name="theme-color" content="#f3f2ee" media="(prefers-color-scheme: light)">',
+                        '<meta name="theme-color" content="#03050b" media="(prefers-color-scheme: dark)">',
+                        '<link rel="icon" href="/assets/site/favicon.svg" type="image/svg+xml">',
+                        '<link rel="icon" type="image/png" sizes="32x32" href="/assets/site/favicon-32.png">',
+                        '<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">',
+                        '<link rel="manifest" href="/assets/site/site.webmanifest">',
                         'href="https://cocoresearch.org/demo-prod/"', 'prefers-reduced-motion: reduce',
-                        'coco-3d-pause:', '<script type="importmap">', M.THREE_URL, 'product-scene.js'):
+                        'coco-3d-pause:', 'URLSearchParams(location.search)',
+                        '<script type="importmap">', M.THREE_URL, 'product-scene.js'):
             self.assertIn(snippet, h3)
+
+        # AC-6: extract and run the shipped regexes against positive and negative query strings
+        m_pat = re.search(r'/([^/]+)/\.test\(location\.search\)', h3)
+        t_pat = re.search(r'/([^/]+)/\.exec\(location\.search\)', h3)
+        self.assertIsNotNone(m_pat)
+        self.assertIsNotNone(t_pat)
+        m_re, t_re = re.compile(m_pat.group(1)), re.compile(t_pat.group(1))
+        for ok_q in ('?motion=off', '?a=1&motion=off', '?motion=off&theme=dark'):
+            self.assertIsNotNone(m_re.search(ok_q), ok_q)
+        for bad_q in ('?motion=office', '?xmotion=off', '?motion=on'):
+            self.assertIsNone(m_re.search(bad_q), bad_q)
+        for ok_q, want in (('?theme=light', 'light'), ('?a=1&theme=dark', 'dark'), ('?motion=off&theme=dark&x=1', 'dark')):
+            mt = t_re.search(ok_q)
+            self.assertIsNotNone(mt, ok_q)
+            self.assertEqual(mt.group(1), want)
+        for bad_q in ('?theme=darkblue', '?theme=lightest', '?mytheme=dark'):
+            self.assertIsNone(t_re.search(bad_q), bad_q)
 
         h0 = M.head_html(title='Plain', desc='Desc', slug='plain', og_img=M.DEFAULT_OG, og_alt='Alt', robots='', jsonld='', three=False)
         self.assertIn('<html lang="en">', h0)
         for absent in ('data-product=', 'data-own-stage', 'importmap', 'product-scene.js', 'coco-3d-pause:'):
             self.assertNotIn(absent, h0)
         self.assertIn("d.className += ' js';", h0)
+        self.assertIn('URLSearchParams(location.search)', h0)
         self.assertIn('site-nav.js', h0)
 
     def test_li_dl_copy_box_part_head_dir_hero_sec_open_and_stage_page(self):

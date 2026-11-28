@@ -969,6 +969,160 @@ if (
 else:
     fail_('AC-5 self-test failed: ok=%r btn=%r h2=%r priv=%r list=%r m0=%r href=%r' % (ok_a11y, bad_btn, bad_h2, bad_priv, bad_list, bad_m0_cur, bad_href))
 
+# ---- AC-6, AC-7, AC-8, AC-9: anchored flags, skip-link rewrite, theme-color, canonical icons ----
+CANONICAL_ICONS = {
+    '/assets/site/favicon.svg',
+    '/assets/site/favicon-32.png',
+    '/apple-touch-icon.png',
+    '/assets/site/site.webmanifest',
+}
+icon_link_re = re.compile(r'<link\b([^>]*\brel="(?:icon|apple-touch-icon|manifest)"[^>]*)>', re.S)
+theme_meta_re = re.compile(r'<meta\b([^>]*\bname="theme-color"[^>]*)>', re.S)
+
+
+def check_head_flags_theme_icons(root):
+    errs = []
+    pages = []
+    idx_p = root / 'index.html'
+    if idx_p.is_file():
+        pages.append(idx_p)
+    else:
+        errs.append('index.html is missing for head/icons check')
+    for page_p in sorted(root.glob('*/index.html')):
+        if '<meta http-equiv="refresh"' in page_p.read_text():
+            continue
+        pages.append(page_p)
+    if len(pages) != 15:
+        errs.append('expected 15 site HTML pages for head/icons check, found %d' % len(pages))
+
+    for page_p in pages:
+        txt = page_p.read_text()
+        head_m = re.search(r'<head>(.*?)</head>', txt, re.S)
+        if not head_m:
+            errs.append('%s is missing <head>...</head>' % page_p)
+            continue
+        head_txt = head_m.group(1)
+        html_tag = re.search(r'<html\b[^>]*>', txt)
+        locked_dark = bool(html_tag and 'data-theme-locked=' in html_tag.group(0))
+
+        # AC-6: extract and test shipped motion=off and (for themed pages) theme= regexes
+        mp = re.search(r'/([^/\n]+)/\.test\(location\.search\)', head_txt)
+        if not mp:
+            errs.append('%s head script is missing motion=off regex' % page_p)
+        else:
+            mre = re.compile(mp.group(1))
+            for ok_q in ('?motion=off', '?a=1&motion=off', '?motion=off&theme=dark'):
+                if not mre.search(ok_q):
+                    errs.append('%s motion regex %r failed to match %r' % (page_p, mp.group(1), ok_q))
+            for bad_q in ('?motion=office', '?xmotion=off'):
+                if mre.search(bad_q):
+                    errs.append('%s motion regex %r matched unanchored %r' % (page_p, mp.group(1), bad_q))
+        if not locked_dark:
+            tp = re.search(r'/([^/\n]+)/\.exec\(location\.search\)', head_txt)
+            if not tp:
+                errs.append('%s head script is missing theme= regex' % page_p)
+            else:
+                tre = re.compile(tp.group(1))
+                for ok_q, want in (('?theme=light', 'light'), ('?a=1&theme=dark', 'dark'), ('?motion=off&theme=dark&x=1', 'dark')):
+                    mt = tre.search(ok_q)
+                    if not mt or mt.group(1) != want:
+                        errs.append('%s theme regex %r failed to extract %r from %r' % (page_p, tp.group(1), want, ok_q))
+                for bad_q in ('?theme=darkblue', '?theme=lightest'):
+                    if tre.search(bad_q):
+                        errs.append('%s theme regex %r matched unanchored %r' % (page_p, tp.group(1), bad_q))
+
+        # AC-7: static ?motion=off skip link + progressive URLSearchParams rewrite
+        if not re.search(r'<a\b[^>]*class="[^"]*\bskip\b[^"]*"[^>]*href="\?motion=off"', txt):
+            errs.append('%s is missing static <a class="skip..." href="?motion=off"> fallback' % page_p)
+        if 'URLSearchParams(location.search)' not in head_txt or "p.set('motion', 'off')" not in head_txt:
+            errs.append('%s head script is missing URLSearchParams skip-link rewrite' % page_p)
+
+        # AC-8: theme-color meta tags (locked-dark single #03050b vs themed light/dark pair)
+        tmetas = []
+        for attrs in theme_meta_re.findall(head_txt):
+            cm = re.search(r'\bcontent="([^"]+)"', attrs)
+            mm = re.search(r'\bmedia="([^"]+)"', attrs)
+            tmetas.append((cm.group(1) if cm else '', mm.group(1) if mm else ''))
+        if locked_dark:
+            if tmetas != [('#03050b', '')]:
+                errs.append('%s (locked dark) theme-color metas=%r, expected single #03050b with no media' % (page_p, tmetas))
+        else:
+            want_pair = [('#f3f2ee', '(prefers-color-scheme: light)'), ('#03050b', '(prefers-color-scheme: dark)')]
+            if tmetas != want_pair:
+                errs.append('%s (themed) theme-color metas=%r, expected %r' % (page_p, tmetas, want_pair))
+
+        # AC-9: root-absolute canonical icon + manifest links
+        hrefs = []
+        for attrs in icon_link_re.findall(head_txt):
+            hm = re.search(r'\bhref="([^"]+)"', attrs)
+            hrefs.append(hm.group(1) if hm else '')
+        if set(hrefs) != CANONICAL_ICONS or len(hrefs) != len(CANONICAL_ICONS):
+            errs.append('%s icon/manifest hrefs=%r, expected canonical %r' % (page_p, hrefs, sorted(CANONICAL_ICONS)))
+
+    for extra_rel in ('coco/guardrails/index.html', 'guides/manage-multiple-ai-coding-agents/index.html'):
+        ep = root / extra_rel
+        if ep.is_file():
+            eh = re.search(r'<head>(.*?)</head>', ep.read_text(), re.S)
+            ehrefs = [re.search(r'\bhref="([^"]+)"', a).group(1) for a in icon_link_re.findall(eh.group(1)) if re.search(r'\bhref="([^"]+)"', a)] if eh else []
+            if set(ehrefs) != CANONICAL_ICONS or len(ehrefs) != len(CANONICAL_ICONS):
+                errs.append('%s icon/manifest hrefs=%r, expected canonical %r' % (extra_rel, ehrefs, sorted(CANONICAL_ICONS)))
+    return errs, len(pages)
+
+
+head_errs, head_checked = check_head_flags_theme_icons(Path('.'))
+if head_errs:
+    for err in head_errs:
+        fail_(err)
+else:
+    pass_('AC-6..AC-9: anchored flags, URLSearchParams skip-link rewrite, theme-color, and canonical icons hold across all %d pages' % head_checked)
+
+for dup_icon in ('assets/img/favicon.svg', 'assets/site/apple-touch-icon.png'):
+    if Path(dup_icon).is_file():
+        pass_('AC-9 out-of-scope guard: duplicate icon %s stays on disk' % dup_icon)
+    else:
+        fail_('duplicate icon %s was unexpectedly removed' % dup_icon)
+
+# Self-test: unanchored motion/theme regex, missing skip rewrite, wrong theme-color, and relative icon all fail.
+with tempfile.TemporaryDirectory(prefix='r1c-head-') as tmp:
+    troot = Path(tmp)
+    (troot / 'index.html').write_text(index_html)
+    for page_p in sorted(Path('.').glob('*/index.html')):
+        if '<meta http-equiv="refresh"' in page_p.read_text():
+            continue
+        dst = troot / page_p
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(page_p.read_text())
+    ok_head, _ = check_head_flags_theme_icons(troot)
+
+    orig_idx = (troot / 'index.html').read_text()
+    (troot / 'index.html').write_text(orig_idx.replace('motion=off(?:&|$)', 'motion=off', 1))
+    bad_motion, _ = check_head_flags_theme_icons(troot)
+    (troot / 'index.html').write_text(orig_idx.replace('<meta name="theme-color" content="#03050b">', '<meta name="theme-color" content="#03050b" media="(prefers-color-scheme: dark)">', 1))
+    bad_locked_tc, _ = check_head_flags_theme_icons(troot)
+    (troot / 'index.html').write_text(orig_idx)
+
+    orig_p = (troot / 'products' / 'index.html').read_text()
+    (troot / 'products' / 'index.html').write_text(orig_p.replace('theme=(light|dark)(?:&|$)', 'theme=(light|dark)', 1))
+    bad_theme, _ = check_head_flags_theme_icons(troot)
+    (troot / 'products' / 'index.html').write_text(orig_p.replace('URLSearchParams(location.search)', 'location.search', 1))
+    bad_skip, _ = check_head_flags_theme_icons(troot)
+    (troot / 'products' / 'index.html').write_text(orig_p.replace('<meta name="theme-color" content="#f3f2ee" media="(prefers-color-scheme: light)">\n', '', 1))
+    bad_themed_tc, _ = check_head_flags_theme_icons(troot)
+    (troot / 'products' / 'index.html').write_text(orig_p.replace('href="/assets/site/favicon.svg"', 'href="../assets/img/favicon.svg"', 1))
+    bad_icon, _ = check_head_flags_theme_icons(troot)
+if (
+    ok_head == []
+    and any('matched unanchored' in e and 'motion' in e for e in bad_motion)
+    and any('locked dark' in e for e in bad_locked_tc)
+    and any('matched unanchored' in e and 'theme' in e for e in bad_theme)
+    and any('URLSearchParams skip-link rewrite' in e for e in bad_skip)
+    and any('(themed) theme-color' in e for e in bad_themed_tc)
+    and any('icon/manifest hrefs' in e for e in bad_icon)
+):
+    pass_('AC-6..AC-9 self-test: unanchored motion/theme, missing skip rewrite, theme-color drift, and relative icon all fail')
+else:
+    fail_('AC-6..AC-9 self-test failed: ok=%r motion=%r locked=%r theme=%r skip=%r themed=%r icon=%r' % (ok_head, bad_motion, bad_locked_tc, bad_theme, bad_skip, bad_themed_tc, bad_icon))
+
 print()
 if fail == 0:
     print('  homepage product rows agree with data/products.json')

@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mira — Coco Research</title>
 <meta name="description" content="Local Python pipeline for assembling vertical Reels and Shorts in English and Hindi on your own machine. Archived AGPL-3.0 source repository.">
-<meta name="theme-color" content="#03050b">
+<meta name="theme-color" content="#f3f2ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#03050b" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Mira — Coco Research">
@@ -20,7 +21,7 @@
 <meta name="twitter:description" content="Local Python pipeline for assembling vertical Reels and Shorts in English and Hindi on your own machine. Archived AGPL-3.0 source repository.">
 <meta name="twitter:image" content="https://cocoresearch.org/assets/img/og-coco-research.png">
 <link rel="canonical" href="https://cocoresearch.org/mira/">
-<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/site/favicon.svg" type="image/svg+xml">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/site/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="manifest" href="/assets/site/site.webmanifest">
@@ -67,12 +68,17 @@
   var d = document.documentElement, rm = false, off = false, th = '';
   try { rm = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   try { off = sessionStorage.getItem('coco-3d-pause:' + location.pathname) === '1'; } catch (e) {}
-  if (/[?&]motion=off/.test(location.search)) off = true;
+  if (/[?&]motion=off(?:&|$)/.test(location.search)) off = true;
   try { th = localStorage.getItem('coco-theme') || ''; } catch (e) {}
-  var m = /[?&]theme=(light|dark)/.exec(location.search);
+  var m = /[?&]theme=(light|dark)(?:&|$)/.exec(location.search);
   if (m) th = m[1];
   if (th === 'light' || th === 'dark') d.setAttribute('data-theme', th);
   d.className += ' js' + (rm || off ? ' still' : ' cine') + (rm ? ' os-reduced' : '');
+  document.addEventListener('DOMContentLoaded', function () {
+    var a = document.querySelector('a.skip[href="?motion=off"]');
+    if (!a) return;
+    try { var p = new URLSearchParams(location.search); p.set('motion', 'off'); a.setAttribute('href', '?' + p.toString() + location.hash); } catch (e) {}
+  });
 })();
 </script>
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/vendor/fonts/archivo-latin-wdth-normal.woff2">

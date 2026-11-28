@@ -419,8 +419,15 @@ def head_html(*, title, desc, slug, og_img, og_alt, robots, jsonld, three, produ
     t_attr, d_attr = attr(title), attr(desc)
     motion_js = (
         "  try { off = sessionStorage.getItem('coco-3d-pause:' + location.pathname) === '1'; } catch (e) {}\n"
-        "  if (/[?&]motion=off/.test(location.search)) off = true;\n"
+        "  if (/[?&]motion=off(?:&|$)/.test(location.search)) off = true;\n"
     ) if three else ''
+    skip_js = (
+        "  document.addEventListener('DOMContentLoaded', function () {\n"
+        "    var a = document.querySelector('a.skip[href=\"?motion=off\"]');\n"
+        "    if (!a) return;\n"
+        "    try { var p = new URLSearchParams(location.search); p.set('motion', 'off'); a.setAttribute('href', '?' + p.toString() + location.hash); } catch (e) {}\n"
+        "  });\n"
+    )
     cls = "' js' + (rm || off ? ' still' : ' cine') + (rm ? ' os-reduced' : '')" if three else "' js'"
     three_links = (
         '<link rel="modulepreload" href="%s">\n' % THREE_URL
@@ -437,7 +444,8 @@ def head_html(*, title, desc, slug, og_img, og_alt, robots, jsonld, three, produ
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">{robots}
 <title>{esc(title)}</title>
 <meta name="description" content="{d_attr}">
-<meta name="theme-color" content="#03050b">
+<meta name="theme-color" content="#f3f2ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#03050b" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
 <meta property="og:type" content="website">
 <meta property="og:title" content="{t_attr}">
@@ -452,7 +460,7 @@ def head_html(*, title, desc, slug, og_img, og_alt, robots, jsonld, three, produ
 <meta name="twitter:description" content="{d_attr}">
 <meta name="twitter:image" content="{attr(og_img)}">
 <link rel="canonical" href="{SITE}/{slug}/">
-<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/site/favicon.svg" type="image/svg+xml">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/site/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="manifest" href="/assets/site/site.webmanifest">{jsonld}
@@ -461,11 +469,11 @@ def head_html(*, title, desc, slug, og_img, og_alt, robots, jsonld, three, produ
   var d = document.documentElement, rm = false, off = false, th = '';
   try {{ rm = matchMedia('(prefers-reduced-motion: reduce)').matches; }} catch (e) {{}}
 {motion_js}  try {{ th = localStorage.getItem('coco-theme') || ''; }} catch (e) {{}}
-  var m = /[?&]theme=(light|dark)/.exec(location.search);
+  var m = /[?&]theme=(light|dark)(?:&|$)/.exec(location.search);
   if (m) th = m[1];
   if (th === 'light' || th === 'dark') d.setAttribute('data-theme', th);
   d.className += {cls};
-}})();
+{skip_js}}})();
 </script>
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/vendor/fonts/archivo-latin-wdth-normal.woff2">
 {three_links}<link rel="stylesheet" href="../assets/css/site-nav.css">

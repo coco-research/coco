@@ -14,6 +14,8 @@ a pass.
 
 Run from repo root: python3 tests/check-site-counts.py
 """
+import glob
+from html.parser import HTMLParser
 import importlib.util
 import json
 import os
@@ -254,6 +256,110 @@ for pid, entry in json.loads(pub_text).items():
             fail_(f'{PUB_PATH}: {pid} release count mismatch: {"; ".join(bad)}')
         else:
             pass_(f'{PUB_PATH}: {pid} release count ({now}) consistent ({len(rels)} mentions)')
+
+# Verify mobile drawer HTML structure on coco/index.html and every */index.html
+# that carries .sn-drawer: .sn-d-all, .sn-d-top and .sn-d-foot must be direct
+# children of .sn-d-body (never nested in .sn-m-grid), and <div> tags must balance.
+VOID_TAGS = frozenset((
+    'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
+    'link', 'meta', 'param', 'source', 'track', 'wbr',
+))
+DRAWER_DIRECT_CHILDREN = ('sn-d-all', 'sn-d-top', 'sn-d-foot')
+
+
+class _DrawerParser(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=False)
+        self.in_drawer = False
+        self.drawers_seen = 0
+        self.stack = []
+        self.div_opens = 0
+        self.div_closes = 0
+        self.seen = {}
+        self.errors = []
+
+    def handle_starttag(self, tag, attrs):
+        attr_map = dict(attrs)
+        classes = set((attr_map.get('class') or '').split())
+        if not self.in_drawer:
+            if tag == 'dialog' and ('sn-drawer' in classes or attr_map.get('id') == 'site-mobile-drawer'):
+                self.in_drawer = True
+                self.drawers_seen += 1
+                self.stack = [(tag, classes)]
+                self.div_opens = 0
+                self.div_closes = 0
+                self.seen = {c: 0 for c in DRAWER_DIRECT_CHILDREN}
+            return
+        if tag == 'div':
+            self.div_opens += 1
+        for cls in DRAWER_DIRECT_CHILDREN:
+            if cls in classes:
+                self.seen[cls] += 1
+                parent_tag, parent_cls = self.stack[-1] if self.stack else ('', set())
+                if 'sn-d-body' not in parent_cls:
+                    self.errors.append(
+                        f'.{cls} parent is <{parent_tag} class="{" ".join(sorted(parent_cls))}">, expected .sn-d-body'
+                    )
+                if any('sn-m-grid' in anc_cls for _, anc_cls in self.stack):
+                    self.errors.append(f'.{cls} is nested inside .sn-m-grid')
+        if tag not in VOID_TAGS:
+            self.stack.append((tag, classes))
+
+    def handle_endtag(self, tag):
+        if not self.in_drawer:
+            return
+        if tag == 'div':
+            self.div_closes += 1
+            for idx in range(len(self.stack) - 1, 0, -1):
+                if self.stack[idx][0] == 'div':
+                    del self.stack[idx:]
+                    return
+            self.errors.append('extra </div> inside drawer with no matching <div>')
+            return
+        if tag == 'dialog':
+            unclosed = [c for t, c in self.stack[1:] if t == 'div']
+            if unclosed or self.div_opens != self.div_closes:
+                self.errors.append(
+                    f'unbalanced divs in drawer: {self.div_opens} opened vs '
+                    f'{self.div_closes} closed ({len(unclosed)} unclosed at </dialog>)'
+                )
+            for cls, cnt in self.seen.items():
+                if cnt != 1:
+                    self.errors.append(f'expected 1 .{cls} in drawer, found {cnt}')
+            self.in_drawer = False
+            self.stack = []
+            return
+        for idx in range(len(self.stack) - 1, 0, -1):
+            if self.stack[idx][0] == tag:
+                del self.stack[idx:]
+                break
+
+
+def check_drawer_html(path):
+    parser = _DrawerParser()
+    parser.feed(open(path, encoding='utf-8').read())
+    parser.close()
+    if parser.in_drawer:
+        parser.errors.append('unclosed <dialog> drawer')
+    if parser.drawers_seen != 1:
+        parser.errors.append(f'expected 1 .sn-drawer dialog, found {parser.drawers_seen}')
+    return parser.errors, parser.div_opens, parser.div_closes
+
+
+drawer_pages = [
+    candidate.replace('\\', '/')
+    for candidate in sorted(glob.glob('*/index.html'))
+    if 'sn-drawer' in open(candidate, encoding='utf-8').read()
+]
+if not drawer_pages:
+    fail_('expected at least 1 */index.html page with .sn-drawer')
+for dpath in drawer_pages:
+    derrs, dopens, dcloses = check_drawer_html(dpath)
+    if derrs:
+        fail_(f'{dpath}: drawer structure failed: {"; ".join(derrs)}')
+    else:
+        pass_(f'{dpath}: drawer balanced ({dopens}/{dcloses} divs; .sn-d-all/.sn-d-top/.sn-d-foot direct under .sn-d-body)')
+
 
 print()
 if fail == 0:

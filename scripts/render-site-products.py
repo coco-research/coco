@@ -199,17 +199,11 @@ def _load_page_renderer():
     return mod
 
 
-def render_nav(prefix='./', home=True):
-    """The shared top bar and phone drawer, from the same generator the product pages use."""
+def render_nav(prefix='./'):
+    """The shared top bar and phone drawer, from the same generator the product pages use (home: locked dark)."""
     mod = _load_page_renderer()
     _data, catalog = mod.load_catalog()
-    return mod.nav_html(catalog, None, True, prefix=prefix, home=home).split('\n')
-
-
-def render_footer_block(data):
-    """The shared footer nav for subpages, from the same generator the product pages use."""
-    mod = _load_page_renderer()
-    return mod.footer_html(data, '').split('\n')
+    return mod.nav_html(catalog, None, True, prefix=prefix, home=True).split('\n')
 
 
 def render(text, data):
@@ -224,8 +218,12 @@ def render(text, data):
 
 def render_m0(text, data):
     check_ids(data)
-    text = replace_region(text, 'nav', render_nav(prefix='../', home=False), where='m0/index.html')
-    text = replace_region(text, 'foot', render_footer_block(data), where='m0/index.html')
+    mod = _load_page_renderer()
+    _data, catalog = mod.load_catalog()
+    nav = mod.nav_html(catalog, None, True, prefix='../', home=False).split('\n')
+    foot = mod.footer_html(data, '').split('\n')
+    text = replace_region(text, 'nav', nav, where='m0/index.html')
+    text = replace_region(text, 'foot', foot, where='m0/index.html')
     return text
 
 

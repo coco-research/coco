@@ -15,13 +15,52 @@ const lite = matchMedia('(max-width: 820px)').matches || (navigator.hardwareConc
 root.classList.toggle('lite', lite);
 
 let teardown = () => {};
+let cineRan = false; // the film builds once per page load (text splitting is not repeatable)
+// An explicit choice (this page's opt-out key, ?motion=off) or the OS reduced-motion setting: never upgrade.
+const userOptedOut = () => root.classList.contains('opt-out') || root.classList.contains('os-reduced');
+const gsapReady = () => !!(window.gsap && window.ScrollTrigger);
 wireCommon();
-if (root.classList.contains('cine')) {
-  if (!window.gsap || !window.ScrollTrigger) rescue('GSAP did not load');
-  else {
-    try { cine(); } catch (e) { console.warn('[coco] cinematic layer failed, showing the static page', e); rescue('error'); }
-  }
+boot();
+
+// Boots the film when the page is (or can safely become) cinematic. A page rescued after 5 s because the scripts were
+// slow is promoted to the full film if they arrive late and the visitor is still at the top.
+function boot() {
+  if (!root.classList.contains('cine') && canPromote()) { promote(); return; }
+  if (root.classList.contains('cine')) startCine();
 }
+function canPromote() {
+  return root.classList.contains('rescued') && !cineRan && window.scrollY < 40 && !userOptedOut()
+    && !root.classList.contains('short') && gsapReady();
+}
+function promote() {
+  root.classList.remove('static', 'rescued');
+  root.classList.add('cine');
+  startCine();
+}
+function startCine() {
+  if (!gsapReady()) { rescue('GSAP did not load'); return; }
+  cineRan = true;
+  try { cine(); } catch (e) { console.warn('[coco] cinematic layer failed, showing the static page', e); rescue('error'); }
+  syncMotionToggle();
+}
+
+// A short window (landscape phone, DevTools docked) gets the plain page; making it taller brings the film back without a reload.
+try {
+  const shortMq = matchMedia('(max-height: 580px)');
+  shortMq.addEventListener('change', () => {
+    if (shortMq.matches) {
+      root.classList.add('short');
+      if (root.classList.contains('cine')) { location.reload(); return; } // the plain page is rebuilt from scratch
+    } else {
+      root.classList.remove('short');
+      if (!userOptedOut() && root.classList.contains('static')) {
+        if (cineRan) { location.reload(); return; }
+        if (gsapReady()) { root.classList.remove('rescued'); promote(); return; }
+      }
+    }
+    syncMotionToggle();
+  });
+} catch (e) { /* older Safari: the plain page stays until reload */ }
 
 /* ---------------------------------------------------- shared behaviours */
 
@@ -376,6 +415,63 @@ function cine() {
   }));
   ['wheel', 'touchstart', 'keydown'].forEach((t) => addEventListener(t, stopTravel, { passive: true }));
   ['wheel', 'touchstart', 'keydown'].forEach((t) => addEventListener(t, () => { if (forced != null) { prog.v = forced; forced = null; } }, { passive: true }));
+
+  /* ---- keyboard: every control on the stage is reachable with Tab */
+  // Chapters that are off screen are hidden (visibility), so the browser would skip them. Tab therefore moves the film
+  // to the chapter that owns the next control, then focuses it. The pinned stage is also never allowed to scroll itself.
+  const stage = $('.stage');
+  const stageControls = () => $$('.stage a[href], .stage button').filter((el) => !el.disabled && !el.closest('[inert]'));
+  const shown = (el) => { const cs = getComputedStyle(el); return cs.visibility === 'visible' && cs.display !== 'none'; };
+  function stopFor(el) {
+    const ch = el.closest('.ch');
+    const id = ch ? ch.id : 'hero';
+    if (id === 'flagship') return TL.editor.install[1] + 0.35; // the install window is fully drawn and holding
+    if (id === 'products') {
+      const i = Math.max(0, cards.indexOf(el.closest('.card')));
+      const t = TL.products[0] + 1.1 + 1.7 * (cards.length > 1 ? i / (cards.length - 1) : 0) + 0.05; // card i is the focal poster
+      return Math.min(t, TL.products[1] - 0.65);
+    }
+    const c = CHAPTERS.find((x) => x.id === id);
+    return c ? c.stop : 0;
+  }
+  function jumpTo(s) {
+    stopTravel();
+    forced = s;
+    snapTo(s);
+    frame(g.ticker.time);
+    setTimeout(() => { if (forced === s) forced = null; }, 1200); // by now the scrub has caught up with the scroll position
+  }
+  function chromeBefore() { // the last tabbable control before the stage, in DOM order
+    const pre = $$('.skip, .site-nav a, .site-nav button, .rail a').filter((el) => !el.disabled && shown(el) && el.getClientRects().length);
+    return pre[pre.length - 1] || null;
+  }
+  addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab' || e.altKey || e.ctrlKey || e.metaKey || e.defaultPrevented) return;
+    if (document.querySelector('dialog[open]')) return;
+    const controls = stageControls();
+    const act = document.activeElement;
+    const i = controls.indexOf(act);
+    let next = null;
+    if (i >= 0) next = controls[i + (e.shiftKey ? -1 : 1)] || null;
+    else if (!e.shiftKey && act && act === chromeBefore()) {
+      // entering the stage from the header/rail: the control on the current chapter, else the first one
+      next = controls.find((el) => shown(el) && Math.abs(curS() - stopFor(el)) < 0.9) || controls[0] || null;
+    }
+    if (!next) return; // leaving the stage: the browser continues to the footer (or header) as usual
+    const to = stopFor(next);
+    if (shown(next) && Math.abs(curS() - to) < 0.45) return; // already on screen: native Tab
+    e.preventDefault();
+    jumpTo(to);
+    next.focus({ preventScroll: true });
+  });
+  // Anything else that takes focus inside the stage (assistive tech, scripts) also brings its chapter into view.
+  $('.story').addEventListener('focusin', (e) => {
+    stage.scrollTop = 0; stage.scrollLeft = 0;
+    if (!e.target.closest || !e.target.closest('.stage')) return;
+    const to = stopFor(e.target);
+    if (Math.abs(curS() - to) > 0.9) jumpTo(to);
+  });
+  stage.addEventListener('scroll', () => { stage.scrollTop = 0; stage.scrollLeft = 0; }, { passive: true });
 
   /* ---- resize: re-measure; flipping orientation rebuilds the whole timeline */
   let lastW = innerWidth;

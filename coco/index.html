@@ -1,552 +1,408 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-product="coco-si">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Coco: Agent skills, slash commands and subagents for Claude Code, Cursor, Codex and other AI coding agents</title>
-<meta name="description" content="Each of the 493 requires a live, checkable source. Then 231 skills ship what they decided.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coco Super Intelligence — Coco Research</title>
+<meta name="description" content="493 expert personas across 13 departments, 231 skills, and 389 commands inside Claude Code, Cursor, Codex, and 13 more coding tools.">
+<meta name="theme-color" content="#03050b">
+<meta name="color-scheme" content="light dark">
 <meta property="og:type" content="website">
+<meta property="og:title" content="Coco Super Intelligence — Coco Research">
+<meta property="og:description" content="493 expert personas across 13 departments, 231 skills, and 389 commands inside Claude Code, Cursor, Codex, and 13 more coding tools.">
 <meta property="og:url" content="https://cocoresearch.org/coco/">
-<meta property="og:title" content="Coco: Agent skills, slash commands and subagents for Claude Code, Cursor, Codex and other AI coding agents">
-<meta property="og:description" content="Each of the 493 requires a live, checkable source. Then 231 skills ship what they decided.">
-<meta property="og:image" content="https://cocoresearch.org/assets/og-image.png">
+<meta property="og:image" content="https://cocoresearch.org/assets/img/og-coco-si.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Coco Super Intelligence — Coco Research">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Coco: Agent skills, slash commands and subagents for Claude Code, Cursor, Codex and other AI coding agents">
-<meta name="twitter:description" content="Each of the 493 requires a live, checkable source. Then 231 skills ship what they decided.">
-<meta name="twitter:image" content="https://cocoresearch.org/assets/og-image.png">
-<link rel="icon" type="image/svg+xml" href="/assets/site/favicon.svg">
+<meta name="twitter:title" content="Coco Super Intelligence — Coco Research">
+<meta name="twitter:description" content="493 expert personas across 13 departments, 231 skills, and 389 commands inside Claude Code, Cursor, Codex, and 13 more coding tools.">
+<meta name="twitter:image" content="https://cocoresearch.org/assets/img/og-coco-si.png">
+<link rel="canonical" href="https://cocoresearch.org/coco/">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/site/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="manifest" href="/assets/site/site.webmanifest">
-<link rel="canonical" href="https://cocoresearch.org/coco/">
-<style>
-/* ============================================================================
-   Type scale, spacing, and layout proportions follow the Apple methodology
-   (computed styles, ranked by usage). The accent is deliberately our own —
-   a deep navy, not Apple's blue — to keep the visual identity distinct.
-   Colours: 5 total. Shadows: 1. Weights: 400/600 only. Easing: 1 curve.
-   Font stack resolves to real SF Pro on Apple devices, the system default elsewhere.
-   ========================================================================== */
-:root{
-  --ink:#14171c;            /* primary text, never pure black */
-  --ink-2:#333336;          /* secondary */
-  --muted:#5b6169;          /* tertiary */
-  --surface:#f6f5f2;        /* the one off-white, warm rather than Apple's cool grey */
-  --white:#fff;
-  --blue:#0a3a66;           /* button fill — deep navy, our own, not Apple's blue */
-  --link:#0a3a66;           /* link — same navy, one accent throughout */
-  --hair:rgba(0,0,0,.10);
-  --shadow:0 5px 30px rgba(0,0,0,.22);   /* the single shadow */
-  --ease:cubic-bezier(.4,0,.6,1);        /* the single curve */
-  --dur:.32s;
-  --stadium:100px;
-  --wide:1024px;
-  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Coco Super Intelligence",
+      "description": "493 expert personas across 13 departments, 231 skills, and 389 commands inside Claude Code, Cursor, Codex, and 13 more coding tools.",
+      "url": "https://cocoresearch.org/coco/",
+      "applicationCategory": "DeveloperApplication",
+      "softwareVersion": "2.4.0",
+      "license": "https://github.com/coco-research/coco#licence",
+      "codeRepository": "https://github.com/coco-research/coco",
+      "author": {
+        "@type": "Organization",
+        "name": "Coco Research",
+        "url": "https://cocoresearch.org/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Coco Research",
+        "url": "https://cocoresearch.org/"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Coco Research",
+          "item": "https://cocoresearch.org/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Coco Super Intelligence",
+          "item": "https://cocoresearch.org/coco/"
+        }
+      ]
+    }
+  ]
 }
-*{box-sizing:border-box}
-html,body{overflow-x:hidden;max-width:100%}
-html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-@media (prefers-reduced-motion: no-preference){html{scroll-behavior:smooth}}
-body{margin:0;background:var(--white);color:var(--ink);font-family:var(--sans);
-  font-size:17px;line-height:1.47;letter-spacing:-.022em;font-weight:400}
-a{color:var(--link);text-decoration:none}
-a:hover{text-decoration:underline}
-.wrap{max-width:var(--wide);margin:0 auto;padding:0 22px}
-
-/* ---- nav: 12px, translucent, hairline. Own blur recipe, not Apple's documented one. ---- */
-.nav{position:sticky;top:0;z-index:100;height:44px;
-  background:rgba(255,255,255,.78);backdrop-filter:saturate(150%) blur(16px);
-  -webkit-backdrop-filter:saturate(150%) blur(16px);border-bottom:1px solid var(--hair)}
-.nav-in{max-width:var(--wide);margin:0 auto;padding:0 22px;height:44px;
-  display:flex;align-items:center;gap:34px}
-.nav a{font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;transition:opacity var(--dur) var(--ease);
-  display:inline-flex;align-items:center;min-height:44px;padding:0 10px}
-.nav a:hover{opacity:1;text-decoration:none}
-.nav .mark{font-size:15px;font-weight:600;letter-spacing:-.02em;margin-right:4px;
-  display:inline-flex;align-items:center;gap:8px}
-.nav .mark svg{display:block;flex:none}
-.nav .back{opacity:.6}
-.nav .back:hover{opacity:1}
-.nav .spacer{flex:1}
-
-/* ---- nav-trigger: a nav link that opens the products overlay instead of navigating ---- */
-.nav-trigger{appearance:none;background:none;border:0;cursor:pointer;font-family:inherit;
-  font-size:12px;letter-spacing:-.01em;color:var(--ink);opacity:.85;padding:0 10px;
-  display:inline-flex;align-items:center;min-height:44px;
-  transition:opacity var(--dur) var(--ease)}
-.nav-trigger:hover{opacity:1}
-.nav-trigger[aria-expanded="true"]{opacity:1;font-weight:600}
-
-/* ---- products overlay: same pattern as the homepage. Links here lead back to
-   the home page's product cards, since this page has none of its own. ---- */
-.overlay-backdrop{position:fixed;inset:44px 0 0 0;background:rgba(0,0,0,.28);z-index:98;
-  opacity:0;visibility:hidden;transition:opacity var(--dur) var(--ease)}
-.overlay-backdrop.open{opacity:1;visibility:visible}
-.overlay{position:fixed;top:44px;left:0;right:0;z-index:99;max-height:calc(100vh - 44px);
-  overflow-y:auto;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(24px);
-  -webkit-backdrop-filter:saturate(180%) blur(24px);border-bottom:1px solid var(--hair);
-  box-shadow:var(--shadow);transform:translateY(-8px);opacity:0;visibility:hidden;
-  transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease),visibility var(--dur)}
-.overlay.open{transform:none;opacity:1;visibility:visible}
-.overlay-in{max-width:var(--wide);margin:0 auto;padding:36px 22px 40px;text-align:left}
-.overlay-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px}
-.overlay-group .k{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-  color:var(--muted);margin:0 0 14px}
-.overlay-group ul{list-style:none;margin:0;padding:0}
-.overlay-group li{margin-bottom:16px}
-.overlay-group a{display:block;color:var(--ink);opacity:1}
-.overlay-group a .name{display:block;font-size:14px;font-weight:600;letter-spacing:-.01em}
-.overlay-group a .stage{display:block;font-size:11px;color:var(--muted);margin-top:2px;font-weight:400}
-.overlay-group a:hover .name{color:var(--blue)}
-.overlay-close{position:absolute;top:0;right:8px;font-size:12px;color:var(--muted);
-  background:none;border:0;cursor:pointer;font-family:inherit;
-  width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center}
-.overlay-close:hover{color:var(--ink)}
-
-/* ---- type scale. Tracking flips sign with size: the key Apple detail. ---- */
-.eyebrow{font-size:19px;font-weight:600;letter-spacing:.011em;color:var(--ink);margin:0 0 6px}
-h1{font-size:80px;line-height:1.05;font-weight:600;letter-spacing:-.015em;margin:0}
-h2{font-size:48px;line-height:1.08;font-weight:600;letter-spacing:-.012em;margin:0 0 18px}
-h3{font-size:28px;line-height:1.14;font-weight:600;letter-spacing:.007em;margin:0 0 8px}
-.sub{font-size:28px;line-height:1.21;font-weight:400;letter-spacing:.007em;color:var(--ink-2);
-  margin:18px auto 0;max-width:34ch}
-.body{font-size:17px;line-height:1.5;letter-spacing:-.022em;color:var(--muted);max-width:52ch}
-.fine{font-size:12px;line-height:1.34;letter-spacing:-.01em;color:var(--muted)}
-
-/* ---- sections: tight component padding, huge section padding ---- */
-section{padding:92px 0}
-section.tint{background:var(--surface)}
-.center{text-align:center}
-
-/* ---- the CTA pair: stadium fill + plain link, Apple's canonical pattern ---- */
-.cta{display:flex;gap:26px;justify-content:center;align-items:center;margin-top:34px;flex-wrap:wrap}
-.btn{display:inline-block;background:var(--blue);color:#fff;font-size:17px;letter-spacing:-.022em;
-  padding:12px 24px;border-radius:var(--stadium);transition:opacity var(--dur) var(--ease)}
-.btn:hover{opacity:.85;text-decoration:none}
-.arrow{font-size:17px;letter-spacing:-.022em;display:inline-block;padding:10px 0;margin:-10px 0}
-.arrow:after{content:" ›";font-weight:600}
-
-/* ---- hero visual: the 13 departments. Pure CSS/SVG, no imagery. ---- */
-.stage{margin:56px auto 0;max-width:820px;position:relative}
-.stage svg{width:100%;height:auto;display:block}
-
-/* ---- feature grid: 2-up tiles on the tint, 18px radius like Apple's cards ---- */
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:44px}
-.tile{background:var(--white);border-radius:18px;padding:40px 36px;min-width:0}
-.tile .n{font-size:56px;line-height:1;font-weight:600;letter-spacing:-.015em;margin:0 0 10px}
-.tile .lbl{font-size:17px;font-weight:600;letter-spacing:-.022em;margin:0 0 6px}
-.tile p{margin:0;font-size:17px;line-height:1.5;letter-spacing:-.022em;color:var(--muted)}
-
-/* ---- product imagery: real renders, the one shadow, the one existing radius ---- */
-figure{margin:0}
-.shot img{width:100%;height:auto;display:block;border-radius:18px;box-shadow:var(--shadow)}
-
-/* ---- three-step: numbered, restrained ---- */
-.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:34px;margin-top:48px;text-align:left}
-.steps-2{grid-template-columns:repeat(2,minmax(0,1fr))}
-.step .k{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-.step code{display:block;background:var(--surface);border-radius:8px;padding:12px 14px;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;letter-spacing:0;
-  color:var(--ink);margin-top:12px;overflow-x:auto;white-space:nowrap}
-section.tint .step code{background:var(--white)}
-
-/* ---- spec table: 12px fine print, hairline rows. Apple's footer tables. ---- */
-table{width:100%;border-collapse:collapse;margin-top:34px}
-th,td{text-align:left;padding:14px 0;border-bottom:1px solid var(--hair);font-size:17px;letter-spacing:-.022em;vertical-align:top}
-th{width:34%;font-weight:600;color:var(--ink)}
-td{color:var(--muted)}
-
-/* ---- footer ---- */
-footer{background:var(--surface);padding:44px 0 56px}
-footer .row{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:18px}
-footer a{font-size:12px;letter-spacing:-.01em;color:var(--link)}
-
-/* ---- motion: one curve, and only on entrance ---- */
-.reveal{opacity:0;transform:translateY(14px);
-  transition:opacity .45s var(--ease),transform .45s var(--ease)}
-.reveal.in{opacity:1;transform:none}
-@media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-  .reveal{opacity:1;transform:none;transition:none}
-  .overlay{transform:none;transition:opacity 160ms ease,visibility 160ms}
-  .nav a,.nav-trigger,.btn{transition:none}
-}
-a:focus-visible,button:focus-visible,[tabindex]:focus-visible,video:focus-visible{
-  outline:2px solid var(--blue);outline-offset:3px}
-video{display:block;width:100%;height:auto}
-
-/* Between the mobile breakpoint and the full-width desktop layout, the
-   content column is too narrow for an 80px h1 to hold its intended line
-   count — verified live: this specific headline wraps to 3 lines from
-   861px up to just under 1024px. 60px holds 2 lines across that whole gap. */
-@media (min-width:861px) and (max-width:1023px){
-  h1{font-size:60px}
-}
-@media (max-width:860px){
-  h1{font-size:48px} h2{font-size:34px} .sub{font-size:21px}
-  .grid,.steps,.steps-2{grid-template-columns:1fr}
-  section{padding:64px 0}
-  /* Every nav destination stays reachable on mobile — swipeable instead of
-     hidden, the same overflow-scroll pattern already used for .tabs. */
-  .nav-in{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-  .nav-in::-webkit-scrollbar{display:none}
-  .nav-in .mark,.nav-in .back,.nav-in .nav-trigger,.nav-in a{flex:0 0 auto}
-  .nav-in .spacer{flex:0 0 16px}
-  .overlay-groups{grid-template-columns:1fr 1fr;gap:24px}
-  .overlay-in{padding:28px 22px 32px}
-}
-</style>
+</script>
+<script>
+(function () {
+  var d = document.documentElement, rm = false, off = false, th = '';
+  try { rm = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  try { off = sessionStorage.getItem('coco-3d-pause:' + location.pathname) === '1'; } catch (e) {}
+  if (/[?&]motion=off/.test(location.search)) off = true;
+  try { th = localStorage.getItem('coco-theme') || ''; } catch (e) {}
+  var m = /[?&]theme=(light|dark)/.exec(location.search);
+  if (m) th = m[1];
+  if (th === 'light' || th === 'dark') d.setAttribute('data-theme', th);
+  d.className += ' js' + (rm || off ? ' still' : ' cine') + (rm ? ' os-reduced' : '');
+})();
+</script>
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../assets/vendor/fonts/archivo-latin-wdth-normal.woff2">
+<link rel="modulepreload" href="../assets/vendor/three/three.module.min.js">
+<link rel="stylesheet" href="../assets/css/site-nav.css">
+<link rel="stylesheet" href="../assets/css/product.css">
+<script type="importmap">
+{ "imports": { "three": "../assets/vendor/three/three.module.min.js" } }
+</script>
+<script type="module" src="../assets/js/site-nav.js"></script>
+<script type="module" src="../assets/js/product-scene.js"></script>
 </head>
 <body>
-
-<nav class="nav">
-  <div class="nav-in">
-    <a href="/" class="back">&lsaquo; Coco Research</a>
-    <a href="#top" class="mark">
-      <svg width="20" height="20" viewBox="0 0 100 100" role="img" aria-label="">
-        <defs>
-          <linearGradient id="markGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#0a3a66"/>
-            <stop offset="100%" stop-color="#5b9bd5"/>
-          </linearGradient>
-        </defs>
-        <path d="M 46 20 A 30 30 0 1 0 46 80" stroke="#14171c" stroke-width="10" stroke-linecap="round" fill="none"/>
-        <path d="M 54 20 A 30 30 0 1 1 54 80" stroke="url(#markGrad)" stroke-width="10" stroke-linecap="round" fill="none"/>
-      </svg>
-      Coco
-    </a>
-    <div class="spacer"></div>
-    <a href="#board">The Board</a>
-    <a href="#capabilities">Capabilities</a>
-    <a href="#release">Release 2.4.0</a>
-    <button type="button" class="nav-trigger" id="products-trigger" aria-expanded="false" aria-controls="products-overlay">Products</button>
-    <a href="#install">Install</a>
-    <a href="#specs">By the numbers</a>
-    <a href="https://github.com/coco-research/coco">GitHub</a>
+<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="?motion=off">View plain page (no motion)</a>
+<div class="world" aria-hidden="true"><canvas id="world"></canvas><div class="hero-point"></div><svg class="world-svg-fallback" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" focusable="false"><circle cx="840" cy="370" r="190" fill="none" stroke="currentColor" stroke-width="1" stroke-opacity=".14" stroke-dasharray="5 8"/><line x1="600" y1="370" x2="1080" y2="370" stroke="currentColor" stroke-width="1" stroke-opacity=".12"/><g stroke="currentColor" stroke-width="1.4" fill="none"><path d="M650 220 Q790 230 930 370" stroke-opacity=".45"/><path d="M630 300 Q780 306 930 370" stroke-opacity=".4"/><path d="M645 370 L930 370" stroke-opacity=".55"/><path d="M630 440 Q780 434 930 370" stroke-opacity=".4"/><path d="M650 520 Q790 510 930 370" stroke-opacity=".45"/><circle cx="930" cy="370" r="56" stroke-opacity=".38"/><circle cx="930" cy="370" r="24" stroke-opacity=".65"/></g><g fill="currentColor"><circle cx="650" cy="220" r="5"/><circle cx="630" cy="300" r="5"/><circle cx="645" cy="370" r="6"/><circle cx="630" cy="440" r="5"/><circle cx="650" cy="520" r="5"/><circle cx="930" cy="370" r="8"/></g></svg></div>
+<header class="site-nav" data-site-nav>
+  <a class="sn-brand" href="../"><i aria-hidden="true"></i><span>Coco Research</span></a>
+  <nav class="sn-links" aria-label="Primary">
+    <button class="sn-tab" type="button" data-products-trigger aria-expanded="false" aria-controls="site-products-menu">Products <span class="sn-caret" aria-hidden="true">▾</span></button>
+    <a class="sn-tab" href="../lab/">In the lab</a>
+    <a class="sn-tab" href="../whats-new/">What's new</a>
+    <a class="sn-tab" href="../rijul-kalra/">Rijul Kalra</a>
+  </nav>
+  <div class="sn-right">
+    <button class="sn-chip" type="button" data-theme-toggle>Dark</button>
+    <button class="sn-chip" type="button" data-motion-toggle>Pause 3D</button>
+    <a class="sn-cta" href="../coco/">Get Coco</a>
+    <button class="sn-menu-btn" type="button" data-drawer-open aria-expanded="false" aria-controls="site-mobile-drawer" aria-label="Open menu">Menu</button>
   </div>
-</nav>
-
-<div class="overlay-backdrop" id="products-backdrop" hidden></div>
-<div class="overlay" id="products-overlay" role="region" aria-label="All Coco Research products" hidden>
-  <button type="button" class="overlay-close" id="products-close">Close &times;</button>
-  <div class="overlay-in">
-    <div class="overlay-groups">
-      <div class="overlay-group">
-        <p class="k">Shipped</p>
-        <ul>
-          <li><a href="/#shipped"><span class="name">Coco Super Intelligence</span><span class="stage">Available now &middot; v2.4.0</span></a></li>
-          <li><a href="/voice/"><span class="name">Coco Voice</span><span class="stage">Available now</span></a></li>
-          <li><a href="/#shipped"><span class="name">Coco Connect</span><span class="stage">Available now &middot; v0.2.1</span></a></li>
+  <div class="sn-menu" id="site-products-menu" data-products-menu hidden>
+    <div class="sn-m-grid">
+      <div class="sn-m-group" data-group="products">
+        <h3 class="sn-m-h g-products"><span class="sh sh-dot" aria-hidden="true"></span>Products<span class="sn-m-n">2</span></h3>
+        <ul aria-label="Products">
+          <li><a class="sn-m-item" href="../coco/"><span class="sn-m-name">Coco Super Intelligence</span><span class="sn-m-line">Argues a hard call out with expert personas, then hands it to skills.</span></a></li>
+          <li><a class="sn-m-item" href="../voice/"><span class="sn-m-name">Coco Voice</span><span class="sn-m-line">Hold a key to dictate into any app. Private, on your computer.</span></a></li>
         </ul>
       </div>
-      <div class="overlay-group">
-        <p class="k">Source available</p>
-        <ul>
-          <li><a href="https://github.com/coco-research/coco-design-language"><span class="name">Signal</span><span class="stage">Source available &middot; Apache-2.0, no release</span></a></li>
-          <li><a href="https://github.com/coco-research/Mira"><span class="name">Mira</span><span class="stage">Source available &middot; AGPL-3.0, Python, no release</span></a></li>
-          <li><a href="https://github.com/coco-research/coco-loops"><span class="name">Coco Loops</span><span class="stage">Source available &middot; no release</span></a></li>
-          <li><a href="https://github.com/coco-research/jev-use"><span class="name">jev-use</span><span class="stage">Source available &middot; Apache-2.0, pre-alpha</span></a></li>
-          <li><a href="https://github.com/coco-research/heliopause"><span class="name">Heliopause</span><span class="stage">Source available &middot; Apache-2.0, early preview</span></a></li>
-        </ul>
-      </div>
-      <div class="overlay-group">
-        <p class="k">In the lab</p>
-        <ul>
-          <li><a href="/#lab"><span class="name">Coco M0</span><span class="stage">Private</span></a></li>
-          <li><a href="/#lab"><span class="name">Coco Hermes</span><span class="stage">Private</span></a></li>
-          <li><a href="/#lab"><span class="name">Coco Code</span><span class="stage">Private</span></a></li>
-          <li><a href="/#lab"><span class="name">Coco Teams NG</span><span class="stage">Private</span></a></li>
-          <li><a href="/#lab"><span class="name">Status Zero</span><span class="stage">Private</span></a></li>
+      <div class="sn-m-group" data-group="lab">
+        <h3 class="sn-m-h g-lab"><span class="sh sh-sq" aria-hidden="true"></span>In the lab<span class="sn-m-n">8</span></h3>
+        <ul aria-label="In the lab">
+          <li><a class="sn-m-item" href="../heliopause/"><span class="sn-m-name">Heliopause</span><span class="sn-m-line">Gives your AI tools a Lead and roles, like a small company.</span></a></li>
+          <li><a class="sn-m-item" href="../signal/"><span class="sn-m-name">Signal</span><span class="sn-m-line">A ready-made look for your product: three editions, CSS and docs.</span></a></li>
+          <li><a class="sn-m-item" href="../mira/"><span class="sn-m-name">Mira<span class="sn-m-badge">Archived</span></span><span class="sn-m-line">Makes Reels and Shorts in English and Hindi.</span></a></li>
+          <li><a class="sn-m-item" href="../jev-use/"><span class="sn-m-name">jev-use</span><span class="sn-m-line">Control your Mac with your voice.</span></a></li>
+          <li><a class="sn-m-item" href="../m0/"><span class="sn-m-name">Coco M0</span><span class="sn-m-line">Remembers across your AI tools, so you stop re-explaining.</span></a></li>
+          <li><a class="sn-m-item" href="../hermes/"><span class="sn-m-name">Coco Hermes</span><span class="sn-m-line">Answers over your own files with an exact quote, or says it can’t.</span></a></li>
+          <li><a class="sn-m-item" href="../teams-ng/"><span class="sn-m-name">Coco Teams NG</span><span class="sn-m-line">A team of AI members you hire, brief and work with in one console.</span></a></li>
+          <li><a class="sn-m-item" href="../aloomannu/"><span class="sn-m-name">Aloo Mannu</span><span class="sn-m-line">The local message and wake layer for coding agents on your machine.</span><span class="sn-m-priv"><span class="sh sh-sq" aria-hidden="true"></span>Private, in the lab</span></a></li>
         </ul>
       </div>
     </div>
+    <div class="sn-m-foot"><a href="../products/">Browse all 10 products →</a><a href="../lab/">In the lab →</a><a href="../whats-new/">What's new →</a></div>
   </div>
-</div>
-
-<!-- ================= HERO ================= -->
-<section id="top" class="center" style="padding-top:76px">
-  <div class="wrap">
-    <p class="eyebrow reveal">Coco Super Intelligence turns the coding agent you already use into a team of specialists. One command installs it.</p>
-    <h1 class="reveal">Your editor, arguing with itself before anything ships.</h1>
-    <div class="cta reveal">
-      <a class="btn" href="https://github.com/coco-research/coco">Get Coco on GitHub</a>
-      <a class="arrow" href="#board">See how it decides</a>
+</header>
+<dialog class="sn-drawer" id="site-mobile-drawer" data-mobile-drawer aria-labelledby="sn-drawer-title">
+  <div class="sn-d-head">
+    <a class="sn-brand" href="../"><i aria-hidden="true"></i><span>Coco Research</span></a>
+    <h2 class="sr-only" id="sn-drawer-title">Site menu</h2>
+    <button class="sn-chip" type="button" data-drawer-close>Close</button>
+  </div>
+  <div class="sn-d-body">
+    <p class="sn-d-label">Products</p>
+    <div class="sn-m-grid">
+    <div class="sn-m-group" data-group="products">
+      <h3 class="sn-m-h g-products"><span class="sh sh-dot" aria-hidden="true"></span>Products<span class="sn-m-n">2</span></h3>
+      <ul aria-label="Products">
+        <li><a class="sn-m-item" href="../coco/"><span class="sn-m-name">Coco Super Intelligence</span><span class="sn-m-line">Argues a hard call out with expert personas, then hands it to skills.</span></a></li>
+        <li><a class="sn-m-item" href="../voice/"><span class="sn-m-name">Coco Voice</span><span class="sn-m-line">Hold a key to dictate into any app. Private, on your computer.</span></a></li>
+      </ul>
     </div>
-
-    <div class="stage reveal">
-      <!-- The board: 13 departments, 493 seats. Drawn, not rendered. -->
-      <svg viewBox="0 0 820 380" role="img" aria-label="13 departments arranged around a decision">
-        <defs>
-          <radialGradient id="glow" cx="50%" cy="52%" r="52%">
-            <stop offset="0%" stop-color="#0a3a66" stop-opacity=".10"/>
-            <stop offset="100%" stop-color="#0a3a66" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-        <rect width="820" height="380" fill="url(#glow)"/>
-        <g id="spokes" stroke="#14171c" stroke-opacity=".14" stroke-width="1"></g>
-        <g id="seats"></g>
-        <g id="depts"></g>
-        <circle cx="410" cy="196" r="46" fill="#14171c"/>
-        <text x="410" y="192" text-anchor="middle" fill="#fff" font-size="15" font-weight="600"
-              letter-spacing="-.3" font-family="-apple-system,sans-serif">Your</text>
-        <text x="410" y="210" text-anchor="middle" fill="#fff" font-size="15" font-weight="600"
-              letter-spacing="-.3" font-family="-apple-system,sans-serif">call</text>
-      </svg>
+    <div class="sn-m-group" data-group="lab">
+      <h3 class="sn-m-h g-lab"><span class="sh sh-sq" aria-hidden="true"></span>In the lab<span class="sn-m-n">8</span></h3>
+      <ul aria-label="In the lab">
+        <li><a class="sn-m-item" href="../heliopause/"><span class="sn-m-name">Heliopause</span><span class="sn-m-line">Gives your AI tools a Lead and roles, like a small company.</span></a></li>
+        <li><a class="sn-m-item" href="../signal/"><span class="sn-m-name">Signal</span><span class="sn-m-line">A ready-made look for your product: three editions, CSS and docs.</span></a></li>
+        <li><a class="sn-m-item" href="../mira/"><span class="sn-m-name">Mira<span class="sn-m-badge">Archived</span></span><span class="sn-m-line">Makes Reels and Shorts in English and Hindi.</span></a></li>
+        <li><a class="sn-m-item" href="../jev-use/"><span class="sn-m-name">jev-use</span><span class="sn-m-line">Control your Mac with your voice.</span></a></li>
+        <li><a class="sn-m-item" href="../m0/"><span class="sn-m-name">Coco M0</span><span class="sn-m-line">Remembers across your AI tools, so you stop re-explaining.</span></a></li>
+        <li><a class="sn-m-item" href="../hermes/"><span class="sn-m-name">Coco Hermes</span><span class="sn-m-line">Answers over your own files with an exact quote, or says it can’t.</span></a></li>
+        <li><a class="sn-m-item" href="../teams-ng/"><span class="sn-m-name">Coco Teams NG</span><span class="sn-m-line">A team of AI members you hire, brief and work with in one console.</span></a></li>
+        <li><a class="sn-m-item" href="../aloomannu/"><span class="sn-m-name">Aloo Mannu</span><span class="sn-m-line">The local message and wake layer for coding agents on your machine.</span><span class="sn-m-priv"><span class="sh sh-sq" aria-hidden="true"></span>Private, in the lab</span></a></li>
+      </ul>
     </div>
-    <p class="fine reveal" style="margin-top:22px">Coco's files and state stay on your machine. No telemetry. A version check may contact GitHub once a day.</p>
-  </div>
-</section>
-
-<!-- ================= THE BOARD ================= -->
-<section id="board" class="tint">
-  <div class="wrap center">
-    <h2 class="reveal">The board argues before Coco answers.</h2>
-    <p class="body reveal" style="margin:0 auto;text-align:center">
-      Ask a hard question and Coco convenes the experts who actually disagree about it.
-      They argue in rounds, positions move, and dissent is recorded by name rather than
-      averaged away. You get the reasoning, the split, and who held which line.
-    </p>
-
-    <figure class="shot reveal" style="margin:36px auto 0;max-width:700px">
-      <video src="assets/coco-si-decide-terminal.mp4" poster="assets/coco-si-decide-terminal.png" width="1200" height="750" muted playsinline preload="metadata" controls aria-label="A real SI-Decide run: a routed panel, a verdict, and named dissent"></video>
-      <p class="fine" style="margin-top:8px">A real SI-Decide run: routed panel, verdict, named dissent.</p>
-      <figcaption class="fine" style="margin-top:14px">A real /SI-Decide run. The panel is routed, not fixed, and dissent is kept, not averaged away.</figcaption>
-    </figure>
-
-    <div class="grid" style="margin-top:56px">
-      <div class="tile reveal"><p class="n">493</p><p class="lbl">Expert personas</p>
-        <p>Each requires a live, checkable source link. Quotes are illustrative reconstructions, not verbatim; see the <a href="https://github.com/coco-research/coco/blob/main/systems/superintelligence/DISCLAIMER.md">disclaimer</a>.</p></div>
-      <div class="tile reveal"><p class="n">13</p><p class="lbl">Departments</p>
-        <p>Engineering, AI, product and design, finance, trading, legal and IP, risk and compliance, strategy, data, climate and energy, education, healthcare, sales and go-to-market.</p></div>
-      <div class="tile reveal"><p class="n">389</p><p class="lbl">Commands</p>
-        <p>47 shipped, plus 342 generated locally at install from the team registries.</p></div>
-      <div class="tile reveal"><p class="n">41</p><p class="lbl">Agents</p>
-        <p>Specialists that carry the decision into code, review it, and verify the result.</p></div>
     </div>
-  </div>
-</section>
-
-<!-- ================= CAPABILITIES ================= -->
-<section id="capabilities">
-  <div class="wrap center">
-    <h2 class="reveal">231 skills. One instruction set each.</h2>
-    <p class="body reveal" style="margin:0 auto 0;text-align:center">Not prompt snippets.</p>
-
-    <div class="steps" style="margin-top:56px">
-      <div class="step reveal"><p class="k">Orchestrate</p><h3>Teams</h3>
-        <p class="body">A four-layer role pipeline behind <code style="background:none;padding:0;font-size:.94em">/team</code>: research, execute, review, synthesize. It ships with the core install; there is nothing to enable.</p></div>
-      <div class="step reveal"><p class="k">Remember</p><h3>Brain</h3>
-        <p class="body">Six skills that keep durable project knowledge, so context outlives the session it was learned in.</p></div>
-      <div class="step reveal"><p class="k">Travel</p><h3>Any editor</h3>
-        <p class="body">Claude Code, Cursor, and Codex, from one install. The adapter changes; bundle availability varies.</p></div>
+    <a class="sn-m-item sn-d-all" href="../products/"><span class="sn-m-name">Browse all 10 products →</span></a>
+    <div class="sn-d-top">
+      <a href="../lab/">In the lab →</a>
+      <a href="../whats-new/">What's new →</a>
+      <a href="../rijul-kalra/">Rijul Kalra →</a>
     </div>
-
-    <figure class="shot reveal" style="margin:56px auto 0;max-width:900px">
-      <img src="assets/coco-cross-editor-portability.png" alt="Claude Code, Cursor, and Codex CLI shown as three identical cards, unified under one Coco layer" width="1200" height="675" loading="lazy">
-      <figcaption class="fine" style="margin-top:14px">One layer. It installs into Claude Code, Cursor, or Codex CLI.</figcaption>
-    </figure>
+    <div class="sn-d-foot"><button class="sn-chip" type="button" data-theme-toggle>Dark</button><a class="sn-cta" href="../coco/">Get Coco</a></div>
   </div>
-</section>
-
-<!-- ================= RELEASE ================= -->
-<section id="release">
-  <div class="wrap center">
-    <h2 class="reveal">Release 2.4.0.</h2>
-    <p class="body reveal" style="margin:0 auto;text-align:center">Published on 26 November 2026. The release notes list three changes.</p>
-    <div class="steps" style="margin-top:56px">
-      <div class="step reveal"><p class="k">Feature</p><h3>Persona checks</h3>
-        <p class="body">The checker now enforces persona source and held-status validation rules.</p></div>
-      <div class="step reveal"><p class="k">Fix</p><h3>M0 bridge</h3>
-        <p class="body">The M0 MCP bridge accepts only a loopback M0_BASE_URL, and the M0 skill docs are refreshed.</p></div>
-      <div class="step reveal"><p class="k">Fix</p><h3>Legal and IP personas</h3>
-        <p class="body">Five verified legal and IP profiles are updated and two retired entries are removed.</p></div>
+</dialog>
+<main id="main" class="stage-main p-main">
+  <section id="hero" class="hero p-hero" aria-labelledby="h-hero">
+    <div class="wrap">
+      <div class="hero-col">
+        <h1 id="h-hero" class="display">Coco Super Intelligence</h1>
+        <p class="p-for-you">Argues a hard call out with expert personas, then hands it to skills.</p>
+        <div class="p-who"><span class="p-who-k">Who it’s for</span><p>Developers and tech leads who use Claude Code, Cursor or Codex and want a second opinion before a hard call.</p></div>
+        <div class="p-try-above" aria-label="How to try it">
+          <div class="cta-row">
+          <div class="install-box try-box p-try-cmd" aria-label="Install Coco Super Intelligence (v2.4.0)">
+            <code class="install-cmd">npx cocosuperintelligence</code>
+            <button class="copy-btn" type="button" data-copy="npx cocosuperintelligence">Copy</button>
+            <span class="copy-status" data-copy-status aria-live="polite"></span>
+          </div>
+          <a class="btn btn-ghost" href="https://www.npmjs.com/package/cocosuperintelligence">npm package</a>
+          </div>
+        <p class="p-try-note">One command. Open-core, v2.4.0.</p>
+          <div class="p-badges" aria-label="Stage and licence"><span class="p-badge" data-kind="stage" data-stage="released">Available now · v2.4.0</span><span class="p-badge" data-kind="licence" data-open="false">Open-core (Apache-2.0 core)</span></div>
+        </div>
+      </div>
     </div>
-    <div class="cta reveal"><a class="btn" href="https://github.com/coco-research/coco/releases/tag/v2.4.0">Read the 2.4.0 release notes</a>
-      <a class="arrow" href="https://www.npmjs.com/package/cocosuperintelligence">cocosuperintelligence on npm</a></div>
-  </div>
-</section>
-
-<!-- ================= WHY ================= -->
-<section id="why" class="tint">
-  <div class="wrap center">
-    <h2 class="reveal">The same five situations, with a board behind them.</h2>
-    <figure class="shot reveal" style="margin:44px auto 0;max-width:820px">
-      <img src="assets/coco-before-after.png" alt="A five-row comparison of a standard AI assistant versus a Coco-orchestrated workspace, across hard decisions, feature development, code auditing, system debugging, and context resets" width="1200" height="775" loading="lazy">
-      <figcaption class="fine" style="margin-top:14px">Before Coco and after, across five real workflows.</figcaption>
-    </figure>
-  </div>
-</section>
-
-<!-- ================= INSTALL ================= -->
-<section id="install" class="tint">
-  <div class="wrap center">
-    <h2 class="reveal">About 3 minutes on a fresh machine, including the download.</h2>
-    <p class="body reveal" style="margin:0 auto;text-align:center">npx cocosuperintelligence installs the latest release. It clones the pinned release tag (currently v2.4.0, not floating main) into ./coco of the current directory, then runs install.sh. Run it from your home folder, so the clone is ~/coco and not a folder inside another project. Your model and your keys stay yours.</p>
-    <div class="steps steps-2">
-      <div class="step reveal"><p class="k">Step one</p><h3>Run it</h3>
-        <code>npx cocosuperintelligence</code></div>
-      <div class="step reveal"><p class="k">Step two</p><h3>Convene the board</h3>
-        <code>/SI-Decide "should we migrate to Postgres?"</code></div>
+  </section>
+  <section id="for-you" class="sec p-part" data-part="01" aria-labelledby="h-p-01">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">01</span> Part one</p><h2 id="h-p-01" class="sec-title">What it does for you</h2></div>
+      </div>
+      <p class="p-lead">Coco Super Intelligence seats an advisory board of expert personas inside the coding tool you already use. You ask one hard question, the board argues it out, you get one pick with the dissent named, and your local skills, commands and agents then do the work.</p>
     </div>
-
-    <p class="sub reveal">Each of the 493 requires a live, checkable source. Then 231 skills ship what they decided.</p>
-
-    <div class="cta reveal"><a class="btn" href="https://github.com/coco-research/coco">Get Coco on GitHub</a>
-      <a class="arrow" href="#specs">Read the specs</a></div>
-  </div>
-</section>
-
-<!-- ================= SPECS ================= -->
-<section id="specs">
-  <div class="wrap">
-    <h2 class="reveal center" style="margin-bottom:8px">By the numbers</h2>
-    <table class="reveal">
-      <tr><th>Version</th><td>2.4.0, published 26 November 2026. <a href="https://github.com/coco-research/coco/releases/tag/v2.4.0">Release notes</a>.</td></tr>
-      <tr><th>Skills</th><td>231 in the repository. 193 install by default on Claude Code.</td></tr>
-      <tr><th>Commands</th><td>389 (47 shipped + 342 generated at install).</td></tr>
-      <tr><th>Agents</th><td>41 delivered by a default Claude Code install.</td></tr>
-      <tr><th>Personas</th><td>493 across 13 departments, each behind an evidence-validation gate.</td></tr>
-      <tr><th>Editors</th><td>Claude Code, Cursor, Codex, and any AGENTS.md-compatible tool.</td></tr>
-      <tr><th>Execution</th><td>Coco's files and state stay on your machine. Your coding agent still uses its own model provider. No telemetry and no hosted service; one optional version check against GitHub per day (COCO_NO_UPDATE_CHECK=1 turns it off).</td></tr>
-      <tr><th>Install</th><td>About 3 minutes on a fresh machine, including the download. The remote bootstrap prints the commit and waits for you to type y before it runs install.sh.</td></tr>
-      <tr><th>Bundles</th><td>6 system bundles, installed by default: GSD (68 skills, 24 agents), HyperFrames (20 skills), Super Intelligence (13 skills), Brain (6 skills), M0 (4 skills), and Cognee (3 skills). --core-only skips them; the reverse-skill security pack is opt-in with --systems reverse-skill.</td></tr>
-      <tr><th>Licence</th><td>Open-core — most of the framework is Apache-2.0; the Super Intelligence board is proprietary.</td></tr>
-    </table>
-  </div>
-</section>
-
-<footer>
-  <div class="wrap">
-    <div class="row">
-      <a href="/">Coco Research</a>
-      <a href="https://github.com/coco-research/coco">Repository</a>
-      <a href="https://github.com/coco-research/coco/releases">Releases</a>
-      <a href="https://github.com/coco-research/coco/blob/main/CHANGELOG.md">Changelog</a>
-      <a href="https://github.com/coco-research/coco/blob/main/LICENSE">Licence</a>
-      <a href="https://github.com/coco-research/coco/blob/main/CONTRIBUTING.md">Contributing</a>
-      <a href="mailto:product@cocoresearch.org">product@cocoresearch.org</a>
+  </section>
+  <section id="who" class="sec p-part" data-part="02" aria-labelledby="h-p-02">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">02</span> Part two</p><h2 id="h-p-02" class="sec-title">Who it’s for</h2></div>
+      </div>
+      <p class="p-lead">Developers and tech leads who use Claude Code, Cursor or Codex and want a second opinion before a hard call.</p>
+      <p class="p-detail">You already work in Claude Code, Cursor or Codex, and the calls that hurt are the ones with no obvious answer: architecture, scope, risk, go or no-go. You want the strongest objections on the table before you commit.</p>
     </div>
-    <p class="fine">Open-core — most of the framework is Apache-2.0; the Super Intelligence board is proprietary. Vendored components keep their own licences. Figures on this page are from the v2.4.0 release. Coco is the flagship product of <a href="/">Coco Research</a>.</p>
+  </section>
+  <section id="does" class="sec p-part" data-part="03" aria-labelledby="h-p-03">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">03</span> Part three</p><h2 id="h-p-03" class="sec-title">What it does today</h2></div>
+        <p class="sec-sub">True of the code and releases available today.</p>
+      </div>
+      <div class="cap-grid">
+        <article class="cap-card">
+          <div class="cap-head"><span class="cap-idx">01</span><h3 class="cap-title">16 to 32 personas on /SI-Decide</h3></div>
+          <p class="cap-desc">Ask one hard question with /SI-Decide and it seats 16 to 32 of 493 personas across 13 departments; add --debate for reaction rounds before the vote.</p>
+          <div class="cap-slot" role="img" aria-label="Capture slot for 16 to 32 personas on /SI-Decide. Real app capture not yet added — Coco Super Intelligence inside Claude Code, Cursor or Codex">
+            <svg class="cap-slot-icon" viewBox="0 0 36 28" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="33" height="25" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M9 19l5-6 4 4 3-3 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="cap-slot-tag">Real app capture not yet added — Coco Super Intelligence inside Claude Code, Cursor or Codex</span>
+            <span class="cap-slot-meta">Awaiting a real running-app screenshot. Nothing is mocked up here.</span>
+          </div>
+        </article>
+        <article class="cap-card">
+          <div class="cap-head"><span class="cap-idx">02</span><h3 class="cap-title">Named dissent, not an average</h3></div>
+          <p class="cap-desc">Every advisory round records who disagreed and why, backed by an offline checker that enforces persona source and held-status rules.</p>
+          <div class="cap-slot" role="img" aria-label="Capture slot for Named dissent, not an average. Real app capture not yet added — Coco Super Intelligence inside Claude Code, Cursor or Codex">
+            <svg class="cap-slot-icon" viewBox="0 0 36 28" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="33" height="25" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M9 19l5-6 4 4 3-3 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="cap-slot-tag">Real app capture not yet added — Coco Super Intelligence inside Claude Code, Cursor or Codex</span>
+            <span class="cap-slot-meta">Awaiting a real running-app screenshot. Nothing is mocked up here.</span>
+          </div>
+        </article>
+        <article class="cap-card">
+          <div class="cap-head"><span class="cap-idx">03</span><h3 class="cap-title">Skills, commands and agents that do the work</h3></div>
+          <p class="cap-desc">Ships 231 skills, 389 commands and 41 agents; a default Claude Code install delivers 193 of the skills.</p>
+          <div class="cap-slot" role="img" aria-label="Capture slot for Skills, commands and agents that do the work. Real app capture not yet added — Coco Super Intelligence inside Claude Code, Cursor or Codex">
+            <svg class="cap-slot-icon" viewBox="0 0 36 28" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="33" height="25" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M9 19l5-6 4 4 3-3 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="cap-slot-tag">Real app capture not yet added — Coco Super Intelligence inside Claude Code, Cursor or Codex</span>
+            <span class="cap-slot-meta">Awaiting a real running-app screenshot. Nothing is mocked up here.</span>
+          </div>
+        </article>
+        <article class="cap-card">
+          <div class="cap-head"><span class="cap-idx">04</span><h3 class="cap-title">One command, 16 coding tools</h3></div>
+          <p class="cap-desc">One command, npx cocosuperintelligence, installs into Claude Code, Cursor, Codex, VS Code and 12 other coding tools (16 adapters).</p>
+          <div class="cap-slot" role="img" aria-label="Capture slot for One command, 16 coding tools. Real app capture not yet added — Coco Super Intelligence inside Claude Code, Cursor or Codex">
+            <svg class="cap-slot-icon" viewBox="0 0 36 28" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="33" height="25" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M9 19l5-6 4 4 3-3 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="cap-slot-tag">Real app capture not yet added — Coco Super Intelligence inside Claude Code, Cursor or Codex</span>
+            <span class="cap-slot-meta">Awaiting a real running-app screenshot. Nothing is mocked up here.</span>
+          </div>
+        </article>
+        <article class="cap-card">
+          <div class="cap-head"><span class="cap-idx">05</span><h3 class="cap-title">Runs on your own machine, no telemetry</h3></div>
+          <p class="cap-desc">Files and state stay on your machine with no telemetry; your coding tool keeps its own model provider and keys.</p>
+          <div class="cap-slot" role="img" aria-label="Capture slot for Runs on your own machine, no telemetry. Real app capture not yet added — Coco Super Intelligence inside Claude Code, Cursor or Codex">
+            <svg class="cap-slot-icon" viewBox="0 0 36 28" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="33" height="25" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M9 19l5-6 4 4 3-3 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="cap-slot-tag">Real app capture not yet added — Coco Super Intelligence inside Claude Code, Cursor or Codex</span>
+            <span class="cap-slot-meta">Awaiting a real running-app screenshot. Nothing is mocked up here.</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+  <section id="try" class="sec p-part" data-part="04" aria-labelledby="h-p-04">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">04</span> Part four</p><h2 id="h-p-04" class="sec-title">Install in one step</h2></div>
+      </div>
+      <div class="try-panel">
+          <p class="try-lead">Run one command in a terminal. It clones the pinned v2.4.0 release tag into ./coco and wires your coding agent locally.</p>
+          <div class="install-box try-box" aria-label="Install Coco Super Intelligence (v2.4.0)">
+            <code class="install-cmd">npx cocosuperintelligence</code>
+            <button class="copy-btn" type="button" data-copy="npx cocosuperintelligence">Copy</button>
+            <span class="copy-status" data-copy-status aria-live="polite"></span>
+          </div>
+          <div class="try-actions">
+            <a class="btn btn-ghost" href="https://www.npmjs.com/package/cocosuperintelligence">npm package</a>
+            <a class="btn btn-ghost" href="https://github.com/coco-research/coco/releases/tag/v2.4.0">GitHub release v2.4.0</a>
+          </div>
+          <p class="try-note">Open-core: the core framework is Apache-2.0 and the Super Intelligence board is proprietary. Remove it any time with --uninstall, which removes only what the install recorded and restores your original files.</p>
+      </div>
+    </div>
+  </section>
+  <section id="status" class="sec p-part" data-part="05" aria-labelledby="h-p-05">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">05</span> Part five</p><h2 id="h-p-05" class="sec-title">Status and licence</h2></div>
+      </div>
+      <div class="stage-card">
+        <span class="stage-badge stage-chip stage-chip-released" data-stage="released">Released</span>
+        <div class="stage-progress">
+          <div class="progress-meta"><span class="progress-count">21 tagged releases shipped (latest: v2.4.0)</span></div>
+          <div class="progress-track" role="progressbar" aria-label="Coco Super Intelligence release progress" aria-valuenow="21" aria-valuemin="0" aria-valuemax="21">
+            <div class="progress-fill" style="width: 100%"></div>
+          </div>
+        </div>
+        <dl class="facts-grid">
+          <div class="fact"><dt>Stage</dt><dd>Available now, v2.4.0, on npm (21 tagged releases)</dd></div>
+          <div class="fact"><dt>Released</dt><dd>26 Nov 2026</dd></div>
+          <div class="fact"><dt>Licence</dt><dd>Open-core: core framework under Apache-2.0; Super Intelligence board proprietary</dd></div>
+          <div class="fact"><dt>Works with</dt><dd>Claude Code, Cursor, Codex, VS Code and 12 other coding tools (16 install adapters)</dd></div>
+          <div class="fact"><dt>Requirements</dt><dd>A terminal with npx (Node.js) and one of the supported coding tools</dd></div>
+          <div class="fact"><dt>Privacy</dt><dd>Files and state stay on your machine, no telemetry; your coding tool keeps its own model provider and keys</dd></div>
+        </dl>
+        <div class="kns" aria-label="Key facts">
+          <div class="kn"><span class="kn-num">493</span><span class="kn-lbl">Expert personas across 13 departments</span></div>
+          <div class="kn"><span class="kn-num">231</span><span class="kn-lbl">Skills (79 core + 152 bundle)</span></div>
+          <div class="kn"><span class="kn-num">389</span><span class="kn-lbl">Commands across 16 adapters</span></div>
+        </div>
+        <table class="spec-table">
+          <tr><th>Version</th><td>2.4.0 (21 GitHub releases)</td></tr>
+          <tr><th>Skills</th><td>231 in the repository (79 core + 152 bundle; 193 delivered by default on Claude Code).</td></tr>
+          <tr><th>Commands</th><td>389 customer-facing (47 shipped + 342 generated at install).</td></tr>
+          <tr><th>Agents</th><td>41. 17 core, plus 24 in the GSD bundle.</td></tr>
+          <tr><th>Personas</th><td>493 across 13 departments, modeled on public writing with offline source validation.</td></tr>
+          <tr><th>Adapters &amp; MCP</th><td>16 install adapters plus a local stdio MCP server with 19 tool connectors.</td></tr>
+          <tr><th>Bundles</th><td>6 default bundles: GSD, HyperFrames, Super Intelligence, Brain, M0 and Cognee.</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+  <section id="next" class="sec p-part" data-part="06" aria-labelledby="h-p-06">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">06</span> Part six</p><h2 id="h-p-06" class="sec-title">What’s next</h2></div>
+        <p class="sec-sub">Honest next steps and limits. No dates are promised.</p>
+      </div>
+      <div class="next-list">
+        <div class="next-item"><span class="cap-idx">01</span><div><h3>Expanded MCP connector verification</h3><p>Promoting more of the 19 documented MCP tool connectors from configuration templates to full automated verification.</p></div></div>
+        <div class="next-item"><span class="cap-idx">02</span><div><h3>Ongoing persona registry audits</h3><p>Continuing offline source checks, profile hygiene and registry maintenance across all 13 departments.</p></div></div>
+      </div>
+    </div>
+  </section>
+  <section id="links" class="sec p-part" data-part="07" aria-labelledby="h-p-07">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow"><span class="p-part-num">07</span> Part seven</p><h2 id="h-p-07" class="sec-title">Links</h2></div>
+      </div>
+      <div class="links-row">
+        <a class="link-pill" href="https://github.com/coco-research/coco" rel="noopener">GitHub repository</a>
+        <a class="link-pill" href="https://www.npmjs.com/package/cocosuperintelligence" rel="noopener">npm package</a>
+        <a class="link-pill" href="https://github.com/coco-research/coco/releases/tag/v2.4.0" rel="noopener">Release v2.4.0</a>
+        <a class="link-pill" href="https://github.com/coco-research/coco/releases" rel="noopener">All tagged releases</a>
+        <a class="link-pill" href="https://github.com/coco-research/coco#licence" rel="noopener">Licence</a>
+        <a class="link-pill" href="https://github.com/coco-research/coco/blob/main/systems/superintelligence/DISCLAIMER.md" rel="noopener">Persona disclaimer</a>
+        <a class="link-pill" href="../coco/guardrails/">Guardrails guide</a>
+        <a class="link-pill" href="../guides/manage-multiple-ai-coding-agents/">Multi-agent guide</a>
+        <a class="link-pill" href="../products/">Browse all 10 products</a>
+        <a class="link-pill" href="../whats-new/">What’s new</a>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <a class="brand" href="../"><i aria-hidden="true"></i><span>Coco Research</span></a>
+      <p>Governed AI, built in the open. Built by <a class="inline" href="../rijul-kalra/">Rijul Kalra</a>.</p>
+      <p>product@cocoresearch.org · <a class="inline" href="mailto:product@cocoresearch.org">Email</a></p>
+    </div>
+    <nav class="foot-cols" aria-label="Footer">
+      <div><h2>Products</h2><ul>
+          <li><a href="../coco/">Coco Super Intelligence</a></li>
+          <li><a href="../voice/">Coco Voice</a></li>
+      </ul></div>
+      <div><h2>In the lab</h2><ul>
+          <li><a href="../heliopause/">Heliopause by Coco Research</a></li>
+          <li><a href="../signal/">Signal</a></li>
+          <li><a href="../mira/">Mira</a> <span class="sn-badge">Archived</span></li>
+          <li><a href="../jev-use/">jev-use</a></li>
+          <li><a href="../m0/">Coco M0</a></li>
+          <li><a href="../hermes/">Coco Hermes</a></li>
+          <li><a href="../teams-ng/">Coco Teams NG</a></li>
+          <li><a href="../aloomannu/">Aloo Mannu</a></li>
+      </ul></div>
+      <div><h2>Company</h2><ul>
+          <li><a href="../products/">All products</a></li>
+          <li><a href="../lab/">In the lab</a></li>
+          <li><a href="../whats-new/">What's new</a></li>
+          <li><a href="../rijul-kalra/">Rijul Kalra</a></li>
+          <li><a href="../guides/manage-multiple-ai-coding-agents/">Guides</a></li>
+          <li><a href="https://github.com/coco-research/coco/releases">Coco changelog</a></li>
+      </ul></div>
+      <div><h2>Code</h2><ul>
+          <li><a href="https://github.com/coco-research">GitHub</a></li>
+          <li><a href="https://www.npmjs.com/package/cocosuperintelligence">npm</a></li>
+          <li><a href="https://github.com/coco-research/coco#licence">Licence</a></li>
+      </ul></div>
+    </nav>
+  </div>
+  <div class="foot-base">
+    <p>© 2026 Coco Research</p>
   </div>
 </footer>
-
-<script>
-/* A refresh shouldn't drop you wherever the browser last remembered scrolling to. */
-if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-</script>
-<script>
-/* The board diagram: 13 departments, 493 seats, drawn to scale. */
-(function(){
-  /* Real counts, measured from systems/superintelligence/<team>/personas/. Sum = 493. */
-  var depts=[["Engineering",70],["AI",59],["Product & design",56],["Finance",47],["Trading",46],
-             ["Legal & IP",29],["Risk & compliance",30],["Strategy",29],["Data & analytics",29],
-             ["Climate & energy",25],["Education & edtech",25],["Healthcare & life sciences",25],
-             ["Sales & GTM",23]];
-  var cx=410, cy=196, R=138, spokes=document.getElementById('spokes'),
-      seats=document.getElementById('seats'), labels=document.getElementById('depts');
-  var NS='http://www.w3.org/2000/svg';
-  function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
-  depts.forEach(function(d,i){
-    var a=(-90+i*(360/depts.length))*Math.PI/180;
-    var x=cx+Math.cos(a)*R, y=cy+Math.sin(a)*R;
-    spokes.appendChild(el('line',{x1:cx,y1:cy,x2:x,y2:y}));
-    // one dot per seat, in a compact block sized so all clusters read evenly
-    var n=d[1], per=10, rows=Math.ceil(n/per);
-    for(var s=0;s<n;s++){
-      var col=s%per, row=Math.floor(s/per);
-      seats.appendChild(el('circle',{
-        cx:x+(col-(Math.min(n,per)-1)/2)*4.6, cy:y+(row-(rows-1)/2)*4.6, r:1.5,
-        fill:'#14171c', 'fill-opacity':0.32
-      }));
-    }
-    var anchor = (x<cx-20)?'end':(x>cx+20)?'start':'middle';
-    var ly = y + (y<cy? -26 : 30);
-    labels.appendChild((function(){
-      var t=el('text',{x:x,y:ly,'text-anchor':anchor,fill:'#5b6169','font-size':11,
-        'font-weight':600,'letter-spacing':'.02em','font-family':'-apple-system,sans-serif'});
-      t.textContent=d[0]+' · '+d[1]; return t;})());
-  });
-})();
-
-/* Entrance reveal. One curve, fires once, respects reduced motion. */
-(function(){
-  var els=[].slice.call(document.querySelectorAll('.reveal'));
-  if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});return;}
-  var io=new IntersectionObserver(function(es){
-    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
-  },{rootMargin:'0px 0px -8% 0px',threshold:.08});
-  els.forEach(function(e,i){ e.style.transitionDelay=(Math.min(i,4)*35)+'ms'; io.observe(e); });
-})();
-</script>
-<script>
-/* Products overlay: same pattern as the homepage. Every link here leads back to
-   the home page, since this page carries no product cards of its own. */
-(function () {
-  var trigger = document.getElementById('products-trigger');
-  var overlay = document.getElementById('products-overlay');
-  var backdrop = document.getElementById('products-backdrop');
-  var closeBtn = document.getElementById('products-close');
-  if (!trigger || !overlay || !backdrop) return;
-
-  function open() {
-    overlay.hidden = false;
-    backdrop.hidden = false;
-    requestAnimationFrame(function () {
-      overlay.classList.add('open');
-      backdrop.classList.add('open');
-    });
-    trigger.setAttribute('aria-expanded', 'true');
-    overlay._lastFocus = document.activeElement;
-    var firstLink = overlay.querySelector('a, button');
-    if (firstLink) firstLink.focus();
-  }
-  function close() {
-    overlay.classList.remove('open');
-    backdrop.classList.remove('open');
-    trigger.setAttribute('aria-expanded', 'false');
-    if (overlay._lastFocus && overlay._lastFocus.focus) overlay._lastFocus.focus();
-    window.setTimeout(function () {
-      overlay.hidden = true;
-      backdrop.hidden = true;
-    }, 340);
-  }
-  function isOpen() { return trigger.getAttribute('aria-expanded') === 'true'; }
-
-  trigger.addEventListener('click', function () { isOpen() ? close() : open(); });
-  backdrop.addEventListener('click', close);
-  if (closeBtn) closeBtn.addEventListener('click', close);
-  document.addEventListener('keydown', function (ev) {
-    if (ev.key === 'Escape' && isOpen()) { close(); trigger.focus(); }
-    /* Keep Tab inside the open overlay while it is open. */
-    if (ev.key === 'Tab' && isOpen()) {
-      var focusables = [].slice.call(
-        overlay.querySelectorAll('a[href], button:not([disabled])')
-      ).filter(function (el) { return el.offsetParent !== null; });
-      if (!focusables.length) return;
-      var first = focusables[0], last = focusables[focusables.length - 1];
-      if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
-      else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
-      else if (!overlay.contains(document.activeElement)) { ev.preventDefault(); first.focus(); }
-    }
-  });
-  [].slice.call(overlay.querySelectorAll('a')).forEach(function (a) {
-    a.addEventListener('click', close);
-  });
-})();
-</script>
-<script>
-/* Respect prefers-reduced-motion: the poster PNG is the complete static frame,
-   so pause playback and expose controls instead of autoplaying. */
-(function () {
-  var q = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
-  if (!q || !q.matches) return;
-  document.querySelectorAll('video[autoplay]').forEach(function (v) {
-    v.removeAttribute('autoplay');
-    v.removeAttribute('loop');
-    v.setAttribute('controls', '');
-    v.pause();
-  });
-})();
-</script>
 </body>
 </html>

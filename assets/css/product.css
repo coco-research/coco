@@ -667,6 +667,11 @@ html[data-banner-export] .aloo-banner-tagline { font-size: 1.30rem !important; m
 .facts-grid dd { margin: 0; color: var(--ink); text-align: right; overflow-wrap: anywhere; }
 /* /lab/ stage key: long sentences read left-aligned under their word. */
 #stages .facts-grid .fact { display: block; }
+#stages .facts-grid dt { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); }
+#stages .facts-grid dt[data-stage="source"] .sh { color: var(--blue-text); }
+#stages .facts-grid dt[data-stage="archived"] .sh { color: var(--ink-3); }
+#stages .facts-grid dt[data-stage="beta"] .sh,
+#stages .facts-grid dt[data-stage="lab"] .sh { color: var(--amber); }
 #stages .facts-grid dd { margin-top: 6px; text-align: left; color: var(--ink-2); }
 
 /* Part 6: what's next */

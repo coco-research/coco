@@ -553,7 +553,7 @@
     ],
     "stage": {
       "chip": "Archived",
-      "cls": "source"
+      "cls": "archived"
     },
     "try": {
       "heading": "Clone the repository",
@@ -787,7 +787,7 @@
       ]
     ],
     "stage": {
-      "chip": "Public preview (v0.7.3)",
+      "chip": "Early preview \u00b7 v0.7.3",
       "cls": "source"
     },
     "try": {

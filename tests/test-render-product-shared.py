@@ -241,21 +241,28 @@ class CatalogDatesAndStagesTests(unittest.TestCase):
         self.assertEqual(M.stage_chip_text(by_id['demo-prod']), 'Available now \u00b7 v1.2.3')
         self.assertEqual(M.stage_chip_text(by_id['demo-plain']), 'Available now')
         self.assertEqual(M.stage_chip_text(by_id['demo-arch']), 'Archived')
-        self.assertEqual(M.stage_chip_text(by_id['heliopause']), 'Source available')
-        self.assertEqual(M.stage_chip_text(by_id['demo-priv']), 'In the lab')
+        self.assertEqual(M.stage_chip_text(by_id['heliopause']), 'Early preview')
+        self.assertEqual(M.stage_chip_text(by_id['demo-pre']), 'Source available')
+        self.assertEqual(M.stage_chip_text(by_id['demo-priv']), 'Private, in the lab')
+        self.assertEqual(M.stage_chip_text(by_id['demo-beta']), 'Private beta')
 
         self.assertEqual(M.stage_label(by_id['demo-prod']), 'Available now \u00b7 v1.2.3')
         self.assertEqual(M.stage_label(by_id['demo-priv']), 'Private, in the lab')
         self.assertEqual(M.stage_label(by_id['heliopause']), 'Early preview')
         self.assertEqual(M.stage_label(by_id['demo-arch']), 'Archived')
-        self.assertEqual(M.stage_label(by_id['demo-pre']), 'Pre-alpha')
+        self.assertEqual(M.stage_label(by_id['demo-pre']), 'Source available')
         self.assertEqual(M.stage_label(src_plain), 'Source available')
         self.assertEqual(M.stage_label(by_id['demo-beta']), 'Private beta')
 
-        self.assertEqual((M.stage_shape(by_id['demo-prod']), M.stage_shape(by_id['heliopause']), M.stage_shape(by_id['demo-priv'])),
-                         ('sh-dot', 'sh-ring', 'sh-sq'))
-        self.assertEqual((M.stage_key(by_id['demo-prod']), M.stage_key(by_id['heliopause']), M.stage_key(by_id['demo-beta']), M.stage_key(by_id['demo-priv'])),
-                         ('released', 'source', 'beta', 'lab'))
+        self.assertEqual(
+            (M.stage_shape(by_id['demo-prod']), M.stage_shape(by_id['heliopause']), M.stage_shape(by_id['demo-arch']), M.stage_shape(by_id['demo-beta']), M.stage_shape(by_id['demo-priv'])),
+            ('sh-dot', 'sh-ring', 'sh-bar', 'sh-sq', 'sh-dia'),
+        )
+        self.assertEqual(
+            (M.stage_key(by_id['demo-prod']), M.stage_key(by_id['heliopause']), M.stage_key(by_id['demo-arch']), M.stage_key(by_id['demo-beta']), M.stage_key(by_id['demo-priv'])),
+            ('released', 'source', 'archived', 'beta', 'lab'),
+        )
+        self.assertEqual(len(M.STAGES), 5)
         self.assertEqual(M.short_status(by_id['demo-prod']), 'Available now, v1.2.3, on npm')
         self.assertEqual(M.short_status(by_id['demo-beta']), 'Private beta, used daily')
 

@@ -35,7 +35,7 @@ world_fallback_svg, build_jsonld = _shared.world_fallback_svg, _shared.build_jso
 ld_script, breadcrumb, collection_ld = _shared.ld_script, _shared.breadcrumb, _shared.collection_ld
 human_date, load_catalog, counts_ctx = _shared.human_date, _shared.load_catalog, _shared.counts_ctx
 stage_chip_text, stage_label, stage_shape = _shared.stage_chip_text, _shared.stage_label, _shared.stage_shape
-stage_key, short_status = _shared.stage_key, _shared.short_status
+stage_key, short_status, STAGES = _shared.stage_key, _shared.short_status, _shared.STAGES
 nav_html, footer_html, head_html = _shared.nav_html, _shared.footer_html, _shared.head_html
 li_dl, copy_box, part_head = _shared.li_dl, _shared.copy_box, _shared.part_head
 stage_page, dir_hero, sec_open = _shared.stage_page, _shared.dir_hero, _shared.sec_open
@@ -186,7 +186,7 @@ def render_page(it, data):
         _safe_href(spec['licence_href'], '%s.licence_href' % pid)) if spec.get('licence_href') else ''
 
     stage_badge = '<span class="p-badge" data-kind="stage" data-stage="%s">%s</span>' % (
-        attr(bucket if bucket != 'shipped' else 'released'), esc(stage_chip_text(it)))
+        attr(stage_key(it)), esc(stage_chip_text(it)))
     lic_badge = '<span class="p-badge" data-kind="licence" data-open="%s">%s</span>' % (
         'true' if row['open_source'] else 'false', esc(row['licence_short']))
     head = head_html(title=page_title, desc=spec['meta_description'], slug=slug,
@@ -293,11 +293,8 @@ def card_html(it):
     slug = attr(spec['slug'])
     if it['bucket'] == 'shipped':
         act = '<a class="btn btn-primary" href="../%s/">Try it<span class="sr-only"> %s</span> <span aria-hidden="true">\u2192</span></a>' % (slug, nm)
-    elif it['bucket'] == 'source':
-        act = '<a class="btn btn-ghost" href="../%s/">Read more<span class="sr-only"> about %s</span> <span aria-hidden="true">\u2192</span></a>' % (slug, nm)
     else:
-        act = ('<a class="btn btn-lab" href="../%s/"><span class="sh sh-sq" aria-hidden="true"></span>Private, in the lab'
-               '<span class="sr-only"> %s</span></a>' % (slug, nm))
+        act = '<a class="btn btn-ghost" href="../%s/">Read more<span class="sr-only"> about %s</span> <span aria-hidden="true">\u2192</span></a>' % (slug, nm)
     return (
         '        <article class="dir-card" data-product-card id="p-%s" data-group="%s" data-stage="%s">\n'
         '          <div class="dir-tags"><span class="stage-chip dir-stage" data-stage="%s"><span class="sh %s" aria-hidden="true"></span>%s</span>'
@@ -348,13 +345,7 @@ def render_products(catalog, data):
 
 
 # ---------------------------------------------------------------- /lab/
-LAB_STAGE_KEY = (
-    ('Early preview', 'Public code you can run today. Not a stable release, and the version number says so.'),
-    ('Source available', 'A public repository with a licence. Read it, copy it, adapt it; there is no packaged release.'),
-    ('Archived', 'Public source kept as read-only reference. No active development and no packaged release.'),
-    ('Private beta', 'Used inside Coco Research. No public build and no repository link.'),
-    ('Private, in the lab', 'Built here, not released. A page exists so you can see what it is; there is nothing to download yet.'),
-)
+LAB_STAGE_KEY = STAGES
 
 
 def render_lab(catalog, data):
@@ -376,7 +367,11 @@ def render_lab(catalog, data):
                  '<a class="btn btn-ghost" href="../products/">All products</a>',
                  '<a class="btn btn-ghost" href="../whats-new/">What\u2019s new</a>'],
         badges=[('source', 'Public code \u00b7 %d' % len(pub)), ('lab', 'Private \u00b7 %d' % len(priv))])
-    key = '\n'.join('          <div class="fact"><dt>%s</dt><dd>%s</dd></div>' % (esc(k), esc(v)) for k, v in LAB_STAGE_KEY)
+    key = '\n'.join(
+        '          <div class="fact"><dt data-stage="%s"><span class="sh %s" aria-hidden="true"></span>%s</dt><dd>%s</dd></div>'
+        % (attr(skey), attr(shape), esc(label), esc(desc_text))
+        for label, skey, shape, desc_text in LAB_STAGE_KEY
+    )
     body = '\n'.join([
         sec_open('public-code', '01', 'Public code', 'Source you can read', 'Early previews and source tools. Each has a repository you can open today.'),
         '      <div class="dir-grid" role="list" aria-label="Lab projects with public code">',
@@ -413,7 +408,7 @@ def render_whats_new(catalog, data, counts):
         line = r['whats_new'].format(**counts)
         ver = r['release_version']
         shape = stage_shape(it)
-        cls_key = 'released' if it['bucket'] == 'shipped' else 'source'
+        cls_key = stage_key(it)
         rel_url = _safe_href(r['release_url'], '%s.release_url' % it['pid'])
         entries.append(
             '        <article class="tl-entry">\n'
@@ -438,8 +433,9 @@ def render_whats_new(catalog, data, counts):
         '          <div class="active-row">\n'
         '            <h3 class="active-name"><a class="inline" href="../%s/">%s</a></h3>\n'
         '            <p>%s</p>\n'
-        '            <span class="stage-chip" data-stage="source"><span class="sh sh-ring" aria-hidden="true"></span>%s</span>\n'
-        '          </div>' % (attr(it['spec']['slug']), esc(it['row']['name']), esc(it['row']['for_you']), esc(stage_label(it)))
+        '            <span class="stage-chip" data-stage="%s"><span class="sh %s" aria-hidden="true"></span>%s</span>\n'
+        '          </div>' % (attr(it['spec']['slug']), esc(it['row']['name']), esc(it['row']['for_you']),
+                              attr(stage_key(it)), attr(stage_shape(it)), esc(stage_label(it)))
         for it in active)
     priv = [it for it in catalog if it['bucket'] == 'lab']
     priv_li = '\n'.join('              <li><a href="../%s/">%s</a></li>' % (attr(it['spec']['slug']), esc(it['row']['name'])) for it in priv)
@@ -479,7 +475,7 @@ def render_whats_new(catalog, data, counts):
 {active_rows}
         </div>
         <aside class="private-summary" aria-label="Private lab status">
-          <span class="stage-chip" data-stage="lab"><span class="sh sh-sq" aria-hidden="true"></span>Private, in the lab</span>
+          <span class="stage-chip" data-stage="lab"><span class="sh sh-dia" aria-hidden="true"></span>Private, in the lab</span>
           <h3>Not publicly released today</h3>
           <p>These projects are in private development inside Coco Research, with no public download and no announced release date.</p>
           <ul class="private-names">

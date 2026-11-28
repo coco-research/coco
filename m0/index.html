@@ -29,9 +29,9 @@
   var d = document.documentElement, rm = false, off = false, th = '';
   try { rm = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   try { off = sessionStorage.getItem('coco-3d-pause:' + location.pathname) === '1'; } catch (e) {}
-  if (/[?&]motion=off/.test(location.search)) off = true;
+  if (/[?&]motion=off(?:&|$)/.test(location.search)) off = true;
   try { th = localStorage.getItem('coco-theme') || ''; } catch (e) {}
-  var m = /[?&]theme=(light|dark)/.exec(location.search);
+  var m = /[?&]theme=(light|dark)(?:&|$)/.exec(location.search);
   if (m) th = m[1];
   if (th === 'light' || th === 'dark') d.setAttribute('data-theme', th);
   d.className += ' js' + (rm || off ? ' still' : ' cine') + (rm ? ' os-reduced' : '');
@@ -328,7 +328,7 @@
         <p class="p-for-you">Remembers across your AI tools, so you stop re-explaining.</p>
         <p class="m0-lede">A memory layer that lives on your own machine. It captures what you decide, keeps the newest truth, and hands the right context back to any tool you use, with its source attached.</p>
         <div class="p-who"><span class="p-who-k">Who it’s for</span><p>People who switch between AI coding tools on one machine and are tired of repeating earlier decisions.</p></div>
-        <div class="p-try-above" aria-label="How to try it">
+        <div class="p-try-above" role="group" aria-label="How to try it">
           <div class="cta-row">
             <span class="p-static-pill"><span class="sh sh-sq" aria-hidden="true"></span>Private beta, used daily — no public download yet</span>
           </div>
@@ -336,7 +336,7 @@
             <a class="btn btn-primary" href="#special">Why it is special</a>
             <a class="btn btn-ghost" href="#architecture">See the architecture</a>
           </div>
-          <div class="p-badges" aria-label="Stage and licence"><span class="p-badge" data-kind="stage" data-stage="lab">In the lab</span><span class="p-badge" data-kind="licence" data-open="false">Private</span></div>
+          <div class="p-badges" role="group" aria-label="Stage and licence"><span class="p-badge" data-kind="stage" data-stage="lab">In the lab</span><span class="p-badge" data-kind="licence" data-open="false">Private</span></div>
         </div>
       </div>
     </div>
@@ -614,7 +614,7 @@
         <div><p class="eyebrow"><span class="p-part-num">04</span> Time and truth</p><h2 id="h-p-04" class="sec-title">Why a vector index alone gets changing facts wrong</h2></div>
         <p class="sec-sub">Plain vector search finds what sounds similar. It has no idea which of two similar statements is newer, which replaced which, or which was only ever a plan.</p>
       </div>
-      <div class="ex" aria-label="Illustration">
+      <div class="ex" role="group" aria-label="Illustration">
         <div class="ex-col">
           <h3>A plain vector index</h3>
           <p class="ex-q">Query: “which day do we release?”</p>
@@ -815,7 +815,7 @@
           <div class="fact"><dt>Platforms</dt><dd>Runs locally on your own machine</dd></div>
           <div class="fact"><dt>Privacy</dt><dd>Project memory stays on your computer, with no cloud relay</dd></div>
         </dl>
-        <div class="kns" aria-label="Key facts">
+        <div class="kns" role="group" aria-label="Key facts">
           <div class="kn"><span class="kn-num">Cross-tool</span><span class="kn-lbl">One memory shared by your tools</span></div>
           <div class="kn"><span class="kn-num">On-device</span><span class="kn-lbl">Kept locally on your own machine</span></div>
           <div class="kn"><span class="kn-num">Private beta</span><span class="kn-lbl">Used daily in the lab</span></div>

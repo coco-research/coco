@@ -123,8 +123,18 @@ fi
 # Catch the exact drift class Pike found: a leftover 149 that is not skills.total.
 # Anchored to skills phrasings only: a bare 149 is also a legitimate non-skills
 # count (e.g. the core-install "(149 active assets)" total, #473).
-LEFTOVER_149=$(grep -niE '(^|[^[:alnum:]])149([[:space:][:punct:]]|<[^>]+>)*skills([^[:alnum:]]|$)|(^|[^[:alnum:]])skills([[:space:][:punct:]]|<[^>]+>)*149([^[:alnum:]]|$)' README.md || true)
-if [ -n "$LEFTOVER_149" ] && [ "$SKILLS" != "149" ]; then
+SKILLS_149_PATTERN='(^|[^[:alnum:]_])149[[:space:]]+skills([^[:alnum:]_]|$)|'
+SKILLS_149_PATTERN+='(^|[^[:alnum:]_])skills[[:space:]]*[:=][[:space:]]*149([^[:alnum:]_]|$)|'
+SKILLS_149_PATTERN+='(^|[^[:alnum:]_])skills[[:space:]]+-[[:space:]]+149([^[:alnum:]_]|$)|'
+SKILLS_149_PATTERN+='(^|[^[:alnum:]_])skills[[:space:]]+\([[:space:]]*149[[:space:]]*\)([^[:alnum:]_]|$)|'
+SKILLS_149_PATTERN+='\|[^|\n]*[[:space:]]skills[[:space:]][^|\n]*\|[[:space:]]*149[[:space:]]*\||'
+SKILLS_149_PATTERN+='<h3>[[:space:]]*149[[:space:]]*</h3>[[:space:]]*<sub>[[:space:]]*skills[[:space:]]*</sub>|'
+SKILLS_149_PATTERN+='<sub>[[:space:]]*skills[[:space:]]*</sub>[[:space:]]*<h3>[[:space:]]*149[[:space:]]*</h3>'
+GREP_STATUS=0
+LEFTOVER_149=$(grep -niE "$SKILLS_149_PATTERN" README.md) || GREP_STATUS=$?
+if [ "$GREP_STATUS" -gt 1 ]; then
+  fail_ "Could not scan README for skills count drift (grep exit $GREP_STATUS)"
+elif [ -n "$LEFTOVER_149" ] && [ "$SKILLS" != "149" ]; then
   fail_ "ASSET_COUNT_SKILLS_DRIFT: README still contains 149 (third skills number); customer-facing is $SKILLS: $LEFTOVER_149"
 else
   pass "ASSET_COUNT_SKILLS_CHECK_OK: no leftover 149 in README"

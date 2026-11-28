@@ -66,6 +66,17 @@ run_checker
 assert_no_skills_drift
 echo "PASS: non-skills 149 in README does not trip the skills drift check"
 
+for phrase in '[Skills](#skills-149)' 'Skills149' 'skills-149' 'https://example.test/badge/skills-149'; do
+  cat > "$tmp/README.md" <<EOF
+# coco
+
+$phrase
+EOF
+  run_checker
+  assert_no_skills_drift
+done
+echo "PASS: anchor links and glued identifiers do not trip the skills drift check"
+
 for phrase in '149 Skills' 'Skills: 149' 'Skills (149)' '| Total Skills | 149 |' '<h3>149</h3><sub>Skills</sub>' '<h3>149</h3><sub>skills</sub>'; do
   cat > "$tmp/README.md" <<EOF
 # coco
@@ -77,3 +88,44 @@ EOF
 done
 
 echo "PASS: common skills-count phrasings trip the skills drift check"
+
+python3 - "$tmp/docs/asset-counts.json" <<'PY'
+import json
+import sys
+
+path = sys.argv[1]
+with open(path, encoding='utf-8') as source:
+    counts = json.load(source)
+counts['skills']['total'] = 149
+with open(path, 'w', encoding='utf-8') as destination:
+    json.dump(counts, destination)
+PY
+cat > "$tmp/README.md" <<'EOF'
+# coco
+
+149 skills
+EOF
+run_checker
+assert_no_skills_drift
+echo "PASS: the current skills total of 149 does not trip the drift check"
+
+mkdir -p "$tmp/bin"
+real_grep="$(command -v grep)"
+cat > "$tmp/bin/grep" <<'EOF'
+#!/usr/bin/env bash
+if [[ "$*" == *'149[[:space:]]+skills'* ]]; then
+  exit 2
+fi
+exec "$REAL_GREP" "$@"
+EOF
+chmod +x "$tmp/bin/grep"
+if REAL_GREP="$real_grep" PATH="$tmp/bin:$PATH" bash "$tmp/tests/check-asset-counts.sh" > "$tmp/output" 2>&1; then
+  echo "FAIL: grep errors were reported as a successful drift scan"
+  exit 1
+fi
+if ! "$real_grep" -q 'Could not scan README for skills count drift (grep exit 2)' "$tmp/output"; then
+  echo "FAIL: checker did not report the skills scan error"
+  tail -30 "$tmp/output"
+  exit 1
+fi
+echo "PASS: grep errors fail the skills drift check"
